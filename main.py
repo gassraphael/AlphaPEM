@@ -60,13 +60,13 @@ type_plot = "dynamic"
 t_step, i_step, delta_pola, i_EIS, ratio_EIS, f_EIS, t_EIS, current_density = \
     current_density_parameters(type_current)
 # Operating conditions
-Tfc_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, i_pola_1 = operating_inputs(type_fuel_cell_1)
+Tfc_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, i_max_pola_1 = operating_inputs(type_fuel_cell_1)
 if type_fuel_cell_2 is not None:
-    Tfc_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2, i_pola_2 = operating_inputs(type_fuel_cell_2)
+    Tfc_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2, i_max_pola_2 = operating_inputs(type_fuel_cell_2)
 if type_fuel_cell_3 is not None:
-    Tfc_3, Pa_des_3, Pc_des_3, Sa_3, Sc_3, Phi_a_des_3, Phi_c_des_3, i_pola_3 = operating_inputs(type_fuel_cell_3)
+    Tfc_3, Pa_des_3, Pc_des_3, Sa_3, Sc_3, Phi_a_des_3, Phi_c_des_3, i_max_pola_3 = operating_inputs(type_fuel_cell_3)
 if type_fuel_cell_4 is not None:
-    Tfc_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4, i_pola_4 = operating_inputs(type_fuel_cell_4)
+    Tfc_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4, i_max_pola_4 = operating_inputs(type_fuel_cell_4)
 # Physical parameters
 Hcl, epsilon_mc, tau, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, Re, i0_c_ref, kappa_co, \
     kappa_c, a_slim, b_slim, a_switch, C_dl = physical_parameters(type_fuel_cell_1)
@@ -104,15 +104,16 @@ if __name__ == '__main__':
         #       ... of the plot update number (n) and the initial time interval (time_interval)
         initial_variable_values = None
         if type_current == "step":
-            t0_step, tf_step, delta_t_load, delta_t_dyn = t_step
-            n = int(tf_step / delta_t_dyn)  # It is the plot update number.
-            time_interval = [0, delta_t_dyn]  # It is the initial time interval.
+            t0_step, tf_step, delta_t_load_step, delta_t_dyn_step = t_step
+            n = int(tf_step / delta_t_dyn_step)  # It is the plot update number.
+            time_interval = [0, delta_t_dyn_step]  # It is the initial time interval.
         elif type_current == "polarization":
-            delta_t_load, delta_t_break, delta_i, delta_t_ini = delta_pola
-            delta_t = delta_t_load + delta_t_break  # s. It is the time of one load.
-            tf = delta_t_ini + int(i_pola_1 / delta_i + 1) * delta_t  # s. It is the polarization current duration.
+            delta_t_load_pola, delta_t_break_pola, delta_i_pola, delta_t_ini_pola = delta_pola
+            delta_t = delta_t_load_pola + delta_t_break_pola  # s. It is the time of one load.
+            tf = delta_t_ini_pola + int(i_max_pola_1 / delta_i_pola + 1) * delta_t  # s. It is the polarization current
+            #                                                                         duration.
             n = int(tf / delta_t)  # It is the plot update number.
-            time_interval = [0, delta_t_ini + delta_t]  # It is the initial time interval.
+            time_interval = [0, delta_t_ini_pola + delta_t]  # It is the initial time interval.
         elif type_current == "EIS":
             t0_EIS, t_new_start, tf_EIS, delta_t_break_EIS, delta_t_measurement_EIS = t_EIS
             f_power_min, f_power_max, nb_f, nb_points = f_EIS  # These are used for EIS max_step actualization.
@@ -124,7 +125,7 @@ if __name__ == '__main__':
         #       prior to initiating the EIS.
         if type_current == "EIS":
             Simulator1 = AlphaPEM(current_density, Tfc_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
-                                  t_step, i_step, i_pola_1, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
+                                  t_step, i_step, i_max_pola_1, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
                                   Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref,
                                   kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge,
                                   type_fuel_cell_1, type_current, type_auxiliary, type_control_1, type_purge,
@@ -148,7 +149,7 @@ if __name__ == '__main__':
         # Dynamic simulation
         for i in range(n):
             Simulator1 = AlphaPEM(current_density, Tfc_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
-                                  t_step, i_step, i_pola_1, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
+                                  t_step, i_step, i_max_pola_1, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
                                   Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref,
                                   kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge,
                                   type_fuel_cell_1, type_current, type_auxiliary, type_control_1, type_purge,
@@ -158,11 +159,11 @@ if __name__ == '__main__':
             if i < (n - 1):  # The final simulation does not require actualization.
                 if type_current == "step":
                     t0_interval = Simulator1.variables['t'][-1]
-                    tf_interval = (i + 2) * delta_t_dyn
+                    tf_interval = (i + 2) * delta_t_dyn_step
                     time_interval = [t0_interval, tf_interval]  # Reset of the time interval
                 elif type_current == "polarization":
                     t0_interval = Simulator1.variables['t'][-1]
-                    tf_interval = delta_t_ini + (i + 2) * delta_t
+                    tf_interval = delta_t_ini_pola + (i + 2) * delta_t
                     time_interval = [t0_interval, tf_interval]  # Reset of the time interval
                 elif type_current == "EIS":
                     t0_EIS_temp = Simulator1.variables['t'][-1]  # It is the initial time for 1 EIS point.
@@ -195,27 +196,27 @@ if __name__ == '__main__':
 
         # Simulation
         Simulator1 = AlphaPEM(current_density, Tfc_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, t_step,
-                              i_step, i_pola_1, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
-                              Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c,
-                              a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell_1, type_current,
-                              type_auxiliary, type_control_1, type_purge, type_display, type_plot)
+                              i_step, i_max_pola_1, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl,
+                              Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
+                              kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell_1,
+                              type_current, type_auxiliary, type_control_1, type_purge, type_display, type_plot)
         if type_fuel_cell_2 is not None:
             Simulator2 = AlphaPEM(current_density, Tfc_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2,
-                                  t_step, i_step, i_pola_2, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
+                                  t_step, i_step, i_max_pola_2, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
                                   Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref,
                                   kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge,
                                   type_fuel_cell_2, type_current, type_auxiliary, type_control_2, type_purge,
                                   type_display, type_plot)
         if type_fuel_cell_3 is not None:
             Simulator3 = AlphaPEM(current_density, Tfc_3, Pa_des_3, Pc_des_3, Sa_3, Sc_3, Phi_a_des_3, Phi_c_des_3,
-                                  t_step, i_step, i_pola_3, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
+                                  t_step, i_step, i_max_pola_3, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
                                   Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref,
                                   kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge,
                                   type_fuel_cell_3, type_current, type_auxiliary, type_control_3, type_purge,
                                   type_display, type_plot)
         if type_fuel_cell_4 is not None:
             Simulator4 = AlphaPEM(current_density, Tfc_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4,
-                                  t_step, i_step, i_pola_4, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
+                                  t_step, i_step, i_max_pola_4, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
                                   Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref,
                                   kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge,
                                   type_fuel_cell_4, type_current, type_auxiliary, type_control_4, type_purge,

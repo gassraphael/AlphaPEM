@@ -35,7 +35,7 @@ def stored_operating_inputs(type_fuel_cell):
         Desired anode relative humidity.
     Phi_c_des : float
         Desired cathode relative humidity.
-    i_pola : float
+    i_max_pola : float
         Maximum current density for the polarization curve.
     """
 
@@ -45,25 +45,25 @@ def stored_operating_inputs(type_fuel_cell):
         Pa_des, Pc_des = 1.5e5, 1.5e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
-        i_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
+        i_max_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "EH-31_2.0":
         Tfc = 74 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.0e5, 2.0e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
-        i_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
+        i_max_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "EH-31_2.25":
         Tfc = 74 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.25e5, 2.25e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
-        i_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
+        i_max_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "EH-31_2.5":
         Tfc = 74 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.5e5, 2.5e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
-        i_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
+        i_max_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
 
     # For BX fuel cell
     elif type_fuel_cell == "BX_1.0":
@@ -71,13 +71,13 @@ def stored_operating_inputs(type_fuel_cell):
         Pa_des, Pc_des = 101325, 101325  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.5, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.25, 0.25  # It is the desired relative humidity.
-        i_pola = 4.5e4  # A.m-2. It is the maximum current density for the polarization curve.
+        i_max_pola = 4.5e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "BX_1.35":
         Tfc = 80 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 1.35e5, 1.35e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.5, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 1.0, 0.5  # It is the desired relative humidity.
-        i_pola = 1.4e4  # A.m-2. It is the maximum current density for the polarization curve.
+        i_max_pola = 1.4e4  # A.m-2. It is the maximum current density for the polarization curve.
 
     # For LF fuel cell
     elif type_fuel_cell == "LF":
@@ -85,13 +85,13 @@ def stored_operating_inputs(type_fuel_cell):
         Pa_des, Pc_des = 101325, 101325  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 2.0, 1.5  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.84, 0.59  # It is the desired relative humidity.
-        i_pola = 1.6e4  # A.m-2. It is the maximum current density for the polarization curve.
+        i_max_pola = 1.6e4  # A.m-2. It is the maximum current density for the polarization curve.
 
     # For other fuel cells
     else:
         raise ValueError('the type_fuel_cell given is not valid.')
 
-    return Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_pola
+    return Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola
 
 
 def stored_physical_parameters(type_fuel_cell):

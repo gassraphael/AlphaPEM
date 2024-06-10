@@ -19,12 +19,12 @@ def changeValue(frame, choices, label_widgets, entry_widgets):
     """
 
     if choices['setting_input'].get() == 'EH-31 1.5 bar (2021)' or \
-        choices['setting_input'].get() == 'EH-31 2.0 bar (2021)' or \
-        choices['setting_input'].get() == 'EH-31 2.25 bar (2021)' or \
-        choices['setting_input'].get() == 'EH-31 2.5 bar (2021)' or \
-        choices['setting_input'].get() == 'Biao Xie 1.0 bar (2015)' or \
-        choices['setting_input'].get() == 'Biao Xie 1.35 bar (2015)' or \
-        choices['setting_input'].get() == 'Linhao Fan (2010)':
+            choices['setting_input'].get() == 'EH-31 2.0 bar (2021)' or \
+            choices['setting_input'].get() == 'EH-31 2.25 bar (2021)' or \
+            choices['setting_input'].get() == 'EH-31 2.5 bar (2021)' or \
+            choices['setting_input'].get() == 'Biao Xie 1.0 bar (2015)' or \
+            choices['setting_input'].get() == 'Biao Xie 1.35 bar (2015)' or \
+            choices['setting_input'].get() == 'Linhao Fan (2010)':
         # Hide all the Entries if they are already displayed
         for entry in entry_widgets:
             entry.grid_forget()
@@ -91,21 +91,38 @@ def changeValue(frame, choices, label_widgets, entry_widgets):
             grid(row=16, column=1, padx=5)
         tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w', textvariable=choices['tf_step_i']). \
             grid(row=16, column=3, padx=5)
-        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w', textvariable=choices['delta_t_load_i']) \
-            .grid(row=16, column=5, padx=5)
-        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w', textvariable=choices['i_ini_i']). \
+        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                 textvariable=choices['delta_t_load_step_i']). \
+            grid(row=16, column=5, padx=5)
+        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w', textvariable=choices['i_ini_step_i']). \
             grid(row=17, column=1, padx=5)
-        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w', textvariable=choices['i_final_i']). \
+        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                 textvariable=choices['i_final_step_i']). \
             grid(row=17, column=3, padx=5)
-        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w', textvariable=choices['i_pola_i']). \
+        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w', textvariable=choices['i_max_pola_i']). \
             grid(row=18, column=1, padx=5)
-        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w', textvariable=choices['i_EIS_i']). \
+        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                 textvariable=choices['delta_i_pola_i']). \
             grid(row=18, column=3, padx=5)
-        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w', textvariable=choices['t_purge_i']). \
+        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                 textvariable=choices['delta_t_load_pola_i']). \
             grid(row=19, column=1, padx=5)
         tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
-                 textvariable=choices['delta_t_purge_i']). \
+                 textvariable=choices['delta_t_break_pola_i']). \
             grid(row=19, column=3, padx=5)
+        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                 textvariable=choices['delta_t_ini_pola_i']). \
+            grid(row=19, column=5, padx=5)
+        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w', textvariable=choices['i_EIS_i']). \
+            grid(row=20, column=1, padx=5)
+        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                 textvariable=choices['delta_t_dyn_step_i']). \
+            grid(row=23, column=1, padx=5)
+        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w', textvariable=choices['t_purge_i']). \
+            grid(row=23, column=3, padx=5)
+        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                 textvariable=choices['delta_t_purge_i']). \
+            grid(row=23, column=5, padx=5)
 
     else:  # setting_input == 'Enter its specifications':
         # Hide the Labels if they are already displayed
@@ -113,42 +130,88 @@ def changeValue(frame, choices, label_widgets, entry_widgets):
             label.grid_forget()
 
         # Saves and displays the user entries
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['Tfc_i']).grid(row=2, column=1, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['Pa_des_i']).grid(row=2, column=3, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['Pc_des_i']).grid(row=2, column=5, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['Sa_i']).grid(row=3, column=1, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['Sc_i']).grid(row=3, column=3, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['Phi_a_des_i']).grid(row=4, column=1, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['Phi_c_des_i']).grid(row=4, column=3, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['Aact_i']).grid(row=6, column=1, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['Hgdl_i']).grid(row=7, column=1, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['Hcl_i']).grid(row=7, column=3, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['Hmem_i']).grid(row=7, column=5, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['Hgc_i']).grid(row=8, column=1, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['Wgc_i']).grid(row=8, column=3, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['Lgc_i']).grid(row=8, column=5, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['epsilon_gdl_i']).grid(row=10, column=1, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['epsilon_mc_i']).grid(row=10, column=3, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['tau_i']).grid(row=10, column=5, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['epsilon_c_i']).grid(row=11, column=1, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['e_i']).grid(row=11, column=3, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['Re_i']).grid(row=11, column=5, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['i0_c_ref_i']).grid(row=12, column=1, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['kappa_co_i']).grid(row=12, column=3, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['kappa_c_i']).grid(row=12, column=5, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['a_slim_i']).grid(row=13, column=1, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['b_slim_i']).grid(row=13, column=3, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['a_switch_i']).grid(row=13, column=5, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['C_dl_i']).grid(row=14, column=1, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['t0_step_i']).grid(row=16, column=1, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['tf_step_i']).grid(row=16, column=3, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_t_load_i']).grid(row=16, column=5, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['i_ini_i']).grid(row=17, column=1, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['i_final_i']).grid(row=17, column=3, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['i_pola_i']).grid(row=18, column=1, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['i_EIS_i']).grid(row=18, column=3, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['t_purge_i']).grid(row=19, column=1, padx=5)
-        tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_t_purge_i']).grid(row=19, column=3, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['Tfc_i']). \
+            grid(row=2, column=1, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['Pa_des_i']). \
+            grid(row=2, column=3, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['Pc_des_i']). \
+            grid(row=2, column=5, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['Sa_i']). \
+            grid(row=3, column=1, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['Sc_i']). \
+            grid(row=3, column=3, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['Phi_a_des_i']). \
+            grid(row=4, column=1, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['Phi_c_des_i']). \
+            grid(row=4, column=3, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['Aact_i']). \
+            grid(row=6, column=1, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['Hgdl_i']). \
+            grid(row=7, column=1, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['Hcl_i']). \
+            grid(row=7, column=3, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['Hmem_i']). \
+            grid(row=7, column=5, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['Hgc_i']). \
+            grid(row=8, column=1, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['Wgc_i']). \
+            grid(row=8, column=3, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['Lgc_i']). \
+            grid(row=8, column=5, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['epsilon_gdl_i']). \
+            grid(row=10, column=1, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['epsilon_mc_i']). \
+            grid(row=10, column=3, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['tau_i']). \
+            grid(row=10, column=5, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['epsilon_c_i']). \
+            grid(row=11, column=1, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['e_i']). \
+            grid(row=11, column=3, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['Re_i']). \
+            grid(row=11, column=5, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['i0_c_ref_i']). \
+            grid(row=12, column=1, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['kappa_co_i']). \
+            grid(row=12, column=3, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['kappa_c_i']). \
+            grid(row=12, column=5, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['a_slim_i']). \
+            grid(row=13, column=1, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['b_slim_i']). \
+            grid(row=13, column=3, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['a_switch_i']). \
+            grid(row=13, column=5, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['C_dl_i']). \
+            grid(row=14, column=1, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['t0_step_i']). \
+            grid(row=16, column=1, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['tf_step_i']). \
+            grid(row=16, column=3, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_t_load_step_i']). \
+            grid(row=16, column=5, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['i_ini_step_i']). \
+            grid(row=17, column=1, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['i_final_step_i']). \
+            grid(row=17, column=3, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['i_max_pola_i']). \
+            grid(row=18, column=1, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_i_pola_i']). \
+            grid(row=18, column=3, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_t_load_pola_i']). \
+            grid(row=19, column=1, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_t_break_pola_i']). \
+            grid(row=19, column=3, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_t_ini_pola_i']). \
+            grid(row=19, column=5, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['i_EIS_i']). \
+            grid(row=20, column=1, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_t_dyn_step_i']). \
+            grid(row=23, column=1, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['t_purge_i']). \
+            grid(row=23, column=3, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_t_purge_i']). \
+            grid(row=23, column=5, padx=5)
 
 
 def display_label_operating_inputs_and_physical_parameters(frame):
@@ -157,8 +220,8 @@ def display_label_operating_inputs_and_physical_parameters(frame):
     without their actual values.
     """
 
-    # Operating inputs
-    tk.Label(frame, text='Operating inputs', fg='black', font=('Times New Roman', 12, 'bold')). \
+    # Operating conditions
+    tk.Label(frame, text='Operating conditions', fg='black', font=('Times New Roman', 12, 'bold')). \
         grid(row=1, column=0, columnspan=6, ipady=15)
     tk.Label(frame, text='Tfc (°C)', fg='black', font=('Times New Roman', 10)).grid(row=2, column=0, sticky="w")
     tk.Label(frame, text='Pa_des (bar)', fg='black', font=('Times New Roman', 10)).grid(row=2, column=2, sticky="w")
@@ -188,31 +251,51 @@ def display_label_operating_inputs_and_physical_parameters(frame):
     tk.Label(frame, text='ε_c', fg='black', font=('Times New Roman', 10)).grid(row=11, column=0, sticky="w")
     tk.Label(frame, text='e', fg='black', font=('Times New Roman', 10)).grid(row=11, column=2, sticky="w")
     tk.Label(frame, text='Re (µΩ.m²)', fg='black', font=('Times New Roman', 10)).grid(row=11, column=4, sticky="w")
-    tk.Label(frame, text='i0_c_ref (A.m-2)', fg='black', font=('Times New Roman', 10)). \
+    tk.Label(frame, text='i0_c_ref (A/m²)', fg='black', font=('Times New Roman', 10)). \
         grid(row=12, column=0, sticky="w")
-    tk.Label(frame, text='κ_co (mol.m-1.s-1.Pa-1)', fg='black', font=('Times New Roman', 10)). \
+    tk.Label(frame, text='κ_co (mol/(m.s.Pa))', fg='black', font=('Times New Roman', 10)). \
         grid(row=12, column=2, sticky="w")
     tk.Label(frame, text='κ_c', fg='black', font=('Times New Roman', 10)).grid(row=12, column=4, sticky="w")
     tk.Label(frame, text='a_slim', fg='black', font=('Times New Roman', 10)).grid(row=13, column=0, sticky="w")
     tk.Label(frame, text='b_slim', fg='black', font=('Times New Roman', 10)).grid(row=13, column=2, sticky="w")
     tk.Label(frame, text='a_switch', fg='black', font=('Times New Roman', 10)).grid(row=13, column=4, sticky="w")
-    tk.Label(frame, text='C_dl (MF.m-3)', fg='black', font=('Times New Roman', 10)).grid(row=14, column=0, sticky="w")
+    tk.Label(frame, text='C_dl (MF/m³)', fg='black', font=('Times New Roman', 10)).grid(row=14, column=0, sticky="w")
 
-
-    # Modeling parameters
-    tk.Label(frame, text='Modeling parameters', fg='black', font=('Times New Roman', 12, 'bold')). \
+    # Current density parameters
+    tk.Label(frame, text='Current density parameters', fg='black', font=('Times New Roman', 12, 'bold')). \
         grid(row=15, column=0, columnspan=6, ipady=15)
-    tk.Label(frame, text='t0_step (s)', fg='black', font=('Times New Roman', 10)).grid(row=16, column=0, sticky="w")
-    tk.Label(frame, text='tf_step (s)', fg='black', font=('Times New Roman', 10)).grid(row=16, column=2, sticky="w")
-    tk.Label(frame, text='Δt_load (s)', fg='black', font=('Times New Roman', 10)). \
+    tk.Label(frame, text='t0_step (s)', fg='black', font=('Times New Roman', 10)). \
+        grid(row=16, column=0, sticky="w")
+    tk.Label(frame, text='tf_step (s)', fg='black', font=('Times New Roman', 10)). \
+        grid(row=16, column=2, sticky="w")
+    tk.Label(frame, text='Δt_load_step (s)', fg='black', font=('Times New Roman', 10)). \
         grid(row=16, column=4, sticky="w")
-    tk.Label(frame, text='i_ini (A/cm²)', fg='black', font=('Times New Roman', 10)).grid(row=17, column=0, sticky="w")
-    tk.Label(frame, text='i_final (A/cm²)', fg='black', font=('Times New Roman', 10)).grid(row=17, column=2, sticky="w")
-    tk.Label(frame, text='i_pola (A/cm²)', fg='black', font=('Times New Roman', 10)).grid(row=18, column=0, sticky="w")
-    tk.Label(frame, text='i_EIS (A/cm²)', fg='black', font=('Times New Roman', 10)).grid(row=18, column=2, sticky="w")
-    tk.Label(frame, text='t_purge (s)', fg='black', font=('Times New Roman', 10)).grid(row=19, column=0, sticky="w")
-    tk.Label(frame, text='Δt_purge (s)', fg='black', font=('Times New Roman', 10)). \
+    tk.Label(frame, text='i_ini_step (A/cm²)', fg='black', font=('Times New Roman', 10)). \
+        grid(row=17, column=0, sticky="w")
+    tk.Label(frame, text='i_final_step (A/cm²)', fg='black', font=('Times New Roman', 10)). \
+        grid(row=17, column=2, sticky="w")
+    tk.Label(frame, text='i_max_pola (A/cm²)', fg='black', font=('Times New Roman', 10)). \
+        grid(row=18, column=0, sticky="w")
+    tk.Label(frame, text='Δi_pola (A/cm²)', fg='black', font=('Times New Roman', 10)). \
+        grid(row=18, column=2, sticky="w")
+    tk.Label(frame, text='Δt_load_pola (s)', fg='black', font=('Times New Roman', 10)). \
+        grid(row=19, column=0, sticky="w")
+    tk.Label(frame, text='Δt_break_pola (s)', fg='black', font=('Times New Roman', 10)). \
         grid(row=19, column=2, sticky="w")
+    tk.Label(frame, text='Δt_ini_pola (s)', fg='black', font=('Times New Roman', 10)). \
+        grid(row=19, column=4, sticky="w")
+    tk.Label(frame, text='i_EIS (A/cm²)', fg='black', font=('Times New Roman', 10)). \
+        grid(row=20, column=0, sticky="w")
+
+    # Computing parameters
+    tk.Label(frame, text='Computing parameters', fg='black', font=('Times New Roman', 12, 'bold')). \
+        grid(row=22, column=0, columnspan=6, ipady=15)
+    tk.Label(frame, text='Δt_dyn_step (s)', fg='black', font=('Times New Roman', 10)). \
+        grid(row=23, column=0, sticky="w")
+    tk.Label(frame, text='t_purge (s)', fg='black', font=('Times New Roman', 10)). \
+        grid(row=23, column=2, sticky="w")
+    tk.Label(frame, text='Δt_purge (s)', fg='black', font=('Times New Roman', 10)). \
+        grid(row=23, column=4, sticky="w")
 
 
 def display_value_operating_inputs_and_physical_parameters(frame, choices):
@@ -272,23 +355,33 @@ def display_value_operating_inputs_and_physical_parameters(frame, choices):
     Label_b_slim = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
                             textvariable=choices['b_slim_i'])
     Label_a_switch = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
-                            textvariable=choices['a_switch_i'])
+                              textvariable=choices['a_switch_i'])
     Label_C_dl = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
-                              textvariable=choices['C_dl_i'])
+                          textvariable=choices['C_dl_i'])
     Label_t0_step = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
-                        textvariable=choices['t0_step_i'])
+                             textvariable=choices['t0_step_i'])
     Label_tf_step = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
-                        textvariable=choices['tf_step_i'])
-    Label_delta_t_load = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
-                                  textvariable=choices['delta_t_load_i'])
-    Label_i_ini = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
-                           textvariable=choices['i_ini_i'])
-    Label_i_final = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
-                             textvariable=choices['i_final_i'])
-    Label_i_pola = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
-                            textvariable=choices['i_pola_i'])
+                             textvariable=choices['tf_step_i'])
+    Label_delta_t_load_step = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                                       textvariable=choices['delta_t_load_step_i'])
+    Label_i_ini_step = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                                textvariable=choices['i_ini_step_i'])
+    Label_i_final_step = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                                  textvariable=choices['i_final_step_i'])
+    Label_i_max_pola = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                                textvariable=choices['i_max_pola_i'])
+    Label_delta_i_pola = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                                  textvariable=choices['delta_i_pola_i'])
+    Label_delta_t_load_pola = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                                       textvariable=choices['delta_t_load_pola_i'])
+    Label_delta_t_break_pola = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                                        textvariable=choices['delta_t_break_pola_i'])
+    Label_delta_t_ini_pola = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                                      textvariable=choices['delta_t_ini_pola_i'])
     Label_i_EIS = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
                            textvariable=choices['i_EIS_i'])
+    Label_delta_t_dyn_step = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                                      textvariable=choices['delta_t_dyn_step_i'])
     Label_t_purge = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
                              textvariable=choices['t_purge_i'])
     Label_delta_t_purge = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
@@ -298,8 +391,9 @@ def display_value_operating_inputs_and_physical_parameters(frame, choices):
                      Label_Aact, Label_Hgdl, Label_Hcl, Label_Hmem, Label_Hgc, Label_Wgc, Label_Lgc, Label_epsilon_gdl,
                      Label_epsilon_mc, Label_tau, Label_epsilon_c, Label_e, Label_Re, Label_i0_c_ref, Label_kappa_co,
                      Label_kappa_c, Label_a_slim, Label_b_slim, Label_a_switch, Label_C_dl, Label_t0_step,
-                     Label_tf_step, Label_delta_t_load, Label_i_ini, Label_i_final, Label_i_pola, Label_i_EIS,
-                     Label_t_purge, Label_delta_t_purge]
+                     Label_tf_step, Label_delta_t_load_step, Label_i_ini_step, Label_i_final_step, Label_i_max_pola,
+                     Label_delta_i_pola, Label_delta_t_load_pola, Label_delta_t_break_pola, Label_delta_t_ini_pola,
+                     Label_i_EIS, Label_delta_t_dyn_step, Label_t_purge, Label_delta_t_purge]
 
     Entry_Tfc = tk.Entry(frame, width=7, bg='white', textvariable=choices['Tfc_i'])
     Entry_Pa_des = tk.Entry(frame, width=7, bg='white', textvariable=choices['Pa_des_i'])
@@ -330,11 +424,16 @@ def display_value_operating_inputs_and_physical_parameters(frame, choices):
     Entry_C_dl = tk.Entry(frame, width=7, bg='white', textvariable=choices['C_dl_i'])
     Entry_t0_step = tk.Entry(frame, width=7, bg='white', textvariable=choices['t0_step_i'])
     Entry_tf_step = tk.Entry(frame, width=7, bg='white', textvariable=choices['tf_step_i'])
-    Entry_delta_t_load = tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_t_load_i'])
-    Entry_i_ini = tk.Entry(frame, width=7, bg='white', textvariable=choices['i_ini_i'])
-    Entry_i_final = tk.Entry(frame, width=7, bg='white', textvariable=choices['i_final_i'])
-    Entry_i_pola = tk.Entry(frame, width=7, bg='white', textvariable=choices['i_pola_i'])
+    Entry_delta_t_load_step = tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_t_load_step_i'])
+    Entry_i_ini_step = tk.Entry(frame, width=7, bg='white', textvariable=choices['i_ini_step_i'])
+    Entry_i_final_step = tk.Entry(frame, width=7, bg='white', textvariable=choices['i_final_step_i'])
+    Entry_i_max_pola = tk.Entry(frame, width=7, bg='white', textvariable=choices['i_max_pola_i'])
+    Entry_delta_i_pola = tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_i_pola_i'])
+    Entry_delta_t_load_pola = tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_t_load_pola_i'])
+    Entry_delta_t_break_pola = tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_t_break_pola_i'])
+    Entry_delta_t_ini_pola = tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_t_ini_pola_i'])
     Entry_i_EIS = tk.Entry(frame, width=7, bg='white', textvariable=choices['i_EIS_i'])
+    Entry_delta_t_dyn_step = tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_t_dyn_step_i'])
     Entry_t_purge = tk.Entry(frame, width=7, bg='white', textvariable=choices['t_purge_i'])
     Entry_delta_t_purge = tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_t_purge_i'])
 
@@ -342,8 +441,9 @@ def display_value_operating_inputs_and_physical_parameters(frame, choices):
                      Entry_Aact, Entry_Hgdl, Entry_Hcl, Entry_Hmem, Entry_Hgc, Entry_Wgc, Entry_Lgc, Entry_epsilon_gdl,
                      Entry_epsilon_mc, Entry_tau, Entry_epsilon_c, Entry_e, Entry_Re, Entry_i0_c_ref, Entry_kappa_co,
                      Entry_kappa_c, Entry_a_slim, Entry_b_slim, Entry_a_switch, Entry_C_dl, Entry_t0_step,
-                     Entry_tf_step, Entry_delta_t_load, Entry_i_ini, Entry_i_final, Entry_i_pola, Entry_i_EIS,
-                     Entry_t_purge, Entry_delta_t_purge]
+                     Entry_tf_step, Entry_delta_t_load_step, Entry_i_ini_step, Entry_i_final_step, Entry_i_max_pola,
+                     Entry_i_max_pola, Entry_delta_t_load_pola, Entry_delta_t_break_pola, Entry_delta_t_ini_pola,
+                     Entry_i_EIS, Entry_delta_t_dyn_step, Entry_t_purge, Entry_delta_t_purge]
 
     Entry_Tfc.grid(row=2, column=1, padx=5)
     Entry_Pa_des.grid(row=2, column=3, padx=5)
@@ -374,13 +474,18 @@ def display_value_operating_inputs_and_physical_parameters(frame, choices):
     Entry_C_dl.grid(row=14, column=1, padx=5)
     Entry_t0_step.grid(row=16, column=1, padx=5)
     Entry_tf_step.grid(row=16, column=3, padx=5)
-    Entry_delta_t_load.grid(row=16, column=5, padx=5)
-    Entry_i_ini.grid(row=17, column=1, padx=5)
-    Entry_i_final.grid(row=17, column=3, padx=5)
-    Entry_i_pola.grid(row=18, column=1, padx=5)
-    Entry_i_EIS.grid(row=18, column=3, padx=5)
-    Entry_t_purge.grid(row=19, column=1, padx=5)
-    Entry_delta_t_purge.grid(row=19, column=3, padx=5)
+    Entry_delta_t_load_step.grid(row=16, column=5, padx=5)
+    Entry_i_ini_step.grid(row=17, column=1, padx=5)
+    Entry_i_final_step.grid(row=17, column=3, padx=5)
+    Entry_i_max_pola.grid(row=18, column=1, padx=5)
+    Entry_delta_i_pola.grid(row=18, column=3, padx=5)
+    Entry_delta_t_load_pola.grid(row=19, column=1, padx=5)
+    Entry_delta_t_break_pola.grid(row=19, column=3, padx=5)
+    Entry_delta_t_ini_pola.grid(row=19, column=5, padx=5)
+    Entry_i_EIS.grid(row=20, column=1, padx=5)
+    Entry_delta_t_dyn_step.grid(row=23, column=1, padx=5)
+    Entry_t_purge.grid(row=23, column=3, padx=5)
+    Entry_delta_t_purge.grid(row=23, column=5, padx=5)
 
     return label_widgets, entry_widgets
 
@@ -390,41 +495,41 @@ def display_radiobuttons(frame, choices):
     This function displays radiobuttons on the GUI, allowing the user to make choices for purging, 
     results display, plot style, etc.
     """
-    tk.Label(frame, text='Selections', fg='black', font=('Times New Roman', 12, 'bold')) \
-        .grid(row=20, column=0, columnspan=6, ipady=15)
+    tk.Label(frame, text='Model possibilities', fg='black', font=('Times New Roman', 12, 'bold')) \
+        .grid(row=24, column=0, columnspan=6, ipady=15)
 
     # Ask the user to choose an option and save it
     tk.Label(frame, text='Auxiliaries: ', fg='black', font=('Times New Roman', 12)). \
-        grid(row=21, column=0, sticky="w")
+        grid(row=25, column=0, sticky="w")
     tk.Radiobutton(frame, text='No auxiliaries', value=2, variable=choices['auxiliaries_choice']). \
-        grid(row=21, column=1, sticky="w")
+        grid(row=25, column=1, sticky="w")
     tk.Radiobutton(frame, text='Closed anode', value=1, variable=choices['auxiliaries_choice']). \
-        grid(row=21, column=2, sticky="w")
+        grid(row=25, column=2, sticky="w")
     tk.Radiobutton(frame, text='Opened anode', value=0, variable=choices['auxiliaries_choice']). \
-        grid(row=21, column=3, sticky="w")
+        grid(row=25, column=3, sticky="w")
 
     # Ask the user to choose an option and save it
-    tk.Label(frame, text='Purge: ', fg='black', font=('Times New Roman', 12)).grid(row=22, column=0, sticky="w")
-    tk.Radiobutton(frame, text='Periodic', value=1, variable=choices['is_purging']).grid(row=22, column=1, sticky="w")
-    tk.Radiobutton(frame, text='No purge', value=0, variable=choices['is_purging']).grid(row=22, column=2, sticky="w")
+    tk.Label(frame, text='Purge: ', fg='black', font=('Times New Roman', 12)).grid(row=26, column=0, sticky="w")
+    tk.Radiobutton(frame, text='Periodic', value=1, variable=choices['is_purging']).grid(row=26, column=1, sticky="w")
+    tk.Radiobutton(frame, text='No purge', value=0, variable=choices['is_purging']).grid(row=26, column=2, sticky="w")
 
     # Ask the user to choose an option and save it
-    tk.Label(frame, text='Results: ', fg='black', font=('Times New Roman', 12)).grid(row=23, column=0, sticky="w")
-    tk.Radiobutton(frame, text='Precise', value=1, variable=choices['is_precise']).grid(row=23, column=1, sticky="w")
-    tk.Radiobutton(frame, text='Fast', value=0, variable=choices['is_precise']).grid(row=23, column=2, sticky="w")
+    tk.Label(frame, text='Results: ', fg='black', font=('Times New Roman', 12)).grid(row=27, column=0, sticky="w")
+    tk.Radiobutton(frame, text='Precise', value=1, variable=choices['is_precise']).grid(row=27, column=1, sticky="w")
+    tk.Radiobutton(frame, text='Fast', value=0, variable=choices['is_precise']).grid(row=27, column=2, sticky="w")
 
     # Ask the user to choose an option and save it
     tk.Label(frame, text='Display: ', fg='black', font=('Times New Roman', 12)). \
-        grid(row=24, column=0, sticky="w")
+        grid(row=28, column=0, sticky="w")
     tk.Radiobutton(frame, text='Synthetic', value=1, variable=choices['is_synthetic']). \
-        grid(row=24, column=1, sticky="w")
+        grid(row=28, column=1, sticky="w")
     tk.Radiobutton(frame, text='Shattered', value=0, variable=choices['is_synthetic']). \
-        grid(row=24, column=2, sticky="w")
+        grid(row=28, column=2, sticky="w")
 
     # Ask the user to choose an option and save it
-    tk.Label(frame, text='Plot: ', fg='black', font=('Times New Roman', 12)).grid(row=25, column=0, sticky="w")
-    tk.Radiobutton(frame, text='Dynamic', value=1, variable=choices['is_dynamic']).grid(row=25, column=1, sticky="w")
-    tk.Radiobutton(frame, text='Fixed', value=0, variable=choices['is_dynamic']).grid(row=25, column=2, sticky="w")
+    tk.Label(frame, text='Plot: ', fg='black', font=('Times New Roman', 12)).grid(row=29, column=0, sticky="w")
+    tk.Radiobutton(frame, text='Dynamic', value=1, variable=choices['is_dynamic']).grid(row=29, column=1, sticky="w")
+    tk.Radiobutton(frame, text='Fixed', value=0, variable=choices['is_dynamic']).grid(row=29, column=2, sticky="w")
 
 
 def recover_for_display_operating_inputs_and_physical_parameters(frame, choices):
@@ -450,7 +555,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(frame, choices)
     else:
         raise ValueError('the type_fuel_cell given is not valid.')
 
-    Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_pola = stored_operating_inputs(type_fuel_cell)
+    Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
     Hcl, epsilon_mc, tau, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, Re, i0_c_ref, kappa_co, kappa_c, \
         a_slim, b_slim, a_switch, C_dl = \
@@ -483,7 +588,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(frame, choices)
     choices['b_slim_i'].set(np.round(b_slim, 4))
     choices['a_switch_i'].set(np.round(a_switch, 4))
     choices['C_dl_i'].set(np.round(C_dl * 1e-6, 2))  # MF.m-3
-    choices['i_pola_i'].set(np.round(i_pola / 1e4, 2))  # A/cm²
+    choices['i_max_pola_i'].set(np.round(i_max_pola / 1e4, 2))  # A/cm²
 
 
 def recover_for_use_operating_inputs_and_physical_parameters(choices):
@@ -514,11 +619,17 @@ def recover_for_use_operating_inputs_and_physical_parameters(choices):
     a_slim = choices['a_slim_i'].get()
     b_slim = choices['b_slim_i'].get()
     a_switch = choices['a_switch_i'].get()
-    C_dl = choices['C_dl_i'].get() * 1e6 # F.m-3
-    t_step = choices['t0_step_i'].get(), choices['tf_step_i'].get(), choices['delta_t_load_i'].get()  # s
-    i_step = choices['i_ini_i'].get() * 1e4, choices['i_final_i'].get() * 1e4  # A.m-2
-    i_pola, i_EIS = choices['i_pola_i'].get() * 1e4, choices['i_EIS_i'].get() * 1e4  # A.m-2
-    t_purge, delta_t_purge = choices['t_purge_i'].get(), choices['delta_t_purge_i'].get() * 1e4  # s
+    C_dl = choices['C_dl_i'].get() * 1e6  # F.m-3
+    t_step = (choices['t0_step_i'].get(), choices['tf_step_i'].get(),
+              choices['delta_t_load_step_i'].get(), choices['delta_t_dyn_step_i'].get())  # (s, s, s, s)
+    i_step = choices['i_ini_step_i'].get() * 1e4, choices['i_final_step_i'].get() * 1e4  # (A.m-2, A.m-2)
+    i_max_pola = choices['i_max_pola_i'].get() * 1e4  # A.m-2
+    delta_pola = choices['delta_t_load_pola'].get(), choices['delta_t_break_pola'].get(), \
+        choices['delta_i_pola'].get() * 1e4, choices['delta_t_ini_pola'].get()  # (s, s, A.m-2, s)
+
+    i_EIS = choices['i_EIS_i'].get() * 1e4
+
+    t_purge, delta_t_purge = choices['t_purge_i'].get(), choices['delta_t_purge_i'].get()  # s
 
     if choices['setting_input'].get() == "EH-31 1.5 bar":
         type_fuel_cell = "EH-31_1.5"
@@ -558,8 +669,8 @@ def recover_for_use_operating_inputs_and_physical_parameters(choices):
 
     return (Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl,
             epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, t_step,
-            i_step, i_pola, i_EIS, t_purge, delta_t_purge, type_fuel_cell, type_auxiliary, type_purge, max_step,
-            type_display, type_plot)
+            i_step, i_max_pola, delta_pola, i_EIS, t_purge, delta_t_purge, type_fuel_cell, type_auxiliary, type_purge,
+            max_step, type_display, type_plot)
 
 
 def value_control(choices):
@@ -673,18 +784,22 @@ def value_control(choices):
         'I have not settled yet a range for C_dl.')
         choices.clear()
         return
-    if choices['t0_step_i'].get() < 0 or choices['tf_step_i'].get() < 0 or choices['delta_t_load_i'].get() < 0 or \
+    if choices['t0_step_i'].get() < 0 or choices['tf_step_i'].get() < 0 or choices['delta_t_load_step_i'].get() < 0 or \
+            choices['delta_t_dyn_step_i'].get() < 0 or choices['delta_t_load_pola_i'].get() < 0 or \
+            choices['delta_t_break_pola_i'].get() < 0 or choices['delta_t_ini_pola_i'].get() < 0 or \
             choices['t0_step_i'].get() > choices['tf_step_i'].get() or \
-            choices['delta_t_load_i'].get() > (choices['tf_step_i'].get() - choices['t0_step_i'].get()):
+            choices['delta_t_load_step_i'].get() > (choices['tf_step_i'].get() - choices['t0_step_i'].get()):
         messagebox.showerror(title='Times', message=
-        'The times should be positive, t0_step < tf_step and delta_t_load < (tf_step - t0_step).')
+        'The times should be positive, t0_step < tf_step and delta_t_load_step < (tf_step - t0_step).')
         choices.clear()
         return
-    if choices['i_ini_i'].get() < 0 or choices['i_final_i'].get() < 0 or \
-            choices['i_pola_i'].get() < 0 or choices['i_EIS_i'].get() < 0 or \
-            choices['i_ini_i'].get() > choices['i_final_i'].get():
+    if choices['i_ini_step_i'].get() < 0 or choices['i_final_step_i'].get() < 0 or \
+            choices['i_max_pola_i'].get() < 0 or choices['delta_i_pola_i'].get() < 0 or \
+            choices['i_EIS_i'].get() < 0 or \
+            choices['delta_i_pola_i'].get() > choices['i_max_pola_i'].get() or \
+            choices['i_ini_step_i'].get() > choices['i_final_step_i'].get():
         messagebox.showerror(title='Current densities', message=
-        'The current densities should be positive and i_ini_i < i_final_i.')
+        'The current densities should be positive, delta_i_pola_i < i_max_pola_i and i_ini_step_i < i_final_step_i.')
         choices.clear()
         return
     if choices['t_purge_i'].get() < 0 and choices['delta_purge_i'].get() < 0:

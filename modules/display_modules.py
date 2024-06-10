@@ -36,10 +36,10 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax):
     of the current density.
     To generate it, the current density is increased step by step, and the cell voltage is recorded at each step.
     The time for which this point is captured is determined using the following approach: at the beginning of each load,
-    a delta_t_load time is needed to raise the current density to its next value. Subsequently, a delta_t_break time is
-    observed to ensure the dynamic stability of the stack's variables before initiating a new load. Ideally, each
-    polarisation point should be recorded at the end of each delta_t_break time. However, due to the design of the
-    increments to minimize program instability (as observed in step_current function), the end of each delta_t_break
+    a delta_t_load_pola time is needed to raise the current density to its next value. Subsequently, a delta_t_break_pola
+    time is observed to ensure the dynamic stability of the stack's variables before initiating a new load. Ideally,
+    each polarisation point should be recorded at the end of each delta_t_break_pola time. However, due to the design of the
+    increments to minimize program instability (as observed in step_current function), the end of each delta_t_break_pola
     time corresponds to the beginning of a new load. To ensure a stationary operation and accurate polarisation point
     measurements, it is recommended to take the polarisation point just before by subtracting a delta_t value from it.
     This adjustment allows for stable and consistent measurements during the stationary period.
@@ -60,7 +60,7 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax):
     t, Ucell_t = np.array(variables['t']), np.array(variables['Ucell'])
     # Extraction of the operating inputs and the parameters
     current_density = operating_inputs['current_density']
-    t_step, i_step, i_pola = parameters['t_step'], parameters['i_step'], parameters['i_pola']
+    t_step, i_step, i_max_pola = parameters['t_step'], parameters['i_step'], parameters['i_max_pola']
     delta_pola = parameters['delta_pola']
     i_EIS, t_EIS, f_EIS = parameters['i_EIS'], parameters['t_EIS'], parameters['f_EIS']
     type_fuel_cell, type_auxiliary = parameters['type_fuel_cell'], parameters['type_auxiliary']
@@ -74,12 +74,13 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax):
             ifc_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
 
         # Recovery of ifc and Ucell from the model after each stack stabilisation
-        delta_t_load, delta_t_break, delta_i, delta_t_ini = delta_pola
-        nb_loads = int(i_pola / delta_i + 1)  # Number of loads which are made
+        delta_t_load_pola, delta_t_break_pola, delta_i_pola, delta_t_ini_pola = delta_pola
+        nb_loads = int(i_max_pola / delta_i_pola + 1)  # Number of loads which are made
         ifc_discretized = np.zeros(nb_loads)
         Ucell_discretized = np.zeros(nb_loads)
         for i in range(nb_loads):
-            t_load = delta_t_ini + (i + 1) * (delta_t_load + delta_t_break) - delta_t_break / 10  # time for measurement
+            t_load = delta_t_ini_pola + (i + 1) * (delta_t_load_pola + delta_t_break_pola) - delta_t_break_pola / 10
+            #                                                                                    # time for measurement
             idx = (np.abs(t - t_load)).argmin()  # the corresponding index
             ifc_discretized[i] = ifc_t[idx]  # the last value at the end of each load
             Ucell_discretized[i] = Ucell_t[idx]  # the last value at the end of each load
@@ -106,8 +107,8 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax):
 
     else:  # type_plot == "dynamic"
         # Plot of the polarisation curve produced by the model
-        delta_t_load, delta_t_break, delta_i, delta_t_ini = delta_pola
-        idx = (np.abs(t - t[-1] + delta_t_break / 10)).argmin()  # index for polarisation measurement
+        delta_t_load_pola, delta_t_break_pola, delta_i_pola, delta_t_ini_pola = delta_pola
+        idx = (np.abs(t - t[-1] + delta_t_break_pola / 10)).argmin()  # index for polarisation measurement
         ifc = np.array(current_density(t[idx], parameters) / 1e4)  # time for polarisation measurement
         Ucell = np.array(Ucell_t[idx])  # voltage measurement
         ax.plot(ifc, Ucell, 'og', markersize=2)

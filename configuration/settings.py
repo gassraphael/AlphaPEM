@@ -26,14 +26,16 @@ def current_density_parameters(type_current):
     t_step : tuple
         Time parameters for the step_current density function.
         It is a tuple containing the initial time 't0_step' in seconds, final time 'tf_step' in seconds, loading time
-        'delta_t_load' in seconds, and dynamic time for display 'delta_t_dyn' in seconds.
+        'delta_t_load_step' in seconds, and dynamic time for display 'delta_t_dyn_step' in seconds.
     i_step : tuple
         Current parameters for the step_current density function.
-        It is a tuple containing the initial and final current density values 'i_ini' and 'i_final', both in A.m-2.
+        It is a tuple containing the initial and final current density values 'i_ini_step' and 'i_final_step', both in
+        A.m-2.
     delta_pola : tuple
         Parameters for the polarization curve.
-        It is a tuple containing the loading time 'delta_t_load' in seconds, the breaking time 'delta_t_break' in
-        seconds, the current density step 'delta_i' in A.m-2, and the initial breaking time 'delta_t_ini' in seconds.
+        It is a tuple containing the loading time 'delta_t_load_pola' in seconds, the breaking time 'delta_t_break_pola'
+        in seconds, the current density step 'delta_i_pola' in A.m-2, and the initial breaking time 'delta_t_ini_pola'
+        in seconds.
     i_EIS : float
         Parameters for the EIS curve. It is the current for which a perturbation is added.
     ratio_EIS : float
@@ -93,7 +95,7 @@ def operating_inputs(type_fuel_cell):
         Desired anode relative humidity.
     Phi_c_des : float
         Desired cathode relative humidity.
-    i_pola : float
+    i_max_pola : float
         Maximum current density for the polarization curve.
     """
 
@@ -102,11 +104,11 @@ def operating_inputs(type_fuel_cell):
         Pa_des, Pc_des = 2.0e5, 2.0e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
-        i_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
+        i_max_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
     else: # Stored setup in "stored_operating_inputs".
-        Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_pola = stored_operating_inputs(type_fuel_cell)
+        Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
-    return Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_pola
+    return Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola
 
 
 def physical_parameters(type_fuel_cell):

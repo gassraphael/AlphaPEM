@@ -40,7 +40,7 @@ mpl.use("Qt5Agg")
 
 class AlphaPEM:
 
-    def __init__(self, current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_pola,
+    def __init__(self, current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_max_pola,
                  delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau,
                  epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step,
                  n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge, type_display,
@@ -68,17 +68,17 @@ class AlphaPEM:
             Desired cathode relative humidity (operating input).
         t_step : tuple
             Time parameters for the step_current density function (current parameters).
-            It is a tuple containing the initial time 't0_step', final time 'tf_step', loading time 'delta_t_load' and
-            dynamic time for display 'delta_t_dyn'.
+            It is a tuple containing the initial time 't0_step', final time 'tf_step', loading time 'delta_t_load_step'
+            and dynamic time for display 'delta_t_dyn_step'.
         i_step : tuple
             Current parameters for the step_current density function (current parameters).
-            It is a tuple containing the initial and final current density value 'i_ini' and 'i_final'.
-        i_pola : float
+            It is a tuple containing the initial and final current density value 'i_ini_step' and 'i_final_step'.
+        i_max_pola : float
             Maximum current density for the polarization curve (current parameter).
         delta_pola : tuple
             Parameters for the polarization curve (current parameters). It is a tuple containing the loading time
-            'delta_t_load', the breaking time 'delta_t_break', the current density step 'delta_i', and the initial
-            breaking time 'delta_t_ini'.
+            'delta_t_load_pola', the breaking time 'delta_t_break_pola', the current density step 'delta_i_pola', and
+            the initial breaking time 'delta_t_ini_pola'.
         i_EIS : float
             Current for which a ratio_EIS perturbation is added (current parameter).
         ratio_EIS : float
@@ -168,8 +168,9 @@ class AlphaPEM:
         # Initialize the operating inputs and parameters dictionaries.
         self.operating_inputs = {'current_density': current_density, 'Tfc': Tfc, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
                                  'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des}
-        self.current_parameters = {'t_step': t_step, 'i_step': i_step, 'delta_pola': delta_pola, 'i_pola': i_pola,
-                                   'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
+        self.current_parameters = {'t_step': t_step, 'i_step': i_step, 'delta_pola': delta_pola,
+                                   'i_max_pola': i_max_pola, 'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS,
+                                   'f_EIS': f_EIS}
         self.accessible_physical_parameters = {'Aact': Aact, 'Hgdl': Hgdl, 'Hmem': Hmem, 'Hcl': Hcl, 'Hgc': Hgc,
                                                'Wgc': Wgc, 'Lgc': Lgc}
         self.accessible_undetermined_parameters = {'epsilon_gdl': epsilon_gdl, 'tau': tau, 'epsilon_mc': epsilon_mc,
@@ -252,18 +253,18 @@ class AlphaPEM:
         """
 
         # Extraction of the parameters
-        t_step, delta_pola, i_pola = self.parameters['t_step'], self.parameters['delta_pola'], self.parameters['i_pola']
+        t_step, delta_pola, i_max_pola = self.parameters['t_step'], self.parameters['delta_pola'], self.parameters['i_max_pola']
         type_current = self.parameters['type_current']
 
         # Recovery of the good time interval
         if type_current == "step":
-            t0_step, tf_step, delta_t_load, delta_t_dyn = t_step
+            t0_step, tf_step, delta_t_load_step, delta_t_dyn_step = t_step
             t0_interval = t0_step
             tf_interval = tf_step
         elif type_current == "polarization":
-            delta_t_load, delta_t_break, delta_i, delta_t_ini = delta_pola
+            delta_t_load_pola, delta_t_break_pola, delta_i_pola, delta_t_ini_pola = delta_pola
             t0_interval = 0
-            tf_interval = delta_t_ini + int(i_pola / delta_i + 1) * (delta_t_load + delta_t_break)
+            tf_interval = delta_t_ini_pola + int(i_max_pola / delta_i_pola + 1) * (delta_t_load_pola + delta_t_break_pola)
         else:  # EIS time_interval is calculated in the main.py file.
             raise ValueError("Please enter a recognized type_current option for calculating the time interval.")
 

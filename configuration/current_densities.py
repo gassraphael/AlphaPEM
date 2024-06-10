@@ -27,8 +27,8 @@ mpl.use("Qt5Agg")
 
 def step_current(t, parameters):
     """Represents a step change in current density.
-    The current starts at 0 and smoothly stabilizes at i_ini A.m-2 in delta_t_load seconds.
-    Around t_switch seconds, the current increases smoothly and stabilizes at i_final A.m-2 in delta_t_load seconds.
+    The current starts at 0 and smoothly stabilizes at i_ini_step A.m-2 in delta_t_load seconds.
+    Around t_switch seconds, the current increases smoothly and stabilizes at i_final_step A.m-2 in delta_t_load seconds.
     This is a C∞ function, which is advantageous for enhancing the overall stability of the results.
 
     Parameters:
@@ -45,23 +45,23 @@ def step_current(t, parameters):
     """
 
     # Initialisation
-    t0_step, tf_step, delta_t_load, delta_t_dyn = parameters['t_step']  # (s, s, s, s). It is the initial, final,
+    t0_step, tf_step, delta_t_load_step, delta_t_dyn_step = parameters['t_step']  # (s, s, s, s). It is the initial, final,
     #                                                                     loading and dynamic time for display.
-    i_ini, i_final = parameters['i_step']  # (A.m-2, A.m-2). It is the initial and final current density values.
+    i_ini_step, i_final_step = parameters['i_step']  # (A.m-2, A.m-2). It is the initial and final current density values.
     t_switch = tf_step // 2  # The current density value changes around this time.
 
     # Step current density
-    i_fc = i_ini * (1.0 + np.tanh(4 * (t - 2 * (delta_t_load / 2)) / delta_t_load)) / 2 + \
-           + (i_final - i_ini) * (1.0 + np.tanh(4 * (t - t_switch - (delta_t_load / 2)) / delta_t_load)) / 2
+    i_fc = i_ini_step * (1.0 + np.tanh(4 * (t - 2 * (delta_t_load_step / 2)) / delta_t_load_step)) / 2 + \
+           + (i_final_step - i_ini_step) * (1.0 + np.tanh(4 * (t - t_switch - (delta_t_load_step / 2)) / delta_t_load_step)) / 2
 
     return i_fc
 
 
 def polarization_current(t, parameters):
     """Represents a current density used for creating a polarization curve.
-    Starting from 0, the current density increases by the value of delta_i every delta_t, following C∞ step current
-    increments, until it reaches i_max. Each increment lasts for delta_t_load seconds. After each increment, there is a
-    pause of delta_t_break seconds to allow the stack to reach equilibrium.
+    Starting from 0, the current density increases by the value of delta_i_pola every delta_t, following C∞ step current
+    increments, until it reaches i_max_pola. Each increment lasts for delta_t_load_pola seconds. After each increment,
+    there is a pause of delta_t_break_pola seconds to allow the stack to reach equilibrium.
 
     Parameters:
     ----------
@@ -77,22 +77,23 @@ def polarization_current(t, parameters):
     """
 
     # Initialisation
-    delta_t_load, delta_t_break, delta_i, delta_t_ini = parameters['delta_pola']  # (s, s, A.m-2, s). It is the loading
-    #                                 time, the breaking time, the current density step, and the initial breaking time.
-    i_pola = parameters['i_pola']  # A.m-2. It is the maximum current density for the polarization curve.
-    delta_t = delta_t_load + delta_t_break  # s. It is the time of one load.
-    tf = delta_t_ini + int(i_pola / delta_i + 1) * delta_t  # s. It is the duration of this polarization current.
+    delta_t_load_pola, delta_t_break_pola, delta_i_pola, delta_t_ini_pola = parameters['delta_pola']
+    #                                 (s, s, A.m-2, s). It is the loading time, the breaking time, the current density
+    #                                 step, and the initial breaking time.
+    i_max_pola = parameters['i_max_pola']  # A.m-2. It is the maximum current density for the polarization curve.
+    delta_t = delta_t_load_pola + delta_t_break_pola  # s. It is the time of one load.
+    tf = delta_t_ini_pola + int(i_max_pola / delta_i_pola + 1) * delta_t  # s. It is the duration of this polarization current.
     n = int(tf / delta_t)  # . It is the number of loads made for this polarization current.
 
     # Current density for the polarization curve
     i_fc = 0  # A.m-2. Initialisation of the current density.
-    if t < delta_t_ini:  # It is the initial break for having homogeneity inside the cell
+    if t < delta_t_ini_pola:  # It is the initial break for having homogeneity inside the cell
         i_fc = 0  # before starting the measurements.
     else:
         for i in range(n):
             t_switch = delta_t * i  # The current density value changes around this time.
-            i_fc += delta_i * (1.0 + np.tanh(4 * (t - delta_t_ini - delta_t - t_switch - (delta_t_load / 2)) /
-                                             delta_t_load)) / 2
+            i_fc += delta_i_pola * (1.0 + np.tanh(4 * (t - delta_t_ini_pola - delta_t - t_switch - (delta_t_load_pola / 2)) /
+                                             delta_t_load_pola)) / 2
 
     return i_fc
 
@@ -171,12 +172,12 @@ if __name__ == "__main__":
     #   polarization_current parameters
     delta_pola = 30, 30, 0.1e4, 1 * 60  # (s, s, A.m-2, s). It is the loading time, the breaking time, the current
     #                                     density step, and the initial breaking time.
-    i_pola = 1e4  # A.m-2. The maximum current density for the polarization curve.
-    parameters = {'delta_pola': delta_pola, 'i_pola': i_pola}
+    i_max_pola = 1e4  # A.m-2. The maximum current density for the polarization curve.
+    parameters = {'delta_pola': delta_pola, 'i_max_pola': i_max_pola}
 
-    delta_t_load, delta_t_break, delta_i, delta_t_ini = delta_pola
+    delta_t_load, delta_t_break_pola, delta_i_pola, delta_t_ini_pola = delta_pola
     t0 = 0
-    tf = delta_t_ini + int(i_pola / delta_i + 1) * (delta_t_load + delta_t_break)
+    tf = delta_t_ini_pola + int(i_max_pola / delta_i_pola + 1) * (delta_t_load + delta_t_break_pola)
     #   Display
     n = 10000
     t = np.linspace(t0, tf, n)
