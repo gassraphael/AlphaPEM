@@ -2,10 +2,10 @@
 
 """
 - Objectives: Create an open-source software package to simulate the PEM fuel cell for control system applications.
-- Authors: Raphaël GASS, Zhongliang LI, Rachid OUTBIB, Samir JEMEI, Daniel HISSEL
+- Authors: Raphaël GASS, Zhongliang LI, Rachid OUTBIB, Samir JEMEI and Daniel HISSEL.
 ---
-This file describes the AlphaPEM class, which is a fuel cell system simulator. 
-The model is one-dimensional, dynamic, biphasic, and isothermal. It has been published in the following article:
+This file describes the AlphaPEM class, which is a PEM fuel cell system simulator.
+The model is one-dimensional, dynamic, biphasic, and isothermal. It has been published in the following articles:
 - Gass et al 2024 J. Electrochem. Soc. https://doi.org/10.1149/1945-7111/ad305a
 - Gass et al 2024 SSRN http://dx.doi.org/10.2139/ssrn.4812343
 """

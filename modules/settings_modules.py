@@ -68,13 +68,13 @@ def stored_operating_inputs(type_fuel_cell):
     # For BX fuel cell
     elif type_fuel_cell == "BX_1.0":
         Tfc = 80 + 273.15  # K. It is the desired fuel cell temperature.
-        Pa_des, Pc_des = 1.0 * 101325, 1.0 * 101325  # Pa. It is the desired pressures of the fuel gas.
+        Pa_des, Pc_des = 101325, 101325  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.5, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.25, 0.25  # It is the desired relative humidity.
         i_pola = 4.5e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "BX_1.35":
         Tfc = 80 + 273.15  # K. It is the desired fuel cell temperature.
-        Pa_des, Pc_des = 1.35 * 101325, 1.35 * 101325  # Pa. It is the desired pressures of the fuel gas.
+        Pa_des, Pc_des = 1.35e5, 1.35e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.5, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 1.0, 0.5  # It is the desired relative humidity.
         i_pola = 1.4e4  # A.m-2. It is the maximum current density for the polarization curve.
