@@ -65,8 +65,8 @@ vartype = np.array(['real', 'real', 'real', 'real', 'int', 'real', 'real', 'real
 C_dl = 2e7  # F.m-3. It is the volumetric double layer capacitance.
 
 # GeneticAlgorithm parameters
-algorithm_param = AlgorithmParams(  # 1 iteration takes 738s = 12.3min = 0.205h inside LIS cluster with 80 nodes.
-    #                                 800 iterations takes 164h = 6.84j.
+algorithm_param = AlgorithmParams(  # 1 iteration takes 693s = 11.6min = 0.193h inside LIS cluster with 80 nodes.
+    #                                 800 iterations takes 155h = 6.45j.
     max_num_iteration=800,  # It should be between 500 and 1500, depending on the population_size, for a good compromise
     #                         between speed and precision.
     population_size=160,  # It should be between 100 and 200 for a good compromise between speed and precision.
