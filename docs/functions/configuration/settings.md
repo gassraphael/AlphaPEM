@@ -1,0 +1,3 @@
+# Settings
+
+::: configuration.settings
