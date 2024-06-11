@@ -42,16 +42,16 @@ def current_density_parameters(type_current):
         Parameters for the EIS curve. It is the ratio of the current for which a perturbation is added.
     f_EIS : tuple
         Frequency parameters for the EIS_current density function.
-        It is a tuple containing the power of the initial frequency 'f_power_min' in Hz (f_min = 10**f_power_min), the
-        power of the final frequency 'f_power_max' in Hz, the number of frequencies tested 'nb_f', and the number of
-        points calculated per specific period 'nb_points'.
+        It is a tuple containing the power of the initial frequency 'f_power_min_EIS'
+        (f_min_EIS = 10**f_power_min_EIS), the power of the final frequency 'f_power_max_EIS', the number of
+        frequencies tested 'nb_f_EIS', and the number of points calculated per specific period 'nb_points_EIS'.
     t_EIS : tuple
         Time parameters for the EIS_current density function.
         It is a tuple containing the initial EIS time after stack equilibrium 't0_EIS' in seconds, a list of time
-        parameters which gives the beginning of each frequency change 't_new_start' in seconds, the final time 'tf_EIS'
-        in seconds, a list of time parameters which gives the estimated time for reaching equilibrium at each frequency
-        'delta_t_break_EIS' in seconds, and a list of time parameters which gives the estimated time for measuring the
-        voltage response at each frequency 'delta_t_measurement_EIS' in seconds.
+        parameters which gives the beginning of each frequency change 't_new_start_EIS' in seconds, the final time
+        'tf_EIS' in seconds, a list of time parameters which gives the estimated time for reaching equilibrium at each
+        frequency 'delta_t_break_EIS' in seconds, and a list of time parameters which gives the estimated time for
+        measuring the voltage response at each frequency 'delta_t_measurement_EIS' in seconds.
     current_density : function
         Current density function.
     """
@@ -60,7 +60,7 @@ def current_density_parameters(type_current):
     i_step = 0.5e4, 1.5e4  # (A.m-2, A.m-2). Current parameters for the step_current density function.
     delta_pola = 30, 30, 0.1e4, 1 * 60  # (s, s, A.m-2, s). Parameters for the polarization curve.
     i_EIS, ratio_EIS = 1.0e4, 5/100  # (A/m², ). Parameters for the EIS curve.
-    f_EIS = -3.0, 5.0, 60, 50 # Frequency parameters for the EIS_current density function.
+    f_EIS = -3, 5, 60, 50 # Frequency parameters for the EIS_current density function.
     t_EIS = EIS_parameters(f_EIS)  # Time parameters for the EIS_current density function.
     if type_current == "step": current_density = step_current  # It is the current density function.
     elif type_current == "polarization": current_density = polarization_current  # It is the current density function.

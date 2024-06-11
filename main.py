@@ -116,8 +116,8 @@ if __name__ == '__main__':
             time_interval = [0, delta_t_ini_pola + delta_t]  # It is the initial time interval.
         elif type_current == "EIS":
             t0_EIS, t_new_start, tf_EIS, delta_t_break_EIS, delta_t_measurement_EIS = t_EIS
-            f_power_min, f_power_max, nb_f, nb_points = f_EIS  # These are used for EIS max_step actualization.
-            f = np.logspace(f_power_min, f_power_max, num=nb_f)  # It is a list of all the frequency tested.
+            f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = f_EIS  # These are used for EIS max_step actualization.
+            f = np.logspace(f_power_min_EIS, f_power_max_EIS, num=nb_f_EIS)  # It is a list of all the frequency tested.
             n = len(t_new_start)  # It is the plot update number.
             time_interval = [0, t0_EIS]  # It is the initial time interval.
 
@@ -137,7 +137,7 @@ if __name__ == '__main__':
             #                                                                                  1 EIS point.
             n_inf = np.where(t_new_start <= t0_EIS_temp)[0][-1]  # It is the number of frequency changes which has been
             #                                                      made.
-            max_step = 1 / (f[n_inf] * nb_points)  # max_step is actualized according to the current frequency
+            max_step = 1 / (f[n_inf] * nb_points_EIS)  # max_step is actualized according to the current frequency
             #                                        for increased calculation
             time_interval = [t0_EIS_temp, tf_EIS_temp]
 
@@ -171,7 +171,7 @@ if __name__ == '__main__':
                     #                                                               is the final time for 1 EIS point.
                     n_inf = np.where(t_new_start <= t0_EIS_temp)[0][-1]  # It is the number of frequency changes which
                     #                                                      has been made.
-                    max_step = 1 / (f[n_inf] * nb_points)  # max_step is actualized according to the current frequency
+                    max_step = 1 / (f[n_inf] * nb_points_EIS)  # max_step is actualized according to the current frequency
                     #                                        for increased calculation
                     time_interval = [t0_EIS_temp, tf_EIS_temp]  # It is the time interval for 1 EIS point.
 

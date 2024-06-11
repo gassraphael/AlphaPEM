@@ -59,10 +59,13 @@ def main_frame(root):
                'delta_i_pola_i': tk.DoubleVar(frame, 0.1), 'delta_t_load_pola_i': tk.DoubleVar(frame, 30),
                'delta_t_break_pola_i': tk.DoubleVar(frame, 30),
                'delta_t_ini_pola_i': tk.DoubleVar(frame, 60), 'i_EIS_i': tk.DoubleVar(frame, 0.5),
-               'delta_t_dyn_step_i': tk.DoubleVar(frame, 10), 't_purge_i': tk.DoubleVar(frame, 0.6),
-               'delta_t_purge_i': tk.DoubleVar(frame, 15), 'auxiliaries_choice': tk.IntVar(frame, 0),
-               'is_purging': tk.IntVar(frame, 0), 'is_precise': tk.IntVar(frame, 0),
-               'is_synthetic': tk.IntVar(frame, 0), 'is_dynamic': tk.IntVar(frame, 0),
+               'ratio_EIS_i': tk.DoubleVar(frame, 5), 'nb_points_EIS_i': tk.DoubleVar(frame, 50),
+               'f_power_min_EIS_i': tk.DoubleVar(frame, -3), 'f_power_max_EIS_i': tk.DoubleVar(frame, 5),
+               'nb_f_EIS_i': tk.DoubleVar(frame, 60), 'delta_t_dyn_step_i': tk.DoubleVar(frame, 10),
+               't_purge_i': tk.DoubleVar(frame, 0.6), 'delta_t_purge_i': tk.DoubleVar(frame, 15),
+               'auxiliaries_choice': tk.IntVar(frame, 0),  'is_purging': tk.IntVar(frame, 0),
+               'is_precise': tk.IntVar(frame, 0), 'is_synthetic': tk.IntVar(frame, 0),
+               'is_dynamic': tk.IntVar(frame, 0),
                'setting_input': tk.StringVar(frame, 'Enter its specifications')}
 
     # Displays operating conditions and physical parameters on the screen (without their values)
@@ -132,8 +135,8 @@ def show(choices, button_type):
     # or converts user-selected quantities into standard units.
     Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mc, \
         tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, t_step, i_step, \
-        i_max_pola, delta_pola, i_EIS, t_purge, delta_t_purge, type_fuel_cell, type_auxiliary, type_purge, max_step, \
-        type_display, type_plot \
+        i_max_pola, delta_pola, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, type_fuel_cell, \
+        type_auxiliary, type_purge, max_step, type_display, type_plot \
         = recover_for_use_operating_inputs_and_physical_parameters(choices)
 
     if button_type == 0:

@@ -85,14 +85,15 @@ class AlphaPEM:
             Value of the perturbation on the current density for building the EIS curve (current parameter).
         t_EIS : tuple
             EIS parameters (current parameters). It is a tuple containing the initial EIS time after stack equilibrium
-            't0_EIS', a list of time parameters which gives the beginning of each frequency change 't_new_start',
+            't0_EIS', a list of time parameters which gives the beginning of each frequency change 't_new_start_EIS',
             the final time 'tf_EIS', a list of time parameters which gives the estimated time for reaching equilibrium
             at each frequency 'delta_t_break_EIS', and a list of time parameters which gives the estimated time for
             measuring the voltage response at each frequency 'delta_t_measurement_EIS'.
         f_EIS : tuple
             EIS parameters (current parameters). It is a tuple containing the power of the initial frequency
-            'f_power_min': f_min = 10**f_power_min, the power of the final frequency 'f_power_max', the number of
-            frequencies tested 'nb_f' and the number of points calculated per specific period 'nb_points'.
+            'f_power_min_EIS': f_min_EIS = 10**f_power_min_EIS, the power of the final frequency 'f_power_max_EIS', the
+            number of frequencies tested 'nb_f_EIS' and the number of points calculated per specific period
+            'nb_points_EIS'.
         Aact : float
             Active area of the cell in m² (accessible physical parameter).
         Hgdl : float

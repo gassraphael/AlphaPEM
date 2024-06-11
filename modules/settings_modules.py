@@ -245,27 +245,28 @@ def EIS_parameters(f_EIS):
     Parameters
     ----------
     f_EIS : tuple
-        EIS parameters. It is a tuple containing the power of the initial frequency 'f_power_min':
-        f_min = 10**f_power_min, the power of the final frequency 'f_power_max', the number of frequencies tested 'nb_f'
-        and the number of points calculated per specific period 'nb_points'.
+        EIS parameters. It is a tuple containing the power of the initial frequency 'f_power_min_EIS':
+        f_min_EIS = 10**f_power_min_EIS, the power of the final frequency 'f_power_max_EIS', the number of frequencies
+        tested 'nb_f_EIS' and the number of points calculated per specific period 'nb_points_EIS'.
 
     Returns
     -------
     t_EIS : tuple
         EIS parameters. It is a tuple containing the initial EIS time after stack equilibrium 't0_EIS', a list of time
-        parameters which gives the beginning of each frequency change 't_new_start', the final time 'tf_EIS', a list of
-        time parameters which gives the estimated time for reaching equilibrium at each frequency 'delta_t_break_EIS',
-        and a list of time parameters which gives the estimated time for measuring the voltage response at each
-        frequency 'delta_t_measurement_EIS'.
+        parameters which gives the beginning of each frequency change 't_new_start_EIS', the final time 'tf_EIS', a list
+        of time parameters which gives the estimated time for reaching equilibrium at each frequency
+        'delta_t_break_EIS', and a list of time parameters which gives the estimated time for measuring the voltage
+        response at each frequency 'delta_t_measurement_EIS'.
     """
 
     # Initialisation
     #       Frequencies
-    f_power_min, f_power_max, nb_f, nb_points = f_EIS  # They are the frequency parameters for the EIS simulation.
-    f = np.logspace(f_power_min, f_power_max, num=nb_f)  # It is the tested frequencies
-    nb_period_break, nb_period_measurement = 50, 50  # They are the number of temporal periods which are used
-    #                                                  for break and for measurement. It is more accurate to use
-    #                                                  periods than time as the frequency range is big.
+    f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = f_EIS  # They are the frequency parameters for the EIS
+    #                                                                    simulation.
+    f = np.logspace(f_power_min_EIS, f_power_max_EIS, num=nb_f_EIS)  # It is the tested frequencies
+    nb_period_break_EIS, nb_period_measurement_EIS = 50, 50  # They are the number of temporal periods which are used
+    #                                                          for break and for measurement. It is more accurate to use
+    #                                                          periods than time as the frequency range is big.
     #       Time parameters
     delta_t_break_EIS = np.array([])  # It is the estimated time for reaching equilibrium at each frequency.
     delta_t_measurement_EIS = np.array([])  # It is the estimated time for measuring the voltage response.
@@ -273,20 +274,20 @@ def EIS_parameters(f_EIS):
     # Time parameters calculation
     t0_EIS = 1 / f[0]  # s. It is the simulation starting time.
     #                   [0, t0_EIS] is used to let the stack equilibrate to i_EIS.
-    t_new_start = np.array([t0_EIS])  # It is a list of time parameters which gives the beginning of each frequency
+    t_new_start_EIS = np.array([t0_EIS])  # It is a list of time parameters which gives the beginning of each frequency
     #                                   change.
-    for i in range(nb_f):  # The goal is to measure nb_f periods of the signal in order to have precise enough values.
+    for i in range(nb_f_EIS):  # The goal is to measure nb_f_EIS periods of the signal in order to have precise enough values.
         T_i = 1 / (f[i]) # s. It is the period of the signal.
-        if i < (nb_f - 1):
-            delta_t_break_EIS = np.concatenate((delta_t_break_EIS, [nb_period_break * T_i]))
-            delta_t_measurement_EIS = np.concatenate((delta_t_measurement_EIS, [nb_period_measurement * T_i]))
-            next_start = t_new_start[i] + delta_t_break_EIS[i] + delta_t_measurement_EIS[i]
-            t_new_start = np.concatenate((t_new_start, [next_start]))
+        if i < (nb_f_EIS - 1):
+            delta_t_break_EIS = np.concatenate((delta_t_break_EIS, [nb_period_break_EIS * T_i]))
+            delta_t_measurement_EIS = np.concatenate((delta_t_measurement_EIS, [nb_period_measurement_EIS * T_i]))
+            next_start_EIS = t_new_start_EIS[i] + delta_t_break_EIS[i] + delta_t_measurement_EIS[i]
+            t_new_start_EIS = np.concatenate((t_new_start_EIS, [next_start_EIS]))
         else:
-            delta_t_break_EIS = np.concatenate((delta_t_break_EIS, [nb_period_break * T_i]))
-            delta_t_measurement_EIS = np.concatenate((delta_t_measurement_EIS, [nb_period_measurement * T_i]))
-            tf_EIS = t_new_start[-1] + delta_t_break_EIS[-1] + delta_t_measurement_EIS[-1]  # s. It is the simulation
-            #                                                                                 ending time
+            delta_t_break_EIS = np.concatenate((delta_t_break_EIS, [nb_period_break_EIS * T_i]))
+            delta_t_measurement_EIS = np.concatenate((delta_t_measurement_EIS, [nb_period_measurement_EIS * T_i]))
+            tf_EIS = t_new_start_EIS[-1] + delta_t_break_EIS[-1] + delta_t_measurement_EIS[-1]  # s. It is the
+            #                                                                                     simulation ending time
 
-    t_EIS = t0_EIS, t_new_start, tf_EIS, delta_t_break_EIS, delta_t_measurement_EIS
+    t_EIS = t0_EIS, t_new_start_EIS, tf_EIS, delta_t_break_EIS, delta_t_measurement_EIS
     return t_EIS

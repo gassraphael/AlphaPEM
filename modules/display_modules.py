@@ -164,8 +164,8 @@ def make_Fourier_transformation(variables, operating_inputs, parameters):
         ifc_t[i] = current_density(t[i], parameters)
 
     # Identify the areas where Ucell and ifc can be measured for the EIS: after equilibrium and at each frequency change
-    t0_EIS, t_new_start, tf_EIS, delta_t_break_EIS, delta_t_measurement_EIS = t_EIS
-    n_inf = np.where(t_new_start <= t[0])[0][-1]  # The number of frequency changes which has been mad so far.
+    t0_EIS, t_new_start_EIS, tf_EIS, delta_t_break_EIS, delta_t_measurement_EIS = t_EIS
+    n_inf = np.where(t_new_start_EIS <= t[0])[0][-1]  # The number of frequency changes which has been mad so far.
     Ucell_EIS_measured = Ucell_t[np.where((t > (t[0] + delta_t_break_EIS[n_inf])) &
                                           (t < (t[0] + delta_t_break_EIS[n_inf] + delta_t_measurement_EIS[n_inf])))]
     ifc_EIS_measured = ifc_t[np.where((t > (t[0] + delta_t_break_EIS[n_inf])) &
@@ -331,10 +331,10 @@ def plot_EIS_curve_tests(variables, operating_inputs, parameters, Fourier_result
     f, N = Fourier_results['f'], Fourier_results['N']
 
     # Reconstructed Ucell with a cosinus form, and comparison of its form with the current density one.
-    t0_EIS, t_new_start, tf_EIS, delta_t_break_EIS, delta_t_measurement_EIS = t_EIS
-    f_power_min, f_power_max, nb_f, nb_points = f_EIS
-    n_inf = np.where(t_new_start <= t[0])[0][-1]  # The number of frequency changes which has been made.
-    f_current = np.logspace(f_power_min, f_power_max, num=nb_f)
+    t0_EIS, t_new_start_EIS, tf_EIS, delta_t_break_EIS, delta_t_measurement_EIS = t_EIS
+    f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = f_EIS
+    n_inf = np.where(t_new_start_EIS <= t[0])[0][-1]  # The number of frequency changes which has been made.
+    f_current = np.logspace(f_power_min_EIS, f_power_max_EIS, num=nb_f_EIS)
     theta_U_t = np.angle(Ucell_Fourier[0:N // 2])  # Recovery of all dephasing values calculated by fft
     theta_i_t = np.angle(ifc_Fourier[0:N // 2])  # Recovery of all dephasing values calculated by fft
     theta_U = theta_U_t[np.argmax(A_period_t == A)]  # Dephasing at the frequency of the perturbation

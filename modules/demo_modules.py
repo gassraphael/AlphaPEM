@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 # Constants value and functions
-from modules.settings_modules import stored_operating_inputs, stored_physical_parameters
+from modules.settings_modules import stored_operating_inputs, stored_physical_parameters, EIS_parameters
 
 """
 This modul contains some of the required functions for the main program AlphaPEM_interface.
@@ -115,6 +115,19 @@ def changeValue(frame, choices, label_widgets, entry_widgets):
             grid(row=19, column=5, padx=5)
         tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w', textvariable=choices['i_EIS_i']). \
             grid(row=20, column=1, padx=5)
+        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w', textvariable=choices['ratio_EIS_i']). \
+            grid(row=20, column=3, padx=5)
+        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                 textvariable=choices['nb_points_EIS_i']). \
+            grid(row=20, column=5, padx=5)
+        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                 textvariable=choices['f_power_min_EIS_i']). \
+            grid(row=21, column=1, padx=5)
+        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                 textvariable=choices['f_power_max_EIS_i']). \
+            grid(row=21, column=3, padx=5)
+        tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w', textvariable=choices['nb_f_EIS_i']). \
+            grid(row=21, column=5, padx=5)
         tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
                  textvariable=choices['delta_t_dyn_step_i']). \
             grid(row=23, column=1, padx=5)
@@ -206,6 +219,16 @@ def changeValue(frame, choices, label_widgets, entry_widgets):
             grid(row=19, column=5, padx=5)
         tk.Entry(frame, width=7, bg='white', textvariable=choices['i_EIS_i']). \
             grid(row=20, column=1, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['ratio_EIS_i']). \
+            grid(row=20, column=3, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['nb_points_EIS_i']). \
+            grid(row=20, column=5, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['f_power_min_EIS_i']). \
+            grid(row=21, column=1, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['f_power_max_EIS_i']). \
+            grid(row=21, column=3, padx=5)
+        tk.Entry(frame, width=7, bg='white', textvariable=choices['nb_f_EIS_i']). \
+            grid(row=21, column=5, padx=5)
         tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_t_dyn_step_i']). \
             grid(row=23, column=1, padx=5)
         tk.Entry(frame, width=7, bg='white', textvariable=choices['t_purge_i']). \
@@ -286,6 +309,17 @@ def display_label_operating_inputs_and_physical_parameters(frame):
         grid(row=19, column=4, sticky="w")
     tk.Label(frame, text='i_EIS (A/cm²)', fg='black', font=('Times New Roman', 10)). \
         grid(row=20, column=0, sticky="w")
+    tk.Label(frame, text='ratio_EIS (%)', fg='black', font=('Times New Roman', 10)). \
+        grid(row=20, column=2, sticky="w")
+    tk.Label(frame, text='nb_points_EIS', fg='black', font=('Times New Roman', 10)). \
+        grid(row=20, column=4, sticky="w")
+    tk.Label(frame, text='f_power_min_EIS', fg='black', font=('Times New Roman', 10)). \
+        grid(row=21, column=0, sticky="w")
+    tk.Label(frame, text='f_power_max_EIS', fg='black', font=('Times New Roman', 10)). \
+        grid(row=21, column=2, sticky="w")
+    tk.Label(frame, text='nb_f_EIS', fg='black', font=('Times New Roman', 10)). \
+        grid(row=21, column=4, sticky="w")
+
 
     # Computing parameters
     tk.Label(frame, text='Computing parameters', fg='black', font=('Times New Roman', 12, 'bold')). \
@@ -380,6 +414,16 @@ def display_value_operating_inputs_and_physical_parameters(frame, choices):
                                       textvariable=choices['delta_t_ini_pola_i'])
     Label_i_EIS = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
                            textvariable=choices['i_EIS_i'])
+    Label_ratio_EIS = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                           textvariable=choices['ratio_EIS_i'])
+    Label_nb_points_EIS = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                           textvariable=choices['nb_points_EIS_i'])
+    Label_f_power_min_EIS = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                           textvariable=choices['f_power_min_EIS_i'])
+    Label_f_power_max_EIS = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                           textvariable=choices['f_power_max_EIS_i'])
+    Label_nb_f_EIS = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
+                           textvariable=choices['nb_f_EIS_i'])
     Label_delta_t_dyn_step = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
                                       textvariable=choices['delta_t_dyn_step_i'])
     Label_t_purge = tk.Label(frame, width=7, bg='white', bd=1, relief='solid', anchor='w',
@@ -393,7 +437,8 @@ def display_value_operating_inputs_and_physical_parameters(frame, choices):
                      Label_kappa_c, Label_a_slim, Label_b_slim, Label_a_switch, Label_C_dl, Label_t0_step,
                      Label_tf_step, Label_delta_t_load_step, Label_i_ini_step, Label_i_final_step, Label_i_max_pola,
                      Label_delta_i_pola, Label_delta_t_load_pola, Label_delta_t_break_pola, Label_delta_t_ini_pola,
-                     Label_i_EIS, Label_delta_t_dyn_step, Label_t_purge, Label_delta_t_purge]
+                     Label_i_EIS, Label_ratio_EIS, Label_nb_points_EIS, Label_f_power_min_EIS, Label_f_power_max_EIS,
+                     Label_nb_f_EIS, Label_delta_t_dyn_step, Label_t_purge, Label_delta_t_purge]
 
     Entry_Tfc = tk.Entry(frame, width=7, bg='white', textvariable=choices['Tfc_i'])
     Entry_Pa_des = tk.Entry(frame, width=7, bg='white', textvariable=choices['Pa_des_i'])
@@ -433,6 +478,11 @@ def display_value_operating_inputs_and_physical_parameters(frame, choices):
     Entry_delta_t_break_pola = tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_t_break_pola_i'])
     Entry_delta_t_ini_pola = tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_t_ini_pola_i'])
     Entry_i_EIS = tk.Entry(frame, width=7, bg='white', textvariable=choices['i_EIS_i'])
+    Entry_ratio_EIS = tk.Entry(frame, width=7, bg='white', textvariable=choices['ratio_EIS_i'])
+    Entry_nb_points_EIS = tk.Entry(frame, width=7, bg='white', textvariable=choices['nb_points_EIS_i'])
+    Entry_f_power_min_EIS = tk.Entry(frame, width=7, bg='white', textvariable=choices['f_power_min_EIS_i'])
+    Entry_f_power_max_EIS = tk.Entry(frame, width=7, bg='white', textvariable=choices['f_power_max_EIS_i'])
+    Entry_nb_f_EIS = tk.Entry(frame, width=7, bg='white', textvariable=choices['nb_f_EIS_i'])
     Entry_delta_t_dyn_step = tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_t_dyn_step_i'])
     Entry_t_purge = tk.Entry(frame, width=7, bg='white', textvariable=choices['t_purge_i'])
     Entry_delta_t_purge = tk.Entry(frame, width=7, bg='white', textvariable=choices['delta_t_purge_i'])
@@ -443,7 +493,8 @@ def display_value_operating_inputs_and_physical_parameters(frame, choices):
                      Entry_kappa_c, Entry_a_slim, Entry_b_slim, Entry_a_switch, Entry_C_dl, Entry_t0_step,
                      Entry_tf_step, Entry_delta_t_load_step, Entry_i_ini_step, Entry_i_final_step, Entry_i_max_pola,
                      Entry_i_max_pola, Entry_delta_t_load_pola, Entry_delta_t_break_pola, Entry_delta_t_ini_pola,
-                     Entry_i_EIS, Entry_delta_t_dyn_step, Entry_t_purge, Entry_delta_t_purge]
+                     Entry_i_EIS, Entry_ratio_EIS, Entry_nb_points_EIS, Entry_f_power_min_EIS, Entry_f_power_max_EIS,
+                     Entry_nb_f_EIS, Entry_delta_t_dyn_step, Entry_t_purge, Entry_delta_t_purge]
 
     Entry_Tfc.grid(row=2, column=1, padx=5)
     Entry_Pa_des.grid(row=2, column=3, padx=5)
@@ -483,6 +534,11 @@ def display_value_operating_inputs_and_physical_parameters(frame, choices):
     Entry_delta_t_break_pola.grid(row=19, column=3, padx=5)
     Entry_delta_t_ini_pola.grid(row=19, column=5, padx=5)
     Entry_i_EIS.grid(row=20, column=1, padx=5)
+    Entry_ratio_EIS.grid(row=20, column=3, padx=5)
+    Entry_nb_points_EIS.grid(row=20, column=5, padx=5)
+    Entry_f_power_min_EIS.grid(row=21, column=1, padx=5)
+    Entry_f_power_max_EIS.grid(row=21, column=3, padx=5)
+    Entry_nb_f_EIS.grid(row=21, column=5, padx=5)
     Entry_delta_t_dyn_step.grid(row=23, column=1, padx=5)
     Entry_t_purge.grid(row=23, column=3, padx=5)
     Entry_delta_t_purge.grid(row=23, column=5, padx=5)
@@ -626,9 +682,10 @@ def recover_for_use_operating_inputs_and_physical_parameters(choices):
     i_max_pola = choices['i_max_pola_i'].get() * 1e4  # A.m-2
     delta_pola = choices['delta_t_load_pola'].get(), choices['delta_t_break_pola'].get(), \
         choices['delta_i_pola'].get() * 1e4, choices['delta_t_ini_pola'].get()  # (s, s, A.m-2, s)
-
-    i_EIS = choices['i_EIS_i'].get() * 1e4
-
+    i_EIS, ratio_EIS = choices['i_EIS_i'].get() * 1e4, choices['ratio_EIS_i'].get() / 100 # (A.m-2, )
+    f_EIS = ( choices['f_power_min_EIS'].get(), choices['f_power_max_EIS'].get(),
+             choices['nb_f_EIS'].get(), choices['nb_points_EIS'].get() )
+    t_EIS = EIS_parameters(f_EIS)  # Time parameters for the EIS_current density function.
     t_purge, delta_t_purge = choices['t_purge_i'].get(), choices['delta_t_purge_i'].get()  # s
 
     if choices['setting_input'].get() == "EH-31 1.5 bar":
@@ -669,8 +726,8 @@ def recover_for_use_operating_inputs_and_physical_parameters(choices):
 
     return (Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl,
             epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, t_step,
-            i_step, i_max_pola, delta_pola, i_EIS, t_purge, delta_t_purge, type_fuel_cell, type_auxiliary, type_purge,
-            max_step, type_display, type_plot)
+            i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, type_fuel_cell,
+            type_auxiliary, type_purge, max_step, type_display, type_plot)
 
 
 def value_control(choices):
@@ -802,7 +859,22 @@ def value_control(choices):
         'The current densities should be positive, delta_i_pola_i < i_max_pola_i and i_ini_step_i < i_final_step_i.')
         choices.clear()
         return
-    if choices['t_purge_i'].get() < 0 and choices['delta_purge_i'].get() < 0:
+    if choices['ratio_EIS_i'].get() < 0 or choices['ratio_EIS_i'].get() > 20:
+        messagebox.showerror(title='Ratio EIS', message=
+        'Ratio EIS is a pourcentage of i_EIS and should be between 0 and 20 for plotting correct EIS.')
+        choices.clear()
+        return
+
+
+    if choices['nb_f_EIS_i'].get() < 0 or choices['nb_points_EIS_i'].get() < 0 or \
+        type(choices['f_power_min_EIS_i'].get()) != int or type(choices['f_power_max_EIS_i'].get()) != int or \
+        type(choices['nb_f_EIS_i'].get()) != int or type(choices['nb_points_EIS_i'].get()) != int :
+        messagebox.showerror(title='f EIS', message=
+        'f_EIS parameters should be integer and number of points should be positive.')
+        choices.clear()
+        return
+
+    if choices['t_purge_i'].get() < 0 or choices['delta_purge_i'].get() < 0:
         messagebox.showerror(title='Purge times', message=
         'Negative times does not characterise purges.')
         choices.clear()
