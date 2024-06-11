@@ -66,7 +66,7 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax):
     type_fuel_cell, type_auxiliary = parameters['type_fuel_cell'], parameters['type_auxiliary']
     type_control, type_plot = parameters['type_control'], parameters['type_plot']
 
-    if type_plot == "final":
+    if type_plot == "fixed":
         # Creation of ifc_t
         n = len(t)
         ifc_t = np.zeros(n)
@@ -119,7 +119,7 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax):
     ax.set_ylabel(r'Cell voltage $\mathregular{U_{cell}}$ $\mathregular{\left( V \right)}$',
                   labelpad=3, fontsize=18)
     plot_instructions(ax)
-    if type_plot == "final":
+    if type_plot == "fixed":
         ax.legend(loc='best', frameon=False)
 
 

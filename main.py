@@ -49,7 +49,7 @@ type_control_4 = "no_control"
 type_purge = "no_purge"
 # Display possibilities: "multiple", "synthetic", "no_display".
 type_display = "synthetic"
-# Plot possibilities: "dynamic", "final". Using dynamic plot option enables real-time figure updates during program
+# Plot possibilities: "dynamic", "fixed". Using dynamic plot option enables real-time figure updates during program
 # execution, albeit at the cost of decreased program speed.
 type_plot = "dynamic"
 
@@ -184,7 +184,7 @@ if __name__ == '__main__':
             if type_display != "no_display":
                 Simulator1.Display(ax1, ax2)
 
-    else:  # elif type_plot == "final":
+    else:  # elif type_plot == "fixed":
 
         # Certain conditions must be met.
         if (type_current == "step" and
