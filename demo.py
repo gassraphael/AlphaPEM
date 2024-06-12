@@ -25,28 +25,29 @@ from configuration.current_densities import step_current, polarization_current, 
 mpl.use("Qt5Agg")
 
 
-# _______________________________________Functions________________________________________
+# ____________________________________________________Demo functions____________________________________________________
 
 def create_application():
-    """
-    This function is responsible for creating the main application window and setting its title. 
+    """This function creates the main application window and setting its title.
     It calls the main_frame() function to create the main graphical elements of the window.
     """
     root = ThemedTk(theme="arc")
     root.title("AlphaPEM")
-    # Create the main widget of the application
     main_frame(root)
     root.mainloop()
 
 
 def main_frame(root):
+    """This function creates the main graphical elements, such as labels, entry widgets, radio buttons, and buttons.
+    It arranges them in the application window (root). It also initializes the choice dictionary variables for various
+    parameters and settings.
+
+    Parameters:
+    -----------
+    root : ThemedTk
+        The main application window where the graphical elements will be placed.
     """
-    This function creates the main graphical elements, such as labels, entry widgets, radio buttons, 
-    and buttons, and arranges them in the application window (root). 
-    It also initializes the choice dictionary with DoubleVar and IntVar variables for various parameters
-    and settings.
-    """
-    # Creation of the frames
+    # Create the frames
     frame = ttk.Frame(root)
     frame.grid(row=1, column=0, padx=5, pady=5)
 
@@ -57,7 +58,7 @@ def main_frame(root):
     style.configure('Red.TButton', foreground='red', font=('cmr10', 10, 'bold'))  # Set the font color to red
     style.configure('Black.TButton', foreground='black', font=('cmr10', 10, 'bold'))  # Set the font color to black
 
-    # Creation of the choice dictionary
+    # Create the choice dictionaries
     choices_parameters = {'Tfc (°C)': {'value': tk.DoubleVar(frame), 'label_row': 2, 'label_column': 1},
                           'Pa_des (bar)': {'value': tk.DoubleVar(frame), 'label_row': 2, 'label_column': 3},
                           'Pc_des (bar)': {'value': tk.DoubleVar(frame), 'label_row': 2, 'label_column': 5},
@@ -144,37 +145,43 @@ def main_frame(root):
                    'Biao Xie 1.35 bar (2015)', 'Linhao Fan (2010)',
                    command=lambda value: changeValue(frame, choices_parameters, choices_buttons, label_widgets,
                                                      entry_widgets)) \
-        .grid(row=0, column=2, columnspan=2)
+                                                                   .grid(row=0, column=2, columnspan=2)
 
     # Display the action buttons to select the type of current density to be applied.
-    ttk.Label(frame, text='Current density:', font=('cmr10', 12, 'bold')) \
-        .grid(row=31, column=0, columnspan=2)
+    ttk.Label(frame, text='Current density:', font=('cmr10', 12, 'bold')).grid(row=31, column=0, columnspan=2)
     current_button = {'Step curve': 0, 'Pola curve': 1, 'EIS curve': 2}
     #       Button to generate the step curve
     ttk.Button(frame, text='Step curve', style='Blue.TButton',
                command=lambda: control_current_button(choices_parameters, choices_buttons,
                                                       current_button['Step curve'])) \
-        .grid(row=31, column=2, padx=10, pady=20)
+                                                                         .grid(row=31, column=2, padx=10, pady=20)
     #       Button to generate the Pola curve
     ttk.Button(frame, text='Pola curve', style='Green.TButton',
                command=lambda: control_current_button(choices_parameters, choices_buttons,
                                                       current_button['Pola curve'])) \
-        .grid(row=31, column=3, padx=10, pady=20)
+                                                                         .grid(row=31, column=3, padx=10, pady=20)
     #       Button to generate the EIS curve
     ttk.Button(frame, text='EIS curve', style='Red.TButton',
                command=lambda: control_current_button(choices_parameters, choices_buttons,
                                                       current_button['EIS curve'])) \
-        .grid(row=31, column=4, padx=10, pady=20)
+                                                                         .grid(row=31, column=4, padx=10, pady=20)
     #       About button
     ttk.Button(frame, text='About', style='Black.TButton', command=about) \
-        .grid(row=31, column=5, ipadx=12)
+                                                                         .grid(row=31, column=5, ipadx=12)
 
 
 def control_current_button(choices_parameters, choices_buttons, current_button):
-    """
-    This function is responsible for validating the user inputs by calling the value_control() function. 
-    If the input is valid, it then calls the show_current_button function to perform the requested action
-    based on the button_type.
+    """This function is responsible for validating the user inputs by calling the value_control() function. If the input
+    is valid, it then calls the show_current_button function to perform the requested action based on the button_type.
+
+    Parameters
+    ----------
+    choices_parameters : dict
+        A dictionary containing the parameter information.
+    choices_buttons : dict
+        A dictionary containing the button information.
+    current_button : dict
+        A dictionary representing the clicked button.
     """
     # Control the values
     value_control(choices_parameters, choices_buttons, current_button)
@@ -184,14 +191,20 @@ def control_current_button(choices_parameters, choices_buttons, current_button):
 
 
 def show_current_button(choices_parameters, choices_buttons, current_button):
-    """
-    This function determines the action to be performed based on the button_type. 
-    It calls the AlphaPEM() function with the appropriate parameters and settings to 
-    simulate different scenarios such as step curve, polarization curve, or EIS curve.
+    """This function determines the action to be performed based on the button_type.
+
+    Parameters
+    ----------
+    choices_parameters : dict
+        A dictionary containing the parameter information.
+    choices_buttons : dict
+        A dictionary containing the button information.
+    current_button : dict
+        A dictionary representing the clicked button.
     """
 
-    # Retrieves parameter values for predefined stacks and keeps them in their standard unit,
-    # or converts user-selected quantities into standard units.
+    # Retrieves parameter values for predefined stacks and keeps them in their standard unit, or converts user-selected
+    # quantities into standard units.
     Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl, \
         epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, t_step, \
         i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, max_step, n_gdl, \
@@ -230,9 +243,8 @@ def show_current_button(choices_parameters, choices_buttons, current_button):
 
 
 def about():
-    """
-    This function displays information about the program and its author in a dialog box 
-    when the "About" button is clicked.
+    """This function displays information about the program and its author in a dialog box when the "About" button is
+    clicked.
     """
     msg = "AlphaPEM is an open-source PEM fuel cell simulator for control system applications. It is a physical, " \
           "dynamic, two-phase, isothermal, 1D model." \
@@ -244,6 +256,6 @@ def about():
     messagebox.showinfo(title='About this program', message=msg)
 
 
-# ____________________________________Use of the programme ___________________________________
+# ________________________________________________Use of the programme _________________________________________________
 if __name__ == '__main__':
     create_application()

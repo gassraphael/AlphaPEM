@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This modul contains some of the required functions for the main.py file.
+"""This module contains some of the required functions for the main.py file.
 """
 
 # _____________________________________________________Preliminaries____________________________________________________

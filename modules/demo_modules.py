@@ -1,23 +1,41 @@
 # -*- coding: utf-8 -*-
+
+"""This module contains some of the required functions for the demo.py file.
+"""
+
+# _____________________________________________________Preliminaries____________________________________________________
+
+# Importing the necessary libraries
 import numpy as np
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
 
-# Constants value and functions
+# Importing constants' value and functions
 from model.AlphaPEM import AlphaPEM
 from modules.settings_modules import stored_operating_inputs, stored_physical_parameters, EIS_parameters
 from modules.main_modules import figures_preparation, plot_saving
 
-"""
-This modul contains some of the required functions for the main program AlphaPEM_interface.
-"""
 
+# _____________________________________________________Demo modules_____________________________________________________
 
 def changeValue(frame, choices_parameters, choices_buttons, Label_widgets, Entry_widgets):
-    """This function is called when the user selects a specific option from a dropdown menu
-    (choices_buttons['type_fuel_cell']). Depending on the selected option, it either hides or displays specific
-    input fields (labels or entry widgets) on the GUI.
+    """This function is called when the user selects a specific option from a dropdown menu for the type of fuel cell.
+    Depending on the selected option, it either hides or displays specific input fields (labels or entry widgets) on
+    the GUI.
+
+    Parameters
+    ----------
+    frame : ttk.Frame
+        The main application frame where the graphical elements are placed.
+    choices_parameters : dict
+        A dictionary containing the parameter information.
+    choices_buttons : dict
+        A dictionary containing the button information.
+    Label_widgets : dict
+        A dictionary containing the label widgets.
+    Entry_widgets : dict
+        A dictionary containing the entry widgets.
     """
 
     if choices_buttons['type_fuel_cell']['value'].get() != 'Enter your specifications':
@@ -45,9 +63,15 @@ def changeValue(frame, choices_parameters, choices_buttons, Label_widgets, Entry
 
 
 def display_label_operating_inputs_and_physical_parameters(frame, choices_parameters):
-    """
-    This function displays labels on the GUI, representing operating conditions and physical parameters, 
-    without their actual values.
+    """This function displays labels on the GUI, representing operating conditions and physical parameters, without
+    their actual values.
+
+    Parameters
+    ----------
+    frame : ttk.Frame
+        The main application frame where the graphical elements are placed.
+    choices_parameters : dict
+        A dictionary containing the parameter information.
     """
 
     # Display the titles
@@ -68,9 +92,24 @@ def display_label_operating_inputs_and_physical_parameters(frame, choices_parame
 
 
 def display_value_operating_inputs_and_physical_parameters(frame, choices_parameters):
-    """This function displays entry widgets on the GUI,
-    where the user can enter values for operating conditions and physical parameters.
+    """This function displays entry widgets on the GUI. There, the user can enter values for operating conditions and
+    physical parameters.
+
+    Parameters
+    ----------
+    frame : ttk.Frame
+        The main application frame where the graphical elements are placed.
+    choices_parameters : dict
+        A dictionary containing the parameter information.
+
+    Returns
+    -------
+    Label_widgets : dict
+        A dictionary containing the label widgets.
+    Entry_widgets : dict
+        A dictionary containing the entry widgets.
     """
+
     Label_widgets = {}
     for k, p in choices_parameters.items():
         Label_widgets['Label ' + k] = ttk.Label(frame, width=7, anchor='w', textvariable=p['value'])
@@ -84,10 +123,17 @@ def display_value_operating_inputs_and_physical_parameters(frame, choices_parame
 
 
 def display_radiobuttons(frame, choices_buttons):
+    """This function displays radiobuttons on the GUI, allowing the user to make choices for control, results display,
+    plot style, etc.
+
+    Parameters
+    ----------
+    frame : ttk.Frame
+        The main application frame where the graphical elements are placed.
+    choices_buttons : dict
+        A dictionary containing the button information.
     """
-    This function displays radiobuttons on the GUI, allowing the user to make choices for purging, 
-    results display, plot style, etc.
-    """
+
     ttk.Label(frame, text='Model possibilities', font=('cmr10', 12, 'bold')) \
         .grid(row=25, column=0, columnspan=6, ipady=15)
 
@@ -139,9 +185,17 @@ def display_radiobuttons(frame, choices_buttons):
 
 
 def recover_for_display_operating_inputs_and_physical_parameters(frame, choices_parameters, choices_buttons):
-    """
-    This function retrieves parameter values for predefined stacks (e.g., "EH-31 1.5 bar (2021)", "Biao Xie 1.0 bar
+    """This function retrieves parameter values for predefined stacks (e.g., "EH-31 1.5 bar (2021)", "Biao Xie 1.0 bar
     (2015)", etc.) and converts them to appropriate units for display on the GUI.
+
+    Parameters
+    ----------
+    frame : ttk.Frame
+        The main application frame where the graphical elements are placed.
+    choices_parameters : dict
+        A dictionary containing the parameter information.
+    choices_buttons : dict
+        A dictionary containing the button information.
     """
 
     if choices_buttons['type_fuel_cell']['value'].get() == "EH-31 1.5 bar (2021)":
@@ -200,8 +254,15 @@ def recover_for_display_operating_inputs_and_physical_parameters(frame, choices_
 
 
 def recover_for_use_operating_inputs_and_physical_parameters(choices_parameters, choices_buttons):
-    """This function retrieves and converts the parameter values from the GUI into standard units
-    for further calculations.
+    """This function retrieves and converts the parameter values from the GUI into standard units for further
+    calculations.
+
+    Parameters
+    ----------
+    choices_parameters : dict
+        A dictionary containing the parameter information.
+    choices_buttons : dict
+        A dictionary containing the button information.
     """
     Tfc = choices_parameters['Tfc (°C)']['value'].get() + 273.15  # K
     Pa_des = choices_parameters['Pa_des (bar)']['value'].get() * 1e5  # Pa
@@ -307,9 +368,17 @@ def recover_for_use_operating_inputs_and_physical_parameters(choices_parameters,
 
 
 def value_control(choices_parameters, choices_buttons, current_button):
-    """
-    This function checks the integrity of the values entered by the user and 
-    returns an empty tuple if they are not valid.
+    """This function checks the integrity of the values entered by the user and returns an empty tuple if they are not
+    valid.
+
+    Parameters
+    ----------
+    choices_parameters : dict
+        A dictionary containing the parameter information.
+    choices_buttons : dict
+        A dictionary containing the button information.
+    current_button : dict
+        A dictionary representing the clicked button.
     """
 
     # The values entered by the user are checked for compliance
@@ -423,15 +492,15 @@ def value_control(choices_parameters, choices_buttons, current_button):
         messagebox.showerror(title='Double layer capacitance', message='I have not settled yet a range for C_dl.')
         choices.clear()
         return
-    if (choices_parameters['t0_step (s)']['value'].get() < 0 or choices_parameters['tf_step (s)']['value'].get() < 0 or
-            choices_parameters['Δt_load_step (s)']['value'].get() < 0 or
-            choices_parameters['Δt_dyn_step (s)']['value'].get() < 0 or
-            choices_parameters['Δt_load_pola (s)']['value'].get() < 0 or
-            choices_parameters['Δt_break_pola (s)']['value'].get() < 0 or
-            choices_parameters['Δt_ini_pola (s)']['value'].get() < 0 or
-            choices_parameters['t0_step (s)']['value'].get() > choices_parameters['tf_step (s)']['value'].get() or
-            choices_parameters['Δt_load_step (s)']['value'].get() >
-            (choices_parameters['tf_step (s)']['value'].get() - choices_parameters['t0_step (s)']['value'].get())):
+    if choices_parameters['t0_step (s)']['value'].get() < 0 or choices_parameters['tf_step (s)']['value'].get() < 0 or \
+            choices_parameters['Δt_load_step (s)']['value'].get() < 0 or \
+            choices_parameters['Δt_dyn_step (s)']['value'].get() < 0 or \
+            choices_parameters['Δt_load_pola (s)']['value'].get() < 0 or \
+            choices_parameters['Δt_break_pola (s)']['value'].get() < 0 or \
+            choices_parameters['Δt_ini_pola (s)']['value'].get() < 0 or \
+            choices_parameters['t0_step (s)']['value'].get() > choices_parameters['tf_step (s)']['value'].get() or \
+            choices_parameters['Δt_load_step (s)']['value'].get() > \
+            choices_parameters['tf_step (s)']['value'].get() - choices_parameters['t0_step (s)']['value'].get():
         messagebox.showerror(title='Times', message='The times should be positive, t0_step < tf_step and '
                                                     'delta_t_load_step < (tf_step - t0_step).')
         choices.clear()
@@ -442,9 +511,9 @@ def value_control(choices_parameters, choices_buttons, current_button):
             choices_parameters['Δi_pola (A/cm²)']['value'].get() < 0 or \
             choices_parameters['i_EIS (A/cm²)']['value'].get() < 0 or \
             choices_parameters['Δi_pola (A/cm²)']['value'].get() > \
-                choices_parameters['i_max_pola (A/cm²)']['value'].get() or \
+            choices_parameters['i_max_pola (A/cm²)']['value'].get() or \
             choices_parameters['i_ini_step (A/cm²)']['value'].get() > \
-                choices_parameters['i_final_step (A/cm²)']['value'].get():
+            choices_parameters['i_final_step (A/cm²)']['value'].get():
         messagebox.showerror(title='Current densities', message='The current densities should be positive, '
                                                                 'delta_i_pola < i_max_pola and '
                                                                 'i_ini_step < i_final_step.')
@@ -452,7 +521,7 @@ def value_control(choices_parameters, choices_buttons, current_button):
         return
     if choices_parameters['ratio_EIS (%)']['value'].get() < 0 or \
             choices_parameters['ratio_EIS (%)']['value'].get() > 20:
-        messagebox.showerror(title='Ratio EIS', message='Ratio EIS is a pourcentage of i_EIS and should be between 0 '
+        messagebox.showerror(title='Ratio EIS', message='Ratio EIS is a percentage of i_EIS and should be between 0 '
                                                         'and 20 for plotting correct EIS.')
         choices.clear()
         return
