@@ -472,6 +472,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(frame, choices)
     elif choices['type_fuel_cell'].get() == "Biao Xie 1.0 bar (2015)": type_fuel_cell = "BX_1.0"
     elif choices['type_fuel_cell'].get() == "Biao Xie 1.35 bar (2015)": type_fuel_cell = "BX_1.35"
     elif choices['type_fuel_cell'].get() == "Linhao Fan (2010)": type_fuel_cell = "LF"
+    elif choices['type_fuel_cell'].get() == "Enter your specifications": type_fuel_cell = "manual_setup"
     else: raise ValueError('the type_fuel_cell given is not valid.')
 
     Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
@@ -560,7 +561,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choices):
     elif choices['type_fuel_cell'].get() == "Biao Xie 1.0 bar (2015)": type_fuel_cell = "BX_1.0"
     elif choices['type_fuel_cell'].get() == "Biao Xie 1.35 bar (2015)": type_fuel_cell = "BX_1.35"
     elif choices['type_fuel_cell'].get() == "Linhao Fan (2010)": type_fuel_cell = "LF"
-    elif choices['type_fuel_cell'].get() == "Enter your specifications": type_fuel_cell = "Enter your specifications"
+    elif choices['type_fuel_cell'].get() == "Enter your specifications": type_fuel_cell = "manual_setup"
 
     if choices['type_auxiliary'].get() == 0: type_auxiliary = "no_auxiliary"
     elif choices['type_auxiliary'].get() == 1: type_auxiliary = "closed_anode"
@@ -574,7 +575,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choices):
     else: type_purge = "constant_purge"
 
     if choices['type_display'].get() == 0: type_display = "no_display"
-    elif choices['type_display'].get() == 1: type_display = "synthetic_display"
+    elif choices['type_display'].get() == 1: type_display = "synthetic"
     else: type_display = "multiple_display"
 
     if choices['type_plot'].get() == 0: type_plot = "fixed"
@@ -586,7 +587,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choices):
             type_fuel_cell, type_auxiliary, type_control, type_purge, type_display, type_plot)
 
 
-def value_control(choices):
+def value_control(choices, current_button):
     """
     This function checks the integrity of the values entered by the user and 
     returns an empty tuple if they are not valid.
@@ -721,7 +722,6 @@ def value_control(choices):
         choices.clear()
         return
 
-
     if choices['nb_f_EIS_i'].get() < 0 or choices['nb_points_EIS_i'].get() < 0 or \
         type(choices['f_power_min_EIS_i'].get()) != int or type(choices['f_power_max_EIS_i'].get()) != int or \
         type(choices['nb_f_EIS_i'].get()) != int or type(choices['nb_points_EIS_i'].get()) != int :
@@ -745,5 +745,19 @@ def value_control(choices):
     if choices['n_gdl_i'].get() < 5 or type(choices['n_gdl_i'].get()) != int:
         messagebox.showerror(title='n gdl', message=
         'The n_gdl value should be an integer bigger than 5.')
+        choices.clear()
+        return
+
+    if current_button == 0 and choices['type_display'].get() == 2:
+        messagebox.showerror(title='n gdl', message=
+        'dynamic plot is not thought to be used with step current and multiple display.' +
+        'There would be too much plots to handle.')
+        choices.clear()
+        return
+
+    if current_button == 2 and choices['type_plot'].get() == 0:
+        messagebox.showerror(title='n gdl', message=
+        'EIS has to be plot with a dynamic type_plot setting, '
+        'because max_step has to be adjusted at each frequency.')
         choices.clear()
         return
