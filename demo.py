@@ -132,7 +132,7 @@ def main_frame(root):
     display_label_operating_inputs_and_physical_parameters(frame, choices_parameters)
 
     # Displays the value of the operating conditions and physical parameters on the screen.
-    label_widgets, entry_widgets = display_value_operating_inputs_and_physical_parameters(frame, choices_parameters)
+    display_value_operating_inputs_and_physical_parameters(frame, choices_parameters)
 
     # Display the radiobuttons on the screen
     display_radiobuttons(frame, choices_buttons)
@@ -143,8 +143,7 @@ def main_frame(root):
                    'Enter your specifications', 'Enter your specifications', 'EH-31 1.5 bar (2021)',
                    'EH-31 2.0 bar (2021)', 'EH-31 2.25 bar (2021)', 'EH-31 2.5 bar (2021)', 'Biao Xie 1.0 bar (2015)',
                    'Biao Xie 1.35 bar (2015)', 'Linhao Fan (2010)',
-                   command=lambda value: changeValue(frame, choices_parameters, choices_buttons, label_widgets,
-                                                     entry_widgets)) \
+                   command=lambda value: changeValue(frame, choices_parameters, choices_buttons)) \
                                                                    .grid(row=0, column=2, columnspan=2)
 
     # Display the action buttons to select the type of current density to be applied.

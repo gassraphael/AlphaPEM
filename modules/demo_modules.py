@@ -19,7 +19,7 @@ from modules.main_modules import figures_preparation, plot_saving
 
 # _____________________________________________________Demo modules_____________________________________________________
 
-def changeValue(frame, choices_parameters, choices_buttons, Label_widgets, Entry_widgets):
+def changeValue(frame, choices_parameters, choices_buttons):
     """This function is called when the user selects a specific option from a dropdown menu for the type of fuel cell.
     Depending on the selected option, it either hides or displays specific input fields (labels or entry widgets) on
     the GUI.
@@ -34,33 +34,21 @@ def changeValue(frame, choices_parameters, choices_buttons, Label_widgets, Entry
         A dictionary containing the button information.
     Label_widgets : dict
         A dictionary containing the label widgets.
-    Entry_widgets : dict
-        A dictionary containing the entry widgets.
     """
 
     if choices_buttons['type_fuel_cell']['value'].get() != 'Enter your specifications':
-        # Hide all the Entries if they are already displayed
-        for k, v in Entry_widgets.items():
-            v.grid_forget()
-
         # Recovers the new settings
         recover_for_display_operating_inputs_and_physical_parameters(frame, choices_parameters, choices_buttons)
-
         # Display the Labels
         for k, v in choices_parameters.items():
             ttk.Label(frame, width=7, anchor='w', textvariable=v['value']). \
                 grid(row=v['label_row'], column=v['label_column'], padx=5)
 
     else:  # choices_buttons['type_fuel_cell']['value'].get() == 'Enter your specifications':
-        # Hide the Labels if they are already displayed
-        for k, v in Label_widgets.items():
-            v.grid_forget()
-
         # Saves and displays the user entries
         for k, v in choices_parameters.items():
-            ttk.Label(frame, width=7, anchor='w', textvariable=v['value']). \
+            ttk.Entry(frame, width=7, textvariable=v['value']). \
                 grid(row=v['label_row'], column=v['label_column'], padx=5)
-
 
 def display_label_operating_inputs_and_physical_parameters(frame, choices_parameters):
     """This function displays labels on the GUI, representing operating conditions and physical parameters, without
@@ -87,8 +75,8 @@ def display_label_operating_inputs_and_physical_parameters(frame, choices_parame
         grid(row=22, column=0, columnspan=6, ipady=15)
 
     # Display the parameters labels
-    for k, p in choices_parameters.items():
-        ttk.Label(frame, text=k, font=('cmr10', 10)).grid(row=p['label_row'], column=p['label_column'] - 1, sticky="w")
+    for k, v in choices_parameters.items():
+        ttk.Label(frame, text=k, font=('cmr10', 10)).grid(row=v['label_row'], column=v['label_column'] - 1, sticky="w")
 
 
 def display_value_operating_inputs_and_physical_parameters(frame, choices_parameters):
@@ -101,25 +89,9 @@ def display_value_operating_inputs_and_physical_parameters(frame, choices_parame
         The main application frame where the graphical elements are placed.
     choices_parameters : dict
         A dictionary containing the parameter information.
-
-    Returns
-    -------
-    Label_widgets : dict
-        A dictionary containing the label widgets.
-    Entry_widgets : dict
-        A dictionary containing the entry widgets.
     """
-
-    Label_widgets = {}
-    for k, p in choices_parameters.items():
-        Label_widgets['Label ' + k] = ttk.Label(frame, width=7, anchor='w', textvariable=p['value'])
-
-    Entry_widgets = {}
-    for k, p in choices_parameters.items():
-        Entry_widgets['Entry ' + k] = ttk.Entry(frame, width=7, textvariable=p['value'])
-        Entry_widgets['Entry ' + k].grid(row=p['label_row'], column=p['label_column'], padx=5)
-
-    return Label_widgets, Entry_widgets
+    for k, v in choices_parameters.items():
+        ttk.Entry(frame, width=7, textvariable=v['value']).grid(row=v['label_row'], column=v['label_column'], padx=5)
 
 
 def display_radiobuttons(frame, choices_buttons):
@@ -212,10 +184,6 @@ def recover_for_display_operating_inputs_and_physical_parameters(frame, choices_
         type_fuel_cell = "BX_1.35"
     elif choices_buttons['type_fuel_cell']['value'].get() == "Linhao Fan (2010)":
         type_fuel_cell = "LF"
-    elif choices_buttons['type_fuel_cell']['value'].get() == "Enter your specifications":
-        type_fuel_cell = "manual_setup"
-    else:
-        raise ValueError('the type_fuel_cell given is not valid.')
 
     Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
