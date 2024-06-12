@@ -43,6 +43,7 @@ def changeValue(frame, choices_parameters, choices_buttons, Label_widgets, Entry
             ttk.Label(frame, width=7, anchor='w', textvariable=v['value']). \
                 grid(row=v['label_row'], column=v['label_column'], padx=5)
 
+
 def display_label_operating_inputs_and_physical_parameters(frame, choices_parameters):
     """
     This function displays labels on the GUI, representing operating conditions and physical parameters, 
@@ -143,15 +144,24 @@ def recover_for_display_operating_inputs_and_physical_parameters(frame, choices_
     (2015)", etc.) and converts them to appropriate units for display on the GUI.
     """
 
-    if choices_buttons['type_fuel_cell']['value'].get() == "EH-31 1.5 bar (2021)": type_fuel_cell = "EH-31_1.5"
-    elif choices_buttons['type_fuel_cell']['value'].get() == "EH-31 2.0 bar (2021)": type_fuel_cell = "EH-31_2.0"
-    elif choices_buttons['type_fuel_cell']['value'].get() == "EH-31 2.25 bar (2021)": type_fuel_cell = "EH-31_2.25"
-    elif choices_buttons['type_fuel_cell']['value'].get() == "EH-31 2.5 bar (2021)": type_fuel_cell = "EH-31_2.5"
-    elif choices_buttons['type_fuel_cell']['value'].get() == "Biao Xie 1.0 bar (2015)": type_fuel_cell = "BX_1.0"
-    elif choices_buttons['type_fuel_cell']['value'].get() == "Biao Xie 1.35 bar (2015)": type_fuel_cell = "BX_1.35"
-    elif choices_buttons['type_fuel_cell']['value'].get() == "Linhao Fan (2010)": type_fuel_cell = "LF"
-    elif choices_buttons['type_fuel_cell']['value'].get() == "Enter your specifications": type_fuel_cell = "manual_setup"
-    else: raise ValueError('the type_fuel_cell given is not valid.')
+    if choices_buttons['type_fuel_cell']['value'].get() == "EH-31 1.5 bar (2021)":
+        type_fuel_cell = "EH-31_1.5"
+    elif choices_buttons['type_fuel_cell']['value'].get() == "EH-31 2.0 bar (2021)":
+        type_fuel_cell = "EH-31_2.0"
+    elif choices_buttons['type_fuel_cell']['value'].get() == "EH-31 2.25 bar (2021)":
+        type_fuel_cell = "EH-31_2.25"
+    elif choices_buttons['type_fuel_cell']['value'].get() == "EH-31 2.5 bar (2021)":
+        type_fuel_cell = "EH-31_2.5"
+    elif choices_buttons['type_fuel_cell']['value'].get() == "Biao Xie 1.0 bar (2015)":
+        type_fuel_cell = "BX_1.0"
+    elif choices_buttons['type_fuel_cell']['value'].get() == "Biao Xie 1.35 bar (2015)":
+        type_fuel_cell = "BX_1.35"
+    elif choices_buttons['type_fuel_cell']['value'].get() == "Linhao Fan (2010)":
+        type_fuel_cell = "LF"
+    elif choices_buttons['type_fuel_cell']['value'].get() == "Enter your specifications":
+        type_fuel_cell = "manual_setup"
+    else:
+        raise ValueError('the type_fuel_cell given is not valid.')
 
     Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
@@ -173,18 +183,18 @@ def recover_for_display_operating_inputs_and_physical_parameters(frame, choices_
     choices_parameters['Hgc (µm)']['value'].set(np.round(Hgc * 1e6))  # µm
     choices_parameters['Wgc (µm)']['value'].set(np.round(Wgc * 1e6))  # µm
     choices_parameters['Lgc (m)']['value'].set(np.round(Lgc, 2))  # µm
-    choices_parameters['ε_gdl']['value'].set(np.round(epsilon_gdl, 2))
-    choices_parameters['ε_mc']['value'].set(np.round(epsilon_mc, 2))
-    choices_parameters['τ']['value'].set(np.round(tau, 2))
-    choices_parameters['ε_c']['value'].set(np.round(epsilon_c, 2))
+    choices_parameters['ε_gdl']['value'].set(np.round(epsilon_gdl, 3))
+    choices_parameters['ε_mc']['value'].set(np.round(epsilon_mc, 3))
+    choices_parameters['τ']['value'].set(np.round(tau, 3))
+    choices_parameters['ε_c']['value'].set(np.round(epsilon_c, 3))
     choices_parameters['e']['value'].set(e)
     choices_parameters['Re (µΩ.m²)']['value'].set(np.round(Re * 1e6, 2))  # µΩ.m²
     choices_parameters['i0_c_ref (A/m²)']['value'].set(np.round(i0_c_ref, 2))  # A.m-2
     choices_parameters['κ_co (mol/(m.s.Pa))']['value'].set(np.round(kappa_co, 2))  # mol.m-1.s-1.Pa-1
     choices_parameters['κ_c']['value'].set(np.round(kappa_c, 2))
-    choices_parameters['a_slim']['value'].set(np.round(a_slim, 4))
-    choices_parameters['b_slim']['value'].set(np.round(b_slim, 4))
-    choices_parameters['a_switch']['value'].set(np.round(a_switch, 4))
+    choices_parameters['a_slim']['value'].set(np.round(a_slim, 7))
+    choices_parameters['b_slim']['value'].set(np.round(b_slim, 7))
+    choices_parameters['a_switch']['value'].set(np.round(a_switch, 7))
     choices_parameters['C_dl (MF/m³)']['value'].set(np.round(C_dl * 1e-6, 2))  # MF.m-3
     choices_parameters['i_max_pola (A/cm²)']['value'].set(np.round(i_max_pola / 1e4, 2))  # A/cm²
 
@@ -229,7 +239,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choices_parameters,
     delta_pola = (choices_parameters['Δt_load_pola (s)']['value'].get(),
                   choices_parameters['Δt_break_pola (s)']['value'].get(),
                   choices_parameters['Δi_pola (A/cm²)']['value'].get() * 1e4,
-                  choices_parameters['Δt_ini_pola (s)']['value'].get()) # (s, s, A.m-2, s)
+                  choices_parameters['Δt_ini_pola (s)']['value'].get())  # (s, s, A.m-2, s)
     i_EIS = choices_parameters['i_EIS (A/cm²)']['value'].get() * 1e4  # (A.m-2)
     ratio_EIS = choices_parameters['ratio_EIS (%)']['value'].get() / 100
     f_EIS = (choices_parameters['f_power_min_EIS']['value'].get(),
@@ -311,14 +321,14 @@ def value_control(choices_parameters, choices_buttons, current_button):
             choices_parameters['Pc_des (bar)']['value'].get() < 0 or \
             choices_parameters['Pc_des (bar)']['value'].get() > 5.0 or \
             choices_parameters['Pc_des (bar)']['value'].get() > 5.0:
-        messagebox.showerror(title='Desired pressures', message=
-        'Desired pressure should be positive and bellow 5.0 bars.')
+        messagebox.showerror(title='Desired pressures', message='Desired pressure should be positive and bellow 5.0 '
+                                                                'bars.')
         choices.clear()
         return
     if choices_parameters['Sa']['value'].get() < 1 or choices_parameters['Sa']['value'].get() > 5 or \
             choices_parameters['Sc']['value'].get() < 1 or choices_parameters['Sc']['value'].get() > 5:
-        messagebox.showerror(title='Stoichiometric ratios', message=
-        'The stoichiometric ratios Sa and Sc should be between 1 and 5.')
+        messagebox.showerror(title='Stoichiometric ratios', message='The stoichiometric ratios Sa and Sc should be '
+                                                                    'between 1 and 5.')
         choices.clear()
         return
     if choices_parameters['Ф_a_des']['value'].get() < 0 or choices_parameters['Ф_a_des']['value'].get() > 1 or \
@@ -337,8 +347,8 @@ def value_control(choices_parameters, choices_buttons, current_button):
             choices_parameters['Hcl (µm)']['value'].get() > 1000 or \
             choices_parameters['Hmem (µm)']['value'].get() < 1 or \
             choices_parameters['Hmem (µm)']['value'].get() > 1000:
-        messagebox.showerror(title='MEA thickness', message=
-        'All MEA components generally have a thickness between 1µm and 1mm.')
+        messagebox.showerror(title='MEA thickness', message='All MEA components generally have a thickness between '
+                                                            '1µm and 1mm.')
         choices.clear()
         return
     if choices_parameters['Hgc (µm)']['value'].get() < 10 or \
@@ -347,9 +357,8 @@ def value_control(choices_parameters, choices_buttons, current_button):
             choices_parameters['Wgc (µm)']['value'].get() > 10000 or \
             choices_parameters['Lgc (m)']['value'].get() < 0 or \
             choices_parameters['Lgc (m)']['value'].get() > 100:
-        messagebox.showerror(title='GC distances', message=
-        'GC generally have a thickness and a width between 10µm and 10mm.\
-        Also, GC length is generally between 0 and 100m')
+        messagebox.showerror(title='GC distances', message='GC generally have a thickness and a width between 10µm and '
+                                                           '10mm. Also, GC length is generally between 0 and 100m')
         choices.clear()
         return
     if choices_parameters['ε_gdl']['value'].get() < 0 or choices_parameters['ε_gdl']['value'].get() > 1 or \
@@ -358,8 +367,8 @@ def value_control(choices_parameters, choices_buttons, current_button):
         choices.clear()
         return
     if choices_parameters['τ']['value'].get() < 1 or choices_parameters['τ']['value'].get() > 4:
-        messagebox.showerror(title='Pore structure coefficient', message=
-        'The pore structure coefficient should be between 1 and 4.')
+        messagebox.showerror(title='Pore structure coefficient', message='The pore structure coefficient should be '
+                                                                         'between 1 and 4.')
         choices.clear()
         return
     if choices_parameters['ε_c']['value'].get() < 0 or choices_parameters['ε_c']['value'].get() > 1:
@@ -367,62 +376,64 @@ def value_control(choices_parameters, choices_buttons, current_button):
         choices.clear()
         return
     if choices_parameters['e']['value'].get() < 3 or choices_parameters['e']['value'].get() > 5:
-        messagebox.showerror(title='Capillary exponent', message=
-        'The capillary exponent should be between 3 and 5 and being an integer.')
+        messagebox.showerror(title='Capillary exponent', message='The capillary exponent should be between 3 and 5 and '
+                                                                 'being an integer.')
         choices.clear()
         return
     if choices_parameters['Re (µΩ.m²)']['value'].get() < 0.5 or choices_parameters['Re (µΩ.m²)']['value'].get() > 5:
-        messagebox.showerror(title='Electron conduction resistance', message=
-        'The electron conduction resistance is generally between 0.5 and 5 µΩ.m².')
+        messagebox.showerror(title='Electron conduction resistance', message='The electron conduction resistance is '
+                                                                             'generally between 0.5 and 5 µΩ.m².')
         choices.clear()
         return
     if choices_parameters['i0_c_ref (A/m²)']['value'].get() < 0.001 or \
             choices_parameters['i0_c_ref (A/m²)']['value'].get() > 500:
-        messagebox.showerror(title='Referenced exchange current density', message=
-        'The referenced exchange current density is generally between 0.001 and 500 A.m-2.')
+        messagebox.showerror(title='Referenced exchange current density', message='The referenced exchange current '
+                                                                                  'density is generally between 0.001 '
+                                                                                  'and 500 A.m-2.')
         choices.clear()
         return
     if choices_parameters['κ_co (mol/(m.s.Pa))']['value'].get() < 0.01 or \
             choices_parameters['κ_co (mol/(m.s.Pa))']['value'].get() > 100:
-        messagebox.showerror(title='Crossover correction coefficient', message=
-        'The crossover correction coefficient is generally between 0.01 and 100 mol.m-1.s-1.Pa-1.')
+        messagebox.showerror(title='Crossover correction coefficient', message='The crossover correction coefficient is'
+                                                                               ' generally between 0.01 and 100 '
+                                                                               'mol.m-1.s-1.Pa-1.')
         choices.clear()
         return
     if choices_parameters['κ_c']['value'].get() < 0 or choices_parameters['κ_c']['value'].get() > 100:
-        messagebox.showerror(title='Overpotential correction exponent', message=
-        'The overpotential correction exponent is generally between 0 and 100.')
+        messagebox.showerror(title='Overpotential correction exponent', message='The overpotential correction exponent '
+                                                                                'is generally between 0 and 100.')
         choices.clear()
         return
     if choices_parameters['a_slim']['value'].get() < 0 or choices_parameters['a_slim']['value'].get() > 1:
-        messagebox.showerror(title='Slop of slim function', message=
-        'The slop of slim function is generally between 0 and 1.')
+        messagebox.showerror(title='Slop of slim function', message='The slop of slim function is generally between 0 '
+                                                                    'and 1.')
         choices.clear()
         return
     if choices_parameters['b_slim']['value'].get() < 0 or choices_parameters['b_slim']['value'].get() > 1:
-        messagebox.showerror(title='Intercept of slim function', message=
-        'The intercept of slim function is generally between 0 and 1.')
+        messagebox.showerror(title='Intercept of slim function', message='The intercept of slim function is generally '
+                                                                         'between 0 and 1.')
         choices.clear()
         return
     if choices_parameters['a_switch']['value'].get() < 0 or choices_parameters['a_switch']['value'].get() > 1:
-        messagebox.showerror(title='Slop of switch function', message=
-        'The slop of switch function is generally between 0 and 1.')
+        messagebox.showerror(title='Slop of switch function', message='The slop of switch function is generally between'
+                                                                      ' 0 and 1.')
         choices.clear()
         return
     if choices_parameters['C_dl (MF/m³)']['value'].get() < 5 or choices_parameters['C_dl (MF/m³)']['value'].get() > 100:
         messagebox.showerror(title='Double layer capacitance', message='I have not settled yet a range for C_dl.')
         choices.clear()
         return
-    if (choices_parameters['t0_step (s)']['value'].get() < 0 or choices_parameters['tf_step (s)']['value'].get() < 0 or \
-            choices_parameters['Δt_load_step (s)']['value'].get() < 0 or \
-            choices_parameters['Δt_dyn_step (s)']['value'].get() < 0 or \
-            choices_parameters['Δt_load_pola (s)']['value'].get() < 0 or \
-            choices_parameters['Δt_break_pola (s)']['value'].get() < 0 or \
-            choices_parameters['Δt_ini_pola (s)']['value'].get() < 0 or \
-            choices_parameters['t0_step (s)']['value'].get() > choices_parameters['tf_step (s)']['value'].get() or \
+    if (choices_parameters['t0_step (s)']['value'].get() < 0 or choices_parameters['tf_step (s)']['value'].get() < 0 or
+            choices_parameters['Δt_load_step (s)']['value'].get() < 0 or
+            choices_parameters['Δt_dyn_step (s)']['value'].get() < 0 or
+            choices_parameters['Δt_load_pola (s)']['value'].get() < 0 or
+            choices_parameters['Δt_break_pola (s)']['value'].get() < 0 or
+            choices_parameters['Δt_ini_pola (s)']['value'].get() < 0 or
+            choices_parameters['t0_step (s)']['value'].get() > choices_parameters['tf_step (s)']['value'].get() or
             choices_parameters['Δt_load_step (s)']['value'].get() >
-          (choices_parameters['tf_step (s)']['value'].get() - choices_parameters['t0_step (s)']['value'].get())):
-        messagebox.showerror(title='Times', message=
-        'The times should be positive, t0_step < tf_step and delta_t_load_step < (tf_step - t0_step).')
+            (choices_parameters['tf_step (s)']['value'].get() - choices_parameters['t0_step (s)']['value'].get())):
+        messagebox.showerror(title='Times', message='The times should be positive, t0_step < tf_step and '
+                                                    'delta_t_load_step < (tf_step - t0_step).')
         choices.clear()
         return
     if choices_parameters['i_ini_step (A/cm²)']['value'].get() < 0 or \
@@ -430,16 +441,19 @@ def value_control(choices_parameters, choices_buttons, current_button):
             choices_parameters['i_max_pola (A/cm²)']['value'].get() < 0 or \
             choices_parameters['Δi_pola (A/cm²)']['value'].get() < 0 or \
             choices_parameters['i_EIS (A/cm²)']['value'].get() < 0 or \
-            choices_parameters['Δi_pola (A/cm²)']['value'].get() > choices_parameters['i_max_pola (A/cm²)']['value'].get() or \
-            choices_parameters['i_ini_step (A/cm²)']['value'].get() > choices_parameters['i_final_step (A/cm²)']['value'].get():
-        messagebox.showerror(title='Current densities', message=
-        'The current densities should be positive, delta_i_pola < i_max_pola and i_ini_step < i_final_step.')
+            choices_parameters['Δi_pola (A/cm²)']['value'].get() > \
+                choices_parameters['i_max_pola (A/cm²)']['value'].get() or \
+            choices_parameters['i_ini_step (A/cm²)']['value'].get() > \
+                choices_parameters['i_final_step (A/cm²)']['value'].get():
+        messagebox.showerror(title='Current densities', message='The current densities should be positive, '
+                                                                'delta_i_pola < i_max_pola and '
+                                                                'i_ini_step < i_final_step.')
         choices.clear()
         return
     if choices_parameters['ratio_EIS (%)']['value'].get() < 0 or \
             choices_parameters['ratio_EIS (%)']['value'].get() > 20:
-        messagebox.showerror(title='Ratio EIS', message=
-        'Ratio EIS is a pourcentage of i_EIS and should be between 0 and 20 for plotting correct EIS.')
+        messagebox.showerror(title='Ratio EIS', message='Ratio EIS is a pourcentage of i_EIS and should be between 0 '
+                                                        'and 20 for plotting correct EIS.')
         choices.clear()
         return
 
@@ -449,8 +463,8 @@ def value_control(choices_parameters, choices_buttons, current_button):
             type(choices_parameters['f_power_max_EIS']['value'].get()) != int or \
             type(choices_parameters['nb_f_EIS']['value'].get()) != int or \
             type(choices_parameters['nb_points_EIS']['value'].get()) != int:
-        messagebox.showerror(title='f EIS', message=
-        'f_EIS parameters should be integer and number of points should be positive.')
+        messagebox.showerror(title='f EIS', message='f_EIS parameters should be integer and number of points should '
+                                                    'be positive.')
         choices.clear()
         return
 
@@ -460,8 +474,8 @@ def value_control(choices_parameters, choices_buttons, current_button):
         return
 
     if choices_parameters['max_step (s)']['value'].get() < 0 or choices_parameters['max_step (s)']['value'].get() > 0.1:
-        messagebox.showerror(title='Max step', message=
-        'The max step value for the solver should be positive and lower than 0.1 for normal use.')
+        messagebox.showerror(title='Max step', message='The max step value for the solver should be positive and lower '
+                                                       'than 0.1 for normal use.')
         choices.clear()
         return
 
@@ -471,17 +485,17 @@ def value_control(choices_parameters, choices_buttons, current_button):
         return
 
     if current_button == 0 and choices_buttons['type_display']['value'].get() == 2:
-        messagebox.showerror(title='n gdl', message=
-        'dynamic plot is not thought to be used with step current and multiple display.' +
-        'There would be too much plots to handle.')
+        messagebox.showerror(title='n gdl', message='dynamic plot is not thought to be used with step current and '
+                                                    'multiple display. There would be too much plots to handle.')
         choices.clear()
         return
 
     if current_button == 2 and choices_buttons['type_plot']['value'].get() == 0:
         messagebox.showerror(title='n gdl', message='EIS has to be plot with a dynamic type_plot setting, '
-        'because max_step has to be adjusted at each frequency.')
+                                                    'because max_step has to be adjusted at each frequency.')
         choices.clear()
         return
+
 
 def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                                      i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
@@ -650,7 +664,6 @@ def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, S
             Simulator.Display(ax1, ax2)
         # Plot saving
         plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2)
-
 
 
 def launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step,
@@ -824,6 +837,7 @@ def launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_de
             Simulator.Display(ax1, ax2)
         # Plot saving
         plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2)
+
 
 def launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                                     i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,

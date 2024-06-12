@@ -11,8 +11,8 @@ import numpy as np
 import matplotlib as mpl
 
 # Importing constants' value and functions
-from configuration.settings import (current_density_parameters, operating_inputs, physical_parameters,
-                                    computing_parameters)
+from configuration.settings import current_density_parameters, operating_inputs, physical_parameters, \
+                                   computing_parameters
 from model.AlphaPEM import AlphaPEM
 from modules.main_modules import figures_preparation, plot_saving
 
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     type_fuel_cell_3 = None
     type_fuel_cell_4 = None
     # Current density possibilities: "step", "polarization", "EIS".
-    type_current = "polarization"
+    type_current = "EIS"
     # Auxiliary system possibilities: "closed_anode", "opened_anode", "no_auxiliary".
     type_auxiliary = "opened_anode"
     # Control strategy for the operating inputs: "Phi_des", "no_control".
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     type_display = "synthetic"
     # Plot possibilities: "dynamic", "fixed". Using dynamic plot option enables real-time figure updates during program
     # execution, albeit at the cost of decreased program speed.
-    type_plot = "fixed"
+    type_plot = "dynamic"
 
 # ___________________________________Retrieving parameters from the settings.py file____________________________________
     """This should remain unaltered for regular program usage."""

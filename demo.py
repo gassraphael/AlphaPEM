@@ -1,6 +1,12 @@
-# ______________________________________Preliminaries_____________________________________
-
 # -*- coding: utf-8 -*-
+
+"""This file is designated for executing the AlphaPEM software package through a demonstrator interface. Most of the
+functionalities are available, but some are not implemented.
+"""
+
+# _____________________________________________________Preliminaries____________________________________________________
+
+# Importing the necessary libraries
 import tkinter as tk
 from tkinter import messagebox
 from ttkthemes import ThemedTk
@@ -8,7 +14,7 @@ from tkinter import ttk
 import numpy as np
 import matplotlib as mpl
 
-# Constants value and functions
+# Importing constants' value and functions
 from modules.demo_modules import display_label_operating_inputs_and_physical_parameters, \
     display_value_operating_inputs_and_physical_parameters, recover_for_use_operating_inputs_and_physical_parameters, \
     display_radiobuttons, changeValue, value_control, launch_AlphaPEM_for_step_current, \
@@ -53,61 +59,73 @@ def main_frame(root):
 
     # Creation of the choice dictionary
     choices_parameters = {'Tfc (°C)': {'value': tk.DoubleVar(frame), 'label_row': 2, 'label_column': 1},
-               'Pa_des (bar)': {'value': tk.DoubleVar(frame), 'label_row': 2, 'label_column': 3},
-               'Pc_des (bar)': {'value': tk.DoubleVar(frame), 'label_row': 2, 'label_column': 5},
-               'Sa': {'value': tk.DoubleVar(frame), 'label_row': 3, 'label_column': 1},
-               'Sc': {'value': tk.DoubleVar(frame), 'label_row': 3, 'label_column': 3},
-               'Ф_a_des': {'value': tk.DoubleVar(frame), 'label_row': 4, 'label_column': 1},
-               'Ф_c_des': {'value': tk.DoubleVar(frame), 'label_row': 4, 'label_column': 3},
-               'Aact (cm²)': {'value': tk.DoubleVar(frame), 'label_row': 6, 'label_column': 1},
-               'Hgdl (µm)': {'value': tk.DoubleVar(frame), 'label_row': 7, 'label_column': 1},
-               'Hcl (µm)': {'value': tk.DoubleVar(frame), 'label_row': 7, 'label_column': 3},
-               'Hmem (µm)': {'value': tk.DoubleVar(frame), 'label_row': 7, 'label_column': 5},
-               'Hgc (µm)': {'value': tk.DoubleVar(frame), 'label_row': 8, 'label_column': 1},
-               'Wgc (µm)': {'value': tk.DoubleVar(frame), 'label_row': 8, 'label_column': 3},
-               'Lgc (m)': {'value': tk.DoubleVar(frame), 'label_row': 8, 'label_column': 5},
-               'ε_gdl': {'value': tk.DoubleVar(frame, 0.6), 'label_row': 10, 'label_column': 1},
-               'ε_mc': {'value': tk.DoubleVar(frame, 0.25), 'label_row': 10, 'label_column': 3},
-               'τ': {'value': tk.DoubleVar(frame, 1.5), 'label_row': 10, 'label_column': 5},
-               'ε_c': {'value': tk.DoubleVar(frame, 0.2), 'label_row': 11, 'label_column': 1},
-               'e': {'value': tk.IntVar(frame, 4), 'label_row': 11, 'label_column': 3},
-               'Re (µΩ.m²)': {'value': tk.DoubleVar(frame, 1.0), 'label_row': 11, 'label_column': 5},
-               'i0_c_ref (A/m²)': {'value': tk.DoubleVar(frame, 3.0), 'label_row': 12, 'label_column': 1},
-               'κ_co (mol/(m.s.Pa))': {'value': tk.DoubleVar(frame, 1.0), 'label_row': 12, 'label_column': 3},
-               'κ_c': {'value': tk.DoubleVar(frame, 2.0), 'label_row': 12, 'label_column': 5},
-               'a_slim': {'value': tk.DoubleVar(frame, 0.05), 'label_row': 13, 'label_column': 1},
-               'b_slim': {'value': tk.DoubleVar(frame, 0.1), 'label_row': 13, 'label_column': 3},
-               'a_switch': {'value': tk.DoubleVar(frame, 0.7), 'label_row': 13, 'label_column': 5},
-               'C_dl (MF/m³)': {'value': tk.DoubleVar(frame, 20), 'label_row': 14, 'label_column': 1},
-               't0_step (s)': {'value': tk.DoubleVar(frame, 0), 'label_row': 16, 'label_column': 1},
-               'tf_step (s)': {'value': tk.DoubleVar(frame, 1000), 'label_row': 16, 'label_column': 3},
-               'Δt_load_step (s)': {'value': tk.DoubleVar(frame, 50), 'label_row': 16, 'label_column': 5},
-               'i_ini_step (A/cm²)': {'value': tk.DoubleVar(frame, 0.5), 'label_row': 17, 'label_column': 1},
-               'i_final_step (A/cm²)': {'value': tk.DoubleVar(frame, 1.5), 'label_row': 17, 'label_column': 3},
-               'i_max_pola (A/cm²)': {'value': tk.DoubleVar(frame, 0.5), 'label_row': 18, 'label_column': 1},
-               'Δi_pola (A/cm²)': {'value': tk.DoubleVar(frame, 0.1), 'label_row': 18, 'label_column': 3},
-               'Δt_load_pola (s)': {'value': tk.DoubleVar(frame, 30), 'label_row': 19, 'label_column': 1},
-               'Δt_break_pola (s)': {'value': tk.DoubleVar(frame, 30), 'label_row': 19, 'label_column': 3},
-               'Δt_ini_pola (s)': {'value': tk.DoubleVar(frame, 60), 'label_row': 19, 'label_column': 5},
-               'i_EIS (A/cm²)': {'value': tk.DoubleVar(frame, 0.5), 'label_row': 20, 'label_column': 1},
-               'ratio_EIS (%)': {'value': tk.DoubleVar(frame, 5), 'label_row': 20, 'label_column': 3},
-               'nb_points_EIS': {'value': tk.IntVar(frame, 50), 'label_row': 20, 'label_column': 5},
-               'f_power_min_EIS': {'value': tk.IntVar(frame, -3), 'label_row': 21, 'label_column': 1},
-               'f_power_max_EIS': {'value': tk.IntVar(frame, 5), 'label_row': 21, 'label_column': 3},
-               'nb_f_EIS': {'value': tk.IntVar(frame, 60), 'label_row': 21, 'label_column': 5},
-               'Δt_dyn_step (s)': {'value': tk.DoubleVar(frame, 10), 'label_row': 23, 'label_column': 1},
-               't_purge (s)': {'value': tk.DoubleVar(frame, 0.6), 'label_row': 23, 'label_column': 3},
-               'Δt_purge (s)': {'value': tk.DoubleVar(frame, 15), 'label_row': 23, 'label_column': 5},
-               'max_step (s)': {'value': tk.DoubleVar(frame, 0.1), 'label_row': 24, 'label_column': 1},
-               'n_gdl': {'value': tk.IntVar(frame, 10), 'label_row': 24, 'label_column': 3}}
+                          'Pa_des (bar)': {'value': tk.DoubleVar(frame), 'label_row': 2, 'label_column': 3},
+                          'Pc_des (bar)': {'value': tk.DoubleVar(frame), 'label_row': 2, 'label_column': 5},
+                          'Sa': {'value': tk.DoubleVar(frame), 'label_row': 3, 'label_column': 1},
+                          'Sc': {'value': tk.DoubleVar(frame), 'label_row': 3, 'label_column': 3},
+                          'Ф_a_des': {'value': tk.DoubleVar(frame), 'label_row': 4, 'label_column': 1},
+                          'Ф_c_des': {'value': tk.DoubleVar(frame), 'label_row': 4, 'label_column': 3},
+                          'Hgdl (µm)': {'value': tk.DoubleVar(frame), 'label_row': 6, 'label_column': 1},
+                          'Hcl (µm)': {'value': tk.DoubleVar(frame), 'label_row': 6, 'label_column': 3},
+                          'Hmem (µm)': {'value': tk.DoubleVar(frame), 'label_row': 6, 'label_column': 5},
+                          'Hgc (µm)': {'value': tk.DoubleVar(frame), 'label_row': 7, 'label_column': 1},
+                          'Wgc (µm)': {'value': tk.DoubleVar(frame), 'label_row': 7, 'label_column': 3},
+                          'Lgc (m)': {'value': tk.DoubleVar(frame), 'label_row': 7, 'label_column': 5},
+                          'Aact (cm²)': {'value': tk.DoubleVar(frame), 'label_row': 8, 'label_column': 1},
+                          'ε_gdl': {'value': tk.DoubleVar(frame, 0.6), 'label_row': 10, 'label_column': 1},
+                          'ε_mc': {'value': tk.DoubleVar(frame, 0.25), 'label_row': 10, 'label_column': 3},
+                          'τ': {'value': tk.DoubleVar(frame, 1.5), 'label_row': 10, 'label_column': 5},
+                          'ε_c': {'value': tk.DoubleVar(frame, 0.2), 'label_row': 11, 'label_column': 1},
+                          'e': {'value': tk.IntVar(frame, 4), 'label_row': 11, 'label_column': 3},
+                          'Re (µΩ.m²)': {'value': tk.DoubleVar(frame, 1.0), 'label_row': 11, 'label_column': 5},
+                          'i0_c_ref (A/m²)': {'value': tk.DoubleVar(frame, 3.0), 'label_row': 12,
+                                              'label_column': 1},
+                          'κ_co (mol/(m.s.Pa))': {'value': tk.DoubleVar(frame, 1.0), 'label_row': 12,
+                                                  'label_column': 3},
+                          'κ_c': {'value': tk.DoubleVar(frame, 2.0), 'label_row': 12, 'label_column': 5},
+                          'a_slim': {'value': tk.DoubleVar(frame, 0.05), 'label_row': 13, 'label_column': 1},
+                          'b_slim': {'value': tk.DoubleVar(frame, 0.1), 'label_row': 13, 'label_column': 3},
+                          'a_switch': {'value': tk.DoubleVar(frame, 0.7), 'label_row': 13, 'label_column': 5},
+                          'C_dl (MF/m³)': {'value': tk.DoubleVar(frame, 20), 'label_row': 14, 'label_column': 1},
+                          't0_step (s)': {'value': tk.DoubleVar(frame, 0), 'label_row': 16, 'label_column': 1},
+                          'tf_step (s)': {'value': tk.DoubleVar(frame, 1000), 'label_row': 16, 'label_column': 3},
+                          'Δt_load_step (s)': {'value': tk.DoubleVar(frame, 50), 'label_row': 16,
+                                               'label_column': 5},
+                          'i_ini_step (A/cm²)': {'value': tk.DoubleVar(frame, 0.5), 'label_row': 17,
+                                                 'label_column': 1},
+                          'i_final_step (A/cm²)': {'value': tk.DoubleVar(frame, 1.5), 'label_row': 17,
+                                                   'label_column': 3},
+                          'Δt_load_pola (s)': {'value': tk.DoubleVar(frame, 30), 'label_row': 18,
+                                               'label_column': 1},
+                          'Δt_break_pola (s)': {'value': tk.DoubleVar(frame, 30), 'label_row': 18,
+                                                'label_column': 3},
+                          'Δt_ini_pola (s)': {'value': tk.DoubleVar(frame, 60), 'label_row': 18,
+                                              'label_column': 5},
+                          'i_max_pola (A/cm²)': {'value': tk.DoubleVar(frame, 0.5), 'label_row': 19,
+                                                 'label_column': 1},
+                          'Δi_pola (A/cm²)': {'value': tk.DoubleVar(frame, 0.1), 'label_row': 19,
+                                              'label_column': 3},
+                          'i_EIS (A/cm²)': {'value': tk.DoubleVar(frame, 0.5), 'label_row': 20,
+                                            'label_column': 1},
+                          'ratio_EIS (%)': {'value': tk.DoubleVar(frame, 5), 'label_row': 20, 'label_column': 3},
+                          'nb_points_EIS': {'value': tk.IntVar(frame, 50), 'label_row': 20, 'label_column': 5},
+                          'f_power_min_EIS': {'value': tk.IntVar(frame, -3), 'label_row': 21, 'label_column': 1},
+                          'f_power_max_EIS': {'value': tk.IntVar(frame, 5), 'label_row': 21, 'label_column': 3},
+                          'nb_f_EIS': {'value': tk.IntVar(frame, 60), 'label_row': 21, 'label_column': 5},
+                          'Δt_dyn_step (s)': {'value': tk.DoubleVar(frame, 10), 'label_row': 23,
+                                              'label_column': 1},
+                          't_purge (s)': {'value': tk.DoubleVar(frame, 0.6), 'label_row': 23, 'label_column': 3},
+                          'Δt_purge (s)': {'value': tk.DoubleVar(frame, 15), 'label_row': 23, 'label_column': 5},
+                          'max_step (s)': {'value': tk.DoubleVar(frame, 0.1), 'label_row': 24, 'label_column': 1},
+                          'n_gdl': {'value': tk.IntVar(frame, 10), 'label_row': 24, 'label_column': 3}}
 
     choices_buttons = {'type_fuel_cell': {'value': tk.StringVar(frame, 'Enter your specifications'),
-                                         'label_row': 0},
-                      'type_auxiliary': {'value': tk.IntVar(frame, 2), 'label_row': 26},
-                      'type_control': {'value': tk.IntVar(frame, 0), 'label_row': 27},
-                      'type_purge': {'value': tk.IntVar(frame, 0), 'label_row': 28},
-                      'type_display': {'value': tk.IntVar(frame, 1), 'label_row': 29},
-                      'type_plot': {'value': tk.IntVar(frame, 0), 'label_row': 30}}
+                                          'label_row': 0},
+                       'type_auxiliary': {'value': tk.IntVar(frame, 2), 'label_row': 26},
+                       'type_control': {'value': tk.IntVar(frame, 0), 'label_row': 27},
+                       'type_purge': {'value': tk.IntVar(frame, 0), 'label_row': 28},
+                       'type_display': {'value': tk.IntVar(frame, 1), 'label_row': 29},
+                       'type_plot': {'value': tk.IntVar(frame, 0), 'label_row': 30}}
 
     # Displays operating conditions and physical parameters on the screen (without their values)
     display_label_operating_inputs_and_physical_parameters(frame, choices_parameters)
@@ -126,7 +144,7 @@ def main_frame(root):
                    'Biao Xie 1.35 bar (2015)', 'Linhao Fan (2010)',
                    command=lambda value: changeValue(frame, choices_parameters, choices_buttons, label_widgets,
                                                      entry_widgets)) \
-                   .grid(row=0, column=2, columnspan=2)
+        .grid(row=0, column=2, columnspan=2)
 
     # Display the action buttons to select the type of current density to be applied.
     ttk.Label(frame, text='Current density:', font=('cmr10', 12, 'bold')) \
