@@ -5,7 +5,9 @@ from tkinter import messagebox
 from tkinter import ttk
 
 # Constants value and functions
+from model.AlphaPEM import AlphaPEM
 from modules.settings_modules import stored_operating_inputs, stored_physical_parameters, EIS_parameters
+from modules.main_modules import figures_preparation, plot_saving
 
 """
 This modul contains some of the required functions for the main program AlphaPEM_interface.
@@ -64,15 +66,15 @@ def changeValue(frame, choices, label_widgets, entry_widgets):
         ttk.Label(frame, width=7, anchor='w', textvariable=choices['t0_step_i']).grid(row=16, column=1, padx=5)
         ttk.Label(frame, width=7, anchor='w', textvariable=choices['tf_step_i']).grid(row=16, column=3, padx=5)
         ttk.Label(frame, width=7, anchor='w', textvariable=choices['delta_t_load_step_i']). \
-                                                                                 grid(row=16, column=5, padx=5)
+            grid(row=16, column=5, padx=5)
         ttk.Label(frame, width=7, anchor='w', textvariable=choices['i_ini_step_i']).grid(row=17, column=1, padx=5)
         ttk.Label(frame, width=7, anchor='w', textvariable=choices['i_final_step_i']).grid(row=17, column=3, padx=5)
         ttk.Label(frame, width=7, anchor='w', textvariable=choices['i_max_pola_i']).grid(row=18, column=1, padx=5)
         ttk.Label(frame, width=7, anchor='w', textvariable=choices['delta_i_pola_i']).grid(row=18, column=3, padx=5)
         ttk.Label(frame, width=7, anchor='w', textvariable=choices['delta_t_load_pola_i']). \
-                                                                                      grid(row=19, column=1, padx=5)
+            grid(row=19, column=1, padx=5)
         ttk.Label(frame, width=7, anchor='w', textvariable=choices['delta_t_break_pola_i']). \
-                                                                                      grid(row=19, column=3, padx=5)
+            grid(row=19, column=3, padx=5)
         ttk.Label(frame, width=7, anchor='w', textvariable=choices['delta_t_ini_pola_i']).grid(row=19, column=5, padx=5)
         ttk.Label(frame, width=7, anchor='w', textvariable=choices['i_EIS_i']).grid(row=20, column=1, padx=5)
         ttk.Label(frame, width=7, anchor='w', textvariable=choices['ratio_EIS_i']).grid(row=20, column=3, padx=5)
@@ -223,10 +225,9 @@ def display_label_operating_inputs_and_physical_parameters(frame):
     ttk.Label(frame, text='nb_f_EIS', font=('Times New Roman', 10)). \
         grid(row=21, column=4, sticky="w")
 
-
     # Computing parameters
     ttk.Label(frame, text='Computing parameters', font=('Times New Roman', 12, 'bold')). \
-                                                                          grid(row=22, column=0, columnspan=6, ipady=15)
+        grid(row=22, column=0, columnspan=6, ipady=15)
     ttk.Label(frame, text='Δt_dyn_step (s)', font=('Times New Roman', 10)).grid(row=23, column=0, sticky="w")
     ttk.Label(frame, text='t_purge (s)', font=('Times New Roman', 10)).grid(row=23, column=2, sticky="w")
     ttk.Label(frame, text='Δt_purge (s)', font=('Times New Roman', 10)).grid(row=23, column=4, sticky="w")
@@ -256,7 +257,7 @@ def display_value_operating_inputs_and_physical_parameters(frame, choices):
     Label_Hgc = ttk.Label(frame, width=7, anchor='w', textvariable=choices['Hgc_i'])
     Label_Wgc = ttk.Label(frame, width=7, anchor='w', textvariable=choices['Wgc_i'])
     Label_Lgc = ttk.Label(frame, width=7, anchor='w', textvariable=choices['Lgc_i'])
-    Label_epsilon_gdl = ttk.Label(frame, width=7, anchor='w',textvariable=choices['epsilon_gdl_i'])
+    Label_epsilon_gdl = ttk.Label(frame, width=7, anchor='w', textvariable=choices['epsilon_gdl_i'])
     Label_epsilon_mc = ttk.Label(frame, width=7, anchor='w', textvariable=choices['epsilon_mc_i'])
     Label_tau = ttk.Label(frame, width=7, anchor='w', textvariable=choices['tau_i'])
     Label_epsilon_c = ttk.Label(frame, width=7, anchor='w', textvariable=choices['epsilon_c_i'])
@@ -273,9 +274,9 @@ def display_value_operating_inputs_and_physical_parameters(frame, choices):
     Label_tf_step = ttk.Label(frame, width=7, anchor='w', textvariable=choices['tf_step_i'])
     Label_delta_t_load_step = ttk.Label(frame, width=7, anchor='w', textvariable=choices['delta_t_load_step_i'])
     Label_i_ini_step = ttk.Label(frame, width=7, anchor='w', textvariable=choices['i_ini_step_i'])
-    Label_i_final_step = ttk.Label(frame, width=7, anchor='w',textvariable=choices['i_final_step_i'])
+    Label_i_final_step = ttk.Label(frame, width=7, anchor='w', textvariable=choices['i_final_step_i'])
     Label_i_max_pola = ttk.Label(frame, width=7, anchor='w', textvariable=choices['i_max_pola_i'])
-    Label_delta_i_pola = ttk.Label(frame, width=7, anchor='w',textvariable=choices['delta_i_pola_i'])
+    Label_delta_i_pola = ttk.Label(frame, width=7, anchor='w', textvariable=choices['delta_i_pola_i'])
     Label_delta_t_load_pola = ttk.Label(frame, width=7, anchor='w', textvariable=choices['delta_t_load_pola_i'])
     Label_delta_t_break_pola = ttk.Label(frame, width=7, anchor='w', textvariable=choices['delta_t_break_pola_i'])
     Label_delta_t_ini_pola = ttk.Label(frame, width=7, anchor='w', textvariable=choices['delta_t_ini_pola_i'])
@@ -433,9 +434,9 @@ def display_radiobuttons(frame, choices):
     # Ask the user to choose an option and save it
     ttk.Label(frame, text='Control: ', font=('Times New Roman', 12)).grid(row=27, column=0, sticky="w")
     ttk.Radiobutton(frame, text='No control', value=0, variable=choices['type_control']). \
-                                                                     grid(row=27, column=1, sticky="w")
+        grid(row=27, column=1, sticky="w")
     ttk.Radiobutton(frame, text='Humidity', value=1, variable=choices['type_control']). \
-                                                                     grid(row=27, column=2, sticky="w")
+        grid(row=27, column=2, sticky="w")
 
     # Ask the user to choose an option and save it
     ttk.Label(frame, text='Purge: ', font=('Times New Roman', 12)).grid(row=28, column=0, sticky="w")
@@ -465,15 +466,24 @@ def recover_for_display_operating_inputs_and_physical_parameters(frame, choices)
     (2015)", etc.) and converts them to appropriate units for display on the GUI.
     """
 
-    if choices['type_fuel_cell'].get() == "EH-31 1.5 bar (2021)": type_fuel_cell = "EH-31_1.5"
-    elif choices['type_fuel_cell'].get() == "EH-31 2.0 bar (2021)": type_fuel_cell = "EH-31_2.0"
-    elif choices['type_fuel_cell'].get() == "EH-31 2.25 bar (2021)": type_fuel_cell = "EH-31_2.25"
-    elif choices['type_fuel_cell'].get() == "EH-31 2.5 bar (2021)": type_fuel_cell = "EH-31_2.5"
-    elif choices['type_fuel_cell'].get() == "Biao Xie 1.0 bar (2015)": type_fuel_cell = "BX_1.0"
-    elif choices['type_fuel_cell'].get() == "Biao Xie 1.35 bar (2015)": type_fuel_cell = "BX_1.35"
-    elif choices['type_fuel_cell'].get() == "Linhao Fan (2010)": type_fuel_cell = "LF"
-    elif choices['type_fuel_cell'].get() == "Enter your specifications": type_fuel_cell = "manual_setup"
-    else: raise ValueError('the type_fuel_cell given is not valid.')
+    if choices['type_fuel_cell'].get() == "EH-31 1.5 bar (2021)":
+        type_fuel_cell = "EH-31_1.5"
+    elif choices['type_fuel_cell'].get() == "EH-31 2.0 bar (2021)":
+        type_fuel_cell = "EH-31_2.0"
+    elif choices['type_fuel_cell'].get() == "EH-31 2.25 bar (2021)":
+        type_fuel_cell = "EH-31_2.25"
+    elif choices['type_fuel_cell'].get() == "EH-31 2.5 bar (2021)":
+        type_fuel_cell = "EH-31_2.5"
+    elif choices['type_fuel_cell'].get() == "Biao Xie 1.0 bar (2015)":
+        type_fuel_cell = "BX_1.0"
+    elif choices['type_fuel_cell'].get() == "Biao Xie 1.35 bar (2015)":
+        type_fuel_cell = "BX_1.35"
+    elif choices['type_fuel_cell'].get() == "Linhao Fan (2010)":
+        type_fuel_cell = "LF"
+    elif choices['type_fuel_cell'].get() == "Enter your specifications":
+        type_fuel_cell = "manual_setup"
+    else:
+        raise ValueError('the type_fuel_cell given is not valid.')
 
     Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
@@ -546,40 +556,61 @@ def recover_for_use_operating_inputs_and_physical_parameters(choices):
     i_max_pola = choices['i_max_pola_i'].get() * 1e4  # A.m-2
     delta_pola = choices['delta_t_load_pola_i'].get(), choices['delta_t_break_pola_i'].get(), \
         choices['delta_i_pola_i'].get() * 1e4, choices['delta_t_ini_pola_i'].get()  # (s, s, A.m-2, s)
-    i_EIS, ratio_EIS = choices['i_EIS_i'].get() * 1e4, choices['ratio_EIS_i'].get() / 100 # (A.m-2, )
-    f_EIS = ( choices['f_power_min_EIS_i'].get(), choices['f_power_max_EIS_i'].get(),
-             choices['nb_f_EIS_i'].get(), choices['nb_points_EIS_i'].get() )
+    i_EIS, ratio_EIS = choices['i_EIS_i'].get() * 1e4, choices['ratio_EIS_i'].get() / 100  # (A.m-2, )
+    f_EIS = (choices['f_power_min_EIS_i'].get(), choices['f_power_max_EIS_i'].get(),
+             choices['nb_f_EIS_i'].get(), choices['nb_points_EIS_i'].get())
     t_EIS = EIS_parameters(f_EIS)  # Time parameters for the EIS_current density function.
     t_purge, delta_t_purge = choices['t_purge_i'].get(), choices['delta_t_purge_i'].get()  # s
     max_step = choices['max_step_i'].get()  # s
     n_gdl = choices['n_gdl_i'].get()
 
-    if choices['type_fuel_cell'].get() == "EH-31 1.5 bar (2021)": type_fuel_cell = "EH-31_1.5"
-    elif choices['type_fuel_cell'].get() == "EH-31 2.0 bar (2021)": type_fuel_cell = "EH-31_2.0"
-    elif choices['type_fuel_cell'].get() == "EH-31 2.25 bar (2021)": type_fuel_cell = "EH-31_2.25"
-    elif choices['type_fuel_cell'].get() == "EH-31 2.5 bar (2021)": type_fuel_cell = "EH-31_2.5"
-    elif choices['type_fuel_cell'].get() == "Biao Xie 1.0 bar (2015)": type_fuel_cell = "BX_1.0"
-    elif choices['type_fuel_cell'].get() == "Biao Xie 1.35 bar (2015)": type_fuel_cell = "BX_1.35"
-    elif choices['type_fuel_cell'].get() == "Linhao Fan (2010)": type_fuel_cell = "LF"
-    elif choices['type_fuel_cell'].get() == "Enter your specifications": type_fuel_cell = "manual_setup"
+    if choices['type_fuel_cell'].get() == "EH-31 1.5 bar (2021)":
+        type_fuel_cell = "EH-31_1.5"
+    elif choices['type_fuel_cell'].get() == "EH-31 2.0 bar (2021)":
+        type_fuel_cell = "EH-31_2.0"
+    elif choices['type_fuel_cell'].get() == "EH-31 2.25 bar (2021)":
+        type_fuel_cell = "EH-31_2.25"
+    elif choices['type_fuel_cell'].get() == "EH-31 2.5 bar (2021)":
+        type_fuel_cell = "EH-31_2.5"
+    elif choices['type_fuel_cell'].get() == "Biao Xie 1.0 bar (2015)":
+        type_fuel_cell = "BX_1.0"
+    elif choices['type_fuel_cell'].get() == "Biao Xie 1.35 bar (2015)":
+        type_fuel_cell = "BX_1.35"
+    elif choices['type_fuel_cell'].get() == "Linhao Fan (2010)":
+        type_fuel_cell = "LF"
+    elif choices['type_fuel_cell'].get() == "Enter your specifications":
+        type_fuel_cell = "manual_setup"
 
-    if choices['type_auxiliary'].get() == 0: type_auxiliary = "no_auxiliary"
-    elif choices['type_auxiliary'].get() == 1: type_auxiliary = "closed_anode"
-    else: type_auxiliary = "opened_anode"
+    if choices['type_auxiliary'].get() == 0:
+        type_auxiliary = "no_auxiliary"
+    elif choices['type_auxiliary'].get() == 1:
+        type_auxiliary = "closed_anode"
+    else:
+        type_auxiliary = "opened_anode"
 
-    if choices['type_control'].get() == 0: type_control = "no_control"
-    else: type_control = "Phi_des"
+    if choices['type_control'].get() == 0:
+        type_control = "no_control"
+    else:
+        type_control = "Phi_des"
 
-    if choices['type_purge'].get() == 0: type_purge = "no_purge"
-    elif choices['type_purge'].get() == 1: type_purge = "periodic_purge"
-    else: type_purge = "constant_purge"
+    if choices['type_purge'].get() == 0:
+        type_purge = "no_purge"
+    elif choices['type_purge'].get() == 1:
+        type_purge = "periodic_purge"
+    else:
+        type_purge = "constant_purge"
 
-    if choices['type_display'].get() == 0: type_display = "no_display"
-    elif choices['type_display'].get() == 1: type_display = "synthetic"
-    else: type_display = "multiple_display"
+    if choices['type_display'].get() == 0:
+        type_display = "no_display"
+    elif choices['type_display'].get() == 1:
+        type_display = "synthetic"
+    else:
+        type_display = "multiple_display"
 
-    if choices['type_plot'].get() == 0: type_plot = "fixed"
-    else: type_plot = "dynamic"
+    if choices['type_plot'].get() == 0:
+        type_plot = "fixed"
+    else:
+        type_plot = "dynamic"
 
     return (Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl,
             epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, t_step,
@@ -723,8 +754,8 @@ def value_control(choices, current_button):
         return
 
     if choices['nb_f_EIS_i'].get() < 0 or choices['nb_points_EIS_i'].get() < 0 or \
-        type(choices['f_power_min_EIS_i'].get()) != int or type(choices['f_power_max_EIS_i'].get()) != int or \
-        type(choices['nb_f_EIS_i'].get()) != int or type(choices['nb_points_EIS_i'].get()) != int :
+            type(choices['f_power_min_EIS_i'].get()) != int or type(choices['f_power_max_EIS_i'].get()) != int or \
+            type(choices['nb_f_EIS_i'].get()) != int or type(choices['nb_points_EIS_i'].get()) != int:
         messagebox.showerror(title='f EIS', message=
         'f_EIS parameters should be integer and number of points should be positive.')
         choices.clear()
@@ -761,3 +792,545 @@ def value_control(choices, current_button):
         'because max_step has to be adjusted at each frequency.')
         choices.clear()
         return
+
+def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+                                     i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
+                                     Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
+                                     kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell,
+                                     type_current, type_auxiliary, type_control, type_purge, type_display, type_plot):
+    """Launch the AlphaPEM simulator for a step current density and display the results.
+
+    Parameters
+    ----------
+    current_density : function
+        Current density evolution over time (operating input). It is a function of time and parameters dictionary.
+    Tfc : float
+        Desired fuel cell temperature in Kelvin (operating input).
+    Pa_des : float
+        Desired anode pressure in Pascal (operating input).
+    Pc_des : float
+        Desired cathode pressure in Pascal (operating input).
+    Sa : float
+        Stoichiometric ratio of hydrogen (operating input).
+    Sc : float
+        Stoichiometric ratio of oxygen (operating input).
+    Phi_a_des : float
+        Desired anode relative humidity (operating input).
+    Phi_c_des : float
+        Desired cathode relative humidity (operating input).
+    t_step : tuple
+        Time parameters for the step_current density function (current parameters).
+        It is a tuple containing the initial time 't0_step', final time 'tf_step', loading time 'delta_t_load_step'
+        and dynamic time for display 'delta_t_dyn_step'.
+    i_step : tuple
+        Current parameters for the step_current density function (current parameters).
+        It is a tuple containing the initial and final current density value 'i_ini_step' and 'i_final_step'.
+    i_max_pola : float
+        Maximum current density for the polarization curve (current parameter).
+    delta_pola : tuple
+        Parameters for the polarization curve (current parameters). It is a tuple containing the loading time
+        'delta_t_load_pola', the breaking time 'delta_t_break_pola', the current density step 'delta_i_pola', and
+        the initial breaking time 'delta_t_ini_pola'.
+    i_EIS : float
+        Current for which a ratio_EIS perturbation is added (current parameter).
+    ratio_EIS : float
+        Value of the perturbation on the current density for building the EIS curve (current parameter).
+    t_EIS : tuple
+        EIS parameters (current parameters). It is a tuple containing the initial EIS time after stack equilibrium
+        't0_EIS', a list of time parameters which gives the beginning of each frequency change 't_new_start_EIS',
+        the final time 'tf_EIS', a list of time parameters which gives the estimated time for reaching equilibrium
+        at each frequency 'delta_t_break_EIS', and a list of time parameters which gives the estimated time for
+        measuring the voltage response at each frequency 'delta_t_measurement_EIS'.
+    f_EIS : tuple
+        EIS parameters (current parameters). It is a tuple containing the power of the initial frequency
+        'f_power_min_EIS': f_min_EIS = 10**f_power_min_EIS, the power of the final frequency 'f_power_max_EIS', the
+        number of frequencies tested 'nb_f_EIS' and the number of points calculated per specific period
+        'nb_points_EIS'.
+    Aact : float
+        Active area of the cell in m² (accessible physical parameter).
+    Hgdl : float
+        Thickness of the gas diffusion layer in m (accessible physical parameter).
+    Hmem : float
+        Thickness of the membrane in m (accessible physical parameter).
+    Hcl : float
+        Thickness of the catalyst layer in m (accessible physical parameter).
+    Hgc : float
+        Thickness of the gas channel in m (accessible physical parameter).
+    Wgc : float
+        Width of the gas channel in m (accessible physical parameter).
+    Lgc : float
+        Length of the gas channel in m (accessible physical parameter).
+    epsilon_gdl : float
+        Anode/cathode GDL porosity (undetermined physical parameter).
+    tau : float
+        Pore structure coefficient (undetermined physical parameter).
+    epsilon_mc : float
+        Volume fraction of ionomer in the CL (undetermined physical parameter).
+    epsilon_c : float
+        Compression ratio of the GDL (undetermined physical parameter).
+    e : float
+        Capillary exponent (undetermined physical parameter).
+    Re : float
+        Electron conduction resistance of the circuit in ohm.m² (undetermined physical parameter).
+    i0_c_ref : float
+        Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
+    kappa_co : float
+        Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
+    kappa_c : float
+        Overpotential correction exponent (undetermined physical parameter).
+    a_slim : float
+        One of the limit liquid saturation coefficients: the slop of slim function
+        (undetermined physical parameter).
+    b_slim : float
+        One of the limit liquid saturation coefficients: the intercept of slim function
+        (undetermined physical parameter).
+    a_switch : float
+        One of the limit liquid saturation coefficients: the slop of s_switch function
+        (undetermined physical parameter).
+    C_dl : float
+        Volumetric double layer capacitance in F.m-3 (undetermined physical parameter).
+    max_step : float
+        Maximum time step for the solver (computing parameter).
+    n_gdl : int
+        Number of points considered in the GDL (computing parameter).
+    t_purge : tuple
+        Time parameters for purging the system (computing parameter).
+        It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
+    type_fuel_cell : str
+        Type of fuel cell configuration (computing parameter).
+    type_current : str
+        Type of current density function (computing parameter).
+    type_auxiliary : str
+        Type of auxiliary system (computing parameter).
+    type_control : str
+        Type of control system (computing parameter).
+    type_purge : str
+        Type of purge system (computing parameter).
+    type_display : str
+        Type of display (computing parameter).
+    type_plot : str
+        Type of plot (computing parameter).
+    """
+
+    # Figures preparation
+    fig1, ax1, fig2, ax2 = figures_preparation(type_current, type_display)
+
+    # Dynamic display requires a dedicated use of the AlphaPEM class.
+    if type_plot == "dynamic":
+        # Initialization
+        #       ... of the plot update number (n) and the initial time interval (time_interval)
+        initial_variable_values = None
+        t0_step, tf_step, delta_t_load_step, delta_t_dyn_step = t_step
+        n = int(tf_step / delta_t_dyn_step)  # It is the plot update number.
+        time_interval = [0, delta_t_dyn_step]  # It is the initial time interval.
+
+        # Dynamic simulation
+        for i in range(n):
+            Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+                                 i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
+                                 Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c,
+                                 a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
+                                 type_auxiliary, type_control, type_purge, type_display, type_plot,
+                                 initial_variable_values, time_interval)
+
+            # time_interval actualization
+            if i < (n - 1):  # The final simulation does not require actualization.
+                t0_interval = Simulator.variables['t'][-1]
+                tf_interval = (i + 2) * delta_t_dyn_step
+                time_interval = [t0_interval, tf_interval]  # Reset of the time interval
+
+            # Recovery of the internal states from the end of the preceding simulation.
+            initial_variable_values = []
+            for x in Simulator.solver_variable_names:
+                initial_variable_values.append(Simulator.variables[x][-1])
+
+            # Display
+            if type_display != "no_display":
+                Simulator.Display(ax1, ax2)
+
+    else:  # elif type_plot == "fixed":
+        # Simulation
+        Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+                             i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
+                             Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
+                             b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
+                             type_auxiliary, type_control, type_purge, type_display, type_plot)
+        # Display
+        if type_display != "no_display":
+            Simulator.Display(ax1, ax2)
+        # Plot saving
+        plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2)
+
+
+
+def launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step,
+                                             i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
+                                             Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re,
+                                             i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step,
+                                             n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
+                                             type_purge, type_display, type_plot):
+    """Launch the AlphaPEM simulator for a polarization current density and display the results.
+
+    Parameters
+    ----------
+    current_density : function
+        Current density evolution over time (operating input). It is a function of time and parameters dictionary.
+    Tfc : float
+        Desired fuel cell temperature in Kelvin (operating input).
+    Pa_des : float
+        Desired anode pressure in Pascal (operating input).
+    Pc_des : float
+        Desired cathode pressure in Pascal (operating input).
+    Sa : float
+        Stoichiometric ratio of hydrogen (operating input).
+    Sc : float
+        Stoichiometric ratio of oxygen (operating input).
+    Phi_a_des : float
+        Desired anode relative humidity (operating input).
+    Phi_c_des : float
+        Desired cathode relative humidity (operating input).
+    t_step : tuple
+        Time parameters for the step_current density function (current parameters).
+        It is a tuple containing the initial time 't0_step', final time 'tf_step', loading time 'delta_t_load_step'
+        and dynamic time for display 'delta_t_dyn_step'.
+    i_step : tuple
+        Current parameters for the step_current density function (current parameters).
+        It is a tuple containing the initial and final current density value 'i_ini_step' and 'i_final_step'.
+    i_max_pola : float
+        Maximum current density for the polarization curve (current parameter).
+    delta_pola : tuple
+        Parameters for the polarization curve (current parameters). It is a tuple containing the loading time
+        'delta_t_load_pola', the breaking time 'delta_t_break_pola', the current density step 'delta_i_pola', and
+        the initial breaking time 'delta_t_ini_pola'.
+    i_EIS : float
+        Current for which a ratio_EIS perturbation is added (current parameter).
+    ratio_EIS : float
+        Value of the perturbation on the current density for building the EIS curve (current parameter).
+    t_EIS : tuple
+        EIS parameters (current parameters). It is a tuple containing the initial EIS time after stack equilibrium
+        't0_EIS', a list of time parameters which gives the beginning of each frequency change 't_new_start_EIS',
+        the final time 'tf_EIS', a list of time parameters which gives the estimated time for reaching equilibrium
+        at each frequency 'delta_t_break_EIS', and a list of time parameters which gives the estimated time for
+        measuring the voltage response at each frequency 'delta_t_measurement_EIS'.
+    f_EIS : tuple
+        EIS parameters (current parameters). It is a tuple containing the power of the initial frequency
+        'f_power_min_EIS': f_min_EIS = 10**f_power_min_EIS, the power of the final frequency 'f_power_max_EIS', the
+        number of frequencies tested 'nb_f_EIS' and the number of points calculated per specific period
+        'nb_points_EIS'.
+    Aact : float
+        Active area of the cell in m² (accessible physical parameter).
+    Hgdl : float
+        Thickness of the gas diffusion layer in m (accessible physical parameter).
+    Hmem : float
+        Thickness of the membrane in m (accessible physical parameter).
+    Hcl : float
+        Thickness of the catalyst layer in m (accessible physical parameter).
+    Hgc : float
+        Thickness of the gas channel in m (accessible physical parameter).
+    Wgc : float
+        Width of the gas channel in m (accessible physical parameter).
+    Lgc : float
+        Length of the gas channel in m (accessible physical parameter).
+    epsilon_gdl : float
+        Anode/cathode GDL porosity (undetermined physical parameter).
+    tau : float
+        Pore structure coefficient (undetermined physical parameter).
+    epsilon_mc : float
+        Volume fraction of ionomer in the CL (undetermined physical parameter).
+    epsilon_c : float
+        Compression ratio of the GDL (undetermined physical parameter).
+    e : float
+        Capillary exponent (undetermined physical parameter).
+    Re : float
+        Electron conduction resistance of the circuit in ohm.m² (undetermined physical parameter).
+    i0_c_ref : float
+        Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
+    kappa_co : float
+        Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
+    kappa_c : float
+        Overpotential correction exponent (undetermined physical parameter).
+    a_slim : float
+        One of the limit liquid saturation coefficients: the slop of slim function
+        (undetermined physical parameter).
+    b_slim : float
+        One of the limit liquid saturation coefficients: the intercept of slim function
+        (undetermined physical parameter).
+    a_switch : float
+        One of the limit liquid saturation coefficients: the slop of s_switch function
+        (undetermined physical parameter).
+    C_dl : float
+        Volumetric double layer capacitance in F.m-3 (undetermined physical parameter).
+    max_step : float
+        Maximum time step for the solver (computing parameter).
+    n_gdl : int
+        Number of points considered in the GDL (computing parameter).
+    t_purge : tuple
+        Time parameters for purging the system (computing parameter).
+        It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
+    type_fuel_cell : str
+        Type of fuel cell configuration (computing parameter).
+    type_current : str
+        Type of current density function (computing parameter).
+    type_auxiliary : str
+        Type of auxiliary system (computing parameter).
+    type_control : str
+        Type of control system (computing parameter).
+    type_purge : str
+        Type of purge system (computing parameter).
+    type_display : str
+        Type of display (computing parameter).
+    type_plot : str
+        Type of plot (computing parameter).
+    """
+
+    # Figures preparation
+    fig1, ax1, fig2, ax2 = figures_preparation(type_current, type_display)
+
+    # Dynamic display requires a dedicated use of the AlphaPEM class.
+    if type_plot == "dynamic":
+        # Initialization
+        #       ... of the plot update number (n) and the initial time interval (time_interval)
+        initial_variable_values = None
+        delta_t_load_pola, delta_t_break_pola, delta_i_pola, delta_t_ini_pola = delta_pola
+        delta_t = delta_t_load_pola + delta_t_break_pola  # s. It is the time of one load.
+        tf = delta_t_ini_pola + int(i_max_pola_1 / delta_i_pola + 1) * delta_t  # s. It is the polarization current
+        #                                                                            duration.
+        n = int(tf / delta_t)  # It is the plot update number.
+        time_interval = [0, delta_t_ini_pola + delta_t]  # It is the initial time interval.
+
+        # Dynamic simulation
+        for i in range(n):
+            Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+                                 i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
+                                 Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c,
+                                 a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
+                                 type_auxiliary, type_control, type_purge, type_display, type_plot,
+                                 initial_variable_values, time_interval)
+
+            # time_interval actualization
+            if i < (n - 1):  # The final simulation does not require actualization.
+                t0_interval = Simulator.variables['t'][-1]
+                tf_interval = delta_t_ini_pola + (i + 2) * delta_t
+                time_interval = [t0_interval, tf_interval]  # Reset of the time interval
+
+            # Recovery of the internal states from the end of the preceding simulation.
+            initial_variable_values = []
+            for x in Simulator.solver_variable_names:
+                initial_variable_values.append(Simulator.variables[x][-1])
+
+            # Display
+            if type_display != "no_display":
+                Simulator.Display(ax1, ax2)
+
+    else:  # elif type_plot == "fixed":
+        # Simulation
+        Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+                             i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
+                             Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
+                             b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
+                             type_auxiliary, type_control, type_purge, type_display, type_plot)
+        # Display
+        if type_display != "no_display":
+            Simulator.Display(ax1, ax2)
+        # Plot saving
+        plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2)
+
+def launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+                                    i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
+                                    Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
+                                    kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell,
+                                    type_current, type_auxiliary, type_control, type_purge, type_display, type_plot):
+    """Launch the AlphaPEM simulator for an EIS current density and display the results.
+
+    Parameters
+    ----------
+    current_density : function
+        Current density evolution over time (operating input). It is a function of time and parameters dictionary.
+    Tfc : float
+        Desired fuel cell temperature in Kelvin (operating input).
+    Pa_des : float
+        Desired anode pressure in Pascal (operating input).
+    Pc_des : float
+        Desired cathode pressure in Pascal (operating input).
+    Sa : float
+        Stoichiometric ratio of hydrogen (operating input).
+    Sc : float
+        Stoichiometric ratio of oxygen (operating input).
+    Phi_a_des : float
+        Desired anode relative humidity (operating input).
+    Phi_c_des : float
+        Desired cathode relative humidity (operating input).
+    t_step : tuple
+        Time parameters for the step_current density function (current parameters).
+        It is a tuple containing the initial time 't0_step', final time 'tf_step', loading time 'delta_t_load_step'
+        and dynamic time for display 'delta_t_dyn_step'.
+    i_step : tuple
+        Current parameters for the step_current density function (current parameters).
+        It is a tuple containing the initial and final current density value 'i_ini_step' and 'i_final_step'.
+    i_max_pola : float
+        Maximum current density for the polarization curve (current parameter).
+    delta_pola : tuple
+        Parameters for the polarization curve (current parameters). It is a tuple containing the loading time
+        'delta_t_load_pola', the breaking time 'delta_t_break_pola', the current density step 'delta_i_pola', and
+        the initial breaking time 'delta_t_ini_pola'.
+    i_EIS : float
+        Current for which a ratio_EIS perturbation is added (current parameter).
+    ratio_EIS : float
+        Value of the perturbation on the current density for building the EIS curve (current parameter).
+    t_EIS : tuple
+        EIS parameters (current parameters). It is a tuple containing the initial EIS time after stack equilibrium
+        't0_EIS', a list of time parameters which gives the beginning of each frequency change 't_new_start_EIS',
+        the final time 'tf_EIS', a list of time parameters which gives the estimated time for reaching equilibrium
+        at each frequency 'delta_t_break_EIS', and a list of time parameters which gives the estimated time for
+        measuring the voltage response at each frequency 'delta_t_measurement_EIS'.
+    f_EIS : tuple
+        EIS parameters (current parameters). It is a tuple containing the power of the initial frequency
+        'f_power_min_EIS': f_min_EIS = 10**f_power_min_EIS, the power of the final frequency 'f_power_max_EIS', the
+        number of frequencies tested 'nb_f_EIS' and the number of points calculated per specific period
+        'nb_points_EIS'.
+    Aact : float
+        Active area of the cell in m² (accessible physical parameter).
+    Hgdl : float
+        Thickness of the gas diffusion layer in m (accessible physical parameter).
+    Hmem : float
+        Thickness of the membrane in m (accessible physical parameter).
+    Hcl : float
+        Thickness of the catalyst layer in m (accessible physical parameter).
+    Hgc : float
+        Thickness of the gas channel in m (accessible physical parameter).
+    Wgc : float
+        Width of the gas channel in m (accessible physical parameter).
+    Lgc : float
+        Length of the gas channel in m (accessible physical parameter).
+    epsilon_gdl : float
+        Anode/cathode GDL porosity (undetermined physical parameter).
+    tau : float
+        Pore structure coefficient (undetermined physical parameter).
+    epsilon_mc : float
+        Volume fraction of ionomer in the CL (undetermined physical parameter).
+    epsilon_c : float
+        Compression ratio of the GDL (undetermined physical parameter).
+    e : float
+        Capillary exponent (undetermined physical parameter).
+    Re : float
+        Electron conduction resistance of the circuit in ohm.m² (undetermined physical parameter).
+    i0_c_ref : float
+        Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
+    kappa_co : float
+        Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
+    kappa_c : float
+        Overpotential correction exponent (undetermined physical parameter).
+    a_slim : float
+        One of the limit liquid saturation coefficients: the slop of slim function
+        (undetermined physical parameter).
+    b_slim : float
+        One of the limit liquid saturation coefficients: the intercept of slim function
+        (undetermined physical parameter).
+    a_switch : float
+        One of the limit liquid saturation coefficients: the slop of s_switch function
+        (undetermined physical parameter).
+    C_dl : float
+        Volumetric double layer capacitance in F.m-3 (undetermined physical parameter).
+    max_step : float
+        Maximum time step for the solver (computing parameter).
+    n_gdl : int
+        Number of points considered in the GDL (computing parameter).
+    t_purge : tuple
+        Time parameters for purging the system (computing parameter).
+        It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
+    type_fuel_cell : str
+        Type of fuel cell configuration (computing parameter).
+    type_current : str
+        Type of current density function (computing parameter).
+    type_auxiliary : str
+        Type of auxiliary system (computing parameter).
+    type_control : str
+        Type of control system (computing parameter).
+    type_purge : str
+        Type of purge system (computing parameter).
+    type_display : str
+        Type of display (computing parameter).
+    type_plot : str
+        Type of plot (computing parameter).
+    """
+
+    # Figures preparation
+    fig1, ax1, fig2, ax2 = figures_preparation(type_current, type_display)
+
+    # Dynamic display requires a dedicated use of the AlphaPEM class.
+    if type_plot == "dynamic":
+        # Initialization
+        #       ... of the plot update number (n) and the initial time interval (time_interval)
+        initial_variable_values = None
+        t0_EIS, t_new_start, tf_EIS, delta_t_break_EIS, delta_t_measurement_EIS = t_EIS
+        f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = f_EIS  # These are used for EIS max_step
+        #                                                                    actualization.
+        f = np.logspace(f_power_min_EIS, f_power_max_EIS, num=nb_f_EIS)  # It is a list of all the frequency tested.
+        n = len(t_new_start)  # It is the plot update number.
+        time_interval = [0, t0_EIS]  # It is the initial time interval.
+
+        #       A preliminary simulation run is necessary to equilibrate the internal variables of the cell at i_EIS
+        #       prior to initiating the EIS.
+        Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+                             i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
+                             Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
+                             b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
+                             type_auxiliary, type_control, type_purge, type_display, type_plot,
+                             initial_variable_values, time_interval)
+
+        # time_interval actualization
+        t0_EIS_temp = t0_EIS  # It is the initial time for 1 EIS point.
+        tf_EIS_temp = t_new_start[0] + delta_t_break_EIS[0] + delta_t_measurement_EIS[0]  # It is the final time for
+        #                                                                                  1 EIS point.
+        n_inf = np.where(t_new_start <= t0_EIS_temp)[0][-1]  # It is the number of frequency changes which has been
+        #                                                      made.
+        max_step = 1 / (f[n_inf] * nb_points_EIS)  # max_step is actualized according to the current frequency
+        #                                        for increased calculation
+        time_interval = [t0_EIS_temp, tf_EIS_temp]
+
+        # Recovery of the internal states from the end of the preceding simulation.
+        initial_variable_values = []
+        for x in Simulator.solver_variable_names:
+            initial_variable_values.append(Simulator.variables[x][-1])
+
+        # Dynamic simulation
+        for i in range(n):
+            Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+                                 i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
+                                 Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
+                                 kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell,
+                                 type_current, type_auxiliary, type_control, type_purge, type_display, type_plot,
+                                 initial_variable_values, time_interval)
+
+            # time_interval actualization
+            if i < (n - 1):  # The final simulation does not require actualization.
+                t0_EIS_temp = Simulator.variables['t'][-1]  # It is the initial time for 1 EIS point.
+                tf_EIS_temp = t_new_start[i + 1] + delta_t_break_EIS[i + 1] + delta_t_measurement_EIS[i + 1]  # It
+                #                                                                 is the final time for 1 EIS point.
+                n_inf = np.where(t_new_start <= t0_EIS_temp)[0][-1]  # It is the number of frequency changes which
+                #                                                      has been made.
+                max_step = 1 / (f[n_inf] * nb_points_EIS)  # max_step is actualized according to the current
+                #                                            frequency for increased calculation
+                time_interval = [t0_EIS_temp, tf_EIS_temp]  # It is the time interval for 1 EIS point.
+
+            # Recovery of the internal states from the end of the preceding simulation.
+            initial_variable_values = []
+            for x in Simulator.solver_variable_names:
+                initial_variable_values.append(Simulator.variables[x][-1])
+
+            # Display
+            if type_display != "no_display":
+                Simulator.Display(ax1, ax2)
+
+    else:  # elif type_plot == "fixed":
+        # Simulation
+        Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+                             i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
+                             Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
+                             kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell,
+                             type_current, type_auxiliary, type_control, type_purge, type_display, type_plot)
+        # Display
+        if type_display != "no_display":
+            Simulator.Display(ax1, ax2)
+        # Plot saving
+        plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2)

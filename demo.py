@@ -9,13 +9,11 @@ import numpy as np
 import matplotlib as mpl
 
 # Constants value and functions
-from model.AlphaPEM import AlphaPEM
 from modules.demo_modules import display_label_operating_inputs_and_physical_parameters, \
-    display_value_operating_inputs_and_physical_parameters, \
-    recover_for_use_operating_inputs_and_physical_parameters, \
-    display_radiobuttons, changeValue, value_control
+    display_value_operating_inputs_and_physical_parameters, recover_for_use_operating_inputs_and_physical_parameters, \
+    display_radiobuttons, changeValue, value_control, launch_AlphaPEM_for_step_current, \
+    launch_AlphaPEM_for_polarization_current, launch_AlphaPEM_for_EIS_current
 from configuration.current_densities import step_current, polarization_current, EIS_current
-from modules.main_modules import figures_preparation, plot_saving
 
 # PyCharm requirement for dynamic plot display
 mpl.use("Qt5Agg")
@@ -153,198 +151,33 @@ def show_current_button(choices, current_button):
 
     if current_button == 0:
         type_current = "step"
-        current_density = step_current  # A.m-2. It is the current density function.
-
-        # Figures preparation
-        fig1, ax1, fig2, ax2 = figures_preparation(type_current, type_display)
-
-        # Dynamic display requires a dedicated use of the AlphaPEM class.
-        if type_plot == "dynamic":
-            # Initialization
-            #       ... of the plot update number (n) and the initial time interval (time_interval)
-            initial_variable_values = None
-            t0_step, tf_step, delta_t_load_step, delta_t_dyn_step = t_step
-            n = int(tf_step / delta_t_dyn_step)  # It is the plot update number.
-            time_interval = [0, delta_t_dyn_step]  # It is the initial time interval.
-
-            # Dynamic simulation
-            for i in range(n):
-                Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
-                                     i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
-                                     Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
-                                     kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell,
-                                     type_current, type_auxiliary, type_control, type_purge, type_display, type_plot,
-                                     initial_variable_values, time_interval)
-
-                # time_interval actualization
-                if i < (n - 1):  # The final simulation does not require actualization.
-                    t0_interval = Simulator1.variables['t'][-1]
-                    tf_interval = (i + 2) * delta_t_dyn_step
-                    time_interval = [t0_interval, tf_interval]  # Reset of the time interval
-
-                # Recovery of the internal states from the end of the preceding simulation.
-                initial_variable_values = []
-                for x in Simulator.solver_variable_names:
-                    initial_variable_values.append(Simulator1.variables[x][-1])
-
-                # Display
-                if type_display != "no_display":
-                    Simulator.Display(ax1, ax2)
-
-        else:  # elif type_plot == "fixed":
-            # Simulation
-            Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
-                                 i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
-                                 Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
-                                 kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell,
-                                 type_current, type_auxiliary, type_control, type_purge, type_display, type_plot)
-            # Display
-            if type_display != "no_display":
-                Simulator.Display(ax1, ax2)
-            # Plot saving
-            plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2)
+        current_density = step_current
+        launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step,
+                                         i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
+                                         Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re,
+                                         i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl,
+                                         t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
+                                         type_purge, type_display, type_plot)
 
     if current_button == 1:
         type_current = "polarization"
-        current_density = polarization_current  # A.m-2. It is the current density function.
-
-        # Figures preparation
-        fig1, ax1, fig2, ax2 = figures_preparation(type_current, type_display)
-
-        # Dynamic display requires a dedicated use of the AlphaPEM class.
-        if type_plot == "dynamic":
-            # Initialization
-            #       ... of the plot update number (n) and the initial time interval (time_interval)
-            initial_variable_values = None
-            delta_t_load_pola, delta_t_break_pola, delta_i_pola, delta_t_ini_pola = delta_pola
-            delta_t = delta_t_load_pola + delta_t_break_pola  # s. It is the time of one load.
-            tf = delta_t_ini_pola + int(i_max_pola_1 / delta_i_pola + 1) * delta_t  # s. It is the polarization current
-            #                                                                            duration.
-            n = int(tf / delta_t)  # It is the plot update number.
-            time_interval = [0, delta_t_ini_pola + delta_t]  # It is the initial time interval.
-
-            # Dynamic simulation
-            for i in range(n):
-                Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
-                                     i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
-                                     Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
-                                     kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell,
-                                     type_current, type_auxiliary, type_control, type_purge, type_display, type_plot,
-                                     initial_variable_values, time_interval)
-
-                # time_interval actualization
-                if i < (n - 1):  # The final simulation does not require actualization.
-                    t0_interval = Simulator1.variables['t'][-1]
-                    tf_interval = delta_t_ini_pola + (i + 2) * delta_t
-                    time_interval = [t0_interval, tf_interval]  # Reset of the time interval
-
-                # Recovery of the internal states from the end of the preceding simulation.
-                initial_variable_values = []
-                for x in Simulator.solver_variable_names:
-                    initial_variable_values.append(Simulator.variables[x][-1])
-
-                # Display
-                if type_display != "no_display":
-                    Simulator.Display(ax1, ax2)
-
-        else:  # elif type_plot == "fixed":
-            # Simulation
-            Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
-                                 i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
-                                 Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
-                                 kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell,
-                                 type_current, type_auxiliary, type_control, type_purge, type_display, type_plot)
-            # Display
-            if type_display != "no_display":
-                Simulator.Display(ax1, ax2)
-            # Plot saving
-            plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2)
-
+        current_density = polarization_current
+        launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
+                                                 t_step, i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS,
+                                                 Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc,
+                                                 epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
+                                                 a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
+                                                 type_auxiliary, type_control, type_purge, type_display, type_plot)
 
     if current_button == 2:
         type_current = "EIS"
-        current_density = EIS_current  # A.m-2. It is the current density function.
-
-        # Figures preparation
-        fig1, ax1, fig2, ax2 = figures_preparation(type_current, type_display)
-
-        # Dynamic display requires a dedicated use of the AlphaPEM class.
-        if type_plot == "dynamic":
-            # Initialization
-            #       ... of the plot update number (n) and the initial time interval (time_interval)
-            initial_variable_values = None
-            t0_EIS, t_new_start, tf_EIS, delta_t_break_EIS, delta_t_measurement_EIS = t_EIS
-            f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = f_EIS  # These are used for EIS max_step
-            #                                                                    actualization.
-            f = np.logspace(f_power_min_EIS, f_power_max_EIS, num=nb_f_EIS)  # It is a list of all the frequency tested.
-            n = len(t_new_start)  # It is the plot update number.
-            time_interval = [0, t0_EIS]  # It is the initial time interval.
-
-            #       A preliminary simulation run is necessary to equilibrate the internal variables of the cell at i_EIS
-            #       prior to initiating the EIS.
-            Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
-                                 i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
-                                 Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
-                                 kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell,
-                                 type_current, type_auxiliary, type_control, type_purge, type_display, type_plot,
-                                 initial_variable_values, time_interval)
-
-            # time_interval actualization
-            t0_EIS_temp = t0_EIS  # It is the initial time for 1 EIS point.
-            tf_EIS_temp = t_new_start[0] + delta_t_break_EIS[0] + delta_t_measurement_EIS[0]  # It is the final time for
-            #                                                                                  1 EIS point.
-            n_inf = np.where(t_new_start <= t0_EIS_temp)[0][-1]  # It is the number of frequency changes which has been
-            #                                                      made.
-            max_step = 1 / (f[n_inf] * nb_points_EIS)  # max_step is actualized according to the current frequency
-            #                                        for increased calculation
-            time_interval = [t0_EIS_temp, tf_EIS_temp]
-
-            # Recovery of the internal states from the end of the preceding simulation.
-            initial_variable_values = []
-            for x in Simulator.solver_variable_names:
-                initial_variable_values.append(Simulator.variables[x][-1])
-
-            # Dynamic simulation
-            for i in range(n):
-                Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
-                                     i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
-                                     Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
-                                     kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell,
-                                     type_current, type_auxiliary, type_control, type_purge, type_display, type_plot,
-                                     initial_variable_values, time_interval)
-
-                # time_interval actualization
-                if i < (n - 1):  # The final simulation does not require actualization.
-                    t0_EIS_temp = Simulator1.variables['t'][-1]  # It is the initial time for 1 EIS point.
-                    tf_EIS_temp = t_new_start[i + 1] + delta_t_break_EIS[i + 1] + delta_t_measurement_EIS[i + 1]  # It
-                    #                                                                 is the final time for 1 EIS point.
-                    n_inf = np.where(t_new_start <= t0_EIS_temp)[0][-1]  # It is the number of frequency changes which
-                    #                                                      has been made.
-                    max_step = 1 / (f[n_inf] * nb_points_EIS)  # max_step is actualized according to the current
-                    #                                            frequency for increased calculation
-                    time_interval = [t0_EIS_temp, tf_EIS_temp]  # It is the time interval for 1 EIS point.
-
-                # Recovery of the internal states from the end of the preceding simulation.
-                initial_variable_values = []
-                for x in Simulator.solver_variable_names:
-                    initial_variable_values.append(Simulator.variables[x][-1])
-
-                # Display
-                if type_display != "no_display":
-                    Simulator.Display(ax1, ax2)
-
-        else:  # elif type_plot == "fixed":
-            # Simulation
-            Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
-                                 i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
-                                 Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
-                                 kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell,
-                                 type_current, type_auxiliary, type_control, type_purge, type_display, type_plot)
-            # Display
-            if type_display != "no_display":
-                Simulator.Display(ax1, ax2)
-            # Plot saving
-            plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2)
+        current_density = EIS_current
+        launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step,
+                                        i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
+                                        Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re,
+                                        i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl,
+                                        t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge,
+                                        type_display, type_plot)
 
 
 def about():
