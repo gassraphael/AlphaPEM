@@ -11,7 +11,8 @@ import numpy as np
 import matplotlib as mpl
 
 # Importing constants' value and functions
-from configuration.settings import current_density_parameters, operating_inputs, physical_parameters, computing_parameters
+from configuration.settings import (current_density_parameters, operating_inputs, physical_parameters,
+                                    computing_parameters)
 from model.AlphaPEM import AlphaPEM
 from modules.main_modules import figures_preparation, plot_saving
 
@@ -25,63 +26,67 @@ mpl.use("Qt5Agg")
 - Selecting different type_fuel_cell during a single run results in simultaneous plots for various configurations.
 """
 
-# Fuel cell possibilities: "EH-31_1.5"(2021), "EH-31_2.0"(2021), "EH-31_2.25"(2021), "EH-31_2.5"(2021),
-#                          "BX_1.0"(2015), "BX_1.35"(2015), "LF"(2010), "manual_setup".
-# This parameter includes the fuel cell used in the model and the corresponding operating conditions.
-# - EH-31 is a fuel cell developed by EH GROUP. 1.5, 2.0, 2.25 and 2.5 corresponds to the different pressure options.
-# - BX corresponds to the fuel cell used in Biao Xie's work: https://doi.org/10.1016/j.ijheatmasstransfer.2022.122705.
-# 1.0 and 1.35 corresponds to the different pressure options.
-# - LF corresponds to the fuel cell used in Linhao Fan work: http://dx.doi.org/10.1016/j.enconman.2017.08.034.
-type_fuel_cell_1 = "EH-31_2.0"
-type_fuel_cell_2 = None
-type_fuel_cell_3 = None
-type_fuel_cell_4 = None
-# Current density possibilities: "step", "polarization", "EIS".
-type_current = "EIS"
-# Auxiliary system possibilities: "closed_anode", "opened_anode", "no_auxiliary".
-type_auxiliary = "opened_anode"
-# Control strategy for the operating inputs: "Phi_des", "no_control".
-type_control_1 = "no_control"
-type_control_2 = "no_control"
-type_control_3 = "no_control"
-type_control_4 = "no_control"
-# Purges possibilities: "constant_purge", "periodic_purge", "no_purge".
-type_purge = "no_purge"
-# Display possibilities: "multiple", "synthetic", "no_display".
-type_display = "synthetic"
-# Plot possibilities: "dynamic", "fixed". Using dynamic plot option enables real-time figure updates during program
-# execution, albeit at the cost of decreased program speed.
-type_plot = "dynamic"
-
-# ___________________________________Retrieving parameters from the settings.py file____________________________________
-"""This should remain unaltered for regular program usage."""
-
-# Imposed inputs
-t_step, i_step, delta_pola, i_EIS, ratio_EIS, f_EIS, t_EIS, current_density = \
-    current_density_parameters(type_current)
-# Operating conditions
-Tfc_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, i_max_pola_1 = operating_inputs(type_fuel_cell_1)
-if type_fuel_cell_2 is not None:
-    Tfc_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2, i_max_pola_2 = operating_inputs(type_fuel_cell_2)
-if type_fuel_cell_3 is not None:
-    Tfc_3, Pa_des_3, Pc_des_3, Sa_3, Sc_3, Phi_a_des_3, Phi_c_des_3, i_max_pola_3 = operating_inputs(type_fuel_cell_3)
-if type_fuel_cell_4 is not None:
-    Tfc_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4, i_max_pola_4 = operating_inputs(type_fuel_cell_4)
-# Physical parameters
-Hcl, epsilon_mc, tau, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, Re, i0_c_ref, kappa_co, \
-    kappa_c, a_slim, b_slim, a_switch, C_dl = physical_parameters(type_fuel_cell_1)
-# Computing parameters
-max_step, n_gdl, t_purge = computing_parameters(type_current, Hgdl, Hcl)
-
-# __________________________________________________________Main________________________________________________________
-"""This section is dedicated to ensuring the proper execution of the simulator, considering all the various 
-possibilities including real-time figure updates and simultaneous plotting for different configurations. 
-This should remain unaltered for regular program usage.
-"""
-
 if __name__ == '__main__':
     # Starting time
     start_time = time.time()
+
+    # Fuel cell possibilities: "EH-31_1.5"(2021), "EH-31_2.0"(2021), "EH-31_2.25"(2021), "EH-31_2.5"(2021),
+    #                          "BX_1.0"(2015), "BX_1.35"(2015), "LF"(2010), "manual_setup".
+    # This parameter includes the fuel cell used in the model and the corresponding operating conditions.
+    # - EH-31 is a fuel cell developed by EH GROUP. 1.5, 2.0, 2.25 and 2.5 corresponds to the different pressure options.
+    # - BX corresponds to the fuel cell used in Biao Xie's work: https://doi.org/10.1016/j.ijheatmasstransfer.2022.122705.
+    # 1.0 and 1.35 corresponds to the different pressure options.
+    # - LF corresponds to the fuel cell used in Linhao Fan work: http://dx.doi.org/10.1016/j.enconman.2017.08.034.
+    type_fuel_cell_1 = "EH-31_2.0"
+    type_fuel_cell_2 = None
+    type_fuel_cell_3 = None
+    type_fuel_cell_4 = None
+    # Current density possibilities: "step", "polarization", "EIS".
+    type_current = "polarization"
+    # Auxiliary system possibilities: "closed_anode", "opened_anode", "no_auxiliary".
+    type_auxiliary = "opened_anode"
+    # Control strategy for the operating inputs: "Phi_des", "no_control".
+    type_control_1 = "no_control"
+    type_control_2 = "no_control"
+    type_control_3 = "no_control"
+    type_control_4 = "no_control"
+    # Purges possibilities: "constant_purge", "periodic_purge", "no_purge".
+    type_purge = "no_purge"
+    # Display possibilities: "multiple", "synthetic", "no_display".
+    type_display = "synthetic"
+    # Plot possibilities: "dynamic", "fixed". Using dynamic plot option enables real-time figure updates during program
+    # execution, albeit at the cost of decreased program speed.
+    type_plot = "fixed"
+
+# ___________________________________Retrieving parameters from the settings.py file____________________________________
+    """This should remain unaltered for regular program usage."""
+
+    # Imposed inputs
+    t_step, i_step, delta_pola, i_EIS, ratio_EIS, f_EIS, t_EIS, current_density = \
+        current_density_parameters(type_current)
+    # Operating conditions
+    Tfc_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, i_max_pola_1 = \
+        operating_inputs(type_fuel_cell_1)
+    if type_fuel_cell_2 is not None:
+        Tfc_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2, i_max_pola_2 = \
+            operating_inputs(type_fuel_cell_2)
+    if type_fuel_cell_3 is not None:
+        Tfc_3, Pa_des_3, Pc_des_3, Sa_3, Sc_3, Phi_a_des_3, Phi_c_des_3, i_max_pola_3 = \
+            operating_inputs(type_fuel_cell_3)
+    if type_fuel_cell_4 is not None:
+        Tfc_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4, i_max_pola_4 = \
+            operating_inputs(type_fuel_cell_4)
+    # Physical parameters
+    Hcl, epsilon_mc, tau, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, Re, i0_c_ref, kappa_co, \
+        kappa_c, a_slim, b_slim, a_switch, C_dl = physical_parameters(type_fuel_cell_1)
+    # Computing parameters
+    max_step, n_gdl, t_purge = computing_parameters(type_current, Hgdl, Hcl)
+
+# __________________________________________________________Main________________________________________________________
+    """This section is dedicated to ensuring the proper execution of the simulator, considering all the various 
+    possibilities including real-time figure updates and simultaneous plotting for different configurations. 
+    This should remain unaltered for regular program usage.
+    """
 
     # Check if the type_current is valid
     if type_current != "step" and type_current != "polarization" and type_current != "EIS":

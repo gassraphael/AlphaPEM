@@ -47,31 +47,35 @@ def main_frame(root):
 
     # Create a custom style for the button
     style = ttk.Style()
-    style.configure('Blue.TButton', foreground='blue')  # Set the font color to blue
-    style.configure('Green.TButton', foreground='green')  # Set the font color to green
-    style.configure('Red.TButton', foreground='red')  # Set the font color to red
+    style.configure('Blue.TButton', foreground='blue', font=('cmr10', 10, 'bold'))  # Set the font color to blue
+    style.configure('Green.TButton', foreground='green', font=('cmr10', 10, 'bold'))  # Set the font color to green
+    style.configure('Red.TButton', foreground='red', font=('cmr10', 10, 'bold'))  # Set the font color to red
+    style.configure('Black.TButton', foreground='black', font=('cmr10', 10, 'bold'))  # Set the font color to black
 
     # Creation of the choice dictionary
     choices = {'Tfc_i': tk.DoubleVar(frame), 'Pa_des_i': tk.DoubleVar(frame), 'Pc_des_i': tk.DoubleVar(frame),
                'Sa_i': tk.DoubleVar(frame), 'Sc_i': tk.DoubleVar(frame), 'Phi_a_des_i': tk.DoubleVar(frame),
                'Phi_c_des_i': tk.DoubleVar(frame), 'Aact_i': tk.DoubleVar(frame), 'Hgdl_i': tk.DoubleVar(frame),
                'Hcl_i': tk.DoubleVar(frame), 'Hmem_i': tk.DoubleVar(frame), 'Hgc_i': tk.DoubleVar(frame),
-               'Wgc_i': tk.DoubleVar(frame), 'Lgc_i': tk.DoubleVar(frame), 'epsilon_gdl_i': tk.DoubleVar(frame),
-               'epsilon_mc_i': tk.DoubleVar(frame), 'tau_i': tk.DoubleVar(frame), 'epsilon_c_i': tk.DoubleVar(frame),
-               'e_i': tk.IntVar(frame), 'Re_i': tk.DoubleVar(frame), 'i0_c_ref_i': tk.DoubleVar(frame),
-               'kappa_co_i': tk.DoubleVar(frame), 'kappa_c_i': tk.DoubleVar(frame), 'a_slim_i': tk.DoubleVar(frame),
-               'b_slim_i': tk.DoubleVar(frame), 'a_switch_i': tk.DoubleVar(frame), 'C_dl_i': tk.DoubleVar(frame),
-               't0_step_i': tk.DoubleVar(frame, 0), 'tf_step_i': tk.DoubleVar(frame, 1000),
-               'delta_t_load_step_i': tk.DoubleVar(frame, 20), 'i_ini_step_i': tk.DoubleVar(frame, 0.4),
-               'i_final_step_i': tk.DoubleVar(frame, 0.8), 'i_max_pola_i': tk.DoubleVar(frame, 0.5),
-               'delta_i_pola_i': tk.DoubleVar(frame, 0.1), 'delta_t_load_pola_i': tk.DoubleVar(frame, 30),
+               'Wgc_i': tk.DoubleVar(frame), 'Lgc_i': tk.DoubleVar(frame),
+               'epsilon_gdl_i': tk.DoubleVar(frame, 0.6), 'epsilon_mc_i': tk.DoubleVar(frame, 0.25),
+               'tau_i': tk.DoubleVar(frame, 1.5), 'epsilon_c_i': tk.DoubleVar(frame, 0.2),
+               'e_i': tk.IntVar(frame, 4), 'Re_i': tk.DoubleVar(frame, 1.0),
+               'i0_c_ref_i': tk.DoubleVar(frame, 3.0), 'kappa_co_i': tk.DoubleVar(frame, 1.0),
+               'kappa_c_i': tk.DoubleVar(frame, 2.0), 'a_slim_i': tk.DoubleVar(frame, 0.05),
+               'b_slim_i': tk.DoubleVar(frame, 0.1), 'a_switch_i': tk.DoubleVar(frame, 0.7),
+               'C_dl_i': tk.DoubleVar(frame, 20), 't0_step_i': tk.DoubleVar(frame, 0),
+               'tf_step_i': tk.DoubleVar(frame, 1000), 'delta_t_load_step_i': tk.DoubleVar(frame, 50),
+               'i_ini_step_i': tk.DoubleVar(frame, 0.5), 'i_final_step_i': tk.DoubleVar(frame, 1.5),
+               'i_max_pola_i': tk.DoubleVar(frame, 0.5), 'delta_i_pola_i': tk.DoubleVar(frame, 0.1),
+               'delta_t_load_pola_i': tk.DoubleVar(frame, 30),
                'delta_t_break_pola_i': tk.DoubleVar(frame, 30),
                'delta_t_ini_pola_i': tk.DoubleVar(frame, 60), 'i_EIS_i': tk.DoubleVar(frame, 0.5),
-               'ratio_EIS_i': tk.DoubleVar(frame, 5), 'nb_points_EIS_i': tk.DoubleVar(frame, 50),
-               'f_power_min_EIS_i': tk.DoubleVar(frame, -3), 'f_power_max_EIS_i': tk.DoubleVar(frame, 5),
-               'nb_f_EIS_i': tk.DoubleVar(frame, 60), 'delta_t_dyn_step_i': tk.DoubleVar(frame, 10),
+               'ratio_EIS_i': tk.DoubleVar(frame, 5), 'nb_points_EIS_i': tk.IntVar(frame, 50),
+               'f_power_min_EIS_i': tk.IntVar(frame, -3), 'f_power_max_EIS_i': tk.IntVar(frame, 5),
+               'nb_f_EIS_i': tk.IntVar(frame, 60), 'delta_t_dyn_step_i': tk.DoubleVar(frame, 10),
                't_purge_i': tk.DoubleVar(frame, 0.6), 'delta_t_purge_i': tk.DoubleVar(frame, 15),
-               'max_step_i': tk.DoubleVar(frame, 0.1), 'n_gdl_i': tk.DoubleVar(frame, 10),
+               'max_step_i': tk.DoubleVar(frame, 0.1), 'n_gdl_i': tk.IntVar(frame, 10),
                'type_auxiliary': tk.IntVar(frame, 2), 'type_control': tk.IntVar(frame, 0),
                'type_purge': tk.IntVar(frame, 0), 'type_display': tk.IntVar(frame, 1),
                'type_plot': tk.IntVar(frame, 0),
@@ -112,7 +116,7 @@ def main_frame(root):
                command=lambda: control(choices, button_type['EIS curve'])) \
         .grid(row=31, column=4, padx=10, pady=20)
     #       About button
-    ttk.Button(frame, text='About', command=about) \
+    ttk.Button(frame, text='About', style='Black.TButton', command=about) \
         .grid(row=31, column=5, ipadx=12)
 
 
@@ -143,11 +147,11 @@ def show(choices, button_type):
     Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl, \
         epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, t_step, \
         i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, max_step, n_gdl, \
-        type_fuel_cell, type_auxiliary, type_purge, type_display, type_plot \
+        type_fuel_cell, type_auxiliary, type_control, type_purge, type_display, type_plot \
         = recover_for_use_operating_inputs_and_physical_parameters(choices)
 
     if button_type == 0:
-        type_current = "step_current"
+        type_current = "step"
         current_density = step_current  # A.m-2. It is the current density function.
         AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_max_pola,
                  delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau,
@@ -156,7 +160,7 @@ def show(choices, button_type):
                  type_plot)
 
     if button_type == 1:
-        type_current = "polarization_current"
+        type_current = "polarization"
         current_density = polarization_current  # A.m-2. It is the current density function.
         AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_max_pola,
                  delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau,
@@ -165,7 +169,7 @@ def show(choices, button_type):
                  type_plot)
 
     if button_type == 2:
-        type_current = "EIS_current"
+        type_current = "EIS"
         current_density = EIS_current  # A.m-2. It is the current density function.
         AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_max_pola,
                  delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau,

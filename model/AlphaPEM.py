@@ -466,11 +466,6 @@ class AlphaPEM:
         elif type_current == "polarization":
             if type_display == "multiple":
 
-                plot_polarisation_curve(self.variables, self.operating_inputs, self.parameters, ax1)
-                plt.pause(0.001)  # A break is necessary to plot the new points in dynamic mode
-
-            elif type_display == "synthetic":
-
                 plot_polarisation_curve(self.variables, self.operating_inputs, self.parameters, ax1[0])
                 plot_power_density_curve(self.variables, self.operating_inputs, self.parameters, n, ax1[1])
                 plot_cell_efficiency(self.variables, self.operating_inputs, self.parameters, n, ax1[2])
@@ -479,6 +474,11 @@ class AlphaPEM:
                 plot_lambda(self.variables, self.operating_inputs, self.parameters, ax2[1])
                 plot_s(self.variables, self.operating_inputs, self.parameters, ax2[2])
 
+                plt.pause(0.001)  # A break is necessary to plot the new points in dynamic mode
+
+            elif type_display == "synthetic":
+
+                plot_polarisation_curve(self.variables, self.operating_inputs, self.parameters, ax1)
                 plt.pause(0.001)  # A break is necessary to plot the new points in dynamic mode
 
         elif type_current == "EIS":

@@ -461,8 +461,8 @@ def display_radiobuttons(frame, choices):
 
 def recover_for_display_operating_inputs_and_physical_parameters(frame, choices):
     """
-    This function retrieves parameter values for predefined stacks (e.g., "EH-31 1.5 bar", "Biao Xie 1.0 bar", etc.)
-    and converts them to appropriate units for display on the GUI.
+    This function retrieves parameter values for predefined stacks (e.g., "EH-31 1.5 bar (2021)", "Biao Xie 1.0 bar
+    (2015)", etc.) and converts them to appropriate units for display on the GUI.
     """
 
     if choices['type_fuel_cell'].get() == "EH-31 1.5 bar (2021)": type_fuel_cell = "EH-31_1.5"
@@ -543,27 +543,31 @@ def recover_for_use_operating_inputs_and_physical_parameters(choices):
               choices['delta_t_load_step_i'].get(), choices['delta_t_dyn_step_i'].get())  # (s, s, s, s)
     i_step = choices['i_ini_step_i'].get() * 1e4, choices['i_final_step_i'].get() * 1e4  # (A.m-2, A.m-2)
     i_max_pola = choices['i_max_pola_i'].get() * 1e4  # A.m-2
-    delta_pola = choices['delta_t_load_pola'].get(), choices['delta_t_break_pola'].get(), \
-        choices['delta_i_pola'].get() * 1e4, choices['delta_t_ini_pola'].get()  # (s, s, A.m-2, s)
+    delta_pola = choices['delta_t_load_pola_i'].get(), choices['delta_t_break_pola_i'].get(), \
+        choices['delta_i_pola_i'].get() * 1e4, choices['delta_t_ini_pola_i'].get()  # (s, s, A.m-2, s)
     i_EIS, ratio_EIS = choices['i_EIS_i'].get() * 1e4, choices['ratio_EIS_i'].get() / 100 # (A.m-2, )
-    f_EIS = ( choices['f_power_min_EIS'].get(), choices['f_power_max_EIS'].get(),
-             choices['nb_f_EIS'].get(), choices['nb_points_EIS'].get() )
+    f_EIS = ( choices['f_power_min_EIS_i'].get(), choices['f_power_max_EIS_i'].get(),
+             choices['nb_f_EIS_i'].get(), choices['nb_points_EIS_i'].get() )
     t_EIS = EIS_parameters(f_EIS)  # Time parameters for the EIS_current density function.
     t_purge, delta_t_purge = choices['t_purge_i'].get(), choices['delta_t_purge_i'].get()  # s
     max_step = choices['max_step_i'].get()  # s
     n_gdl = choices['n_gdl_i'].get()
 
-    if choices['type_fuel_cell'].get() == "EH-31 1.5 bar": type_fuel_cell = "EH-31_1.5"
-    elif choices['type_fuel_cell'].get() == "Biao Xie 1.0 bar": type_fuel_cell = "BX_1.0"
-    elif choices['type_fuel_cell'].get() == "Linhao Fan": type_fuel_cell = "LF"
-    elif choices['type_fuel_cell'].get() == "Enter your specifications": type_fuel_cell = "manual_setup"
+    if choices['type_fuel_cell'].get() == "EH-31 1.5 bar (2021)": type_fuel_cell = "EH-31_1.5"
+    elif choices['type_fuel_cell'].get() == "EH-31 2.0 bar (2021)": type_fuel_cell = "EH-31_2.0"
+    elif choices['type_fuel_cell'].get() == "EH-31 2.25 bar (2021)": type_fuel_cell = "EH-31_2.25"
+    elif choices['type_fuel_cell'].get() == "EH-31 2.5 bar (2021)": type_fuel_cell = "EH-31_2.5"
+    elif choices['type_fuel_cell'].get() == "Biao Xie 1.0 bar (2015)": type_fuel_cell = "BX_1.0"
+    elif choices['type_fuel_cell'].get() == "Biao Xie 1.35 bar (2015)": type_fuel_cell = "BX_1.35"
+    elif choices['type_fuel_cell'].get() == "Linhao Fan (2010)": type_fuel_cell = "LF"
+    elif choices['type_fuel_cell'].get() == "Enter your specifications": type_fuel_cell = "Enter your specifications"
 
     if choices['type_auxiliary'].get() == 0: type_auxiliary = "no_auxiliary"
     elif choices['type_auxiliary'].get() == 1: type_auxiliary = "closed_anode"
     else: type_auxiliary = "opened_anode"
 
-    if choices['type_control'].get() == 0: type_purge = "no_control"
-    else: type_purge = "Phi_des"
+    if choices['type_control'].get() == 0: type_control = "no_control"
+    else: type_control = "Phi_des"
 
     if choices['type_purge'].get() == 0: type_purge = "no_purge"
     elif choices['type_purge'].get() == 1: type_purge = "periodic_purge"
@@ -579,7 +583,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choices):
     return (Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl,
             epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, t_step,
             i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, max_step, n_gdl,
-            type_fuel_cell, type_auxiliary, type_purge, type_display, type_plot)
+            type_fuel_cell, type_auxiliary, type_control, type_purge, type_display, type_plot)
 
 
 def value_control(choices):
@@ -726,7 +730,7 @@ def value_control(choices):
         choices.clear()
         return
 
-    if choices['t_purge_i'].get() < 0 or choices['delta_purge_i'].get() < 0:
+    if choices['t_purge_i'].get() < 0 or choices['delta_t_purge_i'].get() < 0:
         messagebox.showerror(title='Purge times', message=
         'Negative times does not characterise purges.')
         choices.clear()

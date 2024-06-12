@@ -55,16 +55,16 @@ def figures_preparation(type_current, type_display):
     # For the polarization curve
     elif type_current == "polarization":
         if type_display == "multiple":
-            fig1, ax1 = plt.subplots(figsize=(8, 8))
-            fig2, ax2 = None, None  # Here, additional plots are unnecessary
-            plt.rcParams['font.size'] = 16
-            plt.rcParams['lines.linewidth'] = 2.0
-        elif type_display == "synthetic":
             fig1, ax1 = plt.subplots(1, 3, figsize=(18, 6))
             fig2, ax2 = plt.subplots(1, 3, figsize=(18, 6))
             plt.rcParams['font.size'] = 12
             plt.rcParams['lines.linewidth'] = 2.5
             plt.subplots_adjust(left=0.04, right=0.98, top=0.96, bottom=0.07, wspace=0.2, hspace=0.15)
+        elif type_display == "synthetic":
+            fig1, ax1 = plt.subplots(figsize=(8, 8))
+            fig2, ax2 = None, None  # Here, additional plots are unnecessary
+            plt.rcParams['font.size'] = 16
+            plt.rcParams['lines.linewidth'] = 2.0
 
     # For the EIS curve
     elif type_current == "EIS":
@@ -114,10 +114,10 @@ def plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2):
     # For the polarization curve
     elif type_current == "polarization":
         if type_display == "multiple":
-            saving_instructions("results", subfolder_name, "pola_curve_1.pdf", fig1)
-        elif type_display == "synthetic":
             saving_instructions("results", subfolder_name, "global_indicators_1.pdf", fig1)
             saving_instructions("results", subfolder_name, "pola_curve_syn_1.pdf", fig2)
+        elif type_display == "synthetic":
+            saving_instructions("results", subfolder_name, "pola_curve_1.pdf", fig1)
 
     # For the EIS curve
     elif type_current == "EIS":
