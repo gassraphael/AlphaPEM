@@ -2,6 +2,8 @@
 
 Welcome to the **AlphaPEM** fuel cell model repository. **AlphaPEM** is a state-of-the-art physical model designed for simulating proton exchange membrane (PEM) fuel cells. This repository contains the code, documentation, and resources needed to use and understand the **AlphaPEM** model.
 
+TO do: giving the names and a brief description of the files/directory structure that make up the package and clear instructions on the installation and execution of the program.
+
 ## Features
 
 - **High Accuracy**: Implements advanced algorithms to ensure precise simulation results.
