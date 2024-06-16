@@ -32,6 +32,7 @@ def create_application():
     It calls the main_frame() function to create the main graphical elements of the window.
     """
     root = ThemedTk(theme="arc")
+    root.configure(background='#f5f6f7')
     root.title("AlphaPEM")
     main_frame(root)
     root.mainloop()
@@ -47,6 +48,15 @@ def main_frame(root):
     root : ThemedTk
         The main application window where the graphical elements will be placed.
     """
+    # Create a custom styles
+    style = ttk.Style()
+    style.configure('Custom.TFrame', background='#f5f6f7')
+    style.configure('Blue.TButton', foreground='blue', font=('cmr10', 10, 'bold'))  # Set the font color to blue
+    style.configure('Green.TButton', foreground='green', font=('cmr10', 10, 'bold'))  # Set the font color to green
+    style.configure('Red.TButton', foreground='red', font=('cmr10', 10, 'bold'))  # Set the font color to red
+    style.configure('Black.TButton', foreground='black', font=('cmr10', 10, 'bold'))  # Set the font color to black
+    style.configure('Big.TButton', font=('cmr10', 12, 'bold'))
+
     # Create control variables to track the visibility state of some frame
     show_info_undetermined_parameters = tk.BooleanVar(value=False)
     show_info_current_density_parameters = tk.BooleanVar(value=False)
@@ -54,33 +64,26 @@ def main_frame(root):
 
     # Create the frames to hold the different set of information
     #   Fuel cell type and operating conditions
-    operating_conditions_frame = ttk.Frame(root)
+    operating_conditions_frame = ttk.Frame(root, style='Custom.TFrame')
     operating_conditions_frame.grid(row=1, column=0, padx=5, pady=5)
     #   Accessible physical parameters
-    accessible_parameters_frame = ttk.Frame(root)
+    accessible_parameters_frame = ttk.Frame(root, style='Custom.TFrame')
     accessible_parameters_frame.grid(row=3, column=0, padx=5, pady=5)
     #   Undetermined physical parameters
-    undetermined_parameters_frame = ttk.Frame(root)
+    undetermined_parameters_frame = ttk.Frame(root, style='Custom.TFrame')
     undetermined_parameters_frame.grid(row=5, column=0, padx=5, pady=5)
     undetermined_parameters_frame.grid_remove()  # Hide the frame by default
     #   Current density parameters
-    current_density_parameters_frame = ttk.Frame(root)
+    current_density_parameters_frame = ttk.Frame(root, style='Custom.TFrame')
     current_density_parameters_frame.grid(row=7, column=0, padx=5, pady=5)
     current_density_parameters_frame.grid_remove()  # Hide the frame by default
     #   Computing parameters
-    computing_parameters_frame = ttk.Frame(root)
+    computing_parameters_frame = ttk.Frame(root, style='Custom.TFrame')
     computing_parameters_frame.grid(row=9, column=0, padx=5, pady=5)
     computing_parameters_frame.grid_remove()  # Hide the frame by default
     #   Model possibilities and current density choice
-    model_possibilities_frame = ttk.Frame(root)
+    model_possibilities_frame = ttk.Frame(root, style='Custom.TFrame')
     model_possibilities_frame.grid(row=11, column=0, padx=5, pady=5)
-
-    # Create a custom style for the button
-    style = ttk.Style()
-    style.configure('Blue.TButton', foreground='blue', font=('cmr10', 10, 'bold'))  # Set the font color to blue
-    style.configure('Green.TButton', foreground='green', font=('cmr10', 10, 'bold'))  # Set the font color to green
-    style.configure('Red.TButton', foreground='red', font=('cmr10', 10, 'bold'))  # Set the font color to red
-    style.configure('Black.TButton', foreground='black', font=('cmr10', 10, 'bold'))  # Set the font color to black
 
     # Create the choice dictionaries
     choice_operating_conditions = \
@@ -179,13 +182,13 @@ def main_frame(root):
 
     # Displays operating conditions and physical parameters on the screen (without their values)
     #   Display the dropdow menu buttons
-    ttk.Button(root, text='Undetermined physical parameters',
+    ttk.Button(root, text='Undetermined physical parameters', style='Big.TButton',
                command=lambda: toggle_info(undetermined_parameters_frame, show_info_undetermined_parameters)). \
         grid(row=4, column=0, padx=5, pady=5)
-    ttk.Button(root, text='Current density parameters',
+    ttk.Button(root, text='Current density parameters', style='Big.TButton',
                command=lambda: toggle_info(current_density_parameters_frame, show_info_current_density_parameters)). \
         grid(row=6, column=0, padx=5, pady=5)
-    ttk.Button(root, text='Computing parameters',
+    ttk.Button(root, text='Computing parameters', style='Big.TButton',
                command=lambda: toggle_info(computing_parameters_frame, show_info_computing_parameters)). \
         grid(row=8, column=0, padx=5, pady=5)
     #   Display the labels
@@ -220,7 +223,7 @@ def main_frame(root):
 
     # Display the action buttons to select the type of current density to be applied.
     ttk.Label(model_possibilities_frame, text='Current density:', font=('cmr10', 12, 'bold')). \
-        grid(row=6, column=0, columnspan=2)
+        grid(row=6, column=0, columnspan=2, sticky="w")
     current_button = {'Step curve': 0, 'Pola curve': 1, 'EIS curve': 2}
     #       Button to generate the step curve
     ttk.Button(model_possibilities_frame, text='Step curve', style='Blue.TButton',

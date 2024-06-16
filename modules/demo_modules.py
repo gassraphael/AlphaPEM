@@ -190,7 +190,7 @@ def display_radiobuttons(model_possibilities_frame, choices_buttons):
 
     # Ask the user to choose an option and save it
     ttk.Label(model_possibilities_frame, text='Auxiliaries: ', font=('cmr10', 12)). \
-        grid(row=choices_buttons['type_auxiliary']['label_row'], column=0, columnspan=2, sticky="w")
+        grid(row=choices_buttons['type_auxiliary']['label_row'], column=0, columnspan=1, sticky="w")
     ttk.Radiobutton(model_possibilities_frame, text='No auxiliaries', value=0,
                     variable=choices_buttons['type_auxiliary']['value']). \
         grid(row=choices_buttons['type_auxiliary']['label_row'], column=2, sticky="w")
@@ -678,32 +678,20 @@ def set_equal_width(frame1, frame2, frame3, frame4, frame5, frame6):
     frame6 : ttk.Frame
         The sixth frame to be resized.
     """
-    # Update the frame sizes
-    frame1.update_idletasks()
-    frame2.update_idletasks()
-    frame3.update_idletasks()
-    frame4.update_idletasks()
-    frame5.update_idletasks()
-    frame6.update_idletasks()
 
-    # Get the current width of all frames
-    width1 = frame1.winfo_width()
-    width2 = frame2.winfo_width()
-    width3 = frame3.winfo_width()
-    width4 = frame4.winfo_width()
-    width5 = frame5.winfo_width()
-    width6 = frame6.winfo_width()
+    # Initialisation of the list of widths
+    widths = []
 
-    # Determine the maximum width
-    max_width = max(width1, width2, width3, width4, width5, width6)
+    for frame in [frame1, frame2, frame3, frame4, frame5, frame6]:
+        # Update the frame sizes
+        frame.update_idletasks()
+        # Get the current width of all frames
+        widths.append(frame.winfo_width())
 
     # Set all frames to the maximum width
-    frame1.config(width=max_width)
-    frame2.config(width=max_width)
-    frame3.config(width=max_width)
-    frame4.config(width=max_width)
-    frame5.config(width=max_width)
-    frame6.config(width=max_width)
+    for frame in [frame1, frame2, frame3, frame4, frame5, frame6]:
+        for i in range(6):
+            frame.grid_columnconfigure(i, minsize=max(widths)/5) # Set minimum width of all column to max_width/6
 
 
 def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
