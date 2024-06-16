@@ -29,14 +29,28 @@ def changeValue(operating_conditions_frame, accessible_parameters_frame, undeter
 
     Parameters
     ----------
-    frame : ttk.Frame
-        The main application frame where the graphical elements are placed.
-    choices_parameters : dict
-        A dictionary containing the parameter information.
+    operating_conditions_frame : ttk.Frame
+        The frame where the graphical elements for the operating condition and the choice of fuel cell are placed.
+    accessible_parameters_frame : ttk.Frame
+        The frame where the graphical elements for the accessible physical parameters are placed.
+    undetermined_parameters_frame : ttk.Frame
+        The frame where the graphical elements for the undetermined physical parameters are placed.
+    current_density_parameters_frame : ttk.Frame
+        The frame where the graphical elements for the current density parameters are placed.
+    computing_parameters_frame : ttk.Frame
+        The frame where the graphical elements for the computing parameters are placed.
+    choice_operating_conditions : dict
+        A dictionary containing the operating condition information.
+    choice_accessible_parameters : dict
+        A dictionary containing the accessible physical parameter information.
+    choice_undetermined_parameters : dict
+        A dictionary containing the undetermined physical parameter information.
+    choice_current_density_parameters : dict
+        A dictionary containing the current density parameter information.
+    choice_computing_parameters : dict
+        A dictionary containing the computing parameter information.
     choices_buttons : dict
         A dictionary containing the button information.
-    Label_widgets : dict
-        A dictionary containing the label widgets.
     """
 
     if choices_buttons['type_fuel_cell']['value'].get() != 'Enter your specifications':
@@ -101,10 +115,26 @@ def display_parameter_labels(operating_conditions_frame, accessible_parameters_f
 
     Parameters
     ----------
-    frame : ttk.Frame
-        The main application frame where the graphical elements are placed.
-    choices_parameters : dict
-        A dictionary containing the parameter information.
+    operating_conditions_frame : ttk.Frame
+        The frame where the graphical elements for the operating condition and the choice of fuel cell are placed.
+    accessible_parameters_frame : ttk.Frame
+        The frame where the graphical elements for the accessible physical parameters are placed.
+    undetermined_parameters_frame : ttk.Frame
+        The frame where the graphical elements for the undetermined physical parameters are placed.
+    current_density_parameters_frame : ttk.Frame
+        The frame where the graphical elements for the current density parameters are placed.
+    computing_parameters_frame : ttk.Frame
+        The frame where the graphical elements for the computing parameters are placed.
+    choice_operating_conditions : dict
+        A dictionary containing the operating condition information.
+    choice_accessible_parameters : dict
+        A dictionary containing the accessible physical parameter information.
+    choice_undetermined_parameters : dict
+        A dictionary containing the undetermined physical parameter information.
+    choice_current_density_parameters : dict
+        A dictionary containing the current density parameter information.
+    choice_computing_parameters : dict
+        A dictionary containing the computing parameter information.
     """
 
     # Display the titles
@@ -145,10 +175,26 @@ def display_parameters_value(operating_conditions_frame, accessible_parameters_f
 
     Parameters
     ----------
-    frame : ttk.Frame
-        The main application frame where the graphical elements are placed.
-    choices_parameters : dict
-        A dictionary containing the parameter information.
+    operating_conditions_frame : ttk.Frame
+        The frame where the graphical elements for the operating condition and the choice of fuel cell are placed.
+    accessible_parameters_frame : ttk.Frame
+        The frame where the graphical elements for the accessible physical parameters are placed.
+    undetermined_parameters_frame : ttk.Frame
+        The frame where the graphical elements for the undetermined physical parameters are placed.
+    current_density_parameters_frame : ttk.Frame
+        The frame where the graphical elements for the current density parameters are placed.
+    computing_parameters_frame : ttk.Frame
+        The frame where the graphical elements for the computing parameters are placed.
+    choice_operating_conditions : dict
+        A dictionary containing the operating condition information.
+    choice_accessible_parameters : dict
+        A dictionary containing the accessible physical parameter information.
+    choice_undetermined_parameters : dict
+        A dictionary containing the undetermined physical parameter information.
+    choice_current_density_parameters : dict
+        A dictionary containing the current density parameter information.
+    choice_computing_parameters : dict
+        A dictionary containing the computing parameter information.
     """
     # Display the value for ...
     #       operating conditions
@@ -180,7 +226,7 @@ def display_radiobuttons(model_possibilities_frame, choices_buttons):
     Parameters
     ----------
     model_possibilities_frame : ttk.Frame
-        The main application frame where the graphical elements are placed.
+        The frame where the graphical elements for the model possibilities and the choice of current density are placed.
     choices_buttons : dict
         A dictionary containing the button information.
     """
@@ -252,31 +298,39 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
                                                                  choice_accessible_parameters,
                                                                  choice_undetermined_parameters,
                                                                  choice_current_density_parameters,
-                                                                 choice_computing_parameters, choices_buttons):
+                                                                 choice_computing_parameters, choice_buttons):
     """This function retrieves parameter values for predefined stacks (e.g., "EH-31 1.5 bar (2021)", "Biao Xie 1.0 bar
     (2015)", etc.) and converts them to appropriate units for display on the GUI.
 
     Parameters
     ----------
-    choices_parameters : dict
-        A dictionary containing the parameter information.
-    choices_buttons : dict
+    choice_operating_conditions : dict
+        A dictionary containing the operating condition information.
+    choice_accessible_parameters : dict
+        A dictionary containing the accessible physical parameter information.
+    choice_undetermined_parameters : dict
+        A dictionary containing the undetermined physical parameter information.
+    choice_current_density_parameters : dict
+        A dictionary containing the current density parameter information.
+    choice_computing_parameters : dict
+        A dictionary containing the computing parameter information.
+    choice_buttons : dict
         A dictionary containing the button information.
     """
 
-    if choices_buttons['type_fuel_cell']['value'].get() == "EH-31 1.5 bar (2021)":
+    if choice_buttons['type_fuel_cell']['value'].get() == "EH-31 1.5 bar (2021)":
         type_fuel_cell = "EH-31_1.5"
-    elif choices_buttons['type_fuel_cell']['value'].get() == "EH-31 2.0 bar (2021)":
+    elif choice_buttons['type_fuel_cell']['value'].get() == "EH-31 2.0 bar (2021)":
         type_fuel_cell = "EH-31_2.0"
-    elif choices_buttons['type_fuel_cell']['value'].get() == "EH-31 2.25 bar (2021)":
+    elif choice_buttons['type_fuel_cell']['value'].get() == "EH-31 2.25 bar (2021)":
         type_fuel_cell = "EH-31_2.25"
-    elif choices_buttons['type_fuel_cell']['value'].get() == "EH-31 2.5 bar (2021)":
+    elif choice_buttons['type_fuel_cell']['value'].get() == "EH-31 2.5 bar (2021)":
         type_fuel_cell = "EH-31_2.5"
-    elif choices_buttons['type_fuel_cell']['value'].get() == "Biao Xie 1.0 bar (2015)":
+    elif choice_buttons['type_fuel_cell']['value'].get() == "Biao Xie 1.0 bar (2015)":
         type_fuel_cell = "BX_1.0"
-    elif choices_buttons['type_fuel_cell']['value'].get() == "Biao Xie 1.35 bar (2015)":
+    elif choice_buttons['type_fuel_cell']['value'].get() == "Biao Xie 1.35 bar (2015)":
         type_fuel_cell = "BX_1.35"
-    elif choices_buttons['type_fuel_cell']['value'].get() == "Linhao Fan (2010)":
+    elif choice_buttons['type_fuel_cell']['value'].get() == "Linhao Fan (2010)":
         type_fuel_cell = "LF"
 
     Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
@@ -328,9 +382,17 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
 
     Parameters
     ----------
-    choices_parameters : dict
-        A dictionary containing the parameter information.
-    choices_buttons : dict
+    choice_operating_conditions : dict
+        A dictionary containing the operating condition information.
+    choice_accessible_parameters : dict
+        A dictionary containing the accessible physical parameter information.
+    choice_undetermined_parameters : dict
+        A dictionary containing the undetermined physical parameter information.
+    choice_current_density_parameters : dict
+        A dictionary containing the current density parameter information.
+    choice_computing_parameters : dict
+        A dictionary containing the computing parameter information.
+    choice_buttons : dict
         A dictionary containing the button information.
     """
     # operating conditions
@@ -448,9 +510,17 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
 
     Parameters
     ----------
-    choices_parameters : dict
-        A dictionary containing the parameter information.
-    choices_buttons : dict
+    choice_operating_conditions : dict
+        A dictionary containing the operating condition information.
+    choice_accessible_parameters : dict
+        A dictionary containing the accessible physical parameter information.
+    choice_undetermined_parameters : dict
+        A dictionary containing the undetermined physical parameter information.
+    choice_current_density_parameters : dict
+        A dictionary containing the current density parameter information.
+    choice_computing_parameters : dict
+        A dictionary containing the computing parameter information.
+    choice_buttons : dict
         A dictionary containing the button information.
     current_button : dict
         A dictionary representing the clicked button.
@@ -691,7 +761,7 @@ def set_equal_width(frame1, frame2, frame3, frame4, frame5, frame6):
     # Set all frames to the maximum width
     for frame in [frame1, frame2, frame3, frame4, frame5, frame6]:
         for i in range(6):
-            frame.grid_columnconfigure(i, minsize=max(widths)/5) # Set minimum width of all column to max_width/6
+            frame.grid_columnconfigure(i, minsize=max(widths) / 5)  # Set minimum width of all column to max_width / 5
 
 
 def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,

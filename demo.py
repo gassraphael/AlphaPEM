@@ -181,7 +181,7 @@ def main_frame(root):
          'type_plot': {'value': tk.IntVar(model_possibilities_frame, 0), 'label_row': 5}}
 
     # Displays operating conditions and physical parameters on the screen (without their values)
-    #   Display the dropdow menu buttons
+    #   Display the dropdown menu buttons
     ttk.Button(root, text='Undetermined physical parameters', style='Big.TButton',
                command=lambda: toggle_info(undetermined_parameters_frame, show_info_undetermined_parameters)). \
         grid(row=4, column=0, padx=5, pady=5)
@@ -283,8 +283,16 @@ def control_current_button(choice_operating_conditions, choice_accessible_parame
 
     Parameters
     ----------
-    choice_parameters : dict
-        A dictionary containing the parameter information.
+    choice_operating_conditions : dict
+        A dictionary containing the operating condition information.
+    choice_accessible_parameters : dict
+        A dictionary containing the accessible parameter information.
+    choice_undetermined_parameters : dict
+        A dictionary containing the undetermined parameter information.
+    choice_current_density_parameters : dict
+        A dictionary containing the current density parameter information.
+    choice_computing_parameters : dict
+        A dictionary containing the computing parameter information.
     choice_buttons : dict
         A dictionary containing the button information.
     current_button : dict
@@ -305,8 +313,16 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
 
     Parameters
     ----------
-    choice_parameters : dict
-        A dictionary containing the parameter information.
+    choice_operating_conditions : dict
+        A dictionary containing the operating condition information.
+    choice_accessible_parameters : dict
+        A dictionary containing the accessible parameter information.
+    choice_undetermined_parameters : dict
+        A dictionary containing the undetermined parameter information.
+    choice_current_density_parameters : dict
+        A dictionary containing the current density parameter information.
+    choice_computing_parameters : dict
+        A dictionary containing the computing parameter information.
     choice_buttons : dict
         A dictionary containing the button information.
     current_button : dict
