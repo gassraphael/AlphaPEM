@@ -190,62 +190,62 @@ def display_radiobuttons(model_possibilities_frame, choices_buttons):
 
     # Ask the user to choose an option and save it
     ttk.Label(model_possibilities_frame, text='Auxiliaries: ', font=('cmr10', 12)). \
-        grid(row=choices_buttons['type_auxiliary']['label_row'], column=0, sticky="w")
+        grid(row=choices_buttons['type_auxiliary']['label_row'], column=0, columnspan=2, sticky="w")
     ttk.Radiobutton(model_possibilities_frame, text='No auxiliaries', value=0,
                     variable=choices_buttons['type_auxiliary']['value']). \
-        grid(row=choices_buttons['type_auxiliary']['label_row'], column=1, sticky="w")
+        grid(row=choices_buttons['type_auxiliary']['label_row'], column=2, sticky="w")
     ttk.Radiobutton(model_possibilities_frame, text='Closed anode', value=1,
                     variable=choices_buttons['type_auxiliary']['value']). \
-        grid(row=choices_buttons['type_auxiliary']['label_row'], column=2, sticky="w")
+        grid(row=choices_buttons['type_auxiliary']['label_row'], column=3, sticky="w")
     ttk.Radiobutton(model_possibilities_frame, text='Opened anode', value=2,
                     variable=choices_buttons['type_auxiliary']['value']). \
-        grid(row=choices_buttons['type_auxiliary']['label_row'], column=3, sticky="w")
+        grid(row=choices_buttons['type_auxiliary']['label_row'], column=4, sticky="w")
 
     # Ask the user to choose an option and save it
     ttk.Label(model_possibilities_frame, text='Control: ', font=('cmr10', 12)). \
-        grid(row=choices_buttons['type_control']['label_row'], column=0, sticky="w")
+        grid(row=choices_buttons['type_control']['label_row'], column=0, columnspan=2, sticky="w")
     ttk.Radiobutton(model_possibilities_frame, text='No control', value=0,
                     variable=choices_buttons['type_control']['value']). \
-        grid(row=choices_buttons['type_control']['label_row'], column=1, sticky="w")
+        grid(row=choices_buttons['type_control']['label_row'], column=2, sticky="w")
     ttk.Radiobutton(model_possibilities_frame, text='Humidity', value=1,
                     variable=choices_buttons['type_control']['value']). \
-        grid(row=choices_buttons['type_control']['label_row'], column=2, sticky="w")
+        grid(row=choices_buttons['type_control']['label_row'], column=3, sticky="w")
 
     # Ask the user to choose an option and save it
     ttk.Label(model_possibilities_frame, text='Purge: ', font=('cmr10', 12)). \
-        grid(row=choices_buttons['type_purge']['label_row'], column=0, sticky="w")
+        grid(row=choices_buttons['type_purge']['label_row'], column=0, columnspan=2, sticky="w")
     ttk.Radiobutton(model_possibilities_frame, text='No purge', value=0,
                     variable=choices_buttons['type_purge']['value']). \
-        grid(row=choices_buttons['type_purge']['label_row'], column=1, sticky="w")
+        grid(row=choices_buttons['type_purge']['label_row'], column=2, sticky="w")
     ttk.Radiobutton(model_possibilities_frame, text='Periodic', value=1,
                     variable=choices_buttons['type_purge']['value']). \
-        grid(row=choices_buttons['type_purge']['label_row'], column=2, sticky="w")
+        grid(row=choices_buttons['type_purge']['label_row'], column=3, sticky="w")
     ttk.Radiobutton(model_possibilities_frame, text='Constant', value=2,
                     variable=choices_buttons['type_purge']['value']). \
-        grid(row=choices_buttons['type_purge']['label_row'], column=3, sticky="w")
+        grid(row=choices_buttons['type_purge']['label_row'], column=4, sticky="w")
 
     # Ask the user to choose an option and save it
     ttk.Label(model_possibilities_frame, text='Display: ', font=('cmr10', 12)). \
-        grid(row=choices_buttons['type_display']['label_row'], column=0, sticky="w")
+        grid(row=choices_buttons['type_display']['label_row'], column=0, columnspan=2, sticky="w")
     ttk.Radiobutton(model_possibilities_frame, text='No display', value=0,
                     variable=choices_buttons['type_display']['value']). \
-        grid(row=choices_buttons['type_display']['label_row'], column=1, sticky="w")
+        grid(row=choices_buttons['type_display']['label_row'], column=2, sticky="w")
     ttk.Radiobutton(model_possibilities_frame, text='Synthetic', value=1,
                     variable=choices_buttons['type_display']['value']). \
-        grid(row=choices_buttons['type_display']['label_row'], column=2, sticky="w")
+        grid(row=choices_buttons['type_display']['label_row'], column=3, sticky="w")
     ttk.Radiobutton(model_possibilities_frame, text='Multiple', value=2,
                     variable=choices_buttons['type_display']['value']). \
-        grid(row=choices_buttons['type_display']['label_row'], column=3, sticky="w")
+        grid(row=choices_buttons['type_display']['label_row'], column=4, sticky="w")
 
     # Ask the user to choose an option and save it
     ttk.Label(model_possibilities_frame, text='Plot: ', font=('cmr10', 12)). \
-        grid(row=choices_buttons['type_plot']['label_row'], column=0, sticky="w")
+        grid(row=choices_buttons['type_plot']['label_row'], column=0, columnspan=2, sticky="w")
     ttk.Radiobutton(model_possibilities_frame, text='Fixed', value=0,
                     variable=choices_buttons['type_plot']['value']). \
-        grid(row=choices_buttons['type_plot']['label_row'], column=1, sticky="w")
+        grid(row=choices_buttons['type_plot']['label_row'], column=2, sticky="w")
     ttk.Radiobutton(model_possibilities_frame, text='Dynamic', value=1,
                     variable=choices_buttons['type_plot']['value']). \
-        grid(row=choices_buttons['type_plot']['label_row'], column=2, sticky="w")
+        grid(row=choices_buttons['type_plot']['label_row'], column=3, sticky="w")
 
 
 def recover_for_display_operating_inputs_and_physical_parameters(choice_operating_conditions,
@@ -659,9 +659,9 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
         return
 
 
-def set_equal_width(frame1, frame2):
+def set_equal_width(frame1, frame2, frame3, frame4, frame5, frame6):
     """
-    Adjusts the width of two frames to be equal based on their maximum width.
+    Adjusts the width of the frames to be equal based on their maximum width.
 
     Parameters
     ----------
@@ -669,25 +669,41 @@ def set_equal_width(frame1, frame2):
         The first frame to be resized.
     frame2 : ttk.Frame
         The second frame to be resized.
+    frame3 : ttk.Frame
+        The third frame to be resized.
+    frame4 : ttk.Frame
+        The fourth frame to be resized.
+    frame5 : ttk.Frame
+        The fifth frame to be resized.
+    frame6 : ttk.Frame
+        The sixth frame to be resized.
     """
     # Update the frame sizes
     frame1.update_idletasks()
     frame2.update_idletasks()
+    frame3.update_idletasks()
+    frame4.update_idletasks()
+    frame5.update_idletasks()
+    frame6.update_idletasks()
 
-    # Get the current width of both frames
+    # Get the current width of all frames
     width1 = frame1.winfo_width()
     width2 = frame2.winfo_width()
+    width3 = frame3.winfo_width()
+    width4 = frame4.winfo_width()
+    width5 = frame5.winfo_width()
+    width6 = frame6.winfo_width()
 
     # Determine the maximum width
-    max_width = max(width1, width2)
+    max_width = max(width1, width2, width3, width4, width5, width6)
 
-    # Set both frames to the maximum width
+    # Set all frames to the maximum width
     frame1.config(width=max_width)
     frame2.config(width=max_width)
-
-    # # Prevent the frames from resizing automatically
-    # frame1.grid_propagate(False)
-    # frame2.grid_propagate(False)
+    frame3.config(width=max_width)
+    frame4.config(width=max_width)
+    frame5.config(width=max_width)
+    frame6.config(width=max_width)
 
 
 def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,

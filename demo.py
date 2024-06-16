@@ -247,13 +247,10 @@ def main_frame(root):
     ttk.Button(model_possibilities_frame, text='About', style='Black.TButton', command=about) \
         .grid(row=6, column=5, ipadx=12)
 
-    # # Ensure the frame sizes are updated
-    # root.update_idletasks()
-    # set_equal_width(operating_conditions_frame, model_possibilities_frame)
-    # set_equal_width(accessible_parameters_frame, model_possibilities_frame)
-    # set_equal_width(undetermined_parameters_frame, model_possibilities_frame)
-    # set_equal_width(current_density_parameters_frame, model_possibilities_frame)
-    # set_equal_width(computing_parameters_frame, model_possibilities_frame)
+    # Ensure the frame sizes are updated
+    root.update_idletasks()
+    set_equal_width(operating_conditions_frame, accessible_parameters_frame, undetermined_parameters_frame,
+                    current_density_parameters_frame, computing_parameters_frame, model_possibilities_frame)
 
 
 def toggle_info(frame, show_info):
