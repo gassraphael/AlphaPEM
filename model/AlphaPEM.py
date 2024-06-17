@@ -489,8 +489,8 @@ class AlphaPEM:
                 plot_EIS_curve_Bode_amplitude(self.parameters, Fourier_results, ax2[0])
                 plot_EIS_curve_Bode_angle(Fourier_results, ax2[1])
 
-                # Tests to verify the accuracy of EIS simulation.
-                plot_EIS_curve_tests(self.variables, self.operating_inputs, self.parameters, Fourier_results)
+                # # Tests to verify the accuracy of EIS simulation.
+                # plot_EIS_curve_tests(self.variables, self.operating_inputs, self.parameters, Fourier_results)
 
                 plt.pause(0.1)  # A break is necessary to plot the new points in dynamic mode
 
@@ -501,7 +501,7 @@ class AlphaPEM:
                 plot_EIS_curve_Bode_amplitude(self.parameters, Fourier_results, ax1[1])
                 plot_EIS_curve_Bode_angle(Fourier_results, ax1[2])
 
-                # Tests to verify the accuracy of EIS simulation.
-                plot_EIS_curve_tests(self.variables, self.operating_inputs, self.parameters, Fourier_results)
+                # # Tests to verify the accuracy of EIS simulation.
+                # plot_EIS_curve_tests(self.variables, self.operating_inputs, self.parameters, Fourier_results)
 
                 plt.pause(0.1)  # A break is necessary to plot the new points in dynamic mode
