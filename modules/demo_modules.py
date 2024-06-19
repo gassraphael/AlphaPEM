@@ -761,7 +761,7 @@ def set_equal_width(frame1, frame2, frame3, frame4, frame5, frame6):
     # Set all frames to the maximum width
     for frame in [frame1, frame2, frame3, frame4, frame5, frame6]:
         for i in range(6):
-            frame.grid_columnconfigure(i, minsize=max(widths) / 5)  # Set minimum width of all column to max_width / 5
+            frame.grid_columnconfigure(i, minsize=max(widths) / 5.5)  # Set minimum width of all column to max_width / 5
 
 
 def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,

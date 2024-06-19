@@ -171,7 +171,7 @@ def stored_physical_parameters(type_fuel_cell):
         i0_c_ref = 2.79  # A.m-2.It is the reference exchange current density at the cathode.
         kappa_co = 27.2  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 1.61  # It is the overpotential correction exponent.
-        a_slim, b_slim, a_switch = 0.0555312, 0.1051427, 0.6365425  # It is the limit liquid saturation coefficients.
+        a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
         C_dl = 2e7  # F.m-3. It is the volumetric double layer capacitance.
 
     # For BX fuel cell
