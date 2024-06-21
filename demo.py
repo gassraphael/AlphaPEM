@@ -31,14 +31,32 @@ def create_application():
     """This function creates the main application window and setting its title.
     It calls the main_frame() function to create the main graphical elements of the window.
     """
+    # Create the main application window
     root = ThemedTk(theme="arc")
     root.configure(background='#f5f6f7')
     root.title("AlphaPEM")
-    main_frame(root)
+    root.geometry("810x690") # Set default size of the window
+
+    # Create a canvas and add a scrollbar to it
+    canvas = tk.Canvas(root)
+    scrollbar = ttk.Scrollbar(root, command=canvas.yview)
+    canvas.configure(yscrollcommand=scrollbar.set)
+    frame = ttk.Frame(canvas) # Create a frame inside the canvas to add your widgets
+
+    # Add all the widgets to the frame
+    main_frame(frame, canvas)
+    canvas.create_window((0,0), window=frame, anchor='nw') # Add the frame to the canvas
+
+    # Adjust the scrollable region to the size of the canvas content
+    frame.update_idletasks()
+    canvas.configure(scrollregion=canvas.bbox('all'))
+    canvas.pack(fill='both', expand=True, side='left') # Organize the widgets
+    scrollbar.pack(fill='y', side='right')
+
     root.mainloop()
 
 
-def main_frame(root):
+def main_frame(root, canvas):
     """This function creates the main graphical elements, such as labels, entry widgets, radio buttons, and buttons.
     It arranges them in the application window (root). It also initializes the choice dictionary variables for various
     parameters and settings.
@@ -47,6 +65,8 @@ def main_frame(root):
     -----------
     root : ThemedTk
         The main application window where the graphical elements will be placed.
+    canvas : tk.Canvas
+        The canvas where the main graphical elements will be placed.
     """
     # Create a custom styles
     style = ttk.Style()
@@ -183,13 +203,14 @@ def main_frame(root):
     # Displays operating conditions and physical parameters on the screen (without their values)
     #   Display the dropdown menu buttons
     ttk.Button(root, text='Undetermined physical parameters', style='Big.TButton',
-               command=lambda: toggle_info(undetermined_parameters_frame, show_info_undetermined_parameters)). \
+               command=lambda: toggle_info(undetermined_parameters_frame, show_info_undetermined_parameters, canvas)). \
         grid(row=4, column=0, padx=5, pady=5)
     ttk.Button(root, text='Current density parameters', style='Big.TButton',
-               command=lambda: toggle_info(current_density_parameters_frame, show_info_current_density_parameters)). \
+               command=lambda: toggle_info(current_density_parameters_frame, show_info_current_density_parameters,
+                                           canvas)). \
         grid(row=6, column=0, padx=5, pady=5)
     ttk.Button(root, text='Computing parameters', style='Big.TButton',
-               command=lambda: toggle_info(computing_parameters_frame, show_info_computing_parameters)). \
+               command=lambda: toggle_info(computing_parameters_frame, show_info_computing_parameters, canvas)). \
         grid(row=8, column=0, padx=5, pady=5)
     #   Display the labels
     display_parameter_labels(operating_conditions_frame, accessible_parameters_frame, undetermined_parameters_frame,
@@ -256,9 +277,9 @@ def main_frame(root):
                     current_density_parameters_frame, computing_parameters_frame, model_possibilities_frame)
 
 
-def toggle_info(frame, show_info):
+def toggle_info(frame, show_info, canvas):
     """
-    Toggles the visibility of the given frame.
+    Toggles the visibility of the given frame and updates the scroll region of the given canvas.
 
     Parameters
     ----------
@@ -266,6 +287,8 @@ def toggle_info(frame, show_info):
         The frame to show or hide.
     show_info : tk.BooleanVar
         A boolean variable to track the current visibility state.
+    canvas : tk.Canvas
+        The canvas to update the scroll region.
     """
     if show_info.get():
         frame.grid_remove()  # Hide the info frame
@@ -273,6 +296,9 @@ def toggle_info(frame, show_info):
     else:
         frame.grid()  # Show the info frame
         show_info.set(True)  # Update the visibility state
+
+    canvas.update_idletasks() # Update the scroll region of the given canvas.
+    canvas.configure(scrollregion=canvas.bbox('all'))
 
 
 def control_current_button(choice_operating_conditions, choice_accessible_parameters, choice_undetermined_parameters,
