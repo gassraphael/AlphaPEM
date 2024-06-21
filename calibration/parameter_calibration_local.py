@@ -68,8 +68,8 @@ local_optimum = np.array([[0.7011156494971454, 0.3949198274842546, 1.01563913568
 C_dl = 2e7  # F.m-3. It is the volumetric double layer capacitance.
 
 # GeneticAlgorithm parameters
-algorithm_param = AlgorithmParams(  # 1 iteration takes 693s = 11.6min = 0.193h inside LIS cluster with 80 nodes.
-    #                                 800 iterations takes 155h = 6.45j.
+algorithm_param = AlgorithmParams(  # 1 iteration takes 720s = 12min = 0.2h inside LIS cluster with 80 nodes.
+    #                                 800 iterations takes 160h = 6.67j.
     max_num_iteration=800,  # It should be between 500 and 1500, depending on the population_size, for a good compromise
     #                         between speed and precision.
     population_size=160,  # It should be between 100 and 200 for a good compromise between speed and precision.
