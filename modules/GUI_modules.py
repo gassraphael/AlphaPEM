@@ -490,7 +490,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     elif choice_buttons['type_display']['value'].get() == 1:
         type_display = "synthetic"
     else:
-        type_display = "multiple_display"
+        type_display = "multiple"
 
     if choice_buttons['type_plot']['value'].get() == 0:
         type_plot = "fixed"
@@ -716,7 +716,8 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
         choices.clear()
         return
 
-    if current_button == 0 and choice_buttons['type_display']['value'].get() == 2:
+    if current_button == 0 and choice_buttons['type_display']['value'].get() == 2 \
+                           and choice_buttons['type_plot']['value'].get() == 1 :
         messagebox.showerror(title='n gdl', message='dynamic plot is not thought to be used with step current and '
                                                     'multiple display. There would be too much plots to handle.')
         choices.clear()
