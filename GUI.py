@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""This file is designated for executing the AlphaPEM software package through a demonstrator interface. Most of the
-functionalities are available, but some are not implemented.
+"""This file is designated for executing the AlphaPEM software package through a graphical user interface (GUI). 
+Most of the functionalities are available, but some are not implemented.
 """
 
 # _____________________________________________________Preliminaries____________________________________________________
@@ -15,7 +15,7 @@ import numpy as np
 import matplotlib as mpl
 
 # Importing constants' value and functions
-from modules.demo_modules import display_parameter_labels, \
+from modules.GUI_modules import display_parameter_labels, \
     display_parameters_value, recover_for_use_operating_inputs_and_physical_parameters, \
     display_radiobuttons, changeValue, value_control, set_equal_width, launch_AlphaPEM_for_step_current, \
     launch_AlphaPEM_for_polarization_current, launch_AlphaPEM_for_EIS_current
@@ -25,7 +25,7 @@ from configuration.current_densities import step_current, polarization_current, 
 mpl.use("Qt5Agg")
 
 
-# ____________________________________________________Demo functions____________________________________________________
+# ____________________________________________________GUI functions____________________________________________________
 
 def create_application():
     """This function creates the main application window and setting its title.

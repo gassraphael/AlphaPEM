@@ -9,9 +9,8 @@
 import numpy as np
 
 # Importing constants' value and functions
-from configuration.settings import Text, Pext, Phi_ext, M_H2, M_O2, M_N2, M_H2O, yO2_ext, R, F
+from configuration.settings import Text, Pext, Phi_ext, M_H2, M_O2, M_N2, M_H2O, yO2_ext, R, F, A_T
 from modules.transitory_functions import Psat, C_v_sat, k_H2, k_O2
-from configuration.settings import A_T
 
 
 # _________________________________________________Auxiliaries modules__________________________________________________

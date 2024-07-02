@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains some of the required functions for the demo.py file.
+"""This module contains some of the required functions for the GUI.py file.
 """
 
 # _____________________________________________________Preliminaries____________________________________________________
@@ -17,7 +17,7 @@ from modules.settings_modules import stored_operating_inputs, stored_physical_pa
 from modules.main_modules import figures_preparation, plot_saving
 
 
-# _____________________________________________________Demo modules_____________________________________________________
+# _____________________________________________________GUI modules_____________________________________________________
 
 def changeValue(operating_conditions_frame, accessible_parameters_frame, undetermined_parameters_frame,
                 current_density_parameters_frame, computing_parameters_frame, choice_operating_conditions,

@@ -95,9 +95,13 @@ We welcome contributions from the community! If you would like to contribute to 
 
 Please read our contributing guidelines for more details.
 
-## License
+## Licenses
 
-**AlphaPEM** is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+**AlphaPEM** is licensed under the GNU GPL 3.0. See the [LICENSE](LICENSE) file for more details. However, it includes components licensed under the MIT license:
+
+- calibration/parameter_calibration.py from [geneticalgorithm2](https://github.com/PasaOpasen/geneticalgorithm2). 
+
+The text of the MIT license for these components is available in the calibration/LICENSE-MIT.txt file.
 
 ## Contact
 
