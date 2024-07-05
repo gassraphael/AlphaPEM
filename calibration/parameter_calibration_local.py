@@ -186,7 +186,7 @@ if __name__ == '__main__':
 
     # Save data in a text file
     save_calibration_results(convergence, epsilon_gdl, epsilon_mc, tau, epsilon_c, e,
-                             Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, sim_error)
+                             Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, sim_error, type_fuel_cell_1)
 
     # Calculate, display and save the calibrated and experimental polarization curve
     #       Calculate the calibrated polarization curve

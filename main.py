@@ -38,8 +38,8 @@ if __name__ == '__main__':
     # 1.0 and 1.35 corresponds to the different pressure options.
     # - LF corresponds to the fuel cell used in Linhao Fan work: http://dx.doi.org/10.1016/j.enconman.2017.08.034.
     type_fuel_cell_1 = "EH-31_2.0"
-    type_fuel_cell_2 = None
-    type_fuel_cell_3 = None
+    type_fuel_cell_2 = "EH-31_2.25"
+    type_fuel_cell_3 = "EH-31_2.5"
     type_fuel_cell_4 = None
     # Current density possibilities: "step", "polarization", "EIS".
     type_current = "polarization"
@@ -192,8 +192,8 @@ if __name__ == '__main__':
     else:  # elif type_plot == "fixed":
 
         # Certain conditions must be met.
-        if (type_current == "step" and
-                type_fuel_cell_2 is not None or type_fuel_cell_3 is not None or type_fuel_cell_4 is not None):
+        if type_current == "step" and \
+                (type_fuel_cell_2 is not None or type_fuel_cell_3 is not None or type_fuel_cell_4 is not None):
             raise ValueError('step current contains too much information for a common plot with different inputs.')
         elif type_current == "EIS":
             raise ValueError('EIS has to be plot with a dynamic type_plot setting, '
