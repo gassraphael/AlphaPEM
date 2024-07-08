@@ -9,7 +9,7 @@ Comprehensive documentation in Numpy style for the software functions is availab
 
 - [Installation](#installation)
 - [Major updates](#major-updates)
-- [Related publications](#related-publications)
+- [Related publications](#related-publications) 
 - [Contributions](#contributions)
 - [Contact](#contact)
 
@@ -37,6 +37,7 @@ The required dependencies, which can be found in the document requirements.txt, 
     ```sh
     pip install numpy scipy matplotlib colorama PyQt5 PySide2 geneticalgorithm2[full] ttkthemes
     ```
+    
 
 # Major updates
 
@@ -65,12 +66,12 @@ The detailed model description and simulation results can be found in the follow
 
 ## Authors
 
-AlphaPEM is firstly developed by [RaphaëL Gass](https://gassraphael.github.io/) during his PhD thesis from 2021 to 2024, supervised by Prof. Zhongliang Li, Prof. Rachid Outbib, Prof. Samir Jemei and Prof. Daniel Hissel.
+AlphaPEM is firstly developed by [Raphaël Gass](https://gassraphael.github.io/) during his PhD thesis from 2021 to 2024, supervised by Prof. Zhongliang Li, Prof. Rachid Outbib, Prof. Samir Jemei and Prof. Daniel Hissel.
     
 ## Financial support
 
 This work has been supported:
-	-from 2021 to 2024 by French National Research Agency via project DEAL (Grant no. ANR-20-CE05-0016-01), the Region Provence-Alpes-Côte d’Azur, the EIPHI Graduate School (contract ANR-17-EURE-0002) and the Region Bourgogne Franche-Comté.
+- from 2021 to 2024 by French National Research Agency via project [DEAL](https://deal.lis-lab.fr/) (Grant no. ANR-20-CE05-0016-01), the Region Provence-Alpes-Côte d’Azur, the EIPHI Graduate School (contract ANR-17-EURE-0002) and the Region Bourgogne Franche-Comté.
 
 ## Licenses
 
