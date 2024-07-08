@@ -30,12 +30,11 @@ To install **AlphaPEM**, follow these steps in a shell:
 
 3. Install the required dependencies (eventually in a specific environment):
     ```sh
-    pip install -r requirements.txt
-    ```
-    
-The required dependencies, which can be found in the file requirements.txt, are the following:
-    ```sh
     pip install numpy scipy matplotlib colorama PyQt5 PySide2 geneticalgorithm2[full] ttkthemes
+    ```
+    or
+    ```sh
+    pip install -r requirements.txt
     ```
     
 
