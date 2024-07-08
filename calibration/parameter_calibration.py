@@ -24,8 +24,9 @@ from modules.main_modules import saving_instructions
 
 # _________________________________________________Calibration settings_________________________________________________
 """
-Users can select the experimental fuel cell data for calibration from calibration_modules.py and experimental_values.py,
-along with the undetermined parameters to modify, and the parameters for the Genetic Algorithm. 
+Users can select here the fuel cell to calibrate, along with the undetermined parameters to modify, and the parameters 
+for the Genetic Algorithm. The experimental fuel cell data are stored in the files calibration_modules.py and 
+experimental_values.py.
 The parameters employed for the Genetic Algorithm here have proven to be effective, though not necessarily optimal.
 """
 

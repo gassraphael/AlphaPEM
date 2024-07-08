@@ -31,5 +31,3 @@ Contributions from the community are welcome! If you would like to contribute to
 
 For any questions or support, please contact me at [gassraphael@proton.me](mailto:gassraphael@proton.me).
 
-Thank you for using **AlphaPEM**!
-

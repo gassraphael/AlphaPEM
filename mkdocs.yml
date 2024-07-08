@@ -22,7 +22,6 @@ nav:
       - Calibration:
           - Experimental values: functions/calibration/experimental_values.md
           - Parameter calibration: functions/calibration/parameter_calibration.md
-          - Parameter calibration local: functions/calibration/parameter_calibration_local.md
       - Configuration:
           - Current densities: functions/configuration/current_densities.md
           - Settings: functions/configuration/settings.md
