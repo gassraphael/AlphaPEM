@@ -44,7 +44,7 @@ The required dependencies, which can be found in the document requirements.txt, 
 This part is still empty.
 
 
-# Related publications
+# Related publications
 
 The detailed model description and simulation results can be found in the following articles and thesis.
 
