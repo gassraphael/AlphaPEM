@@ -64,7 +64,7 @@ The detailed model description and simulation results can be found in the follow
 
 # Contributions
 
-## Authors
+## Authors
 
 AlphaPEM is firstly developed by [Raphaël Gass](https://gassraphael.github.io/) during his PhD thesis from 2021 to 2024, supervised by Prof. Zhongliang Li, Prof. Rachid Outbib, Prof. Samir Jemei and Prof. Daniel Hissel.
     
