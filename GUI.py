@@ -402,14 +402,39 @@ def about():
     """This function displays information about the program and its author in a dialog box when the "About" button is
     clicked.
     """
-    msg = "AlphaPEM is an open-source PEM fuel cell simulator for control system applications. It is a physical, " \
-          "dynamic, two-phase, isothermal, 1D model." \
-          "\n\nIt was created by Raphaël GASS, Zhongliang LI, Rachid OUTBIB, Samir JEMEI and Daniel HISSEL." \
-          "\n\nIt has been published in the following articles:" \
+    msg = "AlphaPEM is an open-source software package for simulating proton exchange membrane fuel cell (PEMFC) " \
+          "systems using physics-based models for embedded applications. \nIt is based on a physics-based, " \
+          "one-dimensional (1D), dynamic, two-phase, and isothermal model. It can quickly simulate the internal " \
+          "states and voltage dynamics of PEMFC systems, and produce polarization and EIS curves. It can also " \
+          "automatically calibrate the undetermined parameters of the model to simulate a given real fuel cell " \
+          "system." \
+          "\n\nAlphaPEM is firstly developed by Raphaël Gass during his PhD thesis from 2021 to 2024, supervised by " \
+          "Prof. Zhongliang Li, Prof. Rachid Outbib, Prof. Samir Jemei and Prof. Daniel Hissel. \nIt has been " \
+          "supported by French National Research Agency via project DEAL (Grant no. ANR-20-CE05-0016-01), the Region " \
+          "Provence-Alpes-Côte d’Azur, the EIPHI Graduate School (contract ANR-17-EURE-0002) and the Region " \
+          "Bourgogne Franche-Comté." \
+          "\n\nIt is related to the following articles:" \
           "\n    - Gass et al 2024 J. Electrochem. Soc. https://doi.org/10.1149/1945-7111/ad305a," \
           "\n    - Gass et al 2024 SSRN http://dx.doi.org/10.2139/ssrn.4812343." \
-          "\n\nContact: gassraphael@proton.me"
-    messagebox.showinfo(title='About this program', message=msg)
+          "\n\nMore information can be found in:" \
+          "\n    - GitHub webpage: https://github.com/gassraphael/AlphaPEM" \
+          "\n    - Documentation webpage: to do" \
+          "\n\nIf you want to contact me, please send an email to: gassraphael@proton.me."
+
+    # Create a new top-level window
+    about_window = tk.Toplevel()
+    about_window.title('About this program')
+
+    # Set the size of the window
+    about_window.geometry('730x460')  # Width x Height
+
+    # Create a label with the message
+    label = ttk.Label(about_window, text=msg, wraplength=700)  # wraplength to wrap text within the given width
+    label.pack(padx=15, pady=15)  # Add padding around the label
+
+    # Create an OK button to close the window
+    ok_button = ttk.Button(about_window, text='OK', command=about_window.destroy)
+    ok_button.pack(pady=10)
 
 
 # ________________________________________________Use of the programme _________________________________________________

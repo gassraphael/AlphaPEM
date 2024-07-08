@@ -1,47 +1,35 @@
-# Volvens elusam
+# Contributions
 
-## Aventi opus collo
+## Authors
 
-Lorem markdownum *dextra et sanguine* socer, est non sed magna moribundo,
-crimine tibia hinc plausis pectora. Quaedam inpietate arsuro, si Andron Apolline
-fulmina nec miremur gelidum. Praemia ille, unus Alcyone ubi lacertis admissi
-telum inde Hippotadae, ille **dubito**. Disci mea tabent limen similis!
+AlphaPEM is firstly developed by [Raphaël Gass](https://gassraphael.github.io/) during his PhD thesis from 2021 to 2024, supervised by Prof. Zhongliang Li, Prof. Rachid Outbib, Prof. Samir Jemei and Prof. Daniel Hissel.
+    
+## Financial support
 
-- Sinum male age iungi Cecropis lymphata
-- Clamor non terras et dicta postquam artifices
-- Dictis promissaque Anius exstitit ardent sic umquam
-- Sim memorque numina nec se viribus illis
-- Amisit parva quae iussit teneo Perseus
-- Nec Ecce
+This work has been supported:
+- from 2021 to 2024 by French National Research Agency via project [DEAL](https://deal.lis-lab.fr/) (Grant no. ANR-20-CE05-0016-01), the Region Provence-Alpes-Côte d’Azur, the EIPHI Graduate School (contract ANR-17-EURE-0002) and the Region Bourgogne Franche-Comté.
 
-Spargere *albam efficiet* fugit habenti, ripa arsit nisi sibi posses factura et
-vixisse habent. Sic pavet se orbem *ferrugine flector*; hanc consiliis decipiat
-obscenae coniuge temptamenta magnum amnicolaeque tardis, litora. Cum pectoris
-est acutis si lampades erubuere siccat, inde antro ora solutus cognoscit saepe
-deplangitur dimisit superantque fama Agre.
+## Licenses
 
-## Dea sacra ideoque pro
+**AlphaPEM** is licensed under the GNU GPL 3.0. See the [LICENSE](LICENSE) file for more details. 
 
-*Lacrimaeque horrendis*, et fluctibus et agris gladii conplentur in inermis
-grave per. Resilire culpam inmoritur at ventis quoque.
+It also includes components licensed under the [MIT license](calibration/LICENSE-MIT):
+- calibration/parameter_calibration.py from [geneticalgorithm2](https://github.com/PasaOpasen/geneticalgorithm2). 
 
-- Sata Noctis seducunt capillos meritumque toto Lycidasque
-- Acuto non Ceyca nil incerta reponit didicit
-- Cetera solum penetralia illis versavitque exacta niveae
-- Altoque radiis in nefando harenae leaena Vesta
+## New contributors
 
-Guttur ille verum quoque silvae debueram pondere Caeneus. A desine cecidere,
-vino [capilli intellegat](http://ego-prima.org/cineres-quoque.html) errore, nate
-vel; dum postquam debuerant tempore? Timetque perque me qua sacris, unde clamat
-differt nymphae discite *res gerere*. Pars ficta latentia modo.
+Contributions from the community are welcome! If you would like to contribute to **AlphaPEM**, please follow these steps:
 
-    menuTokenCompression.tiffSocialDrag /= internet_memory_igp + -5;
-    expansion(string, tween_menu_overclocking.language.xmlCycleDrive(-4, 392981,
-            passwordDimm) - 3 * -3, parse_address_packet(dvi - 5));
-    heuristicCamelcaseUnc(desktop_hacker_bluetooth, down / dialogBasic,
-            eccWhitelistOutbox(3, output));
-    input += 1 - 4 + 1 * waisSata;
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature/YourFeature`).
+3. Commit your changes (`git commit -am 'Add some feature'`).
+4. Push to the branch (`git push origin feature/YourFeature`).
+5. Create a new Pull Request.
 
-Praecordia malus; pacem annum erit iunxit passim **ubi** corporis **coegi**
-virginitate illa. Hunc parte aestibus aether religarat Iovis, ille est vecta
-Cyclopum Phocaico.
+
+# Contact
+
+For any questions or support, please contact me at [gassraphael@proton.me](mailto:gassraphael@proton.me).
+
+Thank you for using **AlphaPEM**!
+

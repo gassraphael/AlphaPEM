@@ -1,95 +1,61 @@
-# AlphaPEM Fuel Cell Model
+# AlphaPEM
 
-Welcome to the documentation for the **AlphaPEM** fuel cell model. This documentation provides comprehensive information about the **AlphaPEM** model, including its theoretical background, implementation details, and usage examples.
+AlphaPEM is an open-source software package for simulating proton exchange membrane fuel cell (PEMFC) systems for embedded applications. It is based on a physics-based, one-dimensional (1D), dynamic, two-phase, and isothermal model. It can quickly simulate the internal states and voltage dynamics of PEMFC systems, and produce polarization and EIS curves. It can also automatically calibrate the undetermined parameters of the model to simulate a given real fuel cell system.
 
-## Introduction
+A detailed presentation of this program was published in the peer-reviewed journal SoftwareX (see section [Related publications](#related-publications)). (**to do!!**)
 
-**AlphaPEM** is a state-of-the-art physical model for simulating proton exchange membrane (PEM) fuel cells. Designed to offer high accuracy and performance, **AlphaPEM** can be used for both academic research and industrial applications.
+Improvements to **AlphaPEM**, such as the addition of heat transfer modelling and spatial extension to 1D+1D, will be available in the future.
 
-## Features
 
-- **High Accuracy**: Implements advanced algorithms to ensure precise simulation results.
-- **Scalability**: Capable of handling simulations from single cells to large stacks.
-- **Flexibility**: Customizable parameters to fit various operational conditions and configurations.
-- **User-Friendly**: Provides an intuitive interface for setting up and running simulations.
+# Table of Contents
 
-## Installation
+- [Installation](#installation)
+- [Major updates](#major-updates)
+- [Related publications](#related-publications) 
 
-To install **AlphaPEM**, follow these steps:
+
+# Installation
+
+To install **AlphaPEM**, follow these steps in a shell:
 
 1. Clone the repository:
-
- ```
- git clone https://github.com/yourusername/alphapem.git
- ```
-
-2. Navigate to the project directory:
-
     ```sh
-    cd alphapem
+    git clone https://github.com/gassraphael/AlphaPEM.git
     ```
 
-3. Install the required dependencies:
+2. Navigate to the project directory:
+    ```sh
+    cd AlphaPEM
+    ```
 
+3. Install the required dependencies (eventually in a specific environment):
+    ```sh
+    pip install numpy scipy matplotlib colorama PyQt5 PySide2 geneticalgorithm2[full] ttkthemes
+    ```
+    or
     ```sh
     pip install -r requirements.txt
     ```
+    
 
-## Getting Started
+# Major updates
 
-To get started with **AlphaPEM**, follow the quickstart guide below:
+This part is still empty.
 
-1. **Import the AlphaPEM module**:
 
-    ```python
-    from alphapem import AlphaPEM
-    ```
+# Related publications
 
-2. **Initialize the model with your configuration**:
+The detailed model description and simulation results can be found in the following articles and thesis.
 
-    ```python
-    config = {
-        'temperature': 353,  # in Kelvin
-        'pressure': 101325,  # in Pascals
-        'humidity': 0.8,     # relative humidity
-        'current_density': 0.5  # in A/cm^2
-    }
-    model = AlphaPEM(config)
-    ```
-
-3. **Run the simulation**:
-
-    ```python
-    results = model.run()
-    print(results)
-    ```
-
-For more detailed instructions, refer to the usage guide.
-
-## Documentation Overview
-
-This documentation is divided into the following sections:
-
-- **Theory**: Detailed theoretical background of the PEM fuel cell model.
-- **Configuration**: Information on configurable parameters and how to set them.
-- **API Reference**: Comprehensive API documentation for all modules and functions.
-- **Examples**: Practical examples demonstrating various use cases of **AlphaPEM**.
-- **FAQ**: Frequently asked questions and troubleshooting tips.
-
-## Contributing
-
-We welcome contributions from the community! If you would like to contribute to **AlphaPEM**, please read our contributing guidelines and check out the [issues](https://github.com/yourusername/alphapem/issues) on GitHub.
-
-## License
-
-**AlphaPEM** is licensed under the MIT License. See the LICENSE file for more details.
-
-## Contact
-
-For any questions or support, please contact us at [support@alphapem.com](mailto:support@alphapem.com).
-
-Thank you for using **AlphaPEM**!
-
----
-This documentation was generated using [MkDocs](https://www.mkdocs.org/) and [mkdocstrings](https://github.com/mkdocstrings/mkdocstrings).
-
+- Submitted journal papers:
+	- **An Advanced 1D Physics-Based Model for PEM Hydrogen Fuel Cells With Enhanced Overvoltage Prediction**
+		- In the journal eTransportation, in [arXiv](https://doi.org/10.48550/arXiv.2404.07508), [HAL](https://hal.science/hal-04530852) or in [SSRN](http://dx.doi.org/10.2139/ssrn.4812343) (preprint).
+		- The aim of this study was to introduce the dynamic 1D model developed during 2021-2024, emphasizing the adjustment of the equations for this specific model and their numerical resolution. Furthermore, a novel theory is proposed to establish a physical relationship between the voltage drop at high currents, the quantity of liquid water in the cell, and operating conditions.
+	
+- Published journal papers:
+	- **A Critical Review of Proton Exchange Membrane Fuel Cells Matter Transports and Voltage Polarisation for Modelling**
+		- In the [Journal of the Electrochemical Society](https://doi.org/10.1149/1945-7111/ad305a) or in [HAL](https://hal.science/hal-04493419) (postprint).
+		- The aim of this work was to compile, within a single article, all the equations required for the physical modeling of a fuel cell. Each equation is complemented with explanations, critical analysis, and suggestions for potential enhancements.
+		
+- Thesis:
+	- to complete.
