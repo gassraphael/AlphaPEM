@@ -19,9 +19,9 @@ To install **AlphaPEM**, follow these steps:
 
 1. Clone the repository:
 
-    ```sh
-    git clone https://github.com/yourusername/alphapem.git
-    ```
+ ```
+ git clone https://github.com/yourusername/alphapem.git
+ ```
 
 2. Navigate to the project directory:
 

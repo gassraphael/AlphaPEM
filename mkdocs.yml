@@ -1,5 +1,7 @@
 site_name: AlphaPEM
-theme: readthedocs
+theme:
+  name: readthedocs
+  titles_only: true #Only include page titles in the sidebar, excluding all section headers for all pages.
 
 # Plugins used by MkDocs
 plugins:
@@ -7,27 +9,15 @@ plugins:
   - mkdocstrings:  # Uses mkdocstrings to generate documentation from docstrings
       handlers:
         python:  # Uses the Python handler for mkdocstrings
-          docstring_style: numpy  # Uses Numpy style for mkdocstrings
-  
-# Markdown extensions adding additional functionalities
-markdown_extensions:
-  - admonition  # Allows the creation of special blocks like notes and warnings
-  - codehilite  # Adds syntax highlighting to code blocks
-  - pymdownx.details  # Allows the creation of collapsible sections with <details> and <summary>
-  - pymdownx.superfences  # Enhances code block handling with advanced features
-  - pymdownx.tabbed  # Allows the creation of tabbed content blocks
-  - pymdownx.arithmatex  # Adds support for LaTeX
-  
-# Links to necessary JavaScript scripts for MathJax
-extra_javascript:
-  - https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js
-  - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML
+          options:
+            docstring_style: numpy  # Uses Numpy style for mkdocstrings
+
 
 # Structure of the documentation site's navigation
 nav:
   - Home: index.md # Documentation home page
   - Functions:
-      - Demo: functions/demo.md
+      - GUI: functions/GUI.md
       - Main: functions/main.md
       - Calibration:
           - Experimental values: functions/calibration/experimental_values.md
@@ -46,10 +36,10 @@ nav:
       - Modules:
           - Auxiliaries modules: functions/modules/auxiliaries_modules.md
           - Calibration modules: functions/modules/calibration_modules.md
-          - Demo modules: functions/modules/demo_modules.md
           - Differential equations modules: functions/modules/dif_eq_modules.md
           - Display modules: functions/modules/display_modules.md
           - Flows modules: functions/modules/flows_modules.md
+          - GUI modules: functions/modules/GUI_modules.md
           - Main modules: functions/modules/main_modules.md
           - Settings modules: functions/modules/settings_modules.md
           - Transitory functions: functions/modules/transitory_functions.md

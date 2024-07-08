@@ -492,7 +492,7 @@ def plot_C_v(variables, n_gdl, C_v_sat, n, ax):
     ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
     ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(1))
     ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(1 / 5))
-    ax.set_ylim(11, 15)
+    ax.set_ylim(11, 15.5)
 
 
 def plot_lambda(variables, operating_inputs, parameters, ax):
