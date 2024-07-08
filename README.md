@@ -33,7 +33,7 @@ To install **AlphaPEM**, follow these steps in a shell:
     pip install -r requirements.txt
     ```
     
-The required dependencies, which can be found in the document requirements.txt, are the following: 
+The required dependencies, which can be found in the file requirements.txt, are the following:
     ```sh
     pip install numpy scipy matplotlib colorama PyQt5 PySide2 geneticalgorithm2[full] ttkthemes
     ```
@@ -82,7 +82,7 @@ It also includes components licensed under the [MIT license](calibration/LICENSE
 
 ## New contributors
 
-Contributions from the community are welcomed! If you would like to contribute to **AlphaPEM**, please follow these steps:
+Contributions from the community are welcome! If you would like to contribute to **AlphaPEM**, please follow these steps:
 
 1. Fork the repository.
 2. Create a new branch (`git checkout -b feature/YourFeature`).
