@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Calibration modules - AlphaPEM</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Calibration modules";
+        var mkdocs_page_input_path = "functions/modules/calibration_modules.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> AlphaPEM
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Functions</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../../GUI/">GUI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../main/">Main</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Calibration</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../calibration/experimental_values/">Experimental values</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../calibration/parameter_calibration/">Parameter calibration</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Configuration</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../configuration/current_densities/">Current densities</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../configuration/settings/">Settings</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Model</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/AlphaPEM/">AlphaPEM</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/auxiliaries/">Auxiliaries</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/cell_voltage/">Cell voltage</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/control/">Control</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/dif_eq/">Differentiel equations</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/flows/">Flows</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" >Modules</a>
+    <ul class="current">
+                <li class="toctree-l2"><a class="reference internal" href="../auxiliaries_modules/">Auxiliaries modules</a>
+                </li>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">Calibration modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../dif_eq_modules/">Differential equations modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../display_modules/">Display modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../flows_modules/">Flows modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../GUI_modules/">GUI modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../main_modules/">Main modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../settings_modules/">Settings modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../transitory_functions/">Transitory functions</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../../about/">About</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">AlphaPEM</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Functions</li>
+          <li class="breadcrumb-item">Modules</li>
+      <li class="breadcrumb-item active">Calibration modules</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="calibration-modules">Calibration modules</h1>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="modules.calibration_modules"></a>
+    <div class="doc doc-contents first">
+
+      <p>This module contains some of the functions required for the parameter calibration.</p>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="modules.calibration_modules.calculate_simulation_error" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">calculate_simulation_error</span><span class="p">(</span><span class="n">Simulator1</span><span class="p">,</span> <span class="n">U_exp1</span><span class="p">,</span> <span class="n">i_exp1</span><span class="p">,</span> <span class="n">Simulator2</span><span class="p">,</span> <span class="n">U_exp2</span><span class="p">,</span> <span class="n">i_exp2</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+      <p>This function is used to calculate the simulation maximal error between the experimental and the simulated
+polarization curves. Two simulations on different operating conditions and on the same stack, and so two set of
+experimental data, are considered as it is the minimum amount of data which is required for the calibration.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>Simulator1</code></b>
+                  (<code>AlphaPEM object</code>)
+              –
+              <div class="doc-md-description">
+                <p>PEM simulator which contains the simulation results for the first simulation.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>U_exp1</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Experimental values of the voltage for the first simulation.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>i_exp1</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Experimental values of the current density for the first simulation.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Simulator2</code></b>
+                  (<code>AlphaPEM object</code>)
+              –
+              <div class="doc-md-description">
+                <p>PEM simulator which contains the simulation results for the second simulation.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>U_exp2</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Experimental values of the voltage for the second simulation.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>i_exp2</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Experimental values of the current density for the second simulation.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>sim_error</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Maximum error between the experimental and the simulated polarization curves in percentage.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>modules/calibration_modules.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">calculate_simulation_error</span><span class="p">(</span><span class="n">Simulator1</span><span class="p">,</span> <span class="n">U_exp1</span><span class="p">,</span> <span class="n">i_exp1</span><span class="p">,</span> <span class="n">Simulator2</span><span class="p">,</span> <span class="n">U_exp2</span><span class="p">,</span> <span class="n">i_exp2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function is used to calculate the simulation maximal error between the experimental and the simulated</span>
+<span class="sd">    polarization curves. Two simulations on different operating conditions and on the same stack, and so two set of</span>
+<span class="sd">    experimental data, are considered as it is the minimum amount of data which is required for the calibration.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Simulator1 : AlphaPEM object</span>
+<span class="sd">        PEM simulator which contains the simulation results for the first simulation.</span>
+<span class="sd">    U_exp1 : numpy.ndarray</span>
+<span class="sd">        Experimental values of the voltage for the first simulation.</span>
+<span class="sd">    i_exp1 : numpy.ndarray</span>
+<span class="sd">        Experimental values of the current density for the first simulation.</span>
+<span class="sd">    Simulator2 : AlphaPEM object</span>
+<span class="sd">        PEM simulator which contains the simulation results for the second simulation.</span>
+<span class="sd">    U_exp2 : numpy.ndarray</span>
+<span class="sd">        Experimental values of the voltage for the second simulation.</span>
+<span class="sd">    i_exp2 : numpy.ndarray</span>
+<span class="sd">        Experimental values of the current density for the second simulation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    sim_error : float</span>
+<span class="sd">        Maximum error between the experimental and the simulated polarization curves in percentage.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Recovery of ifc_1</span>
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Simulator1</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">])</span>
+    <span class="n">n1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">t1</span><span class="p">)</span>
+    <span class="n">ifc_t_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n1</span><span class="p">):</span>  <span class="c1"># Creation of ifc_t and conversion in A/cm²</span>
+        <span class="n">ifc_t_1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Simulator1</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;current_density&#39;</span><span class="p">](</span><span class="n">t1</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">Simulator1</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1e4</span>
+    <span class="c1"># Recovery of ifc_2</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Simulator2</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">])</span>
+    <span class="n">n2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">t2</span><span class="p">)</span>
+    <span class="n">ifc_t_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n2</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n2</span><span class="p">):</span>  <span class="c1"># Creation of ifc_t and conversion in A/cm²</span>
+        <span class="n">ifc_t_2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Simulator2</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;current_density&#39;</span><span class="p">](</span><span class="n">t2</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">Simulator2</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1e4</span>
+
+    <span class="c1"># Polarisation curve point recovery after stack stabilisation for Simulator1</span>
+    <span class="n">delta_t_load</span><span class="p">,</span> <span class="n">delta_t_break</span><span class="p">,</span> <span class="n">delta_i</span><span class="p">,</span> <span class="n">delta_t_ini</span> <span class="o">=</span> <span class="n">Simulator1</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;delta_pola&#39;</span><span class="p">]</span>
+    <span class="n">nb_loads1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">Simulator1</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;i_pola&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">delta_i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># Number of load which are made</span>
+    <span class="n">ifc_discretized1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_loads1</span><span class="p">)</span>
+    <span class="n">Ucell_discretized1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_loads1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_loads1</span><span class="p">):</span>
+        <span class="n">t_load</span> <span class="o">=</span> <span class="n">delta_t_ini</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">delta_t_load</span> <span class="o">+</span> <span class="n">delta_t_break</span><span class="p">)</span> <span class="o">-</span> <span class="n">delta_t_break</span> <span class="o">/</span> <span class="mi">10</span>  <span class="c1"># time for the measurement</span>
+        <span class="n">idx1</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">t1</span> <span class="o">-</span> <span class="n">t_load</span><span class="p">))</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>  <span class="c1"># the corresponding index</span>
+        <span class="n">ifc_discretized1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ifc_t_1</span><span class="p">[</span><span class="n">idx1</span><span class="p">]</span>  <span class="c1"># the last value at the end of each load</span>
+        <span class="n">Ucell_discretized1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Simulator1</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;Ucell&#39;</span><span class="p">][</span><span class="n">idx1</span><span class="p">]</span>  <span class="c1"># the last value at the end of each load</span>
+    <span class="c1"># Polarisation curve point recovery after stack stabilisation for Simulator2</span>
+    <span class="n">delta_t_load</span><span class="p">,</span> <span class="n">delta_t_break</span><span class="p">,</span> <span class="n">delta_i</span><span class="p">,</span> <span class="n">delta_t_ini</span> <span class="o">=</span> <span class="n">Simulator2</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;delta_pola&#39;</span><span class="p">]</span>
+    <span class="n">nb_loads2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">Simulator2</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;i_pola&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">delta_i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># Number of load which are made</span>
+    <span class="n">ifc_discretized2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_loads2</span><span class="p">)</span>
+    <span class="n">Ucell_discretized2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_loads2</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_loads2</span><span class="p">):</span>
+        <span class="n">t_load</span> <span class="o">=</span> <span class="n">delta_t_ini</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">delta_t_load</span> <span class="o">+</span> <span class="n">delta_t_break</span><span class="p">)</span> <span class="o">-</span> <span class="n">delta_t_break</span> <span class="o">/</span> <span class="mi">10</span>  <span class="c1"># time for the measurement</span>
+        <span class="n">idx2</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">t2</span> <span class="o">-</span> <span class="n">t_load</span><span class="p">))</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>  <span class="c1"># the corresponding index</span>
+        <span class="n">ifc_discretized2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ifc_t_2</span><span class="p">[</span><span class="n">idx2</span><span class="p">]</span>  <span class="c1"># the last value at the end of each load</span>
+        <span class="n">Ucell_discretized2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Simulator2</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;Ucell&#39;</span><span class="p">][</span><span class="n">idx2</span><span class="p">]</span>  <span class="c1"># the last value at the end of each load</span>
+
+    <span class="c1"># Interpolation of experimental points to match model points for Simulator 1</span>
+    <span class="n">i_fc_reduced1</span> <span class="o">=</span> <span class="n">ifc_discretized1</span><span class="p">[(</span><span class="n">ifc_discretized1</span> <span class="o">&gt;=</span> <span class="n">i_exp1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ifc_discretized1</span> <span class="o">&lt;=</span> <span class="n">i_exp1</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
+    <span class="n">Ucell_reduced1</span> <span class="o">=</span> <span class="n">Ucell_discretized1</span><span class="p">[(</span><span class="n">ifc_discretized1</span> <span class="o">&gt;=</span> <span class="n">i_exp1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ifc_discretized1</span> <span class="o">&lt;=</span> <span class="n">i_exp1</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
+    <span class="n">U_exp_interpolated1</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">i_exp1</span><span class="p">,</span> <span class="n">U_exp1</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)(</span><span class="n">i_fc_reduced1</span><span class="p">)</span>
+    <span class="c1"># Interpolation of experimental points to match model points for Simulator 2</span>
+    <span class="n">i_fc_reduced2</span> <span class="o">=</span> <span class="n">ifc_discretized2</span><span class="p">[(</span><span class="n">ifc_discretized2</span> <span class="o">&gt;=</span> <span class="n">i_exp2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ifc_discretized2</span> <span class="o">&lt;=</span> <span class="n">i_exp2</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
+    <span class="n">Ucell_reduced2</span> <span class="o">=</span> <span class="n">Ucell_discretized2</span><span class="p">[(</span><span class="n">ifc_discretized2</span> <span class="o">&gt;=</span> <span class="n">i_exp2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ifc_discretized2</span> <span class="o">&lt;=</span> <span class="n">i_exp2</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
+    <span class="n">U_exp_interpolated2</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">i_exp2</span><span class="p">,</span> <span class="n">U_exp2</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)(</span><span class="n">i_fc_reduced2</span><span class="p">)</span>
+
+    <span class="c1"># Distance between the simulated and the experimental polarization curves.</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">Ucell_reduced1</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">Ucell_reduced2</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="n">sim_error</span> <span class="o">=</span> <span class="mf">1e5</span>  <span class="c1"># If the mass loss arrives before i_exp[-1], some value would be equal to NaN.</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sim_error</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Ucell_reduced1</span> <span class="o">-</span> <span class="n">U_exp_interpolated1</span><span class="p">)</span> <span class="o">/</span> <span class="n">U_exp_interpolated1</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+                     <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Ucell_reduced2</span> <span class="o">-</span> <span class="n">U_exp_interpolated2</span><span class="p">)</span> <span class="o">/</span> <span class="n">U_exp_interpolated2</span> <span class="o">*</span> <span class="mi">100</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span>  <span class="c1"># in %.</span>
+
+    <span class="k">return</span> <span class="n">sim_error</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="modules.calibration_modules.determined_parameters" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">determined_parameters</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+      <p>This function is used to determine the parameters of the fuel cell model for the calibration when a registered
+type_fuel_cell is considered.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>type_fuel_cell</code></b>
+                  (<code>str</code>)
+              –
+              <div class="doc-md-description">
+                <pre><code>Type of fuel cell configuration.
+</code></pre>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>Tfc</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Desired fuel cell temperature in Kelvin.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Pa_des</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Desired anode pressure in Pascal.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Pc_des</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Desired cathode pressure in Pascal.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Sa</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Stoichiometric ratio of hydrogen.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Sc</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Stoichiometric ratio of oxygen.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Phi_a_des</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Desired anode relative humidity.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Phi_c_des</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Desired cathode relative humidity.</p>
+              </div>
+            </li>
+            <li>
+<b><code>i_pola</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Maximum current density for the polarization curve.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Aact</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Active area of the cell in m².</p>
+              </div>
+            </li>
+            <li>
+<b><code>Hmem</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Thickness of the membrane in m.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Hcl</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Thickness of the catalyst layer in m.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Hgc</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Thickness of the gas channel in m.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Wgc</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Width of the gas channel in m.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Lgc</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Length of the gas channel in m.</p>
+              </div>
+            </li>
+            <li>
+<b><code>type_auxiliary</code></b>(                  <code>str</code>
+)              –
+              <div class="doc-md-description">
+                <p>Type of auxiliary system.</p>
+              </div>
+            </li>
+            <li>
+<b><code>type_control</code></b>(                  <code>str</code>
+)              –
+              <div class="doc-md-description">
+                <p>Type of control system.</p>
+              </div>
+            </li>
+            <li>
+<b><code>type_purge</code></b>(                  <code>str</code>
+)              –
+              <div class="doc-md-description">
+                <p>Type of purge system.</p>
+              </div>
+            </li>
+            <li>
+<b><code>type_display</code></b>(                  <code>str</code>
+)              –
+              <div class="doc-md-description">
+                <p>Type of display.</p>
+              </div>
+            </li>
+            <li>
+<b><code>type_plot</code></b>(                  <code>str</code>
+)              –
+              <div class="doc-md-description">
+                <p>Type of plot.</p>
+              </div>
+            </li>
+            <li>
+<b><code>type_current</code></b>(                  <code>str</code>
+)              –
+              <div class="doc-md-description">
+                <p>Type of current density function.</p>
+              </div>
+            </li>
+            <li>
+<b><code>current_density</code></b>(                  <code>function</code>
+)              –
+              <div class="doc-md-description">
+                <p>Current density evolution over time. It is a function of time and parameters dictionary.</p>
+              </div>
+            </li>
+            <li>
+<b><code>t_step</code></b>(                  <code>tuple</code>
+)              –
+              <div class="doc-md-description">
+                <p>Time parameters for the step_current density function.
+It is a tuple containing the initial time 't0_step', final time 'tf_step', loading time 'delta_t_load' and
+dynamic time for display 'delta_t_dyn'.</p>
+              </div>
+            </li>
+            <li>
+<b><code>i_step</code></b>(                  <code>tuple</code>
+)              –
+              <div class="doc-md-description">
+                <p>Current parameters for the step_current density function.
+It is a tuple containing the initial and final current density value 'i_ini' and 'i_final'.</p>
+              </div>
+            </li>
+            <li>
+<b><code>delta_pola</code></b>(                  <code>tuple</code>
+)              –
+              <div class="doc-md-description">
+                <p>Parameters for the polarization curve. It is a tuple containing the loading time
+'delta_t_load', the breaking time 'delta_t_break', the current density step 'delta_i', and the initial
+breaking time 'delta_t_ini'.</p>
+              </div>
+            </li>
+            <li>
+<b><code>i_EIS</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Current for which a ratio_EIS perturbation is added.</p>
+              </div>
+            </li>
+            <li>
+<b><code>ratio_EIS</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Value of the perturbation on the current density for building the EIS curve.</p>
+              </div>
+            </li>
+            <li>
+<b><code>t_EIS</code></b>(                  <code>tuple</code>
+)              –
+              <div class="doc-md-description">
+                <p>EIS parameters. It is a tuple containing the initial EIS time after stack equilibrium 't0_EIS', a list of time
+parameters which gives the beginning of each frequency change 't_new_start', the final time 'tf_EIS', a list of
+time parameters which gives the estimated time for reaching equilibrium at each frequency 'delta_t_break_EIS',
+and a list of time parameters which gives the estimated time for measuring the voltage response at each
+frequency 'delta_t_measurement_EIS'.</p>
+              </div>
+            </li>
+            <li>
+<b><code>f_EIS</code></b>(                  <code>tuple</code>
+)              –
+              <div class="doc-md-description">
+                <p>EIS parameters. It is a tuple containing the power of the initial frequency
+'f_power_min': f_min = 10**f_power_min, the power of the final frequency 'f_power_max', the number of
+frequencies tested 'nb_f' and the number of points calculated per specific period 'nb_points'.</p>
+              </div>
+            </li>
+            <li>
+<b><code>t_purge</code></b>(                  <code>tuple</code>
+)              –
+              <div class="doc-md-description">
+                <p>Time parameters for purging the system.
+It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.</p>
+              </div>
+            </li>
+            <li>
+<b><code>max_step</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Maximum time step for the solver.</p>
+              </div>
+            </li>
+            <li>
+<b><code>n_gdl</code></b>(                  <code>int</code>
+)              –
+              <div class="doc-md-description">
+                <p>Number of points considered in the GDL.</p>
+              </div>
+            </li>
+            <li>
+<b><code>i_exp</code></b>(                  <code><span title="numpy.ndarray">ndarray</span></code>
+)              –
+              <div class="doc-md-description">
+                <p>Experimental values of the current density.</p>
+              </div>
+            </li>
+            <li>
+<b><code>U_exp</code></b>(                  <code><span title="numpy.ndarray">ndarray</span></code>
+)              –
+              <div class="doc-md-description">
+                <p>Experimental values of the voltage.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>modules/calibration_modules.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">determined_parameters</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function is used to determine the parameters of the fuel cell model for the calibration when a registered</span>
+<span class="sd">    type_fuel_cell is considered.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    type_fuel_cell : str</span>
+<span class="sd">            Type of fuel cell configuration.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tfc : float</span>
+<span class="sd">            Desired fuel cell temperature in Kelvin.</span>
+<span class="sd">    Pa_des : float</span>
+<span class="sd">        Desired anode pressure in Pascal.</span>
+<span class="sd">    Pc_des : float</span>
+<span class="sd">        Desired cathode pressure in Pascal.</span>
+<span class="sd">    Sa : float</span>
+<span class="sd">        Stoichiometric ratio of hydrogen.</span>
+<span class="sd">    Sc : float</span>
+<span class="sd">        Stoichiometric ratio of oxygen.</span>
+<span class="sd">    Phi_a_des : float</span>
+<span class="sd">        Desired anode relative humidity.</span>
+<span class="sd">    Phi_c_des : float</span>
+<span class="sd">        Desired cathode relative humidity.</span>
+<span class="sd">    i_pola : float</span>
+<span class="sd">        Maximum current density for the polarization curve.</span>
+<span class="sd">    Aact : float</span>
+<span class="sd">        Active area of the cell in m².</span>
+<span class="sd">    Hmem : float</span>
+<span class="sd">        Thickness of the membrane in m.</span>
+<span class="sd">    Hcl : float</span>
+<span class="sd">        Thickness of the catalyst layer in m.</span>
+<span class="sd">    Hgc : float</span>
+<span class="sd">        Thickness of the gas channel in m.</span>
+<span class="sd">    Wgc : float</span>
+<span class="sd">        Width of the gas channel in m.</span>
+<span class="sd">    Lgc : float</span>
+<span class="sd">        Length of the gas channel in m.</span>
+<span class="sd">    type_auxiliary : str</span>
+<span class="sd">        Type of auxiliary system.</span>
+<span class="sd">    type_control : str</span>
+<span class="sd">        Type of control system.</span>
+<span class="sd">    type_purge : str</span>
+<span class="sd">        Type of purge system.</span>
+<span class="sd">    type_display : str</span>
+<span class="sd">        Type of display.</span>
+<span class="sd">    type_plot : str</span>
+<span class="sd">        Type of plot.</span>
+<span class="sd">    type_current : str</span>
+<span class="sd">        Type of current density function.</span>
+<span class="sd">    current_density : function</span>
+<span class="sd">        Current density evolution over time. It is a function of time and parameters dictionary.</span>
+<span class="sd">    t_step : tuple</span>
+<span class="sd">        Time parameters for the step_current density function.</span>
+<span class="sd">        It is a tuple containing the initial time &#39;t0_step&#39;, final time &#39;tf_step&#39;, loading time &#39;delta_t_load&#39; and</span>
+<span class="sd">        dynamic time for display &#39;delta_t_dyn&#39;.</span>
+<span class="sd">    i_step : tuple</span>
+<span class="sd">        Current parameters for the step_current density function.</span>
+<span class="sd">        It is a tuple containing the initial and final current density value &#39;i_ini&#39; and &#39;i_final&#39;.</span>
+<span class="sd">    delta_pola : tuple</span>
+<span class="sd">        Parameters for the polarization curve. It is a tuple containing the loading time</span>
+<span class="sd">        &#39;delta_t_load&#39;, the breaking time &#39;delta_t_break&#39;, the current density step &#39;delta_i&#39;, and the initial</span>
+<span class="sd">        breaking time &#39;delta_t_ini&#39;.</span>
+<span class="sd">    i_EIS : float</span>
+<span class="sd">        Current for which a ratio_EIS perturbation is added.</span>
+<span class="sd">    ratio_EIS : float</span>
+<span class="sd">        Value of the perturbation on the current density for building the EIS curve.</span>
+<span class="sd">    t_EIS : tuple</span>
+<span class="sd">        EIS parameters. It is a tuple containing the initial EIS time after stack equilibrium &#39;t0_EIS&#39;, a list of time</span>
+<span class="sd">        parameters which gives the beginning of each frequency change &#39;t_new_start&#39;, the final time &#39;tf_EIS&#39;, a list of</span>
+<span class="sd">        time parameters which gives the estimated time for reaching equilibrium at each frequency &#39;delta_t_break_EIS&#39;,</span>
+<span class="sd">        and a list of time parameters which gives the estimated time for measuring the voltage response at each</span>
+<span class="sd">        frequency &#39;delta_t_measurement_EIS&#39;.</span>
+<span class="sd">    f_EIS : tuple</span>
+<span class="sd">        EIS parameters. It is a tuple containing the power of the initial frequency</span>
+<span class="sd">        &#39;f_power_min&#39;: f_min = 10**f_power_min, the power of the final frequency &#39;f_power_max&#39;, the number of</span>
+<span class="sd">        frequencies tested &#39;nb_f&#39; and the number of points calculated per specific period &#39;nb_points&#39;.</span>
+<span class="sd">    t_purge : tuple</span>
+<span class="sd">        Time parameters for purging the system.</span>
+<span class="sd">        It is the purge time interval &#39;purge_time&#39; and the time between two purges &#39;delta_purge&#39;.</span>
+<span class="sd">    max_step : float</span>
+<span class="sd">            Maximum time step for the solver.</span>
+<span class="sd">    n_gdl : int</span>
+<span class="sd">        Number of points considered in the GDL.</span>
+<span class="sd">    i_exp : numpy.ndarray</span>
+<span class="sd">        Experimental values of the current density.</span>
+<span class="sd">    U_exp : numpy.ndarray</span>
+<span class="sd">        Experimental values of the voltage.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_1.5&quot;</span> <span class="ow">or</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_2.0&quot;</span> <span class="ow">or</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_2.25&quot;</span> <span class="ow">or</span> \
+            <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_2.5&quot;</span><span class="p">:</span>
+        <span class="c1"># Given values by the author</span>
+        <span class="c1">#       Operating inputs</span>
+        <span class="n">Tfc</span> <span class="o">=</span> <span class="mi">74</span> <span class="o">+</span> <span class="mf">273.15</span>  <span class="c1"># K. It is the temperature of the fuel cell.</span>
+        <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span> <span class="o">=</span> <span class="mf">1.2</span><span class="p">,</span> <span class="mf">2.0</span>  <span class="c1"># It is the stoichiometric ratio (of hydrogen and oxygen).</span>
+        <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span> <span class="o">=</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.6</span>  <span class="c1"># It is the desired relative humidity.</span>
+        <span class="k">if</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_1.5&quot;</span><span class="p">:</span>
+            <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mf">1.5e5</span><span class="p">,</span> <span class="mf">1.5e5</span>  <span class="c1"># Pa. It is the desired pressure of the fuel gas (at the anode/cathode).</span>
+            <span class="n">i_pola</span> <span class="o">=</span> <span class="mf">2.3e4</span>
+        <span class="k">elif</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_2.0&quot;</span><span class="p">:</span>
+            <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mf">2.0e5</span><span class="p">,</span> <span class="mf">2.0e5</span>  <span class="c1"># Pa. It is the desired pressure of the fuel gas (at the anode/cathode).</span>
+            <span class="n">i_pola</span> <span class="o">=</span> <span class="mf">2.5e4</span>
+        <span class="k">elif</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_2.25&quot;</span><span class="p">:</span>
+            <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mf">2.25e5</span><span class="p">,</span> <span class="mf">2.25e5</span>  <span class="c1"># Pa. It is the desired pressure of the fuel gas (at the anode/cathode).</span>
+            <span class="n">i_pola</span> <span class="o">=</span> <span class="mf">2.85e4</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># type_fuel_cell == &quot;EH-31_2.5&quot;:</span>
+            <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mf">2.5e5</span><span class="p">,</span> <span class="mf">2.5e5</span>  <span class="c1"># Pa. It is the desired pressure of the fuel gas (at the anode/cathode).</span>
+            <span class="n">i_pola</span> <span class="o">=</span> <span class="mf">3.05e4</span>
+        <span class="c1">#       Fuel cell physical parameters</span>
+        <span class="n">Aact</span> <span class="o">=</span> <span class="mf">8.5e-3</span>  <span class="c1"># m². It is the active area of the catalyst layer.</span>
+        <span class="n">Wgc</span> <span class="o">=</span> <span class="mf">4.5e-4</span>  <span class="c1"># m. It is the width of the gas channel.</span>
+        <span class="n">Lgc</span> <span class="o">=</span> <span class="mf">9.67</span>  <span class="c1"># m. It is the length of the gas channel.</span>
+
+        <span class="c1"># Extrapolated physical parameters</span>
+        <span class="n">Hmem</span> <span class="o">=</span> <span class="mf">2e-5</span>  <span class="c1"># m. It is the thickness of the membrane.</span>
+        <span class="n">Hcl</span> <span class="o">=</span> <span class="mf">1e-5</span>  <span class="c1"># m. It is the thickness of the anode or cathode catalyst layer.</span>
+        <span class="n">Hgdl</span> <span class="o">=</span> <span class="mf">2e-4</span>  <span class="c1"># m. It is the thickness of the gas diffusion layer.</span>
+        <span class="n">Hgc</span> <span class="o">=</span> <span class="mf">5e-4</span>  <span class="c1"># m. It is the thickness of the gas channel.</span>
+
+        <span class="c1"># Algorithm parameters for polarization curve generation</span>
+        <span class="n">type_auxiliary</span> <span class="o">=</span> <span class="s2">&quot;opened_anode&quot;</span>
+        <span class="n">type_control</span> <span class="o">=</span> <span class="s2">&quot;no_control&quot;</span>
+        <span class="n">type_purge</span> <span class="o">=</span> <span class="s2">&quot;no_purge&quot;</span>
+        <span class="n">type_display</span> <span class="o">=</span> <span class="s2">&quot;multiple&quot;</span>
+        <span class="n">type_plot</span> <span class="o">=</span> <span class="s2">&quot;final&quot;</span>
+        <span class="n">type_current</span> <span class="o">=</span> <span class="s2">&quot;polarization&quot;</span>
+        <span class="n">current_density</span> <span class="o">=</span> <span class="n">polarization_current</span>
+        <span class="n">t_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># It is the time parameters for the step_current density function.</span>
+        <span class="n">i_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># It is the current parameters for the step_current density function.</span>
+        <span class="n">delta_pola</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mf">0.1e4</span><span class="p">,</span> <span class="mi">1</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># It is the parameters for the polarization curve.</span>
+        <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.</span>
+        <span class="n">f_EIS</span><span class="p">,</span> <span class="n">t_EIS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># It is the EIS parameters.</span>
+        <span class="n">t_purge</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mi">15</span>  <span class="c1"># s It is the purge time and the distance between two purges.</span>
+        <span class="n">max_step</span> <span class="o">=</span> <span class="mf">0.05</span>  <span class="c1"># It is good enough for having graphs without instabilities.</span>
+        <span class="n">n_gdl</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">Hcl</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># It is the number of model points placed inside each GDL.</span>
+
+    <span class="k">elif</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;BX_1.0&quot;</span> <span class="ow">or</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;BX_1.35&quot;</span><span class="p">:</span>
+        <span class="c1"># Given values by the author</span>
+        <span class="c1">#       Operating inputs</span>
+        <span class="n">Tfc</span> <span class="o">=</span> <span class="mi">80</span> <span class="o">+</span> <span class="mf">273.15</span>  <span class="c1"># K. It is the temperature of the fuel cell.</span>
+        <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.0</span>  <span class="c1"># It is the stoichiometric ratio (of hydrogen and oxygen).</span>
+        <span class="k">if</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;BX_1.0&quot;</span><span class="p">:</span>
+            <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="mi">101325</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="mi">101325</span>  <span class="c1"># Pa. It is the desired pressures of the fuel gasS.</span>
+            <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.25</span>  <span class="c1"># It is the desired relative humidity.</span>
+            <span class="n">i_pola</span> <span class="o">=</span> <span class="mf">2.1e4</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># type_fuel_cell == &quot;BX_1.35&quot;:</span>
+            <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mf">1.35</span> <span class="o">*</span> <span class="mi">101325</span><span class="p">,</span> <span class="mf">1.35</span> <span class="o">*</span> <span class="mi">101325</span>  <span class="c1"># Pa. It is the desired pressures of the fuel gas.</span>
+            <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.5</span>  <span class="c1"># It is the desired relative humidity.</span>
+            <span class="n">i_pola</span> <span class="o">=</span> <span class="mf">1.6e4</span>
+        <span class="c1">#       Fuel cell physical parameters</span>
+        <span class="n">Aact</span> <span class="o">=</span> <span class="mf">0.005</span>  <span class="c1"># m². It is the active area of the catalyst layer.</span>
+        <span class="n">Hmem</span> <span class="o">=</span> <span class="mf">1e-5</span>  <span class="c1"># m. It is the thickness of the membrane.</span>
+        <span class="n">Hcl</span> <span class="o">=</span> <span class="mf">1e-5</span>  <span class="c1"># m. It is the thickness of the anode or cathode catalyst layer.</span>
+        <span class="n">Hgdl</span> <span class="o">=</span> <span class="mf">2e-4</span>  <span class="c1"># m. It is the thickness of the gas diffusion layer.</span>
+        <span class="n">Hgc</span> <span class="o">=</span> <span class="mf">5e-4</span>  <span class="c1"># m. It is the thickness of the gas channel.</span>
+        <span class="n">Wgc</span> <span class="o">=</span> <span class="mf">8e-4</span>  <span class="c1"># m. It is the width of the gas channel.</span>
+
+        <span class="c1"># Extrapolated physical parameters</span>
+        <span class="n">Lgc</span> <span class="o">=</span> <span class="mf">3.0</span>  <span class="c1"># m. It is the length of the gas channel.</span>
+
+        <span class="c1"># Algorithm parameters for polarization curve generation</span>
+        <span class="n">type_auxiliary</span> <span class="o">=</span> <span class="s2">&quot;opened_anode&quot;</span>
+        <span class="n">type_control</span> <span class="o">=</span> <span class="s2">&quot;no_control&quot;</span>
+        <span class="n">type_purge</span> <span class="o">=</span> <span class="s2">&quot;no_purge&quot;</span>
+        <span class="n">type_display</span> <span class="o">=</span> <span class="s2">&quot;no_display&quot;</span>
+        <span class="n">type_plot</span> <span class="o">=</span> <span class="s2">&quot;final&quot;</span>
+        <span class="n">type_current</span> <span class="o">=</span> <span class="s2">&quot;polarization&quot;</span>
+        <span class="n">current_density</span> <span class="o">=</span> <span class="n">polarization_current</span>
+        <span class="n">t_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># It is the time parameters for the step_current density function.</span>
+        <span class="n">i_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># It is the current parameters for the step_current density function.</span>
+        <span class="n">delta_pola</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mf">0.1e4</span><span class="p">,</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># It is the parameters for the polarization curve.</span>
+        <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.</span>
+        <span class="n">f_EIS</span><span class="p">,</span> <span class="n">t_EIS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># It is the EIS parameters.</span>
+        <span class="n">t_purge</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mi">15</span>  <span class="c1"># s It is the purge time and the distance between two purges.</span>
+        <span class="n">max_step</span> <span class="o">=</span> <span class="mf">0.05</span>  <span class="c1"># It is good enough for having graphs without instabilities.</span>
+        <span class="n">n_gdl</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">Hcl</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># It is the number of model points placed inside each GDL.</span>
+
+    <span class="k">elif</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;LF&quot;</span><span class="p">:</span>
+        <span class="c1"># Given values by the author</span>
+        <span class="c1">#       Operating inputs</span>
+        <span class="n">Tfc</span> <span class="o">=</span> <span class="mi">80</span> <span class="o">+</span> <span class="mf">273.15</span>  <span class="c1"># K. It is the temperature of the fuel cell.</span>
+        <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mi">101325</span><span class="p">,</span> <span class="mi">101325</span>  <span class="c1"># Pa. It is the desired pressure of the fuel gas (at the anode/cathode).</span>
+        <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.5</span>  <span class="c1"># It is the stoichiometric ratio (of hydrogen and oxygen).</span>
+        <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span> <span class="o">=</span> <span class="mf">0.84</span><span class="p">,</span> <span class="mf">0.59</span>  <span class="c1"># It is the desired relative humidity.</span>
+        <span class="n">i_pola</span> <span class="o">=</span> <span class="mf">1.45e4</span>
+        <span class="c1">#       Fuel cell physical parameters</span>
+        <span class="n">Hmem</span> <span class="o">=</span> <span class="mf">5.08e-5</span>  <span class="c1"># m. It is the thickness of the membrane.</span>
+        <span class="n">Hcl</span> <span class="o">=</span> <span class="mf">1e-5</span>  <span class="c1"># m. It is the thickness of the anode or cathode catalyst layer.</span>
+        <span class="n">Hgdl</span> <span class="o">=</span> <span class="mf">4.2e-4</span>  <span class="c1"># m. It is the thickness of the gas diffusion layer.</span>
+        <span class="n">Hgc</span> <span class="o">=</span> <span class="mf">1e-3</span>  <span class="c1"># m. It is the thickness of the gas channel.</span>
+        <span class="n">Wgc</span> <span class="o">=</span> <span class="mf">8e-4</span>  <span class="c1"># m. It is the width of the gas channel.</span>
+
+        <span class="c1"># Extrapolated physical parameters</span>
+        <span class="n">Aact</span> <span class="o">=</span> <span class="mf">0.0025</span>  <span class="c1"># m². It is the active area of the catalyst layer.</span>
+        <span class="n">Lgc</span> <span class="o">=</span> <span class="mf">1.6</span>  <span class="c1"># m. It is the length of the gas channel.</span>
+
+        <span class="c1"># Algorithm parameters for polarization curve generation</span>
+        <span class="n">type_auxiliary</span> <span class="o">=</span> <span class="s2">&quot;closed_anode&quot;</span>
+        <span class="n">type_control</span> <span class="o">=</span> <span class="s2">&quot;no_control&quot;</span>
+        <span class="n">type_purge</span> <span class="o">=</span> <span class="s2">&quot;no_purge&quot;</span>
+        <span class="n">type_display</span> <span class="o">=</span> <span class="s2">&quot;no_display&quot;</span>
+        <span class="n">type_plot</span> <span class="o">=</span> <span class="s2">&quot;final&quot;</span>
+        <span class="n">type_current</span> <span class="o">=</span> <span class="s2">&quot;polarization&quot;</span>
+        <span class="n">current_density</span> <span class="o">=</span> <span class="n">polarization_current</span>
+        <span class="n">t_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># It is the time parameters for the step_current density function.</span>
+        <span class="n">i_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># It is the current parameters for the step_current density function.</span>
+        <span class="n">delta_pola</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mf">0.1e4</span><span class="p">,</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># It is the parameters for the polarization curve.</span>
+        <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.</span>
+        <span class="n">f_EIS</span><span class="p">,</span> <span class="n">t_EIS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># It is the EIS parameters.</span>
+        <span class="n">t_purge</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mi">15</span>  <span class="c1"># s It is the purge time and the distance between two purges.</span>
+        <span class="n">max_step</span> <span class="o">=</span> <span class="mf">0.05</span>  <span class="c1"># It is good enough for having graphs without instabilities.</span>
+        <span class="n">n_gdl</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">Hcl</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># It is the number of model points placed inside each GDL.</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;A correct type_fuel_cell should be given.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Characteristic points of the experimental polarization curve</span>
+    <span class="n">i_exp</span><span class="p">,</span> <span class="n">U_exp</span> <span class="o">=</span> <span class="n">pola_exp_values</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">Tfc</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">i_pola</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span>
+            <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">current_density</span><span class="p">,</span> <span class="n">t_step</span><span class="p">,</span>
+            <span class="n">i_step</span><span class="p">,</span> <span class="n">delta_pola</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">i_exp</span><span class="p">,</span> <span class="n">U_exp</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="modules.calibration_modules.print_calibration_results" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">print_calibration_results</span><span class="p">(</span><span class="n">convergence</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">sim_error</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+      <p>This function is used to print the calibration results.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>convergence</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>A dictionary generated by the GeneticAlgorithm2 model's report method. It contains information about the
+convergence of the genetic algorithm used for optimizing the undetermined parameters in the calibration files.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>epsilon_gdl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Anode/cathode GDL porosity.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>epsilon_mc</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Volume fraction of ionomer in the CL.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>tau</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Pore structure coefficient.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>epsilon_c</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Compression ratio of the GDL.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>e</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Capillary exponent.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Re</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Electron conduction resistance of the circuit in ohm.m².</p>
+              </div>
+            </li>
+            <li>
+              <b><code>i0_c_ref</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Reference exchange current density at the cathode in A.m-2.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>kappa_co</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Crossover correction coefficient in mol.m-1.s-1.Pa-1.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>kappa_c</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Overpotential correction exponent.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>a_slim</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>One of the limit liquid saturation coefficients: the slop of slim function.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>b_slim</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>One of the limit liquid saturation coefficients: the intercept of slim function.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>a_switch</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>One of the limit liquid saturation coefficients: the slop of s_switch function.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>sim_error</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Maximum error between the experimental and the simulated polarization curves in percentage.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>modules/calibration_modules.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">print_calibration_results</span><span class="p">(</span><span class="n">convergence</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span>
+                              <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">sim_error</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function is used to print the calibration results.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    convergence : dict</span>
+<span class="sd">        A dictionary generated by the GeneticAlgorithm2 model&#39;s report method. It contains information about the</span>
+<span class="sd">        convergence of the genetic algorithm used for optimizing the undetermined parameters in the calibration files.</span>
+<span class="sd">    epsilon_gdl : float</span>
+<span class="sd">        Anode/cathode GDL porosity.</span>
+<span class="sd">    epsilon_mc : float</span>
+<span class="sd">        Volume fraction of ionomer in the CL.</span>
+<span class="sd">    tau : float</span>
+<span class="sd">        Pore structure coefficient.</span>
+<span class="sd">    epsilon_c : float</span>
+<span class="sd">        Compression ratio of the GDL.</span>
+<span class="sd">    e : float</span>
+<span class="sd">        Capillary exponent.</span>
+<span class="sd">    Re : float</span>
+<span class="sd">        Electron conduction resistance of the circuit in ohm.m².</span>
+<span class="sd">    i0_c_ref : float</span>
+<span class="sd">        Reference exchange current density at the cathode in A.m-2.</span>
+<span class="sd">    kappa_co : float</span>
+<span class="sd">        Crossover correction coefficient in mol.m-1.s-1.Pa-1.</span>
+<span class="sd">    kappa_c : float</span>
+<span class="sd">        Overpotential correction exponent.</span>
+<span class="sd">    a_slim : float</span>
+<span class="sd">        One of the limit liquid saturation coefficients: the slop of slim function.</span>
+<span class="sd">    b_slim : float</span>
+<span class="sd">        One of the limit liquid saturation coefficients: the intercept of slim function.</span>
+<span class="sd">    a_switch : float</span>
+<span class="sd">        One of the limit liquid saturation coefficients: the slop of s_switch function.</span>
+<span class="sd">    sim_error : float</span>
+<span class="sd">        Maximum error between the experimental and the simulated polarization curves in percentage.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The convergence is:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">convergence</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The optimized epsilon_gdl: &quot;</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The optimized epsilon_mc: &quot;</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The optimized tau: &quot;</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The optimized epsilon_c: &quot;</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The optimized e: &quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The optimized Re: &quot;</span><span class="p">,</span> <span class="n">Re</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The optimized i0_c_ref: &quot;</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The optimized kappa_co: &quot;</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The optimized kappa_c: &quot;</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The optimized a_slim: &quot;</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The optimized b_slim: &quot;</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The optimized a_switch: &quot;</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">RED</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The max simulation error is: &quot;</span><span class="p">,</span> <span class="n">sim_error</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">Style</span><span class="o">.</span><span class="n">RESET_ALL</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="modules.calibration_modules.save_calibration_results" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">save_calibration_results</span><span class="p">(</span><span class="n">convergence</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">sim_error</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+      <p>This function is used to save in a text file the calibration results.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>convergence</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>A dictionary generated by the GeneticAlgorithm2 model's report method. It contains information about the
+convergence of the genetic algorithm used for optimizing the undetermined parameters in the calibration files.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>epsilon_gdl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Anode/cathode GDL porosity.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>epsilon_mc</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Volume fraction of ionomer in the CL.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>tau</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Pore structure coefficient.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>epsilon_c</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Compression ratio of the GDL.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>e</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Capillary exponent.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Re</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Electron conduction resistance of the circuit in ohm.m².</p>
+              </div>
+            </li>
+            <li>
+              <b><code>i0_c_ref</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Reference exchange current density at the cathode in A.m-2.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>kappa_co</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Crossover correction coefficient in mol.m-1.s-1.Pa-1.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>kappa_c</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Overpotential correction exponent.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>a_slim</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>One of the limit liquid saturation coefficients: the slop of slim function.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>b_slim</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>One of the limit liquid saturation coefficients: the intercept of slim function.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>a_switch</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>One of the limit liquid saturation coefficients: the slop of s_switch function.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>sim_error</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Maximum error between the experimental and the simulated polarization curves in percentage.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>type_fuel_cell</code></b>
+                  (<code>str</code>)
+              –
+              <div class="doc-md-description">
+                <p>Type of fuel cell configuration.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>modules/calibration_modules.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">save_calibration_results</span><span class="p">(</span><span class="n">convergence</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span>
+                             <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">sim_error</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function is used to save in a text file the calibration results.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    convergence : dict</span>
+<span class="sd">        A dictionary generated by the GeneticAlgorithm2 model&#39;s report method. It contains information about the</span>
+<span class="sd">        convergence of the genetic algorithm used for optimizing the undetermined parameters in the calibration files.</span>
+<span class="sd">    epsilon_gdl : float</span>
+<span class="sd">        Anode/cathode GDL porosity.</span>
+<span class="sd">    epsilon_mc : float</span>
+<span class="sd">        Volume fraction of ionomer in the CL.</span>
+<span class="sd">    tau : float</span>
+<span class="sd">        Pore structure coefficient.</span>
+<span class="sd">    epsilon_c : float</span>
+<span class="sd">        Compression ratio of the GDL.</span>
+<span class="sd">    e : float</span>
+<span class="sd">        Capillary exponent.</span>
+<span class="sd">    Re : float</span>
+<span class="sd">        Electron conduction resistance of the circuit in ohm.m².</span>
+<span class="sd">    i0_c_ref : float</span>
+<span class="sd">        Reference exchange current density at the cathode in A.m-2.</span>
+<span class="sd">    kappa_co : float</span>
+<span class="sd">        Crossover correction coefficient in mol.m-1.s-1.Pa-1.</span>
+<span class="sd">    kappa_c : float</span>
+<span class="sd">        Overpotential correction exponent.</span>
+<span class="sd">    a_slim : float</span>
+<span class="sd">        One of the limit liquid saturation coefficients: the slop of slim function.</span>
+<span class="sd">    b_slim : float</span>
+<span class="sd">        One of the limit liquid saturation coefficients: the intercept of slim function.</span>
+<span class="sd">    a_switch : float</span>
+<span class="sd">        One of the limit liquid saturation coefficients: the slop of s_switch function.</span>
+<span class="sd">    sim_error : float</span>
+<span class="sd">        Maximum error between the experimental and the simulated polarization curves in percentage.</span>
+<span class="sd">    type_fuel_cell : str</span>
+<span class="sd">        Type of fuel cell configuration.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">root_folder</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="s2">&quot;parameter_calibration_1.txt&quot;</span>
+    <span class="n">subfolder_name</span> <span class="o">=</span> <span class="n">type_fuel_cell</span><span class="p">[:</span><span class="n">type_fuel_cell</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)]</span> <span class="k">if</span> <span class="n">type_fuel_cell</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">type_fuel_cell</span>
+    <span class="n">counter</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="c1"># Create the folder if necessary</span>
+    <span class="n">folder_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_folder</span><span class="p">,</span> <span class="n">subfolder_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">folder_name</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">folder_name</span><span class="p">)</span>
+    <span class="c1"># Create the file without erasing the previous ones</span>
+    <span class="k">while</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder_name</span><span class="p">,</span> <span class="n">filename</span><span class="p">)):</span>
+        <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;parameter_calibration_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.txt&quot;</span>
+    <span class="c1"># Write information</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder_name</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;The convergence is: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">convergence</span><span class="p">)</span> <span class="o">+</span>
+                   <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The optimized epsilon_gdl: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">epsilon_gdl</span><span class="p">)</span> <span class="o">+</span>
+                   <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The optimized epsilon_mc: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">epsilon_mc</span><span class="p">)</span> <span class="o">+</span>
+                   <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The optimized tau: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">tau</span><span class="p">)</span> <span class="o">+</span>
+                   <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The optimized epsilon_c: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">epsilon_c</span><span class="p">)</span> <span class="o">+</span>
+                   <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The optimized e: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">+</span>
+                   <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The optimized Re: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">Re</span><span class="p">)</span> <span class="o">+</span>
+                   <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The optimized i0_c_ref: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i0_c_ref</span><span class="p">)</span> <span class="o">+</span>
+                   <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The optimized kappa_co: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">kappa_co</span><span class="p">)</span> <span class="o">+</span>
+                   <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The optimized kappa_c: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">kappa_c</span><span class="p">)</span> <span class="o">+</span>
+                   <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The optimized a_slim: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">a_slim</span><span class="p">)</span> <span class="o">+</span>
+                   <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The optimized b_slim: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">b_slim</span><span class="p">)</span> <span class="o">+</span>
+                   <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The optimized a_switch: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">a_switch</span><span class="p">)</span> <span class="o">+</span>
+                   <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The max simulation error is: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sim_error</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;%&quot;</span> <span class="o">+</span>
+                   <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Here the algorithm works with RG2&amp;3 (global)&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../auxiliaries_modules/" class="btn btn-neutral float-left" title="Auxiliaries modules"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../dif_eq_modules/" class="btn btn-neutral float-right" title="Differential equations modules">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../auxiliaries_modules/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../dif_eq_modules/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

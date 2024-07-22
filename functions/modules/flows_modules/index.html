@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Flows modules - AlphaPEM</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Flows modules";
+        var mkdocs_page_input_path = "functions/modules/flows_modules.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> AlphaPEM
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Functions</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../../GUI/">GUI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../main/">Main</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Calibration</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../calibration/experimental_values/">Experimental values</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../calibration/parameter_calibration/">Parameter calibration</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Configuration</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../configuration/current_densities/">Current densities</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../configuration/settings/">Settings</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Model</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/AlphaPEM/">AlphaPEM</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/auxiliaries/">Auxiliaries</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/cell_voltage/">Cell voltage</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/control/">Control</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/dif_eq/">Differentiel equations</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/flows/">Flows</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" >Modules</a>
+    <ul class="current">
+                <li class="toctree-l2"><a class="reference internal" href="../auxiliaries_modules/">Auxiliaries modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../calibration_modules/">Calibration modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../dif_eq_modules/">Differential equations modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../display_modules/">Display modules</a>
+                </li>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">Flows modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../GUI_modules/">GUI modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../main_modules/">Main modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../settings_modules/">Settings modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../transitory_functions/">Transitory functions</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../../about/">About</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">AlphaPEM</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Functions</li>
+          <li class="breadcrumb-item">Modules</li>
+      <li class="breadcrumb-item active">Flows modules</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="flows-modules">Flows modules</h1>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="modules.flows_modules"></a>
+    <div class="doc doc-contents first">
+
+      <p>This module is used to calculate intermediate values for the flows calculation.</p>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="modules.flows_modules.flows_int_values" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">flows_int_values</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+      <p>This functions calculates intermediate values for the flows calculation.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>sv</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Variables calculated by the solver. They correspond to the fuel cell internal states.
+sv is a contraction of solver_variables for enhanced readability.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>operating_inputs</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Operating inputs of the fuel cell.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>parameters</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Parameters of the fuel cell model.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>Pagc</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Global pressure in the anode gas channel (Pa).</p>
+              </div>
+            </li>
+            <li>
+<b><code>Pcgc</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Global pressure in the cathode gas channel (Pa).</p>
+              </div>
+            </li>
+            <li>
+<b><code>s_agdl_agdl</code></b>(                  <code>list</code>
+)              –
+              <div class="doc-md-description">
+                <p>Mean value of the saturated liquid water variable in the anode GDL between two adjacent GDL nodes.</p>
+              </div>
+            </li>
+            <li>
+<b><code>s_agdl_acl</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Mean value of the saturated liquid water variable between the last GDL node and the anode CL.</p>
+              </div>
+            </li>
+            <li>
+<b><code>s_ccl_cgdl</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Mean value of the saturated liquid water variable between the cathode CL and the first GDL node.</p>
+              </div>
+            </li>
+            <li>
+<b><code>s_cgdl_cgdl</code></b>(                  <code>list</code>
+)              –
+              <div class="doc-md-description">
+                <p>Mean value of the saturated liquid water variable in the cathode GDL between two adjacent GDL nodes.</p>
+              </div>
+            </li>
+            <li>
+<b><code>epsilon_mean</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Mean value of the porosity in the GDL and the CL.</p>
+              </div>
+            </li>
+            <li>
+<b><code>theta_c_mean</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Mean value of the contact angle in the GDL and the CL.</p>
+              </div>
+            </li>
+            <li>
+<b><code>lambda_acl_mem</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Mean value of the dissolved water variable between the anode CL and the membrane.</p>
+              </div>
+            </li>
+            <li>
+<b><code>lambda_mem_ccl</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Mean value of the dissolved water variable between the membrane and the cathode CL.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Pagc_agdl</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Mean value of the pressure between the anode gas channel and the first GDL node.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Pagdl_agdl</code></b>(                  <code>list</code>
+)              –
+              <div class="doc-md-description">
+                <p>Mean value of the pressure in the anode GDL between two adjacent GDL nodes.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Pagdl_acl</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Mean value of the pressure between the last GDL node and the anode CL.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Pccl_cgdl</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Mean value of the pressure between the cathode CL and the first GDL node.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Pcgdl_cgdl</code></b>(                  <code>list</code>
+)              –
+              <div class="doc-md-description">
+                <p>Mean value of the pressure in the cathode GDL between two adjacent GDL nodes.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Pcgdl_cgc</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Mean value of the pressure between the last GDL node and the cathode gas channel.</p>
+              </div>
+            </li>
+            <li>
+<b><code>nu_l</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Liquid water kinematic viscosity (m².s-1).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>modules/flows_modules.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">flows_int_values</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This functions calculates intermediate values for the flows calculation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sv : dict</span>
+<span class="sd">        Variables calculated by the solver. They correspond to the fuel cell internal states.</span>
+<span class="sd">        sv is a contraction of solver_variables for enhanced readability.</span>
+<span class="sd">    operating_inputs : dict</span>
+<span class="sd">        Operating inputs of the fuel cell.</span>
+<span class="sd">    parameters : dict</span>
+<span class="sd">        Parameters of the fuel cell model.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Pagc : float</span>
+<span class="sd">        Global pressure in the anode gas channel (Pa).</span>
+<span class="sd">    Pcgc : float</span>
+<span class="sd">        Global pressure in the cathode gas channel (Pa).</span>
+<span class="sd">    s_agdl_agdl : list</span>
+<span class="sd">        Mean value of the saturated liquid water variable in the anode GDL between two adjacent GDL nodes.</span>
+<span class="sd">    s_agdl_acl : float</span>
+<span class="sd">        Mean value of the saturated liquid water variable between the last GDL node and the anode CL.</span>
+<span class="sd">    s_ccl_cgdl : float</span>
+<span class="sd">        Mean value of the saturated liquid water variable between the cathode CL and the first GDL node.</span>
+<span class="sd">    s_cgdl_cgdl : list</span>
+<span class="sd">        Mean value of the saturated liquid water variable in the cathode GDL between two adjacent GDL nodes.</span>
+<span class="sd">    epsilon_mean : float</span>
+<span class="sd">        Mean value of the porosity in the GDL and the CL.</span>
+<span class="sd">    theta_c_mean : float</span>
+<span class="sd">        Mean value of the contact angle in the GDL and the CL.</span>
+<span class="sd">    lambda_acl_mem : float</span>
+<span class="sd">        Mean value of the dissolved water variable between the anode CL and the membrane.</span>
+<span class="sd">    lambda_mem_ccl : float</span>
+<span class="sd">        Mean value of the dissolved water variable between the membrane and the cathode CL.</span>
+<span class="sd">    Pagc_agdl : float</span>
+<span class="sd">        Mean value of the pressure between the anode gas channel and the first GDL node.</span>
+<span class="sd">    Pagdl_agdl : list</span>
+<span class="sd">        Mean value of the pressure in the anode GDL between two adjacent GDL nodes.</span>
+<span class="sd">    Pagdl_acl : float</span>
+<span class="sd">        Mean value of the pressure between the last GDL node and the anode CL.</span>
+<span class="sd">    Pccl_cgdl : float</span>
+<span class="sd">        Mean value of the pressure between the cathode CL and the first GDL node.</span>
+<span class="sd">    Pcgdl_cgdl : list</span>
+<span class="sd">        Mean value of the pressure in the cathode GDL between two adjacent GDL nodes.</span>
+<span class="sd">    Pcgdl_cgc : float</span>
+<span class="sd">        Mean value of the pressure between the last GDL node and the cathode gas channel.</span>
+<span class="sd">    nu_l : float</span>
+<span class="sd">        Liquid water kinematic viscosity (m².s-1).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Extraction of the variables</span>
+    <span class="n">C_v_agc</span><span class="p">,</span> <span class="n">C_v_acl</span><span class="p">,</span> <span class="n">C_v_ccl</span><span class="p">,</span> <span class="n">C_v_cgc</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_v_agc&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_v_acl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_v_ccl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_v_cgc&#39;</span><span class="p">]</span>
+    <span class="n">s_acl</span><span class="p">,</span> <span class="n">s_ccl</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_acl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_ccl&#39;</span><span class="p">]</span>
+    <span class="n">lambda_acl</span><span class="p">,</span> <span class="n">lambda_mem</span><span class="p">,</span> <span class="n">lambda_ccl</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;lambda_acl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;lambda_mem&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;lambda_ccl&#39;</span><span class="p">]</span>
+    <span class="n">C_H2_agc</span><span class="p">,</span> <span class="n">C_H2_acl</span><span class="p">,</span> <span class="n">C_O2_ccl</span><span class="p">,</span> <span class="n">C_O2_cgc</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_H2_agc&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_H2_acl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_O2_ccl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_O2_cgc&#39;</span><span class="p">]</span>
+    <span class="n">C_N2</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_N2&#39;</span><span class="p">]</span>
+    <span class="c1"># Extraction of the operating inputs and the parameters</span>
+    <span class="n">Tfc</span> <span class="o">=</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Tfc&#39;</span><span class="p">]</span>
+    <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">n_gdl</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;epsilon_gdl&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;n_gdl&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Pressures in the stack</span>
+    <span class="n">Pagc</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_v_agc</span> <span class="o">+</span> <span class="n">C_H2_agc</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span>
+    <span class="n">Pagdl</span> <span class="o">=</span> <span class="p">[(</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_H2_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="n">Pacl</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_v_acl</span> <span class="o">+</span> <span class="n">C_H2_acl</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span>
+    <span class="n">Pccl</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_v_ccl</span> <span class="o">+</span> <span class="n">C_O2_ccl</span> <span class="o">+</span> <span class="n">C_N2</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span>
+    <span class="n">Pcgdl</span> <span class="o">=</span> <span class="p">[(</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_O2_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">C_N2</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="n">Pcgc</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_v_cgc</span> <span class="o">+</span> <span class="n">C_O2_cgc</span> <span class="o">+</span> <span class="n">C_N2</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span>
+
+    <span class="c1"># Mean values ...</span>
+    <span class="c1">#       ... of the saturated liquid water variable</span>
+    <span class="n">s_agdl_agdl</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_agdl_</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">)]</span>
+    <span class="n">s_agdl_acl</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">s_acl</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">s_ccl_cgdl</span> <span class="o">=</span> <span class="n">s_ccl</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_cgdl_1&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">s_cgdl_cgdl</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">)]</span>
+    <span class="c1">#       ... of the porosity and the contact angle</span>
+    <span class="n">epsilon_mean</span> <span class="o">=</span> <span class="n">epsilon_gdl</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">epsilon_cl</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">theta_c_mean</span> <span class="o">=</span> <span class="n">theta_c_gdl</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">theta_c_cl</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="c1">#       ... of the dissolved water variable</span>
+    <span class="n">lambda_acl_mem</span> <span class="o">=</span> <span class="n">lambda_acl</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">lambda_mem</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">lambda_mem_ccl</span> <span class="o">=</span> <span class="n">lambda_mem</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">lambda_ccl</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="c1">#       ... of the pressure</span>
+    <span class="n">Pagc_agdl</span> <span class="o">=</span> <span class="n">Pagc</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">Pagdl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">Pagdl_agdl</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">Pagdl</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">Pagdl</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="n">Pagdl_acl</span> <span class="o">=</span> <span class="n">Pagdl</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">Pacl</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">Pccl_cgdl</span> <span class="o">=</span> <span class="n">Pccl</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">Pcgdl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">Pcgdl_cgdl</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">Pcgdl</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">Pcgdl</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="n">Pcgdl_cgc</span> <span class="o">=</span> <span class="n">Pcgdl</span><span class="p">[</span><span class="n">n_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">Pcgc</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">Pagc</span><span class="p">,</span> <span class="n">Pcgc</span><span class="p">,</span> <span class="n">s_agdl_agdl</span><span class="p">,</span> <span class="n">s_agdl_acl</span><span class="p">,</span> <span class="n">s_ccl_cgdl</span><span class="p">,</span> <span class="n">s_cgdl_cgdl</span><span class="p">,</span> <span class="n">epsilon_mean</span><span class="p">,</span> <span class="n">theta_c_mean</span><span class="p">,</span> <span class="n">lambda_acl_mem</span><span class="p">,</span>
+            <span class="n">lambda_mem_ccl</span><span class="p">,</span> <span class="n">Pagc_agdl</span><span class="p">,</span> <span class="n">Pagdl_agdl</span><span class="p">,</span> <span class="n">Pagdl_acl</span><span class="p">,</span> <span class="n">Pccl_cgdl</span><span class="p">,</span> <span class="n">Pcgdl_cgdl</span><span class="p">,</span> <span class="n">Pcgdl_cgc</span><span class="p">,</span> <span class="n">nu_l</span><span class="p">(</span><span class="n">Tfc</span><span class="p">))</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../display_modules/" class="btn btn-neutral float-left" title="Display modules"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../GUI_modules/" class="btn btn-neutral float-right" title="GUI modules">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../display_modules/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../GUI_modules/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

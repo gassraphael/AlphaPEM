@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Differential equations modules - AlphaPEM</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Differential equations modules";
+        var mkdocs_page_input_path = "functions/modules/dif_eq_modules.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> AlphaPEM
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Functions</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../../GUI/">GUI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../main/">Main</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Calibration</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../calibration/experimental_values/">Experimental values</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../calibration/parameter_calibration/">Parameter calibration</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Configuration</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../configuration/current_densities/">Current densities</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../configuration/settings/">Settings</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Model</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/AlphaPEM/">AlphaPEM</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/auxiliaries/">Auxiliaries</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/cell_voltage/">Cell voltage</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/control/">Control</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/dif_eq/">Differentiel equations</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/flows/">Flows</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" >Modules</a>
+    <ul class="current">
+                <li class="toctree-l2"><a class="reference internal" href="../auxiliaries_modules/">Auxiliaries modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../calibration_modules/">Calibration modules</a>
+                </li>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">Differential equations modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../display_modules/">Display modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../flows_modules/">Flows modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../GUI_modules/">GUI modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../main_modules/">Main modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../settings_modules/">Settings modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../transitory_functions/">Transitory functions</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../../about/">About</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">AlphaPEM</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Functions</li>
+          <li class="breadcrumb-item">Modules</li>
+      <li class="breadcrumb-item active">Differential equations modules</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="differential-equations-modules">Differential equations modules</h1>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="modules.dif_eq_modules"></a>
+    <div class="doc doc-contents first">
+
+      <p>This module is used to determine intermediate values for the calculation of the differential equations
+and to implement integration events.</p>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="modules.dif_eq_modules.desired_flows" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">desired_flows</span><span class="p">(</span><span class="n">solver_variables</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">,</span> <span class="n">i_n</span><span class="p">,</span> <span class="n">i_fc</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">Mext</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+      <p>This function calculates the desired flow for the air compressor and the humidifiers. These desired flow are
+different from the real ones as the corresponding machines takes time to reach the desired values.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>solver_variables</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Variables calculated by the solver. They correspond to the fuel cell internal states.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>control_variables</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Variables controlled by the user.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>i_n</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Internal current density (A/m²).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>i_fc</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Fuel cell current density (A/m²).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>operating_inputs</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Operating inputs of the fuel cell.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>parameters</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Parameters of the fuel cell model.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Mext</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Molar mass of the ambient air outside the stack (kg/mol).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>Wcp_des</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Desired air compressor flow rate (kg/s).</p>
+              </div>
+            </li>
+            <li>
+<b><code>Wa_inj_des</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Desired humidifier flow rate at the anode side (kg/s).</p>
+              </div>
+            </li>
+            <li>
+<b><code>Wc_inj_des</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Desired humidifier flow rate at the cathode side (kg/s).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>modules/dif_eq_modules.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">desired_flows</span><span class="p">(</span><span class="n">solver_variables</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">,</span> <span class="n">i_n</span><span class="p">,</span> <span class="n">i_fc</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">Mext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function calculates the desired flow for the air compressor and the humidifiers. These desired flow are</span>
+<span class="sd">    different from the real ones as the corresponding machines takes time to reach the desired values.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    solver_variables : dict</span>
+<span class="sd">        Variables calculated by the solver. They correspond to the fuel cell internal states.</span>
+<span class="sd">    control_variables : dict</span>
+<span class="sd">        Variables controlled by the user.</span>
+<span class="sd">    i_n : float</span>
+<span class="sd">        Internal current density (A/m²).</span>
+<span class="sd">    i_fc : float</span>
+<span class="sd">        Fuel cell current density (A/m²).</span>
+<span class="sd">    operating_inputs : dict</span>
+<span class="sd">        Operating inputs of the fuel cell.</span>
+<span class="sd">    parameters : dict</span>
+<span class="sd">        Parameters of the fuel cell model.</span>
+<span class="sd">    Mext : float</span>
+<span class="sd">        Molar mass of the ambient air outside the stack (kg/mol).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Wcp_des : float</span>
+<span class="sd">        Desired air compressor flow rate (kg/s).</span>
+<span class="sd">    Wa_inj_des : float</span>
+<span class="sd">        Desired humidifier flow rate at the anode side (kg/s).</span>
+<span class="sd">    Wc_inj_des : float</span>
+<span class="sd">        Desired humidifier flow rate at the cathode side (kg/s).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Extraction of the variables</span>
+    <span class="n">Pasm</span><span class="p">,</span> <span class="n">Pcsm</span><span class="p">,</span> <span class="n">Wcp</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Pasm&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Pcsm&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Wcp&#39;</span><span class="p">]</span>
+    <span class="c1"># Extraction of the operating inputs and the parameters</span>
+    <span class="n">Tfc</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span> <span class="o">=</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Tfc&#39;</span><span class="p">],</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Sa&#39;</span><span class="p">],</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Sc&#39;</span><span class="p">]</span>
+    <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span> <span class="o">=</span> <span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_a_des&#39;</span><span class="p">],</span> <span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]</span>
+    <span class="n">Aact</span><span class="p">,</span> <span class="n">type_auxiliary</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Aact&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_auxiliary&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;closed_anode&quot;</span> <span class="ow">or</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;opened_anode&quot;</span><span class="p">:</span>
+        <span class="c1"># Intermediate values</span>
+        <span class="n">Prd</span> <span class="o">=</span> <span class="n">Pasm</span>
+        <span class="n">Pcp</span> <span class="o">=</span> <span class="n">Pcsm</span>
+
+        <span class="c1"># The desired air compressor flow rate Wcp_des (kg.s-1)</span>
+        <span class="n">Wcp_des</span> <span class="o">=</span> <span class="n">n_cell</span> <span class="o">*</span> <span class="n">Mext</span> <span class="o">*</span> <span class="n">Pext</span> <span class="o">/</span> <span class="p">(</span><span class="n">Pext</span> <span class="o">-</span> <span class="n">Phi_ext</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Text</span><span class="p">))</span> <span class="o">*</span> \
+                  <span class="mi">1</span> <span class="o">/</span> <span class="n">yO2_ext</span> <span class="o">*</span> <span class="n">Sc</span> <span class="o">*</span> <span class="p">(</span><span class="n">i_fc</span> <span class="o">+</span> <span class="n">i_n</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">F</span><span class="p">)</span> <span class="o">*</span> <span class="n">Aact</span>
+
+        <span class="c1"># The desired humidifier flow rate at the anode side Wa_v_inj_des (kg.s-1)</span>
+        <span class="n">Wrd</span> <span class="o">=</span> <span class="n">M_H2</span> <span class="o">*</span> <span class="n">Sa</span> <span class="o">*</span> <span class="p">(</span><span class="n">i_fc</span> <span class="o">+</span> <span class="n">i_n</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">F</span><span class="p">)</span> <span class="o">*</span> <span class="n">Aact</span>
+        <span class="n">Wa_inj_des</span> <span class="o">=</span> <span class="p">(</span><span class="n">M_H2O</span> <span class="o">*</span> <span class="n">Phi_a_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Prd</span> <span class="o">+</span> <span class="n">Phi_a_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">))</span> <span class="o">/</span>
+                      <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_a_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Prd</span> <span class="o">+</span> <span class="n">Phi_a_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)))</span> <span class="o">*</span> <span class="p">(</span><span class="n">Wrd</span> <span class="o">/</span> <span class="n">M_H2</span><span class="p">))</span>
+
+        <span class="c1"># The desired humidifier flow rate at the cathode side Wc_inj_des (kg.s-1)</span>
+        <span class="n">Wv_hum_in</span> <span class="o">=</span> <span class="n">M_H2O</span> <span class="o">*</span> <span class="n">Phi_ext</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pext</span> <span class="o">*</span> <span class="p">(</span><span class="n">Wcp</span> <span class="o">/</span> <span class="n">Mext</span><span class="p">)</span>  <span class="c1"># Vapor flow rate from the outside</span>
+        <span class="n">Wc_v_des</span> <span class="o">=</span> <span class="n">M_H2O</span> <span class="o">*</span> <span class="n">Phi_c_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcp</span> <span class="o">*</span> <span class="p">(</span><span class="n">Wcp</span> <span class="o">/</span> <span class="n">Mext</span><span class="p">)</span>  <span class="c1"># Desired vapor flow rate</span>
+        <span class="n">Wc_inj_des</span> <span class="o">=</span> <span class="n">Wc_v_des</span> <span class="o">-</span> <span class="n">Wv_hum_in</span>  <span class="c1"># Desired humidifier flow rate</span>
+
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># elif type_auxiliary == &quot;no_auxiliary&quot;:</span>
+        <span class="n">Wcp_des</span><span class="p">,</span> <span class="n">Wa_inj_des</span><span class="p">,</span> <span class="n">Wc_inj_des</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">Wcp_des</span><span class="p">,</span> <span class="n">Wa_inj_des</span><span class="p">,</span> <span class="n">Wc_inj_des</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="modules.dif_eq_modules.dif_eq_int_values" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">dif_eq_int_values</span><span class="p">(</span><span class="n">solver_variables</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+      <p>This functions calculates intermediate values for the calculation of the differential equations</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>solver_variables</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Variables calculated by the solver. They correspond to the fuel cell internal states.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>control_variables</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Variables controlled by the user.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>operating_inputs</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Operating inputs of the fuel cell.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>parameters</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Parameters of the fuel cell model.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>Mext</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Molar mass of the ambient air outside the stack (kg/mol).</p>
+              </div>
+            </li>
+            <li>
+<b><code>Pagc</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Global pressure in the anode gas channel (Pa).</p>
+              </div>
+            </li>
+            <li>
+<b><code>Pcgc</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Global pressure in the cathode gas channel (Pa).</p>
+              </div>
+            </li>
+            <li>
+<b><code>i_n</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Internal current density (A/m²).</p>
+              </div>
+            </li>
+            <li>
+<b><code>Masm</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Molar mass of all the gas species in the anode supply manifold (kg/mol).</p>
+              </div>
+            </li>
+            <li>
+<b><code>Maem</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Molar mass of all the gas species in the anode external manifold (kg/mol).</p>
+              </div>
+            </li>
+            <li>
+<b><code>Mcsm</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Molar mass of all the gas species in the cathode supply manifold (kg/mol).</p>
+              </div>
+            </li>
+            <li>
+<b><code>Mcem</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Molar mass of all the gas species in the cathode external manifold (kg/mol).</p>
+              </div>
+            </li>
+            <li>
+                  <code>rho_H2O(Tfc) : float</code>
+              –
+              <div class="doc-md-description">
+                <p>Density of water vapor at the fuel cell temperature (kg/m³).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>modules/dif_eq_modules.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">dif_eq_int_values</span><span class="p">(</span><span class="n">solver_variables</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This functions calculates intermediate values for the calculation of the differential equations</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        solver_variables : dict</span>
+<span class="sd">            Variables calculated by the solver. They correspond to the fuel cell internal states.</span>
+<span class="sd">        control_variables : dict</span>
+<span class="sd">            Variables controlled by the user.</span>
+<span class="sd">        operating_inputs : dict</span>
+<span class="sd">            Operating inputs of the fuel cell.</span>
+<span class="sd">        parameters : dict</span>
+<span class="sd">            Parameters of the fuel cell model.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Mext : float</span>
+<span class="sd">            Molar mass of the ambient air outside the stack (kg/mol).</span>
+<span class="sd">        Pagc : float</span>
+<span class="sd">            Global pressure in the anode gas channel (Pa).</span>
+<span class="sd">        Pcgc : float</span>
+<span class="sd">            Global pressure in the cathode gas channel (Pa).</span>
+<span class="sd">        i_n : float</span>
+<span class="sd">            Internal current density (A/m²).</span>
+<span class="sd">        Masm : float</span>
+<span class="sd">            Molar mass of all the gas species in the anode supply manifold (kg/mol).</span>
+<span class="sd">        Maem : float</span>
+<span class="sd">            Molar mass of all the gas species in the anode external manifold (kg/mol).</span>
+<span class="sd">        Mcsm : float</span>
+<span class="sd">            Molar mass of all the gas species in the cathode supply manifold (kg/mol).</span>
+<span class="sd">        Mcem : float</span>
+<span class="sd">            Molar mass of all the gas species in the cathode external manifold (kg/mol).</span>
+<span class="sd">        rho_H2O(Tfc) : float</span>
+<span class="sd">            Density of water vapor at the fuel cell temperature (kg/m³).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="c1"># Extraction of the variables</span>
+    <span class="n">C_v_agc</span><span class="p">,</span> <span class="n">C_v_cgc</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_v_agc&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_v_cgc&#39;</span><span class="p">]</span>
+    <span class="n">C_H2_agc</span><span class="p">,</span> <span class="n">C_H2_acl</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_H2_agc&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_H2_acl&#39;</span><span class="p">]</span>
+    <span class="n">C_O2_ccl</span><span class="p">,</span> <span class="n">C_O2_cgc</span><span class="p">,</span> <span class="n">C_N2</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_O2_ccl&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_O2_cgc&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_N2&#39;</span><span class="p">]</span>
+    <span class="n">lambda_mem</span><span class="p">,</span> <span class="n">Pasm</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;lambda_mem&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Pasm&#39;</span><span class="p">]</span>
+    <span class="n">Paem</span><span class="p">,</span> <span class="n">Pcsm</span><span class="p">,</span> <span class="n">Pcem</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Paem&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Pcsm&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Pcem&#39;</span><span class="p">]</span>
+    <span class="c1"># Extraction of the operating inputs and the parameters</span>
+    <span class="n">Tfc</span><span class="p">,</span> <span class="n">Phi_c_des</span> <span class="o">=</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Tfc&#39;</span><span class="p">],</span> <span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]</span>
+    <span class="n">Hmem</span><span class="p">,</span> <span class="n">kappa_co</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hmem&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;kappa_co&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Physical quantities outside the stack</span>
+    <span class="c1"># Molar masses</span>
+    <span class="n">Mext</span> <span class="o">=</span> <span class="n">Phi_ext</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pext</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
+           <span class="n">yO2_ext</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_ext</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pext</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_O2</span> <span class="o">+</span> \
+           <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">yO2_ext</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_ext</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pext</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_N2</span>
+
+    <span class="c1"># Physical quantities inside the stack</span>
+    <span class="c1">#       Pressures</span>
+    <span class="n">Pagc</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_v_agc</span> <span class="o">+</span> <span class="n">C_H2_agc</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span>
+    <span class="n">Pcgc</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_v_cgc</span> <span class="o">+</span> <span class="n">C_O2_cgc</span> <span class="o">+</span> <span class="n">C_N2</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span>
+    <span class="c1">#       Humidities</span>
+    <span class="n">Phi_agc</span> <span class="o">=</span> <span class="n">C_v_agc</span> <span class="o">/</span> <span class="n">C_v_sat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span>
+    <span class="n">Phi_cgc</span> <span class="o">=</span> <span class="n">C_v_cgc</span> <span class="o">/</span> <span class="n">C_v_sat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span>
+    <span class="c1">#       Oxygen ratio in dry air</span>
+    <span class="n">y_c</span> <span class="o">=</span> <span class="n">C_O2_cgc</span> <span class="o">/</span> <span class="p">(</span><span class="n">C_O2_cgc</span> <span class="o">+</span> <span class="n">C_N2</span><span class="p">)</span>
+    <span class="c1">#       Internal current density</span>
+    <span class="n">i_H2</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">F</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span> <span class="o">/</span> <span class="n">Hmem</span> <span class="o">*</span> <span class="n">C_H2_acl</span> <span class="o">*</span> <span class="n">k_H2</span><span class="p">(</span><span class="n">lambda_mem</span><span class="p">,</span> <span class="n">Tfc</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">)</span>
+    <span class="n">i_O2</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">F</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span> <span class="o">/</span> <span class="n">Hmem</span> <span class="o">*</span> <span class="n">C_O2_ccl</span> <span class="o">*</span> <span class="n">k_O2</span><span class="p">(</span><span class="n">lambda_mem</span><span class="p">,</span> <span class="n">Tfc</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">)</span>
+    <span class="n">i_n</span> <span class="o">=</span> <span class="n">i_H2</span> <span class="o">+</span> <span class="n">i_O2</span>
+
+    <span class="c1"># Physical quantities inside the auxiliary system</span>
+    <span class="k">if</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;type_auxiliary&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;closed_anode&quot;</span> <span class="ow">or</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;type_auxiliary&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;opened_anode&quot;</span><span class="p">:</span>
+        <span class="c1"># Pressure</span>
+        <span class="n">Pp</span> <span class="o">=</span> <span class="n">Pasm</span>
+        <span class="c1"># Humidities</span>
+        <span class="n">Phi_aem</span> <span class="o">=</span> <span class="n">Phi_agc</span> <span class="o">*</span> <span class="n">Paem</span> <span class="o">/</span> <span class="n">Pagc</span>
+        <span class="n">Phi_asm</span> <span class="o">=</span> <span class="n">Phi_aem</span> <span class="o">*</span> <span class="n">Pp</span> <span class="o">/</span> <span class="n">Paem</span>
+        <span class="n">Phi_cem</span> <span class="o">=</span> <span class="n">Phi_cgc</span> <span class="o">*</span> <span class="n">Pcem</span> <span class="o">/</span> <span class="n">Pcgc</span>
+        <span class="c1"># Molar masses</span>
+        <span class="n">Masm</span> <span class="o">=</span> <span class="n">Phi_asm</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pasm</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
+               <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_asm</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pasm</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_H2</span>
+        <span class="n">Maem</span> <span class="o">=</span> <span class="n">Phi_aem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Paem</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
+               <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_aem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Paem</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_H2</span>
+        <span class="n">Mcsm</span> <span class="o">=</span> <span class="n">Phi_c_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcsm</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
+               <span class="n">yO2_ext</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_c_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcsm</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_O2</span> <span class="o">+</span> \
+               <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">yO2_ext</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_c_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcsm</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_N2</span>
+        <span class="n">Mcem</span> <span class="o">=</span> <span class="n">Phi_cem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcem</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
+               <span class="n">y_c</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_cem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcem</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_O2</span> <span class="o">+</span> \
+               <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y_c</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_cem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcem</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_N2</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># parameters[&quot;type_auxiliary&quot;] == &quot;no_auxiliary&quot;</span>
+        <span class="n">Masm</span><span class="p">,</span> <span class="n">Maem</span><span class="p">,</span> <span class="n">Mcsm</span><span class="p">,</span> <span class="n">Mcem</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+
+    <span class="k">return</span> <span class="n">Mext</span><span class="p">,</span> <span class="n">Pagc</span><span class="p">,</span> <span class="n">Pcgc</span><span class="p">,</span> <span class="n">i_n</span><span class="p">,</span> <span class="n">Masm</span><span class="p">,</span> <span class="n">Maem</span><span class="p">,</span> <span class="n">Mcsm</span><span class="p">,</span> <span class="n">Mcem</span><span class="p">,</span> <span class="n">rho_H2O</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="modules.dif_eq_modules.event_negative" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">event_negative</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">solver_variable_names</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+      <p>This function creates an event that will be checked at each step of solve_ivp integration. The integration stops
+if one of the crucial variables (C_v, lambda, C_O2, C_H2) becomes negative (or smaller than 1e-5).</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>t</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Time (s).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Numpy list of the solver variables.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>operating_inputs</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Operating inputs of the fuel cell.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>parameters</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Parameters of the fuel cell model.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>solver_variable_names</code></b>
+                  (<code>list</code>)
+              –
+              <div class="doc-md-description">
+                <p>Names of the solver variables.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>control_variables</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Variables controlled by the user.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>The difference between the minimum value of the crucial variables and 1e-5.</code>
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>modules/dif_eq_modules.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">event_negative</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">solver_variable_names</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function creates an event that will be checked at each step of solve_ivp integration. The integration stops</span>
+<span class="sd">    if one of the crucial variables (C_v, lambda, C_O2, C_H2) becomes negative (or smaller than 1e-5).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    t : float</span>
+<span class="sd">        Time (s).</span>
+<span class="sd">    y : numpy.ndarray</span>
+<span class="sd">        Numpy list of the solver variables.</span>
+<span class="sd">    operating_inputs : dict</span>
+<span class="sd">        Operating inputs of the fuel cell.</span>
+<span class="sd">    parameters : dict</span>
+<span class="sd">        Parameters of the fuel cell model.</span>
+<span class="sd">    solver_variable_names : list</span>
+<span class="sd">        Names of the solver variables.</span>
+<span class="sd">    control_variables : dict</span>
+<span class="sd">        Variables controlled by the user.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    The difference between the minimum value of the crucial variables and 1e-5.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">negative_solver_variables</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1"># Dictionary to store the crucial variables</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">solver_variable_names</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;C_v_&quot;</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;lambda_&quot;</span><span class="p">))</span> <span class="ow">or</span> \
+                <span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;C_O2_&quot;</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;C_H2_&quot;</span><span class="p">)):</span>
+            <span class="n">negative_solver_variables</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">negative_solver_variables</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">-</span> <span class="mf">1e-5</span>  <span class="c1"># 1e-5 is a control parameter to stop the program before</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../calibration_modules/" class="btn btn-neutral float-left" title="Calibration modules"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../display_modules/" class="btn btn-neutral float-right" title="Display modules">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../calibration_modules/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../display_modules/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
