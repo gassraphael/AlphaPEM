@@ -2,7 +2,7 @@
 
 AlphaPEM is an open-source software package for simulating proton exchange membrane fuel cell (PEMFC) systems for embedded applications. It is based on a physics-based, one-dimensional (1D), dynamic, two-phase, and isothermal model. It can quickly simulate the internal states and voltage dynamics of PEMFC systems, and produce polarization and EIS curves. It can also automatically calibrate the undetermined parameters of the model to simulate a given real fuel cell system.
 
-A detailed presentation of this program was published in the peer-reviewed journal SoftwareX (see section [Related publications](#related-publications)). (**to do!!**)
+A detailed [presentation](https://doi.org/10.48550/arXiv.2407.12373) of this program was published in the peer-reviewed journal SoftwareX. 
 
 Improvements to **AlphaPEM**, such as the addition of heat transfer modelling and spatial extension to 1D+1D, will be available in the future.
 
@@ -28,13 +28,14 @@ To install **AlphaPEM**, follow these steps in a shell:
     cd AlphaPEM
     ```
 
-3. Install the required dependencies (eventually in a specific environment):
+3. Update the Python package manager, pip, to the latest available version:
     ```sh
-    pip install numpy scipy matplotlib colorama PyQt5 PySide2 geneticalgorithm2[full] ttkthemes
+    pip install --upgrade pip
     ```
-    or
+
+4. Install the required dependencies (eventually in a specific environment):
     ```sh
-    pip install -r requirements.txt
+    pip install numpy scipy matplotlib colorama geneticalgorithm2[full] ttkthemes
     ```
     
 

@@ -29,14 +29,15 @@ To install **AlphaPEM**, follow these steps in a shell:
     ```sh
     cd AlphaPEM
     ```
-
-3. Install the required dependencies (eventually in a specific environment):
+    
+3. Update the Python package manager, pip, to the latest available version:
     ```sh
-    pip install numpy scipy matplotlib colorama PyQt5 PySide2 geneticalgorithm2[full] ttkthemes
+    pip install --upgrade pip
     ```
-    or
+
+4. Install the required dependencies (eventually in a specific environment):
     ```sh
-    pip install -r requirements.txt
+    pip install numpy scipy matplotlib colorama geneticalgorithm2[full] ttkthemes
     ```
     
 
