@@ -12,7 +12,6 @@ plugins:
           options:
             docstring_style: numpy  # Uses Numpy style for mkdocstrings
 
-
 # Structure of the documentation site's navigation
 nav:
   - Home: index.md # Documentation home page

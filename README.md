@@ -73,6 +73,7 @@ AlphaPEM is firstly developed by [Raphaël Gass](https://gassraphael.github.io/)
 ## Financial support
 
 This work has been supported:
+
 - from 2021 to 2024 by French National Research Agency via project [DEAL](https://deal.lis-lab.fr/) (Grant no. ANR-20-CE05-0016-01), the Region Provence-Alpes-Côte d’Azur, the EIPHI Graduate School (contract ANR-17-EURE-0002) and the Region Bourgogne Franche-Comté.
 
 ## Licenses
@@ -80,6 +81,7 @@ This work has been supported:
 **AlphaPEM** is licensed under the GNU GPL 3.0. See the [LICENSE](LICENSE) file for more details. 
 
 It also includes components licensed under the [MIT license](calibration/LICENSE-MIT):
+
 - calibration/parameter_calibration.py from [geneticalgorithm2](https://github.com/PasaOpasen/geneticalgorithm2). 
 
 ## New contributors

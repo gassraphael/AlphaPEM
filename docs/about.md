@@ -11,10 +11,11 @@ This work has been supported:
 
 ## Licenses
 
-**AlphaPEM** is licensed under the GNU GPL 3.0. See the [LICENSE](LICENSE) file for more details. 
+**AlphaPEM** is licensed under the GNU GPL 3.0. See the [LICENSE](https://github.com/gassraphael/AlphaPEM/blob/main/LICENSE) file for more details. 
 
-It also includes components licensed under the [MIT license](calibration/LICENSE-MIT):
-- calibration/parameter_calibration.py from [geneticalgorithm2](https://github.com/PasaOpasen/geneticalgorithm2). 
+It also includes components licensed under the [MIT license](https://github.com/gassraphael/AlphaPEM/blob/main/calibration/LICENSE-MIT):
+   
+   - calibration/parameter_calibration.py from [geneticalgorithm2](https://github.com/PasaOpasen/geneticalgorithm2). 
 
 ## New contributors
 
