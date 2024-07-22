@@ -134,7 +134,7 @@
               
                 <h1 id="alphapem">AlphaPEM</h1>
 <p>AlphaPEM is an open-source software package for simulating proton exchange membrane fuel cell (PEMFC) systems for embedded applications. It is based on a physics-based, one-dimensional (1D), dynamic, two-phase, and isothermal model. It can quickly simulate the internal states and voltage dynamics of PEMFC systems, and produce polarization and EIS curves. It can also automatically calibrate the undetermined parameters of the model to simulate a given real fuel cell system.</p>
-<p>A detailed presentation of this program was published in the peer-reviewed journal SoftwareX (see section <a href="#related-publications">Related publications</a>). (<strong>to do!!</strong>)</p>
+<p>A detailed <a href="https://doi.org/10.48550/arXiv.2407.12373">presentation</a> of this program was published in the peer-reviewed journal SoftwareX. </p>
 <p>Improvements to <strong>AlphaPEM</strong>, such as the addition of heat transfer modelling and spatial extension to 1D+1D, will be available in the future.</p>
 <h1 id="table-of-contents">Table of Contents</h1>
 <ul>
@@ -156,12 +156,14 @@
     cd AlphaPEM</code></p>
 </li>
 <li>
+<p>Update the Python package manager, pip, to the latest available version:
+    <code>sh
+    pip install --upgrade pip</code></p>
+</li>
+<li>
 <p>Install the required dependencies (eventually in a specific environment):
     <code>sh
-    pip install numpy scipy matplotlib colorama PyQt5 PySide2 geneticalgorithm2[full] ttkthemes</code>
-    or
-    <code>sh
-    pip install -r requirements.txt</code></p>
+    pip install numpy scipy matplotlib colorama geneticalgorithm2[full] ttkthemes</code></p>
 </li>
 </ol>
 <h1 id="major-updates">Major updates</h1>
@@ -244,5 +246,5 @@
 
 <!--
 MkDocs version : 1.6.0
-Build Date UTC : 2024-07-22 10:31:37.107138+00:00
+Build Date UTC : 2024-07-22 11:00:55.939228+00:00
 -->
