@@ -19,24 +19,16 @@ Improvements to **AlphaPEM**, such as the addition of heat transfer modelling an
 To install **AlphaPEM**, follow these steps in a shell:
 
 1. Clone the repository:
-    ```sh
-    git clone https://github.com/gassraphael/AlphaPEM.git
-    ```
+    ```git clone https://github.com/gassraphael/AlphaPEM.git```
 
 2. Navigate to the project directory:
-    ```sh
-    cd AlphaPEM
-    ```
+    ```cd AlphaPEM```
 
 3. Update the Python package manager, pip, to the latest available version:
-    ```sh
-    pip install --upgrade pip
-    ```
+    ```pip install --upgrade pip```
 
 4. Install the required dependencies (eventually in a specific environment):
-    ```sh
-    pip install numpy scipy matplotlib colorama geneticalgorithm2[full] ttkthemes
-    ```
+    ```pip install numpy scipy matplotlib colorama geneticalgorithm2[full] ttkthemes```
     
 
 # Major updates
