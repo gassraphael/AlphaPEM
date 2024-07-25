@@ -6,7 +6,7 @@ A detailed [presentation](https://doi.org/10.48550/arXiv.2407.12373) of this pro
 
 Improvements to **AlphaPEM**, such as the addition of heat transfer modelling and spatial extension to 1D+1D, will be available in the future.
 
-![1D modelling of matter transport phenomena in a PEM single cell divided into several nodes](docs/image/nodal_model.png "1D modelling of matter transport phenomena in a PEM single cell divided into several nodes")
+![1D modelling of matter transport phenomena in a PEM single cell divided into several nodes](docs/images/nodal_model.pdf "1D modelling of matter transport phenomena in a PEM single cell divided into several nodes")
 
 
 # Table of Contents
