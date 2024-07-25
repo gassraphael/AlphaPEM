@@ -6,8 +6,7 @@ A detailed [presentation](https://doi.org/10.48550/arXiv.2407.12373) of this pro
 
 Improvements to **AlphaPEM**, such as the addition of heat transfer modelling and spatial extension to 1D+1D, will be available in the future.
 
-![1D modelling of matter transport phenomena in a PEM single cell divided into several nodes](docs/images/nodal_model.png "1D modelling of matter transport phenomena in a PEM single cell divided into several nodes")
-
+![AlphaPEM graphical user interface](docs/images/demo.png "AlphaPEM graphical user interface (GUI)")
 
 # Table of Contents
 
@@ -55,7 +54,8 @@ The detailed model description and simulation results can be found in the follow
 - Submitted journal papers:
 	- **An Advanced 1D Physics-Based Model for PEM Hydrogen Fuel Cells With Enhanced Overvoltage Prediction**
 		- In the journal eTransportation, in [arXiv](https://doi.org/10.48550/arXiv.2404.07508), [HAL](https://hal.science/hal-04530852) or in [SSRN](http://dx.doi.org/10.2139/ssrn.4812343) (preprint).
-		- The aim of this study was to introduce the dynamic 1D model developed during 2021-2024, emphasizing the adjustment of the equations for this specific model and their numerical resolution. Furthermore, a novel theory is proposed to establish a physical relationship between the voltage drop at high currents, the quantity of liquid water in the cell, and operating conditions.
+		- The aim of this study was to introduce the dynamic 1D model developed during 2021-2024, emphasizing the adjustment of the equations for this specific model and their numerical resolution. Furthermore, a novel coefficient is proposed to establish a physical relationship between the voltage drop at high currents, the quantity of liquid water in the cell, and operating conditions.
+		- ![1D modelling of matter transport phenomena in a PEM single cell divided into several nodes](docs/images/nodal_model.png "1D modelling of matter transport phenomena in a PEM single cell divided into several nodes")
 	
 - Published journal papers:
 	- **A Critical Review of Proton Exchange Membrane Fuel Cells Matter Transports and Voltage Polarisation for Modelling**
