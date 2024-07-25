@@ -1,6 +1,6 @@
 # AlphaPEM
 
-AlphaPEM is an open-source software package for simulating proton exchange membrane fuel cell (PEMFC) systems for embedded applications. It is based on a physics-based, one-dimensional (1D), dynamic, two-phase, and isothermal model. It can quickly simulate the internal states and voltage dynamics of PEMFC systems, and produce polarization and EIS curves. It can also automatically calibrate the undetermined parameters of the model to simulate a given real fuel cell system.
+AlphaPEM is an open-source software package for simulating proton exchange membrane fuel cell (PEMFC) systems for embedded applications. It is based on a physics-based, one-dimensional (1D), dynamic, two-phase, and isothermal model. It quickly simulates the internal states and voltage dynamics of PEMFC systems for all current densities and operating conditions imposed on it. In particular, it is possible to apply a step current density or use current profiles to generate polarization curves or electrochemical impedance spectroscopy (EIS) curves. It can also automatically calibrate the undetermined parameters of the model to simulate a given real fuel cell system.
 
 A detailed [presentation](https://doi.org/10.48550/arXiv.2407.12373) of this program is currently under publication in the peer-reviewed journal SoftwareX. Furthermore, comprehensive [documentation](https://gassraphael.github.io/AlphaPEM/) in Numpy style for the software functions is available.
 
