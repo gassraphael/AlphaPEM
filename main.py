@@ -43,8 +43,8 @@ if __name__ == '__main__':
     type_fuel_cell_4 = None
     # Current density possibilities: "step", "polarization", "EIS".
     type_current = "polarization"
-    # Auxiliary system possibilities: "closed_anode", "opened_anode", "no_auxiliary".
-    type_auxiliary = "opened_anode"
+    # Auxiliary system possibilities: "closed_anode_with_recirculation", "opened_anode", "no_auxiliary".
+    type_auxiliary = "closed_anode_with_recirculation"
     # Control strategy for the operating inputs: "Phi_des", "no_control".
     type_control_1 = "no_control"
     type_control_2 = "no_control"

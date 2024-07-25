@@ -240,7 +240,7 @@ def display_radiobuttons(model_possibilities_frame, choices_buttons):
     ttk.Radiobutton(model_possibilities_frame, text='No auxiliaries', value=0,
                     variable=choices_buttons['type_auxiliary']['value']). \
         grid(row=choices_buttons['type_auxiliary']['label_row'], column=2, sticky="w")
-    ttk.Radiobutton(model_possibilities_frame, text='Closed anode', value=1,
+    ttk.Radiobutton(model_possibilities_frame, text='Closed anode\nwith recirculation', value=1,
                     variable=choices_buttons['type_auxiliary']['value']). \
         grid(row=choices_buttons['type_auxiliary']['label_row'], column=3, sticky="w")
     ttk.Radiobutton(model_possibilities_frame, text='Opened anode', value=2,
@@ -469,7 +469,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     if choice_buttons['type_auxiliary']['value'].get() == 0:
         type_auxiliary = "no_auxiliary"
     elif choice_buttons['type_auxiliary']['value'].get() == 1:
-        type_auxiliary = "closed_anode"
+        type_auxiliary = "closed_anode_with_recirculation"
     else:
         type_auxiliary = "opened_anode"
 

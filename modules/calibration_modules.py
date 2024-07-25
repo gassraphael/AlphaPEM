@@ -217,7 +217,7 @@ def determined_parameters(type_fuel_cell):
         Lgc = 1.6  # m. It is the length of the gas channel.
 
         # Algorithm parameters for polarization curve generation
-        type_auxiliary = "closed_anode"
+        type_auxiliary = "closed_anode_with_recirculation"
         type_control = "no_control"
         type_purge = "no_purge"
         type_display = "no_display"
