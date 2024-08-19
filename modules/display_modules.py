@@ -290,7 +290,8 @@ def plot_EIS_curve_Bode_angle(Fourier_results, ax):
     theta_i = theta_i_t[np.argmax(A_period_t == A)]  # Dephasing at the frequency of the perturbation
 
     # Plot the angle Bode diagram
-    ax.plot(np.log10(f), (theta_U - theta_i) * 180 / np.pi, 'o', color=colors(2), label='Angle Bode diagram')
+    ax.plot(np.log10(f), ((theta_U - theta_i) * 180 / np.pi) % 360, 'o', color=colors(2),
+            label='Angle Bode diagram')
     ax.set_xlabel(r'log(f(Hz))', labelpad=3)
     ax.set_ylabel('phase shift (degree)', labelpad=3)
     ax.legend(['Angle Bode diagram'], loc='best')
