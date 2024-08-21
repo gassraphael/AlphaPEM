@@ -133,7 +133,7 @@ def plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2, fig3):
             saving_instructions("results", subfolder_name, "Bode_amplitude_curve_1.pdf", fig2)
             saving_instructions("results", subfolder_name, "Bode_angle_curve_1.pdf", fig3)
         elif type_display == "synthetic":
-            saving_instructions("results", subfolder_name, "Nyquist_plot_1.pdf", fig1)
+            saving_instructions("results", subfolder_name, "Nyquist_plot_syn_1.pdf", fig1)
 
 
 def saving_instructions(root_folder, subfolder_name, filename, fig):
