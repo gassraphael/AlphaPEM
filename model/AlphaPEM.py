@@ -397,7 +397,7 @@ class AlphaPEM:
                                              self.parameters, self.control_variables)
                 for key in ['Phi_a_des', 'Phi_c_des']: self.variables[key].append(self.control_variables[key])
 
-    def Display(self, ax1=None, ax2=None):
+    def Display(self, ax1=None, ax2=None, ax3=None):
         """Display the plots of the program.
 
         Parameters
@@ -486,8 +486,8 @@ class AlphaPEM:
 
                 Fourier_results = make_Fourier_transformation(self.variables, self.operating_inputs, self.parameters)
                 plot_EIS_curve_Nyquist(self.parameters, Fourier_results, ax1)
-                plot_EIS_curve_Bode_amplitude(self.parameters, Fourier_results, ax2[0])
-                plot_EIS_curve_Bode_angle(Fourier_results, ax2[1])
+                plot_EIS_curve_Bode_amplitude(self.parameters, Fourier_results, ax2)
+                plot_EIS_curve_Bode_angle(Fourier_results, ax3)
 
                 # # Tests to verify the accuracy of EIS simulation.
                 # plot_EIS_curve_tests(self.variables, self.operating_inputs, self.parameters, Fourier_results)

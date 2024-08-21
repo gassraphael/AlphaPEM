@@ -37,17 +37,20 @@ def figures_preparation(type_current, type_display):
     if type_display == "no_display":
         fig1, ax1 = None, None
         fig2, ax2 = None, None
+        fig3, ax3 = None, None
 
     # For the step current
     if type_current == "step":
         if type_display == "multiple":  # saving instruction is directly implemented within AlphaPEM.Display here.
             fig1, ax1 = None, None  # Here, additional plots are unnecessary
             fig2, ax2 = None, None  # Here, additional plots are unnecessary
+            fig3, ax3 = None, None  # Here, additional plots are unnecessary
             plt.rcParams['font.size'] = 16
             plt.rcParams['lines.linewidth'] = 2.0
         elif type_display == "synthetic":
             fig1, ax1 = plt.subplots(3, 3, figsize=(18, 18))
             fig2, ax2 = None, None  # Here, additional plots are unnecessary
+            fig3, ax3 = None, None  # Here, additional plots are unnecessary
             plt.rcParams['font.size'] = 17
             plt.rcParams['lines.linewidth'] = 2.5
             plt.subplots_adjust(left=0.04, right=0.98, top=0.96, bottom=0.07, wspace=0.2, hspace=0.15)
@@ -57,12 +60,14 @@ def figures_preparation(type_current, type_display):
         if type_display == "multiple":
             fig1, ax1 = plt.subplots(1, 3, figsize=(18, 6))
             fig2, ax2 = plt.subplots(1, 3, figsize=(18, 6))
+            fig3, ax3 = None, None  # Here, additional plots are unnecessary
             plt.rcParams['font.size'] = 12
             plt.rcParams['lines.linewidth'] = 2.5
             plt.subplots_adjust(left=0.04, right=0.98, top=0.96, bottom=0.07, wspace=0.2, hspace=0.15)
         elif type_display == "synthetic":
             fig1, ax1 = plt.subplots(figsize=(8, 8))
             fig2, ax2 = None, None  # Here, additional plots are unnecessary
+            fig3, ax3 = None, None  # Here, additional plots are unnecessary
             plt.rcParams['font.size'] = 16
             plt.rcParams['lines.linewidth'] = 2.0
 
@@ -70,17 +75,19 @@ def figures_preparation(type_current, type_display):
     elif type_current == "EIS":
         if type_display == "multiple":
             fig1, ax1 = plt.subplots(figsize=(6, 6))
-            fig2, ax2 = plt.subplots(1, 2, figsize=(12, 6))
+            fig2, ax2 = plt.subplots(figsize=(6, 6))
+            fig3, ax3 = plt.subplots(figsize=(6, 6))
             plt.rcParams['font.size'] = 16
             plt.rcParams['lines.linewidth'] = 2.0
         elif type_display == "synthetic":
             fig1, ax1 = plt.subplots(1, 3, figsize=(18, 6))
             fig2, ax2 = None, None  # Here, additional plots are unnecessary
+            fig3, ax3 = None, None  # Here, additional plots are unnecessary
             plt.rcParams['font.size'] = 12
             plt.rcParams['lines.linewidth'] = 2.5
             plt.subplots_adjust(left=0.04, right=0.98, top=0.96, bottom=0.07, wspace=0.2, hspace=0.15)
 
-    return fig1, ax1, fig2, ax2
+    return fig1, ax1, fig2, ax2, fig3, ax3
 
 
 def plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2):

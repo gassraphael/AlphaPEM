@@ -93,7 +93,7 @@ if __name__ == '__main__':
         raise ValueError('You have to specify a type_current which is accepted.')
 
     # Figures preparation
-    fig1, ax1, fig2, ax2 = figures_preparation(type_current, type_display)
+    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(type_current, type_display)
 
     # Dynamic display requires a dedicated use of the AlphaPEM class.
     if type_plot == "dynamic":
