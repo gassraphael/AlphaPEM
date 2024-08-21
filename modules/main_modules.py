@@ -90,7 +90,7 @@ def figures_preparation(type_current, type_display):
     return fig1, ax1, fig2, ax2, fig3, ax3
 
 
-def plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2):
+def plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2, fig3):
     """This function saves the plots in the mentioned folder. The names of the files are automatically generated
     according to the type_current and the type_display.
 
@@ -130,7 +130,8 @@ def plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2):
     elif type_current == "EIS":
         if type_display == "multiple":
             saving_instructions("results", subfolder_name, "Nyquist_plot_1.pdf", fig1)
-            saving_instructions("results", subfolder_name, "Bode_curves_1.pdf", fig2)
+            saving_instructions("results", subfolder_name, "Bode_amplitude_curve_1.pdf", fig2)
+            saving_instructions("results", subfolder_name, "Bode_angle_curve_1.pdf", fig3)
         elif type_display == "synthetic":
             saving_instructions("results", subfolder_name, "Nyquist_plot_1.pdf", fig1)
 

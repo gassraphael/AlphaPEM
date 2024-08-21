@@ -151,6 +151,11 @@ if __name__ == '__main__':
             for x in Simulator1.solver_variable_names:
                 initial_variable_values.append(Simulator1.variables[x][-1])
 
+            if type_display == "multiple":
+                print("A display bug prevents the dynamic updating of the graphs, as it appears that too much data is "
+                      "involved. However, the data is correctly calculated, and the appropriate plots are saved in the "
+                      "'results' folder. This display bug does not occur when using a 'synthetic' type_display.")
+
         # Dynamic simulation
         for i in range(n):
             Simulator1 = AlphaPEM(current_density, Tfc_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
@@ -238,7 +243,7 @@ if __name__ == '__main__':
                 Simulator4.Display(ax1, ax2, ax3)
 
     # Plot saving
-    plot_saving(type_fuel_cell_1, type_current, type_display, fig1, fig2)
+    plot_saving(type_fuel_cell_1, type_current, type_display, fig1, fig2, fig3)
 
     # Ending time
     algo_time = time.time() - start_time
