@@ -187,7 +187,7 @@ if __name__ == '__main__':
 
             # Display
             if type_display != "no_display":
-                Simulator1.Display(ax1, ax2)
+                Simulator1.Display(ax1, ax2, ax3)
 
     else:  # elif type_plot == "fixed":
 
@@ -229,13 +229,13 @@ if __name__ == '__main__':
 
         # Display
         if type_display != "no_display":
-            Simulator1.Display(ax1, ax2)
+            Simulator1.Display(ax1, ax2, ax3)
             if type_fuel_cell_2 is not None:
-                Simulator2.Display(ax1, ax2)
+                Simulator2.Display(ax1, ax2, ax3)
             if type_fuel_cell_3 is not None:
-                Simulator3.Display(ax1, ax2)
+                Simulator3.Display(ax1, ax2, ax3)
             if type_fuel_cell_4 is not None:
-                Simulator4.Display(ax1, ax2)
+                Simulator4.Display(ax1, ax2, ax3)
 
     # Plot saving
     plot_saving(type_fuel_cell_1, type_current, type_display, fig1, fig2)

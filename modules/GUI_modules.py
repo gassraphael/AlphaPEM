@@ -918,7 +918,7 @@ def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, S
 
             # Display
             if type_display != "no_display":
-                Simulator.Display(ax1, ax2)
+                Simulator.Display(ax1, ax2, ax3)
 
     else:  # elif type_plot == "fixed":
         # Simulation
@@ -929,7 +929,7 @@ def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, S
                              type_auxiliary, type_control, type_purge, type_display, type_plot)
         # Display
         if type_display != "no_display":
-            Simulator.Display(ax1, ax2)
+            Simulator.Display(ax1, ax2, ax3)
 
     # Plot saving
     plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2)
@@ -1092,7 +1092,7 @@ def launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_de
 
             # Display
             if type_display != "no_display":
-                Simulator.Display(ax1, ax2)
+                Simulator.Display(ax1, ax2, ax3)
 
     else:  # elif type_plot == "fixed":
         # Simulation
@@ -1103,7 +1103,7 @@ def launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_de
                              type_auxiliary, type_control, type_purge, type_display, type_plot)
         # Display
         if type_display != "no_display":
-            Simulator.Display(ax1, ax2)
+            Simulator.Display(ax1, ax2, ax3)
 
     # Plot saving
     plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2)
@@ -1292,7 +1292,7 @@ def launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc
 
         # Display
         if type_display != "no_display":
-            Simulator.Display(ax1, ax2)
+            Simulator.Display(ax1, ax2, ax3)
 
     # Plot saving
     plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2)
