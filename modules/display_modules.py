@@ -297,7 +297,7 @@ def plot_EIS_curve_Bode_angle(parameters, Fourier_results, ax):
     ax.plot(f, ((theta_U - theta_i) * 180 / np.pi) % 360, 'o', color=colors(2),
             label='Angle Bode diagram')
     ax.set_xlabel('Frequency (Hz, logarithmic scale)', labelpad=3)
-    ax.set_ylabel(r'Phase (°)', labelpad=3)
+    ax.set_ylabel(r'Phase ($^\circ$)', labelpad=3)
     #   Plot instructions
     plot_general_instructions(ax)
     plot_Bode_phase_instructions(f_EIS, type_fuel_cell, ax)
@@ -1125,8 +1125,8 @@ def plot_EIS_Nyquist_instructions(type_fuel_cell, ax):
     # For EH-31 fuel cell
     if type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or \
             type_fuel_cell == "EH-31_2.25" or type_fuel_cell == "EH-31_2.5":
-        ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(40))
-        ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(40 / 5))
+        ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(30))
+        ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(30 / 5))
         ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(10))
         ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(10 / 5))
         # ax.set_xlim(0, 200)
