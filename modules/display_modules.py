@@ -9,7 +9,7 @@
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib.ticker import LogLocator, LogFormatter
+from matplotlib.ticker import LogLocator, LogFormatter, FormatStrFormatter
 from numpy.fft import fft, fftfreq
 from scipy.interpolate import interp1d
 
@@ -204,8 +204,8 @@ def plot_EIS_curve_Nyquist(parameters, Fourier_results, ax):
         Axes on which the Nyquist diagram will be plotted.
     """
 
-    # Extraction of the operating inputs and the parameters
-    i_EIS, ratio_EIS = parameters['i_EIS'], parameters['ratio_EIS']
+    # Extraction of the parameters
+    i_EIS, ratio_EIS, type_fuel_cell = parameters['i_EIS'], parameters['ratio_EIS'], parameters['type_fuel_cell']
     # Extraction of the Fourier results
     Ucell_Fourier, ifc_Fourier = Fourier_results['Ucell_Fourier'], Fourier_results['ifc_Fourier']
     A_period_t, A, N = Fourier_results['A_period_t'], Fourier_results['A'], Fourier_results['N']
@@ -248,6 +248,7 @@ def plot_EIS_curve_Bode_amplitude(parameters, Fourier_results, ax):
 
     # Extraction of the parameters
     i_EIS, ratio_EIS, f_EIS = parameters['i_EIS'], parameters['ratio_EIS'], parameters['f_EIS']
+    type_fuel_cell = parameters['type_fuel_cell']
     # Extraction of the Fourier results
     A, f = Fourier_results['A'], Fourier_results['f']
 
@@ -256,7 +257,7 @@ def plot_EIS_curve_Bode_amplitude(parameters, Fourier_results, ax):
     #                                        which measure a device under load rather than a current source.
 
     # Plot the amplitude Bode diagram
-    ax.plot(np.log10(f), np.abs(Z0), 'o', color=colors(1), label='Amplitude Bode diagram')
+    ax.plot(f, np.abs(Z0), 'o', color=colors(1), label='Amplitude Bode diagram')
     ax.set_xlabel('Frequency (Hz, logarithmic scale)', labelpad=3)
     ax.set_ylabel(r'Impedance amplitude ($m\Omega.cm^{2}$)', labelpad=3)
     #   Plot instructions
@@ -280,7 +281,7 @@ def plot_EIS_curve_Bode_angle(parameters, Fourier_results, ax):
     """
 
     # Extraction of the parameters
-    f_EIS = parameters['f_EIS']
+    f_EIS, type_fuel_cell = parameters['f_EIS'], parameters['type_fuel_cell']
     # Extraction of the Fourier results
     Ucell_Fourier, ifc_Fourier = Fourier_results['Ucell_Fourier'], Fourier_results['ifc_Fourier']
     A_period_t, A = Fourier_results['A_period_t'], Fourier_results['A']
@@ -293,10 +294,10 @@ def plot_EIS_curve_Bode_angle(parameters, Fourier_results, ax):
     theta_i = theta_i_t[np.argmax(A_period_t == A)]  # Dephasing at the frequency of the perturbation
 
     # Plot the angle Bode diagram
-    ax.plot(np.log10(f), ((theta_U - theta_i) * 180 / np.pi) % 360, 'o', color=colors(2),
+    ax.plot(f, ((theta_U - theta_i) * 180 / np.pi) % 360, 'o', color=colors(2),
             label='Angle Bode diagram')
     ax.set_xlabel('Frequency (Hz, logarithmic scale)', labelpad=3)
-    ax.set_ylabel('Phase (°)', labelpad=3)
+    ax.set_ylabel(r'Phase (°)', labelpad=3)
     #   Plot instructions
     plot_general_instructions(ax)
     plot_Bode_phase_instructions(f_EIS, type_fuel_cell, ax)
@@ -1150,12 +1151,12 @@ def plot_Bode_amplitude_instructions(f_EIS, type_fuel_cell, ax):
     # For EH-31 fuel cell
     if type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or \
             type_fuel_cell == "EH-31_2.25" or type_fuel_cell == "EH-31_2.5":
-        ax.xaxis.set_major_locator(LogLocator(base=10.0, numticks=10)) # set major ticks at each power of 10
-        ax.xaxis.set_minor_locator(LogLocator(base=10.0, subs='auto', numticks=6)) # set 5 minor ticks evenly spaced between each power of 10
-        ax.xaxis.set_major_formatter(LogFormatter(base=10.0)) # set the format of the major ticks
+        ax.xaxis.set_major_locator(LogLocator(base=10.0, numticks=f_power_max_EIS - f_power_min_EIS + 1))
+        ax.xaxis.set_minor_locator(LogLocator(base=10.0, subs=np.arange(2, 10) * .1,
+                                              numticks=(f_power_max_EIS - f_power_min_EIS + 1) * len(np.arange(2, 10))))
         ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(30))
         ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(30 / 5))
-        ax.set_xlim([f_power_min_EIS, f_power_max_EIS])
+        ax.set_xlim([10**f_power_min_EIS, 10**f_power_max_EIS])
         # ax.set_ylim(0, 200)
 
 def plot_Bode_phase_instructions(f_EIS, type_fuel_cell, ax):
@@ -1177,10 +1178,10 @@ def plot_Bode_phase_instructions(f_EIS, type_fuel_cell, ax):
     # For EH-31 fuel cell
     if type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or \
             type_fuel_cell == "EH-31_2.25" or type_fuel_cell == "EH-31_2.5":
-        ax.xaxis.set_major_locator(LogLocator(base=10.0, numticks=10))  # set major ticks at each power of 10
-        ax.xaxis.set_minor_locator(LogLocator(base=10.0, subs='auto', numticks=6))  # set 5 minor ticks evenly spaced between each power of 10
-        ax.xaxis.set_major_formatter(LogFormatter(base=10.0))  # set the format of the major ticks
-        ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(10))
-        ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(10 / 5))
-        ax.set_xlim([f_power_min_EIS, f_power_max_EIS])
+        ax.xaxis.set_major_locator(LogLocator(base=10.0, numticks = f_power_max_EIS-f_power_min_EIS+1))
+        ax.xaxis.set_minor_locator(LogLocator(base=10.0, subs=np.arange(2, 10) * .1,
+                                              numticks = (f_power_max_EIS-f_power_min_EIS+1)*len(np.arange(2, 10))))
+        ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(5))
+        ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(5 / 5))
+        ax.set_xlim([10**f_power_min_EIS, 10**f_power_max_EIS])
         # ax.set_ylim(0, 360)
