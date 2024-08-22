@@ -487,7 +487,7 @@ class AlphaPEM:
                 Fourier_results = make_Fourier_transformation(self.variables, self.operating_inputs, self.parameters)
                 plot_EIS_curve_Nyquist(self.parameters, Fourier_results, ax1)
                 plot_EIS_curve_Bode_amplitude(self.parameters, Fourier_results, ax2)
-                plot_EIS_curve_Bode_angle(Fourier_results, ax3)
+                plot_EIS_curve_Bode_angle(self.parameters, Fourier_results, ax3)
 
                 # # Tests to verify the accuracy of EIS simulation.
                 # plot_EIS_curve_tests(self.variables, self.operating_inputs, self.parameters, Fourier_results)
@@ -499,7 +499,7 @@ class AlphaPEM:
                 Fourier_results = make_Fourier_transformation(self.variables, self.operating_inputs, self.parameters)
                 plot_EIS_curve_Nyquist(self.parameters, Fourier_results, ax1[0])
                 plot_EIS_curve_Bode_amplitude(self.parameters, Fourier_results, ax1[1])
-                plot_EIS_curve_Bode_angle(Fourier_results, ax1[2])
+                plot_EIS_curve_Bode_angle(self.parameters, Fourier_results, ax1[2])
 
                 # # Tests to verify the accuracy of EIS simulation.
                 # plot_EIS_curve_tests(self.variables, self.operating_inputs, self.parameters, Fourier_results)

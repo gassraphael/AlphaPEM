@@ -9,6 +9,7 @@
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from matplotlib.ticker import LogLocator, LogFormatter
 from numpy.fft import fft, fftfreq
 from scipy.interpolate import interp1d
 
@@ -103,7 +104,7 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax):
         # Plot the model polarisation curve
         plot_specific_line(ifc_discretized, Ucell_discretized, type_fuel_cell, type_auxiliary, type_control, sim_error,
                            ax)
-        plot_specific_instructions(type_fuel_cell, ax)
+        plot_pola_instructions(type_fuel_cell, ax)
 
     else:  # type_plot == "dynamic"
         # Plot of the polarisation curve produced by the model
@@ -118,7 +119,7 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax):
                   labelpad=3, fontsize=18)
     ax.set_ylabel(r'Cell voltage $\mathregular{U_{cell}}$ $\mathregular{\left( V \right)}$',
                   labelpad=3, fontsize=18)
-    plot_instructions(ax)
+    plot_general_instructions(ax)
     if type_plot == "fixed":
         ax.legend(loc='best', frameon=False)
 
@@ -223,9 +224,9 @@ def plot_EIS_curve_Nyquist(parameters, Fourier_results, ax):
     ax.plot(Z_real, -Z_imag, 'o', color=colors(0), label='Nyquist diagram')
     ax.set_xlabel(r'$Z_{real}$ ($m\Omega.cm^{2}$)', labelpad=3)
     ax.set_ylabel(r'$-Z_{imag}$ ($m\Omega.cm^{2}$)', labelpad=3)
-    ax.legend(['Nyquist diagram'], loc='best')
     #       Plot instructions
-    plot_instructions(ax)
+    plot_general_instructions(ax)
+    plot_EIS_Nyquist_instructions(type_fuel_cell, ax)
 
 
 def plot_EIS_curve_Bode_amplitude(parameters, Fourier_results, ax):
@@ -245,8 +246,8 @@ def plot_EIS_curve_Bode_amplitude(parameters, Fourier_results, ax):
 
     """
 
-    # Extraction of the operating inputs and the parameters
-    i_EIS, ratio_EIS = parameters['i_EIS'], parameters['ratio_EIS']
+    # Extraction of the parameters
+    i_EIS, ratio_EIS, f_EIS = parameters['i_EIS'], parameters['ratio_EIS'], parameters['f_EIS']
     # Extraction of the Fourier results
     A, f = Fourier_results['A'], Fourier_results['f']
 
@@ -256,14 +257,14 @@ def plot_EIS_curve_Bode_amplitude(parameters, Fourier_results, ax):
 
     # Plot the amplitude Bode diagram
     ax.plot(np.log10(f), np.abs(Z0), 'o', color=colors(1), label='Amplitude Bode diagram')
-    ax.set_xlabel(r'log(f(Hz))', labelpad=3)
-    ax.set_ylabel(r'$\left| Z \right|$ ($m\Omega.cm^{2}$)', labelpad=3)
-    ax.legend(['Amplitude Bode diagram'], loc='best')
+    ax.set_xlabel('Frequency (Hz, logarithmic scale)', labelpad=3)
+    ax.set_ylabel(r'Impedance amplitude ($m\Omega.cm^{2}$)', labelpad=3)
     #   Plot instructions
-    plot_instructions(ax)
+    plot_general_instructions(ax)
+    plot_Bode_amplitude_instructions(f_EIS, type_fuel_cell, ax)
 
 
-def plot_EIS_curve_Bode_angle(Fourier_results, ax):
+def plot_EIS_curve_Bode_angle(parameters, Fourier_results, ax):
     """This function is used to plot the angle Bode diagram. It only works with an entry signal made with a cosinus
     (not a sinus).
 
@@ -278,6 +279,8 @@ def plot_EIS_curve_Bode_angle(Fourier_results, ax):
         Axes on which the angle Bode diagram will be plotted.
     """
 
+    # Extraction of the parameters
+    f_EIS = parameters['f_EIS']
     # Extraction of the Fourier results
     Ucell_Fourier, ifc_Fourier = Fourier_results['Ucell_Fourier'], Fourier_results['ifc_Fourier']
     A_period_t, A = Fourier_results['A_period_t'], Fourier_results['A']
@@ -292,11 +295,11 @@ def plot_EIS_curve_Bode_angle(Fourier_results, ax):
     # Plot the angle Bode diagram
     ax.plot(np.log10(f), ((theta_U - theta_i) * 180 / np.pi) % 360, 'o', color=colors(2),
             label='Angle Bode diagram')
-    ax.set_xlabel(r'log(f(Hz))', labelpad=3)
-    ax.set_ylabel('phase shift (degree)', labelpad=3)
-    ax.legend(['Angle Bode diagram'], loc='best')
+    ax.set_xlabel('Frequency (Hz, logarithmic scale)', labelpad=3)
+    ax.set_ylabel('Phase (°)', labelpad=3)
     #   Plot instructions
-    plot_instructions(ax)
+    plot_general_instructions(ax)
+    plot_Bode_phase_instructions(f_EIS, type_fuel_cell, ax)
 
 
 def plot_EIS_curve_tests(variables, operating_inputs, parameters, Fourier_results):
@@ -403,7 +406,7 @@ def plot_ifc(variables, operating_inputs, parameters, n, ax):
     ax.legend([r'$\mathregular{i_{fc}}$'], loc='best')
 
     # Plot instructions
-    plot_instructions(ax)
+    plot_general_instructions(ax)
     ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
     ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
     ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.5))
@@ -441,7 +444,7 @@ def plot_J(variables, parameters, ax):
     ax.set_ylabel(r'Flows $\mathregular{J}$ $\mathregular{\left( mol.m^{-2}.s^{-1} \right)}$', labelpad=0)
 
     # Plot instructions
-    plot_instructions(ax)
+    plot_general_instructions(ax)
     ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
     ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
     ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.02))
@@ -488,7 +491,7 @@ def plot_C_v(variables, n_gdl, C_v_sat, n, ax):
                   labelpad=3)
 
     # Plot instructions
-    plot_instructions(ax)
+    plot_general_instructions(ax)
     ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
     ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
     ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(1))
@@ -538,7 +541,7 @@ def plot_lambda(variables, operating_inputs, parameters, ax):
                r'$\mathregular{\lambda_{ccl}}$'], loc='best')
 
     # Plot instructions
-    plot_instructions(ax)
+    plot_general_instructions(ax)
     ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
     ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
     ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(3))
@@ -589,7 +592,7 @@ def plot_s(variables, operating_inputs, parameters, ax):
                r'$\mathregular{s_{ccl}}$', r'$\mathregular{s_{cgdl}}$'], loc='best')
 
     # Plot instructions
-    plot_instructions(ax)
+    plot_general_instructions(ax)
     ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
     ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
     ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.04))
@@ -624,7 +627,7 @@ def plot_C_H2(variables, n_gdl, ax):
                   labelpad=3)
 
     # Plot instructions
-    plot_instructions(ax)
+    plot_general_instructions(ax)
     ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
     ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
     ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(1))
@@ -660,7 +663,7 @@ def plot_C_O2(variables, n_gdl, ax):
                   labelpad=3)
 
     # Plot instructions
-    plot_instructions(ax)
+    plot_general_instructions(ax)
     ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
     ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
     ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(1))
@@ -690,7 +693,7 @@ def plot_C_N2(variables, ax):
                   labelpad=3)
 
     # Plot instructions
-    plot_instructions(ax)
+    plot_general_instructions(ax)
 
 
 def plot_Ucell(variables, ax):
@@ -714,7 +717,7 @@ def plot_Ucell(variables, ax):
     ax.legend([r'$\mathregular{U_{cell}}$'], loc='best')
 
     # Plot instructions
-    plot_instructions(ax)
+    plot_general_instructions(ax)
     ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
     ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
     ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.05))
@@ -754,7 +757,7 @@ def plot_P(variables, ax):
     ax.ticklabel_format(style='scientific', axis='y', scilimits=(0, 0))
 
     # Plot instructions
-    plot_instructions(ax)
+    plot_general_instructions(ax)
     ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
     ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
     ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.5e-4))
@@ -805,7 +808,7 @@ def plot_Phi(variables, operating_inputs, ax):
     ax.set_ylabel(r'Humidity $\mathregular{\Phi}$', labelpad=3)
 
     # Plot instructions
-    plot_instructions(ax)
+    plot_general_instructions(ax)
 
 
 def plot_Phi_des(variables, operating_inputs, parameters, ax):
@@ -849,7 +852,7 @@ def plot_Phi_des(variables, operating_inputs, parameters, ax):
         ax.legend([r'$\mathregular{\Phi_{c,des}}$'], loc='best')
 
     # Plot instructions
-    plot_instructions(ax)
+    plot_general_instructions(ax)
     ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(0.5))
     ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.5 / 5))
     ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.2))
@@ -897,7 +900,7 @@ def plot_power_density_curve(variables, operating_inputs, parameters, n, ax):
     ax.legend(loc='best', frameon=False)
 
     # Plot instructions
-    plot_instructions(ax)
+    plot_general_instructions(ax)
     ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(0.5))
     ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.5 / 5))
     ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.3))
@@ -951,7 +954,7 @@ def plot_cell_efficiency(variables, operating_inputs, parameters, n, ax):
     ax.legend(loc='best', frameon=False)
 
     # Plot instructions
-    plot_instructions(ax)
+    plot_general_instructions(ax)
     ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(0.5))
     ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.5 / 5))
     ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.1))
@@ -1050,7 +1053,7 @@ def plot_specific_line(x, y, type_fuel_cell, type_auxiliary, type_control, sim_e
         ax.plot(x, y, color=colors(0), label='Simulation')
 
 
-def plot_instructions(ax):
+def plot_general_instructions(ax):
     """This function adds the common instructions for all the plots displayed by AlphaPEM to the ax object.
 
     Parameters
@@ -1064,8 +1067,8 @@ def plot_instructions(ax):
     plt.show()
 
 
-def plot_specific_instructions(type_fuel_cell, ax):
-    """This function adds the specific instructions for the plots according to the type_input to the ax object.
+def plot_pola_instructions(type_fuel_cell, ax):
+    """This function adds the specific instructions for polarisation plots according to the type_input to the ax object.
 
     Parameters
     ----------
@@ -1106,3 +1109,78 @@ def plot_specific_instructions(type_fuel_cell, ax):
     # For other fuel cell
     else:
         pass
+
+def plot_EIS_Nyquist_instructions(type_fuel_cell, ax):
+    """This function adds the instructions for EIS plots according to the type_input to the ax object.
+
+    Parameters
+    ----------
+    type_fuel_cell : str
+        Type of fuel cell configuration.
+    ax : matplotlib.axes.Axes
+        Axes on which the instructions will be added.
+    """
+
+    # For EH-31 fuel cell
+    if type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or \
+            type_fuel_cell == "EH-31_2.25" or type_fuel_cell == "EH-31_2.5":
+        ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(40))
+        ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(40 / 5))
+        ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(10))
+        ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(10 / 5))
+        # ax.set_xlim(0, 200)
+        # ax.set_ylim(-30, 60)
+
+def plot_Bode_amplitude_instructions(f_EIS, type_fuel_cell, ax):
+    """This function adds the instructions for amplitude Bode plots according to the type_input to the ax object.
+
+    Parameters
+    ----------
+    type_fuel_cell : str
+        Type of fuel cell configuration.
+    ax : matplotlib.axes.Axes
+        Axes on which the instructions will be added.
+    """
+
+    # Commun instructions
+    f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = f_EIS  # They are the frequency parameters for the EIS
+    #                                                                    simulation.
+    ax.set_xscale('log') # set logarithmic scale for the x-axis
+
+    # For EH-31 fuel cell
+    if type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or \
+            type_fuel_cell == "EH-31_2.25" or type_fuel_cell == "EH-31_2.5":
+        ax.xaxis.set_major_locator(LogLocator(base=10.0, numticks=10)) # set major ticks at each power of 10
+        ax.xaxis.set_minor_locator(LogLocator(base=10.0, subs='auto', numticks=6)) # set 5 minor ticks evenly spaced between each power of 10
+        ax.xaxis.set_major_formatter(LogFormatter(base=10.0)) # set the format of the major ticks
+        ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(30))
+        ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(30 / 5))
+        ax.set_xlim([f_power_min_EIS, f_power_max_EIS])
+        # ax.set_ylim(0, 200)
+
+def plot_Bode_phase_instructions(f_EIS, type_fuel_cell, ax):
+    """This function adds the instructions for phase Bode plots according to the type_input to the ax object.
+
+    Parameters
+    ----------
+    type_fuel_cell : str
+        Type of fuel cell configuration.
+    ax : matplotlib.axes.Axes
+        Axes on which the instructions will be added.
+    """
+
+    # Commun instructions
+    f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = f_EIS  # They are the frequency parameters for the EIS
+    #                                                                    simulation.
+    ax.set_xscale('log')  # set logarithmic scale for the x-axis
+
+    # For EH-31 fuel cell
+    if type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or \
+            type_fuel_cell == "EH-31_2.25" or type_fuel_cell == "EH-31_2.5":
+        ax.xaxis.set_major_locator(LogLocator(base=10.0, numticks=10))  # set major ticks at each power of 10
+        ax.xaxis.set_minor_locator(LogLocator(base=10.0, subs='auto', numticks=6))  # set 5 minor ticks evenly spaced between each power of 10
+        ax.xaxis.set_major_formatter(LogFormatter(base=10.0))  # set the format of the major ticks
+        ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(10))
+        ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(10 / 5))
+        ax.set_xlim([f_power_min_EIS, f_power_max_EIS])
+        # ax.set_ylim(0, 360)
