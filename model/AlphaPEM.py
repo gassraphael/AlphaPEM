@@ -14,7 +14,6 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 
 # Importing the necessary libraries
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 import numpy as np
 from scipy.integrate import solve_ivp
 
@@ -31,10 +30,6 @@ from modules.display_modules import plot_ifc, plot_J, plot_C_v, plot_lambda, plo
     plot_EIS_curve_Nyquist, plot_EIS_curve_Bode_amplitude, plot_EIS_curve_Bode_angle, plot_EIS_curve_tests, \
     plot_power_density_curve, plot_cell_efficiency
 from modules.main_modules import saving_instructions
-
-# PyCharm requirement for dynamic plot display
-mpl.use("Qt5Agg")
-
 
 # _______________________________________________________AlphaPEM_______________________________________________________
 

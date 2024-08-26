@@ -19,9 +19,6 @@ plt.rcParams['axes.formatter.use_mathtext'] = True
 plt.rcParams['axes.linewidth'] = 2.0
 colors = mpl.colormaps['tab10']
 
-# PyCharm requirement for dynamic plot display
-mpl.use("Qt5Agg")
-
 
 # __________________________________________________Current densities___________________________________________________
 
