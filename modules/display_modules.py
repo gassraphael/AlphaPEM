@@ -286,12 +286,17 @@ def plot_EIS_curve_Bode_angle(parameters, Fourier_results, ax):
 
     # Calculation of the dephasing values at the frequency of the perturbation
     theta_U_t = np.angle(Ucell_Fourier[0:N // 2])  # Recovery of all dephasing values calculated by fft
-    theta_i_t = np.angle(ifc_Fourier[0:N // 2])  # Recovery of all dephasing values calculated by fft
+    theta_i_t = np.angle(ifc_Fourier[0:N // 2]) + np.pi  # Recovery of all dephasing values calculated by fft.
+    #                                                    An angle of pi is added to comply with the standards of EIS,
+    #                                                    which measure a device under load rather than a current source.
     theta_U = theta_U_t[np.argmax(A_period_t == A)]  # Dephasing at the frequency of the perturbation
     theta_i = theta_i_t[np.argmax(A_period_t == A)]  # Dephasing at the frequency of the perturbation
+    phi_U_i = ((theta_U - theta_i) * 180 / np.pi) % 360 # Dephasing between Ucell and ifc with a value between 0 and 360
+    if phi_U_i > 180:
+        phi_U_i -= 360 # To have a value between -180 and 180
 
     # Plot the angle Bode diagram
-    ax.plot(f, ((theta_U - theta_i) * 180 / np.pi) % 360, 'o', color=colors(2),
+    ax.plot(f, phi_U_i, 'o', color=colors(2),
             label='Angle Bode diagram')
     ax.set_xlabel('Frequency (Hz, logarithmic scale)', labelpad=3)
     ax.set_ylabel(r'Phase ($^\circ$)', labelpad=3)
