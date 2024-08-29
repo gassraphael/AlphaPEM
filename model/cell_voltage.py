@@ -125,5 +125,4 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
 
         # The cell voltage
         Ucell_t[i] = Ueq - eta_c - (i_fc + i_n) * (Rp + Re)
-
     return Ucell_t

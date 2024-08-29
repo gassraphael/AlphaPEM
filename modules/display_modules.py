@@ -1131,8 +1131,8 @@ def plot_EIS_Nyquist_instructions(type_fuel_cell, ax):
         ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(30 / 5))
         ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(10))
         ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(10 / 5))
-        # ax.set_xlim(0, 200)
-        # ax.set_ylim(-30, 60)
+        # ax.set_xlim(30, 200)
+        # ax.set_ylim(-25, 55)
 
 def plot_Bode_amplitude_instructions(f_EIS, type_fuel_cell, ax):
     """This function adds the instructions for amplitude Bode plots according to the type_input to the ax object.
