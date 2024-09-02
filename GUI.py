@@ -21,9 +21,6 @@ from modules.GUI_modules import display_parameter_labels, \
     launch_AlphaPEM_for_polarization_current, launch_AlphaPEM_for_EIS_current
 from configuration.current_densities import step_current, polarization_current, EIS_current
 
-# PyCharm requirement for dynamic plot display
-mpl.use("Qt5Agg")
-
 
 # ____________________________________________________GUI functions____________________________________________________
 
@@ -35,7 +32,7 @@ def create_application():
     root = ThemedTk(theme="arc")
     root.configure(background='#f5f6f7')
     root.title("AlphaPEM")
-    root.geometry("825x695") # Set default size of the window
+    root.geometry("770x750") # Set default size of the window
 
     # Create a canvas and add a scrollbar to it
     canvas = tk.Canvas(root)
