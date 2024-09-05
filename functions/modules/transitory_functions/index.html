@@ -144,7 +144,7 @@
 <a id="modules.transitory_functions"></a>
     <div class="doc doc-contents first">
 
-      <p>This module contains transitory functions which all have a specific physical meaning for modeling the PEM fuel cell.</p>
+        <p>This module contains transitory functions which all have a specific physical meaning for modeling the PEM fuel cell.</p>
 
 
 
@@ -162,14 +162,14 @@
 
 
 <h2 id="modules.transitory_functions.C_v_sat" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">C_v_sat</span><span class="p">(</span><span class="n">T</span><span class="p">)</span></code>
+            <code class="highlight language-python">C_v_sat(T)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This function calculates the saturated vapor concentration for a perfect gas, in mol.m-3, as a function of the
+        <p>This function calculates the saturated vapor concentration for a perfect gas, in mol.m-3, as a function of the
 temperature.</p>
 
 
@@ -221,36 +221,21 @@ temperature.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/transitory_functions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span>
-<span class="normal">83</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">C_v_sat</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the saturated vapor concentration for a perfect gas, in mol.m-3, as a function of the</span>
-<span class="sd">    temperature.</span>
+              <pre class="highlight"><code class="language-python">def C_v_sat(T):
+    """This function calculates the saturated vapor concentration for a perfect gas, in mol.m-3, as a function of the
+    temperature.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    T : float</span>
-<span class="sd">        Temperature in K.</span>
+    Parameters
+    ----------
+    T : float
+        Temperature in K.
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        Saturated vapor concentration for a perfect gas in mol.m-3.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+    Returns
+    -------
+    float
+        Saturated vapor concentration for a perfect gas in mol.m-3.
+    """
+    return Psat(T) / (R * T)</code></pre>
             </details>
     </div>
 
@@ -260,14 +245,14 @@ temperature.</p>
 
 
 <h2 id="modules.transitory_functions.D" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">D</span><span class="p">(</span><span class="n">lambdaa</span><span class="p">)</span></code>
+            <code class="highlight language-python">D(lambdaa)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This function calculates the diffusion coefficient of water in the membrane, in m².s-1.</p>
+        <p>This function calculates the diffusion coefficient of water in the membrane, in m².s-1.</p>
 
 
 <table class="field-list">
@@ -318,34 +303,20 @@ temperature.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/transitory_functions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
-<span class="normal">284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">D</span><span class="p">(</span><span class="n">lambdaa</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the diffusion coefficient of water in the membrane, in m².s-1.</span>
+              <pre class="highlight"><code class="language-python">def D(lambdaa):
+    """This function calculates the diffusion coefficient of water in the membrane, in m².s-1.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    lambdaa : float</span>
-<span class="sd">        Water content in the membrane.</span>
+    Parameters
+    ----------
+    lambdaa : float
+        Water content in the membrane.
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        Diffusion coefficient of water in the membrane in m².s-1.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="mf">4.1e-10</span> <span class="o">*</span> <span class="p">(</span><span class="n">lambdaa</span> <span class="o">/</span> <span class="mf">25.0</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.15</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">((</span><span class="n">lambdaa</span> <span class="o">-</span> <span class="mf">2.5</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1.4</span><span class="p">))</span>
-</code></pre></div></td></tr></table></div>
+    Returns
+    -------
+    float
+        Diffusion coefficient of water in the membrane in m².s-1.
+    """
+    return 4.1e-10 * (lambdaa / 25.0) ** 0.15 * (1.0 + np.tanh((lambdaa - 2.5) / 1.4))</code></pre>
             </details>
     </div>
 
@@ -355,14 +326,14 @@ temperature.</p>
 
 
 <h2 id="modules.transitory_functions.Da" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">Da</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span></code>
+            <code class="highlight language-python">Da(P, T)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This function calculates the diffusion coefficient at the anode, in m².s-1.</p>
+        <p>This function calculates the diffusion coefficient at the anode, in m².s-1.</p>
 
 
 <table class="field-list">
@@ -421,38 +392,22 @@ temperature.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/transitory_functions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">Da</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the diffusion coefficient at the anode, in m².s-1.</span>
+              <pre class="highlight"><code class="language-python">def Da(P, T):
+    """This function calculates the diffusion coefficient at the anode, in m².s-1.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    P : float</span>
-<span class="sd">        Pressure in Pa.</span>
-<span class="sd">    T : float</span>
-<span class="sd">        Temperature in K.</span>
+    Parameters
+    ----------
+    P : float
+        Pressure in Pa.
+    T : float
+        Temperature in K.
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        Diffusion coefficient at the anode in m².s-1.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="mf">1.644e-4</span> <span class="o">*</span> <span class="p">(</span><span class="n">T</span> <span class="o">/</span> <span class="mi">333</span><span class="p">)</span> <span class="o">**</span> <span class="mf">2.334</span> <span class="o">*</span> <span class="p">(</span><span class="mi">101325</span> <span class="o">/</span> <span class="n">P</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+    Returns
+    -------
+    float
+        Diffusion coefficient at the anode in m².s-1.
+    """
+    return 1.644e-4 * (T / 333) ** 2.334 * (101325 / P)</code></pre>
             </details>
     </div>
 
@@ -462,14 +417,14 @@ temperature.</p>
 
 
 <h2 id="modules.transitory_functions.Da_eff" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">Da_eff</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">)</span></code>
+            <code class="highlight language-python">Da_eff(s, epsilon, P, T, epsilon_c, epsilon_gdl)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This function calculates the effective diffusion coefficient at the anode, in m².s-1, considering GDL
+        <p>This function calculates the effective diffusion coefficient at the anode, in m².s-1, considering GDL
 compression.
 Remark: it is considered here that the compression of the stack has a similar effect on the GDL and the CL, which
 may be wrong. This is why two porosities are considered in the parameters of this function: epsilon and epsilon_gdl.</p>
@@ -563,80 +518,43 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/transitory_functions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">Da_eff</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the effective diffusion coefficient at the anode, in m².s-1, considering GDL</span>
-<span class="sd">    compression.</span>
-<span class="sd">    Remark: it is considered here that the compression of the stack has a similar effect on the GDL and the CL, which</span>
-<span class="sd">    may be wrong. This is why two porosities are considered in the parameters of this function: epsilon and epsilon_gdl.</span>
+              <pre class="highlight"><code class="language-python">def Da_eff(s, epsilon, P, T, epsilon_c, epsilon_gdl):
+    """This function calculates the effective diffusion coefficient at the anode, in m².s-1, considering GDL
+    compression.
+    Remark: it is considered here that the compression of the stack has a similar effect on the GDL and the CL, which
+    may be wrong. This is why two porosities are considered in the parameters of this function: epsilon and epsilon_gdl.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    s : float</span>
-<span class="sd">        Liquid water saturation variable.</span>
-<span class="sd">    epsilon : float</span>
-<span class="sd">        Porosity.</span>
-<span class="sd">    P : float</span>
-<span class="sd">        Pressure in Pa.</span>
-<span class="sd">    T : float</span>
-<span class="sd">        Temperature in K.</span>
-<span class="sd">    epsilon_c : float</span>
-<span class="sd">        Compression ratio of the GDL.</span>
-<span class="sd">    epsilon_gdl : float</span>
-<span class="sd">        Porosity of the GDL.</span>
+    Parameters
+    ----------
+    s : float
+        Liquid water saturation variable.
+    epsilon : float
+        Porosity.
+    P : float
+        Pressure in Pa.
+    T : float
+        Temperature in K.
+    epsilon_c : float
+        Compression ratio of the GDL.
+    epsilon_gdl : float
+        Porosity of the GDL.
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        Effective diffusion coefficient at the anode in m².s-1.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    Returns
+    -------
+    float
+        Effective diffusion coefficient at the anode in m².s-1.
+    """
 
-    <span class="c1"># According to the GDL porosity, the GDL compression effect is different.</span>
-    <span class="k">if</span> <span class="mf">0.55</span> <span class="o">&lt;=</span> <span class="n">epsilon_gdl</span> <span class="o">&lt;</span> <span class="mf">0.67</span><span class="p">:</span>
-        <span class="n">beta2</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.59</span>
-    <span class="k">elif</span> <span class="mf">0.67</span> <span class="o">&lt;=</span> <span class="n">epsilon_gdl</span> <span class="o">&lt;</span> <span class="mf">0.8</span><span class="p">:</span>
-        <span class="n">beta2</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.90</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;In order to calculate the effects of the GDL compression on its structure, &quot;</span>
-                         <span class="s2">&quot;epsilon_gdl should be between 0.55 and 0.8.&quot;</span><span class="p">)</span>
+    # According to the GDL porosity, the GDL compression effect is different.
+    if 0.55 &lt;= epsilon_gdl &lt; 0.67:
+        beta2 = -1.59
+    elif 0.67 &lt;= epsilon_gdl &lt; 0.8:
+        beta2 = -0.90
+    else:
+        raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
+                         "epsilon_gdl should be between 0.55 and 0.8.")
 
-    <span class="k">return</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="p">((</span><span class="n">epsilon</span> <span class="o">-</span> <span class="mf">0.11</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mf">0.11</span><span class="p">))</span> <span class="o">**</span> <span class="mf">0.785</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">beta2</span> <span class="o">*</span> <span class="n">epsilon_c</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">s</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Da</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+    return epsilon * ((epsilon - 0.11) / (1 - 0.11)) ** 0.785 * np.exp(beta2 * epsilon_c) * (1 - s) ** 2 * Da(P, T)</code></pre>
             </details>
     </div>
 
@@ -646,14 +564,14 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 
 
 <h2 id="modules.transitory_functions.Dc" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">Dc</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span></code>
+            <code class="highlight language-python">Dc(P, T)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This function calculates the diffusion coefficient at the cathode, in m².s-1.</p>
+        <p>This function calculates the diffusion coefficient at the cathode, in m².s-1.</p>
 
 
 <table class="field-list">
@@ -712,38 +630,22 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/transitory_functions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">Dc</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the diffusion coefficient at the cathode, in m².s-1.</span>
+              <pre class="highlight"><code class="language-python">def Dc(P, T):
+    """This function calculates the diffusion coefficient at the cathode, in m².s-1.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    P : float</span>
-<span class="sd">        Pressure in Pa.</span>
-<span class="sd">    T : float</span>
-<span class="sd">        Temperature in K.</span>
+    Parameters
+    ----------
+    P : float
+        Pressure in Pa.
+    T : float
+        Temperature in K.
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        Diffusion coefficient at the cathode in m².s-1.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="mf">3.242e-5</span> <span class="o">*</span> <span class="p">(</span><span class="n">T</span> <span class="o">/</span> <span class="mi">333</span><span class="p">)</span> <span class="o">**</span> <span class="mf">2.334</span> <span class="o">*</span> <span class="p">(</span><span class="mi">101325</span> <span class="o">/</span> <span class="n">P</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+    Returns
+    -------
+    float
+        Diffusion coefficient at the cathode in m².s-1.
+    """
+    return 3.242e-5 * (T / 333) ** 2.334 * (101325 / P)</code></pre>
             </details>
     </div>
 
@@ -753,14 +655,14 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 
 
 <h2 id="modules.transitory_functions.Dc_eff" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">Dc_eff</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">)</span></code>
+            <code class="highlight language-python">Dc_eff(s, epsilon, P, T, epsilon_c, epsilon_gdl)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This function calculates the effective diffusion coefficient at the cathode, in m².s-1, considering GDL
+        <p>This function calculates the effective diffusion coefficient at the cathode, in m².s-1, considering GDL
 compression.
 Remark: it is considered here that the compression of the stack has a similar effect on the GDL and the CL, which
 may be wrong. This is why two porosities are considered in the parameters of this function: epsilon and epsilon_gdl.</p>
@@ -854,80 +756,43 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/transitory_functions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span>
-<span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span>
-<span class="normal">196</span>
-<span class="normal">197</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">Dc_eff</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the effective diffusion coefficient at the cathode, in m².s-1, considering GDL</span>
-<span class="sd">    compression.</span>
-<span class="sd">    Remark: it is considered here that the compression of the stack has a similar effect on the GDL and the CL, which</span>
-<span class="sd">    may be wrong. This is why two porosities are considered in the parameters of this function: epsilon and epsilon_gdl.</span>
+              <pre class="highlight"><code class="language-python">def Dc_eff(s, epsilon, P, T, epsilon_c, epsilon_gdl):
+    """This function calculates the effective diffusion coefficient at the cathode, in m².s-1, considering GDL
+    compression.
+    Remark: it is considered here that the compression of the stack has a similar effect on the GDL and the CL, which
+    may be wrong. This is why two porosities are considered in the parameters of this function: epsilon and epsilon_gdl.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    s : float</span>
-<span class="sd">        Liquid water saturation variable.</span>
-<span class="sd">    epsilon : float</span>
-<span class="sd">        Porosity.</span>
-<span class="sd">    P : float</span>
-<span class="sd">        Pressure in Pa.</span>
-<span class="sd">    T : float</span>
-<span class="sd">        Temperature in K.</span>
-<span class="sd">    epsilon_c : float</span>
-<span class="sd">        Compression ratio of the GDL.</span>
-<span class="sd">    epsilon_gdl : float</span>
-<span class="sd">        Porosity of the GDL.</span>
+    Parameters
+    ----------
+    s : float
+        Liquid water saturation variable.
+    epsilon : float
+        Porosity.
+    P : float
+        Pressure in Pa.
+    T : float
+        Temperature in K.
+    epsilon_c : float
+        Compression ratio of the GDL.
+    epsilon_gdl : float
+        Porosity of the GDL.
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        Effective diffusion coefficient at the cathode in m².s-1.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    Returns
+    -------
+    float
+        Effective diffusion coefficient at the cathode in m².s-1.
+    """
 
-    <span class="c1"># According to the GDL porosity, the GDL compression effect is different.</span>
-    <span class="k">if</span> <span class="mf">0.55</span> <span class="o">&lt;=</span> <span class="n">epsilon_gdl</span> <span class="o">&lt;</span> <span class="mf">0.67</span><span class="p">:</span>
-        <span class="n">beta2</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.59</span>
-    <span class="k">elif</span> <span class="mf">0.67</span> <span class="o">&lt;=</span> <span class="n">epsilon_gdl</span> <span class="o">&lt;</span> <span class="mf">0.8</span><span class="p">:</span>
-        <span class="n">beta2</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.90</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;In order to calculate the effects of the GDL compression on its structure, &quot;</span>
-                         <span class="s2">&quot;epsilon_gdl should be between 0.55 and 0.8.&quot;</span><span class="p">)</span>
+    # According to the GDL porosity, the GDL compression effect is different.
+    if 0.55 &lt;= epsilon_gdl &lt; 0.67:
+        beta2 = -1.59
+    elif 0.67 &lt;= epsilon_gdl &lt; 0.8:
+        beta2 = -0.90
+    else:
+        raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
+                         "epsilon_gdl should be between 0.55 and 0.8.")
 
-    <span class="k">return</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="p">((</span><span class="n">epsilon</span> <span class="o">-</span> <span class="mf">0.11</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mf">0.11</span><span class="p">))</span> <span class="o">**</span> <span class="mf">0.785</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">beta2</span> <span class="o">*</span> <span class="n">epsilon_c</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">s</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Dc</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+    return epsilon * ((epsilon - 0.11) / (1 - 0.11)) ** 0.785 * np.exp(beta2 * epsilon_c) * (1 - s) ** 2 * Dc(P, T)</code></pre>
             </details>
     </div>
 
@@ -937,14 +802,14 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 
 
 <h2 id="modules.transitory_functions.K0" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">K0</span><span class="p">(</span><span class="n">epsilon</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">)</span></code>
+            <code class="highlight language-python">K0(epsilon, epsilon_c, epsilon_gdl)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This function calculates the intrinsic permeability, in m², considering GDL compression.
+        <p>This function calculates the intrinsic permeability, in m², considering GDL compression.
 Remark: it is considered here that the compression of the stack has a similar effect on the GDL and the CL, which
 may be wrong. This is why two porosities are considered in the parameters of this function: epsilon and epsilon_gdl.</p>
 
@@ -1013,68 +878,37 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/transitory_functions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">367</span>
-<span class="normal">368</span>
-<span class="normal">369</span>
-<span class="normal">370</span>
-<span class="normal">371</span>
-<span class="normal">372</span>
-<span class="normal">373</span>
-<span class="normal">374</span>
-<span class="normal">375</span>
-<span class="normal">376</span>
-<span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span>
-<span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span>
-<span class="normal">383</span>
-<span class="normal">384</span>
-<span class="normal">385</span>
-<span class="normal">386</span>
-<span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span>
-<span class="normal">390</span>
-<span class="normal">391</span>
-<span class="normal">392</span>
-<span class="normal">393</span>
-<span class="normal">394</span>
-<span class="normal">395</span>
-<span class="normal">396</span>
-<span class="normal">397</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">K0</span><span class="p">(</span><span class="n">epsilon</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the intrinsic permeability, in m², considering GDL compression.</span>
-<span class="sd">    Remark: it is considered here that the compression of the stack has a similar effect on the GDL and the CL, which</span>
-<span class="sd">    may be wrong. This is why two porosities are considered in the parameters of this function: epsilon and epsilon_gdl.</span>
+              <pre class="highlight"><code class="language-python">def K0(epsilon, epsilon_c, epsilon_gdl):
+    """This function calculates the intrinsic permeability, in m², considering GDL compression.
+    Remark: it is considered here that the compression of the stack has a similar effect on the GDL and the CL, which
+    may be wrong. This is why two porosities are considered in the parameters of this function: epsilon and epsilon_gdl.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    epsilon : float</span>
-<span class="sd">        Porosity.</span>
-<span class="sd">    epsilon_c : float</span>
-<span class="sd">        Compression ratio of the GDL.</span>
-<span class="sd">    epsilon_gdl : float</span>
-<span class="sd">        Porosity of the GDL.</span>
+    Parameters
+    ----------
+    epsilon : float
+        Porosity.
+    epsilon_c : float
+        Compression ratio of the GDL.
+    epsilon_gdl : float
+        Porosity of the GDL.
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        Intrinsic permeability in m².</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    Returns
+    -------
+    float
+        Intrinsic permeability in m².
+    """
 
-    <span class="c1"># According to the GDL porosity, the GDL compression effect is different.</span>
-    <span class="k">if</span> <span class="mf">0.55</span> <span class="o">&lt;=</span> <span class="n">epsilon_gdl</span> <span class="o">&lt;</span> <span class="mf">0.67</span><span class="p">:</span>
-        <span class="n">beta1</span> <span class="o">=</span> <span class="o">-</span><span class="mf">3.60</span>
-    <span class="k">elif</span> <span class="mf">0.67</span> <span class="o">&lt;=</span> <span class="n">epsilon_gdl</span> <span class="o">&lt;</span> <span class="mf">0.8</span><span class="p">:</span>
-        <span class="n">beta1</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.60</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;In order to calculate the effects of the GDL compression on its structure, &quot;</span>
-                         <span class="s2">&quot;epsilon_gdl should be between 0.55 and 0.8.&quot;</span><span class="p">)</span>
+    # According to the GDL porosity, the GDL compression effect is different.
+    if 0.55 &lt;= epsilon_gdl &lt; 0.67:
+        beta1 = -3.60
+    elif 0.67 &lt;= epsilon_gdl &lt; 0.8:
+        beta1 = -2.60
+    else:
+        raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
+                         "epsilon_gdl should be between 0.55 and 0.8.")
 
-    <span class="k">return</span> <span class="n">epsilon</span> <span class="o">/</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">epsilon</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">epsilon</span> <span class="o">-</span> <span class="mf">0.11</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">0.785</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> \
-        <span class="mf">4.6e-6</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="mf">0.11</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.785</span> <span class="o">*</span> <span class="p">((</span><span class="mf">0.785</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">-</span> <span class="mf">0.11</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">beta1</span> <span class="o">*</span> <span class="n">epsilon_c</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+    return epsilon / (8 * np.log(epsilon) ** 2) * (epsilon - 0.11) ** (0.785 + 2) * \
+        4.6e-6 ** 2 / ((1 - 0.11) ** 0.785 * ((0.785 + 1) * epsilon - 0.11) ** 2) * np.exp(beta1 * epsilon_c)</code></pre>
             </details>
     </div>
 
@@ -1084,14 +918,14 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 
 
 <h2 id="modules.transitory_functions.Psat" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">Psat</span><span class="p">(</span><span class="n">T</span><span class="p">)</span></code>
+            <code class="highlight language-python">Psat(T)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This function calculates the saturated partial pressure of vapor, in Pa, as a function of the temperature.</p>
+        <p>This function calculates the saturated partial pressure of vapor, in Pa, as a function of the temperature.</p>
 
 
 <table class="field-list">
@@ -1142,36 +976,21 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/transitory_functions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">Psat</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the saturated partial pressure of vapor, in Pa, as a function of the temperature.</span>
+              <pre class="highlight"><code class="language-python">def Psat(T):
+    """This function calculates the saturated partial pressure of vapor, in Pa, as a function of the temperature.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    T : float</span>
-<span class="sd">        Temperature in K.</span>
+    Parameters
+    ----------
+    T : float
+        Temperature in K.
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        Saturated partial pressure of vapor in Pa.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="mi">101325</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">2.1794</span> <span class="o">+</span> <span class="mf">0.02953</span> <span class="o">*</span> <span class="p">(</span><span class="n">T</span> <span class="o">-</span> <span class="mf">273.15</span><span class="p">)</span> <span class="o">-</span> <span class="mf">9.1837e-5</span> <span class="o">*</span> <span class="p">(</span><span class="n">T</span> <span class="o">-</span> <span class="mf">273.15</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span>
-                           <span class="mf">1.4454e-7</span> <span class="o">*</span> <span class="p">(</span><span class="n">T</span> <span class="o">-</span> <span class="mf">273.15</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+    Returns
+    -------
+    float
+        Saturated partial pressure of vapor in Pa.
+    """
+    return 101325 * 10 ** (-2.1794 + 0.02953 * (T - 273.15) - 9.1837e-5 * (T - 273.15) ** 2 +
+                           1.4454e-7 * (T - 273.15) ** 3)</code></pre>
             </details>
     </div>
 
@@ -1181,14 +1000,14 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 
 
 <h2 id="modules.transitory_functions.Svl" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">Svl</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">C_v</span><span class="p">,</span> <span class="n">Ctot</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">gamma_cond</span><span class="p">,</span> <span class="n">gamma_evap</span><span class="p">)</span></code>
+            <code class="highlight language-python">Svl(s, C_v, Ctot, epsilon, T, gamma_cond, gamma_evap)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This function calculates the phase transfer rate of water condensation or evaporation, in mol.m-3.s-1.</p>
+        <p>This function calculates the phase transfer rate of water condensation or evaporation, in mol.m-3.s-1.</p>
 
 
 <table class="field-list">
@@ -1287,66 +1106,36 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/transitory_functions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span>
-<span class="normal">323</span>
-<span class="normal">324</span>
-<span class="normal">325</span>
-<span class="normal">326</span>
-<span class="normal">327</span>
-<span class="normal">328</span>
-<span class="normal">329</span>
-<span class="normal">330</span>
-<span class="normal">331</span>
-<span class="normal">332</span>
-<span class="normal">333</span>
-<span class="normal">334</span>
-<span class="normal">335</span>
-<span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span>
-<span class="normal">345</span>
-<span class="normal">346</span>
-<span class="normal">347</span>
-<span class="normal">348</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">Svl</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">C_v</span><span class="p">,</span> <span class="n">Ctot</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">gamma_cond</span><span class="p">,</span> <span class="n">gamma_evap</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the phase transfer rate of water condensation or evaporation, in mol.m-3.s-1.</span>
+              <pre class="highlight"><code class="language-python">def Svl(s, C_v, Ctot, epsilon, T, gamma_cond, gamma_evap):
+    """This function calculates the phase transfer rate of water condensation or evaporation, in mol.m-3.s-1.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    s : float</span>
-<span class="sd">        Liquid water saturation variable.</span>
-<span class="sd">    C_v : float</span>
-<span class="sd">        Water concentration variable in mol.m-3.</span>
-<span class="sd">    Ctot : float</span>
-<span class="sd">        Total gas concentration in mol.m-3.</span>
-<span class="sd">    epsilon : float</span>
-<span class="sd">        Porosity.</span>
-<span class="sd">    T : float</span>
-<span class="sd">        Temperature in K.</span>
-<span class="sd">    gamma_cond : float</span>
-<span class="sd">        Overall condensation rate constant for water in s-1.</span>
-<span class="sd">    gamma_evap : float</span>
-<span class="sd">        Overall evaporation rate constant for water in Pa-1.s-1.</span>
+    Parameters
+    ----------
+    s : float
+        Liquid water saturation variable.
+    C_v : float
+        Water concentration variable in mol.m-3.
+    Ctot : float
+        Total gas concentration in mol.m-3.
+    epsilon : float
+        Porosity.
+    T : float
+        Temperature in K.
+    gamma_cond : float
+        Overall condensation rate constant for water in s-1.
+    gamma_evap : float
+        Overall evaporation rate constant for water in Pa-1.s-1.
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        Phase transfer rate of water condensation or evaporation in mol.m-3.s-1.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    Returns
+    -------
+    float
+        Phase transfer rate of water condensation or evaporation in mol.m-3.s-1.
+    """
 
-    <span class="k">if</span> <span class="n">C_v</span> <span class="o">&gt;</span> <span class="n">C_v_sat</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>  <span class="c1"># condensation</span>
-        <span class="k">return</span> <span class="n">gamma_cond</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">s</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">C_v</span> <span class="o">/</span> <span class="n">Ctot</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">C_v</span> <span class="o">-</span> <span class="n">C_v_sat</span><span class="p">(</span><span class="n">T</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>  <span class="c1"># evaporation</span>
-        <span class="k">return</span> <span class="o">-</span><span class="n">gamma_evap</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="n">s</span> <span class="o">*</span> <span class="n">rho_H2O</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="n">M_H2O</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T</span> <span class="o">*</span> <span class="p">(</span><span class="n">C_v_sat</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">-</span> <span class="n">C_v</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+    if C_v &gt; C_v_sat(T):  # condensation
+        return gamma_cond * epsilon * (1 - s) * (C_v / Ctot) * (C_v - C_v_sat(T))
+    else:  # evaporation
+        return -gamma_evap * epsilon * s * rho_H2O(T) / M_H2O * R * T * (C_v_sat(T) - C_v)</code></pre>
             </details>
     </div>
 
@@ -1356,14 +1145,14 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 
 
 <h2 id="modules.transitory_functions.gamma_sorp" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">gamma_sorp</span><span class="p">(</span><span class="n">C_v</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">lambdaa</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Kshape</span><span class="p">)</span></code>
+            <code class="highlight language-python">gamma_sorp(C_v, s, lambdaa, T, Hcl, Kshape)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This function calculates the sorption rate of water in the membrane, in s-1.</p>
+        <p>This function calculates the sorption rate of water in the membrane, in s-1.</p>
 
 
 <table class="field-list">
@@ -1454,66 +1243,36 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/transitory_functions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span>
-<span class="normal">296</span>
-<span class="normal">297</span>
-<span class="normal">298</span>
-<span class="normal">299</span>
-<span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span>
-<span class="normal">306</span>
-<span class="normal">307</span>
-<span class="normal">308</span>
-<span class="normal">309</span>
-<span class="normal">310</span>
-<span class="normal">311</span>
-<span class="normal">312</span>
-<span class="normal">313</span>
-<span class="normal">314</span>
-<span class="normal">315</span>
-<span class="normal">316</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">gamma_sorp</span><span class="p">(</span><span class="n">C_v</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">lambdaa</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Kshape</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the sorption rate of water in the membrane, in s-1.</span>
+              <pre class="highlight"><code class="language-python">def gamma_sorp(C_v, s, lambdaa, T, Hcl, Kshape):
+    """This function calculates the sorption rate of water in the membrane, in s-1.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    C_v : float</span>
-<span class="sd">        Water concentration variable in mol.m-3.</span>
-<span class="sd">    s : float</span>
-<span class="sd">        Liquid water saturation variable.</span>
-<span class="sd">    lambdaa : float</span>
-<span class="sd">        Water content in the membrane.</span>
-<span class="sd">    T : float</span>
-<span class="sd">        Temperature in K.</span>
-<span class="sd">    Hcl : float</span>
-<span class="sd">        Thickness of the CL layer.</span>
-<span class="sd">    Kshape : float</span>
-<span class="sd">        Mathematical factor governing lambda_eq smoothing</span>
+    Parameters
+    ----------
+    C_v : float
+        Water concentration variable in mol.m-3.
+    s : float
+        Liquid water saturation variable.
+    lambdaa : float
+        Water content in the membrane.
+    T : float
+        Temperature in K.
+    Hcl : float
+        Thickness of the CL layer.
+    Kshape : float
+        Mathematical factor governing lambda_eq smoothing
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        Sorption rate of water in the membrane in s-1.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    Returns
+    -------
+    float
+        Sorption rate of water in the membrane in s-1.
+    """
 
-    <span class="n">fv</span> <span class="o">=</span> <span class="p">(</span><span class="n">lambdaa</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">/</span> <span class="n">rho_H2O</span><span class="p">(</span><span class="n">T</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">M_eq</span> <span class="o">/</span> <span class="n">rho_mem</span> <span class="o">+</span> <span class="n">lambdaa</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">/</span> <span class="n">rho_H2O</span><span class="p">(</span><span class="n">T</span><span class="p">))</span>  <span class="c1"># water volume fraction of</span>
-    <span class="c1">#                                                                                       the membrane</span>
-    <span class="k">if</span> <span class="n">lambda_eq</span><span class="p">(</span><span class="n">C_v</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">Kshape</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">lambdaa</span><span class="p">:</span>  <span class="c1"># type_flow = absorption</span>
-        <span class="k">return</span> <span class="p">(</span><span class="mf">1.14e-5</span> <span class="o">*</span> <span class="n">fv</span><span class="p">)</span> <span class="o">/</span> <span class="n">Hcl</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">2416</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">303</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">T</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>  <span class="c1"># type_flow = desorption</span>
-        <span class="k">return</span> <span class="p">(</span><span class="mf">4.59e-5</span> <span class="o">*</span> <span class="n">fv</span><span class="p">)</span> <span class="o">/</span> <span class="n">Hcl</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">2416</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">303</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">T</span><span class="p">))</span>
-</code></pre></div></td></tr></table></div>
+    fv = (lambdaa * M_H2O / rho_H2O(T)) / (M_eq / rho_mem + lambdaa * M_H2O / rho_H2O(T))  # water volume fraction of
+    #                                                                                       the membrane
+    if lambda_eq(C_v, s, T, Kshape) &gt;= lambdaa:  # type_flow = absorption
+        return (1.14e-5 * fv) / Hcl * np.exp(2416 * (1 / 303 - 1 / T))
+    else:  # type_flow = desorption
+        return (4.59e-5 * fv) / Hcl * np.exp(2416 * (1 / 303 - 1 / T))</code></pre>
             </details>
     </div>
 
@@ -1523,14 +1282,14 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 
 
 <h2 id="modules.transitory_functions.h_a" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">h_a</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">)</span></code>
+            <code class="highlight language-python">h_a(P, T, Wgc, Hgc)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This function calculates the effective convective-conductive mass transfer coefficient at the anode, in m.s-1.</p>
+        <p>This function calculates the effective convective-conductive mass transfer coefficient at the anode, in m.s-1.</p>
 
 
 <table class="field-list">
@@ -1605,48 +1364,27 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/transitory_functions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">200</span>
-<span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">h_a</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the effective convective-conductive mass transfer coefficient at the anode, in m.s-1.</span>
+              <pre class="highlight"><code class="language-python">def h_a(P, T, Wgc, Hgc):
+    """This function calculates the effective convective-conductive mass transfer coefficient at the anode, in m.s-1.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    P : float</span>
-<span class="sd">        Pressure in Pa.</span>
-<span class="sd">    T : float</span>
-<span class="sd">        Temperature in K.</span>
-<span class="sd">    Wgc : float</span>
-<span class="sd">        Width of the gas channel in m.</span>
-<span class="sd">    Hgc : float</span>
-<span class="sd">        Thickness of the gas channel in m.</span>
+    Parameters
+    ----------
+    P : float
+        Pressure in Pa.
+    T : float
+        Temperature in K.
+    Wgc : float
+        Width of the gas channel in m.
+    Hgc : float
+        Thickness of the gas channel in m.
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        Effective convective-conductive mass transfer coefficient at the anode in m.s-1.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">Sh</span> <span class="o">=</span> <span class="mf">0.9247</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">Wgc</span> <span class="o">/</span> <span class="n">Hgc</span><span class="p">)</span> <span class="o">+</span> <span class="mf">2.3787</span>  <span class="c1"># Sherwood coefficient.</span>
-    <span class="k">return</span> <span class="n">Sh</span> <span class="o">*</span> <span class="n">Da</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="n">Hgc</span>
-</code></pre></div></td></tr></table></div>
+    Returns
+    -------
+    float
+        Effective convective-conductive mass transfer coefficient at the anode in m.s-1.
+    """
+    Sh = 0.9247 * np.log(Wgc / Hgc) + 2.3787  # Sherwood coefficient.
+    return Sh * Da(P, T) / Hgc</code></pre>
             </details>
     </div>
 
@@ -1656,14 +1394,14 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 
 
 <h2 id="modules.transitory_functions.h_c" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">h_c</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">)</span></code>
+            <code class="highlight language-python">h_c(P, T, Wgc, Hgc)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This function calculates the effective convective-conductive mass transfer coefficient at the cathode, in m.s-1.</p>
+        <p>This function calculates the effective convective-conductive mass transfer coefficient at the cathode, in m.s-1.</p>
 
 
 <table class="field-list">
@@ -1738,48 +1476,27 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/transitory_functions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span>
-<span class="normal">229</span>
-<span class="normal">230</span>
-<span class="normal">231</span>
-<span class="normal">232</span>
-<span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">h_c</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the effective convective-conductive mass transfer coefficient at the cathode, in m.s-1.</span>
+              <pre class="highlight"><code class="language-python">def h_c(P, T, Wgc, Hgc):
+    """This function calculates the effective convective-conductive mass transfer coefficient at the cathode, in m.s-1.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    P : float</span>
-<span class="sd">        Pressure in Pa.</span>
-<span class="sd">    T : float</span>
-<span class="sd">        Temperature in K.</span>
-<span class="sd">    Wgc : float</span>
-<span class="sd">        Width of the gas channel in m.</span>
-<span class="sd">    Hgc : float</span>
-<span class="sd">        Thickness of the gas channel in m.</span>
+    Parameters
+    ----------
+    P : float
+        Pressure in Pa.
+    T : float
+        Temperature in K.
+    Wgc : float
+        Width of the gas channel in m.
+    Hgc : float
+        Thickness of the gas channel in m.
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        Effective convective-conductive mass transfer coefficient at the cathode in m.s-1.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">Sh</span> <span class="o">=</span> <span class="mf">0.9247</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">Wgc</span> <span class="o">/</span> <span class="n">Hgc</span><span class="p">)</span> <span class="o">+</span> <span class="mf">2.3787</span>  <span class="c1"># Sherwood coefficient.</span>
-    <span class="k">return</span> <span class="n">Sh</span> <span class="o">*</span> <span class="n">Dc</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="n">Hgc</span>
-</code></pre></div></td></tr></table></div>
+    Returns
+    -------
+    float
+        Effective convective-conductive mass transfer coefficient at the cathode in m.s-1.
+    """
+    Sh = 0.9247 * np.log(Wgc / Hgc) + 2.3787  # Sherwood coefficient.
+    return Sh * Dc(P, T) / Hgc</code></pre>
             </details>
     </div>
 
@@ -1789,14 +1506,14 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 
 
 <h2 id="modules.transitory_functions.k_H2" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">k_H2</span><span class="p">(</span><span class="n">lambdaa</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">)</span></code>
+            <code class="highlight language-python">k_H2(lambdaa, T, kappa_co)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This function calculates the permeability coefficient of the membrane for hydrogen, in mol.m−1.s−1.Pa−1.</p>
+        <p>This function calculates the permeability coefficient of the membrane for hydrogen, in mol.m−1.s−1.Pa−1.</p>
 
 
 <table class="field-list">
@@ -1863,64 +1580,35 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/transitory_functions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">400</span>
-<span class="normal">401</span>
-<span class="normal">402</span>
-<span class="normal">403</span>
-<span class="normal">404</span>
-<span class="normal">405</span>
-<span class="normal">406</span>
-<span class="normal">407</span>
-<span class="normal">408</span>
-<span class="normal">409</span>
-<span class="normal">410</span>
-<span class="normal">411</span>
-<span class="normal">412</span>
-<span class="normal">413</span>
-<span class="normal">414</span>
-<span class="normal">415</span>
-<span class="normal">416</span>
-<span class="normal">417</span>
-<span class="normal">418</span>
-<span class="normal">419</span>
-<span class="normal">420</span>
-<span class="normal">421</span>
-<span class="normal">422</span>
-<span class="normal">423</span>
-<span class="normal">424</span>
-<span class="normal">425</span>
-<span class="normal">426</span>
-<span class="normal">427</span>
-<span class="normal">428</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">k_H2</span><span class="p">(</span><span class="n">lambdaa</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the permeability coefficient of the membrane for hydrogen, in mol.m−1.s−1.Pa−1.</span>
+              <pre class="highlight"><code class="language-python">def k_H2(lambdaa, T, kappa_co):
+    """This function calculates the permeability coefficient of the membrane for hydrogen, in mol.m−1.s−1.Pa−1.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    lambdaa : float</span>
-<span class="sd">        Water content in the membrane.</span>
-<span class="sd">    T : float</span>
-<span class="sd">        Temperature in K.</span>
-<span class="sd">    kappa_co : float</span>
-<span class="sd">        Crossover correction coefficient in mol.m-1.s-1.Pa-1.</span>
+    Parameters
+    ----------
+    lambdaa : float
+        Water content in the membrane.
+    T : float
+        Temperature in K.
+    kappa_co : float
+        Crossover correction coefficient in mol.m-1.s-1.Pa-1.
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        Permeability coefficient of the membrane for hydrogen in mol.m−1.s−1.Pa−1.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    Returns
+    -------
+    float
+        Permeability coefficient of the membrane for hydrogen in mol.m−1.s−1.Pa−1.
+    """
 
-    <span class="c1"># Initialisation of the constants</span>
-    <span class="n">E_H2_v</span> <span class="o">=</span> <span class="mf">2.1e4</span>  <span class="c1"># J.mol-1. It is the activation energy of H2 for crossover in the under saturated membrane.</span>
-    <span class="n">E_H2_l</span> <span class="o">=</span> <span class="mf">1.8e4</span>  <span class="c1"># J.mol-1. It is the activation energy of H2 for crossover in the liquide-equilibrated membrane.</span>
-    <span class="n">Tref</span> <span class="o">=</span> <span class="mf">303.15</span>  <span class="c1"># K.</span>
+    # Initialisation of the constants
+    E_H2_v = 2.1e4  # J.mol-1. It is the activation energy of H2 for crossover in the under saturated membrane.
+    E_H2_l = 1.8e4  # J.mol-1. It is the activation energy of H2 for crossover in the liquide-equilibrated membrane.
+    Tref = 303.15  # K.
 
-    <span class="c1"># Calculation of the permeability coefficient of the membrane for hydrogen</span>
-    <span class="k">if</span> <span class="n">lambdaa</span> <span class="o">&lt;</span> <span class="mf">17.6</span><span class="p">:</span>
-        <span class="n">fv</span> <span class="o">=</span> <span class="p">(</span><span class="n">lambdaa</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">/</span> <span class="n">rho_H2O</span><span class="p">(</span><span class="n">T</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">M_eq</span> <span class="o">/</span> <span class="n">rho_mem</span> <span class="o">+</span> <span class="n">lambdaa</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">/</span> <span class="n">rho_H2O</span><span class="p">(</span><span class="n">T</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">kappa_co</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.29</span> <span class="o">+</span> <span class="mf">2.2</span> <span class="o">*</span> <span class="n">fv</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-14</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">E_H2_v</span> <span class="o">/</span> <span class="n">R</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">Tref</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">T</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">kappa_co</span> <span class="o">*</span> <span class="mf">1.8</span> <span class="o">*</span> <span class="mf">1e-14</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">E_H2_l</span> <span class="o">/</span> <span class="n">R</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">Tref</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">T</span><span class="p">))</span>
-</code></pre></div></td></tr></table></div>
+    # Calculation of the permeability coefficient of the membrane for hydrogen
+    if lambdaa &lt; 17.6:
+        fv = (lambdaa * M_H2O / rho_H2O(T)) / (M_eq / rho_mem + lambdaa * M_H2O / rho_H2O(T))
+        return kappa_co * (0.29 + 2.2 * fv) * 1e-14 * np.exp(E_H2_v / R * (1 / Tref - 1 / T))
+    else:
+        return kappa_co * 1.8 * 1e-14 * np.exp(E_H2_l / R * (1 / Tref - 1 / T))</code></pre>
             </details>
     </div>
 
@@ -1930,14 +1618,14 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 
 
 <h2 id="modules.transitory_functions.k_O2" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">k_O2</span><span class="p">(</span><span class="n">lambdaa</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">)</span></code>
+            <code class="highlight language-python">k_O2(lambdaa, T, kappa_co)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This function calculates the permeability coefficient of the membrane for oxygen, in mol.m−1.s−1.Pa−1.</p>
+        <p>This function calculates the permeability coefficient of the membrane for oxygen, in mol.m−1.s−1.Pa−1.</p>
 
 
 <table class="field-list">
@@ -2004,64 +1692,35 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/transitory_functions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">431</span>
-<span class="normal">432</span>
-<span class="normal">433</span>
-<span class="normal">434</span>
-<span class="normal">435</span>
-<span class="normal">436</span>
-<span class="normal">437</span>
-<span class="normal">438</span>
-<span class="normal">439</span>
-<span class="normal">440</span>
-<span class="normal">441</span>
-<span class="normal">442</span>
-<span class="normal">443</span>
-<span class="normal">444</span>
-<span class="normal">445</span>
-<span class="normal">446</span>
-<span class="normal">447</span>
-<span class="normal">448</span>
-<span class="normal">449</span>
-<span class="normal">450</span>
-<span class="normal">451</span>
-<span class="normal">452</span>
-<span class="normal">453</span>
-<span class="normal">454</span>
-<span class="normal">455</span>
-<span class="normal">456</span>
-<span class="normal">457</span>
-<span class="normal">458</span>
-<span class="normal">459</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">k_O2</span><span class="p">(</span><span class="n">lambdaa</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the permeability coefficient of the membrane for oxygen, in mol.m−1.s−1.Pa−1.</span>
+              <pre class="highlight"><code class="language-python">def k_O2(lambdaa, T, kappa_co):
+    """This function calculates the permeability coefficient of the membrane for oxygen, in mol.m−1.s−1.Pa−1.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    lambdaa : float</span>
-<span class="sd">        Water content in the membrane.</span>
-<span class="sd">    T : float</span>
-<span class="sd">        Temperature in K.</span>
-<span class="sd">    kappa_co : float</span>
-<span class="sd">        Crossover correction coefficient in mol.m-1.s-1.Pa-1.</span>
+    Parameters
+    ----------
+    lambdaa : float
+        Water content in the membrane.
+    T : float
+        Temperature in K.
+    kappa_co : float
+        Crossover correction coefficient in mol.m-1.s-1.Pa-1.
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        Permeability coefficient of the membrane for oxygen in mol.m−1.s−1.Pa−1.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    Returns
+    -------
+    float
+        Permeability coefficient of the membrane for oxygen in mol.m−1.s−1.Pa−1.
+    """
 
-    <span class="c1"># Initialisation of the constants</span>
-    <span class="n">E_O2_v</span> <span class="o">=</span> <span class="mf">2.2e4</span>  <span class="c1"># J.mol-1. It is the activation energy of oxygen for crossover in the under saturated membrane.</span>
-    <span class="n">E_O2_l</span> <span class="o">=</span> <span class="mf">2.0e4</span>  <span class="c1"># J.mol-1. It is the activation energy of oxygen for crossover in the liquide-equilibrated membrane.</span>
-    <span class="n">Tref</span> <span class="o">=</span> <span class="mf">303.15</span>  <span class="c1"># K.</span>
+    # Initialisation of the constants
+    E_O2_v = 2.2e4  # J.mol-1. It is the activation energy of oxygen for crossover in the under saturated membrane.
+    E_O2_l = 2.0e4  # J.mol-1. It is the activation energy of oxygen for crossover in the liquide-equilibrated membrane.
+    Tref = 303.15  # K.
 
-    <span class="c1"># Calculation of the permeability coefficient of the membrane for oxygen</span>
-    <span class="k">if</span> <span class="n">lambdaa</span> <span class="o">&lt;</span> <span class="mf">17.6</span><span class="p">:</span>
-        <span class="n">fv</span> <span class="o">=</span> <span class="p">(</span><span class="n">lambdaa</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">/</span> <span class="n">rho_H2O</span><span class="p">(</span><span class="n">T</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">M_eq</span> <span class="o">/</span> <span class="n">rho_mem</span> <span class="o">+</span> <span class="n">lambdaa</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">/</span> <span class="n">rho_H2O</span><span class="p">(</span><span class="n">T</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">kappa_co</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.11</span> <span class="o">+</span> <span class="mf">1.9</span> <span class="o">*</span> <span class="n">fv</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-14</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">E_O2_v</span> <span class="o">/</span> <span class="n">R</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">Tref</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">T</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">kappa_co</span> <span class="o">*</span> <span class="mf">1.2</span> <span class="o">*</span> <span class="mf">1e-14</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">E_O2_l</span> <span class="o">/</span> <span class="n">R</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">Tref</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">T</span><span class="p">))</span>
-</code></pre></div></td></tr></table></div>
+    # Calculation of the permeability coefficient of the membrane for oxygen
+    if lambdaa &lt; 17.6:
+        fv = (lambdaa * M_H2O / rho_H2O(T)) / (M_eq / rho_mem + lambdaa * M_H2O / rho_H2O(T))
+        return kappa_co * (0.11 + 1.9 * fv) * 1e-14 * np.exp(E_O2_v / R * (1 / Tref - 1 / T))
+    else:
+        return kappa_co * 1.2 * 1e-14 * np.exp(E_O2_l / R * (1 / Tref - 1 / T))</code></pre>
             </details>
     </div>
 
@@ -2071,14 +1730,14 @@ may be wrong. This is why two porosities are considered in the parameters of thi
 
 
 <h2 id="modules.transitory_functions.lambda_eq" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">lambda_eq</span><span class="p">(</span><span class="n">C_v</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">Kshape</span><span class="p">)</span></code>
+            <code class="highlight language-python">lambda_eq(C_v, s, T, Kshape)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This function calculates the equilibrium water content in the membrane. Hinatsu's expression modified with
+        <p>This function calculates the equilibrium water content in the membrane. Hinatsu's expression modified with
 Bao's formulation has been selected.</p>
 
 
@@ -2154,52 +1813,29 @@ Bao's formulation has been selected.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/transitory_functions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span>
-<span class="normal">267</span>
-<span class="normal">268</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">lambda_eq</span><span class="p">(</span><span class="n">C_v</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">Kshape</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the equilibrium water content in the membrane. Hinatsu&#39;s expression modified with</span>
-<span class="sd">    Bao&#39;s formulation has been selected.</span>
+              <pre class="highlight"><code class="language-python">def lambda_eq(C_v, s, T, Kshape):
+    """This function calculates the equilibrium water content in the membrane. Hinatsu's expression modified with
+    Bao's formulation has been selected.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    C_v : float</span>
-<span class="sd">        Water concentration variable in mol.m-3.</span>
-<span class="sd">    s : float</span>
-<span class="sd">        Liquid water saturation variable.</span>
-<span class="sd">    T : float</span>
-<span class="sd">        Temperature in K.</span>
-<span class="sd">    Kshape : float</span>
-<span class="sd">        Mathematical factor governing lambda_eq smoothing</span>
+    Parameters
+    ----------
+    C_v : float
+        Water concentration variable in mol.m-3.
+    s : float
+        Liquid water saturation variable.
+    T : float
+        Temperature in K.
+    Kshape : float
+        Mathematical factor governing lambda_eq smoothing
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        Equilibrium water content in the membrane.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">a_w</span> <span class="o">=</span> <span class="n">C_v</span> <span class="o">/</span> <span class="n">C_v_sat</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">s</span>  <span class="c1"># water activity</span>
-    <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.300</span> <span class="o">+</span> <span class="mf">10.8</span> <span class="o">*</span> <span class="n">a_w</span> <span class="o">-</span> <span class="mf">16.0</span> <span class="o">*</span> <span class="n">a_w</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">14.1</span> <span class="o">*</span> <span class="n">a_w</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">a_w</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span> \
-        <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mf">9.2</span> <span class="o">+</span> <span class="mf">8.6</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">Kshape</span> <span class="o">*</span> <span class="p">(</span><span class="n">a_w</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))))</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">a_w</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
-</code></pre></div></td></tr></table></div>
+    Returns
+    -------
+    float
+        Equilibrium water content in the membrane.
+    """
+    a_w = C_v / C_v_sat(T) + 2 * s  # water activity
+    return 0.5 * (0.300 + 10.8 * a_w - 16.0 * a_w ** 2 + 14.1 * a_w ** 3) * (1 - np.tanh(100 * (a_w - 1))) \
+        + 0.5 * (9.2 + 8.6 * (1 - np.exp(-Kshape * (a_w - 1)))) * (1 + np.tanh(100 * (a_w - 1)))</code></pre>
             </details>
     </div>
 
@@ -2209,14 +1845,14 @@ Bao's formulation has been selected.</p>
 
 
 <h2 id="modules.transitory_functions.nu_l" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">nu_l</span><span class="p">(</span><span class="n">T</span><span class="p">)</span></code>
+            <code class="highlight language-python">nu_l(T)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This function calculates the liquid water kinematic viscosity, in m².s-1, as a function of the temperature.</p>
+        <p>This function calculates the liquid water kinematic viscosity, in m².s-1, as a function of the temperature.</p>
 
 
 <table class="field-list">
@@ -2267,36 +1903,21 @@ Bao's formulation has been selected.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/transitory_functions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">nu_l</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the liquid water kinematic viscosity, in m².s-1, as a function of the temperature.</span>
+              <pre class="highlight"><code class="language-python">def nu_l(T):
+    """This function calculates the liquid water kinematic viscosity, in m².s-1, as a function of the temperature.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    T : float</span>
-<span class="sd">        Temperature in K.</span>
+    Parameters
+    ----------
+    T : float
+        Temperature in K.
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        Liquid water kinematic viscosity in m².s-1.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">mu_l</span> <span class="o">=</span> <span class="mf">2.414</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span> <span class="o">+</span> <span class="mf">247.8</span> <span class="o">/</span> <span class="p">(</span><span class="n">T</span> <span class="o">-</span> <span class="mf">140.0</span><span class="p">))</span>  <span class="c1"># Pa.s. It is the liquid water dynamic viscosity.</span>
-    <span class="k">return</span> <span class="n">mu_l</span> <span class="o">/</span> <span class="n">rho_H2O</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+    Returns
+    -------
+    float
+        Liquid water kinematic viscosity in m².s-1.
+    """
+    mu_l = 2.414 * 10 ** (-5 + 247.8 / (T - 140.0))  # Pa.s. It is the liquid water dynamic viscosity.
+    return mu_l / rho_H2O(T)</code></pre>
             </details>
     </div>
 
@@ -2306,14 +1927,14 @@ Bao's formulation has been selected.</p>
 
 
 <h2 id="modules.transitory_functions.rho_H2O" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">rho_H2O</span><span class="p">(</span><span class="n">T</span><span class="p">)</span></code>
+            <code class="highlight language-python">rho_H2O(T)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This function calculates the water density, in kg.m-3, as a function of the temperature.</p>
+        <p>This function calculates the water density, in kg.m-3, as a function of the temperature.</p>
 
 
 <table class="field-list">
@@ -2364,38 +1985,22 @@ Bao's formulation has been selected.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/transitory_functions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">rho_H2O</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the water density, in kg.m-3, as a function of the temperature.</span>
+              <pre class="highlight"><code class="language-python">def rho_H2O(T):
+    """This function calculates the water density, in kg.m-3, as a function of the temperature.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    T : float</span>
-<span class="sd">        Temperature in K.</span>
+    Parameters
+    ----------
+    T : float
+        Temperature in K.
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        Water density in kg.m-3.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">((</span><span class="mf">999.83952</span> <span class="o">+</span> <span class="mf">16.945176</span> <span class="o">*</span> <span class="p">(</span><span class="n">T</span> <span class="o">-</span> <span class="mf">273.15</span><span class="p">)</span> <span class="o">-</span> <span class="mf">7.9870401e-3</span> <span class="o">*</span> <span class="p">(</span><span class="n">T</span> <span class="o">-</span> <span class="mf">273.15</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="mf">46.170461e-6</span> <span class="o">*</span> <span class="p">(</span><span class="n">T</span> <span class="o">-</span> <span class="mf">273.15</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span>
-             <span class="o">+</span> <span class="mf">105.56302e-9</span> <span class="o">*</span> <span class="p">(</span><span class="n">T</span> <span class="o">-</span> <span class="mf">273.15</span><span class="p">)</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">-</span> <span class="mf">280.54253e-12</span> <span class="o">*</span> <span class="p">(</span><span class="n">T</span> <span class="o">-</span> <span class="mf">273.15</span><span class="p">)</span> <span class="o">**</span> <span class="mi">5</span><span class="p">)</span> <span class="o">/</span>
-            <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">16.879850e-3</span> <span class="o">*</span> <span class="p">(</span><span class="n">T</span> <span class="o">-</span> <span class="mf">273.15</span><span class="p">)))</span>
-</code></pre></div></td></tr></table></div>
+    Returns
+    -------
+    float
+        Water density in kg.m-3.
+    """
+    return ((999.83952 + 16.945176 * (T - 273.15) - 7.9870401e-3 * (T - 273.15) ** 2 - 46.170461e-6 * (T - 273.15) ** 3
+             + 105.56302e-9 * (T - 273.15) ** 4 - 280.54253e-12 * (T - 273.15) ** 5) /
+            (1 + 16.879850e-3 * (T - 273.15)))</code></pre>
             </details>
     </div>
 
@@ -2405,14 +2010,14 @@ Bao's formulation has been selected.</p>
 
 
 <h2 id="modules.transitory_functions.sigma" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">sigma</span><span class="p">(</span><span class="n">T</span><span class="p">)</span></code>
+            <code class="highlight language-python">sigma(T)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This function calculates the water surface tension, in N.m-1, as a function of the temperature.</p>
+        <p>This function calculates the water surface tension, in N.m-1, as a function of the temperature.</p>
 
 
 <table class="field-list">
@@ -2463,34 +2068,20 @@ Bao's formulation has been selected.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/transitory_functions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">351</span>
-<span class="normal">352</span>
-<span class="normal">353</span>
-<span class="normal">354</span>
-<span class="normal">355</span>
-<span class="normal">356</span>
-<span class="normal">357</span>
-<span class="normal">358</span>
-<span class="normal">359</span>
-<span class="normal">360</span>
-<span class="normal">361</span>
-<span class="normal">362</span>
-<span class="normal">363</span>
-<span class="normal">364</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">sigma</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the water surface tension, in N.m-1, as a function of the temperature.</span>
+              <pre class="highlight"><code class="language-python">def sigma(T):
+    """This function calculates the water surface tension, in N.m-1, as a function of the temperature.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    T : float</span>
-<span class="sd">        Temperature in K.</span>
+    Parameters
+    ----------
+    T : float
+        Temperature in K.
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        Water surface tension in N.m-1.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="mf">235.8e-3</span> <span class="o">*</span> <span class="p">((</span><span class="mf">647.15</span> <span class="o">-</span> <span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="mf">647.15</span><span class="p">)</span> <span class="o">**</span> <span class="mf">1.256</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mf">0.625</span> <span class="o">*</span> <span class="p">(</span><span class="mf">647.15</span> <span class="o">-</span> <span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="mf">647.15</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+    Returns
+    -------
+    float
+        Water surface tension in N.m-1.
+    """
+    return 235.8e-3 * ((647.15 - T) / 647.15) ** 1.256 * (1 - 0.625 * (647.15 - T) / 647.15)</code></pre>
             </details>
     </div>
 

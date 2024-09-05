@@ -144,7 +144,7 @@
 <a id="model.control"></a>
     <div class="doc doc-contents first">
 
-      <p>This module contains the function that control the operating conditions of the MEA system.</p>
+        <p>This module contains the function that control the operating conditions of the MEA system.</p>
 
 
 
@@ -162,14 +162,14 @@
 
 
 <h2 id="model.control.control_operating_conditions" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">control_operating_conditions</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">solver_variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">)</span></code>
+            <code class="highlight language-python">control_operating_conditions(t, solver_variables, operating_inputs, parameters, control_variables)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This function controls the operating conditions of the MEA system, if required.
+        <p>This function controls the operating conditions of the MEA system, if required.
 It is currently in construction.</p>
 
 
@@ -230,44 +230,25 @@ It is currently in construction.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>model/control.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">control_operating_conditions</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">solver_variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function controls the operating conditions of the MEA system, if required.</span>
-<span class="sd">    It is currently in construction.</span>
+              <pre class="highlight"><code class="language-python">def control_operating_conditions(t, solver_variables, operating_inputs, parameters, control_variables):
+    """This function controls the operating conditions of the MEA system, if required.
+    It is currently in construction.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    t : float</span>
-<span class="sd">        Time (s).</span>
-<span class="sd">    solver_variables : dict</span>
-<span class="sd">        Dictionary containing the solver variables.</span>
-<span class="sd">    operating_inputs : dict</span>
-<span class="sd">        Dictionary containing the operating inputs.</span>
-<span class="sd">    parameters : dict</span>
-<span class="sd">        Dictionary containing the parameters.</span>
-<span class="sd">    control_variables : dict</span>
-<span class="sd">        Dictionary containing the control variables.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    Parameters
+    ----------
+    t : float
+        Time (s).
+    solver_variables : dict
+        Dictionary containing the solver variables.
+    operating_inputs : dict
+        Dictionary containing the operating inputs.
+    parameters : dict
+        Dictionary containing the parameters.
+    control_variables : dict
+        Dictionary containing the control variables.
+    """
 
-    <span class="k">pass</span>
-</code></pre></div></td></tr></table></div>
+    pass</code></pre>
             </details>
     </div>
 

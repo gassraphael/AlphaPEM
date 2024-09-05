@@ -144,7 +144,7 @@
 <a id="modules.auxiliaries_modules"></a>
     <div class="doc doc-contents first">
 
-      <p>This module is used to calculate intermediate values for the auxiliaries flows calculation.</p>
+        <p>This module is used to calculate intermediate values for the auxiliaries flows calculation.</p>
 
 
 
@@ -162,14 +162,14 @@
 
 
 <h2 id="modules.auxiliaries_modules.auxiliaries_int_values" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">auxiliaries_int_values</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">solver_variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span></code>
+            <code class="highlight language-python">auxiliaries_int_values(t, solver_variables, operating_inputs, parameters)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This functions calculates intermediate values for the auxiliaries flows calculation.</p>
+        <p>This functions calculates intermediate values for the auxiliaries flows calculation.</p>
 
 
 <table class="field-list">
@@ -363,284 +363,145 @@
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/auxiliaries_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 18</span>
-<span class="normal"> 19</span>
-<span class="normal"> 20</span>
-<span class="normal"> 21</span>
-<span class="normal"> 22</span>
-<span class="normal"> 23</span>
-<span class="normal"> 24</span>
-<span class="normal"> 25</span>
-<span class="normal"> 26</span>
-<span class="normal"> 27</span>
-<span class="normal"> 28</span>
-<span class="normal"> 29</span>
-<span class="normal"> 30</span>
-<span class="normal"> 31</span>
-<span class="normal"> 32</span>
-<span class="normal"> 33</span>
-<span class="normal"> 34</span>
-<span class="normal"> 35</span>
-<span class="normal"> 36</span>
-<span class="normal"> 37</span>
-<span class="normal"> 38</span>
-<span class="normal"> 39</span>
-<span class="normal"> 40</span>
-<span class="normal"> 41</span>
-<span class="normal"> 42</span>
-<span class="normal"> 43</span>
-<span class="normal"> 44</span>
-<span class="normal"> 45</span>
-<span class="normal"> 46</span>
-<span class="normal"> 47</span>
-<span class="normal"> 48</span>
-<span class="normal"> 49</span>
-<span class="normal"> 50</span>
-<span class="normal"> 51</span>
-<span class="normal"> 52</span>
-<span class="normal"> 53</span>
-<span class="normal"> 54</span>
-<span class="normal"> 55</span>
-<span class="normal"> 56</span>
-<span class="normal"> 57</span>
-<span class="normal"> 58</span>
-<span class="normal"> 59</span>
-<span class="normal"> 60</span>
-<span class="normal"> 61</span>
-<span class="normal"> 62</span>
-<span class="normal"> 63</span>
-<span class="normal"> 64</span>
-<span class="normal"> 65</span>
-<span class="normal"> 66</span>
-<span class="normal"> 67</span>
-<span class="normal"> 68</span>
-<span class="normal"> 69</span>
-<span class="normal"> 70</span>
-<span class="normal"> 71</span>
-<span class="normal"> 72</span>
-<span class="normal"> 73</span>
-<span class="normal"> 74</span>
-<span class="normal"> 75</span>
-<span class="normal"> 76</span>
-<span class="normal"> 77</span>
-<span class="normal"> 78</span>
-<span class="normal"> 79</span>
-<span class="normal"> 80</span>
-<span class="normal"> 81</span>
-<span class="normal"> 82</span>
-<span class="normal"> 83</span>
-<span class="normal"> 84</span>
-<span class="normal"> 85</span>
-<span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">auxiliaries_int_values</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">solver_variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This functions calculates intermediate values for the auxiliaries flows calculation.</span>
+              <pre class="highlight"><code class="language-python">def auxiliaries_int_values(t, solver_variables, operating_inputs, parameters):
+    """This functions calculates intermediate values for the auxiliaries flows calculation.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    t : float</span>
-<span class="sd">        Time (s).</span>
-<span class="sd">    solver_variables : dict</span>
-<span class="sd">        Variables calculated by the solver. They correspond to the fuel cell internal states.</span>
-<span class="sd">    operating_inputs : dict</span>
-<span class="sd">        Operating inputs of the fuel cell.</span>
-<span class="sd">    parameters : dict</span>
-<span class="sd">        Parameters of the fuel cell model.</span>
+    Parameters
+    ----------
+    t : float
+        Time (s).
+    solver_variables : dict
+        Variables calculated by the solver. They correspond to the fuel cell internal states.
+    operating_inputs : dict
+        Operating inputs of the fuel cell.
+    parameters : dict
+        Parameters of the fuel cell model.
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    Mext : float</span>
-<span class="sd">        Molar mass of the ambient air outside the stack (kg/mol).</span>
-<span class="sd">    Pagc : float</span>
-<span class="sd">        Global pressure in the anode gas channel (Pa).</span>
-<span class="sd">    Pcgc : float</span>
-<span class="sd">        Global pressure in the cathode gas channel (Pa).</span>
-<span class="sd">    Phi_agc : float</span>
-<span class="sd">        Relative humidity in the anode gas channel.</span>
-<span class="sd">    Phi_cgc : float</span>
-<span class="sd">        Relative humidity in the cathode gas channel.</span>
-<span class="sd">    y_cgc : float</span>
-<span class="sd">        Oxygen ratio in dry air in the cathode gas channel.</span>
-<span class="sd">    Magc : float</span>
-<span class="sd">        Molar mass of all the gas species in the anode gas channel (kg/mol).</span>
-<span class="sd">    Mcgc : float</span>
-<span class="sd">        Molar mass of all the gas species in the cathode gas channel (kg/mol).</span>
-<span class="sd">    Pr_aem : float</span>
-<span class="sd">        Pressure ratio in the anode external manifold.</span>
-<span class="sd">    Pr_cem : float</span>
-<span class="sd">        Pressure ratio in the cathode external manifold.</span>
-<span class="sd">    Maem : float</span>
-<span class="sd">        Molar mass of all the gas species in the anode external manifold (kg/mol).</span>
-<span class="sd">    Masm : float</span>
-<span class="sd">        Molar mass of all the gas species in the anode supply manifold (kg/mol).</span>
-<span class="sd">    Mcem : float</span>
-<span class="sd">        Molar mass of all the gas species in the cathode external manifold (kg/mol).</span>
-<span class="sd">    Mcsm : float</span>
-<span class="sd">        Molar mass of all the gas species in the cathode supply manifold (kg/mol).</span>
-<span class="sd">    k_purge : float</span>
-<span class="sd">        Purge coefficient. It is equal to 1 if the purge is active and 0 otherwise.</span>
-<span class="sd">    Abp_a : float</span>
-<span class="sd">        Area of the back pressure valve in the anode external manifold (m²).</span>
-<span class="sd">    Abp_c : float</span>
-<span class="sd">        Area of the back pressure valve in the cathode external manifold (m²).</span>
-<span class="sd">    i_n : float</span>
-<span class="sd">        Internal current density (A/m²).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    Returns
+    -------
+    Mext : float
+        Molar mass of the ambient air outside the stack (kg/mol).
+    Pagc : float
+        Global pressure in the anode gas channel (Pa).
+    Pcgc : float
+        Global pressure in the cathode gas channel (Pa).
+    Phi_agc : float
+        Relative humidity in the anode gas channel.
+    Phi_cgc : float
+        Relative humidity in the cathode gas channel.
+    y_cgc : float
+        Oxygen ratio in dry air in the cathode gas channel.
+    Magc : float
+        Molar mass of all the gas species in the anode gas channel (kg/mol).
+    Mcgc : float
+        Molar mass of all the gas species in the cathode gas channel (kg/mol).
+    Pr_aem : float
+        Pressure ratio in the anode external manifold.
+    Pr_cem : float
+        Pressure ratio in the cathode external manifold.
+    Maem : float
+        Molar mass of all the gas species in the anode external manifold (kg/mol).
+    Masm : float
+        Molar mass of all the gas species in the anode supply manifold (kg/mol).
+    Mcem : float
+        Molar mass of all the gas species in the cathode external manifold (kg/mol).
+    Mcsm : float
+        Molar mass of all the gas species in the cathode supply manifold (kg/mol).
+    k_purge : float
+        Purge coefficient. It is equal to 1 if the purge is active and 0 otherwise.
+    Abp_a : float
+        Area of the back pressure valve in the anode external manifold (m²).
+    Abp_c : float
+        Area of the back pressure valve in the cathode external manifold (m²).
+    i_n : float
+        Internal current density (A/m²).
+    """
 
-    <span class="c1"># Extraction of the variables</span>
-    <span class="n">C_v_agc</span><span class="p">,</span> <span class="n">C_v_cgc</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_v_agc&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_v_cgc&#39;</span><span class="p">]</span>
-    <span class="n">lambda_mem</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;lambda_mem&#39;</span><span class="p">]</span>
-    <span class="n">C_H2_agc</span><span class="p">,</span> <span class="n">C_H2_acl</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_H2_agc&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_H2_acl&#39;</span><span class="p">]</span>
-    <span class="n">C_N2</span><span class="p">,</span> <span class="n">C_O2_ccl</span><span class="p">,</span> <span class="n">C_O2_cgc</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_N2&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_O2_ccl&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_O2_cgc&#39;</span><span class="p">]</span>
-    <span class="n">Pasm</span><span class="p">,</span> <span class="n">Paem</span><span class="p">,</span> <span class="n">Pcsm</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Pasm&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Paem&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Pcsm&#39;</span><span class="p">]</span>
-    <span class="n">Pcem</span><span class="p">,</span> <span class="n">Phi_asm</span><span class="p">,</span> <span class="n">Phi_aem</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Pcem&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Phi_asm&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Phi_aem&#39;</span><span class="p">]</span>
-    <span class="n">Phi_csm</span><span class="p">,</span> <span class="n">Phi_cem</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Phi_csm&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Phi_cem&#39;</span><span class="p">]</span>
-    <span class="n">Abp_a</span><span class="p">,</span> <span class="n">Abp_c</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Abp_a&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Abp_c&#39;</span><span class="p">]</span>
-    <span class="c1"># Extraction of the operating inputs and the parameters</span>
-    <span class="n">Tfc</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Tfc&#39;</span><span class="p">],</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Pa_des&#39;</span><span class="p">],</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Pc_des&#39;</span><span class="p">]</span>
-    <span class="n">Hmem</span><span class="p">,</span> <span class="n">kappa_co</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hmem&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;kappa_co&#39;</span><span class="p">]</span>
-    <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_purge</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;t_purge&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_purge&#39;</span><span class="p">]</span>
+    # Extraction of the variables
+    C_v_agc, C_v_cgc = solver_variables['C_v_agc'], solver_variables['C_v_cgc']
+    lambda_mem = solver_variables['lambda_mem']
+    C_H2_agc, C_H2_acl = solver_variables['C_H2_agc'], solver_variables['C_H2_acl']
+    C_N2, C_O2_ccl, C_O2_cgc = solver_variables['C_N2'], solver_variables['C_O2_ccl'], solver_variables['C_O2_cgc']
+    Pasm, Paem, Pcsm = solver_variables['Pasm'], solver_variables['Paem'], solver_variables['Pcsm']
+    Pcem, Phi_asm, Phi_aem = solver_variables['Pcem'], solver_variables['Phi_asm'], solver_variables['Phi_aem']
+    Phi_csm, Phi_cem = solver_variables['Phi_csm'], solver_variables['Phi_cem']
+    Abp_a, Abp_c = solver_variables['Abp_a'], solver_variables['Abp_c']
+    # Extraction of the operating inputs and the parameters
+    Tfc, Pa_des, Pc_des = operating_inputs['Tfc'], operating_inputs['Pa_des'], operating_inputs['Pc_des']
+    Hmem, kappa_co = parameters['Hmem'], parameters['kappa_co']
+    t_purge, type_purge = parameters['t_purge'], parameters['type_purge']
 
-    <span class="c1"># Molar mass of the ambient air</span>
-    <span class="n">Mext</span> <span class="o">=</span> <span class="n">Phi_ext</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pext</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
-           <span class="n">yO2_ext</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_ext</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pext</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_O2</span> <span class="o">+</span> \
-           <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">yO2_ext</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_ext</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pext</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_N2</span>
+    # Molar mass of the ambient air
+    Mext = Phi_ext * Psat(Text) / Pext * M_H2O + \
+           yO2_ext * (1 - Phi_ext * Psat(Text) / Pext) * M_O2 + \
+           (1 - yO2_ext) * (1 - Phi_ext * Psat(Text) / Pext) * M_N2
 
-    <span class="c1"># Physical quantities inside the stack</span>
-    <span class="c1">#       Pressures</span>
-    <span class="n">Pagc</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_v_agc</span> <span class="o">+</span> <span class="n">C_H2_agc</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span>
-    <span class="n">Pcgc</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_v_cgc</span> <span class="o">+</span> <span class="n">C_O2_cgc</span> <span class="o">+</span> <span class="n">C_N2</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span>
-    <span class="c1">#       Humidities</span>
-    <span class="n">Phi_agc</span> <span class="o">=</span> <span class="n">C_v_agc</span> <span class="o">/</span> <span class="n">C_v_sat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span>
-    <span class="n">Phi_cgc</span> <span class="o">=</span> <span class="n">C_v_cgc</span> <span class="o">/</span> <span class="n">C_v_sat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span>
-    <span class="c1">#       Oxygen ratio in dry air</span>
-    <span class="n">y_cgc</span> <span class="o">=</span> <span class="n">C_O2_cgc</span> <span class="o">/</span> <span class="p">(</span><span class="n">C_O2_cgc</span> <span class="o">+</span> <span class="n">C_N2</span><span class="p">)</span>
-    <span class="c1">#       Molar masses</span>
-    <span class="n">Magc</span> <span class="o">=</span> <span class="n">C_v_agc</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span> <span class="o">/</span> <span class="n">Pagc</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
-           <span class="n">C_H2_agc</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span> <span class="o">/</span> <span class="n">Pagc</span> <span class="o">*</span> <span class="n">M_H2</span>
-    <span class="n">Mcgc</span> <span class="o">=</span> <span class="n">Phi_cgc</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcgc</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
-           <span class="n">y_cgc</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_cgc</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcgc</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_O2</span> <span class="o">+</span> \
-           <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y_cgc</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_cgc</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcgc</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_N2</span>
+    # Physical quantities inside the stack
+    #       Pressures
+    Pagc = (C_v_agc + C_H2_agc) * R * Tfc
+    Pcgc = (C_v_cgc + C_O2_cgc + C_N2) * R * Tfc
+    #       Humidities
+    Phi_agc = C_v_agc / C_v_sat(Tfc)
+    Phi_cgc = C_v_cgc / C_v_sat(Tfc)
+    #       Oxygen ratio in dry air
+    y_cgc = C_O2_cgc / (C_O2_cgc + C_N2)
+    #       Molar masses
+    Magc = C_v_agc * R * Tfc / Pagc * M_H2O + \
+           C_H2_agc * R * Tfc / Pagc * M_H2
+    Mcgc = Phi_cgc * Psat(Tfc) / Pcgc * M_H2O + \
+           y_cgc * (1 - Phi_cgc * Psat(Tfc) / Pcgc) * M_O2 + \
+           (1 - y_cgc) * (1 - Phi_cgc * Psat(Tfc) / Pcgc) * M_N2
 
-    <span class="c1"># Internal current density</span>
-    <span class="n">i_H2</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">F</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span> <span class="o">/</span> <span class="n">Hmem</span> <span class="o">*</span> <span class="n">C_H2_acl</span> <span class="o">*</span> <span class="n">k_H2</span><span class="p">(</span><span class="n">lambda_mem</span><span class="p">,</span> <span class="n">Tfc</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">)</span>
-    <span class="n">i_O2</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">F</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span> <span class="o">/</span> <span class="n">Hmem</span> <span class="o">*</span> <span class="n">C_O2_ccl</span> <span class="o">*</span> <span class="n">k_O2</span><span class="p">(</span><span class="n">lambda_mem</span><span class="p">,</span> <span class="n">Tfc</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">)</span>
-    <span class="n">i_n</span> <span class="o">=</span> <span class="n">i_H2</span> <span class="o">+</span> <span class="n">i_O2</span>
+    # Internal current density
+    i_H2 = 2 * F * R * Tfc / Hmem * C_H2_acl * k_H2(lambda_mem, Tfc, kappa_co)
+    i_O2 = 4 * F * R * Tfc / Hmem * C_O2_ccl * k_O2(lambda_mem, Tfc, kappa_co)
+    i_n = i_H2 + i_O2
 
-    <span class="c1"># Physical quantities in the auxiliary system</span>
-    <span class="k">if</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;type_auxiliary&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;closed_anode&quot;</span> <span class="ow">or</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;type_auxiliary&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;opened_anode&quot;</span><span class="p">:</span>
-        <span class="c1"># Pressure ratios</span>
-        <span class="n">Pr_aem</span> <span class="o">=</span> <span class="p">(</span><span class="n">Pext</span> <span class="o">/</span> <span class="n">Paem</span><span class="p">)</span>
-        <span class="n">Pr_cem</span> <span class="o">=</span> <span class="p">(</span><span class="n">Pext</span> <span class="o">/</span> <span class="n">Pcem</span><span class="p">)</span>
-        <span class="c1"># Oxygen ratio in dry air</span>
-        <span class="n">y_cem</span> <span class="o">=</span> <span class="p">(</span><span class="n">Pcem</span> <span class="o">-</span> <span class="n">Phi_cem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">-</span> <span class="n">C_N2</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Pcem</span> <span class="o">-</span> <span class="n">Phi_cem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">))</span>
-        <span class="c1"># Molar masses</span>
-        <span class="n">Maem</span> <span class="o">=</span> <span class="n">Phi_aem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Paem</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
-               <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_aem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Paem</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_H2</span>
-        <span class="n">Masm</span> <span class="o">=</span> <span class="n">Phi_asm</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pasm</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
-               <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_asm</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pasm</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_H2</span>
-        <span class="n">Mcem</span> <span class="o">=</span> <span class="n">Phi_cem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcem</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
-               <span class="n">y_cem</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_cem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcem</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_O2</span> <span class="o">+</span> \
-               <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y_cem</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_cem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcem</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_N2</span>
-        <span class="n">Mcsm</span> <span class="o">=</span> <span class="n">Phi_csm</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcsm</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
-               <span class="n">yO2_ext</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_csm</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcsm</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_O2</span> <span class="o">+</span> \
-               <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">yO2_ext</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_csm</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Tfc</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcsm</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_N2</span>
-        <span class="c1"># Purge</span>
-        <span class="k">if</span> <span class="n">type_purge</span> <span class="o">==</span> <span class="s2">&quot;no_purge&quot;</span><span class="p">:</span>
-            <span class="n">k_purge</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">elif</span> <span class="n">type_purge</span> <span class="o">==</span> <span class="s2">&quot;constant_purge&quot;</span><span class="p">:</span>
-            <span class="n">k_purge</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="k">elif</span> <span class="n">type_purge</span> <span class="o">==</span> <span class="s2">&quot;periodic_purge&quot;</span><span class="p">:</span>
-            <span class="n">purge_time</span><span class="p">,</span> <span class="n">delta_purge</span> <span class="o">=</span> <span class="n">t_purge</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">t</span> <span class="o">/</span> <span class="p">(</span><span class="n">purge_time</span> <span class="o">+</span> <span class="n">delta_purge</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">purge_time</span> <span class="o">+</span> <span class="n">delta_purge</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="n">purge_time</span><span class="p">:</span>
-                <span class="n">k_purge</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">k_purge</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The type_purge variable should be correctly referenced.&quot;</span><span class="p">)</span>
-        <span class="c1"># Back pressure valve area</span>
-        <span class="k">if</span> <span class="n">Abp_a</span> <span class="o">&gt;</span> <span class="n">A_T</span><span class="p">:</span>
-            <span class="n">Abp_a</span> <span class="o">=</span> <span class="n">A_T</span>
-        <span class="k">elif</span> <span class="n">Abp_a</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">Abp_a</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="n">Abp_c</span> <span class="o">&gt;</span> <span class="n">A_T</span><span class="p">:</span>
-            <span class="n">Abp_c</span> <span class="o">=</span> <span class="n">A_T</span>
-        <span class="k">elif</span> <span class="n">Abp_c</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">Abp_c</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">else</span><span class="p">:</span>  <span class="c1"># parameters[&quot;type_auxiliary&quot;] == &quot;no_auxiliary&quot;</span>
-        <span class="n">Pr_aem</span><span class="p">,</span> <span class="n">Pr_cem</span><span class="p">,</span> <span class="n">Maem</span><span class="p">,</span> <span class="n">Masm</span><span class="p">,</span> <span class="n">Mcem</span><span class="p">,</span> <span class="n">Mcsm</span><span class="p">,</span> <span class="n">k_purge</span><span class="p">,</span> <span class="n">Abp_a</span><span class="p">,</span> <span class="n">Abp_c</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">9</span>
+    # Physical quantities in the auxiliary system
+    if parameters["type_auxiliary"] == "closed_anode_with_recirculation" or parameters["type_auxiliary"] == "opened_anode":
+        # Pressure ratios
+        Pr_aem = (Pext / Paem)
+        Pr_cem = (Pext / Pcem)
+        # Oxygen ratio in dry air
+        y_cem = (Pcem - Phi_cem * Psat(Tfc) - C_N2 * R * Tfc) / (Pcem - Phi_cem * Psat(Tfc))
+        # Molar masses
+        Maem = Phi_aem * Psat(Tfc) / Paem * M_H2O + \
+               (1 - Phi_aem * Psat(Tfc) / Paem) * M_H2
+        Masm = Phi_asm * Psat(Tfc) / Pasm * M_H2O + \
+               (1 - Phi_asm * Psat(Tfc) / Pasm) * M_H2
+        Mcem = Phi_cem * Psat(Tfc) / Pcem * M_H2O + \
+               y_cem * (1 - Phi_cem * Psat(Tfc) / Pcem) * M_O2 + \
+               (1 - y_cem) * (1 - Phi_cem * Psat(Tfc) / Pcem) * M_N2
+        Mcsm = Phi_csm * Psat(Tfc) / Pcsm * M_H2O + \
+               yO2_ext * (1 - Phi_csm * Psat(Tfc) / Pcsm) * M_O2 + \
+               (1 - yO2_ext) * (1 - Phi_csm * Psat(Tfc) / Pcsm) * M_N2
+        # Purge
+        if type_purge == "no_purge":
+            k_purge = 0
+        elif type_purge == "constant_purge":
+            k_purge = 1
+        elif type_purge == "periodic_purge":
+            purge_time, delta_purge = t_purge
+            if (t - int(t / (purge_time + delta_purge)) * (purge_time + delta_purge)) &lt;= purge_time:
+                k_purge = 1
+            else:
+                k_purge = 0
+        else:
+            raise ValueError("The type_purge variable should be correctly referenced.")
+        # Back pressure valve area
+        if Abp_a &gt; A_T:
+            Abp_a = A_T
+        elif Abp_a &lt; 0:
+            Abp_a = 0
+        if Abp_c &gt; A_T:
+            Abp_c = A_T
+        elif Abp_c &lt; 0:
+            Abp_c = 0
+    else:  # parameters["type_auxiliary"] == "no_auxiliary"
+        Pr_aem, Pr_cem, Maem, Masm, Mcem, Mcsm, k_purge, Abp_a, Abp_c = [0] * 9
 
-    <span class="k">return</span> <span class="p">(</span><span class="n">Mext</span><span class="p">,</span> <span class="n">Pagc</span><span class="p">,</span> <span class="n">Pcgc</span><span class="p">,</span> <span class="n">Phi_agc</span><span class="p">,</span> <span class="n">Phi_cgc</span><span class="p">,</span> <span class="n">y_cgc</span><span class="p">,</span> <span class="n">Magc</span><span class="p">,</span> <span class="n">Mcgc</span><span class="p">,</span> <span class="n">Pr_aem</span><span class="p">,</span> <span class="n">Pr_cem</span><span class="p">,</span> <span class="n">Maem</span><span class="p">,</span> <span class="n">Masm</span><span class="p">,</span> <span class="n">Mcem</span><span class="p">,</span> <span class="n">Mcsm</span><span class="p">,</span>
-            <span class="n">k_purge</span><span class="p">,</span> <span class="n">Abp_a</span><span class="p">,</span> <span class="n">Abp_c</span><span class="p">,</span> <span class="n">i_n</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+    return (Mext, Pagc, Pcgc, Phi_agc, Phi_cgc, y_cgc, Magc, Mcgc, Pr_aem, Pr_cem, Maem, Masm, Mcem, Mcsm,
+            k_purge, Abp_a, Abp_c, i_n)</code></pre>
             </details>
     </div>
 

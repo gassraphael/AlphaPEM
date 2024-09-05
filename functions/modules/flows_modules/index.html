@@ -144,7 +144,7 @@
 <a id="modules.flows_modules"></a>
     <div class="doc doc-contents first">
 
-      <p>This module is used to calculate intermediate values for the flows calculation.</p>
+        <p>This module is used to calculate intermediate values for the flows calculation.</p>
 
 
 
@@ -162,14 +162,14 @@
 
 
 <h2 id="modules.flows_modules.flows_int_values" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">flows_int_values</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span></code>
+            <code class="highlight language-python">flows_int_values(sv, operating_inputs, parameters)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>This functions calculates intermediate values for the flows calculation.</p>
+        <p>This functions calculates intermediate values for the flows calculation.</p>
 
 
 <table class="field-list">
@@ -349,188 +349,97 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/flows_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 18</span>
-<span class="normal"> 19</span>
-<span class="normal"> 20</span>
-<span class="normal"> 21</span>
-<span class="normal"> 22</span>
-<span class="normal"> 23</span>
-<span class="normal"> 24</span>
-<span class="normal"> 25</span>
-<span class="normal"> 26</span>
-<span class="normal"> 27</span>
-<span class="normal"> 28</span>
-<span class="normal"> 29</span>
-<span class="normal"> 30</span>
-<span class="normal"> 31</span>
-<span class="normal"> 32</span>
-<span class="normal"> 33</span>
-<span class="normal"> 34</span>
-<span class="normal"> 35</span>
-<span class="normal"> 36</span>
-<span class="normal"> 37</span>
-<span class="normal"> 38</span>
-<span class="normal"> 39</span>
-<span class="normal"> 40</span>
-<span class="normal"> 41</span>
-<span class="normal"> 42</span>
-<span class="normal"> 43</span>
-<span class="normal"> 44</span>
-<span class="normal"> 45</span>
-<span class="normal"> 46</span>
-<span class="normal"> 47</span>
-<span class="normal"> 48</span>
-<span class="normal"> 49</span>
-<span class="normal"> 50</span>
-<span class="normal"> 51</span>
-<span class="normal"> 52</span>
-<span class="normal"> 53</span>
-<span class="normal"> 54</span>
-<span class="normal"> 55</span>
-<span class="normal"> 56</span>
-<span class="normal"> 57</span>
-<span class="normal"> 58</span>
-<span class="normal"> 59</span>
-<span class="normal"> 60</span>
-<span class="normal"> 61</span>
-<span class="normal"> 62</span>
-<span class="normal"> 63</span>
-<span class="normal"> 64</span>
-<span class="normal"> 65</span>
-<span class="normal"> 66</span>
-<span class="normal"> 67</span>
-<span class="normal"> 68</span>
-<span class="normal"> 69</span>
-<span class="normal"> 70</span>
-<span class="normal"> 71</span>
-<span class="normal"> 72</span>
-<span class="normal"> 73</span>
-<span class="normal"> 74</span>
-<span class="normal"> 75</span>
-<span class="normal"> 76</span>
-<span class="normal"> 77</span>
-<span class="normal"> 78</span>
-<span class="normal"> 79</span>
-<span class="normal"> 80</span>
-<span class="normal"> 81</span>
-<span class="normal"> 82</span>
-<span class="normal"> 83</span>
-<span class="normal"> 84</span>
-<span class="normal"> 85</span>
-<span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">flows_int_values</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This functions calculates intermediate values for the flows calculation.</span>
+              <pre class="highlight"><code class="language-python">def flows_int_values(sv, operating_inputs, parameters):
+    """This functions calculates intermediate values for the flows calculation.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    sv : dict</span>
-<span class="sd">        Variables calculated by the solver. They correspond to the fuel cell internal states.</span>
-<span class="sd">        sv is a contraction of solver_variables for enhanced readability.</span>
-<span class="sd">    operating_inputs : dict</span>
-<span class="sd">        Operating inputs of the fuel cell.</span>
-<span class="sd">    parameters : dict</span>
-<span class="sd">        Parameters of the fuel cell model.</span>
+    Parameters
+    ----------
+    sv : dict
+        Variables calculated by the solver. They correspond to the fuel cell internal states.
+        sv is a contraction of solver_variables for enhanced readability.
+    operating_inputs : dict
+        Operating inputs of the fuel cell.
+    parameters : dict
+        Parameters of the fuel cell model.
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    Pagc : float</span>
-<span class="sd">        Global pressure in the anode gas channel (Pa).</span>
-<span class="sd">    Pcgc : float</span>
-<span class="sd">        Global pressure in the cathode gas channel (Pa).</span>
-<span class="sd">    s_agdl_agdl : list</span>
-<span class="sd">        Mean value of the saturated liquid water variable in the anode GDL between two adjacent GDL nodes.</span>
-<span class="sd">    s_agdl_acl : float</span>
-<span class="sd">        Mean value of the saturated liquid water variable between the last GDL node and the anode CL.</span>
-<span class="sd">    s_ccl_cgdl : float</span>
-<span class="sd">        Mean value of the saturated liquid water variable between the cathode CL and the first GDL node.</span>
-<span class="sd">    s_cgdl_cgdl : list</span>
-<span class="sd">        Mean value of the saturated liquid water variable in the cathode GDL between two adjacent GDL nodes.</span>
-<span class="sd">    epsilon_mean : float</span>
-<span class="sd">        Mean value of the porosity in the GDL and the CL.</span>
-<span class="sd">    theta_c_mean : float</span>
-<span class="sd">        Mean value of the contact angle in the GDL and the CL.</span>
-<span class="sd">    lambda_acl_mem : float</span>
-<span class="sd">        Mean value of the dissolved water variable between the anode CL and the membrane.</span>
-<span class="sd">    lambda_mem_ccl : float</span>
-<span class="sd">        Mean value of the dissolved water variable between the membrane and the cathode CL.</span>
-<span class="sd">    Pagc_agdl : float</span>
-<span class="sd">        Mean value of the pressure between the anode gas channel and the first GDL node.</span>
-<span class="sd">    Pagdl_agdl : list</span>
-<span class="sd">        Mean value of the pressure in the anode GDL between two adjacent GDL nodes.</span>
-<span class="sd">    Pagdl_acl : float</span>
-<span class="sd">        Mean value of the pressure between the last GDL node and the anode CL.</span>
-<span class="sd">    Pccl_cgdl : float</span>
-<span class="sd">        Mean value of the pressure between the cathode CL and the first GDL node.</span>
-<span class="sd">    Pcgdl_cgdl : list</span>
-<span class="sd">        Mean value of the pressure in the cathode GDL between two adjacent GDL nodes.</span>
-<span class="sd">    Pcgdl_cgc : float</span>
-<span class="sd">        Mean value of the pressure between the last GDL node and the cathode gas channel.</span>
-<span class="sd">    nu_l : float</span>
-<span class="sd">        Liquid water kinematic viscosity (m².s-1).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    Returns
+    -------
+    Pagc : float
+        Global pressure in the anode gas channel (Pa).
+    Pcgc : float
+        Global pressure in the cathode gas channel (Pa).
+    s_agdl_agdl : list
+        Mean value of the saturated liquid water variable in the anode GDL between two adjacent GDL nodes.
+    s_agdl_acl : float
+        Mean value of the saturated liquid water variable between the last GDL node and the anode CL.
+    s_ccl_cgdl : float
+        Mean value of the saturated liquid water variable between the cathode CL and the first GDL node.
+    s_cgdl_cgdl : list
+        Mean value of the saturated liquid water variable in the cathode GDL between two adjacent GDL nodes.
+    epsilon_mean : float
+        Mean value of the porosity in the GDL and the CL.
+    theta_c_mean : float
+        Mean value of the contact angle in the GDL and the CL.
+    lambda_acl_mem : float
+        Mean value of the dissolved water variable between the anode CL and the membrane.
+    lambda_mem_ccl : float
+        Mean value of the dissolved water variable between the membrane and the cathode CL.
+    Pagc_agdl : float
+        Mean value of the pressure between the anode gas channel and the first GDL node.
+    Pagdl_agdl : list
+        Mean value of the pressure in the anode GDL between two adjacent GDL nodes.
+    Pagdl_acl : float
+        Mean value of the pressure between the last GDL node and the anode CL.
+    Pccl_cgdl : float
+        Mean value of the pressure between the cathode CL and the first GDL node.
+    Pcgdl_cgdl : list
+        Mean value of the pressure in the cathode GDL between two adjacent GDL nodes.
+    Pcgdl_cgc : float
+        Mean value of the pressure between the last GDL node and the cathode gas channel.
+    nu_l : float
+        Liquid water kinematic viscosity (m².s-1).
+    """
 
-    <span class="c1"># Extraction of the variables</span>
-    <span class="n">C_v_agc</span><span class="p">,</span> <span class="n">C_v_acl</span><span class="p">,</span> <span class="n">C_v_ccl</span><span class="p">,</span> <span class="n">C_v_cgc</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_v_agc&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_v_acl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_v_ccl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_v_cgc&#39;</span><span class="p">]</span>
-    <span class="n">s_acl</span><span class="p">,</span> <span class="n">s_ccl</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_acl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_ccl&#39;</span><span class="p">]</span>
-    <span class="n">lambda_acl</span><span class="p">,</span> <span class="n">lambda_mem</span><span class="p">,</span> <span class="n">lambda_ccl</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;lambda_acl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;lambda_mem&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;lambda_ccl&#39;</span><span class="p">]</span>
-    <span class="n">C_H2_agc</span><span class="p">,</span> <span class="n">C_H2_acl</span><span class="p">,</span> <span class="n">C_O2_ccl</span><span class="p">,</span> <span class="n">C_O2_cgc</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_H2_agc&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_H2_acl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_O2_ccl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_O2_cgc&#39;</span><span class="p">]</span>
-    <span class="n">C_N2</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_N2&#39;</span><span class="p">]</span>
-    <span class="c1"># Extraction of the operating inputs and the parameters</span>
-    <span class="n">Tfc</span> <span class="o">=</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Tfc&#39;</span><span class="p">]</span>
-    <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">n_gdl</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;epsilon_gdl&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;n_gdl&#39;</span><span class="p">]</span>
+    # Extraction of the variables
+    C_v_agc, C_v_acl, C_v_ccl, C_v_cgc = sv['C_v_agc'], sv['C_v_acl'], sv['C_v_ccl'], sv['C_v_cgc']
+    s_acl, s_ccl = sv['s_acl'], sv['s_ccl']
+    lambda_acl, lambda_mem, lambda_ccl = sv['lambda_acl'], sv['lambda_mem'], sv['lambda_ccl']
+    C_H2_agc, C_H2_acl, C_O2_ccl, C_O2_cgc = sv['C_H2_agc'], sv['C_H2_acl'], sv['C_O2_ccl'], sv['C_O2_cgc']
+    C_N2 = sv['C_N2']
+    # Extraction of the operating inputs and the parameters
+    Tfc = operating_inputs['Tfc']
+    epsilon_gdl, n_gdl = parameters['epsilon_gdl'], parameters['n_gdl']
 
-    <span class="c1"># Pressures in the stack</span>
-    <span class="n">Pagc</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_v_agc</span> <span class="o">+</span> <span class="n">C_H2_agc</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span>
-    <span class="n">Pagdl</span> <span class="o">=</span> <span class="p">[(</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_H2_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
-    <span class="n">Pacl</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_v_acl</span> <span class="o">+</span> <span class="n">C_H2_acl</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span>
-    <span class="n">Pccl</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_v_ccl</span> <span class="o">+</span> <span class="n">C_O2_ccl</span> <span class="o">+</span> <span class="n">C_N2</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span>
-    <span class="n">Pcgdl</span> <span class="o">=</span> <span class="p">[(</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_O2_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">C_N2</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
-    <span class="n">Pcgc</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_v_cgc</span> <span class="o">+</span> <span class="n">C_O2_cgc</span> <span class="o">+</span> <span class="n">C_N2</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Tfc</span>
+    # Pressures in the stack
+    Pagc = (C_v_agc + C_H2_agc) * R * Tfc
+    Pagdl = [(sv[f'C_v_agdl_{i}'] + sv[f'C_H2_agdl_{i}']) * R * Tfc for i in range(1, n_gdl + 1)]
+    Pacl = (C_v_acl + C_H2_acl) * R * Tfc
+    Pccl = (C_v_ccl + C_O2_ccl + C_N2) * R * Tfc
+    Pcgdl = [(sv[f'C_v_cgdl_{i}'] + sv[f'C_O2_cgdl_{i}'] + C_N2) * R * Tfc for i in range(1, n_gdl + 1)]
+    Pcgc = (C_v_cgc + C_O2_cgc + C_N2) * R * Tfc
 
-    <span class="c1"># Mean values ...</span>
-    <span class="c1">#       ... of the saturated liquid water variable</span>
-    <span class="n">s_agdl_agdl</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_agdl_</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">)]</span>
-    <span class="n">s_agdl_acl</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">s_acl</span> <span class="o">/</span> <span class="mi">2</span>
-    <span class="n">s_ccl_cgdl</span> <span class="o">=</span> <span class="n">s_ccl</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_cgdl_1&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
-    <span class="n">s_cgdl_cgdl</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">)]</span>
-    <span class="c1">#       ... of the porosity and the contact angle</span>
-    <span class="n">epsilon_mean</span> <span class="o">=</span> <span class="n">epsilon_gdl</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">epsilon_cl</span> <span class="o">/</span> <span class="mi">2</span>
-    <span class="n">theta_c_mean</span> <span class="o">=</span> <span class="n">theta_c_gdl</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">theta_c_cl</span> <span class="o">/</span> <span class="mi">2</span>
-    <span class="c1">#       ... of the dissolved water variable</span>
-    <span class="n">lambda_acl_mem</span> <span class="o">=</span> <span class="n">lambda_acl</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">lambda_mem</span> <span class="o">/</span> <span class="mi">2</span>
-    <span class="n">lambda_mem_ccl</span> <span class="o">=</span> <span class="n">lambda_mem</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">lambda_ccl</span> <span class="o">/</span> <span class="mi">2</span>
-    <span class="c1">#       ... of the pressure</span>
-    <span class="n">Pagc_agdl</span> <span class="o">=</span> <span class="n">Pagc</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">Pagdl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
-    <span class="n">Pagdl_agdl</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">Pagdl</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">Pagdl</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
-    <span class="n">Pagdl_acl</span> <span class="o">=</span> <span class="n">Pagdl</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">Pacl</span> <span class="o">/</span> <span class="mi">2</span>
-    <span class="n">Pccl_cgdl</span> <span class="o">=</span> <span class="n">Pccl</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">Pcgdl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
-    <span class="n">Pcgdl_cgdl</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">Pcgdl</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">Pcgdl</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
-    <span class="n">Pcgdl_cgc</span> <span class="o">=</span> <span class="n">Pcgdl</span><span class="p">[</span><span class="n">n_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">Pcgc</span> <span class="o">/</span> <span class="mi">2</span>
+    # Mean values ...
+    #       ... of the saturated liquid water variable
+    s_agdl_agdl = [None] + [sv[f's_agdl_{i}'] / 2 + sv[f's_agdl_{i + 1}'] / 2 for i in range(1, n_gdl)]
+    s_agdl_acl = sv[f's_agdl_{n_gdl}'] / 2 + s_acl / 2
+    s_ccl_cgdl = s_ccl / 2 + sv['s_cgdl_1'] / 2
+    s_cgdl_cgdl = [None] + [sv[f's_cgdl_{i}'] / 2 + sv[f's_cgdl_{i + 1}'] / 2 for i in range(1, n_gdl)]
+    #       ... of the porosity and the contact angle
+    epsilon_mean = epsilon_gdl / 2 + epsilon_cl / 2
+    theta_c_mean = theta_c_gdl / 2 + theta_c_cl / 2
+    #       ... of the dissolved water variable
+    lambda_acl_mem = lambda_acl / 2 + lambda_mem / 2
+    lambda_mem_ccl = lambda_mem / 2 + lambda_ccl / 2
+    #       ... of the pressure
+    Pagc_agdl = Pagc / 2 + Pagdl[0] / 2
+    Pagdl_agdl = [None] + [Pagdl[i] / 2 + Pagdl[i + 1] / 2 for i in range(0, n_gdl - 1)]
+    Pagdl_acl = Pagdl[-1] / 2 + Pacl / 2
+    Pccl_cgdl = Pccl / 2 + Pcgdl[0] / 2
+    Pcgdl_cgdl = [None] + [Pcgdl[i] / 2 + Pcgdl[i + 1] / 2 for i in range(0, n_gdl - 1)]
+    Pcgdl_cgc = Pcgdl[n_gdl - 1] / 2 + Pcgc / 2
 
-    <span class="k">return</span> <span class="p">(</span><span class="n">Pagc</span><span class="p">,</span> <span class="n">Pcgc</span><span class="p">,</span> <span class="n">s_agdl_agdl</span><span class="p">,</span> <span class="n">s_agdl_acl</span><span class="p">,</span> <span class="n">s_ccl_cgdl</span><span class="p">,</span> <span class="n">s_cgdl_cgdl</span><span class="p">,</span> <span class="n">epsilon_mean</span><span class="p">,</span> <span class="n">theta_c_mean</span><span class="p">,</span> <span class="n">lambda_acl_mem</span><span class="p">,</span>
-            <span class="n">lambda_mem_ccl</span><span class="p">,</span> <span class="n">Pagc_agdl</span><span class="p">,</span> <span class="n">Pagdl_agdl</span><span class="p">,</span> <span class="n">Pagdl_acl</span><span class="p">,</span> <span class="n">Pccl_cgdl</span><span class="p">,</span> <span class="n">Pcgdl_cgdl</span><span class="p">,</span> <span class="n">Pcgdl_cgc</span><span class="p">,</span> <span class="n">nu_l</span><span class="p">(</span><span class="n">Tfc</span><span class="p">))</span>
-</code></pre></div></td></tr></table></div>
+    return (Pagc, Pcgc, s_agdl_agdl, s_agdl_acl, s_ccl_cgdl, s_cgdl_cgdl, epsilon_mean, theta_c_mean, lambda_acl_mem,
+            lambda_mem_ccl, Pagc_agdl, Pagdl_agdl, Pagdl_acl, Pccl_cgdl, Pcgdl_cgdl, Pcgdl_cgc, nu_l(Tfc))</code></pre>
             </details>
     </div>
 
