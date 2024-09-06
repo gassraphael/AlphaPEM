@@ -114,7 +114,7 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax):
     ax.set_ylabel(r'$\mathbf{Cell}$ $\mathbf{voltage}$ $\mathbf{U_{cell}}$ $\mathbf{\left( V \right)}$', labelpad=3)
     plot_general_instructions(ax)
     if type_plot == "fixed":
-        ax.legend(loc='best', frameon=False)
+        ax.legend(loc='best')
 
 
 # _______________________________________________________EIS curves_____________________________________________________
