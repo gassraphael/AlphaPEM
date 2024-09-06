@@ -417,7 +417,7 @@ class AlphaPEM:
         if type_current == "step":
             if type_display == "multiple":
 
-                figs, axes = zip(*[plt.subplots(figsize=(6, 6)) for _ in range(10)])
+                figs, axes = zip(*[plt.subplots(figsize=(8, 8)) for _ in range(10)])
 
                 plot_ifc(self.variables, self.operating_inputs, self.parameters, n, axes[0])
                 plot_J(self.variables, self.parameters, axes[1])
