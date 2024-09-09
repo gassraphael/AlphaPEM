@@ -795,7 +795,7 @@ def plot_Phi(variables, operating_inputs, ax):
     """
 
     # Extraction of the variables
-    t, C_agc_t, C_cgc_t = variables['t'], variables['C_agc'], variables['C_cgc']
+    t, C_v_agc_t, C_v_cgc_t = variables['t'], variables['C_v_agc'], variables['C_v_cgc']
     Phi_asm_t, Phi_aem_t = variables['Phi_asm'], variables['Phi_aem']
     Phi_csm_t, Phi_cem_t = variables['Phi_csm'], variables['Phi_cem']
     # Extraction of the operating inputs
@@ -805,8 +805,8 @@ def plot_Phi(variables, operating_inputs, ax):
     # Calculate the humidity Phi
     Phi_agc_t, Phi_cgc_t = [0] * len(t), [0] * len(t)
     for i in range(len(t)):
-        Phi_agc_t[i] = C_agc_t[i] * R * Tfc / Psat(Tfc)
-        Phi_cgc_t[i] = C_cgc_t[i] * R * Tfc / Psat(Tfc)
+        Phi_agc_t[i] = C_v_agc_t[i] * R * Tfc / Psat(Tfc)
+        Phi_cgc_t[i] = C_v_cgc_t[i] * R * Tfc / Psat(Tfc)
 
     # Plot the humidity at different spatial localisations: Phi
     ax.plot(t, Phi_agc_t, color=colors(0))
@@ -828,6 +828,9 @@ def plot_Phi(variables, operating_inputs, ax):
     plot_general_instructions(ax)
     ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
     ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
+    ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.2))
+    ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.2 / 5))
+    ax.set_ylim(0, 1.04)
 
 
 def plot_Phi_des(variables, operating_inputs, parameters, ax):
