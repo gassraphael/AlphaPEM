@@ -809,18 +809,20 @@ def plot_Phi(variables, operating_inputs, ax):
         Phi_cgc_t[i] = C_v_cgc_t[i] * R * Tfc / Psat(Tfc)
 
     # Plot the humidity at different spatial localisations: Phi
-    ax.plot(t, Phi_agc_t, color=colors(0))
-    ax.plot(t, Phi_cgc_t, color=colors(6))
-    ax.plot(t, Phi_asm_t, color=colors(7))
-    ax.plot(t, Phi_aem_t, color=colors(8))
-    ax.plot(t, Phi_csm_t, color=colors(9))
-    ax.plot(t, Phi_cem_t, color=colors(3))
-    ax.plot(t, [Phi_a_des] * len(t), color='black')
-    ax.plot(t, [Phi_c_des] * len(t), color='dimgrey')
-    ax.legend([r'$\mathregular{\Phi_{agc}}$', r'$\mathregular{\Phi_{cgc}}$',
-               r'$\mathregular{\Phi_{asm}}$', r'$\mathregular{\Phi_{aem}}$',
-               r'$\mathregular{\Phi_{csm}}$', r'$\mathregular{\Phi_{cem}}$',
-               r'$\mathregular{\Phi_{a,des}}$', r'$\mathregular{\Phi_{c,des}}$'], loc='best')
+    line1, = ax.plot(t, Phi_agc_t, color=colors(0), label=r'$\mathregular{\Phi_{agc}}$')
+    line2, = ax.plot(t, Phi_cgc_t, color=colors(1), label=r'$\mathregular{\Phi_{cgc}}$')
+    line3, = ax.plot(t, Phi_asm_t, color=colors(2), label=r'$\mathregular{\Phi_{asm}}$')
+    line4, = ax.plot(t, Phi_aem_t, color=colors(3), label=r'$\mathregular{\Phi_{aem}}$')
+    line5, = ax.plot(t, Phi_csm_t, color=colors(4), label=r'$\mathregular{\Phi_{csm}}$')
+    line6, = ax.plot(t, Phi_cem_t, color=colors(5), label=r'$\mathregular{\Phi_{cem}}$')
+
+    # First legend
+    first_legend = ax.legend(handles=[line1, line2, line3], loc='lower left', frameon=True)
+    ax.add_artist(first_legend)
+
+    # Second legend
+    ax.legend(handles=[line4, line5, line6], loc='lower right', frameon=True)
+
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r'$\mathbf{Humidity}$ $\mathbf{\Phi}$', labelpad=3)
 
