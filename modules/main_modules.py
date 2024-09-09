@@ -52,7 +52,7 @@ def figures_preparation(type_current, type_display):
             fig2, ax2 = None, None  # Here, additional plots are unnecessary
             fig3, ax3 = None, None  # Here, additional plots are unnecessary
         elif type_display == "synthetic":
-            mpl.rcParams['font.size'] = 15  # Font size for all text
+            mpl.rcParams['font.size'] = 13  # Font size for all text
             fig1, ax1 = plt.subplots(3, 3, figsize=(14, 14))
             fig2, ax2 = None, None  # Here, additional plots are unnecessary
             fig3, ax3 = None, None  # Here, additional plots are unnecessary
@@ -61,7 +61,7 @@ def figures_preparation(type_current, type_display):
     # For the polarization curve
     elif type_current == "polarization":
         if type_display == "multiple":
-            mpl.rcParams['font.size'] = 15  # Font size for all text
+            mpl.rcParams['font.size'] = 11  # Font size for all text
             fig1, ax1 = plt.subplots(1, 3, figsize=(14, 4.7))
             fig2, ax2 = plt.subplots(1, 3, figsize=(14, 4.7))
             fig3, ax3 = None, None  # Here, additional plots are unnecessary
@@ -80,7 +80,7 @@ def figures_preparation(type_current, type_display):
             fig2, ax2 = plt.subplots(figsize=(8, 8))
             fig3, ax3 = plt.subplots(figsize=(8, 8))
         elif type_display == "synthetic":
-            mpl.rcParams['font.size'] = 15  # Font size for all text
+            mpl.rcParams['font.size'] = 13  # Font size for all text
             fig1, ax1 = plt.subplots(1, 3, figsize=(14, 4.7))
             fig2, ax2 = None, None  # Here, additional plots are unnecessary
             fig3, ax3 = None, None  # Here, additional plots are unnecessary

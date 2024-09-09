@@ -417,7 +417,7 @@ class AlphaPEM:
         if type_current == "step":
             if type_display == "multiple":
 
-                figs, axes = zip(*[plt.subplots(figsize=(8, 8)) for _ in range(10)])
+                figs, axes = zip(*[plt.subplots(figsize=(8, 8)) for _ in range(11)])
 
                 plot_ifc(self.variables, self.operating_inputs, self.parameters, n, axes[0])
                 plot_J(self.variables, self.parameters, axes[1])
@@ -429,6 +429,7 @@ class AlphaPEM:
                 plot_C_N2(self.variables, axes[7])
                 plot_Ucell(self.variables, axes[8])
                 plot_P(self.variables, axes[9])
+                plot_Phi(self.variables, self.operating_inputs, axes[10])
 
                 # Considering the number of plots, the saving instructions are made here and not in the main.py file.
                 saving_instructions("results", subfolder_name, "step_current_ifc_1.pdf", figs[0])
@@ -441,6 +442,7 @@ class AlphaPEM:
                 saving_instructions("results", subfolder_name, "step_current_C_N2_1.pdf", figs[7])
                 saving_instructions("results", subfolder_name, "step_current_Ucell_1.pdf", figs[8])
                 saving_instructions("results", subfolder_name, "step_current_P_1.pdf", figs[9])
+                saving_instructions("results", subfolder_name, "step_current_Phi_1.pdf", figs[10])
 
                 plt.pause(0.001)  # A break is necessary to plot the new points in dynamic mode
 

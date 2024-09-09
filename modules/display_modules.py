@@ -110,7 +110,6 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax):
         ax.plot(ifc, Ucell, 'og', markersize=2)
 
     # Add the common instructions for the plot
-    mpl.rcParams['font.size'] = 18  # Font size for all text
     ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
                   labelpad=3)
     ax.set_ylabel(r'$\mathbf{Cell}$ $\mathbf{voltage}$ $\mathbf{U_{cell}}$ $\mathbf{\left( V \right)}$', labelpad=3)
@@ -546,10 +545,14 @@ def plot_lambda(variables, operating_inputs, parameters, ax):
 
     # Plot instructions
     plot_general_instructions(ax)
-    ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
-    ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
-    ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(3))
-    ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(3 / 5))
+    if type_current == "polarization":
+        ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(0.5))
+        ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.5 / 5))
+    else:
+        ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
+        ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
+        ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(3))
+        ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(3 / 5))
 
 
 def plot_s(variables, operating_inputs, parameters, ax):
@@ -598,10 +601,14 @@ def plot_s(variables, operating_inputs, parameters, ax):
 
     # Plot instructions
     plot_general_instructions(ax)
-    ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
-    ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
-    ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.04))
-    ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.04 / 5))
+    if type_current == "polarization":
+        ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(0.5))
+        ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.5 / 5))
+    else:
+        ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
+        ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
+        ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.04))
+        ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.04 / 5))
 
 
 def plot_C_H2(variables, n_gdl, ax):
@@ -699,6 +706,10 @@ def plot_C_N2(variables, ax):
 
     # Plot instructions
     plot_general_instructions(ax)
+    ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
+    ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
+    ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(1))
+    ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(1 / 5))
 
 
 def plot_Ucell(variables, ax):
@@ -815,6 +826,8 @@ def plot_Phi(variables, operating_inputs, ax):
 
     # Plot instructions
     plot_general_instructions(ax)
+    ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
+    ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
 
 
 def plot_Phi_des(variables, operating_inputs, parameters, ax):
@@ -902,10 +915,10 @@ def plot_power_density_curve(variables, operating_inputs, parameters, n, ax):
     # Plot of the power density function: Pfc
     plot_specific_line(ifc_t, Pfc_t, type_fuel_cell, type_auxiliary, type_control, None, ax)
     ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
-                  labelpad=3)
+                  labelpad=0)
     ax.set_ylabel(r'$\mathbf{Fuel}$ $\mathbf{cell}$ $\mathbf{power}$ $\mathbf{density}$ $\mathbf{P_{fc}}$ $\mathbf{\left( W.cm^{-2} \right)}$',
-                  labelpad=3)
-    ax.legend(loc='best', frameon=False)
+                  labelpad=0)
+    ax.legend(loc='best')
 
     # Plot instructions
     plot_general_instructions(ax)
@@ -958,9 +971,9 @@ def plot_cell_efficiency(variables, operating_inputs, parameters, n, ax):
     # Plot of the fuel cell efficiency: eta_fc
     plot_specific_line(ifc_t, eta_fc_t, type_fuel_cell, type_auxiliary, type_control, None, ax)
     ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
-                  labelpad=3)
-    ax.set_ylabel(r'$\mathbf{Fuel}$ $\mathbf{cell}$ $\mathbf{efficiency}$ $\mathbf{\eta_{fc}}$', labelpad=3)
-    ax.legend(loc='best', frameon=False)
+                  labelpad=0)
+    ax.set_ylabel(r'$\mathbf{Fuel}$ $\mathbf{cell}$ $\mathbf{efficiency}$ $\mathbf{\eta_{fc}}$', labelpad=0)
+    ax.legend(loc='best')
 
     # Plot instructions
     plot_general_instructions(ax)
@@ -1019,26 +1032,29 @@ def plot_specific_line(x, y, type_fuel_cell, type_auxiliary, type_control, sim_e
             type_fuel_cell == "EH-31_2.5":
         if type_fuel_cell == "EH-31_1.5" and type_auxiliary == "opened_anode":
             ax.plot(x, y, color=colors(0), label='Sim. - P = 1.5 bar' + r' - $ΔU_{max}$ =' f' {sim_error} %')
-        elif type_fuel_cell == "EH-31_1.5" and type_auxiliary != "opened_anode":  # no auxiliaries
+        elif type_fuel_cell == "EH-31_1.5" and type_auxiliary != "opened_anode":
             ax.plot(x, y, color=colors(0), label='Sim. - P = 1.5 bar')
+
         elif type_fuel_cell == "EH-31_2.0" and type_auxiliary == "opened_anode":
             ax.plot(x, y, '--', color=colors(1),
                     label='Sim. - P = 2.0 bar' + r' - $ΔU_{max}$ =' f' {sim_error} %')
-        elif type_fuel_cell == "EH-31_2.0" and type_auxiliary != "opened_anode":  # no auxiliaries
+        elif type_fuel_cell == "EH-31_2.0" and type_auxiliary != "opened_anode":
             if type_control == "Phi_des":
                 ax.plot(x, y, color=colors(5),
                         label=r'Sim. - P = 2.0 bar - controlled $\mathregular{\Phi_{des}}$')
             else:
                 ax.plot(x, y, color=colors(1),
                         label=r'Sim. - P = 2.0 bar - uncontrolled $\mathregular{\Phi_{des}}$')
+
         elif type_fuel_cell == "EH-31_2.25" and type_auxiliary == "opened_anode":
             ax.plot(x, y, '--', color=colors(2),
                     label='Sim. - P = 2.25 bar' + r' - $ΔU_{max}$ =' f' {sim_error} %')
-        elif type_fuel_cell == "EH-31_2.25" and type_auxiliary != "opened_anode":  # no auxiliaries
+        elif type_fuel_cell == "EH-31_2.25" and type_auxiliary != "opened_anode":
             ax.plot(x, y, color=colors(2), label='Sim. - P = 2.25 bar')
+
         elif type_fuel_cell == "EH-31_2.5" and type_auxiliary == "opened_anode":
             ax.plot(x, y, color=colors(3), label='Sim - P = 2.5 bar' + r' - $ΔU_{max}$ =' f' {sim_error} %')
-        elif type_fuel_cell == "EH-31_2.5" and type_auxiliary != "opened_anode":  # no auxiliaries
+        elif type_fuel_cell == "EH-31_2.5" and type_auxiliary != "opened_anode":
             ax.plot(x, y, color=colors(3), label='Sim - P = 2.5 bar')
 
     # For BX fuel cell
@@ -1046,11 +1062,12 @@ def plot_specific_line(x, y, type_fuel_cell, type_auxiliary, type_control, sim_e
         if type_fuel_cell == "BX_1.0" and type_auxiliary == "opened_anode":
             ax.plot(x, y, '--', color=colors(0),
                     label='Sim. - P = 1.35 atm' + r' - $ΔU_{max}$ =' f' {sim_error} %')
-        elif type_fuel_cell == "BX_1.0" and type_auxiliary != "opened_anode":  # no auxiliaries
+        elif type_fuel_cell == "BX_1.0" and type_auxiliary != "opened_anode":
+
             ax.plot(x, y, '--', color=colors(0), label='Sim. - P = 1.35 atm')
         elif type_fuel_cell == "BX_1.35" and type_auxiliary == "opened_anode":
             ax.plot(x, y, color=colors(1), label='Sim. - P = 1.0 atm' + r' - $ΔU_{max}$ =' f' {sim_error} %')
-        elif type_fuel_cell == "BX_1.35" and type_auxiliary != "opened_anode":  # no auxiliaries
+        elif type_fuel_cell == "BX_1.35" and type_auxiliary != "opened_anode":
             ax.plot(x, y, color=colors(1), label='Sim. - P = 1.0 atm')
 
     # For LF fuel cell
@@ -1096,7 +1113,7 @@ def plot_pola_instructions(type_fuel_cell, ax):
         ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.1))
         ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.1 / 5))
         ax.set_xlim(0, 3.0)
-        ax.set_ylim(0.4, 1.0)
+        ax.set_ylim(0.4, 1.04)
 
     # For BX fuel cell
     elif type_fuel_cell == "BX_1.0" or type_fuel_cell == "BX_1.35":
