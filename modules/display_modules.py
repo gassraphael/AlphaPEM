@@ -110,6 +110,7 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax):
         ax.plot(ifc, Ucell, 'og', markersize=2)
 
     # Add the common instructions for the plot
+    mpl.rcParams['font.size'] = 18  # Font size for all text
     ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
                   labelpad=3)
     ax.set_ylabel(r'$\mathbf{Cell}$ $\mathbf{voltage}$ $\mathbf{U_{cell}}$ $\mathbf{\left( V \right)}$', labelpad=3)
