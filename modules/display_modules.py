@@ -8,6 +8,7 @@
 # Importing the necessary libraries
 import numpy as np
 import matplotlib as mpl
+mpl.use('TkAgg') # Pycharm can struggle to display dynamic plots without this instruction. It is optional for other IDE.
 import matplotlib.pyplot as plt
 from matplotlib.ticker import LogLocator, LogFormatter, FormatStrFormatter
 from numpy.fft import fft, fftfreq
