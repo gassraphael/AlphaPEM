@@ -253,7 +253,7 @@ def plot_EIS_curve_Bode_amplitude(parameters, Fourier_results, ax):
     # Plot the amplitude Bode diagram
     ax.plot(f, np.abs(Z0), 'o', color=colors(1), label='Amplitude Bode diagram')
     ax.set_xlabel(r'$\mathbf{Frequency}$ $\mathbf{(Hz,}$ $\mathbf{logarithmic}$ $\mathbf{scale)}$', labelpad=3)
-    ax.set_ylabel(r'$\mathbf{Impedance} $\mathbf{amplitude}$ $\mathbf{(m\Omega.cm^{2})}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Impedance}$ $\mathbf{amplitude}$ $\mathbf{(m\Omega.cm^{2})}$', labelpad=3)
     #   Plot instructions
     plot_general_instructions(ax)
     plot_Bode_amplitude_instructions(f_EIS, type_fuel_cell, ax)
