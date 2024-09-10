@@ -812,11 +812,11 @@ def plot_Phi(variables, operating_inputs, ax):
     line1, = ax.plot(t, Phi_agc_t, color=colors(0), label=r'$\mathregular{\Phi_{agc}}$')
     line2, = ax.plot(t, Phi_cgc_t, color=colors(1), label=r'$\mathregular{\Phi_{cgc}}$')
     line3, = ax.plot(t, Phi_asm_t, color=colors(2), label=r'$\mathregular{\Phi_{asm}}$')
-    line4, = ax.plot(t, Phi_csm_t, color=colors(3), label=r'$\mathregular{\Phi_{csm}}$')
-    line5, = ax.plot(t, Phi_aem_t, color=colors(4), label=r'$\mathregular{\Phi_{aem}}$')
+    line4, = ax.plot(t, Phi_aem_t, color=colors(3), label=r'$\mathregular{\Phi_{aem}}$')
+    line5, = ax.plot(t, Phi_csm_t, color=colors(4), label=r'$\mathregular{\Phi_{csm}}$')
     line6, = ax.plot(t, Phi_cem_t, color=colors(5), label=r'$\mathregular{\Phi_{cem}}$')
-    line7, = ax.plot(t, [Phi_a_des]*len(t), color='black', label=r'$\mathregular{\Phi_{cem}}$')
-    line8, = ax.plot(t, [Phi_c_des]*len(t), color=colors(7), label=r'$\mathregular{\Phi_{cem}}$')
+    line7, = ax.plot(t, [Phi_a_des]*len(t), color='black', label=r'$\mathregular{\Phi_{a,des}}$')
+    line8, = ax.plot(t, [Phi_c_des]*len(t), color=colors(7), label=r'$\mathregular{\Phi_{c,des}}$')
 
 
     # First legend
