@@ -318,11 +318,11 @@ class AlphaPEM:
         #                                                                       cathode overpotential in the fuel cell.
 
         # Initial auxiliary system state
-        Pasm_ini, Paem_ini = Pa_des, Pa_des  # Pa. It is the supply/exhaust manifold pressure at the anode side.
-        Pcsm_ini, Pcem_ini = Pc_des, Pc_des  # Pa. It is the supply/exhaust manifold pressure at the cathode side.
-        Phi_asm_ini, Phi_aem_ini = Phi_a_des, Phi_a_des  # It is the supply/exhaust manifold relative humidity
+        Pasm_ini, Paem_ini = P_des_moy, P_des_moy  # Pa. It is the supply/exhaust manifold pressure at the anode side.
+        Pcsm_ini, Pcem_ini = P_des_moy, P_des_moy  # Pa. It is the supply/exhaust manifold pressure at the cathode side.
+        Phi_asm_ini, Phi_aem_ini = Phi_des_moy, Phi_des_moy  # It is the supply/exhaust manifold relative humidity
         #                                                  at the anode side.
-        Phi_csm_ini, Phi_cem_ini = Phi_c_des, Phi_c_des  # It is the supply/exhaust manifold relative humidity
+        Phi_csm_ini, Phi_cem_ini = Phi_des_moy, Phi_des_moy  # It is the supply/exhaust manifold relative humidity
         #                                                  at the cathode side.
         Wcp_ini = 0  # kg.s-1. It is the flow rate of the air compressor.
         Wa_inj_ini = 0  # kg.s-1. It is the flow rate of the air compressor at the anode side.
