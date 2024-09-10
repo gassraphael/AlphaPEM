@@ -781,8 +781,8 @@ def plot_P(variables, ax):
     ax.set_ylim(1.99980, 2.00015)
 
 
-def plot_Phi(variables, operating_inputs, ax):
-    """This function plots the humidity at different spatial localisations as a function of time.
+def plot_Phi_a(variables, operating_inputs, ax):
+    """This function plots the humidity at the anode side, at different spatial localisations, as a function of time.
 
     Parameters
     ----------
@@ -795,47 +795,72 @@ def plot_Phi(variables, operating_inputs, ax):
     """
 
     # Extraction of the variables
-    t, C_v_agc_t, C_v_cgc_t = variables['t'], variables['C_v_agc'], variables['C_v_cgc']
+    t, C_v_agc_t = variables['t'], variables['C_v_agc']
     Phi_asm_t, Phi_aem_t = variables['Phi_asm'], variables['Phi_aem']
-    Phi_csm_t, Phi_cem_t = variables['Phi_csm'], variables['Phi_cem']
     # Extraction of the operating inputs
-    Tfc = operating_inputs['Tfc']
-    Phi_a_des, Phi_c_des = operating_inputs['Phi_a_des'], operating_inputs['Phi_c_des']
+    Tfc, Phi_a_des = operating_inputs['Tfc'], operating_inputs['Phi_a_des']
 
     # Calculate the humidity Phi
-    Phi_agc_t, Phi_cgc_t = [0] * len(t), [0] * len(t)
-    for i in range(len(t)):
-        Phi_agc_t[i] = C_v_agc_t[i] * R * Tfc / Psat(Tfc)
-        Phi_cgc_t[i] = C_v_cgc_t[i] * R * Tfc / Psat(Tfc)
+    Phi_agc_t = [0] * len(t)
+    for i in range(len(t)): Phi_agc_t[i] = C_v_agc_t[i] * R * Tfc / Psat(Tfc)
 
     # Plot the humidity at different spatial localisations: Phi
-    line1, = ax.plot(t, Phi_agc_t, color=colors(0), label=r'$\mathregular{\Phi_{agc}}$')
-    line2, = ax.plot(t, Phi_cgc_t, color=colors(1), label=r'$\mathregular{\Phi_{cgc}}$')
-    line3, = ax.plot(t, Phi_asm_t, color=colors(2), label=r'$\mathregular{\Phi_{asm}}$')
-    line4, = ax.plot(t, Phi_aem_t, color=colors(3), label=r'$\mathregular{\Phi_{aem}}$')
-    line5, = ax.plot(t, Phi_csm_t, color=colors(4), label=r'$\mathregular{\Phi_{csm}}$')
-    line6, = ax.plot(t, Phi_cem_t, color=colors(5), label=r'$\mathregular{\Phi_{cem}}$')
-    line7, = ax.plot(t, [Phi_a_des]*len(t), color='black', label=r'$\mathregular{\Phi_{a,des}}$')
-    line8, = ax.plot(t, [Phi_c_des]*len(t), color=colors(7), label=r'$\mathregular{\Phi_{c,des}}$')
-
-
-    # First legend
-    first_legend = ax.legend(handles=[line1, line2, line3, line4], loc='lower left', frameon=True)
-    ax.add_artist(first_legend)
-
-    # Second legend
-    ax.legend(handles=[line5, line6, line7, line8], loc='lower right', frameon=True)
-
+    ax.plot(t, Phi_agc_t, color=colors(0), label=r'$\mathregular{\Phi_{agc}}$')
+    ax.plot(t, Phi_asm_t, color=colors(1), label=r'$\mathregular{\Phi_{asm}}$')
+    ax.plot(t, Phi_aem_t, color=colors(2), label=r'$\mathregular{\Phi_{aem}}$')
+    ax.plot(t, [Phi_a_des]*len(t), color='black', label=r'$\mathregular{\Phi_{a,des}}$')
+    ax.legend(loc='center right', bbox_to_anchor=(1, 0.67))
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
-    ax.set_ylabel(r'$\mathbf{Humidity}$ $\mathbf{\Phi}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Humidity}$ $\mathbf{at}$ $\mathbf{the}$ $\mathbf{anode}$ $\mathbf{side}$ $\mathbf{\Phi}$',
+                  labelpad=3)
 
     # Plot instructions
     plot_general_instructions(ax)
     ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
     ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
-    ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.2))
-    ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.2 / 5))
-    ax.set_ylim(0, 1.04)
+    ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.1))
+    ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.1 / 5))
+
+
+def plot_Phi_c(variables, operating_inputs, ax):
+    """This function plots the humidity, at the cathode side, at different spatial localisations as a function of time.
+
+    Parameters
+    ----------
+    variables : dict
+        Variables calculated by the solver. They correspond to the fuel cell internal states.
+    operating_inputs : dict
+        Operating inputs of the fuel cell.
+    ax : matplotlib.axes.Axes
+        Axes on which the humidity will be plotted.
+    """
+
+    # Extraction of the variables
+    t, C_v_cgc_t = variables['t'], variables['C_v_cgc']
+    Phi_csm_t, Phi_cem_t = variables['Phi_csm'], variables['Phi_cem']
+    # Extraction of the operating inputs
+    Tfc, Phi_c_des = operating_inputs['Tfc'], operating_inputs['Phi_c_des']
+
+    # Calculate the humidity Phi
+    Phi_cgc_t = [0] * len(t)
+    for i in range(len(t)): Phi_cgc_t[i] = C_v_cgc_t[i] * R * Tfc / Psat(Tfc)
+
+    # Plot the humidity at different spatial localisations: Phi
+    ax.plot(t, Phi_cgc_t, color=colors(0), label=r'$\mathregular{\Phi_{cgc}}$')
+    ax.plot(t, Phi_csm_t, color=colors(1), label=r'$\mathregular{\Phi_{csm}}$')
+    ax.plot(t, Phi_cem_t, color=colors(2), label=r'$\mathregular{\Phi_{cem}}$')
+    ax.plot(t, [Phi_c_des]*len(t), color='black', label=r'$\mathregular{\Phi_{c,des}}$')
+    ax.legend(loc='best')
+    ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Humidity}$ $\mathbf{at}$ $\mathbf{the}$ $\mathbf{cathode}$ $\mathbf{side}$ $\mathbf{\Phi}$',
+                  labelpad=3)
+
+    # Plot instructions
+    plot_general_instructions(ax)
+    ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
+    ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
+    ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.1))
+    ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.1 / 5))
 
 
 def plot_Phi_des(variables, operating_inputs, parameters, ax):
