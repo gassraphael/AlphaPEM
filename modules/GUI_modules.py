@@ -1265,11 +1265,6 @@ def launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc
     for x in Simulator.solver_variable_names:
         initial_variable_values.append(Simulator.variables[x][-1])
 
-    if type_display == "multiple":
-        print("A display bug prevents the dynamic updating of the graphs, as it appears that too much data is involved. "
-              "However, the data is correctly calculated, and the appropriate plots are saved in the 'results' folder. "
-              "This display bug does not occur when using a 'synthetic' type_display.")
-
     # Dynamic simulation
     for i in range(n):
         Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
