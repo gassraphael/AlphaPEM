@@ -229,8 +229,7 @@ def main_frame(root, canvas):
         grid(row=0, column=0, columnspan=2)
     ttk.OptionMenu(operating_conditions_frame, choice_buttons['type_fuel_cell']['value'],
                    'Enter your specifications', 'Enter your specifications', 'EH-31 1.5 bar (2021)',
-                   'EH-31 2.0 bar (2021)', 'EH-31 2.25 bar (2021)', 'EH-31 2.5 bar (2021)', 'Biao Xie 1.0 bar (2015)',
-                   'Biao Xie 1.35 bar (2015)', 'Linhao Fan (2010)',
+                   'EH-31 2.0 bar (2021)', 'EH-31 2.25 bar (2021)', 'EH-31 2.5 bar (2021)', 'Linhao Fan (2010)',
                    command=lambda value: changeValue(operating_conditions_frame, accessible_parameters_frame,
                                                      undetermined_parameters_frame, current_density_parameters_frame,
                                                      computing_parameters_frame, choice_operating_conditions,
