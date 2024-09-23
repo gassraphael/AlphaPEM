@@ -170,7 +170,7 @@
     <div class="doc doc-contents ">
 
         <p>This function controls the operating conditions of the MEA system, if required.
-It is currently in construction.</p>
+This is an elementary rule-based control, serving as a demonstrator. It will need to be improved in the future.</p>
 
 
 <table class="field-list">
@@ -232,7 +232,7 @@ It is currently in construction.</p>
               <summary>Source code in <code>model/control.py</code></summary>
               <pre class="highlight"><code class="language-python">def control_operating_conditions(t, solver_variables, operating_inputs, parameters, control_variables):
     """This function controls the operating conditions of the MEA system, if required.
-    It is currently in construction.
+    This is an elementary rule-based control, serving as a demonstrator. It will need to be improved in the future.
 
     Parameters
     ----------
@@ -248,7 +248,44 @@ It is currently in construction.</p>
         Dictionary containing the control variables.
     """
 
-    pass</code></pre>
+    if parameters["type_control"] != "Phi_des":
+        raise ValueError('You have to specify a type_control which is accepted.')
+
+    elif parameters["type_control"] == "Phi_des":
+        # Initialisation
+        delta_t_control_Phi = 20  # s. Every delta_t_control_Phi second the cell humidity is controlled.
+        delta_Phi_des = 0.01  # Arbitrary value for the step change of Phi_des.
+        slim = parameters['a_slim'] * (operating_inputs['Pc_des'] / 1e5) + parameters['b_slim']
+        s_ccl_max = 0.55 * slim  # An arbitrary margin for s_ccl is established to ensure the CCL is not too flooded.
+        #                          I may take s_switch instead of 0.55 ?
+        lambda_mem_min = 8  # An arbitrary margin for lambda_mem is established to ensure the membrane is not too dry.
+
+        # Control on Phi_des
+        #       Every delta_t_control_Phi second, Phi_a_des is monitored for controlling the cell humidity.
+        if t &gt; (control_variables['t_control_Phi'] + delta_t_control_Phi):  # s.
+            control_variables['t_control_Phi'] = control_variables['t_control_Phi'] + delta_t_control_Phi
+
+            # Flooding is likely.
+            if solver_variables['s_ccl'] &gt; s_ccl_max and solver_variables['lambda_mem'] &gt; lambda_mem_min:
+                if control_variables['Phi_a_des'] - delta_Phi_des &gt;= 0:
+                    control_variables['Phi_a_des'] = control_variables['Phi_a_des'] - delta_Phi_des
+                if control_variables['Phi_c_des'] - delta_Phi_des &gt;= 0:
+                    control_variables['Phi_c_des'] = control_variables['Phi_c_des'] - delta_Phi_des
+
+            # Drying out is likely.
+            elif solver_variables['lambda_mem'] &lt; lambda_mem_min and solver_variables['s_ccl'] &lt; s_ccl_max:
+                if control_variables['Phi_a_des'] + delta_Phi_des &lt;= 1:
+                    control_variables['Phi_a_des'] = control_variables['Phi_a_des'] + delta_Phi_des
+                if control_variables['Phi_c_des'] + delta_Phi_des &lt;= 1:
+                    control_variables['Phi_c_des'] = control_variables['Phi_c_des'] + delta_Phi_des
+
+            # Both flooding and drying out are likely. Nothing can be done.
+            elif solver_variables['s_ccl'] &gt; s_ccl_max and solver_variables['lambda_mem'] &lt; lambda_mem_min:
+                pass
+
+            # Both flooding and drying out are unlikely. It is the desired situation.
+            else:  # elif solver_variables['s_ccl'] &lt; s_ccl_max and solver_variables['lambda_mem'] &gt; lambda_mem_min:
+                pass</code></pre>
             </details>
     </div>
 

@@ -1409,11 +1409,6 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
     for x in Simulator.solver_variable_names:
         initial_variable_values.append(Simulator.variables[x][-1])
 
-    if type_display == "multiple":
-        print("A display bug prevents the dynamic updating of the graphs, as it appears that too much data is involved. "
-              "However, the data is correctly calculated, and the appropriate plots are saved in the 'results' folder. "
-              "This display bug does not occur when using a 'synthetic' type_display.")
-
     # Dynamic simulation
     for i in range(n):
         Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
@@ -2742,10 +2737,6 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
         type_fuel_cell = "EH-31_2.25"
     elif choice_buttons['type_fuel_cell']['value'].get() == "EH-31 2.5 bar (2021)":
         type_fuel_cell = "EH-31_2.5"
-    elif choice_buttons['type_fuel_cell']['value'].get() == "Biao Xie 1.0 bar (2015)":
-        type_fuel_cell = "BX_1.0"
-    elif choice_buttons['type_fuel_cell']['value'].get() == "Biao Xie 1.35 bar (2015)":
-        type_fuel_cell = "BX_1.35"
     elif choice_buttons['type_fuel_cell']['value'].get() == "Linhao Fan (2010)":
         type_fuel_cell = "LF"
 
@@ -2956,10 +2947,6 @@ calculations.</p>
         type_fuel_cell = "EH-31_2.25"
     elif choice_buttons['type_fuel_cell']['value'].get() == "EH-31 2.5 bar (2021)":
         type_fuel_cell = "EH-31_2.5"
-    elif choice_buttons['type_fuel_cell']['value'].get() == "Biao Xie 1.0 bar (2015)":
-        type_fuel_cell = "BX_1.0"
-    elif choice_buttons['type_fuel_cell']['value'].get() == "Biao Xie 1.35 bar (2015)":
-        type_fuel_cell = "BX_1.35"
     elif choice_buttons['type_fuel_cell']['value'].get() == "Linhao Fan (2010)":
         type_fuel_cell = "LF"
     elif choice_buttons['type_fuel_cell']['value'].get() == "Enter your specifications":

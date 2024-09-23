@@ -470,11 +470,11 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
         #                                                                       cathode overpotential in the fuel cell.
 
         # Initial auxiliary system state
-        Pasm_ini, Paem_ini = Pa_des, Pa_des  # Pa. It is the supply/exhaust manifold pressure at the anode side.
-        Pcsm_ini, Pcem_ini = Pc_des, Pc_des  # Pa. It is the supply/exhaust manifold pressure at the cathode side.
-        Phi_asm_ini, Phi_aem_ini = Phi_a_des, Phi_a_des  # It is the supply/exhaust manifold relative humidity
+        Pasm_ini, Paem_ini = Pa_des, P_des_moy  # Pa. It is the supply/exhaust manifold pressure at the anode side.
+        Pcsm_ini, Pcem_ini = Pc_des, P_des_moy  # Pa. It is the supply/exhaust manifold pressure at the cathode side.
+        Phi_asm_ini, Phi_aem_ini = Phi_a_des, Phi_des_moy  # It is the supply/exhaust manifold relative humidity
         #                                                  at the anode side.
-        Phi_csm_ini, Phi_cem_ini = Phi_c_des, Phi_c_des  # It is the supply/exhaust manifold relative humidity
+        Phi_csm_ini, Phi_cem_ini = Phi_c_des, Phi_des_moy  # It is the supply/exhaust manifold relative humidity
         #                                                  at the cathode side.
         Wcp_ini = 0  # kg.s-1. It is the flow rate of the air compressor.
         Wa_inj_ini = 0  # kg.s-1. It is the flow rate of the air compressor at the anode side.
@@ -569,7 +569,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
         if type_current == "step":
             if type_display == "multiple":
 
-                figs, axes = zip(*[plt.subplots(figsize=(6, 6)) for _ in range(10)])
+                figs, axes = zip(*[plt.subplots(figsize=(8, 8)) for _ in range(12)])
 
                 plot_ifc(self.variables, self.operating_inputs, self.parameters, n, axes[0])
                 plot_J(self.variables, self.parameters, axes[1])
@@ -581,6 +581,8 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
                 plot_C_N2(self.variables, axes[7])
                 plot_Ucell(self.variables, axes[8])
                 plot_P(self.variables, axes[9])
+                plot_Phi_a(self.variables, self.operating_inputs, axes[10])
+                plot_Phi_c(self.variables, self.operating_inputs, axes[11])
 
                 # Considering the number of plots, the saving instructions are made here and not in the main.py file.
                 saving_instructions("results", subfolder_name, "step_current_ifc_1.pdf", figs[0])
@@ -593,6 +595,8 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
                 saving_instructions("results", subfolder_name, "step_current_C_N2_1.pdf", figs[7])
                 saving_instructions("results", subfolder_name, "step_current_Ucell_1.pdf", figs[8])
                 saving_instructions("results", subfolder_name, "step_current_P_1.pdf", figs[9])
+                saving_instructions("results", subfolder_name, "step_current_Phi_a_1.pdf", figs[10])
+                saving_instructions("results", subfolder_name, "step_current_Phi_c_1.pdf", figs[11])
 
                 plt.pause(0.001)  # A break is necessary to plot the new points in dynamic mode
 
@@ -742,7 +746,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
     if type_current == "step":
         if type_display == "multiple":
 
-            figs, axes = zip(*[plt.subplots(figsize=(6, 6)) for _ in range(10)])
+            figs, axes = zip(*[plt.subplots(figsize=(8, 8)) for _ in range(12)])
 
             plot_ifc(self.variables, self.operating_inputs, self.parameters, n, axes[0])
             plot_J(self.variables, self.parameters, axes[1])
@@ -754,6 +758,8 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
             plot_C_N2(self.variables, axes[7])
             plot_Ucell(self.variables, axes[8])
             plot_P(self.variables, axes[9])
+            plot_Phi_a(self.variables, self.operating_inputs, axes[10])
+            plot_Phi_c(self.variables, self.operating_inputs, axes[11])
 
             # Considering the number of plots, the saving instructions are made here and not in the main.py file.
             saving_instructions("results", subfolder_name, "step_current_ifc_1.pdf", figs[0])
@@ -766,6 +772,8 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
             saving_instructions("results", subfolder_name, "step_current_C_N2_1.pdf", figs[7])
             saving_instructions("results", subfolder_name, "step_current_Ucell_1.pdf", figs[8])
             saving_instructions("results", subfolder_name, "step_current_P_1.pdf", figs[9])
+            saving_instructions("results", subfolder_name, "step_current_Phi_a_1.pdf", figs[10])
+            saving_instructions("results", subfolder_name, "step_current_Phi_c_1.pdf", figs[11])
 
             plt.pause(0.001)  # A break is necessary to plot the new points in dynamic mode
 

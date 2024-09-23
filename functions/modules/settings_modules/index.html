@@ -448,20 +448,6 @@ response at each frequency 'delta_t_measurement_EIS'.</p>
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
         i_max_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
 
-    # For BX fuel cell
-    elif type_fuel_cell == "BX_1.0":
-        Tfc = 80 + 273.15  # K. It is the desired fuel cell temperature.
-        Pa_des, Pc_des = 101325, 101325  # Pa. It is the desired pressures of the fuel gas.
-        Sa, Sc = 1.5, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
-        Phi_a_des, Phi_c_des = 0.25, 0.25  # It is the desired relative humidity.
-        i_max_pola = 4.5e4  # A.m-2. It is the maximum current density for the polarization curve.
-    elif type_fuel_cell == "BX_1.35":
-        Tfc = 80 + 273.15  # K. It is the desired fuel cell temperature.
-        Pa_des, Pc_des = 1.35e5, 1.35e5  # Pa. It is the desired pressures of the fuel gas.
-        Sa, Sc = 1.5, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
-        Phi_a_des, Phi_c_des = 1.0, 0.5  # It is the desired relative humidity.
-        i_max_pola = 1.4e4  # A.m-2. It is the maximum current density for the polarization curve.
-
     # For LF fuel cell
     elif type_fuel_cell == "LF":
         Tfc = 80 + 273.15  # K. It is the desired fuel cell temperature.
@@ -753,33 +739,6 @@ response at each frequency 'delta_t_measurement_EIS'.</p>
         kappa_co = 27.2  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 1.61  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
-        C_dl = 2e7  # F.m-3. It is the volumetric double layer capacitance.
-
-    # For BX fuel cell
-    elif type_fuel_cell == "BX_1.0" or type_fuel_cell == "BX_1.35":
-        # Catalyst layer
-        Hcl = 1e-5  # m. It is the thickness of the anode or cathode catalyst layer.
-        epsilon_mc = 0.25  # It is the volume fraction of ionomer in the CL.
-        tau = 1.4  # It is the pore structure coefficient, without units.
-        # Membrane
-        Hmem = 1e-5  # m. It is the thickness of the membrane.
-        # Gas diffusion layer
-        Hgdl = 2e-4  # m. It is the thickness of the gas diffusion layer.
-        epsilon_gdl = 0.65  # It is the anode/cathode GDL porosity.
-        epsilon_c = 0.3  # It is the compression ratio of the GDL.
-        # Gas channel.
-        Hgc = 5e-4  # m. It is the thickness of the gas channel.
-        Wgc = 8e-4  # m. It is the width of the gas channel.
-        Lgc = 3.0  # m. It is the length of the gas channel.
-        Aact = 0.005  # m². It is the active area of the catalyst layer.
-        # Interaction parameters between water and PEMFC structure
-        e = 5.0  # It is the capillary exponent
-        # Voltage polarization
-        Re = 2.2e-6  # ohm.m². It is the electron conduction resistance of the circuit.
-        i0_c_ref = 3  # A.m-2.It is the reference exchange current density at the cathode.
-        kappa_co = 2.9  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
-        kappa_c = 0.4  # It is the overpotential correction exponent.
-        a_slim, b_slim, a_switch = 0, 1, 1  # It is the limit liquid saturation coefficients.
         C_dl = 2e7  # F.m-3. It is the volumetric double layer capacitance.
 
     # For LF fuel cell

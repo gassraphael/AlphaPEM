@@ -633,8 +633,8 @@ used in the FT.</p>
     ax.plot(t, C_H2_acl_t, color=colors(2))
     ax.legend([r'$\mathregular{C_{H_{2},agc}}$', r'$\mathregular{C_{H_{2},agdl}}$',
                r'$\mathregular{C_{H_{2},acl}}$'], loc='best')
-    ax.set_xlabel(r'Time $\mathregular{t}$ $\mathregular{\left( s \right)}$', labelpad=3)
-    ax.set_ylabel(r'Hydrogen concentration $\mathregular{C_{H_{2}}}$ $\mathregular{\left( mol.m^{-3} \right)}$',
+    ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Hydrogen}$ $\mathbf{concentration}$ $\mathbf{C_{H_{2}}}$ $\mathbf{\left( mol.m^{-3} \right)}$',
                   labelpad=3)
 
     # Plot instructions
@@ -713,12 +713,17 @@ used in the FT.</p>
     # Plot C_N2
     ax.plot(t, C_N2_t, color=colors(6))
     ax.legend([r'$\mathregular{C_{N_{2}}}$'], loc='best')
-    ax.set_xlabel(r'Time $\mathregular{t}$ $\mathregular{\left( s \right)}$', labelpad=3)
-    ax.set_ylabel(r'Nitrogen concentration $\mathregular{C_{N_{2}}}$ $\mathregular{\left( mol.m^{-3} \right)}$',
+    ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Nitrogen}$ $\mathbf{concentration}$ $\mathbf{C_{N_{2}}}$ $\mathbf{\left( mol.m^{-3} \right)}$',
                   labelpad=3)
 
     # Plot instructions
-    plot_general_instructions(ax)</code></pre>
+    plot_general_instructions(ax)
+    ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
+    ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
+    ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.5))
+    ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.5 / 5))
+    ax.set_ylim(47, 49)</code></pre>
             </details>
     </div>
 
@@ -802,8 +807,8 @@ used in the FT.</p>
     ax.plot(t, C_O2_cgc_t, color=colors(6))
     ax.legend([r'$\mathregular{C_{O_{2},ccl}}$', r'$\mathregular{C_{O_{2},cgdl}}$',
                r'$\mathregular{C_{O_{2},cgc}}$'], loc='best')
-    ax.set_xlabel(r'Time $\mathregular{t}$ $\mathregular{\left( s \right)}$', labelpad=3)
-    ax.set_ylabel(r'Oxygen concentration $\mathregular{C_{O_{2}}}$ $\mathregular{\left( mol.m^{-3} \right)}$',
+    ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Oxygen}$ $\mathbf{concentration}$ $\mathbf{C_{O_{2}}}$ $\mathbf{\left( mol.m^{-3} \right)}$',
                   labelpad=3)
 
     # Plot instructions
@@ -923,8 +928,8 @@ used in the FT.</p>
     ax.legend([r'$\mathregular{C_{v,agc}}$', r'$\mathregular{C_{v,agdl}}$', r'$\mathregular{C_{v,acl}}$',
                r'$\mathregular{C_{v,ccl}}$', r'$\mathregular{C_{v,cgdl}}$', r'$\mathregular{C_{v,cgc}}$',
                r'$\mathregular{C_{v,sat}}$'], loc='best')
-    ax.set_xlabel(r'Time $\mathregular{t}$ $\mathregular{\left( s \right)}$', labelpad=3)
-    ax.set_ylabel(r"Vapor concentration $\mathregular{C_{v}}$ $\mathregular{\left( mol.m^{-3} \right)}$",
+    ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
+    ax.set_ylabel(r"$\mathbf{Vapor}$ $\mathbf{concentration}$ $\mathbf{C_{v}}$ $\mathbf{\left( mol.m^{-3} \right)}$",
                   labelpad=3)
 
     # Plot instructions
@@ -933,7 +938,7 @@ used in the FT.</p>
     ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
     ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(1))
     ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(1 / 5))
-    ax.set_ylim(11, 15.5)</code></pre>
+    ax.set_ylim(11, 16)</code></pre>
             </details>
     </div>
 
@@ -1096,8 +1101,8 @@ used in the FT.</p>
 
     # Plot the amplitude Bode diagram
     ax.plot(f, np.abs(Z0), 'o', color=colors(1), label='Amplitude Bode diagram')
-    ax.set_xlabel('Frequency (Hz, logarithmic scale)', labelpad=3)
-    ax.set_ylabel(r'Impedance amplitude ($m\Omega.cm^{2}$)', labelpad=3)
+    ax.set_xlabel(r'$\mathbf{Frequency}$ $\mathbf{(Hz,}$ $\mathbf{logarithmic}$ $\mathbf{scale)}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Impedance}$ $\mathbf{amplitude}$ $\mathbf{(m\Omega.cm^{2})}$', labelpad=3)
     #   Plot instructions
     plot_general_instructions(ax)
     plot_Bode_amplitude_instructions(f_EIS, type_fuel_cell, ax)</code></pre>
@@ -1193,8 +1198,8 @@ used in the FT.</p>
     # Plot the angle Bode diagram
     ax.plot(f, phi_U_i, 'o', color=colors(2),
             label='Angle Bode diagram')
-    ax.set_xlabel('Frequency (Hz, logarithmic scale)', labelpad=3)
-    ax.set_ylabel(r'Phase ($^\circ$)', labelpad=3)
+    ax.set_xlabel(r'$\mathbf{Frequency}$ $\mathbf{(Hz,}$ $\mathbf{logarithmic}$ $\mathbf{scale)}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Phase}$ $\mathbf{(^\circ)}$', labelpad=3)
     #   Plot instructions
     plot_general_instructions(ax)
     plot_Bode_phase_instructions(f_EIS, type_fuel_cell, ax)</code></pre>
@@ -1296,8 +1301,8 @@ used in the FT.</p>
 
     # Plot the Nyquist diagram
     ax.plot(Z_real, -Z_imag, 'o', color=colors(0), label='Nyquist diagram')
-    ax.set_xlabel(r'$Z_{real}$ ($m\Omega.cm^{2}$)', labelpad=3)
-    ax.set_ylabel(r'$-Z_{imag}$ ($m\Omega.cm^{2}$)', labelpad=3)
+    ax.set_xlabel(r'$\mathbf{Z_{real}}$ $\mathbf{(m\Omega.cm^{2})}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{-Z_{imag}}$ $\mathbf{(m\Omega.cm^{2})}$', labelpad=3)
     #       Plot instructions
     plot_general_instructions(ax)
     plot_EIS_Nyquist_instructions(type_fuel_cell, ax)</code></pre>
@@ -1529,8 +1534,9 @@ used in the FT.</p>
     ax.plot(t, J_lambda_mem_ccl_t, color=colors(7))
     ax.legend([r'$\mathregular{J_{sorp,acl}}$', r'$\mathregular{J_{\lambda,mem,acl}}$', r'$\mathregular{J_{sorp,ccl}}$',
                r'$\mathregular{J_{\lambda,mem,ccl}}$'], loc='best')
-    ax.set_xlabel(r'Time $\mathregular{t}$ $\mathregular{\left( s \right)}$', labelpad=3)
-    ax.set_ylabel(r'Flows $\mathregular{J}$ $\mathregular{\left( mol.m^{-2}.s^{-1} \right)}$', labelpad=0)
+    ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Flows}$ $\mathbf{J}$ $\mathbf{\left( mol.m^{-2}.s^{-1} \right)}$', labelpad=3)
+    ax.ticklabel_format(style='scientific', axis='y', scilimits=(0, 0))
 
     # Plot instructions
     plot_general_instructions(ax)
@@ -1619,8 +1625,8 @@ used in the FT.</p>
     ax.plot(t, Pcem_t, color=colors(3))
     ax.legend([r'$\mathregular{P_{agc}}$', r'$\mathregular{P_{cgc}}$', r'$\mathregular{P_{asm}}$',
                r'$\mathregular{P_{aem}}$', r'$\mathregular{P_{csm}}$', r'$\mathregular{P_{cem}}$'], loc='best')
-    ax.set_xlabel(r'Time $\mathregular{t}$ $\mathregular{\left( s \right)}$', labelpad=3)
-    ax.set_ylabel(r'Pressure $\mathregular{P}$ $\mathregular{\left( bar \right)}$', labelpad=3)
+    ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Pressure}$ $\mathbf{P}$ $\mathbf{\left( bar \right)}$', labelpad=3)
     ax.ticklabel_format(style='scientific', axis='y', scilimits=(0, 0))
 
     # Plot instructions
@@ -1628,7 +1634,8 @@ used in the FT.</p>
     ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
     ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
     ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.5e-4))
-    ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.5e-4 / 5))</code></pre>
+    ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.5e-4 / 5))
+    ax.set_ylim(1.99980, 2.00015)</code></pre>
             </details>
     </div>
 
@@ -1637,15 +1644,15 @@ used in the FT.</p>
 <div class="doc doc-object doc-function">
 
 
-<h2 id="modules.display_modules.plot_Phi" class="doc doc-heading">
-            <code class="highlight language-python">plot_Phi(variables, operating_inputs, ax)</code>
+<h2 id="modules.display_modules.plot_Phi_a" class="doc doc-heading">
+            <code class="highlight language-python">plot_Phi_a(variables, operating_inputs, ax)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-        <p>This function plots the humidity at different spatial localisations as a function of time.</p>
+        <p>This function plots the humidity at the anode side, at different spatial localisations, as a function of time.</p>
 
 
 <table class="field-list">
@@ -1689,8 +1696,8 @@ used in the FT.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <pre class="highlight"><code class="language-python">def plot_Phi(variables, operating_inputs, ax):
-    """This function plots the humidity at different spatial localisations as a function of time.
+              <pre class="highlight"><code class="language-python">def plot_Phi_a(variables, operating_inputs, ax):
+    """This function plots the humidity at the anode side, at different spatial localisations, as a function of time.
 
     Parameters
     ----------
@@ -1703,37 +1710,130 @@ used in the FT.</p>
     """
 
     # Extraction of the variables
-    t, C_agc_t, C_cgc_t = variables['t'], variables['C_agc'], variables['C_cgc']
+    t, C_v_agc_t = variables['t'], variables['C_v_agc']
     Phi_asm_t, Phi_aem_t = variables['Phi_asm'], variables['Phi_aem']
-    Phi_csm_t, Phi_cem_t = variables['Phi_csm'], variables['Phi_cem']
     # Extraction of the operating inputs
-    Tfc = operating_inputs['Tfc']
-    Phi_a_des, Phi_c_des = operating_inputs['Phi_a_des'], operating_inputs['Phi_c_des']
+    Tfc, Phi_a_des = operating_inputs['Tfc'], operating_inputs['Phi_a_des']
 
     # Calculate the humidity Phi
-    Phi_agc_t, Phi_cgc_t = [0] * len(t), [0] * len(t)
-    for i in range(len(t)):
-        Phi_agc_t[i] = C_agc_t[i] * R * Tfc / Psat(Tfc)
-        Phi_cgc_t[i] = C_cgc_t[i] * R * Tfc / Psat(Tfc)
+    Phi_agc_t = [0] * len(t)
+    for i in range(len(t)): Phi_agc_t[i] = C_v_agc_t[i] * R * Tfc / Psat(Tfc)
 
     # Plot the humidity at different spatial localisations: Phi
-    ax.plot(t, Phi_agc_t, color=colors(0))
-    ax.plot(t, Phi_cgc_t, color=colors(6))
-    ax.plot(t, Phi_asm_t, color=colors(7))
-    ax.plot(t, Phi_aem_t, color=colors(8))
-    ax.plot(t, Phi_csm_t, color=colors(9))
-    ax.plot(t, Phi_cem_t, color=colors(3))
-    ax.plot(t, [Phi_a_des] * len(t), color='black')
-    ax.plot(t, [Phi_c_des] * len(t), color='dimgrey')
-    ax.legend([r'$\mathregular{\Phi_{agc}}$', r'$\mathregular{\Phi_{cgc}}$',
-               r'$\mathregular{\Phi_{asm}}$', r'$\mathregular{\Phi_{aem}}$',
-               r'$\mathregular{\Phi_{csm}}$', r'$\mathregular{\Phi_{cem}}$',
-               r'$\mathregular{\Phi_{a,des}}$', r'$\mathregular{\Phi_{c,des}}$'], loc='best')
-    ax.set_xlabel(r'Time $\mathregular{t}$ $\mathregular{\left( s \right)}$', labelpad=3)
-    ax.set_ylabel(r'Humidity $\mathregular{\Phi}$', labelpad=3)
+    ax.plot(t, Phi_agc_t, color=colors(0), label=r'$\mathregular{\Phi_{agc}}$')
+    ax.plot(t, Phi_asm_t, color=colors(1), label=r'$\mathregular{\Phi_{asm}}$')
+    ax.plot(t, Phi_aem_t, color=colors(2), label=r'$\mathregular{\Phi_{aem}}$')
+    ax.plot(t, [Phi_a_des]*len(t), color='black', label=r'$\mathregular{\Phi_{a,des}}$')
+    ax.legend(loc='center right', bbox_to_anchor=(1, 0.67))
+    ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Humidity}$ $\mathbf{at}$ $\mathbf{the}$ $\mathbf{anode}$ $\mathbf{side}$ $\mathbf{\Phi}$',
+                  labelpad=3)
 
     # Plot instructions
-    plot_general_instructions(ax)</code></pre>
+    plot_general_instructions(ax)
+    ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
+    ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
+    ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.1))
+    ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.1 / 5))</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="modules.display_modules.plot_Phi_c" class="doc doc-heading">
+            <code class="highlight language-python">plot_Phi_c(variables, operating_inputs, ax)</code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>This function plots the humidity, at the cathode side, at different spatial localisations as a function of time.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>variables</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Variables calculated by the solver. They correspond to the fuel cell internal states.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>operating_inputs</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Operating inputs of the fuel cell.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>ax</code></b>
+                  (<code><span title="matplotlib.axes.Axes">Axes</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Axes on which the humidity will be plotted.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>modules/display_modules.py</code></summary>
+              <pre class="highlight"><code class="language-python">def plot_Phi_c(variables, operating_inputs, ax):
+    """This function plots the humidity, at the cathode side, at different spatial localisations as a function of time.
+
+    Parameters
+    ----------
+    variables : dict
+        Variables calculated by the solver. They correspond to the fuel cell internal states.
+    operating_inputs : dict
+        Operating inputs of the fuel cell.
+    ax : matplotlib.axes.Axes
+        Axes on which the humidity will be plotted.
+    """
+
+    # Extraction of the variables
+    t, C_v_cgc_t = variables['t'], variables['C_v_cgc']
+    Phi_csm_t, Phi_cem_t = variables['Phi_csm'], variables['Phi_cem']
+    # Extraction of the operating inputs
+    Tfc, Phi_c_des = operating_inputs['Tfc'], operating_inputs['Phi_c_des']
+
+    # Calculate the humidity Phi
+    Phi_cgc_t = [0] * len(t)
+    for i in range(len(t)): Phi_cgc_t[i] = C_v_cgc_t[i] * R * Tfc / Psat(Tfc)
+
+    # Plot the humidity at different spatial localisations: Phi
+    ax.plot(t, Phi_cgc_t, color=colors(0), label=r'$\mathregular{\Phi_{cgc}}$')
+    ax.plot(t, Phi_csm_t, color=colors(1), label=r'$\mathregular{\Phi_{csm}}$')
+    ax.plot(t, Phi_cem_t, color=colors(2), label=r'$\mathregular{\Phi_{cem}}$')
+    ax.plot(t, [Phi_c_des]*len(t), color='black', label=r'$\mathregular{\Phi_{c,des}}$')
+    ax.legend(loc='best')
+    ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Humidity}$ $\mathbf{at}$ $\mathbf{the}$ $\mathbf{cathode}$ $\mathbf{side}$ $\mathbf{\Phi}$',
+                  labelpad=3)
+
+    # Plot instructions
+    plot_general_instructions(ax)
+    ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
+    ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
+    ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.1))
+    ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.1 / 5))</code></pre>
             </details>
     </div>
 
@@ -1825,10 +1925,10 @@ current density.</p>
     current_density = operating_inputs['current_density']
     if parameters['type_control'] == "Phi_des":
         Phi_a_des, Phi_c_des = variables['Phi_a_des'], variables['Phi_c_des']
-        ax.set_ylabel(r'Controlled inlet humidity  $\mathregular{\Phi_{des}}$', labelpad=3)
+        ax.set_ylabel(r'$\mathbf{Controlled}$ $\mathbf{inlet}$ $\mathbf{humidity}$  $\mathbf{\Phi_{des}}$', labelpad=3)
     else:
         Phi_a_des, Phi_c_des = [operating_inputs['Phi_a_des']] * len(t), [operating_inputs['Phi_c_des']] * len(t)
-        ax.set_ylabel(r'Uncontrolled inlet humidity $\mathregular{\Phi_{des}}$', labelpad=3)
+        ax.set_ylabel(r'$\mathbf{Uncontrolled}$ $\mathbf{inlet}$ $\mathbf{humidity}$ $\mathbf{\Phi_{des}}$', labelpad=3)
 
     # Plot Phi_des
     n = len(t)
@@ -1836,7 +1936,8 @@ current density.</p>
     for i in range(n):  # Creation of ifc_t
         ifc_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
     ax.plot(ifc_t, Phi_c_des, color=colors(6), label=r'$\mathregular{\Phi_{c,des}}$')
-    ax.set_xlabel(r'Current density $\mathregular{i_{fc}}$ $\mathregular{\left( A.cm^{-2} \right)}$', labelpad=3)
+    ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
+                  labelpad=3)
     if parameters['type_auxiliary'] == "opened_anode" or parameters['type_auxiliary'] == "no_auxiliary":
         ax.plot(t, Phi_a_des, color=colors(0), label=r'$\mathregular{\Phi_{a,des}}$')
         ax.legend([r'$\mathregular{\Phi_{a,des}}$', r'$\mathregular{\Phi_{c,des}}$'], loc='best')
@@ -1918,8 +2019,8 @@ current density.</p>
 
     # Plot the cell voltage: Ucell
     ax.plot(t, Ucell_t, color=colors(0), label=r'$\mathregular{U_{cell}}$')
-    ax.set_xlabel(r'Time $\mathregular{t}$ $\mathregular{\left( s \right)}$', labelpad=3)
-    ax.set_ylabel(r'Cell voltage $\mathregular{U_{cell}}$ $\mathregular{\left( V \right)}$', labelpad=3)
+    ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Cell}$ $\mathbf{voltage}$ $\mathbf{U_{cell}}$ $\mathbf{\left( V \right)}$', labelpad=3)
     ax.legend([r'$\mathregular{U_{cell}}$'], loc='best')
 
     # Plot instructions
@@ -2044,9 +2145,10 @@ current density.</p>
 
     # Plot of the fuel cell efficiency: eta_fc
     plot_specific_line(ifc_t, eta_fc_t, type_fuel_cell, type_auxiliary, type_control, None, ax)
-    ax.set_xlabel(r'Current density $\mathregular{i_{fc}}$ $\mathregular{\left( A.cm^{-2} \right)}$', labelpad=3)
-    ax.set_ylabel(r'Fuel cell efficiency $\mathregular{\eta_{fc}}$', labelpad=3)
-    ax.legend(loc='best', frameon=False)
+    ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
+                  labelpad=0)
+    ax.set_ylabel(r'$\mathbf{Fuel}$ $\mathbf{cell}$ $\mathbf{efficiency}$ $\mathbf{\eta_{fc}}$', labelpad=0)
+    ax.legend(loc='best')
 
     # Plot instructions
     plot_general_instructions(ax)
@@ -2109,9 +2211,10 @@ current density.</p>
         Axes on which the instructions will be added.
     """
 
-    ax.tick_params(axis='both', which='major', size=10, width=1.5, direction='out', labelsize=15)
-    ax.tick_params(axis='both', which='minor', size=5, width=1.5, direction='out', labelsize=15)
-    plt.show()</code></pre>
+    ax.tick_params(axis='both', which='major', size=10, width=1.5, direction='out')
+    ax.tick_params(axis='both', which='minor', size=5, width=1.5, direction='out')
+    plt.tight_layout() # Adjust layout to prevent overlap between labels and the figure
+    plt.show() # Show the figure</code></pre>
             </details>
     </div>
 
@@ -2215,8 +2318,9 @@ current density.</p>
     for i in range(n):  # Creation of ifc_t
         ifc_t[i] = current_density(t[i], parameters) / 10000  # Conversion in A/cm²
     ax.plot(t, ifc_t, color=colors(0), label=r'$\mathregular{i_{fc}}$')
-    ax.set_xlabel(r'Time $\mathregular{t}$ $\mathregular{\left( s \right)}$', labelpad=3)
-    ax.set_ylabel(r'Current density $\mathregular{i_{fc}}$ $\mathregular{\left( A.cm^{-2} \right)}$', labelpad=3)
+    ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
+                  labelpad=3)
     ax.legend([r'$\mathregular{i_{fc}}$'], loc='best')
 
     # Plot instructions
@@ -2324,22 +2428,27 @@ current density.</p>
         ax.plot(ifc_t, lambda_acl_t, color=colors(2))
         ax.plot(ifc_t, lambda_mem_t, color=colors(3))
         ax.plot(ifc_t, lambda_ccl_t, color=colors(4))
-        ax.set_xlabel(r'Current density $\mathregular{i_{fc}}$ $\mathregular{\left( A.cm^{-2} \right)}$', labelpad=3)
+        ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
+                      labelpad=3)
     else:
         ax.plot(t, lambda_acl_t, color=colors(2))
         ax.plot(t, lambda_mem_t, color=colors(3))
         ax.plot(t, lambda_ccl_t, color=colors(4))
-        ax.set_xlabel(r'Time $\mathregular{t}$ $\mathregular{\left( s \right)}$', labelpad=3)
-    ax.set_ylabel(r'Water content $\mathregular{\lambda}$', labelpad=3)
+        ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Water}$ $\mathbf{content}$ $\mathbf{\lambda}$', labelpad=3)
     ax.legend([r'$\mathregular{\lambda_{acl}}$', r'$\mathregular{\lambda_{mem}}$',
                r'$\mathregular{\lambda_{ccl}}$'], loc='best')
 
     # Plot instructions
     plot_general_instructions(ax)
-    ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
-    ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
-    ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(3))
-    ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(3 / 5))</code></pre>
+    if type_current == "polarization":
+        ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(0.5))
+        ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.5 / 5))
+    else:
+        ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
+        ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
+        ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(3))
+        ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(3 / 5))</code></pre>
             </details>
     </div>
 
@@ -2411,16 +2520,7 @@ current density.</p>
         ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.1))
         ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.1 / 5))
         ax.set_xlim(0, 3.0)
-        ax.set_ylim(0.4, 1.0)
-
-    # For BX fuel cell
-    elif type_fuel_cell == "BX_1.0" or type_fuel_cell == "BX_1.35":
-        ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(0.3))
-        ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.3 / 5))
-        ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.2))
-        ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.2 / 5))
-        ax.set_xlim(-0.1, 4.5)
-        ax.set_ylim(0.1, 1.0)
+        ax.set_ylim(0.4, 1.04)
 
     # For LF fuel cell
     elif type_fuel_cell == "LF":
@@ -2598,13 +2698,12 @@ This adjustment allows for stable and consistent measurements during the station
         ax.plot(ifc, Ucell, 'og', markersize=2)
 
     # Add the common instructions for the plot
-    ax.set_xlabel(r'Current density $\mathregular{i_{fc}}$ $\mathregular{\left( A.cm^{-2} \right)}$',
-                  labelpad=3, fontsize=18)
-    ax.set_ylabel(r'Cell voltage $\mathregular{U_{cell}}$ $\mathregular{\left( V \right)}$',
-                  labelpad=3, fontsize=18)
+    ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
+                  labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Cell}$ $\mathbf{voltage}$ $\mathbf{U_{cell}}$ $\mathbf{\left( V \right)}$', labelpad=3)
     plot_general_instructions(ax)
     if type_plot == "fixed":
-        ax.legend(loc='best', frameon=False)</code></pre>
+        ax.legend(loc='best')</code></pre>
             </details>
     </div>
 
@@ -2713,10 +2812,11 @@ This adjustment allows for stable and consistent measurements during the station
 
     # Plot of the power density function: Pfc
     plot_specific_line(ifc_t, Pfc_t, type_fuel_cell, type_auxiliary, type_control, None, ax)
-    ax.set_xlabel(r'Current density $\mathregular{i_{fc}}$ $\mathregular{\left( A.cm^{-2} \right)}$', labelpad=3)
-    ax.set_ylabel(r'Fuel cell power density $\mathregular{P_{fc}}$ $\mathregular{\left( W.cm^{-2} \right)}$',
-                  labelpad=3)
-    ax.legend(loc='best', frameon=False)
+    ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
+                  labelpad=0)
+    ax.set_ylabel(r'$\mathbf{Fuel}$ $\mathbf{cell}$ $\mathbf{power}$ $\mathbf{density}$ $\mathbf{P_{fc}}$ $\mathbf{\left( W.cm^{-2} \right)}$',
+                  labelpad=0)
+    ax.legend(loc='best')
 
     # Plot instructions
     plot_general_instructions(ax)
@@ -2826,23 +2926,28 @@ This adjustment allows for stable and consistent measurements during the station
         ax.plot(ifc_t, s_acl_t, color=colors(2))
         ax.plot(ifc_t, s_ccl_t, color=colors(4))
         ax.plot(ifc_t, s_cgdl_t, color=colors(5))
-        ax.set_xlabel(r'Current density $\mathregular{i_{fc}}$ $\mathregular{\left( A.cm^{-2} \right)}$', labelpad=3)
+        ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
+                      labelpad=3)
     else:
         ax.plot(t, s_agdl_t, color=colors(1))
         ax.plot(t, s_acl_t, color=colors(2))
         ax.plot(t, s_ccl_t, color=colors(4))
         ax.plot(t, s_cgdl_t, color=colors(5))
-        ax.set_xlabel(r'Time $\mathregular{t}$ $\mathregular{\left( s \right)}$', labelpad=3)
-    ax.set_ylabel(r'Liquid water saturation $\mathregular{s}$', labelpad=3)
+        ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Liquid}$ $\mathbf{water}$ $\mathbf{saturation}$ $\mathbf{s}$', labelpad=3)
     ax.legend([r'$\mathregular{s_{agdl}}$', r'$\mathregular{s_{acl}}$',
                r'$\mathregular{s_{ccl}}$', r'$\mathregular{s_{cgdl}}$'], loc='best')
 
     # Plot instructions
     plot_general_instructions(ax)
-    ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
-    ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
-    ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.04))
-    ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.04 / 5))</code></pre>
+    if type_current == "polarization":
+        ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(0.5))
+        ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.5 / 5))
+    else:
+        ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
+        ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
+        ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.04))
+        ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.04 / 5))</code></pre>
             </details>
     </div>
 
@@ -2961,39 +3066,30 @@ This adjustment allows for stable and consistent measurements during the station
             type_fuel_cell == "EH-31_2.5":
         if type_fuel_cell == "EH-31_1.5" and type_auxiliary == "opened_anode":
             ax.plot(x, y, color=colors(0), label='Sim. - P = 1.5 bar' + r' - $ΔU_{max}$ =' f' {sim_error} %')
-        elif type_fuel_cell == "EH-31_1.5" and type_auxiliary != "opened_anode":  # no auxiliaries
+        elif type_fuel_cell == "EH-31_1.5" and type_auxiliary != "opened_anode":
             ax.plot(x, y, color=colors(0), label='Sim. - P = 1.5 bar')
+
         elif type_fuel_cell == "EH-31_2.0" and type_auxiliary == "opened_anode":
             ax.plot(x, y, '--', color=colors(1),
                     label='Sim. - P = 2.0 bar' + r' - $ΔU_{max}$ =' f' {sim_error} %')
-        elif type_fuel_cell == "EH-31_2.0" and type_auxiliary != "opened_anode":  # no auxiliaries
+        elif type_fuel_cell == "EH-31_2.0" and type_auxiliary != "opened_anode":
             if type_control == "Phi_des":
                 ax.plot(x, y, color=colors(5),
                         label=r'Sim. - P = 2.0 bar - controlled $\mathregular{\Phi_{des}}$')
             else:
                 ax.plot(x, y, color=colors(1),
                         label=r'Sim. - P = 2.0 bar - uncontrolled $\mathregular{\Phi_{des}}$')
+
         elif type_fuel_cell == "EH-31_2.25" and type_auxiliary == "opened_anode":
             ax.plot(x, y, '--', color=colors(2),
                     label='Sim. - P = 2.25 bar' + r' - $ΔU_{max}$ =' f' {sim_error} %')
-        elif type_fuel_cell == "EH-31_2.25" and type_auxiliary != "opened_anode":  # no auxiliaries
+        elif type_fuel_cell == "EH-31_2.25" and type_auxiliary != "opened_anode":
             ax.plot(x, y, color=colors(2), label='Sim. - P = 2.25 bar')
+
         elif type_fuel_cell == "EH-31_2.5" and type_auxiliary == "opened_anode":
             ax.plot(x, y, color=colors(3), label='Sim - P = 2.5 bar' + r' - $ΔU_{max}$ =' f' {sim_error} %')
-        elif type_fuel_cell == "EH-31_2.5" and type_auxiliary != "opened_anode":  # no auxiliaries
+        elif type_fuel_cell == "EH-31_2.5" and type_auxiliary != "opened_anode":
             ax.plot(x, y, color=colors(3), label='Sim - P = 2.5 bar')
-
-    # For BX fuel cell
-    elif type_fuel_cell == "BX_1.0" or type_fuel_cell == "BX_1.35":
-        if type_fuel_cell == "BX_1.0" and type_auxiliary == "opened_anode":
-            ax.plot(x, y, '--', color=colors(0),
-                    label='Sim. - P = 1.35 atm' + r' - $ΔU_{max}$ =' f' {sim_error} %')
-        elif type_fuel_cell == "BX_1.0" and type_auxiliary != "opened_anode":  # no auxiliaries
-            ax.plot(x, y, '--', color=colors(0), label='Sim. - P = 1.35 atm')
-        elif type_fuel_cell == "BX_1.35" and type_auxiliary == "opened_anode":
-            ax.plot(x, y, color=colors(1), label='Sim. - P = 1.0 atm' + r' - $ΔU_{max}$ =' f' {sim_error} %')
-        elif type_fuel_cell == "BX_1.35" and type_auxiliary != "opened_anode":  # no auxiliaries
-            ax.plot(x, y, color=colors(1), label='Sim. - P = 1.0 atm')
 
     # For LF fuel cell
     elif type_fuel_cell == "LF":
