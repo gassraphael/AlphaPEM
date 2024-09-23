@@ -60,7 +60,7 @@ def current_density_parameters(type_current):
     i_step = 0.5e4, 1.5e4  # (A.m-2, A.m-2). Current parameters for the step_current density function.
     delta_pola = 30, 30, 0.1e4, 1 * 60  # (s, s, A.m-2, s). Parameters for the polarization curve.
     i_EIS, ratio_EIS = 1.0e4, 5/100  # (A/m², ). Parameters for the EIS curve.
-    f_EIS = -3, 5, 60, 50 # Frequency parameters for the EIS_current density function.
+    f_EIS = -3, 5, 90, 50 # Frequency parameters for the EIS_current density function.
     t_EIS = EIS_parameters(f_EIS)  # Time parameters for the EIS_current density function.
     if type_current == "step": current_density = step_current  # It is the current density function.
     elif type_current == "polarization": current_density = polarization_current  # It is the current density function.

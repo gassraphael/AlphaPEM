@@ -293,8 +293,7 @@ def plot_EIS_curve_Bode_angle(parameters, Fourier_results, ax):
         phi_U_i -= 360 # To have a value between -180 and 180
 
     # Plot the angle Bode diagram
-    ax.plot(f, phi_U_i, 'o', color=colors(2),
-            label='Angle Bode diagram')
+    ax.plot(f, phi_U_i, 'o', color=colors(2), label='Angle Bode diagram')
     ax.set_xlabel(r'$\mathbf{Frequency}$ $\mathbf{(Hz,}$ $\mathbf{logarithmic}$ $\mathbf{scale)}$', labelpad=3)
     ax.set_ylabel(r'$\mathbf{Phase}$ $\mathbf{(^\circ)}$', labelpad=3)
     #   Plot instructions
@@ -1160,11 +1159,14 @@ def plot_EIS_Nyquist_instructions(type_fuel_cell, ax):
         Axes on which the instructions will be added.
     """
 
+    # Commun instructions
+    ax.set_aspect('equal', adjustable='box')  # Set orthonormal axis.
+
     # For EH-31 fuel cell
     if type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or \
             type_fuel_cell == "EH-31_2.25" or type_fuel_cell == "EH-31_2.5":
-        ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(30))
-        ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(30 / 5))
+        ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(20))
+        ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(20 / 5))
         ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(10))
         ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(10 / 5))
         # ax.set_xlim(30, 200)
@@ -1212,6 +1214,8 @@ def plot_Bode_phase_instructions(f_EIS, type_fuel_cell, ax):
     f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = f_EIS  # They are the frequency parameters for the EIS
     #                                                                    simulation.
     ax.set_xscale('log')  # set logarithmic scale for the x-axis
+    if not ax.yaxis_inverted():
+        ax.invert_yaxis()  # Invert the y-axis
 
     # For EH-31 fuel cell
     if type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or \
