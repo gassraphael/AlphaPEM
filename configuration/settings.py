@@ -76,8 +76,8 @@ def operating_inputs(type_fuel_cell):
     Parameters
     ----------
     type_fuel_cell : str
-        Type of fuel cell system. It can be "EH-31_1.5", "EH-31_2.0", "EH-31_2.25", "EH-31_2.5", "BX_1.0", "BX_1.35",
-        "LF", or "manual_setup".
+        Type of fuel cell system. It can be "EH-31_1.5", "EH-31_2.0", "EH-31_2.25", "EH-31_2.5", "LF",
+        or "manual_setup".
 
     Returns
     -------
@@ -117,8 +117,8 @@ def physical_parameters(type_fuel_cell):
     Parameters
     ----------
     type_fuel_cell : str
-        Type of fuel cell system. It can be "EH-31_1.5", "EH-31_2.0", "EH-31_2.25", "EH-31_2.5", "BX_1.0", "BX_1.35",
-        "LF", or "manual_setup".
+        Type of fuel cell system. It can be "EH-31_1.5", "EH-31_2.0", "EH-31_2.25", "EH-31_2.5", "LF",
+        or "manual_setup".
 
     Returns
     -------

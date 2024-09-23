@@ -27,11 +27,9 @@ if __name__ == '__main__':
     start_time = time.time()
 
     # Fuel cell possibilities: "EH-31_1.5"(2021), "EH-31_2.0"(2021), "EH-31_2.25"(2021), "EH-31_2.5"(2021),
-    #                          "BX_1.0"(2015), "BX_1.35"(2015), "LF"(2010), "manual_setup".
+    #                          "LF"(2010), "manual_setup".
     # This parameter includes the fuel cell used in the model and the corresponding operating conditions.
     # - EH-31 is a fuel cell developed by EH GROUP. 1.5, 2.0, 2.25 and 2.5 corresponds to the different pressure options.
-    # - BX corresponds to the fuel cell used in Biao Xie's work: https://doi.org/10.1016/j.ijheatmasstransfer.2022.122705.
-    # 1.0 and 1.35 corresponds to the different pressure options.
     # - LF corresponds to the fuel cell used in Linhao Fan work: http://dx.doi.org/10.1016/j.enconman.2017.08.034.
     type_fuel_cell_1 = "EH-31_2.0"
     type_fuel_cell_2 = None

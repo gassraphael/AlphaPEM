@@ -326,10 +326,6 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
         type_fuel_cell = "EH-31_2.25"
     elif choice_buttons['type_fuel_cell']['value'].get() == "EH-31 2.5 bar (2021)":
         type_fuel_cell = "EH-31_2.5"
-    elif choice_buttons['type_fuel_cell']['value'].get() == "Biao Xie 1.0 bar (2015)":
-        type_fuel_cell = "BX_1.0"
-    elif choice_buttons['type_fuel_cell']['value'].get() == "Biao Xie 1.35 bar (2015)":
-        type_fuel_cell = "BX_1.35"
     elif choice_buttons['type_fuel_cell']['value'].get() == "Linhao Fan (2010)":
         type_fuel_cell = "LF"
 
@@ -457,10 +453,6 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
         type_fuel_cell = "EH-31_2.25"
     elif choice_buttons['type_fuel_cell']['value'].get() == "EH-31 2.5 bar (2021)":
         type_fuel_cell = "EH-31_2.5"
-    elif choice_buttons['type_fuel_cell']['value'].get() == "Biao Xie 1.0 bar (2015)":
-        type_fuel_cell = "BX_1.0"
-    elif choice_buttons['type_fuel_cell']['value'].get() == "Biao Xie 1.35 bar (2015)":
-        type_fuel_cell = "BX_1.35"
     elif choice_buttons['type_fuel_cell']['value'].get() == "Linhao Fan (2010)":
         type_fuel_cell = "LF"
     elif choice_buttons['type_fuel_cell']['value'].get() == "Enter your specifications":

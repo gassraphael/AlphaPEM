@@ -1091,19 +1091,6 @@ def plot_specific_line(x, y, type_fuel_cell, type_auxiliary, type_control, sim_e
         elif type_fuel_cell == "EH-31_2.5" and type_auxiliary != "opened_anode":
             ax.plot(x, y, color=colors(3), label='Sim - P = 2.5 bar')
 
-    # For BX fuel cell
-    elif type_fuel_cell == "BX_1.0" or type_fuel_cell == "BX_1.35":
-        if type_fuel_cell == "BX_1.0" and type_auxiliary == "opened_anode":
-            ax.plot(x, y, '--', color=colors(0),
-                    label='Sim. - P = 1.35 atm' + r' - $ΔU_{max}$ =' f' {sim_error} %')
-        elif type_fuel_cell == "BX_1.0" and type_auxiliary != "opened_anode":
-
-            ax.plot(x, y, '--', color=colors(0), label='Sim. - P = 1.35 atm')
-        elif type_fuel_cell == "BX_1.35" and type_auxiliary == "opened_anode":
-            ax.plot(x, y, color=colors(1), label='Sim. - P = 1.0 atm' + r' - $ΔU_{max}$ =' f' {sim_error} %')
-        elif type_fuel_cell == "BX_1.35" and type_auxiliary != "opened_anode":
-            ax.plot(x, y, color=colors(1), label='Sim. - P = 1.0 atm')
-
     # For LF fuel cell
     elif type_fuel_cell == "LF":
         ax.plot(x, y, color=colors(0), label='Simulation')
@@ -1148,15 +1135,6 @@ def plot_pola_instructions(type_fuel_cell, ax):
         ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.1 / 5))
         ax.set_xlim(0, 3.0)
         ax.set_ylim(0.4, 1.04)
-
-    # For BX fuel cell
-    elif type_fuel_cell == "BX_1.0" or type_fuel_cell == "BX_1.35":
-        ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(0.3))
-        ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.3 / 5))
-        ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.2))
-        ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.2 / 5))
-        ax.set_xlim(-0.1, 4.5)
-        ax.set_ylim(0.1, 1.0)
 
     # For LF fuel cell
     elif type_fuel_cell == "LF":
