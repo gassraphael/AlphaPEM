@@ -202,6 +202,7 @@ def plot_EIS_curve_Nyquist(parameters, Fourier_results, ax):
     i_EIS, ratio_EIS, type_fuel_cell = parameters['i_EIS'], parameters['ratio_EIS'], parameters['type_fuel_cell']
     # Extraction of the Fourier results
     Ucell_Fourier, ifc_Fourier = Fourier_results['Ucell_Fourier'], Fourier_results['ifc_Fourier']
+    f_Fourier = Fourier_results['f']
     A_period_t, A, N = Fourier_results['A_period_t'], Fourier_results['A'], Fourier_results['N']
 
     # Calculation of the real and imaginary component of the impedance for each period
@@ -220,7 +221,7 @@ def plot_EIS_curve_Nyquist(parameters, Fourier_results, ax):
     ax.set_ylabel(r'$\mathbf{-Z_{imag}}$ $\mathbf{(m\Omega.cm^{2})}$', labelpad=3)
     #       Plot instructions
     plot_general_instructions(ax)
-    plot_EIS_Nyquist_instructions(type_fuel_cell, ax)
+    plot_EIS_Nyquist_instructions(type_fuel_cell, f_Fourier, Z_real, -Z_imag, ax)
 
 
 def plot_EIS_curve_Bode_amplitude(parameters, Fourier_results, ax):
@@ -1148,13 +1149,19 @@ def plot_pola_instructions(type_fuel_cell, ax):
     else:
         pass
 
-def plot_EIS_Nyquist_instructions(type_fuel_cell, ax):
+def plot_EIS_Nyquist_instructions(type_fuel_cell, f_Fourier, x, y, ax):
     """This function adds the instructions for EIS plots according to the type_input to the ax object.
 
     Parameters
     ----------
     type_fuel_cell : str
         Type of fuel cell configuration.
+    f : numpy.ndarray
+        Frequency at which the EIS is simulated.
+    x : numpy.ndarray
+        x-axis values for plotting the annotation.
+    y : numpy.ndarray
+        y-axis values for plotting the annotation.
     ax : matplotlib.axes.Axes
         Axes on which the instructions will be added.
     """
@@ -1171,6 +1178,18 @@ def plot_EIS_Nyquist_instructions(type_fuel_cell, ax):
         ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(10 / 5))
         # ax.set_xlim(30, 200)
         # ax.set_ylim(-25, 55)
+        if (f_Fourier >= 0.14 and f_Fourier <= 0.16):
+            freq_str = f'{f_Fourier:.2g} Hz'  # Frequency annotation.
+            ax.annotate(freq_str, (x, y), textcoords="offset points", xytext=(0, 10), ha='center', fontsize = 14,
+                        rotation=90, weight='bold')
+        if (f_Fourier >= 1.0 and f_Fourier <= 1.5) or (f_Fourier >= 5 and f_Fourier <= 7):
+            freq_str = f'{f_Fourier:.2g} Hz'  # Frequency annotation with scientific notation.
+            ax.annotate(freq_str, (x, y), textcoords="offset points", xytext=(0, -45), ha='center', fontsize=14,
+                        rotation=90, weight='bold')
+        if (f_Fourier >= 70 and f_Fourier <= 80):
+            freq_str = str(int(f_Fourier)) + ' Hz'  # Frequency annotation with scientific notation.
+            ax.annotate(freq_str, (x, y), textcoords="offset points", xytext=(0, -40), ha='center', fontsize = 14,
+                        rotation=90, weight='bold')
 
 def plot_Bode_amplitude_instructions(f_EIS, type_fuel_cell, ax):
     """This function adds the instructions for amplitude Bode plots according to the type_input to the ax object.
