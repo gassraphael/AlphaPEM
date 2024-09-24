@@ -1172,24 +1172,43 @@ def plot_EIS_Nyquist_instructions(type_fuel_cell, f_Fourier, x, y, ax):
     # For EH-31 fuel cell
     if type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or \
             type_fuel_cell == "EH-31_2.25" or type_fuel_cell == "EH-31_2.5":
+        # Double charge transfer
+        if (f_Fourier >= 70 and f_Fourier <= 80):
+            freq_str = str(int(f_Fourier)) + ' Hz'  # Frequency annotation.
+            ax.annotate(freq_str, (x, y), textcoords="offset points", xytext=(0, -40), ha='center', fontsize=14,
+                        rotation=90, weight='bold')
+        # Auxiliary system
+        if (f_Fourier >= 0.14 and f_Fourier <= 0.16):
+            freq_str = f'{f_Fourier:.2g} Hz'  # Frequency annotation.
+            ax.annotate(freq_str, (x, y), textcoords="offset points", xytext=(0, 7), ha='center', fontsize=14,
+                        rotation=90, weight='bold')
+        if (f_Fourier >= 1.2 and f_Fourier <= 1.4):
+            freq_str = f'{f_Fourier:.2g} Hz'  # Frequency annotation.
+            ax.annotate(freq_str, (x, y), textcoords="offset points", xytext=(0, 10), ha='center', fontsize=14,
+                        rotation=90, weight='bold')
+        # Diffusion
+        if (f_Fourier >= 0.015 and f_Fourier <= 0.020):
+            freq_str = f'{f_Fourier:.2g} Hz'  # Frequency annotation.
+            ax.annotate(freq_str, (x, y), textcoords="offset points", xytext=(30, 0), ha='center', fontsize=14,
+                        rotation=0, weight='bold')
+        if (f_Fourier >= 0.9 and f_Fourier <= 1.1):
+            freq_str = f'{f_Fourier:.2g} Hz'  # Frequency annotation.
+            ax.annotate(freq_str, (x, y), textcoords="offset points", xytext=(0, 10), ha='center', fontsize=14,
+                        rotation=90, weight='bold')
+        if (f_Fourier >= 70 and f_Fourier <= 90):
+            freq_str = str(int(f_Fourier)) + ' Hz'  # Frequency annotation.
+            ax.annotate(freq_str, (x, y), textcoords="offset points", xytext=(0, -40), ha='center', fontsize=14,
+                        rotation=90, weight='bold')
+        if (f_Fourier >= 10000 and f_Fourier <= 12000):
+            freq_str = str(int(f_Fourier)) + ' Hz'  # Frequency annotation.
+            ax.annotate(freq_str, (x, y), textcoords="offset points", xytext=(35, 0), ha='center', fontsize=14,
+                        rotation=0, weight='bold')
         ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(20))
         ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(20 / 5))
         ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(10))
         ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(10 / 5))
-        # ax.set_xlim(30, 200)
-        # ax.set_ylim(-25, 55)
-        if (f_Fourier >= 0.14 and f_Fourier <= 0.16):
-            freq_str = f'{f_Fourier:.2g} Hz'  # Frequency annotation.
-            ax.annotate(freq_str, (x, y), textcoords="offset points", xytext=(0, 10), ha='center', fontsize = 14,
-                        rotation=90, weight='bold')
-        if (f_Fourier >= 1.0 and f_Fourier <= 1.5) or (f_Fourier >= 5 and f_Fourier <= 7):
-            freq_str = f'{f_Fourier:.2g} Hz'  # Frequency annotation with scientific notation.
-            ax.annotate(freq_str, (x, y), textcoords="offset points", xytext=(0, -45), ha='center', fontsize=14,
-                        rotation=90, weight='bold')
-        if (f_Fourier >= 70 and f_Fourier <= 80):
-            freq_str = str(int(f_Fourier)) + ' Hz'  # Frequency annotation with scientific notation.
-            ax.annotate(freq_str, (x, y), textcoords="offset points", xytext=(0, -40), ha='center', fontsize = 14,
-                        rotation=90, weight='bold')
+        ax.set_xlim(30, 200)
+        ax.set_ylim(-25, 55)
 
 def plot_Bode_amplitude_instructions(f_EIS, type_fuel_cell, ax):
     """This function adds the instructions for amplitude Bode plots according to the type_input to the ax object.

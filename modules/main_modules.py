@@ -38,6 +38,7 @@ def figures_preparation(type_current, type_display):
     mpl.rcParams['font.family'] = 'cmr10'  # 'cmr10' for English characters and 'DejaVu Serif' for French ones
     mpl.rcParams['axes.formatter.use_mathtext'] = True  # For the scientific notation
     mpl.rcParams['lines.linewidth'] = 2.0
+    mpl.rcParams['lines.markersize'] = 5.0
 
     if type_display == "no_display":
         fig1, ax1 = None, None
