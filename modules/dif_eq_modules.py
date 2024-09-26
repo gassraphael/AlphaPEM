@@ -156,7 +156,7 @@ def desired_flows(solver_variables, control_variables, i_n, i_fc, operating_inpu
                   1 / yO2_ext * Sc * (i_fc + i_n) / (4 * F) * Aact
 
         # The desired humidifier flow rate at the anode side Wa_v_inj_des (kg.s-1)
-        Wrd = M_H2 * Sa * (i_fc + i_n) / (2 * F) * Aact
+        Wrd = n_cell * M_H2 * Sa * (i_fc + i_n) / (2 * F) * Aact
         Wa_inj_des = (M_H2O * Phi_a_des * Psat(Tfc) / (Prd + Phi_a_des * Psat(Tfc)) /
                       (1 - Phi_a_des * Psat(Tfc) / (Prd + Phi_a_des * Psat(Tfc))) * (Wrd / M_H2))
 
