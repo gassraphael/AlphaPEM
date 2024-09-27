@@ -65,7 +65,7 @@ local_optimum = np.array([[0.7011156494971454, 0.3949198274842546, 1.01563913568
                            0.0555312850726664, 0.10514269908118055, 0.6365424991141914]] * 96)
 
 # Undetermined parameter which is not considered yet (require the use of EIS curves to be calibrated)
-C_dl = 2e7  # F.m-3. It is the volumetric double layer capacitance.
+C_scl = 2e7  # F.m-3. It is the volumetric double layer capacitance.
 
 # GeneticAlgorithm parameters
 algorithm_param = AlgorithmParams(  # 1 iteration takes 720s = 12min = 0.2h inside LIS cluster with 80 nodes.
@@ -125,12 +125,12 @@ def pola_points(x):
     Simulator1 = AlphaPEM(current_density, Tfc_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
                           t_step, i_step, i_pola_1, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl,
                           Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c,
-                          a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell_1, type_current,
+                          a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell_1, type_current,
                           type_auxiliary, type_control, type_purge, type_display, type_plot)
     Simulator2 = AlphaPEM(current_density, Tfc_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2,
                           t_step, i_step, i_pola_2, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl,
                           Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c,
-                          a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell_2, type_current,
+                          a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell_2, type_current,
                           type_auxiliary, type_control, type_purge, type_display, type_plot)
 
     # Calculation of the error between the simulated polarization curves and the experimental ones
@@ -193,12 +193,12 @@ if __name__ == '__main__':
     Simulator1 = AlphaPEM(current_density, Tfc_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, t_step,
                           i_step, i_pola_1, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
                           Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
-                          b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell_1, type_current,
+                          b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell_1, type_current,
                           type_auxiliary, type_control, type_purge, type_display, type_plot)
     Simulator2 = AlphaPEM(current_density, Tfc_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2,
                           t_step, i_step, i_pola_2, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl,
                           Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c,
-                          a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell_2, type_current,
+                          a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell_2, type_current,
                           type_auxiliary, type_control, type_purge, type_display, type_plot)
     #       Display the calibrated and experimental polarization curve
     fig, ax = plt.subplots(figsize=(6, 6))

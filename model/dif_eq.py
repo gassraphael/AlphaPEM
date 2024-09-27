@@ -362,7 +362,7 @@ def calculate_dyn_H2_O2_N2_evolution(dif_eq, sv, Hgdl, Hcl, Hgc, Lgc, epsilon_gd
     dif_eq['dC_N2 / dt'] = (J_N2_in - J_N2_out) / Lgc
 
 
-def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, eta_c, Tfc, Hcl, i0_c_ref, kappa_c, C_dl, i_n, f_drop,
+def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, eta_c, Tfc, Hcl, i0_c_ref, kappa_c, C_scl, i_n, f_drop,
                                     **kwargs):
     """This function calculates the dynamic evolution of the cell overpotential eta_c.
 
@@ -384,15 +384,15 @@ def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, eta_c, Tfc, Hcl, i0_
         Reference exchange current density at the cathode (A.m-2).
     kappa_c : float
         Overpotential correction exponent.
-    C_dl : float
-        Volumetric double layer capacitance (F.m-3).
+    C_scl : float
+        Volumetric space-charge layer capacitance (F.m-3).
     i_n : float
         Crossover current density (A.m-2).
     f_drop : float
         Liquid water induced voltage drop function.
     """
 
-    dif_eq['deta_c / dt'] = 1 / (C_dl * Hcl) * ((i_fc + i_n) - i0_c_ref * (C_O2_ccl / C_O2ref) ** kappa_c *
+    dif_eq['deta_c / dt'] = 1 / (C_scl * Hcl) * ((i_fc + i_n) - i0_c_ref * (C_O2_ccl / C_O2ref) ** kappa_c *
                                                 np.exp(f_drop * alpha_c * F / (R * Tfc) * eta_c))
 
 

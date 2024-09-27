@@ -158,7 +158,7 @@ def stored_physical_parameters(type_fuel_cell):
         kappa_co = 27.2  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 1.61  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
-        C_dl = 2e7  # F.m-3. It is the volumetric double layer capacitance.
+        C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
 
     # For LF fuel cell
     elif type_fuel_cell == "LF":
@@ -188,14 +188,14 @@ def stored_physical_parameters(type_fuel_cell):
         kappa_co = 25  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 1.5  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0, 1, 1  # It is the limit liquid saturation coefficients.
-        C_dl = 2e7  # F.m-3. It is the volumetric double layer capacitance.
+        C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
 
     # For other fuel cells
     else:
         raise ValueError('the type_input given is not valid.')
 
     return Hcl, epsilon_mc, tau, Hmem, Hgdl, epsilon_gdl, epsilon_c, \
-        Hgc, Wgc, Lgc, Aact, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl
+        Hgc, Wgc, Lgc, Aact, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl
 
 
 def EIS_parameters(f_EIS):

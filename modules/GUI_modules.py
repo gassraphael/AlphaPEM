@@ -332,7 +332,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
     Hcl, epsilon_mc, tau, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, Re, i0_c_ref, kappa_co, kappa_c, \
-        a_slim, b_slim, a_switch, C_dl = \
+        a_slim, b_slim, a_switch, C_scl = \
         stored_physical_parameters(type_fuel_cell)
 
     # operating conditions recovery
@@ -364,7 +364,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_undetermined_parameters['a_slim']['value'].set(np.round(a_slim, 7))
     choice_undetermined_parameters['b_slim']['value'].set(np.round(b_slim, 7))
     choice_undetermined_parameters['a_switch']['value'].set(np.round(a_switch, 7))
-    choice_undetermined_parameters['C_dl (MF/m³)']['value'].set(np.round(C_dl * 1e-6, 2))  # MF.m-3
+    choice_undetermined_parameters['C_scl (F/cm³)']['value'].set(np.round(C_scl * 1e-6, 2))  # F.cm-3
     # i_max_pola recovery
     choice_current_density_parameters['i_max_pola (A/cm²)']['value'].set(np.round(i_max_pola / 1e4, 2))  # A/cm²
 
@@ -420,7 +420,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     a_slim = choice_undetermined_parameters['a_slim']['value'].get()
     b_slim = choice_undetermined_parameters['b_slim']['value'].get()
     a_switch = choice_undetermined_parameters['a_switch']['value'].get()
-    C_dl = choice_undetermined_parameters['C_dl (MF/m³)']['value'].get() * 1e6  # F.m-3
+    C_scl = choice_undetermined_parameters['C_scl (F/cm³)']['value'].get() * 1e6  # F.m-3
     # current density parameters
     t_step = (choice_current_density_parameters['t0_step (s)']['value'].get(),
               choice_current_density_parameters['tf_step (s)']['value'].get(),
@@ -490,7 +490,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
         type_plot = "dynamic"
 
     return (Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl,
-            epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, t_step,
+            epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, t_step,
             i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, max_step, n_gdl,
             type_fuel_cell, type_auxiliary, type_control, type_purge, type_display, type_plot)
 
@@ -636,9 +636,9 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
                                                                       ' 0 and 1.')
         choices.clear()
         return
-    if choice_undetermined_parameters['C_dl (MF/m³)']['value'].get() < 5 or \
-            choice_undetermined_parameters['C_dl (MF/m³)']['value'].get() > 100:
-        messagebox.showerror(title='Double layer capacitance', message='I have not settled yet a range for C_dl.')
+    if choice_undetermined_parameters['C_scl (F/cm³)']['value'].get() < 5 or \
+            choice_undetermined_parameters['C_scl (F/cm³)']['value'].get() > 100:
+        messagebox.showerror(title='Double layer capacitance', message='I have not settled yet a range for C_scl.')
         choices.clear()
         return
     if choice_current_density_parameters['t0_step (s)']['value'].get() < 0 or \
@@ -760,7 +760,7 @@ def set_equal_width(frame1, frame2, frame3, frame4, frame5, frame6):
 def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                                      i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
                                      Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
-                                     kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell,
+                                     kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell,
                                      type_current, type_auxiliary, type_control, type_purge, type_display, type_plot):
     """Launch the AlphaPEM simulator for a step current density and display the results.
 
@@ -851,8 +851,8 @@ def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, S
     a_switch : float
         One of the limit liquid saturation coefficients: the slop of s_switch function
         (undetermined physical parameter).
-    C_dl : float
-        Volumetric double layer capacitance in F.m-3 (undetermined physical parameter).
+    C_scl : float
+        Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
     max_step : float
         Maximum time step for the solver (computing parameter).
     n_gdl : int
@@ -893,7 +893,7 @@ def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, S
             Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                                  i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
                                  Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c,
-                                 a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
+                                 a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
                                  type_auxiliary, type_control, type_purge, type_display, type_plot,
                                  initial_variable_values, time_interval)
 
@@ -917,7 +917,7 @@ def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, S
         Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                              i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
                              Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
-                             b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
+                             b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
                              type_auxiliary, type_control, type_purge, type_display, type_plot)
         # Display
         if type_display != "no_display":
@@ -930,7 +930,7 @@ def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, S
 def launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step,
                                              i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
                                              Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re,
-                                             i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step,
+                                             i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step,
                                              n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
                                              type_purge, type_display, type_plot):
     """Launch the AlphaPEM simulator for a polarization current density and display the results.
@@ -1022,8 +1022,8 @@ def launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_de
     a_switch : float
         One of the limit liquid saturation coefficients: the slop of s_switch function
         (undetermined physical parameter).
-    C_dl : float
-        Volumetric double layer capacitance in F.m-3 (undetermined physical parameter).
+    C_scl : float
+        Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
     max_step : float
         Maximum time step for the solver (computing parameter).
     n_gdl : int
@@ -1067,7 +1067,7 @@ def launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_de
             Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                                  i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
                                  Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c,
-                                 a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
+                                 a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
                                  type_auxiliary, type_control, type_purge, type_display, type_plot,
                                  initial_variable_values, time_interval)
 
@@ -1091,7 +1091,7 @@ def launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_de
         Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                              i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
                              Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
-                             b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
+                             b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
                              type_auxiliary, type_control, type_purge, type_display, type_plot)
         # Display
         if type_display != "no_display":
@@ -1104,7 +1104,7 @@ def launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_de
 def launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                                     i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
                                     Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
-                                    kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell,
+                                    kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell,
                                     type_current, type_auxiliary, type_control, type_purge, type_display, type_plot):
     """Launch the AlphaPEM simulator for an EIS current density and display the results.
 
@@ -1195,8 +1195,8 @@ def launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc
     a_switch : float
         One of the limit liquid saturation coefficients: the slop of s_switch function
         (undetermined physical parameter).
-    C_dl : float
-        Volumetric double layer capacitance in F.m-3 (undetermined physical parameter).
+    C_scl : float
+        Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
     max_step : float
         Maximum time step for the solver (computing parameter).
     n_gdl : int
@@ -1238,7 +1238,7 @@ def launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc
     Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                          i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
                          Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
-                         b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
+                         b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
                          type_auxiliary, type_control, type_purge, type_display, type_plot,
                          initial_variable_values, time_interval)
 
@@ -1262,7 +1262,7 @@ def launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc
         Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                              i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
                              Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
-                             kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell,
+                             kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell,
                              type_current, type_auxiliary, type_control, type_purge, type_display, type_plot,
                              initial_variable_values, time_interval)
 

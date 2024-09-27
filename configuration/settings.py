@@ -190,13 +190,13 @@ def physical_parameters(type_fuel_cell):
         kappa_c = 1.6136446641573106  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.0555312850726664, 0.10514269908118055, 0.6365424991141914  # It is the limit
         #                                                               liquid saturation coefficients.
-        C_dl = 2e7  # F.m-3. It is the volumetric double layer capacitance.
+        C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
     else: # Stored setup in "stored_physical_parameters".
         (Hcl, epsilon_mc, tau, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, Re, i0_c_ref, kappa_co,
-         kappa_c, a_slim, b_slim, a_switch, C_dl) = stored_physical_parameters(type_fuel_cell)
+         kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
 
     return (Hcl, epsilon_mc, tau, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, Re, i0_c_ref, kappa_co,
-            kappa_c, a_slim, b_slim, a_switch, C_dl)
+            kappa_c, a_slim, b_slim, a_switch, C_scl)
 
 
 def computing_parameters(type_current, Hgdl, Hcl):

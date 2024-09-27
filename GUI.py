@@ -140,7 +140,7 @@ def main_frame(root, canvas):
                     'label_column': 3},
          'a_switch': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.7), 'label_row': 3,
                       'label_column': 5},
-         'C_dl (MF/m³)': {'value': tk.DoubleVar(undetermined_parameters_frame, 20), 'label_row': 4,
+         'C_scl (F/cm³)': {'value': tk.DoubleVar(undetermined_parameters_frame, 20), 'label_row': 4,
                           'label_column': 1}}
 
     choice_current_density_parameters = \
@@ -354,7 +354,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
     # Retrieves parameter values for predefined stacks and keeps them in their standard unit, or converts user-selected
     # quantities into standard units.
     Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl, \
-        epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, t_step, \
+        epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, t_step, \
         i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, max_step, n_gdl, \
         type_fuel_cell, type_auxiliary, type_control, type_purge, type_display, type_plot \
         = recover_for_use_operating_inputs_and_physical_parameters(choice_operating_conditions,
@@ -369,7 +369,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step,
                                          i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
                                          Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re,
-                                         i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl,
+                                         i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl,
                                          t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
                                          type_purge, type_display, type_plot)
 
@@ -380,7 +380,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
                                                  t_step, i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS,
                                                  Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc,
                                                  epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
-                                                 a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
+                                                 a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
                                                  type_auxiliary, type_control, type_purge, type_display, type_plot)
 
     if current_button == 2:
@@ -389,7 +389,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step,
                                         i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
                                         Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re,
-                                        i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl,
+                                        i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl,
                                         t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge,
                                         type_display, type_plot)
 

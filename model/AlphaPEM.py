@@ -37,7 +37,7 @@ class AlphaPEM:
 
     def __init__(self, current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_max_pola,
                  delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau,
-                 epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step,
+                 epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step,
                  n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge, type_display,
                  type_plot, initial_variable_values=None, time_interval=None):
         """Initialise all parameters defining a fuel cell stack operation: nominal operating conditions,
@@ -130,8 +130,8 @@ class AlphaPEM:
         a_switch : float
             One of the limit liquid saturation coefficients: the slop of s_switch function
             (undetermined physical parameter).
-        C_dl : float
-            Volumetric double layer capacitance in F.m-3 (undetermined physical parameter).
+        C_scl : float
+            Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
         max_step : float
             Maximum time step for the solver (computing parameter).
         n_gdl : int
@@ -169,16 +169,16 @@ class AlphaPEM:
                                    'f_EIS': f_EIS}
         self.accessible_physical_parameters = {'Aact': Aact, 'Hgdl': Hgdl, 'Hmem': Hmem, 'Hcl': Hcl, 'Hgc': Hgc,
                                                'Wgc': Wgc, 'Lgc': Lgc}
-        self.accessible_undetermined_parameters = {'epsilon_gdl': epsilon_gdl, 'tau': tau, 'epsilon_mc': epsilon_mc,
+        self.undetermined_physical_parameters = {'epsilon_gdl': epsilon_gdl, 'tau': tau, 'epsilon_mc': epsilon_mc,
                                                    'epsilon_c': epsilon_c, 'e': e, 'kappa_co': kappa_co, 'Re': Re,
                                                    'i0_c_ref': i0_c_ref, 'kappa_c': kappa_c, 'a_slim': a_slim,
-                                                   'b_slim': b_slim, 'a_switch': a_switch, 'C_dl': C_dl}
+                                                   'b_slim': b_slim, 'a_switch': a_switch, 'C_scl': C_scl}
         self.computing_parameters = {'max_step': max_step, 'n_gdl': n_gdl, 't_purge': t_purge,
                                      'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
                                      'type_auxiliary': type_auxiliary, 'type_control': type_control,
                                      'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}
         self.parameters = {**self.current_parameters, **self.accessible_physical_parameters,
-                           **self.accessible_undetermined_parameters, **self.computing_parameters}
+                           **self.undetermined_physical_parameters, **self.computing_parameters}
         if self.operating_inputs['Pa_des'] < Pext or self.operating_inputs['Pc_des'] < Pext:
             raise ValueError('The desired pressure is too low. It cannot be lower than the pressure outside the stack.')
 

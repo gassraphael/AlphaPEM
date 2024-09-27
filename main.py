@@ -72,7 +72,7 @@ if __name__ == '__main__':
             operating_inputs(type_fuel_cell_4)
     # Physical parameters
     Hcl, epsilon_mc, tau, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, Re, i0_c_ref, kappa_co, \
-        kappa_c, a_slim, b_slim, a_switch, C_dl = physical_parameters(type_fuel_cell_1)
+        kappa_c, a_slim, b_slim, a_switch, C_scl = physical_parameters(type_fuel_cell_1)
     # Computing parameters
     max_step, n_gdl, t_purge = computing_parameters(type_current, Hgdl, Hcl)
 
@@ -126,7 +126,7 @@ if __name__ == '__main__':
             Simulator1 = AlphaPEM(current_density, Tfc_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
                                   t_step, i_step, i_max_pola_1, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
                                   Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref,
-                                  kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge,
+                                  kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge,
                                   type_fuel_cell_1, type_current, type_auxiliary, type_control_1, type_purge,
                                   "no_display", type_plot, initial_variable_values, time_interval)
 
@@ -155,7 +155,7 @@ if __name__ == '__main__':
             Simulator1 = AlphaPEM(current_density, Tfc_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
                                   t_step, i_step, i_max_pola_1, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
                                   Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref,
-                                  kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge,
+                                  kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge,
                                   type_fuel_cell_1, type_current, type_auxiliary, type_control_1, type_purge,
                                   type_display, type_plot, initial_variable_values, time_interval)
 
@@ -202,27 +202,27 @@ if __name__ == '__main__':
         Simulator1 = AlphaPEM(current_density, Tfc_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, t_step,
                               i_step, i_max_pola_1, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl,
                               Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
-                              kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell_1,
+                              kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell_1,
                               type_current, type_auxiliary, type_control_1, type_purge, type_display, type_plot)
         if type_fuel_cell_2 is not None:
             Simulator2 = AlphaPEM(current_density, Tfc_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2,
                                   t_step, i_step, i_max_pola_2, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
                                   Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref,
-                                  kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge,
+                                  kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge,
                                   type_fuel_cell_2, type_current, type_auxiliary, type_control_2, type_purge,
                                   type_display, type_plot)
         if type_fuel_cell_3 is not None:
             Simulator3 = AlphaPEM(current_density, Tfc_3, Pa_des_3, Pc_des_3, Sa_3, Sc_3, Phi_a_des_3, Phi_c_des_3,
                                   t_step, i_step, i_max_pola_3, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
                                   Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref,
-                                  kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge,
+                                  kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge,
                                   type_fuel_cell_3, type_current, type_auxiliary, type_control_3, type_purge,
                                   type_display, type_plot)
         if type_fuel_cell_4 is not None:
             Simulator4 = AlphaPEM(current_density, Tfc_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4,
                                   t_step, i_step, i_max_pola_4, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
                                   Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref,
-                                  kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge,
+                                  kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge,
                                   type_fuel_cell_4, type_current, type_auxiliary, type_control_4, type_purge,
                                   type_display, type_plot)
 
