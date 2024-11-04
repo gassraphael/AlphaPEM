@@ -26,7 +26,7 @@ def current_density_parameters(type_current):
     t_step : tuple
         Time parameters for the step_current density function.
         It is a tuple containing the initial time 't0_step' in seconds, final time 'tf_step' in seconds, loading time
-        'delta_t_load_step' in seconds, and dynamic time for display 'delta_t_dyn_step' in seconds.
+        'delta_t_load_step' in seconds, and time for dynamic display 'delta_t_dyn_step' in seconds.
     i_step : tuple
         Current parameters for the step_current density function.
         It is a tuple containing the initial and final current density values 'i_ini_step' and 'i_final_step', both in
@@ -214,12 +214,12 @@ def computing_parameters(type_current, Hgdl, Hcl):
     Returns
     -------
     max_step : float
-        Maximum step for the resolution of the system of differential equations.
+        Maximum time step for the resolution of the system of differential equations.
     n_gdl : int
         Number of model nodes placed inside each GDL.
     t_purge : tuple
         Time parameters for purging the system.
-        It is a tuple containing the purge time interval 'purge_time' in seconds, and the time between two purges
+        It is a tuple containing the purge time 'purge_time' in seconds, and the time between two purges
         'delta_purge' in seconds.
     """
 

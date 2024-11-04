@@ -140,7 +140,7 @@ def determined_parameters(type_fuel_cell):
         Hgc = 5e-4  # m. It is the thickness of the gas channel.
 
         # Algorithm parameters for polarization curve generation
-        type_auxiliary = "opened_anode"
+        type_auxiliary = "closed_cathode_with_flow-through_anode"
         type_control = "no_control"
         type_purge = "no_purge"
         type_display = "multiple"
@@ -181,7 +181,7 @@ def determined_parameters(type_fuel_cell):
         Lgc = 3.0  # m. It is the length of the gas channel.
 
         # Algorithm parameters for polarization curve generation
-        type_auxiliary = "opened_anode"
+        type_auxiliary = "closed_cathode_with_flow-through_anode"
         type_control = "no_control"
         type_purge = "no_purge"
         type_display = "no_display"
@@ -217,7 +217,7 @@ def determined_parameters(type_fuel_cell):
         Lgc = 1.6  # m. It is the length of the gas channel.
 
         # Algorithm parameters for polarization curve generation
-        type_auxiliary = "closed_anode_with_recirculation"
+        type_auxiliary = "closed_cathode_with_anodic_recirculation"
         type_control = "no_control"
         type_purge = "no_purge"
         type_display = "no_display"
