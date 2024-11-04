@@ -353,18 +353,18 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].set(np.round(Lgc, 2))  # µm
     # undetermined physical parameters recovery
     choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].set(np.round(epsilon_gdl, 3))
-    choice_undetermined_parameters['Ionomer volume fraction - ε_mc']['value'].set(np.round(epsilon_mc, 3))
+    choice_undetermined_parameters['Ionomer volume fraction\n- ε_mc']['value'].set(np.round(epsilon_mc, 3))
     choice_undetermined_parameters['Tortuosity - τ']['value'].set(np.round(tau, 3))
     choice_undetermined_parameters['Compression ratio - ε_c']['value'].set(np.round(epsilon_c, 3))
     choice_undetermined_parameters['Capillary exponent - e']['value'].set(e)
-    choice_undetermined_parameters['Electron resistance - Re (µΩ.m²)']['value'].set(np.round(Re * 1e6, 2))  # µΩ.m²
+    choice_undetermined_parameters['Electron resistance\n- Re (µΩ.m²)']['value'].set(np.round(Re * 1e6, 2))  # µΩ.m²
     choice_undetermined_parameters['Reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].set(np.round(i0_c_ref, 2))  # A.m-2
-    choice_undetermined_parameters['Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))']['value'].set(np.round(kappa_co, 2))  # mol.m-1.s-1.Pa-1
+    choice_undetermined_parameters['Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))']['value'].set(np.round(kappa_co, 2))  # mol.m-1.s-1.Pa-1
     choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].set(np.round(kappa_c, 2))
     choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_slim']['value'].set(np.round(a_slim, 7))
     choice_undetermined_parameters['Limit liquid saturation\ncoefficient - b_slim']['value'].set(np.round(b_slim, 7))
     choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_switch']['value'].set(np.round(a_switch, 7))
-    choice_undetermined_parameters['Volumetric space-charge layer\ncapacitance - C_scl (F/cm³)']['value'].set(np.round(C_scl * 1e-6, 2))  # F.cm-3
+    choice_undetermined_parameters['Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)']['value'].set(np.round(C_scl * 1e-6, 2))  # F.cm-3
     # i_max_pola recovery
     choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].set(np.round(i_max_pola / 1e4, 2))  # A/cm²
 
@@ -409,34 +409,34 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     Lgc = choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].get()  # m
     # undetermined physical parameters
     epsilon_gdl = choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].get()
-    epsilon_mc = choice_undetermined_parameters['Ionomer volume fraction - ε_mc']['value'].get()
+    epsilon_mc = choice_undetermined_parameters['Ionomer volume fraction\n- ε_mc']['value'].get()
     tau = choice_undetermined_parameters['Tortuosity - τ']['value'].get()
     epsilon_c = choice_undetermined_parameters['Compression ratio - ε_c']['value'].get()
     e = choice_undetermined_parameters['Capillary exponent - e']['value'].get()
-    Re = choice_undetermined_parameters['Electron resistance - Re (µΩ.m²)']['value'].get() * 1e-6  # ohm.m²
+    Re = choice_undetermined_parameters['Electron resistance\n- Re (µΩ.m²)']['value'].get() * 1e-6  # ohm.m²
     i0_c_ref = choice_undetermined_parameters['Reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].get()  # A.m-2
-    kappa_co = choice_undetermined_parameters['Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))']['value'].get()  # mol.m-1.s-1.Pa-1
+    kappa_co = choice_undetermined_parameters['Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))']['value'].get()  # mol.m-1.s-1.Pa-1
     kappa_c = choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].get()
     a_slim = choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_slim']['value'].get()
     b_slim = choice_undetermined_parameters['Limit liquid saturation\ncoefficient - b_slim']['value'].get()
     a_switch = choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_switch']['value'].get()
-    C_scl = choice_undetermined_parameters['Volumetric space-charge layer\ncapacitance - C_scl (F/cm³)']['value'].get() * 1e6  # F.m-3
+    C_scl = choice_undetermined_parameters['Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)']['value'].get() * 1e6  # F.m-3
     # current density parameters
     t_step = (choice_current_density_parameters['Initial time - t0_step (s)']['value'].get(),
               choice_current_density_parameters['Final time - tf_step (s)']['value'].get(),
-              choice_current_density_parameters['Loading time - Δt_load_step (s)']['value'].get(),
+              choice_current_density_parameters['Loading time\n- Δt_load_step (s)']['value'].get(),
               choice_computing_parameters['Time for dynamic\ndisplay - Δt_dyn_step (s)']['value'].get())  # (s, s, s, s)
     i_step = (choice_current_density_parameters['Initial current density\n- i_ini_step (A/cm²)']['value'].get() * 1e4,
               choice_current_density_parameters['Final current density\n- i_final_step (A/cm²)']['value'].get() * 1e4)  # (A.m-2, A.m-2)
     i_max_pola = choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].get() * 1e4  # A.m-2
-    delta_pola = (choice_current_density_parameters['Loading time - Δt_load_pola (s)']['value'].get(),
-                  choice_current_density_parameters['Breaking time - Δt_break_pola (s)']['value'].get(),
+    delta_pola = (choice_current_density_parameters['Loading time\n- Δt_load_pola (s)']['value'].get(),
+                  choice_current_density_parameters['Breaking time\n- Δt_break_pola (s)']['value'].get(),
                   choice_current_density_parameters['Current density step\n- Δi_pola (A/cm²)']['value'].get() * 1e4,
                   choice_current_density_parameters['Initial breaking time\n- Δt_ini_pola (s)']['value'].get())  # (s, s, A.m-2, s)
-    i_EIS = choice_current_density_parameters['Static current - i_EIS (A/cm²)']['value'].get() * 1e4  # (A.m-2)
-    ratio_EIS = choice_current_density_parameters['Current ratio - ratio_EIS (%)']['value'].get() / 100
-    f_EIS = (choice_current_density_parameters['Power of the initial\nfrequency - f_power_min_EIS']['value'].get(),
-             choice_current_density_parameters['Power of the final\nfrequency - f_power_max_EIS']['value'].get(),
+    i_EIS = choice_current_density_parameters['Static current\n- i_EIS (A/cm²)']['value'].get() * 1e4  # (A.m-2)
+    ratio_EIS = choice_current_density_parameters['Current ratio\n- ratio_EIS (%)']['value'].get() / 100
+    f_EIS = (choice_current_density_parameters['Power of the\ninitial frequency\n- f_power_min_EIS']['value'].get(),
+             choice_current_density_parameters['Power of the\nfinal frequency\n- f_power_min_EIS']['value'].get(),
              choice_current_density_parameters['Number of frequencies\ntested - nb_f_EIS']['value'].get(),
              choice_current_density_parameters['Number of points\ncalculated - nb_points_EIS']['value'].get())
     t_EIS = EIS_parameters(f_EIS)  # Time parameters for the EIS_current density function.
@@ -572,8 +572,8 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
         return
     if choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].get() < 0 or \
             choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].get() > 1 or \
-            choice_undetermined_parameters['Ionomer volume fraction - ε_mc']['value'].get() < 0 or \
-            choice_undetermined_parameters['Ionomer volume fraction - ε_mc']['value'].get() > 1:
+            choice_undetermined_parameters['Ionomer volume fraction\n- ε_mc']['value'].get() < 0 or \
+            choice_undetermined_parameters['Ionomer volume fraction\n- ε_mc']['value'].get() > 1:
         messagebox.showerror(title='Porosities', message='All porosities should be between 0 and 1.')
         choices.clear()
         return
@@ -592,8 +592,8 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
                                                                  'being an integer.')
         choices.clear()
         return
-    if choice_undetermined_parameters['Electron resistance - Re (µΩ.m²)']['value'].get() < 0.5 or \
-            choice_undetermined_parameters['Electron resistance - Re (µΩ.m²)']['value'].get() > 5:
+    if choice_undetermined_parameters['Electron resistance\n- Re (µΩ.m²)']['value'].get() < 0.5 or \
+            choice_undetermined_parameters['Electron resistance\n- Re (µΩ.m²)']['value'].get() > 5:
         messagebox.showerror(title='Electron conduction resistance', message='The electron conduction resistance is '
                                                                              'generally between 0.5 and 5 µΩ.m².')
         choices.clear()
@@ -605,8 +605,8 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
                                                                                   'and 500 A.m-2.')
         choices.clear()
         return
-    if choice_undetermined_parameters['Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))']['value'].get() < 0.01 or \
-            choice_undetermined_parameters['Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))']['value'].get() > 100:
+    if choice_undetermined_parameters['Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))']['value'].get() < 0.01 or \
+            choice_undetermined_parameters['Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))']['value'].get() > 100:
         messagebox.showerror(title='Crossover correction coefficient', message='The crossover correction coefficient is'
                                                                                ' generally between 0.01 and 100 '
                                                                                'mol.m-1.s-1.Pa-1.')
@@ -636,21 +636,21 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
                                                                       ' 0 and 1.')
         choices.clear()
         return
-    if choice_undetermined_parameters['Volumetric space-charge layer\ncapacitance - C_scl (F/cm³)']['value'].get() < 5 or \
-            choice_undetermined_parameters['Volumetric space-charge layer\ncapacitance - C_scl (F/cm³)']['value'].get() > 100:
+    if choice_undetermined_parameters['Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)']['value'].get() < 5 or \
+            choice_undetermined_parameters['Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)']['value'].get() > 100:
         messagebox.showerror(title='Double layer capacitance', message='I have not settled yet a range for C_scl.')
         choices.clear()
         return
     if choice_current_density_parameters['Initial time - t0_step (s)']['value'].get() < 0 or \
             choice_current_density_parameters['Final time - tf_step (s)']['value'].get() < 0 or \
-            choice_current_density_parameters['Loading time - Δt_load_step (s)']['value'].get() < 0 or \
+            choice_current_density_parameters['Loading time\n- Δt_load_step (s)']['value'].get() < 0 or \
             choice_computing_parameters['Time for dynamic\ndisplay - Δt_dyn_step (s)']['value'].get() < 0 or \
-            choice_current_density_parameters['Loading time - Δt_load_pola (s)']['value'].get() < 0 or \
-            choice_current_density_parameters['Breaking time - Δt_break_pola (s)']['value'].get() < 0 or \
+            choice_current_density_parameters['Loading time\n- Δt_load_pola (s)']['value'].get() < 0 or \
+            choice_current_density_parameters['Breaking time\n- Δt_break_pola (s)']['value'].get() < 0 or \
             choice_current_density_parameters['Initial breaking time\n- Δt_ini_pola (s)']['value'].get() < 0 or \
             choice_current_density_parameters['Initial time - t0_step (s)']['value'].get() > \
             choice_current_density_parameters['Final time - tf_step (s)']['value'].get() or \
-            choice_current_density_parameters['Loading time - Δt_load_step (s)']['value'].get() > \
+            choice_current_density_parameters['Loading time\n- Δt_load_step (s)']['value'].get() > \
             (choice_current_density_parameters['Final time - tf_step (s)']['value'].get() -
              choice_current_density_parameters['Initial time - t0_step (s)']['value'].get()):
         messagebox.showerror(title='Times', message='The times should be positive, t0_step < tf_step and '
@@ -661,7 +661,7 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
             choice_current_density_parameters['Final current density\n- i_final_step (A/cm²)']['value'].get() < 0 or \
             choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].get() < 0 or \
             choice_current_density_parameters['Current density step\n- Δi_pola (A/cm²)']['value'].get() < 0 or \
-            choice_current_density_parameters['Static current - i_EIS (A/cm²)']['value'].get() < 0 or \
+            choice_current_density_parameters['Static current\n- i_EIS (A/cm²)']['value'].get() < 0 or \
             choice_current_density_parameters['Current density step\n- Δi_pola (A/cm²)']['value'].get() > \
             choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].get() or \
             choice_current_density_parameters['Initial current density\n- i_ini_step (A/cm²)']['value'].get() > \
@@ -671,8 +671,8 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
                                                                 'i_ini_step < i_final_step.')
         choices.clear()
         return
-    if choice_current_density_parameters['Current ratio - ratio_EIS (%)']['value'].get() < 0 or \
-            choice_current_density_parameters['Current ratio - ratio_EIS (%)']['value'].get() > 20:
+    if choice_current_density_parameters['Current ratio\n- ratio_EIS (%)']['value'].get() < 0 or \
+            choice_current_density_parameters['Current ratio\n- ratio_EIS (%)']['value'].get() > 20:
         messagebox.showerror(title='Ratio EIS', message='Ratio EIS is a percentage of i_EIS and should be between 0 '
                                                         'and 20 for plotting correct EIS.')
         choices.clear()
@@ -680,8 +680,8 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
 
     if choice_current_density_parameters['Number of frequencies\ntested - nb_f_EIS']['value'].get() < 0 or \
             choice_current_density_parameters['Number of points\ncalculated - nb_points_EIS']['value'].get() < 0 or \
-            type(choice_current_density_parameters['Power of the initial\nfrequency - f_power_min_EIS']['value'].get()) != int or \
-            type(choice_current_density_parameters['Power of the final\nfrequency - f_power_max_EIS']['value'].get()) != int or \
+            type(choice_current_density_parameters['Power of the\ninitial frequency\n- f_power_min_EIS']['value'].get()) != int or \
+            type(choice_current_density_parameters['Power of the\nfinal frequency\n- f_power_min_EIS']['value'].get()) != int or \
             type(choice_current_density_parameters['Number of frequencies\ntested - nb_f_EIS']['value'].get()) != int or \
             type(choice_current_density_parameters['Number of points\ncalculated - nb_points_EIS']['value'].get()) != int:
         messagebox.showerror(title='f EIS', message='f_EIS parameters should be integer and number of points should '

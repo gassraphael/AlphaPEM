@@ -32,7 +32,6 @@ def create_application():
     root = ThemedTk(theme="arc")
     root.configure(background='#f5f6f7')
     root.title("AlphaPEM")
-    root.geometry("770x750") # Set default size of the window
 
     # Create a canvas and add a scrollbar to it
     canvas = tk.Canvas(root)
@@ -44,8 +43,9 @@ def create_application():
     main_frame(frame, canvas)
     canvas.create_window((0,0), window=frame, anchor='nw') # Add the frame to the canvas
 
-    # Adjust the scrollable region to the size of the canvas content
+    # Adjust the main window and canvas size
     frame.update_idletasks()
+    root.geometry(f"{frame.winfo_width()}x{frame.winfo_height()}")
     canvas.configure(scrollregion=canvas.bbox('all'))
     canvas.pack(fill='both', expand=True, side='left') # Organize the widgets
     scrollbar.pack(fill='y', side='right')
@@ -123,15 +123,15 @@ def main_frame(root, canvas):
 
     choice_undetermined_parameters = \
         {'GDL porosity - ε_gdl': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.6), 'label_row': 0, 'label_column': 1},
-         'Ionomer volume fraction - ε_mc': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.25), 'label_row': 0, 'label_column': 3},
+         'Ionomer volume fraction\n- ε_mc': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.25), 'label_row': 0, 'label_column': 3},
          'Tortuosity - τ': {'value': tk.DoubleVar(undetermined_parameters_frame, 1.5), 'label_row': 0, 'label_column': 5},
          'Compression ratio - ε_c': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.2), 'label_row': 1, 'label_column': 1},
          'Capillary exponent - e': {'value': tk.IntVar(undetermined_parameters_frame, 4), 'label_row': 1, 'label_column': 3},
-         'Electron resistance - Re (µΩ.m²)': {'value': tk.DoubleVar(undetermined_parameters_frame, 1.0), 'label_row': 1,
+         'Electron resistance\n- Re (µΩ.m²)': {'value': tk.DoubleVar(undetermined_parameters_frame, 1.0), 'label_row': 1,
                         'label_column': 5},
-         'Reference exchange current\ndensity - i0_c_ref (A/m²)': {'value': tk.DoubleVar(undetermined_parameters_frame, 3.0), 'label_row': 2,
+         'Reference exchange\ncurrent density\n- i0_c_ref (A/m²)': {'value': tk.DoubleVar(undetermined_parameters_frame, 3.0), 'label_row': 2,
                              'label_column': 1},
-         'Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))': {'value': tk.DoubleVar(undetermined_parameters_frame, 1.0), 'label_row': 2,
+         'Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))': {'value': tk.DoubleVar(undetermined_parameters_frame, 1.0), 'label_row': 2,
                                  'label_column': 3},
          'Overpotential correction\nexponent - κ_c': {'value': tk.DoubleVar(undetermined_parameters_frame, 2.0), 'label_row': 2, 'label_column': 5},
          'Limit liquid saturation\ncoefficient - a_slim': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.05), 'label_row': 3,
@@ -140,7 +140,7 @@ def main_frame(root, canvas):
                     'label_column': 3},
          'Limit liquid saturation\ncoefficient - a_switch': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.7), 'label_row': 3,
                       'label_column': 5},
-         'Volumetric space-charge layer\ncapacitance - C_scl (F/cm³)': {'value': tk.DoubleVar(undetermined_parameters_frame, 20), 'label_row': 4,
+         'Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)': {'value': tk.DoubleVar(undetermined_parameters_frame, 20), 'label_row': 4,
                           'label_column': 1}}
 
     choice_current_density_parameters = \
@@ -148,15 +148,15 @@ def main_frame(root, canvas):
                          'label_column': 1},
          'Final time - tf_step (s)': {'value': tk.DoubleVar(current_density_parameters_frame, 1000), 'label_row': 0,
                          'label_column': 3},
-         'Loading time - Δt_load_step (s)': {'value': tk.DoubleVar(current_density_parameters_frame, 50), 'label_row': 0,
+         'Loading time\n- Δt_load_step (s)': {'value': tk.DoubleVar(current_density_parameters_frame, 50), 'label_row': 0,
                               'label_column': 5},
          'Initial current density\n- i_ini_step (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, 0.5), 'label_row': 1,
                                 'label_column': 1},
          'Final current density\n- i_final_step (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, 1.5), 'label_row': 1,
                                   'label_column': 3},
-         'Loading time - Δt_load_pola (s)': {'value': tk.DoubleVar(current_density_parameters_frame, 30), 'label_row': 2,
+         'Loading time\n- Δt_load_pola (s)': {'value': tk.DoubleVar(current_density_parameters_frame, 30), 'label_row': 2,
                               'label_column': 1},
-         'Breaking time - Δt_break_pola (s)': {'value': tk.DoubleVar(current_density_parameters_frame, 30), 'label_row': 2,
+         'Breaking time\n- Δt_break_pola (s)': {'value': tk.DoubleVar(current_density_parameters_frame, 30), 'label_row': 2,
                                'label_column': 3},
          'Initial breaking time\n- Δt_ini_pola (s)': {'value': tk.DoubleVar(current_density_parameters_frame, 60), 'label_row': 2,
                              'label_column': 5},
@@ -164,15 +164,15 @@ def main_frame(root, canvas):
                                 'label_column': 1},
          'Current density step\n- Δi_pola (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, 0.1), 'label_row': 3,
                              'label_column': 3},
-         'Static current - i_EIS (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, 0.5), 'label_row': 4,
+         'Static current\n- i_EIS (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, 0.5), 'label_row': 4,
                            'label_column': 1},
-         'Current ratio - ratio_EIS (%)': {'value': tk.DoubleVar(current_density_parameters_frame, 5), 'label_row': 4,
+         'Current ratio\n- ratio_EIS (%)': {'value': tk.DoubleVar(current_density_parameters_frame, 5), 'label_row': 4,
                            'label_column': 3},
          'Number of points\ncalculated - nb_points_EIS': {'value': tk.IntVar(current_density_parameters_frame, 50), 'label_row': 4,
                            'label_column': 5},
-         'Power of the initial\nfrequency - f_power_min_EIS': {'value': tk.IntVar(current_density_parameters_frame, -3), 'label_row': 5,
+         'Power of the\ninitial frequency\n- f_power_min_EIS': {'value': tk.IntVar(current_density_parameters_frame, -3), 'label_row': 5,
                              'label_column': 1},
-         'Power of the final\nfrequency - f_power_max_EIS': {'value': tk.IntVar(current_density_parameters_frame, 5), 'label_row': 5,
+         'Power of the\nfinal frequency\n- f_power_max_EIS': {'value': tk.IntVar(current_density_parameters_frame, 5), 'label_row': 5,
                              'label_column': 3},
          'Number of frequencies\ntested - nb_f_EIS': {'value': tk.IntVar(current_density_parameters_frame, 60), 'label_row': 5,
                       'label_column': 5}}
