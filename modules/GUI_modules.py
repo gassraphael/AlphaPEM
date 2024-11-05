@@ -358,7 +358,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_undetermined_parameters['Compression ratio - ε_c']['value'].set(np.round(epsilon_c, 3))
     choice_undetermined_parameters['Capillary exponent - e']['value'].set(e)
     choice_undetermined_parameters['Electron resistance\n- Re (µΩ.m²)']['value'].set(np.round(Re * 1e6, 2))  # µΩ.m²
-    choice_undetermined_parameters['Reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].set(np.round(i0_c_ref, 2))  # A.m-2
+    choice_undetermined_parameters['Reference exchange\ncurrent density\n- i0_c_ref (A/m²)']['value'].set(np.round(i0_c_ref, 2))  # A.m-2
     choice_undetermined_parameters['Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))']['value'].set(np.round(kappa_co, 2))  # mol.m-1.s-1.Pa-1
     choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].set(np.round(kappa_c, 2))
     choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_slim']['value'].set(np.round(a_slim, 7))
@@ -414,7 +414,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     epsilon_c = choice_undetermined_parameters['Compression ratio - ε_c']['value'].get()
     e = choice_undetermined_parameters['Capillary exponent - e']['value'].get()
     Re = choice_undetermined_parameters['Electron resistance\n- Re (µΩ.m²)']['value'].get() * 1e-6  # ohm.m²
-    i0_c_ref = choice_undetermined_parameters['Reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].get()  # A.m-2
+    i0_c_ref = choice_undetermined_parameters['Reference exchange\ncurrent density\n- i0_c_ref (A/m²)']['value'].get()  # A.m-2
     kappa_co = choice_undetermined_parameters['Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))']['value'].get()  # mol.m-1.s-1.Pa-1
     kappa_c = choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].get()
     a_slim = choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_slim']['value'].get()
@@ -436,7 +436,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     i_EIS = choice_current_density_parameters['Static current\n- i_EIS (A/cm²)']['value'].get() * 1e4  # (A.m-2)
     ratio_EIS = choice_current_density_parameters['Current ratio\n- ratio_EIS (%)']['value'].get() / 100
     f_EIS = (choice_current_density_parameters['Power of the\ninitial frequency\n- f_power_min_EIS']['value'].get(),
-             choice_current_density_parameters['Power of the\nfinal frequency\n- f_power_min_EIS']['value'].get(),
+             choice_current_density_parameters['Power of the\nfinal frequency\n- f_power_max_EIS']['value'].get(),
              choice_current_density_parameters['Number of frequencies\ntested - nb_f_EIS']['value'].get(),
              choice_current_density_parameters['Number of points\ncalculated - nb_points_EIS']['value'].get())
     t_EIS = EIS_parameters(f_EIS)  # Time parameters for the EIS_current density function.
@@ -598,8 +598,8 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
                                                                              'generally between 0.5 and 5 µΩ.m².')
         choices.clear()
         return
-    if choice_undetermined_parameters['Reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].get() < 0.001 or \
-            choice_undetermined_parameters['Reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].get() > 500:
+    if choice_undetermined_parameters['Reference exchange\ncurrent density\n- i0_c_ref (A/m²)']['value'].get() < 0.001 or \
+            choice_undetermined_parameters['Reference exchange\ncurrent density\n- i0_c_ref (A/m²)']['value'].get() > 500:
         messagebox.showerror(title='Referenced exchange current density', message='The referenced exchange current '
                                                                                   'density is generally between 0.001 '
                                                                                   'and 500 A.m-2.')
@@ -681,7 +681,7 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
     if choice_current_density_parameters['Number of frequencies\ntested - nb_f_EIS']['value'].get() < 0 or \
             choice_current_density_parameters['Number of points\ncalculated - nb_points_EIS']['value'].get() < 0 or \
             type(choice_current_density_parameters['Power of the\ninitial frequency\n- f_power_min_EIS']['value'].get()) != int or \
-            type(choice_current_density_parameters['Power of the\nfinal frequency\n- f_power_min_EIS']['value'].get()) != int or \
+            type(choice_current_density_parameters['Power of the\nfinal frequency\n- f_power_max_EIS']['value'].get()) != int or \
             type(choice_current_density_parameters['Number of frequencies\ntested - nb_f_EIS']['value'].get()) != int or \
             type(choice_current_density_parameters['Number of points\ncalculated - nb_points_EIS']['value'].get()) != int:
         messagebox.showerror(title='f EIS', message='f_EIS parameters should be integer and number of points should '
