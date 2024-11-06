@@ -702,9 +702,10 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
         choices.clear()
         return
 
-    if choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].get() < 5 or \
+    if choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].get() < 2 or \
             type(choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].get()) != int:
-        messagebox.showerror(title='n gdl', message='The n_gdl value should be an integer bigger than 5.')
+        messagebox.showerror(title='n gdl', message='The n_gdl value should be an integer bigger than 2. '
+                                                    'A good compromise is 10.')
         choices.clear()
         return
 
