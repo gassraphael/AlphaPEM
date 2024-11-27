@@ -140,7 +140,7 @@ def determined_parameters(type_fuel_cell):
         Hgc = 5e-4  # m. It is the thickness of the gas channel.
 
         # Algorithm parameters for polarization curve generation
-        type_auxiliary = "closed_cathode_with_flow-through_anode"
+        type_auxiliary = "forced-convective_cathode_with_flow-through_anode"
         type_control = "no_control"
         type_purge = "no_purge"
         type_display = "multiple"
@@ -150,47 +150,6 @@ def determined_parameters(type_fuel_cell):
         t_step = np.nan, np.nan, np.nan, np.nan  # It is the time parameters for the step_current density function.
         i_step = np.nan, np.nan  # It is the current parameters for the step_current density function.
         delta_pola = 30, 30, 0.1e4, 1 * 60  # It is the parameters for the polarization curve.
-        i_EIS, ratio_EIS = np.nan, np.nan  # (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.
-        f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
-        t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
-        max_step = 0.05  # It is good enough for having graphs without instabilities.
-        n_gdl = int(Hgdl / Hcl / 2)  # It is the number of model points placed inside each GDL.
-
-    elif type_fuel_cell == "BX_1.0" or type_fuel_cell == "BX_1.35":
-        # Given values by the author
-        #       Operating inputs
-        Tfc = 80 + 273.15  # K. It is the temperature of the fuel cell.
-        Sa, Sc = 1.5, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
-        if type_fuel_cell == "BX_1.0":
-            Pa_des, Pc_des = 1.0 * 101325, 1.0 * 101325  # Pa. It is the desired pressures of the fuel gasS.
-            Phi_a_des, Phi_c_des = 0.25, 0.25  # It is the desired relative humidity.
-            i_pola = 2.1e4
-        else:  # type_fuel_cell == "BX_1.35":
-            Pa_des, Pc_des = 1.35 * 101325, 1.35 * 101325  # Pa. It is the desired pressures of the fuel gas.
-            Phi_a_des, Phi_c_des = 1.0, 0.5  # It is the desired relative humidity.
-            i_pola = 1.6e4
-        #       Fuel cell physical parameters
-        Aact = 0.005  # m². It is the active area of the catalyst layer.
-        Hmem = 1e-5  # m. It is the thickness of the membrane.
-        Hcl = 1e-5  # m. It is the thickness of the anode or cathode catalyst layer.
-        Hgdl = 2e-4  # m. It is the thickness of the gas diffusion layer.
-        Hgc = 5e-4  # m. It is the thickness of the gas channel.
-        Wgc = 8e-4  # m. It is the width of the gas channel.
-
-        # Extrapolated physical parameters
-        Lgc = 3.0  # m. It is the length of the gas channel.
-
-        # Algorithm parameters for polarization curve generation
-        type_auxiliary = "closed_cathode_with_flow-through_anode"
-        type_control = "no_control"
-        type_purge = "no_purge"
-        type_display = "no_display"
-        type_plot = "final"
-        type_current = "polarization"
-        current_density = polarization_current
-        t_step = np.nan  # It is the time parameters for the step_current density function.
-        i_step = np.nan, np.nan  # It is the current parameters for the step_current density function.
-        delta_pola = 30, 30, 0.1e4, 60 * 60  # It is the parameters for the polarization curve.
         i_EIS, ratio_EIS = np.nan, np.nan  # (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.
         f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
         t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
@@ -217,7 +176,7 @@ def determined_parameters(type_fuel_cell):
         Lgc = 1.6  # m. It is the length of the gas channel.
 
         # Algorithm parameters for polarization curve generation
-        type_auxiliary = "closed_cathode_with_anodic_recirculation"
+        type_auxiliary = "forced-convective_cathode_with_anodic_recirculation"
         type_control = "no_control"
         type_purge = "no_purge"
         type_display = "no_display"

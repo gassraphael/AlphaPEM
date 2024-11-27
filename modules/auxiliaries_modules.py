@@ -110,7 +110,8 @@ def auxiliaries_int_values(t, solver_variables, operating_inputs, parameters):
     i_n = i_H2 + i_O2
 
     # Physical quantities in the auxiliary system
-    if parameters["type_auxiliary"] == "closed_cathode_with_anodic_recirculation" or parameters["type_auxiliary"] == "closed_cathode_with_flow-through_anode":
+    if parameters["type_auxiliary"] == "forced-convective_cathode_with_anodic_recirculation" or \
+       parameters["type_auxiliary"] == "forced-convective_cathode_with_flow-through_anode":
         # Pressure ratios
         Pr_aem = (Pext / Paem)
         Pr_cem = (Pext / Pcem)

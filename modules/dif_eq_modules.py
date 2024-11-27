@@ -83,7 +83,8 @@ def dif_eq_int_values(solver_variables, control_variables, operating_inputs, par
     i_n = i_H2 + i_O2
 
     # Physical quantities inside the auxiliary system
-    if parameters["type_auxiliary"] == "closed_cathode_with_anodic_recirculation" or parameters["type_auxiliary"] == "closed_cathode_with_flow-through_anode":
+    if parameters["type_auxiliary"] == "forced-convective_cathode_with_anodic_recirculation" or \
+       parameters["type_auxiliary"] == "forced-convective_cathode_with_flow-through_anode":
         # Pressure
         Pp = Pasm
         # Humidities
@@ -146,7 +147,8 @@ def desired_flows(solver_variables, control_variables, i_n, i_fc, operating_inpu
     Phi_a_des, Phi_c_des = control_variables['Phi_a_des'], control_variables['Phi_c_des']
     Aact, type_auxiliary = parameters['Aact'], parameters['type_auxiliary']
 
-    if type_auxiliary == "closed_cathode_with_anodic_recirculation" or type_auxiliary == "closed_cathode_with_flow-through_anode":
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
+       type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         # Intermediate values
         Prd = Pasm
         Pcp = Pcsm

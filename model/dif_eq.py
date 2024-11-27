@@ -460,12 +460,12 @@ def calculate_dyn_manifold_pressure_and_humidity_evolution(dif_eq, Masm, Maem, M
     """
 
     # Pressure evolution inside the manifolds
-    if type_auxiliary == "closed_cathode_with_anodic_recirculation":
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
         dif_eq['dPasm / dt'] = (Wasm_in + Ware - n_cell * Wasm_out) / (Vsm * Masm) * R * Tfc
         dif_eq['dPaem / dt'] = (n_cell * Waem_in - Ware - Waem_out) / (Vem * Maem) * R * Tfc
         dif_eq['dPcsm / dt'] = (Wcsm_in - n_cell * Wcsm_out) / (Vsm * Mcsm) * R * Tfc
         dif_eq['dPcem / dt'] = (n_cell * Wcem_in - Wcem_out) / (Vem * Mcem) * R * Tfc
-    elif type_auxiliary == "closed_cathode_with_flow-through_anode":
+    elif type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         dif_eq['dPasm / dt'] = (Wasm_in - n_cell * Wasm_out) / (Vsm * Masm) * R * Tfc
         dif_eq['dPaem / dt'] = (n_cell * Waem_in - Waem_out) / (Vem * Maem) * R * Tfc
         dif_eq['dPcsm / dt'] = (Wcsm_in - n_cell * Wcsm_out) / (Vsm * Mcsm) * R * Tfc
@@ -474,12 +474,12 @@ def calculate_dyn_manifold_pressure_and_humidity_evolution(dif_eq, Masm, Maem, M
         dif_eq['dPasm / dt'], dif_eq['dPaem / dt'], dif_eq['dPcsm / dt'], dif_eq['dPcem / dt'] = 0, 0, 0, 0
 
     # Humidity evolution inside the manifolds
-    if type_auxiliary == "closed_cathode_with_anodic_recirculation":
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
         dif_eq['dPhi_asm / dt'] = (Wv_asm_in - Jv_a_in * Hgc * Wgc * n_cell) / Vsm * R * Tfc / Psat(Tfc)
         dif_eq['dPhi_aem / dt'] = (Jv_a_out * Hgc * Wgc * n_cell - Wv_asm_in - Wv_aem_out) / Vem * R * Tfc / Psat(Tfc)
         dif_eq['dPhi_csm / dt'] = (Wv_csm_in - Jv_c_in * Hgc * Wgc * n_cell) / Vsm * R * Tfc / Psat(Tfc)
         dif_eq['dPhi_cem / dt'] = (Jv_c_out * Hgc * Wgc * n_cell - Wv_cem_out) / Vem * R * Tfc / Psat(Tfc)
-    elif type_auxiliary == "closed_cathode_with_flow-through_anode":
+    elif type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         dif_eq['dPhi_asm / dt'] = (Wv_asm_in - Jv_a_in * Hgc * Wgc * n_cell) / Vsm * R * Tfc / Psat(Tfc)
         dif_eq['dPhi_aem / dt'] = (Jv_a_out * Hgc * Wgc * n_cell - Wv_aem_out) / Vem * R * Tfc / Psat(Tfc)
         dif_eq['dPhi_csm / dt'] = (Wv_csm_in - Jv_c_in * Hgc * Wgc * n_cell) / Vsm * R * Tfc / Psat(Tfc)
@@ -513,18 +513,18 @@ def calculate_dyn_air_compressor_and_humidifier_evolution(dif_eq, Wcp_des, Wa_in
     """
 
     # Air compressor evolution
-    if type_auxiliary == "closed_cathode_with_anodic_recirculation":
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
         dif_eq['dWcp / dt'] = (Wcp_des - Wcp) / tau_cp  # Estimation at the first order.
-    elif type_auxiliary == "closed_cathode_with_flow-through_anode":
+    elif type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         dif_eq['dWcp / dt'] = (Wcp_des - Wcp) / tau_cp  # Estimation at the first order.
     else:  # elif type_auxiliary == "no_auxiliary":
         dif_eq['dWcp / dt'] = 0
 
     # Anode and cathode humidifiers evolution
-    if type_auxiliary == "closed_cathode_with_anodic_recirculation":
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
         dif_eq['dWa_inj / dt'] = 0
         dif_eq['dWc_inj / dt'] = (Wc_inj_des - Wc_inj) / tau_hum  # Estimation at the first order.
-    elif type_auxiliary == "closed_cathode_with_flow-through_anode":
+    elif type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         dif_eq['dWa_inj / dt'] = (Wa_inj_des - Wa_inj) / tau_hum  # Estimation at the first order.
         dif_eq['dWc_inj / dt'] = (Wc_inj_des - Wc_inj) / tau_hum  # Estimation at the first order.
     else:  # elif type_auxiliary == "no_auxiliary":
@@ -563,17 +563,19 @@ def calculate_dyn_throttle_area_evolution(dif_eq, Pagc, Pcgc, type_auxiliary, Ab
     dPcgcdt = (dif_eq['dC_v_cgc / dt'] + dif_eq['dC_O2_cgc / dt'] + dif_eq['dC_N2 / dt']) * R * Tfc
 
     # Throttle area evolution inside the anode auxiliaries
-    if type_auxiliary == "closed_cathode_with_flow-through_anode":
+    if type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         dif_eq['dAbp_a / dt'] = - Kp * (Pa_des - Pagc) + Kd * dPagcdt  # PD controller
         if Abp_a > A_T and dif_eq['dAbp_a / dt'] > 0:  # The throttle area cannot be higher than the maximum value
             dif_eq['dAbp_a / dt'] = 0
         elif Abp_a < 0 and dif_eq['dAbp_a / dt'] < 0:  # The throttle area cannot be lower than 0
             dif_eq['dAbp_a / dt'] = 0
-    else:  # elif type_auxiliary == "closed_cathode_with_anodic_recirculation" or type_auxiliary == "no_auxiliary":
+    else:  # elif type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
+           #      type_auxiliary == "no_auxiliary":
         dif_eq['dAbp_a / dt'] = 0  # The throttle area is not considered
 
     # Throttle area evolution inside the cathode auxiliaries
-    if type_auxiliary == "closed_cathode_with_anodic_recirculation" or type_auxiliary == "closed_cathode_with_flow-through_anode":
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
+       type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         dif_eq['dAbp_c / dt'] = - Kp * (Pc_des - Pcgc) + Kd * dPcgcdt  # PD controller
         if Abp_c > A_T and dif_eq['dAbp_c / dt'] > 0:  # The throttle area cannot be higher than the maximum value
             dif_eq['dAbp_c / dt'] = 0
