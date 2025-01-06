@@ -148,6 +148,11 @@
 
 
 
+
+
+
+
+
   <div class="doc doc-children">
 
 
@@ -781,10 +786,10 @@ plot style, etc.</p>
     ttk.Radiobutton(model_possibilities_frame, text='No auxiliaries', value=0,
                     variable=choices_buttons['type_auxiliary']['value']). \
         grid(row=choices_buttons['type_auxiliary']['label_row'], column=2, sticky="w")
-    ttk.Radiobutton(model_possibilities_frame, text='Closed anode\nwith recirculation', value=1,
+    ttk.Radiobutton(model_possibilities_frame, text='Forced-convective cathode\nwith anodic recirculation', value=1,
                     variable=choices_buttons['type_auxiliary']['value']). \
         grid(row=choices_buttons['type_auxiliary']['label_row'], column=3, sticky="w")
-    ttk.Radiobutton(model_possibilities_frame, text='Opened anode', value=2,
+    ttk.Radiobutton(model_possibilities_frame, text='Forced-convective cathode\nwith flow-through anode', value=2,
                     variable=choices_buttons['type_auxiliary']['value']). \
         grid(row=choices_buttons['type_auxiliary']['label_row'], column=4, sticky="w")
 
@@ -842,7 +847,7 @@ plot style, etc.</p>
 
 
 <h2 id="modules.GUI_modules.launch_AlphaPEM_for_EIS_current" class="doc doc-heading">
-            <code class="highlight language-python">launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge, type_display, type_plot)</code>
+            <code class="highlight language-python">launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge, type_display, type_plot)</code>
 
 </h2>
 
@@ -1158,11 +1163,11 @@ number of frequencies tested 'nb_f_EIS' and the number of points calculated per 
               </div>
             </li>
             <li>
-              <b><code>C_dl</code></b>
+              <b><code>C_scl</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Volumetric double layer capacitance in F.m-3 (undetermined physical parameter).</p>
+                <p>Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).</p>
               </div>
             </li>
             <li>
@@ -1256,7 +1261,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
               <pre class="highlight"><code class="language-python">def launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                                     i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
                                     Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
-                                    kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell,
+                                    kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell,
                                     type_current, type_auxiliary, type_control, type_purge, type_display, type_plot):
     """Launch the AlphaPEM simulator for an EIS current density and display the results.
 
@@ -1347,8 +1352,8 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
     a_switch : float
         One of the limit liquid saturation coefficients: the slop of s_switch function
         (undetermined physical parameter).
-    C_dl : float
-        Volumetric double layer capacitance in F.m-3 (undetermined physical parameter).
+    C_scl : float
+        Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
     max_step : float
         Maximum time step for the solver (computing parameter).
     n_gdl : int
@@ -1390,7 +1395,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
     Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                          i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
                          Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
-                         b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
+                         b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
                          type_auxiliary, type_control, type_purge, type_display, type_plot,
                          initial_variable_values, time_interval)
 
@@ -1414,7 +1419,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
         Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                              i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
                              Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
-                             kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell,
+                             kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell,
                              type_current, type_auxiliary, type_control, type_purge, type_display, type_plot,
                              initial_variable_values, time_interval)
 
@@ -1449,7 +1454,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 
 
 <h2 id="modules.GUI_modules.launch_AlphaPEM_for_polarization_current" class="doc doc-heading">
-            <code class="highlight language-python">launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge, type_display, type_plot)</code>
+            <code class="highlight language-python">launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge, type_display, type_plot)</code>
 
 </h2>
 
@@ -1765,11 +1770,11 @@ number of frequencies tested 'nb_f_EIS' and the number of points calculated per 
               </div>
             </li>
             <li>
-              <b><code>C_dl</code></b>
+              <b><code>C_scl</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Volumetric double layer capacitance in F.m-3 (undetermined physical parameter).</p>
+                <p>Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).</p>
               </div>
             </li>
             <li>
@@ -1863,7 +1868,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
               <pre class="highlight"><code class="language-python">def launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step,
                                              i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
                                              Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re,
-                                             i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step,
+                                             i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step,
                                              n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
                                              type_purge, type_display, type_plot):
     """Launch the AlphaPEM simulator for a polarization current density and display the results.
@@ -1955,8 +1960,8 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
     a_switch : float
         One of the limit liquid saturation coefficients: the slop of s_switch function
         (undetermined physical parameter).
-    C_dl : float
-        Volumetric double layer capacitance in F.m-3 (undetermined physical parameter).
+    C_scl : float
+        Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
     max_step : float
         Maximum time step for the solver (computing parameter).
     n_gdl : int
@@ -2000,7 +2005,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
             Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                                  i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
                                  Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c,
-                                 a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
+                                 a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
                                  type_auxiliary, type_control, type_purge, type_display, type_plot,
                                  initial_variable_values, time_interval)
 
@@ -2024,7 +2029,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
         Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                              i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
                              Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
-                             b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
+                             b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
                              type_auxiliary, type_control, type_purge, type_display, type_plot)
         # Display
         if type_display != "no_display":
@@ -2041,7 +2046,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 
 
 <h2 id="modules.GUI_modules.launch_AlphaPEM_for_step_current" class="doc doc-heading">
-            <code class="highlight language-python">launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge, type_display, type_plot)</code>
+            <code class="highlight language-python">launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge, type_display, type_plot)</code>
 
 </h2>
 
@@ -2357,11 +2362,11 @@ number of frequencies tested 'nb_f_EIS' and the number of points calculated per 
               </div>
             </li>
             <li>
-              <b><code>C_dl</code></b>
+              <b><code>C_scl</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Volumetric double layer capacitance in F.m-3 (undetermined physical parameter).</p>
+                <p>Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).</p>
               </div>
             </li>
             <li>
@@ -2455,7 +2460,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
               <pre class="highlight"><code class="language-python">def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                                      i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
                                      Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
-                                     kappa_c, a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell,
+                                     kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell,
                                      type_current, type_auxiliary, type_control, type_purge, type_display, type_plot):
     """Launch the AlphaPEM simulator for a step current density and display the results.
 
@@ -2546,8 +2551,8 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
     a_switch : float
         One of the limit liquid saturation coefficients: the slop of s_switch function
         (undetermined physical parameter).
-    C_dl : float
-        Volumetric double layer capacitance in F.m-3 (undetermined physical parameter).
+    C_scl : float
+        Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
     max_step : float
         Maximum time step for the solver (computing parameter).
     n_gdl : int
@@ -2588,7 +2593,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
             Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                                  i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
                                  Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c,
-                                 a_slim, b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
+                                 a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
                                  type_auxiliary, type_control, type_purge, type_display, type_plot,
                                  initial_variable_values, time_interval)
 
@@ -2612,7 +2617,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
         Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                              i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
                              Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
-                             b_slim, a_switch, C_dl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
+                             b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
                              type_auxiliary, type_control, type_purge, type_display, type_plot)
         # Display
         if type_display != "no_display":
@@ -2743,41 +2748,41 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
     Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
     Hcl, epsilon_mc, tau, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, Re, i0_c_ref, kappa_co, kappa_c, \
-        a_slim, b_slim, a_switch, C_dl = \
+        a_slim, b_slim, a_switch, C_scl = \
         stored_physical_parameters(type_fuel_cell)
 
     # operating conditions recovery
-    choice_operating_conditions['Tfc (°C)']['value'].set(np.round(Tfc - 273.15))  # °C
-    choice_operating_conditions['Pa_des (bar)']['value'].set(np.round(Pa_des / 1e5, 2))  # bar
-    choice_operating_conditions['Pc_des (bar)']['value'].set(np.round(Pc_des / 1e5, 2))  # bar
-    choice_operating_conditions['Sa']['value'].set(np.round(Sa, 1))
-    choice_operating_conditions['Sc']['value'].set(np.round(Sc, 1))
-    choice_operating_conditions['Ф_a_des']['value'].set(np.round(Phi_a_des, 1))
-    choice_operating_conditions['Ф_c_des']['value'].set(np.round(Phi_c_des, 1))
+    choice_operating_conditions['Temperature - Tfc (°C)']['value'].set(np.round(Tfc - 273.15))  # °C
+    choice_operating_conditions['Anode pressure - Pa (bar)']['value'].set(np.round(Pa_des / 1e5, 2))  # bar
+    choice_operating_conditions['Cathode pressure - Pc (bar)']['value'].set(np.round(Pc_des / 1e5, 2))  # bar
+    choice_operating_conditions['Anode stoichiometry - Sa']['value'].set(np.round(Sa, 1))
+    choice_operating_conditions['Cathode stoichiometry - Sc']['value'].set(np.round(Sc, 1))
+    choice_operating_conditions['Anode humidity - Φa']['value'].set(np.round(Phi_a_des, 1))
+    choice_operating_conditions['Cathode humidity - Φc']['value'].set(np.round(Phi_c_des, 1))
     # accessible physical parameters recovery
-    choice_accessible_parameters['Aact (cm²)']['value'].set(np.round(Aact * 1e4))  # cm²
-    choice_accessible_parameters['Hgdl (µm)']['value'].set(np.round(Hgdl * 1e6))  # µm
-    choice_accessible_parameters['Hcl (µm)']['value'].set(np.round(Hcl * 1e6))  # µm
-    choice_accessible_parameters['Hmem (µm)']['value'].set(np.round(Hmem * 1e6))  # µm
-    choice_accessible_parameters['Hgc (µm)']['value'].set(np.round(Hgc * 1e6))  # µm
-    choice_accessible_parameters['Wgc (µm)']['value'].set(np.round(Wgc * 1e6))  # µm
-    choice_accessible_parameters['Lgc (m)']['value'].set(np.round(Lgc, 2))  # µm
+    choice_accessible_parameters['Active area - Aact (cm²)']['value'].set(np.round(Aact * 1e4))  # cm²
+    choice_accessible_parameters['GDL thickness - Hgdl (µm)']['value'].set(np.round(Hgdl * 1e6))  # µm
+    choice_accessible_parameters['CL thickness - Hcl (µm)']['value'].set(np.round(Hcl * 1e6))  # µm
+    choice_accessible_parameters['Membrane thickness - Hmem (µm)']['value'].set(np.round(Hmem * 1e6))  # µm
+    choice_accessible_parameters['GC thickness - Hgc (µm)']['value'].set(np.round(Hgc * 1e6))  # µm
+    choice_accessible_parameters['GC width - Wgc (µm)']['value'].set(np.round(Wgc * 1e6))  # µm
+    choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].set(np.round(Lgc, 2))  # µm
     # undetermined physical parameters recovery
-    choice_undetermined_parameters['ε_gdl']['value'].set(np.round(epsilon_gdl, 3))
-    choice_undetermined_parameters['ε_mc']['value'].set(np.round(epsilon_mc, 3))
-    choice_undetermined_parameters['τ']['value'].set(np.round(tau, 3))
-    choice_undetermined_parameters['ε_c']['value'].set(np.round(epsilon_c, 3))
-    choice_undetermined_parameters['e']['value'].set(e)
-    choice_undetermined_parameters['Re (µΩ.m²)']['value'].set(np.round(Re * 1e6, 2))  # µΩ.m²
-    choice_undetermined_parameters['i0_c_ref (A/m²)']['value'].set(np.round(i0_c_ref, 2))  # A.m-2
-    choice_undetermined_parameters['κ_co (mol/(m.s.Pa))']['value'].set(np.round(kappa_co, 2))  # mol.m-1.s-1.Pa-1
-    choice_undetermined_parameters['κ_c']['value'].set(np.round(kappa_c, 2))
-    choice_undetermined_parameters['a_slim']['value'].set(np.round(a_slim, 7))
-    choice_undetermined_parameters['b_slim']['value'].set(np.round(b_slim, 7))
-    choice_undetermined_parameters['a_switch']['value'].set(np.round(a_switch, 7))
-    choice_undetermined_parameters['C_dl (MF/m³)']['value'].set(np.round(C_dl * 1e-6, 2))  # MF.m-3
+    choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].set(np.round(epsilon_gdl, 3))
+    choice_undetermined_parameters['Ionomer volume fraction\n- ε_mc']['value'].set(np.round(epsilon_mc, 3))
+    choice_undetermined_parameters['Tortuosity - τ']['value'].set(np.round(tau, 3))
+    choice_undetermined_parameters['Compression ratio - ε_c']['value'].set(np.round(epsilon_c, 3))
+    choice_undetermined_parameters['Capillary exponent - e']['value'].set(e)
+    choice_undetermined_parameters['Electron resistance\n- Re (µΩ.m²)']['value'].set(np.round(Re * 1e6, 2))  # µΩ.m²
+    choice_undetermined_parameters['Reference exchange\ncurrent density\n- i0_c_ref (A/m²)']['value'].set(np.round(i0_c_ref, 2))  # A.m-2
+    choice_undetermined_parameters['Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))']['value'].set(np.round(kappa_co, 2))  # mol.m-1.s-1.Pa-1
+    choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].set(np.round(kappa_c, 2))
+    choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_slim']['value'].set(np.round(a_slim, 7))
+    choice_undetermined_parameters['Limit liquid saturation\ncoefficient - b_slim']['value'].set(np.round(b_slim, 7))
+    choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_switch']['value'].set(np.round(a_switch, 7))
+    choice_undetermined_parameters['Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)']['value'].set(np.round(C_scl * 1e-6, 2))  # F.cm-3
     # i_max_pola recovery
-    choice_current_density_parameters['i_max_pola (A/cm²)']['value'].set(np.round(i_max_pola / 1e4, 2))  # A/cm²</code></pre>
+    choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].set(np.round(i_max_pola / 1e4, 2))  # A/cm²</code></pre>
             </details>
     </div>
 
@@ -2886,58 +2891,58 @@ calculations.</p>
         A dictionary containing the button information.
     """
     # operating conditions
-    Tfc = choice_operating_conditions['Tfc (°C)']['value'].get() + 273.15  # K
-    Pa_des = choice_operating_conditions['Pa_des (bar)']['value'].get() * 1e5  # Pa
-    Pc_des = choice_operating_conditions['Pc_des (bar)']['value'].get() * 1e5  # Pa
-    Sa = choice_operating_conditions['Sa']['value'].get()
-    Sc = choice_operating_conditions['Sc']['value'].get()
-    Phi_a_des = choice_operating_conditions['Ф_a_des']['value'].get()
-    Phi_c_des = choice_operating_conditions['Ф_c_des']['value'].get()
+    Tfc = choice_operating_conditions['Temperature - Tfc (°C)']['value'].get() + 273.15  # K
+    Pa_des = choice_operating_conditions['Anode pressure - Pa (bar)']['value'].get() * 1e5  # Pa
+    Pc_des = choice_operating_conditions['Cathode pressure - Pc (bar)']['value'].get() * 1e5  # Pa
+    Sa = choice_operating_conditions['Anode stoichiometry - Sa']['value'].get()
+    Sc = choice_operating_conditions['Cathode stoichiometry - Sc']['value'].get()
+    Phi_a_des = choice_operating_conditions['Anode humidity - Φa']['value'].get()
+    Phi_c_des = choice_operating_conditions['Cathode humidity - Φc']['value'].get()
     # accessible physical parameters
-    Aact = choice_accessible_parameters['Aact (cm²)']['value'].get() * 1e-4  # m²
-    Hgdl = choice_accessible_parameters['Hgdl (µm)']['value'].get() * 1e-6  # m
-    Hcl = choice_accessible_parameters['Hcl (µm)']['value'].get() * 1e-6  # m
-    Hmem = choice_accessible_parameters['Hmem (µm)']['value'].get() * 1e-6  # m
-    Hgc = choice_accessible_parameters['Hgc (µm)']['value'].get() * 1e-6  # m
-    Wgc = choice_accessible_parameters['Wgc (µm)']['value'].get() * 1e-6  # m
-    Lgc = choice_accessible_parameters['Lgc (m)']['value'].get()  # m
+    Aact = choice_accessible_parameters['Active area - Aact (cm²)']['value'].get() * 1e-4  # m²
+    Hgdl = choice_accessible_parameters['GDL thickness - Hgdl (µm)']['value'].get() * 1e-6  # m
+    Hcl = choice_accessible_parameters['CL thickness - Hcl (µm)']['value'].get() * 1e-6  # m
+    Hmem = choice_accessible_parameters['Membrane thickness - Hmem (µm)']['value'].get() * 1e-6  # m
+    Hgc = choice_accessible_parameters['GC thickness - Hgc (µm)']['value'].get() * 1e-6  # m
+    Wgc = choice_accessible_parameters['GC width - Wgc (µm)']['value'].get() * 1e-6  # m
+    Lgc = choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].get()  # m
     # undetermined physical parameters
-    epsilon_gdl = choice_undetermined_parameters['ε_gdl']['value'].get()
-    epsilon_mc = choice_undetermined_parameters['ε_mc']['value'].get()
-    tau = choice_undetermined_parameters['τ']['value'].get()
-    epsilon_c = choice_undetermined_parameters['ε_c']['value'].get()
-    e = choice_undetermined_parameters['e']['value'].get()
-    Re = choice_undetermined_parameters['Re (µΩ.m²)']['value'].get() * 1e-6  # ohm.m²
-    i0_c_ref = choice_undetermined_parameters['i0_c_ref (A/m²)']['value'].get()  # A.m-2
-    kappa_co = choice_undetermined_parameters['κ_co (mol/(m.s.Pa))']['value'].get()  # mol.m-1.s-1.Pa-1
-    kappa_c = choice_undetermined_parameters['κ_c']['value'].get()
-    a_slim = choice_undetermined_parameters['a_slim']['value'].get()
-    b_slim = choice_undetermined_parameters['b_slim']['value'].get()
-    a_switch = choice_undetermined_parameters['a_switch']['value'].get()
-    C_dl = choice_undetermined_parameters['C_dl (MF/m³)']['value'].get() * 1e6  # F.m-3
+    epsilon_gdl = choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].get()
+    epsilon_mc = choice_undetermined_parameters['Ionomer volume fraction\n- ε_mc']['value'].get()
+    tau = choice_undetermined_parameters['Tortuosity - τ']['value'].get()
+    epsilon_c = choice_undetermined_parameters['Compression ratio - ε_c']['value'].get()
+    e = choice_undetermined_parameters['Capillary exponent - e']['value'].get()
+    Re = choice_undetermined_parameters['Electron resistance\n- Re (µΩ.m²)']['value'].get() * 1e-6  # ohm.m²
+    i0_c_ref = choice_undetermined_parameters['Reference exchange\ncurrent density\n- i0_c_ref (A/m²)']['value'].get()  # A.m-2
+    kappa_co = choice_undetermined_parameters['Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))']['value'].get()  # mol.m-1.s-1.Pa-1
+    kappa_c = choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].get()
+    a_slim = choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_slim']['value'].get()
+    b_slim = choice_undetermined_parameters['Limit liquid saturation\ncoefficient - b_slim']['value'].get()
+    a_switch = choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_switch']['value'].get()
+    C_scl = choice_undetermined_parameters['Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)']['value'].get() * 1e6  # F.m-3
     # current density parameters
-    t_step = (choice_current_density_parameters['t0_step (s)']['value'].get(),
-              choice_current_density_parameters['tf_step (s)']['value'].get(),
-              choice_current_density_parameters['Δt_load_step (s)']['value'].get(),
-              choice_computing_parameters['Δt_dyn_step (s)']['value'].get())  # (s, s, s, s)
-    i_step = (choice_current_density_parameters['i_ini_step (A/cm²)']['value'].get() * 1e4,
-              choice_current_density_parameters['i_final_step (A/cm²)']['value'].get() * 1e4)  # (A.m-2, A.m-2)
-    i_max_pola = choice_current_density_parameters['i_max_pola (A/cm²)']['value'].get() * 1e4  # A.m-2
-    delta_pola = (choice_current_density_parameters['Δt_load_pola (s)']['value'].get(),
-                  choice_current_density_parameters['Δt_break_pola (s)']['value'].get(),
-                  choice_current_density_parameters['Δi_pola (A/cm²)']['value'].get() * 1e4,
-                  choice_current_density_parameters['Δt_ini_pola (s)']['value'].get())  # (s, s, A.m-2, s)
-    i_EIS = choice_current_density_parameters['i_EIS (A/cm²)']['value'].get() * 1e4  # (A.m-2)
-    ratio_EIS = choice_current_density_parameters['ratio_EIS (%)']['value'].get() / 100
-    f_EIS = (choice_current_density_parameters['f_power_min_EIS']['value'].get(),
-             choice_current_density_parameters['f_power_max_EIS']['value'].get(),
-             choice_current_density_parameters['nb_f_EIS']['value'].get(),
-             choice_current_density_parameters['nb_points_EIS']['value'].get())
+    t_step = (choice_current_density_parameters['Initial time - t0_step (s)']['value'].get(),
+              choice_current_density_parameters['Final time - tf_step (s)']['value'].get(),
+              choice_current_density_parameters['Loading time\n- Δt_load_step (s)']['value'].get(),
+              choice_computing_parameters['Time for dynamic\ndisplay - Δt_dyn_step (s)']['value'].get())  # (s, s, s, s)
+    i_step = (choice_current_density_parameters['Initial current density\n- i_ini_step (A/cm²)']['value'].get() * 1e4,
+              choice_current_density_parameters['Final current density\n- i_final_step (A/cm²)']['value'].get() * 1e4)  # (A.m-2, A.m-2)
+    i_max_pola = choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].get() * 1e4  # A.m-2
+    delta_pola = (choice_current_density_parameters['Loading time\n- Δt_load_pola (s)']['value'].get(),
+                  choice_current_density_parameters['Breaking time\n- Δt_break_pola (s)']['value'].get(),
+                  choice_current_density_parameters['Current density step\n- Δi_pola (A/cm²)']['value'].get() * 1e4,
+                  choice_current_density_parameters['Initial breaking time\n- Δt_ini_pola (s)']['value'].get())  # (s, s, A.m-2, s)
+    i_EIS = choice_current_density_parameters['Static current\n- i_EIS (A/cm²)']['value'].get() * 1e4  # (A.m-2)
+    ratio_EIS = choice_current_density_parameters['Current ratio\n- ratio_EIS (%)']['value'].get() / 100
+    f_EIS = (choice_current_density_parameters['Power of the\ninitial frequency\n- f_power_min_EIS']['value'].get(),
+             choice_current_density_parameters['Power of the\nfinal frequency\n- f_power_max_EIS']['value'].get(),
+             choice_current_density_parameters['Number of frequencies\ntested - nb_f_EIS']['value'].get(),
+             choice_current_density_parameters['Number of points\ncalculated - nb_points_EIS']['value'].get())
     t_EIS = EIS_parameters(f_EIS)  # Time parameters for the EIS_current density function.
-    t_purge = choice_computing_parameters['t_purge (s)']['value'].get()  # s
-    delta_t_purge = choice_computing_parameters['Δt_purge (s)']['value'].get()  # s
-    max_step = choice_computing_parameters['max_step (s)']['value'].get()  # s
-    n_gdl = choice_computing_parameters['n_gdl']['value'].get()
+    t_purge = choice_computing_parameters['Purge time - t_purge (s)']['value'].get()  # s
+    delta_t_purge = choice_computing_parameters['Time between two purges\n- Δt_purge (s)']['value'].get()  # s
+    max_step = choice_computing_parameters['Maximum time step\n- max_step (s)']['value'].get()  # s
+    n_gdl = choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].get()
 
     if choice_buttons['type_fuel_cell']['value'].get() == "EH-31 1.5 bar (2021)":
         type_fuel_cell = "EH-31_1.5"
@@ -2955,9 +2960,9 @@ calculations.</p>
     if choice_buttons['type_auxiliary']['value'].get() == 0:
         type_auxiliary = "no_auxiliary"
     elif choice_buttons['type_auxiliary']['value'].get() == 1:
-        type_auxiliary = "closed_anode_with_recirculation"
+        type_auxiliary = "forced-convective_cathode_with_anodic_recirculation"
     else:
-        type_auxiliary = "opened_anode"
+        type_auxiliary = "forced-convective_cathode_with_flow-through_anode"
 
     if choice_buttons['type_control']['value'].get() == 0:
         type_control = "no_control"
@@ -2984,7 +2989,7 @@ calculations.</p>
         type_plot = "dynamic"
 
     return (Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl,
-            epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_dl, t_step,
+            epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, t_step,
             i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, max_step, n_gdl,
             type_fuel_cell, type_auxiliary, type_control, type_purge, type_display, type_plot)</code></pre>
             </details>
@@ -3221,192 +3226,193 @@ valid.</p>
     """
 
     # The values entered by the user are checked for compliance
-    if choice_operating_conditions['Tfc (°C)']['value'].get() &lt; 0:
+    if choice_operating_conditions['Temperature - Tfc (°C)']['value'].get() &lt; 0:
         messagebox.showerror(title='Temperatures', message='Negative temperatures do not exist in the Kelvin scale.')
         choices.clear()
         return
-    if choice_operating_conditions['Pa_des (bar)']['value'].get() &lt; 0 or \
-            choice_operating_conditions['Pc_des (bar)']['value'].get() &lt; 0 or \
-            choice_operating_conditions['Pc_des (bar)']['value'].get() &gt; 5.0 or \
-            choice_operating_conditions['Pc_des (bar)']['value'].get() &gt; 5.0:
+    if choice_operating_conditions['Anode pressure - Pa (bar)']['value'].get() &lt; 0 or \
+            choice_operating_conditions['Cathode pressure - Pc (bar)']['value'].get() &lt; 0 or \
+            choice_operating_conditions['Cathode pressure - Pc (bar)']['value'].get() &gt; 5.0 or \
+            choice_operating_conditions['Cathode pressure - Pc (bar)']['value'].get() &gt; 5.0:
         messagebox.showerror(title='Desired pressures', message='Desired pressure should be positive and bellow 5.0 '
                                                                 'bars.')
         choices.clear()
         return
-    if choice_operating_conditions['Sa']['value'].get() &lt; 1 or \
-            choice_operating_conditions['Sa']['value'].get() &gt; 5 or \
-            choice_operating_conditions['Sc']['value'].get() &lt; 1 or \
-            choice_operating_conditions['Sc']['value'].get() &gt; 5:
+    if choice_operating_conditions['Anode stoichiometry - Sa']['value'].get() &lt; 1 or \
+            choice_operating_conditions['Anode stoichiometry - Sa']['value'].get() &gt; 5 or \
+            choice_operating_conditions['Cathode stoichiometry - Sc']['value'].get() &lt; 1 or \
+            choice_operating_conditions['Cathode stoichiometry - Sc']['value'].get() &gt; 5:
         messagebox.showerror(title='Stoichiometric ratios', message='The stoichiometric ratios Sa and Sc should be '
                                                                     'between 1 and 5.')
         choices.clear()
         return
-    if choice_operating_conditions['Ф_a_des']['value'].get() &lt; 0 or \
-            choice_operating_conditions['Ф_a_des']['value'].get() &gt; 1 or \
-            choice_operating_conditions['Ф_c_des']['value'].get() &lt; 0 or \
-            choice_operating_conditions['Ф_c_des']['value'].get() &gt; 1:
+    if choice_operating_conditions['Anode humidity - Φa']['value'].get() &lt; 0 or \
+            choice_operating_conditions['Anode humidity - Φa']['value'].get() &gt; 1 or \
+            choice_operating_conditions['Cathode humidity - Φc']['value'].get() &lt; 0 or \
+            choice_operating_conditions['Cathode humidity - Φc']['value'].get() &gt; 1:
         messagebox.showerror(title='Desired humidity', message='The desired humidities should be between 0 and 1.')
         choices.clear()
         return
-    if choice_accessible_parameters['Aact (cm²)']['value'].get() &lt; 0:
+    if choice_accessible_parameters['Active area - Aact (cm²)']['value'].get() &lt; 0:
         messagebox.showerror(title='Active area', message='Negative active area is impossible.')
         choices.clear()
         return
-    if choice_accessible_parameters['Hgdl (µm)']['value'].get() &lt; 1 or \
-            choice_accessible_parameters['Hgdl (µm)']['value'].get() &gt; 1000 or \
-            choice_accessible_parameters['Hcl (µm)']['value'].get() &lt; 1 or \
-            choice_accessible_parameters['Hcl (µm)']['value'].get() &gt; 1000 or \
-            choice_accessible_parameters['Hmem (µm)']['value'].get() &lt; 1 or \
-            choice_accessible_parameters['Hmem (µm)']['value'].get() &gt; 1000:
+    if choice_accessible_parameters['GDL thickness - Hgdl (µm)']['value'].get() &lt; 1 or \
+            choice_accessible_parameters['GDL thickness - Hgdl (µm)']['value'].get() &gt; 1000 or \
+            choice_accessible_parameters['CL thickness - Hcl (µm)']['value'].get() &lt; 1 or \
+            choice_accessible_parameters['CL thickness - Hcl (µm)']['value'].get() &gt; 1000 or \
+            choice_accessible_parameters['Membrane thickness - Hmem (µm)']['value'].get() &lt; 1 or \
+            choice_accessible_parameters['Membrane thickness - Hmem (µm)']['value'].get() &gt; 1000:
         messagebox.showerror(title='MEA thickness', message='All MEA components generally have a thickness between '
                                                             '1µm and 1mm.')
         choices.clear()
         return
-    if choice_accessible_parameters['Hgc (µm)']['value'].get() &lt; 10 or \
-            choice_accessible_parameters['Hgc (µm)']['value'].get() &gt; 10000 or \
-            choice_accessible_parameters['Wgc (µm)']['value'].get() &lt; 10 or \
-            choice_accessible_parameters['Wgc (µm)']['value'].get() &gt; 10000 or \
-            choice_accessible_parameters['Lgc (m)']['value'].get() &lt; 0 or \
-            choice_accessible_parameters['Lgc (m)']['value'].get() &gt; 100:
+    if choice_accessible_parameters['GC thickness - Hgc (µm)']['value'].get() &lt; 10 or \
+            choice_accessible_parameters['GC thickness - Hgc (µm)']['value'].get() &gt; 10000 or \
+            choice_accessible_parameters['GC width - Wgc (µm)']['value'].get() &lt; 10 or \
+            choice_accessible_parameters['GC width - Wgc (µm)']['value'].get() &gt; 10000 or \
+            choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].get() &lt; 0 or \
+            choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].get() &gt; 100:
         messagebox.showerror(title='GC distances', message='GC generally have a thickness and a width between 10µm and '
                                                            '10mm. Also, GC length is generally between 0 and 100m')
         choices.clear()
         return
-    if choice_undetermined_parameters['ε_gdl']['value'].get() &lt; 0 or \
-            choice_undetermined_parameters['ε_gdl']['value'].get() &gt; 1 or \
-            choice_undetermined_parameters['ε_mc']['value'].get() &lt; 0 or \
-            choice_undetermined_parameters['ε_mc']['value'].get() &gt; 1:
+    if choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].get() &lt; 0 or \
+            choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].get() &gt; 1 or \
+            choice_undetermined_parameters['Ionomer volume fraction\n- ε_mc']['value'].get() &lt; 0 or \
+            choice_undetermined_parameters['Ionomer volume fraction\n- ε_mc']['value'].get() &gt; 1:
         messagebox.showerror(title='Porosities', message='All porosities should be between 0 and 1.')
         choices.clear()
         return
-    if choice_undetermined_parameters['τ']['value'].get() &lt; 1 or choice_undetermined_parameters['τ']['value'].get() &gt; 4:
+    if choice_undetermined_parameters['Tortuosity - τ']['value'].get() &lt; 1 or choice_undetermined_parameters['Tortuosity - τ']['value'].get() &gt; 4:
         messagebox.showerror(title='Pore structure coefficient', message='The pore structure coefficient should be '
                                                                          'between 1 and 4.')
         choices.clear()
         return
-    if choice_undetermined_parameters['ε_c']['value'].get() &lt; 0 or \
-            choice_undetermined_parameters['ε_c']['value'].get() &gt; 1:
+    if choice_undetermined_parameters['Compression ratio - ε_c']['value'].get() &lt; 0 or \
+            choice_undetermined_parameters['Compression ratio - ε_c']['value'].get() &gt; 1:
         messagebox.showerror(title='Compression ratio', message='The compression ratio should be between 0 and 1.')
         choices.clear()
         return
-    if choice_undetermined_parameters['e']['value'].get() &lt; 3 or choice_undetermined_parameters['e']['value'].get() &gt; 5:
+    if choice_undetermined_parameters['Capillary exponent - e']['value'].get() &lt; 3 or choice_undetermined_parameters['Capillary exponent - e']['value'].get() &gt; 5:
         messagebox.showerror(title='Capillary exponent', message='The capillary exponent should be between 3 and 5 and '
                                                                  'being an integer.')
         choices.clear()
         return
-    if choice_undetermined_parameters['Re (µΩ.m²)']['value'].get() &lt; 0.5 or \
-            choice_undetermined_parameters['Re (µΩ.m²)']['value'].get() &gt; 5:
+    if choice_undetermined_parameters['Electron resistance\n- Re (µΩ.m²)']['value'].get() &lt; 0.5 or \
+            choice_undetermined_parameters['Electron resistance\n- Re (µΩ.m²)']['value'].get() &gt; 5:
         messagebox.showerror(title='Electron conduction resistance', message='The electron conduction resistance is '
                                                                              'generally between 0.5 and 5 µΩ.m².')
         choices.clear()
         return
-    if choice_undetermined_parameters['i0_c_ref (A/m²)']['value'].get() &lt; 0.001 or \
-            choice_undetermined_parameters['i0_c_ref (A/m²)']['value'].get() &gt; 500:
+    if choice_undetermined_parameters['Reference exchange\ncurrent density\n- i0_c_ref (A/m²)']['value'].get() &lt; 0.001 or \
+            choice_undetermined_parameters['Reference exchange\ncurrent density\n- i0_c_ref (A/m²)']['value'].get() &gt; 500:
         messagebox.showerror(title='Referenced exchange current density', message='The referenced exchange current '
                                                                                   'density is generally between 0.001 '
                                                                                   'and 500 A.m-2.')
         choices.clear()
         return
-    if choice_undetermined_parameters['κ_co (mol/(m.s.Pa))']['value'].get() &lt; 0.01 or \
-            choice_undetermined_parameters['κ_co (mol/(m.s.Pa))']['value'].get() &gt; 100:
+    if choice_undetermined_parameters['Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))']['value'].get() &lt; 0.01 or \
+            choice_undetermined_parameters['Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))']['value'].get() &gt; 100:
         messagebox.showerror(title='Crossover correction coefficient', message='The crossover correction coefficient is'
                                                                                ' generally between 0.01 and 100 '
                                                                                'mol.m-1.s-1.Pa-1.')
         choices.clear()
         return
-    if choice_undetermined_parameters['κ_c']['value'].get() &lt; 0 or \
-            choice_undetermined_parameters['κ_c']['value'].get() &gt; 100:
+    if choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].get() &lt; 0 or \
+            choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].get() &gt; 100:
         messagebox.showerror(title='Overpotential correction exponent', message='The overpotential correction exponent '
                                                                                 'is generally between 0 and 100.')
         choices.clear()
         return
-    if choice_undetermined_parameters['a_slim']['value'].get() &lt; 0 or \
-            choice_undetermined_parameters['a_slim']['value'].get() &gt; 1:
+    if choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_slim']['value'].get() &lt; 0 or \
+            choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_slim']['value'].get() &gt; 1:
         messagebox.showerror(title='Slop of slim function', message='The slop of slim function is generally between 0 '
                                                                     'and 1.')
         choices.clear()
         return
-    if choice_undetermined_parameters['b_slim']['value'].get() &lt; 0 or \
-            choice_undetermined_parameters['b_slim']['value'].get() &gt; 1:
+    if choice_undetermined_parameters['Limit liquid saturation\ncoefficient - b_slim']['value'].get() &lt; 0 or \
+            choice_undetermined_parameters['Limit liquid saturation\ncoefficient - b_slim']['value'].get() &gt; 1:
         messagebox.showerror(title='Intercept of slim function', message='The intercept of slim function is generally '
                                                                          'between 0 and 1.')
         choices.clear()
         return
-    if choice_undetermined_parameters['a_switch']['value'].get() &lt; 0 or \
-            choice_undetermined_parameters['a_switch']['value'].get() &gt; 1:
+    if choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_switch']['value'].get() &lt; 0 or \
+            choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_switch']['value'].get() &gt; 1:
         messagebox.showerror(title='Slop of switch function', message='The slop of switch function is generally between'
                                                                       ' 0 and 1.')
         choices.clear()
         return
-    if choice_undetermined_parameters['C_dl (MF/m³)']['value'].get() &lt; 5 or \
-            choice_undetermined_parameters['C_dl (MF/m³)']['value'].get() &gt; 100:
-        messagebox.showerror(title='Double layer capacitance', message='I have not settled yet a range for C_dl.')
+    if choice_undetermined_parameters['Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)']['value'].get() &lt; 5 or \
+            choice_undetermined_parameters['Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)']['value'].get() &gt; 100:
+        messagebox.showerror(title='Double layer capacitance', message='I have not settled yet a range for C_scl.')
         choices.clear()
         return
-    if choice_current_density_parameters['t0_step (s)']['value'].get() &lt; 0 or \
-            choice_current_density_parameters['tf_step (s)']['value'].get() &lt; 0 or \
-            choice_current_density_parameters['Δt_load_step (s)']['value'].get() &lt; 0 or \
-            choice_computing_parameters['Δt_dyn_step (s)']['value'].get() &lt; 0 or \
-            choice_current_density_parameters['Δt_load_pola (s)']['value'].get() &lt; 0 or \
-            choice_current_density_parameters['Δt_break_pola (s)']['value'].get() &lt; 0 or \
-            choice_current_density_parameters['Δt_ini_pola (s)']['value'].get() &lt; 0 or \
-            choice_current_density_parameters['t0_step (s)']['value'].get() &gt; \
-            choice_current_density_parameters['tf_step (s)']['value'].get() or \
-            choice_current_density_parameters['Δt_load_step (s)']['value'].get() &gt; \
-            (choice_current_density_parameters['tf_step (s)']['value'].get() -
-             choice_current_density_parameters['t0_step (s)']['value'].get()):
+    if choice_current_density_parameters['Initial time - t0_step (s)']['value'].get() &lt; 0 or \
+            choice_current_density_parameters['Final time - tf_step (s)']['value'].get() &lt; 0 or \
+            choice_current_density_parameters['Loading time\n- Δt_load_step (s)']['value'].get() &lt; 0 or \
+            choice_computing_parameters['Time for dynamic\ndisplay - Δt_dyn_step (s)']['value'].get() &lt; 0 or \
+            choice_current_density_parameters['Loading time\n- Δt_load_pola (s)']['value'].get() &lt; 0 or \
+            choice_current_density_parameters['Breaking time\n- Δt_break_pola (s)']['value'].get() &lt; 0 or \
+            choice_current_density_parameters['Initial breaking time\n- Δt_ini_pola (s)']['value'].get() &lt; 0 or \
+            choice_current_density_parameters['Initial time - t0_step (s)']['value'].get() &gt; \
+            choice_current_density_parameters['Final time - tf_step (s)']['value'].get() or \
+            choice_current_density_parameters['Loading time\n- Δt_load_step (s)']['value'].get() &gt; \
+            (choice_current_density_parameters['Final time - tf_step (s)']['value'].get() -
+             choice_current_density_parameters['Initial time - t0_step (s)']['value'].get()):
         messagebox.showerror(title='Times', message='The times should be positive, t0_step &lt; tf_step and '
                                                     'delta_t_load_step &lt; (tf_step - t0_step).')
         choices.clear()
         return
-    if choice_current_density_parameters['i_ini_step (A/cm²)']['value'].get() &lt; 0 or \
-            choice_current_density_parameters['i_final_step (A/cm²)']['value'].get() &lt; 0 or \
-            choice_current_density_parameters['i_max_pola (A/cm²)']['value'].get() &lt; 0 or \
-            choice_current_density_parameters['Δi_pola (A/cm²)']['value'].get() &lt; 0 or \
-            choice_current_density_parameters['i_EIS (A/cm²)']['value'].get() &lt; 0 or \
-            choice_current_density_parameters['Δi_pola (A/cm²)']['value'].get() &gt; \
-            choice_current_density_parameters['i_max_pola (A/cm²)']['value'].get() or \
-            choice_current_density_parameters['i_ini_step (A/cm²)']['value'].get() &gt; \
-            choice_current_density_parameters['i_final_step (A/cm²)']['value'].get():
+    if choice_current_density_parameters['Initial current density\n- i_ini_step (A/cm²)']['value'].get() &lt; 0 or \
+            choice_current_density_parameters['Final current density\n- i_final_step (A/cm²)']['value'].get() &lt; 0 or \
+            choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].get() &lt; 0 or \
+            choice_current_density_parameters['Current density step\n- Δi_pola (A/cm²)']['value'].get() &lt; 0 or \
+            choice_current_density_parameters['Static current\n- i_EIS (A/cm²)']['value'].get() &lt; 0 or \
+            choice_current_density_parameters['Current density step\n- Δi_pola (A/cm²)']['value'].get() &gt; \
+            choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].get() or \
+            choice_current_density_parameters['Initial current density\n- i_ini_step (A/cm²)']['value'].get() &gt; \
+            choice_current_density_parameters['Final current density\n- i_final_step (A/cm²)']['value'].get():
         messagebox.showerror(title='Current densities', message='The current densities should be positive, '
                                                                 'delta_i_pola &lt; i_max_pola and '
                                                                 'i_ini_step &lt; i_final_step.')
         choices.clear()
         return
-    if choice_current_density_parameters['ratio_EIS (%)']['value'].get() &lt; 0 or \
-            choice_current_density_parameters['ratio_EIS (%)']['value'].get() &gt; 20:
+    if choice_current_density_parameters['Current ratio\n- ratio_EIS (%)']['value'].get() &lt; 0 or \
+            choice_current_density_parameters['Current ratio\n- ratio_EIS (%)']['value'].get() &gt; 20:
         messagebox.showerror(title='Ratio EIS', message='Ratio EIS is a percentage of i_EIS and should be between 0 '
                                                         'and 20 for plotting correct EIS.')
         choices.clear()
         return
 
-    if choice_current_density_parameters['nb_f_EIS']['value'].get() &lt; 0 or \
-            choice_current_density_parameters['nb_points_EIS']['value'].get() &lt; 0 or \
-            type(choice_current_density_parameters['f_power_min_EIS']['value'].get()) != int or \
-            type(choice_current_density_parameters['f_power_max_EIS']['value'].get()) != int or \
-            type(choice_current_density_parameters['nb_f_EIS']['value'].get()) != int or \
-            type(choice_current_density_parameters['nb_points_EIS']['value'].get()) != int:
+    if choice_current_density_parameters['Number of frequencies\ntested - nb_f_EIS']['value'].get() &lt; 0 or \
+            choice_current_density_parameters['Number of points\ncalculated - nb_points_EIS']['value'].get() &lt; 0 or \
+            type(choice_current_density_parameters['Power of the\ninitial frequency\n- f_power_min_EIS']['value'].get()) != int or \
+            type(choice_current_density_parameters['Power of the\nfinal frequency\n- f_power_max_EIS']['value'].get()) != int or \
+            type(choice_current_density_parameters['Number of frequencies\ntested - nb_f_EIS']['value'].get()) != int or \
+            type(choice_current_density_parameters['Number of points\ncalculated - nb_points_EIS']['value'].get()) != int:
         messagebox.showerror(title='f EIS', message='f_EIS parameters should be integer and number of points should '
                                                     'be positive.')
         choices.clear()
         return
 
-    if choice_computing_parameters['t_purge (s)']['value'].get() &lt; 0 or \
-            choice_computing_parameters['Δt_purge (s)']['value'].get() &lt; 0:
+    if choice_computing_parameters['Purge time - t_purge (s)']['value'].get() &lt; 0 or \
+            choice_computing_parameters['Time between two purges\n- Δt_purge (s)']['value'].get() &lt; 0:
         messagebox.showerror(title='Purge times', message='Negative times does not characterise purges.')
         choices.clear()
         return
 
-    if choice_computing_parameters['max_step (s)']['value'].get() &lt; 0 or \
-            choice_computing_parameters['max_step (s)']['value'].get() &gt; 0.1:
+    if choice_computing_parameters['Maximum time step\n- max_step (s)']['value'].get() &lt; 0 or \
+            choice_computing_parameters['Maximum time step\n- max_step (s)']['value'].get() &gt; 0.1:
         messagebox.showerror(title='Max step', message='The max step value for the solver should be positive and lower '
                                                        'than 0.1 for normal use.')
         choices.clear()
         return
 
-    if choice_computing_parameters['n_gdl']['value'].get() &lt; 5 or \
-            type(choice_computing_parameters['n_gdl']['value'].get()) != int:
-        messagebox.showerror(title='n gdl', message='The n_gdl value should be an integer bigger than 5.')
+    if choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].get() &lt; 2 or \
+            type(choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].get()) != int:
+        messagebox.showerror(title='n gdl', message='The n_gdl value should be an integer bigger than 2. '
+                                                    'A good compromise is 10.')
         choices.clear()
         return
 

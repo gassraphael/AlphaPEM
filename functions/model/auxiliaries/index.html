@@ -148,6 +148,11 @@
 
 
 
+
+
+
+
+
   <div class="doc doc-children">
 
 
@@ -508,7 +513,7 @@
     """
 
     # At the anode side
-    if type_auxiliary == "closed_anode_with_recirculation":
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
         # Anode inlet
         Wasm_in = Ksm_in * (Pa_des - Pasm)  # kg.s-1
         Wasm_out = Ksm_out * (Pasm - Pagc)  # kg.s-1
@@ -521,7 +526,7 @@
                    np.sqrt(Magc * 2 * gamma_H2 / (gamma_H2 - 1) * (1 - Pr_aem ** ((gamma_H2 - 1) / gamma_H2)))  # kg.s-1
         Ja_out = Waem_in / (Hgc * Wgc * Magc)  # mol.m-2.s-1
 
-    elif type_auxiliary == "opened_anode":
+    elif type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         # Anode inlet
         Wrd = n_cell * M_H2 * Sa * (i_fc + i_n) / (2 * F) * Aact  # kg.s-1
         Wasm_in = Wrd + Wa_inj  # kg.s-1
@@ -545,7 +550,8 @@
         Ja_out = Kem_in * (Pagc - Pa_des) / (Hgc * Wgc * Magc)  # mol.m-2.s-1
 
     # At the cathode side
-    if type_auxiliary == "closed_anode_with_recirculation" or type_auxiliary == "opened_anode":
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
+       type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         # Cathode inlet         
         Wcsm_in = Wcp + Wc_inj  # kg.s-1
         Wcsm_out = Ksm_out * (Pcsm - Pcgc)  # kg.s-1
@@ -571,7 +577,8 @@
      """
 
     # Vapor flows at the GC (mol.m-2.s-1)
-    if type_auxiliary == "closed_anode_with_recirculation" or type_auxiliary == "opened_anode":
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
+       type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         Jv_a_in = Phi_asm * Psat(Tfc) / Pasm * Ja_in
         Jv_c_in = Phi_csm * Psat(Tfc) / Pcsm * Jc_in
     else:  # elif type_auxiliary == "no_auxiliary":
@@ -581,33 +588,36 @@
     Jv_c_out = Phi_cgc * Psat(Tfc) / Pcgc * Jc_out
 
     # H2 flows at the GC (mol.m-2.s-1)
-    if type_auxiliary == "closed_anode_with_recirculation" or type_auxiliary == "opened_anode":
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
+       type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         J_H2_in = (1 - Phi_asm * Psat(Tfc) / Pasm) * Ja_in
     else:  # elif type_auxiliary == "no_auxiliary":
         J_H2_in = (1 - Phi_a_des * Psat(Tfc) / Pagc) * Ja_in
     J_H2_out = (1 - Phi_agc * Psat(Tfc) / Pagc) * Ja_out
 
     # O2 flows at the GC (mol.m-2.s-1)
-    if type_auxiliary == "closed_anode_with_recirculation" or type_auxiliary == "opened_anode":
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
+       type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         J_O2_in = yO2_ext * (1 - Phi_csm * Psat(Tfc) / Pcsm) * Jc_in
     else:  # elif type_auxiliary == "no_auxiliary":
         J_O2_in = yO2_ext * (1 - Phi_c_des * Psat(Tfc) / Pcgc) * Jc_in
     J_O2_out = y_cgc * (1 - Phi_cgc * Psat(Tfc) / Pcgc) * Jc_out
 
     # N2 flows at the GC (mol.m-2.s-1)
-    if type_auxiliary == "closed_anode_with_recirculation" or type_auxiliary == "opened_anode":
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
+       type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         J_N2_in = (1 - yO2_ext) * (1 - Phi_csm * Psat(Tfc) / Pcsm) * Jc_in
     else:  # elif type_auxiliary == "no_auxiliary":
         J_N2_in = (1 - yO2_ext) * (1 - Phi_c_des * Psat(Tfc) / Pcgc) * Jc_in
     J_N2_out = (1 - y_cgc) * (1 - Phi_cgc * Psat(Tfc) / Pcgc) * Jc_out
 
     # Vapor flows at the manifold (mol.s-1)
-    if type_auxiliary == "closed_anode_with_recirculation":
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
         Wv_asm_in = Phi_aem * Psat(Tfc) / Paem * (Ware / Maem)
         Wv_aem_out = Phi_aem * Psat(Tfc) / Paem * (Waem_out / Maem)
         Wv_csm_in = Phi_ext * Psat(Text) / Pext * (Wcp / Mext) + Wc_inj / M_H2O
         Wv_cem_out = Phi_cem * Psat(Tfc) / Pcem * (Wcem_out / Mcem)
-    elif type_auxiliary == "opened_anode":
+    elif type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         Wv_asm_in = Wa_inj / M_H2O
         Wv_aem_out = Phi_aem * Psat(Tfc) / Paem * (Waem_out / Maem)
         Wv_csm_in = Phi_ext * Psat(Text) / Pext * (Wcp / Mext) + Wc_inj / M_H2O

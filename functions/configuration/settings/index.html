@@ -148,6 +148,11 @@
 
 
 
+
+
+
+
+
   <div class="doc doc-children">
 
 
@@ -226,7 +231,7 @@
 <b><code>max_step</code></b>(                  <code>float</code>
 )              –
               <div class="doc-md-description">
-                <p>Maximum step for the resolution of the system of differential equations.</p>
+                <p>Maximum time step for the resolution of the system of differential equations.</p>
               </div>
             </li>
             <li>
@@ -241,7 +246,7 @@
 )              –
               <div class="doc-md-description">
                 <p>Time parameters for purging the system.
-It is a tuple containing the purge time interval 'purge_time' in seconds, and the time between two purges
+It is a tuple containing the purge time 'purge_time' in seconds, and the time between two purges
 'delta_purge' in seconds.</p>
               </div>
             </li>
@@ -267,12 +272,12 @@ It is a tuple containing the purge time interval 'purge_time' in seconds, and th
     Returns
     -------
     max_step : float
-        Maximum step for the resolution of the system of differential equations.
+        Maximum time step for the resolution of the system of differential equations.
     n_gdl : int
         Number of model nodes placed inside each GDL.
     t_purge : tuple
         Time parameters for purging the system.
-        It is a tuple containing the purge time interval 'purge_time' in seconds, and the time between two purges
+        It is a tuple containing the purge time 'purge_time' in seconds, and the time between two purges
         'delta_purge' in seconds.
     """
 
@@ -346,7 +351,7 @@ It is a tuple containing the purge time interval 'purge_time' in seconds, and th
               <div class="doc-md-description">
                 <p>Time parameters for the step_current density function.
 It is a tuple containing the initial time 't0_step' in seconds, final time 'tf_step' in seconds, loading time
-'delta_t_load_step' in seconds, and dynamic time for display 'delta_t_dyn_step' in seconds.</p>
+'delta_t_load_step' in seconds, and time for dynamic display 'delta_t_dyn_step' in seconds.</p>
               </div>
             </li>
             <li>
@@ -431,7 +436,7 @@ measuring the voltage response at each frequency 'delta_t_measurement_EIS' in se
     t_step : tuple
         Time parameters for the step_current density function.
         It is a tuple containing the initial time 't0_step' in seconds, final time 'tf_step' in seconds, loading time
-        'delta_t_load_step' in seconds, and dynamic time for display 'delta_t_dyn_step' in seconds.
+        'delta_t_load_step' in seconds, and time for dynamic display 'delta_t_dyn_step' in seconds.
     i_step : tuple
         Current parameters for the step_current density function.
         It is a tuple containing the initial and final current density values 'i_ini_step' and 'i_final_step', both in
@@ -465,7 +470,7 @@ measuring the voltage response at each frequency 'delta_t_measurement_EIS' in se
     i_step = 0.5e4, 1.5e4  # (A.m-2, A.m-2). Current parameters for the step_current density function.
     delta_pola = 30, 30, 0.1e4, 1 * 60  # (s, s, A.m-2, s). Parameters for the polarization curve.
     i_EIS, ratio_EIS = 1.0e4, 5/100  # (A/m², ). Parameters for the EIS curve.
-    f_EIS = -3, 5, 60, 50 # Frequency parameters for the EIS_current density function.
+    f_EIS = -3, 5, 90, 50 # Frequency parameters for the EIS_current density function.
     t_EIS = EIS_parameters(f_EIS)  # Time parameters for the EIS_current density function.
     if type_current == "step": current_density = step_current  # It is the current density function.
     elif type_current == "polarization": current_density = polarization_current  # It is the current density function.
@@ -909,13 +914,13 @@ or "manual_setup".</p>
         kappa_c = 1.6136446641573106  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.0555312850726664, 0.10514269908118055, 0.6365424991141914  # It is the limit
         #                                                               liquid saturation coefficients.
-        C_dl = 2e7  # F.m-3. It is the volumetric double layer capacitance.
+        C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
     else: # Stored setup in "stored_physical_parameters".
         (Hcl, epsilon_mc, tau, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, Re, i0_c_ref, kappa_co,
-         kappa_c, a_slim, b_slim, a_switch, C_dl) = stored_physical_parameters(type_fuel_cell)
+         kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
 
     return (Hcl, epsilon_mc, tau, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, Re, i0_c_ref, kappa_co,
-            kappa_c, a_slim, b_slim, a_switch, C_dl)</code></pre>
+            kappa_c, a_slim, b_slim, a_switch, C_scl)</code></pre>
             </details>
     </div>
 

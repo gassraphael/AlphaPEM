@@ -149,6 +149,11 @@ and to implement integration events.</p>
 
 
 
+
+
+
+
+
   <div class="doc doc-children">
 
 
@@ -323,7 +328,8 @@ different from the real ones as the corresponding machines takes time to reach t
     Phi_a_des, Phi_c_des = control_variables['Phi_a_des'], control_variables['Phi_c_des']
     Aact, type_auxiliary = parameters['Aact'], parameters['type_auxiliary']
 
-    if type_auxiliary == "closed_anode_with_recirculation" or type_auxiliary == "opened_anode":
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
+       type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         # Intermediate values
         Prd = Pasm
         Pcp = Pcsm
@@ -333,7 +339,7 @@ different from the real ones as the corresponding machines takes time to reach t
                   1 / yO2_ext * Sc * (i_fc + i_n) / (4 * F) * Aact
 
         # The desired humidifier flow rate at the anode side Wa_v_inj_des (kg.s-1)
-        Wrd = M_H2 * Sa * (i_fc + i_n) / (2 * F) * Aact
+        Wrd = n_cell * M_H2 * Sa * (i_fc + i_n) / (2 * F) * Aact
         Wa_inj_des = (M_H2O * Phi_a_des * Psat(Tfc) / (Prd + Phi_a_des * Psat(Tfc)) /
                       (1 - Phi_a_des * Psat(Tfc) / (Prd + Phi_a_des * Psat(Tfc))) * (Wrd / M_H2))
 
@@ -560,7 +566,8 @@ different from the real ones as the corresponding machines takes time to reach t
     i_n = i_H2 + i_O2
 
     # Physical quantities inside the auxiliary system
-    if parameters["type_auxiliary"] == "closed_anode_with_recirculation" or parameters["type_auxiliary"] == "opened_anode":
+    if parameters["type_auxiliary"] == "forced-convective_cathode_with_anodic_recirculation" or \
+       parameters["type_auxiliary"] == "forced-convective_cathode_with_flow-through_anode":
         # Pressure
         Pp = Pasm
         # Humidities

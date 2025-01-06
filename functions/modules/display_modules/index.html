@@ -148,6 +148,11 @@
 
 
 
+
+
+
+
+
   <div class="doc doc-children">
 
 
@@ -540,6 +545,8 @@ used in the FT.</p>
     f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = f_EIS  # They are the frequency parameters for the EIS
     #                                                                    simulation.
     ax.set_xscale('log')  # set logarithmic scale for the x-axis
+    if not ax.yaxis_inverted():
+        ax.invert_yaxis()  # Invert the y-axis
 
     # For EH-31 fuel cell
     if type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or \
@@ -948,7 +955,7 @@ used in the FT.</p>
 
 
 <h2 id="modules.display_modules.plot_EIS_Nyquist_instructions" class="doc doc-heading">
-            <code class="highlight language-python">plot_EIS_Nyquist_instructions(type_fuel_cell, ax)</code>
+            <code class="highlight language-python">plot_EIS_Nyquist_instructions(type_fuel_cell, f_Fourier, x, y, ax)</code>
 
 </h2>
 
@@ -977,6 +984,30 @@ used in the FT.</p>
               </div>
             </li>
             <li>
+              <b><code>f_Fourier</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Frequency at which the EIS is simulated.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>x</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>x-axis values for plotting the annotation.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>y-axis values for plotting the annotation.</p>
+              </div>
+            </li>
+            <li>
               <b><code>ax</code></b>
                   (<code><span title="matplotlib.axes.Axes">Axes</span></code>)
               –
@@ -991,24 +1022,66 @@ used in the FT.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <pre class="highlight"><code class="language-python">def plot_EIS_Nyquist_instructions(type_fuel_cell, ax):
+              <pre class="highlight"><code class="language-python">def plot_EIS_Nyquist_instructions(type_fuel_cell, f_Fourier, x, y, ax):
     """This function adds the instructions for EIS plots according to the type_input to the ax object.
 
     Parameters
     ----------
     type_fuel_cell : str
         Type of fuel cell configuration.
+    f_Fourier : numpy.ndarray
+        Frequency at which the EIS is simulated.
+    x : numpy.ndarray
+        x-axis values for plotting the annotation.
+    y : numpy.ndarray
+        y-axis values for plotting the annotation.
     ax : matplotlib.axes.Axes
         Axes on which the instructions will be added.
     """
 
+    # Commun instructions
+    ax.set_aspect('equal', adjustable='box')  # Set orthonormal axis.
+
     # For EH-31 fuel cell
     if type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or \
             type_fuel_cell == "EH-31_2.25" or type_fuel_cell == "EH-31_2.5":
-        ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(30))
-        ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(30 / 5))
+        # Double charge transfer
+        if (f_Fourier &gt;= 70 and f_Fourier &lt;= 80):
+            freq_str = str(int(f_Fourier)) + ' Hz'  # Frequency annotation.
+            ax.annotate(freq_str, (x, y), textcoords="offset points", xytext=(0, -40), ha='center', fontsize=14,
+                        rotation=90, weight='bold')
+        # Auxiliary system
+        if (f_Fourier &gt;= 0.14 and f_Fourier &lt;= 0.16):
+            freq_str = f'{f_Fourier:.2g} Hz'  # Frequency annotation.
+            ax.annotate(freq_str, (x, y), textcoords="offset points", xytext=(0, 7), ha='center', fontsize=14,
+                        rotation=90, weight='bold')
+        if (f_Fourier &gt;= 1.2 and f_Fourier &lt;= 1.4):
+            freq_str = f'{f_Fourier:.2g} Hz'  # Frequency annotation.
+            ax.annotate(freq_str, (x, y), textcoords="offset points", xytext=(0, 10), ha='center', fontsize=14,
+                        rotation=90, weight='bold')
+        # Diffusion
+        if (f_Fourier &gt;= 0.015 and f_Fourier &lt;= 0.020):
+            freq_str = f'{f_Fourier:.2g} Hz'  # Frequency annotation.
+            ax.annotate(freq_str, (x, y), textcoords="offset points", xytext=(30, 0), ha='center', fontsize=14,
+                        rotation=0, weight='bold')
+        if (f_Fourier &gt;= 0.9 and f_Fourier &lt;= 1.1):
+            freq_str = f'{f_Fourier:.2g} Hz'  # Frequency annotation.
+            ax.annotate(freq_str, (x, y), textcoords="offset points", xytext=(0, 10), ha='center', fontsize=14,
+                        rotation=90, weight='bold')
+        if (f_Fourier &gt;= 70 and f_Fourier &lt;= 90):
+            freq_str = str(int(f_Fourier)) + ' Hz'  # Frequency annotation.
+            ax.annotate(freq_str, (x, y), textcoords="offset points", xytext=(0, -40), ha='center', fontsize=14,
+                        rotation=90, weight='bold')
+        if (f_Fourier &gt;= 10000 and f_Fourier &lt;= 12000):
+            freq_str = str(int(f_Fourier)) + ' Hz'  # Frequency annotation.
+            ax.annotate(freq_str, (x, y), textcoords="offset points", xytext=(35, 0), ha='center', fontsize=14,
+                        rotation=0, weight='bold')
+        ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(20))
+        ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(20 / 5))
         ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(10))
-        ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(10 / 5))</code></pre>
+        ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(10 / 5))
+        ax.set_xlim(30, 200)
+        ax.set_ylim(-25, 55)</code></pre>
             </details>
     </div>
 
@@ -1196,8 +1269,7 @@ used in the FT.</p>
         phi_U_i -= 360 # To have a value between -180 and 180
 
     # Plot the angle Bode diagram
-    ax.plot(f, phi_U_i, 'o', color=colors(2),
-            label='Angle Bode diagram')
+    ax.plot(f, phi_U_i, 'o', color=colors(2), label='Angle Bode diagram')
     ax.set_xlabel(r'$\mathbf{Frequency}$ $\mathbf{(Hz,}$ $\mathbf{logarithmic}$ $\mathbf{scale)}$', labelpad=3)
     ax.set_ylabel(r'$\mathbf{Phase}$ $\mathbf{(^\circ)}$', labelpad=3)
     #   Plot instructions
@@ -1287,6 +1359,7 @@ used in the FT.</p>
     i_EIS, ratio_EIS, type_fuel_cell = parameters['i_EIS'], parameters['ratio_EIS'], parameters['type_fuel_cell']
     # Extraction of the Fourier results
     Ucell_Fourier, ifc_Fourier = Fourier_results['Ucell_Fourier'], Fourier_results['ifc_Fourier']
+    f_Fourier = Fourier_results['f']
     A_period_t, A, N = Fourier_results['A_period_t'], Fourier_results['A'], Fourier_results['N']
 
     # Calculation of the real and imaginary component of the impedance for each period
@@ -1305,7 +1378,7 @@ used in the FT.</p>
     ax.set_ylabel(r'$\mathbf{-Z_{imag}}$ $\mathbf{(m\Omega.cm^{2})}$', labelpad=3)
     #       Plot instructions
     plot_general_instructions(ax)
-    plot_EIS_Nyquist_instructions(type_fuel_cell, ax)</code></pre>
+    plot_EIS_Nyquist_instructions(type_fuel_cell, f_Fourier, Z_real, -Z_imag, ax)</code></pre>
             </details>
     </div>
 
@@ -1938,7 +2011,8 @@ current density.</p>
     ax.plot(ifc_t, Phi_c_des, color=colors(6), label=r'$\mathregular{\Phi_{c,des}}$')
     ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
                   labelpad=3)
-    if parameters['type_auxiliary'] == "opened_anode" or parameters['type_auxiliary'] == "no_auxiliary":
+    if parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
+       parameters['type_auxiliary'] == "no_auxiliary":
         ax.plot(t, Phi_a_des, color=colors(0), label=r'$\mathregular{\Phi_{a,des}}$')
         ax.legend([r'$\mathregular{\Phi_{a,des}}$', r'$\mathregular{\Phi_{c,des}}$'], loc='best')
     else:
@@ -2670,7 +2744,8 @@ This adjustment allows for stable and consistent measurements during the station
             Ucell_discretized[i] = Ucell_t[idx]  # the last value at the end of each load
 
         # Plot the experimental polarization curve and calculate the simulation error compared with experimental data
-        if type_fuel_cell != "manual_setup" and type_auxiliary == "opened_anode":  # Experimental points are accessible
+        if type_fuel_cell != "manual_setup" and \
+           type_auxiliary == "forced-convective_cathode_with_flow-through_anode":  # Experimental points are accessible
             # Plot of the experimental polarization curve
             i_exp_t, U_exp_t = pola_exp_values(type_fuel_cell)
             plot_experimental_polarisation_curve(type_fuel_cell, i_exp_t, U_exp_t, ax)
@@ -3064,15 +3139,15 @@ This adjustment allows for stable and consistent measurements during the station
     # For EH-31 fuel cell
     if type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
             type_fuel_cell == "EH-31_2.5":
-        if type_fuel_cell == "EH-31_1.5" and type_auxiliary == "opened_anode":
+        if type_fuel_cell == "EH-31_1.5" and type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
             ax.plot(x, y, color=colors(0), label='Sim. - P = 1.5 bar' + r' - $ΔU_{max}$ =' f' {sim_error} %')
-        elif type_fuel_cell == "EH-31_1.5" and type_auxiliary != "opened_anode":
+        elif type_fuel_cell == "EH-31_1.5" and type_auxiliary != "forced-convective_cathode_with_flow-through_anode":
             ax.plot(x, y, color=colors(0), label='Sim. - P = 1.5 bar')
 
-        elif type_fuel_cell == "EH-31_2.0" and type_auxiliary == "opened_anode":
+        elif type_fuel_cell == "EH-31_2.0" and type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
             ax.plot(x, y, '--', color=colors(1),
                     label='Sim. - P = 2.0 bar' + r' - $ΔU_{max}$ =' f' {sim_error} %')
-        elif type_fuel_cell == "EH-31_2.0" and type_auxiliary != "opened_anode":
+        elif type_fuel_cell == "EH-31_2.0" and type_auxiliary != "forced-convective_cathode_with_flow-through_anode":
             if type_control == "Phi_des":
                 ax.plot(x, y, color=colors(5),
                         label=r'Sim. - P = 2.0 bar - controlled $\mathregular{\Phi_{des}}$')
@@ -3080,15 +3155,15 @@ This adjustment allows for stable and consistent measurements during the station
                 ax.plot(x, y, color=colors(1),
                         label=r'Sim. - P = 2.0 bar - uncontrolled $\mathregular{\Phi_{des}}$')
 
-        elif type_fuel_cell == "EH-31_2.25" and type_auxiliary == "opened_anode":
+        elif type_fuel_cell == "EH-31_2.25" and type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
             ax.plot(x, y, '--', color=colors(2),
                     label='Sim. - P = 2.25 bar' + r' - $ΔU_{max}$ =' f' {sim_error} %')
-        elif type_fuel_cell == "EH-31_2.25" and type_auxiliary != "opened_anode":
+        elif type_fuel_cell == "EH-31_2.25" and type_auxiliary != "forced-convective_cathode_with_flow-through_anode":
             ax.plot(x, y, color=colors(2), label='Sim. - P = 2.25 bar')
 
-        elif type_fuel_cell == "EH-31_2.5" and type_auxiliary == "opened_anode":
+        elif type_fuel_cell == "EH-31_2.5" and type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
             ax.plot(x, y, color=colors(3), label='Sim - P = 2.5 bar' + r' - $ΔU_{max}$ =' f' {sim_error} %')
-        elif type_fuel_cell == "EH-31_2.5" and type_auxiliary != "opened_anode":
+        elif type_fuel_cell == "EH-31_2.5" and type_auxiliary != "forced-convective_cathode_with_flow-through_anode":
             ax.plot(x, y, color=colors(3), label='Sim - P = 2.5 bar')
 
     # For LF fuel cell
