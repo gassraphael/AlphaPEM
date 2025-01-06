@@ -28,7 +28,10 @@ To install **AlphaPEM**, follow these steps in a shell:
     ```pip install --upgrade pip```
 
 4. Install the required dependencies (eventually in a specific environment):
-    ```pip install numpy scipy matplotlib colorama geneticalgorithm2[full] ttkthemes```
+    ```
+    pip install numpy scipy matplotlib colorama geneticalgorithm2
+    python3 -m pip install git+https://github.com/RedFantom/ttkthemes
+    ```
     
 
 # Major updates

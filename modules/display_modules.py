@@ -1158,7 +1158,7 @@ def plot_EIS_Nyquist_instructions(type_fuel_cell, f_Fourier, x, y, ax):
     ----------
     type_fuel_cell : str
         Type of fuel cell configuration.
-    f : numpy.ndarray
+    f_Fourier : numpy.ndarray
         Frequency at which the EIS is simulated.
     x : numpy.ndarray
         x-axis values for plotting the annotation.
