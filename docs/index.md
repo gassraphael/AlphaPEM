@@ -39,6 +39,11 @@ To install **AlphaPEM**, follow these steps in a shell:
 - V1.0 - 2024.09.05 - This version of AlphaPEM corresponds to the one developed during Raphaël Gass's PhD from 2021 to 2024.
 
 
+# Work in progress
+
+- The polarization curves from the EH-31 fuel cells, provided by default, are no longer calibrated due to recent modifications made to the equations. A calibration of the indeterminate parameters will be performed in the future to correct this issue.
+
+
 # Related publications
 
 The detailed model description and simulation results can be found in the following articles and thesis.
