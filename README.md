@@ -12,6 +12,7 @@ Improvements to **AlphaPEM**, such as the addition of heat transfer modelling an
 
 - [Installation](#installation)
 - [Major updates](#major-updates)
+- [Work in progress](#work-in-progress)
 - [Related publications](#related-publications) 
 - [Contributions](#contributions)
 - [Contact](#contact)
