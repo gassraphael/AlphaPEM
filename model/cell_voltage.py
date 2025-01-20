@@ -115,11 +115,9 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
             Rmem = Hmem / (0.1879 * np.exp(1268 * (1 / 303.15 - 1 / Tfc)))
         #       The proton resistance at the cathode catalyst layer : Rccl
         if lambda_ccl >= 1:
-            Rccl = 1 / 3 * 1 / (epsilon_mc / tau) * \
-                   Hcl / ((0.5139 * lambda_ccl - 0.326) * np.exp(1268 * (1 / 303.15 - 1 / Tfc)))
+            Rccl = Hcl / ((epsilon_mc ** tau) * (0.5139 * lambda_ccl - 0.326) * np.exp(1268 * (1 / 303.15 - 1 / Tfc)))
         else:
-            Rccl = 1 / 3 * 1 / (epsilon_mc / tau) * \
-                   Hcl / (0.1879 * np.exp(1268 * (1 / 303.15 - 1 / Tfc)))
+            Rccl = Hcl / ((epsilon_mc ** tau) * 0.1879 * np.exp(1268 * (1 / 303.15 - 1 / Tfc)))
         #       The total proton resistance
         Rp = Rmem + Rccl  # its value is around [4-7]e-6 ohm.m².
 
