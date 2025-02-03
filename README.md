@@ -69,12 +69,14 @@ The detailed model description and simulation results can be found in the follow
 		- ![1D modeling of matter transport phenomena in a PEM single cell divided into several nodes.](docs/images/nodal_model.png "1D modeling of matter transport phenomena in a PEM single cell divided into several nodes")
 		
 	
-	- **A Critical Review of Proton Exchange Membrane Fuel Cells Matter Transports and Voltage Polarisation for Modelling**
+	- **A Critical Review of Proton Exchange Membrane Fuel Cells Matter Transports and Voltage Polarisation for Modelling** (1st author)
 		- In the [Journal of the Electrochemical Society](https://doi.org/10.1149/1945-7111/ad305a) or in [HAL](https://hal.science/hal-04493419) (postprint).
 		- The aim of this work was to compile, within a single article, all the equations required for the physical modeling of a fuel cell. Each equation is complemented with explanations, critical analysis, and suggestions for potential enhancements.
 		
 - Thesis:
-	- to complete.
+	- **Advanced physical modeling of PEM fuel cells to enhance their performances** (1st author)
+		- In [HAL](https://hal.science/tel-04923016) (final version).
+		- The objective of this thesis was to develop an advanced modeling approach for proton exchange membrane fuel cells (PEMFCs) to optimize their control and improve performance. A one-dimensional, dynamic, two-phase, isothermal model was proposed, leading to the development of the open-source software AlphaPEM, which enables accurate simulations and facilitates predictive control strategies for enhanced fuel cell operation.
 
 
 # Contributions
