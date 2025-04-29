@@ -35,7 +35,7 @@ from modules.main_modules import saving_instructions
 
 class AlphaPEM:
 
-    def __init__(self, current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_max_pola,
+    def __init__(self, current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_max_pola,
                  delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau,
                  epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step,
                  n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge, type_display,
@@ -47,7 +47,7 @@ class AlphaPEM:
         ----------
         current_density : function
             Current density evolution over time (operating input). It is a function of time and parameters dictionary.
-        Tfc : float
+        T_des : float
             Desired fuel cell temperature in Kelvin (operating input).
         Pa_des : float
             Desired anode pressure in Pascal (operating input).
@@ -162,7 +162,7 @@ class AlphaPEM:
         """
 
         # Initialize the operating inputs and parameters dictionaries.
-        self.operating_inputs = {'current_density': current_density, 'Tfc': Tfc, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
+        self.operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
                                  'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des}
         self.current_parameters = {'t_step': t_step, 'i_step': i_step, 'delta_pola': delta_pola,
                                    'i_max_pola': i_max_pola, 'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS,
@@ -185,12 +185,13 @@ class AlphaPEM:
         # Initialize the variables' dictionary.
         self.solver_variable_names = ['C_v_agc', 'C_v_agdl', 'C_v_acl', 'C_v_ccl', 'C_v_cgdl', 'C_v_cgc', 's_agdl',
                                       's_acl', 's_ccl', 's_cgdl', 'lambda_acl', 'lambda_mem', 'lambda_ccl', 'C_H2_agc',
-                                      'C_H2_agdl', 'C_H2_acl', 'C_O2_ccl', 'C_O2_cgdl', 'C_O2_cgc', 'C_N2', 'eta_c',
-                                      'Pasm', 'Paem', 'Pcsm', 'Pcem', 'Phi_asm', 'Phi_aem', 'Phi_csm', 'Phi_cem',
-                                      'Wcp', 'Wa_inj', 'Wc_inj', 'Abp_a', 'Abp_c']
+                                      'C_H2_agdl', 'C_H2_acl', 'C_O2_ccl', 'C_O2_cgdl', 'C_O2_cgc', 'C_N2', 'T_agc',
+                                      'T_agdl', 'T_acl', 'T_mem', 'T_ccl', 'T_cgdl', 'T_cgc', 'eta_c', 'Pasm', 'Paem',
+                                      'Pcsm', 'Pcem', 'Phi_asm', 'Phi_aem', 'Phi_csm', 'Phi_cem', 'Wcp', 'Wa_inj',
+                                      'Wc_inj', 'Abp_a', 'Abp_c']
         self.solver_variable_names_extension()  # Several points are considered in each GDL and must be inserted into
         #                                        the solver_variable_names.
-        self.all_variable_names = self.solver_variable_names + ['t', 'Ucell', 'S_sorp_acl', 'S_sorp_ccl'] + \
+        self.all_variable_names = self.solver_variable_names + ['t', 'Ucell', 'S_abs_acl', 'S_abs_ccl'] + \
                                   ['J_lambda_mem_acl', 'J_lambda_mem_ccl', 'Pagc', 'Pcgc', 'Phi_a_des', 'Phi_c_des']
         self.variables = {key: [] for key in self.all_variable_names}
 
@@ -229,7 +230,7 @@ class AlphaPEM:
         """Several points are considered in each GDL and must be inserted into the solver_variable_names.
         """
 
-        new_points_location = ['C_v_agdl', 'C_v_cgdl', 's_agdl', 's_cgdl', 'C_H2_agdl', 'C_O2_cgdl']
+        new_points_location = ['C_v_agdl', 'C_v_cgdl', 's_agdl', 's_cgdl', 'C_H2_agdl', 'C_O2_cgdl', 'T_agdl', 'T_cgdl']
         for variable in new_points_location:
             index = self.solver_variable_names.index(variable)
             # Delete the previous points
@@ -280,7 +281,7 @@ class AlphaPEM:
         """
 
         # Extraction of the operating inputs and parameters
-        current_density, Tfc = self.operating_inputs['current_density'], self.operating_inputs['Tfc']
+        current_density, T_des = self.operating_inputs['current_density'], self.operating_inputs['T_des']
         Pa_des, Pc_des = self.operating_inputs['Pa_des'], self.operating_inputs['Pc_des']
         Phi_a_des, Phi_c_des = self.operating_inputs['Phi_a_des'], self.operating_inputs['Phi_c_des']
         Hmem, kappa_co, i0_c_ref, = self.parameters['Hmem'], self.parameters['kappa_co'], self.parameters['i0_c_ref']
@@ -294,26 +295,26 @@ class AlphaPEM:
 
         # Initial fuel cell states
         #   Intermediate values
-        Psat_ini = 101325 * 10 ** (-2.1794 + 0.02953 * (Tfc - 273.15) - 9.1837e-5 * (Tfc - 273.15) ** 2 +
-                                   1.4454e-7 * (Tfc - 273.15) ** 3)
+        T_ini = T_des  # K. It is the initial temperature in the fuel cell.
+        Psat_ini = 101325 * 10 ** (-2.1794 + 0.02953 * (T_ini - 273.15) - 9.1837e-5 * (T_ini - 273.15) ** 2 +
+                                   1.4454e-7 * (T_ini - 273.15) ** 3)
         slim = a_slim * (Pc_des / 1e5) + b_slim
         s_switch = a_switch * slim
         #   Initial fuel cell states
-        C_v_ini = Phi_des_moy * Psat_ini / (R * Tfc)  # mol.m-3. It is the initial vapor concentration.
-        C_H2_ini = (P_des_moy - Phi_des_moy * Psat_ini) / (R * Tfc)  # mol.m-3. It is the initial H2 concentration
+        C_v_ini = Phi_des_moy * Psat_ini / (R * T_ini)  # mol.m-3. It is the initial vapor concentration.
+        C_H2_ini = (P_des_moy - Phi_des_moy * Psat_ini) / (R * T_ini)  # mol.m-3. It is the initial H2 concentration
         #                                                              in the fuel cell.
-        C_O2_ini = yO2_ext * (P_des_moy - Phi_des_moy * Psat_ini) / (R * Tfc)  # mol.m-3. It is the initial O2
+        C_O2_ini = yO2_ext * (P_des_moy - Phi_des_moy * Psat_ini) / (R * T_ini)  # mol.m-3. It is the initial O2
         #                                                                        concentration in the fuel cell.
-        C_N2_ini = (1 - yO2_ext) * (P_des_moy - Phi_des_moy * Psat_ini) / (R * Tfc)  # mol.m-3. It is the initial N2
+        C_N2_ini = (1 - yO2_ext) * (P_des_moy - Phi_des_moy * Psat_ini) / (R * T_ini)  # mol.m-3. It is the initial N2
         #                                                                              concentration in the fuel cell.
         s_ini = 0  # It is the initial liquid water saturation in the fuel cell.
-        lambda_mem_ini = lambda_eq(C_v_ini, s_ini, Tfc, Kshape)  # It is the initial water
-        #                                                                                  content in the fuel cell.
+        lambda_mem_ini = lambda_eq(C_v_ini, s_ini, T_ini)  # It is the initial water content in the fuel cell.
         i_fc_ini = current_density(self.time_interval[0], self.parameters)
-        i_n_ini = 2 * F * R * Tfc / Hmem * C_H2_ini * k_H2(lambda_mem_ini, Tfc, kappa_co) + \
-                  4 * F * R * Tfc / Hmem * C_O2_ini * k_O2(lambda_mem_ini, Tfc, kappa_co)
+        i_n_ini = 2 * F * R * T_ini / Hmem * C_H2_ini * k_H2(lambda_mem_ini, T_ini, kappa_co) + \
+                  4 * F * R * T_ini / Hmem * C_O2_ini * k_O2(lambda_mem_ini, T_ini, kappa_co)
         f_drop_ini = 0.5 * (1.0 - np.tanh((4 * s_ini - 2 * slim - 2 * s_switch) / (slim - s_switch)))
-        eta_c_ini = 1 / f_drop_ini * R * Tfc / (alpha_c * F) * \
+        eta_c_ini = 1 / f_drop_ini * R * T_ini / (alpha_c * F) * \
                     np.log((i_fc_ini + i_n_ini) / i0_c_ref * (C_O2ref / C_O2_ini) ** kappa_c)  # It is the initial
         #                                                                       cathode overpotential in the fuel cell.
 
@@ -337,20 +338,23 @@ class AlphaPEM:
         lambda_acl, lambda_mem, lambda_ccl = [lambda_mem_ini] * 3
         C_H2_agc, C_H2_agdl, C_H2_acl = C_H2_ini, C_H2_ini, C_H2_ini
         C_O2_ccl, C_O2_cgdl, C_O2_cgc = C_O2_ini, C_O2_ini, C_O2_ini
-        C_N2, eta_c = C_N2_ini, eta_c_ini
+        C_N2 = C_N2_ini
+        T_agc, T_agdl, T_acl, T_mem, T_ccl, T_cgdl, T_cgc = [T_ini] * 7
+        eta_c = eta_c_ini
         Pasm, Paem, Pcsm, Pcem = Pasm_ini, Paem_ini, Pcsm_ini, Pcem_ini
         Phi_asm, Phi_aem, Phi_csm, Phi_cem = Phi_asm_ini, Phi_aem_ini, Phi_csm_ini, Phi_cem_ini
         Wcp, Wa_inj, Wc_inj, Abp_a, Abp_c = Wcp_ini, Wa_inj_ini, Wc_inj_ini, Abp_a_ini, Abp_c_ini
 
         # Gathering of the variables initial value into one list
-        initial_variable_values = [C_v_agc] + [C_v_agdl] * n_gdl + [C_v_acl, C_v_ccl] + [C_v_cgdl] * n_gdl + \
+        initial_variable_values = ([C_v_agc] + [C_v_agdl] * n_gdl + [C_v_acl, C_v_ccl] + [C_v_cgdl] * n_gdl + \
                                   [C_v_cgc] + \
                                   [s_boundary] + [s_agdl] * (n_gdl - 1) + [s_acl, s_ccl] + [s_cgdl] * (n_gdl - 1) + \
                                   [s_boundary] + [lambda_acl, lambda_mem, lambda_ccl] + \
                                   [C_H2_agc] + [C_H2_agdl] * n_gdl + [C_H2_acl, C_O2_ccl] + [C_O2_cgdl] * n_gdl + \
-                                  [C_O2_cgc, C_N2] + [eta_c] + \
+                                  [C_O2_cgc, C_N2] + [T_agc] + [T_agdl] * n_gdl + [T_acl, T_mem, T_ccl] + \
+                                  [T_cgdl] * n_gdl + [T_cgc] + [eta_c] + \
                                   [Pasm, Paem, Pcsm, Pcem, Phi_asm, Phi_aem, Phi_csm, Phi_cem] + \
-                                  [Wcp, Wa_inj, Wc_inj, Abp_a, Abp_c]
+                                  [Wcp, Wa_inj, Wc_inj, Abp_a, Abp_c])
 
         return initial_variable_values
 
@@ -379,11 +383,11 @@ class AlphaPEM:
         for j in range(len(self.sol.t)):  # For each time...
             # ... recovery of i_fc.
             i_fc = self.operating_inputs["current_density"](self.variables['t'][j], self.parameters)
-            # ... recovery of S_sorp_acl, S_sorp_ccl, Jmem_acl, Jmem_ccl, Pagc, Pcgc.
+            # ... recovery of S_abs_acl, S_abs_ccl, Jmem_acl, Jmem_ccl, Pagc, Pcgc.
             last_solver_variables = {key: self.variables[key][j] for key in self.solver_variable_names}
             flows_recovery = calculate_flows(self.variables['t'][j], last_solver_variables, self.control_variables,
                                              i_fc, self.operating_inputs, self.parameters)
-            for key in ['S_sorp_acl', 'S_sorp_ccl', 'J_lambda_mem_acl', 'J_lambda_mem_ccl', 'Pagc', 'Pcgc']:
+            for key in ['S_abs_acl', 'S_abs_ccl', 'J_lambda_mem_acl', 'J_lambda_mem_ccl', 'Pagc', 'Pcgc']:
                 self.variables[key].append(flows_recovery[key])
             # ... recovery of Phi_a_des and Phi_c_des.
             if self.parameters["type_control"] == "Phi_des":
@@ -404,7 +408,6 @@ class AlphaPEM:
         """
 
         # Extraction of the operating inputs and parameters
-        Tfc = self.operating_inputs['Tfc']
         n_gdl, type_fuel_cell = self.parameters['n_gdl'], self.parameters['type_fuel_cell']
         type_current, type_display = self.parameters['type_current'], self.parameters['type_display']
 
@@ -421,7 +424,7 @@ class AlphaPEM:
 
                 plot_ifc(self.variables, self.operating_inputs, self.parameters, n, axes[0])
                 plot_J(self.variables, self.parameters, axes[1])
-                plot_C_v(self.variables, n_gdl, C_v_sat(Tfc), n, axes[2])
+                plot_C_v(self.variables, n_gdl, n, axes[2])
                 plot_lambda(self.variables, self.operating_inputs, self.parameters, axes[3])
                 plot_s(self.variables, self.operating_inputs, self.parameters, axes[4])
                 plot_C_O2(self.variables, n_gdl, axes[5])
@@ -453,7 +456,7 @@ class AlphaPEM:
                 plot_ifc(self.variables, self.operating_inputs, self.parameters, n, ax1[0, 0])
                 plot_Ucell(self.variables, ax1[0, 1])
                 plot_J(self.variables, self.parameters, ax1[0, 2])
-                plot_C_v(self.variables, n_gdl, C_v_sat(Tfc), n, ax1[1, 0])
+                plot_C_v(self.variables, n_gdl, n, ax1[1, 0])
                 plot_s(self.variables, self.operating_inputs, self.parameters, ax1[1, 1])
                 plot_lambda(self.variables, self.operating_inputs, self.parameters, ax1[1, 2])
                 plot_C_H2(self.variables, n_gdl, ax1[2, 0])

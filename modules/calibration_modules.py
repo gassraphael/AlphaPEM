@@ -29,7 +29,7 @@ def determined_parameters(type_fuel_cell):
 
     Returns
     -------
-    Tfc : float
+    T_des : float
             Desired fuel cell temperature in Kelvin.
     Pa_des : float
         Desired anode pressure in Pascal.
@@ -113,7 +113,7 @@ def determined_parameters(type_fuel_cell):
             type_fuel_cell == "EH-31_2.5":
         # Given values by the author
         #       Operating inputs
-        Tfc = 74 + 273.15  # K. It is the temperature of the fuel cell.
+        T_des = 74 + 273.15  # K. It is the temperature of the fuel cell.
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
         if type_fuel_cell == "EH-31_1.5":
@@ -159,7 +159,7 @@ def determined_parameters(type_fuel_cell):
     elif type_fuel_cell == "LF":
         # Given values by the author
         #       Operating inputs
-        Tfc = 80 + 273.15  # K. It is the temperature of the fuel cell.
+        T_des = 80 + 273.15  # K. It is the temperature of the fuel cell.
         Pa_des, Pc_des = 101325, 101325  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 2.0, 1.5  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.84, 0.59  # It is the desired relative humidity.
@@ -198,7 +198,7 @@ def determined_parameters(type_fuel_cell):
     # Characteristic points of the experimental polarization curve
     i_exp, U_exp = pola_exp_values(type_fuel_cell)
 
-    return (Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_pola, Aact, Hmem, Hcl, Hgdl, Hgc, Wgc, Lgc,
+    return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_pola, Aact, Hmem, Hcl, Hgdl, Hgc, Wgc, Lgc,
             type_auxiliary, type_control, type_purge, type_display, type_plot, type_current, current_density, t_step,
             i_step, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, t_purge, max_step, n_gdl, i_exp, U_exp)
 

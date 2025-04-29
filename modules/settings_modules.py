@@ -21,7 +21,7 @@ def stored_operating_inputs(type_fuel_cell):
 
     Returns
     -------
-    Tfc : float
+    T_des : float
         Desired fuel cell temperature in Kelvin.
     Pa_des : float
         Desired anode pressure in Pascal.
@@ -41,25 +41,25 @@ def stored_operating_inputs(type_fuel_cell):
 
     # For EH-31 fuel cell
     if type_fuel_cell == "EH-31_1.5":
-        Tfc = 74 + 273.15  # K. It is the desired fuel cell temperature.
+        T_des = 74 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 1.5e5, 1.5e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
         i_max_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "EH-31_2.0":
-        Tfc = 74 + 273.15  # K. It is the desired fuel cell temperature.
+        T_des = 74 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.0e5, 2.0e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
         i_max_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "EH-31_2.25":
-        Tfc = 74 + 273.15  # K. It is the desired fuel cell temperature.
+        T_des = 74 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.25e5, 2.25e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
         i_max_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "EH-31_2.5":
-        Tfc = 74 + 273.15  # K. It is the desired fuel cell temperature.
+        T_des = 74 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.5e5, 2.5e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
@@ -67,7 +67,7 @@ def stored_operating_inputs(type_fuel_cell):
 
     # For LF fuel cell
     elif type_fuel_cell == "LF":
-        Tfc = 80 + 273.15  # K. It is the desired fuel cell temperature.
+        T_des = 80 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 101325, 101325  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 2.0, 1.5  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.84, 0.59  # It is the desired relative humidity.
@@ -77,7 +77,7 @@ def stored_operating_inputs(type_fuel_cell):
     else:
         raise ValueError('the type_fuel_cell given is not valid.')
 
-    return Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola
+    return T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola
 
 
 def stored_physical_parameters(type_fuel_cell):

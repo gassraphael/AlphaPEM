@@ -81,7 +81,7 @@ def operating_inputs(type_fuel_cell):
 
     Returns
     -------
-    Tfc : float
+    T_des : float
         Desired fuel cell temperature in Kelvin.
     Pa_des : float
         Desired anode pressure in Pascal.
@@ -100,15 +100,15 @@ def operating_inputs(type_fuel_cell):
     """
 
     if type_fuel_cell == "manual_setup": # Setup which are not stored in "stored_operating_inputs".
-        Tfc = 74 + 273.15  # K. It is the desired fuel cell temperature.
+        T_des = 74 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.0e5, 2.0e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
         i_max_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
     else: # Stored setup in "stored_operating_inputs".
-        Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
+        T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
-    return Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola
+    return T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola
 
 
 def physical_parameters(type_fuel_cell):
@@ -239,8 +239,8 @@ def computing_parameters(type_current, Hgdl, Hcl):
 """ These parameters remain unchanged no matter the setting configurations."""
 
 # Physical constants
-F = 96485  # C.mol-1. It is the Faraday constant.
-R = 8.314  # J.mol-1.K-1. It is the universal gas constant.
+F = 96485.3321233  # C.mol-1. It is the Faraday constant.
+R = 8.31446261815324  # J.mol-1.K-1. It is the universal gas constant.
 M_O2 = 3.2e-2  # kg.mol-1. It is the molar mass of O2.
 M_H2 = 2e-3  # kg.mol-1. It is the molar mass of H2.
 M_N2 = 2.8e-2  # kg.mol-1. It is the molar mass of N2.
@@ -262,6 +262,8 @@ theta_c_gdl = 120 * np.pi / 180  # radian. It is the contact angle of GDL for li
 theta_c_cl = 95 * np.pi / 180  # radian. It is the contact angle of CL for liquid water.
 gamma_cond = 5e3  # s-1. It is the overall condensation rate constant for water.
 gamma_evap = 1e-4  # Pa-1.s-1. It is the overall evaporation rate constant for water.
+epsilon_p = 0.11 #. It is the percolation threshold porosity of the GDL.
+alpha_p = 0.785 #. It is a fitted value for the effective matter transfer in the GDL, for through plane direction.
 Kshape = 2  # . Mathematical factor governing lambda_eq smoothing.
 
 # Model parameters for the voltage calculation
@@ -270,6 +272,48 @@ alpha_c = 0.5  # It is the transfer coefficient of the cathode.
 E0 = 1.229  # V. It is the standard-state reversible voltage.
 Pref = 1e5  # Pa. It is the reference pressure.
 Eact = 73.2e3  # J.mol-1. It is the activation energy.
+
+# Model parameters for the heat transfer calculation
+#   Thermal conductivities
+k_th_gdl = 1.6 # J.m-1.s-1.K-1. It is the thermal conductivity of the GDLs [vetterFreeOpenReference2019].
+k_th_cl = 0.27 # J.m-1.s-1.K-1. It is the thermal conductivity of the CLs [vetterFreeOpenReference2019].
+k_th_mem = 0.3 # J.m-1.s-1.K-1. It is the thermal conductivity of the membrane [vetterFreeOpenReference2019].
+#   Specific heat capacities
+Cp_gdl = 568 # J.kg-1.K-1. It is the specific heat capacities of the GDLs [wangQuasi2DTransientModel2018].
+Cp_cl = 3300 # J.kg-1.K-1. It is the specific heat capacities the CLs [wangQuasi2DTransientModel2018].
+Cp_mem = 833 # J.kg-1.K-1. It is the specific heat capacities of the membrane [wangQuasi2DTransientModel2018].
+#   Densities
+rho_gdl = 1000 # kg.m-3. It is the density of the GDLs [wangQuasi2DTransientModel2018].
+rho_cl = 1000 # kg.m-3. It is the density of the CLs [wangQuasi2DTransientModel2018].
+#   Electrical conductivities
+sigma_e_gdl = 1250 # Ω-1.m-1. It is the electrical conductivity of the GDL [vetterFreeOpenReference2019].
+sigma_e_cl = 350 # Ω-1.m-1. It is the electrical conductivity of the GDL [vetterFreeOpenReference2019].
+#   Molar entropy of reactions
+delta_s_HOR = 0.104  # J.mol-1.K-1. It is the HOR molar reaction entropy [vetterFreeOpenReference2019].
+delta_s_ORR = -163.3  # J.mol-1.K-1. It is the ORR molar reaction entropy [vetterFreeOpenReference2019].
+#   NASA polynomial coefficients for various chemical species
+        # Coefficient format: [a1, a2, a3, a4, a5, a6, a7, phase_flag]
+        # - a1 to a5: coefficients for the dimensionless Cp/R polynomial
+        # - a6: integration constant for enthalpy (h/R)
+        # - a7: entropy constant (s/R), not used here
+        # - phase_flag: 1 = gas phase, 0 = liquid or other condensed phase
+nasa_coeffs = {
+    'H2': np.array(
+        [-7.376117610E-12, 2.015720940E-08, -1.947815100E-05, 7.980520750E-03, 2.344331120E+00, -9.179351730E+02,
+         0.683010238, 1]), # hydrogen
+    'O2': np.array(
+        [3.243728370E-12, -9.681295090E-09, 9.847302010E-06, -2.996734160E-03, 3.782456360E+00, -1.020899900E+03,
+         3.657675730E+00, 1]), # oxygen
+    'N2': np.array(
+        [-2.444854000E-12, 5.641515000E-09, -3.963222000E-06, 1.408240400E-03, 3.298677000E+00, -1.063943560E+03,
+         3.950372000E+00, 1]), # nitrogen
+    'H2O_v': np.array(
+        [1.771978170E-12, -5.487970620E-09, 6.520402110E-06, -2.036434100E-03, 4.198640560E+00, -3.029372670E+04,
+         -8.490322080E-01, 1]), # water vapor
+    'H2O_l': np.array(
+        [2.781789810E-09, -4.365919230E-06, 2.561987460E-03, -6.624454020E-01, 7.255750050E+01, -4.188654990E+04,
+         -2.882801370E+02, 0]), # liquid water
+}
 
 # Model parameters for the balance of plant
 #   Physical parameters

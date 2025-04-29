@@ -16,7 +16,7 @@ from scipy.interpolate import interp1d
 
 # Importing constants' value and functions
 from configuration.settings import F, R, E0, Pref
-from modules.transitory_functions import Psat, k_H2, k_O2
+from modules.transitory_functions import Psat, C_v_sat, k_H2, k_O2
 from calibration.experimental_values import pola_exp_values, plot_experimental_polarisation_curve
 
 # General edition
@@ -428,19 +428,19 @@ def plot_J(variables, parameters, ax):
         Axes on which the flows will be plotted.
     """
     # Extraction of the variables
-    t, S_sorp_acl_t, S_sorp_ccl_t = variables['t'], variables['S_sorp_acl'], variables['S_sorp_ccl'],
+    t, S_abs_acl_t, S_abs_ccl_t = variables['t'], variables['S_abs_acl'], variables['S_abs_ccl'],
     J_lambda_mem_acl_t, J_lambda_mem_ccl_t = variables['J_lambda_mem_acl'], variables['J_lambda_mem_ccl']
     # Extraction of the operating inputs and the parameters
     Hcl = parameters['Hcl']
 
     # Plot the sorption and dissolved water flows: J
-    J_sorp_acl, J_sorp_ccl = [x * Hcl for x in S_sorp_acl_t], [x * Hcl for x in S_sorp_ccl_t]  # Conversion in
+    J_abs_acl, J_abs_ccl = [x * Hcl for x in S_abs_acl_t], [x * Hcl for x in S_abs_ccl_t]  # Conversion in
     #                                                                                         mol.m⁻².s⁻¹ for comparison
-    ax.plot(t, J_sorp_acl, color=colors(2))
+    ax.plot(t, J_abs_acl, color=colors(2))
     ax.plot(t, J_lambda_mem_acl_t, color=colors(3))
-    ax.plot(t, J_sorp_ccl, color=colors(4))
+    ax.plot(t, J_abs_ccl, color=colors(4))
     ax.plot(t, J_lambda_mem_ccl_t, color=colors(7))
-    ax.legend([r'$\mathregular{J_{sorp,acl}}$', r'$\mathregular{J_{\lambda,mem,acl}}$', r'$\mathregular{J_{sorp,ccl}}$',
+    ax.legend([r'$\mathregular{J_{abs,acl}}$', r'$\mathregular{J_{\lambda,mem,acl}}$', r'$\mathregular{J_{abs,ccl}}$',
                r'$\mathregular{J_{\lambda,mem,ccl}}$'], loc='best')
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r'$\mathbf{Flows}$ $\mathbf{J}$ $\mathbf{\left( mol.m^{-2}.s^{-1} \right)}$', labelpad=3)
@@ -455,7 +455,7 @@ def plot_J(variables, parameters, ax):
     plt.show()
 
 
-def plot_C_v(variables, n_gdl, C_v_sat, n, ax):
+def plot_C_v(variables, n_gdl, n, ax):
     """This function plots the vapor concentrations at different spatial localisations, as a function of time.
 
     Parameters
@@ -464,8 +464,6 @@ def plot_C_v(variables, n_gdl, C_v_sat, n, ax):
         Variables calculated by the solver. They correspond to the fuel cell internal states.
     n_gdl : int
         Number of model nodes placed inside each GDL.
-    C_v_sat : float
-        Saturation vapor concentration.
     n : int
         Number of points used to plot the vapor concentration.
     ax : matplotlib.axes.Axes
@@ -476,19 +474,20 @@ def plot_C_v(variables, n_gdl, C_v_sat, n, ax):
     t, C_v_agc_t, C_v_agdl_t = variables['t'], variables['C_v_agc'], variables[f'C_v_agdl_{n_gdl // 2}']
     C_v_acl_t, C_v_ccl_t = variables['C_v_acl'], variables['C_v_ccl']
     C_v_cgdl_t, C_v_cgc_t = variables[f'C_v_cgdl_{n_gdl // 2}'], variables['C_v_cgc']
+    T_ccl = variables['T_ccl']
 
     # Plot the vapor concentrations at different spatial localisations Cv
-    C_v_sat_t = np.ones(n) * C_v_sat
+    C_v_sat_ccl_t = np.array([C_v_sat(T) for T in T_ccl])
     ax.plot(t, C_v_agc_t, color=colors(0))
     ax.plot(t, C_v_agdl_t, color=colors(1))
     ax.plot(t, C_v_acl_t, color=colors(2))
     ax.plot(t, C_v_ccl_t, color=colors(4))
     ax.plot(t, C_v_cgdl_t, color=colors(5))
     ax.plot(t, C_v_cgc_t, color=colors(6))
-    ax.plot(t, C_v_sat_t, color='k')
+    ax.plot(t, C_v_sat_ccl_t, color='k')
     ax.legend([r'$\mathregular{C_{v,agc}}$', r'$\mathregular{C_{v,agdl}}$', r'$\mathregular{C_{v,acl}}$',
                r'$\mathregular{C_{v,ccl}}$', r'$\mathregular{C_{v,cgdl}}$', r'$\mathregular{C_{v,cgc}}$',
-               r'$\mathregular{C_{v,sat}}$'], loc='best')
+               r'$\mathregular{C_{v,sat,ccl}}$'], loc='best')
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r"$\mathbf{Vapor}$ $\mathbf{concentration}$ $\mathbf{C_{v}}$ $\mathbf{\left( mol.m^{-3} \right)}$",
                   labelpad=3)
@@ -797,14 +796,14 @@ def plot_Phi_a(variables, operating_inputs, ax):
     """
 
     # Extraction of the variables
-    t, C_v_agc_t = variables['t'], variables['C_v_agc']
+    t, C_v_agc_t, T_agc = variables['t'], variables['C_v_agc'], variables['T_agc']
     Phi_asm_t, Phi_aem_t = variables['Phi_asm'], variables['Phi_aem']
     # Extraction of the operating inputs
-    Tfc, Phi_a_des = operating_inputs['Tfc'], operating_inputs['Phi_a_des']
+    Phi_a_des = operating_inputs['Phi_a_des']
 
     # Calculate the humidity Phi
     Phi_agc_t = [0] * len(t)
-    for i in range(len(t)): Phi_agc_t[i] = C_v_agc_t[i] * R * Tfc / Psat(Tfc)
+    for i in range(len(t)): Phi_agc_t[i] = C_v_agc_t[i] * R * T_agc / Psat(T_agc)
 
     # Plot the humidity at different spatial localisations: Phi
     ax.plot(t, Phi_agc_t, color=colors(0), label=r'$\mathregular{\Phi_{agc}}$')
@@ -838,14 +837,14 @@ def plot_Phi_c(variables, operating_inputs, ax):
     """
 
     # Extraction of the variables
-    t, C_v_cgc_t = variables['t'], variables['C_v_cgc']
+    t, C_v_cgc_t, T_cgc = variables['t'], variables['C_v_cgc'], variables['T_cgc']
     Phi_csm_t, Phi_cem_t = variables['Phi_csm'], variables['Phi_cem']
     # Extraction of the operating inputs
-    Tfc, Phi_c_des = operating_inputs['Tfc'], operating_inputs['Phi_c_des']
+    Phi_c_des = operating_inputs['Phi_c_des']
 
     # Calculate the humidity Phi
     Phi_cgc_t = [0] * len(t)
-    for i in range(len(t)): Phi_cgc_t[i] = C_v_cgc_t[i] * R * Tfc / Psat(Tfc)
+    for i in range(len(t)): Phi_cgc_t[i] = C_v_cgc_t[i] * R * T_cgc / Psat(T_cgc)
 
     # Plot the humidity at different spatial localisations: Phi
     ax.plot(t, Phi_cgc_t, color=colors(0), label=r'$\mathregular{\Phi_{cgc}}$')
@@ -986,9 +985,10 @@ def plot_cell_efficiency(variables, operating_inputs, parameters, n, ax):
     # Extraction of the variables
     t, Ucell_t, lambda_mem_t = variables['t'], variables['Ucell'], variables['lambda_mem']
     C_H2_acl_t, C_O2_ccl_t = variables['C_H2_acl'], variables['C_O2_ccl']
+    T_acl_t, T_mem_t, T_ccl_t = variables['T_acl'], variables['T_mem'], variables['T_ccl']
     # Extraction of the operating inputs and the parameters
-    current_density, Tfc = operating_inputs['current_density'], operating_inputs['Tfc']
-    Hmem, kappa_co = parameters['Hmem'], parameters['kappa_co']
+    current_density = operating_inputs['current_density']
+    Hmem, Hcl, kappa_co = parameters['Hmem'], parameters['Hcl'], parameters['kappa_co']
     type_fuel_cell, type_auxiliary = parameters['type_fuel_cell'], parameters['type_auxiliary']
     type_control = parameters['type_control']
 
@@ -997,10 +997,13 @@ def plot_cell_efficiency(variables, operating_inputs, parameters, n, ax):
     for i in range(n):
         ifc_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
         Pfc_t[i] = Ucell_t[i] * ifc_t[i]
-        Ueq = E0 - 8.5e-4 * (Tfc - 298.15) + R * Tfc / (2 * F) * (np.log(R * Tfc * C_H2_acl_t[i] / Pref) +
-                                                                  0.5 * np.log(R * Tfc * C_O2_ccl_t[i] / Pref))
-        i_H2 = 2 * F * R * Tfc / Hmem * C_H2_acl_t[i] * k_H2(lambda_mem_t[i], Tfc, kappa_co)
-        i_O2 = 4 * F * R * Tfc / Hmem * C_O2_ccl_t[i] * k_O2(lambda_mem_t[i], Tfc, kappa_co)
+        Ueq = E0 - 8.5e-4 * (T_ccl_t[i] - 298.15) + \
+              R * T_ccl_t[i] / (2 * F) * (np.log(R * T_acl_t[i] * C_H2_acl_t[i] / Pref) +
+                                          0.5 * np.log(R * T_ccl_t[i] * C_O2_ccl_t[i] / Pref))
+        T_acl_mem_ccl = np.average([T_acl_t[i], T_mem_t[i], T_ccl_t[i]],
+                                   weights=[Hcl / (2 * Hcl + Hmem), Hmem / (2 * Hcl + Hmem), Hcl / (2 * Hcl + Hmem)])
+        i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl_t[i] * k_H2(lambda_mem_t[i], T_mem_t[i], kappa_co)
+        i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl_t[i] * k_O2(lambda_mem_t[i], T_mem_t[i], kappa_co)
         i_n = (i_H2 + i_O2) / 1e4  # Conversion in A/cm²
         eta_fc_t[i] = Pfc_t[i] / (Ueq * (ifc_t[i] + i_n))
 

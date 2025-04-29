@@ -10,7 +10,6 @@ import numpy as np
 
 # Importing constants' value and functions
 from configuration.settings import epsilon_cl, theta_c_gdl, theta_c_cl, R
-from modules.transitory_functions import nu_l
 
 
 # _____________________________________________________Flow modules_____________________________________________________
@@ -62,8 +61,20 @@ def flows_int_values(sv, operating_inputs, parameters):
         Mean value of the pressure in the cathode GDL between two adjacent GDL nodes.
     Pcgdl_cgc : float
         Mean value of the pressure between the last GDL node and the cathode gas channel.
-    nu_l : float
-        Liquid water kinematic viscosity (m².s-1).
+    T_agc_agdl : float
+        Mean value of the temperature between the anode gas channel and the first GDL node.
+    T_agdl_agdl : list
+        Mean value of the temperature in the anode GDL between two adjacent GDL nodes.
+    T_agdl_acl : float
+        Mean value of the temperature between the last GDL node and the anode CL.
+    T_ccl_cgdl : float
+        Mean value of the temperature between the cathode CL and the first GDL node.
+    T_cgdl_cgdl : list
+        Mean value of the temperature in the cathode GDL between two adjacent GDL nodes.
+    T_cgdl_cgc : float
+        Mean value of the temperature between the last GDL node and the cathode gas channel.
+    T_acl_mem_ccl : float
+        Mean value of the temperature between the anode CL, the membrane and the cathode CL.
     """
 
     # Extraction of the variables
@@ -72,17 +83,18 @@ def flows_int_values(sv, operating_inputs, parameters):
     lambda_acl, lambda_mem, lambda_ccl = sv['lambda_acl'], sv['lambda_mem'], sv['lambda_ccl']
     C_H2_agc, C_H2_acl, C_O2_ccl, C_O2_cgc = sv['C_H2_agc'], sv['C_H2_acl'], sv['C_O2_ccl'], sv['C_O2_cgc']
     C_N2 = sv['C_N2']
+    T_agc, T_acl, T_mem, T_ccl, T_cgc = sv['T_agc'], sv['T_acl'], sv['T_mem'], sv['T_ccl'], sv['T_cgc']
     # Extraction of the operating inputs and the parameters
-    Tfc = operating_inputs['Tfc']
     epsilon_gdl, n_gdl = parameters['epsilon_gdl'], parameters['n_gdl']
+    Hcl, Hmem = parameters['Hcl'], parameters['Hmem']
 
     # Pressures in the stack
-    Pagc = (C_v_agc + C_H2_agc) * R * Tfc
-    Pagdl = [(sv[f'C_v_agdl_{i}'] + sv[f'C_H2_agdl_{i}']) * R * Tfc for i in range(1, n_gdl + 1)]
-    Pacl = (C_v_acl + C_H2_acl) * R * Tfc
-    Pccl = (C_v_ccl + C_O2_ccl + C_N2) * R * Tfc
-    Pcgdl = [(sv[f'C_v_cgdl_{i}'] + sv[f'C_O2_cgdl_{i}'] + C_N2) * R * Tfc for i in range(1, n_gdl + 1)]
-    Pcgc = (C_v_cgc + C_O2_cgc + C_N2) * R * Tfc
+    Pagc = (C_v_agc + C_H2_agc) * R * T_agc
+    Pagdl = [(sv[f'C_v_agdl_{i}'] + sv[f'C_H2_agdl_{i}']) * R * sv[f'T_agdl_{i}'] for i in range(1, n_gdl + 1)]
+    Pacl = (C_v_acl + C_H2_acl) * R * T_acl
+    Pccl = (C_v_ccl + C_O2_ccl + C_N2) * R * T_ccl
+    Pcgdl = [(sv[f'C_v_cgdl_{i}'] + sv[f'C_O2_cgdl_{i}'] + C_N2) * R * sv[f'T_cgdl_{i}'] for i in range(1, n_gdl + 1)]
+    Pcgc = (C_v_cgc + C_O2_cgc + C_N2) * R * T_cgc
 
     # Mean values ...
     #       ... of the saturated liquid water variable
@@ -103,6 +115,16 @@ def flows_int_values(sv, operating_inputs, parameters):
     Pccl_cgdl = Pccl / 2 + Pcgdl[0] / 2
     Pcgdl_cgdl = [None] + [Pcgdl[i] / 2 + Pcgdl[i + 1] / 2 for i in range(0, n_gdl - 1)]
     Pcgdl_cgc = Pcgdl[n_gdl - 1] / 2 + Pcgc / 2
+    #       ... of the temperature
+    T_agc_agdl = T_agc / 2 + sv['T_agdl_1'] / 2
+    T_agdl_agdl = [None] + [sv[f'T_agdl_{i}'] / 2 + sv[f'T_agdl_{i+1}'] / 2 for i in range(1, n_gdl)]
+    T_agdl_acl = sv[f'T_agdl_{n_gdl}'] / 2 + T_acl / 2
+    T_ccl_cgdl = T_ccl / 2 + sv['T_cgdl_1'] / 2
+    T_cgdl_cgdl = [None] + [sv[f'T_cgdl_{i}'] / 2 + sv[f'T_cgdl_{i+1}'] / 2 for i in range(1, n_gdl)]
+    T_cgdl_cgc = sv[f'T_cgdl_{n_gdl}'] / 2 + T_cgc / 2
+    T_acl_mem_ccl = np.average([T_acl, T_mem, T_ccl],
+                               weights=[Hcl / (2 * Hcl + Hmem), Hmem / (2 * Hcl + Hmem), Hcl / (2 * Hcl + Hmem)])
 
     return (Pagc, Pcgc, s_agdl_agdl, s_agdl_acl, s_ccl_cgdl, s_cgdl_cgdl, epsilon_mean, theta_c_mean, lambda_acl_mem,
-            lambda_mem_ccl, Pagc_agdl, Pagdl_agdl, Pagdl_acl, Pccl_cgdl, Pcgdl_cgdl, Pcgdl_cgc, nu_l(Tfc))
+            lambda_mem_ccl, Pagc_agdl, Pagdl_agdl, Pagdl_acl, Pccl_cgdl, Pcgdl_cgdl, Pcgdl_cgc, T_agc_agdl, T_agdl_agdl,
+            T_agdl_acl, T_ccl_cgdl, T_cgdl_cgdl, T_cgdl_cgc, T_acl_mem_ccl)

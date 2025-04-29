@@ -6,6 +6,7 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing the necessary libraries
+import time
 import numpy as np
 import tkinter as tk
 from tkinter import messagebox
@@ -329,14 +330,14 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     elif choice_buttons['type_fuel_cell']['value'].get() == "Linhao Fan (2010)":
         type_fuel_cell = "LF"
 
-    Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
+    T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
     Hcl, epsilon_mc, tau, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, Re, i0_c_ref, kappa_co, kappa_c, \
         a_slim, b_slim, a_switch, C_scl = \
         stored_physical_parameters(type_fuel_cell)
 
     # operating conditions recovery
-    choice_operating_conditions['Temperature - Tfc (°C)']['value'].set(np.round(Tfc - 273.15))  # °C
+    choice_operating_conditions['Temperature - Tfc (°C)']['value'].set(np.round(T_des - 273.15))  # °C
     choice_operating_conditions['Anode pressure - Pa (bar)']['value'].set(np.round(Pa_des / 1e5, 2))  # bar
     choice_operating_conditions['Cathode pressure - Pc (bar)']['value'].set(np.round(Pc_des / 1e5, 2))  # bar
     choice_operating_conditions['Anode stoichiometry - Sa']['value'].set(np.round(Sa, 1))
@@ -392,7 +393,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
         A dictionary containing the button information.
     """
     # operating conditions
-    Tfc = choice_operating_conditions['Temperature - Tfc (°C)']['value'].get() + 273.15  # K
+    T_des = choice_operating_conditions['Temperature - Tfc (°C)']['value'].get() + 273.15  # K
     Pa_des = choice_operating_conditions['Anode pressure - Pa (bar)']['value'].get() * 1e5  # Pa
     Pc_des = choice_operating_conditions['Cathode pressure - Pc (bar)']['value'].get() * 1e5  # Pa
     Sa = choice_operating_conditions['Anode stoichiometry - Sa']['value'].get()
@@ -489,7 +490,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     else:
         type_plot = "dynamic"
 
-    return (Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl,
+    return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl,
             epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, t_step,
             i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, max_step, n_gdl,
             type_fuel_cell, type_auxiliary, type_control, type_purge, type_display, type_plot)
@@ -758,7 +759,7 @@ def set_equal_width(frame1, frame2, frame3, frame4, frame5, frame6):
             frame.grid_columnconfigure(i, minsize=max(widths) / 5.5)  # Set minimum width of all column to max_width / 5
 
 
-def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+def launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                                      i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
                                      Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
                                      kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell,
@@ -769,7 +770,7 @@ def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, S
     ----------
     current_density : function
         Current density evolution over time (operating input). It is a function of time and parameters dictionary.
-    Tfc : float
+    T_des : float
         Desired fuel cell temperature in Kelvin (operating input).
     Pa_des : float
         Desired anode pressure in Pascal (operating input).
@@ -877,6 +878,9 @@ def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, S
         Type of plot (computing parameter).
     """
 
+    # Starting time
+    start_time = time.time()
+
     # Figures preparation
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(type_current, type_display)
 
@@ -891,7 +895,7 @@ def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, S
 
         # Dynamic simulation
         for i in range(n):
-            Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+            Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                                  i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
                                  Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c,
                                  a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
@@ -915,7 +919,7 @@ def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, S
 
     else:  # elif type_plot == "fixed":
         # Simulation
-        Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+        Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                              i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
                              Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
                              b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
@@ -927,8 +931,12 @@ def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, S
     # Plot saving
     plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2, fig3)
 
+    # Ending time
+    algo_time = time.time() - start_time
+    print('Time of the algorithm in second :', algo_time)
 
-def launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step,
+
+def launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step,
                                              i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
                                              Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re,
                                              i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step,
@@ -940,7 +948,7 @@ def launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_de
     ----------
     current_density : function
         Current density evolution over time (operating input). It is a function of time and parameters dictionary.
-    Tfc : float
+    T_des : float
         Desired fuel cell temperature in Kelvin (operating input).
     Pa_des : float
         Desired anode pressure in Pascal (operating input).
@@ -1048,6 +1056,9 @@ def launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_de
         Type of plot (computing parameter).
     """
 
+    # Starting time
+    start_time = time.time()
+
     # Figures preparation
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(type_current, type_display)
 
@@ -1065,7 +1076,7 @@ def launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_de
 
         # Dynamic simulation
         for i in range(n):
-            Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+            Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                                  i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
                                  Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c,
                                  a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
@@ -1089,7 +1100,7 @@ def launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_de
 
     else:  # elif type_plot == "fixed":
         # Simulation
-        Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+        Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                              i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
                              Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
                              b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
@@ -1101,8 +1112,12 @@ def launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_de
     # Plot saving
     plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2, fig3)
 
+    # Ending time
+    algo_time = time.time() - start_time
+    print('Time of the algorithm in second :', algo_time)
 
-def launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+
+def launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                                     i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
                                     Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
                                     kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell,
@@ -1113,7 +1128,7 @@ def launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc
     ----------
     current_density : function
         Current density evolution over time (operating input). It is a function of time and parameters dictionary.
-    Tfc : float
+    T_des : float
         Desired fuel cell temperature in Kelvin (operating input).
     Pa_des : float
         Desired anode pressure in Pascal (operating input).
@@ -1221,6 +1236,9 @@ def launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc
         Type of plot (computing parameter).
     """
 
+    # Starting time
+    start_time = time.time()
+
     # Figures preparation
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(type_current, type_display)
 
@@ -1236,7 +1254,7 @@ def launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc
 
     #       A preliminary simulation run is necessary to equilibrate the internal variables of the cell at i_EIS
     #       prior to initiating the EIS.
-    Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+    Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                          i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
                          Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
                          b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
@@ -1260,7 +1278,7 @@ def launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc
 
     # Dynamic simulation
     for i in range(n):
-        Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+        Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                              i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
                              Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
                              kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell,
@@ -1289,3 +1307,7 @@ def launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc
 
     # Plot saving
     plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2, fig3)
+
+    # Ending time
+    algo_time = time.time() - start_time
+    print('Time of the algorithm in second :', algo_time)

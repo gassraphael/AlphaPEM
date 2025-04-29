@@ -10,7 +10,7 @@ import numpy as np
 
 # Importing constants' value and functions
 from configuration.settings import F, R, E0, Pref
-from modules.transitory_functions import k_H2, k_O2
+from modules.transitory_functions import k_H2, k_O2, sigma_p
 
 
 # _____________________________________________________Cell voltage_____________________________________________________
@@ -38,15 +38,18 @@ def calculate_eta_c_intermediate_values(solver_variables, operating_inputs, para
     # Extraction of the variables
     s_ccl, lambda_mem = solver_variables['s_ccl'], solver_variables['lambda_mem']
     C_H2_acl, C_O2_ccl = solver_variables['C_H2_acl'], solver_variables['C_O2_ccl']
+    T_acl, T_mem, T_ccl = solver_variables['T_acl'], solver_variables['T_mem'], solver_variables['T_ccl']
     # Extraction of the operating inputs and the parameters
-    Tfc, Pc_des = operating_inputs['Tfc'], operating_inputs['Pc_des']
-    Hmem = parameters['Hmem']
+    Pc_des = operating_inputs['Pc_des']
+    Hmem, Hcl = parameters['Hmem'], parameters['Hcl']
     i0_c_ref, kappa_co, kappa_c = parameters['i0_c_ref'], parameters['kappa_co'], parameters['kappa_c']
     a_slim, b_slim, a_switch = parameters['a_slim'], parameters['b_slim'], parameters['a_switch']
 
     # The crossover current density i_n
-    i_H2 = 2 * F * R * Tfc / Hmem * C_H2_acl * k_H2(lambda_mem, Tfc, kappa_co)
-    i_O2 = 4 * F * R * Tfc / Hmem * C_O2_ccl * k_O2(lambda_mem, Tfc, kappa_co)
+    T_acl_mem_ccl = np.average([T_acl, T_mem, T_ccl],
+                               weights=[Hcl / (2 * Hcl + Hmem), Hmem / (2 * Hcl + Hmem), Hcl / (2 * Hcl + Hmem)])
+    i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
+    i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
     i_n = i_H2 + i_O2
 
     # The liquid water induced voltage drop function f_drop
@@ -78,8 +81,8 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
     # Extraction of the variables
     t, lambda_mem_t, lambda_ccl_t = variables['t'], variables['lambda_mem'], variables['lambda_ccl']
     C_H2_acl_t, C_O2_ccl_t, eta_c_t = variables['C_H2_acl'], variables['C_O2_ccl'], variables['eta_c']
+    T_acl_t, T_mem_t, T_ccl_t = variables['T_acl'], variables['T_mem'], variables['T_ccl']
     # Extraction of the operating inputs and the parameters
-    Tfc = operating_inputs['Tfc']
     Hmem, Hcl, epsilon_mc, tau = parameters['Hmem'], parameters['Hcl'], parameters['epsilon_mc'], parameters['tau']
     Re, kappa_co = parameters['Re'], parameters['kappa_co']
 
@@ -93,31 +96,28 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
         # Recovery of the already calculated variable values at each time step
         lambda_mem, lambda_ccl = lambda_mem_t[i], lambda_ccl_t[i]
         C_H2_acl, C_O2_ccl = C_H2_acl_t[i], C_O2_ccl_t[i]
+        T_acl, T_mem, T_ccl = T_acl_t[i], T_mem_t[i], T_ccl_t[i]
         eta_c = eta_c_t[i]
 
         # Current density value at this time step
         i_fc = operating_inputs['current_density'](t[i], parameters)
 
         # The equilibrium potential
-        Ueq = E0 - 8.5e-4 * (Tfc - 298.15) + R * Tfc / (2 * F) * (np.log(R * Tfc * C_H2_acl / Pref) +
-                                                                  0.5 * np.log(R * Tfc * C_O2_ccl / Pref))
+        Ueq = E0 - 8.5e-4 * (T_ccl - 298.15) + R * T_ccl / (2 * F) * (np.log(R * T_acl * C_H2_acl / Pref) +
+                                                                  0.5 * np.log(R * T_ccl * C_O2_ccl / Pref))
 
         # The crossover current density
-        i_H2 = 2 * F * R * Tfc / Hmem * C_H2_acl * k_H2(lambda_mem, Tfc, kappa_co)
-        i_O2 = 4 * F * R * Tfc / Hmem * C_O2_ccl * k_O2(lambda_mem, Tfc, kappa_co)
+        T_acl_mem_ccl = np.average([T_acl, T_mem, T_ccl],
+                                   weights=[Hcl/(2*Hcl + Hmem), Hmem/(2*Hcl + Hmem), Hcl/(2*Hcl + Hmem)])
+        i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
+        i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
         i_n = i_H2 + i_O2
 
         # The proton resistance
         #       The proton resistance at the membrane : Rmem
-        if lambda_mem >= 1:
-            Rmem = Hmem / ((0.5139 * lambda_mem - 0.326) * np.exp(1268 * (1 / 303.15 - 1 / Tfc)))
-        else:
-            Rmem = Hmem / (0.1879 * np.exp(1268 * (1 / 303.15 - 1 / Tfc)))
+        Rmem = Hmem / sigma_p('mem', lambda_mem, T_mem)
         #       The proton resistance at the cathode catalyst layer : Rccl
-        if lambda_ccl >= 1:
-            Rccl = Hcl / ((epsilon_mc ** tau) * (0.5139 * lambda_ccl - 0.326) * np.exp(1268 * (1 / 303.15 - 1 / Tfc)))
-        else:
-            Rccl = Hcl / ((epsilon_mc ** tau) * 0.1879 * np.exp(1268 * (1 / 303.15 - 1 / Tfc)))
+        Rccl = Hcl / sigma_p('ccl', lambda_ccl, T_ccl, epsilon_mc, tau)
         #       The total proton resistance
         Rp = Rmem + Rccl  # its value is around [4-7]e-6 ohm.m².
 
