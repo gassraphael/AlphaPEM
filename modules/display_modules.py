@@ -742,7 +742,7 @@ def plot_T(variables, operating_inputs, n_gdl, ax):
     ax.plot(t, T_ccl_t, color=colors(4))
     ax.plot(t, T_cgdl_t, color=colors(5))
     ax.plot(t, T_cgc_t, color=colors(6))
-    ax.plot(t, T_des, color='k')
+    ax.plot(t, T_des_t, color='k')
     ax.legend([r'$\mathregular{T_{agc}}$', r'$\mathregular{T_{agdl}}$', r'$\mathregular{T_{acl}}$',
                r'$\mathregular{T_{mem}}$', r'$\mathregular{T_{ccl}}$', r'$\mathregular{T_{cgdl}}$',
                r'$\mathregular{T_{cgc}}$', r'$\mathregular{T_{des}}$'], loc='best')
