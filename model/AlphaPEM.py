@@ -26,9 +26,9 @@ from configuration.settings import Pext, Kshape, yO2_ext, C_O2ref, alpha_c, F, R
 from modules.dif_eq_modules import event_negative
 from modules.transitory_functions import lambda_eq, C_v_sat, k_H2, k_O2
 from modules.display_modules import plot_ifc, plot_J, plot_C_v, plot_lambda, plot_s, plot_C_O2, plot_C_H2, plot_C_N2, \
-    plot_Ucell, plot_P, plot_Phi_a, plot_Phi_c, plot_Phi_des, plot_polarisation_curve, make_Fourier_transformation, \
-    plot_EIS_curve_Nyquist, plot_EIS_curve_Bode_amplitude, plot_EIS_curve_Bode_angle, plot_EIS_curve_tests, \
-    plot_power_density_curve, plot_cell_efficiency
+    plot_T, plot_Ucell, plot_P, plot_Phi_a, plot_Phi_c, plot_Phi_des, plot_polarisation_curve, \
+    make_Fourier_transformation, plot_EIS_curve_Nyquist, plot_EIS_curve_Bode_amplitude, plot_EIS_curve_Bode_angle, \
+    plot_EIS_curve_tests, plot_power_density_curve, plot_cell_efficiency
 from modules.main_modules import saving_instructions
 
 # _______________________________________________________AlphaPEM_______________________________________________________
@@ -420,20 +420,21 @@ class AlphaPEM:
         if type_current == "step":
             if type_display == "multiple":
 
-                figs, axes = zip(*[plt.subplots(figsize=(8, 8)) for _ in range(12)])
+                figs, axes = zip(*[plt.subplots(figsize=(8, 8)) for _ in range(13)])
 
                 plot_ifc(self.variables, self.operating_inputs, self.parameters, n, axes[0])
                 plot_J(self.variables, self.parameters, axes[1])
-                plot_C_v(self.variables, n_gdl, n, axes[2])
+                plot_C_v(self.variables, n_gdl, axes[2])
                 plot_lambda(self.variables, self.operating_inputs, self.parameters, axes[3])
                 plot_s(self.variables, self.operating_inputs, self.parameters, axes[4])
                 plot_C_O2(self.variables, n_gdl, axes[5])
                 plot_C_H2(self.variables, n_gdl, axes[6])
                 plot_C_N2(self.variables, axes[7])
-                plot_Ucell(self.variables, axes[8])
-                plot_P(self.variables, axes[9])
-                plot_Phi_a(self.variables, self.operating_inputs, axes[10])
-                plot_Phi_c(self.variables, self.operating_inputs, axes[11])
+                plot_T(self.variables, self.operating_inputs, n_gdl, axes[8])
+                plot_Ucell(self.variables, axes[9])
+                plot_P(self.variables, axes[10])
+                plot_Phi_a(self.variables, self.operating_inputs, axes[11])
+                plot_Phi_c(self.variables, self.operating_inputs, axes[12])
 
                 # Considering the number of plots, the saving instructions are made here and not in the main.py file.
                 saving_instructions("results", subfolder_name, "step_current_ifc_1.pdf", figs[0])
@@ -444,10 +445,11 @@ class AlphaPEM:
                 saving_instructions("results", subfolder_name, "step_current_C_O2_1.pdf", figs[5])
                 saving_instructions("results", subfolder_name, "step_current_C_H2_1.pdf", figs[6])
                 saving_instructions("results", subfolder_name, "step_current_C_N2_1.pdf", figs[7])
-                saving_instructions("results", subfolder_name, "step_current_Ucell_1.pdf", figs[8])
-                saving_instructions("results", subfolder_name, "step_current_P_1.pdf", figs[9])
-                saving_instructions("results", subfolder_name, "step_current_Phi_a_1.pdf", figs[10])
-                saving_instructions("results", subfolder_name, "step_current_Phi_c_1.pdf", figs[11])
+                saving_instructions("results", subfolder_name, "step_current_T_1.pdf", figs[8])
+                saving_instructions("results", subfolder_name, "step_current_Ucell_1.pdf", figs[9])
+                saving_instructions("results", subfolder_name, "step_current_P_1.pdf", figs[10])
+                saving_instructions("results", subfolder_name, "step_current_Phi_a_1.pdf", figs[11])
+                saving_instructions("results", subfolder_name, "step_current_Phi_c_1.pdf", figs[12])
 
                 plt.pause(0.001)  # A break is necessary to plot the new points in dynamic mode
 
@@ -455,8 +457,8 @@ class AlphaPEM:
 
                 plot_ifc(self.variables, self.operating_inputs, self.parameters, n, ax1[0, 0])
                 plot_Ucell(self.variables, ax1[0, 1])
-                plot_J(self.variables, self.parameters, ax1[0, 2])
-                plot_C_v(self.variables, n_gdl, n, ax1[1, 0])
+                plot_T(self.variables, self.operating_inputs, n_gdl, ax1[0, 2])
+                plot_C_v(self.variables, n_gdl, ax1[1, 0])
                 plot_s(self.variables, self.operating_inputs, self.parameters, ax1[1, 1])
                 plot_lambda(self.variables, self.operating_inputs, self.parameters, ax1[1, 2])
                 plot_C_H2(self.variables, n_gdl, ax1[2, 0])

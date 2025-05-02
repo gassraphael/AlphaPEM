@@ -455,7 +455,7 @@ def plot_J(variables, parameters, ax):
     plt.show()
 
 
-def plot_C_v(variables, n_gdl, n, ax):
+def plot_C_v(variables, n_gdl, ax):
     """This function plots the vapor concentrations at different spatial localisations, as a function of time.
 
     Parameters
@@ -464,8 +464,6 @@ def plot_C_v(variables, n_gdl, n, ax):
         Variables calculated by the solver. They correspond to the fuel cell internal states.
     n_gdl : int
         Number of model nodes placed inside each GDL.
-    n : int
-        Number of points used to plot the vapor concentration.
     ax : matplotlib.axes.Axes
         Axes on which the vapor concentration will be plotted.
     """
@@ -711,6 +709,53 @@ def plot_C_N2(variables, ax):
     ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.5))
     ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.5 / 5))
     ax.set_ylim(47, 49)
+
+
+def plot_T(variables, operating_inputs, n_gdl, ax):
+    """This function plots the vapor concentrations at different spatial localisations, as a function of time.
+
+    Parameters
+    ----------
+    variables : dict
+        Variables calculated by the solver. They correspond to the fuel cell internal states.
+    operating_inputs : dict
+        Operating inputs of the fuel cell.
+    n_gdl : int
+        Number of model nodes placed inside each GDL.
+    ax : matplotlib.axes.Axes
+        Axes on which the vapor concentration will be plotted.
+    """
+
+    # Extraction of the variables and the operating inputs
+    t, T_agc_t, T_agdl_t = variables['t'], variables['T_agc'], variables[f'T_agdl_{n_gdl // 2}']
+    T_acl_t, T_mem_t, T_ccl_t = variables['T_acl'], variables['T_mem'], variables['T_ccl']
+    T_cgdl_t, T_cgc_t = variables[f'T_cgdl_{n_gdl // 2}'], variables['T_cgc']
+    T_des = operating_inputs['T_des']
+
+
+    # Plot the temperature at different spatial localisations
+    T_des_t = np.array([T_des] * len(t))
+    ax.plot(t, T_agc_t, color=colors(0))
+    ax.plot(t, T_agdl_t, color=colors(1))
+    ax.plot(t, T_acl_t, color=colors(2))
+    ax.plot(t, T_mem_t, color=colors(3))
+    ax.plot(t, T_ccl_t, color=colors(4))
+    ax.plot(t, T_cgdl_t, color=colors(5))
+    ax.plot(t, T_cgc_t, color=colors(6))
+    ax.plot(t, T_des, color='k')
+    ax.legend([r'$\mathregular{T_{agc}}$', r'$\mathregular{T_{agdl}}$', r'$\mathregular{T_{acl}}$',
+               r'$\mathregular{T_{mem}}$', r'$\mathregular{T_{ccl}}$', r'$\mathregular{T_{cgdl}}$',
+               r'$\mathregular{T_{cgc}}$', r'$\mathregular{T_{des}}$'], loc='best')
+    ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
+    ax.set_ylabel(r"$\mathbf{Temperature}$ $\mathbf{T}$ $\mathbf{\left( K \right)}$", labelpad=3)
+
+    # Plot instructions
+    plot_general_instructions(ax)
+    ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
+    ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
+    # ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(1))
+    # ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(1 / 5))
+    # ax.set_ylim(11, 16)
 
 
 def plot_Ucell(variables, ax):
