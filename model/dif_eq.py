@@ -430,24 +430,32 @@ def calculate_dyn_temperature_evolution(dif_eq, rho_Cp, n_gdl, Jt, Q_r, Q_sorp, 
     #       Inside the AGC
     dif_eq['dT_agc / dt'] = 0  # Dirichlet boundary condition. T_agc is initialized to T_fc and remains constant.
     #       Inside the AGDL
-    dif_eq['dT_agdl_1 / dt'] = 0
+    dif_eq['dT_agdl_1 / dt'] = (1 / rho_Cp['agdl_1']) * ((Jt['agc_agdl'] - Jt['agdl_agdl_1']) +
+                                                          Q_lv['agdl_1'] + Q_e['agdl_1'])
     for i in range(2, n_gdl):
-        dif_eq[f'dT_agdl_{i} / dt'] = 0
-    dif_eq[f'dT_agdl_{n_gdl} / dt'] = 0
+        dif_eq[f'dT_agdl_{i} / dt'] = (1 / rho_Cp[f'agdl_{i}']) * ((Jt[f'agdl_agdl_{i-1}'] - Jt[f'agdl_agdl_{i}']) +
+                                                                 Q_lv[f'agdl_{i}'] + Q_e[f'agdl_{i}'])
+    dif_eq[f'dT_agdl_{n_gdl} / dt'] = (1 / rho_Cp[f'agdl_{n_gdl}']) * ((Jt[f'agdl_agdl_{n_gdl-1}'] - Jt['agdl_acl']) +
+                                                                     Q_lv[f'agdl_{n_gdl}'] + Q_e[f'agdl_{n_gdl}'])
     #      Inside the ACL
-    dif_eq['dT_acl / dt'] = 0
+    dif_eq['dT_acl / dt'] = (1 / rho_Cp['acl']) * ((Jt['agdl_acl'] - Jt['acl_mem']) +
+                                                   Q_r['acl'] + Q_sorp['acl'] + Q_lv['acl'] + Q_e['acl'])
 
     # Inside the membrane
-    dif_eq['dT_mem / dt'] = 0
+    dif_eq['dT_mem / dt'] = (1 / rho_Cp['mem']) * ((Jt['acl_mem'] - Jt['mem_ccl']) + Q_p['mem'])
 
     # At the cathode side
     #       Inside the CCL
-    dif_eq['dT_ccl / dt'] = 0
+    dif_eq['dT_ccl / dt'] = (1 / rho_Cp['ccl']) * ((Jt['mem_ccl'] - Jt['ccl_cgdl']) +
+                                                   Q_r['ccl'] + Q_sorp['acl'] + Q_lv['ccl'] + Q_p['ccl'] + Q_e['ccl'])
     #       Inside the CGDL
-    dif_eq['dT_cgdl_1 / dt'] = 0
+    dif_eq['dT_cgdl_1 / dt'] = (1 / rho_Cp['cgdl_1']) * ((Jt['ccl_cgdl'] - Jt['cgdl_cgdl_1']) +
+                                                          Q_lv['cgdl_1'] + Q_e['cgdl_1'])
     for i in range(2, n_gdl):
-        dif_eq[f'dT_cgdl_{i} / dt'] = 0
-    dif_eq[f'dT_cgdl_{n_gdl} / dt'] = 0
+        dif_eq[f'dT_cgdl_{i} / dt'] = (1 / rho_Cp[f'cgdl_{i}']) * ((Jt[f'cgdl_cgdl_{i-1}'] - Jt[f'cgdl_cgdl_{i}']) +
+                                                                 Q_lv[f'cgdl_{i}'] + Q_e[f'cgdl_{i}'])
+    dif_eq[f'dT_cgdl_{n_gdl} / dt'] = (1 / rho_Cp[f'cgdl_{n_gdl}']) * ((Jt[f'cgdl_cgdl_{n_gdl-1}'] - Jt['cgdl_cgc']) +
+                                                                     Q_lv[f'cgdl_{n_gdl}'] + Q_e[f'cgdl_{n_gdl}'])
     #       Inside the CCG
     dif_eq['dT_cgc / dt'] = 0  # Dirichlet boundary condition. T_cgc is initialized to T_fc and remains constant.
 
