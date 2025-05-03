@@ -93,13 +93,13 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl
            'ccl': i_fc * eta_c / Hcl + S_r_ccl * T_ccl * (-delta_s_ORR)}
 
     # The heat dissipated by the absorption of water from the CL to the membrane, in J.m-3.s-1.
-    Q_sorp = {'acl': S_abs_acl * (- delta_h_abs(T_acl)),
-              'ccl': S_abs_ccl * (- delta_h_abs(T_ccl))}
+    Q_sorp = {'acl': S_abs_acl * (-delta_h_abs(T_acl)),
+              'ccl': S_abs_ccl * (-delta_h_abs(T_ccl))}
 
     # The heat dissipated by the liquefaction of vapor water, in J.m-3.s-1.
     Q_liq = {**{f'agdl_{i}': Sl_agdl[i] * (- delta_h_liq(sv[f'T_agdl_{i}'])) for i in range(1, n_gdl + 1)},
             **{f'cgdl_{i}': Sl_cgdl[i] * (- delta_h_liq(sv[f'T_cgdl_{i}'])) for i in range(1, n_gdl + 1)},
-            'acl': Sl_acl * (- delta_h_liq(T_acl)),
+            'acl': Sl_acl * (-delta_h_liq(T_acl)),
             'ccl': Sl_ccl * (-delta_h_liq(T_ccl))}
 
     # The heat dissipated by the ionic currents (Joule heating + Ohm's law), in J.m-3.s-1.
