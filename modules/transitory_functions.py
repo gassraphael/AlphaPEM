@@ -11,8 +11,7 @@ from scipy.stats import hmean
 
 # Importing constants' value
 from configuration.settings import (M_eq, rho_mem, M_H2, M_O2, M_N2, M_H2O, R, Kshape, epsilon_p, alpha_p, k_th_gdl,
-                                    k_th_cl, k_th_mem, Cp_gdl, Cp_cl, Cp_mem, rho_gdl, rho_cl, sigma_e_gdl, sigma_e_cl,
-                                    nasa_coeffs)
+                                    k_th_cl, k_th_mem, Cp_gdl, Cp_cl, Cp_mem, rho_gdl, rho_cl, sigma_e_gdl, sigma_e_cl)
 
 
 # _________________________________________________Transitory functions_________________________________________________
@@ -503,7 +502,7 @@ def k_O2(lambdaa, T, kappa_co):
         return kappa_co * 1.2 * 1e-14 * np.exp(E_O2_l / R * (1 / Tref - 1 / T))
 
 
-def sigma_p(element, lambdaa, T, epsilon_mc=None, tau=None):
+def sigma_p_eff(element, lambdaa, T, epsilon_mc=None, tau=None):
     """This function calculates the proton conductivity, in Ω-1.m-1, in either the membrane or the CCL.
 
     Parameters
@@ -750,7 +749,7 @@ def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C
         raise ValueError("The element should be either 'agdl', 'cgdl', 'acl', 'ccl' or 'mem'.")
 
 
-def Cp(component, T):
+def Cp0(component, T):
     """This function calculates the specific heat capacity of fluids, in J.kg-1.K-1, as a function of the
     temperature.
 
@@ -789,7 +788,37 @@ def Cp(component, T):
         raise ValueError("The element should be either 'H2O_l', 'H2O_v', 'H2', 'O2' or 'N2'.")
 
 
-def calculate_rho_Cp(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C_N2=None, epsilon=None, epsilon_mc=None):
+def h0(component, T):
+    """This function calculates the standard enthalpy of fluids, in J.mol-1, as a function of the temperature.
+    The variation of the enthalpy of reaction with temperature is given by Kirchhoff's Law of Thermochemistry.
+
+    Parameters
+    ----------
+    component : str
+        Specifies the gas for which the specific heat capacity is calculated.
+        Must be either 'H2O_l' (liquid water) or 'H2O_v' (vapor).
+    T : float
+        Temperature in K.
+
+    Returns
+    -------
+    float
+        Standard enthalpy of the selected fluid in J.mol-1.
+
+    Notes
+    -----
+    Source : Chase, M. W. (1998). NIST-JANAF Thermochemical Tables, 4th edition"""
+
+    if component == 'H2O_l':  # For T >= 298 and T <= 500 K.
+        return (-285.83 - 203.6060 * (T/1000) + 1523.290 * (T/1000)**2 / 2 - 3196.413 * (T/1000)**3 / 3 +
+                2474.455 * (T/1000)**4 / 4 - 3.855326 / (T/1000) - 256.5478 + 285.8304) * 1e3
+    elif component == 'H2O_v':  # For T = 298.15 K. I failed to find a proper equation at the good range of temperature.
+        return -241.83 * 1e3 + Cp0('H2O_v', T) * M_H2O * (T - 298.15)
+    else:
+        raise ValueError("The element should be either 'H2O_l' or 'H2O_v'")
+
+
+def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C_N2=None, epsilon=None, epsilon_mc=None):
     """This function calculates the volumetric heat capacity, in J.m-3.K-1, in either the GDL, the CL or the membrane.
 
     Parameters
@@ -829,15 +858,15 @@ def calculate_rho_Cp(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2
         if element == 'agdl':  # The heat capacity of the gas mixture in the AGDL
             if C_H2 is None:
                 raise ValueError("For the AGDL, C_H2 must be provided.")
-            rho_Cp_gaz = np.average([M_H2O * C_v * Cp('H2O_v', T), M_H2 * C_H2 * Cp('H2', T)],
+            rho_Cp0_gaz = np.average([M_H2O * C_v * Cp0('H2O_v', T), M_H2 * C_H2 * Cp0('H2', T)],
                                     weights=[C_v / (C_v + C_H2), C_H2 / (C_v + C_H2)])
         else:  # The heat capacity of the gas mixture in the CGDL
             if C_O2 is None or C_N2 is None:
                 raise ValueError("For the CGDL, C_O2 and C_N2 must be provided.")
-            rho_Cp_gaz = np.average([M_H2O * C_v * Cp('H2O_v', T), M_O2 * C_O2 * Cp('O2', T),
-                                     M_N2 * C_N2 * Cp('N2', T)],
+            rho_Cp0_gaz = np.average([M_H2O * C_v * Cp0('H2O_v', T), M_O2 * C_O2 * Cp0('O2', T),
+                                     M_N2 * C_N2 * Cp0('N2', T)],
                                     weights=[C_v / (C_v + C_O2 + C_N2), C_O2 / (C_v + C_O2 + C_N2), C_N2 / (C_v + C_O2 + C_N2)])
-        return np.average([rho_gdl * Cp_gdl, rho_H2O_l(T) * Cp('H2O_l', T), rho_Cp_gaz],
+        return np.average([rho_gdl * Cp_gdl, rho_H2O_l(T) * Cp0('H2O_l', T), rho_Cp0_gaz],
                           weights=[epsilon_c, epsilon * s, epsilon * (1 - s)])
 
     elif element == 'acl' or element == 'ccl':  # The volumetric heat capacity at the CL
@@ -847,31 +876,30 @@ def calculate_rho_Cp(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2
         if element == 'acl':  # The heat capacity of the gas mixture in the ACL
             if C_H2 is None:
                 raise ValueError("For the ACL, C_H2 must be provided.")
-            rho_Cp_gaz = np.average([M_H2O * C_v * Cp('H2O_v', T), M_H2 * C_H2 * Cp('H2', T)],
+            rho_Cp0_gaz = np.average([M_H2O * C_v * Cp0('H2O_v', T), M_H2 * C_H2 * Cp0('H2', T)],
                                     weights=[C_v / (C_v + C_H2), C_H2 / (C_v + C_H2)])
         else:  # The heat capacity of the gas mixture in the CCL
             if C_O2 is None or C_N2 is None:
                 raise ValueError("For the CCL, C_O2 and C_N2 must be provided.")
-            rho_Cp_gaz = np.average([M_H2O * C_v * Cp('H2O_v', T), M_O2 * C_O2 * Cp('O2', T),
-                                     M_N2 * C_N2 * Cp('N2', T)],
+            rho_Cp0_gaz = np.average([M_H2O * C_v * Cp0('H2O_v', T), M_O2 * C_O2 * Cp0('O2', T),
+                                     M_N2 * C_N2 * Cp0('N2', T)],
                                     weights=[C_v / (C_v + C_O2 + C_N2), C_O2 / (C_v + C_O2 + C_N2), C_N2 / (C_v + C_O2 + C_N2)])
-        return np.average([rho_cl * Cp_cl, rho_mem * Cp_mem, rho_H2O_l(T) * Cp('H2O_l', T), rho_Cp_gaz],
+        return np.average([rho_cl * Cp_cl, rho_mem * Cp_mem, rho_H2O_l(T) * Cp0('H2O_l', T), rho_Cp0_gaz],
                           weights=[epsilon_c, epsilon_mc, epsilon * s, epsilon * (1 - s)])
 
     elif element == 'mem':  # The volumetric heat capacity at the membrane
         if lambdaa is None:
             raise ValueError("For the membrane, lambdaa must be provided.")
-        return np.average([rho_mem * Cp_mem, rho_H2O_l(T) * Cp('H2O_l', T)],
+        return np.average([rho_mem * Cp_mem, rho_H2O_l(T) * Cp0('H2O_l', T)],
                           weights=[1 - fv(lambdaa, T), fv(lambdaa, T)])
 
     else:
         raise ValueError("The element should be either 'agdl', 'cgdl', 'acl', 'ccl' or 'mem'.")
 
 
-def delta_h_vap(T):
-    """This function computes the molar enthalpy of vaporization of water at a given temperature, in J.mol-1.
-       It is calculated as the difference in molar enthalpy between water vapor (H2O_v) and liquid water (H2O_l),
-       based on NASA polynomials.
+def delta_h_liq(T):
+    """This function computes the molar enthalpy of liquefaction of water at a given temperature, in J.mol-1.
+       It is calculated as the difference in molar enthalpy between liquid water (H2O_l) and water vapor (H2O_v).
 
         Parameters
         ----------
@@ -880,28 +908,19 @@ def delta_h_vap(T):
 
         Returns
         -------
-        delta_h_vap : float
-            Molar enthalpy of vaporization in J.mol-1.
+        delta_h_liq : float
+            Molar enthalpy of liquefaction in J.mol-1.
 
         Notes
         -----
-        The result is valid within the temperature range where the NASA polynomial data for H2O in vapor and liquid
-        phases are applicable (typically near the boiling point).
-        This value should be close to 42 000 J.mol-1 [vetterFreeOpenReference2019].
+        This value should be close to -42 000 J.mol-1 [vetterFreeOpenReference2019].
     """
 
-    # Dictionary of specific heat polynomial functions: cp(T) = R * (a1*T^4 + a2*T^3 + a3*T^2 + a4*T + a5)
-    #   Uses np.poly1d for convenient evaluation at any temperature T
-    specific_heat_dict = {species: np.poly1d(R * coeffs[:5]) for species, coeffs in nasa_coeffs.items()}
-    # Dictionary of enthalpy polynomial functions: h(T) = ∫ cp(T) dT = integrated polynomial + a6*R
-    #   Integrates cp(T) analytically and adds the proper integration constant
-    molar_enthalpy_dict = {species: specific_heat_dict[species].integ(k=coeffs[5] * R) for species, coeffs in
-                     nasa_coeffs.items()}
-
-    return molar_enthalpy_dict['H2O_v'](T) - molar_enthalpy_dict['H2O_l'](T)
+    return h0('H2O_l', T) - h0('H2O_v', T)
 
 def delta_h_abs(T):
     """This function computes the molar enthalpy of absorption of water at a given temperature, in J.mol-1.
+    This reaction is exothermic.
 
         Parameters
         ----------
@@ -915,7 +934,7 @@ def delta_h_abs(T):
 
         Notes
         -----
-        For Nafion, the enthalpy of sorption is almost equal to that of vaporization [vetterFreeOpenReference2019].
+        For Nafion, the enthalpy of absorption is almost equal to that of liquefaction [vetterFreeOpenReference2019].
     """
 
-    return - np.abs(delta_h_vap(T))
+    return delta_h_liq(T)

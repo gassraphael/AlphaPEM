@@ -12,7 +12,7 @@ import numpy as np
 # Importing constants' value and functions
 from configuration.settings import Text, Pext, Phi_ext, n_cell, M_H2, M_O2, M_N2, M_H2O, epsilon_cl, yO2_ext, R, F, \
     operating_inputs
-from modules.transitory_functions import Psat, C_v_sat, k_H2, k_O2, rho_H2O_l, calculate_rho_Cp
+from modules.transitory_functions import Psat, C_v_sat, k_H2, k_O2, rho_H2O_l, calculate_rho_Cp0
 
 
 # ____________________________________________Differential equations modules____________________________________________
@@ -50,7 +50,7 @@ def dif_eq_int_values(sv, operating_inputs, control_variables, parameters):
             Molar mass of all the gas species in the cathode supply manifold (kg/mol).
         Mcem : float
             Molar mass of all the gas species in the cathode external manifold (kg/mol).
-        rho_Cp : dict
+        rho_Cp0 : dict
             Volumetric heat capacity of each component in the stack (J.m-3.K-1).
         """
 
@@ -89,17 +89,17 @@ def dif_eq_int_values(sv, operating_inputs, control_variables, parameters):
     i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
     i_n = i_H2 + i_O2
     #       Volumetric heat capacity (J.m-3.K-1)
-    rho_Cp = {
-        **{f'agdl_{i}': calculate_rho_Cp('agdl', sv[f'T_agdl_{i}'], C_v=sv[f'C_v_agdl_{i}'],
-                                         s=sv[f's_agdl_{i}'], C_H2=sv[f'C_H2_agdl_{i}'], epsilon=epsilon_gdl)
+    rho_Cp0 = {
+        **{f'agdl_{i}': calculate_rho_Cp0('agdl', sv[f'T_agdl_{i}'], C_v=sv[f'C_v_agdl_{i}'],
+                                          s=sv[f's_agdl_{i}'], C_H2=sv[f'C_H2_agdl_{i}'], epsilon=epsilon_gdl)
            for i in range(1, n_gdl + 1)},
-        'acl': calculate_rho_Cp('acl', T_acl, C_v=C_v_acl, s=s_acl, lambdaa=lambda_acl, C_H2=C_H2_acl,
-                                epsilon=epsilon_cl, epsilon_mc=epsilon_mc),
-        'mem': calculate_rho_Cp('mem', T_mem, lambdaa=lambda_mem),
-        'ccl': calculate_rho_Cp('ccl', T_ccl, C_v=C_v_ccl, s=s_ccl, lambdaa=lambda_ccl, C_O2=C_O2_ccl, C_N2=C_N2,
-                                epsilon=epsilon_cl, epsilon_mc=epsilon_mc),
-        **{f'cgdl_{i}': calculate_rho_Cp('cgdl', sv[f'T_cgdl_{i}'], C_v=sv[f'C_v_cgdl_{i}'],
-                                         s=sv[f's_cgdl_{i}'], C_O2=sv[f'C_O2_cgdl_{i}'], C_N2=C_N2, epsilon=epsilon_gdl)
+        'acl': calculate_rho_Cp0('acl', T_acl, C_v=C_v_acl, s=s_acl, lambdaa=lambda_acl, C_H2=C_H2_acl,
+                                 epsilon=epsilon_cl, epsilon_mc=epsilon_mc),
+        'mem': calculate_rho_Cp0('mem', T_mem, lambdaa=lambda_mem),
+        'ccl': calculate_rho_Cp0('ccl', T_ccl, C_v=C_v_ccl, s=s_ccl, lambdaa=lambda_ccl, C_O2=C_O2_ccl, C_N2=C_N2,
+                                 epsilon=epsilon_cl, epsilon_mc=epsilon_mc),
+        **{f'cgdl_{i}': calculate_rho_Cp0('cgdl', sv[f'T_cgdl_{i}'], C_v=sv[f'C_v_cgdl_{i}'],
+                                          s=sv[f's_cgdl_{i}'], C_O2=sv[f'C_O2_cgdl_{i}'], C_N2=C_N2, epsilon=epsilon_gdl)
            for i in range(1, n_gdl + 1)}
         }
 
@@ -126,7 +126,7 @@ def dif_eq_int_values(sv, operating_inputs, control_variables, parameters):
     else:  # parameters["type_auxiliary"] == "no_auxiliary"
         Masm, Maem, Mcsm, Mcem = [0] * 4
 
-    return Mext, Pagc, Pcgc, i_n, Masm, Maem, Mcsm, Mcem, rho_Cp
+    return Mext, Pagc, Pcgc, i_n, Masm, Maem, Mcsm, Mcem, rho_Cp0
 
 
 def desired_flows(solver_variables, control_variables, i_n, i_fc, operating_inputs, parameters, Mext):

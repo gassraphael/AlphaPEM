@@ -8,13 +8,13 @@ It is a component of the fuel cell model.
 
 # Importing constants' value and functions
 from configuration.settings import F, epsilon_cl, delta_s_HOR, delta_s_ORR
-from modules.transitory_functions import sigma_p, sigma_e_eff, delta_h_vap, delta_h_abs
+from modules.transitory_functions import sigma_p_eff, sigma_e_eff, delta_h_liq, delta_h_abs
 from modules.heat_modules import heat_transfer_int_values
 
 
 # ____________________________________________________Heat transfers____________________________________________________
 
-def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sv_agdl, Sv_acl, Sv_ccl, Sv_cgdl, **kwargs):
+def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl, Sl_acl, Sl_ccl, Sl_cgdl, **kwargs):
     """This function calculates the heat transfers occurring inside the fuel cell system.
 
     Parameters
@@ -30,14 +30,14 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sv_agdl
         Water absorption in the ACL (mol.m-3.s-1).
     S_abs_ccl : float
         Water absorption in the CCL (mol.m-3.s-1).
-    Sv_agdl : list
-        Vapor generated through liquid water evaporation or degenerated through condensation in the AGDL (mol.m-3.s-1).
-    Sv_acl : float
-        Vapor generated through liquid water evaporation or degenerated through condensation in the ACL (mol.m-3.s-1).
-    Sv_ccl : float
-        Vapor generated through liquid water evaporation or degenerated through condensation in the CCL (mol.m-3.s-1).
-    Sv_cgdl : list
-        Vapor generated through liquid water evaporation or degenerated through condensation in the CGDL (mol.m-3.s-1).
+    Sl_agdl : list
+        Liquid water generated through vapor water liquefaction in the AGDL (mol.m-3.s-1).
+    Sl_acl : float
+        Liquid water generated through vapor water liquefaction in the ACL (mol.m-3.s-1).
+    Sl_ccl : float
+        Liquid water generated through vapor water liquefaction in the CCL (mol.m-3.s-1).
+    Sl_cgdl : list
+        Liquid water generated through vapor water liquefaction in the CGDL (mol.m-3.s-1).
 
     Returns
     -------
@@ -89,21 +89,22 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sv_agdl
     #    It is given by the sum of activation and Peltier heats [vetterFreeOpenReference2019].
     S_r_acl = i_fc / (2 * F * Hcl) # mol.m-3.s-1. It is the amount of hydrogen consumed at the ACL.
     S_r_ccl = i_fc / (4 * F * Hcl) # mol.m-3.s-1. It is the amount of oxygen consumed at the CCL.
-    Q_r = {'acl': i_fc * eta_c / Hcl - S_r_acl * T_acl * delta_s_HOR,
-           'ccl': i_fc * eta_c / Hcl - S_r_ccl * T_ccl * delta_s_ORR}
+    Q_r = {'acl': i_fc * eta_c / Hcl + S_r_acl * T_acl * (-delta_s_HOR),
+           'ccl': i_fc * eta_c / Hcl + S_r_ccl * T_ccl * (-delta_s_ORR)}
 
     # The heat dissipated by the absorption of water from the CL to the membrane, in J.m-3.s-1.
-    Q_sorp = {'acl': S_abs_acl * delta_h_abs(T_acl), 'ccl': S_abs_ccl * delta_h_abs(T_ccl)}
+    Q_sorp = {'acl': S_abs_acl * (- delta_h_abs(T_acl)),
+              'ccl': S_abs_ccl * (- delta_h_abs(T_ccl))}
 
-    # The heat dissipated by the evaporation of liquid water, in J.m-3.s-1.                                         
-    Q_lv = {**{f'agdl_{i}': Sv_agdl[i] * delta_h_vap(sv[f'T_agdl_{i}']) for i in range(1, n_gdl + 1)},
-            **{f'cgdl_{i}': Sv_cgdl[i] * delta_h_vap(sv[f'T_cgdl_{i}']) for i in range(1, n_gdl + 1)},
-            'acl': Sv_acl * delta_h_vap(T_acl),
-            'ccl': Sv_ccl * delta_h_vap(T_ccl)}
+    # The heat dissipated by the liquefaction of vapor water, in J.m-3.s-1.
+    Q_liq = {**{f'agdl_{i}': Sl_agdl[i] * (- delta_h_liq(sv[f'T_agdl_{i}'])) for i in range(1, n_gdl + 1)},
+            **{f'cgdl_{i}': Sl_cgdl[i] * (- delta_h_liq(sv[f'T_cgdl_{i}'])) for i in range(1, n_gdl + 1)},
+            'acl': Sl_acl * (- delta_h_liq(T_acl)),
+            'ccl': Sl_ccl * (-delta_h_liq(T_ccl))}
 
     # The heat dissipated by the ionic currents (Joule heating + Ohm's law), in J.m-3.s-1.
-    Q_p = {'mem': i_fc ** 2 / sigma_p('mem', lambda_mem, T_mem),
-           'ccl': i_fc ** 2 / (3 * sigma_p('ccl', lambda_ccl, T_ccl, epsilon_mc, tau))}
+    Q_p = {'mem': i_fc ** 2 / sigma_p_eff('mem', lambda_mem, T_mem),
+           'ccl': i_fc ** 2 / (3 * sigma_p_eff('ccl', lambda_ccl, T_ccl, epsilon_mc, tau))}
 
     # The heat dissipated by the electric currents (Joule heating + Ohm's law), in J.m-3.s-1.
     Q_e = {**{f'agdl_{i}': i_fc ** 2 / sigma_e_eff('gdl', epsilon_gdl) for i in range(1, n_gdl + 1)},
@@ -111,4 +112,6 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sv_agdl
            'ccl': i_fc ** 2 / (3 * sigma_e_eff('cl', epsilon_cl, epsilon_mc, tau)),
            **{f'cgdl_{i}': i_fc ** 2 / sigma_e_eff('gdl', epsilon_gdl) for i in range(1, n_gdl + 1)}}
 
-    return {'Jt': Jt, 'Q_r': Q_r, 'Q_sorp': Q_sorp, 'Q_lv': Q_lv, 'Q_p': Q_p, 'Q_e': Q_e}
+    print('Q_e: ', Q_e['ccl'], '. Q_p: ', Q_p['ccl'], '. Q_liq: ', Q_liq['ccl'], '. Q_sorp: ', Q_sorp['ccl'], '. Q_r: ', Q_r['ccl'])
+
+    return {'Jt': Jt, 'Q_r': Q_r, 'Q_sorp': Q_sorp, 'Q_liq': Q_liq, 'Q_p': Q_p, 'Q_e': Q_e}

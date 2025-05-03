@@ -58,7 +58,7 @@ def dydt(t, y, operating_inputs, parameters, solver_variable_names, control_vari
 
     # Intermediate values
     i_fc = operating_inputs['current_density'](t, parameters)
-    Mext, Pagc, Pcgc, i_n, Masm, Maem, Mcsm, Mcem, rho_Cp = dif_eq_int_values(solver_variables, 
+    Mext, Pagc, Pcgc, i_n, Masm, Maem, Mcsm, Mcem, rho_Cp0 = dif_eq_int_values(solver_variables,
                                                                         operating_inputs, control_variables, parameters)
     Wcp_des, Wa_inj_des, Wc_inj_des = desired_flows(solver_variables, control_variables, i_n, i_fc, operating_inputs,
                                                     parameters, Mext)
@@ -76,7 +76,7 @@ def dydt(t, y, operating_inputs, parameters, solver_variable_names, control_vari
     calculate_dyn_H2_O2_N2_evolution(dif_eq, solver_variables, **parameters, **matter_flows_dico)
     calculate_dyn_voltage_evolution(dif_eq, i_fc, **solver_variables, **operating_inputs, **parameters,
                                     **eta_c_intermediate_values)
-    calculate_dyn_temperature_evolution(dif_eq, rho_Cp, **parameters, **heat_flows_dico)
+    calculate_dyn_temperature_evolution(dif_eq, rho_Cp0, **parameters, **heat_flows_dico)
     #       Inside the auxiliary components
     calculate_dyn_manifold_pressure_and_humidity_evolution(dif_eq, Masm, Maem, Mcsm, Mcem, **solver_variables,
                                                            **operating_inputs, **parameters, **matter_flows_dico)
@@ -366,6 +366,66 @@ def calculate_dyn_H2_O2_N2_evolution(dif_eq, sv, Hgdl, Hcl, Hgc, Lgc, epsilon_gd
     dif_eq['dC_N2 / dt'] = (J_N2_in - J_N2_out) / Lgc
 
 
+def calculate_dyn_temperature_evolution(dif_eq, rho_Cp0, n_gdl, Jt, Q_r, Q_sorp, Q_liq, Q_p, Q_e, **kwargs):
+    """
+    This function calculates the dynamic evolution of the temperature in the fuel cell.
+
+    Parameters
+    ----------
+    dif_eq : dict
+        Dictionary used for saving the differential equations.
+    rho_Cp0 : dict
+        Volumetric heat capacity of the different components of the fuel cell system, in J.m-3.K-1.
+    n_gdl : int
+        Number of model nodes placed inside each GDL.
+    Jt : dict
+        Heat flows occuring inside the fuel cell system, J.m-2.s-1.
+    Q_r : dict
+        Heat dissipated by the electrochemical reaction 2*H2 + O2 -> 2*H2O, in J.m-3.s-1.
+    Q_sorp : dict
+        Heat dissipated by the absorption of water from the CL to the membrane, in J.m-3.s-1.
+    Q_liq : dict
+        Heat dissipated by the evaporation of liquid water, in J.m-3.s-1.
+    Q_p : dict
+        Heat dissipated by the ionic currents (Joule heating + Ohm's law), in J.m-3.s-1.
+    Q_e : dict
+        Heat dissipated by the electric currents (Joule heating + Ohm's law), in J.m-3.s-1.
+    """
+
+    # At the anode side
+    #       Inside the AGC
+    dif_eq['dT_agc / dt'] = 0  # Dirichlet boundary condition. T_agc is initialized to T_fc and remains constant.
+    #       Inside the AGDL
+    dif_eq['dT_agdl_1 / dt'] = (1 / rho_Cp0['agdl_1']) * ((Jt['agc_agdl'] - Jt['agdl_agdl_1']) +
+                                                          Q_liq['agdl_1'] + Q_e['agdl_1'])
+    for i in range(2, n_gdl):
+        dif_eq[f'dT_agdl_{i} / dt'] = (1 / rho_Cp0[f'agdl_{i}']) * ((Jt[f'agdl_agdl_{i - 1}'] - Jt[f'agdl_agdl_{i}']) +
+                                                                    Q_liq[f'agdl_{i}'] + Q_e[f'agdl_{i}'])
+    dif_eq[f'dT_agdl_{n_gdl} / dt'] = (1 / rho_Cp0[f'agdl_{n_gdl}']) * ((Jt[f'agdl_agdl_{n_gdl - 1}'] - Jt['agdl_acl']) +
+                                                                        Q_liq[f'agdl_{n_gdl}'] + Q_e[f'agdl_{n_gdl}'])
+    #      Inside the ACL
+    dif_eq['dT_acl / dt'] = (1 / rho_Cp0['acl']) * ((Jt['agdl_acl'] - Jt['acl_mem']) +
+                                                    Q_r['acl'] + Q_sorp['acl'] + Q_liq['acl'] + Q_e['acl'])
+
+    # Inside the membrane
+    dif_eq['dT_mem / dt'] = (1 / rho_Cp0['mem']) * ((Jt['acl_mem'] - Jt['mem_ccl']) + Q_p['mem'])
+
+    # At the cathode side
+    #       Inside the CCL
+    dif_eq['dT_ccl / dt'] = (1 / rho_Cp0['ccl']) * ((Jt['mem_ccl'] - Jt['ccl_cgdl']) +
+                                                    Q_r['ccl'] + Q_sorp['acl'] + Q_liq['ccl'] + Q_p['ccl'] + Q_e['ccl'])
+    #       Inside the CGDL
+    dif_eq['dT_cgdl_1 / dt'] = (1 / rho_Cp0['cgdl_1']) * ((Jt['ccl_cgdl'] - Jt['cgdl_cgdl_1']) +
+                                                          Q_liq['cgdl_1'] + Q_e['cgdl_1'])
+    for i in range(2, n_gdl):
+        dif_eq[f'dT_cgdl_{i} / dt'] = (1 / rho_Cp0[f'cgdl_{i}']) * ((Jt[f'cgdl_cgdl_{i - 1}'] - Jt[f'cgdl_cgdl_{i}']) +
+                                                                    Q_liq[f'cgdl_{i}'] + Q_e[f'cgdl_{i}'])
+    dif_eq[f'dT_cgdl_{n_gdl} / dt'] = (1 / rho_Cp0[f'cgdl_{n_gdl}']) * ((Jt[f'cgdl_cgdl_{n_gdl - 1}'] - Jt['cgdl_cgc']) +
+                                                                        Q_liq[f'cgdl_{n_gdl}'] + Q_e[f'cgdl_{n_gdl}'])
+    #       Inside the CCG
+    dif_eq['dT_cgc / dt'] = 0  # Dirichlet boundary condition. T_cgc is initialized to T_fc and remains constant.
+
+
 def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hcl, i0_c_ref, kappa_c, C_scl, i_n, f_drop,
                                     **kwargs):
     """This function calculates the dynamic evolution of the cell overpotential eta_c.
@@ -398,66 +458,6 @@ def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hcl, i
 
     dif_eq['deta_c / dt'] = 1 / (C_scl * Hcl) * ((i_fc + i_n) - i0_c_ref * (C_O2_ccl / C_O2ref) ** kappa_c *
                                                  np.exp(f_drop * alpha_c * F / (R * T_ccl) * eta_c))
-
-
-def calculate_dyn_temperature_evolution(dif_eq, rho_Cp, n_gdl, Jt, Q_r, Q_sorp, Q_lv, Q_p, Q_e, **kwargs):
-    """
-    This function calculates the dynamic evolution of the temperature in the fuel cell.
-
-    Parameters
-    ----------
-    dif_eq : dict
-        Dictionary used for saving the differential equations.
-    rho_Cp : dict
-        Volumetric heat capacity of the different components of the fuel cell system, in J.m-3.K-1.
-    n_gdl : int
-        Number of model nodes placed inside each GDL.
-    Jt : dict
-        Heat flows occuring inside the fuel cell system, J.m-2.s-1.
-    Q_r : dict
-        Heat dissipated by the electrochemical reaction 2*H2 + O2 -> 2*H2O, in J.m-3.s-1.
-    Q_sorp : dict
-        Heat dissipated by the absorption of water from the CL to the membrane, in J.m-3.s-1.
-    Q_lv : dict
-        Heat dissipated by the evaporation of liquid water, in J.m-3.s-1.
-    Q_p : dict
-        Heat dissipated by the ionic currents (Joule heating + Ohm's law), in J.m-3.s-1.
-    Q_e : dict
-        Heat dissipated by the electric currents (Joule heating + Ohm's law), in J.m-3.s-1.
-    """
-
-    # At the anode side
-    #       Inside the AGC
-    dif_eq['dT_agc / dt'] = 0  # Dirichlet boundary condition. T_agc is initialized to T_fc and remains constant.
-    #       Inside the AGDL
-    dif_eq['dT_agdl_1 / dt'] = (1 / rho_Cp['agdl_1']) * ((Jt['agc_agdl'] - Jt['agdl_agdl_1']) +
-                                                          Q_lv['agdl_1'] + Q_e['agdl_1'])
-    for i in range(2, n_gdl):
-        dif_eq[f'dT_agdl_{i} / dt'] = (1 / rho_Cp[f'agdl_{i}']) * ((Jt[f'agdl_agdl_{i-1}'] - Jt[f'agdl_agdl_{i}']) +
-                                                                 Q_lv[f'agdl_{i}'] + Q_e[f'agdl_{i}'])
-    dif_eq[f'dT_agdl_{n_gdl} / dt'] = (1 / rho_Cp[f'agdl_{n_gdl}']) * ((Jt[f'agdl_agdl_{n_gdl-1}'] - Jt['agdl_acl']) +
-                                                                     Q_lv[f'agdl_{n_gdl}'] + Q_e[f'agdl_{n_gdl}'])
-    #      Inside the ACL
-    dif_eq['dT_acl / dt'] = (1 / rho_Cp['acl']) * ((Jt['agdl_acl'] - Jt['acl_mem']) +
-                                                   Q_r['acl'] + Q_sorp['acl'] + Q_lv['acl'] + Q_e['acl'])
-
-    # Inside the membrane
-    dif_eq['dT_mem / dt'] = (1 / rho_Cp['mem']) * ((Jt['acl_mem'] - Jt['mem_ccl']) + Q_p['mem'])
-
-    # At the cathode side
-    #       Inside the CCL
-    dif_eq['dT_ccl / dt'] = (1 / rho_Cp['ccl']) * ((Jt['mem_ccl'] - Jt['ccl_cgdl']) +
-                                                   Q_r['ccl'] + Q_sorp['acl'] + Q_lv['ccl'] + Q_p['ccl'] + Q_e['ccl'])
-    #       Inside the CGDL
-    dif_eq['dT_cgdl_1 / dt'] = (1 / rho_Cp['cgdl_1']) * ((Jt['ccl_cgdl'] - Jt['cgdl_cgdl_1']) +
-                                                          Q_lv['cgdl_1'] + Q_e['cgdl_1'])
-    for i in range(2, n_gdl):
-        dif_eq[f'dT_cgdl_{i} / dt'] = (1 / rho_Cp[f'cgdl_{i}']) * ((Jt[f'cgdl_cgdl_{i-1}'] - Jt[f'cgdl_cgdl_{i}']) +
-                                                                 Q_lv[f'cgdl_{i}'] + Q_e[f'cgdl_{i}'])
-    dif_eq[f'dT_cgdl_{n_gdl} / dt'] = (1 / rho_Cp[f'cgdl_{n_gdl}']) * ((Jt[f'cgdl_cgdl_{n_gdl-1}'] - Jt['cgdl_cgc']) +
-                                                                     Q_lv[f'cgdl_{n_gdl}'] + Q_e[f'cgdl_{n_gdl}'])
-    #       Inside the CCG
-    dif_eq['dT_cgc / dt'] = 0  # Dirichlet boundary condition. T_cgc is initialized to T_fc and remains constant.
 
 
 def calculate_dyn_manifold_pressure_and_humidity_evolution(dif_eq, Masm, Maem, Mcsm, Mcem, T_des, Hgc, Wgc,

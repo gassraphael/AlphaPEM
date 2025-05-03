@@ -751,8 +751,8 @@ def plot_T(variables, operating_inputs, n_gdl, ax):
 
     # Plot instructions
     plot_general_instructions(ax)
-    ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
-    ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
+    # ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
+    # ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
     # ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(1))
     # ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(1 / 5))
     # ax.set_ylim(11, 16)

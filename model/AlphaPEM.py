@@ -451,7 +451,7 @@ class AlphaPEM:
                 saving_instructions("results", subfolder_name, "step_current_Phi_a_1.pdf", figs[11])
                 saving_instructions("results", subfolder_name, "step_current_Phi_c_1.pdf", figs[12])
 
-                plt.pause(0.001)  # A break is necessary to plot the new points in dynamic mode
+                plt.pause(0.01)  # A break is necessary to plot the new points in dynamic mode
 
             elif type_display == "synthetic":
 
@@ -465,7 +465,7 @@ class AlphaPEM:
                 plot_C_O2(self.variables, n_gdl, ax1[2, 1])
                 plot_P(self.variables, ax1[2, 2])
 
-                plt.pause(0.001)  # A break is necessary to plot the new points in dynamic mode
+                plt.pause(0.01)  # A break is necessary to plot the new points in dynamic mode
 
         elif type_current == "polarization":
             if type_display == "multiple":
@@ -478,12 +478,12 @@ class AlphaPEM:
                 plot_lambda(self.variables, self.operating_inputs, self.parameters, ax2[1])
                 plot_s(self.variables, self.operating_inputs, self.parameters, ax2[2])
 
-                plt.pause(0.001)  # A break is necessary to plot the new points in dynamic mode
+                plt.pause(0.01)  # A break is necessary to plot the new points in dynamic mode
 
             elif type_display == "synthetic":
 
                 plot_polarisation_curve(self.variables, self.operating_inputs, self.parameters, ax1)
-                plt.pause(0.001)  # A break is necessary to plot the new points in dynamic mode
+                plt.pause(0.01)  # A break is necessary to plot the new points in dynamic mode
 
         elif type_current == "EIS":
             if type_display == "multiple":

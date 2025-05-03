@@ -10,7 +10,7 @@ import numpy as np
 
 # Importing constants' value and functions
 from configuration.settings import F, R, E0, Pref
-from modules.transitory_functions import k_H2, k_O2, sigma_p
+from modules.transitory_functions import k_H2, k_O2, sigma_p_eff
 
 
 # _____________________________________________________Cell voltage_____________________________________________________
@@ -115,9 +115,9 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
 
         # The proton resistance
         #       The proton resistance at the membrane : Rmem
-        Rmem = Hmem / sigma_p('mem', lambda_mem, T_mem)
+        Rmem = Hmem / sigma_p_eff('mem', lambda_mem, T_mem)
         #       The proton resistance at the cathode catalyst layer : Rccl
-        Rccl = Hcl / sigma_p('ccl', lambda_ccl, T_ccl, epsilon_mc, tau)
+        Rccl = Hcl / sigma_p_eff('ccl', lambda_ccl, T_ccl, epsilon_mc, tau)
         #       The total proton resistance
         Rp = Rmem + Rccl  # its value is around [4-7]e-6 ohm.m².
 
