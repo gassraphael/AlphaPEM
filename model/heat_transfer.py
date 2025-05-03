@@ -86,11 +86,11 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl
     # ____________________________________________Heat generated (J.m-3.s-1)____________________________________________
 
     # The heat dissipated by the electrochemical reaction 2*H2 + O2 -> 2*H2O, in J.m-3.s-1.
-    #    It is given by the sum of activation and Peltier heats [vetterFreeOpenReference2019].
+    #    It is given by the sum of Peltier and activation heats [vetterFreeOpenReference2019].
     S_r_acl = i_fc / (2 * F * Hcl) # mol.m-3.s-1. It is the amount of hydrogen consumed at the ACL.
     S_r_ccl = i_fc / (4 * F * Hcl) # mol.m-3.s-1. It is the amount of oxygen consumed at the CCL.
     Q_r = {'acl': S_r_acl * T_acl * (-delta_s_HOR),
-           'ccl': i_fc * eta_c / Hcl + S_r_ccl * T_ccl * (-delta_s_ORR)}
+           'ccl': S_r_ccl * T_ccl * (-delta_s_ORR) + i_fc * eta_c / Hcl}
 
     # The heat dissipated by the absorption of water from the CL to the membrane, in J.m-3.s-1.
     Q_sorp = {'acl': S_abs_acl * (-delta_h_abs(T_acl)),
