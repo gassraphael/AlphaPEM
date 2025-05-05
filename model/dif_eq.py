@@ -366,7 +366,8 @@ def calculate_dyn_H2_O2_N2_evolution(dif_eq, sv, Hgdl, Hcl, Hgc, Lgc, epsilon_gd
     dif_eq['dC_N2 / dt'] = (J_N2_in - J_N2_out) / Lgc
 
 
-def calculate_dyn_temperature_evolution(dif_eq, rho_Cp0, n_gdl, Jt, Q_r, Q_sorp, Q_liq, Q_p, Q_e, **kwargs):
+def calculate_dyn_temperature_evolution(dif_eq, rho_Cp0, Hgdl, Hcl, Hmem, n_gdl, Jt, Q_r, Q_sorp, Q_liq, Q_p, Q_e,
+                                        **kwargs):
     """
     This function calculates the dynamic evolution of the temperature in the fuel cell.
 
@@ -376,6 +377,12 @@ def calculate_dyn_temperature_evolution(dif_eq, rho_Cp0, n_gdl, Jt, Q_r, Q_sorp,
         Dictionary used for saving the differential equations.
     rho_Cp0 : dict
         Volumetric heat capacity of the different components of the fuel cell system, in J.m-3.K-1.
+    Hgdl : float
+        Thickness of the gas diffusion layer, in m.
+    Hcl : float
+        Thickness of the catalyst layer, in m.
+    Hmem : float
+        Thickness of the membrane, in m.
     n_gdl : int
         Number of model nodes placed inside each GDL.
     Jt : dict
@@ -396,32 +403,42 @@ def calculate_dyn_temperature_evolution(dif_eq, rho_Cp0, n_gdl, Jt, Q_r, Q_sorp,
     #       Inside the AGC
     dif_eq['dT_agc / dt'] = 0  # Dirichlet boundary condition. T_agc is initialized to T_fc and remains constant.
     #       Inside the AGDL
-    dif_eq['dT_agdl_1 / dt'] = (1 / rho_Cp0['agdl_1']) * ((Jt['agc_agdl'] - Jt['agdl_agdl_1']) +
-                                                          Q_liq['agdl_1'] + Q_e['agdl_1'])
+    dif_eq['dT_agdl_1 / dt'] = (1 / rho_Cp0['agdl_1']) * \
+                               ( (Jt['agc_agdl'] - Jt['agdl_agdl_1']) / (Hgdl / n_gdl)  +
+                                 Q_liq['agdl_1'] + Q_e['agdl_1'] )
     for i in range(2, n_gdl):
-        dif_eq[f'dT_agdl_{i} / dt'] = (1 / rho_Cp0[f'agdl_{i}']) * ((Jt[f'agdl_agdl_{i - 1}'] - Jt[f'agdl_agdl_{i}']) +
-                                                                    Q_liq[f'agdl_{i}'] + Q_e[f'agdl_{i}'])
-    dif_eq[f'dT_agdl_{n_gdl} / dt'] = (1 / rho_Cp0[f'agdl_{n_gdl}']) * ((Jt[f'agdl_agdl_{n_gdl - 1}'] - Jt['agdl_acl']) +
-                                                                        Q_liq[f'agdl_{n_gdl}'] + Q_e[f'agdl_{n_gdl}'])
+        dif_eq[f'dT_agdl_{i} / dt'] = (1 / rho_Cp0[f'agdl_{i}']) * \
+                                      ( (Jt[f'agdl_agdl_{i - 1}'] - Jt[f'agdl_agdl_{i}']) / (Hgdl / n_gdl) +
+                                        Q_liq[f'agdl_{i}'] + Q_e[f'agdl_{i}'] )
+    dif_eq[f'dT_agdl_{n_gdl} / dt'] = (1 / rho_Cp0[f'agdl_{n_gdl}']) * \
+                                      ( (Jt[f'agdl_agdl_{n_gdl - 1}'] - Jt['agdl_acl']) / (Hgdl / n_gdl) +
+                                        Q_liq[f'agdl_{n_gdl}'] + Q_e[f'agdl_{n_gdl}'] )
     #      Inside the ACL
-    dif_eq['dT_acl / dt'] = (1 / rho_Cp0['acl']) * ((Jt['agdl_acl'] - Jt['acl_mem']) +
-                                                    Q_r['acl'] + Q_sorp['acl'] + Q_liq['acl'] + Q_e['acl'])
+    dif_eq['dT_acl / dt'] = (1 / rho_Cp0['acl']) * \
+                            ( (Jt['agdl_acl'] - Jt['acl_mem']) / Hcl +
+                              Q_r['acl'] + Q_sorp['acl'] + Q_liq['acl'] + Q_e['acl'] )
 
     # Inside the membrane
-    dif_eq['dT_mem / dt'] = (1 / rho_Cp0['mem']) * ((Jt['acl_mem'] - Jt['mem_ccl']) + Q_p['mem'])
+    dif_eq['dT_mem / dt'] = (1 / rho_Cp0['mem']) * \
+                            ( (Jt['acl_mem'] - Jt['mem_ccl']) / Hmem +
+                              Q_p['mem'] )
 
     # At the cathode side
     #       Inside the CCL
-    dif_eq['dT_ccl / dt'] = (1 / rho_Cp0['ccl']) * ((Jt['mem_ccl'] - Jt['ccl_cgdl']) +
-                                                    Q_r['ccl'] + Q_sorp['acl'] + Q_liq['ccl'] + Q_p['ccl'] + Q_e['ccl'])
+    dif_eq['dT_ccl / dt'] = (1 / rho_Cp0['ccl']) * \
+                            ( (Jt['mem_ccl'] - Jt['ccl_cgdl']) / Hcl +
+                              Q_r['ccl'] + Q_sorp['acl'] + Q_liq['ccl'] + Q_p['ccl'] + Q_e['ccl'] )
     #       Inside the CGDL
-    dif_eq['dT_cgdl_1 / dt'] = (1 / rho_Cp0['cgdl_1']) * ((Jt['ccl_cgdl'] - Jt['cgdl_cgdl_1']) +
-                                                          Q_liq['cgdl_1'] + Q_e['cgdl_1'])
+    dif_eq['dT_cgdl_1 / dt'] = (1 / rho_Cp0['cgdl_1']) * \
+                               ( (Jt['ccl_cgdl'] - Jt['cgdl_cgdl_1']) / (Hgdl / n_gdl) +
+                                 Q_liq['cgdl_1'] + Q_e['cgdl_1'] )
     for i in range(2, n_gdl):
-        dif_eq[f'dT_cgdl_{i} / dt'] = (1 / rho_Cp0[f'cgdl_{i}']) * ((Jt[f'cgdl_cgdl_{i - 1}'] - Jt[f'cgdl_cgdl_{i}']) +
-                                                                    Q_liq[f'cgdl_{i}'] + Q_e[f'cgdl_{i}'])
-    dif_eq[f'dT_cgdl_{n_gdl} / dt'] = (1 / rho_Cp0[f'cgdl_{n_gdl}']) * ((Jt[f'cgdl_cgdl_{n_gdl - 1}'] - Jt['cgdl_cgc']) +
-                                                                        Q_liq[f'cgdl_{n_gdl}'] + Q_e[f'cgdl_{n_gdl}'])
+        dif_eq[f'dT_cgdl_{i} / dt'] = (1 / rho_Cp0[f'cgdl_{i}']) * \
+                                      ( (Jt[f'cgdl_cgdl_{i - 1}'] - Jt[f'cgdl_cgdl_{i}']) / (Hgdl / n_gdl) +
+                                        Q_liq[f'cgdl_{i}'] + Q_e[f'cgdl_{i}'] )
+    dif_eq[f'dT_cgdl_{n_gdl} / dt'] = (1 / rho_Cp0[f'cgdl_{n_gdl}']) * \
+                                      ( (Jt[f'cgdl_cgdl_{n_gdl - 1}'] - Jt['cgdl_cgc']) / (Hgdl / n_gdl) +
+                                        Q_liq[f'cgdl_{n_gdl}'] + Q_e[f'cgdl_{n_gdl}'] )
     #       Inside the CCG
     dif_eq['dT_cgc / dt'] = 0  # Dirichlet boundary condition. T_cgc is initialized to T_fc and remains constant.
 

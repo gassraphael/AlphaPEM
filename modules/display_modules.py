@@ -735,19 +735,19 @@ def plot_T(variables, operating_inputs, n_gdl, ax):
 
     # Plot the temperature at different spatial localisations
     T_des_t = np.array([T_des] * len(t))
-    ax.plot(t, T_agc_t, color=colors(0))
-    ax.plot(t, T_agdl_t, color=colors(1))
-    ax.plot(t, T_acl_t, color=colors(2))
-    ax.plot(t, T_mem_t, color=colors(3))
-    ax.plot(t, T_ccl_t, color=colors(4))
-    ax.plot(t, T_cgdl_t, color=colors(5))
-    ax.plot(t, T_cgc_t, color=colors(6))
-    ax.plot(t, T_des_t, color='k')
+    ax.plot(t, np.array(T_agc_t) - 273.15, color=colors(0)) # Conversion in °C
+    ax.plot(t, np.array(T_agdl_t) - 273.15, color=colors(1)) # Conversion in °C
+    ax.plot(t, np.array(T_acl_t) - 273.15, color=colors(2)) # Conversion in °C
+    ax.plot(t, np.array(T_mem_t) - 273.15, color=colors(3)) # Conversion in °C
+    ax.plot(t, np.array(T_ccl_t) - 273.15, color=colors(4)) # Conversion in °C
+    ax.plot(t, np.array(T_cgdl_t) - 273.15, color=colors(5)) # Conversion in °C
+    ax.plot(t, np.array(T_cgc_t) - 273.15, color=colors(6)) # Conversion in °C
+    ax.plot(t, np.array(T_des_t) - 273.15, color='k') # Conversion in °C
     ax.legend([r'$\mathregular{T_{agc}}$', r'$\mathregular{T_{agdl}}$', r'$\mathregular{T_{acl}}$',
                r'$\mathregular{T_{mem}}$', r'$\mathregular{T_{ccl}}$', r'$\mathregular{T_{cgdl}}$',
                r'$\mathregular{T_{cgc}}$', r'$\mathregular{T_{des}}$'], loc='best')
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
-    ax.set_ylabel(r"$\mathbf{Temperature}$ $\mathbf{T}$ $\mathbf{\left( K \right)}$", labelpad=3)
+    ax.set_ylabel(r"$\mathbf{Temperature}$ $\mathbf{T}$ $\mathbf{\left( °C \right)}$", labelpad=3)
 
     # Plot instructions
     plot_general_instructions(ax)

@@ -112,6 +112,4 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl
            'ccl': i_fc ** 2 / (3 * sigma_e_eff('cl', epsilon_cl, epsilon_mc, tau)),
            **{f'cgdl_{i}': i_fc ** 2 / sigma_e_eff('gdl', epsilon_gdl) for i in range(1, n_gdl + 1)}}
 
-    print('Q_e: ', Q_e['ccl'], '. Q_p: ', Q_p['ccl'], '. Q_liq: ', Q_liq['ccl'], '. Q_sorp: ', Q_sorp['ccl'], '. Q_r: ', Q_r['ccl'])
-
     return {'Jt': Jt, 'Q_r': Q_r, 'Q_sorp': Q_sorp, 'Q_liq': Q_liq, 'Q_p': Q_p, 'Q_e': Q_e}
