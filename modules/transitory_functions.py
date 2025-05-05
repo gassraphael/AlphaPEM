@@ -645,9 +645,8 @@ def k_th_gaz_mixture(k_th_g, mu_g, x, M):
             if i == j:
                 A_W[i, j] = 1.0
             else:
-                num = epsilon_TS * (1 + np.sqrt(mu_g[i] / mu_g[j]) * (M[j] / M[i]) ** 0.25) ** 2
-                denom = np.sqrt(8 * (1 + M[i] / M[j]))
-                A_W[i, j] = num / denom
+                A_W[i, j] = (epsilon_TS * (1 + np.sqrt(mu_g[i] / mu_g[j]) * (M[j] / M[i]) ** 0.25) ** 2) /  \
+                            np.sqrt(8 * (1 + M[i] / M[j]))
 
     # Calculation of the thermal conductivity of the gas mixture.
     k_th_gaz_mixture = 0.0
