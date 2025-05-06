@@ -400,7 +400,7 @@ type_fuel_cell is considered.</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-<b><code>Tfc</code></b>(                  <code>float</code>
+<b><code>T_des</code></b>(                  <code>float</code>
 )              –
               <div class="doc-md-description">
                 <p>Desired fuel cell temperature in Kelvin.</p>
@@ -660,7 +660,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 
     Returns
     -------
-    Tfc : float
+    T_des : float
             Desired fuel cell temperature in Kelvin.
     Pa_des : float
         Desired anode pressure in Pascal.
@@ -744,7 +744,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
             type_fuel_cell == "EH-31_2.5":
         # Given values by the author
         #       Operating inputs
-        Tfc = 74 + 273.15  # K. It is the temperature of the fuel cell.
+        T_des = 74 + 273.15  # K. It is the temperature of the fuel cell.
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
         if type_fuel_cell == "EH-31_1.5":
@@ -790,7 +790,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
     elif type_fuel_cell == "LF":
         # Given values by the author
         #       Operating inputs
-        Tfc = 80 + 273.15  # K. It is the temperature of the fuel cell.
+        T_des = 80 + 273.15  # K. It is the temperature of the fuel cell.
         Pa_des, Pc_des = 101325, 101325  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 2.0, 1.5  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.84, 0.59  # It is the desired relative humidity.
@@ -829,7 +829,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
     # Characteristic points of the experimental polarization curve
     i_exp, U_exp = pola_exp_values(type_fuel_cell)
 
-    return (Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_pola, Aact, Hmem, Hcl, Hgdl, Hgc, Wgc, Lgc,
+    return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_pola, Aact, Hmem, Hcl, Hgdl, Hgc, Wgc, Lgc,
             type_auxiliary, type_control, type_purge, type_display, type_plot, type_current, current_density, t_step,
             i_step, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, t_purge, max_step, n_gdl, i_exp, U_exp)</code></pre>
             </details>

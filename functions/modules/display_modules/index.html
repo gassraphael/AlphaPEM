@@ -834,7 +834,7 @@ used in the FT.</p>
 
 
 <h2 id="modules.display_modules.plot_C_v" class="doc doc-heading">
-            <code class="highlight language-python">plot_C_v(variables, n_gdl, C_v_sat, n, ax)</code>
+            <code class="highlight language-python">plot_C_v(variables, n_gdl, ax)</code>
 
 </h2>
 
@@ -871,22 +871,6 @@ used in the FT.</p>
               </div>
             </li>
             <li>
-              <b><code>C_v_sat</code></b>
-                  (<code>float</code>)
-              –
-              <div class="doc-md-description">
-                <p>Saturation vapor concentration.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>n</code></b>
-                  (<code>int</code>)
-              –
-              <div class="doc-md-description">
-                <p>Number of points used to plot the vapor concentration.</p>
-              </div>
-            </li>
-            <li>
               <b><code>ax</code></b>
                   (<code><span title="matplotlib.axes.Axes">Axes</span></code>)
               –
@@ -901,7 +885,7 @@ used in the FT.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <pre class="highlight"><code class="language-python">def plot_C_v(variables, n_gdl, C_v_sat, n, ax):
+              <pre class="highlight"><code class="language-python">def plot_C_v(variables, n_gdl, ax):
     """This function plots the vapor concentrations at different spatial localisations, as a function of time.
 
     Parameters
@@ -910,10 +894,6 @@ used in the FT.</p>
         Variables calculated by the solver. They correspond to the fuel cell internal states.
     n_gdl : int
         Number of model nodes placed inside each GDL.
-    C_v_sat : float
-        Saturation vapor concentration.
-    n : int
-        Number of points used to plot the vapor concentration.
     ax : matplotlib.axes.Axes
         Axes on which the vapor concentration will be plotted.
     """
@@ -922,19 +902,20 @@ used in the FT.</p>
     t, C_v_agc_t, C_v_agdl_t = variables['t'], variables['C_v_agc'], variables[f'C_v_agdl_{n_gdl // 2}']
     C_v_acl_t, C_v_ccl_t = variables['C_v_acl'], variables['C_v_ccl']
     C_v_cgdl_t, C_v_cgc_t = variables[f'C_v_cgdl_{n_gdl // 2}'], variables['C_v_cgc']
+    T_ccl = variables['T_ccl']
 
     # Plot the vapor concentrations at different spatial localisations Cv
-    C_v_sat_t = np.ones(n) * C_v_sat
+    C_v_sat_ccl_t = np.array([C_v_sat(T) for T in T_ccl])
     ax.plot(t, C_v_agc_t, color=colors(0))
     ax.plot(t, C_v_agdl_t, color=colors(1))
     ax.plot(t, C_v_acl_t, color=colors(2))
     ax.plot(t, C_v_ccl_t, color=colors(4))
     ax.plot(t, C_v_cgdl_t, color=colors(5))
     ax.plot(t, C_v_cgc_t, color=colors(6))
-    ax.plot(t, C_v_sat_t, color='k')
+    ax.plot(t, C_v_sat_ccl_t, color='k')
     ax.legend([r'$\mathregular{C_{v,agc}}$', r'$\mathregular{C_{v,agdl}}$', r'$\mathregular{C_{v,acl}}$',
                r'$\mathregular{C_{v,ccl}}$', r'$\mathregular{C_{v,cgdl}}$', r'$\mathregular{C_{v,cgc}}$',
-               r'$\mathregular{C_{v,sat}}$'], loc='best')
+               r'$\mathregular{C_{v,sat,ccl}}$'], loc='best')
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r"$\mathbf{Vapor}$ $\mathbf{concentration}$ $\mathbf{C_{v}}$ $\mathbf{\left( mol.m^{-3} \right)}$",
                   labelpad=3)
@@ -1593,19 +1574,19 @@ used in the FT.</p>
         Axes on which the flows will be plotted.
     """
     # Extraction of the variables
-    t, S_sorp_acl_t, S_sorp_ccl_t = variables['t'], variables['S_sorp_acl'], variables['S_sorp_ccl'],
+    t, S_abs_acl_t, S_abs_ccl_t = variables['t'], variables['S_abs_acl'], variables['S_abs_ccl'],
     J_lambda_mem_acl_t, J_lambda_mem_ccl_t = variables['J_lambda_mem_acl'], variables['J_lambda_mem_ccl']
     # Extraction of the operating inputs and the parameters
     Hcl = parameters['Hcl']
 
     # Plot the sorption and dissolved water flows: J
-    J_sorp_acl, J_sorp_ccl = [x * Hcl for x in S_sorp_acl_t], [x * Hcl for x in S_sorp_ccl_t]  # Conversion in
+    J_abs_acl, J_abs_ccl = [x * Hcl for x in S_abs_acl_t], [x * Hcl for x in S_abs_ccl_t]  # Conversion in
     #                                                                                         mol.m⁻².s⁻¹ for comparison
-    ax.plot(t, J_sorp_acl, color=colors(2))
+    ax.plot(t, J_abs_acl, color=colors(2))
     ax.plot(t, J_lambda_mem_acl_t, color=colors(3))
-    ax.plot(t, J_sorp_ccl, color=colors(4))
+    ax.plot(t, J_abs_ccl, color=colors(4))
     ax.plot(t, J_lambda_mem_ccl_t, color=colors(7))
-    ax.legend([r'$\mathregular{J_{sorp,acl}}$', r'$\mathregular{J_{\lambda,mem,acl}}$', r'$\mathregular{J_{sorp,ccl}}$',
+    ax.legend([r'$\mathregular{J_{abs,acl}}$', r'$\mathregular{J_{\lambda,mem,acl}}$', r'$\mathregular{J_{abs,ccl}}$',
                r'$\mathregular{J_{\lambda,mem,ccl}}$'], loc='best')
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r'$\mathbf{Flows}$ $\mathbf{J}$ $\mathbf{\left( mol.m^{-2}.s^{-1} \right)}$', labelpad=3)
@@ -1783,14 +1764,14 @@ used in the FT.</p>
     """
 
     # Extraction of the variables
-    t, C_v_agc_t = variables['t'], variables['C_v_agc']
+    t, C_v_agc_t, T_agc = variables['t'], variables['C_v_agc'], variables['T_agc']
     Phi_asm_t, Phi_aem_t = variables['Phi_asm'], variables['Phi_aem']
     # Extraction of the operating inputs
-    Tfc, Phi_a_des = operating_inputs['Tfc'], operating_inputs['Phi_a_des']
+    Phi_a_des = operating_inputs['Phi_a_des']
 
     # Calculate the humidity Phi
     Phi_agc_t = [0] * len(t)
-    for i in range(len(t)): Phi_agc_t[i] = C_v_agc_t[i] * R * Tfc / Psat(Tfc)
+    for i in range(len(t)): Phi_agc_t[i] = C_v_agc_t[i] * R * T_agc / Psat(T_agc)
 
     # Plot the humidity at different spatial localisations: Phi
     ax.plot(t, Phi_agc_t, color=colors(0), label=r'$\mathregular{\Phi_{agc}}$')
@@ -1882,14 +1863,14 @@ used in the FT.</p>
     """
 
     # Extraction of the variables
-    t, C_v_cgc_t = variables['t'], variables['C_v_cgc']
+    t, C_v_cgc_t, T_cgc = variables['t'], variables['C_v_cgc'], variables['T_cgc']
     Phi_csm_t, Phi_cem_t = variables['Phi_csm'], variables['Phi_cem']
     # Extraction of the operating inputs
-    Tfc, Phi_c_des = operating_inputs['Tfc'], operating_inputs['Phi_c_des']
+    Phi_c_des = operating_inputs['Phi_c_des']
 
     # Calculate the humidity Phi
     Phi_cgc_t = [0] * len(t)
-    for i in range(len(t)): Phi_cgc_t[i] = C_v_cgc_t[i] * R * Tfc / Psat(Tfc)
+    for i in range(len(t)): Phi_cgc_t[i] = C_v_cgc_t[i] * R * T_cgc / Psat(T_cgc)
 
     # Plot the humidity at different spatial localisations: Phi
     ax.plot(t, Phi_cgc_t, color=colors(0), label=r'$\mathregular{\Phi_{cgc}}$')
@@ -2025,6 +2006,118 @@ current density.</p>
     ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.2))
     ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.2 / 5))
     ax.set_xlim(0, 4.1)</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="modules.display_modules.plot_T" class="doc doc-heading">
+            <code class="highlight language-python">plot_T(variables, operating_inputs, n_gdl, ax)</code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>This function plots the vapor concentrations at different spatial localisations, as a function of time.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>variables</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Variables calculated by the solver. They correspond to the fuel cell internal states.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>operating_inputs</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Operating inputs of the fuel cell.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>n_gdl</code></b>
+                  (<code>int</code>)
+              –
+              <div class="doc-md-description">
+                <p>Number of model nodes placed inside each GDL.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>ax</code></b>
+                  (<code><span title="matplotlib.axes.Axes">Axes</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Axes on which the vapor concentration will be plotted.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>modules/display_modules.py</code></summary>
+              <pre class="highlight"><code class="language-python">def plot_T(variables, operating_inputs, n_gdl, ax):
+    """This function plots the vapor concentrations at different spatial localisations, as a function of time.
+
+    Parameters
+    ----------
+    variables : dict
+        Variables calculated by the solver. They correspond to the fuel cell internal states.
+    operating_inputs : dict
+        Operating inputs of the fuel cell.
+    n_gdl : int
+        Number of model nodes placed inside each GDL.
+    ax : matplotlib.axes.Axes
+        Axes on which the vapor concentration will be plotted.
+    """
+
+    # Extraction of the variables and the operating inputs
+    t, T_agc_t, T_agdl_t = variables['t'], variables['T_agc'], variables[f'T_agdl_{n_gdl // 2}']
+    T_acl_t, T_mem_t, T_ccl_t = variables['T_acl'], variables['T_mem'], variables['T_ccl']
+    T_cgdl_t, T_cgc_t = variables[f'T_cgdl_{n_gdl // 2}'], variables['T_cgc']
+    T_des = operating_inputs['T_des']
+
+
+    # Plot the temperature at different spatial localisations
+    T_des_t = np.array([T_des] * len(t))
+    ax.plot(t, np.array(T_agc_t) - 273.15, color=colors(0)) # Conversion in °C
+    ax.plot(t, np.array(T_agdl_t) - 273.15, color=colors(1)) # Conversion in °C
+    ax.plot(t, np.array(T_acl_t) - 273.15, color=colors(2)) # Conversion in °C
+    ax.plot(t, np.array(T_mem_t) - 273.15, color=colors(3)) # Conversion in °C
+    ax.plot(t, np.array(T_ccl_t) - 273.15, color=colors(4)) # Conversion in °C
+    ax.plot(t, np.array(T_cgdl_t) - 273.15, color=colors(5)) # Conversion in °C
+    ax.plot(t, np.array(T_cgc_t) - 273.15, color=colors(6)) # Conversion in °C
+    ax.plot(t, np.array(T_des_t) - 273.15, color='k') # Conversion in °C
+    ax.legend([r'$\mathregular{T_{agc}}$', r'$\mathregular{T_{agdl}}$', r'$\mathregular{T_{acl}}$',
+               r'$\mathregular{T_{mem}}$', r'$\mathregular{T_{ccl}}$', r'$\mathregular{T_{cgdl}}$',
+               r'$\mathregular{T_{cgc}}$', r'$\mathregular{T_{des}}$'], loc='best')
+    ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
+    ax.set_ylabel(r"$\mathbf{Temperature}$ $\mathbf{T}$ $\mathbf{\left( °C \right)}$", labelpad=3)
+
+    # Plot instructions
+    plot_general_instructions(ax)
+    ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(200))
+    ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(200 / 5))
+    ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(1))
+    ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(1 / 5))</code></pre>
             </details>
     </div>
 
@@ -2199,9 +2292,10 @@ current density.</p>
     # Extraction of the variables
     t, Ucell_t, lambda_mem_t = variables['t'], variables['Ucell'], variables['lambda_mem']
     C_H2_acl_t, C_O2_ccl_t = variables['C_H2_acl'], variables['C_O2_ccl']
+    T_acl_t, T_mem_t, T_ccl_t = variables['T_acl'], variables['T_mem'], variables['T_ccl']
     # Extraction of the operating inputs and the parameters
-    current_density, Tfc = operating_inputs['current_density'], operating_inputs['Tfc']
-    Hmem, kappa_co = parameters['Hmem'], parameters['kappa_co']
+    current_density = operating_inputs['current_density']
+    Hmem, Hcl, kappa_co = parameters['Hmem'], parameters['Hcl'], parameters['kappa_co']
     type_fuel_cell, type_auxiliary = parameters['type_fuel_cell'], parameters['type_auxiliary']
     type_control = parameters['type_control']
 
@@ -2210,10 +2304,13 @@ current density.</p>
     for i in range(n):
         ifc_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
         Pfc_t[i] = Ucell_t[i] * ifc_t[i]
-        Ueq = E0 - 8.5e-4 * (Tfc - 298.15) + R * Tfc / (2 * F) * (np.log(R * Tfc * C_H2_acl_t[i] / Pref) +
-                                                                  0.5 * np.log(R * Tfc * C_O2_ccl_t[i] / Pref))
-        i_H2 = 2 * F * R * Tfc / Hmem * C_H2_acl_t[i] * k_H2(lambda_mem_t[i], Tfc, kappa_co)
-        i_O2 = 4 * F * R * Tfc / Hmem * C_O2_ccl_t[i] * k_O2(lambda_mem_t[i], Tfc, kappa_co)
+        Ueq = E0 - 8.5e-4 * (T_ccl_t[i] - 298.15) + \
+              R * T_ccl_t[i] / (2 * F) * (np.log(R * T_acl_t[i] * C_H2_acl_t[i] / Pref) +
+                                          0.5 * np.log(R * T_ccl_t[i] * C_O2_ccl_t[i] / Pref))
+        T_acl_mem_ccl = average([T_acl_t[i], T_mem_t[i], T_ccl_t[i]],
+                                   weights=[Hcl / (2 * Hcl + Hmem), Hmem / (2 * Hcl + Hmem), Hcl / (2 * Hcl + Hmem)])
+        i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl_t[i] * k_H2(lambda_mem_t[i], T_mem_t[i], kappa_co)
+        i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl_t[i] * k_O2(lambda_mem_t[i], T_mem_t[i], kappa_co)
         i_n = (i_H2 + i_O2) / 1e4  # Conversion in A/cm²
         eta_fc_t[i] = Pfc_t[i] / (Ueq * (ifc_t[i] + i_n))
 

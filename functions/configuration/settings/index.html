@@ -533,7 +533,7 @@ or "manual_setup".</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-<b><code>Tfc</code></b>(                  <code>float</code>
+<b><code>T_des</code></b>(                  <code>float</code>
 )              –
               <div class="doc-md-description">
                 <p>Desired fuel cell temperature in Kelvin.</p>
@@ -606,7 +606,7 @@ or "manual_setup".</p>
 
     Returns
     -------
-    Tfc : float
+    T_des : float
         Desired fuel cell temperature in Kelvin.
     Pa_des : float
         Desired anode pressure in Pascal.
@@ -625,15 +625,15 @@ or "manual_setup".</p>
     """
 
     if type_fuel_cell == "manual_setup": # Setup which are not stored in "stored_operating_inputs".
-        Tfc = 74 + 273.15  # K. It is the desired fuel cell temperature.
+        T_des = 74 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.0e5, 2.0e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
         i_max_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
     else: # Stored setup in "stored_operating_inputs".
-        Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
+        T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
-    return Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola</code></pre>
+    return T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola</code></pre>
             </details>
     </div>
 

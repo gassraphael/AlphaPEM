@@ -847,7 +847,7 @@ plot style, etc.</p>
 
 
 <h2 id="modules.GUI_modules.launch_AlphaPEM_for_EIS_current" class="doc doc-heading">
-            <code class="highlight language-python">launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge, type_display, type_plot)</code>
+            <code class="highlight language-python">launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge, type_display, type_plot)</code>
 
 </h2>
 
@@ -876,7 +876,7 @@ plot style, etc.</p>
               </div>
             </li>
             <li>
-              <b><code>Tfc</code></b>
+              <b><code>T_des</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
@@ -1258,7 +1258,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/GUI_modules.py</code></summary>
-              <pre class="highlight"><code class="language-python">def launch_AlphaPEM_for_EIS_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+              <pre class="highlight"><code class="language-python">def launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                                     i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
                                     Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
                                     kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell,
@@ -1269,7 +1269,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
     ----------
     current_density : function
         Current density evolution over time (operating input). It is a function of time and parameters dictionary.
-    Tfc : float
+    T_des : float
         Desired fuel cell temperature in Kelvin (operating input).
     Pa_des : float
         Desired anode pressure in Pascal (operating input).
@@ -1377,6 +1377,9 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
         Type of plot (computing parameter).
     """
 
+    # Starting time
+    start_time = time.time()
+
     # Figures preparation
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(type_current, type_display)
 
@@ -1392,7 +1395,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 
     #       A preliminary simulation run is necessary to equilibrate the internal variables of the cell at i_EIS
     #       prior to initiating the EIS.
-    Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+    Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                          i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
                          Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
                          b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
@@ -1416,7 +1419,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 
     # Dynamic simulation
     for i in range(n):
-        Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+        Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                              i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
                              Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
                              kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell,
@@ -1444,7 +1447,11 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
             Simulator.Display(ax1, ax2, ax3)
 
     # Plot saving
-    plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2, fig3)</code></pre>
+    plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2, fig3)
+
+    # Ending time
+    algo_time = time.time() - start_time
+    print('Time of the algorithm in second :', algo_time)</code></pre>
             </details>
     </div>
 
@@ -1454,7 +1461,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 
 
 <h2 id="modules.GUI_modules.launch_AlphaPEM_for_polarization_current" class="doc doc-heading">
-            <code class="highlight language-python">launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge, type_display, type_plot)</code>
+            <code class="highlight language-python">launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge, type_display, type_plot)</code>
 
 </h2>
 
@@ -1483,7 +1490,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
               </div>
             </li>
             <li>
-              <b><code>Tfc</code></b>
+              <b><code>T_des</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
@@ -1865,7 +1872,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/GUI_modules.py</code></summary>
-              <pre class="highlight"><code class="language-python">def launch_AlphaPEM_for_polarization_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step,
+              <pre class="highlight"><code class="language-python">def launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step,
                                              i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
                                              Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re,
                                              i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step,
@@ -1877,7 +1884,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
     ----------
     current_density : function
         Current density evolution over time (operating input). It is a function of time and parameters dictionary.
-    Tfc : float
+    T_des : float
         Desired fuel cell temperature in Kelvin (operating input).
     Pa_des : float
         Desired anode pressure in Pascal (operating input).
@@ -1985,6 +1992,9 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
         Type of plot (computing parameter).
     """
 
+    # Starting time
+    start_time = time.time()
+
     # Figures preparation
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(type_current, type_display)
 
@@ -2002,7 +2012,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 
         # Dynamic simulation
         for i in range(n):
-            Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+            Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                                  i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
                                  Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c,
                                  a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
@@ -2026,7 +2036,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 
     else:  # elif type_plot == "fixed":
         # Simulation
-        Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+        Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                              i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
                              Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
                              b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
@@ -2036,7 +2046,11 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
             Simulator.Display(ax1, ax2, ax3)
 
     # Plot saving
-    plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2, fig3)</code></pre>
+    plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2, fig3)
+
+    # Ending time
+    algo_time = time.time() - start_time
+    print('Time of the algorithm in second :', algo_time)</code></pre>
             </details>
     </div>
 
@@ -2046,7 +2060,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 
 
 <h2 id="modules.GUI_modules.launch_AlphaPEM_for_step_current" class="doc doc-heading">
-            <code class="highlight language-python">launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge, type_display, type_plot)</code>
+            <code class="highlight language-python">launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge, type_display, type_plot)</code>
 
 </h2>
 
@@ -2075,7 +2089,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
               </div>
             </li>
             <li>
-              <b><code>Tfc</code></b>
+              <b><code>T_des</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
@@ -2457,7 +2471,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/GUI_modules.py</code></summary>
-              <pre class="highlight"><code class="language-python">def launch_AlphaPEM_for_step_current(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+              <pre class="highlight"><code class="language-python">def launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                                      i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
                                      Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
                                      kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell,
@@ -2468,7 +2482,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
     ----------
     current_density : function
         Current density evolution over time (operating input). It is a function of time and parameters dictionary.
-    Tfc : float
+    T_des : float
         Desired fuel cell temperature in Kelvin (operating input).
     Pa_des : float
         Desired anode pressure in Pascal (operating input).
@@ -2576,6 +2590,9 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
         Type of plot (computing parameter).
     """
 
+    # Starting time
+    start_time = time.time()
+
     # Figures preparation
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(type_current, type_display)
 
@@ -2590,7 +2607,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 
         # Dynamic simulation
         for i in range(n):
-            Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+            Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                                  i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
                                  Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c,
                                  a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
@@ -2614,7 +2631,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 
     else:  # elif type_plot == "fixed":
         # Simulation
-        Simulator = AlphaPEM(current_density, Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
+        Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
                              i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
                              Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
                              b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
@@ -2624,7 +2641,11 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
             Simulator.Display(ax1, ax2, ax3)
 
     # Plot saving
-    plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2, fig3)</code></pre>
+    plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2, fig3)
+
+    # Ending time
+    algo_time = time.time() - start_time
+    print('Time of the algorithm in second :', algo_time)</code></pre>
             </details>
     </div>
 
@@ -2745,44 +2766,44 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
     elif choice_buttons['type_fuel_cell']['value'].get() == "Linhao Fan (2010)":
         type_fuel_cell = "LF"
 
-    Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
+    T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
     Hcl, epsilon_mc, tau, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, Re, i0_c_ref, kappa_co, kappa_c, \
         a_slim, b_slim, a_switch, C_scl = \
         stored_physical_parameters(type_fuel_cell)
 
     # operating conditions recovery
-    choice_operating_conditions['Temperature - Tfc (°C)']['value'].set(np.round(Tfc - 273.15))  # °C
-    choice_operating_conditions['Anode pressure - Pa (bar)']['value'].set(np.round(Pa_des / 1e5, 2))  # bar
-    choice_operating_conditions['Cathode pressure - Pc (bar)']['value'].set(np.round(Pc_des / 1e5, 2))  # bar
-    choice_operating_conditions['Anode stoichiometry - Sa']['value'].set(np.round(Sa, 1))
-    choice_operating_conditions['Cathode stoichiometry - Sc']['value'].set(np.round(Sc, 1))
-    choice_operating_conditions['Anode humidity - Φa']['value'].set(np.round(Phi_a_des, 1))
-    choice_operating_conditions['Cathode humidity - Φc']['value'].set(np.round(Phi_c_des, 1))
+    choice_operating_conditions['Temperature - Tfc (°C)']['value'].set(round(T_des - 273.15))  # °C
+    choice_operating_conditions['Anode pressure - Pa (bar)']['value'].set(round(Pa_des / 1e5, 2))  # bar
+    choice_operating_conditions['Cathode pressure - Pc (bar)']['value'].set(round(Pc_des / 1e5, 2))  # bar
+    choice_operating_conditions['Anode stoichiometry - Sa']['value'].set(round(Sa, 1))
+    choice_operating_conditions['Cathode stoichiometry - Sc']['value'].set(round(Sc, 1))
+    choice_operating_conditions['Anode humidity - Φa']['value'].set(round(Phi_a_des, 1))
+    choice_operating_conditions['Cathode humidity - Φc']['value'].set(round(Phi_c_des, 1))
     # accessible physical parameters recovery
-    choice_accessible_parameters['Active area - Aact (cm²)']['value'].set(np.round(Aact * 1e4))  # cm²
-    choice_accessible_parameters['GDL thickness - Hgdl (µm)']['value'].set(np.round(Hgdl * 1e6))  # µm
-    choice_accessible_parameters['CL thickness - Hcl (µm)']['value'].set(np.round(Hcl * 1e6))  # µm
-    choice_accessible_parameters['Membrane thickness - Hmem (µm)']['value'].set(np.round(Hmem * 1e6))  # µm
-    choice_accessible_parameters['GC thickness - Hgc (µm)']['value'].set(np.round(Hgc * 1e6))  # µm
-    choice_accessible_parameters['GC width - Wgc (µm)']['value'].set(np.round(Wgc * 1e6))  # µm
-    choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].set(np.round(Lgc, 2))  # µm
+    choice_accessible_parameters['Active area - Aact (cm²)']['value'].set(round(Aact * 1e4))  # cm²
+    choice_accessible_parameters['GDL thickness - Hgdl (µm)']['value'].set(round(Hgdl * 1e6))  # µm
+    choice_accessible_parameters['CL thickness - Hcl (µm)']['value'].set(round(Hcl * 1e6))  # µm
+    choice_accessible_parameters['Membrane thickness - Hmem (µm)']['value'].set(round(Hmem * 1e6))  # µm
+    choice_accessible_parameters['GC thickness - Hgc (µm)']['value'].set(round(Hgc * 1e6))  # µm
+    choice_accessible_parameters['GC width - Wgc (µm)']['value'].set(round(Wgc * 1e6))  # µm
+    choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].set(round(Lgc, 2))  # µm
     # undetermined physical parameters recovery
-    choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].set(np.round(epsilon_gdl, 3))
-    choice_undetermined_parameters['Ionomer volume fraction\n- ε_mc']['value'].set(np.round(epsilon_mc, 3))
-    choice_undetermined_parameters['Tortuosity - τ']['value'].set(np.round(tau, 3))
-    choice_undetermined_parameters['Compression ratio - ε_c']['value'].set(np.round(epsilon_c, 3))
+    choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].set(round(epsilon_gdl, 3))
+    choice_undetermined_parameters['Ionomer volume fraction\n- ε_mc']['value'].set(round(epsilon_mc, 3))
+    choice_undetermined_parameters['Tortuosity - τ']['value'].set(round(tau, 3))
+    choice_undetermined_parameters['Compression ratio - ε_c']['value'].set(round(epsilon_c, 3))
     choice_undetermined_parameters['Capillary exponent - e']['value'].set(e)
-    choice_undetermined_parameters['Electron resistance\n- Re (µΩ.m²)']['value'].set(np.round(Re * 1e6, 2))  # µΩ.m²
-    choice_undetermined_parameters['Reference exchange\ncurrent density\n- i0_c_ref (A/m²)']['value'].set(np.round(i0_c_ref, 2))  # A.m-2
-    choice_undetermined_parameters['Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))']['value'].set(np.round(kappa_co, 2))  # mol.m-1.s-1.Pa-1
-    choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].set(np.round(kappa_c, 2))
-    choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_slim']['value'].set(np.round(a_slim, 7))
-    choice_undetermined_parameters['Limit liquid saturation\ncoefficient - b_slim']['value'].set(np.round(b_slim, 7))
-    choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_switch']['value'].set(np.round(a_switch, 7))
-    choice_undetermined_parameters['Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)']['value'].set(np.round(C_scl * 1e-6, 2))  # F.cm-3
+    choice_undetermined_parameters['Electron resistance\n- Re (µΩ.m²)']['value'].set(round(Re * 1e6, 2))  # µΩ.m²
+    choice_undetermined_parameters['Reference exchange\ncurrent density\n- i0_c_ref (A/m²)']['value'].set(round(i0_c_ref, 2))  # A.m-2
+    choice_undetermined_parameters['Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))']['value'].set(round(kappa_co, 2))  # mol.m-1.s-1.Pa-1
+    choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].set(round(kappa_c, 2))
+    choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_slim']['value'].set(round(a_slim, 7))
+    choice_undetermined_parameters['Limit liquid saturation\ncoefficient - b_slim']['value'].set(round(b_slim, 7))
+    choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_switch']['value'].set(round(a_switch, 7))
+    choice_undetermined_parameters['Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)']['value'].set(round(C_scl * 1e-6, 2))  # F.cm-3
     # i_max_pola recovery
-    choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].set(np.round(i_max_pola / 1e4, 2))  # A/cm²</code></pre>
+    choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].set(round(i_max_pola / 1e4, 2))  # A/cm²</code></pre>
             </details>
     </div>
 
@@ -2891,7 +2912,7 @@ calculations.</p>
         A dictionary containing the button information.
     """
     # operating conditions
-    Tfc = choice_operating_conditions['Temperature - Tfc (°C)']['value'].get() + 273.15  # K
+    T_des = choice_operating_conditions['Temperature - Tfc (°C)']['value'].get() + 273.15  # K
     Pa_des = choice_operating_conditions['Anode pressure - Pa (bar)']['value'].get() * 1e5  # Pa
     Pc_des = choice_operating_conditions['Cathode pressure - Pc (bar)']['value'].get() * 1e5  # Pa
     Sa = choice_operating_conditions['Anode stoichiometry - Sa']['value'].get()
@@ -2988,7 +3009,7 @@ calculations.</p>
     else:
         type_plot = "dynamic"
 
-    return (Tfc, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl,
+    return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl,
             epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, t_step,
             i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, max_step, n_gdl,
             type_fuel_cell, type_auxiliary, type_control, type_purge, type_display, type_plot)</code></pre>

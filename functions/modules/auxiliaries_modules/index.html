@@ -208,7 +208,7 @@
                   (<code>dict</code>)
               –
               <div class="doc-md-description">
-                <p>Operating inputs of the fuel cell.</p>
+                <p>Operating inputs of the fuel cell model.</p>
               </div>
             </li>
             <li>
@@ -378,7 +378,7 @@
     solver_variables : dict
         Variables calculated by the solver. They correspond to the fuel cell internal states.
     operating_inputs : dict
-        Operating inputs of the fuel cell.
+        Operating inputs of the fuel cell model.
     parameters : dict
         Parameters of the fuel cell model.
 
@@ -427,13 +427,14 @@
     lambda_mem = solver_variables['lambda_mem']
     C_H2_agc, C_H2_acl = solver_variables['C_H2_agc'], solver_variables['C_H2_acl']
     C_N2, C_O2_ccl, C_O2_cgc = solver_variables['C_N2'], solver_variables['C_O2_ccl'], solver_variables['C_O2_cgc']
+    T_acl, T_mem, T_ccl = solver_variables['T_acl'], solver_variables['T_mem'], solver_variables['T_ccl']
     Pasm, Paem, Pcsm = solver_variables['Pasm'], solver_variables['Paem'], solver_variables['Pcsm']
     Pcem, Phi_asm, Phi_aem = solver_variables['Pcem'], solver_variables['Phi_asm'], solver_variables['Phi_aem']
     Phi_csm, Phi_cem = solver_variables['Phi_csm'], solver_variables['Phi_cem']
     Abp_a, Abp_c = solver_variables['Abp_a'], solver_variables['Abp_c']
     # Extraction of the operating inputs and the parameters
-    Tfc, Pa_des, Pc_des = operating_inputs['Tfc'], operating_inputs['Pa_des'], operating_inputs['Pc_des']
-    Hmem, kappa_co = parameters['Hmem'], parameters['kappa_co']
+    T_des = operating_inputs['T_des']
+    Hmem, Hcl, kappa_co = parameters['Hmem'], parameters['Hcl'], parameters['kappa_co']
     t_purge, type_purge = parameters['t_purge'], parameters['type_purge']
 
     # Molar mass of the ambient air
@@ -443,23 +444,25 @@
 
     # Physical quantities inside the stack
     #       Pressures
-    Pagc = (C_v_agc + C_H2_agc) * R * Tfc
-    Pcgc = (C_v_cgc + C_O2_cgc + C_N2) * R * Tfc
+    Pagc = (C_v_agc + C_H2_agc) * R * T_des
+    Pcgc = (C_v_cgc + C_O2_cgc + C_N2) * R * T_des
     #       Humidities
-    Phi_agc = C_v_agc / C_v_sat(Tfc)
-    Phi_cgc = C_v_cgc / C_v_sat(Tfc)
+    Phi_agc = C_v_agc / C_v_sat(T_des)
+    Phi_cgc = C_v_cgc / C_v_sat(T_des)
     #       Oxygen ratio in dry air
     y_cgc = C_O2_cgc / (C_O2_cgc + C_N2)
     #       Molar masses
-    Magc = C_v_agc * R * Tfc / Pagc * M_H2O + \
-           C_H2_agc * R * Tfc / Pagc * M_H2
-    Mcgc = Phi_cgc * Psat(Tfc) / Pcgc * M_H2O + \
-           y_cgc * (1 - Phi_cgc * Psat(Tfc) / Pcgc) * M_O2 + \
-           (1 - y_cgc) * (1 - Phi_cgc * Psat(Tfc) / Pcgc) * M_N2
+    Magc = C_v_agc * R * T_des / Pagc * M_H2O + \
+           C_H2_agc * R * T_des / Pagc * M_H2
+    Mcgc = Phi_cgc * Psat(T_des) / Pcgc * M_H2O + \
+           y_cgc * (1 - Phi_cgc * Psat(T_des) / Pcgc) * M_O2 + \
+           (1 - y_cgc) * (1 - Phi_cgc * Psat(T_des) / Pcgc) * M_N2
 
     # Internal current density
-    i_H2 = 2 * F * R * Tfc / Hmem * C_H2_acl * k_H2(lambda_mem, Tfc, kappa_co)
-    i_O2 = 4 * F * R * Tfc / Hmem * C_O2_ccl * k_O2(lambda_mem, Tfc, kappa_co)
+    T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
+                                  weights=[Hcl / (2 * Hcl + Hmem), Hmem / (2 * Hcl + Hmem), Hcl / (2 * Hcl + Hmem)])
+    i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
+    i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
     i_n = i_H2 + i_O2
 
     # Physical quantities in the auxiliary system
@@ -469,18 +472,18 @@
         Pr_aem = (Pext / Paem)
         Pr_cem = (Pext / Pcem)
         # Oxygen ratio in dry air
-        y_cem = (Pcem - Phi_cem * Psat(Tfc) - C_N2 * R * Tfc) / (Pcem - Phi_cem * Psat(Tfc))
+        y_cem = (Pcem - Phi_cem * Psat(T_des) - C_N2 * R * T_des) / (Pcem - Phi_cem * Psat(T_des))
         # Molar masses
-        Maem = Phi_aem * Psat(Tfc) / Paem * M_H2O + \
-               (1 - Phi_aem * Psat(Tfc) / Paem) * M_H2
-        Masm = Phi_asm * Psat(Tfc) / Pasm * M_H2O + \
-               (1 - Phi_asm * Psat(Tfc) / Pasm) * M_H2
-        Mcem = Phi_cem * Psat(Tfc) / Pcem * M_H2O + \
-               y_cem * (1 - Phi_cem * Psat(Tfc) / Pcem) * M_O2 + \
-               (1 - y_cem) * (1 - Phi_cem * Psat(Tfc) / Pcem) * M_N2
-        Mcsm = Phi_csm * Psat(Tfc) / Pcsm * M_H2O + \
-               yO2_ext * (1 - Phi_csm * Psat(Tfc) / Pcsm) * M_O2 + \
-               (1 - yO2_ext) * (1 - Phi_csm * Psat(Tfc) / Pcsm) * M_N2
+        Maem = Phi_aem * Psat(T_des) / Paem * M_H2O + \
+               (1 - Phi_aem * Psat(T_des) / Paem) * M_H2
+        Masm = Phi_asm * Psat(T_des) / Pasm * M_H2O + \
+               (1 - Phi_asm * Psat(T_des) / Pasm) * M_H2
+        Mcem = Phi_cem * Psat(T_des) / Pcem * M_H2O + \
+               y_cem * (1 - Phi_cem * Psat(T_des) / Pcem) * M_O2 + \
+               (1 - y_cem) * (1 - Phi_cem * Psat(T_des) / Pcem) * M_N2
+        Mcsm = Phi_csm * Psat(T_des) / Pcsm * M_H2O + \
+               yO2_ext * (1 - Phi_csm * Psat(T_des) / Pcsm) * M_O2 + \
+               (1 - yO2_ext) * (1 - Phi_csm * Psat(T_des) / Pcsm) * M_N2
         # Purge
         if type_purge == "no_purge":
             k_purge = 0

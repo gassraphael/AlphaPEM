@@ -607,7 +607,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 
 
 <h2 id="model.dif_eq.calculate_dyn_dissoved_water_evolution" class="doc doc-heading">
-            <code class="highlight language-python">calculate_dyn_dissoved_water_evolution(dif_eq, Hmem, Hcl, epsilon_mc, S_sorp_acl, S_sorp_ccl, J_lambda_mem_acl, J_lambda_mem_ccl, Sp_acl, Sp_ccl, **kwargs)</code>
+            <code class="highlight language-python">calculate_dyn_dissoved_water_evolution(dif_eq, Hmem, Hcl, epsilon_mc, S_abs_acl, S_abs_ccl, J_lambda_mem_acl, J_lambda_mem_ccl, Sp_acl, Sp_ccl, **kwargs)</code>
 
 </h2>
 
@@ -660,19 +660,19 @@ sv is a contraction of solver_variables for enhanced readability.</p>
               </div>
             </li>
             <li>
-              <b><code>S_sorp_acl</code></b>
+              <b><code>S_abs_acl</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Water sorption in the anode catalyst layer (mol.m-3.s-1)</p>
+                <p>Water absorption in the anode catalyst layer (mol.m-3.s-1)</p>
               </div>
             </li>
             <li>
-              <b><code>S_sorp_ccl</code></b>
+              <b><code>S_abs_ccl</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Water sorption in the cathode catalyst layer (mol.m-3.s-1)</p>
+                <p>Water absorption in the cathode catalyst layer (mol.m-3.s-1)</p>
               </div>
             </li>
             <li>
@@ -714,7 +714,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>model/dif_eq.py</code></summary>
-              <pre class="highlight"><code class="language-python">def calculate_dyn_dissoved_water_evolution(dif_eq, Hmem, Hcl, epsilon_mc, S_sorp_acl, S_sorp_ccl, J_lambda_mem_acl,
+              <pre class="highlight"><code class="language-python">def calculate_dyn_dissoved_water_evolution(dif_eq, Hmem, Hcl, epsilon_mc, S_abs_acl, S_abs_ccl, J_lambda_mem_acl,
                                            J_lambda_mem_ccl, Sp_acl, Sp_ccl, **kwargs):
     """
     This function calculates the dynamic evolution of the dissolved water in the membrane and the catalyst layers.
@@ -729,10 +729,10 @@ sv is a contraction of solver_variables for enhanced readability.</p>
         Thickness of the catalyst layer (m).
     epsilon_mc : float
         Volume fraction of ionomer in the catalyst layer.
-    S_sorp_acl : float
-        Water sorption in the anode catalyst layer (mol.m-3.s-1)
-    S_sorp_ccl : float
-        Water sorption in the cathode catalyst layer (mol.m-3.s-1)
+    S_abs_acl : float
+        Water absorption in the anode catalyst layer (mol.m-3.s-1)
+    S_abs_ccl : float
+        Water absorption in the cathode catalyst layer (mol.m-3.s-1)
     J_lambda_mem_acl : float
         Dissolved water flow between the membrane and the anode catalyst layer (mol.m-2.s-1)
     J_lambda_mem_ccl : float
@@ -743,9 +743,9 @@ sv is a contraction of solver_variables for enhanced readability.</p>
         Water produced in the membrane at the CCL through the chemical reaction and crossover (mol.m-3.s-1)
     """
 
-    dif_eq['dlambda_acl / dt'] = M_eq / (rho_mem * epsilon_mc) * (-J_lambda_mem_acl / Hcl + S_sorp_acl + Sp_acl)
+    dif_eq['dlambda_acl / dt'] = M_eq / (rho_mem * epsilon_mc) * (-J_lambda_mem_acl / Hcl + S_abs_acl + Sp_acl)
     dif_eq['dlambda_mem / dt'] = M_eq / rho_mem * (J_lambda_mem_acl - J_lambda_mem_ccl) / Hmem
-    dif_eq['dlambda_ccl / dt'] = M_eq / (rho_mem * epsilon_mc) * (J_lambda_mem_ccl / Hcl + S_sorp_ccl + Sp_ccl)</code></pre>
+    dif_eq['dlambda_ccl / dt'] = M_eq / (rho_mem * epsilon_mc) * (J_lambda_mem_ccl / Hcl + S_abs_ccl + Sp_ccl)</code></pre>
             </details>
     </div>
 
@@ -755,7 +755,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 
 
 <h2 id="model.dif_eq.calculate_dyn_liquid_water_evolution" class="doc doc-heading">
-            <code class="highlight language-python">calculate_dyn_liquid_water_evolution(dif_eq, rho_H2O, Hgdl, Hcl, epsilon_gdl, n_gdl, Jl_agdl_agdl, Jl_agdl_acl, Jl_ccl_cgdl, Jl_cgdl_cgdl, Sl_agdl, Sl_acl, Sl_ccl, Sl_cgdl, **kwargs)</code>
+            <code class="highlight language-python">calculate_dyn_liquid_water_evolution(dif_eq, sv, Hgdl, Hcl, epsilon_gdl, n_gdl, Jl_agdl_agdl, Jl_agdl_acl, Jl_ccl_cgdl, Jl_cgdl_cgdl, Sl_agdl, Sl_acl, Sl_ccl, Sl_cgdl, **kwargs)</code>
 
 </h2>
 
@@ -784,11 +784,12 @@ sv is a contraction of solver_variables for enhanced readability.</p>
               </div>
             </li>
             <li>
-              <b><code>rho_H2O</code></b>
-                  (<code>float</code>)
+              <b><code>sv</code></b>
+                  (<code>dict</code>)
               –
               <div class="doc-md-description">
-                <p>Density of water (kg.m-3).</p>
+                <p>Variables calculated by the solver. They correspond to the fuel cell internal states.
+sv is a contraction of solver_variables for enhanced readability.</p>
               </div>
             </li>
             <li>
@@ -894,7 +895,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>model/dif_eq.py</code></summary>
-              <pre class="highlight"><code class="language-python">def calculate_dyn_liquid_water_evolution(dif_eq, rho_H2O, Hgdl, Hcl, epsilon_gdl, n_gdl, Jl_agdl_agdl, Jl_agdl_acl,
+              <pre class="highlight"><code class="language-python">def calculate_dyn_liquid_water_evolution(dif_eq, sv, Hgdl, Hcl, epsilon_gdl, n_gdl, Jl_agdl_agdl, Jl_agdl_acl,
                                          Jl_ccl_cgdl, Jl_cgdl_cgdl, Sl_agdl, Sl_acl, Sl_ccl, Sl_cgdl, **kwargs):
     """
     This function calculates the dynamic evolution of the liquid water in the gas diffusion and catalyst layers.
@@ -903,8 +904,9 @@ sv is a contraction of solver_variables for enhanced readability.</p>
     ----------
     dif_eq : dict
         Dictionary used for saving the differential equations.
-    rho_H2O : float
-        Density of water (kg.m-3).
+    sv : dict
+        Variables calculated by the solver. They correspond to the fuel cell internal states.
+        sv is a contraction of solver_variables for enhanced readability.
     Hgdl : float
         Thickness of the gas diffusion layer (m).
     Hcl : float
@@ -935,23 +937,23 @@ sv is a contraction of solver_variables for enhanced readability.</p>
     #       Inside the AGDL
     dif_eq['ds_agdl_1 / dt'] = 0  # Dirichlet boundary condition. s_agdl_1 is initialized to 0 and remains constant.
     for i in range(2, n_gdl):
-        dif_eq[f'ds_agdl_{i} / dt'] = 1 / (rho_H2O * epsilon_gdl) * \
+        dif_eq[f'ds_agdl_{i} / dt'] = 1 / (rho_H2O_l(sv[f'T_agdl_{i}']) * epsilon_gdl) * \
                                       ((Jl_agdl_agdl[i - 1] - Jl_agdl_agdl[i]) / (Hgdl / n_gdl) +
                                        M_H2O * Sl_agdl[i])
-    dif_eq[f'ds_agdl_{n_gdl} / dt'] = 1 / (rho_H2O * epsilon_gdl) * \
+    dif_eq[f'ds_agdl_{n_gdl} / dt'] = 1 / (rho_H2O_l(sv[f'T_agdl_{n_gdl}']) * epsilon_gdl) * \
                                       ((Jl_agdl_agdl[n_gdl - 1] - Jl_agdl_acl) / (Hgdl / n_gdl) +
                                        M_H2O * Sl_agdl[n_gdl])
     #      Inside the ACL
-    dif_eq['ds_acl / dt'] = 1 / (rho_H2O * epsilon_cl) * (Jl_agdl_acl / Hcl + M_H2O * Sl_acl)
+    dif_eq['ds_acl / dt'] = 1 / (rho_H2O_l(sv['T_acl']) * epsilon_cl) * (Jl_agdl_acl / Hcl + M_H2O * Sl_acl)
 
     # At the cathode side
     #       Inside the CCL
-    dif_eq['ds_ccl / dt'] = 1 / (rho_H2O * epsilon_cl) * (- Jl_ccl_cgdl / Hcl + M_H2O * Sl_ccl)
+    dif_eq['ds_ccl / dt'] = 1 / (rho_H2O_l(sv['T_ccl']) * epsilon_cl) * (- Jl_ccl_cgdl / Hcl + M_H2O * Sl_ccl)
     #       Inside the CGDL
-    dif_eq['ds_cgdl_1 / dt'] = 1 / (rho_H2O * epsilon_gdl) * ((Jl_ccl_cgdl - Jl_cgdl_cgdl[1]) / (Hgdl / n_gdl) +
-                                                              M_H2O * Sl_cgdl[1])
+    dif_eq['ds_cgdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_cgdl_1']) * epsilon_gdl) * \
+                               ((Jl_ccl_cgdl - Jl_cgdl_cgdl[1]) / (Hgdl / n_gdl) + M_H2O * Sl_cgdl[1])
     for i in range(2, n_gdl):
-        dif_eq[f'ds_cgdl_{i} / dt'] = 1 / (rho_H2O * epsilon_gdl) * \
+        dif_eq[f'ds_cgdl_{i} / dt'] = 1 / (rho_H2O_l(sv[f'T_cgdl_{i}']) * epsilon_gdl) * \
                                       ((Jl_cgdl_cgdl[i - 1] - Jl_cgdl_cgdl[i]) / (Hgdl / n_gdl) + M_H2O * Sl_cgdl[i])
     dif_eq[f'ds_cgdl_{n_gdl} / dt'] = 0  # Dirichlet boundary condition. s_cgdl_n_gdl is initialized to 0 and remains</code></pre>
             </details>
@@ -963,7 +965,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 
 
 <h2 id="model.dif_eq.calculate_dyn_manifold_pressure_and_humidity_evolution" class="doc doc-heading">
-            <code class="highlight language-python">calculate_dyn_manifold_pressure_and_humidity_evolution(dif_eq, Masm, Maem, Mcsm, Mcem, Tfc, Hgc, Wgc, type_auxiliary, Jv_a_in, Jv_a_out, Jv_c_in, Jv_c_out, Wasm_in, Wasm_out, Waem_in, Waem_out, Wcsm_in, Wcsm_out, Wcem_in, Wcem_out, Ware, Wv_asm_in, Wv_aem_out, Wv_csm_in, Wv_cem_out, **kwargs)</code>
+            <code class="highlight language-python">calculate_dyn_manifold_pressure_and_humidity_evolution(dif_eq, Masm, Maem, Mcsm, Mcem, T_des, Hgc, Wgc, type_auxiliary, Jv_a_in, Jv_a_out, Jv_c_in, Jv_c_out, Wasm_in, Wasm_out, Waem_in, Waem_out, Wcsm_in, Wcsm_out, Wcem_in, Wcem_out, Ware, Wv_asm_in, Wv_aem_out, Wv_csm_in, Wv_cem_out, **kwargs)</code>
 
 </h2>
 
@@ -1024,7 +1026,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
               </div>
             </li>
             <li>
-              <b><code>Tfc</code></b>
+              <b><code>T_des</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
@@ -1198,7 +1200,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>model/dif_eq.py</code></summary>
-              <pre class="highlight"><code class="language-python">def calculate_dyn_manifold_pressure_and_humidity_evolution(dif_eq, Masm, Maem, Mcsm, Mcem, Tfc, Hgc, Wgc,
+              <pre class="highlight"><code class="language-python">def calculate_dyn_manifold_pressure_and_humidity_evolution(dif_eq, Masm, Maem, Mcsm, Mcem, T_des, Hgc, Wgc,
                                                            type_auxiliary, Jv_a_in, Jv_a_out, Jv_c_in, Jv_c_out,
                                                            Wasm_in, Wasm_out, Waem_in, Waem_out, Wcsm_in, Wcsm_out,
                                                            Wcem_in, Wcem_out, Ware, Wv_asm_in, Wv_aem_out, Wv_csm_in,
@@ -1217,7 +1219,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
         Molar mass of all the gaseous species inside the cathode supply manifold (kg.mol-1).
     Mcem : float
         Molar mass of all the gaseous species inside the cathode exhaust manifold (kg.mol-1).
-    Tfc : float
+    T_des : float
         Fuel cell temperature (K).
     Hgc : float
         Thickness of the gas channel (m).
@@ -1263,29 +1265,29 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 
     # Pressure evolution inside the manifolds
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
-        dif_eq['dPasm / dt'] = (Wasm_in + Ware - n_cell * Wasm_out) / (Vsm * Masm) * R * Tfc
-        dif_eq['dPaem / dt'] = (n_cell * Waem_in - Ware - Waem_out) / (Vem * Maem) * R * Tfc
-        dif_eq['dPcsm / dt'] = (Wcsm_in - n_cell * Wcsm_out) / (Vsm * Mcsm) * R * Tfc
-        dif_eq['dPcem / dt'] = (n_cell * Wcem_in - Wcem_out) / (Vem * Mcem) * R * Tfc
+        dif_eq['dPasm / dt'] = (Wasm_in + Ware - n_cell * Wasm_out) / (Vsm * Masm) * R * T_des
+        dif_eq['dPaem / dt'] = (n_cell * Waem_in - Ware - Waem_out) / (Vem * Maem) * R * T_des
+        dif_eq['dPcsm / dt'] = (Wcsm_in - n_cell * Wcsm_out) / (Vsm * Mcsm) * R * T_des
+        dif_eq['dPcem / dt'] = (n_cell * Wcem_in - Wcem_out) / (Vem * Mcem) * R * T_des
     elif type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-        dif_eq['dPasm / dt'] = (Wasm_in - n_cell * Wasm_out) / (Vsm * Masm) * R * Tfc
-        dif_eq['dPaem / dt'] = (n_cell * Waem_in - Waem_out) / (Vem * Maem) * R * Tfc
-        dif_eq['dPcsm / dt'] = (Wcsm_in - n_cell * Wcsm_out) / (Vsm * Mcsm) * R * Tfc
-        dif_eq['dPcem / dt'] = (n_cell * Wcem_in - Wcem_out) / (Vem * Mcem) * R * Tfc
+        dif_eq['dPasm / dt'] = (Wasm_in - n_cell * Wasm_out) / (Vsm * Masm) * R * T_des
+        dif_eq['dPaem / dt'] = (n_cell * Waem_in - Waem_out) / (Vem * Maem) * R * T_des
+        dif_eq['dPcsm / dt'] = (Wcsm_in - n_cell * Wcsm_out) / (Vsm * Mcsm) * R * T_des
+        dif_eq['dPcem / dt'] = (n_cell * Wcem_in - Wcem_out) / (Vem * Mcem) * R * T_des
     else:  # elif type_auxiliary == "no_auxiliary":
         dif_eq['dPasm / dt'], dif_eq['dPaem / dt'], dif_eq['dPcsm / dt'], dif_eq['dPcem / dt'] = 0, 0, 0, 0
 
     # Humidity evolution inside the manifolds
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
-        dif_eq['dPhi_asm / dt'] = (Wv_asm_in - Jv_a_in * Hgc * Wgc * n_cell) / Vsm * R * Tfc / Psat(Tfc)
-        dif_eq['dPhi_aem / dt'] = (Jv_a_out * Hgc * Wgc * n_cell - Wv_asm_in - Wv_aem_out) / Vem * R * Tfc / Psat(Tfc)
-        dif_eq['dPhi_csm / dt'] = (Wv_csm_in - Jv_c_in * Hgc * Wgc * n_cell) / Vsm * R * Tfc / Psat(Tfc)
-        dif_eq['dPhi_cem / dt'] = (Jv_c_out * Hgc * Wgc * n_cell - Wv_cem_out) / Vem * R * Tfc / Psat(Tfc)
+        dif_eq['dPhi_asm / dt'] = (Wv_asm_in - Jv_a_in * Hgc * Wgc * n_cell) / Vsm * R * T_des / Psat(T_des)
+        dif_eq['dPhi_aem / dt'] = (Jv_a_out * Hgc * Wgc * n_cell - Wv_asm_in - Wv_aem_out) / Vem * R * T_des / Psat(T_des)
+        dif_eq['dPhi_csm / dt'] = (Wv_csm_in - Jv_c_in * Hgc * Wgc * n_cell) / Vsm * R * T_des / Psat(T_des)
+        dif_eq['dPhi_cem / dt'] = (Jv_c_out * Hgc * Wgc * n_cell - Wv_cem_out) / Vem * R * T_des / Psat(T_des)
     elif type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-        dif_eq['dPhi_asm / dt'] = (Wv_asm_in - Jv_a_in * Hgc * Wgc * n_cell) / Vsm * R * Tfc / Psat(Tfc)
-        dif_eq['dPhi_aem / dt'] = (Jv_a_out * Hgc * Wgc * n_cell - Wv_aem_out) / Vem * R * Tfc / Psat(Tfc)
-        dif_eq['dPhi_csm / dt'] = (Wv_csm_in - Jv_c_in * Hgc * Wgc * n_cell) / Vsm * R * Tfc / Psat(Tfc)
-        dif_eq['dPhi_cem / dt'] = (Jv_c_out * Hgc * Wgc * n_cell - Wv_cem_out) / Vem * R * Tfc / Psat(Tfc)
+        dif_eq['dPhi_asm / dt'] = (Wv_asm_in - Jv_a_in * Hgc * Wgc * n_cell) / Vsm * R * T_des / Psat(T_des)
+        dif_eq['dPhi_aem / dt'] = (Jv_a_out * Hgc * Wgc * n_cell - Wv_aem_out) / Vem * R * T_des / Psat(T_des)
+        dif_eq['dPhi_csm / dt'] = (Wv_csm_in - Jv_c_in * Hgc * Wgc * n_cell) / Vsm * R * T_des / Psat(T_des)
+        dif_eq['dPhi_cem / dt'] = (Jv_c_out * Hgc * Wgc * n_cell - Wv_cem_out) / Vem * R * T_des / Psat(T_des)
     else:  # elif type_auxiliary == "no_auxiliary":
         dif_eq['dPhi_asm / dt'], dif_eq['dPhi_aem / dt'], dif_eq['dPhi_csm / dt'], dif_eq['dPhi_cem / dt'] = 0, 0, 0, 0</code></pre>
             </details>
@@ -1296,8 +1298,215 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 <div class="doc doc-object doc-function">
 
 
+<h2 id="model.dif_eq.calculate_dyn_temperature_evolution" class="doc doc-heading">
+            <code class="highlight language-python">calculate_dyn_temperature_evolution(dif_eq, rho_Cp0, Hgdl, Hcl, Hmem, n_gdl, Jt, Q_r, Q_sorp, Q_liq, Q_p, Q_e, **kwargs)</code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>This function calculates the dynamic evolution of the temperature in the fuel cell.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>dif_eq</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Dictionary used for saving the differential equations.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>rho_Cp0</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Volumetric heat capacity of the different components of the fuel cell system, in J.m-3.K-1.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Hgdl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Thickness of the gas diffusion layer, in m.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Hcl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Thickness of the catalyst layer, in m.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Hmem</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Thickness of the membrane, in m.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>n_gdl</code></b>
+                  (<code>int</code>)
+              –
+              <div class="doc-md-description">
+                <p>Number of model nodes placed inside each GDL.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Jt</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Heat flows occuring inside the fuel cell system, J.m-2.s-1.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Q_r</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Heat dissipated by the electrochemical reaction 2<em>H2 + O2 -&gt; 2</em>H2O, in J.m-3.s-1.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Q_sorp</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Heat dissipated by the absorption of water from the CL to the membrane, in J.m-3.s-1.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Q_liq</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Heat dissipated by the evaporation of liquid water, in J.m-3.s-1.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Q_p</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Heat dissipated by the ionic currents (Joule heating + Ohm's law), in J.m-3.s-1.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Q_e</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Heat dissipated by the electric currents (Joule heating + Ohm's law), in J.m-3.s-1.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>model/dif_eq.py</code></summary>
+              <pre class="highlight"><code class="language-python">def calculate_dyn_temperature_evolution(dif_eq, rho_Cp0, Hgdl, Hcl, Hmem, n_gdl, Jt, Q_r, Q_sorp, Q_liq, Q_p, Q_e,
+                                        **kwargs):
+    """
+    This function calculates the dynamic evolution of the temperature in the fuel cell.
+
+    Parameters
+    ----------
+    dif_eq : dict
+        Dictionary used for saving the differential equations.
+    rho_Cp0 : dict
+        Volumetric heat capacity of the different components of the fuel cell system, in J.m-3.K-1.
+    Hgdl : float
+        Thickness of the gas diffusion layer, in m.
+    Hcl : float
+        Thickness of the catalyst layer, in m.
+    Hmem : float
+        Thickness of the membrane, in m.
+    n_gdl : int
+        Number of model nodes placed inside each GDL.
+    Jt : dict
+        Heat flows occuring inside the fuel cell system, J.m-2.s-1.
+    Q_r : dict
+        Heat dissipated by the electrochemical reaction 2*H2 + O2 -&gt; 2*H2O, in J.m-3.s-1.
+    Q_sorp : dict
+        Heat dissipated by the absorption of water from the CL to the membrane, in J.m-3.s-1.
+    Q_liq : dict
+        Heat dissipated by the evaporation of liquid water, in J.m-3.s-1.
+    Q_p : dict
+        Heat dissipated by the ionic currents (Joule heating + Ohm's law), in J.m-3.s-1.
+    Q_e : dict
+        Heat dissipated by the electric currents (Joule heating + Ohm's law), in J.m-3.s-1.
+    """
+
+    # At the anode side
+    #       Inside the AGC
+    dif_eq['dT_agc / dt'] = 0  # Dirichlet boundary condition. T_agc is initialized to T_fc and remains constant.
+    #       Inside the AGDL
+    dif_eq['dT_agdl_1 / dt'] = (1 / rho_Cp0['agdl_1']) * \
+                               ( (Jt['agc_agdl'] - Jt['agdl_agdl_1']) / (Hgdl / n_gdl)  +
+                                 Q_liq['agdl_1'] + Q_e['agdl_1'] )
+    for i in range(2, n_gdl):
+        dif_eq[f'dT_agdl_{i} / dt'] = (1 / rho_Cp0[f'agdl_{i}']) * \
+                                      ( (Jt[f'agdl_agdl_{i - 1}'] - Jt[f'agdl_agdl_{i}']) / (Hgdl / n_gdl) +
+                                        Q_liq[f'agdl_{i}'] + Q_e[f'agdl_{i}'] )
+    dif_eq[f'dT_agdl_{n_gdl} / dt'] = (1 / rho_Cp0[f'agdl_{n_gdl}']) * \
+                                      ( (Jt[f'agdl_agdl_{n_gdl - 1}'] - Jt['agdl_acl']) / (Hgdl / n_gdl) +
+                                        Q_liq[f'agdl_{n_gdl}'] + Q_e[f'agdl_{n_gdl}'] )
+    #      Inside the ACL
+    dif_eq['dT_acl / dt'] = (1 / rho_Cp0['acl']) * \
+                            ( (Jt['agdl_acl'] - Jt['acl_mem']) / Hcl +
+                              Q_r['acl'] + Q_sorp['acl'] + Q_liq['acl'] + Q_e['acl'] )
+
+    # Inside the membrane
+    dif_eq['dT_mem / dt'] = (1 / rho_Cp0['mem']) * \
+                            ( (Jt['acl_mem'] - Jt['mem_ccl']) / Hmem +
+                              Q_p['mem'] )
+
+    # At the cathode side
+    #       Inside the CCL
+    dif_eq['dT_ccl / dt'] = (1 / rho_Cp0['ccl']) * \
+                            ( (Jt['mem_ccl'] - Jt['ccl_cgdl']) / Hcl +
+                              Q_r['ccl'] + Q_sorp['acl'] + Q_liq['ccl'] + Q_p['ccl'] + Q_e['ccl'] )
+    #       Inside the CGDL
+    dif_eq['dT_cgdl_1 / dt'] = (1 / rho_Cp0['cgdl_1']) * \
+                               ( (Jt['ccl_cgdl'] - Jt['cgdl_cgdl_1']) / (Hgdl / n_gdl) +
+                                 Q_liq['cgdl_1'] + Q_e['cgdl_1'] )
+    for i in range(2, n_gdl):
+        dif_eq[f'dT_cgdl_{i} / dt'] = (1 / rho_Cp0[f'cgdl_{i}']) * \
+                                      ( (Jt[f'cgdl_cgdl_{i - 1}'] - Jt[f'cgdl_cgdl_{i}']) / (Hgdl / n_gdl) +
+                                        Q_liq[f'cgdl_{i}'] + Q_e[f'cgdl_{i}'] )
+    dif_eq[f'dT_cgdl_{n_gdl} / dt'] = (1 / rho_Cp0[f'cgdl_{n_gdl}']) * \
+                                      ( (Jt[f'cgdl_cgdl_{n_gdl - 1}'] - Jt['cgdl_cgc']) / (Hgdl / n_gdl) +
+                                        Q_liq[f'cgdl_{n_gdl}'] + Q_e[f'cgdl_{n_gdl}'] )
+    #       Inside the CCG
+    dif_eq['dT_cgc / dt'] = 0  # Dirichlet boundary condition. T_cgc is initialized to T_fc and remains constant.</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h2 id="model.dif_eq.calculate_dyn_throttle_area_evolution" class="doc doc-heading">
-            <code class="highlight language-python">calculate_dyn_throttle_area_evolution(dif_eq, Pagc, Pcgc, type_auxiliary, Abp_a, Abp_c, Tfc, Pa_des, Pc_des, **kwargs)</code>
+            <code class="highlight language-python">calculate_dyn_throttle_area_evolution(dif_eq, Pagc, Pcgc, T_agc, T_cgc, Abp_a, Abp_c, Pa_des, Pc_des, type_auxiliary, **kwargs)</code>
 
 </h2>
 
@@ -1343,11 +1552,19 @@ This function has to be executed after 'calculate_dyn_vapor_evolution' and 'calc
               </div>
             </li>
             <li>
-              <b><code>type_auxiliary</code></b>
-                  (<code>str</code>)
+              <b><code>T_agc</code></b>
+                  (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Type of auxiliary components used in the fuel cell model.</p>
+                <p>Fuel cell temperature in the anode gas channel (K).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>T_cgc</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Fuel cell temperature in the cathode gas channel (K).</p>
               </div>
             </li>
             <li>
@@ -1367,14 +1584,6 @@ This function has to be executed after 'calculate_dyn_vapor_evolution' and 'calc
               </div>
             </li>
             <li>
-              <b><code>Tfc</code></b>
-                  (<code>float</code>)
-              –
-              <div class="doc-md-description">
-                <p>Fuel cell temperature (K).</p>
-              </div>
-            </li>
-            <li>
               <b><code>Pa_des</code></b>
                   (<code>float</code>)
               –
@@ -1390,6 +1599,14 @@ This function has to be executed after 'calculate_dyn_vapor_evolution' and 'calc
                 <p>Desired pressure inside the cathode gas channel (Pa).</p>
               </div>
             </li>
+            <li>
+              <b><code>type_auxiliary</code></b>
+                  (<code>str</code>)
+              –
+              <div class="doc-md-description">
+                <p>Type of auxiliary components used in the fuel cell model.</p>
+              </div>
+            </li>
         </ul>
       </td>
     </tr>
@@ -1397,8 +1614,8 @@ This function has to be executed after 'calculate_dyn_vapor_evolution' and 'calc
 </table>
             <details class="quote">
               <summary>Source code in <code>model/dif_eq.py</code></summary>
-              <pre class="highlight"><code class="language-python">def calculate_dyn_throttle_area_evolution(dif_eq, Pagc, Pcgc, type_auxiliary, Abp_a, Abp_c, Tfc, Pa_des, Pc_des,
-                                          **kwargs):
+              <pre class="highlight"><code class="language-python">def calculate_dyn_throttle_area_evolution(dif_eq, Pagc, Pcgc, T_agc, T_cgc, Abp_a, Abp_c, Pa_des, Pc_des,
+                                          type_auxiliary, **kwargs):
     """This function calculates the dynamic evolution of the throttle area inside the anode and cathode auxiliaries.
     This function has to be executed after 'calculate_dyn_vapor_evolution' and 'calculate_dyn_H2_O2_N2_evolution'.
 
@@ -1410,23 +1627,25 @@ This function has to be executed after 'calculate_dyn_vapor_evolution' and 'calc
         Pressure inside the anode gas channel (Pa).
     Pcgc : float
         Pressure inside the cathode gas channel (Pa).
-    type_auxiliary : str
-        Type of auxiliary components used in the fuel cell model.
+    T_agc : float
+        Fuel cell temperature in the anode gas channel (K).
+    T_cgc : float
+        Fuel cell temperature in the cathode gas channel (K).
     Abp_a : float
         Throttle area inside the anode auxiliaries (m2).
     Abp_c : float
         Throttle area inside the cathode auxiliaries (m2).
-    Tfc : float
-        Fuel cell temperature (K).
     Pa_des : float
         Desired pressure inside the anode gas channel (Pa).
     Pc_des : float
         Desired pressure inside the cathode gas channel (Pa).
+    type_auxiliary : str
+        Type of auxiliary components used in the fuel cell model.
     """
 
     # Calculation of the pressure derivative inside the gas channels
-    dPagcdt = (dif_eq['dC_v_agc / dt'] + dif_eq['dC_H2_agc / dt']) * R * Tfc
-    dPcgcdt = (dif_eq['dC_v_cgc / dt'] + dif_eq['dC_O2_cgc / dt'] + dif_eq['dC_N2 / dt']) * R * Tfc
+    dPagcdt = (dif_eq['dC_v_agc / dt'] + dif_eq['dC_H2_agc / dt']) * R * T_agc
+    dPcgcdt = (dif_eq['dC_v_cgc / dt'] + dif_eq['dC_O2_cgc / dt'] + dif_eq['dC_N2 / dt']) * R * T_cgc
 
     # Throttle area evolution inside the anode auxiliaries
     if type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
@@ -1458,7 +1677,7 @@ This function has to be executed after 'calculate_dyn_vapor_evolution' and 'calc
 
 
 <h2 id="model.dif_eq.calculate_dyn_vapor_evolution" class="doc doc-heading">
-            <code class="highlight language-python">calculate_dyn_vapor_evolution(dif_eq, sv, Hgdl, Hcl, Hgc, Lgc, epsilon_gdl, n_gdl, Jv_a_in, Jv_a_out, Jv_c_in, Jv_c_out, Jv_agc_agdl, Jv_agdl_agdl, Jv_agdl_acl, S_sorp_acl, S_sorp_ccl, Jv_ccl_cgdl, Jv_cgdl_cgdl, Jv_cgdl_cgc, Sv_agdl, Sv_acl, Sv_ccl, Sv_cgdl, **kwargs)</code>
+            <code class="highlight language-python">calculate_dyn_vapor_evolution(dif_eq, sv, Hgdl, Hcl, Hgc, Lgc, epsilon_gdl, n_gdl, Jv_a_in, Jv_a_out, Jv_c_in, Jv_c_out, Jv_agc_agdl, Jv_agdl_agdl, Jv_agdl_acl, S_abs_acl, S_abs_ccl, Jv_ccl_cgdl, Jv_cgdl_cgdl, Jv_cgdl_cgc, Sv_agdl, Sv_acl, Sv_ccl, Sv_cgdl, **kwargs)</code>
 
 </h2>
 
@@ -1601,17 +1820,17 @@ sv is a contraction of solver_variables for enhanced readability.</p>
               </div>
             </li>
             <li>
-              <b><code>S_sorp_acl</code></b>
+              <b><code>S_abs_acl</code></b>
               –
               <div class="doc-md-description">
-                <p>Water vapor sorption in the anode CL (mol.m-3.s-1).</p>
+                <p>Water vapor absorption in the anode CL (mol.m-3.s-1).</p>
               </div>
             </li>
             <li>
-              <b><code>S_sorp_ccl</code></b>
+              <b><code>S_abs_ccl</code></b>
               –
               <div class="doc-md-description">
-                <p>Water vapor sorption in the cathode CL (mol.m-3.s-1).</p>
+                <p>Water vapor absorption in the cathode CL (mol.m-3.s-1).</p>
               </div>
             </li>
             <li>
@@ -1678,7 +1897,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
             <details class="quote">
               <summary>Source code in <code>model/dif_eq.py</code></summary>
               <pre class="highlight"><code class="language-python">def calculate_dyn_vapor_evolution(dif_eq, sv, Hgdl, Hcl, Hgc, Lgc, epsilon_gdl, n_gdl, Jv_a_in, Jv_a_out, Jv_c_in,
-                                  Jv_c_out, Jv_agc_agdl, Jv_agdl_agdl, Jv_agdl_acl, S_sorp_acl, S_sorp_ccl, Jv_ccl_cgdl,
+                                  Jv_c_out, Jv_agc_agdl, Jv_agdl_agdl, Jv_agdl_acl, S_abs_acl, S_abs_ccl, Jv_ccl_cgdl,
                                   Jv_cgdl_cgdl, Jv_cgdl_cgc, Sv_agdl, Sv_acl, Sv_ccl, Sv_cgdl, **kwargs):
     """This function calculates the dynamic evolution of the vapor in the gas channels, the gas diffusion layers and the
     catalyst layers.
@@ -1716,10 +1935,10 @@ sv is a contraction of solver_variables for enhanced readability.</p>
         Water vapor flow between two nodes of the anode GDL (mol.m-2.s-1).
     Jv_agdl_acl : float
         Water vapor flow between the anode GDL and the anode CL (mol.m-2.s-1).
-    S_sorp_acl: float
-        Water vapor sorption in the anode CL (mol.m-3.s-1).
-    S_sorp_ccl: float
-        Water vapor sorption in the cathode CL (mol.m-3.s-1).
+    S_abs_acl: float
+        Water vapor absorption in the anode CL (mol.m-3.s-1).
+    S_abs_ccl: float
+        Water vapor absorption in the cathode CL (mol.m-3.s-1).
     Jv_ccl_cgdl : float
         Water vapor flow between the cathode CL and the cathode GDL (mol.m-2.s-1).
     Jv_cgdl_cgdl : list
@@ -1748,11 +1967,11 @@ sv is a contraction of solver_variables for enhanced readability.</p>
     dif_eq[f'dC_v_agdl_{n_gdl} / dt'] = 1 / (epsilon_gdl * (1 - sv[f's_agdl_{n_gdl}'])) * \
                                         ((Jv_agdl_agdl[n_gdl - 1] - Jv_agdl_acl) / (Hgdl / n_gdl) + Sv_agdl[n_gdl])
     #       Inside the ACL
-    dif_eq['dC_v_acl / dt'] = 1 / (epsilon_cl * (1 - sv['s_acl'])) * (Jv_agdl_acl / Hcl - S_sorp_acl + Sv_acl)
+    dif_eq['dC_v_acl / dt'] = 1 / (epsilon_cl * (1 - sv['s_acl'])) * (Jv_agdl_acl / Hcl - S_abs_acl + Sv_acl)
 
     # At the cathode side
     #       Inside the CCL
-    dif_eq['dC_v_ccl / dt'] = 1 / (epsilon_cl * (1 - sv['s_ccl'])) * (- Jv_ccl_cgdl / Hcl - S_sorp_ccl + Sv_ccl)
+    dif_eq['dC_v_ccl / dt'] = 1 / (epsilon_cl * (1 - sv['s_ccl'])) * (- Jv_ccl_cgdl / Hcl - S_abs_ccl + Sv_ccl)
     #       Inside the CGDL
     dif_eq['dC_v_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * \
                                  ((Jv_ccl_cgdl - Jv_cgdl_cgdl[1]) / (Hgdl / n_gdl) + Sv_cgdl[1])
@@ -1772,7 +1991,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 
 
 <h2 id="model.dif_eq.calculate_dyn_voltage_evolution" class="doc doc-heading">
-            <code class="highlight language-python">calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, eta_c, Tfc, Hcl, i0_c_ref, kappa_c, C_scl, i_n, f_drop, **kwargs)</code>
+            <code class="highlight language-python">calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hcl, i0_c_ref, kappa_c, C_scl, i_n, f_drop, **kwargs)</code>
 
 </h2>
 
@@ -1817,19 +2036,19 @@ sv is a contraction of solver_variables for enhanced readability.</p>
               </div>
             </li>
             <li>
+              <b><code>T_ccl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Fuel cell temperature in the cathode catalyst layer (K).</p>
+              </div>
+            </li>
+            <li>
               <b><code>eta_c</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
                 <p>Cell overpotential (V).</p>
-              </div>
-            </li>
-            <li>
-              <b><code>Tfc</code></b>
-                  (<code>float</code>)
-              –
-              <div class="doc-md-description">
-                <p>Fuel cell temperature (K).</p>
               </div>
             </li>
             <li>
@@ -1887,7 +2106,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>model/dif_eq.py</code></summary>
-              <pre class="highlight"><code class="language-python">def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, eta_c, Tfc, Hcl, i0_c_ref, kappa_c, C_scl, i_n, f_drop,
+              <pre class="highlight"><code class="language-python">def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hcl, i0_c_ref, kappa_c, C_scl, i_n, f_drop,
                                     **kwargs):
     """This function calculates the dynamic evolution of the cell overpotential eta_c.
 
@@ -1899,10 +2118,10 @@ sv is a contraction of solver_variables for enhanced readability.</p>
         Fuel cell current density (A.m-2).
     C_O2_ccl : float
         Oxygen concentration in the cathode catalyst layer (mol.m-3).
+    T_ccl : float
+        Fuel cell temperature in the cathode catalyst layer (K).
     eta_c : float
         Cell overpotential (V).
-    Tfc : float
-        Fuel cell temperature (K).
     Hcl : float
         Thickness of the catalyst layer (m).
     i0_c_ref : float
@@ -1918,7 +2137,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
     """
 
     dif_eq['deta_c / dt'] = 1 / (C_scl * Hcl) * ((i_fc + i_n) - i0_c_ref * (C_O2_ccl / C_O2ref) ** kappa_c *
-                                                np.exp(f_drop * alpha_c * F / (R * Tfc) * eta_c))</code></pre>
+                                                 math.exp(f_drop * alpha_c * F / (R * T_ccl) * eta_c))</code></pre>
             </details>
     </div>
 
@@ -2063,26 +2282,28 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 
     # Intermediate values
     i_fc = operating_inputs['current_density'](t, parameters)
-    Mext, Pagc, Pcgc, i_n, Masm, Maem, Mcsm, Mcem, rho_H2O = dif_eq_int_values(solver_variables, control_variables,
-                                                                               operating_inputs, parameters)
+    Mext, Pagc, Pcgc, i_n, Masm, Maem, Mcsm, Mcem, rho_Cp0 = dif_eq_int_values(solver_variables,
+                                                                        operating_inputs, control_variables, parameters)
     Wcp_des, Wa_inj_des, Wc_inj_des = desired_flows(solver_variables, control_variables, i_n, i_fc, operating_inputs,
                                                     parameters, Mext)
     eta_c_intermediate_values = calculate_eta_c_intermediate_values(solver_variables, operating_inputs, parameters)
 
     # Calculation of the flows
-    flows_dico = calculate_flows(t, solver_variables, control_variables, i_fc, operating_inputs, parameters)
+    matter_flows_dico = calculate_flows(t, solver_variables, control_variables, i_fc, operating_inputs, parameters)
+    heat_flows_dico = calculate_heat_transfers(solver_variables, i_fc, parameters, **matter_flows_dico)
 
     # Calculation of the dynamic evolutions
     #       Inside the cell
-    calculate_dyn_dissoved_water_evolution(dif_eq, **parameters, **flows_dico)
-    calculate_dyn_liquid_water_evolution(dif_eq, rho_H2O, **parameters, **flows_dico)
-    calculate_dyn_vapor_evolution(dif_eq, solver_variables, **parameters, **flows_dico)
-    calculate_dyn_H2_O2_N2_evolution(dif_eq, solver_variables, **parameters, **flows_dico)
+    calculate_dyn_dissoved_water_evolution(dif_eq, **parameters, **matter_flows_dico)
+    calculate_dyn_liquid_water_evolution(dif_eq, solver_variables, **parameters, **matter_flows_dico)
+    calculate_dyn_vapor_evolution(dif_eq, solver_variables, **parameters, **matter_flows_dico)
+    calculate_dyn_H2_O2_N2_evolution(dif_eq, solver_variables, **parameters, **matter_flows_dico)
     calculate_dyn_voltage_evolution(dif_eq, i_fc, **solver_variables, **operating_inputs, **parameters,
                                     **eta_c_intermediate_values)
+    calculate_dyn_temperature_evolution(dif_eq, rho_Cp0, **parameters, **heat_flows_dico)
     #       Inside the auxiliary components
     calculate_dyn_manifold_pressure_and_humidity_evolution(dif_eq, Masm, Maem, Mcsm, Mcem, **solver_variables,
-                                                           **operating_inputs, **parameters, **flows_dico)
+                                                           **operating_inputs, **parameters, **matter_flows_dico)
     calculate_dyn_air_compressor_and_humidifier_evolution(dif_eq, Wcp_des, Wa_inj_des, Wc_inj_des,
                                                           **solver_variables, **parameters)
     calculate_dyn_throttle_area_evolution(dif_eq, Pagc, Pcgc, **solver_variables, **operating_inputs, **parameters)
