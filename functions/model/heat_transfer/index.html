@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Heat Transfer - AlphaPEM</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Heat Transfer";
+        var mkdocs_page_input_path = "functions/model/heat_transfer.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> AlphaPEM
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Functions</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../GUI/">GUI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../main/">Main</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Calibration</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../calibration/experimental_values/">Experimental values</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../calibration/parameter_calibration/">Parameter calibration</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Configuration</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../configuration/current_densities/">Current densities</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../configuration/settings/">Settings</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Model</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../AlphaPEM/">AlphaPEM</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../auxiliaries/">Auxiliaries</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../cell_voltage/">Cell voltage</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../control/">Control</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../dif_eq/">Differentiel equations</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../flows/">Flows</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Modules</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../modules/auxiliaries_modules/">Auxiliaries modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../modules/calibration_modules/">Calibration modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../modules/dif_eq_modules/">Differential equations modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../modules/display_modules/">Display modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../modules/flows_modules/">Flows modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../modules/GUI_modules/">GUI modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../modules/main_modules/">Main modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../modules/settings_modules/">Settings modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../modules/transitory_functions/">Transitory functions</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../../about/">About</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">AlphaPEM</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Heat Transfer</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="heat-transfer">Heat Transfer</h1>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="model.heat_transfer"></a>
+    <div class="doc doc-contents first">
+
+        <p>This file represents all the heat transfers occuring inside the fuel cell system.
+It is a component of the fuel cell model.</p>
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="model.heat_transfer.calculate_heat_transfers" class="doc doc-heading">
+            <code class="highlight language-python">calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl, Sl_acl, Sl_ccl, Sl_cgdl, **kwargs)</code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>This function calculates the heat transfers occurring inside the fuel cell system.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>sv</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Variables calculated by the solver. They correspond to the fuel cell internal states.
+sv is a contraction of solver_variables for enhanced readability.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>i_fc</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Fuel cell current density at time t (A.m-2).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>parameters</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Parameters of the fuel cell model.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>S_abs_acl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Water absorption in the ACL (mol.m-3.s-1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>S_abs_ccl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Water absorption in the CCL (mol.m-3.s-1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Sl_agdl</code></b>
+                  (<code>list</code>)
+              –
+              <div class="doc-md-description">
+                <p>Liquid water generated through vapor water liquefaction in the AGDL (mol.m-3.s-1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Sl_acl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Liquid water generated through vapor water liquefaction in the ACL (mol.m-3.s-1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Sl_ccl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Liquid water generated through vapor water liquefaction in the CCL (mol.m-3.s-1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Sl_cgdl</code></b>
+                  (<code>list</code>)
+              –
+              <div class="doc-md-description">
+                <p>Liquid water generated through vapor water liquefaction in the CGDL (mol.m-3.s-1).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>dict</code>
+              –
+              <div class="doc-md-description">
+                <p>Heat transfers occuring inside the fuel cell system.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>model/heat_transfer.py</code></summary>
+              <pre class="highlight"><code class="language-python">def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl, Sl_acl, Sl_ccl, Sl_cgdl, **kwargs):
+    """This function calculates the heat transfers occurring inside the fuel cell system.
+
+    Parameters
+    ----------
+    sv : dict
+        Variables calculated by the solver. They correspond to the fuel cell internal states.
+        sv is a contraction of solver_variables for enhanced readability.
+    i_fc : float
+        Fuel cell current density at time t (A.m-2).
+    parameters : dict
+        Parameters of the fuel cell model.
+    S_abs_acl : float
+        Water absorption in the ACL (mol.m-3.s-1).
+    S_abs_ccl : float
+        Water absorption in the CCL (mol.m-3.s-1).
+    Sl_agdl : list
+        Liquid water generated through vapor water liquefaction in the AGDL (mol.m-3.s-1).
+    Sl_acl : float
+        Liquid water generated through vapor water liquefaction in the ACL (mol.m-3.s-1).
+    Sl_ccl : float
+        Liquid water generated through vapor water liquefaction in the CCL (mol.m-3.s-1).
+    Sl_cgdl : list
+        Liquid water generated through vapor water liquefaction in the CGDL (mol.m-3.s-1).
+
+    Returns
+    -------
+    dict
+        Heat transfers occuring inside the fuel cell system.
+    """
+
+    # ___________________________________________________Preliminaries__________________________________________________
+
+    # Extraction of the variables
+    T_agc, T_acl, T_mem, T_ccl, T_cgc = sv['T_agc'], sv['T_acl'], sv['T_mem'], sv['T_ccl'], sv['T_cgc']
+    lambda_acl, lambda_mem, lambda_ccl = sv['lambda_acl'], sv['lambda_mem'], sv['lambda_ccl']
+    s_acl, s_ccl, eta_c = sv['s_acl'], sv['s_ccl'], sv['eta_c']
+
+    # Extraction of the operating inputs and parameters
+    epsilon_mc, tau, epsilon_gdl = parameters['epsilon_mc'], parameters['tau'], parameters['epsilon_gdl']
+    n_gdl, Hmem, Hgdl, Hcl = parameters['n_gdl'], parameters['Hgdl'], parameters['Hmem'], parameters['Hcl']
+
+    # Intermediate values
+    (k_th_eff_agc_agdl, k_th_eff_agdl_agdl, k_th_eff_agdl_acl, k_th_eff_acl_mem, k_th_eff_mem_ccl,
+     k_th_eff_ccl_cgdl, k_th_eff_cgdl_cgdl, k_th_eff_cgdl_cgc) = heat_transfer_int_values(sv, parameters)
+
+    # ______________________________________________Heat flows (J.m-2.s-1)______________________________________________
+
+    # Anode side
+    Jt_agc_agdl = - 2 * k_th_eff_agc_agdl * (sv['T_agdl_1'] - T_agc) / (Hgdl / n_gdl)
+    Jt_agdl_agdl = {f'agdl_agdl_{i}': -k_th_eff_agdl_agdl[i] * (sv[f'T_agdl_{i+1}'] - sv[f'T_agdl_{i}']) / (Hgdl/n_gdl)
+                    for i in range(1, n_gdl)}
+
+    Jt_agdl_acl = - 2 * k_th_eff_agdl_acl * (T_acl - sv[f'T_agdl_{n_gdl}']) / (Hgdl / n_gdl + Hcl)
+
+    # Membrane side
+    Jt_acl_mem = - 2 * k_th_eff_acl_mem * (T_mem - T_acl) / (Hcl + Hmem)
+    Jt_mem_ccl = - 2 * k_th_eff_mem_ccl * (T_ccl - T_mem) / (Hcl + Hmem)
+
+    # Cathode side
+    Jt_ccl_cgdl = - 2 * k_th_eff_ccl_cgdl * (sv['T_cgdl_1'] - T_ccl) / (Hgdl / n_gdl + Hcl)
+    Jt_cgdl_cgdl = {f'cgdl_cgdl_{i}': -k_th_eff_cgdl_cgdl[i] * (sv[f'T_cgdl_{i+1}'] - sv[f'T_cgdl_{i}']) / (Hgdl/n_gdl)
+                    for i in range(1, n_gdl)}
+
+    Jt_cgdl_cgc = - 2 * k_th_eff_cgdl_cgc * (T_cgc - sv[f'T_cgdl_{n_gdl}']) / (Hgdl / n_gdl)
+
+    Jt = {'agc_agdl': Jt_agc_agdl, **Jt_agdl_agdl, 'agdl_acl': Jt_agdl_acl, 'acl_mem': Jt_acl_mem,
+          'mem_ccl': Jt_mem_ccl, 'ccl_cgdl': Jt_ccl_cgdl, **Jt_cgdl_cgdl, 'cgdl_cgc': Jt_cgdl_cgc}
+
+    # ____________________________________________Heat generated (J.m-3.s-1)____________________________________________
+
+    # The heat dissipated by the electrochemical reaction 2*H2 + O2 -&gt; 2*H2O, in J.m-3.s-1.
+    #    It is given by the sum of Peltier and activation heats [vetterFreeOpenReference2019].
+    S_r_acl = i_fc / (2 * F * Hcl) # mol.m-3.s-1. It is the amount of hydrogen consumed at the ACL.
+    S_r_ccl = i_fc / (4 * F * Hcl) # mol.m-3.s-1. It is the amount of oxygen consumed at the CCL.
+    Q_r = {'acl': S_r_acl * T_acl * (-delta_s_HOR),
+           'ccl': S_r_ccl * T_ccl * (-delta_s_ORR) + i_fc * eta_c / Hcl}
+
+    # The heat dissipated by the absorption of water from the CL to the membrane, in J.m-3.s-1.
+    Q_sorp = {'acl': S_abs_acl * (-delta_h_abs(T_acl)),
+              'ccl': S_abs_ccl * (-delta_h_abs(T_ccl))}
+
+    # The heat dissipated by the liquefaction of vapor water, in J.m-3.s-1.
+    Q_liq = {**{f'agdl_{i}': Sl_agdl[i] * (- delta_h_liq(sv[f'T_agdl_{i}'])) for i in range(1, n_gdl + 1)},
+            **{f'cgdl_{i}': Sl_cgdl[i] * (- delta_h_liq(sv[f'T_cgdl_{i}'])) for i in range(1, n_gdl + 1)},
+            'acl': Sl_acl * (-delta_h_liq(T_acl)),
+            'ccl': Sl_ccl * (-delta_h_liq(T_ccl))}
+
+    # The heat dissipated by the ionic currents (Joule heating + Ohm's law), in J.m-3.s-1.
+    Q_p = {'mem': i_fc ** 2 / sigma_p_eff('mem', lambda_mem, T_mem),
+           'ccl': i_fc ** 2 / (3 * sigma_p_eff('ccl', lambda_ccl, T_ccl, epsilon_mc, tau))}
+
+    # The heat dissipated by the electric currents (Joule heating + Ohm's law), in J.m-3.s-1.
+    Q_e = {**{f'agdl_{i}': i_fc ** 2 / sigma_e_eff('gdl', epsilon_gdl) for i in range(1, n_gdl + 1)},
+           'acl': i_fc ** 2 / sigma_e_eff('cl', epsilon_cl, epsilon_mc, tau),
+           'ccl': i_fc ** 2 / (3 * sigma_e_eff('cl', epsilon_cl, epsilon_mc, tau)),
+           **{f'cgdl_{i}': i_fc ** 2 / sigma_e_eff('gdl', epsilon_gdl) for i in range(1, n_gdl + 1)}}
+
+    return {'Jt': Jt, 'Q_r': Q_r, 'Q_sorp': Q_sorp, 'Q_liq': Q_liq, 'Q_p': Q_p, 'Q_e': Q_e}</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

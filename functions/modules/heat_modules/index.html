@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Heat modules - AlphaPEM</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Heat modules";
+        var mkdocs_page_input_path = "functions/modules/heat_modules.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> AlphaPEM
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Functions</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../GUI/">GUI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../main/">Main</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Calibration</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../calibration/experimental_values/">Experimental values</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../calibration/parameter_calibration/">Parameter calibration</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Configuration</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../configuration/current_densities/">Current densities</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../configuration/settings/">Settings</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Model</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/AlphaPEM/">AlphaPEM</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/auxiliaries/">Auxiliaries</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/cell_voltage/">Cell voltage</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/control/">Control</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/dif_eq/">Differentiel equations</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../model/flows/">Flows</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Modules</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../auxiliaries_modules/">Auxiliaries modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../calibration_modules/">Calibration modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../dif_eq_modules/">Differential equations modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../display_modules/">Display modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../flows_modules/">Flows modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../GUI_modules/">GUI modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../main_modules/">Main modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../settings_modules/">Settings modules</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../transitory_functions/">Transitory functions</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../../about/">About</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">AlphaPEM</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Heat modules</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="heat-modules">Heat modules</h1>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="modules.heat_modules"></a>
+    <div class="doc doc-contents first">
+
+        <p>This module is used to calculate intermediate values for the heat transfer calculation.</p>
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="modules.heat_modules.heat_transfer_int_values" class="doc doc-heading">
+            <code class="highlight language-python">heat_transfer_int_values(sv, parameters)</code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>This functions calculates intermediate values for the heat calculation.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>sv</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Variables calculated by the solver. They correspond to the fuel cell internal states.
+sv is a contraction of solver_variables for enhanced readability.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>parameters</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Parameters of the fuel cell model.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>tuple</code>
+              –
+              <div class="doc-md-description">
+                <p>A tuple containing the average effective thermal diffusivity values between different layers:
+- k_th_eff_agc_agdl : Effective thermal diffusivity between the AGC and the first GDL layer.
+- k_th_eff_agdl_agdl : List of effective thermal diffusivities between adjacent GDL layers on the anode side.
+- k_th_eff_agdl_acl : Effective thermal diffusivity between the last GDL layer and the anode catalyst layer.
+- k_th_eff_acl_mem : Effective thermal diffusivity between the anode catalyst layer and the membrane.
+- k_th_eff_mem_ccl : Effective thermal diffusivity between the membrane and the cathode catalyst layer.
+- k_th_eff_ccl_cgdl : Effective thermal diffusivity between the cathode catalyst layer and the first GDL layer.
+- k_th_eff_cgdl_cgdl : List of effective thermal diffusivities between adjacent GDL layers on the cathode side.
+- k_th_eff_cgdl_cgc : Effective thermal diffusivity between the last GDL layer and the CGC.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>modules/heat_modules.py</code></summary>
+              <pre class="highlight"><code class="language-python">def heat_transfer_int_values(sv, parameters):
+    """This functions calculates intermediate values for the heat calculation.
+
+    Parameters
+    ----------
+    sv : dict
+        Variables calculated by the solver. They correspond to the fuel cell internal states.
+        sv is a contraction of solver_variables for enhanced readability.
+    parameters : dict
+        Parameters of the fuel cell model.
+
+    Returns
+    -------
+    tuple
+        A tuple containing the average effective thermal diffusivity values between different layers:
+        - k_th_eff_agc_agdl : Effective thermal diffusivity between the AGC and the first GDL layer.
+        - k_th_eff_agdl_agdl : List of effective thermal diffusivities between adjacent GDL layers on the anode side.
+        - k_th_eff_agdl_acl : Effective thermal diffusivity between the last GDL layer and the anode catalyst layer.
+        - k_th_eff_acl_mem : Effective thermal diffusivity between the anode catalyst layer and the membrane.
+        - k_th_eff_mem_ccl : Effective thermal diffusivity between the membrane and the cathode catalyst layer.
+        - k_th_eff_ccl_cgdl : Effective thermal diffusivity between the cathode catalyst layer and the first GDL layer.
+        - k_th_eff_cgdl_cgdl : List of effective thermal diffusivities between adjacent GDL layers on the cathode side.
+        - k_th_eff_cgdl_cgc : Effective thermal diffusivity between the last GDL layer and the CGC.
+    """
+
+    # Extraction of the variables
+    C_v_acl, C_v_ccl, s_acl, s_ccl = sv['C_v_acl'], sv['C_v_ccl'], sv['s_acl'], sv['s_ccl']
+    lambda_acl, lambda_mem, lambda_ccl = sv['lambda_acl'], sv['lambda_mem'], sv['lambda_ccl']
+    C_H2_acl, C_O2_ccl, C_N2 = sv['C_H2_acl'], sv['C_O2_ccl'], sv['C_N2']
+    T_acl, T_mem, T_ccl = sv['T_acl'], sv['T_mem'], sv['T_ccl']
+
+    # Extraction of the operating inputs and the parameters
+    Hgdl, Hcl, Hmem = parameters['Hgdl'], parameters['Hcl'], parameters['Hmem']
+    epsilon_mc, tau, epsilon_gdl = parameters['epsilon_mc'], parameters['tau'], parameters['epsilon_gdl']
+    n_gdl = parameters['n_gdl']
+
+    # Weighted harmonic means of the effective thermal diffusivity
+    k_th_eff_agc_agdl = k_th_eff('agdl', sv[f'T_agdl_{1}'], C_v=sv[f'C_v_agdl_{1}'], s=sv[f's_agdl_{1}'],
+                                 C_H2=sv[f'C_H2_agdl_{1}'], epsilon=epsilon_gdl)
+
+    k_th_eff_agdl_agdl = [None] + [hmean([k_th_eff('agdl', sv[f'T_agdl_{i}'], C_v=sv[f'C_v_agdl_{i}'],
+                                                   s=sv[f's_agdl_{i}'], C_H2=sv[f'C_H2_agdl_{i}'], epsilon=epsilon_gdl),
+                                          k_th_eff('agdl', sv[f'T_agdl_{i + 1}'], C_v=sv[f'C_v_agdl_{i + 1}'],
+                                                   s=sv[f's_agdl_{i+1}'], C_H2=sv[f'C_H2_agdl_{i+1}'], epsilon=epsilon_gdl)])
+                                   for i in range(1, n_gdl)]
+
+    k_th_eff_agdl_acl = hmean([k_th_eff('agdl', sv[f'T_agdl_{n_gdl}'], C_v=sv[f'C_v_agdl_{n_gdl}'],
+                                        s=sv[f's_agdl_{n_gdl}'], C_H2=sv[f'C_H2_agdl_{n_gdl}'], epsilon=epsilon_gdl),
+                               k_th_eff('acl', T_acl, C_v=C_v_acl, s=s_acl, lambdaa=lambda_acl,
+                                        C_H2=C_H2_acl, epsilon=epsilon_cl, epsilon_mc=epsilon_mc)],
+                              weights=[Hgdl / 2, Hcl / 2])
+
+    k_th_eff_acl_mem = hmean([k_th_eff('acl', T_acl, C_v=C_v_acl, s=s_acl, lambdaa=lambda_acl,
+                                       C_H2=C_H2_acl, epsilon=epsilon_cl, epsilon_mc=epsilon_mc),
+                              k_th_eff('mem', T_mem, lambdaa=lambda_mem)],
+                             weights=[Hcl / 2, Hmem / 2])
+
+    k_th_eff_mem_ccl = hmean([k_th_eff('ccl', T_ccl, C_v=C_v_ccl, s=s_ccl, lambdaa=lambda_ccl, C_O2=C_O2_ccl,
+                                       C_N2=C_N2, epsilon=epsilon_cl, epsilon_mc=epsilon_mc),
+                              k_th_eff('mem', T_mem, lambdaa=lambda_mem)],
+                             weights=[Hcl / 2, Hmem / 2])
+
+    k_th_eff_ccl_cgdl = hmean([k_th_eff('ccl', T_ccl, C_v=C_v_ccl, s=s_ccl, lambdaa=lambda_ccl, C_O2=C_O2_ccl,
+                                        C_N2=C_N2, epsilon=epsilon_cl, epsilon_mc=epsilon_mc),
+                               k_th_eff('cgdl', sv['T_cgdl_1'], C_v=sv['C_v_cgdl_1'], s=sv['s_cgdl_1'],
+                                        C_O2=sv[f'C_O2_cgdl_1'], C_N2=C_N2, epsilon=epsilon_gdl)],
+                              weights=[Hcl / 2, Hgdl / 2])
+
+    k_th_eff_cgdl_cgdl = [None] + [hmean([k_th_eff('cgdl', sv[f'T_cgdl_{i}'], C_v=sv[f'C_v_cgdl_{i}'],
+                                                   s=sv[f's_cgdl_{i}'], C_O2=sv[f'C_O2_cgdl_{i}'], C_N2=C_N2,
+                                                   epsilon=epsilon_gdl),
+                                          k_th_eff('cgdl', sv[f'T_cgdl_{i + 1}'], C_v=sv[f'C_v_cgdl_{i + 1}'],
+                                                   s=sv[f's_cgdl_{i+1}'], C_O2=sv[f'C_O2_cgdl_{i+1}'], C_N2=C_N2,
+                                                   epsilon=epsilon_gdl)])
+                                   for i in range(1, n_gdl)]
+
+    k_th_eff_cgdl_cgc = k_th_eff('cgdl', sv[f'T_cgdl_{n_gdl}'], C_v=sv[f'C_v_cgdl_{n_gdl}'],
+                                 s=sv[f's_cgdl_{n_gdl}'], C_O2=sv[f'C_O2_cgdl_{n_gdl}'], C_N2=C_N2, epsilon=epsilon_gdl)
+
+    return (k_th_eff_agc_agdl, k_th_eff_agdl_agdl, k_th_eff_agdl_acl, k_th_eff_acl_mem, k_th_eff_mem_ccl,
+            k_th_eff_ccl_cgdl, k_th_eff_cgdl_cgdl, k_th_eff_cgdl_cgc)</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
