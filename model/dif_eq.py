@@ -6,7 +6,7 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing the necessary libraries
-import numpy as np
+import math
 
 # Importing constants' value and functions
 from configuration.settings import C_O2ref, alpha_c, tau_cp, tau_hum, rho_mem, M_eq, epsilon_cl, F, R, M_H2O, \
@@ -474,7 +474,7 @@ def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hcl, i
     """
 
     dif_eq['deta_c / dt'] = 1 / (C_scl * Hcl) * ((i_fc + i_n) - i0_c_ref * (C_O2_ccl / C_O2ref) ** kappa_c *
-                                                 np.exp(f_drop * alpha_c * F / (R * T_ccl) * eta_c))
+                                                 math.exp(f_drop * alpha_c * F / (R * T_ccl) * eta_c))
 
 
 def calculate_dyn_manifold_pressure_and_humidity_evolution(dif_eq, Masm, Maem, Mcsm, Mcem, T_des, Hgc, Wgc,

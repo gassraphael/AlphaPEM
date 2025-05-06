@@ -14,7 +14,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 
 # Importing the necessary libraries
 import matplotlib.pyplot as plt
-import numpy as np
+import math
 from scipy.integrate import solve_ivp
 
 # Importing constants' value and functions
@@ -313,9 +313,9 @@ class AlphaPEM:
         i_fc_ini = current_density(self.time_interval[0], self.parameters)
         i_n_ini = 2 * F * R * T_ini / Hmem * C_H2_ini * k_H2(lambda_mem_ini, T_ini, kappa_co) + \
                   4 * F * R * T_ini / Hmem * C_O2_ini * k_O2(lambda_mem_ini, T_ini, kappa_co)
-        f_drop_ini = 0.5 * (1.0 - np.tanh((4 * s_ini - 2 * slim - 2 * s_switch) / (slim - s_switch)))
+        f_drop_ini = 0.5 * (1.0 - math.tanh((4 * s_ini - 2 * slim - 2 * s_switch) / (slim - s_switch)))
         eta_c_ini = 1 / f_drop_ini * R * T_ini / (alpha_c * F) * \
-                    np.log((i_fc_ini + i_n_ini) / i0_c_ref * (C_O2ref / C_O2_ini) ** kappa_c)  # It is the initial
+                    math.log((i_fc_ini + i_n_ini) / i0_c_ref * (C_O2ref / C_O2_ini) ** kappa_c)  # It is the initial
         #                                                                       cathode overpotential in the fuel cell.
 
         # Initial auxiliary system state

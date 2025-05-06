@@ -6,13 +6,10 @@ and to implement integration events.
 
 # _____________________________________________________Preliminaries____________________________________________________
 
-# Importing the necessary libraries
-import numpy as np
-
 # Importing constants' value and functions
 from configuration.settings import Text, Pext, Phi_ext, n_cell, M_H2, M_O2, M_N2, M_H2O, epsilon_cl, yO2_ext, R, F, \
     operating_inputs
-from modules.transitory_functions import Psat, C_v_sat, k_H2, k_O2, rho_H2O_l, calculate_rho_Cp0
+from modules.transitory_functions import average, Psat, C_v_sat, k_H2, k_O2, calculate_rho_Cp0
 
 
 # ____________________________________________Differential equations modules____________________________________________
@@ -83,7 +80,7 @@ def dif_eq_int_values(sv, operating_inputs, control_variables, parameters):
     #       Oxygen ratio in dry air
     y_c = C_O2_cgc / (C_O2_cgc + C_N2)
     #       Internal current density
-    T_acl_mem_ccl = np.average([T_acl, T_mem, T_ccl],
+    T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
                                weights=[Hcl / (2 * Hcl + Hmem), Hmem / (2 * Hcl + Hmem), Hcl / (2 * Hcl + Hmem)])
     i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
     i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)

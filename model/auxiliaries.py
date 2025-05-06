@@ -5,9 +5,6 @@
 
 # _____________________________________________________Preliminaries____________________________________________________
 
-# Importing the necessary libraries
-import numpy as np
-
 # Importing constants' value and functions
 from configuration.settings import F, R, Text, Pext, Phi_ext, yO2_ext, gamma, gamma_H2, M_H2, M_H2O, n_cell, A_T, \
     Ksm_in, Ksm_out, Kem_in, C_D
@@ -120,8 +117,8 @@ def auxiliaries(t, solver_variables, control_variables, i_fc, operating_inputs, 
         Waem_in = Kem_in * (Pagc - Paem)  # kg.s-1
         Ware = n_cell * Maem * (Paem / (Paem - Phi_aem * Psat(T_des))) * (Sa - 1) * (i_fc + i_n) / (
                     2 * F) * Aact  # kg.s-1
-        Waem_out = k_purge * C_D * A_T * Paem / np.sqrt(R * T_des) * Pr_aem ** (1 / gamma_H2) * \
-                   np.sqrt(Magc * 2 * gamma_H2 / (gamma_H2 - 1) * (1 - Pr_aem ** ((gamma_H2 - 1) / gamma_H2)))  # kg.s-1
+        Waem_out = k_purge * C_D * A_T * Paem / (R * T_des)**0.5 * Pr_aem ** (1 / gamma_H2) * \
+                   (Magc * 2 * gamma_H2 / (gamma_H2 - 1) * (1 - Pr_aem ** ((gamma_H2 - 1) / gamma_H2)))**0.5  # kg.s-1
         Ja_out = Waem_in / (Hgc * Wgc * Magc)  # mol.m-2.s-1
 
     elif type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
@@ -133,8 +130,8 @@ def auxiliaries(t, solver_variables, control_variables, i_fc, operating_inputs, 
         # Anode outlet
         Waem_in = Kem_in * (Pagc - Paem)  # kg.s-1
         Ware = 0  # kg.s-1
-        Waem_out = C_D * Abp_a * Paem / np.sqrt(R * T_des) * Pr_aem ** (1 / gamma_H2) * \
-                   np.sqrt(Magc * 2 * gamma_H2 / (gamma_H2 - 1) * (1 - Pr_aem ** ((gamma_H2 - 1) / gamma_H2)))
+        Waem_out = C_D * Abp_a * Paem / (R * T_des)**0.5 * Pr_aem ** (1 / gamma_H2) * \
+                   (Magc * 2 * gamma_H2 / (gamma_H2 - 1) * (1 - Pr_aem ** ((gamma_H2 - 1) / gamma_H2)))**0.5
         # kg.s-1
         Ja_out = Waem_in / (Hgc * Wgc * Magc)  # mol.m-2.s-1
 
@@ -156,8 +153,8 @@ def auxiliaries(t, solver_variables, control_variables, i_fc, operating_inputs, 
         Jc_in = Wcsm_out / (Hgc * Wgc * Mcsm)  # mol.m-2.s-1
         # Cathode outlet
         Wcem_in = Kem_in * (Pcgc - Pcem)  # kg.s-1
-        Wcem_out = C_D * Abp_c * Pcem / np.sqrt(R * T_des) * Pr_cem ** (1 / gamma) * \
-                   np.sqrt(Mcgc * 2 * gamma / (gamma - 1) * (1 - Pr_cem ** ((gamma - 1) / gamma)))  # kg.s-1
+        Wcem_out = C_D * Abp_c * Pcem / (R * T_des)**0.5 * Pr_cem ** (1 / gamma) * \
+                   (Mcgc * 2 * gamma / (gamma - 1) * (1 - Pr_cem ** ((gamma - 1) / gamma)))**0.5  # kg.s-1
         Jc_out = Wcem_in / (Hgc * Wgc * Mcgc)  # mol.m-2.s-1
 
     else:  # elif type_auxiliary == "no_auxiliary" (only 1 cell):

@@ -10,6 +10,7 @@ import numpy as np
 
 # Importing constants' value and functions
 from configuration.settings import epsilon_cl, theta_c_gdl, theta_c_cl, R
+from modules.transitory_functions import average
 
 
 # _____________________________________________________Flow modules_____________________________________________________
@@ -122,7 +123,7 @@ def flows_int_values(sv, operating_inputs, parameters):
     T_ccl_cgdl = T_ccl / 2 + sv['T_cgdl_1'] / 2
     T_cgdl_cgdl = [None] + [sv[f'T_cgdl_{i}'] / 2 + sv[f'T_cgdl_{i+1}'] / 2 for i in range(1, n_gdl)]
     T_cgdl_cgc = sv[f'T_cgdl_{n_gdl}'] / 2 + T_cgc / 2
-    T_acl_mem_ccl = np.average([T_acl, T_mem, T_ccl],
+    T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
                                weights=[Hcl / (2 * Hcl + Hmem), Hmem / (2 * Hcl + Hmem), Hcl / (2 * Hcl + Hmem)])
 
     return (Pagc, Pcgc, s_agdl_agdl, s_agdl_acl, s_ccl_cgdl, s_cgdl_cgdl, epsilon_mean, theta_c_mean, lambda_acl_mem,

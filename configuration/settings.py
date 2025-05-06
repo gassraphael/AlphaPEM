@@ -6,7 +6,7 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing the necessary libraries
-import numpy as np
+import math
 
 # Importing functions
 from configuration.current_densities import step_current, polarization_current, EIS_current
@@ -258,8 +258,8 @@ yO2_ext = 0.2095  # . It is the molar fraction of O2 in dry air.
 rho_mem = 1980  # kg.m-3. It is the density of the dry membrane.
 M_eq = 1.1  # kg.mol-1. It is the equivalent molar mass of ionomer.
 epsilon_cl = 0.25  # It is the porosity of the catalyst layer, without units.
-theta_c_gdl = 120 * np.pi / 180  # radian. It is the contact angle of GDL for liquid water.
-theta_c_cl = 95 * np.pi / 180  # radian. It is the contact angle of CL for liquid water.
+theta_c_gdl = 120 * math.pi / 180  # radian. It is the contact angle of GDL for liquid water.
+theta_c_cl = 95 * math.pi / 180  # radian. It is the contact angle of CL for liquid water.
 gamma_cond = 5e3  # s-1. It is the overall condensation rate constant for water.
 gamma_evap = 1e-4  # Pa-1.s-1. It is the overall evaporation rate constant for water.
 epsilon_p = 0.11 #. It is the percolation threshold porosity of the GDL.

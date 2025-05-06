@@ -9,6 +9,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import math
 
 # Importing functions
 from modules.settings_modules import EIS_parameters
@@ -48,8 +49,8 @@ def step_current(t, parameters):
     t_switch = tf_step // 2  # The current density value changes around this time.
 
     # Step current density
-    i_fc = i_ini_step * (1.0 + np.tanh(4 * (t - 2 * (delta_t_load_step / 2)) / delta_t_load_step)) / 2 + \
-           + (i_final_step - i_ini_step) * (1.0 + np.tanh(4 * (t - t_switch - (delta_t_load_step / 2)) / delta_t_load_step)) / 2
+    i_fc = i_ini_step * (1.0 + math.tanh(4 * (t - 2 * (delta_t_load_step / 2)) / delta_t_load_step)) / 2 + \
+           + (i_final_step - i_ini_step) * (1.0 + math.tanh(4 * (t - t_switch - (delta_t_load_step / 2)) / delta_t_load_step)) / 2
 
     return i_fc
 
@@ -89,7 +90,7 @@ def polarization_current(t, parameters):
     else:
         for i in range(n):
             t_switch = delta_t * i  # The current density value changes around this time.
-            i_fc += delta_i_pola * (1.0 + np.tanh(4 * (t - delta_t_ini_pola - delta_t - t_switch - (delta_t_load_pola / 2)) /
+            i_fc += delta_i_pola * (1.0 + math.tanh(4 * (t - delta_t_ini_pola - delta_t - t_switch - (delta_t_load_pola / 2)) /
                                              delta_t_load_pola)) / 2
 
     return i_fc
@@ -133,10 +134,10 @@ def EIS_current(t, parameters):
     if t < t0_EIS:
         delta_t_ini = t0_EIS / 4  # s. It is the required time for elevating i_fc from 0 to i_EIS without starving the
         #                              cell.
-        i_fc = i_EIS * (1.0 + np.tanh(4 * (t - 2 * (delta_t_ini / 2)) / delta_t_ini)) / 2
+        i_fc = i_EIS * (1.0 + math.tanh(4 * (t - 2 * (delta_t_ini / 2)) / delta_t_ini)) / 2
     else:
         n_inf = np.where(t_new_start_EIS <= t)[0][-1]  # It is the number of frequency changes which has been made so far.
-        i_disruption = (ratio_EIS * i_EIS) * np.cos(2 * np.pi * f[n_inf] * t)
+        i_disruption = (ratio_EIS * i_EIS) * math.cos(2 * math.pi * f[n_inf] * t)
         i_fc = i_EIS + i_disruption
 
     return i_fc

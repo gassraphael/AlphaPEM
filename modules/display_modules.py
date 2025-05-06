@@ -16,7 +16,7 @@ from scipy.interpolate import interp1d
 
 # Importing constants' value and functions
 from configuration.settings import F, R, E0, Pref
-from modules.transitory_functions import Psat, C_v_sat, k_H2, k_O2
+from modules.transitory_functions import average, Psat, C_v_sat, k_H2, k_O2
 from calibration.experimental_values import pola_exp_values, plot_experimental_polarisation_curve
 
 # General edition
@@ -1044,7 +1044,7 @@ def plot_cell_efficiency(variables, operating_inputs, parameters, n, ax):
         Ueq = E0 - 8.5e-4 * (T_ccl_t[i] - 298.15) + \
               R * T_ccl_t[i] / (2 * F) * (np.log(R * T_acl_t[i] * C_H2_acl_t[i] / Pref) +
                                           0.5 * np.log(R * T_ccl_t[i] * C_O2_ccl_t[i] / Pref))
-        T_acl_mem_ccl = np.average([T_acl_t[i], T_mem_t[i], T_ccl_t[i]],
+        T_acl_mem_ccl = average([T_acl_t[i], T_mem_t[i], T_ccl_t[i]],
                                    weights=[Hcl / (2 * Hcl + Hmem), Hmem / (2 * Hcl + Hmem), Hcl / (2 * Hcl + Hmem)])
         i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl_t[i] * k_H2(lambda_mem_t[i], T_mem_t[i], kappa_co)
         i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl_t[i] * k_O2(lambda_mem_t[i], T_mem_t[i], kappa_co)

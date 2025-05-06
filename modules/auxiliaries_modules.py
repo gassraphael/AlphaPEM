@@ -10,7 +10,7 @@ import numpy as np
 
 # Importing constants' value and functions
 from configuration.settings import Text, Pext, Phi_ext, M_H2, M_O2, M_N2, M_H2O, yO2_ext, R, F, A_T
-from modules.transitory_functions import Psat, C_v_sat, k_H2, k_O2
+from modules.transitory_functions import average, Psat, C_v_sat, k_H2, k_O2
 
 
 # _________________________________________________Auxiliaries modules__________________________________________________
@@ -106,8 +106,8 @@ def auxiliaries_int_values(t, solver_variables, operating_inputs, parameters):
            (1 - y_cgc) * (1 - Phi_cgc * Psat(T_des) / Pcgc) * M_N2
 
     # Internal current density
-    T_acl_mem_ccl = np.average([T_acl, T_mem, T_ccl],
-                               weights=[Hcl / (2 * Hcl + Hmem), Hmem / (2 * Hcl + Hmem), Hcl / (2 * Hcl + Hmem)])
+    T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
+                                  weights=[Hcl / (2 * Hcl + Hmem), Hmem / (2 * Hcl + Hmem), Hcl / (2 * Hcl + Hmem)])
     i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
     i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
     i_n = i_H2 + i_O2

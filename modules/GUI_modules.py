@@ -337,37 +337,37 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
         stored_physical_parameters(type_fuel_cell)
 
     # operating conditions recovery
-    choice_operating_conditions['Temperature - Tfc (°C)']['value'].set(np.round(T_des - 273.15))  # °C
-    choice_operating_conditions['Anode pressure - Pa (bar)']['value'].set(np.round(Pa_des / 1e5, 2))  # bar
-    choice_operating_conditions['Cathode pressure - Pc (bar)']['value'].set(np.round(Pc_des / 1e5, 2))  # bar
-    choice_operating_conditions['Anode stoichiometry - Sa']['value'].set(np.round(Sa, 1))
-    choice_operating_conditions['Cathode stoichiometry - Sc']['value'].set(np.round(Sc, 1))
-    choice_operating_conditions['Anode humidity - Φa']['value'].set(np.round(Phi_a_des, 1))
-    choice_operating_conditions['Cathode humidity - Φc']['value'].set(np.round(Phi_c_des, 1))
+    choice_operating_conditions['Temperature - Tfc (°C)']['value'].set(round(T_des - 273.15))  # °C
+    choice_operating_conditions['Anode pressure - Pa (bar)']['value'].set(round(Pa_des / 1e5, 2))  # bar
+    choice_operating_conditions['Cathode pressure - Pc (bar)']['value'].set(round(Pc_des / 1e5, 2))  # bar
+    choice_operating_conditions['Anode stoichiometry - Sa']['value'].set(round(Sa, 1))
+    choice_operating_conditions['Cathode stoichiometry - Sc']['value'].set(round(Sc, 1))
+    choice_operating_conditions['Anode humidity - Φa']['value'].set(round(Phi_a_des, 1))
+    choice_operating_conditions['Cathode humidity - Φc']['value'].set(round(Phi_c_des, 1))
     # accessible physical parameters recovery
-    choice_accessible_parameters['Active area - Aact (cm²)']['value'].set(np.round(Aact * 1e4))  # cm²
-    choice_accessible_parameters['GDL thickness - Hgdl (µm)']['value'].set(np.round(Hgdl * 1e6))  # µm
-    choice_accessible_parameters['CL thickness - Hcl (µm)']['value'].set(np.round(Hcl * 1e6))  # µm
-    choice_accessible_parameters['Membrane thickness - Hmem (µm)']['value'].set(np.round(Hmem * 1e6))  # µm
-    choice_accessible_parameters['GC thickness - Hgc (µm)']['value'].set(np.round(Hgc * 1e6))  # µm
-    choice_accessible_parameters['GC width - Wgc (µm)']['value'].set(np.round(Wgc * 1e6))  # µm
-    choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].set(np.round(Lgc, 2))  # µm
+    choice_accessible_parameters['Active area - Aact (cm²)']['value'].set(round(Aact * 1e4))  # cm²
+    choice_accessible_parameters['GDL thickness - Hgdl (µm)']['value'].set(round(Hgdl * 1e6))  # µm
+    choice_accessible_parameters['CL thickness - Hcl (µm)']['value'].set(round(Hcl * 1e6))  # µm
+    choice_accessible_parameters['Membrane thickness - Hmem (µm)']['value'].set(round(Hmem * 1e6))  # µm
+    choice_accessible_parameters['GC thickness - Hgc (µm)']['value'].set(round(Hgc * 1e6))  # µm
+    choice_accessible_parameters['GC width - Wgc (µm)']['value'].set(round(Wgc * 1e6))  # µm
+    choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].set(round(Lgc, 2))  # µm
     # undetermined physical parameters recovery
-    choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].set(np.round(epsilon_gdl, 3))
-    choice_undetermined_parameters['Ionomer volume fraction\n- ε_mc']['value'].set(np.round(epsilon_mc, 3))
-    choice_undetermined_parameters['Tortuosity - τ']['value'].set(np.round(tau, 3))
-    choice_undetermined_parameters['Compression ratio - ε_c']['value'].set(np.round(epsilon_c, 3))
+    choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].set(round(epsilon_gdl, 3))
+    choice_undetermined_parameters['Ionomer volume fraction\n- ε_mc']['value'].set(round(epsilon_mc, 3))
+    choice_undetermined_parameters['Tortuosity - τ']['value'].set(round(tau, 3))
+    choice_undetermined_parameters['Compression ratio - ε_c']['value'].set(round(epsilon_c, 3))
     choice_undetermined_parameters['Capillary exponent - e']['value'].set(e)
-    choice_undetermined_parameters['Electron resistance\n- Re (µΩ.m²)']['value'].set(np.round(Re * 1e6, 2))  # µΩ.m²
-    choice_undetermined_parameters['Reference exchange\ncurrent density\n- i0_c_ref (A/m²)']['value'].set(np.round(i0_c_ref, 2))  # A.m-2
-    choice_undetermined_parameters['Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))']['value'].set(np.round(kappa_co, 2))  # mol.m-1.s-1.Pa-1
-    choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].set(np.round(kappa_c, 2))
-    choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_slim']['value'].set(np.round(a_slim, 7))
-    choice_undetermined_parameters['Limit liquid saturation\ncoefficient - b_slim']['value'].set(np.round(b_slim, 7))
-    choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_switch']['value'].set(np.round(a_switch, 7))
-    choice_undetermined_parameters['Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)']['value'].set(np.round(C_scl * 1e-6, 2))  # F.cm-3
+    choice_undetermined_parameters['Electron resistance\n- Re (µΩ.m²)']['value'].set(round(Re * 1e6, 2))  # µΩ.m²
+    choice_undetermined_parameters['Reference exchange\ncurrent density\n- i0_c_ref (A/m²)']['value'].set(round(i0_c_ref, 2))  # A.m-2
+    choice_undetermined_parameters['Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))']['value'].set(round(kappa_co, 2))  # mol.m-1.s-1.Pa-1
+    choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].set(round(kappa_c, 2))
+    choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_slim']['value'].set(round(a_slim, 7))
+    choice_undetermined_parameters['Limit liquid saturation\ncoefficient - b_slim']['value'].set(round(b_slim, 7))
+    choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_switch']['value'].set(round(a_switch, 7))
+    choice_undetermined_parameters['Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)']['value'].set(round(C_scl * 1e-6, 2))  # F.cm-3
     # i_max_pola recovery
-    choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].set(np.round(i_max_pola / 1e4, 2))  # A/cm²
+    choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].set(round(i_max_pola / 1e4, 2))  # A/cm²
 
 
 def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_conditions, choice_accessible_parameters,

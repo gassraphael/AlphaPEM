@@ -7,7 +7,7 @@
 
 # Importing the necessary libraries
 import numpy as np
-from scipy.stats import hmean
+import math
 
 # Importing constants' value
 from configuration.settings import (M_eq, rho_mem, M_H2, M_O2, M_N2, M_H2O, R, Kshape, epsilon_p, alpha_p, k_th_gdl,
@@ -15,6 +15,73 @@ from configuration.settings import (M_eq, rho_mem, M_H2, M_O2, M_N2, M_H2O, R, K
 
 
 # _________________________________________________Transitory functions_________________________________________________
+
+def hmean(terms, weights=None):
+    """
+    Calculate the weighted harmonic mean of a list of terms with corresponding weights.
+    It is more efficient to express this function in the code than calling hmean from scipy.stats.
+
+    Parameters
+    ----------
+    terms (list of float):
+        The terms to calculate the harmonic mean for.
+    weights (list of float):
+        The weights corresponding to each term. If None, uniform weights are assumed.
+
+    Returns
+    -------
+    float:
+        The weighted harmonic mean.
+    """
+    if weights is None:
+        weights = [1] * len(terms)  # Assign equal weights if not provided
+
+    if len(terms) != len(weights):
+        raise ValueError("The length of terms and weights must be the same.")
+
+    # Calculate the weighted harmonic mean
+    weighted_sum = sum((w / t) for w, t in zip(weights, terms) if t != 0)
+    total_weight = sum(weights)
+
+    if weighted_sum == 0:
+        return float('inf')  # Avoid division by zero
+
+    return total_weight / weighted_sum
+
+
+def average(terms, weights=None):
+    """
+    Calculate the weighted arithmetic mean of a list of terms with corresponding weights.
+    It is more efficient to express this function in the code than calling average from numpy.
+
+    Parameters
+    ----------
+    terms (list of float):
+        The terms to calculate the average for.
+    weights (list of float, optional):
+        The weights corresponding to each term. If None, uniform weights are assumed.
+
+    Returns
+    -------
+    float:
+        The weighted arithmetic mean.
+    """
+    if weights is None:
+        # If no weights are provided, use uniform weights
+        weights = [1] * len(terms)
+
+    if len(terms) != len(weights):
+        raise ValueError("The length of terms and weights must be the same.")
+
+    # Calculate the weighted arithmetic mean
+    weighted_sum = sum(w * t for w, t in zip(weights, terms))
+    total_weight = sum(weights)
+
+    if total_weight == 0:
+        return float('nan')  # Avoid division by zero
+
+    return weighted_sum / total_weight
+
 
 def rho_H2O_l(T):
     """This function calculates the water density, in kg.m-3, as a function of the temperature.
@@ -189,7 +256,7 @@ def Da_eff(s, epsilon, P, T, epsilon_c, epsilon_gdl):
         raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
                          "epsilon_gdl should be between 0.55 and 0.8.")
 
-    return epsilon * ((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p * np.exp(beta2 * epsilon_c) * (1 - s) ** 2 * Da(P, T)
+    return epsilon * ((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p * math.exp(beta2 * epsilon_c) * (1 - s) ** 2 * Da(P, T)
 
 
 def Dc_eff(s, epsilon, P, T, epsilon_c, epsilon_gdl):
@@ -228,7 +295,7 @@ def Dc_eff(s, epsilon, P, T, epsilon_c, epsilon_gdl):
         raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
                          "epsilon_gdl should be between 0.55 and 0.8.")
 
-    return epsilon * ((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p * np.exp(beta2 * epsilon_c) * (1 - s) ** 2 * Dc(P, T)
+    return epsilon * ((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p * math.exp(beta2 * epsilon_c) * (1 - s) ** 2 * Dc(P, T)
 
 
 def h_a(P, T, Wgc, Hgc):
@@ -250,7 +317,7 @@ def h_a(P, T, Wgc, Hgc):
     float
         Effective convective-conductive mass transfer coefficient at the anode in m.s-1.
     """
-    Sh = 0.9247 * np.log(Wgc / Hgc) + 2.3787  # Sherwood coefficient.
+    Sh = 0.9247 * math.log(Wgc / Hgc) + 2.3787  # Sherwood coefficient.
     return Sh * Da(P, T) / Hgc
 
 
@@ -273,7 +340,7 @@ def h_c(P, T, Wgc, Hgc):
     float
         Effective convective-conductive mass transfer coefficient at the cathode in m.s-1.
     """
-    Sh = 0.9247 * np.log(Wgc / Hgc) + 2.3787  # Sherwood coefficient.
+    Sh = 0.9247 * math.log(Wgc / Hgc) + 2.3787  # Sherwood coefficient.
     return Sh * Dc(P, T) / Hgc
 
 
@@ -296,8 +363,8 @@ def lambda_eq(C_v, s, T):
         Equilibrium water content in the membrane.
     """
     a_w = C_v / C_v_sat(T) + 2 * s  # water activity
-    return 0.5 * (0.300 + 10.8 * a_w - 16.0 * a_w ** 2 + 14.1 * a_w ** 3) * (1 - np.tanh(100 * (a_w - 1))) \
-        + 0.5 * (9.2 + 8.6 * (1 - np.exp(-Kshape * (a_w - 1)))) * (1 + np.tanh(100 * (a_w - 1)))
+    return 0.5 * (0.300 + 10.8 * a_w - 16.0 * a_w ** 2 + 14.1 * a_w ** 3) * (1 - math.tanh(100 * (a_w - 1))) \
+        + 0.5 * (9.2 + 8.6 * (1 - math.exp(-Kshape * (a_w - 1)))) * (1 + math.tanh(100 * (a_w - 1)))
 
 
 def D(lambdaa):
@@ -313,7 +380,7 @@ def D(lambdaa):
     float
         Diffusion coefficient of water in the membrane in m².s-1.
     """
-    return 4.1e-10 * (lambdaa / 25.0) ** 0.15 * (1.0 + np.tanh((lambdaa - 2.5) / 1.4))
+    return 4.1e-10 * (lambdaa / 25.0) ** 0.15 * (1.0 + math.tanh((lambdaa - 2.5) / 1.4))
 
 
 def fv(lambdaa, T):
@@ -356,9 +423,9 @@ def gamma_sorp(C_v, s, lambdaa, T, Hcl):
     """
 
     if lambda_eq(C_v, s, T) >= lambdaa:  # absorption
-        return (1.14e-5 * fv(lambdaa, T)) / Hcl * np.exp(2416 * (1 / 303 - 1 / T))
+        return (1.14e-5 * fv(lambdaa, T)) / Hcl * math.exp(2416 * (1 / 303 - 1 / T))
     else:  #                               desorption
-        return (4.59e-5 * fv(lambdaa, T)) / Hcl * np.exp(2416 * (1 / 303 - 1 / T))
+        return (4.59e-5 * fv(lambdaa, T)) / Hcl * math.exp(2416 * (1 / 303 - 1 / T))
 
 
 def Svl(s, C_v, Ctot, T, epsilon, gamma_cond, gamma_evap):
@@ -438,8 +505,8 @@ def K0(epsilon, epsilon_c, epsilon_gdl):
         raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
                          "epsilon_gdl should be between 0.55 and 0.8.")
 
-    return epsilon / (8 * np.log(epsilon) ** 2) * (epsilon - 0.11) ** (0.785 + 2) * \
-        4.6e-6 ** 2 / ((1 - 0.11) ** 0.785 * ((0.785 + 1) * epsilon - 0.11) ** 2) * np.exp(beta1 * epsilon_c)
+    return epsilon / (8 * math.log(epsilon) ** 2) * (epsilon - 0.11) ** (0.785 + 2) * \
+        4.6e-6 ** 2 / ((1 - 0.11) ** 0.785 * ((0.785 + 1) * epsilon - 0.11) ** 2) * math.exp(beta1 * epsilon_c)
 
 
 def k_H2(lambdaa, T, kappa_co):
@@ -467,9 +534,9 @@ def k_H2(lambdaa, T, kappa_co):
 
     # Calculation of the permeability coefficient of the membrane for hydrogen
     if lambdaa < 17.6:
-        return kappa_co * (0.29 + 2.2 * fv(lambdaa, T)) * 1e-14 * np.exp(E_H2_v / R * (1 / Tref - 1 / T))
+        return kappa_co * (0.29 + 2.2 * fv(lambdaa, T)) * 1e-14 * math.exp(E_H2_v / R * (1 / Tref - 1 / T))
     else:
-        return kappa_co * 1.8 * 1e-14 * np.exp(E_H2_l / R * (1 / Tref - 1 / T))
+        return kappa_co * 1.8 * 1e-14 * math.exp(E_H2_l / R * (1 / Tref - 1 / T))
 
 
 def k_O2(lambdaa, T, kappa_co):
@@ -497,9 +564,9 @@ def k_O2(lambdaa, T, kappa_co):
 
     # Calculation of the permeability coefficient of the membrane for oxygen
     if lambdaa < 17.6:
-        return kappa_co * (0.11 + 1.9 * fv(lambdaa, T)) * 1e-14 * np.exp(E_O2_v / R * (1 / Tref - 1 / T))
+        return kappa_co * (0.11 + 1.9 * fv(lambdaa, T)) * 1e-14 * math.exp(E_O2_v / R * (1 / Tref - 1 / T))
     else:
-        return kappa_co * 1.2 * 1e-14 * np.exp(E_O2_l / R * (1 / Tref - 1 / T))
+        return kappa_co * 1.2 * 1e-14 * math.exp(E_O2_l / R * (1 / Tref - 1 / T))
 
 
 def sigma_p_eff(element, lambdaa, T, epsilon_mc=None, tau=None):
@@ -526,16 +593,16 @@ def sigma_p_eff(element, lambdaa, T, epsilon_mc=None, tau=None):
     """
     if element == 'mem': # The proton conductivity at the membrane
         if lambdaa >= 1:
-            return (0.5139 * lambdaa - 0.326) * np.exp(1268 * (1 / 303.15 - 1 / T))
+            return (0.5139 * lambdaa - 0.326) * math.exp(1268 * (1 / 303.15 - 1 / T))
         else:
-            return 0.1879 * np.exp(1268 * (1 / 303.15 - 1 / T))
+            return 0.1879 * math.exp(1268 * (1 / 303.15 - 1 / T))
     elif element == 'ccl': # The effective proton conductivity at the cathode catalyst layer
         if epsilon_mc==None or tau==None:
             raise ValueError("For the CCL, epsilon_mc and tau must be provided.")
         if lambdaa >= 1:
-            return (epsilon_mc ** tau) * (0.5139 * lambdaa - 0.326) * np.exp(1268 * (1 / 303.15 - 1 / T))
+            return (epsilon_mc ** tau) * (0.5139 * lambdaa - 0.326) * math.exp(1268 * (1 / 303.15 - 1 / T))
         else:
-            return (epsilon_mc ** tau) * 0.1879 * np.exp(1268 * (1 / 303.15 - 1 / T))
+            return (epsilon_mc ** tau) * 0.1879 * math.exp(1268 * (1 / 303.15 - 1 / T))
     else:
         raise ValueError("The element should be either 'mem' or 'ccl'.")
 
@@ -632,7 +699,7 @@ def k_th_gaz_mixture(k_th_g, mu_g, x, M):
     -----
     Source : [wuMathematicalModelingTransient2009] and [polingPropertiesGasesLiquids2001]"""
 
-    if not np.isclose(np.sum(x), 1.0, atol=1e-6):
+    if abs(sum(x) - 1.0) > 1e-6:
         raise ValueError("The sum of the molar fractions should be 1.")
 
     n = len(k_th_g)
@@ -645,13 +712,13 @@ def k_th_gaz_mixture(k_th_g, mu_g, x, M):
             if i == j:
                 A_W[i, j] = 1.0
             else:
-                A_W[i, j] = (epsilon_TS * (1 + np.sqrt(mu_g[i] / mu_g[j]) * (M[j] / M[i]) ** 0.25) ** 2) /  \
-                            np.sqrt(8 * (1 + M[i] / M[j]))
+                A_W[i, j] = (epsilon_TS * (1 + (mu_g[i] / mu_g[j])**0.5 * (M[j] / M[i]) ** 0.25) ** 2) /  \
+                            (8 * (1 + M[i] / M[j]))**0.5
 
     # Calculation of the thermal conductivity of the gas mixture.
     k_th_gaz_mixture = 0.0
     for i in range(n):
-        k_th_gaz_mixture += x[i] * k_th_g[i] / np.sum([x[j] * A_W[i, j] for j in range(n)])
+        k_th_gaz_mixture += x[i] * k_th_g[i] / sum([x[j] * A_W[i, j] for j in range(n)])
 
     return k_th_gaz_mixture
 
@@ -857,15 +924,15 @@ def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O
         if element == 'agdl':  # The heat capacity of the gas mixture in the AGDL
             if C_H2 is None:
                 raise ValueError("For the AGDL, C_H2 must be provided.")
-            rho_Cp0_gaz = np.average([M_H2O * C_v * Cp0('H2O_v', T), M_H2 * C_H2 * Cp0('H2', T)],
+            rho_Cp0_gaz = average([M_H2O * C_v * Cp0('H2O_v', T), M_H2 * C_H2 * Cp0('H2', T)],
                                     weights=[C_v / (C_v + C_H2), C_H2 / (C_v + C_H2)])
         else:  # The heat capacity of the gas mixture in the CGDL
             if C_O2 is None or C_N2 is None:
                 raise ValueError("For the CGDL, C_O2 and C_N2 must be provided.")
-            rho_Cp0_gaz = np.average([M_H2O * C_v * Cp0('H2O_v', T), M_O2 * C_O2 * Cp0('O2', T),
+            rho_Cp0_gaz = average([M_H2O * C_v * Cp0('H2O_v', T), M_O2 * C_O2 * Cp0('O2', T),
                                      M_N2 * C_N2 * Cp0('N2', T)],
                                     weights=[C_v / (C_v + C_O2 + C_N2), C_O2 / (C_v + C_O2 + C_N2), C_N2 / (C_v + C_O2 + C_N2)])
-        return np.average([rho_gdl * Cp_gdl, rho_H2O_l(T) * Cp0('H2O_l', T), rho_Cp0_gaz],
+        return average([rho_gdl * Cp_gdl, rho_H2O_l(T) * Cp0('H2O_l', T), rho_Cp0_gaz],
                           weights=[epsilon_c, epsilon * s, epsilon * (1 - s)])
 
     elif element == 'acl' or element == 'ccl':  # The volumetric heat capacity at the CL
@@ -875,21 +942,21 @@ def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O
         if element == 'acl':  # The heat capacity of the gas mixture in the ACL
             if C_H2 is None:
                 raise ValueError("For the ACL, C_H2 must be provided.")
-            rho_Cp0_gaz = np.average([M_H2O * C_v * Cp0('H2O_v', T), M_H2 * C_H2 * Cp0('H2', T)],
+            rho_Cp0_gaz = average([M_H2O * C_v * Cp0('H2O_v', T), M_H2 * C_H2 * Cp0('H2', T)],
                                     weights=[C_v / (C_v + C_H2), C_H2 / (C_v + C_H2)])
         else:  # The heat capacity of the gas mixture in the CCL
             if C_O2 is None or C_N2 is None:
                 raise ValueError("For the CCL, C_O2 and C_N2 must be provided.")
-            rho_Cp0_gaz = np.average([M_H2O * C_v * Cp0('H2O_v', T), M_O2 * C_O2 * Cp0('O2', T),
+            rho_Cp0_gaz = average([M_H2O * C_v * Cp0('H2O_v', T), M_O2 * C_O2 * Cp0('O2', T),
                                      M_N2 * C_N2 * Cp0('N2', T)],
                                     weights=[C_v / (C_v + C_O2 + C_N2), C_O2 / (C_v + C_O2 + C_N2), C_N2 / (C_v + C_O2 + C_N2)])
-        return np.average([rho_cl * Cp_cl, rho_mem * Cp_mem, rho_H2O_l(T) * Cp0('H2O_l', T), rho_Cp0_gaz],
+        return average([rho_cl * Cp_cl, rho_mem * Cp_mem, rho_H2O_l(T) * Cp0('H2O_l', T), rho_Cp0_gaz],
                           weights=[epsilon_c, epsilon_mc, epsilon * s, epsilon * (1 - s)])
 
     elif element == 'mem':  # The volumetric heat capacity at the membrane
         if lambdaa is None:
             raise ValueError("For the membrane, lambdaa must be provided.")
-        return np.average([rho_mem * Cp_mem, rho_H2O_l(T) * Cp0('H2O_l', T)],
+        return average([rho_mem * Cp_mem, rho_H2O_l(T) * Cp0('H2O_l', T)],
                           weights=[1 - fv(lambdaa, T), fv(lambdaa, T)])
 
     else:

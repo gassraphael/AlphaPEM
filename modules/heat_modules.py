@@ -5,12 +5,9 @@
 
 # _____________________________________________________Preliminaries____________________________________________________
 
-# Importing the necessary libraries
-from scipy.stats import hmean
-
 # Importing constants' value and functions
 from configuration.settings import epsilon_cl
-from modules.transitory_functions import k_th_eff
+from modules.transitory_functions import hmean, k_th_eff
 
 
 # _____________________________________________________Flow modules_____________________________________________________

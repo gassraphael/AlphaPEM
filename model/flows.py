@@ -6,7 +6,7 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing the necessary libraries
-import numpy as np
+import math
 
 # Importing constants' value and functions
 from configuration.settings import Kshape, rho_mem, M_eq, epsilon_cl, theta_c_gdl, gamma_cond, gamma_evap, F, R
@@ -85,11 +85,11 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     # Anode side
     Jl_agdl_agdl = [None] + [0] * (n_gdl - 1)
     for i in range(1, n_gdl):
-        Jl_agdl_agdl[i] = - sigma(T_agdl_agdl[i]) * K0(epsilon_gdl, epsilon_c, epsilon_gdl) / nu_l(T_agdl_agdl[i]) * abs(np.cos(theta_c_gdl)) * \
+        Jl_agdl_agdl[i] = - sigma(T_agdl_agdl[i]) * K0(epsilon_gdl, epsilon_c, epsilon_gdl) / nu_l(T_agdl_agdl[i]) * abs(math.cos(theta_c_gdl)) * \
                           (epsilon_gdl / K0(epsilon_gdl, epsilon_c, epsilon_gdl)) ** 0.5 * \
                           (s_agdl_agdl[i] ** e + 1e-7) * (1.417 - 4.24 * s_agdl_agdl[i] + 3.789 * s_agdl_agdl[i] ** 2) * \
                           (sv[f's_agdl_{i + 1}'] - sv[f's_agdl_{i}']) / (Hgdl / n_gdl)
-    Jl_agdl_acl = - 2 * sigma(T_agdl_acl) * K0(epsilon_mean, epsilon_c, epsilon_gdl) / nu_l(T_agdl_acl) * abs(np.cos(theta_c_mean)) * \
+    Jl_agdl_acl = - 2 * sigma(T_agdl_acl) * K0(epsilon_mean, epsilon_c, epsilon_gdl) / nu_l(T_agdl_acl) * abs(math.cos(theta_c_mean)) * \
                   (epsilon_mean / K0(epsilon_mean, epsilon_c, epsilon_gdl)) ** 0.5 * \
                   (s_agdl_acl ** e + 1e-7) * (1.417 - 4.24 * s_agdl_acl + 3.789 * s_agdl_acl ** 2) * \
                   (s_acl - sv[f's_agdl_{n_gdl}']) / (Hgdl / n_gdl + Hcl)
@@ -97,11 +97,11 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     # Cathode side
     Jl_cgdl_cgdl = [None] + [0] * (n_gdl - 1)
     for i in range(1, n_gdl):
-        Jl_cgdl_cgdl[i] = - sigma(T_cgdl_cgdl[i]) * K0(epsilon_gdl, epsilon_c, epsilon_gdl) / nu_l(T_cgdl_cgdl[i]) * abs(np.cos(theta_c_gdl)) * \
+        Jl_cgdl_cgdl[i] = - sigma(T_cgdl_cgdl[i]) * K0(epsilon_gdl, epsilon_c, epsilon_gdl) / nu_l(T_cgdl_cgdl[i]) * abs(math.cos(theta_c_gdl)) * \
                           (epsilon_gdl / K0(epsilon_gdl, epsilon_c, epsilon_gdl)) ** 0.5 * \
                           (s_cgdl_cgdl[i] ** e + 1e-7) * (1.417 - 4.24 * s_cgdl_cgdl[i] + 3.789 * s_cgdl_cgdl[i] ** 2) * \
                           (sv[f's_cgdl_{i + 1}'] - sv[f's_cgdl_{i}']) / (Hgdl / n_gdl)
-    Jl_ccl_cgdl = - 2 * sigma(T_ccl_cgdl) * K0(epsilon_mean, epsilon_c, epsilon_gdl) / nu_l(T_ccl_cgdl) * abs(np.cos(theta_c_mean)) * \
+    Jl_ccl_cgdl = - 2 * sigma(T_ccl_cgdl) * K0(epsilon_mean, epsilon_c, epsilon_gdl) / nu_l(T_ccl_cgdl) * abs(math.cos(theta_c_mean)) * \
                   (epsilon_mean / K0(epsilon_mean, epsilon_c, epsilon_gdl)) ** 0.5 * \
                   (s_ccl_cgdl ** e + 1e-7) * (1.417 - 4.24 * s_ccl_cgdl + 3.789 * s_ccl_cgdl ** 2) * \
                   (sv['s_cgdl_1'] - s_ccl) / (Hgdl / n_gdl + Hcl)

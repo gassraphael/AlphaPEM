@@ -6,11 +6,11 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing the necessary libraries
-import numpy as np
+import math
 
 # Importing constants' value and functions
 from configuration.settings import F, R, E0, Pref
-from modules.transitory_functions import k_H2, k_O2, sigma_p_eff
+from modules.transitory_functions import average, k_H2, k_O2, sigma_p_eff
 
 
 # _____________________________________________________Cell voltage_____________________________________________________
@@ -46,7 +46,7 @@ def calculate_eta_c_intermediate_values(solver_variables, operating_inputs, para
     a_slim, b_slim, a_switch = parameters['a_slim'], parameters['b_slim'], parameters['a_switch']
 
     # The crossover current density i_n
-    T_acl_mem_ccl = np.average([T_acl, T_mem, T_ccl],
+    T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
                                weights=[Hcl / (2 * Hcl + Hmem), Hmem / (2 * Hcl + Hmem), Hcl / (2 * Hcl + Hmem)])
     i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
     i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
@@ -55,7 +55,7 @@ def calculate_eta_c_intermediate_values(solver_variables, operating_inputs, para
     # The liquid water induced voltage drop function f_drop
     slim = a_slim * (Pc_des / 1e5) + b_slim
     s_switch = a_switch * slim
-    f_drop = 0.5 * (1.0 - np.tanh((4 * s_ccl - 2 * slim - 2 * s_switch) / (slim - s_switch)))
+    f_drop = 0.5 * (1.0 - math.tanh((4 * s_ccl - 2 * slim - 2 * s_switch) / (slim - s_switch)))
 
     return {'i_n': i_n, 'f_drop': f_drop}
 
@@ -103,11 +103,11 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
         i_fc = operating_inputs['current_density'](t[i], parameters)
 
         # The equilibrium potential
-        Ueq = E0 - 8.5e-4 * (T_ccl - 298.15) + R * T_ccl / (2 * F) * (np.log(R * T_acl * C_H2_acl / Pref) +
-                                                                  0.5 * np.log(R * T_ccl * C_O2_ccl / Pref))
+        Ueq = E0 - 8.5e-4 * (T_ccl - 298.15) + R * T_ccl / (2 * F) * (math.log(R * T_acl * C_H2_acl / Pref) +
+                                                                  0.5 * math.log(R * T_ccl * C_O2_ccl / Pref))
 
         # The crossover current density
-        T_acl_mem_ccl = np.average([T_acl, T_mem, T_ccl],
+        T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
                                    weights=[Hcl/(2*Hcl + Hmem), Hmem/(2*Hcl + Hmem), Hcl/(2*Hcl + Hmem)])
         i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
         i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
