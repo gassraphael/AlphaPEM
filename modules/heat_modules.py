@@ -25,16 +25,22 @@ def heat_transfer_int_values(sv, parameters):
 
     Returns
     -------
-    tuple
-        A tuple containing the average effective thermal diffusivity values between different layers:
-        - k_th_eff_agc_agdl : Effective thermal diffusivity between the AGC and the first GDL layer.
-        - k_th_eff_agdl_agdl : List of effective thermal diffusivities between adjacent GDL layers on the anode side.
-        - k_th_eff_agdl_acl : Effective thermal diffusivity between the last GDL layer and the anode catalyst layer.
-        - k_th_eff_acl_mem : Effective thermal diffusivity between the anode catalyst layer and the membrane.
-        - k_th_eff_mem_ccl : Effective thermal diffusivity between the membrane and the cathode catalyst layer.
-        - k_th_eff_ccl_cgdl : Effective thermal diffusivity between the cathode catalyst layer and the first GDL layer.
-        - k_th_eff_cgdl_cgdl : List of effective thermal diffusivities between adjacent GDL layers on the cathode side.
-        - k_th_eff_cgdl_cgc : Effective thermal diffusivity between the last GDL layer and the CGC.
+    k_th_eff_agc_agdl : float
+        Effective thermal diffusivity between the AGC and the first GDL layer (J.m-1.s-1.K-1).
+    k_th_eff_agdl_agdl : list of floats
+        List of effective thermal diffusivities between adjacent GDL layers on the anode side (J.m-1.s-1.K-1).
+    k_th_eff_agdl_acl : float
+        Effective thermal diffusivity between the last GDL layer and the anode catalyst layer (J.m-1.s-1.K-1).
+    k_th_eff_acl_mem : float
+        Effective thermal diffusivity between the anode catalyst layer and the membrane (J.m-1.s-1.K-1).
+    k_th_eff_mem_ccl : float
+        Effective thermal diffusivity between the membrane and the cathode catalyst layer (J.m-1.s-1.K-1).
+    k_th_eff_ccl_cgdl : float
+        Effective thermal diffusivity between the cathode catalyst layer and the first GDL layer (J.m-1.s-1.K-1).
+    k_th_eff_cgdl_cgdl : list of floats
+        List of effective thermal diffusivities between adjacent GDL layers on the cathode side (J.m-1.s-1.K-1).
+    k_th_eff_cgdl_cgc : float
+        Effective thermal diffusivity between the last GDL layer and the CGC (J.m-1.s-1.K-1).
     """
 
     # Extraction of the variables
