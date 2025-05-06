@@ -31,6 +31,7 @@ nav:
           - Control: functions/model/control.md
           - Differentiel equations: functions/model/dif_eq.md
           - Flows: functions/model/flows.md
+          - Heat transfer: functions/model/heat_transfer.md
       - Modules:
           - Auxiliaries modules: functions/modules/auxiliaries_modules.md
           - Calibration modules: functions/modules/calibration_modules.md
@@ -38,6 +39,7 @@ nav:
           - Display modules: functions/modules/display_modules.md
           - Flows modules: functions/modules/flows_modules.md
           - GUI modules: functions/modules/GUI_modules.md
+          - Heat modules: functions/modules/heat_modules.md
           - Main modules: functions/modules/main_modules.md
           - Settings modules: functions/modules/settings_modules.md
           - Transitory functions: functions/modules/transitory_functions.md
