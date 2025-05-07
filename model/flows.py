@@ -5,9 +5,6 @@
 
 # _____________________________________________________Preliminaries____________________________________________________
 
-# Importing the necessary libraries
-import math
-
 # Importing constants' value and functions
 from configuration.settings import rho_mem, M_eq, epsilon_cl, gamma_cond, gamma_evap, F, R
 from model.auxiliaries import auxiliaries

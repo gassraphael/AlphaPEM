@@ -8,11 +8,8 @@ Most of the functionalities are available, but some are not implemented.
 
 # Importing the necessary libraries
 import tkinter as tk
-from tkinter import messagebox
 from ttkthemes import ThemedTk
 from tkinter import ttk
-import numpy as np
-import matplotlib as mpl
 
 # Importing constants' value and functions
 from modules.GUI_modules import display_parameter_labels, \

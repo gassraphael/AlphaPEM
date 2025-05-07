@@ -5,9 +5,6 @@
 
 # _____________________________________________________Preliminaries____________________________________________________
 
-# Importing the necessary libraries
-import numpy as np
-
 # Importing constants' value and functions
 from configuration.settings import epsilon_cl, R
 from modules.transitory_functions import average, Dcap, Da_eff, Dc_eff, h_a, h_c, D
