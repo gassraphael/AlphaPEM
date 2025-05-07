@@ -93,7 +93,7 @@ def dydt(t, y, operating_inputs, parameters, solver_variable_names, control_vari
 
 # ___________________________Elementary functions which gives specific differential equations___________________________
 
-def calculate_dyn_dissoved_water_evolution(dif_eq, Hmem, Hcl, epsilon_mc, S_abs_acl, S_abs_ccl, J_lambda_mem_acl,
+def calculate_dyn_dissoved_water_evolution(dif_eq, Hmem, Hcl, epsilon_mc, S_abs_acl, S_abs_ccl, J_lambda_acl_mem,
                                            J_lambda_mem_ccl, Sp_acl, Sp_ccl, **kwargs):
     """
     This function calculates the dynamic evolution of the dissolved water in the membrane and the catalyst layers.
@@ -112,8 +112,8 @@ def calculate_dyn_dissoved_water_evolution(dif_eq, Hmem, Hcl, epsilon_mc, S_abs_
         Water absorption in the anode catalyst layer (mol.m-3.s-1)
     S_abs_ccl : float
         Water absorption in the cathode catalyst layer (mol.m-3.s-1)
-    J_lambda_mem_acl : float
-        Dissolved water flow between the membrane and the anode catalyst layer (mol.m-2.s-1)
+    J_lambda_acl_mem : float
+        Dissolved water flow between the anode catalyst layer and the membrane (mol.m-2.s-1)
     J_lambda_mem_ccl : float
         Dissolved water flow between the membrane and the cathode catalyst layer (mol.m-2.s-1)
     Sp_acl : float
@@ -122,13 +122,13 @@ def calculate_dyn_dissoved_water_evolution(dif_eq, Hmem, Hcl, epsilon_mc, S_abs_
         Water produced in the membrane at the CCL through the chemical reaction and crossover (mol.m-3.s-1)
     """
 
-    dif_eq['dlambda_acl / dt'] = M_eq / (rho_mem * epsilon_mc) * (-J_lambda_mem_acl / Hcl + S_abs_acl + Sp_acl)
-    dif_eq['dlambda_mem / dt'] = M_eq / rho_mem * (J_lambda_mem_acl - J_lambda_mem_ccl) / Hmem
+    dif_eq['dlambda_acl / dt'] = M_eq / (rho_mem * epsilon_mc) * (-J_lambda_acl_mem / Hcl + S_abs_acl + Sp_acl)
+    dif_eq['dlambda_mem / dt'] = M_eq / rho_mem * (J_lambda_acl_mem - J_lambda_mem_ccl) / Hmem
     dif_eq['dlambda_ccl / dt'] = M_eq / (rho_mem * epsilon_mc) * (J_lambda_mem_ccl / Hcl + S_abs_ccl + Sp_ccl)
 
 
-def calculate_dyn_liquid_water_evolution(dif_eq, sv, Hgdl, Hcl, epsilon_gdl, n_gdl, Jl_agdl_agdl, Jl_agdl_acl,
-                                         Jl_ccl_cgdl, Jl_cgdl_cgdl, Sl_agdl, Sl_acl, Sl_ccl, Sl_cgdl, **kwargs):
+def calculate_dyn_liquid_water_evolution(dif_eq, sv, Hgdl, Hcl, epsilon_gdl, n_gdl, Jl_agc_agdl, Jl_agdl_agdl, Jl_agdl_acl,
+                                         Jl_ccl_cgdl, Jl_cgdl_cgdl, Jl_cgdl_cgc, Sl_agdl, Sl_acl, Sl_ccl, Sl_cgdl, **kwargs):
     """
     This function calculates the dynamic evolution of the liquid water in the gas diffusion and catalyst layers.
 
@@ -147,6 +147,8 @@ def calculate_dyn_liquid_water_evolution(dif_eq, sv, Hgdl, Hcl, epsilon_gdl, n_g
         Anode/cathode GDL porosity.
     n_gdl : int
         Number of model nodes placed inside each GDL.
+    Jl_agc_agdl : float
+        Liquid water flow between the anode gas channel border and the anode GDL (kg.m-2.s-1).
     Jl_agdl_agdl : list
         Liquid water flow between two nodes of the anode GDL (kg.m-2.s-1).
     Jl_agdl_acl : float
@@ -155,6 +157,8 @@ def calculate_dyn_liquid_water_evolution(dif_eq, sv, Hgdl, Hcl, epsilon_gdl, n_g
         Liquid water flow between the cathode CL and the cathode GDL (kg.m-2.s-1).
     Jl_cgdl_cgdl : list
         Liquid water flow between two nodes of the cathode GDL (kg.m-2.s-1).
+    Jl_cgdl_cgc : float
+        Liquid water flow between the cathode GDL and the cathode gas channel border (kg.m-2.s-1).
     Sl_agdl : list
         Liquid water produced in the anode GDL (kg.m-3.s-1).
     Sl_acl : float
@@ -167,7 +171,8 @@ def calculate_dyn_liquid_water_evolution(dif_eq, sv, Hgdl, Hcl, epsilon_gdl, n_g
 
     # At the anode side
     #       Inside the AGDL
-    dif_eq['ds_agdl_1 / dt'] = 0  # Dirichlet boundary condition. s_agdl_1 is initialized to 0 and remains constant.
+    dif_eq['ds_agdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_agdl_1']) * epsilon_gdl) * \
+                                 ((Jl_agc_agdl - Jl_agdl_agdl[1]) / (Hgdl / n_gdl) + M_H2O * Sl_agdl[1])
     for i in range(2, n_gdl):
         dif_eq[f'ds_agdl_{i} / dt'] = 1 / (rho_H2O_l(sv[f'T_agdl_{i}']) * epsilon_gdl) * \
                                       ((Jl_agdl_agdl[i - 1] - Jl_agdl_agdl[i]) / (Hgdl / n_gdl) +
@@ -187,8 +192,8 @@ def calculate_dyn_liquid_water_evolution(dif_eq, sv, Hgdl, Hcl, epsilon_gdl, n_g
     for i in range(2, n_gdl):
         dif_eq[f'ds_cgdl_{i} / dt'] = 1 / (rho_H2O_l(sv[f'T_cgdl_{i}']) * epsilon_gdl) * \
                                       ((Jl_cgdl_cgdl[i - 1] - Jl_cgdl_cgdl[i]) / (Hgdl / n_gdl) + M_H2O * Sl_cgdl[i])
-    dif_eq[f'ds_cgdl_{n_gdl} / dt'] = 0  # Dirichlet boundary condition. s_cgdl_n_gdl is initialized to 0 and remains
-    #                                      constant.
+    dif_eq[f'ds_cgdl_{n_gdl} / dt'] = 1 / (rho_H2O_l(sv[f'T_cgdl_{n_gdl}']) * epsilon_gdl) * \
+                                     ((Jl_cgdl_cgdl[n_gdl - 1] - Jl_cgdl_cgc) / (Hgdl / n_gdl) + M_H2O * Sl_cgdl[n_gdl])
 
 
 def calculate_dyn_vapor_evolution(dif_eq, sv, Hgdl, Hcl, Hgc, Lgc, epsilon_gdl, n_gdl, Jv_a_in, Jv_a_out, Jv_c_in,

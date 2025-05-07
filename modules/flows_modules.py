@@ -9,8 +9,8 @@
 import numpy as np
 
 # Importing constants' value and functions
-from configuration.settings import epsilon_cl, theta_c_gdl, theta_c_cl, R
-from modules.transitory_functions import average
+from configuration.settings import epsilon_cl, R
+from modules.transitory_functions import average, Dcap, Da_eff, Dc_eff, h_a, h_c, D
 
 
 # _____________________________________________________Flow modules_____________________________________________________
@@ -34,48 +34,8 @@ def flows_int_values(sv, operating_inputs, parameters):
         Global pressure in the anode gas channel (Pa).
     Pcgc : float
         Global pressure in the cathode gas channel (Pa).
-    s_agdl_agdl : list
-        Mean value of the saturated liquid water variable in the anode GDL between two adjacent GDL nodes.
-    s_agdl_acl : float
-        Mean value of the saturated liquid water variable between the last GDL node and the anode CL.
-    s_ccl_cgdl : float
-        Mean value of the saturated liquid water variable between the cathode CL and the first GDL node.
-    s_cgdl_cgdl : list
-        Mean value of the saturated liquid water variable in the cathode GDL between two adjacent GDL nodes.
-    epsilon_mean : float
-        Mean value of the porosity in the GDL and the CL.
-    theta_c_mean : float
-        Mean value of the contact angle in the GDL and the CL.
     lambda_acl_mem : float
-        Mean value of the dissolved water variable between the anode CL and the membrane.
-    lambda_mem_ccl : float
-        Mean value of the dissolved water variable between the membrane and the cathode CL.
-    Pagc_agdl : float
-        Mean value of the pressure between the anode gas channel and the first GDL node.
-    Pagdl_agdl : list
-        Mean value of the pressure in the anode GDL between two adjacent GDL nodes.
-    Pagdl_acl : float
-        Mean value of the pressure between the last GDL node and the anode CL.
-    Pccl_cgdl : float
-        Mean value of the pressure between the cathode CL and the first GDL node.
-    Pcgdl_cgdl : list
-        Mean value of the pressure in the cathode GDL between two adjacent GDL nodes.
-    Pcgdl_cgc : float
-        Mean value of the pressure between the last GDL node and the cathode gas channel.
-    T_agc_agdl : float
-        Mean value of the temperature between the anode gas channel and the first GDL node.
-    T_agdl_agdl : list
-        Mean value of the temperature in the anode GDL between two adjacent GDL nodes.
-    T_agdl_acl : float
-        Mean value of the temperature between the last GDL node and the anode CL.
-    T_ccl_cgdl : float
-        Mean value of the temperature between the cathode CL and the first GDL node.
-    T_cgdl_cgdl : list
-        Mean value of the temperature in the cathode GDL between two adjacent GDL nodes.
-    T_cgdl_cgc : float
-        Mean value of the temperature between the last GDL node and the cathode gas channel.
-    T_acl_mem_ccl : float
-        Mean value of the temperature between the anode CL, the membrane and the cathode CL.
+        Water content in the ACL and the membrane (kg/kg).
     """
 
     # Extraction of the variables
@@ -86,46 +46,75 @@ def flows_int_values(sv, operating_inputs, parameters):
     C_N2 = sv['C_N2']
     T_agc, T_acl, T_mem, T_ccl, T_cgc = sv['T_agc'], sv['T_acl'], sv['T_mem'], sv['T_ccl'], sv['T_cgc']
     # Extraction of the operating inputs and the parameters
-    epsilon_gdl, n_gdl = parameters['epsilon_gdl'], parameters['n_gdl']
-    Hcl, Hmem = parameters['Hcl'], parameters['Hmem']
+    tau, epsilon_gdl, epsilon_c, e = parameters['tau'], parameters['epsilon_gdl'], parameters['epsilon_c'], parameters['e']
+    n_gdl, Hcl, Hmem, Hgdl = parameters['n_gdl'], parameters['Hcl'], parameters['Hmem'], parameters['Hgdl']
+    Wgc, Hgc = parameters['Wgc'], parameters['Hgc']
+
+    # Transitory parameter
+    H_gdl_node = Hgdl / n_gdl
 
     # Pressures in the stack
     Pagc = (C_v_agc + C_H2_agc) * R * T_agc
-    Pagdl = [(sv[f'C_v_agdl_{i}'] + sv[f'C_H2_agdl_{i}']) * R * sv[f'T_agdl_{i}'] for i in range(1, n_gdl + 1)]
+    Pagdl = [None] + [(sv[f'C_v_agdl_{i}'] + sv[f'C_H2_agdl_{i}']) * R * sv[f'T_agdl_{i}'] for i in range(1, n_gdl + 1)]
     Pacl = (C_v_acl + C_H2_acl) * R * T_acl
     Pccl = (C_v_ccl + C_O2_ccl + C_N2) * R * T_ccl
-    Pcgdl = [(sv[f'C_v_cgdl_{i}'] + sv[f'C_O2_cgdl_{i}'] + C_N2) * R * sv[f'T_cgdl_{i}'] for i in range(1, n_gdl + 1)]
+    Pcgdl = [None] + [(sv[f'C_v_cgdl_{i}'] + sv[f'C_O2_cgdl_{i}'] + C_N2) * R * sv[f'T_cgdl_{i}'] for i in range(1, n_gdl + 1)]
     Pcgc = (C_v_cgc + C_O2_cgc + C_N2) * R * T_cgc
 
-    # Mean values ...
-    #       ... of the saturated liquid water variable
-    s_agdl_agdl = [None] + [sv[f's_agdl_{i}'] / 2 + sv[f's_agdl_{i + 1}'] / 2 for i in range(1, n_gdl)]
-    s_agdl_acl = sv[f's_agdl_{n_gdl}'] / 2 + s_acl / 2
-    s_ccl_cgdl = s_ccl / 2 + sv['s_cgdl_1'] / 2
-    s_cgdl_cgdl = [None] + [sv[f's_cgdl_{i}'] / 2 + sv[f's_cgdl_{i + 1}'] / 2 for i in range(1, n_gdl)]
-    #       ... of the porosity and the contact angle
-    epsilon_mean = epsilon_gdl / 2 + epsilon_cl / 2
-    theta_c_mean = theta_c_gdl / 2 + theta_c_cl / 2
-    #       ... of the dissolved water variable
-    lambda_acl_mem = lambda_acl / 2 + lambda_mem / 2
-    lambda_mem_ccl = lambda_mem / 2 + lambda_ccl / 2
-    #       ... of the pressure
-    Pagc_agdl = Pagc / 2 + Pagdl[0] / 2
-    Pagdl_agdl = [None] + [Pagdl[i] / 2 + Pagdl[i + 1] / 2 for i in range(0, n_gdl - 1)]
-    Pagdl_acl = Pagdl[-1] / 2 + Pacl / 2
-    Pccl_cgdl = Pccl / 2 + Pcgdl[0] / 2
-    Pcgdl_cgdl = [None] + [Pcgdl[i] / 2 + Pcgdl[i + 1] / 2 for i in range(0, n_gdl - 1)]
-    Pcgdl_cgc = Pcgdl[n_gdl - 1] / 2 + Pcgc / 2
+    # Weighted mean values ...
+    #       ... of the water content
+    lambda_acl_mem = average([lambda_acl, lambda_mem], weights = [Hcl / (Hcl + Hmem), Hmem / (Hcl + Hmem)])
+    lambda_mem_ccl = average([lambda_mem, lambda_ccl], weights = [Hmem / (Hmem + Hcl), Hcl / (Hmem + Hcl)])
+    #       ... of the diffusion coefficient of water in the membrane
+    D_acl_mem = average([D(lambda_acl), D(lambda_mem)], weights = [Hcl / (Hcl + Hmem), Hmem / (Hcl + Hmem)])
+    D_mem_ccl = average([D(lambda_mem), D(lambda_ccl)], weights = [Hmem / (Hmem + Hcl), Hcl / (Hmem + Hcl)])
+    #       ... of the capillary coefficient
+    D_cap_agdl_agdl = [None] + [average([Dcap('gdl', sv[f's_agdl_{i}'], sv[f'T_agdl_{i}'], epsilon_gdl, e,
+                                            epsilon_c=epsilon_c),
+                                        Dcap('gdl', sv[f's_agdl_{i+1}'], sv[f'T_agdl_{i+1}'], epsilon_gdl, e,
+                                            epsilon_c=epsilon_c)]) for i in range(1, n_gdl)]
+    D_cap_agdl_acl = average([Dcap('gdl', sv[f's_agdl_{n_gdl}'], sv[f'T_agdl_{n_gdl}'], epsilon_gdl, e,
+                                  epsilon_c=epsilon_c),
+                            Dcap('cl', s_acl, T_acl, epsilon_cl, e)],
+                           weights = [H_gdl_node / (H_gdl_node + Hcl), Hcl / (H_gdl_node + Hcl)])
+    D_cap_cgdl_cgdl = [None] + [average([Dcap('gdl', sv[f's_cgdl_{i}'], sv[f'T_cgdl_{i}'], epsilon_gdl, e,
+                                            epsilon_c=epsilon_c),
+                                        Dcap('gdl', sv[f's_cgdl_{i+1}'], sv[f'T_cgdl_{i+1}'], epsilon_gdl, e,
+                                            epsilon_c=epsilon_c)]) for i in range(1, n_gdl)]
+    D_cap_ccl_cgdl = average([Dcap('gdl', sv['s_cgdl_1'], sv['T_cgdl_1'], epsilon_gdl, e,
+                                    epsilon_c=epsilon_c),
+                            Dcap('cl', s_ccl, T_ccl, epsilon_cl, e)],
+                            weights = [H_gdl_node / (H_gdl_node + Hcl), Hcl / (H_gdl_node + Hcl)])
+    #       ... of the effective diffusion coefficient between the gas channel and the gas diffusion layer
+    ha_Da_eff_agc_agdl = average([h_a(Pagc, T_agc, Wgc, Hgc) * Hgc,
+                                      Da_eff('gdl', sv['s_agdl_1'], sv['T_agdl_1'], Pagdl[1], epsilon_gdl,
+                                             epsilon_c = epsilon_c)],
+                               weights = [Hgc / (Hgc + H_gdl_node), H_gdl_node / (Hgc + H_gdl_node)])
+    hc_Dc_eff_cgdl_cgc = average([h_c(Pcgc, T_cgc, Wgc, Hgc) * Hgc,
+                                      Dc_eff('gdl', sv[f's_cgdl_{n_gdl}'], sv[f'T_cgdl_{n_gdl}'], Pcgdl[n_gdl],
+                                             epsilon_gdl, epsilon_c = epsilon_c)],
+                               weights = [Hgc / (Hgc + H_gdl_node), H_gdl_node / (Hgc + H_gdl_node)])
+    #       ... of the effective diffusion coefficient
+    Da_eff_agdl_agdl = [None] + [average([Da_eff('gdl', sv[f's_agdl_{i}'], sv[f'T_agdl_{i}'], Pagdl[i],
+                                              epsilon_gdl, epsilon_c = epsilon_c),
+                                        Da_eff('gdl', sv[f's_agdl_{i+1}'], sv[f'T_agdl_{i+1}'], Pagdl[i+1],
+                                              epsilon_gdl, epsilon_c = epsilon_c)]) for i in range(1, n_gdl)]
+    Da_eff_agdl_acl = average([Da_eff('gdl', sv[f's_agdl_{n_gdl}'], sv[f'T_agdl_{n_gdl}'], Pagdl[n_gdl],
+                                          epsilon_gdl, epsilon_c = epsilon_c),
+                                   Da_eff('cl', s_acl, T_acl, Pacl, epsilon_cl, tau = tau)],
+                            weights = [H_gdl_node / (H_gdl_node + Hcl), Hcl / (H_gdl_node + Hcl)])
+    Dc_eff_cgdl_cgdl = [None] + [average([Dc_eff('gdl', sv[f's_cgdl_{i}'], sv[f'T_cgdl_{i}'], Pcgdl[i],
+                                              epsilon_gdl, epsilon_c = epsilon_c),
+                                        Dc_eff('gdl', sv[f's_cgdl_{i+1}'], sv[f'T_cgdl_{i+1}'], Pcgdl[i+1],
+                                              epsilon_gdl, epsilon_c = epsilon_c)]) for i in range(1, n_gdl)]
+    Dc_eff_ccl_cgdl = average([Dc_eff('cl', s_ccl, T_ccl, Pccl, epsilon_cl, tau = tau),
+                                   Dc_eff('gdl', sv['s_cgdl_1'], sv['T_cgdl_1'], Pcgdl[1],
+                                          epsilon_gdl, epsilon_c = epsilon_c)],
+                            weights = [Hcl / (H_gdl_node + Hcl), H_gdl_node / (H_gdl_node + Hcl)])
     #       ... of the temperature
-    T_agc_agdl = T_agc / 2 + sv['T_agdl_1'] / 2
-    T_agdl_agdl = [None] + [sv[f'T_agdl_{i}'] / 2 + sv[f'T_agdl_{i+1}'] / 2 for i in range(1, n_gdl)]
-    T_agdl_acl = sv[f'T_agdl_{n_gdl}'] / 2 + T_acl / 2
-    T_ccl_cgdl = T_ccl / 2 + sv['T_cgdl_1'] / 2
-    T_cgdl_cgdl = [None] + [sv[f'T_cgdl_{i}'] / 2 + sv[f'T_cgdl_{i+1}'] / 2 for i in range(1, n_gdl)]
-    T_cgdl_cgc = sv[f'T_cgdl_{n_gdl}'] / 2 + T_cgc / 2
     T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
                                weights=[Hcl / (2 * Hcl + Hmem), Hmem / (2 * Hcl + Hmem), Hcl / (2 * Hcl + Hmem)])
 
-    return (Pagc, Pcgc, s_agdl_agdl, s_agdl_acl, s_ccl_cgdl, s_cgdl_cgdl, epsilon_mean, theta_c_mean, lambda_acl_mem,
-            lambda_mem_ccl, Pagc_agdl, Pagdl_agdl, Pagdl_acl, Pccl_cgdl, Pcgdl_cgdl, Pcgdl_cgc, T_agc_agdl, T_agdl_agdl,
-            T_agdl_acl, T_ccl_cgdl, T_cgdl_cgdl, T_cgdl_cgc, T_acl_mem_ccl)
+    return (H_gdl_node, Pagc, Pcgc, lambda_acl_mem, lambda_mem_ccl, D_acl_mem, D_mem_ccl, D_cap_agdl_agdl,
+            D_cap_agdl_acl, D_cap_cgdl_cgdl, D_cap_ccl_cgdl, ha_Da_eff_agc_agdl, hc_Dc_eff_cgdl_cgc, Da_eff_agdl_agdl,
+            Da_eff_agdl_acl, Dc_eff_cgdl_cgdl, Dc_eff_ccl_cgdl, T_acl_mem_ccl)

@@ -10,8 +10,9 @@ import numpy as np
 import math
 
 # Importing constants' value
-from configuration.settings import (M_eq, rho_mem, M_H2, M_O2, M_N2, M_H2O, R, Kshape, epsilon_p, alpha_p, k_th_gdl,
-                                    k_th_cl, k_th_mem, Cp_gdl, Cp_cl, Cp_mem, rho_gdl, rho_cl, sigma_e_gdl, sigma_e_cl)
+from configuration.settings import (M_eq, rho_mem, theta_c_gdl, theta_c_cl, M_H2, M_O2, M_N2, M_H2O, R, Kshape,
+                                    epsilon_p, alpha_p, k_th_gdl, k_th_cl, k_th_mem, Cp_gdl, Cp_cl, Cp_mem, rho_gdl,
+                                    rho_cl, sigma_e_gdl, sigma_e_cl)
 
 
 # _________________________________________________Transitory functions_________________________________________________
@@ -184,6 +185,41 @@ def C_v_sat(T):
     return Psat(T) / (R * T)
 
 
+def Dcap(element, s, T, epsilon, e, epsilon_c=None):
+    """ This function calculates the capillary coefficient at the GDL or the CL and at the anode, in kg.m.s-1,
+    considering GDL compression.
+
+    Parameters
+    ----------
+    element : str
+        Specifies the element for which the capillary coefficient is calculated.
+        Must be either 'gdl' (gas diffusion layer) or 'cl' (catalyst layer).
+    s : float
+        Liquid water saturation variable.
+    T : float
+        Temperature in K.
+    epsilon : float
+        Porosity.
+    e : float
+        Capillary exponent.
+    epsilon_c : float, optional
+        Compression ratio of the GDL.
+    """
+
+    if element == 'gdl':
+        if epsilon_c==None:
+            raise ValueError("For the GDL, epsilon_c must be provided.")
+        return sigma(T) * K0(element, epsilon, epsilon_c) / nu_l(T) * abs(math.cos(theta_c_gdl)) * \
+               (epsilon / K0(element, epsilon, epsilon_c)) ** 0.5 * (s ** e + 1e-7) * (1.417 - 4.24 * s + 3.789 * s**2)
+
+    elif element == 'cl':
+        return sigma(T) * K0(element, epsilon) / nu_l(T) * abs(math.cos(theta_c_cl)) * \
+               (epsilon / K0(element, epsilon)) ** 0.5 * (s ** e + 1e-7) * (1.417 - 4.24 * s + 3.789 * s**2)
+
+    else:
+        raise ValueError("The element should be either 'gdl' or 'cl'.")
+
+
 def Da(P, T):
     """This function calculates the diffusion coefficient at the anode, in m².s-1.
 
@@ -220,26 +256,27 @@ def Dc(P, T):
     return 3.242e-5 * (T / 333) ** 2.334 * (101325 / P)
 
 
-def Da_eff(s, epsilon, P, T, epsilon_c, epsilon_gdl):
-    """This function calculates the effective diffusion coefficient at the anode, in m².s-1, considering GDL
-    compression.
-    Remark: it is considered here that the compression of the stack has a similar effect on the GDL and the CL, which
-    may be wrong. This is why two porosities are considered in the parameters of this function: epsilon and epsilon_gdl.
+def Da_eff(element, s, T, P, epsilon, epsilon_c=None, tau=None):
+    """This function calculates the effective diffusion coefficient at the GDL or the CL and at the anode, in m².s-1,
+    considering GDL compression.
 
     Parameters
     ----------
+    element : str
+        Specifies the element for which the effective diffusion coefficient is calculated.
+        Must be either 'gdl' (gas diffusion layer) or 'cl' (catalyst layer).
     s : float
         Liquid water saturation variable.
-    epsilon : float
-        Porosity.
-    P : float
-        Pressure in Pa.
     T : float
         Temperature in K.
-    epsilon_c : float
+    P : float
+        Pressure in Pa.
+    epsilon : float
+        Porosity.
+    epsilon_c : float, optional
         Compression ratio of the GDL.
-    epsilon_gdl : float
-        Porosity of the GDL.
+    tau : float, optional
+        Pore structure coefficient in the CL. Required if element is 'cl'.
 
     Returns
     -------
@@ -247,38 +284,50 @@ def Da_eff(s, epsilon, P, T, epsilon_c, epsilon_gdl):
         Effective diffusion coefficient at the anode in m².s-1.
     """
 
-    # According to the GDL porosity, the GDL compression effect is different.
-    if 0.55 <= epsilon_gdl < 0.67:
-        beta2 = -1.59
-    elif 0.67 <= epsilon_gdl < 0.8:
-        beta2 = -0.90
+    if element == 'gdl': # The effective diffusion coefficient at the GDL using Tomadakis and Sotirchos model.
+        if epsilon_c==None:
+            raise ValueError("For the GDL, epsilon_c must be provided.")
+        # According to the GDL porosity, the GDL compression effect is different.
+        if 0.55 <= epsilon < 0.67:
+            beta2 = -1.59
+        elif 0.67 <= epsilon < 0.8:
+            beta2 = -0.90
+        else:
+            raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
+                             "epsilon_gdl should be between 0.55 and 0.8.")
+        return epsilon * ((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p * math.exp(beta2 * epsilon_c) * (1 - s) ** 2 * Da(P, T)
+
+    elif element == 'cl': # The effective diffusion coefficient at the CL using Bruggeman model.
+        if tau==None:
+            raise ValueError("For the CL, tau must be provided.")
+        return epsilon ** tau * (1 - s) ** tau * Da(P, T)
+
     else:
-        raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
-                         "epsilon_gdl should be between 0.55 and 0.8.")
-
-    return epsilon * ((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p * math.exp(beta2 * epsilon_c) * (1 - s) ** 2 * Da(P, T)
+        raise ValueError("The element should be either 'gdl' or 'cl'.")
 
 
-def Dc_eff(s, epsilon, P, T, epsilon_c, epsilon_gdl):
-    """This function calculates the effective diffusion coefficient at the cathode, in m².s-1, considering GDL
-    compression.
-    Remark: it is considered here that the compression of the stack has a similar effect on the GDL and the CL, which
-    may be wrong. This is why two porosities are considered in the parameters of this function: epsilon and epsilon_gdl.
+
+def Dc_eff(element, s, T, P, epsilon, epsilon_c=None, tau=None):
+    """This function calculates the effective diffusion coefficient at the GDL or the CL and at the cathode, in m².s-1,
+    considering GDL compression.
 
     Parameters
     ----------
+    element : str
+        Specifies the element for which the effective diffusion coefficient is calculated.
+        Must be either 'gdl' (gas diffusion layer) or 'cl' (catalyst layer).
     s : float
         Liquid water saturation variable.
-    epsilon : float
-        Porosity.
-    P : float
-        Pressure in Pa.
     T : float
         Temperature in K.
-    epsilon_c : float
+    P : float
+        Pressure in Pa.
+    epsilon : float
+        Porosity.
+    epsilon_c : float, optional
         Compression ratio of the GDL.
-    epsilon_gdl : float
-        Porosity of the GDL.
+    tau : float, optional
+        Pore structure coefficient in the CL. Required if element is 'cl'.
 
     Returns
     -------
@@ -286,16 +335,26 @@ def Dc_eff(s, epsilon, P, T, epsilon_c, epsilon_gdl):
         Effective diffusion coefficient at the cathode in m².s-1.
     """
 
-    # According to the GDL porosity, the GDL compression effect is different.
-    if 0.55 <= epsilon_gdl < 0.67:
-        beta2 = -1.59
-    elif 0.67 <= epsilon_gdl < 0.8:
-        beta2 = -0.90
-    else:
-        raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
-                         "epsilon_gdl should be between 0.55 and 0.8.")
+    if element == 'gdl': # The effective diffusion coefficient at the GDL using Tomadakis and Sotirchos model.
+        if epsilon_c==None:
+            raise ValueError("For the GDL, epsilon_c must be provided.")
+        # According to the GDL porosity, the GDL compression effect is different.
+        if 0.55 <= epsilon < 0.67:
+            beta2 = -1.59
+        elif 0.67 <= epsilon < 0.8:
+            beta2 = -0.90
+        else:
+            raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
+                             "epsilon_gdl should be between 0.55 and 0.8.")
+        return epsilon * ((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p * math.exp(beta2 * epsilon_c) * (1 - s) ** 2 * Dc(P, T)
 
-    return epsilon * ((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p * math.exp(beta2 * epsilon_c) * (1 - s) ** 2 * Dc(P, T)
+    elif element == 'cl': # The effective diffusion coefficient at the CL using Bruggeman model.
+        if tau==None:
+            raise ValueError("For the CL, tau must be provided.")
+        return epsilon ** tau * (1 - s) ** tau * Dc(P, T)
+
+    else:
+        raise ValueError("The element should be either 'gdl' or 'cl'.")
 
 
 def h_a(P, T, Wgc, Hgc):
@@ -476,19 +535,20 @@ def sigma(T):
     return 235.8e-3 * ((647.15 - T) / 647.15) ** 1.256 * (1 - 0.625 * (647.15 - T) / 647.15)
 
 
-def K0(epsilon, epsilon_c, epsilon_gdl):
+def K0(element, epsilon, epsilon_c=None):
     """This function calculates the intrinsic permeability, in m², considering GDL compression.
     Remark: it is considered here that the compression of the stack has a similar effect on the GDL and the CL, which
     may be wrong. This is why two porosities are considered in the parameters of this function: epsilon and epsilon_gdl.
 
     Parameters
     ----------
+    element : str
+        Specifies the element for which the intrinsic permeability is calculated.
+        Must be either 'gdl' (gas diffusion layer) or 'cl' (catalyst layer).
     epsilon : float
         Porosity.
-    epsilon_c : float
+    epsilon_c : float, optional
         Compression ratio of the GDL.
-    epsilon_gdl : float
-        Porosity of the GDL.
 
     Returns
     -------
@@ -496,17 +556,26 @@ def K0(epsilon, epsilon_c, epsilon_gdl):
         Intrinsic permeability in m².
     """
 
-    # According to the GDL porosity, the GDL compression effect is different.
-    if 0.55 <= epsilon_gdl < 0.67:
-        beta1 = -3.60
-    elif 0.67 <= epsilon_gdl < 0.8:
-        beta1 = -2.60
-    else:
-        raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
-                         "epsilon_gdl should be between 0.55 and 0.8.")
+    if element == 'gdl':
+        if epsilon_c==None:
+            raise ValueError("For the GDL, epsilon_c must be provided.")
+        # According to the GDL porosity, the GDL compression effect is different.
+        if 0.55 <= epsilon < 0.67:
+            beta1 = -3.60
+        elif 0.67 <= epsilon < 0.8:
+            beta1 = -2.60
+        else:
+            raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
+                             "epsilon_gdl should be between 0.55 and 0.8.")
+        return epsilon / (8 * math.log(epsilon) ** 2) * (epsilon - epsilon_p) ** (alpha_p + 2) * \
+            4.6e-6 ** 2 / ((1 - epsilon_p) ** alpha_p * ((alpha_p + 1) * epsilon - epsilon_p) ** 2) * math.exp(beta1 * epsilon_c)
 
-    return epsilon / (8 * math.log(epsilon) ** 2) * (epsilon - 0.11) ** (0.785 + 2) * \
-        4.6e-6 ** 2 / ((1 - 0.11) ** 0.785 * ((0.785 + 1) * epsilon - 0.11) ** 2) * math.exp(beta1 * epsilon_c)
+    elif element == 'cl':
+        return epsilon / (8 * math.log(epsilon) ** 2) * (epsilon - epsilon_p) ** (alpha_p + 2) * \
+            4.6e-6 ** 2 / ((1 - epsilon_p) ** alpha_p * ((alpha_p + 1) * epsilon - epsilon_p) ** 2)
+
+    else:
+        raise ValueError("The element should be either 'gdl' or 'cl'.")
 
 
 def k_H2(lambdaa, T, kappa_co):

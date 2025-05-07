@@ -127,7 +127,7 @@ def physical_parameters(type_fuel_cell):
     epsilon_mc : float
         Volume fraction of ionomer in the catalyst layer.
     tau : float
-        Pore structure coefficient.
+        Pore structure coefficient in the CL.
     Hmem : float
         Thickness of the membrane in meters.
     Hgdl : float
@@ -170,7 +170,7 @@ def physical_parameters(type_fuel_cell):
         Aact = 8.5e-3  # m². It is the active area of the catalyst layer.
         Hcl = 1e-5  # m. It is the thickness of the anode or cathode catalyst layer.
         epsilon_mc = 0.3949198274842546  # It is the volume fraction of ionomer in the CL.
-        tau = 1.015639135686993  # It is the pore structure coefficient, without units.
+        tau = 1.015639135686993  # It is the pore structure coefficient in the CL, without units.
         #   Membrane
         Hmem = 2e-5  # m. It is the thickness of the membrane.
         #   Gas diffusion layer
@@ -229,8 +229,8 @@ def computing_parameters(type_current, Hgdl, Hcl):
         max_step = 0.1  # it is good enough for having graphs without instabilities.
     else:
         max_step = 0.1
-    n_gdl = int(Hgdl / Hcl / 2)  # It is the number of model points placed inside each GDL.
-    #                              A good value is int(Hgdl/Hcl/2), which is usually around 10.
+    n_gdl = int(Hgdl / Hcl / 4)  # It is the number of model points placed inside each GDL.
+    #                              A good value is int(Hgdl/Hcl/4), which is usually around 5.
     t_purge = 0.6, 15  # (s, s). It is the time parameters for purging the system.
 
     return max_step, n_gdl, t_purge

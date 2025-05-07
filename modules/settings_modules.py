@@ -95,7 +95,7 @@ def stored_physical_parameters(type_fuel_cell):
     epsilon_mc : float
         Volume fraction of ionomer in the CL.
     tau : float
-        Pore structure coefficient.
+        Pore structure coefficient in the CL.
     Hmem : float
             Thickness of the membrane in m.
     Hgdl : float
@@ -139,7 +139,7 @@ def stored_physical_parameters(type_fuel_cell):
         Aact = 8.5e-3  # m². It is the active area of the catalyst layer.
         Hcl = 1e-5  # m. It is the thickness of the anode or cathode catalyst layer.
         epsilon_mc = 0.399  # It is the volume fraction of ionomer in the CL.
-        tau = 1.016  # It is the pore structure coefficient, without units.
+        tau = 1.016  # It is the pore structure coefficient in the CL, without units.
         # Membrane
         Hmem = 2e-5  # m. It is the thickness of the membrane.
         # Gas diffusion layer
@@ -165,7 +165,7 @@ def stored_physical_parameters(type_fuel_cell):
         # Catalyst layer
         Hcl = 1e-5  # m. It is the thickness of the anode or cathode catalyst layer.
         epsilon_mc = 0.27  # It is the volume fraction of ionomer in the CL.
-        tau = 1.2  # It is the pore structure coefficient, without units.
+        tau = 1.2  # It is the pore structure coefficient in the CL, without units.
         # Membrane
         Hmem = 5.08e-5  # m. It is the thickness of the membrane.
         # Gas diffusion layer
