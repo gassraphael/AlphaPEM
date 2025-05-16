@@ -358,7 +358,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
         self.solver_variable_names_extension()  # Several points are considered in each GDL and must be inserted into
         #                                        the solver_variable_names.
         self.all_variable_names = self.solver_variable_names + ['t', 'Ucell', 'S_abs_acl', 'S_abs_ccl'] + \
-                                  ['J_lambda_mem_acl', 'J_lambda_mem_ccl', 'Pagc', 'Pcgc', 'Phi_a_des', 'Phi_c_des']
+                                  ['J_lambda_acl_mem', 'J_lambda_mem_ccl', 'Pagc', 'Pcgc', 'Phi_a_des', 'Phi_c_des']
         self.variables = {key: [] for key in self.all_variable_names}
 
         # Initialize the control_variables dictionary.
@@ -553,7 +553,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
             last_solver_variables = {key: self.variables[key][j] for key in self.solver_variable_names}
             flows_recovery = calculate_flows(self.variables['t'][j], last_solver_variables, self.control_variables,
                                              i_fc, self.operating_inputs, self.parameters)
-            for key in ['S_abs_acl', 'S_abs_ccl', 'J_lambda_mem_acl', 'J_lambda_mem_ccl', 'Pagc', 'Pcgc']:
+            for key in ['S_abs_acl', 'S_abs_ccl', 'J_lambda_acl_mem', 'J_lambda_mem_ccl', 'Pagc', 'Pcgc']:
                 self.variables[key].append(flows_recovery[key])
             # ... recovery of Phi_a_des and Phi_c_des.
             if self.parameters["type_control"] == "Phi_des":
@@ -1453,7 +1453,7 @@ generated according to the data given in the current density parameters.</p>
     self.solver_variable_names_extension()  # Several points are considered in each GDL and must be inserted into
     #                                        the solver_variable_names.
     self.all_variable_names = self.solver_variable_names + ['t', 'Ucell', 'S_abs_acl', 'S_abs_ccl'] + \
-                              ['J_lambda_mem_acl', 'J_lambda_mem_ccl', 'Pagc', 'Pcgc', 'Phi_a_des', 'Phi_c_des']
+                              ['J_lambda_acl_mem', 'J_lambda_mem_ccl', 'Pagc', 'Pcgc', 'Phi_a_des', 'Phi_c_des']
     self.variables = {key: [] for key in self.all_variable_names}
 
     # Initialize the control_variables dictionary.

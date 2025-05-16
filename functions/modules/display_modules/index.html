@@ -1579,7 +1579,7 @@ used in the FT.</p>
     """
     # Extraction of the variables
     t, S_abs_acl_t, S_abs_ccl_t = variables['t'], variables['S_abs_acl'], variables['S_abs_ccl'],
-    J_lambda_mem_acl_t, J_lambda_mem_ccl_t = variables['J_lambda_mem_acl'], variables['J_lambda_mem_ccl']
+    J_lambda_acl_mem_t, J_lambda_mem_ccl_t = variables['J_lambda_acl_mem'], variables['J_lambda_mem_ccl']
     # Extraction of the operating inputs and the parameters
     Hcl = parameters['Hcl']
 
@@ -1587,7 +1587,7 @@ used in the FT.</p>
     J_abs_acl, J_abs_ccl = [x * Hcl for x in S_abs_acl_t], [x * Hcl for x in S_abs_ccl_t]  # Conversion in
     #                                                                                         mol.m⁻².s⁻¹ for comparison
     ax.plot(t, J_abs_acl, color=colors(2))
-    ax.plot(t, J_lambda_mem_acl_t, color=colors(3))
+    ax.plot(t, J_lambda_acl_mem_t, color=colors(3))
     ax.plot(t, J_abs_ccl, color=colors(4))
     ax.plot(t, J_lambda_mem_ccl_t, color=colors(7))
     ax.legend([r'$\mathregular{J_{abs,acl}}$', r'$\mathregular{J_{\lambda,mem,acl}}$', r'$\mathregular{J_{abs,ccl}}$',
