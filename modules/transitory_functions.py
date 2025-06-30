@@ -637,7 +637,7 @@ def k_O2(lambdaa, T, kappa_co):
 
 
 def sigma_p_eff(element, lambdaa, T, epsilon_mc=None):
-    """This function calculates the proton conductivity, in Ω-1.m-1, in either the membrane or the CCL.
+    """This function calculates the effective proton conductivity, in Ω-1.m-1, in either the membrane or the CCL.
 
     Parameters
     ----------
@@ -693,13 +693,11 @@ def sigma_e_eff(element, epsilon, epsilon_mc=None, tau=None):
         Effective electrical conductivity in Ω-1.m-1.
     """
     if element == 'gdl': # The effective electrical conductivity at the GDL
-        epsilon_c = 1 - epsilon # The volume fraction of conductive material.
-        return epsilon_c * sigma_e_gdl
+        return (1 - epsilon) * sigma_e_gdl # Using the volume fraction of conductive material.
     elif element == 'cl': # The effective electrical conductivity at the CL
         if epsilon_mc==None or tau==None:
             raise ValueError("For the CL, epsilon_mc and tau must be provided.")
-        epsilon_c = 1 - epsilon - epsilon_mc  # The volume fraction of conductive material.
-        return epsilon_c * sigma_e_cl
+        return (1 - epsilon - epsilon_mc  ) * sigma_e_cl # Using the volume fraction of conductive material.
     else:
         raise ValueError("The element should be either 'gdl' or 'cl'.")
 
@@ -828,7 +826,6 @@ def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C
     if element == 'agdl' or element == 'cgdl': # The effective thermal conductivity at the GDL
         if C_v==None or s==None or epsilon==None:
             raise ValueError("For the GDL, C_v, s and epsilon must be provided.")
-        epsilon_c = 1 - epsilon # The volume fraction of conductive material.
         if element == 'agdl': # The thermal conductivity of the gas mixture in the AGDL
             if C_H2 == None:
                 raise ValueError("For the AGDL, C_H2 must be provided.")
@@ -844,12 +841,11 @@ def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C
                                         [C_v / (C_v + C_O2 + C_N2), C_O2 / (C_v + C_O2 + C_N2), C_N2 / (C_v + C_O2 + C_N2)],
                                         [M_H2O, M_O2, M_N2])
         return hmean([k_th_gdl, k_th('H2O_l', T), k_th_gaz],
-                     weights=[epsilon_c, epsilon * s, epsilon * (1 - s)])
+                     weights=[1 - epsilon, epsilon * s, epsilon * (1 - s)])
 
     elif element == 'acl' or element == 'ccl': # The effective thermal conductivity at the CL
         if C_v==None or lambdaa==None or s==None or epsilon==None or epsilon_mc==None:
             raise ValueError("For the CL, C_v, lambdaa, s, epsilon, epsilon_mc and tau must be provided.")
-        epsilon_c = 1 - epsilon - epsilon_mc  # The volume fraction of conductive material.
         k_th_eff_mem = hmean([k_th_mem, k_th('H2O_l', T)],
                              weights=[1 - fv(lambdaa, T), fv(lambdaa, T)]) # The effective thermal conductivity at the
         #                                                                    membrane
@@ -868,7 +864,7 @@ def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C
                                         [C_v / (C_v + C_O2 + C_N2), C_O2 / (C_v + C_O2 + C_N2), C_N2 / (C_v + C_O2 + C_N2)],
                                         [M_H2O, M_O2, M_N2])
         return hmean([k_th_cl, k_th_eff_mem, k_th('H2O_l', T), k_th_gaz],
-                     weights=[epsilon_c, epsilon_mc, epsilon * s, epsilon * (1-s)])
+                     weights=[1 - epsilon - epsilon_mc, epsilon_mc, epsilon * s, epsilon * (1-s)])
 
     elif element == 'mem': # The effective thermal conductivity at the membrane
         if lambdaa==None:
@@ -985,7 +981,6 @@ def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O
     if element == 'agdl' or element == 'cgdl':  # The volumetric heat capacity at the GDL
         if C_v is None or s is None or epsilon is None:
             raise ValueError("For the GDL, C_v, s and epsilon must be provided.")
-        epsilon_c = 1 - epsilon  # The volume fraction of conductive material.
         if element == 'agdl':  # The heat capacity of the gas mixture in the AGDL
             if C_H2 is None:
                 raise ValueError("For the AGDL, C_H2 must be provided.")
@@ -998,12 +993,11 @@ def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O
                                      M_N2 * C_N2 * Cp0('N2', T)],
                                     weights=[C_v / (C_v + C_O2 + C_N2), C_O2 / (C_v + C_O2 + C_N2), C_N2 / (C_v + C_O2 + C_N2)])
         return average([rho_gdl * Cp_gdl, rho_H2O_l(T) * Cp0('H2O_l', T), rho_Cp0_gaz],
-                          weights=[epsilon_c, epsilon * s, epsilon * (1 - s)])
+                          weights=[1 - epsilon, epsilon * s, epsilon * (1 - s)])
 
     elif element == 'acl' or element == 'ccl':  # The volumetric heat capacity at the CL
         if C_v is None or lambdaa is None or s is None or epsilon is None or epsilon_mc is None:
             raise ValueError("For the CL, C_v, lambdaa, s, epsilon, and epsilon_mc must be provided.")
-        epsilon_c = 1 - epsilon - epsilon_mc  # The volume fraction of conductive material.
         if element == 'acl':  # The heat capacity of the gas mixture in the ACL
             if C_H2 is None:
                 raise ValueError("For the ACL, C_H2 must be provided.")
@@ -1016,7 +1010,7 @@ def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O
                                      M_N2 * C_N2 * Cp0('N2', T)],
                                     weights=[C_v / (C_v + C_O2 + C_N2), C_O2 / (C_v + C_O2 + C_N2), C_N2 / (C_v + C_O2 + C_N2)])
         return average([rho_cl * Cp_cl, rho_mem * Cp_mem, rho_H2O_l(T) * Cp0('H2O_l', T), rho_Cp0_gaz],
-                          weights=[epsilon_c, epsilon_mc, epsilon * s, epsilon * (1 - s)])
+                          weights=[1 - epsilon - epsilon_mc, epsilon_mc, epsilon * s, epsilon * (1 - s)])
 
     elif element == 'mem':  # The volumetric heat capacity at the membrane
         if lambdaa is None:
