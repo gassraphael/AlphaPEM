@@ -672,8 +672,9 @@ def sigma_p_eff(element, lambdaa, T, epsilon_mc=None):
         raise ValueError("The element should be either 'mem' or 'ccl'.")
 
 
-def sigma_e_eff(element, epsilon, epsilon_mc=None, tau=None):
-    """This function calculates the effective electrical conductivity, in Ω-1.m-1, in either the GDL or the CL.
+def sigma_e_eff(element, epsilon, epsilon_c=None, epsilon_mc=None, tau=None):
+    """This function calculates the effective electrical conductivity, in Ω-1.m-1, in either the GDL or the CL,
+    considering GDL compression.
 
     Parameters
     ----------
@@ -693,11 +694,23 @@ def sigma_e_eff(element, epsilon, epsilon_mc=None, tau=None):
         Effective electrical conductivity in Ω-1.m-1.
     """
     if element == 'gdl': # The effective electrical conductivity at the GDL
-        return (1 - epsilon) * sigma_e_gdl # Using the volume fraction of conductive material.
+        if epsilon_c==None:
+            raise ValueError("For the GDL, epsilon_c must be provided.")
+        # According to the GDL porosity, the GDL compression effect is different.
+        if 0.55 <= epsilon < 0.67:
+            beta3 = 4.04
+        elif 0.67 <= epsilon < 0.8:
+            beta3 = 4.40
+        else:
+            raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
+                             "epsilon_gdl should be between 0.55 and 0.8.")
+        return (1 - epsilon) * sigma_e_gdl * math.exp(beta3 * epsilon_c) # Using the volume fraction of conductive material.
+
     elif element == 'cl': # The effective electrical conductivity at the CL
         if epsilon_mc==None or tau==None:
             raise ValueError("For the CL, epsilon_mc and tau must be provided.")
         return (1 - epsilon - epsilon_mc  ) * sigma_e_cl # Using the volume fraction of conductive material.
+
     else:
         raise ValueError("The element should be either 'gdl' or 'cl'.")
 
@@ -786,7 +799,8 @@ def k_th_gaz_mixture(k_th_g, mu_g, x, M):
     return k_th_gaz_mixture
 
 
-def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C_N2=None, epsilon=None, epsilon_mc=None):
+def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C_N2=None, epsilon=None, epsilon_mc=None,
+             epsilon_c=None):
     """This function calculates the effective thermal conductivity, in J.m-1.s-1.K-1, in either the GDL, the CL or the
     membrane. A weighted harmonic average is used for characterizing the conductivity of each material in a layer,
     instead of a weighted arithmetic average. The physical meaning is that all the heat energy is forced to pass through
@@ -824,8 +838,16 @@ def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C
         Effective thermal conductivity in J.m-1.s-1.K-1."""
 
     if element == 'agdl' or element == 'cgdl': # The effective thermal conductivity at the GDL
-        if C_v==None or s==None or epsilon==None:
-            raise ValueError("For the GDL, C_v, s and epsilon must be provided.")
+        if C_v==None or s==None or epsilon==None or epsilon_c==None:
+            raise ValueError("For the GDL, C_v, s, epsilon and epsilon_c must be provided.")
+        # According to the GDL porosity, the GDL compression effect is different.
+        if 0.55 <= epsilon < 0.67:
+            beta3 = 4.04
+        elif 0.67 <= epsilon < 0.8:
+            beta3 = 4.40
+        else:
+            raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
+                             "epsilon_gdl should be between 0.55 and 0.8.")
         if element == 'agdl': # The thermal conductivity of the gas mixture in the AGDL
             if C_H2 == None:
                 raise ValueError("For the AGDL, C_H2 must be provided.")
@@ -840,7 +862,7 @@ def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C
                                         [mu_gaz('H2O_v', T), mu_gaz('O2', T), mu_gaz('N2', T)],
                                         [C_v / (C_v + C_O2 + C_N2), C_O2 / (C_v + C_O2 + C_N2), C_N2 / (C_v + C_O2 + C_N2)],
                                         [M_H2O, M_O2, M_N2])
-        return hmean([k_th_gdl, k_th('H2O_l', T), k_th_gaz],
+        return hmean([k_th_gdl * math.exp(beta3 * epsilon_c), k_th('H2O_l', T), k_th_gaz],
                      weights=[1 - epsilon, epsilon * s, epsilon * (1 - s)])
 
     elif element == 'acl' or element == 'ccl': # The effective thermal conductivity at the CL
