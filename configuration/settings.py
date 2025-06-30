@@ -275,9 +275,9 @@ Eact = 73.2e3  # J.mol-1. It is the activation energy.
 
 # Model parameters for the heat transfer calculation
 #   Thermal conductivities
-k_th_gdl = 1.6 # J.m-1.s-1.K-1. It is the thermal conductivity of the GDLs [vetterFreeOpenReference2019].
-k_th_cl = 0.27 # J.m-1.s-1.K-1. It is the thermal conductivity of the CLs [vetterFreeOpenReference2019].
-k_th_mem = 0.3 # J.m-1.s-1.K-1. It is the thermal conductivity of the membrane [vetterFreeOpenReference2019].
+k_th_gdl = 1.6 # J.m-1.s-1.K-1. It is the thermal conductivity of the GDLs (non-effective ?) [vetterFreeOpenReference2019].
+k_th_cl = 0.27 # J.m-1.s-1.K-1. It is the thermal conductivity of the CLs (non-effective ?) [vetterFreeOpenReference2019].
+k_th_mem = 0.3 # J.m-1.s-1.K-1. It is the thermal conductivity of the membrane (non-effective ?) [vetterFreeOpenReference2019].
 #   Specific heat capacities
 Cp_gdl = 568 # J.kg-1.K-1. It is the specific heat capacities of the GDLs [wangQuasi2DTransientModel2018].
 Cp_cl = 3300 # J.kg-1.K-1. It is the specific heat capacities the CLs [wangQuasi2DTransientModel2018].
@@ -286,8 +286,8 @@ Cp_mem = 833 # J.kg-1.K-1. It is the specific heat capacities of the membrane [w
 rho_gdl = 1000 # kg.m-3. It is the density of the GDLs [wangQuasi2DTransientModel2018].
 rho_cl = 1000 # kg.m-3. It is the density of the CLs [wangQuasi2DTransientModel2018].
 #   Electrical conductivities
-sigma_e_gdl = 1250 # Ω-1.m-1. It is the electrical conductivity of the GDL [vetterFreeOpenReference2019].
-sigma_e_cl = 350 # Ω-1.m-1. It is the electrical conductivity of the GDL [vetterFreeOpenReference2019].
+sigma_e_gdl = 1250 # Ω-1.m-1. It is the electrical conductivity of the GDL (non-effective ?) [vetterFreeOpenReference2019].
+sigma_e_cl = 350 # Ω-1.m-1. It is the electrical conductivity of the GDL (non-effective ?) [vetterFreeOpenReference2019].
 #   Molar entropy of reactions
 delta_s_HOR = 0.104  # J.mol-1.K-1. It is the HOR molar reaction entropy [vetterFreeOpenReference2019].
 delta_s_ORR = -163.3  # J.mol-1.K-1. It is the ORR molar reaction entropy [vetterFreeOpenReference2019].

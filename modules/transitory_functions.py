@@ -636,7 +636,7 @@ def k_O2(lambdaa, T, kappa_co):
         return kappa_co * 1.2 * 1e-14 * math.exp(E_O2_l / R * (1 / Tref - 1 / T))
 
 
-def sigma_p_eff(element, lambdaa, T, epsilon_mc=None, tau=None):
+def sigma_p_eff(element, lambdaa, T, epsilon_mc=None):
     """This function calculates the proton conductivity, in Ω-1.m-1, in either the membrane or the CCL.
 
     Parameters
@@ -650,8 +650,6 @@ def sigma_p_eff(element, lambdaa, T, epsilon_mc=None, tau=None):
         Temperature in K.
     epsilon_mc : float
         Volume fraction of ionomer in the CCL.
-    tau : float
-        Pore structure coefficient in the CCL.
 
     Returns
     -------
@@ -664,12 +662,12 @@ def sigma_p_eff(element, lambdaa, T, epsilon_mc=None, tau=None):
         else:
             return 0.1879 * math.exp(1268 * (1 / 303.15 - 1 / T))
     elif element == 'ccl': # The effective proton conductivity at the cathode catalyst layer
-        if epsilon_mc==None or tau==None:
-            raise ValueError("For the CCL, epsilon_mc and tau must be provided.")
+        if epsilon_mc==None:
+            raise ValueError("For the CCL, epsilon_mc must be provided.")
         if lambdaa >= 1:
-            return (epsilon_mc ** tau) * (0.5139 * lambdaa - 0.326) * math.exp(1268 * (1 / 303.15 - 1 / T))
+            return epsilon_mc * (0.5139 * lambdaa - 0.326) * math.exp(1268 * (1 / 303.15 - 1 / T))
         else:
-            return (epsilon_mc ** tau) * 0.1879 * math.exp(1268 * (1 / 303.15 - 1 / T))
+            return epsilon_mc * 0.1879 * math.exp(1268 * (1 / 303.15 - 1 / T))
     else:
         raise ValueError("The element should be either 'mem' or 'ccl'.")
 
@@ -696,12 +694,12 @@ def sigma_e_eff(element, epsilon, epsilon_mc=None, tau=None):
     """
     if element == 'gdl': # The effective electrical conductivity at the GDL
         epsilon_c = 1 - epsilon # The volume fraction of conductive material.
-        return epsilon_c * ( (epsilon_c - epsilon_p) / (1 - epsilon_p) ) ** alpha_p * sigma_e_gdl
+        return epsilon_c * sigma_e_gdl
     elif element == 'cl': # The effective electrical conductivity at the CL
         if epsilon_mc==None or tau==None:
             raise ValueError("For the CL, epsilon_mc and tau must be provided.")
         epsilon_c = 1 - epsilon - epsilon_mc  # The volume fraction of conductive material.
-        return epsilon_c ** tau * sigma_e_cl
+        return epsilon_c * sigma_e_cl
     else:
         raise ValueError("The element should be either 'gdl' or 'cl'.")
 
