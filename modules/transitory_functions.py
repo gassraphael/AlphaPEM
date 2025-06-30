@@ -537,8 +537,6 @@ def sigma(T):
 
 def K0(element, epsilon, epsilon_c=None):
     """This function calculates the intrinsic permeability, in m², considering GDL compression.
-    Remark: it is considered here that the compression of the stack has a similar effect on the GDL and the CL, which
-    may be wrong. This is why two porosities are considered in the parameters of this function: epsilon and epsilon_gdl.
 
     Parameters
     ----------
