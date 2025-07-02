@@ -43,7 +43,7 @@ def determined_parameters(type_fuel_cell):
         Desired anode relative humidity.
     Phi_c_des : float
         Desired cathode relative humidity.
-    i_pola : float
+    i_max_pola : float
         Maximum current density for the polarization curve.
     Aact : float
         Active area of the cell in m².
@@ -118,16 +118,16 @@ def determined_parameters(type_fuel_cell):
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
         if type_fuel_cell == "EH-31_1.5":
             Pa_des, Pc_des = 1.5e5, 1.5e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
-            i_pola = 2.3e4
+            i_max_pola = 2.3e4
         elif type_fuel_cell == "EH-31_2.0":
             Pa_des, Pc_des = 2.0e5, 2.0e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
-            i_pola = 2.5e4
+            i_max_pola = 2.5e4
         elif type_fuel_cell == "EH-31_2.25":
             Pa_des, Pc_des = 2.25e5, 2.25e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
-            i_pola = 2.85e4
+            i_max_pola = 2.85e4
         else:  # type_fuel_cell == "EH-31_2.5":
             Pa_des, Pc_des = 2.5e5, 2.5e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
-            i_pola = 3.05e4
+            i_max_pola = 3.05e4
         #       Fuel cell physical parameters
         Aact = 8.5e-3  # m². It is the active area of the catalyst layer.
         Wgc = 4.5e-4  # m. It is the width of the gas channel.
@@ -143,8 +143,8 @@ def determined_parameters(type_fuel_cell):
         type_auxiliary = "forced-convective_cathode_with_flow-through_anode"
         type_control = "no_control"
         type_purge = "no_purge"
-        type_display = "multiple"
-        type_plot = "final"
+        type_display = "synthetic"
+        type_plot = "fixed"
         type_current = "polarization"
         current_density = polarization_current
         t_step = np.nan, np.nan, np.nan, np.nan  # It is the time parameters for the step_current density function.
@@ -153,8 +153,8 @@ def determined_parameters(type_fuel_cell):
         i_EIS, ratio_EIS = np.nan, np.nan  # (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.
         f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
         t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
-        max_step = 0.05  # It is good enough for having graphs without instabilities.
-        n_gdl = int(Hgdl / Hcl / 2)  # It is the number of model points placed inside each GDL.
+        max_step = 0.1  # It is good enough for having graphs without instabilities.
+        n_gdl = int(Hgdl / Hcl / 4)  # It is the number of model points placed inside each GDL.
 
     elif type_fuel_cell == "LF":
         # Given values by the author
@@ -163,7 +163,7 @@ def determined_parameters(type_fuel_cell):
         Pa_des, Pc_des = 101325, 101325  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 2.0, 1.5  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.84, 0.59  # It is the desired relative humidity.
-        i_pola = 1.45e4
+        i_max_pola = 1.45e4
         #       Fuel cell physical parameters
         Hmem = 5.08e-5  # m. It is the thickness of the membrane.
         Hcl = 1e-5  # m. It is the thickness of the anode or cathode catalyst layer.
@@ -180,7 +180,7 @@ def determined_parameters(type_fuel_cell):
         type_control = "no_control"
         type_purge = "no_purge"
         type_display = "no_display"
-        type_plot = "final"
+        type_plot = "fixed"
         type_current = "polarization"
         current_density = polarization_current
         t_step = np.nan  # It is the time parameters for the step_current density function.
@@ -189,8 +189,8 @@ def determined_parameters(type_fuel_cell):
         i_EIS, ratio_EIS = np.nan, np.nan  # (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.
         f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
         t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
-        max_step = 0.05  # It is good enough for having graphs without instabilities.
-        n_gdl = int(Hgdl / Hcl / 2)  # It is the number of model points placed inside each GDL.
+        max_step = 0.1  # It is good enough for having graphs without instabilities.
+        n_gdl = int(Hgdl / Hcl / 4)  # It is the number of model points placed inside each GDL.
 
     else:
         ValueError("A correct type_fuel_cell should be given.")
@@ -198,7 +198,7 @@ def determined_parameters(type_fuel_cell):
     # Characteristic points of the experimental polarization curve
     i_exp, U_exp = pola_exp_values(type_fuel_cell)
 
-    return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_pola, Aact, Hmem, Hcl, Hgdl, Hgc, Wgc, Lgc,
+    return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola, Aact, Hmem, Hcl, Hgdl, Hgc, Wgc, Lgc,
             type_auxiliary, type_control, type_purge, type_display, type_plot, type_current, current_density, t_step,
             i_step, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, t_purge, max_step, n_gdl, i_exp, U_exp)
 
@@ -244,7 +244,7 @@ def calculate_simulation_error(Simulator1, U_exp1, i_exp1, Simulator2, U_exp2, i
 
     # Polarisation curve point recovery after stack stabilisation for Simulator1
     delta_t_load, delta_t_break, delta_i, delta_t_ini = Simulator1.parameters['delta_pola']
-    nb_loads1 = int(Simulator1.parameters['i_pola'] / delta_i + 1)  # Number of load which are made
+    nb_loads1 = int(Simulator1.parameters['i_max_pola'] / delta_i + 1)  # Number of load which are made
     ifc_discretized1 = np.zeros(nb_loads1)
     Ucell_discretized1 = np.zeros(nb_loads1)
     for i in range(nb_loads1):
@@ -254,7 +254,7 @@ def calculate_simulation_error(Simulator1, U_exp1, i_exp1, Simulator2, U_exp2, i
         Ucell_discretized1[i] = Simulator1.variables['Ucell'][idx1]  # the last value at the end of each load
     # Polarisation curve point recovery after stack stabilisation for Simulator2
     delta_t_load, delta_t_break, delta_i, delta_t_ini = Simulator2.parameters['delta_pola']
-    nb_loads2 = int(Simulator2.parameters['i_pola'] / delta_i + 1)  # Number of load which are made
+    nb_loads2 = int(Simulator2.parameters['i_max_pola'] / delta_i + 1)  # Number of load which are made
     ifc_discretized2 = np.zeros(nb_loads2)
     Ucell_discretized2 = np.zeros(nb_loads2)
     for i in range(nb_loads2):

@@ -1,6 +1,6 @@
 colorama==0.4.6
-geneticalgorithm2==6.9.2
-matplotlib==3.9.1
-numpy==2.0.1
-scipy==1.14.0
+matplotlib==3.10.3
+numpy==2.3.1
+pygad==3.4.0
+scipy==1.16.0
 ttkthemes==3.2.2

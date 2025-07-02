@@ -11,15 +11,13 @@ import sys
 import os
 import time
 import matplotlib.pyplot as plt
-import numpy as np
-from geneticalgorithm2 import GeneticAlgorithm2 as ga
-from geneticalgorithm2 import AlgorithmParams
+import pygad
 
 # Importing constants' value and functions
 sys.path.append(os.path.abspath('..'))  # Add parent (root) folder path to list of module search paths
 from model.AlphaPEM import AlphaPEM
-from modules.calibration_modules import determined_parameters, calculate_simulation_error, \
-    print_calibration_results, save_calibration_results
+from modules.calibration_modules import determined_parameters, calculate_simulation_error, print_calibration_results, \
+                                        save_calibration_results
 from modules.main_modules import saving_instructions
 
 # _________________________________________________Calibration settings_________________________________________________
@@ -45,40 +43,51 @@ epsilon_c_min, epsilon_c_max = 0.15, 0.30  # It is the compression ratio of the 
 e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.
 #       Voltage polarization
 Re_min, Re_max = 5e-7, 5e-6  # ohm.m². It is the electron conduction resistance of the circuit.
-i0_c_ref_min, i0_c_ref_max = 1e-3, 5e2  # A.m-2.It is the reference exchange current density at the cathode.
+i0_c_ref_min, i0_c_ref_max = 1e-3, 80  # A.m-2.It is the reference exchange current density at the cathode.
 kappa_co_min, kappa_co_max = 0.01, 40  # A.m-2. It is the crossover correction coefficient.
-kappa_c_min, kappa_c_max = 0, 100  # It is the overpotential correction exponent.
+kappa_c_min, kappa_c_max = 0.25, 4  # It is the overpotential correction exponent.
 #       The bounds on liquid saturation coefficients are constrained to facilitate calibration.
 a_slim_min, a_slim_max = 0.0, 0.2  # It is one of the limit liquid saturation coefficients.
 b_slim_min, b_slim_max = 0.0, 0.4  # It is one of the limit liquid saturation coefficients.
 a_switch_min, a_switch_max = 0.5, 1.0  # It is one of the limit liquid saturation coefficients.
-#       Bounds gathering
-varbound = np.array([[epsilon_gdl_min, epsilon_gdl_max],
-                     [epsilon_mc_min, epsilon_mc_max], [tau_min, tau_max],
-                     [epsilon_c_min, epsilon_c_max], [e_min, e_max], [Re_min, Re_max],
-                     [i0_c_ref_min, i0_c_ref_max], [kappa_co_min, kappa_co_max],
-                     [kappa_c_min, kappa_c_max], [a_slim_min, a_slim_max],
-                     [b_slim_min, b_slim_max], [a_switch_min, a_switch_max]])
-#       Bounds type
-vartype = np.array(['real', 'real', 'real', 'real', 'int', 'real', 'real', 'real', 'real', 'real', 'real', 'real'])
-
-# Undetermined parameter which is not considered yet (require the use of EIS curves to be calibrated)
+#       Undetermined parameter which is not considered yet (require the use of EIS curves to be calibrated)
 C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
+#       Bounds gathering and type
+varbound = [[epsilon_gdl_min, epsilon_gdl_max, 'real'],
+            [epsilon_mc_min, epsilon_mc_max, 'real'],
+            [tau_min, tau_max, 'real'],
+            [epsilon_c_min, epsilon_c_max, 'real'],
+            [e_min, e_max, 'int'],
+            [Re_min, Re_max, 'real'],
+            [i0_c_ref_min, i0_c_ref_max, 'real'],
+            [kappa_co_min, kappa_co_max, 'real'],
+            [kappa_c_min, kappa_c_max, 'real'],
+            [a_slim_min, a_slim_max, 'real'],
+            [b_slim_min, b_slim_max, 'real'],
+            [a_switch_min, a_switch_max, 'real']]
+gene_space = [] # List used to define the bounds of the undetermined parameters for pygad.
+for i in range(len(varbound)):
+    min_val, max_val, type_val = varbound[i]
+    if type_val == 'int':
+        gene_space.append({'low': min_val, 'high': max_val, 'step': 1})
+    else:
+        gene_space.append({'low': min_val, 'high': max_val})
 
-# GeneticAlgorithm parameters
-algorithm_param = AlgorithmParams(  # 1 iteration takes 720s = 12min = 0.2h inside LIS cluster with 80 nodes.
-    #                                 800 iterations takes 160h = 6.67j.
-    max_num_iteration=800,  # It should be between 1000 and 1500, depending on the population_size, for a good compromise
-    #                         between speed and precision.
-    population_size=160,  # It should be between 100 and 200 for a good compromise between speed and precision.
-    #                       Select a multiple of the available number of CPU cores for optimal multiprocessing.
-    mutation_probability=0.33 / 12,  # Best found.
-    elit_ratio=1 / 160,  # 1 elite should be enough. The value given in population_size should then be reused here.
-    parents_portion=0.2,  # Best found. Default is 0.3.
-    crossover_type='one_point',  # Best found. Default is 'uniform'.
-    mutation_type='uniform_by_x',  # Best found. Default is 'uniform_by_center'.
-    selection_type='roulette',  # Best found and default setting.
-    max_iteration_without_improv=None)
+# PyGAD parameters for the genetic algorithm:
+    # Number of generations:
+num_generations = 1 # It should be between 1000 and 1500, depending on the population_size,
+    #                 for a good compromise between speed and precision.
+    # Initial population (one solution means a member of the population):
+        # 1) custom initial population.
+initial_population = None
+        # 2) random initial population.
+sol_per_pop = 16 # It is the population size. It should be between 100 and 200 for a good compromise between speed and
+    #              precision. Select a multiple of the available number of CPU cores for optimal multiprocessing.
+num_genes = len(varbound) # Number of genes in the solution. It is the number of undetermined parameters.
+    # Number of solutions to be selected as parents in the mating pool.
+num_parents_mating = int(0.2 * sol_per_pop) # Here it is 20% of the population, the best found (has to be an integer).
+    # Number of genes to mutate.
+mutation_num_genes = 1 # It is the number of undetermined parameters to mutate, here taken to 1. It is the best found.
 
 # ________________________________________________Determined parameters_________________________________________________
 """
@@ -87,54 +96,62 @@ the calibration_module.py.
 This section should remain unaltered for regular program usage.
 """
 
-T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, i_pola_1, Aact, Hmem, Hcl, Hgdl, Hgc, Wgc, Lgc, \
+T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, i_max_pola_1, Aact, Hmem, Hcl, Hgdl, Hgc, Wgc, Lgc, \
     type_auxiliary, type_control, type_purge, type_display, type_plot, type_current, current_density, t_step, i_step, \
     delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, t_purge, max_step, n_gdl, i_exp1, U_exp1 \
     = determined_parameters(type_fuel_cell_1)
 
-T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2, i_pola_2, Aact, Hmem, Hcl, Hgdl, Hgc, Wgc, Lgc, \
+T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2, i_max_pola_2, Aact, Hmem, Hcl, Hgdl, Hgc, Wgc, Lgc, \
     type_auxiliary, type_control, type_purge, type_display, type_plot, type_current, current_density, t_step, i_step, \
     delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, t_purge, max_step, n_gdl, i_exp2, U_exp2 \
     = determined_parameters(type_fuel_cell_2)
 
+# _________________________________________________Function to maximize_________________________________________________
 
-# _________________________________________________Function to minimize_________________________________________________
-
-def pola_points(x):
+def pola_points(ga_instance, solution, solution_idx):
     """
-    This function calculates the maximum error between the simulated polarization curves and the experimental ones.
-    It is the function to minimize using the genetic algorithm.
+    This function calculates first the maximum error between the simulated polarization curves and the experimental
+    ones. Then, it returns the inverse of this error as the fitness value to maximize by the genetic algorithm.
 
     Parameters
     ----------
-    x: numpy.ndarray
-        Undetermined parameters proposed by the genetic algorithm.
+    ga_instance : pygad.GA
+        The instance of the genetic algorithm.
+    solution : list
+        The list of undetermined parameters to calibrate.
+    solution_idx : int
+        The index of the solution in the population.
 
     Returns
     -------
-    sim_error: float
-        Maximum error between the simulated polarization curves and the experimental ones.
+    fitness : float
+        The fitness value to maximize, which is the inverse of the maximum error between the simulated and experimental
+        polarization curves.
     """
 
-    # Undetermined parameters proposed by the genetic algorithm.
-    epsilon_gdl, epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch = x
+    # Extraction of the undetermined parameters from the solution
+    epsilon_gdl, epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch = solution
 
     # Calculation of the model polarization curve
     Simulator1 = AlphaPEM(current_density, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, t_step,
-                          i_step, i_pola_1, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
+                          i_step, i_max_pola_1, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
                           Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
                           b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell_1, type_current,
                           type_auxiliary, type_control, type_purge, type_display, type_plot)
     Simulator2 = AlphaPEM(current_density, T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2, t_step,
-                          i_step, i_pola_2, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
+                          i_step, i_max_pola_2, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
                           Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
                           b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell_2, type_current,
                           type_auxiliary, type_control, type_purge, type_display, type_plot)
 
-    # Calculation of the error between the simulated polarization curves and the experimental ones
+    # Calculation of the simulation error between the simulated and experimental polarization curves
     sim_error = calculate_simulation_error(Simulator1, U_exp1, i_exp1, Simulator2, U_exp2, i_exp2)
-    return sim_error
+    if sim_error == 0:  # If the error is zero, it means the simulation is perfect.
+        sim_error = 1e-6
 
+    # Calculation of the fitness value to maximize
+    fitness = 1.0 / sim_error # pygad maximise the fitness value, not the error value, so the inverse is taken.
+    return fitness
 
 # ____________________________________________________Main program______________________________________________________
 """
@@ -149,14 +166,27 @@ if __name__ == '__main__':
     # Starting time
     start_time = time.time()
 
-    # GeneticAlgorithm execution
+    # pYGAD execution
+    ga_instance = pygad.GA( # 1 iteration takes 720s = 12min = 0.2h inside LIS cluster with 80 nodes.
+    #                         800 iterations takes 160h = 6.67j.
+        num_generations=num_generations, # Number of generations.
+        num_parents_mating=num_parents_mating, # Number of solutions to be selected as parents in the mating pool.
+        fitness_func=pola_points, # Function to maximize.
+        sol_per_pop=sol_per_pop, # Population size. It is the number of solutions in the population.
+        num_genes=num_genes, # Number of genes in the solution.
+        gene_space=gene_space, # Bounds of the undetermined parameters.
+        parent_selection_type="rws", # Parent selection type. "rws" means roulette wheel selection. Best found.
+        keep_parents=1, # Keep the best solution of the previous generation. 1 elite should be enough.
+        crossover_type="single_point", # Crossover type. "single_point" means single point crossover. Best found.
+        mutation_type="random", # Mutation type. "random" means random mutation.
+        mutation_num_genes=mutation_num_genes, # Number of genes to mutate.
+        stop_criteria=["reach_2"], # Stop when the error is less than 0.5%
+        parallel_processing = ["process", os.cpu_count()]  # Use multiprocessing with the number of CPU cores available.
+    )
     unfinished = True  # As long as this value remains true, the execution of the GeneticAlgorithm restart.
     while unfinished:
         try:
-            model = ga(dimension=12, variable_type=vartype, variable_boundaries=varbound,
-                       algorithm_parameters=algorithm_param)
-            # Multi processing is permitted.
-            model.run(function=pola_points, set_function=ga.set_function_multiprocess(pola_points, n_jobs=-1))
+            ga_instance.run() # Run the genetic algorithm.
         except ValueError:
             print("\nA ValueError has been detected due to a parameter combination that is challenging to satisfy "
                   "with the current max_step value, which is too high in the model. The program is relaunched.")
@@ -170,15 +200,15 @@ if __name__ == '__main__':
             unfinished = False
 
     # Recovery of the results
-    convergence = model.report
-    solution = model.result
-    epsilon_gdl, epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch = \
-        solution['variable'][0], solution['variable'][1], solution['variable'][2], solution['variable'][3], \
-            solution['variable'][4], solution['variable'][5], solution['variable'][6], solution['variable'][7], \
-            solution['variable'][8], solution['variable'][9], solution['variable'][10], solution['variable'][11]
-    sim_error = solution['score']
+    ga_instance.plot_fitness() # Plot the fitness value of the best solution at each generation.
+    solution, solution_fitness, solution_idx = ga_instance.best_solution() # solution is the best solution found,
+    #                                                        solution_fitness is the fitness value of the best solution,
+    #                                              and solution_idx is the index of the best solution in the population.
+    epsilon_gdl, epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch = solution
+    sim_error = 1.0 / solution_fitness  # The error is the inverse of the fitness value.
 
     # Print of the parameter calibration results
+    convergence = [float(1.0 / f) for f in ga_instance.best_solutions_fitness]
     print_calibration_results(convergence, epsilon_gdl, epsilon_mc, tau, epsilon_c, e,
                               Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, sim_error)
 
@@ -189,24 +219,24 @@ if __name__ == '__main__':
     # Calculate, display and save the calibrated and experimental polarization curve
     #       Calculate the calibrated polarization curve
     Simulator1 = AlphaPEM(current_density, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, t_step,
-                          i_step, i_pola_1, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
+                          i_step, i_max_pola_1, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
                           Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
                           b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell_1, type_current,
                           type_auxiliary, type_control, type_purge, type_display, type_plot)
     Simulator2 = AlphaPEM(current_density, T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2, t_step,
-                          i_step, i_pola_2, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
+                          i_step, i_max_pola_2, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
                           Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
                           b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell_2, type_current,
                           type_auxiliary, type_control, type_purge, type_display, type_plot)
     #       Display the calibrated and experimental polarization curve
-    fig, ax = plt.subplots(figsize=(6, 6))
+    fig, ax = plt.subplots(figsize=(8, 8))
     Simulator1.Display(ax)
     Simulator2.Display(ax)
     #       Save the calibrated and experimental polarization curve
     subfolder_name = type_fuel_cell_1[:type_fuel_cell_1.rfind('_')] if type_fuel_cell_1.rfind('_') != -1 \
         else type_fuel_cell_1
-    saving_instructions("results", subfolder_name, "step_current_syn_1.pdf", fig)
+    saving_instructions("results", subfolder_name, "final_calibration_1.pdf", fig)
 
     # Algorithm time
     algo_time = time.time() - start_time
-    print('Time of the algorithm in second :', algo_time)
+    print('Time of the algorithm in hours :', algo_time/3600)

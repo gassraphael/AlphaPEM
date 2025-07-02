@@ -58,7 +58,6 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax):
     current_density = operating_inputs['current_density']
     t_step, i_step, i_max_pola = parameters['t_step'], parameters['i_step'], parameters['i_max_pola']
     delta_pola = parameters['delta_pola']
-    i_EIS, t_EIS, f_EIS = parameters['i_EIS'], parameters['t_EIS'], parameters['f_EIS']
     type_fuel_cell, type_auxiliary = parameters['type_fuel_cell'], parameters['type_auxiliary']
     type_control, type_plot = parameters['type_control'], parameters['type_plot']
 

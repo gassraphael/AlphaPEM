@@ -39,7 +39,7 @@ To install **AlphaPEM**, follow these steps in a shell:
 
 4. Install the required dependencies (eventually in a specific environment):
     ```sh
-    pip install numpy scipy matplotlib colorama geneticalgorithm2
+    pip install numpy scipy matplotlib colorama pygad
     python3 -m pip install git+https://github.com/RedFantom/ttkthemes
     ```
     
@@ -96,9 +96,9 @@ This work has been supported:
 
 **AlphaPEM** is licensed under the GNU GPL 3.0. See the [LICENSE](LICENSE) file for more details. 
 
-It also includes components licensed under the [MIT license](calibration/LICENSE-MIT):
+It also includes components licensed under the [BSD-3-Clause license](calibration/LICENSE-BSD-3-CLAUSE):
 
-- calibration/parameter_calibration.py from [geneticalgorithm2](https://github.com/PasaOpasen/geneticalgorithm2). 
+- calibration/parameter_calibration.py from [PyGAD](https://github.com/ahmedfgad/GeneticAlgorithmPython). 
 
 ## New contributors
 

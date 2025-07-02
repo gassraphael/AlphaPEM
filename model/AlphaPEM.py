@@ -405,6 +405,8 @@ class AlphaPEM:
             Axes for the first set of plots. The default is None.
         ax2 : matplotlib.axes.Axes, optional
             Axes for the second set of plots. The default is None.
+        ax3 : matplotlib.axes.Axes, optional
+            Axes for the third set of plots. The default is None.
         """
 
         # Extraction of the operating inputs and parameters
