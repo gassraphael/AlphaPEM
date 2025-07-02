@@ -171,7 +171,7 @@
 
 
 <h2 id="modules.flows_modules.flows_int_values" class="doc doc-heading">
-            <code class="highlight language-python">flows_int_values(sv, operating_inputs, parameters)</code>
+            <code class="highlight language-python"><span class="n">flows_int_values</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span></code>
 
 </h2>
 
@@ -260,109 +260,212 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/flows_modules.py</code></summary>
-              <pre class="highlight"><code class="language-python">def flows_int_values(sv, operating_inputs, parameters):
-    """This functions calculates intermediate values for the flows calculation.
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 15</span>
+<span class="normal"> 16</span>
+<span class="normal"> 17</span>
+<span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">flows_int_values</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This functions calculates intermediate values for the flows calculation.</span>
 
-    Parameters
-    ----------
-    sv : dict
-        Variables calculated by the solver. They correspond to the fuel cell internal states.
-        sv is a contraction of solver_variables for enhanced readability.
-    operating_inputs : dict
-        Operating inputs of the fuel cell.
-    parameters : dict
-        Parameters of the fuel cell model.
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sv : dict</span>
+<span class="sd">        Variables calculated by the solver. They correspond to the fuel cell internal states.</span>
+<span class="sd">        sv is a contraction of solver_variables for enhanced readability.</span>
+<span class="sd">    operating_inputs : dict</span>
+<span class="sd">        Operating inputs of the fuel cell.</span>
+<span class="sd">    parameters : dict</span>
+<span class="sd">        Parameters of the fuel cell model.</span>
 
-    Returns
-    -------
-    Pagc : float
-        Global pressure in the anode gas channel (Pa).
-    Pcgc : float
-        Global pressure in the cathode gas channel (Pa).
-    lambda_acl_mem : float
-        Water content in the ACL and the membrane (kg/kg).
-    """
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Pagc : float</span>
+<span class="sd">        Global pressure in the anode gas channel (Pa).</span>
+<span class="sd">    Pcgc : float</span>
+<span class="sd">        Global pressure in the cathode gas channel (Pa).</span>
+<span class="sd">    lambda_acl_mem : float</span>
+<span class="sd">        Water content in the ACL and the membrane (kg/kg).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    # Extraction of the variables
-    C_v_agc, C_v_acl, C_v_ccl, C_v_cgc = sv['C_v_agc'], sv['C_v_acl'], sv['C_v_ccl'], sv['C_v_cgc']
-    s_acl, s_ccl = sv['s_acl'], sv['s_ccl']
-    lambda_acl, lambda_mem, lambda_ccl = sv['lambda_acl'], sv['lambda_mem'], sv['lambda_ccl']
-    C_H2_agc, C_H2_acl, C_O2_ccl, C_O2_cgc = sv['C_H2_agc'], sv['C_H2_acl'], sv['C_O2_ccl'], sv['C_O2_cgc']
-    C_N2 = sv['C_N2']
-    T_agc, T_acl, T_mem, T_ccl, T_cgc = sv['T_agc'], sv['T_acl'], sv['T_mem'], sv['T_ccl'], sv['T_cgc']
-    # Extraction of the operating inputs and the parameters
-    tau, epsilon_gdl, epsilon_c, e = parameters['tau'], parameters['epsilon_gdl'], parameters['epsilon_c'], parameters['e']
-    n_gdl, Hcl, Hmem, Hgdl = parameters['n_gdl'], parameters['Hcl'], parameters['Hmem'], parameters['Hgdl']
-    Wgc, Hgc = parameters['Wgc'], parameters['Hgc']
+    <span class="c1"># Extraction of the variables</span>
+    <span class="n">C_v_agc</span><span class="p">,</span> <span class="n">C_v_acl</span><span class="p">,</span> <span class="n">C_v_ccl</span><span class="p">,</span> <span class="n">C_v_cgc</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_v_agc&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_v_acl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_v_ccl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_v_cgc&#39;</span><span class="p">]</span>
+    <span class="n">s_acl</span><span class="p">,</span> <span class="n">s_ccl</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_acl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_ccl&#39;</span><span class="p">]</span>
+    <span class="n">lambda_acl</span><span class="p">,</span> <span class="n">lambda_mem</span><span class="p">,</span> <span class="n">lambda_ccl</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;lambda_acl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;lambda_mem&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;lambda_ccl&#39;</span><span class="p">]</span>
+    <span class="n">C_H2_agc</span><span class="p">,</span> <span class="n">C_H2_acl</span><span class="p">,</span> <span class="n">C_O2_ccl</span><span class="p">,</span> <span class="n">C_O2_cgc</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_H2_agc&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_H2_acl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_O2_ccl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_O2_cgc&#39;</span><span class="p">]</span>
+    <span class="n">C_N2</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_N2&#39;</span><span class="p">]</span>
+    <span class="n">T_agc</span><span class="p">,</span> <span class="n">T_acl</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">,</span> <span class="n">T_cgc</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_agc&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_acl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_mem&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_ccl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_cgc&#39;</span><span class="p">]</span>
+    <span class="c1"># Extraction of the operating inputs and the parameters</span>
+    <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;tau&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;epsilon_gdl&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;epsilon_c&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;e&#39;</span><span class="p">]</span>
+    <span class="n">n_gdl</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hgdl</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;n_gdl&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hcl&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hmem&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hgdl&#39;</span><span class="p">]</span>
+    <span class="n">Wgc</span><span class="p">,</span> <span class="n">Hgc</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Wgc&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hgc&#39;</span><span class="p">]</span>
 
-    # Transitory parameter
-    H_gdl_node = Hgdl / n_gdl
+    <span class="c1"># Transitory parameter</span>
+    <span class="n">H_gdl_node</span> <span class="o">=</span> <span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span>
 
-    # Pressures in the stack
-    Pagc = (C_v_agc + C_H2_agc) * R * T_agc
-    Pagdl = [None] + [(sv[f'C_v_agdl_{i}'] + sv[f'C_H2_agdl_{i}']) * R * sv[f'T_agdl_{i}'] for i in range(1, n_gdl + 1)]
-    Pacl = (C_v_acl + C_H2_acl) * R * T_acl
-    Pccl = (C_v_ccl + C_O2_ccl + C_N2) * R * T_ccl
-    Pcgdl = [None] + [(sv[f'C_v_cgdl_{i}'] + sv[f'C_O2_cgdl_{i}'] + C_N2) * R * sv[f'T_cgdl_{i}'] for i in range(1, n_gdl + 1)]
-    Pcgc = (C_v_cgc + C_O2_cgc + C_N2) * R * T_cgc
+    <span class="c1"># Pressures in the stack</span>
+    <span class="n">Pagc</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_v_agc</span> <span class="o">+</span> <span class="n">C_H2_agc</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_agc</span>
+    <span class="n">Pagdl</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="p">[(</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_H2_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="n">Pacl</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_v_acl</span> <span class="o">+</span> <span class="n">C_H2_acl</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_acl</span>
+    <span class="n">Pccl</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_v_ccl</span> <span class="o">+</span> <span class="n">C_O2_ccl</span> <span class="o">+</span> <span class="n">C_N2</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_ccl</span>
+    <span class="n">Pcgdl</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="p">[(</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_O2_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">C_N2</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="n">Pcgc</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_v_cgc</span> <span class="o">+</span> <span class="n">C_O2_cgc</span> <span class="o">+</span> <span class="n">C_N2</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_cgc</span>
 
-    # Weighted mean values ...
-    #       ... of the water content
-    lambda_acl_mem = average([lambda_acl, lambda_mem], weights = [Hcl / (Hcl + Hmem), Hmem / (Hcl + Hmem)])
-    lambda_mem_ccl = average([lambda_mem, lambda_ccl], weights = [Hmem / (Hmem + Hcl), Hcl / (Hmem + Hcl)])
-    #       ... of the diffusion coefficient of water in the membrane
-    D_acl_mem = average([D(lambda_acl), D(lambda_mem)], weights = [Hcl / (Hcl + Hmem), Hmem / (Hcl + Hmem)])
-    D_mem_ccl = average([D(lambda_mem), D(lambda_ccl)], weights = [Hmem / (Hmem + Hcl), Hcl / (Hmem + Hcl)])
-    #       ... of the capillary coefficient
-    D_cap_agdl_agdl = [None] + [average([Dcap('gdl', sv[f's_agdl_{i}'], sv[f'T_agdl_{i}'], epsilon_gdl, e,
-                                            epsilon_c=epsilon_c),
-                                        Dcap('gdl', sv[f's_agdl_{i+1}'], sv[f'T_agdl_{i+1}'], epsilon_gdl, e,
-                                            epsilon_c=epsilon_c)]) for i in range(1, n_gdl)]
-    D_cap_agdl_acl = average([Dcap('gdl', sv[f's_agdl_{n_gdl}'], sv[f'T_agdl_{n_gdl}'], epsilon_gdl, e,
-                                  epsilon_c=epsilon_c),
-                            Dcap('cl', s_acl, T_acl, epsilon_cl, e)],
-                           weights = [H_gdl_node / (H_gdl_node + Hcl), Hcl / (H_gdl_node + Hcl)])
-    D_cap_cgdl_cgdl = [None] + [average([Dcap('gdl', sv[f's_cgdl_{i}'], sv[f'T_cgdl_{i}'], epsilon_gdl, e,
-                                            epsilon_c=epsilon_c),
-                                        Dcap('gdl', sv[f's_cgdl_{i+1}'], sv[f'T_cgdl_{i+1}'], epsilon_gdl, e,
-                                            epsilon_c=epsilon_c)]) for i in range(1, n_gdl)]
-    D_cap_ccl_cgdl = average([Dcap('gdl', sv['s_cgdl_1'], sv['T_cgdl_1'], epsilon_gdl, e,
-                                    epsilon_c=epsilon_c),
-                            Dcap('cl', s_ccl, T_ccl, epsilon_cl, e)],
-                            weights = [H_gdl_node / (H_gdl_node + Hcl), Hcl / (H_gdl_node + Hcl)])
-    #       ... of the effective diffusion coefficient between the gas channel and the gas diffusion layer
-    ha_Da_eff_agc_agdl = average([h_a(Pagc, T_agc, Wgc, Hgc) * Hgc,
-                                      Da_eff('gdl', sv['s_agdl_1'], sv['T_agdl_1'], Pagdl[1], epsilon_gdl,
-                                             epsilon_c = epsilon_c)],
-                               weights = [Hgc / (Hgc + H_gdl_node), H_gdl_node / (Hgc + H_gdl_node)])
-    hc_Dc_eff_cgdl_cgc = average([h_c(Pcgc, T_cgc, Wgc, Hgc) * Hgc,
-                                      Dc_eff('gdl', sv[f's_cgdl_{n_gdl}'], sv[f'T_cgdl_{n_gdl}'], Pcgdl[n_gdl],
-                                             epsilon_gdl, epsilon_c = epsilon_c)],
-                               weights = [Hgc / (Hgc + H_gdl_node), H_gdl_node / (Hgc + H_gdl_node)])
-    #       ... of the effective diffusion coefficient
-    Da_eff_agdl_agdl = [None] + [average([Da_eff('gdl', sv[f's_agdl_{i}'], sv[f'T_agdl_{i}'], Pagdl[i],
-                                              epsilon_gdl, epsilon_c = epsilon_c),
-                                        Da_eff('gdl', sv[f's_agdl_{i+1}'], sv[f'T_agdl_{i+1}'], Pagdl[i+1],
-                                              epsilon_gdl, epsilon_c = epsilon_c)]) for i in range(1, n_gdl)]
-    Da_eff_agdl_acl = average([Da_eff('gdl', sv[f's_agdl_{n_gdl}'], sv[f'T_agdl_{n_gdl}'], Pagdl[n_gdl],
-                                          epsilon_gdl, epsilon_c = epsilon_c),
-                                   Da_eff('cl', s_acl, T_acl, Pacl, epsilon_cl, tau = tau)],
-                            weights = [H_gdl_node / (H_gdl_node + Hcl), Hcl / (H_gdl_node + Hcl)])
-    Dc_eff_cgdl_cgdl = [None] + [average([Dc_eff('gdl', sv[f's_cgdl_{i}'], sv[f'T_cgdl_{i}'], Pcgdl[i],
-                                              epsilon_gdl, epsilon_c = epsilon_c),
-                                        Dc_eff('gdl', sv[f's_cgdl_{i+1}'], sv[f'T_cgdl_{i+1}'], Pcgdl[i+1],
-                                              epsilon_gdl, epsilon_c = epsilon_c)]) for i in range(1, n_gdl)]
-    Dc_eff_ccl_cgdl = average([Dc_eff('cl', s_ccl, T_ccl, Pccl, epsilon_cl, tau = tau),
-                                   Dc_eff('gdl', sv['s_cgdl_1'], sv['T_cgdl_1'], Pcgdl[1],
-                                          epsilon_gdl, epsilon_c = epsilon_c)],
-                            weights = [Hcl / (H_gdl_node + Hcl), H_gdl_node / (H_gdl_node + Hcl)])
-    #       ... of the temperature
-    T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
-                               weights=[Hcl / (2 * Hcl + Hmem), Hmem / (2 * Hcl + Hmem), Hcl / (2 * Hcl + Hmem)])
+    <span class="c1"># Weighted mean values ...</span>
+    <span class="c1">#       ... of the water content</span>
+    <span class="n">lambda_acl_mem</span> <span class="o">=</span> <span class="n">average</span><span class="p">([</span><span class="n">lambda_acl</span><span class="p">,</span> <span class="n">lambda_mem</span><span class="p">],</span> <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">Hcl</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hcl</span> <span class="o">+</span> <span class="n">Hmem</span><span class="p">),</span> <span class="n">Hmem</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hcl</span> <span class="o">+</span> <span class="n">Hmem</span><span class="p">)])</span>
+    <span class="n">lambda_mem_ccl</span> <span class="o">=</span> <span class="n">average</span><span class="p">([</span><span class="n">lambda_mem</span><span class="p">,</span> <span class="n">lambda_ccl</span><span class="p">],</span> <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">Hmem</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hmem</span> <span class="o">+</span> <span class="n">Hcl</span><span class="p">),</span> <span class="n">Hcl</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hmem</span> <span class="o">+</span> <span class="n">Hcl</span><span class="p">)])</span>
+    <span class="c1">#       ... of the diffusion coefficient of water in the membrane</span>
+    <span class="n">D_acl_mem</span> <span class="o">=</span> <span class="n">average</span><span class="p">([</span><span class="n">D</span><span class="p">(</span><span class="n">lambda_acl</span><span class="p">),</span> <span class="n">D</span><span class="p">(</span><span class="n">lambda_mem</span><span class="p">)],</span> <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">Hcl</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hcl</span> <span class="o">+</span> <span class="n">Hmem</span><span class="p">),</span> <span class="n">Hmem</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hcl</span> <span class="o">+</span> <span class="n">Hmem</span><span class="p">)])</span>
+    <span class="n">D_mem_ccl</span> <span class="o">=</span> <span class="n">average</span><span class="p">([</span><span class="n">D</span><span class="p">(</span><span class="n">lambda_mem</span><span class="p">),</span> <span class="n">D</span><span class="p">(</span><span class="n">lambda_ccl</span><span class="p">)],</span> <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">Hmem</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hmem</span> <span class="o">+</span> <span class="n">Hcl</span><span class="p">),</span> <span class="n">Hcl</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hmem</span> <span class="o">+</span> <span class="n">Hcl</span><span class="p">)])</span>
+    <span class="c1">#       ... of the capillary coefficient</span>
+    <span class="n">D_cap_agdl_agdl</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">average</span><span class="p">([</span><span class="n">Dcap</span><span class="p">(</span><span class="s1">&#39;gdl&#39;</span><span class="p">,</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span>
+                                            <span class="n">epsilon_c</span><span class="o">=</span><span class="n">epsilon_c</span><span class="p">),</span>
+                                        <span class="n">Dcap</span><span class="p">(</span><span class="s1">&#39;gdl&#39;</span><span class="p">,</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_agdl_</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_agdl_</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span>
+                                            <span class="n">epsilon_c</span><span class="o">=</span><span class="n">epsilon_c</span><span class="p">)])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">)]</span>
+    <span class="n">D_cap_agdl_acl</span> <span class="o">=</span> <span class="n">average</span><span class="p">([</span><span class="n">Dcap</span><span class="p">(</span><span class="s1">&#39;gdl&#39;</span><span class="p">,</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span>
+                                  <span class="n">epsilon_c</span><span class="o">=</span><span class="n">epsilon_c</span><span class="p">),</span>
+                            <span class="n">Dcap</span><span class="p">(</span><span class="s1">&#39;cl&#39;</span><span class="p">,</span> <span class="n">s_acl</span><span class="p">,</span> <span class="n">T_acl</span><span class="p">,</span> <span class="n">epsilon_cl</span><span class="p">,</span> <span class="n">e</span><span class="p">)],</span>
+                           <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">H_gdl_node</span> <span class="o">/</span> <span class="p">(</span><span class="n">H_gdl_node</span> <span class="o">+</span> <span class="n">Hcl</span><span class="p">),</span> <span class="n">Hcl</span> <span class="o">/</span> <span class="p">(</span><span class="n">H_gdl_node</span> <span class="o">+</span> <span class="n">Hcl</span><span class="p">)])</span>
+    <span class="n">D_cap_cgdl_cgdl</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">average</span><span class="p">([</span><span class="n">Dcap</span><span class="p">(</span><span class="s1">&#39;gdl&#39;</span><span class="p">,</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span>
+                                            <span class="n">epsilon_c</span><span class="o">=</span><span class="n">epsilon_c</span><span class="p">),</span>
+                                        <span class="n">Dcap</span><span class="p">(</span><span class="s1">&#39;gdl&#39;</span><span class="p">,</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span>
+                                            <span class="n">epsilon_c</span><span class="o">=</span><span class="n">epsilon_c</span><span class="p">)])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">)]</span>
+    <span class="n">D_cap_ccl_cgdl</span> <span class="o">=</span> <span class="n">average</span><span class="p">([</span><span class="n">Dcap</span><span class="p">(</span><span class="s1">&#39;gdl&#39;</span><span class="p">,</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_cgdl_1&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_cgdl_1&#39;</span><span class="p">],</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span>
+                                    <span class="n">epsilon_c</span><span class="o">=</span><span class="n">epsilon_c</span><span class="p">),</span>
+                            <span class="n">Dcap</span><span class="p">(</span><span class="s1">&#39;cl&#39;</span><span class="p">,</span> <span class="n">s_ccl</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">,</span> <span class="n">epsilon_cl</span><span class="p">,</span> <span class="n">e</span><span class="p">)],</span>
+                            <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">H_gdl_node</span> <span class="o">/</span> <span class="p">(</span><span class="n">H_gdl_node</span> <span class="o">+</span> <span class="n">Hcl</span><span class="p">),</span> <span class="n">Hcl</span> <span class="o">/</span> <span class="p">(</span><span class="n">H_gdl_node</span> <span class="o">+</span> <span class="n">Hcl</span><span class="p">)])</span>
+    <span class="c1">#       ... of the effective diffusion coefficient between the gas channel and the gas diffusion layer</span>
+    <span class="n">ha_Da_eff_agc_agdl</span> <span class="o">=</span> <span class="n">average</span><span class="p">([</span><span class="n">h_a</span><span class="p">(</span><span class="n">Pagc</span><span class="p">,</span> <span class="n">T_agc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">)</span> <span class="o">*</span> <span class="n">Hgc</span><span class="p">,</span>
+                                      <span class="n">Da_eff</span><span class="p">(</span><span class="s1">&#39;gdl&#39;</span><span class="p">,</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_agdl_1&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_agdl_1&#39;</span><span class="p">],</span> <span class="n">Pagdl</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">epsilon_gdl</span><span class="p">,</span>
+                                             <span class="n">epsilon_c</span> <span class="o">=</span> <span class="n">epsilon_c</span><span class="p">)],</span>
+                               <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">Hgc</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgc</span> <span class="o">+</span> <span class="n">H_gdl_node</span><span class="p">),</span> <span class="n">H_gdl_node</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgc</span> <span class="o">+</span> <span class="n">H_gdl_node</span><span class="p">)])</span>
+    <span class="n">hc_Dc_eff_cgdl_cgc</span> <span class="o">=</span> <span class="n">average</span><span class="p">([</span><span class="n">h_c</span><span class="p">(</span><span class="n">Pcgc</span><span class="p">,</span> <span class="n">T_cgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">)</span> <span class="o">*</span> <span class="n">Hgc</span><span class="p">,</span>
+                                      <span class="n">Dc_eff</span><span class="p">(</span><span class="s1">&#39;gdl&#39;</span><span class="p">,</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_cgdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_cgdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">Pcgdl</span><span class="p">[</span><span class="n">n_gdl</span><span class="p">],</span>
+                                             <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_c</span> <span class="o">=</span> <span class="n">epsilon_c</span><span class="p">)],</span>
+                               <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">Hgc</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgc</span> <span class="o">+</span> <span class="n">H_gdl_node</span><span class="p">),</span> <span class="n">H_gdl_node</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgc</span> <span class="o">+</span> <span class="n">H_gdl_node</span><span class="p">)])</span>
+    <span class="c1">#       ... of the effective diffusion coefficient</span>
+    <span class="n">Da_eff_agdl_agdl</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">average</span><span class="p">([</span><span class="n">Da_eff</span><span class="p">(</span><span class="s1">&#39;gdl&#39;</span><span class="p">,</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">Pagdl</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                              <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_c</span> <span class="o">=</span> <span class="n">epsilon_c</span><span class="p">),</span>
+                                        <span class="n">Da_eff</span><span class="p">(</span><span class="s1">&#39;gdl&#39;</span><span class="p">,</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_agdl_</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_agdl_</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">Pagdl</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span>
+                                              <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_c</span> <span class="o">=</span> <span class="n">epsilon_c</span><span class="p">)])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">)]</span>
+    <span class="n">Da_eff_agdl_acl</span> <span class="o">=</span> <span class="n">average</span><span class="p">([</span><span class="n">Da_eff</span><span class="p">(</span><span class="s1">&#39;gdl&#39;</span><span class="p">,</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">Pagdl</span><span class="p">[</span><span class="n">n_gdl</span><span class="p">],</span>
+                                          <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_c</span> <span class="o">=</span> <span class="n">epsilon_c</span><span class="p">),</span>
+                                   <span class="n">Da_eff</span><span class="p">(</span><span class="s1">&#39;cl&#39;</span><span class="p">,</span> <span class="n">s_acl</span><span class="p">,</span> <span class="n">T_acl</span><span class="p">,</span> <span class="n">Pacl</span><span class="p">,</span> <span class="n">epsilon_cl</span><span class="p">,</span> <span class="n">tau</span> <span class="o">=</span> <span class="n">tau</span><span class="p">)],</span>
+                            <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">H_gdl_node</span> <span class="o">/</span> <span class="p">(</span><span class="n">H_gdl_node</span> <span class="o">+</span> <span class="n">Hcl</span><span class="p">),</span> <span class="n">Hcl</span> <span class="o">/</span> <span class="p">(</span><span class="n">H_gdl_node</span> <span class="o">+</span> <span class="n">Hcl</span><span class="p">)])</span>
+    <span class="n">Dc_eff_cgdl_cgdl</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">average</span><span class="p">([</span><span class="n">Dc_eff</span><span class="p">(</span><span class="s1">&#39;gdl&#39;</span><span class="p">,</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">Pcgdl</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                              <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_c</span> <span class="o">=</span> <span class="n">epsilon_c</span><span class="p">),</span>
+                                        <span class="n">Dc_eff</span><span class="p">(</span><span class="s1">&#39;gdl&#39;</span><span class="p">,</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">Pcgdl</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span>
+                                              <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_c</span> <span class="o">=</span> <span class="n">epsilon_c</span><span class="p">)])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">)]</span>
+    <span class="n">Dc_eff_ccl_cgdl</span> <span class="o">=</span> <span class="n">average</span><span class="p">([</span><span class="n">Dc_eff</span><span class="p">(</span><span class="s1">&#39;cl&#39;</span><span class="p">,</span> <span class="n">s_ccl</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">,</span> <span class="n">Pccl</span><span class="p">,</span> <span class="n">epsilon_cl</span><span class="p">,</span> <span class="n">tau</span> <span class="o">=</span> <span class="n">tau</span><span class="p">),</span>
+                                   <span class="n">Dc_eff</span><span class="p">(</span><span class="s1">&#39;gdl&#39;</span><span class="p">,</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_cgdl_1&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_cgdl_1&#39;</span><span class="p">],</span> <span class="n">Pcgdl</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                          <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_c</span> <span class="o">=</span> <span class="n">epsilon_c</span><span class="p">)],</span>
+                            <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">Hcl</span> <span class="o">/</span> <span class="p">(</span><span class="n">H_gdl_node</span> <span class="o">+</span> <span class="n">Hcl</span><span class="p">),</span> <span class="n">H_gdl_node</span> <span class="o">/</span> <span class="p">(</span><span class="n">H_gdl_node</span> <span class="o">+</span> <span class="n">Hcl</span><span class="p">)])</span>
+    <span class="c1">#       ... of the temperature</span>
+    <span class="n">T_acl_mem_ccl</span> <span class="o">=</span> <span class="n">average</span><span class="p">([</span><span class="n">T_acl</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">],</span>
+                               <span class="n">weights</span><span class="o">=</span><span class="p">[</span><span class="n">Hcl</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Hcl</span> <span class="o">+</span> <span class="n">Hmem</span><span class="p">),</span> <span class="n">Hmem</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Hcl</span> <span class="o">+</span> <span class="n">Hmem</span><span class="p">),</span> <span class="n">Hcl</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Hcl</span> <span class="o">+</span> <span class="n">Hmem</span><span class="p">)])</span>
 
-    return (H_gdl_node, Pagc, Pcgc, lambda_acl_mem, lambda_mem_ccl, D_acl_mem, D_mem_ccl, D_cap_agdl_agdl,
-            D_cap_agdl_acl, D_cap_cgdl_cgdl, D_cap_ccl_cgdl, ha_Da_eff_agc_agdl, hc_Dc_eff_cgdl_cgc, Da_eff_agdl_agdl,
-            Da_eff_agdl_acl, Dc_eff_cgdl_cgdl, Dc_eff_ccl_cgdl, T_acl_mem_ccl)</code></pre>
+    <span class="k">return</span> <span class="p">(</span><span class="n">H_gdl_node</span><span class="p">,</span> <span class="n">Pagc</span><span class="p">,</span> <span class="n">Pcgc</span><span class="p">,</span> <span class="n">lambda_acl_mem</span><span class="p">,</span> <span class="n">lambda_mem_ccl</span><span class="p">,</span> <span class="n">D_acl_mem</span><span class="p">,</span> <span class="n">D_mem_ccl</span><span class="p">,</span> <span class="n">D_cap_agdl_agdl</span><span class="p">,</span>
+            <span class="n">D_cap_agdl_acl</span><span class="p">,</span> <span class="n">D_cap_cgdl_cgdl</span><span class="p">,</span> <span class="n">D_cap_ccl_cgdl</span><span class="p">,</span> <span class="n">ha_Da_eff_agc_agdl</span><span class="p">,</span> <span class="n">hc_Dc_eff_cgdl_cgc</span><span class="p">,</span> <span class="n">Da_eff_agdl_agdl</span><span class="p">,</span>
+            <span class="n">Da_eff_agdl_acl</span><span class="p">,</span> <span class="n">Dc_eff_cgdl_cgdl</span><span class="p">,</span> <span class="n">Dc_eff_ccl_cgdl</span><span class="p">,</span> <span class="n">T_acl_mem_ccl</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
             </details>
     </div>
 

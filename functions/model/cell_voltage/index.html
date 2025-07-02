@@ -171,7 +171,7 @@
 
 
 <h2 id="model.cell_voltage.calculate_cell_voltage" class="doc doc-heading">
-            <code class="highlight language-python">calculate_cell_voltage(variables, operating_inputs, parameters)</code>
+            <code class="highlight language-python"><span class="n">calculate_cell_voltage</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span></code>
 
 </h2>
 
@@ -245,70 +245,134 @@
 </table>
             <details class="quote">
               <summary>Source code in <code>model/cell_voltage.py</code></summary>
-              <pre class="highlight"><code class="language-python">def calculate_cell_voltage(variables, operating_inputs, parameters):
-    """This function calculates the cell voltage at each time step.
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_cell_voltage</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the cell voltage at each time step.</span>
 
-    Parameters
-    ----------
-    variables : dict
-        The dictionary containing the variables calculated by the solver.
-    operating_inputs : dict
-        The dictionary containing the operating inputs.
-    parameters : dict
-        The dictionary containing the parameters.
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    variables : dict</span>
+<span class="sd">        The dictionary containing the variables calculated by the solver.</span>
+<span class="sd">    operating_inputs : dict</span>
+<span class="sd">        The dictionary containing the operating inputs.</span>
+<span class="sd">    parameters : dict</span>
+<span class="sd">        The dictionary containing the parameters.</span>
 
-    Returns
-    -------
-    Ucell_t : list
-        The cell voltage at each time step.
-    """
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Ucell_t : list</span>
+<span class="sd">        The cell voltage at each time step.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    # Extraction of the variables
-    t, lambda_mem_t, lambda_ccl_t = variables['t'], variables['lambda_mem'], variables['lambda_ccl']
-    C_H2_acl_t, C_O2_ccl_t, eta_c_t = variables['C_H2_acl'], variables['C_O2_ccl'], variables['eta_c']
-    T_acl_t, T_mem_t, T_ccl_t = variables['T_acl'], variables['T_mem'], variables['T_ccl']
-    # Extraction of the operating inputs and the parameters
-    Hmem, Hcl, epsilon_mc, tau = parameters['Hmem'], parameters['Hcl'], parameters['epsilon_mc'], parameters['tau']
-    Re, kappa_co = parameters['Re'], parameters['kappa_co']
+    <span class="c1"># Extraction of the variables</span>
+    <span class="n">t</span><span class="p">,</span> <span class="n">lambda_mem_t</span><span class="p">,</span> <span class="n">lambda_ccl_t</span> <span class="o">=</span> <span class="n">variables</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">],</span> <span class="n">variables</span><span class="p">[</span><span class="s1">&#39;lambda_mem&#39;</span><span class="p">],</span> <span class="n">variables</span><span class="p">[</span><span class="s1">&#39;lambda_ccl&#39;</span><span class="p">]</span>
+    <span class="n">C_H2_acl_t</span><span class="p">,</span> <span class="n">C_O2_ccl_t</span><span class="p">,</span> <span class="n">eta_c_t</span> <span class="o">=</span> <span class="n">variables</span><span class="p">[</span><span class="s1">&#39;C_H2_acl&#39;</span><span class="p">],</span> <span class="n">variables</span><span class="p">[</span><span class="s1">&#39;C_O2_ccl&#39;</span><span class="p">],</span> <span class="n">variables</span><span class="p">[</span><span class="s1">&#39;eta_c&#39;</span><span class="p">]</span>
+    <span class="n">T_acl_t</span><span class="p">,</span> <span class="n">T_mem_t</span><span class="p">,</span> <span class="n">T_ccl_t</span> <span class="o">=</span> <span class="n">variables</span><span class="p">[</span><span class="s1">&#39;T_acl&#39;</span><span class="p">],</span> <span class="n">variables</span><span class="p">[</span><span class="s1">&#39;T_mem&#39;</span><span class="p">],</span> <span class="n">variables</span><span class="p">[</span><span class="s1">&#39;T_ccl&#39;</span><span class="p">]</span>
+    <span class="c1"># Extraction of the operating inputs and the parameters</span>
+    <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">tau</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hmem&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hcl&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;epsilon_mc&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;tau&#39;</span><span class="p">]</span>
+    <span class="n">Re</span><span class="p">,</span> <span class="n">kappa_co</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Re&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;kappa_co&#39;</span><span class="p">]</span>
 
-    # Initialisation
-    n = len(t)
-    Ucell_t = [0] * n
+    <span class="c1"># Initialisation</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="n">Ucell_t</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>
 
-    # Loop for having Ucell_t at each time step
-    for i in range(n):
+    <span class="c1"># Loop for having Ucell_t at each time step</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
 
-        # Recovery of the already calculated variable values at each time step
-        lambda_mem, lambda_ccl = lambda_mem_t[i], lambda_ccl_t[i]
-        C_H2_acl, C_O2_ccl = C_H2_acl_t[i], C_O2_ccl_t[i]
-        T_acl, T_mem, T_ccl = T_acl_t[i], T_mem_t[i], T_ccl_t[i]
-        eta_c = eta_c_t[i]
+        <span class="c1"># Recovery of the already calculated variable values at each time step</span>
+        <span class="n">lambda_mem</span><span class="p">,</span> <span class="n">lambda_ccl</span> <span class="o">=</span> <span class="n">lambda_mem_t</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">lambda_ccl_t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">C_H2_acl</span><span class="p">,</span> <span class="n">C_O2_ccl</span> <span class="o">=</span> <span class="n">C_H2_acl_t</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">C_O2_ccl_t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">T_acl</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">T_ccl</span> <span class="o">=</span> <span class="n">T_acl_t</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">T_mem_t</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">T_ccl_t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">eta_c</span> <span class="o">=</span> <span class="n">eta_c_t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
-        # Current density value at this time step
-        i_fc = operating_inputs['current_density'](t[i], parameters)
+        <span class="c1"># Current density value at this time step</span>
+        <span class="n">i_fc</span> <span class="o">=</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;current_density&#39;</span><span class="p">](</span><span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">parameters</span><span class="p">)</span>
 
-        # The equilibrium potential
-        Ueq = E0 - 8.5e-4 * (T_ccl - 298.15) + R * T_ccl / (2 * F) * (math.log(R * T_acl * C_H2_acl / Pref) +
-                                                                  0.5 * math.log(R * T_ccl * C_O2_ccl / Pref))
+        <span class="c1"># The equilibrium potential</span>
+        <span class="n">Ueq</span> <span class="o">=</span> <span class="n">E0</span> <span class="o">-</span> <span class="mf">8.5e-4</span> <span class="o">*</span> <span class="p">(</span><span class="n">T_ccl</span> <span class="o">-</span> <span class="mf">298.15</span><span class="p">)</span> <span class="o">+</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_ccl</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">F</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_acl</span> <span class="o">*</span> <span class="n">C_H2_acl</span> <span class="o">/</span> <span class="n">Pref</span><span class="p">)</span> <span class="o">+</span>
+                                                                  <span class="mf">0.5</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_ccl</span> <span class="o">*</span> <span class="n">C_O2_ccl</span> <span class="o">/</span> <span class="n">Pref</span><span class="p">))</span>
 
-        # The crossover current density
-        T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
-                                   weights=[Hcl/(2*Hcl + Hmem), Hmem/(2*Hcl + Hmem), Hcl/(2*Hcl + Hmem)])
-        i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
-        i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
-        i_n = i_H2 + i_O2
+        <span class="c1"># The crossover current density</span>
+        <span class="n">T_acl_mem_ccl</span> <span class="o">=</span> <span class="n">average</span><span class="p">([</span><span class="n">T_acl</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">],</span>
+                                   <span class="n">weights</span><span class="o">=</span><span class="p">[</span><span class="n">Hcl</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Hcl</span> <span class="o">+</span> <span class="n">Hmem</span><span class="p">),</span> <span class="n">Hmem</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Hcl</span> <span class="o">+</span> <span class="n">Hmem</span><span class="p">),</span> <span class="n">Hcl</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Hcl</span> <span class="o">+</span> <span class="n">Hmem</span><span class="p">)])</span>
+        <span class="n">i_H2</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">F</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_acl_mem_ccl</span> <span class="o">/</span> <span class="n">Hmem</span> <span class="o">*</span> <span class="n">C_H2_acl</span> <span class="o">*</span> <span class="n">k_H2</span><span class="p">(</span><span class="n">lambda_mem</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">)</span>
+        <span class="n">i_O2</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">F</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_acl_mem_ccl</span> <span class="o">/</span> <span class="n">Hmem</span> <span class="o">*</span> <span class="n">C_O2_ccl</span> <span class="o">*</span> <span class="n">k_O2</span><span class="p">(</span><span class="n">lambda_mem</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">)</span>
+        <span class="n">i_n</span> <span class="o">=</span> <span class="n">i_H2</span> <span class="o">+</span> <span class="n">i_O2</span>
 
-        # The proton resistance
-        #       The proton resistance at the membrane : Rmem
-        Rmem = Hmem / sigma_p_eff('mem', lambda_mem, T_mem)
-        #       The proton resistance at the cathode catalyst layer : Rccl
-        Rccl = Hcl / sigma_p_eff('ccl', lambda_ccl, T_ccl, epsilon_mc, tau)
-        #       The total proton resistance
-        Rp = Rmem + Rccl  # its value is around [4-7]e-6 ohm.m².
+        <span class="c1"># The proton resistance</span>
+        <span class="c1">#       The proton resistance at the membrane : Rmem</span>
+        <span class="n">Rmem</span> <span class="o">=</span> <span class="n">Hmem</span> <span class="o">/</span> <span class="n">sigma_p_eff</span><span class="p">(</span><span class="s1">&#39;mem&#39;</span><span class="p">,</span> <span class="n">lambda_mem</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">)</span>
+        <span class="c1">#       The proton resistance at the cathode catalyst layer : Rccl</span>
+        <span class="n">Rccl</span> <span class="o">=</span> <span class="n">Hcl</span> <span class="o">/</span> <span class="n">sigma_p_eff</span><span class="p">(</span><span class="s1">&#39;ccl&#39;</span><span class="p">,</span> <span class="n">lambda_ccl</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">)</span>
+        <span class="c1">#       The total proton resistance</span>
+        <span class="n">Rp</span> <span class="o">=</span> <span class="n">Rmem</span> <span class="o">+</span> <span class="n">Rccl</span>  <span class="c1"># its value is around [4-7]e-6 ohm.m².</span>
 
-        # The cell voltage
-        Ucell_t[i] = Ueq - eta_c - (i_fc + i_n) * (Rp + Re)
-    return Ucell_t</code></pre>
+        <span class="c1"># The cell voltage</span>
+        <span class="n">Ucell_t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ueq</span> <span class="o">-</span> <span class="n">eta_c</span> <span class="o">-</span> <span class="p">(</span><span class="n">i_fc</span> <span class="o">+</span> <span class="n">i_n</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Rp</span> <span class="o">+</span> <span class="n">Re</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Ucell_t</span>
+</code></pre></div></td></tr></table></div>
             </details>
     </div>
 
@@ -318,7 +382,7 @@
 
 
 <h2 id="model.cell_voltage.calculate_eta_c_intermediate_values" class="doc doc-heading">
-            <code class="highlight language-python">calculate_eta_c_intermediate_values(solver_variables, operating_inputs, parameters)</code>
+            <code class="highlight language-python"><span class="n">calculate_eta_c_intermediate_values</span><span class="p">(</span><span class="n">solver_variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span></code>
 
 </h2>
 
@@ -394,49 +458,92 @@ function f_drop at time t.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>model/cell_voltage.py</code></summary>
-              <pre class="highlight"><code class="language-python">def calculate_eta_c_intermediate_values(solver_variables, operating_inputs, parameters):
-    """This function calculates the intermediate values needed for the calculation of the cathode overpotential dynamic
-    evolution.
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_eta_c_intermediate_values</span><span class="p">(</span><span class="n">solver_variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the intermediate values needed for the calculation of the cathode overpotential dynamic</span>
+<span class="sd">    evolution.</span>
 
-    Parameters
-    ----------
-    solver_variables : dict
-        The dictionary containing the variables calculated by the solver.
-    operating_inputs : dict
-        The dictionary containing the operating inputs.
-    parameters : dict
-        The dictionary containing the parameters.
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    solver_variables : dict</span>
+<span class="sd">        The dictionary containing the variables calculated by the solver.</span>
+<span class="sd">    operating_inputs : dict</span>
+<span class="sd">        The dictionary containing the operating inputs.</span>
+<span class="sd">    parameters : dict</span>
+<span class="sd">        The dictionary containing the parameters.</span>
 
-    Returns
-    -------
-    dict
-        The dictionary containing the crossover current density i_n at time t, and the liquid water induced voltage drop
-        function f_drop at time t.
-    """
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        The dictionary containing the crossover current density i_n at time t, and the liquid water induced voltage drop</span>
+<span class="sd">        function f_drop at time t.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    # Extraction of the variables
-    s_ccl, lambda_mem = solver_variables['s_ccl'], solver_variables['lambda_mem']
-    C_H2_acl, C_O2_ccl = solver_variables['C_H2_acl'], solver_variables['C_O2_ccl']
-    T_acl, T_mem, T_ccl = solver_variables['T_acl'], solver_variables['T_mem'], solver_variables['T_ccl']
-    # Extraction of the operating inputs and the parameters
-    Pc_des = operating_inputs['Pc_des']
-    Hmem, Hcl = parameters['Hmem'], parameters['Hcl']
-    i0_c_ref, kappa_co, kappa_c = parameters['i0_c_ref'], parameters['kappa_co'], parameters['kappa_c']
-    a_slim, b_slim, a_switch = parameters['a_slim'], parameters['b_slim'], parameters['a_switch']
+    <span class="c1"># Extraction of the variables</span>
+    <span class="n">s_ccl</span><span class="p">,</span> <span class="n">lambda_mem</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;s_ccl&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;lambda_mem&#39;</span><span class="p">]</span>
+    <span class="n">C_H2_acl</span><span class="p">,</span> <span class="n">C_O2_ccl</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_H2_acl&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_O2_ccl&#39;</span><span class="p">]</span>
+    <span class="n">T_acl</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">T_ccl</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;T_acl&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;T_mem&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;T_ccl&#39;</span><span class="p">]</span>
+    <span class="c1"># Extraction of the operating inputs and the parameters</span>
+    <span class="n">Pc_des</span> <span class="o">=</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Pc_des&#39;</span><span class="p">]</span>
+    <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hmem&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hcl&#39;</span><span class="p">]</span>
+    <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;i0_c_ref&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;kappa_co&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;kappa_c&#39;</span><span class="p">]</span>
+    <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;a_slim&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;b_slim&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;a_switch&#39;</span><span class="p">]</span>
 
-    # The crossover current density i_n
-    T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
-                               weights=[Hcl / (2 * Hcl + Hmem), Hmem / (2 * Hcl + Hmem), Hcl / (2 * Hcl + Hmem)])
-    i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
-    i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
-    i_n = i_H2 + i_O2
+    <span class="c1"># The crossover current density i_n</span>
+    <span class="n">T_acl_mem_ccl</span> <span class="o">=</span> <span class="n">average</span><span class="p">([</span><span class="n">T_acl</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">],</span>
+                               <span class="n">weights</span><span class="o">=</span><span class="p">[</span><span class="n">Hcl</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Hcl</span> <span class="o">+</span> <span class="n">Hmem</span><span class="p">),</span> <span class="n">Hmem</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Hcl</span> <span class="o">+</span> <span class="n">Hmem</span><span class="p">),</span> <span class="n">Hcl</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Hcl</span> <span class="o">+</span> <span class="n">Hmem</span><span class="p">)])</span>
+    <span class="n">i_H2</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">F</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_acl_mem_ccl</span> <span class="o">/</span> <span class="n">Hmem</span> <span class="o">*</span> <span class="n">C_H2_acl</span> <span class="o">*</span> <span class="n">k_H2</span><span class="p">(</span><span class="n">lambda_mem</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">)</span>
+    <span class="n">i_O2</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">F</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_acl_mem_ccl</span> <span class="o">/</span> <span class="n">Hmem</span> <span class="o">*</span> <span class="n">C_O2_ccl</span> <span class="o">*</span> <span class="n">k_O2</span><span class="p">(</span><span class="n">lambda_mem</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">)</span>
+    <span class="n">i_n</span> <span class="o">=</span> <span class="n">i_H2</span> <span class="o">+</span> <span class="n">i_O2</span>
 
-    # The liquid water induced voltage drop function f_drop
-    slim = a_slim * (Pc_des / 1e5) + b_slim
-    s_switch = a_switch * slim
-    f_drop = 0.5 * (1.0 - math.tanh((4 * s_ccl - 2 * slim - 2 * s_switch) / (slim - s_switch)))
+    <span class="c1"># The liquid water induced voltage drop function f_drop</span>
+    <span class="n">slim</span> <span class="o">=</span> <span class="n">a_slim</span> <span class="o">*</span> <span class="p">(</span><span class="n">Pc_des</span> <span class="o">/</span> <span class="mf">1e5</span><span class="p">)</span> <span class="o">+</span> <span class="n">b_slim</span>
+    <span class="n">s_switch</span> <span class="o">=</span> <span class="n">a_switch</span> <span class="o">*</span> <span class="n">slim</span>
+    <span class="n">f_drop</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">tanh</span><span class="p">((</span><span class="mi">4</span> <span class="o">*</span> <span class="n">s_ccl</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">slim</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">s_switch</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">slim</span> <span class="o">-</span> <span class="n">s_switch</span><span class="p">)))</span>
 
-    return {'i_n': i_n, 'f_drop': f_drop}</code></pre>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;i_n&#39;</span><span class="p">:</span> <span class="n">i_n</span><span class="p">,</span> <span class="s1">&#39;f_drop&#39;</span><span class="p">:</span> <span class="n">f_drop</span><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
             </details>
     </div>
 

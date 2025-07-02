@@ -172,7 +172,7 @@ It is a component of the fuel cell model.</p>
 
 
 <h2 id="model.heat_transfer.calculate_heat_transfers" class="doc doc-heading">
-            <code class="highlight language-python">calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl, Sl_acl, Sl_ccl, Sl_cgdl, **kwargs)</code>
+            <code class="highlight language-python"><span class="n">calculate_heat_transfers</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="n">i_fc</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">S_abs_acl</span><span class="p">,</span> <span class="n">S_abs_ccl</span><span class="p">,</span> <span class="n">Sl_agdl</span><span class="p">,</span> <span class="n">Sl_acl</span><span class="p">,</span> <span class="n">Sl_ccl</span><span class="p">,</span> <span class="n">Sl_cgdl</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h2>
 
@@ -295,105 +295,206 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>model/heat_transfer.py</code></summary>
-              <pre class="highlight"><code class="language-python">def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl, Sl_acl, Sl_ccl, Sl_cgdl, **kwargs):
-    """This function calculates the heat transfers occurring inside the fuel cell system.
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 17</span>
+<span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_heat_transfers</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="n">i_fc</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">S_abs_acl</span><span class="p">,</span> <span class="n">S_abs_ccl</span><span class="p">,</span> <span class="n">Sl_agdl</span><span class="p">,</span> <span class="n">Sl_acl</span><span class="p">,</span> <span class="n">Sl_ccl</span><span class="p">,</span> <span class="n">Sl_cgdl</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the heat transfers occurring inside the fuel cell system.</span>
 
-    Parameters
-    ----------
-    sv : dict
-        Variables calculated by the solver. They correspond to the fuel cell internal states.
-        sv is a contraction of solver_variables for enhanced readability.
-    i_fc : float
-        Fuel cell current density at time t (A.m-2).
-    parameters : dict
-        Parameters of the fuel cell model.
-    S_abs_acl : float
-        Water absorption in the ACL (mol.m-3.s-1).
-    S_abs_ccl : float
-        Water absorption in the CCL (mol.m-3.s-1).
-    Sl_agdl : list
-        Liquid water generated through vapor water liquefaction in the AGDL (mol.m-3.s-1).
-    Sl_acl : float
-        Liquid water generated through vapor water liquefaction in the ACL (mol.m-3.s-1).
-    Sl_ccl : float
-        Liquid water generated through vapor water liquefaction in the CCL (mol.m-3.s-1).
-    Sl_cgdl : list
-        Liquid water generated through vapor water liquefaction in the CGDL (mol.m-3.s-1).
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sv : dict</span>
+<span class="sd">        Variables calculated by the solver. They correspond to the fuel cell internal states.</span>
+<span class="sd">        sv is a contraction of solver_variables for enhanced readability.</span>
+<span class="sd">    i_fc : float</span>
+<span class="sd">        Fuel cell current density at time t (A.m-2).</span>
+<span class="sd">    parameters : dict</span>
+<span class="sd">        Parameters of the fuel cell model.</span>
+<span class="sd">    S_abs_acl : float</span>
+<span class="sd">        Water absorption in the ACL (mol.m-3.s-1).</span>
+<span class="sd">    S_abs_ccl : float</span>
+<span class="sd">        Water absorption in the CCL (mol.m-3.s-1).</span>
+<span class="sd">    Sl_agdl : list</span>
+<span class="sd">        Liquid water generated through vapor water liquefaction in the AGDL (mol.m-3.s-1).</span>
+<span class="sd">    Sl_acl : float</span>
+<span class="sd">        Liquid water generated through vapor water liquefaction in the ACL (mol.m-3.s-1).</span>
+<span class="sd">    Sl_ccl : float</span>
+<span class="sd">        Liquid water generated through vapor water liquefaction in the CCL (mol.m-3.s-1).</span>
+<span class="sd">    Sl_cgdl : list</span>
+<span class="sd">        Liquid water generated through vapor water liquefaction in the CGDL (mol.m-3.s-1).</span>
 
-    Returns
-    -------
-    dict
-        Heat transfers occuring inside the fuel cell system.
-    """
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        Heat transfers occuring inside the fuel cell system.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    # ___________________________________________________Preliminaries__________________________________________________
+    <span class="c1"># ___________________________________________________Preliminaries__________________________________________________</span>
 
-    # Extraction of the variables
-    T_agc, T_acl, T_mem, T_ccl, T_cgc = sv['T_agc'], sv['T_acl'], sv['T_mem'], sv['T_ccl'], sv['T_cgc']
-    lambda_acl, lambda_mem, lambda_ccl = sv['lambda_acl'], sv['lambda_mem'], sv['lambda_ccl']
-    s_acl, s_ccl, eta_c = sv['s_acl'], sv['s_ccl'], sv['eta_c']
+    <span class="c1"># Extraction of the variables</span>
+    <span class="n">T_agc</span><span class="p">,</span> <span class="n">T_acl</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">,</span> <span class="n">T_cgc</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_agc&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_acl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_mem&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_ccl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_cgc&#39;</span><span class="p">]</span>
+    <span class="n">lambda_acl</span><span class="p">,</span> <span class="n">lambda_mem</span><span class="p">,</span> <span class="n">lambda_ccl</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;lambda_acl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;lambda_mem&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;lambda_ccl&#39;</span><span class="p">]</span>
+    <span class="n">s_acl</span><span class="p">,</span> <span class="n">s_ccl</span><span class="p">,</span> <span class="n">eta_c</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_acl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_ccl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;eta_c&#39;</span><span class="p">]</span>
 
-    # Extraction of the operating inputs and parameters
-    epsilon_mc, tau, epsilon_gdl = parameters['epsilon_mc'], parameters['tau'], parameters['epsilon_gdl']
-    n_gdl, Hmem, Hgdl, Hcl = parameters['n_gdl'], parameters['Hgdl'], parameters['Hmem'], parameters['Hcl']
+    <span class="c1"># Extraction of the operating inputs and parameters</span>
+    <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_gdl</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;epsilon_mc&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;tau&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;epsilon_gdl&#39;</span><span class="p">]</span>
+    <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">n_gdl</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;epsilon_c&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;n_gdl&#39;</span><span class="p">]</span>
+    <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hcl</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hgdl&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hmem&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hcl&#39;</span><span class="p">]</span>
 
-    # Intermediate values
-    (k_th_eff_agc_agdl, k_th_eff_agdl_agdl, k_th_eff_agdl_acl, k_th_eff_acl_mem, k_th_eff_mem_ccl,
-     k_th_eff_ccl_cgdl, k_th_eff_cgdl_cgdl, k_th_eff_cgdl_cgc) = heat_transfer_int_values(sv, parameters)
+    <span class="c1"># Intermediate values</span>
+    <span class="p">(</span><span class="n">k_th_eff_agc_agdl</span><span class="p">,</span> <span class="n">k_th_eff_agdl_agdl</span><span class="p">,</span> <span class="n">k_th_eff_agdl_acl</span><span class="p">,</span> <span class="n">k_th_eff_acl_mem</span><span class="p">,</span> <span class="n">k_th_eff_mem_ccl</span><span class="p">,</span>
+     <span class="n">k_th_eff_ccl_cgdl</span><span class="p">,</span> <span class="n">k_th_eff_cgdl_cgdl</span><span class="p">,</span> <span class="n">k_th_eff_cgdl_cgc</span><span class="p">)</span> <span class="o">=</span> <span class="n">heat_transfer_int_values</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
 
-    # ______________________________________________Heat flows (J.m-2.s-1)______________________________________________
+    <span class="c1"># ______________________________________________Heat flows (J.m-2.s-1)______________________________________________</span>
 
-    # Anode side
-    Jt_agc_agdl = - 2 * k_th_eff_agc_agdl * (sv['T_agdl_1'] - T_agc) / (Hgdl / n_gdl)
-    Jt_agdl_agdl = {f'agdl_agdl_{i}': -k_th_eff_agdl_agdl[i] * (sv[f'T_agdl_{i+1}'] - sv[f'T_agdl_{i}']) / (Hgdl/n_gdl)
-                    for i in range(1, n_gdl)}
+    <span class="c1"># Anode side</span>
+    <span class="n">Jt_agc_agdl</span> <span class="o">=</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">k_th_eff_agc_agdl</span> <span class="o">*</span> <span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_agdl_1&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">T_agc</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span>
+    <span class="n">Jt_agdl_agdl</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;agdl_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="o">-</span><span class="n">k_th_eff_agdl_agdl</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_agdl_</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span><span class="o">/</span><span class="n">n_gdl</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">)}</span>
 
-    Jt_agdl_acl = - 2 * k_th_eff_agdl_acl * (T_acl - sv[f'T_agdl_{n_gdl}']) / (Hgdl / n_gdl + Hcl)
+    <span class="n">Jt_agdl_acl</span> <span class="o">=</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">k_th_eff_agdl_acl</span> <span class="o">*</span> <span class="p">(</span><span class="n">T_acl</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="n">Hcl</span><span class="p">)</span>
 
-    # Membrane side
-    Jt_acl_mem = - 2 * k_th_eff_acl_mem * (T_mem - T_acl) / (Hcl + Hmem)
-    Jt_mem_ccl = - 2 * k_th_eff_mem_ccl * (T_ccl - T_mem) / (Hcl + Hmem)
+    <span class="c1"># Membrane side</span>
+    <span class="n">Jt_acl_mem</span> <span class="o">=</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">k_th_eff_acl_mem</span> <span class="o">*</span> <span class="p">(</span><span class="n">T_mem</span> <span class="o">-</span> <span class="n">T_acl</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hcl</span> <span class="o">+</span> <span class="n">Hmem</span><span class="p">)</span>
+    <span class="n">Jt_mem_ccl</span> <span class="o">=</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">k_th_eff_mem_ccl</span> <span class="o">*</span> <span class="p">(</span><span class="n">T_ccl</span> <span class="o">-</span> <span class="n">T_mem</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hcl</span> <span class="o">+</span> <span class="n">Hmem</span><span class="p">)</span>
 
-    # Cathode side
-    Jt_ccl_cgdl = - 2 * k_th_eff_ccl_cgdl * (sv['T_cgdl_1'] - T_ccl) / (Hgdl / n_gdl + Hcl)
-    Jt_cgdl_cgdl = {f'cgdl_cgdl_{i}': -k_th_eff_cgdl_cgdl[i] * (sv[f'T_cgdl_{i+1}'] - sv[f'T_cgdl_{i}']) / (Hgdl/n_gdl)
-                    for i in range(1, n_gdl)}
+    <span class="c1"># Cathode side</span>
+    <span class="n">Jt_ccl_cgdl</span> <span class="o">=</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">k_th_eff_ccl_cgdl</span> <span class="o">*</span> <span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_cgdl_1&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">T_ccl</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="n">Hcl</span><span class="p">)</span>
+    <span class="n">Jt_cgdl_cgdl</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;cgdl_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="o">-</span><span class="n">k_th_eff_cgdl_cgdl</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span><span class="o">/</span><span class="n">n_gdl</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">)}</span>
 
-    Jt_cgdl_cgc = - 2 * k_th_eff_cgdl_cgc * (T_cgc - sv[f'T_cgdl_{n_gdl}']) / (Hgdl / n_gdl)
+    <span class="n">Jt_cgdl_cgc</span> <span class="o">=</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">k_th_eff_cgdl_cgc</span> <span class="o">*</span> <span class="p">(</span><span class="n">T_cgc</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_cgdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span>
 
-    Jt = {'agc_agdl': Jt_agc_agdl, **Jt_agdl_agdl, 'agdl_acl': Jt_agdl_acl, 'acl_mem': Jt_acl_mem,
-          'mem_ccl': Jt_mem_ccl, 'ccl_cgdl': Jt_ccl_cgdl, **Jt_cgdl_cgdl, 'cgdl_cgc': Jt_cgdl_cgc}
+    <span class="n">Jt</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;agc_agdl&#39;</span><span class="p">:</span> <span class="n">Jt_agc_agdl</span><span class="p">,</span> <span class="o">**</span><span class="n">Jt_agdl_agdl</span><span class="p">,</span> <span class="s1">&#39;agdl_acl&#39;</span><span class="p">:</span> <span class="n">Jt_agdl_acl</span><span class="p">,</span> <span class="s1">&#39;acl_mem&#39;</span><span class="p">:</span> <span class="n">Jt_acl_mem</span><span class="p">,</span>
+          <span class="s1">&#39;mem_ccl&#39;</span><span class="p">:</span> <span class="n">Jt_mem_ccl</span><span class="p">,</span> <span class="s1">&#39;ccl_cgdl&#39;</span><span class="p">:</span> <span class="n">Jt_ccl_cgdl</span><span class="p">,</span> <span class="o">**</span><span class="n">Jt_cgdl_cgdl</span><span class="p">,</span> <span class="s1">&#39;cgdl_cgc&#39;</span><span class="p">:</span> <span class="n">Jt_cgdl_cgc</span><span class="p">}</span>
 
-    # ____________________________________________Heat generated (J.m-3.s-1)____________________________________________
+    <span class="c1"># ____________________________________________Heat generated (J.m-3.s-1)____________________________________________</span>
 
-    # The heat dissipated by the electrochemical reaction 2*H2 + O2 -&gt; 2*H2O, in J.m-3.s-1.
-    #    It is given by the sum of Peltier and activation heats [vetterFreeOpenReference2019].
-    S_r_acl = i_fc / (2 * F * Hcl) # mol.m-3.s-1. It is the amount of hydrogen consumed at the ACL.
-    S_r_ccl = i_fc / (4 * F * Hcl) # mol.m-3.s-1. It is the amount of oxygen consumed at the CCL.
-    Q_r = {'acl': S_r_acl * T_acl * (-delta_s_HOR),
-           'ccl': S_r_ccl * T_ccl * (-delta_s_ORR) + i_fc * eta_c / Hcl}
+    <span class="c1"># The heat dissipated by the electrochemical reaction 2*H2 + O2 -&gt; 2*H2O, in J.m-3.s-1.</span>
+    <span class="c1">#    It is given by the sum of Peltier and activation heats [vetterFreeOpenReference2019].</span>
+    <span class="n">S_r_acl</span> <span class="o">=</span> <span class="n">i_fc</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">F</span> <span class="o">*</span> <span class="n">Hcl</span><span class="p">)</span> <span class="c1"># mol.m-3.s-1. It is the amount of hydrogen consumed at the ACL.</span>
+    <span class="n">S_r_ccl</span> <span class="o">=</span> <span class="n">i_fc</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">F</span> <span class="o">*</span> <span class="n">Hcl</span><span class="p">)</span> <span class="c1"># mol.m-3.s-1. It is the amount of oxygen consumed at the CCL.</span>
+    <span class="n">Q_r</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;acl&#39;</span><span class="p">:</span> <span class="n">S_r_acl</span> <span class="o">*</span> <span class="n">T_acl</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">delta_s_HOR</span><span class="p">),</span>
+           <span class="s1">&#39;ccl&#39;</span><span class="p">:</span> <span class="n">S_r_ccl</span> <span class="o">*</span> <span class="n">T_ccl</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">delta_s_ORR</span><span class="p">)</span> <span class="o">+</span> <span class="n">i_fc</span> <span class="o">*</span> <span class="n">eta_c</span> <span class="o">/</span> <span class="n">Hcl</span><span class="p">}</span>
 
-    # The heat dissipated by the absorption of water from the CL to the membrane, in J.m-3.s-1.
-    Q_sorp = {'acl': S_abs_acl * (-delta_h_abs(T_acl)),
-              'ccl': S_abs_ccl * (-delta_h_abs(T_ccl))}
+    <span class="c1"># The heat dissipated by the absorption of water from the CL to the membrane, in J.m-3.s-1.</span>
+    <span class="n">Q_sorp</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;acl&#39;</span><span class="p">:</span> <span class="n">S_abs_acl</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">delta_h_abs</span><span class="p">(</span><span class="n">T_acl</span><span class="p">)),</span>
+              <span class="s1">&#39;ccl&#39;</span><span class="p">:</span> <span class="n">S_abs_ccl</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">delta_h_abs</span><span class="p">(</span><span class="n">T_ccl</span><span class="p">))}</span>
 
-    # The heat dissipated by the liquefaction of vapor water, in J.m-3.s-1.
-    Q_liq = {**{f'agdl_{i}': Sl_agdl[i] * (- delta_h_liq(sv[f'T_agdl_{i}'])) for i in range(1, n_gdl + 1)},
-            **{f'cgdl_{i}': Sl_cgdl[i] * (- delta_h_liq(sv[f'T_cgdl_{i}'])) for i in range(1, n_gdl + 1)},
-            'acl': Sl_acl * (-delta_h_liq(T_acl)),
-            'ccl': Sl_ccl * (-delta_h_liq(T_ccl))}
+    <span class="c1"># The heat dissipated by the liquefaction of vapor water, in J.m-3.s-1.</span>
+    <span class="n">Q_liq</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="p">{</span><span class="sa">f</span><span class="s1">&#39;agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">Sl_agdl</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span> <span class="n">delta_h_liq</span><span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)},</span>
+            <span class="o">**</span><span class="p">{</span><span class="sa">f</span><span class="s1">&#39;cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">Sl_cgdl</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span> <span class="n">delta_h_liq</span><span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)},</span>
+            <span class="s1">&#39;acl&#39;</span><span class="p">:</span> <span class="n">Sl_acl</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">delta_h_liq</span><span class="p">(</span><span class="n">T_acl</span><span class="p">)),</span>
+            <span class="s1">&#39;ccl&#39;</span><span class="p">:</span> <span class="n">Sl_ccl</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">delta_h_liq</span><span class="p">(</span><span class="n">T_ccl</span><span class="p">))}</span>
 
-    # The heat dissipated by the ionic currents (Joule heating + Ohm's law), in J.m-3.s-1.
-    Q_p = {'mem': i_fc ** 2 / sigma_p_eff('mem', lambda_mem, T_mem),
-           'ccl': i_fc ** 2 / (3 * sigma_p_eff('ccl', lambda_ccl, T_ccl, epsilon_mc, tau))}
+    <span class="c1"># The heat dissipated by the ionic currents (Joule heating + Ohm&#39;s law), in J.m-3.s-1.</span>
+    <span class="n">Q_p</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;mem&#39;</span><span class="p">:</span> <span class="n">i_fc</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">sigma_p_eff</span><span class="p">(</span><span class="s1">&#39;mem&#39;</span><span class="p">,</span> <span class="n">lambda_mem</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">),</span>
+           <span class="s1">&#39;ccl&#39;</span><span class="p">:</span> <span class="n">i_fc</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">sigma_p_eff</span><span class="p">(</span><span class="s1">&#39;ccl&#39;</span><span class="p">,</span> <span class="n">lambda_ccl</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">))}</span>
 
-    # The heat dissipated by the electric currents (Joule heating + Ohm's law), in J.m-3.s-1.
-    Q_e = {**{f'agdl_{i}': i_fc ** 2 / sigma_e_eff('gdl', epsilon_gdl) for i in range(1, n_gdl + 1)},
-           'acl': i_fc ** 2 / sigma_e_eff('cl', epsilon_cl, epsilon_mc, tau),
-           'ccl': i_fc ** 2 / (3 * sigma_e_eff('cl', epsilon_cl, epsilon_mc, tau)),
-           **{f'cgdl_{i}': i_fc ** 2 / sigma_e_eff('gdl', epsilon_gdl) for i in range(1, n_gdl + 1)}}
+    <span class="c1"># The heat dissipated by the electric currents (Joule heating + Ohm&#39;s law), in J.m-3.s-1.</span>
+    <span class="n">Q_e</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="p">{</span><span class="sa">f</span><span class="s1">&#39;agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">i_fc</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">sigma_e_eff</span><span class="p">(</span><span class="s1">&#39;gdl&#39;</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="o">=</span><span class="n">epsilon_c</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)},</span>
+           <span class="s1">&#39;acl&#39;</span><span class="p">:</span> <span class="n">i_fc</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">sigma_e_eff</span><span class="p">(</span><span class="s1">&#39;cl&#39;</span><span class="p">,</span> <span class="n">epsilon_cl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="o">=</span><span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">),</span>
+           <span class="s1">&#39;ccl&#39;</span><span class="p">:</span> <span class="n">i_fc</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">sigma_e_eff</span><span class="p">(</span><span class="s1">&#39;cl&#39;</span><span class="p">,</span> <span class="n">epsilon_cl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="o">=</span><span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">)),</span>
+           <span class="o">**</span><span class="p">{</span><span class="sa">f</span><span class="s1">&#39;cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">i_fc</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">sigma_e_eff</span><span class="p">(</span><span class="s1">&#39;gdl&#39;</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="o">=</span><span class="n">epsilon_c</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)}}</span>
 
-    return {'Jt': Jt, 'Q_r': Q_r, 'Q_sorp': Q_sorp, 'Q_liq': Q_liq, 'Q_p': Q_p, 'Q_e': Q_e}</code></pre>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;Jt&#39;</span><span class="p">:</span> <span class="n">Jt</span><span class="p">,</span> <span class="s1">&#39;Q_r&#39;</span><span class="p">:</span> <span class="n">Q_r</span><span class="p">,</span> <span class="s1">&#39;Q_sorp&#39;</span><span class="p">:</span> <span class="n">Q_sorp</span><span class="p">,</span> <span class="s1">&#39;Q_liq&#39;</span><span class="p">:</span> <span class="n">Q_liq</span><span class="p">,</span> <span class="s1">&#39;Q_p&#39;</span><span class="p">:</span> <span class="n">Q_p</span><span class="p">,</span> <span class="s1">&#39;Q_e&#39;</span><span class="p">:</span> <span class="n">Q_e</span><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
             </details>
     </div>
 

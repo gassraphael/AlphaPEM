@@ -171,7 +171,7 @@
 
 
 <h2 id="model.control.control_operating_conditions" class="doc doc-heading">
-            <code class="highlight language-python">control_operating_conditions(t, solver_variables, operating_inputs, parameters, control_variables)</code>
+            <code class="highlight language-python"><span class="n">control_operating_conditions</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">solver_variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">)</span></code>
 
 </h2>
 
@@ -239,62 +239,118 @@ This is an elementary rule-based control, serving as a demonstrator. It will nee
 </table>
             <details class="quote">
               <summary>Source code in <code>model/control.py</code></summary>
-              <pre class="highlight"><code class="language-python">def control_operating_conditions(t, solver_variables, operating_inputs, parameters, control_variables):
-    """This function controls the operating conditions of the MEA system, if required.
-    This is an elementary rule-based control, serving as a demonstrator. It will need to be improved in the future.
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">control_operating_conditions</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">solver_variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function controls the operating conditions of the MEA system, if required.</span>
+<span class="sd">    This is an elementary rule-based control, serving as a demonstrator. It will need to be improved in the future.</span>
 
-    Parameters
-    ----------
-    t : float
-        Time (s).
-    solver_variables : dict
-        Dictionary containing the solver variables.
-    operating_inputs : dict
-        Dictionary containing the operating inputs.
-    parameters : dict
-        Dictionary containing the parameters.
-    control_variables : dict
-        Dictionary containing the control variables.
-    """
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    t : float</span>
+<span class="sd">        Time (s).</span>
+<span class="sd">    solver_variables : dict</span>
+<span class="sd">        Dictionary containing the solver variables.</span>
+<span class="sd">    operating_inputs : dict</span>
+<span class="sd">        Dictionary containing the operating inputs.</span>
+<span class="sd">    parameters : dict</span>
+<span class="sd">        Dictionary containing the parameters.</span>
+<span class="sd">    control_variables : dict</span>
+<span class="sd">        Dictionary containing the control variables.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    if parameters["type_control"] != "Phi_des":
-        raise ValueError('You have to specify a type_control which is accepted.')
+    <span class="k">if</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;type_control&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;Phi_des&quot;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;You have to specify a type_control which is accepted.&#39;</span><span class="p">)</span>
 
-    elif parameters["type_control"] == "Phi_des":
-        # Initialisation
-        delta_t_control_Phi = 20  # s. Every delta_t_control_Phi second the cell humidity is controlled.
-        delta_Phi_des = 0.01  # Arbitrary value for the step change of Phi_des.
-        slim = parameters['a_slim'] * (operating_inputs['Pc_des'] / 1e5) + parameters['b_slim']
-        s_ccl_max = 0.55 * slim  # An arbitrary margin for s_ccl is established to ensure the CCL is not too flooded.
-        #                          I may take s_switch instead of 0.55 ?
-        lambda_mem_min = 8  # An arbitrary margin for lambda_mem is established to ensure the membrane is not too dry.
+    <span class="k">elif</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;type_control&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Phi_des&quot;</span><span class="p">:</span>
+        <span class="c1"># Initialisation</span>
+        <span class="n">delta_t_control_Phi</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># s. Every delta_t_control_Phi second the cell humidity is controlled.</span>
+        <span class="n">delta_Phi_des</span> <span class="o">=</span> <span class="mf">0.01</span>  <span class="c1"># Arbitrary value for the step change of Phi_des.</span>
+        <span class="n">slim</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;a_slim&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Pc_des&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1e5</span><span class="p">)</span> <span class="o">+</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;b_slim&#39;</span><span class="p">]</span>
+        <span class="n">s_ccl_max</span> <span class="o">=</span> <span class="mf">0.55</span> <span class="o">*</span> <span class="n">slim</span>  <span class="c1"># An arbitrary margin for s_ccl is established to ensure the CCL is not too flooded.</span>
+        <span class="c1">#                          I may take s_switch instead of 0.55 ?</span>
+        <span class="n">lambda_mem_min</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c1"># An arbitrary margin for lambda_mem is established to ensure the membrane is not too dry.</span>
 
-        # Control on Phi_des
-        #       Every delta_t_control_Phi second, Phi_a_des is monitored for controlling the cell humidity.
-        if t &gt; (control_variables['t_control_Phi'] + delta_t_control_Phi):  # s.
-            control_variables['t_control_Phi'] = control_variables['t_control_Phi'] + delta_t_control_Phi
+        <span class="c1"># Control on Phi_des</span>
+        <span class="c1">#       Every delta_t_control_Phi second, Phi_a_des is monitored for controlling the cell humidity.</span>
+        <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;t_control_Phi&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">delta_t_control_Phi</span><span class="p">):</span>  <span class="c1"># s.</span>
+            <span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;t_control_Phi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;t_control_Phi&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">delta_t_control_Phi</span>
 
-            # Flooding is likely.
-            if solver_variables['s_ccl'] &gt; s_ccl_max and solver_variables['lambda_mem'] &gt; lambda_mem_min:
-                if control_variables['Phi_a_des'] - delta_Phi_des &gt;= 0:
-                    control_variables['Phi_a_des'] = control_variables['Phi_a_des'] - delta_Phi_des
-                if control_variables['Phi_c_des'] - delta_Phi_des &gt;= 0:
-                    control_variables['Phi_c_des'] = control_variables['Phi_c_des'] - delta_Phi_des
+            <span class="c1"># Flooding is likely.</span>
+            <span class="k">if</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;s_ccl&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">s_ccl_max</span> <span class="ow">and</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;lambda_mem&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">lambda_mem_min</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_a_des&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">delta_Phi_des</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_a_des&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_a_des&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">delta_Phi_des</span>
+                <span class="k">if</span> <span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">delta_Phi_des</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">delta_Phi_des</span>
 
-            # Drying out is likely.
-            elif solver_variables['lambda_mem'] &lt; lambda_mem_min and solver_variables['s_ccl'] &lt; s_ccl_max:
-                if control_variables['Phi_a_des'] + delta_Phi_des &lt;= 1:
-                    control_variables['Phi_a_des'] = control_variables['Phi_a_des'] + delta_Phi_des
-                if control_variables['Phi_c_des'] + delta_Phi_des &lt;= 1:
-                    control_variables['Phi_c_des'] = control_variables['Phi_c_des'] + delta_Phi_des
+            <span class="c1"># Drying out is likely.</span>
+            <span class="k">elif</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;lambda_mem&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">lambda_mem_min</span> <span class="ow">and</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;s_ccl&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">s_ccl_max</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_a_des&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">delta_Phi_des</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_a_des&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_a_des&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">delta_Phi_des</span>
+                <span class="k">if</span> <span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">delta_Phi_des</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">delta_Phi_des</span>
 
-            # Both flooding and drying out are likely. Nothing can be done.
-            elif solver_variables['s_ccl'] &gt; s_ccl_max and solver_variables['lambda_mem'] &lt; lambda_mem_min:
-                pass
+            <span class="c1"># Both flooding and drying out are likely. Nothing can be done.</span>
+            <span class="k">elif</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;s_ccl&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">s_ccl_max</span> <span class="ow">and</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;lambda_mem&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">lambda_mem_min</span><span class="p">:</span>
+                <span class="k">pass</span>
 
-            # Both flooding and drying out are unlikely. It is the desired situation.
-            else:  # elif solver_variables['s_ccl'] &lt; s_ccl_max and solver_variables['lambda_mem'] &gt; lambda_mem_min:
-                pass</code></pre>
+            <span class="c1"># Both flooding and drying out are unlikely. It is the desired situation.</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># elif solver_variables[&#39;s_ccl&#39;] &lt; s_ccl_max and solver_variables[&#39;lambda_mem&#39;] &gt; lambda_mem_min:</span>
+                <span class="k">pass</span>
+</code></pre></div></td></tr></table></div>
             </details>
     </div>
 
