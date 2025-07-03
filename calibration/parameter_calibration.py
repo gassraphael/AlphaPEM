@@ -10,8 +10,9 @@ This file is designated for executing the undetermined parameters' calibration.
 import sys
 import os
 import time
-import matplotlib.pyplot as plt
 import pygad
+import matplotlib.pyplot as plt
+import numpy as np
 
 # Importing constants' value and functions
 sys.path.append(os.path.abspath('..'))  # Add parent (root) folder path to list of module search paths
@@ -79,7 +80,8 @@ num_generations = 1 # It should be between 1000 and 1500, depending on the popul
     #                 for a good compromise between speed and precision.
     # Initial population (one solution means a member of the population):
         # 1) custom initial population.
-initial_population = None
+#initial_population = None # It is the initial population, which can be loaded from a file.
+initial_population = pygad.load(filename="results/EH-31/parameter_calibration_1").population
         # 2) random initial population.
 sol_per_pop = 16 # It is the population size. It should be between 100 and 200 for a good compromise between speed and
     #              precision. Select a multiple of the available number of CPU cores for optimal multiprocessing.
@@ -106,9 +108,9 @@ T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2, i_max_pola_2,
     delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, t_purge, max_step, n_gdl, i_exp2, U_exp2 \
     = determined_parameters(type_fuel_cell_2)
 
-# _________________________________________________Function to maximize_________________________________________________
+# _______________________________________________________Functions______________________________________________________
 
-def pola_points(ga_instance, solution, solution_idx):
+def pola_points(ga_instance, solution, solution_idx): # Function to maximize.
     """
     This function calculates first the maximum error between the simulated polarization curves and the experimental
     ones. Then, it returns the inverse of this error as the fitness value to maximize by the genetic algorithm.
@@ -153,6 +155,32 @@ def pola_points(ga_instance, solution, solution_idx):
     fitness = 1.0 / sim_error # pygad maximise the fitness value, not the error value, so the inverse is taken.
     return fitness
 
+last_fitness = 0
+def callback_generation(ga_instance):
+    """
+    Function to display the generation number and the fitness value, and to save the GA instance.
+
+    Parameters
+    ----------
+    ga_instance : PyGAD object
+        An instance of the PyGAD library, which is used to perform the optimization.
+
+    Returns
+    -------
+    None
+        This function does not return any value. It is used as a callback function to display information during the
+    optimization process and to save the GA instance..
+    """
+    global last_fitness
+    idx = np.argmax(ga_instance.last_generation_fitness)  # Get the index of the best solution in the last generation.
+    fitness = ga_instance.last_generation_fitness[idx]  # Get the fitness value of the best solution.
+    print(f"Generation = {ga_instance.generations_completed} / {num_generations+1} "
+          f"= {ga_instance.generations_completed/(num_generations+1)*100:.2f}%")
+    print(f"Fitness    = {fitness}")
+    print(f"Change     = {fitness - last_fitness}")
+    last_fitness = fitness
+    ga_instance.save(filename="parameter_calibration_ongoing")  # Save the GA instance.
+
 # ____________________________________________________Main program______________________________________________________
 """
 This section is dedicated to ensuring the proper execution of the calibration. 
@@ -172,6 +200,7 @@ if __name__ == '__main__':
         num_generations=num_generations, # Number of generations.
         num_parents_mating=num_parents_mating, # Number of solutions to be selected as parents in the mating pool.
         fitness_func=pola_points, # Function to maximize.
+        initial_population=initial_population, # Initial population. It can be None for a random population.
         sol_per_pop=sol_per_pop, # Population size. It is the number of solutions in the population.
         num_genes=num_genes, # Number of genes in the solution.
         gene_space=gene_space, # Bounds of the undetermined parameters.
@@ -181,39 +210,26 @@ if __name__ == '__main__':
         mutation_type="random", # Mutation type. "random" means random mutation.
         mutation_num_genes=mutation_num_genes, # Number of genes to mutate.
         stop_criteria=["reach_2"], # Stop when the error is less than 0.5%
-        parallel_processing = ["process", os.cpu_count()]  # Use multiprocessing with the number of CPU cores available.
+        parallel_processing = ["process", os.cpu_count()],  # Use multiprocessing with the number of CPU cores available.
+        on_generation = callback_generation # Callback function to display the generation number and the fitness value.
     )
-    unfinished = True  # As long as this value remains true, the execution of the GeneticAlgorithm restart.
-    while unfinished:
-        try:
-            ga_instance.run() # Run the genetic algorithm.
-        except ValueError:
-            print("\nA ValueError has been detected due to a parameter combination that is challenging to satisfy "
-                  "with the current max_step value, which is too high in the model. The program is relaunched.")
-        except TypeError:
-            print("\nTypeError has been detected due to a parameter combination that is challenging to satisfy "
-                  "with the current max_step value, which is too high in the model. The program is relaunched.")
-        except AssertionError:
-            print("\nAssertionError has been detected due to a parameter combination that is challenging to satisfy "
-                  "with the current max_step value, which is too high in the model. The program is relaunched.")
-        else:  # Loop exit
-            unfinished = False
+    ga_instance.run() # Run the genetic algorithm.
 
     # Recovery of the results
     ga_instance.plot_fitness() # Plot the fitness value of the best solution at each generation.
-    solution, solution_fitness, solution_idx = ga_instance.best_solution() # solution is the best solution found,
-    #                                                        solution_fitness is the fitness value of the best solution,
-    #                                              and solution_idx is the index of the best solution in the population.
+    idx = np.argmax(ga_instance.last_generation_fitness) # Get the index of the best solution in the last generation.
+    solution = ga_instance.population[idx] # Get the best solution from the last generation.
+    solution_fitness = ga_instance.last_generation_fitness[idx] # Get the fitness value of the best solution.
     epsilon_gdl, epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch = solution
     sim_error = 1.0 / solution_fitness  # The error is the inverse of the fitness value.
 
     # Print of the parameter calibration results
     convergence = [float(1.0 / f) for f in ga_instance.best_solutions_fitness]
-    print_calibration_results(convergence, epsilon_gdl, epsilon_mc, tau, epsilon_c, e,
+    print_calibration_results(convergence, ga_instance, epsilon_gdl, epsilon_mc, tau, epsilon_c, e,
                               Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, sim_error)
 
-    # Save data in a text file
-    save_calibration_results(convergence, epsilon_gdl, epsilon_mc, tau, epsilon_c, e,
+    # Save the data in files
+    save_calibration_results(convergence, ga_instance, epsilon_gdl, epsilon_mc, tau, epsilon_c, e,
                              Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, sim_error, type_fuel_cell_1)
 
     # Calculate, display and save the calibrated and experimental polarization curve
