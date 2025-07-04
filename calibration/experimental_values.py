@@ -133,25 +133,6 @@ def pola_exp_values(type_fuel_cell):
         U_exp_t[50], U_exp_t[51], U_exp_t[52], U_exp_t[53], U_exp_t[54] = 0.566, 0.555, 0.546, 0.537, 0.531
         U_exp_t[55] = 0.524
 
-    elif type_fuel_cell == "BX_1.0":  # at 1.0 atm
-        # Current density
-        i_exp_t = np.zeros(9)
-        i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.00, 0.07, 0.17, 0.31, 0.48
-        i_exp_t[5], i_exp_t[6], i_exp_t[7], i_exp_t[8] = 0.63, 0.74, 0.88, 0.99
-        # Voltage
-        U_exp_t = np.zeros(9)
-        U_exp_t[0], U_exp_t[1], U_exp_t[2], U_exp_t[3], U_exp_t[4] = 0.97, 0.80, 0.75, 0.70, 0.65
-        U_exp_t[5], U_exp_t[6], U_exp_t[7], U_exp_t[8] = 0.60, 0.55, 0.50, 0.44
-    elif type_fuel_cell == "BX_1.35":  # at 1.35 atm
-        # Current density
-        i_exp_t = np.zeros(7)
-        i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3] = 0.00, 0.07, 0.23, 0.52
-        i_exp_t[4], i_exp_t[5], i_exp_t[6] = 0.86, 1.13, 1.35
-        # Voltage
-        U_exp_t = np.zeros(7)
-        U_exp_t[0], U_exp_t[1], U_exp_t[2], U_exp_t[3] = 0.94, 0.80, 0.75, 0.70
-        U_exp_t[4], U_exp_t[5], U_exp_t[6] = 0.65, 0.60, 0.55
-
     elif type_fuel_cell == "LF":
         # Current density
         i_exp_t = np.zeros(13)
@@ -166,6 +147,67 @@ def pola_exp_values(type_fuel_cell):
 
     return i_exp_t, U_exp_t
 
+def pola_exp_values_calibration(type_fuel_cell):
+    """
+    This function returns the experimental values of polarisation curves made on different fuel cells at different
+    operating conditions. The experimental values are used for calibrating the model and so are composed of a reduced
+    number of points compare to the pola_exp_values function. These points are specifically chosen to be as few as
+    possible while still providing a good representation of the polarisation curve.
+
+    Parameters
+    ----------
+    type_fuel_cell : str
+        Type of fuel cell used in the model. This parameter includes the fuel cell used in the model and the
+        corresponding operating conditions.
+
+    Returns
+    -------
+    i_exp_t : numpy.ndarray
+        Experimental values of the current density.
+    U_exp_t : numpy.ndarray
+        Experimental values of the voltage.
+
+    """
+    if type_fuel_cell == "EH-31_1.5":  # at 1.5 bar
+        # Current density
+        i_exp_cali_t = np.zeros(7)
+        i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.050, 0.110, 0.293, 1.039
+        i_exp_cali_t[4], i_exp_cali_t[5], i_exp_cali_t[6] = 1.683, 1.966, 2.246
+        # Voltage
+        U_exp_cali_t = np.zeros(7)
+        U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.900, 0.850, 0.794, 0.681
+        U_exp_cali_t[4], U_exp_cali_t[5], U_exp_cali_t[6] = 0.599, 0.556, 0.500
+    elif type_fuel_cell == "EH-31_2.0":  # at 2.0 bar
+        # Current density
+        i_exp_cali_t = np.zeros(8)
+        i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.050, 0.106, 0.242, 0.681
+        i_exp_cali_t[4], i_exp_cali_t[5], i_exp_cali_t[6], i_exp_cali_t[7] = 1.242, 1.501, 1.979, 2.459
+        # Voltage
+        U_exp_cali_t = np.zeros(8)
+        U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.900, 0.860, 0.830, 0.759
+        U_exp_cali_t[4], U_exp_cali_t[5], U_exp_cali_t[6], U_exp_cali_t[7] = 0.698, 0.668, 0.598, 0.502
+    elif type_fuel_cell == "EH-31_2.25":  # at 2.25 bar
+        # Current density
+        i_exp_cali_t = np.zeros(8)
+        i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.056, 0.183, 0.364, 1.011
+        i_exp_cali_t[4], i_exp_cali_t[5], i_exp_cali_t[6], i_exp_cali_t[7] = 1.675, 1.918, 2.356, 2.794
+        # Voltage
+        U_exp_cali_t = np.zeros(8)
+        U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.894, 0.854, 0.819, 0.746
+        U_exp_cali_t[4], U_exp_cali_t[5], U_exp_cali_t[6], U_exp_cali_t[7] = 0.678, 0.647, 0.580, 0.497
+    elif type_fuel_cell == "EH-31_2.5":  # at 2.5 bar
+        # Current density
+        i_exp_cali_t = np.zeros(10)
+        i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.057, 0.127, 0.296, 0.527
+        i_exp_cali_t[4], i_exp_cali_t[5], i_exp_cali_t[6], i_exp_cali_t[7] = 1.030, 1.514, 1.972, 2.358
+        i_exp_cali_t[8], i_exp_cali_t[9] = 2.691, 2.988
+        # Voltage
+        U_exp_cali_t = np.zeros(10)
+        U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.900, 0.866, 0.835, 0.800
+        U_exp_cali_t[4], U_exp_cali_t[5], U_exp_cali_t[6], U_exp_cali_t[7] = 0.758, 0.712, 0.663, 0.621
+        U_exp_cali_t[8], U_exp_cali_t[9] = 0.575, 0.524
+
+    return i_exp_cali_t, U_exp_cali_t
 
 def plot_experimental_polarisation_curve(type_fuel_cell, i_fc_t, U_exp_t, ax):
     """

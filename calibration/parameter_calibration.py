@@ -80,8 +80,8 @@ num_generations = 1 # It should be between 1000 and 1500, depending on the popul
     #                 for a good compromise between speed and precision.
     # Initial population (one solution means a member of the population):
         # 1) custom initial population.
-#initial_population = None # It is the initial population, which can be loaded from a file.
-initial_population = pygad.load(filename="results/EH-31/parameter_calibration_1").population
+initial_population = None # It is the initial population, which can be loaded from a file.
+# initial_population = pygad.load(filename="results/EH-31/parameter_calibration_1").population
         # 2) random initial population.
 sol_per_pop = 16 # It is the population size. It should be between 100 and 200 for a good compromise between speed and
     #              precision. Select a multiple of the available number of CPU cores for optimal multiprocessing.

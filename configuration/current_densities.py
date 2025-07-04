@@ -13,6 +13,7 @@ import math
 
 # Importing functions
 from modules.settings_modules import EIS_parameters
+from calibration.experimental_values import pola_exp_values_calibration
 
 # General edition
 mpl.rcParams['font.family'] = 'cmr10'  # 'cmr10' for English characters and 'DejaVu Serif' for French ones
@@ -143,10 +144,56 @@ def EIS_current(t, parameters):
     return i_fc
 
 
+def calibration_current(t, type_fuel_cell):
+    """
+    Represents a current density used for creating a polarisation curve dedicated to the calibration of a specific fuel
+    cell. The principle is similar to the polarization_current function, but it uses experimental values for the current
+    density load. The current density starts at 0 and increases according to the experimental values, with a
+    loading time of delta_t_load_pola seconds and a breaking time of delta_t_break_pola seconds. The initial break time
+    is set to delta_t_ini_pola seconds to ensure homogeneity inside the cell before starting the measurements.
+
+    Parameters:
+    ----------
+    t : float
+        Time in seconds.
+    type_fuel_cell : str
+        The type of fuel cell for which the calibration is performed.
+
+    Returns:
+    -------
+    i_fc : float
+        The polarisation current density at time t.
+    """
+
+    # Initialisation
+    i_exp_cali_t, U_exp_cali_t = pola_exp_values_calibration(type_fuel_cell)  # (A.m-2, V). It is the experimental
+    #                                                           current density and voltage values for the calibration.
+    i_exp_cali_t = i_exp_cali_t * 1e4  # Conversion in A.m-2
+    delta_t_load_pola, delta_t_break_pola = 30, 30  # (s, s). It is the loading time and the breaking time.
+    delta_t_ini_pola = 1 * 60 # s. It is the initial breaking time for having homogeneity inside the cell
+    delta_t = delta_t_load_pola + delta_t_break_pola  # s. It is the time of one load.
+
+    # Current density for the polarization curve
+    i_fc = 0  # A.m-2. Initialisation of the current density.
+    if t < delta_t_ini_pola:  # It is the initial break for having homogeneity inside the cell
+        i_fc = 0  # before starting the measurements.
+    else:
+        for i in range(len(i_exp_cali_t)):
+            if i == 0:
+                i_fc += i_exp_cali_t[0] * (1.0 + math.tanh(4 * (t - delta_t_ini_pola - delta_t - (delta_t_load_pola / 2)) /
+                                            delta_t_load_pola)) / 2
+            else:
+                t_switch = delta_t * i  # The current density value changes around this time.
+                i_fc += (i_exp_cali_t[i] - i_exp_cali_t[i-1]) * (1.0 + math.tanh(4 * (t - delta_t_ini_pola - delta_t - t_switch - (delta_t_load_pola / 2)) /
+                                                 delta_t_load_pola)) / 2
+
+    return i_fc
+
+
 # _________________________________________________Test of the program__________________________________________________
 
 if __name__ == "__main__":
-    fig, ax = plt.subplots(1, 3, figsize=(18, 6))
+    fig, ax = plt.subplots(1, 4, figsize=(24, 6))
 
     # Tests for step_current curve:
     #   step_current parameters
@@ -227,4 +274,25 @@ if __name__ == "__main__":
     ax[2].set_ylabel(r'Current density $\mathregular{i_{fc}}$ $\mathregular{\left( A.cm^{-2} \right)}$', labelpad=3)
     ax[2].set_title('The current density behaviour over time\nfor an EIS curve')
     ax[2].legend([r'$\mathregular{i_{fc}}$ (EIS)'], loc='best')
+    plt.show()
+
+    # Tests for calibration curves:
+    type_fuel_cell = "EH-31_2.0" # The type of fuel cell for which the calibration is performed.
+    i_exp_cali_t, U_exp_cali_t = pola_exp_values_calibration(type_fuel_cell)  # (A.m-2, V). It is the experimental
+    #                                                           current density and voltage values for the calibration.
+    delta_t_load_pola, delta_t_break_pola = 30, 30  # (s, s). It is the loading time and the breaking time.
+    delta_t_ini_pola = 1 * 60  # s. It is the initial breaking time for having homogeneity inside the cell
+    t0 = 0
+    tf = delta_t_ini_pola + (len(i_exp_cali_t)+1) * (delta_t_load_pola + delta_t_break_pola)
+    #   Display
+    n = 10000
+    t = np.linspace(t0, tf, n)
+    i_fc = np.zeros(n)
+    for i in range(n):
+        i_fc[i] = calibration_current(t[i], type_fuel_cell) / 10000  # Conversion in A/cm²
+    ax[3].plot(t, i_fc, color=colors(1), label=r'$\mathregular{i_{fc}}$ (pola)')
+    ax[3].set_xlabel(r'Time $\mathregular{t}$ $\mathregular{\left( s \right)}$', labelpad=3)
+    ax[3].set_ylabel(r'Current density $\mathregular{i_{fc}}$ $\mathregular{\left( A.cm^{-2} \right)}$', labelpad=3)
+    ax[3].set_title('The current density behaviour over time\nfor a polarization curve (calibration)')
+    ax[3].legend(loc='best')
     plt.show()
