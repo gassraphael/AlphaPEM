@@ -293,7 +293,8 @@ different from the real ones as the corresponding machines takes time to reach t
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/dif_eq_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">129</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">128</span>
+<span class="normal">129</span>
 <span class="normal">130</span>
 <span class="normal">131</span>
 <span class="normal">132</span>
@@ -354,8 +355,7 @@ different from the real ones as the corresponding machines takes time to reach t
 <span class="normal">187</span>
 <span class="normal">188</span>
 <span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">desired_flows</span><span class="p">(</span><span class="n">solver_variables</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">,</span> <span class="n">i_n</span><span class="p">,</span> <span class="n">i_fc</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">Mext</span><span class="p">):</span>
+<span class="normal">190</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">desired_flows</span><span class="p">(</span><span class="n">solver_variables</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">,</span> <span class="n">i_n</span><span class="p">,</span> <span class="n">i_fc</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">Mext</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function calculates the desired flow for the air compressor and the humidifiers. These desired flow are</span>
 <span class="sd">    different from the real ones as the corresponding machines takes time to reach the desired values.</span>
@@ -567,7 +567,8 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/dif_eq_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 17</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 16</span>
+<span class="normal"> 17</span>
 <span class="normal"> 18</span>
 <span class="normal"> 19</span>
 <span class="normal"> 20</span>
@@ -675,8 +676,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 <span class="normal">122</span>
 <span class="normal">123</span>
 <span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dif_eq_int_values</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+<span class="normal">125</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dif_eq_int_values</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This functions calculates intermediate values for the calculation of the differential equations</span>
 
 <span class="sd">        Parameters</span>
@@ -895,7 +895,8 @@ if one of the crucial variables (C_v, lambda, C_O2, C_H2) becomes negative (or s
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/dif_eq_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">196</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">195</span>
+<span class="normal">196</span>
 <span class="normal">197</span>
 <span class="normal">198</span>
 <span class="normal">199</span>
@@ -923,8 +924,7 @@ if one of the crucial variables (C_v, lambda, C_O2, C_H2) becomes negative (or s
 <span class="normal">221</span>
 <span class="normal">222</span>
 <span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">event_negative</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">solver_variable_names</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">):</span>
+<span class="normal">224</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">event_negative</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">solver_variable_names</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function creates an event that will be checked at each step of solve_ivp integration. The integration stops</span>
 <span class="sd">    if one of the crucial variables (C_v, lambda, C_O2, C_H2) becomes negative (or smaller than 1e-5).</span>
 

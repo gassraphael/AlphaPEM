@@ -632,7 +632,13 @@ their actual values.</p>
 <span class="normal">164</span>
 <span class="normal">165</span>
 <span class="normal">166</span>
-<span class="normal">167</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">display_parameter_labels</span><span class="p">(</span><span class="n">operating_conditions_frame</span><span class="p">,</span> <span class="n">accessible_parameters_frame</span><span class="p">,</span> <span class="n">undetermined_parameters_frame</span><span class="p">,</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">display_parameter_labels</span><span class="p">(</span><span class="n">operating_conditions_frame</span><span class="p">,</span> <span class="n">accessible_parameters_frame</span><span class="p">,</span> <span class="n">undetermined_parameters_frame</span><span class="p">,</span>
                              <span class="n">current_density_parameters_frame</span><span class="p">,</span> <span class="n">computing_parameters_frame</span><span class="p">,</span> <span class="n">choice_operating_conditions</span><span class="p">,</span>
                              <span class="n">choice_accessible_parameters</span><span class="p">,</span> <span class="n">choice_undetermined_parameters</span><span class="p">,</span>
                              <span class="n">choice_current_density_parameters</span><span class="p">,</span> <span class="n">choice_computing_parameters</span><span class="p">):</span>
@@ -683,6 +689,12 @@ their actual values.</p>
         <span class="n">ttk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;cmr10&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span><span class="o">.</span> \
             <span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;label_row&#39;</span><span class="p">],</span> <span class="n">column</span><span class="o">=</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;label_column&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
     <span class="c1">#       current density parameters</span>
+    <span class="n">ttk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">current_density_parameters_frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Step current parameters&#39;</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;cmr10&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;bold&#39;</span><span class="p">))</span><span class="o">.</span> \
+        <span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">columnspan</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+    <span class="n">ttk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">current_density_parameters_frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Polarization current parameters&#39;</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;cmr10&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;bold&#39;</span><span class="p">))</span><span class="o">.</span> \
+        <span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">columnspan</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+    <span class="n">ttk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">current_density_parameters_frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;EIS current parameters&#39;</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;cmr10&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;bold&#39;</span><span class="p">))</span><span class="o">.</span> \
+        <span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">columnspan</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">choice_current_density_parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">ttk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">current_density_parameters_frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;cmr10&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span><span class="o">.</span> \
             <span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;label_row&#39;</span><span class="p">],</span> <span class="n">column</span><span class="o">=</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;label_column&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
@@ -808,13 +820,7 @@ physical parameters.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/GUI_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">176</span>
 <span class="normal">177</span>
 <span class="normal">178</span>
 <span class="normal">179</span>
@@ -858,7 +864,13 @@ physical parameters.</p>
 <span class="normal">217</span>
 <span class="normal">218</span>
 <span class="normal">219</span>
-<span class="normal">220</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">display_parameters_value</span><span class="p">(</span><span class="n">operating_conditions_frame</span><span class="p">,</span> <span class="n">accessible_parameters_frame</span><span class="p">,</span> <span class="n">undetermined_parameters_frame</span><span class="p">,</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">display_parameters_value</span><span class="p">(</span><span class="n">operating_conditions_frame</span><span class="p">,</span> <span class="n">accessible_parameters_frame</span><span class="p">,</span> <span class="n">undetermined_parameters_frame</span><span class="p">,</span>
                              <span class="n">current_density_parameters_frame</span><span class="p">,</span> <span class="n">computing_parameters_frame</span><span class="p">,</span> <span class="n">choice_operating_conditions</span><span class="p">,</span>
                              <span class="n">choice_accessible_parameters</span><span class="p">,</span> <span class="n">choice_undetermined_parameters</span><span class="p">,</span>
                              <span class="n">choice_current_density_parameters</span><span class="p">,</span> <span class="n">choice_computing_parameters</span><span class="p">):</span>
@@ -963,13 +975,7 @@ plot style, etc.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/GUI_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span>
-<span class="normal">229</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">229</span>
 <span class="normal">230</span>
 <span class="normal">231</span>
 <span class="normal">232</span>
@@ -1035,7 +1041,13 @@ plot style, etc.</p>
 <span class="normal">292</span>
 <span class="normal">293</span>
 <span class="normal">294</span>
-<span class="normal">295</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">display_radiobuttons</span><span class="p">(</span><span class="n">model_possibilities_frame</span><span class="p">,</span> <span class="n">choices_buttons</span><span class="p">):</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">display_radiobuttons</span><span class="p">(</span><span class="n">model_possibilities_frame</span><span class="p">,</span> <span class="n">choices_buttons</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function displays radiobuttons on the GUI, allowing the user to make choices for control, results display,</span>
 <span class="sd">    plot style, etc.</span>
 
@@ -1118,7 +1130,7 @@ plot style, etc.</p>
 
 
 <h2 id="modules.GUI_modules.launch_AlphaPEM_for_EIS_current" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">launch_AlphaPEM_for_EIS_current</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">t_step</span><span class="p">,</span> <span class="n">i_step</span><span class="p">,</span> <span class="n">i_max_pola</span><span class="p">,</span> <span class="n">delta_pola</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">launch_AlphaPEM_for_EIS_current</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">)</span></code>
 
 </h2>
 
@@ -1203,40 +1215,36 @@ plot style, etc.</p>
               </div>
             </li>
             <li>
-              <b><code>t_step</code></b>
-                  (<code>tuple</code>)
+              <b><code>step_current_parameters</code></b>
+                  (<code>dict</code>)
               –
               <div class="doc-md-description">
-                <p>Time parameters for the step_current density function (current parameters).
-It is a tuple containing the initial time 't0_step', final time 'tf_step', loading time 'delta_t_load_step'
-and dynamic time for display 'delta_t_dyn_step'.</p>
+                <pre><code>Parameters for the step current density. It is a dictionary containing:
+- 'delta_t_ini_step': the initial time (in seconds) at zero current density for the stabilisation of the
+internal states,
+- 'delta_t_load_step': the loading time (in seconds) for the step current density function, from 0 to
+i_step,
+- 'delta_t_break_step': the time (in seconds) at i_step current density for the stabilisation of the
+internal states,
+- 'i_step': the current density (in A.m-2) for the step current density function,
+- 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
+</code></pre>
               </div>
             </li>
             <li>
-              <b><code>i_step</code></b>
-                  (<code>tuple</code>)
+              <b><code>pola_current_parameters</code></b>
+                  (<code>dict</code>)
               –
               <div class="doc-md-description">
-                <p>Current parameters for the step_current density function (current parameters).
-It is a tuple containing the initial and final current density value 'i_ini_step' and 'i_final_step'.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>i_max_pola</code></b>
-                  (<code>float</code>)
-              –
-              <div class="doc-md-description">
-                <p>Maximum current density for the polarization curve (current parameter).</p>
-              </div>
-            </li>
-            <li>
-              <b><code>delta_pola</code></b>
-                  (<code>tuple</code>)
-              –
-              <div class="doc-md-description">
-                <p>Parameters for the polarization curve (current parameters). It is a tuple containing the loading time
-'delta_t_load_pola', the breaking time 'delta_t_break_pola', the current density step 'delta_i_pola', and
-the initial breaking time 'delta_t_ini_pola'.</p>
+                <p>Parameters for the polarization current density. It is a dictionary containing:
+- 'delta_t_ini_pola': the initial time (in seconds) at zero current density for the stabilisation of the
+internal states,
+- 'delta_t_load_pola': the loading time (in seconds) for one step current of the polarisation current
+density function,
+- 'delta_t_break_pola': the breaking time (in seconds) for one step current, for the stabilisation of the
+internal states,
+- 'delta_i_pola': the current density step (in A.m-2) for the polarisation current density function.
+- 'i_max_pola': the maximum current density (in A.m-2) for the polarization curve.</p>
               </div>
             </li>
             <li>
@@ -1529,47 +1537,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/GUI_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1120</span>
-<span class="normal">1121</span>
-<span class="normal">1122</span>
-<span class="normal">1123</span>
-<span class="normal">1124</span>
-<span class="normal">1125</span>
-<span class="normal">1126</span>
-<span class="normal">1127</span>
-<span class="normal">1128</span>
-<span class="normal">1129</span>
-<span class="normal">1130</span>
-<span class="normal">1131</span>
-<span class="normal">1132</span>
-<span class="normal">1133</span>
-<span class="normal">1134</span>
-<span class="normal">1135</span>
-<span class="normal">1136</span>
-<span class="normal">1137</span>
-<span class="normal">1138</span>
-<span class="normal">1139</span>
-<span class="normal">1140</span>
-<span class="normal">1141</span>
-<span class="normal">1142</span>
-<span class="normal">1143</span>
-<span class="normal">1144</span>
-<span class="normal">1145</span>
-<span class="normal">1146</span>
-<span class="normal">1147</span>
-<span class="normal">1148</span>
-<span class="normal">1149</span>
-<span class="normal">1150</span>
-<span class="normal">1151</span>
-<span class="normal">1152</span>
-<span class="normal">1153</span>
-<span class="normal">1154</span>
-<span class="normal">1155</span>
-<span class="normal">1156</span>
-<span class="normal">1157</span>
-<span class="normal">1158</span>
-<span class="normal">1159</span>
-<span class="normal">1160</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1160</span>
 <span class="normal">1161</span>
 <span class="normal">1162</span>
 <span class="normal">1163</span>
@@ -1722,11 +1690,65 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 <span class="normal">1310</span>
 <span class="normal">1311</span>
 <span class="normal">1312</span>
-<span class="normal">1313</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">launch_AlphaPEM_for_EIS_current</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">t_step</span><span class="p">,</span> <span class="n">i_step</span><span class="p">,</span>
-                                    <span class="n">i_max_pola</span><span class="p">,</span> <span class="n">delta_pola</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span>
-                                    <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span>
-                                    <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span>
-                                    <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">):</span>
+<span class="normal">1313</span>
+<span class="normal">1314</span>
+<span class="normal">1315</span>
+<span class="normal">1316</span>
+<span class="normal">1317</span>
+<span class="normal">1318</span>
+<span class="normal">1319</span>
+<span class="normal">1320</span>
+<span class="normal">1321</span>
+<span class="normal">1322</span>
+<span class="normal">1323</span>
+<span class="normal">1324</span>
+<span class="normal">1325</span>
+<span class="normal">1326</span>
+<span class="normal">1327</span>
+<span class="normal">1328</span>
+<span class="normal">1329</span>
+<span class="normal">1330</span>
+<span class="normal">1331</span>
+<span class="normal">1332</span>
+<span class="normal">1333</span>
+<span class="normal">1334</span>
+<span class="normal">1335</span>
+<span class="normal">1336</span>
+<span class="normal">1337</span>
+<span class="normal">1338</span>
+<span class="normal">1339</span>
+<span class="normal">1340</span>
+<span class="normal">1341</span>
+<span class="normal">1342</span>
+<span class="normal">1343</span>
+<span class="normal">1344</span>
+<span class="normal">1345</span>
+<span class="normal">1346</span>
+<span class="normal">1347</span>
+<span class="normal">1348</span>
+<span class="normal">1349</span>
+<span class="normal">1350</span>
+<span class="normal">1351</span>
+<span class="normal">1352</span>
+<span class="normal">1353</span>
+<span class="normal">1354</span>
+<span class="normal">1355</span>
+<span class="normal">1356</span>
+<span class="normal">1357</span>
+<span class="normal">1358</span>
+<span class="normal">1359</span>
+<span class="normal">1360</span>
+<span class="normal">1361</span>
+<span class="normal">1362</span>
+<span class="normal">1363</span>
+<span class="normal">1364</span>
+<span class="normal">1365</span>
+<span class="normal">1366</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">launch_AlphaPEM_for_EIS_current</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span>
+                                    <span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span>
+                                    <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span>
+                                    <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span>
+                                    <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span>
+                                    <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Launch the AlphaPEM simulator for an EIS current density and display the results.</span>
 
 <span class="sd">    Parameters</span>
@@ -1747,19 +1769,26 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 <span class="sd">        Desired anode relative humidity (operating input).</span>
 <span class="sd">    Phi_c_des : float</span>
 <span class="sd">        Desired cathode relative humidity (operating input).</span>
-<span class="sd">    t_step : tuple</span>
-<span class="sd">        Time parameters for the step_current density function (current parameters).</span>
-<span class="sd">        It is a tuple containing the initial time &#39;t0_step&#39;, final time &#39;tf_step&#39;, loading time &#39;delta_t_load_step&#39;</span>
-<span class="sd">        and dynamic time for display &#39;delta_t_dyn_step&#39;.</span>
-<span class="sd">    i_step : tuple</span>
-<span class="sd">        Current parameters for the step_current density function (current parameters).</span>
-<span class="sd">        It is a tuple containing the initial and final current density value &#39;i_ini_step&#39; and &#39;i_final_step&#39;.</span>
-<span class="sd">    i_max_pola : float</span>
-<span class="sd">        Maximum current density for the polarization curve (current parameter).</span>
-<span class="sd">    delta_pola : tuple</span>
-<span class="sd">        Parameters for the polarization curve (current parameters). It is a tuple containing the loading time</span>
-<span class="sd">        &#39;delta_t_load_pola&#39;, the breaking time &#39;delta_t_break_pola&#39;, the current density step &#39;delta_i_pola&#39;, and</span>
-<span class="sd">        the initial breaking time &#39;delta_t_ini_pola&#39;.</span>
+<span class="sd">    step_current_parameters : dict</span>
+<span class="sd">            Parameters for the step current density. It is a dictionary containing:</span>
+<span class="sd">            - &#39;delta_t_ini_step&#39;: the initial time (in seconds) at zero current density for the stabilisation of the</span>
+<span class="sd">            internal states,</span>
+<span class="sd">            - &#39;delta_t_load_step&#39;: the loading time (in seconds) for the step current density function, from 0 to</span>
+<span class="sd">            i_step,</span>
+<span class="sd">            - &#39;delta_t_break_step&#39;: the time (in seconds) at i_step current density for the stabilisation of the</span>
+<span class="sd">            internal states,</span>
+<span class="sd">            - &#39;i_step&#39;: the current density (in A.m-2) for the step current density function,</span>
+<span class="sd">            - &#39;delta_t_dyn_step&#39;: the time (in seconds) for dynamic display of the step current density function.</span>
+<span class="sd">    pola_current_parameters : dict</span>
+<span class="sd">        Parameters for the polarization current density. It is a dictionary containing:</span>
+<span class="sd">        - &#39;delta_t_ini_pola&#39;: the initial time (in seconds) at zero current density for the stabilisation of the</span>
+<span class="sd">        internal states,</span>
+<span class="sd">        - &#39;delta_t_load_pola&#39;: the loading time (in seconds) for one step current of the polarisation current</span>
+<span class="sd">        density function,</span>
+<span class="sd">        - &#39;delta_t_break_pola&#39;: the breaking time (in seconds) for one step current, for the stabilisation of the</span>
+<span class="sd">        internal states,</span>
+<span class="sd">        - &#39;delta_i_pola&#39;: the current density step (in A.m-2) for the polarisation current density function.</span>
+<span class="sd">        - &#39;i_max_pola&#39;: the maximum current density (in A.m-2) for the polarization curve.</span>
 <span class="sd">    i_EIS : float</span>
 <span class="sd">        Current for which a ratio_EIS perturbation is added (current parameter).</span>
 <span class="sd">    ratio_EIS : float</span>
@@ -1848,7 +1877,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
     <span class="n">fig1</span><span class="p">,</span> <span class="n">ax1</span><span class="p">,</span> <span class="n">fig2</span><span class="p">,</span> <span class="n">ax2</span><span class="p">,</span> <span class="n">fig3</span><span class="p">,</span> <span class="n">ax3</span> <span class="o">=</span> <span class="n">figures_preparation</span><span class="p">(</span><span class="n">type_current</span><span class="p">,</span> <span class="n">type_display</span><span class="p">)</span>
 
     <span class="c1"># Initialization</span>
-    <span class="c1">#       ... of the plot update number (n) and the initial time interval (time_interval)</span>
+    <span class="c1">#       Calculation of the plot update number (n) and the initial time interval (time_interval).</span>
     <span class="n">initial_variable_values</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">t0_EIS</span><span class="p">,</span> <span class="n">t_new_start</span><span class="p">,</span> <span class="n">tf_EIS</span><span class="p">,</span> <span class="n">delta_t_break_EIS</span><span class="p">,</span> <span class="n">delta_t_measurement_EIS</span> <span class="o">=</span> <span class="n">t_EIS</span>
     <span class="n">f_power_min_EIS</span><span class="p">,</span> <span class="n">f_power_max_EIS</span><span class="p">,</span> <span class="n">nb_f_EIS</span><span class="p">,</span> <span class="n">nb_points_EIS</span> <span class="o">=</span> <span class="n">f_EIS</span>  <span class="c1"># These are used for EIS max_step</span>
@@ -1859,11 +1888,11 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 
     <span class="c1">#       A preliminary simulation run is necessary to equilibrate the internal variables of the cell at i_EIS</span>
     <span class="c1">#       prior to initiating the EIS.</span>
-    <span class="n">Simulator</span> <span class="o">=</span> <span class="n">AlphaPEM</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">t_step</span><span class="p">,</span> <span class="n">i_step</span><span class="p">,</span>
-                         <span class="n">i_max_pola</span><span class="p">,</span> <span class="n">delta_pola</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span>
-                         <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span>
-                         <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span>
-                         <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">,</span>
+    <span class="n">Simulator</span> <span class="o">=</span> <span class="n">AlphaPEM</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">step_current_parameters</span><span class="p">,</span>
+                         <span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span>
+                         <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span>
+                         <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span>
+                         <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">,</span>
                          <span class="n">initial_variable_values</span><span class="p">,</span> <span class="n">time_interval</span><span class="p">)</span>
 
     <span class="c1"># time_interval actualization</span>
@@ -1881,14 +1910,19 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
     <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">Simulator</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="p">:</span>
         <span class="n">initial_variable_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Simulator</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
+    <span class="k">if</span> <span class="n">type_display</span> <span class="o">==</span> <span class="s2">&quot;multiple&quot;</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;A display bug prevents the dynamic updating of the graphs, as it appears that too much data is &quot;</span>
+              <span class="s2">&quot;involved. However, the data is correctly calculated, and the appropriate plots are saved in the &quot;</span>
+              <span class="s2">&quot;&#39;results&#39; folder. This display bug does not occur when using a &#39;synthetic&#39; type_display.&quot;</span><span class="p">)</span>
+
     <span class="c1"># Dynamic simulation</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-        <span class="n">Simulator</span> <span class="o">=</span> <span class="n">AlphaPEM</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">t_step</span><span class="p">,</span> <span class="n">i_step</span><span class="p">,</span>
-                             <span class="n">i_max_pola</span><span class="p">,</span> <span class="n">delta_pola</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span>
-                             <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span>
-                             <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span>
-                             <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">,</span>
-                             <span class="n">initial_variable_values</span><span class="p">,</span> <span class="n">time_interval</span><span class="p">)</span>
+        <span class="n">Simulator</span> <span class="o">=</span> <span class="n">AlphaPEM</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span>
+                             <span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span>
+                             <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span>
+                             <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span>
+                             <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span>
+                             <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">,</span> <span class="n">initial_variable_values</span><span class="p">,</span> <span class="n">time_interval</span><span class="p">)</span>
 
         <span class="c1"># time_interval actualization</span>
         <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>  <span class="c1"># The final simulation does not require actualization.</span>
@@ -1911,7 +1945,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
             <span class="n">Simulator</span><span class="o">.</span><span class="n">Display</span><span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">,</span> <span class="n">ax3</span><span class="p">)</span>
 
     <span class="c1"># Plot saving</span>
-    <span class="n">plot_saving</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">fig1</span><span class="p">,</span> <span class="n">fig2</span><span class="p">,</span> <span class="n">fig3</span><span class="p">)</span>
+    <span class="n">Simulator</span><span class="o">.</span><span class="n">Save_plot</span><span class="p">(</span><span class="n">fig1</span><span class="p">,</span> <span class="n">fig2</span><span class="p">,</span> <span class="n">fig3</span><span class="p">)</span>
 
     <span class="c1"># Ending time</span>
     <span class="n">algo_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
@@ -1926,7 +1960,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 
 
 <h2 id="modules.GUI_modules.launch_AlphaPEM_for_polarization_current" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">launch_AlphaPEM_for_polarization_current</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">t_step</span><span class="p">,</span> <span class="n">i_step</span><span class="p">,</span> <span class="n">i_max_pola</span><span class="p">,</span> <span class="n">delta_pola</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">launch_AlphaPEM_for_polarization_current</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">)</span></code>
 
 </h2>
 
@@ -2011,40 +2045,36 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
               </div>
             </li>
             <li>
-              <b><code>t_step</code></b>
-                  (<code>tuple</code>)
+              <b><code>step_current_parameters</code></b>
+                  (<code>dict</code>)
               –
               <div class="doc-md-description">
-                <p>Time parameters for the step_current density function (current parameters).
-It is a tuple containing the initial time 't0_step', final time 'tf_step', loading time 'delta_t_load_step'
-and dynamic time for display 'delta_t_dyn_step'.</p>
+                <pre><code>Parameters for the step current density. It is a dictionary containing:
+- 'delta_t_ini_step': the initial time (in seconds) at zero current density for the stabilisation of the
+internal states,
+- 'delta_t_load_step': the loading time (in seconds) for the step current density function, from 0 to
+i_step,
+- 'delta_t_break_step': the time (in seconds) at i_step current density for the stabilisation of the
+internal states,
+- 'i_step': the current density (in A.m-2) for the step current density function,
+- 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
+</code></pre>
               </div>
             </li>
             <li>
-              <b><code>i_step</code></b>
-                  (<code>tuple</code>)
+              <b><code>pola_current_parameters</code></b>
+                  (<code>dict</code>)
               –
               <div class="doc-md-description">
-                <p>Current parameters for the step_current density function (current parameters).
-It is a tuple containing the initial and final current density value 'i_ini_step' and 'i_final_step'.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>i_max_pola</code></b>
-                  (<code>float</code>)
-              –
-              <div class="doc-md-description">
-                <p>Maximum current density for the polarization curve (current parameter).</p>
-              </div>
-            </li>
-            <li>
-              <b><code>delta_pola</code></b>
-                  (<code>tuple</code>)
-              –
-              <div class="doc-md-description">
-                <p>Parameters for the polarization curve (current parameters). It is a tuple containing the loading time
-'delta_t_load_pola', the breaking time 'delta_t_break_pola', the current density step 'delta_i_pola', and
-the initial breaking time 'delta_t_ini_pola'.</p>
+                <p>Parameters for the polarization current density. It is a dictionary containing:
+- 'delta_t_ini_pola': the initial time (in seconds) at zero current density for the stabilisation of the
+internal states,
+- 'delta_t_load_pola': the loading time (in seconds) for one step current of the polarisation current
+density function,
+- 'delta_t_break_pola': the breaking time (in seconds) for one step current, for the stabilisation of the
+internal states,
+- 'delta_i_pola': the current density step (in A.m-2) for the polarisation current density function.
+- 'i_max_pola': the maximum current density (in A.m-2) for the polarization curve.</p>
               </div>
             </li>
             <li>
@@ -2337,31 +2367,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/GUI_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 939</span>
-<span class="normal"> 940</span>
-<span class="normal"> 941</span>
-<span class="normal"> 942</span>
-<span class="normal"> 943</span>
-<span class="normal"> 944</span>
-<span class="normal"> 945</span>
-<span class="normal"> 946</span>
-<span class="normal"> 947</span>
-<span class="normal"> 948</span>
-<span class="normal"> 949</span>
-<span class="normal"> 950</span>
-<span class="normal"> 951</span>
-<span class="normal"> 952</span>
-<span class="normal"> 953</span>
-<span class="normal"> 954</span>
-<span class="normal"> 955</span>
-<span class="normal"> 956</span>
-<span class="normal"> 957</span>
-<span class="normal"> 958</span>
-<span class="normal"> 959</span>
-<span class="normal"> 960</span>
-<span class="normal"> 961</span>
-<span class="normal"> 962</span>
-<span class="normal"> 963</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 963</span>
 <span class="normal"> 964</span>
 <span class="normal"> 965</span>
 <span class="normal"> 966</span>
@@ -2515,10 +2521,51 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 <span class="normal">1114</span>
 <span class="normal">1115</span>
 <span class="normal">1116</span>
-<span class="normal">1117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">launch_AlphaPEM_for_polarization_current</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">t_step</span><span class="p">,</span>
-                                             <span class="n">i_step</span><span class="p">,</span> <span class="n">i_max_pola</span><span class="p">,</span> <span class="n">delta_pola</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span>
-                                             <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span>
-                                             <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span>
+<span class="normal">1117</span>
+<span class="normal">1118</span>
+<span class="normal">1119</span>
+<span class="normal">1120</span>
+<span class="normal">1121</span>
+<span class="normal">1122</span>
+<span class="normal">1123</span>
+<span class="normal">1124</span>
+<span class="normal">1125</span>
+<span class="normal">1126</span>
+<span class="normal">1127</span>
+<span class="normal">1128</span>
+<span class="normal">1129</span>
+<span class="normal">1130</span>
+<span class="normal">1131</span>
+<span class="normal">1132</span>
+<span class="normal">1133</span>
+<span class="normal">1134</span>
+<span class="normal">1135</span>
+<span class="normal">1136</span>
+<span class="normal">1137</span>
+<span class="normal">1138</span>
+<span class="normal">1139</span>
+<span class="normal">1140</span>
+<span class="normal">1141</span>
+<span class="normal">1142</span>
+<span class="normal">1143</span>
+<span class="normal">1144</span>
+<span class="normal">1145</span>
+<span class="normal">1146</span>
+<span class="normal">1147</span>
+<span class="normal">1148</span>
+<span class="normal">1149</span>
+<span class="normal">1150</span>
+<span class="normal">1151</span>
+<span class="normal">1152</span>
+<span class="normal">1153</span>
+<span class="normal">1154</span>
+<span class="normal">1155</span>
+<span class="normal">1156</span>
+<span class="normal">1157</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">launch_AlphaPEM_for_polarization_current</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span>
+                                             <span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">pola_current_parameters</span><span class="p">,</span>
+                                             <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span>
+                                             <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span>
+                                             <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span>
                                              <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span>
                                              <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Launch the AlphaPEM simulator for a polarization current density and display the results.</span>
@@ -2541,19 +2588,26 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 <span class="sd">        Desired anode relative humidity (operating input).</span>
 <span class="sd">    Phi_c_des : float</span>
 <span class="sd">        Desired cathode relative humidity (operating input).</span>
-<span class="sd">    t_step : tuple</span>
-<span class="sd">        Time parameters for the step_current density function (current parameters).</span>
-<span class="sd">        It is a tuple containing the initial time &#39;t0_step&#39;, final time &#39;tf_step&#39;, loading time &#39;delta_t_load_step&#39;</span>
-<span class="sd">        and dynamic time for display &#39;delta_t_dyn_step&#39;.</span>
-<span class="sd">    i_step : tuple</span>
-<span class="sd">        Current parameters for the step_current density function (current parameters).</span>
-<span class="sd">        It is a tuple containing the initial and final current density value &#39;i_ini_step&#39; and &#39;i_final_step&#39;.</span>
-<span class="sd">    i_max_pola : float</span>
-<span class="sd">        Maximum current density for the polarization curve (current parameter).</span>
-<span class="sd">    delta_pola : tuple</span>
-<span class="sd">        Parameters for the polarization curve (current parameters). It is a tuple containing the loading time</span>
-<span class="sd">        &#39;delta_t_load_pola&#39;, the breaking time &#39;delta_t_break_pola&#39;, the current density step &#39;delta_i_pola&#39;, and</span>
-<span class="sd">        the initial breaking time &#39;delta_t_ini_pola&#39;.</span>
+<span class="sd">    step_current_parameters : dict</span>
+<span class="sd">            Parameters for the step current density. It is a dictionary containing:</span>
+<span class="sd">            - &#39;delta_t_ini_step&#39;: the initial time (in seconds) at zero current density for the stabilisation of the</span>
+<span class="sd">            internal states,</span>
+<span class="sd">            - &#39;delta_t_load_step&#39;: the loading time (in seconds) for the step current density function, from 0 to</span>
+<span class="sd">            i_step,</span>
+<span class="sd">            - &#39;delta_t_break_step&#39;: the time (in seconds) at i_step current density for the stabilisation of the</span>
+<span class="sd">            internal states,</span>
+<span class="sd">            - &#39;i_step&#39;: the current density (in A.m-2) for the step current density function,</span>
+<span class="sd">            - &#39;delta_t_dyn_step&#39;: the time (in seconds) for dynamic display of the step current density function.</span>
+<span class="sd">    pola_current_parameters : dict</span>
+<span class="sd">        Parameters for the polarization current density. It is a dictionary containing:</span>
+<span class="sd">        - &#39;delta_t_ini_pola&#39;: the initial time (in seconds) at zero current density for the stabilisation of the</span>
+<span class="sd">        internal states,</span>
+<span class="sd">        - &#39;delta_t_load_pola&#39;: the loading time (in seconds) for one step current of the polarisation current</span>
+<span class="sd">        density function,</span>
+<span class="sd">        - &#39;delta_t_break_pola&#39;: the breaking time (in seconds) for one step current, for the stabilisation of the</span>
+<span class="sd">        internal states,</span>
+<span class="sd">        - &#39;delta_i_pola&#39;: the current density step (in A.m-2) for the polarisation current density function.</span>
+<span class="sd">        - &#39;i_max_pola&#39;: the maximum current density (in A.m-2) for the polarization curve.</span>
 <span class="sd">    i_EIS : float</span>
 <span class="sd">        Current for which a ratio_EIS perturbation is added (current parameter).</span>
 <span class="sd">    ratio_EIS : float</span>
@@ -2644,28 +2698,35 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
     <span class="c1"># Dynamic display requires a dedicated use of the AlphaPEM class.</span>
     <span class="k">if</span> <span class="n">type_plot</span> <span class="o">==</span> <span class="s2">&quot;dynamic&quot;</span><span class="p">:</span>
         <span class="c1"># Initialization</span>
-        <span class="c1">#       ... of the plot update number (n) and the initial time interval (time_interval)</span>
+        <span class="c1">#       Calculation of the plot update number (n) and the initial time interval (time_interval).</span>
         <span class="n">initial_variable_values</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">delta_t_load_pola</span><span class="p">,</span> <span class="n">delta_t_break_pola</span><span class="p">,</span> <span class="n">delta_i_pola</span><span class="p">,</span> <span class="n">delta_t_ini_pola</span> <span class="o">=</span> <span class="n">delta_pola</span>
-        <span class="n">delta_t</span> <span class="o">=</span> <span class="n">delta_t_load_pola</span> <span class="o">+</span> <span class="n">delta_t_break_pola</span>  <span class="c1"># s. It is the time of one load.</span>
-        <span class="n">tf</span> <span class="o">=</span> <span class="n">delta_t_ini_pola</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">i_max_pola_1</span> <span class="o">/</span> <span class="n">delta_i_pola</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">delta_t</span>  <span class="c1"># s. It is the polarization current</span>
-        <span class="c1">#                                                                            duration.</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tf</span> <span class="o">/</span> <span class="n">delta_t</span><span class="p">)</span>  <span class="c1"># It is the plot update number.</span>
-        <span class="n">time_interval</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">delta_t_ini_pola</span> <span class="o">+</span> <span class="n">delta_t</span><span class="p">]</span>  <span class="c1"># It is the initial time interval.</span>
+        <span class="c1">#           Extraction of the parameters</span>
+        <span class="n">delta_t_ini_pola</span> <span class="o">=</span> <span class="n">pola_current_parameters</span><span class="p">[</span><span class="s1">&#39;delta_t_ini_pola&#39;</span><span class="p">]</span>  <span class="c1"># (s).</span>
+        <span class="n">delta_t_load_pola</span> <span class="o">=</span> <span class="n">pola_current_parameters</span><span class="p">[</span><span class="s1">&#39;delta_t_load_pola&#39;</span><span class="p">]</span>  <span class="c1"># (s).</span>
+        <span class="n">delta_t_break_pola</span> <span class="o">=</span> <span class="n">pola_current_parameters</span><span class="p">[</span><span class="s1">&#39;delta_t_break_pola&#39;</span><span class="p">]</span>  <span class="c1"># (s).</span>
+        <span class="n">delta_i_pola</span> <span class="o">=</span> <span class="n">pola_current_parameters</span><span class="p">[</span><span class="s1">&#39;delta_i_pola&#39;</span><span class="p">]</span>  <span class="c1"># (A.m-2).</span>
+        <span class="n">i_max_pola</span> <span class="o">=</span> <span class="n">pola_current_parameters</span><span class="p">[</span><span class="s1">&#39;i_max_pola&#39;</span><span class="p">]</span>  <span class="c1"># (A.m-2).</span>
+        <span class="c1">#           Calculation</span>
+        <span class="n">delta_t_pola</span> <span class="o">=</span> <span class="n">delta_t_load_pola</span> <span class="o">+</span> <span class="n">delta_t_break_pola</span>  <span class="c1"># s. It is the time of one load.</span>
+        <span class="n">tf</span> <span class="o">=</span> <span class="n">delta_t_ini_pola</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span>
+            <span class="n">i_max_pola</span> <span class="o">/</span> <span class="n">delta_i_pola</span><span class="p">)</span> <span class="o">*</span> <span class="n">delta_t_pola</span>  <span class="c1"># s. It is the polarization current duration.</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tf</span> <span class="o">/</span> <span class="n">delta_t_pola</span><span class="p">)</span>  <span class="c1"># It is the plot update number.</span>
+        <span class="n">time_interval</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">delta_t_ini_pola</span> <span class="o">+</span> <span class="n">delta_t_pola</span><span class="p">]</span>  <span class="c1"># It is the initial time interval.</span>
 
         <span class="c1"># Dynamic simulation</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-            <span class="n">Simulator</span> <span class="o">=</span> <span class="n">AlphaPEM</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">t_step</span><span class="p">,</span> <span class="n">i_step</span><span class="p">,</span>
-                                 <span class="n">i_max_pola</span><span class="p">,</span> <span class="n">delta_pola</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span>
-                                 <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span>
-                                 <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span>
-                                 <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">,</span>
-                                 <span class="n">initial_variable_values</span><span class="p">,</span> <span class="n">time_interval</span><span class="p">)</span>
+            <span class="n">Simulator</span> <span class="o">=</span> <span class="n">AlphaPEM</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span>
+                                 <span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span>
+                                 <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span>
+                                 <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span>
+                                 <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span>
+                                 <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">,</span> <span class="n">initial_variable_values</span><span class="p">,</span>
+                                 <span class="n">time_interval</span><span class="p">)</span>
 
             <span class="c1"># time_interval actualization</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>  <span class="c1"># The final simulation does not require actualization.</span>
                 <span class="n">t0_interval</span> <span class="o">=</span> <span class="n">Simulator</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">tf_interval</span> <span class="o">=</span> <span class="n">delta_t_ini_pola</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">delta_t</span>
+                <span class="n">tf_interval</span> <span class="o">=</span> <span class="n">delta_t_ini_pola</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">delta_t_pola</span>
                 <span class="n">time_interval</span> <span class="o">=</span> <span class="p">[</span><span class="n">t0_interval</span><span class="p">,</span> <span class="n">tf_interval</span><span class="p">]</span>  <span class="c1"># Reset of the time interval</span>
 
             <span class="c1"># Recovery of the internal states from the end of the preceding simulation.</span>
@@ -2679,17 +2740,18 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 
     <span class="k">else</span><span class="p">:</span>  <span class="c1"># elif type_plot == &quot;fixed&quot;:</span>
         <span class="c1"># Simulation</span>
-        <span class="n">Simulator</span> <span class="o">=</span> <span class="n">AlphaPEM</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">t_step</span><span class="p">,</span> <span class="n">i_step</span><span class="p">,</span>
-                             <span class="n">i_max_pola</span><span class="p">,</span> <span class="n">delta_pola</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span>
-                             <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span>
-                             <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span>
-                             <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">)</span>
+        <span class="n">Simulator</span> <span class="o">=</span> <span class="n">AlphaPEM</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span>
+                             <span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span>
+                             <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span>
+                             <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span>
+                             <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span>
+                             <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">)</span>
         <span class="c1"># Display</span>
         <span class="k">if</span> <span class="n">type_display</span> <span class="o">!=</span> <span class="s2">&quot;no_display&quot;</span><span class="p">:</span>
             <span class="n">Simulator</span><span class="o">.</span><span class="n">Display</span><span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">,</span> <span class="n">ax3</span><span class="p">)</span>
 
     <span class="c1"># Plot saving</span>
-    <span class="n">plot_saving</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">fig1</span><span class="p">,</span> <span class="n">fig2</span><span class="p">,</span> <span class="n">fig3</span><span class="p">)</span>
+    <span class="n">Simulator</span><span class="o">.</span><span class="n">Save_plot</span><span class="p">(</span><span class="n">fig1</span><span class="p">,</span> <span class="n">fig2</span><span class="p">,</span> <span class="n">fig3</span><span class="p">)</span>
 
     <span class="c1"># Ending time</span>
     <span class="n">algo_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
@@ -2704,7 +2766,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 
 
 <h2 id="modules.GUI_modules.launch_AlphaPEM_for_step_current" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">launch_AlphaPEM_for_step_current</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">t_step</span><span class="p">,</span> <span class="n">i_step</span><span class="p">,</span> <span class="n">i_max_pola</span><span class="p">,</span> <span class="n">delta_pola</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">launch_AlphaPEM_for_step_current</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">)</span></code>
 
 </h2>
 
@@ -2789,40 +2851,36 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
               </div>
             </li>
             <li>
-              <b><code>t_step</code></b>
-                  (<code>tuple</code>)
+              <b><code>step_current_parameters</code></b>
+                  (<code>dict</code>)
               –
               <div class="doc-md-description">
-                <p>Time parameters for the step_current density function (current parameters).
-It is a tuple containing the initial time 't0_step', final time 'tf_step', loading time 'delta_t_load_step'
-and dynamic time for display 'delta_t_dyn_step'.</p>
+                <pre><code>Parameters for the step current density. It is a dictionary containing:
+- 'delta_t_ini_step': the initial time (in seconds) at zero current density for the stabilisation of the
+internal states,
+- 'delta_t_load_step': the loading time (in seconds) for the step current density function, from 0 to
+i_step,
+- 'delta_t_break_step': the time (in seconds) at i_step current density for the stabilisation of the
+internal states,
+- 'i_step': the current density (in A.m-2) for the step current density function,
+- 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
+</code></pre>
               </div>
             </li>
             <li>
-              <b><code>i_step</code></b>
-                  (<code>tuple</code>)
+              <b><code>pola_current_parameters</code></b>
+                  (<code>dict</code>)
               –
               <div class="doc-md-description">
-                <p>Current parameters for the step_current density function (current parameters).
-It is a tuple containing the initial and final current density value 'i_ini_step' and 'i_final_step'.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>i_max_pola</code></b>
-                  (<code>float</code>)
-              –
-              <div class="doc-md-description">
-                <p>Maximum current density for the polarization curve (current parameter).</p>
-              </div>
-            </li>
-            <li>
-              <b><code>delta_pola</code></b>
-                  (<code>tuple</code>)
-              –
-              <div class="doc-md-description">
-                <p>Parameters for the polarization curve (current parameters). It is a tuple containing the loading time
-'delta_t_load_pola', the breaking time 'delta_t_break_pola', the current density step 'delta_i_pola', and
-the initial breaking time 'delta_t_ini_pola'.</p>
+                <p>Parameters for the polarization current density. It is a dictionary containing:
+- 'delta_t_ini_pola': the initial time (in seconds) at zero current density for the stabilisation of the
+internal states,
+- 'delta_t_load_pola': the loading time (in seconds) for one step current of the polarisation current
+density function,
+- 'delta_t_break_pola': the breaking time (in seconds) for one step current, for the stabilisation of the
+internal states,
+- 'delta_i_pola': the current density step (in A.m-2) for the polarisation current density function.
+- 'i_max_pola': the maximum current density (in A.m-2) for the polarization curve.</p>
               </div>
             </li>
             <li>
@@ -3115,12 +3173,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/GUI_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">762</span>
-<span class="normal">763</span>
-<span class="normal">764</span>
-<span class="normal">765</span>
-<span class="normal">766</span>
-<span class="normal">767</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">767</span>
 <span class="normal">768</span>
 <span class="normal">769</span>
 <span class="normal">770</span>
@@ -3289,11 +3342,36 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 <span class="normal">933</span>
 <span class="normal">934</span>
 <span class="normal">935</span>
-<span class="normal">936</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">launch_AlphaPEM_for_step_current</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">t_step</span><span class="p">,</span> <span class="n">i_step</span><span class="p">,</span>
-                                     <span class="n">i_max_pola</span><span class="p">,</span> <span class="n">delta_pola</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span>
-                                     <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span>
-                                     <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span>
-                                     <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">):</span>
+<span class="normal">936</span>
+<span class="normal">937</span>
+<span class="normal">938</span>
+<span class="normal">939</span>
+<span class="normal">940</span>
+<span class="normal">941</span>
+<span class="normal">942</span>
+<span class="normal">943</span>
+<span class="normal">944</span>
+<span class="normal">945</span>
+<span class="normal">946</span>
+<span class="normal">947</span>
+<span class="normal">948</span>
+<span class="normal">949</span>
+<span class="normal">950</span>
+<span class="normal">951</span>
+<span class="normal">952</span>
+<span class="normal">953</span>
+<span class="normal">954</span>
+<span class="normal">955</span>
+<span class="normal">956</span>
+<span class="normal">957</span>
+<span class="normal">958</span>
+<span class="normal">959</span>
+<span class="normal">960</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">launch_AlphaPEM_for_step_current</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span>
+                                     <span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span>
+                                     <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span>
+                                     <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span>
+                                     <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span>
+                                     <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Launch the AlphaPEM simulator for a step current density and display the results.</span>
 
 <span class="sd">    Parameters</span>
@@ -3314,19 +3392,26 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 <span class="sd">        Desired anode relative humidity (operating input).</span>
 <span class="sd">    Phi_c_des : float</span>
 <span class="sd">        Desired cathode relative humidity (operating input).</span>
-<span class="sd">    t_step : tuple</span>
-<span class="sd">        Time parameters for the step_current density function (current parameters).</span>
-<span class="sd">        It is a tuple containing the initial time &#39;t0_step&#39;, final time &#39;tf_step&#39;, loading time &#39;delta_t_load_step&#39;</span>
-<span class="sd">        and dynamic time for display &#39;delta_t_dyn_step&#39;.</span>
-<span class="sd">    i_step : tuple</span>
-<span class="sd">        Current parameters for the step_current density function (current parameters).</span>
-<span class="sd">        It is a tuple containing the initial and final current density value &#39;i_ini_step&#39; and &#39;i_final_step&#39;.</span>
-<span class="sd">    i_max_pola : float</span>
-<span class="sd">        Maximum current density for the polarization curve (current parameter).</span>
-<span class="sd">    delta_pola : tuple</span>
-<span class="sd">        Parameters for the polarization curve (current parameters). It is a tuple containing the loading time</span>
-<span class="sd">        &#39;delta_t_load_pola&#39;, the breaking time &#39;delta_t_break_pola&#39;, the current density step &#39;delta_i_pola&#39;, and</span>
-<span class="sd">        the initial breaking time &#39;delta_t_ini_pola&#39;.</span>
+<span class="sd">    step_current_parameters : dict</span>
+<span class="sd">            Parameters for the step current density. It is a dictionary containing:</span>
+<span class="sd">            - &#39;delta_t_ini_step&#39;: the initial time (in seconds) at zero current density for the stabilisation of the</span>
+<span class="sd">            internal states,</span>
+<span class="sd">            - &#39;delta_t_load_step&#39;: the loading time (in seconds) for the step current density function, from 0 to</span>
+<span class="sd">            i_step,</span>
+<span class="sd">            - &#39;delta_t_break_step&#39;: the time (in seconds) at i_step current density for the stabilisation of the</span>
+<span class="sd">            internal states,</span>
+<span class="sd">            - &#39;i_step&#39;: the current density (in A.m-2) for the step current density function,</span>
+<span class="sd">            - &#39;delta_t_dyn_step&#39;: the time (in seconds) for dynamic display of the step current density function.</span>
+<span class="sd">    pola_current_parameters : dict</span>
+<span class="sd">        Parameters for the polarization current density. It is a dictionary containing:</span>
+<span class="sd">        - &#39;delta_t_ini_pola&#39;: the initial time (in seconds) at zero current density for the stabilisation of the</span>
+<span class="sd">        internal states,</span>
+<span class="sd">        - &#39;delta_t_load_pola&#39;: the loading time (in seconds) for one step current of the polarisation current</span>
+<span class="sd">        density function,</span>
+<span class="sd">        - &#39;delta_t_break_pola&#39;: the breaking time (in seconds) for one step current, for the stabilisation of the</span>
+<span class="sd">        internal states,</span>
+<span class="sd">        - &#39;delta_i_pola&#39;: the current density step (in A.m-2) for the polarisation current density function.</span>
+<span class="sd">        - &#39;i_max_pola&#39;: the maximum current density (in A.m-2) for the polarization curve.</span>
 <span class="sd">    i_EIS : float</span>
 <span class="sd">        Current for which a ratio_EIS perturbation is added (current parameter).</span>
 <span class="sd">    ratio_EIS : float</span>
@@ -3416,21 +3501,31 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 
     <span class="c1"># Dynamic display requires a dedicated use of the AlphaPEM class.</span>
     <span class="k">if</span> <span class="n">type_plot</span> <span class="o">==</span> <span class="s2">&quot;dynamic&quot;</span><span class="p">:</span>
+        <span class="c1"># Check if the type_fuel_cell and type_current are valid</span>
+        <span class="k">if</span> <span class="n">type_current</span> <span class="o">==</span> <span class="s2">&quot;step&quot;</span> <span class="ow">and</span> <span class="n">type_display</span> <span class="o">==</span> <span class="s2">&quot;multiple&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;dynamic plot is not thought to be used with step current and multiple display.&#39;</span> <span class="o">+</span>
+                             <span class="s1">&#39;There would be too much plots to handle.&#39;</span><span class="p">)</span>
+
         <span class="c1"># Initialization</span>
-        <span class="c1">#       ... of the plot update number (n) and the initial time interval (time_interval)</span>
+        <span class="c1">#       Calculation of the plot update number (n) and the initial time interval (time_interval).</span>
         <span class="n">initial_variable_values</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">t0_step</span><span class="p">,</span> <span class="n">tf_step</span><span class="p">,</span> <span class="n">delta_t_load_step</span><span class="p">,</span> <span class="n">delta_t_dyn_step</span> <span class="o">=</span> <span class="n">t_step</span>
+        <span class="c1">#           Extraction of the parameters</span>
+        <span class="n">tf_step</span> <span class="o">=</span> <span class="n">step_current_parameters</span><span class="p">[</span><span class="s1">&#39;delta_t_ini_step&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">step_current_parameters</span><span class="p">[</span><span class="s1">&#39;delta_t_load_step&#39;</span><span class="p">]</span> <span class="o">+</span> \
+                  <span class="n">step_current_parameters</span><span class="p">[</span><span class="s1">&#39;delta_t_break_step&#39;</span><span class="p">]</span>  <span class="c1"># (s).</span>
+        <span class="n">delta_t_dyn_step</span> <span class="o">=</span> <span class="n">step_current_parameters</span><span class="p">[</span><span class="s1">&#39;delta_t_dyn_step&#39;</span><span class="p">]</span>  <span class="c1"># (s).</span>
+        <span class="c1">#           Calculation</span>
         <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tf_step</span> <span class="o">/</span> <span class="n">delta_t_dyn_step</span><span class="p">)</span>  <span class="c1"># It is the plot update number.</span>
-        <span class="n">time_interval</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">delta_t_dyn_step</span><span class="p">]</span>  <span class="c1"># It is the initial time interval.</span>
+        <span class="n">time_interval</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">delta_t_dyn_step</span><span class="p">]</span>  <span class="c1"># (s). It is the initial time interval.</span>
 
         <span class="c1"># Dynamic simulation</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-            <span class="n">Simulator</span> <span class="o">=</span> <span class="n">AlphaPEM</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">t_step</span><span class="p">,</span> <span class="n">i_step</span><span class="p">,</span>
-                                 <span class="n">i_max_pola</span><span class="p">,</span> <span class="n">delta_pola</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span>
-                                 <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span>
-                                 <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span>
-                                 <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">,</span>
-                                 <span class="n">initial_variable_values</span><span class="p">,</span> <span class="n">time_interval</span><span class="p">)</span>
+            <span class="n">Simulator</span> <span class="o">=</span> <span class="n">AlphaPEM</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span>
+                                 <span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span>
+                                 <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span>
+                                 <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span>
+                                 <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span>
+                                 <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">,</span> <span class="n">initial_variable_values</span><span class="p">,</span>
+                                 <span class="n">time_interval</span><span class="p">)</span>
 
             <span class="c1"># time_interval actualization</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>  <span class="c1"># The final simulation does not require actualization.</span>
@@ -3449,17 +3544,18 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 
     <span class="k">else</span><span class="p">:</span>  <span class="c1"># elif type_plot == &quot;fixed&quot;:</span>
         <span class="c1"># Simulation</span>
-        <span class="n">Simulator</span> <span class="o">=</span> <span class="n">AlphaPEM</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">t_step</span><span class="p">,</span> <span class="n">i_step</span><span class="p">,</span>
-                             <span class="n">i_max_pola</span><span class="p">,</span> <span class="n">delta_pola</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span>
-                             <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span>
-                             <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span>
-                             <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">)</span>
+        <span class="n">Simulator</span> <span class="o">=</span> <span class="n">AlphaPEM</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span>
+                             <span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span>
+                             <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span>
+                             <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span>
+                             <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span>
+                             <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">)</span>
         <span class="c1"># Display</span>
         <span class="k">if</span> <span class="n">type_display</span> <span class="o">!=</span> <span class="s2">&quot;no_display&quot;</span><span class="p">:</span>
             <span class="n">Simulator</span><span class="o">.</span><span class="n">Display</span><span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">,</span> <span class="n">ax3</span><span class="p">)</span>
 
     <span class="c1"># Plot saving</span>
-    <span class="n">plot_saving</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">fig1</span><span class="p">,</span> <span class="n">fig2</span><span class="p">,</span> <span class="n">fig3</span><span class="p">)</span>
+    <span class="n">Simulator</span><span class="o">.</span><span class="n">Save_plot</span><span class="p">(</span><span class="n">fig1</span><span class="p">,</span> <span class="n">fig2</span><span class="p">,</span> <span class="n">fig3</span><span class="p">)</span>
 
     <span class="c1"># Ending time</span>
     <span class="n">algo_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
@@ -3550,13 +3646,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/GUI_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">298</span>
-<span class="normal">299</span>
-<span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">304</span>
 <span class="normal">305</span>
 <span class="normal">306</span>
 <span class="normal">307</span>
@@ -3622,7 +3712,13 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 <span class="normal">367</span>
 <span class="normal">368</span>
 <span class="normal">369</span>
-<span class="normal">370</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">recover_for_display_operating_inputs_and_physical_parameters</span><span class="p">(</span><span class="n">choice_operating_conditions</span><span class="p">,</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">recover_for_display_operating_inputs_and_physical_parameters</span><span class="p">(</span><span class="n">choice_operating_conditions</span><span class="p">,</span>
                                                                  <span class="n">choice_accessible_parameters</span><span class="p">,</span>
                                                                  <span class="n">choice_undetermined_parameters</span><span class="p">,</span>
                                                                  <span class="n">choice_current_density_parameters</span><span class="p">,</span>
@@ -3781,13 +3877,7 @@ calculations.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/GUI_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">373</span>
-<span class="normal">374</span>
-<span class="normal">375</span>
-<span class="normal">376</span>
-<span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">379</span>
 <span class="normal">380</span>
 <span class="normal">381</span>
 <span class="normal">382</span>
@@ -3904,7 +3994,21 @@ calculations.</p>
 <span class="normal">493</span>
 <span class="normal">494</span>
 <span class="normal">495</span>
-<span class="normal">496</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">recover_for_use_operating_inputs_and_physical_parameters</span><span class="p">(</span><span class="n">choice_operating_conditions</span><span class="p">,</span> <span class="n">choice_accessible_parameters</span><span class="p">,</span>
+<span class="normal">496</span>
+<span class="normal">497</span>
+<span class="normal">498</span>
+<span class="normal">499</span>
+<span class="normal">500</span>
+<span class="normal">501</span>
+<span class="normal">502</span>
+<span class="normal">503</span>
+<span class="normal">504</span>
+<span class="normal">505</span>
+<span class="normal">506</span>
+<span class="normal">507</span>
+<span class="normal">508</span>
+<span class="normal">509</span>
+<span class="normal">510</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">recover_for_use_operating_inputs_and_physical_parameters</span><span class="p">(</span><span class="n">choice_operating_conditions</span><span class="p">,</span> <span class="n">choice_accessible_parameters</span><span class="p">,</span>
                                                              <span class="n">choice_undetermined_parameters</span><span class="p">,</span>
                                                              <span class="n">choice_current_density_parameters</span><span class="p">,</span>
                                                              <span class="n">choice_computing_parameters</span><span class="p">,</span> <span class="n">choice_buttons</span><span class="p">):</span>
@@ -3957,17 +4061,23 @@ calculations.</p>
     <span class="n">a_switch</span> <span class="o">=</span> <span class="n">choice_undetermined_parameters</span><span class="p">[</span><span class="s1">&#39;Limit liquid saturation</span><span class="se">\n</span><span class="s1">coefficient - a_switch&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
     <span class="n">C_scl</span> <span class="o">=</span> <span class="n">choice_undetermined_parameters</span><span class="p">[</span><span class="s1">&#39;Volumetric space-charge</span><span class="se">\n</span><span class="s1">layer capacitance</span><span class="se">\n</span><span class="s1">- C_scl (F/cm³)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1e6</span>  <span class="c1"># F.m-3</span>
     <span class="c1"># current density parameters</span>
-    <span class="n">t_step</span> <span class="o">=</span> <span class="p">(</span><span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Initial time - t0_step (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span>
-              <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Final time - tf_step (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span>
-              <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Loading time</span><span class="se">\n</span><span class="s1">- Δt_load_step (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span>
-              <span class="n">choice_computing_parameters</span><span class="p">[</span><span class="s1">&#39;Time for dynamic</span><span class="se">\n</span><span class="s1">display - Δt_dyn_step (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>  <span class="c1"># (s, s, s, s)</span>
-    <span class="n">i_step</span> <span class="o">=</span> <span class="p">(</span><span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Initial current density</span><span class="se">\n</span><span class="s1">- i_ini_step (A/cm²)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1e4</span><span class="p">,</span>
-              <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Final current density</span><span class="se">\n</span><span class="s1">- i_final_step (A/cm²)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1e4</span><span class="p">)</span>  <span class="c1"># (A.m-2, A.m-2)</span>
-    <span class="n">i_max_pola</span> <span class="o">=</span> <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Maximum current density</span><span class="se">\n</span><span class="s1">- i_max_pola (A/cm²)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1e4</span>  <span class="c1"># A.m-2</span>
-    <span class="n">delta_pola</span> <span class="o">=</span> <span class="p">(</span><span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Loading time</span><span class="se">\n</span><span class="s1">- Δt_load_pola (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span>
-                  <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Breaking time</span><span class="se">\n</span><span class="s1">- Δt_break_pola (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span>
-                  <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Current density step</span><span class="se">\n</span><span class="s1">- Δi_pola (A/cm²)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1e4</span><span class="p">,</span>
-                  <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Initial breaking time</span><span class="se">\n</span><span class="s1">- Δt_ini_pola (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>  <span class="c1"># (s, s, A.m-2, s)</span>
+    <span class="n">delta_t_ini_step</span> <span class="o">=</span> <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Stabilisation time</span><span class="se">\n</span><span class="s1">- Δt_ini_step (min)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">*</span> <span class="mi">60</span> <span class="c1">#s</span>
+    <span class="n">delta_t_load_step</span> <span class="o">=</span> <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Loading time</span><span class="se">\n</span><span class="s1">- Δt_load_step (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="c1">#s</span>
+    <span class="n">delta_t_break_step</span> <span class="o">=</span> <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Breaking time</span><span class="se">\n</span><span class="s1">- Δt_break_step (min)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">*</span> <span class="mi">60</span> <span class="c1">#s</span>
+    <span class="n">i_step</span> <span class="o">=</span> <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Current density step</span><span class="se">\n</span><span class="s1">- i_step (A/cm²)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1e4</span> <span class="c1"># A.m-2</span>
+    <span class="n">delta_t_dyn_step</span> <span class="o">=</span> <span class="n">choice_computing_parameters</span><span class="p">[</span><span class="s1">&#39;Time for dynamic</span><span class="se">\n</span><span class="s1">display - Δt_dyn_step (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="c1">#s</span>
+    <span class="n">step_current_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;delta_t_ini_step&#39;</span><span class="p">:</span> <span class="n">delta_t_ini_step</span><span class="p">,</span> <span class="s1">&#39;delta_t_load_step&#39;</span><span class="p">:</span> <span class="n">delta_t_load_step</span><span class="p">,</span>
+                               <span class="s1">&#39;delta_t_break_step&#39;</span><span class="p">:</span> <span class="n">delta_t_break_step</span><span class="p">,</span> <span class="s1">&#39;i_step&#39;</span><span class="p">:</span> <span class="n">i_step</span><span class="p">,</span>
+                               <span class="s1">&#39;delta_t_dyn_step&#39;</span><span class="p">:</span> <span class="n">delta_t_dyn_step</span><span class="p">}</span>
+    <span class="n">delta_t_ini_pola</span> <span class="o">=</span> <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Stabilisation time</span><span class="se">\n</span><span class="s1">- Δt_ini_pola (min)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">*</span> <span class="mi">60</span> <span class="c1">#s</span>
+    <span class="n">delta_t_load_pola</span> <span class="o">=</span> <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Loading time</span><span class="se">\n</span><span class="s1">- Δt_load_pola (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="c1">#s</span>
+    <span class="n">delta_t_break_pola</span> <span class="o">=</span> <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Breaking time</span><span class="se">\n</span><span class="s1">- Δt_break_pola (min)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">*</span> <span class="mi">60</span> <span class="c1">#s</span>
+    <span class="n">delta_i_pola</span> <span class="o">=</span> <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Current density step</span><span class="se">\n</span><span class="s1">- Δi_pola (A/cm²)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1e4</span> <span class="c1"># A.m-2</span>
+    <span class="n">i_max_pola</span> <span class="o">=</span> <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Maximum current density</span><span class="se">\n</span><span class="s1">- i_max_pola (A/cm²)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1e4</span> <span class="c1"># A.m-2</span>
+    <span class="n">pola_current_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;delta_t_ini_pola&#39;</span><span class="p">:</span> <span class="n">delta_t_ini_pola</span><span class="p">,</span> <span class="s1">&#39;delta_t_load_pola&#39;</span><span class="p">:</span> <span class="n">delta_t_load_pola</span><span class="p">,</span>
+                               <span class="s1">&#39;delta_t_break_pola&#39;</span><span class="p">:</span> <span class="n">delta_t_break_pola</span><span class="p">,</span> <span class="s1">&#39;delta_i_pola&#39;</span><span class="p">:</span> <span class="n">delta_i_pola</span><span class="p">,</span>
+                               <span class="s1">&#39;i_max_pola&#39;</span><span class="p">:</span> <span class="n">i_max_pola</span><span class="p">}</span>
+    <span class="n">pola_current_for_cali_parameters</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Calibration is not implemented in the GUI.</span>
     <span class="n">i_EIS</span> <span class="o">=</span> <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Static current</span><span class="se">\n</span><span class="s1">- i_EIS (A/cm²)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1e4</span>  <span class="c1"># (A.m-2)</span>
     <span class="n">ratio_EIS</span> <span class="o">=</span> <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Current ratio</span><span class="se">\n</span><span class="s1">- ratio_EIS (%)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">/</span> <span class="mi">100</span>
     <span class="n">f_EIS</span> <span class="o">=</span> <span class="p">(</span><span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Power of the</span><span class="se">\n</span><span class="s1">initial frequency</span><span class="se">\n</span><span class="s1">- f_power_min_EIS&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span>
@@ -3975,6 +4085,7 @@ calculations.</p>
              <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Number of frequencies</span><span class="se">\n</span><span class="s1">tested - nb_f_EIS&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span>
              <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Number of points</span><span class="se">\n</span><span class="s1">calculated - nb_points_EIS&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
     <span class="n">t_EIS</span> <span class="o">=</span> <span class="n">EIS_parameters</span><span class="p">(</span><span class="n">f_EIS</span><span class="p">)</span>  <span class="c1"># Time parameters for the EIS_current density function.</span>
+    <span class="c1"># computing parameters</span>
     <span class="n">t_purge</span> <span class="o">=</span> <span class="n">choice_computing_parameters</span><span class="p">[</span><span class="s1">&#39;Purge time - t_purge (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>  <span class="c1"># s</span>
     <span class="n">delta_t_purge</span> <span class="o">=</span> <span class="n">choice_computing_parameters</span><span class="p">[</span><span class="s1">&#39;Time between two purges</span><span class="se">\n</span><span class="s1">- Δt_purge (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>  <span class="c1"># s</span>
     <span class="n">max_step</span> <span class="o">=</span> <span class="n">choice_computing_parameters</span><span class="p">[</span><span class="s1">&#39;Maximum time step</span><span class="se">\n</span><span class="s1">- max_step (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>  <span class="c1"># s</span>
@@ -4025,9 +4136,10 @@ calculations.</p>
         <span class="n">type_plot</span> <span class="o">=</span> <span class="s2">&quot;dynamic&quot;</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span>
-            <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">t_step</span><span class="p">,</span>
-            <span class="n">i_step</span><span class="p">,</span> <span class="n">i_max_pola</span><span class="p">,</span> <span class="n">delta_pola</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">delta_t_purge</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span>
-            <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">)</span>
+            <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span>
+            <span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span>
+            <span class="n">t_EIS</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">delta_t_purge</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span>
+            <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4113,12 +4225,7 @@ calculations.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/GUI_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">727</span>
-<span class="normal">728</span>
-<span class="normal">729</span>
-<span class="normal">730</span>
-<span class="normal">731</span>
-<span class="normal">732</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">732</span>
 <span class="normal">733</span>
 <span class="normal">734</span>
 <span class="normal">735</span>
@@ -4145,7 +4252,12 @@ calculations.</p>
 <span class="normal">756</span>
 <span class="normal">757</span>
 <span class="normal">758</span>
-<span class="normal">759</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_equal_width</span><span class="p">(</span><span class="n">frame1</span><span class="p">,</span> <span class="n">frame2</span><span class="p">,</span> <span class="n">frame3</span><span class="p">,</span> <span class="n">frame4</span><span class="p">,</span> <span class="n">frame5</span><span class="p">,</span> <span class="n">frame6</span><span class="p">):</span>
+<span class="normal">759</span>
+<span class="normal">760</span>
+<span class="normal">761</span>
+<span class="normal">762</span>
+<span class="normal">763</span>
+<span class="normal">764</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_equal_width</span><span class="p">(</span><span class="n">frame1</span><span class="p">,</span> <span class="n">frame2</span><span class="p">,</span> <span class="n">frame3</span><span class="p">,</span> <span class="n">frame4</span><span class="p">,</span> <span class="n">frame5</span><span class="p">,</span> <span class="n">frame6</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adjusts the width of the frames to be equal based on their maximum width.</span>
 
@@ -4272,21 +4384,7 @@ valid.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/GUI_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">499</span>
-<span class="normal">500</span>
-<span class="normal">501</span>
-<span class="normal">502</span>
-<span class="normal">503</span>
-<span class="normal">504</span>
-<span class="normal">505</span>
-<span class="normal">506</span>
-<span class="normal">507</span>
-<span class="normal">508</span>
-<span class="normal">509</span>
-<span class="normal">510</span>
-<span class="normal">511</span>
-<span class="normal">512</span>
-<span class="normal">513</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">513</span>
 <span class="normal">514</span>
 <span class="normal">515</span>
 <span class="normal">516</span>
@@ -4497,7 +4595,12 @@ valid.</p>
 <span class="normal">721</span>
 <span class="normal">722</span>
 <span class="normal">723</span>
-<span class="normal">724</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">value_control</span><span class="p">(</span><span class="n">choice_operating_conditions</span><span class="p">,</span> <span class="n">choice_accessible_parameters</span><span class="p">,</span> <span class="n">choice_undetermined_parameters</span><span class="p">,</span>
+<span class="normal">724</span>
+<span class="normal">725</span>
+<span class="normal">726</span>
+<span class="normal">727</span>
+<span class="normal">728</span>
+<span class="normal">729</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">value_control</span><span class="p">(</span><span class="n">choice_operating_conditions</span><span class="p">,</span> <span class="n">choice_accessible_parameters</span><span class="p">,</span> <span class="n">choice_undetermined_parameters</span><span class="p">,</span>
                   <span class="n">choice_current_density_parameters</span><span class="p">,</span> <span class="n">choice_computing_parameters</span><span class="p">,</span> <span class="n">choice_buttons</span><span class="p">,</span> <span class="n">current_button</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function checks the integrity of the values entered by the user and returns an empty tuple if they are not</span>
 <span class="sd">    valid.</span>
@@ -4643,31 +4746,22 @@ valid.</p>
         <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Double layer capacitance&#39;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s1">&#39;I have not settled yet a range for C_scl.&#39;</span><span class="p">)</span>
         <span class="n">choices</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="k">return</span>
-    <span class="k">if</span> <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Initial time - t0_step (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
-            <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Final time - tf_step (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
+    <span class="k">if</span> <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Stabilisation time</span><span class="se">\n</span><span class="s1">- Δt_ini_step (min)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
             <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Loading time</span><span class="se">\n</span><span class="s1">- Δt_load_step (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
+            <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Breaking time</span><span class="se">\n</span><span class="s1">- Δt_break_step (min)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
             <span class="n">choice_computing_parameters</span><span class="p">[</span><span class="s1">&#39;Time for dynamic</span><span class="se">\n</span><span class="s1">display - Δt_dyn_step (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
+            <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Stabilisation time</span><span class="se">\n</span><span class="s1">- Δt_ini_pola (min)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
             <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Loading time</span><span class="se">\n</span><span class="s1">- Δt_load_pola (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
-            <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Breaking time</span><span class="se">\n</span><span class="s1">- Δt_break_pola (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
-            <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Initial breaking time</span><span class="se">\n</span><span class="s1">- Δt_ini_pola (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
-            <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Initial time - t0_step (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&gt;</span> \
-            <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Final time - tf_step (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="ow">or</span> \
-            <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Loading time</span><span class="se">\n</span><span class="s1">- Δt_load_step (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&gt;</span> \
-            <span class="p">(</span><span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Final time - tf_step (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">-</span>
-             <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Initial time - t0_step (s)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()):</span>
+            <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Breaking time</span><span class="se">\n</span><span class="s1">- Δt_break_pola (min)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="p">:</span>
         <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Times&#39;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s1">&#39;The times should be positive, t0_step &lt; tf_step and &#39;</span>
                                                     <span class="s1">&#39;delta_t_load_step &lt; (tf_step - t0_step).&#39;</span><span class="p">)</span>
         <span class="n">choices</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="k">return</span>
-    <span class="k">if</span> <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Initial current density</span><span class="se">\n</span><span class="s1">- i_ini_step (A/cm²)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
-            <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Final current density</span><span class="se">\n</span><span class="s1">- i_final_step (A/cm²)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
-            <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Maximum current density</span><span class="se">\n</span><span class="s1">- i_max_pola (A/cm²)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
+    <span class="k">if</span> <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Maximum current density</span><span class="se">\n</span><span class="s1">- i_max_pola (A/cm²)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
             <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Current density step</span><span class="se">\n</span><span class="s1">- Δi_pola (A/cm²)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
             <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Static current</span><span class="se">\n</span><span class="s1">- i_EIS (A/cm²)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
             <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Current density step</span><span class="se">\n</span><span class="s1">- Δi_pola (A/cm²)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&gt;</span> \
-            <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Maximum current density</span><span class="se">\n</span><span class="s1">- i_max_pola (A/cm²)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="ow">or</span> \
-            <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Initial current density</span><span class="se">\n</span><span class="s1">- i_ini_step (A/cm²)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&gt;</span> \
-            <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Final current density</span><span class="se">\n</span><span class="s1">- i_final_step (A/cm²)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
+            <span class="n">choice_current_density_parameters</span><span class="p">[</span><span class="s1">&#39;Maximum current density</span><span class="se">\n</span><span class="s1">- i_max_pola (A/cm²)&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
         <span class="n">messagebox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Current densities&#39;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s1">&#39;The current densities should be positive, &#39;</span>
                                                                 <span class="s1">&#39;delta_i_pola &lt; i_max_pola and &#39;</span>
                                                                 <span class="s1">&#39;i_ini_step &lt; i_final_step.&#39;</span><span class="p">)</span>

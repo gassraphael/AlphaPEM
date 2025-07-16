@@ -285,8 +285,7 @@ response at each frequency 'delta_t_measurement_EIS'.</p>
 <span class="normal">248</span>
 <span class="normal">249</span>
 <span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">EIS_parameters</span><span class="p">(</span><span class="n">f_EIS</span><span class="p">):</span>
+<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">EIS_parameters</span><span class="p">(</span><span class="n">f_EIS</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function gives the time parameters for the EIS_current density function.</span>
 
 <span class="sd">    Parameters</span>
@@ -319,8 +318,7 @@ response at each frequency 'delta_t_measurement_EIS'.</p>
     <span class="n">delta_t_measurement_EIS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>  <span class="c1"># It is the estimated time for measuring the voltage response.</span>
 
     <span class="c1"># Time parameters calculation</span>
-    <span class="n">t0_EIS</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># s. It is the simulation starting time.</span>
-    <span class="c1">#                   [0, t0_EIS] is used to let the stack equilibrate to i_EIS.</span>
+    <span class="n">t0_EIS</span> <span class="o">=</span> <span class="mi">120</span><span class="o">*</span><span class="mi">60</span>  <span class="c1"># s. It is the simulation starting time. [0, t0_EIS] is used to let the stack equilibrate to i_EIS.</span>
     <span class="n">t_new_start_EIS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">t0_EIS</span><span class="p">])</span>  <span class="c1"># It is a list of time parameters which gives the beginning of each frequency</span>
     <span class="c1">#                                   change.</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_f_EIS</span><span class="p">):</span>  <span class="c1"># The goal is to measure nb_f_EIS periods of the signal in order to have precise enough values.</span>
