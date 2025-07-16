@@ -145,7 +145,7 @@ def pola_exp_values(type_fuel_cell):
         U_exp_t[5], U_exp_t[6], U_exp_t[7], U_exp_t[8], U_exp_t[9] = 0.74, 0.72, 0.69, 0.65, 0.60
         U_exp_t[10], U_exp_t[11], U_exp_t[12] = 0.54, 0.46, 0.32
 
-    return i_exp_t, U_exp_t
+    return i_exp_t * 1e4, U_exp_t # Conversion in A.m-2
 
 def pola_exp_values_calibration(type_fuel_cell):
     """
@@ -207,7 +207,7 @@ def pola_exp_values_calibration(type_fuel_cell):
         U_exp_cali_t[4], U_exp_cali_t[5], U_exp_cali_t[6], U_exp_cali_t[7] = 0.758, 0.712, 0.663, 0.621
         U_exp_cali_t[8], U_exp_cali_t[9] = 0.575, 0.524
 
-    return i_exp_cali_t, U_exp_cali_t
+    return i_exp_cali_t * 1e4, U_exp_cali_t # Conversion in A.m-2
 
 def plot_experimental_polarisation_curve(type_fuel_cell, i_fc_t, U_exp_t, ax):
     """
@@ -228,16 +228,16 @@ def plot_experimental_polarisation_curve(type_fuel_cell, i_fc_t, U_exp_t, ax):
     if type_fuel_cell == "EH-31_1.5":  # at 1.5 bar
         ax.scatter(i_fc_t, U_exp_t, linewidths=1.5, marker="s", color="black", label="Exp. - P = 1.5 bar")
     elif type_fuel_cell == "EH-31_2.0":  # at 2.0 bar
-        ax.scatter(i_fc_t, U_exp_t, linewidths=1.5, marker="o", color="black", label="Exp. - P = 2.0 bar")
+        ax.scatter(i_fc_t, U_exp_t, linewidths=1.5, marker="v", color="black", label="Exp. - P = 2.0 bar")
     elif type_fuel_cell == "EH-31_2.25":  # at 2.25 bar
         ax.scatter(i_fc_t, U_exp_t, linewidths=1.5, marker="^", color="black", label="Exp. - P = 2.25 bar")
     elif type_fuel_cell == "EH-31_2.5":  # at 2.5 bar
-        ax.scatter(i_fc_t, U_exp_t, linewidths=1.5, marker=(5, 1), color="black", label="Exp. - P = 2.5 bar")
+        ax.scatter(i_fc_t, U_exp_t, linewidths=1.5, marker="p", color="black", label="Exp. - P = 2.5 bar")
 
     elif type_fuel_cell == "BX_1.0":  # at 1.0 atm
-        ax.scatter(i_fc_t, U_exp_t, linewidths=3.5, marker="^", color="black", label="Exp. - P = 1.0 atm")
+        ax.scatter(i_fc_t, U_exp_t, linewidths=3.5, marker="s", color="black", label="Exp. - P = 1.0 atm")
     elif type_fuel_cell == "BX_1.35":  # at 1.35 atm
-        ax.scatter(i_fc_t, U_exp_t, linewidths=3.5, marker="s", color="black", label="Exp. - P = 1.35 atm")
+        ax.scatter(i_fc_t, U_exp_t, linewidths=3.5, marker="v", color="black", label="Exp. - P = 1.35 atm")
 
     elif type_fuel_cell == "LF":
         ax.scatter(i_fc_t, U_exp_t, linewidths=3.5, marker="s", color="black", label="Experimental data")

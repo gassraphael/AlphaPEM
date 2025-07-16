@@ -17,9 +17,9 @@ import numpy as np
 # Importing constants' value and functions
 sys.path.append(os.path.abspath('..'))  # Add parent (root) folder path to list of module search paths
 from model.AlphaPEM import AlphaPEM
-from modules.calibration_modules import determined_parameters, calculate_simulation_error, print_calibration_results, \
+from configuration.current_densities import step_current, polarization_current
+from modules.calibration_modules import parameters_for_calibration, calculate_simulation_error, print_calibration_results, \
                                         save_calibration_results
-from modules.main_modules import saving_instructions
 
 # _________________________________________________Calibration settings_________________________________________________
 """
@@ -76,7 +76,7 @@ for i in range(len(varbound)):
 
 # PyGAD parameters for the genetic algorithm:
     # Number of generations:
-num_generations = 1 # It should be between 1000 and 1500, depending on the population_size,
+num_generations = 2 # It should be between 1000 and 1500, depending on the population_size,
     #                 for a good compromise between speed and precision.
     # Initial population (one solution means a member of the population):
         # 1) custom initial population.
@@ -98,15 +98,17 @@ the calibration_module.py.
 This section should remain unaltered for regular program usage.
 """
 
-T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, i_max_pola_1, Aact, Hmem, Hcl, Hgdl, Hgc, Wgc, Lgc, \
-    type_auxiliary, type_control, type_purge, type_display, type_plot, type_current, current_density, t_step, i_step, \
-    delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, t_purge, max_step, n_gdl, i_exp1, U_exp1 \
-    = determined_parameters(type_fuel_cell_1)
+(T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, step_current_parameters, pola_current_parameters,
+ pola_current_for_cali_parameters_1, Aact, Hmem, Hcl, Hgdl, Hgc, Wgc, Lgc,
+ estimated_undetermined_parameters_for_initialisation, type_auxiliary, type_control, type_purge, type_display,
+ type_plot, type_current, current_density, i_EIS, ratio_EIS, t_EIS, f_EIS, t_purge, max_step, n_gdl, i_exp_1, U_exp_1) \
+    = parameters_for_calibration(type_fuel_cell_1)
 
-T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2, i_max_pola_2, Aact, Hmem, Hcl, Hgdl, Hgc, Wgc, Lgc, \
-    type_auxiliary, type_control, type_purge, type_display, type_plot, type_current, current_density, t_step, i_step, \
-    delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, t_purge, max_step, n_gdl, i_exp2, U_exp2 \
-    = determined_parameters(type_fuel_cell_2)
+(T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2, step_current_parameters, pola_current_parameters,
+ pola_current_for_cali_parameters_2, Aact, Hmem, Hcl, Hgdl, Hgc, Wgc, Lgc,
+ estimated_undetermined_parameters_for_initialisation, type_auxiliary, type_control, type_purge, type_display,
+ type_plot, type_current, current_density, i_EIS, ratio_EIS, t_EIS, f_EIS, t_purge, max_step, n_gdl,  i_exp_2, U_exp_2) \
+    = parameters_for_calibration(type_fuel_cell_2)
 
 # _______________________________________________________Functions______________________________________________________
 
@@ -135,19 +137,21 @@ def pola_points(ga_instance, solution, solution_idx): # Function to maximize.
     epsilon_gdl, epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch = solution
 
     # Calculation of the model polarization curve
-    Simulator1 = AlphaPEM(current_density, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, t_step,
-                          i_step, i_max_pola_1, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
-                          Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
-                          b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell_1, type_current,
-                          type_auxiliary, type_control, type_purge, type_display, type_plot)
-    Simulator2 = AlphaPEM(current_density, T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2, t_step,
-                          i_step, i_max_pola_2, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
-                          Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
-                          b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell_2, type_current,
-                          type_auxiliary, type_control, type_purge, type_display, type_plot)
+    Simulator_1 = AlphaPEM(current_density, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
+                          step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters_1, i_EIS,
+                          ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc,
+                          epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step,
+                          n_gdl, t_purge, type_fuel_cell_1, type_current, type_auxiliary, type_control, type_purge,
+                          type_display, type_plot, initial_variable_values_1)
+    Simulator_2 = AlphaPEM(current_density, T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2,
+                          step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters_2, i_EIS,
+                          ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc,
+                          epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step,
+                          n_gdl, t_purge, type_fuel_cell_2, type_current, type_auxiliary, type_control, type_purge,
+                          type_display, type_plot, initial_variable_values_2)
 
     # Calculation of the simulation error between the simulated and experimental polarization curves
-    sim_error = calculate_simulation_error(Simulator1, U_exp1, i_exp1, Simulator2, U_exp2, i_exp2)
+    sim_error = calculate_simulation_error(Simulator_1, U_exp_1, i_exp_1, Simulator_2, U_exp_2, i_exp_2)
     if sim_error == 0:  # If the error is zero, it means the simulation is perfect.
         sim_error = 1e-6
 
@@ -194,6 +198,40 @@ if __name__ == '__main__':
     # Starting time
     start_time = time.time()
 
+    # Initialization of the simulator in order to equilibrate the internal states of the fuel cell
+    epsilon_gdl_ini = estimated_undetermined_parameters_for_initialisation['epsilon_gdl']
+    tau_ini = estimated_undetermined_parameters_for_initialisation['tau']
+    epsilon_mc_ini = estimated_undetermined_parameters_for_initialisation['epsilon_mc']
+    epsilon_c_ini = estimated_undetermined_parameters_for_initialisation['epsilon_c']
+    e_ini = estimated_undetermined_parameters_for_initialisation['e']
+    Re_ini = estimated_undetermined_parameters_for_initialisation['Re']
+    i0_c_ref_ini = estimated_undetermined_parameters_for_initialisation['i0_c_ref']
+    kappa_co_ini = estimated_undetermined_parameters_for_initialisation['kappa_co']
+    kappa_c_ini = estimated_undetermined_parameters_for_initialisation['kappa_c']
+    a_slim_ini = estimated_undetermined_parameters_for_initialisation['a_slim']
+    b_slim_ini = estimated_undetermined_parameters_for_initialisation['b_slim']
+    a_switch_ini = estimated_undetermined_parameters_for_initialisation['a_switch']
+    C_scl_ini = estimated_undetermined_parameters_for_initialisation['C_scl']
+    Simulator_ini_1 = AlphaPEM(step_current, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
+                               step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters_1,
+                               i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl_ini,
+                               tau_ini, epsilon_mc_ini, epsilon_c_ini, e_ini, Re_ini, i0_c_ref_ini, kappa_co_ini,
+                               kappa_c_ini, a_slim_ini, b_slim_ini, a_switch_ini, C_scl_ini, max_step, n_gdl, t_purge,
+                               type_fuel_cell_1, 'step', type_auxiliary, type_control, type_purge,
+                               type_display, type_plot)
+    Simulator_ini_2 = AlphaPEM(step_current, T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2,
+                               step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters_2,
+                               i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl_ini,
+                               tau_ini, epsilon_mc_ini, epsilon_c_ini, e_ini, Re_ini, i0_c_ref_ini, kappa_co_ini,
+                               kappa_c_ini, a_slim_ini, b_slim_ini, a_switch_ini, C_scl_ini, max_step, n_gdl, t_purge,
+                               type_fuel_cell_2, 'step', type_auxiliary, type_control, type_purge,
+                               type_display, type_plot)
+    #   Recovery of the internal states from the end of the preceding simulation.
+    initial_variable_values_1, initial_variable_values_2 = [], []
+    for x in Simulator_ini_1.solver_variable_names:
+        initial_variable_values_1.append(Simulator_ini_1.variables[x][-1])
+        initial_variable_values_2.append(Simulator_ini_2.variables[x][-1])
+
     # pYGAD execution
     ga_instance = pygad.GA( # 1 iteration takes 720s = 12min = 0.2h inside LIS cluster with 80 nodes.
     #                         800 iterations takes 160h = 6.67j.
@@ -232,26 +270,28 @@ if __name__ == '__main__':
     save_calibration_results(convergence, ga_instance, epsilon_gdl, epsilon_mc, tau, epsilon_c, e,
                              Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, sim_error, type_fuel_cell_1)
 
-    # Calculate, display and save the calibrated and experimental polarization curve
+    # Calculate, display and save the calibrated and experimental polarization curve (from the complete experimental points)
     #       Calculate the calibrated polarization curve
-    Simulator1 = AlphaPEM(current_density, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, t_step,
-                          i_step, i_max_pola_1, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
-                          Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
-                          b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell_1, type_current,
-                          type_auxiliary, type_control, type_purge, type_display, type_plot)
-    Simulator2 = AlphaPEM(current_density, T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2, t_step,
-                          i_step, i_max_pola_2, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
-                          Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
-                          b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell_2, type_current,
-                          type_auxiliary, type_control, type_purge, type_display, type_plot)
+    Simulator_final_1 = AlphaPEM(polarization_current, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
+                          step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters_1, i_EIS,
+                          ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc,
+                          epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step,
+                          n_gdl, t_purge, type_fuel_cell_1, 'polarization', type_auxiliary, type_control,
+                          type_purge, type_display, type_plot, initial_variable_values_1)
+    Simulator_final_2 = AlphaPEM(polarization_current, T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2,
+                          step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters_2, i_EIS,
+                          ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc,
+                          epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step,
+                          n_gdl, t_purge, type_fuel_cell_2, 'polarization', type_auxiliary, type_control,
+                          type_purge, type_display, type_plot, initial_variable_values_2)
     #       Display the calibrated and experimental polarization curve
     fig, ax = plt.subplots(figsize=(8, 8))
-    Simulator1.Display(ax)
-    Simulator2.Display(ax)
+    Simulator_final_1.Display(ax)
+    Simulator_final_2.Display(ax)
     #       Save the calibrated and experimental polarization curve
     subfolder_name = type_fuel_cell_1[:type_fuel_cell_1.rfind('_')] if type_fuel_cell_1.rfind('_') != -1 \
         else type_fuel_cell_1
-    saving_instructions("results", subfolder_name, "final_calibration_1.pdf", fig)
+    Simulator_final_1.Saving_instructions("results", subfolder_name, "final_calibration_1.pdf", fig)
 
     # Algorithm time
     algo_time = time.time() - start_time

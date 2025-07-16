@@ -13,8 +13,9 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing the necessary libraries
-import matplotlib.pyplot as plt
+import os
 import math
+import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 
 # Importing constants' value and functions
@@ -22,24 +23,26 @@ from model.dif_eq import dydt
 from model.flows import calculate_flows
 from model.cell_voltage import calculate_cell_voltage
 from model.control import control_operating_conditions
-from configuration.settings import Pext, Kshape, yO2_ext, C_O2ref, alpha_c, F, R
+from configuration.settings import Pext, yO2_ext, C_O2ref, alpha_c, F, R
 from modules.dif_eq_modules import event_negative
-from modules.transitory_functions import lambda_eq, C_v_sat, k_H2, k_O2
-from modules.display_modules import plot_ifc, plot_J, plot_C_v, plot_lambda, plot_s, plot_C_O2, plot_C_H2, plot_C_N2, \
-    plot_T, plot_Ucell, plot_P, plot_Phi_a, plot_Phi_c, plot_Phi_des, plot_polarisation_curve, \
-    make_Fourier_transformation, plot_EIS_curve_Nyquist, plot_EIS_curve_Bode_amplitude, plot_EIS_curve_Bode_angle, \
-    plot_EIS_curve_tests, plot_power_density_curve, plot_cell_efficiency
-from modules.main_modules import saving_instructions
+from modules.transitory_functions import lambda_eq, k_H2, k_O2
+from modules.display_modules import (plot_ifc, plot_J, plot_C_v, plot_lambda, plot_s, plot_C_O2, plot_C_H2, plot_C_N2,
+                                     plot_T, plot_Ucell, plot_P, plot_Phi_a, plot_Phi_c, plot_Phi_des,
+                                     plot_polarisation_curve, plot_polarisation_curve_for_cali,
+                                     make_Fourier_transformation, plot_EIS_curve_Nyquist, plot_EIS_curve_Bode_amplitude,
+                                     plot_EIS_curve_Bode_angle, plot_EIS_curve_tests, plot_power_density_curve,
+                                     plot_cell_efficiency)
+from calibration.experimental_values import pola_exp_values_calibration
 
 # _______________________________________________________AlphaPEM_______________________________________________________
 
 class AlphaPEM:
 
-    def __init__(self, current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step, i_max_pola,
-                 delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau,
-                 epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step,
-                 n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge, type_display,
-                 type_plot, initial_variable_values=None, time_interval=None):
+    def __init__(self, current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, step_current_parameters,
+                 pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
+                 Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c,
+                 a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary,
+                 type_control, type_purge, type_display, type_plot, initial_variable_values=None, time_interval=None):
         """Initialise all parameters defining a fuel cell stack operation: nominal operating conditions,
         applied electrical load, dimensions, and undetermined variables.
 
@@ -61,19 +64,34 @@ class AlphaPEM:
             Desired anode relative humidity (operating input).
         Phi_c_des : float
             Desired cathode relative humidity (operating input).
-        t_step : tuple
-            Time parameters for the step_current density function (current parameters).
-            It is a tuple containing the initial time 't0_step', final time 'tf_step', loading time 'delta_t_load_step'
-            and dynamic time for display 'delta_t_dyn_step'.
-        i_step : tuple
-            Current parameters for the step_current density function (current parameters).
-            It is a tuple containing the initial and final current density value 'i_ini_step' and 'i_final_step'.
-        i_max_pola : float
-            Maximum current density for the polarization curve (current parameter).
-        delta_pola : tuple
-            Parameters for the polarization curve (current parameters). It is a tuple containing the loading time
-            'delta_t_load_pola', the breaking time 'delta_t_break_pola', the current density step 'delta_i_pola', and
-            the initial breaking time 'delta_t_ini_pola'.
+       step_current_parameters : dict
+            Parameters for the step current density. It is a dictionary containing:
+            - 'delta_t_ini_step': the initial time (in seconds) at zero current density for the stabilisation of the
+            internal states,
+            - 'delta_t_load_step': the loading time (in seconds) for the step current density function, from 0 to
+            i_step,
+            - 'delta_t_break_step': the time (in seconds) at i_step current density for the stabilisation of the
+            internal states,
+            - 'i_step': the current density (in A.m-2) for the step current density function,
+            - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
+        pola_current_parameters : dict
+            Parameters for the polarization current density. It is a dictionary containing:
+            - 'delta_t_ini_pola': the initial time (in seconds) at zero current density for the stabilisation of the
+            internal states,
+            - 'delta_t_load_pola': the loading time (in seconds) for one step current of the polarisation current
+            density function,
+            - 'delta_t_break_pola': the breaking time (in seconds) for one step current, for the stabilisation of the
+            internal states,
+            - 'delta_i_pola': the current density step (in A.m-2) for the polarisation current density function.
+            - 'i_max_pola': the maximum current density (in A.m-2) for the polarization curve.
+        pola_current_for_cali_parameters : dict
+            Parameters for the polarization current density for calibration. It is a dictionary containing:
+            - 'delta_t_ini_pola_cali': the initial time (in seconds) at zero current density for the stabilisation of
+            the internal states,
+            - 'delta_t_load_pola_cali': the loading time (in seconds) for one step current of the polarisation current
+            density function,
+            - 'delta_t_break_pola_cali': the breaking time (in seconds) for one step current, for the stabilisation of
+            the internal states.
         i_EIS : float
             Current for which a ratio_EIS perturbation is added (current parameter).
         ratio_EIS : float
@@ -164,9 +182,10 @@ class AlphaPEM:
         # Initialize the operating inputs and parameters dictionaries.
         self.operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
                                  'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des}
-        self.current_parameters = {'t_step': t_step, 'i_step': i_step, 'delta_pola': delta_pola,
-                                   'i_max_pola': i_max_pola, 'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS,
-                                   'f_EIS': f_EIS}
+        self.current_parameters = {'step_current_parameters': step_current_parameters,
+                                   'pola_current_parameters': pola_current_parameters,
+                                   'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
+                                   'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
         self.accessible_physical_parameters = {'Aact': Aact, 'Hgdl': Hgdl, 'Hmem': Hmem, 'Hcl': Hcl, 'Hgc': Hgc,
                                                'Wgc': Wgc, 'Lgc': Lgc}
         self.undetermined_physical_parameters = {'epsilon_gdl': epsilon_gdl, 'tau': tau, 'epsilon_mc': epsilon_mc,
@@ -196,7 +215,7 @@ class AlphaPEM:
         self.variables = {key: [] for key in self.all_variable_names}
 
         # Initialize the control_variables dictionary.
-        self.control_variables = {'t_control_Phi': self.parameters['t_step'][0],
+        self.control_variables = {'t_control_Phi': 0,
                                   'Phi_a_des': self.operating_inputs['Phi_a_des'],
                                   'Phi_c_des': self.operating_inputs['Phi_c_des']}
 
@@ -250,18 +269,36 @@ class AlphaPEM:
         """
 
         # Extraction of the parameters
-        t_step, delta_pola, i_max_pola = self.parameters['t_step'], self.parameters['delta_pola'], self.parameters['i_max_pola']
-        type_current = self.parameters['type_current']
+        step_current_parameters  = self.parameters['step_current_parameters']
+        pola_current_parameters = self.parameters['pola_current_parameters']
+        pola_current_for_cali_parameters = self.parameters['pola_current_for_cali_parameters']
+        type_fuel_cell, type_current = self.parameters['type_fuel_cell'], self.parameters['type_current']
 
         # Recovery of the good time interval
         if type_current == "step":
-            t0_step, tf_step, delta_t_load_step, delta_t_dyn_step = t_step
-            t0_interval = t0_step
-            tf_interval = tf_step
+            t0_interval = 0 # s.
+            tf_interval = step_current_parameters['delta_t_ini_step'] + step_current_parameters['delta_t_load_step'] + \
+                          step_current_parameters['delta_t_break_step'] # s.
         elif type_current == "polarization":
-            delta_t_load_pola, delta_t_break_pola, delta_i_pola, delta_t_ini_pola = delta_pola
+            # Extraction of the parameters
+            delta_t_ini_pola = pola_current_parameters['delta_t_ini_pola']  # (s).
+            delta_t_load_pola = pola_current_parameters['delta_t_load_pola']  # (s).
+            delta_t_break_pola = pola_current_parameters['delta_t_break_pola']  # (s).
+            delta_i_pola = pola_current_parameters['delta_i_pola']  # (A.m-2).
+            i_max_pola = pola_current_parameters['i_max_pola']  # (A.m-2).
+            # Calculation
+            t0_interval = 0 # s.
+            tf_interval = delta_t_ini_pola + int(i_max_pola / delta_i_pola) * (delta_t_load_pola + delta_t_break_pola)
+        elif type_current == "polarization_for_cali":
+            # Extraction of the parameters
+            delta_t_ini_pola_cali = pola_current_for_cali_parameters['delta_t_ini_pola_cali']  # (s).
+            delta_t_load_pola_cali = pola_current_for_cali_parameters['delta_t_load_pola_cali']  # (s).
+            delta_t_break_pola_cali = pola_current_for_cali_parameters['delta_t_break_pola_cali']  # (s).
+            i_exp_cali_t, U_exp_cali_t = pola_exp_values_calibration(type_fuel_cell)  # (A.m-2, V).
+            # Calculation
+            delta_t_cali = delta_t_load_pola_cali + delta_t_break_pola_cali  # s. It is the time of one load.
             t0_interval = 0
-            tf_interval = delta_t_ini_pola + int(i_max_pola / delta_i_pola + 1) * (delta_t_load_pola + delta_t_break_pola)
+            tf_interval = delta_t_ini_pola_cali + len(i_exp_cali_t) * delta_t_cali # s.
         else:  # EIS time_interval is calculated in the main.py file.
             raise ValueError("Please enter a recognized type_current option for calculating the time interval.")
 
@@ -374,7 +411,7 @@ class AlphaPEM:
         # Recovery of more variables
         #   The control variables should be reinitialized. To be reviewed.
         if self.parameters['type_current'] == "step":
-            self.control_variables['t_control_Phi'] = self.parameters['t_step'][0]
+            self.control_variables['t_control_Phi'] = 0
         else:
             self.control_variables['t_control_Phi'] = 0
         self.control_variables['Phi_a_des'] = self.operating_inputs['Phi_a_des']
@@ -424,48 +461,48 @@ class AlphaPEM:
 
                 figs, axes = zip(*[plt.subplots(figsize=(8, 8)) for _ in range(13)])
 
-                plot_ifc(self.variables, self.operating_inputs, self.parameters, n, axes[0])
+                plot_ifc(self.variables, self.operating_inputs, self.parameters, axes[0])
                 plot_J(self.variables, self.parameters, axes[1])
-                plot_C_v(self.variables, n_gdl, axes[2])
+                plot_C_v(self.variables, self.parameters, axes[2])
                 plot_lambda(self.variables, self.operating_inputs, self.parameters, axes[3])
                 plot_s(self.variables, self.operating_inputs, self.parameters, axes[4])
-                plot_C_O2(self.variables, n_gdl, axes[5])
-                plot_C_H2(self.variables, n_gdl, axes[6])
-                plot_C_N2(self.variables, axes[7])
-                plot_T(self.variables, self.operating_inputs, n_gdl, axes[8])
-                plot_Ucell(self.variables, axes[9])
-                plot_P(self.variables, axes[10])
-                plot_Phi_a(self.variables, self.operating_inputs, axes[11])
-                plot_Phi_c(self.variables, self.operating_inputs, axes[12])
+                plot_C_O2(self.variables, self.parameters, axes[5])
+                plot_C_H2(self.variables, self.parameters, axes[6])
+                plot_C_N2(self.variables, self.parameters, axes[7])
+                plot_T(self.variables, self.operating_inputs, self.parameters, axes[8])
+                plot_Ucell(self.variables, self.parameters, axes[9])
+                plot_P(self.variables, self.parameters, axes[10])
+                plot_Phi_a(self.variables, self.operating_inputs, self.parameters, axes[11])
+                plot_Phi_c(self.variables, self.operating_inputs, self.parameters, axes[12])
 
                 # Considering the number of plots, the saving instructions are made here and not in the main.py file.
-                saving_instructions("results", subfolder_name, "step_current_ifc_1.pdf", figs[0])
-                saving_instructions("results", subfolder_name, "step_current_J_1.pdf", figs[1])
-                saving_instructions("results", subfolder_name, "step_current_Cv_1.pdf", figs[2])
-                saving_instructions("results", subfolder_name, "step_current_lambda_1.pdf", figs[3])
-                saving_instructions("results", subfolder_name, "step_current_s_1.pdf", figs[4])
-                saving_instructions("results", subfolder_name, "step_current_C_O2_1.pdf", figs[5])
-                saving_instructions("results", subfolder_name, "step_current_C_H2_1.pdf", figs[6])
-                saving_instructions("results", subfolder_name, "step_current_C_N2_1.pdf", figs[7])
-                saving_instructions("results", subfolder_name, "step_current_T_1.pdf", figs[8])
-                saving_instructions("results", subfolder_name, "step_current_Ucell_1.pdf", figs[9])
-                saving_instructions("results", subfolder_name, "step_current_P_1.pdf", figs[10])
-                saving_instructions("results", subfolder_name, "step_current_Phi_a_1.pdf", figs[11])
-                saving_instructions("results", subfolder_name, "step_current_Phi_c_1.pdf", figs[12])
+                self.Saving_instructions("results", subfolder_name, "step_current_ifc_1.pdf", figs[0])
+                self.Saving_instructions("results", subfolder_name, "step_current_J_1.pdf", figs[1])
+                self.Saving_instructions("results", subfolder_name, "step_current_Cv_1.pdf", figs[2])
+                self.Saving_instructions("results", subfolder_name, "step_current_lambda_1.pdf", figs[3])
+                self.Saving_instructions("results", subfolder_name, "step_current_s_1.pdf", figs[4])
+                self.Saving_instructions("results", subfolder_name, "step_current_C_O2_1.pdf", figs[5])
+                self.Saving_instructions("results", subfolder_name, "step_current_C_H2_1.pdf", figs[6])
+                self.Saving_instructions("results", subfolder_name, "step_current_C_N2_1.pdf", figs[7])
+                self.Saving_instructions("results", subfolder_name, "step_current_T_1.pdf", figs[8])
+                self.Saving_instructions("results", subfolder_name, "step_current_Ucell_1.pdf", figs[9])
+                self.Saving_instructions("results", subfolder_name, "step_current_P_1.pdf", figs[10])
+                self.Saving_instructions("results", subfolder_name, "step_current_Phi_a_1.pdf", figs[11])
+                self.Saving_instructions("results", subfolder_name, "step_current_Phi_c_1.pdf", figs[12])
 
                 plt.pause(0.01)  # A break is necessary to plot the new points in dynamic mode
 
             elif type_display == "synthetic":
 
-                plot_ifc(self.variables, self.operating_inputs, self.parameters, n, ax1[0, 0])
-                plot_Ucell(self.variables, ax1[0, 1])
-                plot_T(self.variables, self.operating_inputs, n_gdl, ax1[0, 2])
-                plot_C_v(self.variables, n_gdl, ax1[1, 0])
+                plot_ifc(self.variables, self.operating_inputs, self.parameters, ax1[0, 0])
+                plot_Ucell(self.variables, self.parameters, ax1[0, 1])
+                plot_T(self.variables, self.operating_inputs, self.parameters, ax1[0, 2])
+                plot_C_v(self.variables, self.parameters, ax1[1, 0])
                 plot_s(self.variables, self.operating_inputs, self.parameters, ax1[1, 1])
                 plot_lambda(self.variables, self.operating_inputs, self.parameters, ax1[1, 2])
-                plot_C_H2(self.variables, n_gdl, ax1[2, 0])
-                plot_C_O2(self.variables, n_gdl, ax1[2, 1])
-                plot_P(self.variables, ax1[2, 2])
+                plot_C_H2(self.variables, self.parameters, ax1[2, 0])
+                plot_C_O2(self.variables, self.parameters, ax1[2, 1])
+                plot_P(self.variables, self.parameters, ax1[2, 2])
 
                 plt.pause(0.01)  # A break is necessary to plot the new points in dynamic mode
 
@@ -485,6 +522,20 @@ class AlphaPEM:
             elif type_display == "synthetic":
 
                 plot_polarisation_curve(self.variables, self.operating_inputs, self.parameters, ax1)
+                plt.pause(0.01)  # A break is necessary to plot the new points in dynamic mode
+
+        elif type_current == "polarization_for_cali":
+            if type_display == "multiple":
+
+                plot_polarisation_curve_for_cali(self.variables, self.operating_inputs, self.parameters, ax1[0])
+                plot_lambda(self.variables, self.operating_inputs, self.parameters, ax1[1])
+                plot_s(self.variables, self.operating_inputs, self.parameters, ax1[2])
+
+                plt.pause(0.01)  # A break is necessary to plot the new points in dynamic mode
+
+            elif type_display == "synthetic":
+
+                plot_polarisation_curve_for_cali(self.variables, self.operating_inputs, self.parameters, ax1)
                 plt.pause(0.01)  # A break is necessary to plot the new points in dynamic mode
 
         elif type_current == "EIS":
@@ -511,3 +562,90 @@ class AlphaPEM:
                 # plot_EIS_curve_tests(self.variables, self.operating_inputs, self.parameters, Fourier_results)
 
                 plt.pause(0.1)  # A break is necessary to plot the new points in dynamic mode
+
+    def Save_plot(self, fig1=None, fig2=None, fig3=None):
+        """Saves the plots. The names of the files are automatically generated according to the type_current and the
+        type_display.
+
+        Parameters
+        ----------
+        fig1 : matplotlib.figure.Figure, optional
+            Figure for the first plot. The default is None.
+        fig2 : matplotlib.figure.Figure, optional
+            Figure for the second plot. The default is None.
+        fig3 : matplotlib.figure.Figure, optional
+            Figure for the third plot. The default is None.
+        """
+
+        # Extraction of the operating inputs and parameters
+        type_fuel_cell, type_current = self.parameters['type_fuel_cell'], self.parameters['type_current']
+        type_display = self.parameters['type_display']
+
+        # Folder name
+        subfolder_name = type_fuel_cell[:type_fuel_cell.rfind('_')] if type_fuel_cell.rfind('_') != -1 else type_fuel_cell
+
+        # For the step current
+        if type_current == "step":
+            if type_display == "multiple":
+                pass  # saving instruction is directly implemented within AlphaPEM.Display for this situation.
+            if type_display == "synthetic":
+                self.Saving_instructions("results", subfolder_name, "step_current_syn.pdf", fig1)
+
+        # For the polarization curve
+        elif type_current == "polarization":
+            if type_display == "multiple":
+                self.Saving_instructions("results", subfolder_name, "global_indicators_1.pdf", fig1)
+                self.Saving_instructions("results", subfolder_name, "pola_curve_syn_1.pdf", fig2)
+            elif type_display == "synthetic":
+                self.Saving_instructions("results", subfolder_name, "pola_curve_1.pdf", fig1)
+
+        # For the EIS curve
+        elif type_current == "EIS":
+            if type_display == "multiple":
+                self.Saving_instructions("results", subfolder_name, "Nyquist_plot_1.pdf", fig1)
+                self.Saving_instructions("results", subfolder_name, "Bode_amplitude_curve_1.pdf", fig2)
+                self.Saving_instructions("results", subfolder_name, "Bode_angle_curve_1.pdf", fig3)
+            elif type_display == "synthetic":
+                self.Saving_instructions("results", subfolder_name, "Nyquist_plot_syn_1.pdf", fig1)
+
+        # For the polarization curve
+        elif type_current == "polarization":
+            if type_display == "multiple":
+                self.Saving_instructions("results", subfolder_name, "impact_cali_on_internal_state_1.pdf", fig1)
+            elif type_display == "synthetic":
+                self.Saving_instructions("results", subfolder_name, "pola_curve_cali_1.pdf", fig1)
+
+    def Saving_instructions(self, root_folder, subfolder_name, filename, fig):
+        """Gives the saving instructions for the figures.
+
+        Parameters
+        ----------
+        root_folder : str
+            The root folder for the saving.
+        subfolder_name : str
+            The subfolder name for the saving.
+        filename : str
+            The filename for the saving.
+        fig : matplotlib.figure.Figure
+            The figure to be saved.
+        """
+
+        # Create the folder if necessary
+        folder_name = os.path.join(root_folder, subfolder_name)
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
+
+        # Create the filename without erasing the previous ones
+        counter = 1
+        while os.path.isfile(os.path.join(folder_name, filename)):
+            counter += 1
+            if filename[-6] == "_":  # for the numbers between 1 and 9
+                filename = filename[:-5] + str(counter) + ".pdf"
+            elif filename[-7] == "_":  # for the numbers between 10 and 99.
+                filename = filename[:-6] + str(counter) + ".pdf"
+            else:  # for the numbers between 100 and 999. The bigger numbers are not considered.
+                filename = filename[:-7] + str(counter) + ".pdf"
+
+        # Save the figure
+        file_path = os.path.join(folder_name, filename)
+        fig.savefig(file_path, dpi=900, transparent=False, bbox_inches='tight')

@@ -231,8 +231,7 @@ def EIS_parameters(f_EIS):
     delta_t_measurement_EIS = np.array([])  # It is the estimated time for measuring the voltage response.
 
     # Time parameters calculation
-    t0_EIS = 1 / f[0]  # s. It is the simulation starting time.
-    #                   [0, t0_EIS] is used to let the stack equilibrate to i_EIS.
+    t0_EIS = 120*60  # s. It is the simulation starting time. [0, t0_EIS] is used to let the stack equilibrate to i_EIS.
     t_new_start_EIS = np.array([t0_EIS])  # It is a list of time parameters which gives the beginning of each frequency
     #                                   change.
     for i in range(nb_f_EIS):  # The goal is to measure nb_f_EIS periods of the signal in order to have precise enough values.

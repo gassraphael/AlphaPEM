@@ -9,7 +9,8 @@
 import math
 
 # Importing functions
-from configuration.current_densities import step_current, polarization_current, EIS_current
+from configuration.current_densities import (step_current, polarization_current, polarization_current_for_calibration,
+                                             EIS_current)
 from modules.settings_modules import stored_operating_inputs, stored_physical_parameters, EIS_parameters
 
 # _______________________________________________________Settings_______________________________________________________
@@ -23,19 +24,34 @@ def current_density_parameters(type_current):
 
     Returns
     -------
-    t_step : tuple
-        Time parameters for the step_current density function.
-        It is a tuple containing the initial time 't0_step' in seconds, final time 'tf_step' in seconds, loading time
-        'delta_t_load_step' in seconds, and time for dynamic display 'delta_t_dyn_step' in seconds.
-    i_step : tuple
-        Current parameters for the step_current density function.
-        It is a tuple containing the initial and final current density values 'i_ini_step' and 'i_final_step', both in
-        A.m-2.
-    delta_pola : tuple
-        Parameters for the polarization curve.
-        It is a tuple containing the loading time 'delta_t_load_pola' in seconds, the breaking time 'delta_t_break_pola'
-        in seconds, the current density step 'delta_i_pola' in A.m-2, and the initial breaking time 'delta_t_ini_pola'
-        in seconds.
+    step_current_parameters : dict
+        Parameters for the step current density. It is a dictionary containing:
+        - 'delta_t_ini_step': the initial time (in seconds) at zero current density for the stabilisation of the
+        internal states,
+        - 'delta_t_load_step': the loading time (in seconds) for the step current density function, from 0 to
+        i_step,
+        - 'delta_t_break_step': the time (in seconds) at i_step current density for the stabilisation of the
+        internal states,
+        - 'i_step': the current density (in A.m-2) for the step current density function,
+        - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
+    pola_current_parameters : dict
+        Parameters for the polarization current density. It is a dictionary containing:
+        - 'delta_t_ini_pola': the initial time (in seconds) at zero current density for the stabilisation of the
+        internal states,
+        - 'delta_t_load_pola': the loading time (in seconds) for one step current of the polarisation current
+        density function,
+        - 'delta_t_break_pola': the breaking time (in seconds) for one step current, for the stabilisation of the
+        internal states,
+        - 'delta_i_pola': the current density step (in A.m-2) for the polarisation current density function.
+        - 'i_max_pola': the maximum current density (in A.m-2) for the polarization curve.
+    pola_current_for_cali_parameters : dict
+        Parameters for the polarization current density for calibration. It is a dictionary containing:
+        - 'delta_t_ini_pola_cali': the initial time (in seconds) at zero current density for the stabilisation of
+        the internal states,
+        - 'delta_t_load_pola_cali': the loading time (in seconds) for one step current of the polarisation current
+        density function,
+        - 'delta_t_break_pola_cali': the breaking time (in seconds) for one step current, for the stabilisation of
+        the internal states.
     i_EIS : float
         Parameters for the EIS curve. It is the current for which a perturbation is added.
     ratio_EIS : float
@@ -56,28 +72,55 @@ def current_density_parameters(type_current):
         Current density function.
     """
 
-    t_step = 0, 1000, 50, 10  # (s, s, s, s). Time parameters for the step_current density function.
-    i_step = 0.5e4, 1.5e4  # (A.m-2, A.m-2). Current parameters for the step_current density function.
-    delta_pola = 30, 30, 0.1e4, 1 * 60  # (s, s, A.m-2, s). Parameters for the polarization curve.
+    # Setting the parameters of the step current density function
+    delta_t_ini_step = 120*60 # (s). Initial time at zero current density for the stabilisation of the internal states.
+    delta_t_load_step = 30 # (s). Loading time for the step current density function, from 0 to i_step.
+    delta_t_break_step = 15 * 60  # (s). Time at i_step current density for the stabilisation of the internal states.
+    i_step = 1.5e4 # (A.m-2). Current density for the step current density function.
+    step_current_parameters = {'delta_t_ini_step': delta_t_ini_step, 'delta_t_load_step': delta_t_load_step,
+                               'delta_t_break_step': delta_t_break_step,'i_step': i_step}
+
+    # Setting the parameters of the polarization current density function
+    delta_t_ini_pola = 120 * 60 # (s). Initial time at zero current density for the stabilisation of the internal states.
+    delta_t_load_pola = 30 # (s). Loading time for one step current of the polarisation current density function.
+    delta_t_break_pola = 15 * 60 # (s). Breaking time for one step current, for the stabilisation of the internal states.
+    delta_i_pola = 0.05e4 # (A.m-2). Current density step for the polarisation current density function.
+    pola_current_parameters = {'delta_t_ini_pola': delta_t_ini_pola, 'delta_t_load_pola': delta_t_load_pola,
+                               'delta_t_break_pola': delta_t_break_pola, 'delta_i_pola': delta_i_pola}
+
+    # Setting the parameters of the polarization for calibration current density function
+    delta_t_ini_pola_cali = 120 * 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
+    delta_t_load_pola_cali = 30  # (s). Loading time for one step current of the polarisation current density function.
+    delta_t_break_pola_cali = 10 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
+    pola_current_for_cali_parameters = {'delta_t_ini_pola_cali': delta_t_ini_pola_cali,
+                                        'delta_t_load_pola_cali': delta_t_load_pola_cali,
+                                        'delta_t_break_pola_cali': delta_t_break_pola_cali}
+
+    # Setting the parameters of the EIS current density function
     i_EIS, ratio_EIS = 1.0e4, 5/100  # (A/m², ). Parameters for the EIS curve.
     f_EIS = -3, 5, 90, 50 # Frequency parameters for the EIS_current density function.
     t_EIS = EIS_parameters(f_EIS)  # Time parameters for the EIS_current density function.
-    if type_current == "step": current_density = step_current  # It is the current density function.
-    elif type_current == "polarization": current_density = polarization_current  # It is the current density function.
-    elif type_current == "EIS": current_density = EIS_current  # It is the current density function.
+
+    # Setting the current density function:
+    if type_current == "step": current_density = step_current
+    elif type_current == "polarization": current_density = polarization_current
+    elif type_current == "polarization_for_cali": current_density = polarization_current_for_calibration
+    elif type_current == "EIS": current_density = EIS_current
     else: raise ValueError('You have to specify a type_current which is on the list.')
 
-    return t_step, i_step, delta_pola, i_EIS, ratio_EIS, f_EIS, t_EIS, current_density
+    return (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters,
+            i_EIS, ratio_EIS, f_EIS, t_EIS, current_density)
 
 
-def operating_inputs(type_fuel_cell):
+def operating_inputs_function(pola_current_parameters, type_fuel_cell):
     """This function is used to set the operating inputs of the fuel cell system.
 
     Parameters
     ----------
+    pola_current_parameters : dict
+        Parameters for the polarization current density function.
     type_fuel_cell : str
-        Type of fuel cell system. It can be "EH-31_1.5", "EH-31_2.0", "EH-31_2.25", "EH-31_2.5", "LF",
-        or "manual_setup".
+        Type of fuel cell system.
 
     Returns
     -------
@@ -95,8 +138,16 @@ def operating_inputs(type_fuel_cell):
         Desired anode relative humidity.
     Phi_c_des : float
         Desired cathode relative humidity.
-    i_max_pola : float
-        Maximum current density for the polarization curve.
+    pola_current_parameters : dict
+        Parameters for the polarization current density. It is a dictionary containing:
+        - 'delta_t_ini_pola': the initial time (in seconds) at zero current density for the stabilisation of the
+        internal states,
+        - 'delta_t_load_pola': the loading time (in seconds) for one step current of the polarisation current
+        density function,
+        - 'delta_t_break_pola': the breaking time (in seconds) for one step current, for the stabilisation of the
+        internal states,
+        - 'delta_i_pola': the current density step (in A.m-2) for the polarisation current density function.
+        - 'i_max_pola': the maximum current density (in A.m-2) for the polarization curve.
     """
 
     if type_fuel_cell == "manual_setup": # Setup which are not stored in "stored_operating_inputs".
@@ -108,7 +159,8 @@ def operating_inputs(type_fuel_cell):
     else: # Stored setup in "stored_operating_inputs".
         T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
-    return T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola
+    pola_current_parameters['i_max_pola'] = i_max_pola  # Update the maximum current density for the polarization curve.
+    return T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, pola_current_parameters
 
 
 def physical_parameters(type_fuel_cell):
@@ -199,11 +251,13 @@ def physical_parameters(type_fuel_cell):
             kappa_c, a_slim, b_slim, a_switch, C_scl)
 
 
-def computing_parameters(type_current, Hgdl, Hcl):
+def computing_parameters(step_current_parameters, type_current, Hgdl, Hcl):
     """This function is used to set the computing parameters of the fuel cell system.
 
     Parameters
     ----------
+    step_current_parameters : dict
+        Parameters for the step current density function.
     type_current : str
         Type of current density which is imposed to the fuel cell system. It can be "step", "polarization" or "EIS".
     Hgdl : float
@@ -221,6 +275,17 @@ def computing_parameters(type_current, Hgdl, Hcl):
         Time parameters for purging the system.
         It is a tuple containing the purge time 'purge_time' in seconds, and the time between two purges
         'delta_purge' in seconds.
+        delta_t_dyn_step : float
+    step_current_parameters : dict
+        Parameters for the step current density. It is a dictionary containing:
+        - 'delta_t_ini_step': the initial time (in seconds) at zero current density for the stabilisation of the
+        internal states,
+        - 'delta_t_load_step': the loading time (in seconds) for the step current density function, from 0 to
+        i_step,
+        - 'delta_t_break_step': the time (in seconds) at i_step current density for the stabilisation of the
+        internal states,
+        - 'i_step': the current density (in A.m-2) for the step current density function,
+        - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
     """
 
     if type_current == "polarization":
@@ -232,8 +297,10 @@ def computing_parameters(type_current, Hgdl, Hcl):
     n_gdl = int(Hgdl / Hcl / 4)  # It is the number of model points placed inside each GDL.
     #                              A good value is int(Hgdl/Hcl/4), which is usually around 5.
     t_purge = 0.6, 15  # (s, s). It is the time parameters for purging the system.
+    delta_t_dyn_step = 5*60  # (s). Time for dynamic display of the step current density function.
 
-    return max_step, n_gdl, t_purge
+    step_current_parameters['delta_t_dyn_step'] = delta_t_dyn_step # Update the step current parameters.
+    return max_step, n_gdl, t_purge, step_current_parameters
 
 # ____________________________________________Unchanged Physical parameters_____________________________________________
 """ These parameters remain unchanged no matter the setting configurations."""

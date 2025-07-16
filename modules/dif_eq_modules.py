@@ -7,8 +7,7 @@ and to implement integration events.
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import Text, Pext, Phi_ext, n_cell, M_H2, M_O2, M_N2, M_H2O, epsilon_cl, yO2_ext, R, F, \
-    operating_inputs
+from configuration.settings import Text, Pext, Phi_ext, n_cell, M_H2, M_O2, M_N2, M_H2O, epsilon_cl, yO2_ext, R, F
 from modules.transitory_functions import average, Psat, C_v_sat, k_H2, k_O2, calculate_rho_Cp0
 
 

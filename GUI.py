@@ -141,41 +141,41 @@ def main_frame(root, canvas):
                           'label_column': 1}}
 
     choice_current_density_parameters = \
-        {'Initial time - t0_step (s)': {'value': tk.DoubleVar(current_density_parameters_frame, 0), 'label_row': 0,
-                         'label_column': 1},
-         'Final time - tf_step (s)': {'value': tk.DoubleVar(current_density_parameters_frame, 1000), 'label_row': 0,
-                         'label_column': 3},
-         'Loading time\n- Δt_load_step (s)': {'value': tk.DoubleVar(current_density_parameters_frame, 50), 'label_row': 0,
-                              'label_column': 5},
-         'Initial current density\n- i_ini_step (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, 0.5), 'label_row': 1,
-                                'label_column': 1},
-         'Final current density\n- i_final_step (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, 1.5), 'label_row': 1,
-                                  'label_column': 3},
-         'Loading time\n- Δt_load_pola (s)': {'value': tk.DoubleVar(current_density_parameters_frame, 30), 'label_row': 2,
-                              'label_column': 1},
-         'Breaking time\n- Δt_break_pola (s)': {'value': tk.DoubleVar(current_density_parameters_frame, 30), 'label_row': 2,
-                               'label_column': 3},
-         'Initial breaking time\n- Δt_ini_pola (s)': {'value': tk.DoubleVar(current_density_parameters_frame, 60), 'label_row': 2,
-                             'label_column': 5},
-         'Maximum current density\n- i_max_pola (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, 0.5), 'label_row': 3,
-                                'label_column': 1},
-         'Current density step\n- Δi_pola (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, 0.1), 'label_row': 3,
-                             'label_column': 3},
-         'Static current\n- i_EIS (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, 0.5), 'label_row': 4,
-                           'label_column': 1},
-         'Current ratio\n- ratio_EIS (%)': {'value': tk.DoubleVar(current_density_parameters_frame, 5), 'label_row': 4,
-                           'label_column': 3},
-         'Number of points\ncalculated - nb_points_EIS': {'value': tk.IntVar(current_density_parameters_frame, 50), 'label_row': 4,
-                           'label_column': 5},
-         'Power of the\ninitial frequency\n- f_power_min_EIS': {'value': tk.IntVar(current_density_parameters_frame, -3), 'label_row': 5,
-                             'label_column': 1},
-         'Power of the\nfinal frequency\n- f_power_max_EIS': {'value': tk.IntVar(current_density_parameters_frame, 5), 'label_row': 5,
-                             'label_column': 3},
-         'Number of frequencies\ntested - nb_f_EIS': {'value': tk.IntVar(current_density_parameters_frame, 60), 'label_row': 5,
-                      'label_column': 5}}
+        {'Stabilisation time\n- Δt_ini_step (min)': {'value': tk.DoubleVar(current_density_parameters_frame, 120),
+                                                   'label_row': 0, 'label_column': 3},
+         'Loading time\n- Δt_load_step (s)': {'value': tk.DoubleVar(current_density_parameters_frame, 30),
+                                              'label_row': 0, 'label_column': 5},
+         'Breaking time\n- Δt_break_step (min)': {'value': tk.DoubleVar(current_density_parameters_frame, 15),
+                                                'label_row': 1, 'label_column': 3},
+         'Current density step\n- i_step (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, 1.5),
+                                                'label_row': 1, 'label_column': 5},
+
+         'Stabilisation time\n- Δt_ini_pola (min)': {'value': tk.DoubleVar(current_density_parameters_frame, 120),
+                                                   'label_row': 2, 'label_column': 3},
+         'Loading time\n- Δt_load_pola (s)': {'value': tk.DoubleVar(current_density_parameters_frame, 30),
+                                              'label_row': 2, 'label_column': 5},
+         'Breaking time\n- Δt_break_pola (min)': {'value': tk.DoubleVar(current_density_parameters_frame, 15),
+                                                'label_row': 3, 'label_column': 3},
+         'Current density step\n- Δi_pola (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, 0.1),
+                                                     'label_row': 3, 'label_column': 5},
+         'Maximum current density\n- i_max_pola (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, 1.5),
+                                                           'label_row': 4, 'label_column': 3},
+
+         'Static current\n- i_EIS (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, 0.5),
+                                             'label_row': 5, 'label_column': 3},
+         'Current ratio\n- ratio_EIS (%)': {'value': tk.DoubleVar(current_density_parameters_frame, 5),
+                                            'label_row': 5, 'label_column': 5},
+         'Number of points\ncalculated - nb_points_EIS': {'value': tk.IntVar(current_density_parameters_frame, 50),
+                                                          'label_row': 6, 'label_column': 3},
+         'Power of the\ninitial frequency\n- f_power_min_EIS': {'value': tk.IntVar(current_density_parameters_frame, -3),
+                                                                'label_row': 6, 'label_column': 5},
+         'Power of the\nfinal frequency\n- f_power_max_EIS': {'value': tk.IntVar(current_density_parameters_frame, 5),
+                                                              'label_row': 7, 'label_column': 3},
+         'Number of frequencies\ntested - nb_f_EIS': {'value': tk.IntVar(current_density_parameters_frame, 60),
+                                                      'label_row': 7, 'label_column': 5}}
 
     choice_computing_parameters = \
-        {'Time for dynamic\ndisplay - Δt_dyn_step (s)': {'value': tk.DoubleVar(computing_parameters_frame, 10), 'label_row': 0,
+        {'Time for dynamic\ndisplay - Δt_dyn_step (s)': {'value': tk.DoubleVar(computing_parameters_frame, 300), 'label_row': 0,
                              'label_column': 1},
          'Purge time - t_purge (s)': {'value': tk.DoubleVar(computing_parameters_frame, 0.6), 'label_row': 0,
                          'label_column': 3},
@@ -351,9 +351,10 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
     # Retrieves parameter values for predefined stacks and keeps them in their standard unit, or converts user-selected
     # quantities into standard units.
     T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl, \
-        epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, t_step, \
-        i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, max_step, n_gdl, \
-        type_fuel_cell, type_auxiliary, type_control, type_purge, type_display, type_plot \
+        epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, \
+        step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, \
+        t_EIS, t_purge, delta_t_purge, max_step, n_gdl, type_fuel_cell, type_auxiliary, type_control, type_purge, \
+        type_display, type_plot \
         = recover_for_use_operating_inputs_and_physical_parameters(choice_operating_conditions,
                                                                    choice_accessible_parameters,
                                                                    choice_undetermined_parameters,
@@ -363,8 +364,9 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
     if current_button == 0:
         type_current = "step"
         current_density = step_current
-        launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step,
-                                         i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
+        launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
+                                         step_current_parameters, pola_current_parameters,
+                                         pola_current_for_cali_parameters, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
                                          Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re,
                                          i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl,
                                          t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
@@ -374,7 +376,8 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         type_current = "polarization"
         current_density = polarization_current
         launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
-                                                 t_step, i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS,
+                                                 step_current_parameters, pola_current_parameters,
+                                                 pola_current_for_cali_parameters, i_EIS, ratio_EIS, t_EIS, f_EIS,
                                                  Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc,
                                                  epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
                                                  a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
@@ -383,8 +386,9 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
     if current_button == 2:
         type_current = "EIS"
         current_density = EIS_current
-        launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step,
-                                        i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
+        launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
+                                        step_current_parameters, pola_current_parameters,
+                                        pola_current_for_cali_parameters, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
                                         Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re,
                                         i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl,
                                         t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge,

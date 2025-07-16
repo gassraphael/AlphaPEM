@@ -15,7 +15,7 @@ from tkinter import ttk
 # Importing constants' value and functions
 from model.AlphaPEM import AlphaPEM
 from modules.settings_modules import stored_operating_inputs, stored_physical_parameters, EIS_parameters
-from modules.main_modules import figures_preparation, plot_saving
+from modules.main_modules import figures_preparation
 
 
 # _____________________________________________________GUI modules_____________________________________________________
@@ -158,6 +158,12 @@ def display_parameter_labels(operating_conditions_frame, accessible_parameters_f
         ttk.Label(undetermined_parameters_frame, text=k, font=('cmr10', 10)). \
             grid(row=v['label_row'], column=v['label_column'] - 1, sticky="w")
     #       current density parameters
+    ttk.Label(current_density_parameters_frame, text='Step current parameters', font=('cmr10', 10, 'bold')). \
+        grid(row=0, column=0, columnspan=2, sticky="w")
+    ttk.Label(current_density_parameters_frame, text='Polarization current parameters', font=('cmr10', 10, 'bold')). \
+        grid(row=2, column=0, columnspan=2, sticky="w")
+    ttk.Label(current_density_parameters_frame, text='EIS current parameters', font=('cmr10', 10, 'bold')). \
+        grid(row=5, column=0, columnspan=2, sticky="w")
     for k, v in choice_current_density_parameters.items():
         ttk.Label(current_density_parameters_frame, text=k, font=('cmr10', 10)). \
             grid(row=v['label_row'], column=v['label_column'] - 1, sticky="w")
@@ -423,17 +429,23 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     a_switch = choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_switch']['value'].get()
     C_scl = choice_undetermined_parameters['Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)']['value'].get() * 1e6  # F.m-3
     # current density parameters
-    t_step = (choice_current_density_parameters['Initial time - t0_step (s)']['value'].get(),
-              choice_current_density_parameters['Final time - tf_step (s)']['value'].get(),
-              choice_current_density_parameters['Loading time\n- Δt_load_step (s)']['value'].get(),
-              choice_computing_parameters['Time for dynamic\ndisplay - Δt_dyn_step (s)']['value'].get())  # (s, s, s, s)
-    i_step = (choice_current_density_parameters['Initial current density\n- i_ini_step (A/cm²)']['value'].get() * 1e4,
-              choice_current_density_parameters['Final current density\n- i_final_step (A/cm²)']['value'].get() * 1e4)  # (A.m-2, A.m-2)
-    i_max_pola = choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].get() * 1e4  # A.m-2
-    delta_pola = (choice_current_density_parameters['Loading time\n- Δt_load_pola (s)']['value'].get(),
-                  choice_current_density_parameters['Breaking time\n- Δt_break_pola (s)']['value'].get(),
-                  choice_current_density_parameters['Current density step\n- Δi_pola (A/cm²)']['value'].get() * 1e4,
-                  choice_current_density_parameters['Initial breaking time\n- Δt_ini_pola (s)']['value'].get())  # (s, s, A.m-2, s)
+    delta_t_ini_step = choice_current_density_parameters['Stabilisation time\n- Δt_ini_step (min)']['value'].get() * 60 #s
+    delta_t_load_step = choice_current_density_parameters['Loading time\n- Δt_load_step (s)']['value'].get() #s
+    delta_t_break_step = choice_current_density_parameters['Breaking time\n- Δt_break_step (min)']['value'].get() * 60 #s
+    i_step = choice_current_density_parameters['Current density step\n- i_step (A/cm²)']['value'].get() * 1e4 # A.m-2
+    delta_t_dyn_step = choice_computing_parameters['Time for dynamic\ndisplay - Δt_dyn_step (s)']['value'].get() #s
+    step_current_parameters = {'delta_t_ini_step': delta_t_ini_step, 'delta_t_load_step': delta_t_load_step,
+                               'delta_t_break_step': delta_t_break_step, 'i_step': i_step,
+                               'delta_t_dyn_step': delta_t_dyn_step}
+    delta_t_ini_pola = choice_current_density_parameters['Stabilisation time\n- Δt_ini_pola (min)']['value'].get() * 60 #s
+    delta_t_load_pola = choice_current_density_parameters['Loading time\n- Δt_load_pola (s)']['value'].get() #s
+    delta_t_break_pola = choice_current_density_parameters['Breaking time\n- Δt_break_pola (min)']['value'].get() * 60 #s
+    delta_i_pola = choice_current_density_parameters['Current density step\n- Δi_pola (A/cm²)']['value'].get() * 1e4 # A.m-2
+    i_max_pola = choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].get() * 1e4 # A.m-2
+    pola_current_parameters = {'delta_t_ini_pola': delta_t_ini_pola, 'delta_t_load_pola': delta_t_load_pola,
+                               'delta_t_break_pola': delta_t_break_pola, 'delta_i_pola': delta_i_pola,
+                               'i_max_pola': i_max_pola}
+    pola_current_for_cali_parameters = None # Calibration is not implemented in the GUI.
     i_EIS = choice_current_density_parameters['Static current\n- i_EIS (A/cm²)']['value'].get() * 1e4  # (A.m-2)
     ratio_EIS = choice_current_density_parameters['Current ratio\n- ratio_EIS (%)']['value'].get() / 100
     f_EIS = (choice_current_density_parameters['Power of the\ninitial frequency\n- f_power_min_EIS']['value'].get(),
@@ -441,6 +453,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
              choice_current_density_parameters['Number of frequencies\ntested - nb_f_EIS']['value'].get(),
              choice_current_density_parameters['Number of points\ncalculated - nb_points_EIS']['value'].get())
     t_EIS = EIS_parameters(f_EIS)  # Time parameters for the EIS_current density function.
+    # computing parameters
     t_purge = choice_computing_parameters['Purge time - t_purge (s)']['value'].get()  # s
     delta_t_purge = choice_computing_parameters['Time between two purges\n- Δt_purge (s)']['value'].get()  # s
     max_step = choice_computing_parameters['Maximum time step\n- max_step (s)']['value'].get()  # s
@@ -491,9 +504,10 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
         type_plot = "dynamic"
 
     return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl,
-            epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, t_step,
-            i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, max_step, n_gdl,
-            type_fuel_cell, type_auxiliary, type_control, type_purge, type_display, type_plot)
+            epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl,
+            step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS,
+            t_EIS, t_purge, delta_t_purge, max_step, n_gdl, type_fuel_cell, type_auxiliary, type_control, type_purge,
+            type_display, type_plot)
 
 
 def value_control(choice_operating_conditions, choice_accessible_parameters, choice_undetermined_parameters,
@@ -642,31 +656,22 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
         messagebox.showerror(title='Double layer capacitance', message='I have not settled yet a range for C_scl.')
         choices.clear()
         return
-    if choice_current_density_parameters['Initial time - t0_step (s)']['value'].get() < 0 or \
-            choice_current_density_parameters['Final time - tf_step (s)']['value'].get() < 0 or \
+    if choice_current_density_parameters['Stabilisation time\n- Δt_ini_step (min)']['value'].get() < 0 or \
             choice_current_density_parameters['Loading time\n- Δt_load_step (s)']['value'].get() < 0 or \
+            choice_current_density_parameters['Breaking time\n- Δt_break_step (min)']['value'].get() < 0 or \
             choice_computing_parameters['Time for dynamic\ndisplay - Δt_dyn_step (s)']['value'].get() < 0 or \
+            choice_current_density_parameters['Stabilisation time\n- Δt_ini_pola (min)']['value'].get() < 0 or \
             choice_current_density_parameters['Loading time\n- Δt_load_pola (s)']['value'].get() < 0 or \
-            choice_current_density_parameters['Breaking time\n- Δt_break_pola (s)']['value'].get() < 0 or \
-            choice_current_density_parameters['Initial breaking time\n- Δt_ini_pola (s)']['value'].get() < 0 or \
-            choice_current_density_parameters['Initial time - t0_step (s)']['value'].get() > \
-            choice_current_density_parameters['Final time - tf_step (s)']['value'].get() or \
-            choice_current_density_parameters['Loading time\n- Δt_load_step (s)']['value'].get() > \
-            (choice_current_density_parameters['Final time - tf_step (s)']['value'].get() -
-             choice_current_density_parameters['Initial time - t0_step (s)']['value'].get()):
+            choice_current_density_parameters['Breaking time\n- Δt_break_pola (min)']['value'].get() < 0 :
         messagebox.showerror(title='Times', message='The times should be positive, t0_step < tf_step and '
                                                     'delta_t_load_step < (tf_step - t0_step).')
         choices.clear()
         return
-    if choice_current_density_parameters['Initial current density\n- i_ini_step (A/cm²)']['value'].get() < 0 or \
-            choice_current_density_parameters['Final current density\n- i_final_step (A/cm²)']['value'].get() < 0 or \
-            choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].get() < 0 or \
+    if choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].get() < 0 or \
             choice_current_density_parameters['Current density step\n- Δi_pola (A/cm²)']['value'].get() < 0 or \
             choice_current_density_parameters['Static current\n- i_EIS (A/cm²)']['value'].get() < 0 or \
             choice_current_density_parameters['Current density step\n- Δi_pola (A/cm²)']['value'].get() > \
-            choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].get() or \
-            choice_current_density_parameters['Initial current density\n- i_ini_step (A/cm²)']['value'].get() > \
-            choice_current_density_parameters['Final current density\n- i_final_step (A/cm²)']['value'].get():
+            choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].get():
         messagebox.showerror(title='Current densities', message='The current densities should be positive, '
                                                                 'delta_i_pola < i_max_pola and '
                                                                 'i_ini_step < i_final_step.')
@@ -759,11 +764,12 @@ def set_equal_width(frame1, frame2, frame3, frame4, frame5, frame6):
             frame.grid_columnconfigure(i, minsize=max(widths) / 5.5)  # Set minimum width of all column to max_width / 5
 
 
-def launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
-                                     i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
-                                     Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
-                                     kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell,
-                                     type_current, type_auxiliary, type_control, type_purge, type_display, type_plot):
+def launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
+                                     step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters,
+                                     i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
+                                     tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
+                                     a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
+                                     type_auxiliary, type_control, type_purge, type_display, type_plot):
     """Launch the AlphaPEM simulator for a step current density and display the results.
 
     Parameters
@@ -784,19 +790,26 @@ def launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa,
         Desired anode relative humidity (operating input).
     Phi_c_des : float
         Desired cathode relative humidity (operating input).
-    t_step : tuple
-        Time parameters for the step_current density function (current parameters).
-        It is a tuple containing the initial time 't0_step', final time 'tf_step', loading time 'delta_t_load_step'
-        and dynamic time for display 'delta_t_dyn_step'.
-    i_step : tuple
-        Current parameters for the step_current density function (current parameters).
-        It is a tuple containing the initial and final current density value 'i_ini_step' and 'i_final_step'.
-    i_max_pola : float
-        Maximum current density for the polarization curve (current parameter).
-    delta_pola : tuple
-        Parameters for the polarization curve (current parameters). It is a tuple containing the loading time
-        'delta_t_load_pola', the breaking time 'delta_t_break_pola', the current density step 'delta_i_pola', and
-        the initial breaking time 'delta_t_ini_pola'.
+    step_current_parameters : dict
+            Parameters for the step current density. It is a dictionary containing:
+            - 'delta_t_ini_step': the initial time (in seconds) at zero current density for the stabilisation of the
+            internal states,
+            - 'delta_t_load_step': the loading time (in seconds) for the step current density function, from 0 to
+            i_step,
+            - 'delta_t_break_step': the time (in seconds) at i_step current density for the stabilisation of the
+            internal states,
+            - 'i_step': the current density (in A.m-2) for the step current density function,
+            - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
+    pola_current_parameters : dict
+        Parameters for the polarization current density. It is a dictionary containing:
+        - 'delta_t_ini_pola': the initial time (in seconds) at zero current density for the stabilisation of the
+        internal states,
+        - 'delta_t_load_pola': the loading time (in seconds) for one step current of the polarisation current
+        density function,
+        - 'delta_t_break_pola': the breaking time (in seconds) for one step current, for the stabilisation of the
+        internal states,
+        - 'delta_i_pola': the current density step (in A.m-2) for the polarisation current density function.
+        - 'i_max_pola': the maximum current density (in A.m-2) for the polarization curve.
     i_EIS : float
         Current for which a ratio_EIS perturbation is added (current parameter).
     ratio_EIS : float
@@ -886,21 +899,31 @@ def launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa,
 
     # Dynamic display requires a dedicated use of the AlphaPEM class.
     if type_plot == "dynamic":
+        # Check if the type_fuel_cell and type_current are valid
+        if type_current == "step" and type_display == "multiple":
+            raise ValueError('dynamic plot is not thought to be used with step current and multiple display.' +
+                             'There would be too much plots to handle.')
+
         # Initialization
-        #       ... of the plot update number (n) and the initial time interval (time_interval)
+        #       Calculation of the plot update number (n) and the initial time interval (time_interval).
         initial_variable_values = None
-        t0_step, tf_step, delta_t_load_step, delta_t_dyn_step = t_step
+        #           Extraction of the parameters
+        tf_step = step_current_parameters['delta_t_ini_step'] + step_current_parameters['delta_t_load_step'] + \
+                  step_current_parameters['delta_t_break_step']  # (s).
+        delta_t_dyn_step = step_current_parameters['delta_t_dyn_step']  # (s).
+        #           Calculation
         n = int(tf_step / delta_t_dyn_step)  # It is the plot update number.
-        time_interval = [0, delta_t_dyn_step]  # It is the initial time interval.
+        time_interval = [0, delta_t_dyn_step]  # (s). It is the initial time interval.
 
         # Dynamic simulation
         for i in range(n):
-            Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
-                                 i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
-                                 Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c,
-                                 a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
-                                 type_auxiliary, type_control, type_purge, type_display, type_plot,
-                                 initial_variable_values, time_interval)
+            Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
+                                 step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters,
+                                 i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau,
+                                 epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
+                                 C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary,
+                                 type_control, type_purge, type_display, type_plot, initial_variable_values,
+                                 time_interval)
 
             # time_interval actualization
             if i < (n - 1):  # The final simulation does not require actualization.
@@ -919,27 +942,29 @@ def launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa,
 
     else:  # elif type_plot == "fixed":
         # Simulation
-        Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
-                             i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
-                             Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
-                             b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
-                             type_auxiliary, type_control, type_purge, type_display, type_plot)
+        Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
+                             step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS,
+                             ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau,
+                             epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl,
+                             max_step, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
+                             type_purge, type_display, type_plot)
         # Display
         if type_display != "no_display":
             Simulator.Display(ax1, ax2, ax3)
 
     # Plot saving
-    plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2, fig3)
+    Simulator.Save_plot(fig1, fig2, fig3)
 
     # Ending time
     algo_time = time.time() - start_time
     print('Time of the algorithm in second :', algo_time)
 
 
-def launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step,
-                                             i_step, i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
-                                             Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re,
-                                             i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step,
+def launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
+                                             step_current_parameters, pola_current_parameters,
+                                             pola_current_for_cali_parameters, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact,
+                                             Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e,
+                                             Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step,
                                              n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
                                              type_purge, type_display, type_plot):
     """Launch the AlphaPEM simulator for a polarization current density and display the results.
@@ -962,19 +987,26 @@ def launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_
         Desired anode relative humidity (operating input).
     Phi_c_des : float
         Desired cathode relative humidity (operating input).
-    t_step : tuple
-        Time parameters for the step_current density function (current parameters).
-        It is a tuple containing the initial time 't0_step', final time 'tf_step', loading time 'delta_t_load_step'
-        and dynamic time for display 'delta_t_dyn_step'.
-    i_step : tuple
-        Current parameters for the step_current density function (current parameters).
-        It is a tuple containing the initial and final current density value 'i_ini_step' and 'i_final_step'.
-    i_max_pola : float
-        Maximum current density for the polarization curve (current parameter).
-    delta_pola : tuple
-        Parameters for the polarization curve (current parameters). It is a tuple containing the loading time
-        'delta_t_load_pola', the breaking time 'delta_t_break_pola', the current density step 'delta_i_pola', and
-        the initial breaking time 'delta_t_ini_pola'.
+    step_current_parameters : dict
+            Parameters for the step current density. It is a dictionary containing:
+            - 'delta_t_ini_step': the initial time (in seconds) at zero current density for the stabilisation of the
+            internal states,
+            - 'delta_t_load_step': the loading time (in seconds) for the step current density function, from 0 to
+            i_step,
+            - 'delta_t_break_step': the time (in seconds) at i_step current density for the stabilisation of the
+            internal states,
+            - 'i_step': the current density (in A.m-2) for the step current density function,
+            - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
+    pola_current_parameters : dict
+        Parameters for the polarization current density. It is a dictionary containing:
+        - 'delta_t_ini_pola': the initial time (in seconds) at zero current density for the stabilisation of the
+        internal states,
+        - 'delta_t_load_pola': the loading time (in seconds) for one step current of the polarisation current
+        density function,
+        - 'delta_t_break_pola': the breaking time (in seconds) for one step current, for the stabilisation of the
+        internal states,
+        - 'delta_i_pola': the current density step (in A.m-2) for the polarisation current density function.
+        - 'i_max_pola': the maximum current density (in A.m-2) for the polarization curve.
     i_EIS : float
         Current for which a ratio_EIS perturbation is added (current parameter).
     ratio_EIS : float
@@ -1065,28 +1097,35 @@ def launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_
     # Dynamic display requires a dedicated use of the AlphaPEM class.
     if type_plot == "dynamic":
         # Initialization
-        #       ... of the plot update number (n) and the initial time interval (time_interval)
+        #       Calculation of the plot update number (n) and the initial time interval (time_interval).
         initial_variable_values = None
-        delta_t_load_pola, delta_t_break_pola, delta_i_pola, delta_t_ini_pola = delta_pola
-        delta_t = delta_t_load_pola + delta_t_break_pola  # s. It is the time of one load.
-        tf = delta_t_ini_pola + int(i_max_pola_1 / delta_i_pola + 1) * delta_t  # s. It is the polarization current
-        #                                                                            duration.
-        n = int(tf / delta_t)  # It is the plot update number.
-        time_interval = [0, delta_t_ini_pola + delta_t]  # It is the initial time interval.
+        #           Extraction of the parameters
+        delta_t_ini_pola = pola_current_parameters['delta_t_ini_pola']  # (s).
+        delta_t_load_pola = pola_current_parameters['delta_t_load_pola']  # (s).
+        delta_t_break_pola = pola_current_parameters['delta_t_break_pola']  # (s).
+        delta_i_pola = pola_current_parameters['delta_i_pola']  # (A.m-2).
+        i_max_pola = pola_current_parameters['i_max_pola']  # (A.m-2).
+        #           Calculation
+        delta_t_pola = delta_t_load_pola + delta_t_break_pola  # s. It is the time of one load.
+        tf = delta_t_ini_pola + int(
+            i_max_pola / delta_i_pola) * delta_t_pola  # s. It is the polarization current duration.
+        n = int(tf / delta_t_pola)  # It is the plot update number.
+        time_interval = [0, delta_t_ini_pola + delta_t_pola]  # It is the initial time interval.
 
         # Dynamic simulation
         for i in range(n):
-            Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
-                                 i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
-                                 Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c,
-                                 a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
-                                 type_auxiliary, type_control, type_purge, type_display, type_plot,
-                                 initial_variable_values, time_interval)
+            Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
+                                 step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters,
+                                 i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau,
+                                 epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
+                                 C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary,
+                                 type_control, type_purge, type_display, type_plot, initial_variable_values,
+                                 time_interval)
 
             # time_interval actualization
             if i < (n - 1):  # The final simulation does not require actualization.
                 t0_interval = Simulator.variables['t'][-1]
-                tf_interval = delta_t_ini_pola + (i + 2) * delta_t
+                tf_interval = delta_t_ini_pola + (i + 2) * delta_t_pola
                 time_interval = [t0_interval, tf_interval]  # Reset of the time interval
 
             # Recovery of the internal states from the end of the preceding simulation.
@@ -1100,28 +1139,30 @@ def launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_
 
     else:  # elif type_plot == "fixed":
         # Simulation
-        Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
-                             i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
-                             Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
-                             b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
-                             type_auxiliary, type_control, type_purge, type_display, type_plot)
+        Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
+                             step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS,
+                             ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau,
+                             epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl,
+                             max_step, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
+                             type_purge, type_display, type_plot)
         # Display
         if type_display != "no_display":
             Simulator.Display(ax1, ax2, ax3)
 
     # Plot saving
-    plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2, fig3)
+    Simulator.Save_plot(fig1, fig2, fig3)
 
     # Ending time
     algo_time = time.time() - start_time
     print('Time of the algorithm in second :', algo_time)
 
 
-def launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
-                                    i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
-                                    Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
-                                    kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell,
-                                    type_current, type_auxiliary, type_control, type_purge, type_display, type_plot):
+def launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
+                                    step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters,
+                                    i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
+                                    tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
+                                    a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
+                                    type_auxiliary, type_control, type_purge, type_display, type_plot):
     """Launch the AlphaPEM simulator for an EIS current density and display the results.
 
     Parameters
@@ -1142,19 +1183,26 @@ def launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, 
         Desired anode relative humidity (operating input).
     Phi_c_des : float
         Desired cathode relative humidity (operating input).
-    t_step : tuple
-        Time parameters for the step_current density function (current parameters).
-        It is a tuple containing the initial time 't0_step', final time 'tf_step', loading time 'delta_t_load_step'
-        and dynamic time for display 'delta_t_dyn_step'.
-    i_step : tuple
-        Current parameters for the step_current density function (current parameters).
-        It is a tuple containing the initial and final current density value 'i_ini_step' and 'i_final_step'.
-    i_max_pola : float
-        Maximum current density for the polarization curve (current parameter).
-    delta_pola : tuple
-        Parameters for the polarization curve (current parameters). It is a tuple containing the loading time
-        'delta_t_load_pola', the breaking time 'delta_t_break_pola', the current density step 'delta_i_pola', and
-        the initial breaking time 'delta_t_ini_pola'.
+    step_current_parameters : dict
+            Parameters for the step current density. It is a dictionary containing:
+            - 'delta_t_ini_step': the initial time (in seconds) at zero current density for the stabilisation of the
+            internal states,
+            - 'delta_t_load_step': the loading time (in seconds) for the step current density function, from 0 to
+            i_step,
+            - 'delta_t_break_step': the time (in seconds) at i_step current density for the stabilisation of the
+            internal states,
+            - 'i_step': the current density (in A.m-2) for the step current density function,
+            - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
+    pola_current_parameters : dict
+        Parameters for the polarization current density. It is a dictionary containing:
+        - 'delta_t_ini_pola': the initial time (in seconds) at zero current density for the stabilisation of the
+        internal states,
+        - 'delta_t_load_pola': the loading time (in seconds) for one step current of the polarisation current
+        density function,
+        - 'delta_t_break_pola': the breaking time (in seconds) for one step current, for the stabilisation of the
+        internal states,
+        - 'delta_i_pola': the current density step (in A.m-2) for the polarisation current density function.
+        - 'i_max_pola': the maximum current density (in A.m-2) for the polarization curve.
     i_EIS : float
         Current for which a ratio_EIS perturbation is added (current parameter).
     ratio_EIS : float
@@ -1243,7 +1291,7 @@ def launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, 
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(type_current, type_display)
 
     # Initialization
-    #       ... of the plot update number (n) and the initial time interval (time_interval)
+    #       Calculation of the plot update number (n) and the initial time interval (time_interval).
     initial_variable_values = None
     t0_EIS, t_new_start, tf_EIS, delta_t_break_EIS, delta_t_measurement_EIS = t_EIS
     f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = f_EIS  # These are used for EIS max_step
@@ -1254,11 +1302,11 @@ def launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, 
 
     #       A preliminary simulation run is necessary to equilibrate the internal variables of the cell at i_EIS
     #       prior to initiating the EIS.
-    Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
-                         i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc,
-                         Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim,
-                         b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current,
-                         type_auxiliary, type_control, type_purge, type_display, type_plot,
+    Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, step_current_parameters,
+                         pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, t_EIS, f_EIS,
+                         Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref,
+                         kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell,
+                         type_current, type_auxiliary, type_control, type_purge, type_display, type_plot,
                          initial_variable_values, time_interval)
 
     # time_interval actualization
@@ -1276,14 +1324,19 @@ def launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, 
     for x in Simulator.solver_variable_names:
         initial_variable_values.append(Simulator.variables[x][-1])
 
+    if type_display == "multiple":
+        print("A display bug prevents the dynamic updating of the graphs, as it appears that too much data is "
+              "involved. However, the data is correctly calculated, and the appropriate plots are saved in the "
+              "'results' folder. This display bug does not occur when using a 'synthetic' type_display.")
+
     # Dynamic simulation
     for i in range(n):
-        Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, t_step, i_step,
-                             i_max_pola, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc,
-                             Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co,
-                             kappa_c, a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell,
-                             type_current, type_auxiliary, type_control, type_purge, type_display, type_plot,
-                             initial_variable_values, time_interval)
+        Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
+                             step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS,
+                             ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau,
+                             epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl,
+                             max_step, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
+                             type_purge, type_display, type_plot, initial_variable_values, time_interval)
 
         # time_interval actualization
         if i < (n - 1):  # The final simulation does not require actualization.
@@ -1306,7 +1359,7 @@ def launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, 
             Simulator.Display(ax1, ax2, ax3)
 
     # Plot saving
-    plot_saving(type_fuel_cell, type_current, type_display, fig1, fig2, fig3)
+    Simulator.Save_plot(fig1, fig2, fig3)
 
     # Ending time
     algo_time = time.time() - start_time

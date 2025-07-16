@@ -9,16 +9,15 @@
 import os
 from colorama import Fore, Style
 import numpy as np
-from scipy.interpolate import interp1d
 
 # Importing functions
-from configuration.current_densities import polarization_current
-from calibration.experimental_values import pola_exp_values
+from configuration.current_densities import polarization_current_for_calibration
+from calibration.experimental_values import pola_exp_values_calibration
 
 
 # _________________________________________________Calibration modules__________________________________________________
 
-def determined_parameters(type_fuel_cell):
+def parameters_for_calibration(type_fuel_cell):
     """This function is used to determine the parameters of the fuel cell model for the calibration when a registered
     type_fuel_cell is considered.
 
@@ -71,17 +70,34 @@ def determined_parameters(type_fuel_cell):
         Type of current density function.
     current_density : function
         Current density evolution over time. It is a function of time and parameters dictionary.
-    t_step : tuple
-        Time parameters for the step_current density function.
-        It is a tuple containing the initial time 't0_step', final time 'tf_step', loading time 'delta_t_load' and
-        dynamic time for display 'delta_t_dyn'.
-    i_step : tuple
-        Current parameters for the step_current density function.
-        It is a tuple containing the initial and final current density value 'i_ini' and 'i_final'.
-    delta_pola : tuple
-        Parameters for the polarization curve. It is a tuple containing the loading time
-        'delta_t_load', the breaking time 'delta_t_break', the current density step 'delta_i', and the initial
-        breaking time 'delta_t_ini'.
+    step_current_parameters : dict
+        Parameters for the step current density. It is a dictionary containing:
+        - 'delta_t_ini_step': the initial time (in seconds) at zero current density for the stabilisation of the
+        internal states,
+        - 'delta_t_load_step': the loading time (in seconds) for the step current density function, from 0 to
+        i_step,
+        - 'delta_t_break_step': the time (in seconds) at i_step current density for the stabilisation of the
+        internal states,
+        - 'i_step': the current density (in A.m-2) for the step current density function,
+        - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
+    pola_current_parameters : dict
+        Parameters for the polarization current density. It is a dictionary containing:
+        - 'delta_t_ini_pola': the initial time (in seconds) at zero current density for the stabilisation of the
+        internal states,
+        - 'delta_t_load_pola': the loading time (in seconds) for one step current of the polarisation current
+        density function,
+        - 'delta_t_break_pola': the breaking time (in seconds) for one step current, for the stabilisation of the
+        internal states,
+        - 'delta_i_pola': the current density step (in A.m-2) for the polarisation current density function.
+        - 'i_max_pola': the maximum current density (in A.m-2) for the polarization curve.
+    pola_current_for_cali_parameters : dict
+        Parameters for the polarization current density for calibration. It is a dictionary containing:
+        - 'delta_t_ini_pola_cali': the initial time (in seconds) at zero current density for the stabilisation of
+        the internal states,
+        - 'delta_t_load_pola_cali': the loading time (in seconds) for one step current of the polarisation current
+        density function,
+        - 'delta_t_break_pola_cali': the breaking time (in seconds) for one step current, for the stabilisation of
+        the internal states.
     i_EIS : float
         Current for which a ratio_EIS perturbation is added.
     ratio_EIS : float
@@ -118,16 +134,12 @@ def determined_parameters(type_fuel_cell):
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
         if type_fuel_cell == "EH-31_1.5":
             Pa_des, Pc_des = 1.5e5, 1.5e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
-            i_max_pola = 2.3e4
         elif type_fuel_cell == "EH-31_2.0":
             Pa_des, Pc_des = 2.0e5, 2.0e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
-            i_max_pola = 2.5e4
         elif type_fuel_cell == "EH-31_2.25":
             Pa_des, Pc_des = 2.25e5, 2.25e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
-            i_max_pola = 2.85e4
         else:  # type_fuel_cell == "EH-31_2.5":
             Pa_des, Pc_des = 2.5e5, 2.5e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
-            i_max_pola = 3.05e4
         #       Fuel cell physical parameters
         Aact = 8.5e-3  # m². It is the active area of the catalyst layer.
         Wgc = 4.5e-4  # m. It is the width of the gas channel.
@@ -139,17 +151,57 @@ def determined_parameters(type_fuel_cell):
         Hgdl = 2e-4  # m. It is the thickness of the gas diffusion layer.
         Hgc = 5e-4  # m. It is the thickness of the gas channel.
 
+        # Estimated undetermined parameters for the initialisation
+        #   Catalyst layer
+        epsilon_mc = 0.399  # It is the volume fraction of ionomer in the CL.
+        tau = 1.016  # It is the pore structure coefficient in the CL, without units.
+        #   Gas diffusion layer
+        epsilon_gdl = 0.701  # It is the anode/cathode GDL porosity.
+        epsilon_c = 0.271  # It is the compression ratio of the GDL.
+        #   Interaction parameters between water and PEMFC structure
+        e = 5.0  # It is the capillary exponent
+        #   Voltage polarization
+        Re = 5.70e-07  # ohm.m². It is the electron conduction resistance of the circuit.
+        i0_c_ref = 2.79  # A.m-2.It is the reference exchange current density at the cathode.
+        kappa_co = 27.2  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
+        kappa_c = 1.61  # It is the overpotential correction exponent.
+        a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
+        C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
+        estimated_undetermined_parameters_for_initialisation = {'epsilon_mc': epsilon_mc, 'tau': tau,
+                                                                'epsilon_gdl': epsilon_gdl, 'epsilon_c': epsilon_c,
+                                                                'e': e, 'Re': Re, 'i0_c_ref': i0_c_ref,
+                                                                'kappa_co': kappa_co, 'kappa_c': kappa_c,
+                                                                'a_slim': a_slim, 'b_slim': b_slim,
+                                                                'a_switch': a_switch, 'C_scl': C_scl}
+
         # Algorithm parameters for polarization curve generation
         type_auxiliary = "forced-convective_cathode_with_flow-through_anode"
         type_control = "no_control"
         type_purge = "no_purge"
         type_display = "synthetic"
         type_plot = "fixed"
-        type_current = "polarization"
-        current_density = polarization_current
-        t_step = np.nan, np.nan, np.nan, np.nan  # It is the time parameters for the step_current density function.
-        i_step = np.nan, np.nan  # It is the current parameters for the step_current density function.
-        delta_pola = 30, 30, 0.1e4, 1 * 60  # It is the parameters for the polarization curve.
+        type_current = "polarization_for_cali"
+        current_density = polarization_current_for_calibration
+        delta_t_ini_step = 120 * 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
+        delta_t_load_step = 1e-15  # (s). Loading time for the step current density function, from 0 to i_step.
+        delta_t_break_step = 0  # (s). Time at i_step current density for the stabilisation of the internal states.
+        i_step = 0  # (A.m-2). Current density for the step current density function.
+        step_current_parameters = {'delta_t_ini_step': delta_t_ini_step, 'delta_t_load_step': delta_t_load_step,
+                                   'delta_t_break_step': delta_t_break_step, 'i_step': i_step}
+        delta_t_ini_pola = 30 * 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
+        delta_t_load_pola = 30  # (s). Loading time for one step current of the polarisation current density function.
+        delta_t_break_pola = 15 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
+        delta_i_pola = 0.05e4  # (A.m-2). Current density step for the polarisation current density function.
+        i_max_pola = 3.0e4  # (A.m-2). It is the maximum current density for the polarization curve.
+        pola_current_parameters = {'delta_t_ini_pola': delta_t_ini_pola, 'delta_t_load_pola': delta_t_load_pola,
+                                   'delta_t_break_pola': delta_t_break_pola, 'delta_i_pola': delta_i_pola,
+                                   'i_max_pola': i_max_pola}
+        delta_t_ini_pola_cali = 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
+        delta_t_load_pola_cali = 30  # (s). Loading time for one step current of the polarisation current density function.
+        delta_t_break_pola_cali = 10 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
+        pola_current_for_cali_parameters = {'delta_t_ini_pola_cali': delta_t_ini_pola_cali,
+                                            'delta_t_load_pola_cali': delta_t_load_pola_cali,
+                                            'delta_t_break_pola_cali': delta_t_break_pola_cali}
         i_EIS, ratio_EIS = np.nan, np.nan  # (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.
         f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
         t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
@@ -163,7 +215,6 @@ def determined_parameters(type_fuel_cell):
         Pa_des, Pc_des = 101325, 101325  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 2.0, 1.5  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.84, 0.59  # It is the desired relative humidity.
-        i_max_pola = 1.45e4
         #       Fuel cell physical parameters
         Hmem = 5.08e-5  # m. It is the thickness of the membrane.
         Hcl = 1e-5  # m. It is the thickness of the anode or cathode catalyst layer.
@@ -175,17 +226,55 @@ def determined_parameters(type_fuel_cell):
         Aact = 0.0025  # m². It is the active area of the catalyst layer.
         Lgc = 1.6  # m. It is the length of the gas channel.
 
+        # Estimated undetermined parameters for the initialisation
+        # Catalyst layer
+        epsilon_mc = 0.27  # It is the volume fraction of ionomer in the CL.
+        tau = 1.2  # It is the pore structure coefficient in the CL, without units.
+        # Gas diffusion layer
+        epsilon_gdl = 0.6  # It is the anode/cathode GDL porosity.
+        epsilon_c = 0.21  # It is the compression ratio of the GDL.
+        # Interaction parameters between water and PEMFC structure
+        e = 3.0  # It is the capillary exponent
+        # Voltage polarization
+        Re = 1e-6  # ohm.m². It is the electron conduction resistance of the circuit.
+        i0_c_ref = 10  # A.m-2.It is the reference exchange current density at the cathode.
+        kappa_co = 25  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
+        kappa_c = 1.5  # It is the overpotential correction exponent.
+        a_slim, b_slim, a_switch = 0, 1, 1  # It is the limit liquid saturation coefficients.
+        C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
+        estimated_undetermined_parameters_for_initialisation = {'epsilon_mc': epsilon_mc, 'tau': tau,
+                                                                'epsilon_gdl': epsilon_gdl, 'epsilon_c': epsilon_c,
+                                                                'e': e, 'Re': Re, 'i0_c_ref': i0_c_ref,
+                                                                'kappa_co': kappa_co, 'kappa_c': kappa_c,
+                                                                'a_slim': a_slim, 'b_slim': b_slim,
+                                                                'a_switch': a_switch, 'C_scl': C_scl}
+
         # Algorithm parameters for polarization curve generation
         type_auxiliary = "forced-convective_cathode_with_anodic_recirculation"
         type_control = "no_control"
         type_purge = "no_purge"
         type_display = "no_display"
         type_plot = "fixed"
-        type_current = "polarization"
-        current_density = polarization_current
-        t_step = np.nan  # It is the time parameters for the step_current density function.
-        i_step = np.nan, np.nan  # It is the current parameters for the step_current density function.
-        delta_pola = 30, 30, 0.1e4, 60 * 60  # It is the parameters for the polarization curve.
+        type_current = "polarization_for_cali"
+        current_density = polarization_current_for_calibration
+        delta_t_ini_step = 120 * 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
+        delta_t_load_step = 0  # (s). Loading time for the step current density function, from 0 to i_step.
+        delta_t_break_step = 0  # (s). Time at i_step current density for the stabilisation of the internal states.
+        i_step = 0  # (A.m-2). Current density for the step current density function.
+        step_current_parameters = {'delta_t_ini_step': delta_t_ini_step, 'delta_t_load_step': delta_t_load_step,
+                                   'delta_t_break_step': delta_t_break_step, 'i_step': i_step}
+        delta_t_ini_pola = 120 * 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
+        delta_t_load_pola = 30  # (s). Loading time for one step current of the polarisation current density function.
+        delta_t_break_pola = 15 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
+        delta_i_pola = 0.1e4  # (A.m-2). Current density step for the polarisation current density function.
+        pola_current_parameters = {'delta_t_ini_pola': delta_t_ini_pola, 'delta_t_load_pola': delta_t_load_pola,
+                                   'delta_t_break_pola': delta_t_break_pola, 'delta_i_pola': delta_i_pola}
+        delta_t_ini_pola_cali = 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
+        delta_t_load_pola_cali = 30  # (s). Loading time for one step current of the polarisation current density function.
+        delta_t_break_pola_cali = 10 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
+        pola_current_for_cali_parameters = {'delta_t_ini_pola_cali': delta_t_ini_pola_cali,
+                                            'delta_t_load_pola_cali': delta_t_load_pola_cali,
+                                            'delta_t_break_pola_cali': delta_t_break_pola_cali}
         i_EIS, ratio_EIS = np.nan, np.nan  # (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.
         f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
         t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
@@ -196,31 +285,33 @@ def determined_parameters(type_fuel_cell):
         ValueError("A correct type_fuel_cell should be given.")
 
     # Characteristic points of the experimental polarization curve
-    i_exp, U_exp = pola_exp_values(type_fuel_cell)
+    i_exp, U_exp = pola_exp_values_calibration(type_fuel_cell)
 
-    return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola, Aact, Hmem, Hcl, Hgdl, Hgc, Wgc, Lgc,
-            type_auxiliary, type_control, type_purge, type_display, type_plot, type_current, current_density, t_step,
-            i_step, delta_pola, i_EIS, ratio_EIS, t_EIS, f_EIS, t_purge, max_step, n_gdl, i_exp, U_exp)
+    return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, step_current_parameters, pola_current_parameters,
+            pola_current_for_cali_parameters, Aact, Hmem, Hcl, Hgdl, Hgc, Wgc, Lgc,
+            estimated_undetermined_parameters_for_initialisation, type_auxiliary, type_control, type_purge,
+            type_display, type_plot, type_current, current_density, i_EIS, ratio_EIS, t_EIS, f_EIS, t_purge, max_step,
+            n_gdl, i_exp, U_exp)
 
 
-def calculate_simulation_error(Simulator1, U_exp1, i_exp1, Simulator2, U_exp2, i_exp2):
+def calculate_simulation_error(Simulator_1, U_exp_1, i_exp_1, Simulator_2, U_exp_2, i_exp_2):
     """This function is used to calculate the simulation maximal error between the experimental and the simulated
     polarization curves. Two simulations on different operating conditions and on the same stack, and so two set of
     experimental data, are considered as it is the minimum amount of data which is required for the calibration.
 
     Parameters
     ----------
-    Simulator1 : AlphaPEM object
+    Simulator_1 : AlphaPEM object
         PEM simulator which contains the simulation results for the first simulation.
-    U_exp1 : numpy.ndarray
+    U_exp_1 : numpy.ndarray
         Experimental values of the voltage for the first simulation.
-    i_exp1 : numpy.ndarray
+    i_exp_1 : numpy.ndarray
         Experimental values of the current density for the first simulation.
-    Simulator2 : AlphaPEM object
+    Simulator_2 : AlphaPEM object
         PEM simulator which contains the simulation results for the second simulation.
-    U_exp2 : numpy.ndarray
+    U_exp_2 : numpy.ndarray
         Experimental values of the voltage for the second simulation.
-    i_exp2 : numpy.ndarray
+    i_exp_2 : numpy.ndarray
         Experimental values of the current density for the second simulation.
 
     Returns
@@ -230,54 +321,58 @@ def calculate_simulation_error(Simulator1, U_exp1, i_exp1, Simulator2, U_exp2, i
     """
 
     # Recovery of ifc_1
-    t1 = np.array(Simulator1.variables['t'])
+    t1 = np.array(Simulator_1.variables['t'])
     n1 = len(t1)
     ifc_t_1 = np.zeros(n1)
-    for i in range(n1):  # Creation of ifc_t and conversion in A/cm²
-        ifc_t_1[i] = Simulator1.operating_inputs['current_density'](t1[i], Simulator1.parameters) / 1e4
+    for i in range(n1):  # Creation of ifc_t
+        ifc_t_1[i] = Simulator_1.operating_inputs['current_density'](t1[i], Simulator_1.parameters)
     # Recovery of ifc_2
-    t2 = np.array(Simulator2.variables['t'])
+    t2 = np.array(Simulator_2.variables['t'])
     n2 = len(t2)
     ifc_t_2 = np.zeros(n2)
-    for i in range(n2):  # Creation of ifc_t and conversion in A/cm²
-        ifc_t_2[i] = Simulator2.operating_inputs['current_density'](t2[i], Simulator2.parameters) / 1e4
+    for i in range(n2):  # Creation of ifc_t
+        ifc_t_2[i] = Simulator_2.operating_inputs['current_density'](t2[i], Simulator_2.parameters)
 
     # Polarisation curve point recovery after stack stabilisation for Simulator1
-    delta_t_load, delta_t_break, delta_i, delta_t_ini = Simulator1.parameters['delta_pola']
-    nb_loads1 = int(Simulator1.parameters['i_max_pola'] / delta_i + 1)  # Number of load which are made
+    #   Extraction of the parameters
+    #       The initial time at zero current density for the stabilisation of the internal states.
+    delta_t_ini_pola_cali_1 = Simulator_1.parameters['pola_current_for_cali_parameters']['delta_t_ini_pola_cali']  # (s).
+    #       The loading time for one step current of the polarisation current density function.
+    delta_t_load_pola_cali_1 = Simulator_1.parameters['pola_current_for_cali_parameters']['delta_t_load_pola_cali']  # (s).
+    #       The breaking time for one step current, for the stabilisation of the internal states.
+    delta_t_break_pola_cali_1 = Simulator_1.parameters['pola_current_for_cali_parameters']['delta_t_break_pola_cali']  # (s).
+    #   Calculation
+    nb_loads1 = len(i_exp_1)  # Number of load which are made
+    delta_t_cali_1 = delta_t_load_pola_cali_1 + delta_t_break_pola_cali_1  # s. It is the time of one load.
     ifc_discretized1 = np.zeros(nb_loads1)
     Ucell_discretized1 = np.zeros(nb_loads1)
     for i in range(nb_loads1):
-        t_load = delta_t_ini + (i + 1) * (delta_t_load + delta_t_break) - delta_t_break / 10  # time for the measurement
-        idx1 = (np.abs(t1 - t_load)).argmin()  # the corresponding index
+        t_load_1 = delta_t_ini_pola_cali_1 + (i + 1) * delta_t_cali_1 # time for measurement
+        idx1 = (np.abs(t1 - t_load_1)).argmin()  # the corresponding index
         ifc_discretized1[i] = ifc_t_1[idx1]  # the last value at the end of each load
-        Ucell_discretized1[i] = Simulator1.variables['Ucell'][idx1]  # the last value at the end of each load
+        Ucell_discretized1[i] = Simulator_1.variables['Ucell'][idx1]  # the last value at the end of each load
     # Polarisation curve point recovery after stack stabilisation for Simulator2
-    delta_t_load, delta_t_break, delta_i, delta_t_ini = Simulator2.parameters['delta_pola']
-    nb_loads2 = int(Simulator2.parameters['i_max_pola'] / delta_i + 1)  # Number of load which are made
+    #   Extraction of the parameters
+    #       The initial time at zero current density for the stabilisation of the internal states.
+    delta_t_ini_pola_cali_2 = Simulator_2.parameters['pola_current_for_cali_parameters']['delta_t_ini_pola_cali']  # (s).
+    #       The loading time for one step current of the polarisation current density function.
+    delta_t_load_pola_cali_2 = Simulator_2.parameters['pola_current_for_cali_parameters']['delta_t_load_pola_cali']  # (s).
+    #       The breaking time for one step current, for the stabilisation of the internal states.
+    delta_t_break_pola_cali_2 = Simulator_2.parameters['pola_current_for_cali_parameters']['delta_t_break_pola_cali']  # (s).
+    #   Calculation
+    nb_loads2 = len(i_exp_2)  # Number of load which are made
+    delta_t_cali_2 = delta_t_load_pola_cali_2 + delta_t_break_pola_cali_2  # s. It is the time of one load.
     ifc_discretized2 = np.zeros(nb_loads2)
     Ucell_discretized2 = np.zeros(nb_loads2)
     for i in range(nb_loads2):
-        t_load = delta_t_ini + (i + 1) * (delta_t_load + delta_t_break) - delta_t_break / 10  # time for the measurement
-        idx2 = (np.abs(t2 - t_load)).argmin()  # the corresponding index
+        t_load_2 = delta_t_ini_pola_cali_2 + (i + 1) * delta_t_cali_2 # time for measurement
+        idx2 = (np.abs(t2 - t_load_2)).argmin()  # the corresponding index
         ifc_discretized2[i] = ifc_t_2[idx2]  # the last value at the end of each load
-        Ucell_discretized2[i] = Simulator2.variables['Ucell'][idx2]  # the last value at the end of each load
-
-    # Interpolation of experimental points to match model points for Simulator 1
-    i_fc_reduced1 = ifc_discretized1[(ifc_discretized1 >= i_exp1[0]) & (ifc_discretized1 <= i_exp1[-1])]
-    Ucell_reduced1 = Ucell_discretized1[(ifc_discretized1 >= i_exp1[0]) & (ifc_discretized1 <= i_exp1[-1])]
-    U_exp_interpolated1 = interp1d(i_exp1, U_exp1, kind='linear')(i_fc_reduced1)
-    # Interpolation of experimental points to match model points for Simulator 2
-    i_fc_reduced2 = ifc_discretized2[(ifc_discretized2 >= i_exp2[0]) & (ifc_discretized2 <= i_exp2[-1])]
-    Ucell_reduced2 = Ucell_discretized2[(ifc_discretized2 >= i_exp2[0]) & (ifc_discretized2 <= i_exp2[-1])]
-    U_exp_interpolated2 = interp1d(i_exp2, U_exp2, kind='linear')(i_fc_reduced2)
+        Ucell_discretized2[i] = Simulator_2.variables['Ucell'][idx2]  # the last value at the end of each load
 
     # Distance between the simulated and the experimental polarization curves.
-    if np.isnan(Ucell_reduced1).any() or np.isnan(Ucell_reduced2).any():
-        sim_error = 1e5  # If the mass loss arrives before i_exp[-1], some value would be equal to NaN.
-    else:
-        sim_error = (np.max(np.abs(Ucell_reduced1 - U_exp_interpolated1) / U_exp_interpolated1 * 100)
-                     + np.max(np.abs(Ucell_reduced2 - U_exp_interpolated2) / U_exp_interpolated2 * 100)) / 2  # in %.
+    sim_error = (np.max(np.abs(Ucell_discretized1 - U_exp_1) / U_exp_1 * 100)
+                     + np.max(np.abs(Ucell_discretized2 - U_exp_2) / U_exp_2 * 100)) / 2  # in %.
 
     return sim_error
 
