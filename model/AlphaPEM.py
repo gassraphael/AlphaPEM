@@ -524,6 +524,10 @@ class AlphaPEM:
                 plot_polarisation_curve(self.variables, self.operating_inputs, self.parameters, ax1)
                 plt.pause(0.01)  # A break is necessary to plot the new points in dynamic mode
 
+            elif type_display == "no_display":
+
+                plot_polarisation_curve(self.variables, self.operating_inputs, self.parameters, ax1, show=False)
+
         elif type_current == "polarization_for_cali":
             if type_display == "multiple":
 

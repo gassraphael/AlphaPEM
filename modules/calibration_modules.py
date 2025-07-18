@@ -178,7 +178,7 @@ def parameters_for_calibration(type_fuel_cell):
         type_auxiliary = "forced-convective_cathode_with_flow-through_anode"
         type_control = "no_control"
         type_purge = "no_purge"
-        type_display = "synthetic"
+        type_display = "no_display"
         type_plot = "fixed"
         type_current = "polarization_for_cali"
         current_density = polarization_current_for_calibration

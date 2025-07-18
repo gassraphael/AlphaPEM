@@ -76,14 +76,14 @@ for i in range(len(varbound)):
 
 # PyGAD parameters for the genetic algorithm:
     # Number of generations:
-num_generations = 2 # It should be between 1000 and 1500, depending on the population_size,
+num_generations = 50 # It should be between 1000 and 1500, depending on the population_size,
     #                 for a good compromise between speed and precision.
     # Initial population (one solution means a member of the population):
         # 1) custom initial population.
 initial_population = None # It is the initial population, which can be loaded from a file.
 # initial_population = pygad.load(filename="results/EH-31/parameter_calibration_1").population
         # 2) random initial population.
-sol_per_pop = 16 # It is the population size. It should be between 100 and 200 for a good compromise between speed and
+sol_per_pop = 96 # It is the population size. It should be between 100 and 200 for a good compromise between speed and
     #              precision. Select a multiple of the available number of CPU cores for optimal multiprocessing.
 num_genes = len(varbound) # Number of genes in the solution. It is the number of undetermined parameters.
     # Number of solutions to be selected as parents in the mating pool.
@@ -254,7 +254,7 @@ if __name__ == '__main__':
     ga_instance.run() # Run the genetic algorithm.
 
     # Recovery of the results
-    ga_instance.plot_fitness() # Plot the fitness value of the best solution at each generation.
+    # ga_instance.plot_fitness() # Plot the fitness value of the best solution at each generation.
     idx = np.argmax(ga_instance.last_generation_fitness) # Get the index of the best solution in the last generation.
     solution = ga_instance.population[idx] # Get the best solution from the last generation.
     solution_fitness = ga_instance.last_generation_fitness[idx] # Get the fitness value of the best solution.

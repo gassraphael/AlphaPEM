@@ -25,7 +25,7 @@ colors = mpl.colormaps['tab10']
 
 # __________________________________________________Polarisation curve__________________________________________________
 
-def plot_polarisation_curve(variables, operating_inputs, parameters, ax):
+def plot_polarisation_curve(variables, operating_inputs, parameters, ax, show=True):
     """
     This function plots the model polarisation curve, and compare it to the experimental one (if it exists). The
     polarisation curve is a classical representation of the cell performances, showing the cell voltage as a function
@@ -46,6 +46,8 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax):
         Parameters of the fuel cell model.
     ax : matplotlib.axes.Axes
         Axes on which the polarisation curve will be plotted.
+    show : bool, optional
+        If True, the polarisation curve will be displayed. If False, it will not be displayed.
     """
 
     # Extraction of the variables
@@ -96,7 +98,7 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax):
         # Plot the model polarisation curve
         plot_specific_line(ifc_discretized, Ucell_discretized, type_fuel_cell, type_current, type_auxiliary,
                            type_control, sim_error, ax)
-        plot_pola_instructions(type_fuel_cell, ax)
+        plot_pola_instructions(type_fuel_cell, ax, show)
 
     else:  # type_plot == "dynamic"
         # Plot of the polarisation curve produced by the model
@@ -1490,7 +1492,7 @@ def round_nice(x):
         nice = 10
     return nice * 10**exp
 
-def plot_pola_instructions(type_fuel_cell, ax):
+def plot_pola_instructions(type_fuel_cell, ax, show = True):
     """This function adds the specific instructions for polarisation plots according to the type_input to the ax object.
 
     Parameters
@@ -1499,6 +1501,8 @@ def plot_pola_instructions(type_fuel_cell, ax):
         Type of fuel cell configuration.
     ax : matplotlib.axes.Axes
         Axes on which the instructions will be added.
+    show : bool, optional
+        If True, the figure will be displayed. Default is True.
     """
 
     # For EH-31 fuel cell
@@ -1528,7 +1532,8 @@ def plot_pola_instructions(type_fuel_cell, ax):
     ax.tick_params(axis='both', which='major', size=10, width=1.5, direction='out')
     ax.tick_params(axis='both', which='minor', size=5, width=1.5, direction='out')
     plt.tight_layout()  # Adjust layout to prevent overlap between labels and the figure
-    plt.show()  # Show the figure
+    if show:
+        plt.show()  # Show the figure
 
 def plot_EIS_Nyquist_instructions(type_fuel_cell, f_Fourier, x, y, ax):
     """This function adds the instructions for EIS plots according to the type_input to the ax object.
