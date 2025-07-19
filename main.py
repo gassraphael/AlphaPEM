@@ -28,7 +28,7 @@ if __name__ == '__main__':
     type_fuel_cell_3 = None
     type_fuel_cell_4 = None
     # Current density possibilities: "step", "polarization", "polarization_for_cali", "EIS".
-    type_current = "polarization"
+    type_current = "step"
     # Auxiliary system possibilities: "forced-convective_cathode_with_anodic_recirculation",
     #                                 "forced-convective_cathode_with_flow-through_anode", "no_auxiliary".
     type_auxiliary = "forced-convective_cathode_with_flow-through_anode"
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     # Purges possibilities: "constant_purge", "periodic_purge", "no_purge".
     type_purge = "no_purge"
     # Display possibilities: "multiple", "synthetic", "no_display".
-    type_display = "multiple"
+    type_display = "synthetic"
     # Plot possibilities: "dynamic", "fixed". Using dynamic plot option enables real-time figure updates during program
     # execution, albeit at the cost of decreased program speed.
     type_plot = "fixed"

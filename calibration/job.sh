@@ -1,15 +1,22 @@
 #!/bin/bash
 
 # **Configuration:**
-#PBS -l select=1:ncpus=32            # select correspond au nombre de serveurs, et ncpus au nombre de CPUS.
-#PBS -l walltime=90:00:00            # durée maximale d'exécution du programme sur le cluster.
+# Select correspond au nombre de serveurs, et ncpus au nombre de CPUS
+#PBS -l select=1:ncpus=32     
+
+# Durée maximale d'exécution du programme sur le cluster
+#PBS -l walltime=90:00:00            
 #PBS -o out
 #PBS -e err
-#PBS -N AlphaPEM_calibration         # nom du job.
+
+# Nom du job
+#PBS -N AlphaPEM_calibration         
 #PBS -V
 
-#PBS -M raphael.gass@univ-reunion.fr # adresse email pour être contacté à la fin du job.
-#PBS -m bea                          # (b)eginning, (e)nd and (a)bortion. Un email est envoyé pour chacun de ces états.
+# Adresse email pour être contacté à la fin du job.
+#PBS -M raphael.gass@univ-reunion.fr 
+# (b)eginning, (e)nd and (a)bortion. Un email est envoyé pour chacun de ces états.
+#PBS -m bea                          
 
 
 # **Infos utiles affichées à l'écran:**
@@ -70,7 +77,7 @@ export PYTHONPATH=.
 mpiexec -np 1 python3 "$SCRIPT_RELATIVE_PATH"
 
 # Copie des résultats de l'exécution vers le dossier d'origine et supprime le répertoire temporaire 
-cd "$PBS_TMPDIR/$PROJECT_NAME/$FOLDER_NAME"
-cp -ru . "$PBS_O_WORKDIR"
+cd "$PBS_TMPDIR/$PROJECT_NAME"
+cp -ru . "$PROJECT_ROOT"
 cd "$PBS_O_WORKDIR"
 rm -rf "$PBS_TMPDIR"

@@ -49,8 +49,8 @@ kappa_co_min, kappa_co_max = 0.01, 40  # A.m-2. It is the crossover correction c
 kappa_c_min, kappa_c_max = 0.25, 4  # It is the overpotential correction exponent.
 #       The bounds on liquid saturation coefficients are constrained to facilitate calibration.
 a_slim_min, a_slim_max = 0.0, 0.2  # It is one of the limit liquid saturation coefficients.
-b_slim_min, b_slim_max = 0.0, 0.4  # It is one of the limit liquid saturation coefficients.
-a_switch_min, a_switch_max = 0.5, 1.0  # It is one of the limit liquid saturation coefficients.
+b_slim_min, b_slim_max = 0.05, 0.4  # It is one of the limit liquid saturation coefficients.
+a_switch_min, a_switch_max = 0.5, 0.95  # It is one of the limit liquid saturation coefficients.
 #       Undetermined parameter which is not considered yet (require the use of EIS curves to be calibrated)
 C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
 #       Bounds gathering and type
@@ -76,14 +76,15 @@ for i in range(len(varbound)):
 
 # PyGAD parameters for the genetic algorithm:
     # Number of generations:
-num_generations = 50 # It should be between 1000 and 1500, depending on the population_size,
-    #                 for a good compromise between speed and precision.
+num_generations = 500 # It should be between 1000 and 1500, depending on the population_size,
+    #                    for a good compromise between speed and precision.
+    #                    1 generation of 96 elements takes approximatively 5min on my computer (16 CPU cores).
     # Initial population (one solution means a member of the population):
-        # 1) custom initial population.
+        # 1) random initial population.
 initial_population = None # It is the initial population, which can be loaded from a file.
+        # 2) custom initial population.
 # initial_population = pygad.load(filename="results/EH-31/parameter_calibration_1").population
-        # 2) random initial population.
-sol_per_pop = 96 # It is the population size. It should be between 100 and 200 for a good compromise between speed and
+sol_per_pop = 128 # It is the population size. It should be between 100 and 200 for a good compromise between speed and
     #              precision. Select a multiple of the available number of CPU cores for optimal multiprocessing.
 num_genes = len(varbound) # Number of genes in the solution. It is the number of undetermined parameters.
     # Number of solutions to be selected as parents in the mating pool.

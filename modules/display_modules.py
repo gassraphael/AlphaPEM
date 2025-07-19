@@ -661,7 +661,7 @@ def plot_lambda(variables, operating_inputs, parameters, ax):
         ax.plot(t, lambda_acl_t, color=colors(2))
         ax.plot(t, lambda_mem_t, color=colors(3))
         ax.plot(t, lambda_ccl_t, color=colors(4))
-    ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
+        ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r'$\mathbf{Water}$ $\mathbf{content}$ $\mathbf{\lambda}$', labelpad=3)
     ax.legend([r'$\mathregular{\lambda_{acl}}$', r'$\mathregular{\lambda_{mem}}$',
                r'$\mathregular{\lambda_{ccl}}$'], loc='best')
@@ -741,7 +741,7 @@ def plot_s(variables, operating_inputs, parameters, ax):
         ax.plot(t, s_acl_t, color=colors(2))
         ax.plot(t, s_ccl_t, color=colors(4))
         ax.plot(t, s_cgdl_t, color=colors(5))
-    ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
+        ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r'$\mathbf{Liquid}$ $\mathbf{water}$ $\mathbf{saturation}$ $\mathbf{s}$', labelpad=3)
     ax.legend([r'$\mathregular{s_{agdl}}$', r'$\mathregular{s_{acl}}$',
                r'$\mathregular{s_{ccl}}$', r'$\mathregular{s_{cgdl}}$'], loc='best')
