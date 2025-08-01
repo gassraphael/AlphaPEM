@@ -40,9 +40,9 @@ class AlphaPEM:
 
     def __init__(self, current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, step_current_parameters,
                  pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
-                 Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, tau, epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c,
-                 a_slim, b_slim, a_switch, C_scl, max_step, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary,
-                 type_control, type_purge, type_display, type_plot, initial_variable_values=None, time_interval=None):
+                 Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim,
+                 b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
+                 type_purge, type_display, type_plot, initial_variable_values=None, time_interval=None):
         """Initialise all parameters defining a fuel cell stack operation: nominal operating conditions,
         applied electrical load, dimensions, and undetermined variables.
 
@@ -109,30 +109,26 @@ class AlphaPEM:
             'nb_points_EIS'.
         Aact : float
             Active area of the cell in m² (accessible physical parameter).
-        Hgdl : float
-            Thickness of the gas diffusion layer in m (accessible physical parameter).
-        Hmem : float
-            Thickness of the membrane in m (accessible physical parameter).
-        Hcl : float
-            Thickness of the catalyst layer in m (accessible physical parameter).
         Hgc : float
             Thickness of the gas channel in m (accessible physical parameter).
         Wgc : float
             Width of the gas channel in m (accessible physical parameter).
         Lgc : float
             Length of the gas channel in m (accessible physical parameter).
+        Hgdl : float
+            Thickness of the gas diffusion layer in m (undetermined physical parameter).
+        Hmem : float
+            Thickness of the membrane in m (undetermined physical parameter).
+        Hcl : float
+            Thickness of the catalyst layer in m (undetermined physical parameter).
         epsilon_gdl : float
             Anode/cathode GDL porosity (undetermined physical parameter).
-        tau : float
-            Pore structure coefficient (undetermined physical parameter).
         epsilon_mc : float
             Volume fraction of ionomer in the CL (undetermined physical parameter).
         epsilon_c : float
             Compression ratio of the GDL (undetermined physical parameter).
         e : float
             Capillary exponent (undetermined physical parameter).
-        Re : float
-            Electron conduction resistance of the circuit in ohm.m² (undetermined physical parameter).
         i0_c_ref : float
             Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
         kappa_co : float
@@ -150,8 +146,6 @@ class AlphaPEM:
             (undetermined physical parameter).
         C_scl : float
             Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
-        max_step : float
-            Maximum time step for the solver (computing parameter).
         n_gdl : int
             Number of points considered in the GDL (computing parameter).
         t_purge : tuple
@@ -186,16 +180,16 @@ class AlphaPEM:
                                    'pola_current_parameters': pola_current_parameters,
                                    'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
                                    'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
-        self.accessible_physical_parameters = {'Aact': Aact, 'Hgdl': Hgdl, 'Hmem': Hmem, 'Hcl': Hcl, 'Hgc': Hgc,
-                                               'Wgc': Wgc, 'Lgc': Lgc}
-        self.undetermined_physical_parameters = {'epsilon_gdl': epsilon_gdl, 'tau': tau, 'epsilon_mc': epsilon_mc,
-                                                   'epsilon_c': epsilon_c, 'e': e, 'kappa_co': kappa_co, 'Re': Re,
-                                                   'i0_c_ref': i0_c_ref, 'kappa_c': kappa_c, 'a_slim': a_slim,
-                                                   'b_slim': b_slim, 'a_switch': a_switch, 'C_scl': C_scl}
-        self.computing_parameters = {'max_step': max_step, 'n_gdl': n_gdl, 't_purge': t_purge,
-                                     'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
-                                     'type_auxiliary': type_auxiliary, 'type_control': type_control,
-                                     'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}
+        self.accessible_physical_parameters = {'Aact': Aact, 'Hgc': Hgc, 'Wgc': Wgc, 'Lgc': Lgc}
+        self.undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmem': Hmem, 'Hcl': Hcl, 'epsilon_gdl': epsilon_gdl,
+                                                 'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c, 'e': e,
+                                                 'kappa_co': kappa_co, 'i0_c_ref': i0_c_ref, 'kappa_c': kappa_c,
+                                                 'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch,
+                                                 'C_scl': C_scl}
+        self.computing_parameters = {'n_gdl': n_gdl, 't_purge': t_purge, 'type_fuel_cell': type_fuel_cell,
+                                     'type_current': type_current, 'type_auxiliary': type_auxiliary,
+                                     'type_control': type_control, 'type_purge': type_purge,
+                                     'type_display': type_display, 'type_plot': type_plot}
         self.parameters = {**self.current_parameters, **self.accessible_physical_parameters,
                            **self.undetermined_physical_parameters, **self.computing_parameters}
         if self.operating_inputs['Pa_des'] < Pext or self.operating_inputs['Pc_des'] < Pext:
@@ -235,7 +229,7 @@ class AlphaPEM:
         #       Resolution of the system of differential equations.
         event_negative.terminal = True  # Integration is stopped if one of the crucial variables becomes negative.
         self.sol = solve_ivp(dydt, self.time_interval, self.initial_variable_values, method='BDF',
-                             rtol = 1e-4, atol = 1e-8, events=event_negative,
+                             rtol = 1e-5, atol = 1e-8, events=event_negative,
                              args=(self.operating_inputs, self.parameters, self.solver_variable_names,
                                    self.control_variables))
 

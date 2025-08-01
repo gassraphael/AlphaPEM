@@ -220,7 +220,7 @@ def make_Fourier_transformation(variables, operating_inputs, parameters):
     t, Ucell_t = np.array(variables['t']), np.array(variables['Ucell'])
     # Extraction of the operating inputs and the parameters
     current_density = operating_inputs['current_density']
-    t_EIS, max_step = parameters['t_EIS'], parameters['max_step']
+    t_EIS = parameters['t_EIS']
 
     # Creation of ifc
     ifc_t = np.zeros(len(t))

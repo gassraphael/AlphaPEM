@@ -115,8 +115,6 @@ def parameters_for_calibration(type_fuel_cell):
     t_purge : tuple
         Time parameters for purging the system.
         It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
-    max_step : float
-            Maximum time step for the solver.
     n_gdl : int
         Number of points considered in the GDL.
     i_exp : numpy.ndarray
@@ -146,32 +144,30 @@ def parameters_for_calibration(type_fuel_cell):
         Lgc = 9.67  # m. It is the length of the gas channel.
 
         # Extrapolated physical parameters
-        Hmem = 2e-5  # m. It is the thickness of the membrane.
-        Hcl = 1e-5  # m. It is the thickness of the anode or cathode catalyst layer.
         Hgdl = 2e-4  # m. It is the thickness of the gas diffusion layer.
         Hgc = 5e-4  # m. It is the thickness of the gas channel.
 
         # Estimated undetermined parameters for the initialisation
-        #   Catalyst layer
-        epsilon_mc = 0.399  # It is the volume fraction of ionomer in the CL.
-        tau = 1.016  # It is the pore structure coefficient in the CL, without units.
         #   Gas diffusion layer
-        epsilon_gdl = 0.701  # It is the anode/cathode GDL porosity.
-        epsilon_c = 0.271  # It is the compression ratio of the GDL.
+        epsilon_gdl = 0.7943  # It is the anode/cathode GDL porosity.
+        epsilon_c = 0.2  # It is the compression ratio of the GDL.
+        #   Catalyst layer
+        Hcl = 8e-6  # m. It is the thickness of the anode or cathode catalyst layer.
+        epsilon_mc = 0.2111  # It is the volume fraction of ionomer in the CL.
+        #   Membrane
+        Hmem = 1.5e-5  # m. It is the thickness of the membrane.
         #   Interaction parameters between water and PEMFC structure
-        e = 5.0  # It is the capillary exponent
+        e = 3.0  # It is the capillary exponent
         #   Voltage polarization
-        Re = 5.70e-07  # ohm.m². It is the electron conduction resistance of the circuit.
-        i0_c_ref = 2.79  # A.m-2.It is the reference exchange current density at the cathode.
-        kappa_co = 27.2  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
-        kappa_c = 1.61  # It is the overpotential correction exponent.
+        i0_c_ref = 14.86  # A.m-2.It is the reference exchange current density at the cathode.
+        kappa_co = 1  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
+        kappa_c = 0.6386  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
-        estimated_undetermined_parameters_for_initialisation = {'epsilon_mc': epsilon_mc, 'tau': tau,
-                                                                'epsilon_gdl': epsilon_gdl, 'epsilon_c': epsilon_c,
-                                                                'e': e, 'Re': Re, 'i0_c_ref': i0_c_ref,
-                                                                'kappa_co': kappa_co, 'kappa_c': kappa_c,
-                                                                'a_slim': a_slim, 'b_slim': b_slim,
+        estimated_undetermined_parameters_for_initialisation = {'epsilon_gdl': epsilon_gdl, 'epsilon_c': epsilon_c,
+                                                                'Hcl': Hcl, 'epsilon_mc': epsilon_mc, 'Hmem': Hmem,
+                                                                'e': e, 'i0_c_ref': i0_c_ref, 'kappa_co': kappa_co,
+                                                                'kappa_c': kappa_c, 'a_slim': a_slim, 'b_slim': b_slim,
                                                                 'a_switch': a_switch, 'C_scl': C_scl}
 
         # Algorithm parameters for polarization curve generation
@@ -192,7 +188,7 @@ def parameters_for_calibration(type_fuel_cell):
         delta_t_load_pola = 30  # (s). Loading time for one step current of the polarisation current density function.
         delta_t_break_pola = 15 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
         delta_i_pola = 0.05e4  # (A.m-2). Current density step for the polarisation current density function.
-        i_max_pola = 3.0e4  # (A.m-2). It is the maximum current density for the polarization curve.
+        i_max_pola = 1.7e4  # (A.m-2). It is the maximum current density for the polarization curve.
         pola_current_parameters = {'delta_t_ini_pola': delta_t_ini_pola, 'delta_t_load_pola': delta_t_load_pola,
                                    'delta_t_break_pola': delta_t_break_pola, 'delta_i_pola': delta_i_pola,
                                    'i_max_pola': i_max_pola}
@@ -205,7 +201,6 @@ def parameters_for_calibration(type_fuel_cell):
         i_EIS, ratio_EIS = np.nan, np.nan  # (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.
         f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
         t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
-        max_step = 0.1  # It is good enough for having graphs without instabilities.
         n_gdl = int(Hgdl / Hcl / 4)  # It is the number of model points placed inside each GDL.
 
     elif type_fuel_cell == "LF":
@@ -229,24 +224,21 @@ def parameters_for_calibration(type_fuel_cell):
         # Estimated undetermined parameters for the initialisation
         # Catalyst layer
         epsilon_mc = 0.27  # It is the volume fraction of ionomer in the CL.
-        tau = 1.2  # It is the pore structure coefficient in the CL, without units.
         # Gas diffusion layer
         epsilon_gdl = 0.6  # It is the anode/cathode GDL porosity.
         epsilon_c = 0.21  # It is the compression ratio of the GDL.
         # Interaction parameters between water and PEMFC structure
         e = 3.0  # It is the capillary exponent
         # Voltage polarization
-        Re = 1e-6  # ohm.m². It is the electron conduction resistance of the circuit.
         i0_c_ref = 10  # A.m-2.It is the reference exchange current density at the cathode.
         kappa_co = 25  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 1.5  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0, 1, 1  # It is the limit liquid saturation coefficients.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
-        estimated_undetermined_parameters_for_initialisation = {'epsilon_mc': epsilon_mc, 'tau': tau,
-                                                                'epsilon_gdl': epsilon_gdl, 'epsilon_c': epsilon_c,
-                                                                'e': e, 'Re': Re, 'i0_c_ref': i0_c_ref,
-                                                                'kappa_co': kappa_co, 'kappa_c': kappa_c,
-                                                                'a_slim': a_slim, 'b_slim': b_slim,
+        estimated_undetermined_parameters_for_initialisation = {'epsilon_gdl': epsilon_gdl, 'epsilon_c': epsilon_c,
+                                                                'Hcl': Hcl, 'epsilon_mc': epsilon_mc, 'Hmem': Hmem,
+                                                                'e': e, 'i0_c_ref': i0_c_ref, 'kappa_co': kappa_co,
+                                                                'kappa_c': kappa_c, 'a_slim': a_slim, 'b_slim': b_slim,
                                                                 'a_switch': a_switch, 'C_scl': C_scl}
 
         # Algorithm parameters for polarization curve generation
@@ -278,7 +270,6 @@ def parameters_for_calibration(type_fuel_cell):
         i_EIS, ratio_EIS = np.nan, np.nan  # (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.
         f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
         t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
-        max_step = 0.1  # It is good enough for having graphs without instabilities.
         n_gdl = int(Hgdl / Hcl / 4)  # It is the number of model points placed inside each GDL.
 
     else:
@@ -288,10 +279,10 @@ def parameters_for_calibration(type_fuel_cell):
     i_exp, U_exp = pola_exp_values_calibration(type_fuel_cell)
 
     return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, step_current_parameters, pola_current_parameters,
-            pola_current_for_cali_parameters, Aact, Hmem, Hcl, Hgdl, Hgc, Wgc, Lgc,
+            pola_current_for_cali_parameters, Aact, Hgdl, Hgc, Wgc, Lgc,
             estimated_undetermined_parameters_for_initialisation, type_auxiliary, type_control, type_purge,
-            type_display, type_plot, type_current, current_density, i_EIS, ratio_EIS, t_EIS, f_EIS, t_purge, max_step,
-            n_gdl, i_exp, U_exp)
+            type_display, type_plot, type_current, current_density, i_EIS, ratio_EIS, t_EIS, f_EIS, t_purge, n_gdl,
+            i_exp, U_exp)
 
 
 def calculate_simulation_error(Simulator_1, U_exp_1, i_exp_1, Simulator_2, U_exp_2, i_exp_2):
@@ -377,7 +368,7 @@ def calculate_simulation_error(Simulator_1, U_exp_1, i_exp_1, Simulator_2, U_exp
     return sim_error
 
 
-def print_calibration_results(convergence, ga_instance, epsilon_gdl, epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref,
+def print_calibration_results(convergence, ga_instance, Hcl, Hmem, epsilon_gdl, epsilon_mc, epsilon_c, e, i0_c_ref,
                               kappa_co, kappa_c, a_slim, b_slim, a_switch, sim_error):
     """This function is used to print the calibration results.
 
@@ -388,18 +379,18 @@ def print_calibration_results(convergence, ga_instance, epsilon_gdl, epsilon_mc,
         convergence of the genetic algorithm used for optimizing the undetermined parameters in the calibration files.
     ga_instance : PyGAD object
         An instance of the PyGAD library, which is used to perform the optimization.
+    Hcl : float
+        Thickness of the catalyst layer in m.
+    Hmem : float
+        Thickness of the membrane in m.
     epsilon_gdl : float
         Anode/cathode GDL porosity.
     epsilon_mc : float
         Volume fraction of ionomer in the CL.
-    tau : float
-        Pore structure coefficient.
     epsilon_c : float
         Compression ratio of the GDL.
     e : float
         Capillary exponent.
-    Re : float
-        Electron conduction resistance of the circuit in ohm.m².
     i0_c_ref : float
         Reference exchange current density at the cathode in A.m-2.
     kappa_co : float
@@ -417,12 +408,12 @@ def print_calibration_results(convergence, ga_instance, epsilon_gdl, epsilon_mc,
     """
 
     print("The convergence is:\n", convergence)
-    print("\nThe optimized epsilon_gdl: ", epsilon_gdl)
+    print("\nThe optimized Hcl: ", Hcl)
+    print("The optimized Hmem: ", Hmem)
+    print("The optimized epsilon_gdl: ", epsilon_gdl)
     print("The optimized epsilon_mc: ", epsilon_mc)
-    print("The optimized tau: ", tau)
     print("The optimized epsilon_c: ", epsilon_c)
     print("The optimized e: ", e)
-    print("The optimized Re: ", Re)
     print("The optimized i0_c_ref: ", i0_c_ref)
     print("The optimized kappa_co: ", kappa_co)
     print("The optimized kappa_c: ", kappa_c)
@@ -435,7 +426,7 @@ def print_calibration_results(convergence, ga_instance, epsilon_gdl, epsilon_mc,
         print(f"Best fitness value reached after {ga_instance.best_solution_generation} generations.")
 
 
-def save_calibration_results(convergence, ga_instance, epsilon_gdl, epsilon_mc, tau, epsilon_c, e, Re, i0_c_ref,
+def save_calibration_results(convergence, ga_instance, Hcl, Hmem, epsilon_gdl, epsilon_mc, epsilon_c, e, i0_c_ref,
                              kappa_co, kappa_c, a_slim, b_slim, a_switch, sim_error, type_fuel_cell):
     """This function is used to save in a text file and a PyGAD file the calibration results.
 
@@ -446,18 +437,18 @@ def save_calibration_results(convergence, ga_instance, epsilon_gdl, epsilon_mc, 
         convergence of the genetic algorithm used for optimizing the undetermined parameters in the calibration files.
     ga_instance : PyGAD object
         An instance of the PyGAD library, which is used to perform the optimization.
+    Hcl : float
+        Thickness of the catalyst layer in m.
+    Hmem : float
+        Thickness of the membrane in m.
     epsilon_gdl : float
         Anode/cathode GDL porosity.
     epsilon_mc : float
         Volume fraction of ionomer in the CL.
-    tau : float
-        Pore structure coefficient.
     epsilon_c : float
         Compression ratio of the GDL.
     e : float
         Capillary exponent.
-    Re : float
-        Electron conduction resistance of the circuit in ohm.m².
     i0_c_ref : float
         Reference exchange current density at the cathode in A.m-2.
     kappa_co : float
@@ -496,12 +487,12 @@ def save_calibration_results(convergence, ga_instance, epsilon_gdl, epsilon_mc, 
     file_path = os.path.join(folder_name, filename)
     with open(file_path, "w") as file:
         file.write("The convergence is: " + str(convergence) +
+                   "\nThe optimized Hcl: " + str(Hcl) +
+                   "\nThe optimized Hmem: " + str(Hmem) +
                    "\nThe optimized epsilon_gdl: " + str(epsilon_gdl) +
                    "\nThe optimized epsilon_mc: " + str(epsilon_mc) +
-                   "\nThe optimized tau: " + str(tau) +
                    "\nThe optimized epsilon_c: " + str(epsilon_c) +
                    "\nThe optimized e: " + str(e) +
-                   "\nThe optimized Re: " + str(Re) +
                    "\nThe optimized i0_c_ref: " + str(i0_c_ref) +
                    "\nThe optimized kappa_co: " + str(kappa_co) +
                    "\nThe optimized kappa_c: " + str(kappa_c) +

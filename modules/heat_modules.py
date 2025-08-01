@@ -51,7 +51,7 @@ def heat_transfer_int_values(sv, parameters):
 
     # Extraction of the operating inputs and the parameters
     Hgdl, Hcl, Hmem = parameters['Hgdl'], parameters['Hcl'], parameters['Hmem']
-    epsilon_mc, tau, epsilon_gdl = parameters['epsilon_mc'], parameters['tau'], parameters['epsilon_gdl']
+    epsilon_mc, epsilon_gdl = parameters['epsilon_mc'], parameters['epsilon_gdl']
     epsilon_c, n_gdl = parameters['epsilon_c'], parameters['n_gdl']
 
     # Weighted harmonic means of the effective thermal diffusivity

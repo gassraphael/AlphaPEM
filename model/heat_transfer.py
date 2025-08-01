@@ -53,7 +53,7 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl
     s_acl, s_ccl, eta_c = sv['s_acl'], sv['s_ccl'], sv['eta_c']
 
     # Extraction of the operating inputs and parameters
-    epsilon_mc, tau, epsilon_gdl = parameters['epsilon_mc'], parameters['tau'], parameters['epsilon_gdl']
+    epsilon_mc, epsilon_gdl = parameters['epsilon_mc'], parameters['epsilon_gdl']
     epsilon_c, n_gdl = parameters['epsilon_c'], parameters['n_gdl']
     Hmem, Hgdl, Hcl = parameters['Hgdl'], parameters['Hmem'], parameters['Hcl']
 
@@ -109,8 +109,8 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl
 
     # The heat dissipated by the electric currents (Joule heating + Ohm's law), in J.m-3.s-1.
     Q_e = {**{f'agdl_{i}': i_fc ** 2 / sigma_e_eff('gdl', epsilon_gdl, epsilon_c=epsilon_c) for i in range(1, n_gdl + 1)},
-           'acl': i_fc ** 2 / sigma_e_eff('cl', epsilon_cl, epsilon_mc=epsilon_mc, tau=tau),
-           'ccl': i_fc ** 2 / (3 * sigma_e_eff('cl', epsilon_cl, epsilon_mc=epsilon_mc, tau=tau)),
+           'acl': i_fc ** 2 / sigma_e_eff('cl', epsilon_cl, epsilon_mc=epsilon_mc),
+           'ccl': i_fc ** 2 / (3 * sigma_e_eff('cl', epsilon_cl, epsilon_mc=epsilon_mc)),
            **{f'cgdl_{i}': i_fc ** 2 / sigma_e_eff('gdl', epsilon_gdl, epsilon_c=epsilon_c) for i in range(1, n_gdl + 1)}}
 
     return {'Jt': Jt, 'Q_r': Q_r, 'Q_sorp': Q_sorp, 'Q_liq': Q_liq, 'Q_p': Q_p, 'Q_e': Q_e}

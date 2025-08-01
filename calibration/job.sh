@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # **Configuration:**
-# Select correspond au nombre de serveurs, et ncpus au nombre de CPUS
-#PBS -l select=1:ncpus=32     
+# Select correspond au nombre de serveurs, ncpus au nombre de CPUS, et mem à la RAM alouée
+#PBS -l select=1:ncpus=32:mem=1gb
 
 # Durée maximale d'exécution du programme sur le cluster
 #PBS -l walltime=90:00:00            

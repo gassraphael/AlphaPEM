@@ -178,8 +178,6 @@ def physical_parameters(type_fuel_cell):
         Thickness of the anode or cathode catalyst layer in meters.
     epsilon_mc : float
         Volume fraction of ionomer in the catalyst layer.
-    tau : float
-        Pore structure coefficient in the CL.
     Hmem : float
         Thickness of the membrane in meters.
     Hgdl : float
@@ -198,8 +196,6 @@ def physical_parameters(type_fuel_cell):
         Active area of the catalyst layer in meters squared.
     e : float
         Capillary exponent.
-    Re : float
-        Electron conduction resistance of the circuit in ohm.m².
     i0_c_ref : float
         Reference exchange current density at the cathode in A.m-2.
     kappa_co : float
@@ -222,7 +218,6 @@ def physical_parameters(type_fuel_cell):
         Aact = 8.5e-3  # m². It is the active area of the catalyst layer.
         Hcl = 1e-5  # m. It is the thickness of the anode or cathode catalyst layer.
         epsilon_mc = 0.3949198274842546  # It is the volume fraction of ionomer in the CL.
-        tau = 1.015639135686993  # It is the pore structure coefficient in the CL, without units.
         #   Membrane
         Hmem = 2e-5  # m. It is the thickness of the membrane.
         #   Gas diffusion layer
@@ -236,7 +231,6 @@ def physical_parameters(type_fuel_cell):
         #   Interaction parameters between water and PEMFC structure
         e = 5.0  # It is the capillary exponent
         #   Voltage polarization
-        Re = 5.694464714060734e-07  # ohm.m². It is the electron conduction resistance of the circuit.
         i0_c_ref = 2.787917581303015  # A.m-2. It is the reference exchange current density at the cathode.
         kappa_co = 29.793535549174077  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 1.6136446641573106  # It is the overpotential correction exponent.
@@ -244,10 +238,10 @@ def physical_parameters(type_fuel_cell):
         #                                                               liquid saturation coefficients.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
     else: # Stored setup in "stored_physical_parameters".
-        (Hcl, epsilon_mc, tau, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, Re, i0_c_ref, kappa_co,
+        (Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co,
          kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
 
-    return (Hcl, epsilon_mc, tau, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, Re, i0_c_ref, kappa_co,
+    return (Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co,
             kappa_c, a_slim, b_slim, a_switch, C_scl)
 
 
@@ -267,8 +261,6 @@ def computing_parameters(step_current_parameters, type_current, Hgdl, Hcl):
 
     Returns
     -------
-    max_step : float
-        Maximum time step for the resolution of the system of differential equations.
     n_gdl : int
         Number of model nodes placed inside each GDL.
     t_purge : tuple
@@ -288,19 +280,13 @@ def computing_parameters(step_current_parameters, type_current, Hgdl, Hcl):
         - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
     """
 
-    if type_current == "polarization":
-        max_step = 0.1  # Once the undetermined parameters are at their optimal values, this max_step can be used.
-    elif type_current == "step":
-        max_step = 0.1  # it is good enough for having graphs without instabilities.
-    else:
-        max_step = 0.1
     n_gdl = int(Hgdl / Hcl / 4)  # It is the number of model points placed inside each GDL.
-    #                              A good value is int(Hgdl/Hcl/4), which is usually around 5.
+    #                              A good compromise is int(Hgdl/Hcl/4), which is usually around 5.
     t_purge = 0.6, 15  # (s, s). It is the time parameters for purging the system.
     delta_t_dyn_step = 5*60  # (s). Time for dynamic display of the step current density function.
 
     step_current_parameters['delta_t_dyn_step'] = delta_t_dyn_step # Update the step current parameters.
-    return max_step, n_gdl, t_purge, step_current_parameters
+    return n_gdl, t_purge, step_current_parameters
 
 # ____________________________________________Unchanged Physical parameters_____________________________________________
 """ These parameters remain unchanged no matter the setting configurations."""
@@ -324,7 +310,8 @@ yO2_ext = 0.2095  # . It is the molar fraction of O2 in dry air.
 # Model parameters for the cell
 rho_mem = 1980  # kg.m-3. It is the density of the dry membrane.
 M_eq = 1.1  # kg.mol-1. It is the equivalent molar mass of ionomer.
-epsilon_cl = 0.25  # It is the porosity of the catalyst layer, without units.
+epsilon_cl = 0.25*1.2  # It is the porosity of the catalyst layer, without units.
+tau = 1.5  # It is the pore structure coefficient in the CL, without units.
 theta_c_gdl = 120 * math.pi / 180  # radian. It is the contact angle of GDL for liquid water.
 theta_c_cl = 95 * math.pi / 180  # radian. It is the contact angle of CL for liquid water.
 gamma_cond = 5e3  # s-1. It is the overall condensation rate constant for water.
@@ -334,6 +321,7 @@ alpha_p = 0.785 #. It is a fitted value for the effective matter transfer in the
 Kshape = 2  # . Mathematical factor governing lambda_eq smoothing.
 
 # Model parameters for the voltage calculation
+Re = 1e-06  # ohm.m². It is the estimated electron conduction resistance of the circuit.
 C_O2ref = 3.39  # mol.m-3. It is the reference concentration of oxygen.
 alpha_c = 0.5  # It is the transfer coefficient of the cathode.
 E0 = 1.229  # V. It is the standard-state reversible voltage.

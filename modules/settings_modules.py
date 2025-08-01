@@ -45,25 +45,25 @@ def stored_operating_inputs(type_fuel_cell):
         Pa_des, Pc_des = 1.5e5, 1.5e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
-        i_max_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
+        i_max_pola = 1.7e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "EH-31_2.0":
         T_des = 74 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.0e5, 2.0e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
-        i_max_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
+        i_max_pola = 1.7e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "EH-31_2.25":
         T_des = 74 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.25e5, 2.25e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
-        i_max_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
+        i_max_pola = 1.7e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "EH-31_2.5":
         T_des = 74 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.5e5, 2.5e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
-        i_max_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
+        i_max_pola = 1.7e4  # A.m-2. It is the maximum current density for the polarization curve.
 
     # For LF fuel cell
     elif type_fuel_cell == "LF":
@@ -94,8 +94,6 @@ def stored_physical_parameters(type_fuel_cell):
         Thickness of the catalyst layer in m.
     epsilon_mc : float
         Volume fraction of ionomer in the CL.
-    tau : float
-        Pore structure coefficient in the CL.
     Hmem : float
             Thickness of the membrane in m.
     Hgdl : float
@@ -114,8 +112,6 @@ def stored_physical_parameters(type_fuel_cell):
             Active area of the cell in m².
     e : float
         Capillary exponent.
-    Re : float
-        Electron conduction resistance of the circuit in ohm.m².
     i0_c_ref : float
         Reference exchange current density at the cathode in A.m-2.
     kappa_co : float
@@ -137,26 +133,24 @@ def stored_physical_parameters(type_fuel_cell):
             type_fuel_cell == "EH-31_2.5":
         # Catalyst layer
         Aact = 8.5e-3  # m². It is the active area of the catalyst layer.
-        Hcl = 1e-5  # m. It is the thickness of the anode or cathode catalyst layer.
-        epsilon_mc = 0.399  # It is the volume fraction of ionomer in the CL.
-        tau = 1.016  # It is the pore structure coefficient in the CL, without units.
+        Hcl = 8e-6  # m. It is the thickness of the anode or cathode catalyst layer.
+        epsilon_mc = 0.3981  # It is the volume fraction of ionomer in the CL.
         # Membrane
-        Hmem = 2e-5  # m. It is the thickness of the membrane.
+        Hmem = 1.5e-5  # m. It is the thickness of the membrane.
         # Gas diffusion layer
         Hgdl = 2e-4  # m. It is the thickness of the gas diffusion layer.
-        epsilon_gdl = 0.701  # It is the anode/cathode GDL porosity.
-        epsilon_c = 0.271  # It is the compression ratio of the GDL.
+        epsilon_gdl = 0.7843  # It is the anode/cathode GDL porosity.
+        epsilon_c = 0.2  # It is the compression ratio of the GDL.
         # Gas channel
         Hgc = 5e-4  # m. It is the thickness of the gas channel.
         Wgc = 4.5e-4  # m. It is the width of the gas channel.
         Lgc = 9.67  # m. It is the length of the gas channel.
         # Interaction parameters between water and PEMFC structure
-        e = 5.0  # It is the capillary exponent
+        e = 4.0  # It is the capillary exponent
         # Voltage polarization
-        Re = 5.70e-07  # ohm.m². It is the electron conduction resistance of the circuit.
-        i0_c_ref = 2.79  # A.m-2.It is the reference exchange current density at the cathode.
-        kappa_co = 27.2  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
-        kappa_c = 1.61  # It is the overpotential correction exponent.
+        i0_c_ref = 7.676  # A.m-2.It is the reference exchange current density at the cathode.
+        kappa_co = 24.75  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
+        kappa_c = 0.8285  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
 
@@ -165,7 +159,6 @@ def stored_physical_parameters(type_fuel_cell):
         # Catalyst layer
         Hcl = 1e-5  # m. It is the thickness of the anode or cathode catalyst layer.
         epsilon_mc = 0.27  # It is the volume fraction of ionomer in the CL.
-        tau = 1.2  # It is the pore structure coefficient in the CL, without units.
         # Membrane
         Hmem = 5.08e-5  # m. It is the thickness of the membrane.
         # Gas diffusion layer
@@ -183,7 +176,6 @@ def stored_physical_parameters(type_fuel_cell):
         # Interaction parameters between water and PEMFC structure
         e = 3.0  # It is the capillary exponent
         # Voltage polarization
-        Re = 1e-6  # ohm.m². It is the electron conduction resistance of the circuit.
         i0_c_ref = 10  # A.m-2.It is the reference exchange current density at the cathode.
         kappa_co = 25  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 1.5  # It is the overpotential correction exponent.
@@ -194,8 +186,8 @@ def stored_physical_parameters(type_fuel_cell):
     else:
         raise ValueError('the type_input given is not valid.')
 
-    return Hcl, epsilon_mc, tau, Hmem, Hgdl, epsilon_gdl, epsilon_c, \
-        Hgc, Wgc, Lgc, Aact, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl
+    return Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, \
+        Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl
 
 
 def EIS_parameters(f_EIS):

@@ -11,7 +11,7 @@ import math
 
 # Importing constants' value
 from configuration.settings import (M_eq, rho_mem, theta_c_gdl, theta_c_cl, M_H2, M_O2, M_N2, M_H2O, R, Kshape,
-                                    epsilon_p, alpha_p, k_th_gdl, k_th_cl, k_th_mem, Cp_gdl, Cp_cl, Cp_mem, rho_gdl,
+                                    epsilon_p, alpha_p, tau, k_th_gdl, k_th_cl, k_th_mem, Cp_gdl, Cp_cl, Cp_mem, rho_gdl,
                                     rho_cl, sigma_e_gdl, sigma_e_cl)
 
 
@@ -256,7 +256,7 @@ def Dc(P, T):
     return 3.242e-5 * (T / 333) ** 2.334 * (101325 / P)
 
 
-def Da_eff(element, s, T, P, epsilon, epsilon_c=None, tau=None):
+def Da_eff(element, s, T, P, epsilon, epsilon_c=None):
     """This function calculates the effective diffusion coefficient at the GDL or the CL and at the anode, in m².s-1,
     considering GDL compression.
 
@@ -275,8 +275,6 @@ def Da_eff(element, s, T, P, epsilon, epsilon_c=None, tau=None):
         Porosity.
     epsilon_c : float, optional
         Compression ratio of the GDL.
-    tau : float, optional
-        Pore structure coefficient in the CL. Required if element is 'cl'.
 
     Returns
     -------
@@ -288,18 +286,16 @@ def Da_eff(element, s, T, P, epsilon, epsilon_c=None, tau=None):
         if epsilon_c==None:
             raise ValueError("For the GDL, epsilon_c must be provided.")
         # According to the GDL porosity, the GDL compression effect is different.
-        if 0.55 <= epsilon < 0.67:
+        if 0.50 <= epsilon < 0.67:
             beta2 = -1.59
-        elif 0.67 <= epsilon < 0.8:
+        elif 0.67 <= epsilon <= 0.90:
             beta2 = -0.90
         else:
             raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
-                             "epsilon_gdl should be between 0.55 and 0.8.")
+                             "epsilon_gdl should be between 0.50 and 0.90.")
         return epsilon * ((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p * math.exp(beta2 * epsilon_c) * (1 - s) ** 2 * Da(P, T)
 
     elif element == 'cl': # The effective diffusion coefficient at the CL using Bruggeman model.
-        if tau==None:
-            raise ValueError("For the CL, tau must be provided.")
         return epsilon ** tau * (1 - s) ** tau * Da(P, T)
 
     else:
@@ -307,7 +303,7 @@ def Da_eff(element, s, T, P, epsilon, epsilon_c=None, tau=None):
 
 
 
-def Dc_eff(element, s, T, P, epsilon, epsilon_c=None, tau=None):
+def Dc_eff(element, s, T, P, epsilon, epsilon_c=None):
     """This function calculates the effective diffusion coefficient at the GDL or the CL and at the cathode, in m².s-1,
     considering GDL compression.
 
@@ -326,8 +322,6 @@ def Dc_eff(element, s, T, P, epsilon, epsilon_c=None, tau=None):
         Porosity.
     epsilon_c : float, optional
         Compression ratio of the GDL.
-    tau : float, optional
-        Pore structure coefficient in the CL. Required if element is 'cl'.
 
     Returns
     -------
@@ -339,18 +333,16 @@ def Dc_eff(element, s, T, P, epsilon, epsilon_c=None, tau=None):
         if epsilon_c==None:
             raise ValueError("For the GDL, epsilon_c must be provided.")
         # According to the GDL porosity, the GDL compression effect is different.
-        if 0.55 <= epsilon < 0.67:
+        if 0.50 <= epsilon < 0.67:
             beta2 = -1.59
-        elif 0.67 <= epsilon < 0.8:
+        elif 0.67 <= epsilon <= 0.90:
             beta2 = -0.90
         else:
             raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
-                             "epsilon_gdl should be between 0.55 and 0.8.")
+                             "epsilon_gdl should be between 0.50 and 0.90.")
         return epsilon * ((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p * math.exp(beta2 * epsilon_c) * (1 - s) ** 2 * Dc(P, T)
 
     elif element == 'cl': # The effective diffusion coefficient at the CL using Bruggeman model.
-        if tau==None:
-            raise ValueError("For the CL, tau must be provided.")
         return epsilon ** tau * (1 - s) ** tau * Dc(P, T)
 
     else:
@@ -558,13 +550,13 @@ def K0(element, epsilon, epsilon_c=None):
         if epsilon_c==None:
             raise ValueError("For the GDL, epsilon_c must be provided.")
         # According to the GDL porosity, the GDL compression effect is different.
-        if 0.55 <= epsilon < 0.67:
+        if 0.50 <= epsilon < 0.67:
             beta1 = -3.60
-        elif 0.67 <= epsilon < 0.8:
+        elif 0.67 <= epsilon <= 0.90:
             beta1 = -2.60
         else:
             raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
-                             "epsilon_gdl should be between 0.55 and 0.8.")
+                             "epsilon_gdl should be between 0.50 and 0.90.")
         return epsilon / (8 * math.log(epsilon) ** 2) * (epsilon - epsilon_p) ** (alpha_p + 2) * \
             4.6e-6 ** 2 / ((1 - epsilon_p) ** alpha_p * ((alpha_p + 1) * epsilon - epsilon_p) ** 2) * math.exp(beta1 * epsilon_c)
 
@@ -672,7 +664,7 @@ def sigma_p_eff(element, lambdaa, T, epsilon_mc=None):
         raise ValueError("The element should be either 'mem' or 'ccl'.")
 
 
-def sigma_e_eff(element, epsilon, epsilon_c=None, epsilon_mc=None, tau=None):
+def sigma_e_eff(element, epsilon, epsilon_c=None, epsilon_mc=None):
     """This function calculates the effective electrical conductivity, in Ω-1.m-1, in either the GDL or the CL,
     considering GDL compression.
 
@@ -685,8 +677,6 @@ def sigma_e_eff(element, epsilon, epsilon_c=None, epsilon_mc=None, tau=None):
         Porosity.
     epsilon_mc : float
         Volume fraction of ionomer in the CL.
-    tau : float
-        Pore structure coefficient in the CL.
 
     Returns
     -------
@@ -697,18 +687,18 @@ def sigma_e_eff(element, epsilon, epsilon_c=None, epsilon_mc=None, tau=None):
         if epsilon_c==None:
             raise ValueError("For the GDL, epsilon_c must be provided.")
         # According to the GDL porosity, the GDL compression effect is different.
-        if 0.55 <= epsilon < 0.67:
+        if 0.50 <= epsilon < 0.67:
             beta3 = 4.04
-        elif 0.67 <= epsilon < 0.8:
+        elif 0.67 <= epsilon <= 0.90:
             beta3 = 4.40
         else:
             raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
-                             "epsilon_gdl should be between 0.55 and 0.8.")
+                             "epsilon_gdl should be between 0.50 and 0.90.")
         return (1 - epsilon) * sigma_e_gdl * math.exp(beta3 * epsilon_c) # Using the volume fraction of conductive material.
 
     elif element == 'cl': # The effective electrical conductivity at the CL
-        if epsilon_mc==None or tau==None:
-            raise ValueError("For the CL, epsilon_mc and tau must be provided.")
+        if epsilon_mc==None:
+            raise ValueError("For the CL, epsilon_mc must be provided.")
         return (1 - epsilon - epsilon_mc  ) * sigma_e_cl # Using the volume fraction of conductive material.
 
     else:
@@ -841,13 +831,13 @@ def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C
         if C_v==None or s==None or epsilon==None or epsilon_c==None:
             raise ValueError("For the GDL, C_v, s, epsilon and epsilon_c must be provided.")
         # According to the GDL porosity, the GDL compression effect is different.
-        if 0.55 <= epsilon < 0.67:
+        if 0.50 <= epsilon < 0.67:
             beta3 = 4.04
-        elif 0.67 <= epsilon < 0.8:
+        elif 0.67 <= epsilon <= 0.90:
             beta3 = 4.40
         else:
             raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
-                             "epsilon_gdl should be between 0.55 and 0.8.")
+                             "epsilon_gdl should be between 0.50 and 0.90.")
         if element == 'agdl': # The thermal conductivity of the gas mixture in the AGDL
             if C_H2 == None:
                 raise ValueError("For the AGDL, C_H2 must be provided.")
@@ -867,7 +857,7 @@ def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C
 
     elif element == 'acl' or element == 'ccl': # The effective thermal conductivity at the CL
         if C_v==None or lambdaa==None or s==None or epsilon==None or epsilon_mc==None:
-            raise ValueError("For the CL, C_v, lambdaa, s, epsilon, epsilon_mc and tau must be provided.")
+            raise ValueError("For the CL, C_v, lambdaa, s, epsilon and epsilon_mc must be provided.")
         k_th_eff_mem = hmean([k_th_mem, k_th('H2O_l', T)],
                              weights=[1 - fv(lambdaa, T), fv(lambdaa, T)]) # The effective thermal conductivity at the
         #                                                                    membrane

@@ -9,7 +9,7 @@
 import math
 
 # Importing constants' value and functions
-from configuration.settings import F, R, E0, Pref
+from configuration.settings import F, R, Re, E0, Pref
 from modules.transitory_functions import average, k_H2, k_O2, sigma_p_eff
 
 
@@ -83,8 +83,7 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
     C_H2_acl_t, C_O2_ccl_t, eta_c_t = variables['C_H2_acl'], variables['C_O2_ccl'], variables['eta_c']
     T_acl_t, T_mem_t, T_ccl_t = variables['T_acl'], variables['T_mem'], variables['T_ccl']
     # Extraction of the operating inputs and the parameters
-    Hmem, Hcl, epsilon_mc, tau = parameters['Hmem'], parameters['Hcl'], parameters['epsilon_mc'], parameters['tau']
-    Re, kappa_co = parameters['Re'], parameters['kappa_co']
+    Hmem, Hcl, epsilon_mc, kappa_co = parameters['Hmem'], parameters['Hcl'], parameters['epsilon_mc'], parameters['kappa_co']
 
     # Initialisation
     n = len(t)

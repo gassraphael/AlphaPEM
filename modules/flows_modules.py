@@ -43,7 +43,7 @@ def flows_int_values(sv, operating_inputs, parameters):
     C_N2 = sv['C_N2']
     T_agc, T_acl, T_mem, T_ccl, T_cgc = sv['T_agc'], sv['T_acl'], sv['T_mem'], sv['T_ccl'], sv['T_cgc']
     # Extraction of the operating inputs and the parameters
-    tau, epsilon_gdl, epsilon_c, e = parameters['tau'], parameters['epsilon_gdl'], parameters['epsilon_c'], parameters['e']
+    epsilon_gdl, epsilon_c, e = parameters['epsilon_gdl'], parameters['epsilon_c'], parameters['e']
     n_gdl, Hcl, Hmem, Hgdl = parameters['n_gdl'], parameters['Hcl'], parameters['Hmem'], parameters['Hgdl']
     Wgc, Hgc = parameters['Wgc'], parameters['Hgc']
 
@@ -98,13 +98,13 @@ def flows_int_values(sv, operating_inputs, parameters):
                                               epsilon_gdl, epsilon_c = epsilon_c)]) for i in range(1, n_gdl)]
     Da_eff_agdl_acl = average([Da_eff('gdl', sv[f's_agdl_{n_gdl}'], sv[f'T_agdl_{n_gdl}'], Pagdl[n_gdl],
                                           epsilon_gdl, epsilon_c = epsilon_c),
-                                   Da_eff('cl', s_acl, T_acl, Pacl, epsilon_cl, tau = tau)],
+                                   Da_eff('cl', s_acl, T_acl, Pacl, epsilon_cl)],
                             weights = [H_gdl_node / (H_gdl_node + Hcl), Hcl / (H_gdl_node + Hcl)])
     Dc_eff_cgdl_cgdl = [None] + [average([Dc_eff('gdl', sv[f's_cgdl_{i}'], sv[f'T_cgdl_{i}'], Pcgdl[i],
                                               epsilon_gdl, epsilon_c = epsilon_c),
                                         Dc_eff('gdl', sv[f's_cgdl_{i+1}'], sv[f'T_cgdl_{i+1}'], Pcgdl[i+1],
                                               epsilon_gdl, epsilon_c = epsilon_c)]) for i in range(1, n_gdl)]
-    Dc_eff_ccl_cgdl = average([Dc_eff('cl', s_ccl, T_ccl, Pccl, epsilon_cl, tau = tau),
+    Dc_eff_ccl_cgdl = average([Dc_eff('cl', s_ccl, T_ccl, Pccl, epsilon_cl),
                                    Dc_eff('gdl', sv['s_cgdl_1'], sv['T_cgdl_1'], Pcgdl[1],
                                           epsilon_gdl, epsilon_c = epsilon_c)],
                             weights = [Hcl / (H_gdl_node + Hcl), H_gdl_node / (H_gdl_node + Hcl)])
