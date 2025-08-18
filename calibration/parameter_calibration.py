@@ -77,14 +77,15 @@ for i in range(len(varbound)):
 
 # PyGAD parameters for the genetic algorithm:
     # Number of generations:
-num_generations = 1000 # 500 generations should be enough.
+num_generations = 1000 # 1000 generations should be enough.
     #                   10 generation of 128 elements takes approximatively 100min on my computer (16 CPU cores).
     #                   1000 generations of 128 elements take less than 80h on UR cluster (1 node of 32 CPU cores).
     # Initial population (one solution means a member of the population):
         # 1) random initial population.
 # initial_population = None # It is the initial population, which can be loaded from a file.
         # 2) custom initial population.
-initial_population = pygad.load(filename="results/EH-31/parameter_calibration_4").population
+initial_population = pygad.load(filename="results/EH-31/parameter_calibration_4").population # Remark: it seems that the
+#                                 file should be loaded from the same computer and in the same folder it is created ...?
 sol_per_pop = 128 # It is the population size. It should be between 100 and 200 for a good compromise between speed and
     #              precision. Select a multiple of the available number of CPU cores for optimal multiprocessing.
 num_genes = len(varbound) # Number of genes in the solution. It is the number of undetermined parameters.

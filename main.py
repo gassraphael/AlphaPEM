@@ -23,10 +23,10 @@ if __name__ == '__main__':
     # This parameter includes the fuel cell used in the model and the corresponding operating conditions.
     # - EH-31 is a fuel cell developed by EH GROUP. 1.5, 2.0, 2.25 and 2.5 corresponds to the different pressure options.
     # - LF corresponds to the fuel cell used in Linhao Fan work: http://dx.doi.org/10.1016/j.enconman.2017.08.034.
-    type_fuel_cell_1 = "EH-31_1.5"
-    type_fuel_cell_2 = "EH-31_2.0"
-    type_fuel_cell_3 = "EH-31_2.25"
-    type_fuel_cell_4 = "EH-31_2.5"
+    type_fuel_cell_1 = "EH-31_2.0"
+    type_fuel_cell_2 = None
+    type_fuel_cell_3 = None
+    type_fuel_cell_4 = None
     # Current density possibilities: "step", "polarization", "polarization_for_cali", "EIS".
     type_current = "polarization"
     # Auxiliary system possibilities: "forced-convective_cathode_with_anodic_recirculation",

@@ -133,13 +133,13 @@ def stored_physical_parameters(type_fuel_cell):
             type_fuel_cell == "EH-31_2.5":
         # Catalyst layer
         Aact = 8.5e-3  # m². It is the active area of the catalyst layer.
-        Hcl = 8e-6  # m. It is the thickness of the anode or cathode catalyst layer.
-        epsilon_mc = 0.3981  # It is the volume fraction of ionomer in the CL.
+        Hcl = 8.089e-6  # m. It is the thickness of the anode or cathode catalyst layer.
+        epsilon_mc = 0.3823  # It is the volume fraction of ionomer in the CL.
         # Membrane
-        Hmem = 1.5e-5  # m. It is the thickness of the membrane.
+        Hmem = 1.697e-5  # m. It is the thickness of the membrane.
         # Gas diffusion layer
         Hgdl = 2e-4  # m. It is the thickness of the gas diffusion layer.
-        epsilon_gdl = 0.7843  # It is the anode/cathode GDL porosity.
+        epsilon_gdl = 0.7393  # It is the anode/cathode GDL porosity.
         epsilon_c = 0.2  # It is the compression ratio of the GDL.
         # Gas channel
         Hgc = 5e-4  # m. It is the thickness of the gas channel.
@@ -148,9 +148,9 @@ def stored_physical_parameters(type_fuel_cell):
         # Interaction parameters between water and PEMFC structure
         e = 4.0  # It is the capillary exponent
         # Voltage polarization
-        i0_c_ref = 7.676  # A.m-2.It is the reference exchange current density at the cathode.
-        kappa_co = 24.75  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
-        kappa_c = 0.8285  # It is the overpotential correction exponent.
+        i0_c_ref = 6.795  # A.m-2.It is the reference exchange current density at the cathode.
+        kappa_co = 30.41  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
+        kappa_c = 1.026  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
 
