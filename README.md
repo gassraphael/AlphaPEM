@@ -46,16 +46,17 @@ To install **AlphaPEM**, follow these steps in a shell:
 
 # Major updates
 
-- V1.1 - 2025.07.16 - This version of AlphaPEM includes: 
+- [V1.1](https://github.com/gassraphael/AlphaPEM/tree/11f07bd084a09cc6432f441b010d89d2a4229e4e) - 2025.08.18 - This version of AlphaPEM includes: 
 	- the addition of heat transfer to the program, in cooperation with Pedro Affonso Nobrega (PERSEE, MINES PSL).
 	- an improvement of the initial variable values: the algorithm waits for a given time (approximately 2 virtual hours) to reach equilibrium, and then the experiment starts (step/pola/EIS).
+	- the limit liquid water saturation coefficient ($s_lim$) is temporarily removed for future refinement.
 - [V1.0](https://github.com/gassraphael/AlphaPEM/tree/2b042c3d16d53fcd16779a5ffdc81eea75a9d012) - 2024.09.05 - This version of AlphaPEM corresponds to the one developed during Raphaël Gass's PhD from 2021 to 2024. 
 	- It is based on a physics-based, one-dimensional (1D), dynamic, two-phase, and isothermal model.
 
 
 # Work in progress
 
-- The polarization curves from the EH-31 fuel cell example are no longer calibrated due to recent modifications made to the equations. A calibration of the undeterminate parameters will be performed in the future to correct this issue. If accurate examples are required, the [V1.0 version](https://github.com/gassraphael/AlphaPEM/tree/2b042c3d16d53fcd16779a5ffdc81eea75a9d012) of AlphaPEM can be used.
+- The addition of the MPL to the model is currently in progress.
 
 
 # Related publications
