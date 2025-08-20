@@ -10,9 +10,9 @@ import numpy as np
 import math
 
 # Importing constants' value
-from configuration.settings import (M_eq, rho_mem, theta_c_gdl, theta_c_cl, M_H2, M_O2, M_N2, M_H2O, R, Kshape,
-                                    epsilon_p, alpha_p, tau, k_th_gdl, k_th_cl, k_th_mem, Cp_gdl, Cp_cl, Cp_mem, rho_gdl,
-                                    rho_cl, sigma_e_gdl, sigma_e_cl)
+from configuration.settings import (M_eq, rho_mem, Dp_mpl, Dp_cl, theta_c_gdl, theta_c_cl, M_H2, M_O2, M_N2, M_H2O, R,
+                                    Kshape, epsilon_p, alpha_p, tau_cl, k_th_gdl, k_th_cl, k_th_mem, Cp_gdl, Cp_cl,
+                                    Cp_mem, rho_gdl, rho_cl, sigma_e_gdl, sigma_e_cl)
 
 
 # _________________________________________________Transitory functions_________________________________________________
@@ -296,7 +296,7 @@ def Da_eff(element, s, T, P, epsilon, epsilon_c=None):
         return epsilon * ((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p * math.exp(beta2 * epsilon_c) * (1 - s) ** 2 * Da(P, T)
 
     elif element == 'cl': # The effective diffusion coefficient at the CL using Bruggeman model.
-        return epsilon ** tau * (1 - s) ** tau * Da(P, T)
+        return epsilon ** tau_cl * (1 - s) ** tau_cl * Da(P, T)
 
     else:
         raise ValueError("The element should be either 'gdl' or 'cl'.")
@@ -343,7 +343,7 @@ def Dc_eff(element, s, T, P, epsilon, epsilon_c=None):
         return epsilon * ((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p * math.exp(beta2 * epsilon_c) * (1 - s) ** 2 * Dc(P, T)
 
     elif element == 'cl': # The effective diffusion coefficient at the CL using Bruggeman model.
-        return epsilon ** tau * (1 - s) ** tau * Dc(P, T)
+        return epsilon ** tau_cl * (1 - s) ** tau_cl * Dc(P, T)
 
     else:
         raise ValueError("The element should be either 'gdl' or 'cl'.")
@@ -544,6 +544,13 @@ def K0(element, epsilon, epsilon_c=None):
     -------
     float
         Intrinsic permeability in m².
+
+    Sources
+    -------
+    1. Qin Chen 2020 - Two-dimensional multi-physics modeling of porous transport layer in polymer electrolyte membrane
+    electrolyzer for water splitting - for the Blake-Kozeny equation.
+    2. M.L. Stewart 2005 - A study of pore geometry effects on anisotropy in hydraulic permeability using the
+    lattice-Boltzmann method - for the Blake-Kozeny equation.
     """
 
     if element == 'gdl':
@@ -560,9 +567,11 @@ def K0(element, epsilon, epsilon_c=None):
         return epsilon / (8 * math.log(epsilon) ** 2) * (epsilon - epsilon_p) ** (alpha_p + 2) * \
             4.6e-6 ** 2 / ((1 - epsilon_p) ** alpha_p * ((alpha_p + 1) * epsilon - epsilon_p) ** 2) * math.exp(beta1 * epsilon_c)
 
+    elif element == 'mpl':
+        return (Dp_mpl**2 / 150) * (epsilon**3 / ((1-epsilon)**2)) # Using the Blake-Kozeny equation
+
     elif element == 'cl':
-        return epsilon / (8 * math.log(epsilon) ** 2) * (epsilon - epsilon_p) ** (alpha_p + 2) * \
-            4.6e-6 ** 2 / ((1 - epsilon_p) ** alpha_p * ((alpha_p + 1) * epsilon - epsilon_p) ** 2)
+        return (Dp_cl**2 / 150) * (epsilon**3 / ((1-epsilon)**2)) # Using the Blake-Kozeny equation
 
     else:
         raise ValueError("The element should be either 'gdl' or 'cl'.")
