@@ -141,6 +141,9 @@ def stored_physical_parameters(type_fuel_cell):
         Hgdl = 2e-4  # m. It is the thickness of the gas diffusion layer.
         epsilon_gdl = 0.7393  # It is the anode/cathode GDL porosity.
         epsilon_c = 0.2  # It is the compression ratio of the GDL.
+        #   Microporous layer
+        Hmpl = 30e-6  # m. It is the thickness of the microporous layer.
+        epsilon_mpl = 0.4  # It is the porosity of the microporous layer.
         # Gas channel
         Hgc = 5e-4  # m. It is the thickness of the gas channel.
         Wgc = 4.5e-4  # m. It is the width of the gas channel.
@@ -165,6 +168,9 @@ def stored_physical_parameters(type_fuel_cell):
         Hgdl = 4.2e-4  # m. It is the thickness of the gas diffusion layer.
         epsilon_gdl = 0.6  # It is the anode/cathode GDL porosity.
         epsilon_c = 0.21  # It is the compression ratio of the GDL.
+        #   Microporous layer
+        Hmpl = 30e-6  # m. It is the thickness of the microporous layer.
+        epsilon_mpl = 0.4  # It is the porosity of the microporous layer.
         # Gas channel.
         Hgc = 1e-3  # m. It is the thickness of the gas channel.
         Wgc = 8e-4  # m. It is the width of the gas channel.
@@ -186,8 +192,8 @@ def stored_physical_parameters(type_fuel_cell):
     else:
         raise ValueError('the type_input given is not valid.')
 
-    return Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, \
-        Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl
+    return Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, \
+           Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl
 
 
 def EIS_parameters(f_EIS):

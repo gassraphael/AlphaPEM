@@ -186,6 +186,10 @@ def physical_parameters(type_fuel_cell):
         Anode/cathode GDL porosity.
     epsilon_c : float
         Compression ratio of the GDL.
+    Hmpl : float
+        Thickness of the microporous layer in meters.
+    epsilon_mpl : float
+        Porosity of the microporous layer.
     Hgc : float
         Thickness of the gas channel in meters.
     Wgc : float
@@ -224,6 +228,9 @@ def physical_parameters(type_fuel_cell):
         Hgdl = 2e-4  # m. It is the thickness of the gas diffusion layer.
         epsilon_gdl = 0.7011156494971454  # It is the anode/cathode GDL porosity.
         epsilon_c = 0.27052745219052654  # It is the compression ratio of the GDL.
+        #   Microporous layer
+        Hmpl = 3e-5  # m. It is the thickness of the microporous layer.
+        epsilon_mpl = 0.4  # It is the porosity of the microporous layer.
         #   Gas channel
         Hgc = 5e-4  # m. It is the thickness of the gas channel.
         Wgc = 4.5e-4  # m. It is the width of the gas channel.
@@ -238,22 +245,20 @@ def physical_parameters(type_fuel_cell):
         #                                                               liquid saturation coefficients.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
     else: # Stored setup in "stored_physical_parameters".
-        (Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co,
-         kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
+        (Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hgc, Wgc, Lgc, Aact, e, i0_c_ref,
+         kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
 
-    return (Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co,
-            kappa_c, a_slim, b_slim, a_switch, C_scl)
+    return (Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hgc, Wgc, Lgc, Aact, e, i0_c_ref,
+            kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
 
 
-def computing_parameters(step_current_parameters, type_current, Hgdl, Hcl):
+def computing_parameters(step_current_parameters, Hgdl, Hcl):
     """This function is used to set the computing parameters of the fuel cell system.
 
     Parameters
     ----------
     step_current_parameters : dict
         Parameters for the step current density function.
-    type_current : str
-        Type of current density which is imposed to the fuel cell system. It can be "step", "polarization" or "EIS".
     Hgdl : float
         Thickness of the gas diffusion layer in meters.
     Hcl : float
@@ -280,8 +285,8 @@ def computing_parameters(step_current_parameters, type_current, Hgdl, Hcl):
         - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
     """
 
-    n_gdl = int(Hgdl / Hcl / 4)  # It is the number of model points placed inside each GDL.
-    #                              A good compromise is int(Hgdl/Hcl/4), which is usually around 5.
+    n_gdl = max(1, int(Hgdl / Hcl / 4))  # It is the number of model points placed inside each GDL.
+    #                              A good compromise is int(Hgdl/Hcl/4).
     t_purge = 0.6, 15  # (s, s). It is the time parameters for purging the system.
     delta_t_dyn_step = 5*60  # (s). Time for dynamic display of the step current density function.
 
@@ -311,6 +316,7 @@ yO2_ext = 0.2095  # . It is the molar fraction of O2 in dry air.
 rho_mem = 1980  # kg.m-3. It is the density of the dry membrane.
 M_eq = 1.1  # kg.mol-1. It is the equivalent molar mass of ionomer.
 epsilon_cl = 0.25*1.2  # It is the porosity of the catalyst layer, without units.
+tau_mpl = 4  # It is the pore structure coefficient in the MPL, without units [Gen Inoue 2016 Journal Power Sources].
 tau_cl = 6  # It is the pore structure coefficient in the CL, without units [Gen Inoue 2016 Journal Power Sources].
 Dp_mpl = 160e-9 # m. It is the pore diameter of the MPL [Abhishek Nanjundappa 2013 Electrochemical Acta].
 Dp_cl = 90e-9  # m. It is the pore diameter of the CL [Ali Malekian 2019 International Journal of Hydrogen Energy].
@@ -334,17 +340,21 @@ Eact = 73.2e3  # J.mol-1. It is the activation energy.
 # Model parameters for the heat transfer calculation
 #   Thermal conductivities
 k_th_gdl = 1.6 # J.m-1.s-1.K-1. It is the thermal conductivity of the GDLs (non-effective ?) [vetterFreeOpenReference2019].
+k_th_mpl = 0.5 # J.m-1.s-1.K-1. It is the thermal conductivity of the MPLs (non-effective ?) [kimModelingTwophaseFlow2017].
 k_th_cl = 0.27 # J.m-1.s-1.K-1. It is the thermal conductivity of the CLs (non-effective ?) [vetterFreeOpenReference2019].
 k_th_mem = 0.3 # J.m-1.s-1.K-1. It is the thermal conductivity of the membrane (non-effective ?) [vetterFreeOpenReference2019].
 #   Specific heat capacities
 Cp_gdl = 568 # J.kg-1.K-1. It is the specific heat capacities of the GDLs [wangQuasi2DTransientModel2018].
+Cp_mpl = 568 # J.kg-1.K-1. It is the specific heat capacities of the MPLs [yangEffectsOperatingConditions2019].
 Cp_cl = 3300 # J.kg-1.K-1. It is the specific heat capacities the CLs [wangQuasi2DTransientModel2018].
 Cp_mem = 833 # J.kg-1.K-1. It is the specific heat capacities of the membrane [wangQuasi2DTransientModel2018].
 #   Densities
 rho_gdl = 1000 # kg.m-3. It is the density of the GDLs [wangQuasi2DTransientModel2018].
+rho_mpl = 1000 # kg.m-3. It is the density of the MPLs [yangEffectsOperatingConditions2019].
 rho_cl = 1000 # kg.m-3. It is the density of the CLs [wangQuasi2DTransientModel2018].
 #   Electrical conductivities
 sigma_e_gdl = 1250 # Ω-1.m-1. It is the electrical conductivity of the GDL (non-effective ?) [vetterFreeOpenReference2019].
+sigma_e_mpl = 5000 # Ω-1.m-1. It is the electrical conductivity of the GDL (non-effective ?) [yangEffectsOperatingConditions2019].
 sigma_e_cl = 350 # Ω-1.m-1. It is the electrical conductivity of the GDL (non-effective ?) [vetterFreeOpenReference2019].
 #   Molar entropy of reactions
 delta_s_HOR = 0.104  # J.mol-1.K-1. It is the HOR molar reaction entropy [vetterFreeOpenReference2019].

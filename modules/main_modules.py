@@ -156,10 +156,10 @@ def launch_AlphaPEM_for_step_current(type_fuel_cell_1, type_fuel_cell_2, type_fu
         T_des_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4, pola_current_parameters_4 = \
             operating_inputs_function(pola_current_parameters, type_fuel_cell_4)
     #   Physical parameters
-    (Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c,
-     a_slim, b_slim, a_switch, C_scl) = physical_parameters(type_fuel_cell_1)
+    (Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co,
+     kappa_c, a_slim, b_slim, a_switch, C_scl) = physical_parameters(type_fuel_cell_1)
     #   Computing parameters
-    n_gdl, t_purge, step_current_parameters = computing_parameters(step_current_parameters, type_current, Hgdl, Hcl)
+    n_gdl, t_purge, step_current_parameters = computing_parameters(step_current_parameters, Hgdl, Hcl)
 
     # Dynamic display requires a dedicated use of the AlphaPEM class.
     if type_plot == "dynamic":
@@ -185,12 +185,12 @@ def launch_AlphaPEM_for_step_current(type_fuel_cell_1, type_fuel_cell_2, type_fu
         # Dynamic simulation
         for i in range(n):
             Simulator_1 = AlphaPEM(current_density, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
-                                  step_current_parameters, pola_current_parameters_1, pola_current_for_cali_parameters,
-                                  i_EIS, ratio_EIS,
-                                  t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mc,
-                                  epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl,
-                                  n_gdl, t_purge, type_fuel_cell_1, type_current, type_auxiliary, type_control_1,
-                                  type_purge, type_display, type_plot, initial_variable_values, time_interval)
+                                   step_current_parameters, pola_current_parameters_1, pola_current_for_cali_parameters,
+                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc,
+                                   epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c,
+                                   a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_1, type_current,
+                                   type_auxiliary, type_control_1, type_purge, type_display, type_plot,
+                                   initial_variable_values, time_interval)
 
             # time_interval actualization
             if i < (n - 1):  # The final simulation does not require actualization.
@@ -217,31 +217,31 @@ def launch_AlphaPEM_for_step_current(type_fuel_cell_1, type_fuel_cell_2, type_fu
         # Simulation
         Simulator_1 = AlphaPEM(current_density, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
                                step_current_parameters, pola_current_parameters_1, pola_current_for_cali_parameters,
-                               i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
-                               epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl,
-                               n_gdl, t_purge, type_fuel_cell_1, type_current, type_auxiliary, type_control_1,
-                               type_purge, type_display, type_plot)
+                               i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
+                               epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
+                               a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_1, type_current, type_auxiliary,
+                               type_control_1, type_purge, type_display, type_plot)
         if type_fuel_cell_2 is not None:
             Simulator_2 = AlphaPEM(current_density, T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2,
                                    step_current_parameters, pola_current_parameters_2, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
-                                   epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
-                                   C_scl, n_gdl, t_purge, type_fuel_cell_2, type_current, type_auxiliary,
-                                   type_control_2, type_purge, type_display, type_plot)
+                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc,
+                                   epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c,
+                                   a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_2, type_current,
+                                   type_auxiliary, type_control_2, type_purge, type_display, type_plot)
         if type_fuel_cell_3 is not None:
             Simulator_3 = AlphaPEM(current_density, T_des_3, Pa_des_3, Pc_des_3, Sa_3, Sc_3, Phi_a_des_3, Phi_c_des_3,
                                    step_current_parameters, pola_current_parameters_3, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
-                                   epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
-                                   C_scl, n_gdl, t_purge, type_fuel_cell_3, type_current, type_auxiliary,
-                                   type_control_3, type_purge, type_display, type_plot)
+                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc,
+                                   epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c,
+                                   a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_3, type_current,
+                                   type_auxiliary, type_control_3, type_purge, type_display, type_plot)
         if type_fuel_cell_4 is not None:
             Simulator_4 = AlphaPEM(current_density, T_des_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4,
                                    step_current_parameters, pola_current_parameters_4, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
-                                   epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
-                                   C_scl, n_gdl, t_purge, type_fuel_cell_4, type_current, type_auxiliary,
-                                   type_control_4, type_purge, type_display, type_plot)
+                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc,
+                                   epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c,
+                                   a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_4, type_current,
+                                   type_auxiliary, type_control_4, type_purge, type_display, type_plot)
         # Display
         if type_display != "no_display":
             Simulator_1.Display(ax1, ax2, ax3)
@@ -306,10 +306,10 @@ def launch_AlphaPEM_for_polarization_current(type_fuel_cell_1, type_fuel_cell_2,
         T_des_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4, pola_current_parameters_4 = \
             operating_inputs_function(pola_current_parameters, type_fuel_cell_4)
     #   Physical parameters
-    (Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c,
-     a_slim, b_slim, a_switch, C_scl) = physical_parameters(type_fuel_cell_1)
+    (Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co,
+     kappa_c, a_slim, b_slim, a_switch, C_scl) = physical_parameters(type_fuel_cell_1)
     #   Computing parameters
-    n_gdl, t_purge, step_current_parameters = computing_parameters(step_current_parameters, type_current, Hgdl, Hcl)
+    n_gdl, t_purge, step_current_parameters = computing_parameters(step_current_parameters, Hgdl, Hcl)
 
     # Condition to fill for the comparison with experimental values
     if type_fuel_cell_1 is not None and type_fuel_cell_1 != "manual_setup" and \
@@ -364,11 +364,11 @@ def launch_AlphaPEM_for_polarization_current(type_fuel_cell_1, type_fuel_cell_2,
         for i in range(n):
             Simulator_1 = AlphaPEM(current_density, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
                                    step_current_parameters, pola_current_parameters_1, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
-                                   epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
-                                   a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_1, type_current, type_auxiliary,
-                                   type_control_1, type_purge, type_display, type_plot, initial_variable_values,
-                                   time_interval)
+                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc,
+                                   epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c,
+                                   a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_1, type_current,
+                                   type_auxiliary, type_control_1, type_purge, type_display, type_plot,
+                                   initial_variable_values, time_interval)
 
             # time_interval actualization
             if i < (n - 1):  # The final simulation does not require actualization.
@@ -389,28 +389,28 @@ def launch_AlphaPEM_for_polarization_current(type_fuel_cell_1, type_fuel_cell_2,
         # Simulation
         Simulator_1 = AlphaPEM(current_density, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
                                step_current_parameters, pola_current_parameters_1, pola_current_for_cali_parameters,
-                               i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
+                               i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
                                epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
                                C_scl, n_gdl, t_purge, type_fuel_cell_1, type_current, type_auxiliary, type_control_1,
                                type_purge, type_display, type_plot)
         if type_fuel_cell_2 is not None:
             Simulator_2 = AlphaPEM(current_density, T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2,
                                    step_current_parameters, pola_current_parameters_2, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
+                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
                                    epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
                                    a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_2, type_current, type_auxiliary,
                                    type_control_2, type_purge, type_display, type_plot)
         if type_fuel_cell_3 is not None:
             Simulator_3 = AlphaPEM(current_density, T_des_3, Pa_des_3, Pc_des_3, Sa_3, Sc_3, Phi_a_des_3, Phi_c_des_3,
                                    step_current_parameters, pola_current_parameters_3, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
+                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
                                    epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
                                    a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_3, type_current, type_auxiliary,
                                    type_control_3, type_purge, type_display, type_plot)
         if type_fuel_cell_4 is not None:
             Simulator_4 = AlphaPEM(current_density, T_des_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4,
                                    step_current_parameters, pola_current_parameters_4, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
+                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
                                    epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
                                    a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_4, type_current, type_auxiliary,
                                    type_control_4, type_purge, type_display, type_plot)
@@ -481,11 +481,10 @@ def launch_AlphaPEM_for_polarization_current_for_calibration(type_fuel_cell_1, t
         T_des_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4, pola_current_parameters_4 = \
             operating_inputs_function(pola_current_parameters, type_fuel_cell_4)
     #   Physical parameters
-    (Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c,
-     a_slim, b_slim, a_switch, C_scl) = physical_parameters(type_fuel_cell_1)
+    (Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co,
+     kappa_c, a_slim, b_slim, a_switch, C_scl) = physical_parameters(type_fuel_cell_1)
     #   Computing parameters
-    n_gdl, t_purge, step_current_parameters = computing_parameters(step_current_parameters, type_current,
-                                                                             Hgdl, Hcl)
+    n_gdl, t_purge, step_current_parameters = computing_parameters(step_current_parameters, Hgdl, Hcl)
 
     # Dynamic display requires a dedicated use of the AlphaPEM class.
     if type_plot == "dynamic":
@@ -515,7 +514,7 @@ def launch_AlphaPEM_for_polarization_current_for_calibration(type_fuel_cell_1, t
         for i in range(n):
             Simulator_1 = AlphaPEM(current_density, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
                                    step_current_parameters, pola_current_parameters_1, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
+                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
                                    epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
                                    a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_1, type_current, type_auxiliary,
                                    type_control_1, type_purge, type_display, type_plot, initial_variable_values,
@@ -546,28 +545,28 @@ def launch_AlphaPEM_for_polarization_current_for_calibration(type_fuel_cell_1, t
         # Simulation
         Simulator_1 = AlphaPEM(current_density, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
                                step_current_parameters, pola_current_parameters_1, pola_current_for_cali_parameters,
-                               i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
+                               i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
                                epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
                                C_scl, n_gdl, t_purge, type_fuel_cell_1, type_current, type_auxiliary, type_control_1,
                                type_purge, type_display, type_plot)
         if type_fuel_cell_2 is not None:
             Simulator_2 = AlphaPEM(current_density, T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2,
                                    step_current_parameters, pola_current_parameters_2, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
+                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
                                    epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
                                    a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_2, type_current, type_auxiliary,
                                    type_control_2, type_purge, type_display, type_plot)
         if type_fuel_cell_3 is not None:
             Simulator_3 = AlphaPEM(current_density, T_des_3, Pa_des_3, Pc_des_3, Sa_3, Sc_3, Phi_a_des_3, Phi_c_des_3,
                                    step_current_parameters, pola_current_parameters_3, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
+                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
                                    epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
                                    a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_3, type_current, type_auxiliary,
                                    type_control_3, type_purge, type_display, type_plot)
         if type_fuel_cell_4 is not None:
             Simulator_4 = AlphaPEM(current_density, T_des_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4,
                                    step_current_parameters, pola_current_parameters_4, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
+                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
                                    epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
                                    a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_4, type_current, type_auxiliary,
                                    type_control_4, type_purge, type_display, type_plot)
@@ -631,10 +630,10 @@ def launch_AlphaPEM_for_EIS_current(type_fuel_cell, type_current, type_auxiliary
     T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, pola_current_parameters = \
         operating_inputs_function(pola_current_parameters, type_fuel_cell)
     #   Physical parameters
-    (Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c,
-     a_slim, b_slim, a_switch, C_scl) = physical_parameters(type_fuel_cell)
+    (Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co,
+     kappa_c, a_slim, b_slim, a_switch, C_scl) = physical_parameters(type_fuel_cell)
     #   Computing parameters
-    n_gdl, t_purge, step_current_parameters = computing_parameters(step_current_parameters, type_current, Hgdl, Hcl)
+    n_gdl, t_purge, step_current_parameters = computing_parameters(step_current_parameters, Hgdl, Hcl)
 
     # Initialization
     #       Calculation of the plot update number (n) and the initial time interval (time_interval).
@@ -650,7 +649,7 @@ def launch_AlphaPEM_for_EIS_current(type_fuel_cell, type_current, type_auxiliary
     #       prior to initiating the EIS.
     Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
                          step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS,
-                         ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mc,
+                         ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc,
                          epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge,
                          type_fuel_cell, type_current, type_auxiliary, type_control, type_purge,"no_display",
                          type_plot, initial_variable_values, time_interval)
@@ -677,7 +676,7 @@ def launch_AlphaPEM_for_EIS_current(type_fuel_cell, type_current, type_auxiliary
     for i in range(n):
         Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
                              step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters,
-                             i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
+                             i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
                              epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl,
                              n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge,
                              type_display, type_plot, initial_variable_values, time_interval)

@@ -243,7 +243,7 @@ def make_Fourier_transformation(variables, operating_inputs, parameters):
         ([np.abs(Ucell_Fourier)[0] / N], np.abs(Ucell_Fourier[1:N // 2]) * 2 / N))  # Recovery of
     #                                                                             all amplitude values calculated by fft
     A = max(A_period_t[1:])  # Amplitude at the frequency of the perturbation
-    freq_t = fftfreq(N, max_step)[:N // 2]  # Recovery of all frequency values used by fft
+    freq_t = fftfreq(N)[:N // 2]  # Recovery of all frequency values used by fft
     f = freq_t[np.argmax(A_period_t == A)]  # Recovery of the studied frequency
 
     return {'Ucell_Fourier': Ucell_Fourier, 'ifc_Fourier': ifc_Fourier, 'A_period_t': A_period_t, 'A': A,
@@ -569,8 +569,10 @@ def plot_C_v(variables, parameters, ax):
     t = np.array(variables['t'])[mask]
     C_v_agc_t = np.array(variables['C_v_agc'])[mask]
     C_v_agdl_t = np.array(variables[f'C_v_agdl_{n_gdl // 2}'])[mask]
+    C_v_ampl_t = np.array(variables['C_v_ampl'])[mask]
     C_v_acl_t = np.array(variables['C_v_acl'])[mask]
     C_v_ccl_t = np.array(variables['C_v_ccl'])[mask]
+    C_v_cmpl_t = np.array(variables['C_v_cmpl'])[mask]
     C_v_cgdl_t = np.array(variables[f'C_v_cgdl_{n_gdl // 2}'])[mask]
     C_v_cgc_t = np.array(variables['C_v_cgc'])[mask]
     T_ccl = np.array(variables['T_ccl'])[mask]
@@ -579,14 +581,16 @@ def plot_C_v(variables, parameters, ax):
     C_v_sat_ccl_t = np.array([C_v_sat(T) for T in T_ccl])
     ax.plot(t, C_v_agc_t, color=colors(0))
     ax.plot(t, C_v_agdl_t, color=colors(1))
-    ax.plot(t, C_v_acl_t, color=colors(2))
-    ax.plot(t, C_v_ccl_t, color=colors(4))
-    ax.plot(t, C_v_cgdl_t, color=colors(5))
-    ax.plot(t, C_v_cgc_t, color=colors(6))
+    ax.plot(t, C_v_ampl_t, color=colors(2))
+    ax.plot(t, C_v_acl_t, color=colors(3))
+    ax.plot(t, C_v_ccl_t, color=colors(5))
+    ax.plot(t, C_v_cmpl_t, color=colors(6))
+    ax.plot(t, C_v_cgdl_t, color=colors(7))
+    ax.plot(t, C_v_cgc_t, color=colors(8))
     ax.plot(t, C_v_sat_ccl_t, color='k')
-    ax.legend([r'$\mathregular{C_{v,agc}}$', r'$\mathregular{C_{v,agdl}}$', r'$\mathregular{C_{v,acl}}$',
-               r'$\mathregular{C_{v,ccl}}$', r'$\mathregular{C_{v,cgdl}}$', r'$\mathregular{C_{v,cgc}}$',
-               r'$\mathregular{C_{v,sat,ccl}}$'], loc='best')
+    ax.legend([r'$\mathregular{C_{v,agc}}$', r'$\mathregular{C_{v,agdl}}$', r'$\mathregular{C_{v,ampl}}$',
+               r'$\mathregular{C_{v,acl}}$', r'$\mathregular{C_{v,ccl}}$', r'$\mathregular{C_{v,cmpl}}$',
+               r'$\mathregular{C_{v,cgdl}}$', r'$\mathregular{C_{v,cgc}}$', r'$\mathregular{C_{v,sat,ccl}}$'], loc='best')
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r"$\mathbf{Vapor}$ $\mathbf{concentration}$ $\mathbf{C_{v}}$ $\mathbf{\left( mol.m^{-3} \right)}$",
                   labelpad=3)
@@ -658,9 +662,9 @@ def plot_lambda(variables, operating_inputs, parameters, ax):
         ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
                       labelpad=3)
     else:
-        ax.plot(t, lambda_acl_t, color=colors(2))
-        ax.plot(t, lambda_mem_t, color=colors(3))
-        ax.plot(t, lambda_ccl_t, color=colors(4))
+        ax.plot(t, lambda_acl_t, color=colors(3))
+        ax.plot(t, lambda_mem_t, color=colors(4))
+        ax.plot(t, lambda_ccl_t, color=colors(5))
         ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r'$\mathbf{Water}$ $\mathbf{content}$ $\mathbf{\lambda}$', labelpad=3)
     ax.legend([r'$\mathregular{\lambda_{acl}}$', r'$\mathregular{\lambda_{mem}}$',
@@ -704,8 +708,10 @@ def plot_s(variables, operating_inputs, parameters, ax):
         mask = np.ones_like(variables['t'], dtype=bool)
     t = np.array(variables['t'])[mask]
     s_agdl_t = np.array(variables[f's_agdl_{n_gdl // 2}'])[mask]
+    s_ampl_t = np.array(variables['s_ampl'])[mask]
     s_acl_t = np.array(variables['s_acl'])[mask]
     s_ccl_t = np.array(variables['s_ccl'])[mask]
+    s_cmpl_t = np.array(variables['s_cmpl'])[mask]
     s_cgdl_t = np.array(variables[f's_cgdl_{n_gdl // 2}'])[mask]
 
     # Plot the liquid water saturation at different spatial localisations: s
@@ -720,31 +726,37 @@ def plot_s(variables, operating_inputs, parameters, ax):
         delta_t_break_pola = pola_current_parameters['delta_t_break_pola']
         nb_loads = int(pola_current_parameters['i_max_pola'] / pola_current_parameters['delta_i_pola']) # Number of loads
         ifc_discretized_t = np.zeros(nb_loads)
-        s_agdl_discretized_t, s_acl_discretized_t = np.zeros(nb_loads), np.zeros(nb_loads)
-        s_ccl_discretized_t, s_cgdl_discretized_t = np.zeros(nb_loads), np.zeros(nb_loads)
+        s_agdl_discretized_t, s_ampl_discretized_t, s_acl_discretized_t = [np.zeros(nb_loads)] * 3
+        s_ccl_discretized_t, s_cmpl_discretized_t, s_cgdl_discretized_t = [np.zeros(nb_loads)] * 3
         for i in range(nb_loads):
             t_load = delta_t_ini_pola + (i + 1) * (delta_t_load_pola + delta_t_break_pola)  # time for measurement
             idx = (np.abs(t - t_load)).argmin()  # the corresponding index
             ifc_discretized_t[i] = ifc_t[idx]  # the last value at the end of each load
             s_agdl_discretized_t[i] = s_agdl_t[idx]  # the last value at the end of each load
+            s_ampl_discretized_t[i] = s_ampl_t[idx]  # the last value at the end of each load
             s_acl_discretized_t[i] = s_acl_t[idx]  # the last value at the end of each load
             s_ccl_discretized_t[i] = s_ccl_t[idx]  # the last value at the end of each load
+            s_cmpl_discretized_t[i] = s_cmpl_t[idx]  # the last value at the end of each load
             s_cgdl_discretized_t[i] =s_cgdl_t[idx]  # the last value at the end of each load
         ax.scatter(ifc_discretized_t, s_agdl_discretized_t, marker='o', color=colors(1))
-        ax.scatter(ifc_discretized_t, s_acl_discretized_t, marker='o', color=colors(2))
-        ax.scatter(ifc_discretized_t, s_ccl_discretized_t, marker='o', color=colors(4))
-        ax.scatter(ifc_discretized_t, s_cgdl_discretized_t, marker='o', color=colors(5))
+        ax.scatter(ifc_discretized_t, s_ampl_discretized_t, marker='o', color=colors(2))
+        ax.scatter(ifc_discretized_t, s_acl_discretized_t, marker='o', color=colors(3))
+        ax.scatter(ifc_discretized_t, s_ccl_discretized_t, marker='o', color=colors(5))
+        ax.scatter(ifc_discretized_t, s_cmpl_discretized_t, marker='o', color=colors(6))
+        ax.scatter(ifc_discretized_t, s_cgdl_discretized_t, marker='o', color=colors(7))
         ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
                       labelpad=3)
     else:
         ax.plot(t, s_agdl_t, color=colors(1))
-        ax.plot(t, s_acl_t, color=colors(2))
-        ax.plot(t, s_ccl_t, color=colors(4))
-        ax.plot(t, s_cgdl_t, color=colors(5))
+        ax.plot(t, s_ampl_t, color=colors(2))
+        ax.plot(t, s_acl_t, color=colors(3))
+        ax.plot(t, s_ccl_t, color=colors(5))
+        ax.plot(t, s_cmpl_t, color=colors(6))
+        ax.plot(t, s_cgdl_t, color=colors(7))
         ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r'$\mathbf{Liquid}$ $\mathbf{water}$ $\mathbf{saturation}$ $\mathbf{s}$', labelpad=3)
-    ax.legend([r'$\mathregular{s_{agdl}}$', r'$\mathregular{s_{acl}}$',
-               r'$\mathregular{s_{ccl}}$', r'$\mathregular{s_{cgdl}}$'], loc='best')
+    ax.legend([r'$\mathregular{s_{agdl}}$', r'$\mathregular{s_{ampl}}$', r'$\mathregular{s_{acl}}$',
+               r'$\mathregular{s_{ccl}}$', r'$\mathregular{s_{cmpl}}$', r'$\mathregular{s_{cgdl}}$'], loc='best')
 
     # Plot instructions
     plot_general_instructions(ax)
@@ -781,13 +793,15 @@ def plot_C_H2(variables, parameters, ax):
     t = np.array(variables['t'])[mask]
     C_H2_agc_t = np.array(variables['C_H2_agc'])[mask]
     C_H2_agdl_t = np.array(variables[f'C_H2_agdl_{n_gdl // 2}'])[mask]
+    C_H2_ampl_t = np.array(variables['C_H2_ampl'])[mask]
     C_H2_acl_t = np.array(variables['C_H2_acl'])[mask]
 
     # Plot the hydrogen concentration at different spatial localisations: C_H2
     ax.plot(t, C_H2_agc_t, color=colors(0))
     ax.plot(t, C_H2_agdl_t, color=colors(1))
-    ax.plot(t, C_H2_acl_t, color=colors(2))
-    ax.legend([r'$\mathregular{C_{H_{2},agc}}$', r'$\mathregular{C_{H_{2},agdl}}$',
+    ax.plot(t, C_H2_ampl_t, color=colors(2))
+    ax.plot(t, C_H2_acl_t, color=colors(3))
+    ax.legend([r'$\mathregular{C_{H_{2},agc}}$', r'$\mathregular{C_{H_{2},agdl}}$', r'$\mathregular{C_{H_{2},ampl}}$',
                r'$\mathregular{C_{H_{2},acl}}$'], loc='best')
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r'$\mathbf{Hydrogen}$ $\mathbf{concentration}$ $\mathbf{C_{H_{2}}}$ $\mathbf{\left( mol.m^{-3} \right)}$',
@@ -827,14 +841,16 @@ def plot_C_O2(variables, parameters, ax):
         mask = np.ones_like(variables['t'], dtype=bool)
     t = np.array(variables['t'])[mask]
     C_O2_ccl_t = np.array(variables['C_O2_ccl'])[mask]
+    C_O2_cmpl_t = np.array(variables['C_O2_cmpl'])[mask]
     C_O2_cgdl_t = np.array(variables[f'C_O2_cgdl_{n_gdl // 2}'])[mask]
     C_O2_cgc_t = np.array(variables['C_O2_cgc'])[mask]
 
     # Plot the oxygen concentration at different spatial localisations: C_O2
-    ax.plot(t, C_O2_ccl_t, color=colors(4))
-    ax.plot(t, C_O2_cgdl_t, color=colors(5))
-    ax.plot(t, C_O2_cgc_t, color=colors(6))
-    ax.legend([r'$\mathregular{C_{O_{2},ccl}}$', r'$\mathregular{C_{O_{2},cgdl}}$',
+    ax.plot(t, C_O2_ccl_t, color=colors(5))
+    ax.plot(t, C_O2_cmpl_t, color=colors(6))
+    ax.plot(t, C_O2_cgdl_t, color=colors(7))
+    ax.plot(t, C_O2_cgc_t, color=colors(8))
+    ax.legend([r'$\mathregular{C_{O_{2},ccl}}$', r'$\mathregular{C_{O_{2},cmpl}}$', r'$\mathregular{C_{O_{2},cgdl}}$',
                r'$\mathregular{C_{O_{2},cgc}}$'], loc='best')
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r'$\mathbf{Oxygen}$ $\mathbf{concentration}$ $\mathbf{C_{O_{2}}}$ $\mathbf{\left( mol.m^{-3} \right)}$',
@@ -918,9 +934,11 @@ def plot_T(variables, operating_inputs, parameters, ax):
     t = np.array(variables['t'])[mask]
     T_agc_t = np.array(variables['T_agc'])[mask] - 273.15 # Conversion in °C.
     T_agdl_t = np.array(variables[f'T_agdl_{n_gdl // 2}'])[mask] - 273.15 # Conversion in °C.
-    T_acl_t = np.array(variables['T_acl'])[mask] - 273.15 # Conversion in °C.
+    T_ampl_t = np.array(variables['T_ampl'])[mask] - 273.15 # Conversion in °C.
+    T_acl_t = np.array(variables['T_acl'])[mask] - 273.15  # Conversion in °C.
     T_mem_t = np.array(variables['T_mem'])[mask] - 273.15 # Conversion in °C.
     T_ccl_t = np.array(variables['T_ccl'])[mask] - 273.15 # Conversion in °C.
+    T_cmpl_t = np.array(variables['T_cmpl'])[mask] - 273.15  # Conversion in °C.
     T_cgdl_t = np.array(variables[f'T_cgdl_{n_gdl // 2}'])[mask] - 273.15 # Conversion in °C.
     T_cgc_t = np.array(variables['T_cgc'])[mask] - 273.15 # Conversion in °C.
 
@@ -928,15 +946,18 @@ def plot_T(variables, operating_inputs, parameters, ax):
     T_des_t = np.array([T_des - 273.15] * len(t))
     ax.plot(t, T_agc_t, color=colors(0))
     ax.plot(t, T_agdl_t, color=colors(1))
-    ax.plot(t, T_acl_t, color=colors(2))
-    ax.plot(t, T_mem_t, color=colors(3))
-    ax.plot(t, T_ccl_t, color=colors(4))
-    ax.plot(t, T_cgdl_t, color=colors(5))
-    ax.plot(t, T_cgc_t, color=colors(6))
+    ax.plot(t, T_ampl_t, color=colors(2))
+    ax.plot(t, T_acl_t, color=colors(3))
+    ax.plot(t, T_mem_t, color=colors(4))
+    ax.plot(t, T_ccl_t, color=colors(5))
+    ax.plot(t, T_cmpl_t, color=colors(6))
+    ax.plot(t, T_cgdl_t, color=colors(7))
+    ax.plot(t, T_cgc_t, color=colors(8))
     ax.plot(t, T_des_t, color='k')
-    ax.legend([r'$\mathregular{T_{agc}}$', r'$\mathregular{T_{agdl}}$', r'$\mathregular{T_{acl}}$',
-               r'$\mathregular{T_{mem}}$', r'$\mathregular{T_{ccl}}$', r'$\mathregular{T_{cgdl}}$',
-               r'$\mathregular{T_{cgc}}$', r'$\mathregular{T_{des}}$'], loc='best')
+    ax.legend([r'$\mathregular{T_{agc}}$', r'$\mathregular{T_{agdl}}$', r'$\mathregular{T_{ampl}}$',
+               r'$\mathregular{T_{acl}}$', r'$\mathregular{T_{mem}}$', r'$\mathregular{T_{ccl}}$',
+               r'$\mathregular{T_{cmpl}}$', r'$\mathregular{T_{cgdl}}$', r'$\mathregular{T_{cgc}}$',
+               r'$\mathregular{T_{des}}$'], loc='best')
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r"$\mathbf{Temperature}$ $\mathbf{T}$ $\mathbf{\left( °C \right)}$", labelpad=3)
 

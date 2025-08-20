@@ -10,9 +10,10 @@ import numpy as np
 import math
 
 # Importing constants' value
-from configuration.settings import (M_eq, rho_mem, Dp_mpl, Dp_cl, theta_c_gdl, theta_c_cl, M_H2, M_O2, M_N2, M_H2O, R,
-                                    Kshape, epsilon_p, alpha_p, tau_cl, k_th_gdl, k_th_cl, k_th_mem, Cp_gdl, Cp_cl,
-                                    Cp_mem, rho_gdl, rho_cl, sigma_e_gdl, sigma_e_cl)
+from configuration.settings import (M_eq, rho_mem, Dp_mpl, Dp_cl, theta_c_gdl, theta_c_mpl, theta_c_cl, M_H2, M_O2,
+                                    M_N2, M_H2O, R, Kshape, epsilon_p, alpha_p, tau_mpl, tau_cl, k_th_gdl, k_th_mpl,
+                                    k_th_cl, k_th_mem, Cp_gdl, Cp_mpl, Cp_cl, Cp_mem, rho_gdl, rho_cl, sigma_e_gdl,
+                                    sigma_e_mpl, sigma_e_cl)
 
 
 # _________________________________________________Transitory functions_________________________________________________
@@ -212,12 +213,16 @@ def Dcap(element, s, T, epsilon, e, epsilon_c=None):
         return sigma(T) * K0(element, epsilon, epsilon_c) / nu_l(T) * abs(math.cos(theta_c_gdl)) * \
                (epsilon / K0(element, epsilon, epsilon_c)) ** 0.5 * (s ** e + 1e-7) * (1.417 - 4.24 * s + 3.789 * s**2)
 
+    elif element == 'mpl':
+        return sigma(T) * K0(element, epsilon) / nu_l(T) * abs(math.cos(theta_c_mpl)) * \
+               (epsilon / K0(element, epsilon)) ** 0.5 * (s ** e + 1e-7) * (1.417 - 4.24 * s + 3.789 * s**2)
+
     elif element == 'cl':
         return sigma(T) * K0(element, epsilon) / nu_l(T) * abs(math.cos(theta_c_cl)) * \
                (epsilon / K0(element, epsilon)) ** 0.5 * (s ** e + 1e-7) * (1.417 - 4.24 * s + 3.789 * s**2)
 
     else:
-        raise ValueError("The element should be either 'gdl' or 'cl'.")
+        raise ValueError("The element should be either 'gdl', 'mpl' or 'cl'.")
 
 
 def Da(P, T):
@@ -295,11 +300,14 @@ def Da_eff(element, s, T, P, epsilon, epsilon_c=None):
                              "epsilon_gdl should be between 0.50 and 0.90.")
         return epsilon * ((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p * math.exp(beta2 * epsilon_c) * (1 - s) ** 2 * Da(P, T)
 
+    elif element == 'mpl': # The effective diffusion coefficient at the MPL using Bruggeman model.
+        return epsilon ** tau_mpl * (1 - s) ** tau_mpl * Da(P, T)
+
     elif element == 'cl': # The effective diffusion coefficient at the CL using Bruggeman model.
         return epsilon ** tau_cl * (1 - s) ** tau_cl * Da(P, T)
 
     else:
-        raise ValueError("The element should be either 'gdl' or 'cl'.")
+        raise ValueError("The element should be either 'gdl', 'mpl' or 'cl'.")
 
 
 
@@ -342,11 +350,14 @@ def Dc_eff(element, s, T, P, epsilon, epsilon_c=None):
                              "epsilon_gdl should be between 0.50 and 0.90.")
         return epsilon * ((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p * math.exp(beta2 * epsilon_c) * (1 - s) ** 2 * Dc(P, T)
 
+    elif element == 'mpl': # The effective diffusion coefficient at the MPL using Bruggeman model.
+        return epsilon ** tau_mpl * (1 - s) ** tau_mpl * Dc(P, T)
+
     elif element == 'cl': # The effective diffusion coefficient at the CL using Bruggeman model.
         return epsilon ** tau_cl * (1 - s) ** tau_cl * Dc(P, T)
 
     else:
-        raise ValueError("The element should be either 'gdl' or 'cl'.")
+        raise ValueError("The element should be either 'gdl', 'mpl' or 'cl'.")
 
 
 def h_a(P, T, Wgc, Hgc):
@@ -674,7 +685,7 @@ def sigma_p_eff(element, lambdaa, T, epsilon_mc=None):
 
 
 def sigma_e_eff(element, epsilon, epsilon_c=None, epsilon_mc=None):
-    """This function calculates the effective electrical conductivity, in Ω-1.m-1, in either the GDL or the CL,
+    """This function calculates the effective electrical conductivity, in Ω-1.m-1, in either the GDL, the MPL or the CL,
     considering GDL compression.
 
     Parameters
@@ -705,13 +716,16 @@ def sigma_e_eff(element, epsilon, epsilon_c=None, epsilon_mc=None):
                              "epsilon_gdl should be between 0.50 and 0.90.")
         return (1 - epsilon) * sigma_e_gdl * math.exp(beta3 * epsilon_c) # Using the volume fraction of conductive material.
 
+    elif element == 'mpl': # The effective electrical conductivity at the MPL
+        return (1 - epsilon) * sigma_e_mpl # Using the volume fraction of conductive material.
+
     elif element == 'cl': # The effective electrical conductivity at the CL
         if epsilon_mc==None:
             raise ValueError("For the CL, epsilon_mc must be provided.")
-        return (1 - epsilon - epsilon_mc  ) * sigma_e_cl # Using the volume fraction of conductive material.
+        return (1 - epsilon - epsilon_mc) * sigma_e_cl # Using the volume fraction of conductive material.
 
     else:
-        raise ValueError("The element should be either 'gdl' or 'cl'.")
+        raise ValueError("The element should be either 'gdl', 'mpl' or 'cl'.")
 
 
 def k_th(component, T):
@@ -800,8 +814,8 @@ def k_th_gaz_mixture(k_th_g, mu_g, x, M):
 
 def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C_N2=None, epsilon=None, epsilon_mc=None,
              epsilon_c=None):
-    """This function calculates the effective thermal conductivity, in J.m-1.s-1.K-1, in either the GDL, the CL or the
-    membrane. A weighted harmonic average is used for characterizing the conductivity of each material in a layer,
+    """This function calculates the effective thermal conductivity, in J.m-1.s-1.K-1, in either the GDL, the MPL, the CL
+    or the membrane. A weighted harmonic average is used for characterizing the conductivity of each material in a layer,
     instead of a weighted arithmetic average. The physical meaning is that all the heat energy is forced to pass through
     all the material, as a series resistance network, instead of a parallel one
     [pharoahEffectiveTransportCoefficients2006].
@@ -864,6 +878,26 @@ def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C
         return hmean([k_th_gdl * math.exp(beta3 * epsilon_c), k_th('H2O_l', T), k_th_gaz],
                      weights=[1 - epsilon, epsilon * s, epsilon * (1 - s)])
 
+    if element == 'ampl' or element == 'cmpl': # The effective thermal conductivity at the GDL
+        if C_v==None or s==None or epsilon==None:
+            raise ValueError("For the MPL, C_v, s and epsilon must be provided.")
+        if element == 'ampl': # The thermal conductivity of the gas mixture in the AGDL
+            if C_H2 == None:
+                raise ValueError("For the AGDL, C_H2 must be provided.")
+            k_th_gaz = k_th_gaz_mixture([k_th('H2O_v', T), k_th('H2', T)],
+                                        [mu_gaz('H2O_v', T), mu_gaz('H2', T)],
+                                        [C_v / (C_v + C_H2), C_H2 / (C_v + C_H2)],
+                                        [M_H2O, M_H2])
+        else:                 # The thermal conductivity of the gas mixture in the CGDL
+            if C_O2 == None or C_N2 == None:
+                raise ValueError("For the CGDL, C_O2 and C_N2 must be provided.")
+            k_th_gaz = k_th_gaz_mixture([k_th('H2O_v', T), k_th('O2', T), k_th('N2', T)],
+                                        [mu_gaz('H2O_v', T), mu_gaz('O2', T), mu_gaz('N2', T)],
+                                        [C_v / (C_v + C_O2 + C_N2), C_O2 / (C_v + C_O2 + C_N2), C_N2 / (C_v + C_O2 + C_N2)],
+                                        [M_H2O, M_O2, M_N2])
+        return hmean([k_th_mpl, k_th('H2O_l', T), k_th_gaz],
+                     weights=[1 - epsilon, epsilon * s, epsilon * (1 - s)])
+
     elif element == 'acl' or element == 'ccl': # The effective thermal conductivity at the CL
         if C_v==None or lambdaa==None or s==None or epsilon==None or epsilon_mc==None:
             raise ValueError("For the CL, C_v, lambdaa, s, epsilon and epsilon_mc must be provided.")
@@ -894,7 +928,7 @@ def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C
                      weights=[1 - fv(lambdaa, T), fv(lambdaa, T)])
 
     else:
-        raise ValueError("The element should be either 'agdl', 'cgdl', 'acl', 'ccl' or 'mem'.")
+        raise ValueError("The element should be either 'agdl', 'cgdl', 'ampl', 'cmpl', 'acl', 'ccl' or 'mem'.")
 
 
 def Cp0(component, T):
@@ -967,7 +1001,8 @@ def h0(component, T):
 
 
 def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C_N2=None, epsilon=None, epsilon_mc=None):
-    """This function calculates the volumetric heat capacity, in J.m-3.K-1, in either the GDL, the CL or the membrane.
+    """This function calculates the volumetric heat capacity, in J.m-3.K-1, in either the GDL, the MPL, the CL or
+    the membrane.
 
     Parameters
     ----------
@@ -1016,6 +1051,23 @@ def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O
         return average([rho_gdl * Cp_gdl, rho_H2O_l(T) * Cp0('H2O_l', T), rho_Cp0_gaz],
                           weights=[1 - epsilon, epsilon * s, epsilon * (1 - s)])
 
+    if element == 'ampl' or element == 'cmpl':  # The volumetric heat capacity at the MPL
+        if C_v is None or s is None or epsilon is None:
+            raise ValueError("For the MPL, C_v, s and epsilon must be provided.")
+        if element == 'ampl':  # The heat capacity of the gas mixture in the AMPL
+            if C_H2 is None:
+                raise ValueError("For the AMPL, C_H2 must be provided.")
+            rho_Cp0_gaz = average([M_H2O * C_v * Cp0('H2O_v', T), M_H2 * C_H2 * Cp0('H2', T)],
+                                    weights=[C_v / (C_v + C_H2), C_H2 / (C_v + C_H2)])
+        else:  # The heat capacity of the gas mixture in the CMPL
+            if C_O2 is None or C_N2 is None:
+                raise ValueError("For the CMPL, C_O2 and C_N2 must be provided.")
+            rho_Cp0_gaz = average([M_H2O * C_v * Cp0('H2O_v', T), M_O2 * C_O2 * Cp0('O2', T),
+                                     M_N2 * C_N2 * Cp0('N2', T)],
+                                    weights=[C_v / (C_v + C_O2 + C_N2), C_O2 / (C_v + C_O2 + C_N2), C_N2 / (C_v + C_O2 + C_N2)])
+        return average([rho_gdl * Cp_mpl, rho_H2O_l(T) * Cp0('H2O_l', T), rho_Cp0_gaz],
+                          weights=[1 - epsilon, epsilon * s, epsilon * (1 - s)])
+
     elif element == 'acl' or element == 'ccl':  # The volumetric heat capacity at the CL
         if C_v is None or lambdaa is None or s is None or epsilon is None or epsilon_mc is None:
             raise ValueError("For the CL, C_v, lambdaa, s, epsilon, and epsilon_mc must be provided.")
@@ -1040,7 +1092,7 @@ def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O
                           weights=[1 - fv(lambdaa, T), fv(lambdaa, T)])
 
     else:
-        raise ValueError("The element should be either 'agdl', 'cgdl', 'acl', 'ccl' or 'mem'.")
+        raise ValueError("The element should be either 'agdl', 'cgdl', 'ampl', 'cmpl', 'acl', 'ccl' or 'mem'.")
 
 
 def delta_h_liq(T):

@@ -40,7 +40,7 @@ class AlphaPEM:
 
     def __init__(self, current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, step_current_parameters,
                  pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
-                 Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim,
+                 Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim,
                  b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
                  type_purge, type_display, type_plot, initial_variable_values=None, time_interval=None):
         """Initialise all parameters defining a fuel cell stack operation: nominal operating conditions,
@@ -181,7 +181,8 @@ class AlphaPEM:
                                    'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
                                    'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
         self.accessible_physical_parameters = {'Aact': Aact, 'Hgc': Hgc, 'Wgc': Wgc, 'Lgc': Lgc}
-        self.undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmem': Hmem, 'Hcl': Hcl, 'epsilon_gdl': epsilon_gdl,
+        self.undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hcl': Hcl,
+                                                 'epsilon_gdl': epsilon_gdl, 'epsilon_mpl': epsilon_mpl,
                                                  'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c, 'e': e,
                                                  'kappa_co': kappa_co, 'i0_c_ref': i0_c_ref, 'kappa_c': kappa_c,
                                                  'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch,
@@ -196,12 +197,13 @@ class AlphaPEM:
             raise ValueError('The desired pressure is too low. It cannot be lower than the pressure outside the stack.')
 
         # Initialize the variables' dictionary.
-        self.solver_variable_names = ['C_v_agc', 'C_v_agdl', 'C_v_acl', 'C_v_ccl', 'C_v_cgdl', 'C_v_cgc', 's_agdl',
-                                      's_acl', 's_ccl', 's_cgdl', 'lambda_acl', 'lambda_mem', 'lambda_ccl', 'C_H2_agc',
-                                      'C_H2_agdl', 'C_H2_acl', 'C_O2_ccl', 'C_O2_cgdl', 'C_O2_cgc', 'C_N2', 'T_agc',
-                                      'T_agdl', 'T_acl', 'T_mem', 'T_ccl', 'T_cgdl', 'T_cgc', 'eta_c', 'Pasm', 'Paem',
-                                      'Pcsm', 'Pcem', 'Phi_asm', 'Phi_aem', 'Phi_csm', 'Phi_cem', 'Wcp', 'Wa_inj',
-                                      'Wc_inj', 'Abp_a', 'Abp_c']
+        self.solver_variable_names = ['C_v_agc', 'C_v_agdl', 'C_v_ampl', 'C_v_acl', 'C_v_ccl', 'C_v_cmpl', 'C_v_cgdl',
+                                      'C_v_cgc', 's_agdl', 's_ampl', 's_acl', 's_ccl', 's_cmpl', 's_cgdl', 'lambda_acl',
+                                      'lambda_mem', 'lambda_ccl', 'C_H2_agc', 'C_H2_agdl', 'C_H2_ampl', 'C_H2_acl',
+                                      'C_O2_ccl', 'C_O2_cmpl', 'C_O2_cgdl', 'C_O2_cgc', 'C_N2', 'T_agc', 'T_agdl',
+                                      'T_ampl', 'T_acl', 'T_mem', 'T_ccl', 'T_cmpl', 'T_cgdl', 'T_cgc', 'eta_c', 'Pasm',
+                                      'Paem', 'Pcsm', 'Pcem', 'Phi_asm', 'Phi_aem', 'Phi_csm', 'Phi_cem', 'Wcp',
+                                      'Wa_inj', 'Wc_inj', 'Abp_a', 'Abp_c']
         self.solver_variable_names_extension()  # Several points are considered in each GDL and must be inserted into
         #                                        the solver_variable_names.
         self.all_variable_names = self.solver_variable_names + ['t', 'Ucell', 'S_abs_acl', 'S_abs_ccl'] + \
@@ -363,29 +365,30 @@ class AlphaPEM:
         Abp_c_ini = 0  # It is the throttle area of the back pressure valve at the cathode.
 
         # Main variable initialization
-        C_v_agc, C_v_agdl, C_v_acl, C_v_ccl, C_v_cgdl, C_v_cgc = [C_v_ini] * 6
-        s_agdl, s_acl, s_ccl, s_cgdl = [s_ini] * 4
+        C_v_agc, C_v_agdl, C_v_ampl, C_v_acl, C_v_ccl, C_v_cmpl, C_v_cgdl, C_v_cgc = [C_v_ini] * 8
+        s_agdl, s_ampl, s_acl, s_ccl, s_cmpl, s_cgdl = [s_ini] * 6
         s_boundary = 0  # Dirichlet boundary condition
         lambda_acl, lambda_mem, lambda_ccl = [lambda_mem_ini] * 3
-        C_H2_agc, C_H2_agdl, C_H2_acl = C_H2_ini, C_H2_ini, C_H2_ini
-        C_O2_ccl, C_O2_cgdl, C_O2_cgc = C_O2_ini, C_O2_ini, C_O2_ini
+        C_H2_agc, C_H2_agdl, C_H2_ampl, C_H2_acl = [C_H2_ini] * 4
+        C_O2_ccl, C_O2_cmpl, C_O2_cgdl, C_O2_cgc = [C_O2_ini] * 4
         C_N2 = C_N2_ini
-        T_agc, T_agdl, T_acl, T_mem, T_ccl, T_cgdl, T_cgc = [T_ini] * 7
+        T_agc, T_agdl, T_ampl, T_acl, T_mem, T_ccl, T_cmpl, T_cgdl, T_cgc = [T_ini] * 9
         eta_c = eta_c_ini
         Pasm, Paem, Pcsm, Pcem = Pasm_ini, Paem_ini, Pcsm_ini, Pcem_ini
         Phi_asm, Phi_aem, Phi_csm, Phi_cem = Phi_asm_ini, Phi_aem_ini, Phi_csm_ini, Phi_cem_ini
         Wcp, Wa_inj, Wc_inj, Abp_a, Abp_c = Wcp_ini, Wa_inj_ini, Wc_inj_ini, Abp_a_ini, Abp_c_ini
 
         # Gathering of the variables initial value into one list
-        initial_variable_values = ([C_v_agc] + [C_v_agdl] * n_gdl + [C_v_acl, C_v_ccl] + [C_v_cgdl] * n_gdl + \
-                                  [C_v_cgc] + \
-                                  [s_boundary] + [s_agdl] * (n_gdl - 1) + [s_acl, s_ccl] + [s_cgdl] * (n_gdl - 1) + \
-                                  [s_boundary] + [lambda_acl, lambda_mem, lambda_ccl] + \
-                                  [C_H2_agc] + [C_H2_agdl] * n_gdl + [C_H2_acl, C_O2_ccl] + [C_O2_cgdl] * n_gdl + \
-                                  [C_O2_cgc, C_N2] + [T_agc] + [T_agdl] * n_gdl + [T_acl, T_mem, T_ccl] + \
-                                  [T_cgdl] * n_gdl + [T_cgc] + [eta_c] + \
-                                  [Pasm, Paem, Pcsm, Pcem, Phi_asm, Phi_aem, Phi_csm, Phi_cem] + \
-                                  [Wcp, Wa_inj, Wc_inj, Abp_a, Abp_c])
+        initial_variable_values = ([C_v_agc] + [C_v_agdl] * n_gdl + [C_v_ampl, C_v_acl, C_v_ccl, C_v_cmpl] +
+                                   [C_v_cgdl] * n_gdl + [C_v_cgc] +
+                                   [s_boundary] + [s_agdl] * (n_gdl - 1) + [s_ampl, s_acl, s_ccl, s_cmpl] +
+                                   [s_cgdl] * (n_gdl - 1) +  [s_boundary] + [lambda_acl, lambda_mem, lambda_ccl] +
+                                   [C_H2_agc] + [C_H2_agdl] * n_gdl + [C_H2_ampl, C_H2_acl, C_O2_ccl, C_O2_cmpl] +
+                                   [C_O2_cgdl] * n_gdl + [C_O2_cgc, C_N2] +
+                                   [T_agc] + [T_agdl] * n_gdl + [T_ampl, T_acl, T_mem, T_ccl, T_cmpl] +
+                                   [T_cgdl] * n_gdl + [T_cgc] + [eta_c] +
+                                   [Pasm, Paem, Pcsm, Pcem, Phi_asm, Phi_aem, Phi_csm, Phi_cem] +
+                                   [Wcp, Wa_inj, Wc_inj, Abp_a, Abp_c])
 
         return initial_variable_values
 

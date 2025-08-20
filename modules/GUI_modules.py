@@ -338,9 +338,8 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
 
     T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
-    Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c, \
-        a_slim, b_slim, a_switch, C_scl = \
-        stored_physical_parameters(type_fuel_cell)
+    Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co,\
+        kappa_c, a_slim, b_slim, a_switch, C_scl = stored_physical_parameters(type_fuel_cell)
 
     # operating conditions recovery
     choice_operating_conditions['Temperature - Tfc (°C)']['value'].set(round(T_des - 273.15))  # °C
@@ -352,14 +351,16 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_operating_conditions['Cathode humidity - Φc']['value'].set(round(Phi_c_des, 1))
     # accessible physical parameters recovery
     choice_accessible_parameters['Active area - Aact (cm²)']['value'].set(round(Aact * 1e4))  # cm²
-    choice_accessible_parameters['GDL thickness - Hgdl (µm)']['value'].set(round(Hgdl * 1e6))  # µm
-    choice_accessible_parameters['CL thickness - Hcl (µm)']['value'].set(round(Hcl * 1e6))  # µm
-    choice_accessible_parameters['Membrane thickness - Hmem (µm)']['value'].set(round(Hmem * 1e6))  # µm
     choice_accessible_parameters['GC thickness - Hgc (µm)']['value'].set(round(Hgc * 1e6))  # µm
     choice_accessible_parameters['GC width - Wgc (µm)']['value'].set(round(Wgc * 1e6))  # µm
     choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].set(round(Lgc, 2))  # µm
     # undetermined physical parameters recovery
+    choice_undetermined_parameters['GDL thickness - Hgdl (µm)']['value'].set(round(Hgdl * 1e6))  # µm
+    choice_undetermined_parameters['MPL thickness - Hmpl (µm)']['value'].set(round(Hmpl * 1e6))  # µm
+    choice_undetermined_parameters['CL thickness - Hcl (µm)']['value'].set(round(Hcl * 1e6))  # µm
+    choice_undetermined_parameters['Membrane thickness - Hmem (µm)']['value'].set(round(Hmem * 1e6))  # µm
     choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].set(round(epsilon_gdl, 3))
+    choice_undetermined_parameters['MPL porosity - ε_mpl']['value'].set(round(epsilon_mpl, 3))
     choice_undetermined_parameters['Ionomer volume fraction\n- ε_mc']['value'].set(round(epsilon_mc, 3))
     choice_undetermined_parameters['Compression ratio - ε_c']['value'].set(round(epsilon_c, 3))
     choice_undetermined_parameters['Capillary exponent - e']['value'].set(e)
@@ -406,14 +407,16 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     Phi_c_des = choice_operating_conditions['Cathode humidity - Φc']['value'].get()
     # accessible physical parameters
     Aact = choice_accessible_parameters['Active area - Aact (cm²)']['value'].get() * 1e-4  # m²
-    Hgdl = choice_accessible_parameters['GDL thickness - Hgdl (µm)']['value'].get() * 1e-6  # m
-    Hcl = choice_accessible_parameters['CL thickness - Hcl (µm)']['value'].get() * 1e-6  # m
-    Hmem = choice_accessible_parameters['Membrane thickness - Hmem (µm)']['value'].get() * 1e-6  # m
     Hgc = choice_accessible_parameters['GC thickness - Hgc (µm)']['value'].get() * 1e-6  # m
     Wgc = choice_accessible_parameters['GC width - Wgc (µm)']['value'].get() * 1e-6  # m
     Lgc = choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].get()  # m
     # undetermined physical parameters
+    Hgdl = choice_undetermined_parameters['GDL thickness - Hgdl (µm)']['value'].get() * 1e-6  # m
+    Hmpl = choice_undetermined_parameters['MPL thickness - Hmpl (µm)']['value'].get() * 1e-6  # m
+    Hcl = choice_undetermined_parameters['CL thickness - Hcl (µm)']['value'].get() * 1e-6  # m
+    Hmem = choice_undetermined_parameters['Membrane thickness - Hmem (µm)']['value'].get() * 1e-6  # m
     epsilon_gdl = choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].get()
+    epsilon_mpl = choice_undetermined_parameters['MPL porosity - ε_mpl']['value'].get()
     epsilon_mc = choice_undetermined_parameters['Ionomer volume fraction\n- ε_mc']['value'].get()
     epsilon_c = choice_undetermined_parameters['Compression ratio - ε_c']['value'].get()
     e = choice_undetermined_parameters['Capillary exponent - e']['value'].get()
@@ -498,11 +501,11 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     else:
         type_plot = "dynamic"
 
-    return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl,
-            epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl,
+    return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hmpl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl,
+            epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl,
             step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS,
-            t_EIS, t_purge, delta_t_purge, n_gdl, type_fuel_cell, type_auxiliary, type_control, type_purge,
-            type_display, type_plot)
+            t_EIS, t_purge, delta_t_purge, n_gdl, type_fuel_cell, type_auxiliary, type_control, type_purge,  type_display,
+            type_plot)
 
 
 def value_control(choice_operating_conditions, choice_accessible_parameters, choice_undetermined_parameters,
@@ -560,16 +563,6 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
         messagebox.showerror(title='Active area', message='Negative active area is impossible.')
         choices.clear()
         return
-    if choice_accessible_parameters['GDL thickness - Hgdl (µm)']['value'].get() < 1 or \
-            choice_accessible_parameters['GDL thickness - Hgdl (µm)']['value'].get() > 1000 or \
-            choice_accessible_parameters['CL thickness - Hcl (µm)']['value'].get() < 1 or \
-            choice_accessible_parameters['CL thickness - Hcl (µm)']['value'].get() > 1000 or \
-            choice_accessible_parameters['Membrane thickness - Hmem (µm)']['value'].get() < 1 or \
-            choice_accessible_parameters['Membrane thickness - Hmem (µm)']['value'].get() > 1000:
-        messagebox.showerror(title='MEA thickness', message='All MEA components generally have a thickness between '
-                                                            '1µm and 1mm.')
-        choices.clear()
-        return
     if choice_accessible_parameters['GC thickness - Hgc (µm)']['value'].get() < 10 or \
             choice_accessible_parameters['GC thickness - Hgc (µm)']['value'].get() > 10000 or \
             choice_accessible_parameters['GC width - Wgc (µm)']['value'].get() < 10 or \
@@ -580,9 +573,26 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
                                                            '10mm. Also, GC length is generally between 0 and 100m')
         choices.clear()
         return
+    if choice_undetermined_parameters['GDL thickness - Hgdl (µm)']['value'].get() < 1 or \
+            choice_undetermined_parameters['GDL thickness - Hgdl (µm)']['value'].get() > 1000 or \
+            choice_undetermined_parameters['MPL thickness - Hmpl (µm)']['value'].get() < 1 or \
+            choice_undetermined_parameters['MPL thickness - Hmpl (µm)']['value'].get() > 1000 or \
+            choice_undetermined_parameters['CL thickness - Hcl (µm)']['value'].get() < 1 or \
+            choice_undetermined_parameters['CL thickness - Hcl (µm)']['value'].get() > 1000 or \
+            choice_undetermined_parameters['Membrane thickness - Hmem (µm)']['value'].get() < 1 or \
+            choice_undetermined_parameters['Membrane thickness - Hmem (µm)']['value'].get() > 1000:
+        messagebox.showerror(title='MEA thickness', message='All MEA components generally have a thickness between '
+                                                            '1µm and 1mm.')
+        choices.clear()
+        return
     if choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].get() < 0.50 or \
             choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].get() > 0.90:
         messagebox.showerror(title='GDL porosity', message='GDL porosity should be between 0.50 and 0.90.')
+        choices.clear()
+        return
+    if choice_undetermined_parameters['MPL porosity - ε_mpl']['value'].get() < 0.30 or \
+            choice_undetermined_parameters['MPL porosity - ε_mpl']['value'].get() > 0.70:
+        messagebox.showerror(title='MPL porosity', message='MPL porosity should be between 0.30 and 0.70.')
         choices.clear()
         return
     if choice_undetermined_parameters['Ionomer volume fraction\n- ε_mc']['value'].get() < 0 or \
@@ -745,7 +755,7 @@ def set_equal_width(frame1, frame2, frame3, frame4, frame5, frame6):
 
 def launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
                                      step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters,
-                                     i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
+                                     i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
                                      epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
                                      C_scl, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
                                      type_purge, type_display, type_plot):
@@ -807,11 +817,13 @@ def launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa,
     Aact : float
         Active area of the cell in m² (accessible physical parameter).
     Hgdl : float
-        Thickness of the gas diffusion layer in m (accessible physical parameter).
+        Thickness of the gas diffusion layer in m (undetermined physical parameter).
+    Hmpl : float
+        Thickness of the microporous layer in m (undetermined physical parameter).
     Hmem : float
-        Thickness of the membrane in m (accessible physical parameter).
+        Thickness of the membrane in m (undetermined physical parameter).
     Hcl : float
-        Thickness of the catalyst layer in m (accessible physical parameter).
+        Thickness of the catalyst layer in m (undetermined physical parameter).
     Hgc : float
         Thickness of the gas channel in m (accessible physical parameter).
     Wgc : float
@@ -820,6 +832,8 @@ def launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa,
         Length of the gas channel in m (accessible physical parameter).
     epsilon_gdl : float
         Anode/cathode GDL porosity (undetermined physical parameter).
+    epsilon_mpl : float
+        Microporous layer porosity (undetermined physical parameter).
     epsilon_mc : float
         Volume fraction of ionomer in the CL (undetermined physical parameter).
     epsilon_c : float
@@ -892,7 +906,7 @@ def launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa,
         for i in range(n):
             Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
                                  step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters,
-                                 i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
+                                 i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
                                  epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
                                  C_scl, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
                                  type_purge, type_display, type_plot, initial_variable_values, time_interval)
@@ -916,7 +930,7 @@ def launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa,
         # Simulation
         Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
                              step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS,
-                             ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mc,
+                             ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc,
                              epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, n_gdl,
                              t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge,
                              type_display, type_plot)
@@ -935,7 +949,7 @@ def launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa,
 def launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
                                              step_current_parameters, pola_current_parameters,
                                              pola_current_for_cali_parameters, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact,
-                                             Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mc, epsilon_c, e,
+                                             Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e,
                                              i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, n_gdl,
                                              t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
                                              type_purge, type_display, type_plot):
@@ -997,11 +1011,13 @@ def launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_
     Aact : float
         Active area of the cell in m² (accessible physical parameter).
     Hgdl : float
-        Thickness of the gas diffusion layer in m (accessible physical parameter).
+        Thickness of the gas diffusion layer in m (undetermined physical parameter).
+    Hmpl : float
+        Thickness of the microporous layer in m (undetermined physical parameter).
     Hmem : float
         Thickness of the membrane in m (accessible physical parameter).
     Hcl : float
-        Thickness of the catalyst layer in m (accessible physical parameter).
+        Thickness of the catalyst layer in m (undetermined physical parameter).
     Hgc : float
         Thickness of the gas channel in m (accessible physical parameter).
     Wgc : float
@@ -1010,6 +1026,8 @@ def launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_
         Length of the gas channel in m (accessible physical parameter).
     epsilon_gdl : float
         Anode/cathode GDL porosity (undetermined physical parameter).
+    epsilon_mpl : float
+        Microporous layer porosity (undetermined physical parameter).
     epsilon_mc : float
         Volume fraction of ionomer in the CL (undetermined physical parameter).
     epsilon_c : float
@@ -1082,7 +1100,7 @@ def launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_
         for i in range(n):
             Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
                                  step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters,
-                                 i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
+                                 i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
                                  epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
                                  C_scl, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
                                  type_purge, type_display, type_plot, initial_variable_values, time_interval)
@@ -1106,7 +1124,7 @@ def launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_
         # Simulation
         Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
                              step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS,
-                             ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mc,
+                             ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc,
                              epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge,
                              type_fuel_cell, type_current, type_auxiliary, type_control, type_purge, type_display,
                              type_plot)
@@ -1124,7 +1142,7 @@ def launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_
 
 def launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
                                     step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters,
-                                    i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
+                                    i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
                                     epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
                                     C_scl, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
                                     type_purge, type_display, type_plot):
@@ -1186,11 +1204,13 @@ def launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, 
     Aact : float
         Active area of the cell in m² (accessible physical parameter).
     Hgdl : float
-        Thickness of the gas diffusion layer in m (accessible physical parameter).
+        Thickness of the gas diffusion layer in m (undetermined physical parameter).
+    Hmpl : float
+        Thickness of the microporous layer in m (undetermined physical parameter).
     Hmem : float
-        Thickness of the membrane in m (accessible physical parameter).
+        Thickness of the membrane in m (undetermined physical parameter).
     Hcl : float
-        Thickness of the catalyst layer in m (accessible physical parameter).
+        Thickness of the catalyst layer in m (undetermined physical parameter).
     Hgc : float
         Thickness of the gas channel in m (accessible physical parameter).
     Wgc : float
@@ -1199,6 +1219,8 @@ def launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, 
         Length of the gas channel in m (accessible physical parameter).
     epsilon_gdl : float
         Anode/cathode GDL porosity (undetermined physical parameter).
+    epsilon_mpl : float
+        Microporous layer porosity (undetermined physical parameter).
     epsilon_mc : float
         Volume fraction of ionomer in the CL (undetermined physical parameter).
     epsilon_c : float
@@ -1263,7 +1285,7 @@ def launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, 
     #       prior to initiating the EIS.
     Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, step_current_parameters,
                          pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, t_EIS, f_EIS,
-                         Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mc, epsilon_c, e, i0_c_ref,
+                         Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref,
                          kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell,
                          type_current, type_auxiliary, type_control, type_purge, type_display, type_plot,
                          initial_variable_values, time_interval)
@@ -1290,7 +1312,7 @@ def launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, 
     for i in range(n):
         Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
                              step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS,
-                             ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mc,
+                             ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc,
                              epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, n_gdl,
                              t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge,
                              type_display, type_plot, initial_variable_values, time_interval)

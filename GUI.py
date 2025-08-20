@@ -110,35 +110,30 @@ def main_frame(root, canvas):
          'Cathode humidity - Φc': {'value': tk.DoubleVar(operating_conditions_frame), 'label_row': 4, 'label_column': 3}}
 
     choice_accessible_parameters = \
-        {'GDL thickness - Hgdl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 1},
-         'CL thickness - Hcl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 3},
-         'Membrane thickness - Hmem (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 5},
-         'GC thickness - Hgc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 1},
-         'GC width - Wgc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 3},
-         'GC cumulated length - Lgc (m)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 5},
-         'Active area - Aact (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 1}}
+        {'GC thickness - Hgc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 1},
+         'GC width - Wgc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 3},
+         'GC cumulated length - Lgc (m)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 5},
+         'Active area - Aact (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 1}}
 
     choice_undetermined_parameters = \
-        {'GDL porosity - ε_gdl': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.6), 'label_row': 0, 'label_column': 1},
-         'Ionomer volume fraction\n- ε_mc': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.25), 'label_row': 0, 'label_column': 3},
-         'Tortuosity - τ': {'value': tk.DoubleVar(undetermined_parameters_frame, 1.5), 'label_row': 0, 'label_column': 5},
-         'Compression ratio - ε_c': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.2), 'label_row': 1, 'label_column': 1},
-         'Capillary exponent - e': {'value': tk.IntVar(undetermined_parameters_frame, 4), 'label_row': 1, 'label_column': 3},
-         'Electron resistance\n- Re (µΩ.m²)': {'value': tk.DoubleVar(undetermined_parameters_frame, 1.0), 'label_row': 1,
-                        'label_column': 5},
-         'Reference exchange\ncurrent density\n- i0_c_ref (A/m²)': {'value': tk.DoubleVar(undetermined_parameters_frame, 3.0), 'label_row': 2,
-                             'label_column': 1},
-         'Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))': {'value': tk.DoubleVar(undetermined_parameters_frame, 1.0), 'label_row': 2,
-                                 'label_column': 3},
-         'Overpotential correction\nexponent - κ_c': {'value': tk.DoubleVar(undetermined_parameters_frame, 2.0), 'label_row': 2, 'label_column': 5},
-         'Limit liquid saturation\ncoefficient - a_slim': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.05), 'label_row': 3,
-                    'label_column': 1},
-         'Limit liquid saturation\ncoefficient - b_slim': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.1), 'label_row': 3,
-                    'label_column': 3},
-         'Limit liquid saturation\ncoefficient - a_switch': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.7), 'label_row': 3,
-                      'label_column': 5},
-         'Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)': {'value': tk.DoubleVar(undetermined_parameters_frame, 20), 'label_row': 4,
-                          'label_column': 1}}
+        {'GDL thickness - Hgdl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 1},
+         'MPL thickness - Hmpl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 3},
+         'CL thickness - Hcl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 5},
+         'Membrane thickness - Hmem (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 1},
+         'GDL porosity - ε_gdl': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.6), 'label_row': 1, 'label_column': 3},
+         'MPL porosity - ε_mpl': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.6), 'label_row': 1, 'label_column': 5},
+         'Ionomer volume fraction\n- ε_mc': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.25), 'label_row': 2, 'label_column': 1},
+         'Tortuosity - τ': {'value': tk.DoubleVar(undetermined_parameters_frame, 1.5), 'label_row': 2, 'label_column': 5},
+         'Compression ratio - ε_c': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.2), 'label_row': 2, 'label_column': 5},
+         'Capillary exponent - e': {'value': tk.IntVar(undetermined_parameters_frame, 4), 'label_row': 3, 'label_column': 1},
+         'Electron resistance\n- Re (µΩ.m²)': {'value': tk.DoubleVar(undetermined_parameters_frame, 1.0), 'label_row': 3, 'label_column': 3},
+         'Reference exchange\ncurrent density\n- i0_c_ref (A/m²)': {'value': tk.DoubleVar(undetermined_parameters_frame, 3.0), 'label_row': 3, 'label_column': 5},
+         'Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))': {'value': tk.DoubleVar(undetermined_parameters_frame, 1.0), 'label_row': 4, 'label_column': 1},
+         'Overpotential correction\nexponent - κ_c': {'value': tk.DoubleVar(undetermined_parameters_frame, 2.0), 'label_row': 4, 'label_column': 3},
+         'Limit liquid saturation\ncoefficient - a_slim': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.05), 'label_row': 4, 'label_column': 5},
+         'Limit liquid saturation\ncoefficient - b_slim': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.1), 'label_row': 5, 'label_column': 1},
+         'Limit liquid saturation\ncoefficient - a_switch': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.7), 'label_row': 5, 'label_column': 3},
+         'Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)': {'value': tk.DoubleVar(undetermined_parameters_frame, 20), 'label_row': 5, 'label_column': 5}}
 
     choice_current_density_parameters = \
         {'Stabilisation time\n- Δt_ini_step (min)': {'value': tk.DoubleVar(current_density_parameters_frame, 120),
@@ -348,8 +343,8 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
 
     # Retrieves parameter values for predefined stacks and keeps them in their standard unit, or converts user-selected
     # quantities into standard units.
-    T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl, \
-        epsilon_mc, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, \
+    T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hmpl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl, \
+        epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, \
         step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, \
         t_EIS, t_purge, delta_t_purge, n_gdl, type_fuel_cell, type_auxiliary, type_control, type_purge,  type_display, \
         type_plot = recover_for_use_operating_inputs_and_physical_parameters(choice_operating_conditions,
@@ -365,7 +360,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
                                          step_current_parameters, pola_current_parameters,
                                          pola_current_for_cali_parameters, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
-                                         Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mc, epsilon_c, e, Re,
+                                         Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e,
                                          i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge,
                                          type_fuel_cell, type_current, type_auxiliary, type_control, type_purge,
                                          type_display, type_plot)
@@ -376,8 +371,8 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
                                                  step_current_parameters, pola_current_parameters,
                                                  pola_current_for_cali_parameters, i_EIS, ratio_EIS, t_EIS, f_EIS,
-                                                 Aact, Hgdl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mc,
-                                                 epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
+                                                 Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc,
+                                                 epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
                                                  a_switch, C_scl, n_gdl, t_purge, type_fuel_cell, type_current,
                                                  type_auxiliary, type_control, type_purge, type_display, type_plot)
 
@@ -387,7 +382,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
                                         step_current_parameters, pola_current_parameters,
                                         pola_current_for_cali_parameters, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
-                                        Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mc, epsilon_c, e, Re,
+                                        Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e,
                                         i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge,
                                         type_fuel_cell, type_current, type_auxiliary, type_control, type_purge,
                                         type_display, type_plot)
