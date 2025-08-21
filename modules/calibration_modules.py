@@ -145,6 +145,8 @@ def parameters_for_calibration(type_fuel_cell):
 
         # Extrapolated physical parameters
         Hgdl = 2e-4  # m. It is the thickness of the gas diffusion layer.
+        Hmpl = 3e-5  # m. It is the thickness of the microporous layer.
+        epsilon_mpl = 0.4  # It is the porosity of the microporous layer.
         Hgc = 5e-4  # m. It is the thickness of the gas channel.
 
         # Estimated undetermined parameters for the initialisation
@@ -220,6 +222,8 @@ def parameters_for_calibration(type_fuel_cell):
         # Extrapolated physical parameters
         Aact = 0.0025  # m². It is the active area of the catalyst layer.
         Lgc = 1.6  # m. It is the length of the gas channel.
+        Hmpl = 3e-5  # m. It is the thickness of the microporous layer.
+        epsilon_mpl = 0.4  # It is the porosity of the microporous layer.
 
         # Estimated undetermined parameters for the initialisation
         # Catalyst layer
@@ -279,7 +283,7 @@ def parameters_for_calibration(type_fuel_cell):
     i_exp, U_exp = pola_exp_values_calibration(type_fuel_cell)
 
     return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, step_current_parameters, pola_current_parameters,
-            pola_current_for_cali_parameters, Aact, Hgdl, Hgc, Wgc, Lgc,
+            pola_current_for_cali_parameters, Aact, Hgdl, Hmpl, Hgc, Wgc, Lgc, epsilon_mpl,
             estimated_undetermined_parameters_for_initialisation, type_auxiliary, type_control, type_purge,
             type_display, type_plot, type_current, current_density, i_EIS, ratio_EIS, t_EIS, f_EIS, t_purge, n_gdl,
             i_exp, U_exp)
