@@ -142,7 +142,7 @@ def stored_physical_parameters(type_fuel_cell):
         epsilon_gdl = 0.7393  # It is the anode/cathode GDL porosity.
         epsilon_c = 0.2  # It is the compression ratio of the GDL.
         #   Microporous layer
-        Hmpl = 30e-6  # m. It is the thickness of the microporous layer.
+        Hmpl = 3e-5  # m. It is the thickness of the microporous layer.
         epsilon_mpl = 0.4  # It is the porosity of the microporous layer.
         # Gas channel
         Hgc = 5e-4  # m. It is the thickness of the gas channel.
