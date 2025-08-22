@@ -487,7 +487,7 @@ def save_calibration_results(convergence, ga_instance, solution, varbound, sim_e
             param_name = varbound[idx][0]
             file.write(f"\nOptimized parameter {param_name}: {val}")
         file.write("\nMax simulation error: " + str(sim_error) + "%")
-        file.write("\nAlgorithm works with" + type_fuel_cell + ".")
+        file.write("\nAlgorithm works with " + type_fuel_cell + ".")
         if ga_instance.best_solution_generation != -1:
             file.write(f"\nBest fitness value reached after {ga_instance.best_solution_generation} generations.")
     ga_instance.save(filename=os.path.join(folder_name, "parameter_calibration_" + str(counter)))
