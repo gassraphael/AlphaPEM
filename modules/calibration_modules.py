@@ -17,6 +17,75 @@ from calibration.experimental_values import pola_exp_values_calibration
 
 # _________________________________________________Calibration modules__________________________________________________
 
+def parameter_bounds_for_calibration(type_fuel_cell):
+    """This function is used to determine the parameter bounds of the fuel cell model for the calibration when a
+    registered type_fuel_cell is considered.
+
+       Parameters
+       ----------
+       type_fuel_cell : str
+               Type of fuel cell configuration.
+
+       Returns
+       -------
+       varbound : list
+            List of the bounds on the parameters to calibrate. Each element is a list containing the minimum and
+            maximum values of the parameter, and the type of the parameter ('real' or 'int').
+       gene_space : list
+            List of dictionaries used to define the bounds of the undetermined parameters for pygad. Each
+            dictionary contains the 'low' and 'high' values for the parameter, and optionally a 'step' value for
+            integer parameters.
+    """
+
+    if type_fuel_cell == "ZSW-GenStack":
+        pass
+
+    elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
+            type_fuel_cell == "EH-31_2.5":
+        #       Fuel cell physical parameters
+        Hcl_min, Hcl_max = 8e-6, 2e-5  # m. It is the thickness of the CL.
+        Hmem_min, Hmem_max = 1.5e-5, 5e-5  # m. It is the thickness of the membrane.
+        epsilon_gdl_min, epsilon_gdl_max = 0.50, 0.90  # It is the anode/cathode GDL porosity, without units.
+        epsilon_mc_min, epsilon_mc_max = 0.15, 0.40  # It is the volume fraction of ionomer in the CL.
+        # epsilon_c_min, epsilon_c_max = 0.15, 0.30  # It is the compression ratio of the GDL.
+        epsilon_c = 0.20  # It is the compression ratio of the GDL.
+        #       Constants based on the interaction between water and the structure
+        e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.
+        #       Voltage polarization
+        i0_c_ref_min, i0_c_ref_max = 1e-3, 80  # A.m-2.It is the reference exchange current density at the cathode.
+        kappa_co_min, kappa_co_max = 0.01, 40  # A.m-2. It is the crossover correction coefficient.
+        # kappa_co = 1  # A.m-2. It is the crossover correction coefficient.
+        kappa_c_min, kappa_c_max = 0.25, 4  # It is the overpotential correction exponent.
+        #       The bounds on liquid saturation coefficients are constrained to facilitate calibration.
+        # a_slim_min, a_slim_max = 0.0, 0.2  # It is one of the limit liquid saturation coefficients.
+        # b_slim_min, b_slim_max = 0.05, 0.4  # It is one of the limit liquid saturation coefficients.
+        # a_switch_min, a_switch_max = 0.5, 0.95  # It is one of the limit liquid saturation coefficients.
+        a_slim = 0.05553  # It is one of the limit liquid saturation coefficients.
+        b_slim = 0.10514  # It is one of the limit liquid saturation coefficients.
+        a_switch = 0.63654  # It is one of the limit liquid saturation coefficients.
+        #       Undetermined parameter which is not considered yet (require the use of EIS curves to be calibrated)
+        C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
+        #       Bounds gathering and type
+        varbound = [['Hcl', Hcl_min, Hcl_max, 'real'],
+                    ['Hmem', Hmem_min, Hmem_max, 'real'],
+                    ['epsilon_gdl', epsilon_gdl_min, epsilon_gdl_max, 'real'],
+                    ['epsilon_mc', epsilon_mc_min, epsilon_mc_max, 'real'],
+                    ['e', e_min, e_max, 'int'],
+                    ['i0_c_ref', i0_c_ref_min, i0_c_ref_max, 'real'],
+                    ['kappa_co', kappa_co_min, kappa_co_max, 'real'],
+                    ['kappa_c', kappa_c_min, kappa_c_max, 'real']]
+        gene_space = []  # List used to define the bounds of the undetermined parameters for pygad.
+        for i in range(len(varbound)):
+            name, min_val, max_val, type_val = varbound[i]
+            if type_val == 'int':
+                gene_space.append({'low': min_val, 'high': max_val, 'step': 1})
+            else:
+                gene_space.append({'low': min_val, 'high': max_val})
+    else:
+        raise ValueError("A correct type_fuel_cell should be given.")
+
+    return varbound, gene_space
+
 def parameters_for_calibration(type_fuel_cell):
     """This function is used to determine the parameters of the fuel cell model for the calibration when a registered
     type_fuel_cell is considered.
@@ -129,7 +198,10 @@ def parameters_for_calibration(type_fuel_cell):
         Experimental values of the voltage.
     """
 
-    if type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
+    if type_fuel_cell == "ZSW-GenStack":
+        pass
+
+    elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
             type_fuel_cell == "EH-31_2.5":
         # Given values by the author
         #       Operating inputs
@@ -175,12 +247,6 @@ def parameters_for_calibration(type_fuel_cell):
         kappa_c = 0.6386  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
-        estimated_undetermined_parameters_for_initialisation = {'epsilon_gdl': epsilon_gdl, 'epsilon_c': epsilon_c,
-                                                                'Hacl': Hacl, 'Hccl': Hccl, 'epsilon_mc': epsilon_mc,
-                                                                'Hmem': Hmem, 'e': e, 'i0_c_ref': i0_c_ref,
-                                                                'kappa_co': kappa_co, 'kappa_c': kappa_c,
-                                                                'a_slim': a_slim, 'b_slim': b_slim,
-                                                                'a_switch': a_switch, 'C_scl': C_scl}
 
         # Algorithm parameters for polarization curve generation
         type_auxiliary = "forced-convective_cathode_with_flow-through_anode"
@@ -215,89 +281,57 @@ def parameters_for_calibration(type_fuel_cell):
         t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
         n_gdl = int(Hgdl / Hacl / 4)  # It is the number of model points placed inside each GDL.
 
-    elif type_fuel_cell == "LF":
-        # Given values by the author
-        #       Operating inputs
-        T_des = 80 + 273.15  # K. It is the temperature of the fuel cell.
-        Pa_des, Pc_des = 101325, 101325  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
-        Sa, Sc = 2.0, 1.5  # It is the stoichiometric ratio (of hydrogen and oxygen).
-        Phi_a_des, Phi_c_des = 0.84, 0.59  # It is the desired relative humidity.
-        #       Fuel cell physical parameters
-        Hmem = 5.08e-5  # m. It is the thickness of the membrane.
-        Hcl = 1e-5  # m. It is the thickness of the anode or cathode catalyst layer.
-        Hgdl = 4.2e-4  # m. It is the thickness of the gas diffusion layer.
-        Hgc = 1e-3  # m. It is the thickness of the gas channel.
-        Wgc = 8e-4  # m. It is the width of the gas channel.
-
-        # Extrapolated physical parameters
-        Aact = 0.0025  # m². It is the active area of the catalyst layer.
-        Lgc = 1.6  # m. It is the length of the gas channel.
-        Hmpl = 3e-5  # m. It is the thickness of the microporous layer.
-        epsilon_mpl = 0.4  # It is the porosity of the microporous layer.
-
-        # Estimated undetermined parameters for the initialisation
-        # Catalyst layer
-        epsilon_mc = 0.27  # It is the volume fraction of ionomer in the CL.
-        # Gas diffusion layer
-        epsilon_gdl = 0.6  # It is the anode/cathode GDL porosity.
-        epsilon_c = 0.21  # It is the compression ratio of the GDL.
-        # Interaction parameters between water and PEMFC structure
-        e = 3.0  # It is the capillary exponent
-        # Voltage polarization
-        i0_c_ref = 10  # A.m-2.It is the reference exchange current density at the cathode.
-        kappa_co = 25  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
-        kappa_c = 1.5  # It is the overpotential correction exponent.
-        a_slim, b_slim, a_switch = 0, 1, 1  # It is the limit liquid saturation coefficients.
-        C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
-        estimated_undetermined_parameters_for_initialisation = {'epsilon_gdl': epsilon_gdl, 'epsilon_c': epsilon_c,
-                                                                'Hcl': Hcl, 'epsilon_mc': epsilon_mc, 'Hmem': Hmem,
-                                                                'e': e, 'i0_c_ref': i0_c_ref, 'kappa_co': kappa_co,
-                                                                'kappa_c': kappa_c, 'a_slim': a_slim, 'b_slim': b_slim,
-                                                                'a_switch': a_switch, 'C_scl': C_scl}
-
-        # Algorithm parameters for polarization curve generation
-        type_auxiliary = "forced-convective_cathode_with_anodic_recirculation"
-        type_control = "no_control"
-        type_purge = "no_purge"
-        type_display = "no_display"
-        type_plot = "fixed"
-        type_current = "polarization_for_cali"
-        current_density = polarization_current_for_calibration
-        delta_t_ini_step = 120 * 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
-        delta_t_load_step = 0  # (s). Loading time for the step current density function, from 0 to i_step.
-        delta_t_break_step = 0  # (s). Time at i_step current density for the stabilisation of the internal states.
-        i_step = 0  # (A.m-2). Current density for the step current density function.
-        step_current_parameters = {'delta_t_ini_step': delta_t_ini_step, 'delta_t_load_step': delta_t_load_step,
-                                   'delta_t_break_step': delta_t_break_step, 'i_step': i_step}
-        delta_t_ini_pola = 120 * 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
-        delta_t_load_pola = 30  # (s). Loading time for one step current of the polarisation current density function.
-        delta_t_break_pola = 15 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
-        delta_i_pola = 0.1e4  # (A.m-2). Current density step for the polarisation current density function.
-        pola_current_parameters = {'delta_t_ini_pola': delta_t_ini_pola, 'delta_t_load_pola': delta_t_load_pola,
-                                   'delta_t_break_pola': delta_t_break_pola, 'delta_i_pola': delta_i_pola}
-        delta_t_ini_pola_cali = 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
-        delta_t_load_pola_cali = 30  # (s). Loading time for one step current of the polarisation current density function.
-        delta_t_break_pola_cali = 10 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
-        pola_current_for_cali_parameters = {'delta_t_ini_pola_cali': delta_t_ini_pola_cali,
-                                            'delta_t_load_pola_cali': delta_t_load_pola_cali,
-                                            'delta_t_break_pola_cali': delta_t_break_pola_cali}
-        i_EIS, ratio_EIS = np.nan, np.nan  # (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.
-        f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
-        t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
-        n_gdl = int(Hgdl / Hcl / 4)  # It is the number of model points placed inside each GDL.
-
     else:
         ValueError("A correct type_fuel_cell should be given.")
+
+    # Initialize the operating inputs and parameters dictionaries.
+    operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
+                        'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des}
+    current_parameters = {'step_current_parameters': step_current_parameters,
+                          'pola_current_parameters': pola_current_parameters,
+                          'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
+                          'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
+    accessible_physical_parameters = {'Aact': Aact, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc, 'Wcgc': Wcgc, 'Lgc': Lgc}
+    undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
+                                        'epsilon_gdl': epsilon_gdl, 'epsilon_mpl': epsilon_mpl,
+                                        'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c, 'e': e,
+                                        'kappa_co': kappa_co, 'i0_c_ref': i0_c_ref, 'kappa_c': kappa_c,
+                                        'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch,
+                                        'C_scl': C_scl}
+    computing_parameters = {'n_gdl': n_gdl, 't_purge': t_purge, 'type_fuel_cell': type_fuel_cell,
+                            'type_current': type_current, 'type_auxiliary': type_auxiliary,
+                            'type_control': type_control, 'type_purge': type_purge, 'type_display': type_display,
+                            'type_plot': type_plot}
 
     # Characteristic points of the experimental polarization curve
     i_exp, U_exp = pola_exp_values_calibration(type_fuel_cell)
 
-    return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, step_current_parameters, pola_current_parameters,
-            pola_current_for_cali_parameters, Aact, Hgdl, Hmpl, Hgc, Wgc, Lgc, epsilon_mpl,
-            estimated_undetermined_parameters_for_initialisation, type_auxiliary, type_control, type_purge,
-            type_display, type_plot, type_current, current_density, i_EIS, ratio_EIS, t_EIS, f_EIS, t_purge, n_gdl,
-            i_exp, U_exp)
+    return (operating_inputs, current_parameters, accessible_physical_parameters, undetermined_physical_parameters,
+            computing_parameters, i_exp, U_exp)
 
+def update_undetermined_parameters(solution, varbound, undetermined_physical_parameters):
+    """
+    Update the undetermined physical parameters dictionary with values from the solution.
+
+    Parameters
+    ----------
+    solution : list
+        List of parameter values obtained from the optimization algorithm.
+    varbound : list
+        List of parameter bounds and names. Each element contains the parameter name at index 0.
+    undetermined_physical_parameters : dict
+        Dictionary of undetermined physical parameters to be updated.
+
+    Returns
+    -------
+    dict
+        Updated dictionary of undetermined physical parameters.
+    """
+    for idx, val in enumerate(solution):
+        param_name = varbound[idx][0]
+        if param_name in undetermined_physical_parameters:
+            undetermined_physical_parameters[param_name] = val
+    return undetermined_physical_parameters
 
 def calculate_simulation_error(Simulator_1, U_exp_1, i_exp_1, Simulator_2, U_exp_2, i_exp_2):
     """This function is used to calculate the simulation maximal error between the experimental and the simulated
@@ -382,143 +416,80 @@ def calculate_simulation_error(Simulator_1, U_exp_1, i_exp_1, Simulator_2, U_exp
     return sim_error
 
 
-def print_calibration_results(convergence, ga_instance, Hcl, Hmem, epsilon_gdl, epsilon_mc, epsilon_c, e, i0_c_ref,
-                              kappa_co, kappa_c, a_slim, b_slim, a_switch, sim_error):
-    """This function is used to print the calibration results.
+def print_calibration_results(convergence, ga_instance, solution, varbound, sim_error):
+    """
+    This function prints the calibration results by associating each optimized value with its parameter name.
 
     Parameters
     ----------
     convergence : dict
-        A dictionary generated by the GeneticAlgorithm2 model's report method. It contains information about the
-        convergence of the genetic algorithm used for optimizing the undetermined parameters in the calibration files.
+        Dictionary containing the convergence information of the genetic algorithm.
     ga_instance : PyGAD object
-        An instance of the PyGAD library, which is used to perform the optimization.
-    Hcl : float
-        Thickness of the catalyst layer in m.
-    Hmem : float
-        Thickness of the membrane in m.
-    epsilon_gdl : float
-        Anode/cathode GDL porosity.
-    epsilon_mc : float
-        Volume fraction of ionomer in the CL.
-    epsilon_c : float
-        Compression ratio of the GDL.
-    e : float
-        Capillary exponent.
-    i0_c_ref : float
-        Reference exchange current density at the cathode in A.m-2.
-    kappa_co : float
-        Crossover correction coefficient in mol.m-1.s-1.Pa-1.
-    kappa_c : float
-        Overpotential correction exponent.
-    a_slim : float
-        One of the limit liquid saturation coefficients: the slop of slim function.
-    b_slim : float
-        One of the limit liquid saturation coefficients: the intercept of slim function.
-    a_switch : float
-        One of the limit liquid saturation coefficients: the slop of s_switch function.
+        Instance of PyGAD used for optimization.
+    solution : list
+        List of optimized parameter values.
+    varbound : list
+        List of parameter bounds and names.
     sim_error : float
-        Maximum error between the experimental and the simulated polarization curves in percentage.
+        Maximum simulation error in percentage.
     """
-
-    print("The convergence is:\n", convergence)
-    print("\nThe optimized Hcl: ", Hcl)
-    print("The optimized Hmem: ", Hmem)
-    print("The optimized epsilon_gdl: ", epsilon_gdl)
-    print("The optimized epsilon_mc: ", epsilon_mc)
-    print("The optimized epsilon_c: ", epsilon_c)
-    print("The optimized e: ", e)
-    print("The optimized i0_c_ref: ", i0_c_ref)
-    print("The optimized kappa_co: ", kappa_co)
-    print("The optimized kappa_c: ", kappa_c)
-    print("The optimized a_slim: ", a_slim)
-    print("The optimized b_slim: ", b_slim)
-    print("The optimized a_switch: ", a_switch)
-    print(Fore.RED + "\nThe max simulation error is: ", sim_error, "%")
+    print("Convergence:\n", convergence)
+    for idx, val in enumerate(solution):
+        param_name = varbound[idx][0]
+        print(f"Optimized parameter {param_name}: {val}")
+    print(Fore.RED + "\nMax simulation error: ", sim_error, "%")
     print(Style.RESET_ALL)
     if ga_instance.best_solution_generation != -1:
         print(f"Best fitness value reached after {ga_instance.best_solution_generation} generations.")
 
 
-def save_calibration_results(convergence, ga_instance, Hcl, Hmem, epsilon_gdl, epsilon_mc, epsilon_c, e, i0_c_ref,
-                             kappa_co, kappa_c, a_slim, b_slim, a_switch, sim_error, type_fuel_cell):
-    """This function is used to save in a text file and a PyGAD file the calibration results.
+def save_calibration_results(convergence, ga_instance, solution, varbound, sim_error, type_fuel_cell):
+    """
+    This function saves the calibration results in a text file and a PyGAD file.
+
+    The optimized values are retrieved from the solution list and associated with their names via varbound.
 
     Parameters
     ----------
     convergence : dict
-        A dictionary generated by the GeneticAlgorithm2 model's report method. It contains information about the
-        convergence of the genetic algorithm used for optimizing the undetermined parameters in the calibration files.
+        Convergence information from the genetic algorithm.
     ga_instance : PyGAD object
-        An instance of the PyGAD library, which is used to perform the optimization.
-    Hcl : float
-        Thickness of the catalyst layer in m.
-    Hmem : float
-        Thickness of the membrane in m.
-    epsilon_gdl : float
-        Anode/cathode GDL porosity.
-    epsilon_mc : float
-        Volume fraction of ionomer in the CL.
-    epsilon_c : float
-        Compression ratio of the GDL.
-    e : float
-        Capillary exponent.
-    i0_c_ref : float
-        Reference exchange current density at the cathode in A.m-2.
-    kappa_co : float
-        Crossover correction coefficient in mol.m-1.s-1.Pa-1.
-    kappa_c : float
-        Overpotential correction exponent.
-    a_slim : float
-        One of the limit liquid saturation coefficients: the slop of slim function.
-    b_slim : float
-        One of the limit liquid saturation coefficients: the intercept of slim function.
-    a_switch : float
-        One of the limit liquid saturation coefficients: the slop of s_switch function.
+        Instance of PyGAD used for optimization.
+    solution : list
+        List of optimized parameter values.
+    varbound : list
+        List of parameter bounds and names.
     sim_error : float
-        Maximum error between the experimental and the simulated polarization curves in percentage.
+        Maximum simulation error in percentage.
     type_fuel_cell : str
         Type of fuel cell configuration.
 
     Returns
     -------
     None
-        The function saves the calibration results in a text file and a PyGAD file.
     """
-
     root_folder, filename = "results", "parameter_calibration_1.txt"
-    subfolder_name = type_fuel_cell[:type_fuel_cell.rfind('_')] if type_fuel_cell.rfind('_') != -1 else type_fuel_cell
+    subfolder_name = type_fuel_cell[:type_fuel_cell.find('_')] if type_fuel_cell.find('_') != -1 else type_fuel_cell
     counter = 1
-    # Create the folder if necessary
     folder_name = os.path.join(root_folder, subfolder_name)
+    # Create the folder if necessary
     if not os.path.exists(folder_name):
         os.makedirs(folder_name)
     # Create the file without erasing the previous ones
     while os.path.isfile(os.path.join(folder_name, filename)):
         counter += 1
         filename = "parameter_calibration_" + str(counter) + ".txt"
-    # Write information
     file_path = os.path.join(folder_name, filename)
+    # Write information
     with open(file_path, "w") as file:
-        file.write("The convergence is: " + str(convergence) +
-                   "\nThe optimized Hcl: " + str(Hcl) +
-                   "\nThe optimized Hmem: " + str(Hmem) +
-                   "\nThe optimized epsilon_gdl: " + str(epsilon_gdl) +
-                   "\nThe optimized epsilon_mc: " + str(epsilon_mc) +
-                   "\nThe optimized epsilon_c: " + str(epsilon_c) +
-                   "\nThe optimized e: " + str(e) +
-                   "\nThe optimized i0_c_ref: " + str(i0_c_ref) +
-                   "\nThe optimized kappa_co: " + str(kappa_co) +
-                   "\nThe optimized kappa_c: " + str(kappa_c) +
-                   "\nThe optimized a_slim: " + str(a_slim) +
-                   "\nThe optimized b_slim: " + str(b_slim) +
-                   "\nThe optimized a_switch: " + str(a_switch) +
-                   "\nThe max simulation error is: " + str(sim_error) + "%" +
-                   "\nHere the algorithm works with RG2&3 (global)")
+        file.write("Convergence: " + str(convergence))
+        for idx, val in enumerate(solution):
+            param_name = varbound[idx][0]
+            file.write(f"\nOptimized parameter {param_name}: {val}")
+        file.write("\nMax simulation error: " + str(sim_error) + "%")
+        file.write("\nAlgorithm works with" + type_fuel_cell + ".")
         if ga_instance.best_solution_generation != -1:
             file.write(f"\nBest fitness value reached after {ga_instance.best_solution_generation} generations.")
-    # Save the GA instance (the name is without extension).
     ga_instance.save(filename=os.path.join(folder_name, "parameter_calibration_" + str(counter)))
-    # Delete the ongoing GA file because the calibration ended.
     if os.path.isfile('parameter_calibration_ongoing.pkl'):
         os.remove('parameter_calibration_ongoing.pkl')

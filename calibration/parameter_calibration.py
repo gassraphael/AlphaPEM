@@ -18,8 +18,9 @@ import numpy as np
 sys.path.append(os.path.abspath('..'))  # Add parent (root) folder path to list of module search paths
 from model.AlphaPEM import AlphaPEM
 from configuration.current_densities import step_current, polarization_current
-from modules.calibration_modules import parameters_for_calibration, calculate_simulation_error, print_calibration_results, \
-                                        save_calibration_results
+from modules.calibration_modules import (parameter_bounds_for_calibration, parameters_for_calibration,
+                                         update_undetermined_parameters, calculate_simulation_error,
+                                         print_calibration_results, save_calibration_results)
 
 # _________________________________________________Calibration settings_________________________________________________
 """
@@ -35,45 +36,7 @@ type_fuel_cell_1 = "EH-31_2.0"
 type_fuel_cell_2 = "EH-31_2.25"
 
 # Parameter bounds
-#       Fuel cell physical parameters
-Hcl_min, Hcl_max = 8e-6, 2e-5  # m. It is the thickness of the CL.
-Hmem_min, Hmem_max = 1.5e-5, 5e-5  # m. It is the thickness of the membrane.
-epsilon_gdl_min, epsilon_gdl_max = 0.50, 0.90  # It is the anode/cathode GDL porosity, without units.
-epsilon_mc_min, epsilon_mc_max = 0.15, 0.40  # It is the volume fraction of ionomer in the CL.
-# epsilon_c_min, epsilon_c_max = 0.15, 0.30  # It is the compression ratio of the GDL.
-epsilon_c = 0.20  # It is the compression ratio of the GDL.
-#       Constants based on the interaction between water and the structure
-e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.
-#       Voltage polarization
-i0_c_ref_min, i0_c_ref_max = 1e-3, 80  # A.m-2.It is the reference exchange current density at the cathode.
-kappa_co_min, kappa_co_max = 0.01, 40  # A.m-2. It is the crossover correction coefficient.
-# kappa_co = 1  # A.m-2. It is the crossover correction coefficient.
-kappa_c_min, kappa_c_max = 0.25, 4  # It is the overpotential correction exponent.
-#       The bounds on liquid saturation coefficients are constrained to facilitate calibration.
-# a_slim_min, a_slim_max = 0.0, 0.2  # It is one of the limit liquid saturation coefficients.
-# b_slim_min, b_slim_max = 0.05, 0.4  # It is one of the limit liquid saturation coefficients.
-# a_switch_min, a_switch_max = 0.5, 0.95  # It is one of the limit liquid saturation coefficients.
-a_slim = 0.05553  # It is one of the limit liquid saturation coefficients.
-b_slim = 0.10514  # It is one of the limit liquid saturation coefficients.
-a_switch = 0.63654  # It is one of the limit liquid saturation coefficients.
-#       Undetermined parameter which is not considered yet (require the use of EIS curves to be calibrated)
-C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
-#       Bounds gathering and type
-varbound = [[Hcl_min, Hcl_max, 'real'],
-            [Hmem_min, Hmem_max, 'real'],
-            [epsilon_gdl_min, epsilon_gdl_max, 'real'],
-            [epsilon_mc_min, epsilon_mc_max, 'real'],
-            [e_min, e_max, 'int'],
-            [i0_c_ref_min, i0_c_ref_max, 'real'],
-            [kappa_co_min, kappa_co_max, 'real'],
-            [kappa_c_min, kappa_c_max, 'real']]
-gene_space = [] # List used to define the bounds of the undetermined parameters for pygad.
-for i in range(len(varbound)):
-    min_val, max_val, type_val = varbound[i]
-    if type_val == 'int':
-        gene_space.append({'low': min_val, 'high': max_val, 'step': 1})
-    else:
-        gene_space.append({'low': min_val, 'high': max_val})
+varbound, gene_space = parameter_bounds_for_calibration(type_fuel_cell_1)
 
 # PyGAD parameters for the genetic algorithm:
     # Number of generations:
@@ -101,16 +64,12 @@ the calibration_module.py.
 This section should remain unaltered for regular program usage.
 """
 
-(T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, step_current_parameters, pola_current_parameters,
- pola_current_for_cali_parameters_1, Aact, Hgdl, Hmpl, Hgc, Wgc, Lgc, epsilon_mpl,
- estimated_undetermined_parameters_for_initialisation, type_auxiliary, type_control, type_purge, type_display,
- type_plot, type_current, current_density, i_EIS, ratio_EIS, t_EIS, f_EIS, t_purge, n_gdl, i_exp_1, U_exp_1) \
+(operating_inputs_1, current_parameters, accessible_physical_parameters, undetermined_physical_parameters,
+ computing_parameters_1, i_exp_1, U_exp_1) \
     = parameters_for_calibration(type_fuel_cell_1)
 
-(T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2, step_current_parameters, pola_current_parameters,
- pola_current_for_cali_parameters_2, Aact, Hgdl, Hmpl, Hgc, Wgc, Lgc, epsilon_mpl,
- estimated_undetermined_parameters_for_initialisation, type_auxiliary, type_control, type_purge, type_display,
- type_plot, type_current, current_density, i_EIS, ratio_EIS, t_EIS, f_EIS, t_purge, n_gdl,  i_exp_2, U_exp_2) \
+(operating_inputs_2, current_parameters, accessible_physical_parameters, undetermined_physical_parameters,
+ computing_parameters_2, i_exp_2, U_exp_2) \
     = parameters_for_calibration(type_fuel_cell_2)
 
 # _______________________________________________________Functions______________________________________________________
@@ -137,22 +96,16 @@ def pola_points(ga_instance, solution, solution_idx): # Function to maximize.
     """
 
     # Extraction of the undetermined parameters from the solution
-    # Hcl, Hmem, epsilon_gdl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch = solution
-    Hcl, Hmem, epsilon_gdl, epsilon_mc, e, i0_c_ref, kappa_co, kappa_c = solution
+    solution_of_undetermined_physical_parameters = update_undetermined_parameters(solution, varbound,
+                                                                      undetermined_physical_parameters)
 
     # Calculation of the model polarization curve
-    Simulator_1 = AlphaPEM(current_density, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
-                           step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters_1, i_EIS,
-                           ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hacl, Hccl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
-                           epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim,
-                           b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_1, type_current, type_auxiliary,
-                           type_control, type_purge, type_display, type_plot, initial_variable_values_1)
-    Simulator_2 = AlphaPEM(current_density, T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2,
-                           step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters_2, i_EIS,
-                           ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hacl, Hccl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
-                           epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim,
-                           b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_2, type_current, type_auxiliary,
-                           type_control, type_purge, type_display, type_plot, initial_variable_values_2)
+    Simulator_1 = AlphaPEM(operating_inputs_1, current_parameters, accessible_physical_parameters,
+                           solution_of_undetermined_physical_parameters, computing_parameters_1,
+                           initial_variable_values_1)
+    Simulator_2 = AlphaPEM(operating_inputs_2, current_parameters, accessible_physical_parameters,
+                           solution_of_undetermined_physical_parameters, computing_parameters_2,
+                           initial_variable_values_2)
 
     # Calculation of the simulation error between the simulated and experimental polarization curves
     sim_error = calculate_simulation_error(Simulator_1, U_exp_1, i_exp_1, Simulator_2, U_exp_2, i_exp_2)
@@ -200,33 +153,14 @@ if __name__ == '__main__':
     start_time = time.time()
 
     # Initialization of the simulator in order to equilibrate the internal states of the fuel cell
-    Hcl_ini = estimated_undetermined_parameters_for_initialisation['Hcl']
-    Hmem_ini = estimated_undetermined_parameters_for_initialisation['Hmem']
-    epsilon_gdl_ini = estimated_undetermined_parameters_for_initialisation['epsilon_gdl']
-    epsilon_mc_ini = estimated_undetermined_parameters_for_initialisation['epsilon_mc']
-    # epsilon_c_ini = estimated_undetermined_parameters_for_initialisation['epsilon_c']
-    e_ini = estimated_undetermined_parameters_for_initialisation['e']
-    i0_c_ref_ini = estimated_undetermined_parameters_for_initialisation['i0_c_ref']
-    kappa_co_ini = estimated_undetermined_parameters_for_initialisation['kappa_co']
-    kappa_c_ini = estimated_undetermined_parameters_for_initialisation['kappa_c']
-    a_slim_ini = estimated_undetermined_parameters_for_initialisation['a_slim']
-    b_slim_ini = estimated_undetermined_parameters_for_initialisation['b_slim']
-    a_switch_ini = estimated_undetermined_parameters_for_initialisation['a_switch']
-    C_scl_ini = estimated_undetermined_parameters_for_initialisation['C_scl']
-    Simulator_ini_1 = AlphaPEM(step_current, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
-                               step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters_1,
-                               i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem_ini, Hacl_ini, Hccl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
-                               epsilon_gdl_ini, epsilon_mpl, epsilon_mc_ini, epsilon_c, e_ini, i0_c_ref_ini,
-                               kappa_co_ini, kappa_c_ini, a_slim_ini, b_slim_ini, a_switch_ini, C_scl_ini, n_gdl,
-                               t_purge, type_fuel_cell_1, 'step', type_auxiliary, type_control, type_purge,
-                               type_display, type_plot)
-    Simulator_ini_2 = AlphaPEM(step_current, T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2,
-                               step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters_2,
-                               i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem_ini, Hacl_ini, Hccl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
-                               epsilon_gdl_ini, epsilon_mpl, epsilon_mc_ini, epsilon_c, e_ini, i0_c_ref_ini,
-                               kappa_co_ini, kappa_c_ini, a_slim_ini, b_slim_ini, a_switch_ini, C_scl_ini, n_gdl,
-                               t_purge, type_fuel_cell_2, 'step', type_auxiliary, type_control, type_purge,
-                               type_display, type_plot)
+    operating_inputs_ini_1, computing_parameters_ini_1 = operating_inputs_1, computing_parameters_1
+    operating_inputs_ini_1['current_density'], computing_parameters_ini_1['type_current'] = step_current, 'step'
+    operating_inputs_ini_2, computing_parameters_ini_2 = operating_inputs_2, computing_parameters_2
+    operating_inputs_ini_2['current_density'], computing_parameters_ini_2['type_current'] = step_current, 'step'
+    Simulator_ini_1 = AlphaPEM(operating_inputs_ini_1, current_parameters, accessible_physical_parameters,
+                               undetermined_physical_parameters, computing_parameters_ini_1)
+    Simulator_ini_2 = AlphaPEM(operating_inputs_ini_2, current_parameters, accessible_physical_parameters,
+                               undetermined_physical_parameters, computing_parameters_ini_2)
     #   Recovery of the internal states from the end of the preceding simulation.
     initial_variable_values_1, initial_variable_values_2 = [], []
     for x in Simulator_ini_1.solver_variable_names:
@@ -259,35 +193,27 @@ if __name__ == '__main__':
     idx = np.argmax(ga_instance.last_generation_fitness) # Get the index of the best solution in the last generation.
     solution = ga_instance.population[idx] # Get the best solution from the last generation.
     solution_fitness = ga_instance.last_generation_fitness[idx] # Get the fitness value of the best solution.
-    # epsilon_gdl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch = solution
-    Hcl, Hmem, epsilon_gdl, epsilon_mc, e, i0_c_ref, kappa_co, kappa_c = solution
     sim_error = 1.0 / solution_fitness  # The error is the inverse of the fitness value.
+    undetermined_physical_parameters = update_undetermined_parameters(solution, varbound,
+                                                                      undetermined_physical_parameters)
 
     # Print of the parameter calibration results
     convergence = [float(1.0 / f) for f in ga_instance.best_solutions_fitness]
-    print_calibration_results(convergence, ga_instance, Hcl, Hmem, epsilon_gdl, epsilon_mc, epsilon_c, e,
-                              i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, sim_error)
+    print_calibration_results(convergence, ga_instance, solution, varbound, sim_error)
 
     # Save the data in files
-    save_calibration_results(convergence, ga_instance, Hcl, Hmem, epsilon_gdl, epsilon_mc, epsilon_c, e,
-                             i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, sim_error, type_fuel_cell_1)
+    save_calibration_results(convergence, ga_instance, solution, varbound, sim_error, type_fuel_cell_1 + " and " + type_fuel_cell_2)
 
     # Calculate, display and save the calibrated and experimental polarization curve (from the complete experimental points)
     #       Calculate the calibrated polarization curve
-    Simulator_final_1 = AlphaPEM(polarization_current, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
-                                 step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters_1,
-                                 i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hacl, Hccl, Hagc, Hcgc, Wagc,
-                                 Wcgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co,
-                                 kappa_c, a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_1,
-                                 'polarization', type_auxiliary, type_control, type_purge, type_display,
-                                 type_plot, initial_variable_values_1)
-    Simulator_final_2 = AlphaPEM(polarization_current, T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2,
-                                 step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters_2,
-                                 i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hacl, Hccl, Hagc, Hcgc, Wagc,
-                                 Wcgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co,
-                                 kappa_c, a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_2,
-                                 'polarization', type_auxiliary, type_control, type_purge, type_display,
-                                 type_plot, initial_variable_values_2)
+    operating_inputs_final_1, computing_parameters_final_1 = operating_inputs_1, computing_parameters_1
+    operating_inputs_final_1['current_density'], computing_parameters_final_1['type_current'] = polarization_current, 'polarization'
+    operating_inputs_final_2, computing_parameters_final_2 = operating_inputs_2, computing_parameters_2
+    operating_inputs_final_2['current_density'], computing_parameters_final_2['type_current'] = polarization_current, 'polarization'
+    Simulator_final_1 = AlphaPEM(operating_inputs_final_1, current_parameters, accessible_physical_parameters,
+                                 undetermined_physical_parameters, computing_parameters_final_1, initial_variable_values_1)
+    Simulator_final_2 = AlphaPEM(operating_inputs_final_2, current_parameters, accessible_physical_parameters,
+                                 undetermined_physical_parameters, computing_parameters_final_2, initial_variable_values_2)
     #       Display the calibrated and experimental polarization curve
     fig, ax = plt.subplots(figsize=(8, 8))
     Simulator_final_1.Display(ax)
