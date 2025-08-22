@@ -28,11 +28,11 @@ if __name__ == '__main__':
     # - EH-31 is a fuel cell developed by EH GROUP. 1.5, 2.0, 2.25 and 2.5 corresponds to the different pressure options.
     # - GenStack is a fuel cell developed in open source by ZSW (https://zenodo.org/records/14223364).
     type_fuel_cell_1 = "EH-31_2.0"
-    type_fuel_cell_2 = "EH-31_2.25"
+    type_fuel_cell_2 = None
     type_fuel_cell_3 = None
     type_fuel_cell_4 = None
     # Current density possibilities: "step", "polarization", "polarization_for_cali", "EIS".
-    type_current = "polarization"
+    type_current = "step"
     # Auxiliary system possibilities: "forced-convective_cathode_with_anodic_recirculation",
     #                                 "forced-convective_cathode_with_flow-through_anode", "no_auxiliary".
     type_auxiliary = "forced-convective_cathode_with_flow-through_anode"
