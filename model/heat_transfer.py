@@ -61,7 +61,8 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl
     # Extraction of the operating inputs and parameters
     epsilon_mc, epsilon_gdl = parameters['epsilon_mc'], parameters['epsilon_gdl']
     epsilon_mpl, epsilon_c, n_gdl = parameters['epsilon_mpl'], parameters['epsilon_c'], parameters['n_gdl']
-    Hmem, Hgdl, Hmpl, Hcl = parameters['Hmem'], parameters['Hgdl'], parameters['Hmpl'], parameters['Hcl']
+    Hmem, Hgdl, Hmpl = parameters['Hmem'], parameters['Hgdl'], parameters['Hmpl']
+    Hacl, Hccl = parameters['Hacl'], parameters['Hccl']
 
     # Intermediate values
     (k_th_eff_agc_agdl, k_th_eff_agdl_agdl, k_th_eff_agdl_ampl, k_th_eff_ampl_acl, k_th_eff_acl_mem,
@@ -76,14 +77,14 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl
                     for i in range(1, n_gdl)}
 
     Jt_agdl_ampl = - 2 * k_th_eff_agdl_ampl * (T_ampl - sv[f'T_agdl_{n_gdl}']) / (Hgdl / n_gdl + Hmpl)
-    Jt_ampl_acl = - 2 * k_th_eff_ampl_acl * (T_acl - T_ampl) / (Hmpl + Hcl)
+    Jt_ampl_acl = - 2 * k_th_eff_ampl_acl * (T_acl - T_ampl) / (Hmpl + Hacl)
 
     # Membrane side
-    Jt_acl_mem = - 2 * k_th_eff_acl_mem * (T_mem - T_acl) / (Hcl + Hmem)
-    Jt_mem_ccl = - 2 * k_th_eff_mem_ccl * (T_ccl - T_mem) / (Hcl + Hmem)
+    Jt_acl_mem = - 2 * k_th_eff_acl_mem * (T_mem - T_acl) / (Hacl + Hmem)
+    Jt_mem_ccl = - 2 * k_th_eff_mem_ccl * (T_ccl - T_mem) / (Hccl + Hmem)
 
     # Cathode side
-    Jt_ccl_cmpl = - 2 * k_th_eff_ccl_cmpl * (T_cmpl - T_ccl) / (Hmpl + Hcl)
+    Jt_ccl_cmpl = - 2 * k_th_eff_ccl_cmpl * (T_cmpl - T_ccl) / (Hmpl + Hccl)
     Jt_cmpl_cgdl = - 2 * k_th_eff_cmpl_cgdl * (sv['T_cgdl_1'] - T_cmpl) / (Hgdl / n_gdl + Hmpl)
     Jt_cgdl_cgdl = {f'cgdl_cgdl_{i}': -k_th_eff_cgdl_cgdl[i] * (sv[f'T_cgdl_{i+1}'] - sv[f'T_cgdl_{i}']) / (Hgdl/n_gdl)
                     for i in range(1, n_gdl)}
@@ -98,10 +99,10 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl
 
     # The heat dissipated by the electrochemical reaction 2*H2 + O2 -> 2*H2O, in J.m-3.s-1.
     #    It is given by the sum of Peltier and activation heats [vetterFreeOpenReference2019].
-    S_r_acl = i_fc / (2 * F * Hcl) # mol.m-3.s-1. It is the amount of hydrogen consumed at the ACL.
-    S_r_ccl = i_fc / (4 * F * Hcl) # mol.m-3.s-1. It is the amount of oxygen consumed at the CCL.
+    S_r_acl = i_fc / (2 * F * Hacl) # mol.m-3.s-1. It is the amount of hydrogen consumed at the ACL.
+    S_r_ccl = i_fc / (4 * F * Hccl) # mol.m-3.s-1. It is the amount of oxygen consumed at the CCL.
     Q_r = {'acl': S_r_acl * T_acl * (-delta_s_HOR),
-           'ccl': S_r_ccl * T_ccl * (-delta_s_ORR) + i_fc * eta_c / Hcl}
+           'ccl': S_r_ccl * T_ccl * (-delta_s_ORR) + i_fc * eta_c / Hccl}
 
     # The heat dissipated by the absorption of water from the CL to the membrane, in J.m-3.s-1.
     Q_sorp = {'acl': S_abs_acl * (-delta_h_abs(T_acl)),

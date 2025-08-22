@@ -12,22 +12,18 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 # Importing constants' value and functions
-from configuration.settings import current_density_parameters, operating_inputs_function, physical_parameters, \
-                                   computing_parameters
 from model.AlphaPEM import AlphaPEM
 from calibration.experimental_values import pola_exp_values, pola_exp_values_calibration
 
 # _____________________________________________________Main modules_____________________________________________________
 
-def figures_preparation(type_current, type_display):
+def figures_preparation(computing_parameters):
     """ This function create the required figures and axes according to the type_current and type_display.
 
     Parameters
     ----------
-    type_current : str
-        Type of current density function.
-    type_display : str
-        Type of display.
+    computing_parameters : dict
+        Dictionary containing the computing parameters for the simulation.
 
     Returns
     -------
@@ -46,19 +42,19 @@ def figures_preparation(type_current, type_display):
     mpl.rcParams['lines.linewidth'] = 2.0
     mpl.rcParams['lines.markersize'] = 5.0
 
-    if type_display == "no_display":
+    if computing_parameters['type_display'] == "no_display":
         fig1, ax1 = None, None
         fig2, ax2 = None, None
         fig3, ax3 = None, None
 
     # For the step current
-    if type_current == "step":
-        if type_display == "multiple":  # saving instruction is directly implemented within AlphaPEM.Display here.
+    if computing_parameters['type_current'] == "step":
+        if computing_parameters['type_display'] == "multiple":  # saving instruction is directly implemented within AlphaPEM.Display here.
             mpl.rcParams['font.size'] = 18  # Font size for all text
             fig1, ax1 = None, None  # Here, additional plots are unnecessary
             fig2, ax2 = None, None  # Here, additional plots are unnecessary
             fig3, ax3 = None, None  # Here, additional plots are unnecessary
-        elif type_display == "synthetic":
+        elif computing_parameters['type_display'] == "synthetic":
             mpl.rcParams['font.size'] = 13  # Font size for all text
             fig1, ax1 = plt.subplots(3, 3, figsize=(14, 14))
             fig2, ax2 = None, None  # Here, additional plots are unnecessary
@@ -66,41 +62,41 @@ def figures_preparation(type_current, type_display):
             plt.subplots_adjust(left=0.04, right=0.98, top=0.96, bottom=0.07, wspace=0.2, hspace=0.15)
 
     # For the polarization curve
-    elif type_current == "polarization":
-        if type_display == "multiple":
+    elif computing_parameters['type_current'] == "polarization":
+        if computing_parameters['type_display'] == "multiple":
             mpl.rcParams['font.size'] = 11  # Font size for all text
             fig1, ax1 = plt.subplots(1, 3, figsize=(14, 4.7))
             fig2, ax2 = plt.subplots(1, 3, figsize=(14, 4.7))
             fig3, ax3 = None, None  # Here, additional plots are unnecessary
             plt.subplots_adjust(left=0.04, right=0.98, top=0.96, bottom=0.07, wspace=0.2, hspace=0.15)
-        elif type_display == "synthetic":
+        elif computing_parameters['type_display'] == "synthetic":
             mpl.rcParams['font.size'] = 18  # Font size for all text
             fig1, ax1 = plt.subplots(figsize=(8, 8))
             fig2, ax2 = None, None  # Here, additional plots are unnecessary
             fig3, ax3 = None, None  # Here, additional plots are unnecessary
 
     # For the polarization curve used for the calibration
-    elif type_current == "polarization_for_cali":
-        if type_display == "multiple":
+    elif computing_parameters['type_current'] == "polarization_for_cali":
+        if computing_parameters['type_display'] == "multiple":
             mpl.rcParams['font.size'] = 11  # Font size for all text
             fig1, ax1 = plt.subplots(1, 3, figsize=(14, 4.7))
             fig2, ax2 = None, None  # Here, additional plots are unnecessary
             fig3, ax3 = None, None  # Here, additional plots are unnecessary
             plt.subplots_adjust(left=0.04, right=0.98, top=0.96, bottom=0.07, wspace=0.2, hspace=0.15)
-        elif type_display == "synthetic":
+        elif computing_parameters['type_display'] == "synthetic":
             mpl.rcParams['font.size'] = 18  # Font size for all text
             fig1, ax1 = plt.subplots(figsize=(8, 8))
             fig2, ax2 = None, None  # Here, additional plots are unnecessary
             fig3, ax3 = None, None  # Here, additional plots are unnecessary
 
     # For the EIS curve
-    elif type_current == "EIS":
-        if type_display == "multiple":
+    elif computing_parameters['type_current'] == "EIS":
+        if computing_parameters['type_display'] == "multiple":
             mpl.rcParams['font.size'] = 18  # Font size for all text
             fig1, ax1 = plt.subplots(figsize=(8, 8))
             fig2, ax2 = plt.subplots(figsize=(8, 8))
             fig3, ax3 = plt.subplots(figsize=(8, 8))
-        elif type_display == "synthetic":
+        elif computing_parameters['type_display'] == "synthetic":
             mpl.rcParams['font.size'] = 13  # Font size for all text
             fig1, ax1 = plt.subplots(1, 3, figsize=(14, 4.7))
             fig2, ax2 = None, None  # Here, additional plots are unnecessary
@@ -110,249 +106,174 @@ def figures_preparation(type_current, type_display):
     return fig1, ax1, fig2, ax2, fig3, ax3
 
 
-def launch_AlphaPEM_for_step_current(type_fuel_cell_1, type_fuel_cell_2, type_fuel_cell_3, type_fuel_cell_4,
-                                     type_current, type_auxiliary, type_control_1, type_control_2, type_control_3,
-                                     type_control_4, type_purge, type_display, type_plot):
+def select_nth_elements(d, n):
+    """Select the n-th element from each list in a dictionary.
+
+    Parameters
+    ----------
+    d : dict
+        Dictionary where values are lists or other objects.
+    n : int
+        Index of the element to select from each list.
+
+    Returns
+    -------
+    dict
+        New dictionary with the n-th element from each list, or the original value if it is not a list or the list is
+        too short.
+    """
+    return {k: (v[n] if isinstance(v, list) and len(v) > n else v) for k, v in d.items()}
+
+
+def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, accessible_physical_parameters,
+                                     undetermined_physical_parameters, computing_parameters):
     """Launch the AlphaPEM simulator for a step current density and display the results.
 
     Parameters
     ----------
-    type_fuel_cell : str
-        Type of fuel cell configuration (computing parameter).
-    type_current : str
-        Type of current density function (computing parameter).
-    type_auxiliary : str
-        Type of auxiliary system (computing parameter).
-    type_control : str
-        Type of control system (computing parameter).
-    type_purge : str
-        Type of purge system (computing parameter).
-    type_display : str
-        Type of display (computing parameter).
-    type_plot : str
-        Type of plot (computing parameter).
+    operating_inputs : dict
+        Dictionary containing the operating inputs for the simulation.
+    current_parameters : dict
+        Dictionary containing the current parameters for the simulation.
+    accessible_physical_parameters : dict
+        Dictionary containing the accessible physical parameters for the simulation.
+    undetermined_physical_parameters : dict
+        Dictionary containing the undetermined physical parameters for the simulation.
+    computing_parameters : dict
+        Dictionary containing the computing parameters for the simulation.
     """
 
     # Starting time
     start_time = time.time()
 
     # Figures preparation
-    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(type_current, type_display)
+    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(computing_parameters)
 
-    # Retrieving parameters from the settings.py file
-    #   Imposed inputs
-    (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
-     current_density) = current_density_parameters(type_current)
-    #   Operating conditions
-    T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, pola_current_parameters_1 = \
-        operating_inputs_function(pola_current_parameters, type_fuel_cell_1)
-    if type_fuel_cell_2 is not None:
-        T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2, pola_current_parameters_2 = \
-            operating_inputs_function(pola_current_parameters, type_fuel_cell_2)
-    if type_fuel_cell_3 is not None:
-        T_des_3, Pa_des_3, Pc_des_3, Sa_3, Sc_3, Phi_a_des_3, Phi_c_des_3, pola_current_parameters_3 = \
-            operating_inputs_function(pola_current_parameters, type_fuel_cell_3)
-    if type_fuel_cell_4 is not None:
-        T_des_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4, pola_current_parameters_4 = \
-            operating_inputs_function(pola_current_parameters, type_fuel_cell_4)
-    #   Physical parameters
-    (Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co,
-     kappa_c, a_slim, b_slim, a_switch, C_scl) = physical_parameters(type_fuel_cell_1)
-    #   Computing parameters
-    n_gdl, t_purge, step_current_parameters = computing_parameters(step_current_parameters, Hgdl, Hcl)
+    # Certain conditions must be met.
+    if computing_parameters['type_display'] == "multiple":
+        raise ValueError('step current is not thought to be used with step current and multiple display.' +
+                         'There would be too much plots to handle.')
 
     # Dynamic display requires a dedicated use of the AlphaPEM class.
-    if type_plot == "dynamic":
-
-        # Certain conditions must be met.
-        if type_fuel_cell_2 is not None or type_fuel_cell_3 is not None or type_fuel_cell_4 is not None:
-            raise ValueError('dynamic plot is not currently intended for use with different inputs.')
-        if type_current == "step" and type_display == "multiple":
-            raise ValueError('dynamic plot is not thought to be used with step current and multiple display.' +
-                             'There would be too much plots to handle.')
+    if computing_parameters['type_plot'] == "dynamic":
 
         # Initialization
         #       Calculation of the plot update number (n) and the initial time interval (time_interval).
         initial_variable_values = None
         #           Extraction of the parameters
-        tf_step = step_current_parameters['delta_t_ini_step'] + step_current_parameters['delta_t_load_step'] + \
-                  step_current_parameters['delta_t_break_step']  # (s).
-        delta_t_dyn_step = step_current_parameters['delta_t_dyn_step']  # (s).
+        tf_step = (current_parameters['step_current_parameters']['delta_t_ini_step'] +
+                   current_parameters['step_current_parameters']['delta_t_load_step'] +
+                   current_parameters['step_current_parameters']['delta_t_break_step'])  # (s).
+        delta_t_dyn_step = current_parameters['step_current_parameters']['delta_t_dyn_step']  # (s).
         #           Calculation
         n = int(tf_step / delta_t_dyn_step)  # It is the plot update number.
         time_interval = [0, delta_t_dyn_step]  # (s). It is the initial time interval.
 
         # Dynamic simulation
         for i in range(n):
-            Simulator_1 = AlphaPEM(current_density, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
-                                   step_current_parameters, pola_current_parameters_1, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc,
-                                   epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c,
-                                   a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_1, type_current,
-                                   type_auxiliary, type_control_1, type_purge, type_display, type_plot,
-                                   initial_variable_values, time_interval)
+            Simulator = AlphaPEM(operating_inputs, current_parameters, accessible_physical_parameters,
+                                 undetermined_physical_parameters, computing_parameters, initial_variable_values,
+                                 time_interval)
 
             # time_interval actualization
             if i < (n - 1):  # The final simulation does not require actualization.
-                t0_interval = Simulator_1.variables['t'][-1]
+                t0_interval = Simulator.variables['t'][-1]
                 tf_interval = (i + 2) * delta_t_dyn_step
                 time_interval = [t0_interval, tf_interval]  # Reset of the time interval
 
             # Recovery of the internal states from the end of the preceding simulation.
             initial_variable_values = []
-            for x in Simulator_1.solver_variable_names:
-                initial_variable_values.append(Simulator_1.variables[x][-1])
+            for x in Simulator.solver_variable_names:
+                initial_variable_values.append(Simulator.variables[x][-1])
 
             # Display
-            if type_display != "no_display":
-                Simulator_1.Display(ax1, ax2, ax3)
+            if computing_parameters['type_display'] != "no_display":
+                Simulator.Display(ax1, ax2, ax3)
 
-    else:  # elif type_plot == "fixed":
-
-        # Certain conditions must be met.
-        if type_current == "step" and \
-                (type_fuel_cell_2 is not None or type_fuel_cell_3 is not None or type_fuel_cell_4 is not None):
-            raise ValueError('step current contains too much information for a common plot with different inputs.')
-
+    else:  # elif computing_parameters['type_plot'] == "fixed":
         # Simulation
-        Simulator_1 = AlphaPEM(current_density, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
-                               step_current_parameters, pola_current_parameters_1, pola_current_for_cali_parameters,
-                               i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
-                               epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
-                               a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_1, type_current, type_auxiliary,
-                               type_control_1, type_purge, type_display, type_plot)
-        if type_fuel_cell_2 is not None:
-            Simulator_2 = AlphaPEM(current_density, T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2,
-                                   step_current_parameters, pola_current_parameters_2, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc,
-                                   epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c,
-                                   a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_2, type_current,
-                                   type_auxiliary, type_control_2, type_purge, type_display, type_plot)
-        if type_fuel_cell_3 is not None:
-            Simulator_3 = AlphaPEM(current_density, T_des_3, Pa_des_3, Pc_des_3, Sa_3, Sc_3, Phi_a_des_3, Phi_c_des_3,
-                                   step_current_parameters, pola_current_parameters_3, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc,
-                                   epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c,
-                                   a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_3, type_current,
-                                   type_auxiliary, type_control_3, type_purge, type_display, type_plot)
-        if type_fuel_cell_4 is not None:
-            Simulator_4 = AlphaPEM(current_density, T_des_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4,
-                                   step_current_parameters, pola_current_parameters_4, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc,
-                                   epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c,
-                                   a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_4, type_current,
-                                   type_auxiliary, type_control_4, type_purge, type_display, type_plot)
+        Simulator = AlphaPEM(operating_inputs, current_parameters, accessible_physical_parameters,
+                               undetermined_physical_parameters, computing_parameters)
         # Display
-        if type_display != "no_display":
-            Simulator_1.Display(ax1, ax2, ax3)
-            if type_fuel_cell_2 is not None:
-                Simulator_2.Display(ax1, ax2, ax3)
-            if type_fuel_cell_3 is not None:
-                Simulator_3.Display(ax1, ax2, ax3)
-            if type_fuel_cell_4 is not None:
-                Simulator_4.Display(ax1, ax2, ax3)
+        if computing_parameters['type_display'] != "no_display":
+            Simulator.Display(ax1, ax2, ax3)
 
     # Plot saving
-    Simulator_1.Save_plot(fig1, fig2, fig3)
+    Simulator.Save_plot(fig1, fig2, fig3)
 
     # Ending time
     algo_time = time.time() - start_time
     print('Time of the algorithm in second :', algo_time)
 
 
-def launch_AlphaPEM_for_polarization_current(type_fuel_cell_1, type_fuel_cell_2, type_fuel_cell_3, type_fuel_cell_4,
-                                             type_current, type_auxiliary, type_control_1, type_control_2,
-                                             type_control_3, type_control_4, type_purge, type_display, type_plot):
+def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameters, accessible_physical_parameters,
+                                             undetermined_physical_parameters, computing_parameters):
     """Launch the AlphaPEM simulator for a polarization current density and display the results.
 
     Parameters
     ----------
-    type_fuel_cell : str
-        Type of fuel cell configuration (computing parameter).
-    type_current : str
-        Type of current density function (computing parameter).
-    type_auxiliary : str
-        Type of auxiliary system (computing parameter).
-    type_control : str
-        Type of control system (computing parameter).
-    type_purge : str
-        Type of purge system (computing parameter).
-    type_display : str
-        Type of display (computing parameter).
-    type_plot : str
-        Type of plot (computing parameter).
+    operating_inputs : dict
+        Dictionary containing the operating inputs for the simulation.
+    current_parameters : dict
+        Dictionary containing the current parameters for the simulation.
+    accessible_physical_parameters : dict
+        Dictionary containing the accessible physical parameters for the simulation.
+    undetermined_physical_parameters : dict
+        Dictionary containing the undetermined physical parameters for the simulation.
+    computing_parameters : dict
+        Dictionary containing the computing parameters for the simulation.
     """
 
     # Starting time
     start_time = time.time()
 
     # Figures preparation
-    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(type_current, type_display)
-
-    # Retrieving parameters from the settings.py file
-    #   Imposed inputs
-    (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
-     current_density) = current_density_parameters(type_current)
-    #   Operating conditions
-    T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, pola_current_parameters_1 = \
-        operating_inputs_function(pola_current_parameters, type_fuel_cell_1)
-    if type_fuel_cell_2 is not None:
-        T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2, pola_current_parameters_2 = \
-            operating_inputs_function(pola_current_parameters, type_fuel_cell_2)
-    if type_fuel_cell_3 is not None:
-        T_des_3, Pa_des_3, Pc_des_3, Sa_3, Sc_3, Phi_a_des_3, Phi_c_des_3, pola_current_parameters_3 = \
-            operating_inputs_function(pola_current_parameters, type_fuel_cell_3)
-    if type_fuel_cell_4 is not None:
-        T_des_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4, pola_current_parameters_4 = \
-            operating_inputs_function(pola_current_parameters, type_fuel_cell_4)
-    #   Physical parameters
-    (Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co,
-     kappa_c, a_slim, b_slim, a_switch, C_scl) = physical_parameters(type_fuel_cell_1)
-    #   Computing parameters
-    n_gdl, t_purge, step_current_parameters = computing_parameters(step_current_parameters, Hgdl, Hcl)
+    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(computing_parameters)
 
     # Condition to fill for the comparison with experimental values
-    if type_fuel_cell_1 is not None and type_fuel_cell_1 != "manual_setup" and \
-            type_auxiliary == "forced-convective_cathode_with_flow-through_anode":  # Experimental points are accessible
-        i_exp_t_1, U_exp_t_1 = pola_exp_values(type_fuel_cell_1)
-        if pola_current_parameters_1['i_max_pola'] < i_exp_t_1[-1]:
+    if computing_parameters['type_fuel_cell'][1] is not None and computing_parameters['type_fuel_cell'][1] != "manual_setup" and \
+            computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode":  # Experimental points are accessible
+        i_exp_t_1, U_exp_t_1 = pola_exp_values(computing_parameters['type_fuel_cell'][1])
+        if current_parameters['pola_current_parameters'][1]['i_max_pola'] < i_exp_t_1[-1]:
             raise ValueError('The given maximum current density of the polarization curve i_max_pola_1 is lower than the '
                              'maximum current density of the experimental values. Please increase it.')
-    if type_fuel_cell_2 is not None and type_fuel_cell_2 != "manual_setup" and \
-            type_auxiliary == "forced-convective_cathode_with_flow-through_anode":  # Experimental points are accessible
-        i_exp_t_2, U_exp_t_2 = pola_exp_values(type_fuel_cell_2)
-        if pola_current_parameters_2['i_max_pola'] < i_exp_t_2[-1]:
+    if computing_parameters['type_fuel_cell'][2] is not None and computing_parameters['type_fuel_cell'][2] != "manual_setup" and \
+            computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode":  # Experimental points are accessible
+        i_exp_t_2, U_exp_t_2 = pola_exp_values(computing_parameters['type_fuel_cell'][2])
+        if current_parameters['pola_current_parameters'][2]['i_max_pola'] < i_exp_t_2[-1]:
             raise ValueError('The given maximum current density of the polarization curve i_max_pola_2 is lower than the '
                              'maximum current density of the experimental values. Please increase it.')
-    if type_fuel_cell_3 is not None and type_fuel_cell_3 != "manual_setup" and \
-            type_auxiliary == "forced-convective_cathode_with_flow-through_anode":  # Experimental points are accessible
-        i_exp_t_3, U_exp_t_3 = pola_exp_values(type_fuel_cell_3)
-        if pola_current_parameters_3['i_max_pola'] < i_exp_t_3[-1]:
+    if computing_parameters['type_fuel_cell'][3] is not None and computing_parameters['type_fuel_cell'][3] != "manual_setup" and \
+            computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode":  # Experimental points are accessible
+        i_exp_t_3, U_exp_t_3 = pola_exp_values(computing_parameters['type_fuel_cell'][3])
+        if current_parameters['pola_current_parameters'][3]['i_max_pola'] < i_exp_t_3[-1]:
             raise ValueError('The given maximum current density of the polarization curve i_max_pola_3 is lower than the '
                              'maximum current density of the experimental values. Please increase it.')
-    if type_fuel_cell_4 is not None and type_fuel_cell_4 != "manual_setup" and \
-            type_auxiliary == "forced-convective_cathode_with_flow-through_anode":  # Experimental points are accessible
-        i_exp_t_4, U_exp_t_4 = pola_exp_values(type_fuel_cell_4)
-        if pola_current_parameters_4['i_max_pola'] < i_exp_t_4[-1]:
+    if computing_parameters['type_fuel_cell'][4] is not None and computing_parameters['type_fuel_cell'][4] != "manual_setup" and \
+            computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode":  # Experimental points are accessible
+        i_exp_t_4, U_exp_t_4 = pola_exp_values(computing_parameters['type_fuel_cell'][4])
+        if current_parameters['pola_current_parameters'][4]['i_max_pola'] < i_exp_t_4[-1]:
             raise ValueError('The given maximum current density of the polarization curve i_max_pola_4 is lower than the '
                              'maximum current density of the experimental values. Please increase it.')
 
     # Dynamic display requires a dedicated use of the AlphaPEM class.
-    if type_plot == "dynamic":
+    if computing_parameters['type_plot'] == "dynamic":
 
         # Certain conditions must be met.
-        if type_fuel_cell_2 is not None or type_fuel_cell_3 is not None or type_fuel_cell_4 is not None:
+        if (computing_parameters['type_fuel_cell'][2] is not None or 
+                computing_parameters['type_fuel_cell'][3] is not None or 
+                computing_parameters['type_fuel_cell'][4] is not None):
             raise ValueError('dynamic plot is not currently intended for use with different inputs.')
 
         # Initialization
         #       Calculation of the plot update number (n) and the initial time interval (time_interval).
         initial_variable_values = None
         #           Extraction of the parameters
-        delta_t_ini_pola = pola_current_parameters_1['delta_t_ini_pola']  # (s).
-        delta_t_load_pola = pola_current_parameters_1['delta_t_load_pola']  # (s).
-        delta_t_break_pola = pola_current_parameters_1['delta_t_break_pola']  # (s).
-        delta_i_pola = pola_current_parameters_1['delta_i_pola']  # (A.m-2).
-        i_max_pola_1 = pola_current_parameters_1['i_max_pola_1']  # (A.m-2).
+        delta_t_ini_pola = current_parameters['pola_current_parameters'][1]['delta_t_ini_pola']  # (s).
+        delta_t_load_pola = current_parameters['pola_current_parameters'][1]['delta_t_load_pola']  # (s).
+        delta_t_break_pola = current_parameters['pola_current_parameters'][1]['delta_t_break_pola']  # (s).
+        delta_i_pola = current_parameters['pola_current_parameters'][1]['delta_i_pola']  # (A.m-2).
+        i_max_pola_1 = current_parameters['pola_current_parameters'][1]['i_max_pola_1']  # (A.m-2).
         #           Calculation
         delta_t_pola = delta_t_load_pola + delta_t_break_pola  # s. It is the time of one load.
         tf = delta_t_ini_pola + int(
@@ -362,12 +283,9 @@ def launch_AlphaPEM_for_polarization_current(type_fuel_cell_1, type_fuel_cell_2,
 
         # Dynamic simulation
         for i in range(n):
-            Simulator_1 = AlphaPEM(current_density, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
-                                   step_current_parameters, pola_current_parameters_1, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc,
-                                   epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c,
-                                   a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_1, type_current,
-                                   type_auxiliary, type_control_1, type_purge, type_display, type_plot,
+            Simulator_1 = AlphaPEM(select_nth_elements(operating_inputs, 1),
+                                   select_nth_elements(current_parameters, 1), accessible_physical_parameters,
+                                   undetermined_physical_parameters, select_nth_elements(computing_parameters, 1),
                                    initial_variable_values, time_interval)
 
             # time_interval actualization
@@ -382,47 +300,35 @@ def launch_AlphaPEM_for_polarization_current(type_fuel_cell_1, type_fuel_cell_2,
                 initial_variable_values.append(Simulator_1.variables[x][-1])
 
             # Display
-            if type_display != "no_display":
+            if computing_parameters['type_display'] != "no_display":
                 Simulator_1.Display(ax1, ax2, ax3)
 
-    else:  # elif type_plot == "fixed":
+    else:  # elif computing_parameters['type_plot'] == "fixed":
         # Simulation
-        Simulator_1 = AlphaPEM(current_density, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
-                               step_current_parameters, pola_current_parameters_1, pola_current_for_cali_parameters,
-                               i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
-                               epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
-                               C_scl, n_gdl, t_purge, type_fuel_cell_1, type_current, type_auxiliary, type_control_1,
-                               type_purge, type_display, type_plot)
-        if type_fuel_cell_2 is not None:
-            Simulator_2 = AlphaPEM(current_density, T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2,
-                                   step_current_parameters, pola_current_parameters_2, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
-                                   epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
-                                   a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_2, type_current, type_auxiliary,
-                                   type_control_2, type_purge, type_display, type_plot)
-        if type_fuel_cell_3 is not None:
-            Simulator_3 = AlphaPEM(current_density, T_des_3, Pa_des_3, Pc_des_3, Sa_3, Sc_3, Phi_a_des_3, Phi_c_des_3,
-                                   step_current_parameters, pola_current_parameters_3, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
-                                   epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
-                                   a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_3, type_current, type_auxiliary,
-                                   type_control_3, type_purge, type_display, type_plot)
-        if type_fuel_cell_4 is not None:
-            Simulator_4 = AlphaPEM(current_density, T_des_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4,
-                                   step_current_parameters, pola_current_parameters_4, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
-                                   epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
-                                   a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_4, type_current, type_auxiliary,
-                                   type_control_4, type_purge, type_display, type_plot)
+        Simulator_1 = AlphaPEM(select_nth_elements(operating_inputs, 1),
+                               select_nth_elements(current_parameters, 1), accessible_physical_parameters,
+                               undetermined_physical_parameters, select_nth_elements(computing_parameters, 1))
+        if computing_parameters['type_fuel_cell'][2] is not None:
+            Simulator_2 = AlphaPEM(select_nth_elements(operating_inputs, 2),
+                                   select_nth_elements(current_parameters, 2), accessible_physical_parameters,
+                                   undetermined_physical_parameters, select_nth_elements(computing_parameters, 2))
+        if computing_parameters['type_fuel_cell'][3] is not None:
+            Simulator_3 = AlphaPEM(select_nth_elements(operating_inputs, 3),
+                                   select_nth_elements(current_parameters, 3), accessible_physical_parameters,
+                                   undetermined_physical_parameters, select_nth_elements(computing_parameters, 3))
+        if computing_parameters['type_fuel_cell'][4] is not None:
+            Simulator_4 = AlphaPEM(select_nth_elements(operating_inputs, 4),
+                                   select_nth_elements(current_parameters, 4), accessible_physical_parameters,
+                                   undetermined_physical_parameters, select_nth_elements(computing_parameters, 4))
 
         # Display
-        if type_display != "no_display":
+        if computing_parameters['type_display'] != "no_display":
             Simulator_1.Display(ax1, ax2, ax3)
-            if type_fuel_cell_2 is not None:
+            if computing_parameters['type_fuel_cell'][2] is not None:
                 Simulator_2.Display(ax1, ax2, ax3)
-            if type_fuel_cell_3 is not None:
+            if computing_parameters['type_fuel_cell'][3] is not None:
                 Simulator_3.Display(ax1, ax2, ax3)
-            if type_fuel_cell_4 is not None:
+            if computing_parameters['type_fuel_cell'][4] is not None:
                 Simulator_4.Display(ax1, ax2, ax3)
 
     # Plot saving
@@ -433,76 +339,51 @@ def launch_AlphaPEM_for_polarization_current(type_fuel_cell_1, type_fuel_cell_2,
     print('Time of the algorithm in second :', algo_time)
 
 
-def launch_AlphaPEM_for_polarization_current_for_calibration(type_fuel_cell_1, type_fuel_cell_2, type_fuel_cell_3,
-                                                             type_fuel_cell_4, type_current, type_auxiliary,
-                                                             type_control_1, type_control_2, type_control_3,
-                                                             type_control_4, type_purge, type_display, type_plot):
+def launch_AlphaPEM_for_polarization_current_for_calibration(operating_inputs, current_parameters,
+                                                             accessible_physical_parameters,
+                                                             undetermined_physical_parameters, computing_parameters):
     """Launch the AlphaPEM simulator for a polarization current density made for the calibration of the undetermined
     parameters, and display the results.
 
     Parameters
     ----------
-    type_fuel_cell : str
-        Type of fuel cell configuration (computing parameter).
-    type_current : str
-        Type of current density function (computing parameter).
-    type_auxiliary : str
-        Type of auxiliary system (computing parameter).
-    type_control : str
-        Type of control system (computing parameter).
-    type_purge : str
-        Type of purge system (computing parameter).
-    type_display : str
-        Type of display (computing parameter).
-    type_plot : str
-        Type of plot (computing parameter).
+    operating_inputs : dict
+        Dictionary containing the operating inputs for the simulation.
+    current_parameters : dict
+        Dictionary containing the current parameters for the simulation.
+    accessible_physical_parameters : dict
+        Dictionary containing the accessible physical parameters for the simulation.
+    undetermined_physical_parameters : dict
+        Dictionary containing the undetermined physical parameters for the simulation.
+    computing_parameters : dict
+        Dictionary containing the computing parameters for the simulation.
     """
 
     # Starting time
     start_time = time.time()
 
     # Figures preparation
-    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(type_current, type_display)
-
-    # Retrieving parameters from the settings.py file
-    #   Imposed inputs
-    (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
-     current_density) = current_density_parameters(type_current)
-    #   Operating conditions
-    T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, pola_current_parameters_1 = \
-        operating_inputs_function(pola_current_parameters, type_fuel_cell_1)
-    if type_fuel_cell_2 is not None:
-        T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2, pola_current_parameters_2 = \
-            operating_inputs_function(pola_current_parameters, type_fuel_cell_2)
-    if type_fuel_cell_3 is not None:
-        T_des_3, Pa_des_3, Pc_des_3, Sa_3, Sc_3, Phi_a_des_3, Phi_c_des_3, pola_current_parameters_3 = \
-            operating_inputs_function(pola_current_parameters, type_fuel_cell_3)
-    if type_fuel_cell_4 is not None:
-        T_des_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4, pola_current_parameters_4 = \
-            operating_inputs_function(pola_current_parameters, type_fuel_cell_4)
-    #   Physical parameters
-    (Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co,
-     kappa_c, a_slim, b_slim, a_switch, C_scl) = physical_parameters(type_fuel_cell_1)
-    #   Computing parameters
-    n_gdl, t_purge, step_current_parameters = computing_parameters(step_current_parameters, Hgdl, Hcl)
+    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(computing_parameters)
 
     # Dynamic display requires a dedicated use of the AlphaPEM class.
-    if type_plot == "dynamic":
+    if computing_parameters['type_plot'] == "dynamic":
 
         # Certain conditions must be met.
-        if type_fuel_cell_2 is not None or type_fuel_cell_3 is not None or type_fuel_cell_4 is not None:
+        if (computing_parameters['type_fuel_cell'][2] is not None or 
+                computing_parameters['type_fuel_cell'][3] is not None or 
+                computing_parameters['type_fuel_cell'][4] is not None):
             raise ValueError('dynamic plot is not currently intended for use with different inputs.')
-        if type_current == "polarization_for_cali":
+        if computing_parameters['type_current'] == "polarization_for_cali":
             raise ValueError('calibration should not use dynamic plot, as it is not intended for real-time display.')
 
         # Initialization
         #       Calculation of the plot update number (n) and the initial time interval (time_interval).
         initial_variable_values = None
         #           Extraction of the parameters
-        delta_t_ini_pola_cali = pola_current_parameters_1['delta_t_ini_pola_cali']  # (s).
-        delta_t_load_pola_cali = pola_current_parameters_1['delta_t_load_pola_cali']  # (s).
-        delta_t_break_pola_cali = pola_current_parameters_1['delta_t_break_pola_cali']  # (s).
-        i_exp_cali_t, U_exp_cali_t = pola_exp_values_calibration(type_fuel_cell_1)  # (A.m-2, V).
+        delta_t_ini_pola_cali = current_parameters['pola_current_parameters'][1]['delta_t_ini_pola_cali']  # (s).
+        delta_t_load_pola_cali = current_parameters['pola_current_parameters'][1]['delta_t_load_pola_cali']  # (s).
+        delta_t_break_pola_cali = current_parameters['pola_current_parameters'][1]['delta_t_break_pola_cali']  # (s).
+        i_exp_cali_t, U_exp_cali_t = pola_exp_values_calibration(computing_parameters['type_fuel_cell'][1])  # (A.m-2, V).
         #           Calculation
         delta_t_pola_cali = delta_t_load_pola_cali + delta_t_break_pola_cali  # s. It is the time of one load.
         tf = delta_t_ini_pola_cali + len(
@@ -512,13 +393,10 @@ def launch_AlphaPEM_for_polarization_current_for_calibration(type_fuel_cell_1, t
 
         # Dynamic simulation
         for i in range(n):
-            Simulator_1 = AlphaPEM(current_density, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
-                                   step_current_parameters, pola_current_parameters_1, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
-                                   epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
-                                   a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_1, type_current, type_auxiliary,
-                                   type_control_1, type_purge, type_display, type_plot, initial_variable_values,
-                                   time_interval)
+            Simulator_1 = AlphaPEM(select_nth_elements(operating_inputs, 1),
+                                   select_nth_elements(current_parameters, 1), accessible_physical_parameters,
+                                   undetermined_physical_parameters, select_nth_elements(computing_parameters, 1),
+                                   initial_variable_values, time_interval)
 
             # time_interval actualization
             if i < (n - 1):  # The final simulation does not require actualization.
@@ -532,53 +410,42 @@ def launch_AlphaPEM_for_polarization_current_for_calibration(type_fuel_cell_1, t
                 initial_variable_values.append(Simulator_1.variables[x][-1])
 
             # Display
-            if type_display != "no_display":
+            if computing_parameters['type_display'] != "no_display":
                 Simulator_1.Display(ax1, ax2, ax3)
 
-    else:  # elif type_plot == "fixed":
+    else:  # elif computing_parameters['type_plot'] == "fixed":
 
         # Certain conditions must be met.
-        if type_current == "polarization_for_cali" and (type_fuel_cell_1 == "manual_setup" or \
-                                                        type_auxiliary != "forced-convective_cathode_with_flow-through_anode"):
+        if (computing_parameters['type_current'] == "polarization_for_cali" and 
+                (computing_parameters['type_fuel_cell'][1] == "manual_setup" or \
+                 computing_parameters['type_auxiliary'] != "forced-convective_cathode_with_flow-through_anode")):
             raise ValueError('polarization current for calibration should be done with experimental data.')
 
         # Simulation
-        Simulator_1 = AlphaPEM(current_density, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
-                               step_current_parameters, pola_current_parameters_1, pola_current_for_cali_parameters,
-                               i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
-                               epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
-                               C_scl, n_gdl, t_purge, type_fuel_cell_1, type_current, type_auxiliary, type_control_1,
-                               type_purge, type_display, type_plot)
-        if type_fuel_cell_2 is not None:
-            Simulator_2 = AlphaPEM(current_density, T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2,
-                                   step_current_parameters, pola_current_parameters_2, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
-                                   epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
-                                   a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_2, type_current, type_auxiliary,
-                                   type_control_2, type_purge, type_display, type_plot)
-        if type_fuel_cell_3 is not None:
-            Simulator_3 = AlphaPEM(current_density, T_des_3, Pa_des_3, Pc_des_3, Sa_3, Sc_3, Phi_a_des_3, Phi_c_des_3,
-                                   step_current_parameters, pola_current_parameters_3, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
-                                   epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
-                                   a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_3, type_current, type_auxiliary,
-                                   type_control_3, type_purge, type_display, type_plot)
-        if type_fuel_cell_4 is not None:
-            Simulator_4 = AlphaPEM(current_density, T_des_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4,
-                                   step_current_parameters, pola_current_parameters_4, pola_current_for_cali_parameters,
-                                   i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
-                                   epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
-                                   a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_4, type_current, type_auxiliary,
-                                   type_control_4, type_purge, type_display, type_plot)
+        Simulator_1 = AlphaPEM(select_nth_elements(operating_inputs, 1),
+                               select_nth_elements(current_parameters, 1), accessible_physical_parameters,
+                               undetermined_physical_parameters, select_nth_elements(computing_parameters, 1))
+        if computing_parameters['type_fuel_cell'][2] is not None:
+            Simulator_2 = AlphaPEM(select_nth_elements(operating_inputs, 2),
+                                   select_nth_elements(current_parameters, 2), accessible_physical_parameters,
+                                   undetermined_physical_parameters, select_nth_elements(computing_parameters, 2))
+        if computing_parameters['type_fuel_cell'][3] is not None:
+            Simulator_3 = AlphaPEM(select_nth_elements(operating_inputs, 3),
+                                   select_nth_elements(current_parameters, 3), accessible_physical_parameters,
+                                   undetermined_physical_parameters, select_nth_elements(computing_parameters, 3))
+        if computing_parameters['type_fuel_cell'][4] is not None:
+            Simulator_4 = AlphaPEM(select_nth_elements(operating_inputs, 4),
+                                   select_nth_elements(current_parameters, 4), accessible_physical_parameters,
+                                   undetermined_physical_parameters, select_nth_elements(computing_parameters, 4))
 
         # Display
-        if type_display != "no_display":
+        if computing_parameters['type_display'] != "no_display":
             Simulator_1.Display(ax1, ax2, ax3)
-            if type_fuel_cell_2 is not None:
+            if computing_parameters['type_fuel_cell'][2] is not None:
                 Simulator_2.Display(ax1, ax2, ax3)
-            if type_fuel_cell_3 is not None:
+            if computing_parameters['type_fuel_cell'][3] is not None:
                 Simulator_3.Display(ax1, ax2, ax3)
-            if type_fuel_cell_4 is not None:
+            if computing_parameters['type_fuel_cell'][4] is not None:
                 Simulator_4.Display(ax1, ax2, ax3)
 
     # Plot saving
@@ -589,57 +456,40 @@ def launch_AlphaPEM_for_polarization_current_for_calibration(type_fuel_cell_1, t
     print('Time of the algorithm in second :', algo_time)
 
 
-def launch_AlphaPEM_for_EIS_current(type_fuel_cell, type_current, type_auxiliary, type_control, type_purge,
-                                    type_display, type_plot):
+def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, accessible_physical_parameters,
+                                    undetermined_physical_parameters, computing_parameters):
     """Launch the AlphaPEM simulator for an EIS current density and display the results.
 
     Parameters
     ----------
-    type_fuel_cell : str
-        Type of fuel cell configuration (computing parameter).
-    type_current : str
-        Type of current density function (computing parameter).
-    type_auxiliary : str
-        Type of auxiliary system (computing parameter).
-    type_control : str
-        Type of control system (computing parameter).
-    type_purge : str
-        Type of purge system (computing parameter).
-    type_display : str
-        Type of display (computing parameter).
-    type_plot : str
-        Type of plot (computing parameter).
+    operating_inputs : dict
+        Dictionary containing the operating inputs for the simulation.
+    current_parameters : dict
+        Dictionary containing the current parameters for the simulation.
+    accessible_physical_parameters : dict
+        Dictionary containing the accessible physical parameters for the simulation.
+    undetermined_physical_parameters : dict
+        Dictionary containing the undetermined physical parameters for the simulation.
+    computing_parameters : dict
+        Dictionary containing the computing parameters for the simulation.
     """
 
     # Starting time
     start_time = time.time()
 
-    # Check if the type_current is valid
-    if type_plot != "dynamic":
+    # Check if the computing_parameters['type_current'] is valid
+    if computing_parameters['type_plot'] != "dynamic":
         raise ValueError('EIS has to be plot with a dynamic type_plot setting, '
                          'because max_step has to be adjusted at each frequency.')
 
     # Figures preparation
-    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(type_current, type_display)
-
-    # Retrieving parameters from the settings.py file
-    #   Imposed inputs
-    (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
-     current_density) = current_density_parameters(type_current)
-    #   Operating conditions
-    T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, pola_current_parameters = \
-        operating_inputs_function(pola_current_parameters, type_fuel_cell)
-    #   Physical parameters
-    (Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co,
-     kappa_c, a_slim, b_slim, a_switch, C_scl) = physical_parameters(type_fuel_cell)
-    #   Computing parameters
-    n_gdl, t_purge, step_current_parameters = computing_parameters(step_current_parameters, Hgdl, Hcl)
+    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(computing_parameters)
 
     # Initialization
     #       Calculation of the plot update number (n) and the initial time interval (time_interval).
     initial_variable_values = None
-    t0_EIS, t_new_start, tf_EIS, delta_t_break_EIS, delta_t_measurement_EIS = t_EIS
-    f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = f_EIS  # These are used for EIS max_step
+    t0_EIS, t_new_start, tf_EIS, delta_t_break_EIS, delta_t_measurement_EIS = current_parameters['t_EIS']
+    f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = current_parameters['f_EIS']  # These are used for EIS max_step
     #                                                                    actualization.
     f = np.logspace(f_power_min_EIS, f_power_max_EIS, num=nb_f_EIS)  # It is a list of all the frequency tested.
     n = len(t_new_start)  # It is the plot update number.
@@ -647,12 +497,8 @@ def launch_AlphaPEM_for_EIS_current(type_fuel_cell, type_current, type_auxiliary
 
     #       A preliminary simulation run is necessary to equilibrate the internal variables of the cell at i_EIS
     #       prior to initiating the EIS.
-    Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
-                         step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS,
-                         ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc,
-                         epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge,
-                         type_fuel_cell, type_current, type_auxiliary, type_control, type_purge,"no_display",
-                         type_plot, initial_variable_values, time_interval)
+    Simulator = AlphaPEM(operating_inputs, current_parameters, accessible_physical_parameters,
+                         undetermined_physical_parameters, computing_parameters, initial_variable_values, time_interval)
 
     # time_interval actualization
     t0_EIS_temp = t0_EIS  # It is the initial time for 1 EIS point.
@@ -667,19 +513,16 @@ def launch_AlphaPEM_for_EIS_current(type_fuel_cell, type_current, type_auxiliary
     for x in Simulator.solver_variable_names:
         initial_variable_values.append(Simulator.variables[x][-1])
 
-    if type_display == "multiple":
+    if computing_parameters['type_display'] == "multiple":
         print("A display bug prevents the dynamic updating of the graphs, as it appears that too much data is "
               "involved. However, the data is correctly calculated, and the appropriate plots are saved in the "
               "'results' folder. This display bug does not occur when using a 'synthetic' type_display.")
 
     # Dynamic simulation
     for i in range(n):
-        Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
-                             step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters,
-                             i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
-                             epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl,
-                             n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge,
-                             type_display, type_plot, initial_variable_values, time_interval)
+        Simulator = AlphaPEM(operating_inputs, current_parameters, accessible_physical_parameters,
+                             undetermined_physical_parameters, computing_parameters, initial_variable_values,
+                             time_interval)
 
         # time_interval actualization
         if i < (n - 1):  # The final simulation does not require actualization.
@@ -696,7 +539,7 @@ def launch_AlphaPEM_for_EIS_current(type_fuel_cell, type_current, type_auxiliary
             initial_variable_values.append(Simulator.variables[x][-1])
 
         # Display
-        if type_display != "no_display":
+        if computing_parameters['type_display'] != "no_display":
             Simulator.Display(ax1, ax2, ax3)
 
     # Plot saving

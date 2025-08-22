@@ -63,7 +63,7 @@ def dif_eq_int_values(sv, operating_inputs, control_variables, parameters):
     Pasm, Paem, Pcsm, Pcem = sv['Pasm'], sv['Paem'], sv['Pcsm'], sv['Pcem']
     # Extraction of the operating inputs and the parameters
     T_des, Phi_c_des = operating_inputs['T_des'], control_variables['Phi_c_des']
-    Hmem, Hcl, epsilon_gdl = parameters['Hmem'], parameters['Hcl'], parameters['epsilon_gdl']
+    Hmem, Hacl, Hccl, epsilon_gdl = parameters['Hmem'], parameters['Hacl'], parameters['Hccl'], parameters['epsilon_gdl']
     epsilon_mpl, kappa_co, epsilon_mc = parameters['epsilon_mpl'], parameters['kappa_co'], parameters['epsilon_mc']
     n_gdl = parameters['n_gdl']
 
@@ -84,7 +84,7 @@ def dif_eq_int_values(sv, operating_inputs, control_variables, parameters):
     y_c = C_O2_cgc / (C_O2_cgc + C_N2)
     #       Internal current density
     T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
-                               weights=[Hcl / (2 * Hcl + Hmem), Hmem / (2 * Hcl + Hmem), Hcl / (2 * Hcl + Hmem)])
+                        weights=[Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl), Hccl / (Hacl + Hmem + Hccl)])
     i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
     i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
     i_n = i_H2 + i_O2

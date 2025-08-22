@@ -14,7 +14,7 @@ from configuration.current_densities import (step_current, polarization_current,
 from modules.settings_modules import stored_operating_inputs, stored_physical_parameters, EIS_parameters
 
 # _______________________________________________________Settings_______________________________________________________
-def current_density_parameters(type_current):
+def current_density_parameters(type_current=None):
     """This function is used to set the parameters of the current density which is imposed to the fuel cell system.
 
     Parameters
@@ -68,7 +68,7 @@ def current_density_parameters(type_current):
         'tf_EIS' in seconds, a list of time parameters which gives the estimated time for reaching equilibrium at each
         frequency 'delta_t_break_EIS' in seconds, and a list of time parameters which gives the estimated time for
         measuring the voltage response at each frequency 'delta_t_measurement_EIS' in seconds.
-    current_density : function
+    current_density : function, optional.
         Current density function.
     """
 
@@ -106,6 +106,7 @@ def current_density_parameters(type_current):
     elif type_current == "polarization": current_density = polarization_current
     elif type_current == "polarization_for_cali": current_density = polarization_current_for_calibration
     elif type_current == "EIS": current_density = EIS_current
+    elif type_current is None: current_density = None  # No current density function is set.
     else: raise ValueError('You have to specify a type_current which is on the list.')
 
     return (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters,
@@ -156,6 +157,8 @@ def operating_inputs_function(pola_current_parameters, type_fuel_cell):
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
         i_max_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
+    elif type_fuel_cell is None:
+        T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = None, None, None, None, None, None, None, None
     else: # Stored setup in "stored_operating_inputs".
         T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
@@ -174,8 +177,10 @@ def physical_parameters(type_fuel_cell):
 
     Returns
     -------
-    Hcl : float
-        Thickness of the anode or cathode catalyst layer in meters.
+    Hacl : float
+        Thickness of the anode catalyst layer in meters.
+    Hacl : float
+        Thickness of the cathode catalyst layer in meters.
     epsilon_mc : float
         Volume fraction of ionomer in the catalyst layer.
     Hmem : float
@@ -190,10 +195,14 @@ def physical_parameters(type_fuel_cell):
         Thickness of the microporous layer in meters.
     epsilon_mpl : float
         Porosity of the microporous layer.
-    Hgc : float
-        Thickness of the gas channel in meters.
-    Wgc : float
-        Width of the gas channel in meters.
+    Hagc : float
+        Thickness of the anode gas channel in meters.
+    Hcgc : float
+        Thickness of the cathode gas channel in meters.
+    Wagc : float
+        Width of the anode gas channel in meters.
+    Wcgc : float
+        Width of the cathode gas channel in meters.
     Lgc : float
         Length of the gas channel in meters.
     Aact : float
@@ -220,7 +229,8 @@ def physical_parameters(type_fuel_cell):
         # Fuel cell physical parameters: 𝜔 (which are not controllable by the system)
         #   Catalyst layer
         Aact = 8.5e-3  # m². It is the active area of the catalyst layer.
-        Hcl = 1e-5  # m. It is the thickness of the anode or cathode catalyst layer.
+        Hacl = 8.089e-6  # m. It is the thickness of the anode catalyst layer.
+        Hccl = Hacl  # m. It is the thickness of the cathode catalyst layer.
         epsilon_mc = 0.3949198274842546  # It is the volume fraction of ionomer in the CL.
         #   Membrane
         Hmem = 2e-5  # m. It is the thickness of the membrane.
@@ -232,8 +242,10 @@ def physical_parameters(type_fuel_cell):
         Hmpl = 3e-5  # m. It is the thickness of the microporous layer.
         epsilon_mpl = 0.4  # It is the porosity of the microporous layer.
         #   Gas channel
-        Hgc = 5e-4  # m. It is the thickness of the gas channel.
-        Wgc = 4.5e-4  # m. It is the width of the gas channel.
+        Hagc = 5e-4  # m. It is the thickness of the anode gas channel.
+        Hcgc = Hagc  # m. It is the thickness of the cathode gas channel.
+        Wagc = 4.5e-4  # m. It is the width of the anode gas channel.
+        Wcgc = Wagc  # m. It is the width of the cathode gas channel.
         Lgc = 9.67  # m. It is the length of the gas channel.
         #   Interaction parameters between water and PEMFC structure
         e = 5.0  # It is the capillary exponent
@@ -245,14 +257,14 @@ def physical_parameters(type_fuel_cell):
         #                                                               liquid saturation coefficients.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
     else: # Stored setup in "stored_physical_parameters".
-        (Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hgc, Wgc, Lgc, Aact, e, i0_c_ref,
-         kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
+        (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
+         Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
 
-    return (Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hgc, Wgc, Lgc, Aact, e, i0_c_ref,
-            kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
+    return (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
+            Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
 
 
-def computing_parameters(step_current_parameters, Hgdl, Hcl):
+def computing_parameters(step_current_parameters, Hgdl, Hacl):
     """This function is used to set the computing parameters of the fuel cell system.
 
     Parameters
@@ -261,8 +273,8 @@ def computing_parameters(step_current_parameters, Hgdl, Hcl):
         Parameters for the step current density function.
     Hgdl : float
         Thickness of the gas diffusion layer in meters.
-    Hcl : float
-        Thickness of the anode or cathode catalyst layer in meters.
+    Hacl : float
+        Thickness of the anode catalyst layer in meters.
 
     Returns
     -------
@@ -285,8 +297,8 @@ def computing_parameters(step_current_parameters, Hgdl, Hcl):
         - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
     """
 
-    n_gdl = max(1, int(Hgdl / Hcl / 4))  # It is the number of model points placed inside each GDL.
-    #                              A good compromise is int(Hgdl/Hcl/4).
+    n_gdl = max(1, int(Hgdl / Hacl / 4))  # It is the number of model points placed inside each GDL.
+    #                                       A good compromise is int(Hgdl/Hacl/4).
     t_purge = 0.6, 15  # (s, s). It is the time parameters for purging the system.
     delta_t_dyn_step = 5*60  # (s). Time for dynamic display of the step current density function.
 
@@ -315,10 +327,11 @@ yO2_ext = 0.2095  # . It is the molar fraction of O2 in dry air.
 # Model parameters for the cell
 rho_mem = 1980  # kg.m-3. It is the density of the dry membrane.
 M_eq = 1.1  # kg.mol-1. It is the equivalent molar mass of ionomer.
-epsilon_cl = 0.25*1.2  # It is the porosity of the catalyst layer, without units.
+epsilon_cl = 0.25  # It is the porosity of the catalyst layer, without units.
 tau_mpl = 4  # It is the pore structure coefficient in the MPL, without units [Gen Inoue 2016 Journal Power Sources].
 tau_cl = 6  # It is the pore structure coefficient in the CL, without units [Gen Inoue 2016 Journal Power Sources].
-Dp_mpl = 20e-6 # m. It is the pore diameter of the MPL [morganUnderstandingGasDiffusion2014].
+Dp_gdl = 33.2e-6  # m. It is the pore diameter of the GDL [ZSW GenStack].
+Dp_mpl = 17.4e-6 # m. It is the pore diameter of the MPL [morganUnderstandingGasDiffusion2014].
 Dp_cl = 0.15e-6  # m. It is the pore diameter of the CL [Ali Malekian 2019 International Journal of Hydrogen Energy].
 theta_c_gdl = 120 * math.pi / 180  # radian. It is the contact angle of GDL for liquid water.
 theta_c_mpl = 135 * math.pi / 180  # radian. It is the contact angle of MPL for liquid water.
@@ -340,7 +353,7 @@ Eact = 73.2e3  # J.mol-1. It is the activation energy.
 # Model parameters for the heat transfer calculation
 #   Thermal conductivities
 k_th_gdl = 1.6 # J.m-1.s-1.K-1. It is the thermal conductivity of the GDLs (non-effective ?) [vetterFreeOpenReference2019].
-k_th_mpl = 0.5 # J.m-1.s-1.K-1. It is the thermal conductivity of the MPLs (non-effective ?) [kimModelingTwophaseFlow2017].
+k_th_mpl = 0.27 # J.m-1.s-1.K-1. It is the thermal conductivity of the MPLs (non-effective ?) [kotakaImpactInterfacialWater2014].
 k_th_cl = 0.27 # J.m-1.s-1.K-1. It is the thermal conductivity of the CLs (non-effective ?) [vetterFreeOpenReference2019].
 k_th_mem = 0.3 # J.m-1.s-1.K-1. It is the thermal conductivity of the membrane (non-effective ?) [vetterFreeOpenReference2019].
 #   Specific heat capacities

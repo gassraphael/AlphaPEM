@@ -56,9 +56,9 @@ def heat_transfer_int_values(sv, parameters):
     T_acl, T_ampl, T_mem, T_ccl, T_cmpl = sv['T_acl'], sv['T_ampl'], sv['T_mem'], sv['T_ccl'], sv['T_cmpl']
 
     # Extraction of the operating inputs and the parameters
-    Hgdl, Hmpl, Hcl, Hmem = parameters['Hgdl'], parameters['Hmpl'], parameters['Hcl'], parameters['Hmem']
-    epsilon_mc, epsilon_gdl, epsilon_mpl = parameters['epsilon_mc'], parameters['epsilon_gdl'], parameters['epsilon_mpl']
-    epsilon_c, n_gdl = parameters['epsilon_c'], parameters['n_gdl']
+    Hgdl, Hmpl, Hacl, Hccl = parameters['Hgdl'], parameters['Hmpl'], parameters['Hacl'], parameters['Hccl']
+    Hmem, epsilon_mc, epsilon_gdl = parameters['Hmem'], parameters['epsilon_mc'], parameters['epsilon_gdl']
+    epsilon_mpl, epsilon_c, n_gdl = parameters['epsilon_mpl'], parameters['epsilon_c'], parameters['n_gdl']
 
     # Weighted harmonic means of the effective thermal diffusivity
     k_th_eff_agc_agdl = k_th_eff('agdl', sv[f'T_agdl_{1}'], C_v=sv[f'C_v_agdl_{1}'], s=sv[f's_agdl_{1}'],
@@ -83,23 +83,23 @@ def heat_transfer_int_values(sv, parameters):
                                                  epsilon=epsilon_mpl),
                                  k_th_eff('acl', T_acl, C_v=C_v_acl, s=s_acl, lambdaa=lambda_acl,
                                           C_H2=C_H2_acl, epsilon=epsilon_cl, epsilon_mc=epsilon_mc)],
-                                weights=[Hmpl / 2, Hcl / 2])
+                                weights=[Hmpl / 2, Hacl / 2])
 
     k_th_eff_acl_mem = average([k_th_eff('acl', T_acl, C_v=C_v_acl, s=s_acl, lambdaa=lambda_acl,
                                        C_H2=C_H2_acl, epsilon=epsilon_cl, epsilon_mc=epsilon_mc),
                                       k_th_eff('mem', T_mem, lambdaa=lambda_mem)],
-                               weights=[Hcl / 2, Hmem / 2])
+                               weights=[Hacl / 2, Hmem / 2])
 
     k_th_eff_mem_ccl = average([k_th_eff('ccl', T_ccl, C_v=C_v_ccl, s=s_ccl, lambdaa=lambda_ccl, C_O2=C_O2_ccl,
                                        C_N2=C_N2, epsilon=epsilon_cl, epsilon_mc=epsilon_mc),
                                       k_th_eff('mem', T_mem, lambdaa=lambda_mem)],
-                               weights=[Hcl / 2, Hmem / 2])
+                               weights=[Hccl / 2, Hmem / 2])
 
     k_th_eff_ccl_cmpl = average([k_th_eff('ccl', T_ccl, C_v=C_v_ccl, s=s_ccl, lambdaa=lambda_ccl, C_O2=C_O2_ccl,
                                                 C_N2=C_N2, epsilon=epsilon_cl, epsilon_mc=epsilon_mc),
                                        k_th_eff('cmpl', T_cmpl, C_v=C_v_cmpl, s=s_cmpl, C_O2=C_O2_cmpl,
                                                 C_N2=C_N2, epsilon=epsilon_mpl)],
-                                weights=[Hcl / 2, Hmpl / 2])
+                                weights=[Hccl / 2, Hmpl / 2])
 
     k_th_eff_cmpl_cgdl = average([k_th_eff('cmpl', T_cmpl, C_v=C_v_cmpl, s=s_cmpl, C_O2=C_O2_cmpl,
                                                 C_N2=C_N2, epsilon=epsilon_mpl),

@@ -39,8 +39,16 @@ def stored_operating_inputs(type_fuel_cell):
         Maximum current density for the polarization curve.
     """
 
+    # For the ZSW Generic Stack fuel cell
+    if type_fuel_cell == "ZSW-GenStack":
+        T_des = 68 + 273.15  # K. It is the desired fuel cell temperature.
+        Pa_des, Pc_des = 2.2e5, 2.0e5  # Pa. It is the desired pressures of the fuel gas.
+        Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
+        Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
+        i_max_pola = 2.5e4  # A.m-2. It is the maximum current density for the polarization curve.
+
     # For EH-31 fuel cell
-    if type_fuel_cell == "EH-31_1.5":
+    elif type_fuel_cell == "EH-31_1.5":
         T_des = 74 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 1.5e5, 1.5e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
@@ -65,14 +73,6 @@ def stored_operating_inputs(type_fuel_cell):
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
         i_max_pola = 1.7e4  # A.m-2. It is the maximum current density for the polarization curve.
 
-    # For LF fuel cell
-    elif type_fuel_cell == "LF":
-        T_des = 80 + 273.15  # K. It is the desired fuel cell temperature.
-        Pa_des, Pc_des = 101325, 101325  # Pa. It is the desired pressures of the fuel gas.
-        Sa, Sc = 2.0, 1.5  # It is the stoichiometric ratio (of hydrogen and oxygen).
-        Phi_a_des, Phi_c_des = 0.84, 0.59  # It is the desired relative humidity.
-        i_max_pola = 1.6e4  # A.m-2. It is the maximum current density for the polarization curve.
-
     # For other fuel cells
     else:
         raise ValueError('the type_fuel_cell given is not valid.')
@@ -90,8 +90,10 @@ def stored_physical_parameters(type_fuel_cell):
 
     Returns
     -------
-    Hcl : float
-        Thickness of the catalyst layer in m.
+    Hacl : float
+        Thickness of the anode catalyst layer in m.
+    Hccl : float
+        Thickness of the cathode catalyst layer in m.
     epsilon_mc : float
         Volume fraction of ionomer in the CL.
     Hmem : float
@@ -102,10 +104,14 @@ def stored_physical_parameters(type_fuel_cell):
         Anode/cathode GDL porosity.
     epsilon_c : float
         Compression ratio of the GDL.
-    Hgc : float
-        Thickness of the gas channel in m.
-    Wgc : float
-        Width of the gas channel in m.
+    Hagc : float
+        Thickness of the anode gas channel in m.
+    Hcgc : float
+        Thickness of the cathode gas channel in m.
+    Wagc : float
+        Width of the anode gas channel in m.
+    Wcgc : float
+        Width of the cathode gas channel in m.
     Lgc : float
         Length of the gas channel in m.
     Aact : float
@@ -128,26 +134,29 @@ def stored_physical_parameters(type_fuel_cell):
         Volumetric double layer capacitance in F.m-3.
     """
 
-    # For EH-31 fuel cell
-    if type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
-            type_fuel_cell == "EH-31_2.5":
+    # For the ZSW Generic Stack fuel cell
+    if type_fuel_cell == "ZSW-GenStack":
+        # Global
+        Aact = 279.72e-4  # m². It is the MEA active area.
         # Catalyst layer
-        Aact = 8.5e-3  # m². It is the active area of the catalyst layer.
-        Hcl = 8.089e-6  # m. It is the thickness of the anode or cathode catalyst layer.
+        Hacl = 8e-6  # m. It is the thickness of the anode catalyst layer.
+        Hccl = 17e-6  # m. It is the thickness of the cathode catalyst layer.
         epsilon_mc = 0.3823  # It is the volume fraction of ionomer in the CL.
         # Membrane
-        Hmem = 1.697e-5  # m. It is the thickness of the membrane.
+        Hmem = 15e-6  # m. It is the thickness of the membrane.
         # Gas diffusion layer
-        Hgdl = 2e-4  # m. It is the thickness of the gas diffusion layer.
-        epsilon_gdl = 0.7393  # It is the anode/cathode GDL porosity.
+        Hgdl = 127e-6  # m. It is the thickness of the gas diffusion layer.
+        epsilon_gdl = 0.788  # It is the anode/cathode GDL porosity.
         epsilon_c = 0.2  # It is the compression ratio of the GDL.
         #   Microporous layer
-        Hmpl = 3e-5  # m. It is the thickness of the microporous layer.
-        epsilon_mpl = 0.4  # It is the porosity of the microporous layer.
+        Hmpl = 70e-6  # m. It is the thickness of the microporous layer.
+        epsilon_mpl = 0.425  # It is the porosity of the microporous layer.
         # Gas channel
-        Hgc = 5e-4  # m. It is the thickness of the gas channel.
-        Wgc = 4.5e-4  # m. It is the width of the gas channel.
-        Lgc = 9.67  # m. It is the length of the gas channel.
+        Hagc = 230e-6  # m. It is the thickness of the anode gas channel.
+        Hcgc = 300e-6  # m. It is the thickness of the cathode gas channel.
+        Wagc = 430e-6  # m. It is the width of the anode gas channel.
+        Wcgc = 532e-6  # m. It is the width of the cathode gas channel.
+        Lgc = 23.31  # m. It is the length of the gas channel.
         # Interaction parameters between water and PEMFC structure
         e = 4.0  # It is the capillary exponent
         # Voltage polarization
@@ -157,43 +166,45 @@ def stored_physical_parameters(type_fuel_cell):
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
 
-    # For LF fuel cell
-    elif type_fuel_cell == "LF":
+    # For EH-31 fuel cell
+    elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
+            type_fuel_cell == "EH-31_2.5":
+        # Global
+        Aact = 85e-4  # m². It is the active area of the catalyst layer.
         # Catalyst layer
-        Hcl = 1e-5  # m. It is the thickness of the anode or cathode catalyst layer.
-        epsilon_mc = 0.27  # It is the volume fraction of ionomer in the CL.
+        Hacl = 8.089e-6  # m. It is the thickness of the anode catalyst layer.
+        Hccl = Hacl  # m. It is the thickness of the cathode catalyst layer.
+        epsilon_mc = 0.3823  # It is the volume fraction of ionomer in the CL.
         # Membrane
-        Hmem = 5.08e-5  # m. It is the thickness of the membrane.
+        Hmem = 16.97e-6  # m. It is the thickness of the membrane.
         # Gas diffusion layer
-        Hgdl = 4.2e-4  # m. It is the thickness of the gas diffusion layer.
-        epsilon_gdl = 0.6  # It is the anode/cathode GDL porosity.
-        epsilon_c = 0.21  # It is the compression ratio of the GDL.
+        Hgdl = 200e-6  # m. It is the thickness of the gas diffusion layer.
+        epsilon_gdl = 0.7393  # It is the anode/cathode GDL porosity.
+        epsilon_c = 0.2  # It is the compression ratio of the GDL.
         #   Microporous layer
         Hmpl = 30e-6  # m. It is the thickness of the microporous layer.
         epsilon_mpl = 0.4  # It is the porosity of the microporous layer.
-        # Gas channel.
-        Hgc = 1e-3  # m. It is the thickness of the gas channel.
-        Wgc = 8e-4  # m. It is the width of the gas channel.
-        Wrib = 7e-4  # m. It is the rib of the gas channel.
-        L1gc = 0.1  # m. It is the length of 1 channel.
-        Ngc = 16  # . It is the number of channels in the gas channel. It is taken to have Aact = 25cm².
-        Lgc = (L1gc + Wrib) * Ngc  # m. It is the length of the gas channel.
-        Aact = (L1gc + 2 * Wrib) * (Wgc + Wrib) * Ngc + (L1gc + 2 * Wrib) * 7e-4  # m². It is the CL active area.
+        # Gas channel
+        Hagc = 500e-6  # m. It is the thickness of the anode gas channel.
+        Hcgc = Hagc  # m. It is the thickness of the cathode gas channel.
+        Wagc = 450e-6  # m. It is the width of the anode gas channel.
+        Wcgc = Wagc  # m. It is the width of the cathode gas channel.
+        Lgc = 9.67  # m. It is the length of the gas channel.
         # Interaction parameters between water and PEMFC structure
-        e = 3.0  # It is the capillary exponent
+        e = 4.0  # It is the capillary exponent
         # Voltage polarization
-        i0_c_ref = 10  # A.m-2.It is the reference exchange current density at the cathode.
-        kappa_co = 25  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
-        kappa_c = 1.5  # It is the overpotential correction exponent.
-        a_slim, b_slim, a_switch = 0, 1, 1  # It is the limit liquid saturation coefficients.
-        C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
+        i0_c_ref = 6.795  # A.m-2.It is the reference exchange current density at the cathode.
+        kappa_co = 30.41  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
+        kappa_c = 1.026  # It is the overpotential correction exponent.
+        a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
+        C_scl = 20e6  # F.m-3. It is the volumetric space-charge layer capacitance.
 
     # For other fuel cells
     else:
         raise ValueError('the type_input given is not valid.')
 
-    return Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, \
-           Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl
+    return Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, \
+           Hagc, Hcgc, Wagc, Wcgc, Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl
 
 
 def EIS_parameters(f_EIS):

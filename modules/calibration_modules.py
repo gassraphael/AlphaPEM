@@ -48,12 +48,18 @@ def parameters_for_calibration(type_fuel_cell):
         Active area of the cell in m².
     Hmem : float
         Thickness of the membrane in m.
-    Hcl : float
-        Thickness of the catalyst layer in m.
-    Hgc : float
-        Thickness of the gas channel in m.
-    Wgc : float
-        Width of the gas channel in m.
+    Hacl : float
+        Thickness of the anode catalyst layer in m.
+    Hccl : float
+        Thickness of the cathode catalyst layer in m.
+    Hagc : float
+        Thickness of the anode gas channel in m.
+    Hcgc : float
+        Thickness of the cathode gas channel in m.
+    Wagc : float
+        Width of the gas anode channel in m.
+    Wcgc : float
+        Width of the gas cathode channel in m.
     Lgc : float
         Length of the gas channel in m.
     type_auxiliary : str
@@ -140,21 +146,24 @@ def parameters_for_calibration(type_fuel_cell):
             Pa_des, Pc_des = 2.5e5, 2.5e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         #       Fuel cell physical parameters
         Aact = 8.5e-3  # m². It is the active area of the catalyst layer.
-        Wgc = 4.5e-4  # m. It is the width of the gas channel.
+        Wagc = 4.5e-4  # m. It is the width of the anode gas channel.
+        Wcgc = Wagc  # m. It is the width of the cathode gas channel.
         Lgc = 9.67  # m. It is the length of the gas channel.
 
         # Extrapolated physical parameters
         Hgdl = 2e-4  # m. It is the thickness of the gas diffusion layer.
         Hmpl = 3e-5  # m. It is the thickness of the microporous layer.
         epsilon_mpl = 0.4  # It is the porosity of the microporous layer.
-        Hgc = 5e-4  # m. It is the thickness of the gas channel.
+        Hagc = 5e-4  # m. It is the thickness of the anode gas channel.
+        Hcgc = Hagc  # m. It is the thickness of the cathode gas channel.
 
         # Estimated undetermined parameters for the initialisation
         #   Gas diffusion layer
         epsilon_gdl = 0.7943  # It is the anode/cathode GDL porosity.
         epsilon_c = 0.2  # It is the compression ratio of the GDL.
         #   Catalyst layer
-        Hcl = 8e-6  # m. It is the thickness of the anode or cathode catalyst layer.
+        Hacl = 8.089e-6  # m. It is the thickness of the anode catalyst layer.
+        Hccl = Hacl  # m. It is the thickness of the cathode catalyst layer.
         epsilon_mc = 0.2111  # It is the volume fraction of ionomer in the CL.
         #   Membrane
         Hmem = 1.5e-5  # m. It is the thickness of the membrane.
@@ -167,9 +176,10 @@ def parameters_for_calibration(type_fuel_cell):
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
         estimated_undetermined_parameters_for_initialisation = {'epsilon_gdl': epsilon_gdl, 'epsilon_c': epsilon_c,
-                                                                'Hcl': Hcl, 'epsilon_mc': epsilon_mc, 'Hmem': Hmem,
-                                                                'e': e, 'i0_c_ref': i0_c_ref, 'kappa_co': kappa_co,
-                                                                'kappa_c': kappa_c, 'a_slim': a_slim, 'b_slim': b_slim,
+                                                                'Hacl': Hacl, 'Hccl': Hccl, 'epsilon_mc': epsilon_mc,
+                                                                'Hmem': Hmem, 'e': e, 'i0_c_ref': i0_c_ref,
+                                                                'kappa_co': kappa_co, 'kappa_c': kappa_c,
+                                                                'a_slim': a_slim, 'b_slim': b_slim,
                                                                 'a_switch': a_switch, 'C_scl': C_scl}
 
         # Algorithm parameters for polarization curve generation
@@ -203,7 +213,7 @@ def parameters_for_calibration(type_fuel_cell):
         i_EIS, ratio_EIS = np.nan, np.nan  # (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.
         f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
         t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
-        n_gdl = int(Hgdl / Hcl / 4)  # It is the number of model points placed inside each GDL.
+        n_gdl = int(Hgdl / Hacl / 4)  # It is the number of model points placed inside each GDL.
 
     elif type_fuel_cell == "LF":
         # Given values by the author

@@ -143,16 +143,16 @@ def pola_points(ga_instance, solution, solution_idx): # Function to maximize.
     # Calculation of the model polarization curve
     Simulator_1 = AlphaPEM(current_density, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
                            step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters_1, i_EIS,
-                           ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
-                           epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
-                           C_scl, n_gdl, t_purge, type_fuel_cell_1, type_current, type_auxiliary, type_control,
-                           type_purge, type_display, type_plot, initial_variable_values_1)
+                           ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hacl, Hccl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
+                           epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim,
+                           b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_1, type_current, type_auxiliary,
+                           type_control, type_purge, type_display, type_plot, initial_variable_values_1)
     Simulator_2 = AlphaPEM(current_density, T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2,
                            step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters_2, i_EIS,
-                           ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
-                           epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
-                           C_scl, n_gdl, t_purge, type_fuel_cell_2, type_current, type_auxiliary, type_control,
-                           type_purge, type_display, type_plot, initial_variable_values_2)
+                           ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hacl, Hccl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
+                           epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim,
+                           b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_2, type_current, type_auxiliary,
+                           type_control, type_purge, type_display, type_plot, initial_variable_values_2)
 
     # Calculation of the simulation error between the simulated and experimental polarization curves
     sim_error = calculate_simulation_error(Simulator_1, U_exp_1, i_exp_1, Simulator_2, U_exp_2, i_exp_2)
@@ -215,14 +215,14 @@ if __name__ == '__main__':
     C_scl_ini = estimated_undetermined_parameters_for_initialisation['C_scl']
     Simulator_ini_1 = AlphaPEM(step_current, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
                                step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters_1,
-                               i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem_ini, Hcl_ini, Hgc, Wgc, Lgc,
+                               i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem_ini, Hacl_ini, Hccl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
                                epsilon_gdl_ini, epsilon_mpl, epsilon_mc_ini, epsilon_c, e_ini, i0_c_ref_ini,
                                kappa_co_ini, kappa_c_ini, a_slim_ini, b_slim_ini, a_switch_ini, C_scl_ini, n_gdl,
                                t_purge, type_fuel_cell_1, 'step', type_auxiliary, type_control, type_purge,
                                type_display, type_plot)
     Simulator_ini_2 = AlphaPEM(step_current, T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2,
                                step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters_2,
-                               i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem_ini, Hcl_ini, Hgc, Wgc, Lgc,
+                               i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem_ini, Hacl_ini, Hccl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
                                epsilon_gdl_ini, epsilon_mpl, epsilon_mc_ini, epsilon_c, e_ini, i0_c_ref_ini,
                                kappa_co_ini, kappa_c_ini, a_slim_ini, b_slim_ini, a_switch_ini, C_scl_ini, n_gdl,
                                t_purge, type_fuel_cell_2, 'step', type_auxiliary, type_control, type_purge,
@@ -276,18 +276,18 @@ if __name__ == '__main__':
     #       Calculate the calibrated polarization curve
     Simulator_final_1 = AlphaPEM(polarization_current, T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1,
                                  step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters_1,
-                                 i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
-                                 epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
-                                 a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_1, 'polarization',
-                                 type_auxiliary, type_control, type_purge, type_display, type_plot,
-                                 initial_variable_values_1)
+                                 i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hacl, Hccl, Hagc, Hcgc, Wagc,
+                                 Wcgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co,
+                                 kappa_c, a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_1,
+                                 'polarization', type_auxiliary, type_control, type_purge, type_display,
+                                 type_plot, initial_variable_values_1)
     Simulator_final_2 = AlphaPEM(polarization_current, T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2,
                                  step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters_2,
-                                 i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl,
-                                 epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
-                                 a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_2, 'polarization',
-                                 type_auxiliary, type_control, type_purge, type_display, type_plot,
-                                 initial_variable_values_2)
+                                 i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hacl, Hccl, Hagc, Hcgc, Wagc,
+                                 Wcgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co,
+                                 kappa_c, a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell_2,
+                                 'polarization', type_auxiliary, type_control, type_purge, type_display,
+                                 type_plot, initial_variable_values_2)
     #       Display the calibrated and experimental polarization curve
     fig, ax = plt.subplots(figsize=(8, 8))
     Simulator_final_1.Display(ax)

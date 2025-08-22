@@ -501,7 +501,7 @@ def plot_J(variables, parameters, ax):
         Axes on which the flows will be plotted.
     """
     # Extraction of the operating inputs and the parameters
-    Hcl = parameters['Hcl']
+    Hacl, Hccl = parameters['Hacl'], parameters['Hccl']
     type_current, type_plot = parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
         delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
@@ -523,7 +523,7 @@ def plot_J(variables, parameters, ax):
     J_lambda_mem_ccl_t = np.array(variables['J_lambda_mem_ccl'])[mask]
 
     # Plot the sorption and dissolved water flows: J
-    J_abs_acl, J_abs_ccl = S_abs_acl_t * Hcl, S_abs_ccl_t * Hcl  # Conversion in mol.m⁻².s⁻¹ for comparison
+    J_abs_acl, J_abs_ccl = S_abs_acl_t * Hacl, S_abs_ccl_t * Hccl  # Conversion in mol.m⁻².s⁻¹ for comparison
     ax.plot(t, J_abs_acl, color=colors(2))
     ax.plot(t, J_lambda_acl_mem_t, color=colors(3))
     ax.plot(t, J_abs_ccl, color=colors(4))
@@ -1303,7 +1303,7 @@ def plot_cell_efficiency(variables, operating_inputs, parameters, n, ax):
     T_acl_t, T_mem_t, T_ccl_t = variables['T_acl'], variables['T_mem'], variables['T_ccl']
     # Extraction of the operating inputs and the parameters
     current_density = operating_inputs['current_density']
-    Hmem, Hcl, kappa_co = parameters['Hmem'], parameters['Hcl'], parameters['kappa_co']
+    Hmem, Hacl, Hccl, kappa_co = parameters['Hmem'], parameters['Hacl'], parameters['Hccl'], parameters['kappa_co']
     type_fuel_cell, type_current = parameters['type_fuel_cell'], parameters['type_current']
     type_auxiliary, type_control = parameters['type_auxiliary'], parameters['type_control']
 
@@ -1316,7 +1316,7 @@ def plot_cell_efficiency(variables, operating_inputs, parameters, n, ax):
               R * T_ccl_t[i] / (2 * F) * (np.log(R * T_acl_t[i] * C_H2_acl_t[i] / Pref) +
                                           0.5 * np.log(R * T_ccl_t[i] * C_O2_ccl_t[i] / Pref))
         T_acl_mem_ccl = average([T_acl_t[i], T_mem_t[i], T_ccl_t[i]],
-                                   weights=[Hcl / (2 * Hcl + Hmem), Hmem / (2 * Hcl + Hmem), Hcl / (2 * Hcl + Hmem)])
+                        weights=[Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl), Hccl / (Hacl + Hmem + Hccl)])
         i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl_t[i] * k_H2(lambda_mem_t[i], T_mem_t[i], kappa_co)
         i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl_t[i] * k_O2(lambda_mem_t[i], T_mem_t[i], kappa_co)
         i_n = (i_H2 + i_O2) / 1e4  # Conversion in A/cm²

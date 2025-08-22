@@ -13,6 +13,7 @@ from tkinter import messagebox
 from tkinter import ttk
 
 # Importing constants' value and functions
+from configuration.settings import current_density_parameters, computing_parameters
 from model.AlphaPEM import AlphaPEM
 from modules.settings_modules import stored_operating_inputs, stored_physical_parameters, EIS_parameters
 from modules.main_modules import figures_preparation
@@ -336,43 +337,53 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     elif choice_buttons['type_fuel_cell']['value'].get() == "Linhao Fan (2010)":
         type_fuel_cell = "LF"
 
+    (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
+     current_density) = current_density_parameters()
+
     T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
-    Hcl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hgc, Wgc, Lgc, Aact, e, i0_c_ref, kappa_co,\
-        kappa_c, a_slim, b_slim, a_switch, C_scl = stored_physical_parameters(type_fuel_cell)
+    (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc, Aact,
+     e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
+
+    n_gdl, t_purge, step_current_parameters = computing_parameters(step_current_parameters, Hgdl, Hacl)
 
     # operating conditions recovery
-    choice_operating_conditions['Temperature - Tfc (°C)']['value'].set(round(T_des - 273.15))  # °C
-    choice_operating_conditions['Anode pressure - Pa (bar)']['value'].set(round(Pa_des / 1e5, 2))  # bar
-    choice_operating_conditions['Cathode pressure - Pc (bar)']['value'].set(round(Pc_des / 1e5, 2))  # bar
-    choice_operating_conditions['Anode stoichiometry - Sa']['value'].set(round(Sa, 1))
-    choice_operating_conditions['Cathode stoichiometry - Sc']['value'].set(round(Sc, 1))
-    choice_operating_conditions['Anode humidity - Φa']['value'].set(round(Phi_a_des, 1))
-    choice_operating_conditions['Cathode humidity - Φc']['value'].set(round(Phi_c_des, 1))
+    choice_operating_conditions['Temperature - Tfc (°C)']['value'].set(round(T_des - 273.15, 4))  # °C
+    choice_operating_conditions['Anode pressure - Pa (bar)']['value'].set(round(Pa_des / 1e5, 4))  # bar
+    choice_operating_conditions['Cathode pressure - Pc (bar)']['value'].set(round(Pc_des / 1e5, 4))  # bar
+    choice_operating_conditions['Anode stoichiometry - Sa']['value'].set(round(Sa, 4))
+    choice_operating_conditions['Cathode stoichiometry - Sc']['value'].set(round(Sc, 4))
+    choice_operating_conditions['Anode humidity - Φa']['value'].set(round(Phi_a_des, 4))
+    choice_operating_conditions['Cathode humidity - Φc']['value'].set(round(Phi_c_des, 4))
     # accessible physical parameters recovery
-    choice_accessible_parameters['Active area - Aact (cm²)']['value'].set(round(Aact * 1e4))  # cm²
-    choice_accessible_parameters['GC thickness - Hgc (µm)']['value'].set(round(Hgc * 1e6))  # µm
-    choice_accessible_parameters['GC width - Wgc (µm)']['value'].set(round(Wgc * 1e6))  # µm
-    choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].set(round(Lgc, 2))  # µm
+    choice_accessible_parameters['Active area - Aact (cm²)']['value'].set(round(Aact * 1e4, 4))  # cm²
+    choice_accessible_parameters['AGC thickness - Hagc (µm)']['value'].set(round(Hagc * 1e6, 4))  # µm
+    choice_accessible_parameters['CGC thickness - Hcgc (µm)']['value'].set(round(Hcgc * 1e6, 4))  # µm
+    choice_accessible_parameters['AGC width - Wagc (µm)']['value'].set(round(Wagc * 1e6, 4))  # µm
+    choice_accessible_parameters['CGC width - Wcgc (µm)']['value'].set(round(Wcgc * 1e6, 4))  # µm
+    choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].set(round(Lgc, 4))  # µm
     # undetermined physical parameters recovery
-    choice_undetermined_parameters['GDL thickness - Hgdl (µm)']['value'].set(round(Hgdl * 1e6))  # µm
-    choice_undetermined_parameters['MPL thickness - Hmpl (µm)']['value'].set(round(Hmpl * 1e6))  # µm
-    choice_undetermined_parameters['CL thickness - Hcl (µm)']['value'].set(round(Hcl * 1e6))  # µm
-    choice_undetermined_parameters['Membrane thickness - Hmem (µm)']['value'].set(round(Hmem * 1e6))  # µm
-    choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].set(round(epsilon_gdl, 3))
-    choice_undetermined_parameters['MPL porosity - ε_mpl']['value'].set(round(epsilon_mpl, 3))
-    choice_undetermined_parameters['Ionomer volume fraction\n- ε_mc']['value'].set(round(epsilon_mc, 3))
-    choice_undetermined_parameters['Compression ratio - ε_c']['value'].set(round(epsilon_c, 3))
+    choice_undetermined_parameters['GDL thickness - Hgdl (µm)']['value'].set(round(Hgdl * 1e6, 4))  # µm
+    choice_undetermined_parameters['MPL thickness - Hmpl (µm)']['value'].set(round(Hmpl * 1e6, 4))  # µm
+    choice_undetermined_parameters['ACL thickness - Hacl (µm)']['value'].set(round(Hacl * 1e6, 4))  # µm
+    choice_undetermined_parameters['CCL thickness - Hccl (µm)']['value'].set(round(Hccl * 1e6, 4))  # µm
+    choice_undetermined_parameters['Membrane thickness - Hmem (µm)']['value'].set(round(Hmem * 1e6, 4))  # µm
+    choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].set(round(epsilon_gdl, 4))
+    choice_undetermined_parameters['MPL porosity - ε_mpl']['value'].set(round(epsilon_mpl, 4))
+    choice_undetermined_parameters['Ionomer volume fraction - ε_mc']['value'].set(round(epsilon_mc, 4))
+    choice_undetermined_parameters['Compression ratio - ε_c']['value'].set(round(epsilon_c, 4))
     choice_undetermined_parameters['Capillary exponent - e']['value'].set(e)
-    choice_undetermined_parameters['Reference exchange\ncurrent density\n- i0_c_ref (A/m²)']['value'].set(round(i0_c_ref, 2))  # A.m-2
-    choice_undetermined_parameters['Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))']['value'].set(round(kappa_co, 2))  # mol.m-1.s-1.Pa-1
-    choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].set(round(kappa_c, 2))
+    choice_undetermined_parameters['Reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].set(round(i0_c_ref, 4))  # A.m-2
+    choice_undetermined_parameters['Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))']['value'].set(round(kappa_co, 4))  # mol.m-1.s-1.Pa-1
+    choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].set(round(kappa_c, 4))
     choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_slim']['value'].set(round(a_slim, 7))
     choice_undetermined_parameters['Limit liquid saturation\ncoefficient - b_slim']['value'].set(round(b_slim, 7))
     choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_switch']['value'].set(round(a_switch, 7))
-    choice_undetermined_parameters['Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)']['value'].set(round(C_scl * 1e-6, 2))  # F.cm-3
+    choice_undetermined_parameters['Volumetric space-charge layer\ncapacitance - C_scl (F/cm³)']['value'].set(round(C_scl * 1e-6, 4))  # F.cm-3
     # i_max_pola recovery
-    choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].set(round(i_max_pola / 1e4, 2))  # A/cm²
+    choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].set(round(i_max_pola / 1e4, 4))  # A/cm²
+    # computing parameters recovery
+    choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].set(n_gdl)
 
 
 def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_conditions, choice_accessible_parameters,
@@ -407,26 +418,29 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     Phi_c_des = choice_operating_conditions['Cathode humidity - Φc']['value'].get()
     # accessible physical parameters
     Aact = choice_accessible_parameters['Active area - Aact (cm²)']['value'].get() * 1e-4  # m²
-    Hgc = choice_accessible_parameters['GC thickness - Hgc (µm)']['value'].get() * 1e-6  # m
-    Wgc = choice_accessible_parameters['GC width - Wgc (µm)']['value'].get() * 1e-6  # m
+    Hagc = choice_accessible_parameters['AGC thickness - Hagc (µm)']['value'].get() * 1e-6  # m
+    Hcgc = choice_accessible_parameters['CGC thickness - Hcgc (µm)']['value'].get() * 1e-6  # m
+    Wagc = choice_accessible_parameters['AGC width - Wagc (µm)']['value'].get() * 1e-6  # m
+    Wcgc = choice_accessible_parameters['CGC width - Wcgc (µm)']['value'].get() * 1e-6  # m
     Lgc = choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].get()  # m
     # undetermined physical parameters
     Hgdl = choice_undetermined_parameters['GDL thickness - Hgdl (µm)']['value'].get() * 1e-6  # m
     Hmpl = choice_undetermined_parameters['MPL thickness - Hmpl (µm)']['value'].get() * 1e-6  # m
-    Hcl = choice_undetermined_parameters['CL thickness - Hcl (µm)']['value'].get() * 1e-6  # m
+    Hacl = choice_undetermined_parameters['ACL thickness - Hacl (µm)']['value'].get() * 1e-6  # m
+    Hccl = choice_undetermined_parameters['CCL thickness - Hccl (µm)']['value'].get() * 1e-6  # m
     Hmem = choice_undetermined_parameters['Membrane thickness - Hmem (µm)']['value'].get() * 1e-6  # m
     epsilon_gdl = choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].get()
     epsilon_mpl = choice_undetermined_parameters['MPL porosity - ε_mpl']['value'].get()
-    epsilon_mc = choice_undetermined_parameters['Ionomer volume fraction\n- ε_mc']['value'].get()
+    epsilon_mc = choice_undetermined_parameters['Ionomer volume fraction - ε_mc']['value'].get()
     epsilon_c = choice_undetermined_parameters['Compression ratio - ε_c']['value'].get()
     e = choice_undetermined_parameters['Capillary exponent - e']['value'].get()
-    i0_c_ref = choice_undetermined_parameters['Reference exchange\ncurrent density\n- i0_c_ref (A/m²)']['value'].get()  # A.m-2
-    kappa_co = choice_undetermined_parameters['Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))']['value'].get()  # mol.m-1.s-1.Pa-1
+    i0_c_ref = choice_undetermined_parameters['Reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].get()  # A.m-2
+    kappa_co = choice_undetermined_parameters['Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))']['value'].get()  # mol.m-1.s-1.Pa-1
     kappa_c = choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].get()
     a_slim = choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_slim']['value'].get()
     b_slim = choice_undetermined_parameters['Limit liquid saturation\ncoefficient - b_slim']['value'].get()
     a_switch = choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_switch']['value'].get()
-    C_scl = choice_undetermined_parameters['Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)']['value'].get() * 1e6  # F.m-3
+    C_scl = choice_undetermined_parameters['Volumetric space-charge layer\ncapacitance - C_scl (F/cm³)']['value'].get() * 1e6  # F.m-3
     # current density parameters
     delta_t_ini_step = choice_current_density_parameters['Stabilisation time\n- Δt_ini_step (min)']['value'].get() * 60 #s
     delta_t_load_step = choice_current_density_parameters['Loading time\n- Δt_load_step (s)']['value'].get() #s
@@ -501,11 +515,11 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     else:
         type_plot = "dynamic"
 
-    return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hmpl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl,
-            epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl,
-            step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS,
-            t_EIS, t_purge, delta_t_purge, n_gdl, type_fuel_cell, type_auxiliary, type_control, type_purge,  type_display,
-            type_plot)
+    return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc, Hcgc, Wagc,
+            Wcgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
+            a_switch, C_scl, step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS,
+            ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, n_gdl, type_fuel_cell, type_auxiliary, type_control,
+            type_purge,  type_display, type_plot)
 
 
 def value_control(choice_operating_conditions, choice_accessible_parameters, choice_undetermined_parameters,
@@ -563,10 +577,14 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
         messagebox.showerror(title='Active area', message='Negative active area is impossible.')
         choices.clear()
         return
-    if choice_accessible_parameters['GC thickness - Hgc (µm)']['value'].get() < 10 or \
-            choice_accessible_parameters['GC thickness - Hgc (µm)']['value'].get() > 10000 or \
-            choice_accessible_parameters['GC width - Wgc (µm)']['value'].get() < 10 or \
-            choice_accessible_parameters['GC width - Wgc (µm)']['value'].get() > 10000 or \
+    if choice_accessible_parameters['AGC thickness - Hagc (µm)']['value'].get() < 10 or \
+            choice_accessible_parameters['AGC thickness - Hagc (µm)']['value'].get() > 10000 or \
+            choice_accessible_parameters['CGC thickness - Hcgc (µm)']['value'].get() < 10 or \
+            choice_accessible_parameters['CGC thickness - Hcgc (µm)']['value'].get() > 10000 or \
+            choice_accessible_parameters['AGC width - Wagc (µm)']['value'].get() < 10 or \
+            choice_accessible_parameters['AGC width - Wagc (µm)']['value'].get() > 10000 or \
+            choice_accessible_parameters['CGC width - Wcgc (µm)']['value'].get() < 10 or \
+            choice_accessible_parameters['CGC width - Wcgc (µm)']['value'].get() > 10000 or \
             choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].get() < 0 or \
             choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].get() > 100:
         messagebox.showerror(title='GC distances', message='GC generally have a thickness and a width between 10µm and '
@@ -577,8 +595,10 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
             choice_undetermined_parameters['GDL thickness - Hgdl (µm)']['value'].get() > 1000 or \
             choice_undetermined_parameters['MPL thickness - Hmpl (µm)']['value'].get() < 1 or \
             choice_undetermined_parameters['MPL thickness - Hmpl (µm)']['value'].get() > 1000 or \
-            choice_undetermined_parameters['CL thickness - Hcl (µm)']['value'].get() < 1 or \
-            choice_undetermined_parameters['CL thickness - Hcl (µm)']['value'].get() > 1000 or \
+            choice_undetermined_parameters['ACL thickness - Hacl (µm)']['value'].get() < 1 or \
+            choice_undetermined_parameters['ACL thickness - Hacl (µm)']['value'].get() > 1000 or \
+            choice_undetermined_parameters['CCL thickness - Hccl (µm)']['value'].get() < 1 or \
+            choice_undetermined_parameters['CCL thickness - Hccl (µm)']['value'].get() > 1000 or \
             choice_undetermined_parameters['Membrane thickness - Hmem (µm)']['value'].get() < 1 or \
             choice_undetermined_parameters['Membrane thickness - Hmem (µm)']['value'].get() > 1000:
         messagebox.showerror(title='MEA thickness', message='All MEA components generally have a thickness between '
@@ -595,14 +615,9 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
         messagebox.showerror(title='MPL porosity', message='MPL porosity should be between 0.30 and 0.70.')
         choices.clear()
         return
-    if choice_undetermined_parameters['Ionomer volume fraction\n- ε_mc']['value'].get() < 0 or \
-            choice_undetermined_parameters['Ionomer volume fraction\n- ε_mc']['value'].get() > 1:
+    if choice_undetermined_parameters['Ionomer volume fraction - ε_mc']['value'].get() < 0 or \
+            choice_undetermined_parameters['Ionomer volume fraction - ε_mc']['value'].get() > 1:
         messagebox.showerror(title='Ionomer volume fraction', message='Ionomer volume fraction should be between 0 and 1.')
-        choices.clear()
-        return
-    if choice_undetermined_parameters['Tortuosity - τ']['value'].get() < 1 or choice_undetermined_parameters['Tortuosity - τ']['value'].get() > 4:
-        messagebox.showerror(title='Pore structure coefficient', message='The pore structure coefficient should be '
-                                                                         'between 1 and 4.')
         choices.clear()
         return
     if choice_undetermined_parameters['Compression ratio - ε_c']['value'].get() < 0 or \
@@ -615,15 +630,15 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
                                                                  'being an integer.')
         choices.clear()
         return
-    if choice_undetermined_parameters['Reference exchange\ncurrent density\n- i0_c_ref (A/m²)']['value'].get() < 0.001 or \
-            choice_undetermined_parameters['Reference exchange\ncurrent density\n- i0_c_ref (A/m²)']['value'].get() > 500:
+    if choice_undetermined_parameters['Reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].get() < 0.001 or \
+            choice_undetermined_parameters['Reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].get() > 500:
         messagebox.showerror(title='Referenced exchange current density', message='The referenced exchange current '
                                                                                   'density is generally between 0.001 '
                                                                                   'and 500 A.m-2.')
         choices.clear()
         return
-    if choice_undetermined_parameters['Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))']['value'].get() < 0.01 or \
-            choice_undetermined_parameters['Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))']['value'].get() > 100:
+    if choice_undetermined_parameters['Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))']['value'].get() < 0.01 or \
+            choice_undetermined_parameters['Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))']['value'].get() > 100:
         messagebox.showerror(title='Crossover correction coefficient', message='The crossover correction coefficient is'
                                                                                ' generally between 0.01 and 100 '
                                                                                'mol.m-1.s-1.Pa-1.')
@@ -653,8 +668,8 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
                                                                       ' 0 and 1.')
         choices.clear()
         return
-    if choice_undetermined_parameters['Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)']['value'].get() < 5 or \
-            choice_undetermined_parameters['Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)']['value'].get() > 100:
+    if choice_undetermined_parameters['Volumetric space-charge layer\ncapacitance - C_scl (F/cm³)']['value'].get() < 5 or \
+            choice_undetermined_parameters['Volumetric space-charge layer\ncapacitance - C_scl (F/cm³)']['value'].get() > 100:
         messagebox.showerror(title='Double layer capacitance', message='I have not settled yet a range for C_scl.')
         choices.clear()
         return
@@ -753,141 +768,157 @@ def set_equal_width(frame1, frame2, frame3, frame4, frame5, frame6):
             frame.grid_columnconfigure(i, minsize=max(widths) / 5.5)  # Set minimum width of all column to max_width / 5
 
 
-def launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
-                                     step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters,
-                                     i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
-                                     epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
-                                     C_scl, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
-                                     type_purge, type_display, type_plot):
+def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, accessible_physical_parameters,
+                                     undetermined_physical_parameters, computing_parameters):
     """Launch the AlphaPEM simulator for a step current density and display the results.
 
     Parameters
     ----------
-    current_density : function
-        Current density evolution over time (operating input). It is a function of time and parameters dictionary.
-    T_des : float
-        Desired fuel cell temperature in Kelvin (operating input).
-    Pa_des : float
-        Desired anode pressure in Pascal (operating input).
-    Pc_des : float
-        Desired cathode pressure in Pascal (operating input).
-    Sa : float
-        Stoichiometric ratio of hydrogen (operating input).
-    Sc : float
-        Stoichiometric ratio of oxygen (operating input).
-    Phi_a_des : float
-        Desired anode relative humidity (operating input).
-    Phi_c_des : float
-        Desired cathode relative humidity (operating input).
-    step_current_parameters : dict
-            Parameters for the step current density. It is a dictionary containing:
-            - 'delta_t_ini_step': the initial time (in seconds) at zero current density for the stabilisation of the
-            internal states,
-            - 'delta_t_load_step': the loading time (in seconds) for the step current density function, from 0 to
-            i_step,
-            - 'delta_t_break_step': the time (in seconds) at i_step current density for the stabilisation of the
-            internal states,
-            - 'i_step': the current density (in A.m-2) for the step current density function,
-            - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
-    pola_current_parameters : dict
-        Parameters for the polarization current density. It is a dictionary containing:
-        - 'delta_t_ini_pola': the initial time (in seconds) at zero current density for the stabilisation of the
-        internal states,
-        - 'delta_t_load_pola': the loading time (in seconds) for one step current of the polarisation current
-        density function,
-        - 'delta_t_break_pola': the breaking time (in seconds) for one step current, for the stabilisation of the
-        internal states,
-        - 'delta_i_pola': the current density step (in A.m-2) for the polarisation current density function.
-        - 'i_max_pola': the maximum current density (in A.m-2) for the polarization curve.
-    i_EIS : float
-        Current for which a ratio_EIS perturbation is added (current parameter).
-    ratio_EIS : float
-        Value of the perturbation on the current density for building the EIS curve (current parameter).
-    t_EIS : tuple
-        EIS parameters (current parameters). It is a tuple containing the initial EIS time after stack equilibrium
-        't0_EIS', a list of time parameters which gives the beginning of each frequency change 't_new_start_EIS',
-        the final time 'tf_EIS', a list of time parameters which gives the estimated time for reaching equilibrium
-        at each frequency 'delta_t_break_EIS', and a list of time parameters which gives the estimated time for
-        measuring the voltage response at each frequency 'delta_t_measurement_EIS'.
-    f_EIS : tuple
-        EIS parameters (current parameters). It is a tuple containing the power of the initial frequency
-        'f_power_min_EIS': f_min_EIS = 10**f_power_min_EIS, the power of the final frequency 'f_power_max_EIS', the
-        number of frequencies tested 'nb_f_EIS' and the number of points calculated per specific period
-        'nb_points_EIS'.
-    Aact : float
-        Active area of the cell in m² (accessible physical parameter).
-    Hgdl : float
-        Thickness of the gas diffusion layer in m (undetermined physical parameter).
-    Hmpl : float
-        Thickness of the microporous layer in m (undetermined physical parameter).
-    Hmem : float
-        Thickness of the membrane in m (undetermined physical parameter).
-    Hcl : float
-        Thickness of the catalyst layer in m (undetermined physical parameter).
-    Hgc : float
-        Thickness of the gas channel in m (accessible physical parameter).
-    Wgc : float
-        Width of the gas channel in m (accessible physical parameter).
-    Lgc : float
-        Length of the gas channel in m (accessible physical parameter).
-    epsilon_gdl : float
-        Anode/cathode GDL porosity (undetermined physical parameter).
-    epsilon_mpl : float
-        Microporous layer porosity (undetermined physical parameter).
-    epsilon_mc : float
-        Volume fraction of ionomer in the CL (undetermined physical parameter).
-    epsilon_c : float
-        Compression ratio of the GDL (undetermined physical parameter).
-    e : float
-        Capillary exponent (undetermined physical parameter).
-    i0_c_ref : float
-        Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
-    kappa_co : float
-        Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
-    kappa_c : float
-        Overpotential correction exponent (undetermined physical parameter).
-    a_slim : float
-        One of the limit liquid saturation coefficients: the slop of slim function
-        (undetermined physical parameter).
-    b_slim : float
-        One of the limit liquid saturation coefficients: the intercept of slim function
-        (undetermined physical parameter).
-    a_switch : float
-        One of the limit liquid saturation coefficients: the slop of s_switch function
-        (undetermined physical parameter).
-    C_scl : float
-        Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
-    n_gdl : int
-        Number of points considered in the GDL (computing parameter).
-    t_purge : tuple
-        Time parameters for purging the system (computing parameter).
-        It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
-    type_fuel_cell : str
-        Type of fuel cell configuration (computing parameter).
-    type_current : str
-        Type of current density function (computing parameter).
-    type_auxiliary : str
-        Type of auxiliary system (computing parameter).
-    type_control : str
-        Type of control system (computing parameter).
-    type_purge : str
-        Type of purge system (computing parameter).
-    type_display : str
-        Type of display (computing parameter).
-    type_plot : str
-        Type of plot (computing parameter).
+    operating_inputs : dict
+        Dictionary containing the operating inputs for the simulation. It contains:
+            - current_density : function
+                Current density evolution over time (operating input). It is a function of time and parameters dictionary.
+            - T_des : float
+                Desired fuel cell temperature in Kelvin (operating input).
+            - Pa_des : float
+                Desired anode pressure in Pascal (operating input).
+            - Pc_des : float
+                Desired cathode pressure in Pascal (operating input).
+            - Sa : float
+                Stoichiometric ratio of hydrogen (operating input).
+            - Sc : float
+                Stoichiometric ratio of oxygen (operating input).
+            - Phi_a_des : float
+                Desired anode relative humidity (operating input).
+            - Phi_c_des : float
+                Desired cathode relative humidity (operating input).
+    current_parameters : dict
+        Dictionary containing the current parameters for the simulation. It contains:
+            - step_current_parameters : dict
+                Parameters for the step current density. It is a dictionary containing:
+                - 'delta_t_ini_step': the initial time (in seconds) at zero current density for the stabilisation of the
+                internal states,
+                - 'delta_t_load_step': the loading time (in seconds) for the step current density function, from 0 to
+                i_step,
+                - 'delta_t_break_step': the time (in seconds) at i_step current density for the stabilisation of the
+                internal states,
+                - 'i_step': the current density (in A.m-2) for the step current density function,
+                - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
+            - pola_current_parameters : dict
+                Parameters for the polarization current density. It is a dictionary containing:
+                - 'delta_t_ini_pola': the initial time (in seconds) at zero current density for the stabilisation of the
+                internal states,
+                - 'delta_t_load_pola': the loading time (in seconds) for one step current of the polarisation current
+                density function,
+                - 'delta_t_break_pola': the breaking time (in seconds) for one step current, for the stabilisation of the
+                internal states,
+                - 'delta_i_pola': the current density step (in A.m-2) for the polarisation current density function.
+                - 'i_max_pola': the maximum current density (in A.m-2) for the polarization curve.
+            - pola_current_for_cali_parameters : dict
+                Parameters for the polarization current density for calibration. It is a dictionary containing:
+                - 'delta_t_ini_pola_cali': the initial time (in seconds) at zero current density for the stabilisation of
+                the internal states,
+                - 'delta_t_load_pola_cali': the loading time (in seconds) for one step current of the polarisation current
+                density function,
+                - 'delta_t_break_pola_cali': the breaking time (in seconds) for one step current, for the stabilisation of
+                the internal states.
+            - i_EIS : float
+                Current for which a ratio_EIS perturbation is added (current parameter).
+            - ratio_EIS : float
+                Value of the perturbation on the current density for building the EIS curve (current parameter).
+            - t_EIS : tuple
+                EIS parameters (current parameters). It is a tuple containing the initial EIS time after stack equilibrium
+                't0_EIS', a list of time parameters which gives the beginning of each frequency change 't_new_start_EIS',
+                the final time 'tf_EIS', a list of time parameters which gives the estimated time for reaching equilibrium
+                at each frequency 'delta_t_break_EIS', and a list of time parameters which gives the estimated time for
+                measuring the voltage response at each frequency 'delta_t_measurement_EIS'.
+            f_EIS : tuple
+                EIS parameters (current parameters). It is a tuple containing the power of the initial frequency
+                'f_power_min_EIS': f_min_EIS = 10**f_power_min_EIS, the power of the final frequency 'f_power_max_EIS', the
+                number of frequencies tested 'nb_f_EIS' and the number of points calculated per specific period
+                'nb_points_EIS'.
+    accessible_physical_parameters : dict
+        Dictionary containing the accessible physical parameters for the simulation. It contains:
+            - Aact : float
+                Active area of the cell in m² (accessible physical parameter).
+            - Hagc : float
+                Thickness of the anode gas channel in m (accessible physical parameter).
+            Hcgc : float
+                Thickness of the cathode gas channel in m (accessible physical parameter).
+            Wagc : float
+                Width of the anode gas channel in m (accessible physical parameter).
+            Wcgc : float
+                Width of the cathode gas channel in m (accessible physical parameter).
+            Lgc : float
+                Length of the gas channel in m (accessible physical parameter).
+    undetermined_physical_parameters : dict
+        Dictionary containing the undetermined physical parameters for the simulation. It contains:
+            - Hgdl : float
+                Thickness of the gas diffusion layer in m (undetermined physical parameter).
+            - Hmem : float
+                Thickness of the membrane in m (undetermined physical parameter).
+            - Hacl : float
+                Thickness of the anode catalyst layer in m (undetermined physical parameter).
+            - Hccl : float
+                Thickness of the cathode catalyst layer in m (undetermined physical parameter).
+            - epsilon_gdl : float
+                Anode/cathode GDL porosity (undetermined physical parameter).
+            - epsilon_mc : float
+                Volume fraction of ionomer in the CL (undetermined physical parameter).
+            - epsilon_c : float
+                Compression ratio of the GDL (undetermined physical parameter).
+            - e : float
+                Capillary exponent (undetermined physical parameter).
+            - i0_c_ref : float
+                Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
+            - kappa_co : float
+                Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
+            - kappa_c : float
+                Overpotential correction exponent (undetermined physical parameter).
+            - a_slim : float
+                One of the limit liquid saturation coefficients: the slop of slim function
+                (undetermined physical parameter).
+            - b_slim : float
+                One of the limit liquid saturation coefficients: the intercept of slim function
+                (undetermined physical parameter).
+            - a_switch : float
+                One of the limit liquid saturation coefficients: the slop of s_switch function
+                (undetermined physical parameter).
+            - C_scl : float
+                Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
+    computing_parameters : dict
+        Dictionary containing the computing parameters for the simulation. It contains:
+            - n_gdl : int
+                Number of points considered in the GDL (computing parameter).
+            - t_purge : tuple
+                Time parameters for purging the system (computing parameter).
+                It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
+            - type_fuel_cell : str
+                Type of fuel cell configuration (computing parameter).
+            - type_current : str
+                Type of current density function (computing parameter).
+            - type_auxiliary : str
+                Type of auxiliary system (computing parameter).
+            - type_control : str
+                Type of control system (computing parameter).
+            - type_purge : str
+                Type of purge system (computing parameter).
+            - type_display : str
+                Type of display (computing parameter).
+            - type_plot : str
+                Type of plot (computing parameter).
     """
 
     # Starting time
     start_time = time.time()
 
     # Figures preparation
-    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(type_current, type_display)
+    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(computing_parameters)
 
     # Dynamic display requires a dedicated use of the AlphaPEM class.
-    if type_plot == "dynamic":
+    if computing_parameters['type_plot'] == "dynamic":
         # Check if the type_fuel_cell and type_current are valid
-        if type_current == "step" and type_display == "multiple":
+        if computing_parameters['type_current'] == "step" and computing_parameters['type_display'] == "multiple":
             raise ValueError('dynamic plot is not thought to be used with step current and multiple display.' +
                              'There would be too much plots to handle.')
 
@@ -895,21 +926,19 @@ def launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa,
         #       Calculation of the plot update number (n) and the initial time interval (time_interval).
         initial_variable_values = None
         #           Extraction of the parameters
-        tf_step = step_current_parameters['delta_t_ini_step'] + step_current_parameters['delta_t_load_step'] + \
-                  step_current_parameters['delta_t_break_step']  # (s).
-        delta_t_dyn_step = step_current_parameters['delta_t_dyn_step']  # (s).
+        tf_step = (current_parameters['step_current_parameters']['delta_t_ini_step'] +
+                   current_parameters['step_current_parameters']['delta_t_load_step'] +
+                   current_parameters['step_current_parameters']['delta_t_break_step'])  # (s).
+        delta_t_dyn_step = current_parameters['step_current_parameters']['delta_t_dyn_step']  # (s).
         #           Calculation
         n = int(tf_step / delta_t_dyn_step)  # It is the plot update number.
         time_interval = [0, delta_t_dyn_step]  # (s). It is the initial time interval.
 
         # Dynamic simulation
         for i in range(n):
-            Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
-                                 step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters,
-                                 i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
-                                 epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
-                                 C_scl, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
-                                 type_purge, type_display, type_plot, initial_variable_values, time_interval)
+            Simulator = AlphaPEM(operating_inputs, current_parameters, accessible_physical_parameters,
+                                 undetermined_physical_parameters, computing_parameters, initial_variable_values,
+                                 time_interval)
 
             # time_interval actualization
             if i < (n - 1):  # The final simulation does not require actualization.
@@ -923,19 +952,15 @@ def launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa,
                 initial_variable_values.append(Simulator.variables[x][-1])
 
             # Display
-            if type_display != "no_display":
+            if computing_parameters['type_display'] != "no_display":
                 Simulator.Display(ax1, ax2, ax3)
 
-    else:  # elif type_plot == "fixed":
+    else:  # elif computing_parameters['type_plot'] == "fixed":
         # Simulation
-        Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
-                             step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS,
-                             ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc,
-                             epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, n_gdl,
-                             t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge,
-                             type_display, type_plot)
+        Simulator = AlphaPEM(operating_inputs, current_parameters, accessible_physical_parameters,
+                             undetermined_physical_parameters, computing_parameters)
         # Display
-        if type_display != "no_display":
+        if computing_parameters['type_display'] != "no_display":
             Simulator.Display(ax1, ax2, ax3)
 
     # Plot saving
@@ -946,149 +971,164 @@ def launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa,
     print('Time of the algorithm in second :', algo_time)
 
 
-def launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
-                                             step_current_parameters, pola_current_parameters,
-                                             pola_current_for_cali_parameters, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact,
-                                             Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e,
-                                             i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, n_gdl,
-                                             t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
-                                             type_purge, type_display, type_plot):
+def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameters, accessible_physical_parameters,
+                                             undetermined_physical_parameters, computing_parameters):
     """Launch the AlphaPEM simulator for a polarization current density and display the results.
 
     Parameters
     ----------
-    current_density : function
-        Current density evolution over time (operating input). It is a function of time and parameters dictionary.
-    T_des : float
-        Desired fuel cell temperature in Kelvin (operating input).
-    Pa_des : float
-        Desired anode pressure in Pascal (operating input).
-    Pc_des : float
-        Desired cathode pressure in Pascal (operating input).
-    Sa : float
-        Stoichiometric ratio of hydrogen (operating input).
-    Sc : float
-        Stoichiometric ratio of oxygen (operating input).
-    Phi_a_des : float
-        Desired anode relative humidity (operating input).
-    Phi_c_des : float
-        Desired cathode relative humidity (operating input).
-    step_current_parameters : dict
-            Parameters for the step current density. It is a dictionary containing:
-            - 'delta_t_ini_step': the initial time (in seconds) at zero current density for the stabilisation of the
-            internal states,
-            - 'delta_t_load_step': the loading time (in seconds) for the step current density function, from 0 to
-            i_step,
-            - 'delta_t_break_step': the time (in seconds) at i_step current density for the stabilisation of the
-            internal states,
-            - 'i_step': the current density (in A.m-2) for the step current density function,
-            - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
-    pola_current_parameters : dict
-        Parameters for the polarization current density. It is a dictionary containing:
-        - 'delta_t_ini_pola': the initial time (in seconds) at zero current density for the stabilisation of the
-        internal states,
-        - 'delta_t_load_pola': the loading time (in seconds) for one step current of the polarisation current
-        density function,
-        - 'delta_t_break_pola': the breaking time (in seconds) for one step current, for the stabilisation of the
-        internal states,
-        - 'delta_i_pola': the current density step (in A.m-2) for the polarisation current density function.
-        - 'i_max_pola': the maximum current density (in A.m-2) for the polarization curve.
-    i_EIS : float
-        Current for which a ratio_EIS perturbation is added (current parameter).
-    ratio_EIS : float
-        Value of the perturbation on the current density for building the EIS curve (current parameter).
-    t_EIS : tuple
-        EIS parameters (current parameters). It is a tuple containing the initial EIS time after stack equilibrium
-        't0_EIS', a list of time parameters which gives the beginning of each frequency change 't_new_start_EIS',
-        the final time 'tf_EIS', a list of time parameters which gives the estimated time for reaching equilibrium
-        at each frequency 'delta_t_break_EIS', and a list of time parameters which gives the estimated time for
-        measuring the voltage response at each frequency 'delta_t_measurement_EIS'.
-    f_EIS : tuple
-        EIS parameters (current parameters). It is a tuple containing the power of the initial frequency
-        'f_power_min_EIS': f_min_EIS = 10**f_power_min_EIS, the power of the final frequency 'f_power_max_EIS', the
-        number of frequencies tested 'nb_f_EIS' and the number of points calculated per specific period
-        'nb_points_EIS'.
-    Aact : float
-        Active area of the cell in m² (accessible physical parameter).
-    Hgdl : float
-        Thickness of the gas diffusion layer in m (undetermined physical parameter).
-    Hmpl : float
-        Thickness of the microporous layer in m (undetermined physical parameter).
-    Hmem : float
-        Thickness of the membrane in m (accessible physical parameter).
-    Hcl : float
-        Thickness of the catalyst layer in m (undetermined physical parameter).
-    Hgc : float
-        Thickness of the gas channel in m (accessible physical parameter).
-    Wgc : float
-        Width of the gas channel in m (accessible physical parameter).
-    Lgc : float
-        Length of the gas channel in m (accessible physical parameter).
-    epsilon_gdl : float
-        Anode/cathode GDL porosity (undetermined physical parameter).
-    epsilon_mpl : float
-        Microporous layer porosity (undetermined physical parameter).
-    epsilon_mc : float
-        Volume fraction of ionomer in the CL (undetermined physical parameter).
-    epsilon_c : float
-        Compression ratio of the GDL (undetermined physical parameter).
-    e : float
-        Capillary exponent (undetermined physical parameter).
-    i0_c_ref : float
-        Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
-    kappa_co : float
-        Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
-    kappa_c : float
-        Overpotential correction exponent (undetermined physical parameter).
-    a_slim : float
-        One of the limit liquid saturation coefficients: the slop of slim function
-        (undetermined physical parameter).
-    b_slim : float
-        One of the limit liquid saturation coefficients: the intercept of slim function
-        (undetermined physical parameter).
-    a_switch : float
-        One of the limit liquid saturation coefficients: the slop of s_switch function
-        (undetermined physical parameter).
-    C_scl : float
-        Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
-    n_gdl : int
-        Number of points considered in the GDL (computing parameter).
-    t_purge : tuple
-        Time parameters for purging the system (computing parameter).
-        It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
-    type_fuel_cell : str
-        Type of fuel cell configuration (computing parameter).
-    type_current : str
-        Type of current density function (computing parameter).
-    type_auxiliary : str
-        Type of auxiliary system (computing parameter).
-    type_control : str
-        Type of control system (computing parameter).
-    type_purge : str
-        Type of purge system (computing parameter).
-    type_display : str
-        Type of display (computing parameter).
-    type_plot : str
-        Type of plot (computing parameter).
+    operating_inputs : dict
+        Dictionary containing the operating inputs for the simulation. It contains:
+            - current_density : function
+                Current density evolution over time (operating input). It is a function of time and parameters dictionary.
+            - T_des : float
+                Desired fuel cell temperature in Kelvin (operating input).
+            - Pa_des : float
+                Desired anode pressure in Pascal (operating input).
+            - Pc_des : float
+                Desired cathode pressure in Pascal (operating input).
+            - Sa : float
+                Stoichiometric ratio of hydrogen (operating input).
+            - Sc : float
+                Stoichiometric ratio of oxygen (operating input).
+            - Phi_a_des : float
+                Desired anode relative humidity (operating input).
+            - Phi_c_des : float
+                Desired cathode relative humidity (operating input).
+    current_parameters : dict
+        Dictionary containing the current parameters for the simulation. It contains:
+            - step_current_parameters : dict
+                Parameters for the step current density. It is a dictionary containing:
+                - 'delta_t_ini_step': the initial time (in seconds) at zero current density for the stabilisation of the
+                internal states,
+                - 'delta_t_load_step': the loading time (in seconds) for the step current density function, from 0 to
+                i_step,
+                - 'delta_t_break_step': the time (in seconds) at i_step current density for the stabilisation of the
+                internal states,
+                - 'i_step': the current density (in A.m-2) for the step current density function,
+                - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
+            - pola_current_parameters : dict
+                Parameters for the polarization current density. It is a dictionary containing:
+                - 'delta_t_ini_pola': the initial time (in seconds) at zero current density for the stabilisation of the
+                internal states,
+                - 'delta_t_load_pola': the loading time (in seconds) for one step current of the polarisation current
+                density function,
+                - 'delta_t_break_pola': the breaking time (in seconds) for one step current, for the stabilisation of the
+                internal states,
+                - 'delta_i_pola': the current density step (in A.m-2) for the polarisation current density function.
+                - 'i_max_pola': the maximum current density (in A.m-2) for the polarization curve.
+            - pola_current_for_cali_parameters : dict
+                Parameters for the polarization current density for calibration. It is a dictionary containing:
+                - 'delta_t_ini_pola_cali': the initial time (in seconds) at zero current density for the stabilisation of
+                the internal states,
+                - 'delta_t_load_pola_cali': the loading time (in seconds) for one step current of the polarisation current
+                density function,
+                - 'delta_t_break_pola_cali': the breaking time (in seconds) for one step current, for the stabilisation of
+                the internal states.
+            - i_EIS : float
+                Current for which a ratio_EIS perturbation is added (current parameter).
+            - ratio_EIS : float
+                Value of the perturbation on the current density for building the EIS curve (current parameter).
+            - t_EIS : tuple
+                EIS parameters (current parameters). It is a tuple containing the initial EIS time after stack equilibrium
+                't0_EIS', a list of time parameters which gives the beginning of each frequency change 't_new_start_EIS',
+                the final time 'tf_EIS', a list of time parameters which gives the estimated time for reaching equilibrium
+                at each frequency 'delta_t_break_EIS', and a list of time parameters which gives the estimated time for
+                measuring the voltage response at each frequency 'delta_t_measurement_EIS'.
+            f_EIS : tuple
+                EIS parameters (current parameters). It is a tuple containing the power of the initial frequency
+                'f_power_min_EIS': f_min_EIS = 10**f_power_min_EIS, the power of the final frequency 'f_power_max_EIS', the
+                number of frequencies tested 'nb_f_EIS' and the number of points calculated per specific period
+                'nb_points_EIS'.
+    accessible_physical_parameters : dict
+        Dictionary containing the accessible physical parameters for the simulation. It contains:
+            - Aact : float
+                Active area of the cell in m² (accessible physical parameter).
+            - Hagc : float
+                Thickness of the anode gas channel in m (accessible physical parameter).
+            Hcgc : float
+                Thickness of the cathode gas channel in m (accessible physical parameter).
+            Wagc : float
+                Width of the anode gas channel in m (accessible physical parameter).
+            Wcgc : float
+                Width of the cathode gas channel in m (accessible physical parameter).
+            Lgc : float
+                Length of the gas channel in m (accessible physical parameter).
+    undetermined_physical_parameters : dict
+        Dictionary containing the undetermined physical parameters for the simulation. It contains:
+            - Hgdl : float
+                Thickness of the gas diffusion layer in m (undetermined physical parameter).
+            - Hmem : float
+                Thickness of the membrane in m (undetermined physical parameter).
+            - Hacl : float
+                Thickness of the anode catalyst layer in m (undetermined physical parameter).
+            - Hccl : float
+                Thickness of the cathode catalyst layer in m (undetermined physical parameter).
+            - epsilon_gdl : float
+                Anode/cathode GDL porosity (undetermined physical parameter).
+            - epsilon_mc : float
+                Volume fraction of ionomer in the CL (undetermined physical parameter).
+            - epsilon_c : float
+                Compression ratio of the GDL (undetermined physical parameter).
+            - e : float
+                Capillary exponent (undetermined physical parameter).
+            - i0_c_ref : float
+                Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
+            - kappa_co : float
+                Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
+            - kappa_c : float
+                Overpotential correction exponent (undetermined physical parameter).
+            - a_slim : float
+                One of the limit liquid saturation coefficients: the slop of slim function
+                (undetermined physical parameter).
+            - b_slim : float
+                One of the limit liquid saturation coefficients: the intercept of slim function
+                (undetermined physical parameter).
+            - a_switch : float
+                One of the limit liquid saturation coefficients: the slop of s_switch function
+                (undetermined physical parameter).
+            - C_scl : float
+                Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
+    computing_parameters : dict
+        Dictionary containing the computing parameters for the simulation. It contains:
+            - n_gdl : int
+                Number of points considered in the GDL (computing parameter).
+            - t_purge : tuple
+                Time parameters for purging the system (computing parameter).
+                It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
+            - type_fuel_cell : str
+                Type of fuel cell configuration (computing parameter).
+            - type_current : str
+                Type of current density function (computing parameter).
+            - type_auxiliary : str
+                Type of auxiliary system (computing parameter).
+            - type_control : str
+                Type of control system (computing parameter).
+            - type_purge : str
+                Type of purge system (computing parameter).
+            - type_display : str
+                Type of display (computing parameter).
+            - type_plot : str
+                Type of plot (computing parameter).
     """
 
     # Starting time
     start_time = time.time()
 
     # Figures preparation
-    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(type_current, type_display)
+    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(computing_parameters)
 
     # Dynamic display requires a dedicated use of the AlphaPEM class.
-    if type_plot == "dynamic":
+    if computing_parameters['type_plot'] == "dynamic":
         # Initialization
         #       Calculation of the plot update number (n) and the initial time interval (time_interval).
         initial_variable_values = None
         #           Extraction of the parameters
-        delta_t_ini_pola = pola_current_parameters['delta_t_ini_pola']  # (s).
-        delta_t_load_pola = pola_current_parameters['delta_t_load_pola']  # (s).
-        delta_t_break_pola = pola_current_parameters['delta_t_break_pola']  # (s).
-        delta_i_pola = pola_current_parameters['delta_i_pola']  # (A.m-2).
-        i_max_pola = pola_current_parameters['i_max_pola']  # (A.m-2).
+        delta_t_ini_pola = current_parameters['pola_current_parameters']['delta_t_ini_pola']  # (s).
+        delta_t_load_pola = current_parameters['pola_current_parameters']['delta_t_load_pola']  # (s).
+        delta_t_break_pola = current_parameters['pola_current_parameters']['delta_t_break_pola']  # (s).
+        delta_i_pola = current_parameters['pola_current_parameters']['delta_i_pola']  # (A.m-2).
+        i_max_pola = current_parameters['pola_current_parameters']['i_max_pola']  # (A.m-2).
         #           Calculation
         delta_t_pola = delta_t_load_pola + delta_t_break_pola  # s. It is the time of one load.
         tf = delta_t_ini_pola + int(
@@ -1098,12 +1138,9 @@ def launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_
 
         # Dynamic simulation
         for i in range(n):
-            Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
-                                 step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters,
-                                 i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
-                                 epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
-                                 C_scl, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
-                                 type_purge, type_display, type_plot, initial_variable_values, time_interval)
+            Simulator = AlphaPEM(operating_inputs, current_parameters, accessible_physical_parameters,
+                                 undetermined_physical_parameters, computing_parameters, initial_variable_values,
+                                 time_interval)
 
             # time_interval actualization
             if i < (n - 1):  # The final simulation does not require actualization.
@@ -1117,19 +1154,15 @@ def launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_
                 initial_variable_values.append(Simulator.variables[x][-1])
 
             # Display
-            if type_display != "no_display":
+            if computing_parameters['type_display'] != "no_display":
                 Simulator.Display(ax1, ax2, ax3)
 
-    else:  # elif type_plot == "fixed":
+    else:  # elif computing_parameters['type_plot'] == "fixed":
         # Simulation
-        Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
-                             step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS,
-                             ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc,
-                             epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge,
-                             type_fuel_cell, type_current, type_auxiliary, type_control, type_purge, type_display,
-                             type_plot)
+        Simulator = AlphaPEM(operating_inputs, current_parameters, accessible_physical_parameters,
+                             undetermined_physical_parameters, computing_parameters)
         # Display
-        if type_display != "no_display":
+        if computing_parameters['type_display'] != "no_display":
             Simulator.Display(ax1, ax2, ax3)
 
     # Plot saving
@@ -1140,142 +1173,158 @@ def launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_
     print('Time of the algorithm in second :', algo_time)
 
 
-def launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
-                                    step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters,
-                                    i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl,
-                                    epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
-                                    C_scl, n_gdl, t_purge, type_fuel_cell, type_current, type_auxiliary, type_control,
-                                    type_purge, type_display, type_plot):
+def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, accessible_physical_parameters,
+                                    undetermined_physical_parameters, computing_parameters):
     """Launch the AlphaPEM simulator for an EIS current density and display the results.
 
     Parameters
     ----------
-    current_density : function
-        Current density evolution over time (operating input). It is a function of time and parameters dictionary.
-    T_des : float
-        Desired fuel cell temperature in Kelvin (operating input).
-    Pa_des : float
-        Desired anode pressure in Pascal (operating input).
-    Pc_des : float
-        Desired cathode pressure in Pascal (operating input).
-    Sa : float
-        Stoichiometric ratio of hydrogen (operating input).
-    Sc : float
-        Stoichiometric ratio of oxygen (operating input).
-    Phi_a_des : float
-        Desired anode relative humidity (operating input).
-    Phi_c_des : float
-        Desired cathode relative humidity (operating input).
-    step_current_parameters : dict
-            Parameters for the step current density. It is a dictionary containing:
-            - 'delta_t_ini_step': the initial time (in seconds) at zero current density for the stabilisation of the
-            internal states,
-            - 'delta_t_load_step': the loading time (in seconds) for the step current density function, from 0 to
-            i_step,
-            - 'delta_t_break_step': the time (in seconds) at i_step current density for the stabilisation of the
-            internal states,
-            - 'i_step': the current density (in A.m-2) for the step current density function,
-            - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
-    pola_current_parameters : dict
-        Parameters for the polarization current density. It is a dictionary containing:
-        - 'delta_t_ini_pola': the initial time (in seconds) at zero current density for the stabilisation of the
-        internal states,
-        - 'delta_t_load_pola': the loading time (in seconds) for one step current of the polarisation current
-        density function,
-        - 'delta_t_break_pola': the breaking time (in seconds) for one step current, for the stabilisation of the
-        internal states,
-        - 'delta_i_pola': the current density step (in A.m-2) for the polarisation current density function.
-        - 'i_max_pola': the maximum current density (in A.m-2) for the polarization curve.
-    i_EIS : float
-        Current for which a ratio_EIS perturbation is added (current parameter).
-    ratio_EIS : float
-        Value of the perturbation on the current density for building the EIS curve (current parameter).
-    t_EIS : tuple
-        EIS parameters (current parameters). It is a tuple containing the initial EIS time after stack equilibrium
-        't0_EIS', a list of time parameters which gives the beginning of each frequency change 't_new_start_EIS',
-        the final time 'tf_EIS', a list of time parameters which gives the estimated time for reaching equilibrium
-        at each frequency 'delta_t_break_EIS', and a list of time parameters which gives the estimated time for
-        measuring the voltage response at each frequency 'delta_t_measurement_EIS'.
-    f_EIS : tuple
-        EIS parameters (current parameters). It is a tuple containing the power of the initial frequency
-        'f_power_min_EIS': f_min_EIS = 10**f_power_min_EIS, the power of the final frequency 'f_power_max_EIS', the
-        number of frequencies tested 'nb_f_EIS' and the number of points calculated per specific period
-        'nb_points_EIS'.
-    Aact : float
-        Active area of the cell in m² (accessible physical parameter).
-    Hgdl : float
-        Thickness of the gas diffusion layer in m (undetermined physical parameter).
-    Hmpl : float
-        Thickness of the microporous layer in m (undetermined physical parameter).
-    Hmem : float
-        Thickness of the membrane in m (undetermined physical parameter).
-    Hcl : float
-        Thickness of the catalyst layer in m (undetermined physical parameter).
-    Hgc : float
-        Thickness of the gas channel in m (accessible physical parameter).
-    Wgc : float
-        Width of the gas channel in m (accessible physical parameter).
-    Lgc : float
-        Length of the gas channel in m (accessible physical parameter).
-    epsilon_gdl : float
-        Anode/cathode GDL porosity (undetermined physical parameter).
-    epsilon_mpl : float
-        Microporous layer porosity (undetermined physical parameter).
-    epsilon_mc : float
-        Volume fraction of ionomer in the CL (undetermined physical parameter).
-    epsilon_c : float
-        Compression ratio of the GDL (undetermined physical parameter).
-    e : float
-        Capillary exponent (undetermined physical parameter).
-    i0_c_ref : float
-        Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
-    kappa_co : float
-        Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
-    kappa_c : float
-        Overpotential correction exponent (undetermined physical parameter).
-    a_slim : float
-        One of the limit liquid saturation coefficients: the slop of slim function
-        (undetermined physical parameter).
-    b_slim : float
-        One of the limit liquid saturation coefficients: the intercept of slim function
-        (undetermined physical parameter).
-    a_switch : float
-        One of the limit liquid saturation coefficients: the slop of s_switch function
-        (undetermined physical parameter).
-    C_scl : float
-        Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
-    n_gdl : int
-        Number of points considered in the GDL (computing parameter).
-    t_purge : tuple
-        Time parameters for purging the system (computing parameter).
-        It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
-    type_fuel_cell : str
-        Type of fuel cell configuration (computing parameter).
-    type_current : str
-        Type of current density function (computing parameter).
-    type_auxiliary : str
-        Type of auxiliary system (computing parameter).
-    type_control : str
-        Type of control system (computing parameter).
-    type_purge : str
-        Type of purge system (computing parameter).
-    type_display : str
-        Type of display (computing parameter).
-    type_plot : str
-        Type of plot (computing parameter).
+    operating_inputs : dict
+        Dictionary containing the operating inputs for the simulation. It contains:
+            - current_density : function
+                Current density evolution over time (operating input). It is a function of time and parameters dictionary.
+            - T_des : float
+                Desired fuel cell temperature in Kelvin (operating input).
+            - Pa_des : float
+                Desired anode pressure in Pascal (operating input).
+            - Pc_des : float
+                Desired cathode pressure in Pascal (operating input).
+            - Sa : float
+                Stoichiometric ratio of hydrogen (operating input).
+            - Sc : float
+                Stoichiometric ratio of oxygen (operating input).
+            - Phi_a_des : float
+                Desired anode relative humidity (operating input).
+            - Phi_c_des : float
+                Desired cathode relative humidity (operating input).
+    current_parameters : dict
+        Dictionary containing the current parameters for the simulation. It contains:
+            - step_current_parameters : dict
+                Parameters for the step current density. It is a dictionary containing:
+                - 'delta_t_ini_step': the initial time (in seconds) at zero current density for the stabilisation of the
+                internal states,
+                - 'delta_t_load_step': the loading time (in seconds) for the step current density function, from 0 to
+                i_step,
+                - 'delta_t_break_step': the time (in seconds) at i_step current density for the stabilisation of the
+                internal states,
+                - 'i_step': the current density (in A.m-2) for the step current density function,
+                - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
+            - pola_current_parameters : dict
+                Parameters for the polarization current density. It is a dictionary containing:
+                - 'delta_t_ini_pola': the initial time (in seconds) at zero current density for the stabilisation of the
+                internal states,
+                - 'delta_t_load_pola': the loading time (in seconds) for one step current of the polarisation current
+                density function,
+                - 'delta_t_break_pola': the breaking time (in seconds) for one step current, for the stabilisation of the
+                internal states,
+                - 'delta_i_pola': the current density step (in A.m-2) for the polarisation current density function.
+                - 'i_max_pola': the maximum current density (in A.m-2) for the polarization curve.
+            - pola_current_for_cali_parameters : dict
+                Parameters for the polarization current density for calibration. It is a dictionary containing:
+                - 'delta_t_ini_pola_cali': the initial time (in seconds) at zero current density for the stabilisation of
+                the internal states,
+                - 'delta_t_load_pola_cali': the loading time (in seconds) for one step current of the polarisation current
+                density function,
+                - 'delta_t_break_pola_cali': the breaking time (in seconds) for one step current, for the stabilisation of
+                the internal states.
+            - i_EIS : float
+                Current for which a ratio_EIS perturbation is added (current parameter).
+            - ratio_EIS : float
+                Value of the perturbation on the current density for building the EIS curve (current parameter).
+            - t_EIS : tuple
+                EIS parameters (current parameters). It is a tuple containing the initial EIS time after stack equilibrium
+                't0_EIS', a list of time parameters which gives the beginning of each frequency change 't_new_start_EIS',
+                the final time 'tf_EIS', a list of time parameters which gives the estimated time for reaching equilibrium
+                at each frequency 'delta_t_break_EIS', and a list of time parameters which gives the estimated time for
+                measuring the voltage response at each frequency 'delta_t_measurement_EIS'.
+            f_EIS : tuple
+                EIS parameters (current parameters). It is a tuple containing the power of the initial frequency
+                'f_power_min_EIS': f_min_EIS = 10**f_power_min_EIS, the power of the final frequency 'f_power_max_EIS', the
+                number of frequencies tested 'nb_f_EIS' and the number of points calculated per specific period
+                'nb_points_EIS'.
+    accessible_physical_parameters : dict
+        Dictionary containing the accessible physical parameters for the simulation. It contains:
+            - Aact : float
+                Active area of the cell in m² (accessible physical parameter).
+            - Hagc : float
+                Thickness of the anode gas channel in m (accessible physical parameter).
+            Hcgc : float
+                Thickness of the cathode gas channel in m (accessible physical parameter).
+            Wagc : float
+                Width of the anode gas channel in m (accessible physical parameter).
+            Wcgc : float
+                Width of the cathode gas channel in m (accessible physical parameter).
+            Lgc : float
+                Length of the gas channel in m (accessible physical parameter).
+    undetermined_physical_parameters : dict
+        Dictionary containing the undetermined physical parameters for the simulation. It contains:
+            - Hgdl : float
+                Thickness of the gas diffusion layer in m (undetermined physical parameter).
+            - Hmem : float
+                Thickness of the membrane in m (undetermined physical parameter).
+            - Hacl : float
+                Thickness of the anode catalyst layer in m (undetermined physical parameter).
+            - Hccl : float
+                Thickness of the cathode catalyst layer in m (undetermined physical parameter).
+            - epsilon_gdl : float
+                Anode/cathode GDL porosity (undetermined physical parameter).
+            - epsilon_mc : float
+                Volume fraction of ionomer in the CL (undetermined physical parameter).
+            - epsilon_c : float
+                Compression ratio of the GDL (undetermined physical parameter).
+            - e : float
+                Capillary exponent (undetermined physical parameter).
+            - i0_c_ref : float
+                Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
+            - kappa_co : float
+                Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
+            - kappa_c : float
+                Overpotential correction exponent (undetermined physical parameter).
+            - a_slim : float
+                One of the limit liquid saturation coefficients: the slop of slim function
+                (undetermined physical parameter).
+            - b_slim : float
+                One of the limit liquid saturation coefficients: the intercept of slim function
+                (undetermined physical parameter).
+            - a_switch : float
+                One of the limit liquid saturation coefficients: the slop of s_switch function
+                (undetermined physical parameter).
+            - C_scl : float
+                Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
+    computing_parameters : dict
+        Dictionary containing the computing parameters for the simulation. It contains:
+            - n_gdl : int
+                Number of points considered in the GDL (computing parameter).
+            - t_purge : tuple
+                Time parameters for purging the system (computing parameter).
+                It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
+            - type_fuel_cell : str
+                Type of fuel cell configuration (computing parameter).
+            - type_current : str
+                Type of current density function (computing parameter).
+            - type_auxiliary : str
+                Type of auxiliary system (computing parameter).
+            - type_control : str
+                Type of control system (computing parameter).
+            - type_purge : str
+                Type of purge system (computing parameter).
+            - type_display : str
+                Type of display (computing parameter).
+            - type_plot : str
+                Type of plot (computing parameter).
     """
 
     # Starting time
     start_time = time.time()
 
     # Figures preparation
-    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(type_current, type_display)
+    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(computing_parameters)
 
     # Initialization
     #       Calculation of the plot update number (n) and the initial time interval (time_interval).
     initial_variable_values = None
-    t0_EIS, t_new_start, tf_EIS, delta_t_break_EIS, delta_t_measurement_EIS = t_EIS
-    f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = f_EIS  # These are used for EIS max_step
+    t0_EIS, t_new_start, tf_EIS, delta_t_break_EIS, delta_t_measurement_EIS = current_parameters['t_EIS']
+    f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = current_parameters['f_EIS']  # These are used for EIS max_step
     #                                                                    actualization.
     f = np.logspace(f_power_min_EIS, f_power_max_EIS, num=nb_f_EIS)  # It is a list of all the frequency tested.
     n = len(t_new_start)  # It is the plot update number.
@@ -1283,12 +1332,8 @@ def launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, 
 
     #       A preliminary simulation run is necessary to equilibrate the internal variables of the cell at i_EIS
     #       prior to initiating the EIS.
-    Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, step_current_parameters,
-                         pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, t_EIS, f_EIS,
-                         Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref,
-                         kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge, type_fuel_cell,
-                         type_current, type_auxiliary, type_control, type_purge, type_display, type_plot,
-                         initial_variable_values, time_interval)
+    Simulator = AlphaPEM(operating_inputs, current_parameters, accessible_physical_parameters,
+                         undetermined_physical_parameters, computing_parameters, initial_variable_values, time_interval)
 
     # time_interval actualization
     t0_EIS_temp = t0_EIS  # It is the initial time for 1 EIS point.
@@ -1303,19 +1348,16 @@ def launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, 
     for x in Simulator.solver_variable_names:
         initial_variable_values.append(Simulator.variables[x][-1])
 
-    if type_display == "multiple":
+    if computing_parameters['type_display'] == "multiple":
         print("A display bug prevents the dynamic updating of the graphs, as it appears that too much data is "
               "involved. However, the data is correctly calculated, and the appropriate plots are saved in the "
               "'results' folder. This display bug does not occur when using a 'synthetic' type_display.")
 
     # Dynamic simulation
     for i in range(n):
-        Simulator = AlphaPEM(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
-                             step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS,
-                             ratio_EIS, t_EIS, f_EIS, Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc,
-                             epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, n_gdl,
-                             t_purge, type_fuel_cell, type_current, type_auxiliary, type_control, type_purge,
-                             type_display, type_plot, initial_variable_values, time_interval)
+        Simulator = AlphaPEM(operating_inputs, current_parameters, accessible_physical_parameters,
+                             undetermined_physical_parameters, computing_parameters, initial_variable_values,
+                             time_interval)
 
         # time_interval actualization
         if i < (n - 1):  # The final simulation does not require actualization.
@@ -1332,7 +1374,7 @@ def launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, 
             initial_variable_values.append(Simulator.variables[x][-1])
 
         # Display
-        if type_display != "no_display":
+        if computing_parameters['type_display'] != "no_display":
             Simulator.Display(ax1, ax2, ax3)
 
     # Plot saving

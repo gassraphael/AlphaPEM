@@ -17,6 +17,7 @@ from modules.GUI_modules import display_parameter_labels, \
     display_radiobuttons, changeValue, value_control, set_equal_width, launch_AlphaPEM_for_step_current, \
     launch_AlphaPEM_for_polarization_current, launch_AlphaPEM_for_EIS_current
 from configuration.current_densities import step_current, polarization_current, EIS_current
+from configuration.settings import current_density_parameters
 
 
 # ____________________________________________________GUI functions____________________________________________________
@@ -99,6 +100,12 @@ def main_frame(root, canvas):
     model_possibilities_frame = ttk.Frame(root, style='Custom.TFrame')
     model_possibilities_frame.grid(row=11, column=0, padx=5, pady=5)
 
+    # Import the current density parameters from the settings file for default value
+    (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
+     current_density) = current_density_parameters()
+    f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = f_EIS
+
+
     # Create the choice dictionaries
     choice_operating_conditions = \
         {'Temperature - Tfc (°C)': {'value': tk.DoubleVar(operating_conditions_frame), 'label_row': 2, 'label_column': 1},
@@ -110,73 +117,76 @@ def main_frame(root, canvas):
          'Cathode humidity - Φc': {'value': tk.DoubleVar(operating_conditions_frame), 'label_row': 4, 'label_column': 3}}
 
     choice_accessible_parameters = \
-        {'GC thickness - Hgc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 1},
-         'GC width - Wgc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 3},
-         'GC cumulated length - Lgc (m)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 5},
-         'Active area - Aact (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 1}}
+        {'AGC thickness - Hagc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 1},
+         'CGC thickness - Hcgc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 3},
+         'AGC width - Wagc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 5},
+         'CGC width - Wcgc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 1},
+         'GC cumulated length - Lgc (m)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 3},
+         'Active area - Aact (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 5}}
 
     choice_undetermined_parameters = \
         {'GDL thickness - Hgdl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 1},
          'MPL thickness - Hmpl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 3},
-         'CL thickness - Hcl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 5},
-         'Membrane thickness - Hmem (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 1},
-         'GDL porosity - ε_gdl': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.6), 'label_row': 1, 'label_column': 3},
-         'MPL porosity - ε_mpl': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.6), 'label_row': 1, 'label_column': 5},
-         'Ionomer volume fraction\n- ε_mc': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.25), 'label_row': 2, 'label_column': 1},
-         'Tortuosity - τ': {'value': tk.DoubleVar(undetermined_parameters_frame, 1.5), 'label_row': 2, 'label_column': 5},
-         'Compression ratio - ε_c': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.2), 'label_row': 2, 'label_column': 5},
-         'Capillary exponent - e': {'value': tk.IntVar(undetermined_parameters_frame, 4), 'label_row': 3, 'label_column': 1},
-         'Electron resistance\n- Re (µΩ.m²)': {'value': tk.DoubleVar(undetermined_parameters_frame, 1.0), 'label_row': 3, 'label_column': 3},
-         'Reference exchange\ncurrent density\n- i0_c_ref (A/m²)': {'value': tk.DoubleVar(undetermined_parameters_frame, 3.0), 'label_row': 3, 'label_column': 5},
-         'Crossover correction\ncoefficient\n- κ_co (mol/(m.s.Pa))': {'value': tk.DoubleVar(undetermined_parameters_frame, 1.0), 'label_row': 4, 'label_column': 1},
-         'Overpotential correction\nexponent - κ_c': {'value': tk.DoubleVar(undetermined_parameters_frame, 2.0), 'label_row': 4, 'label_column': 3},
-         'Limit liquid saturation\ncoefficient - a_slim': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.05), 'label_row': 4, 'label_column': 5},
-         'Limit liquid saturation\ncoefficient - b_slim': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.1), 'label_row': 5, 'label_column': 1},
-         'Limit liquid saturation\ncoefficient - a_switch': {'value': tk.DoubleVar(undetermined_parameters_frame, 0.7), 'label_row': 5, 'label_column': 3},
-         'Volumetric space-charge\nlayer capacitance\n- C_scl (F/cm³)': {'value': tk.DoubleVar(undetermined_parameters_frame, 20), 'label_row': 5, 'label_column': 5}}
+         'ACL thickness - Hacl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 5},
+         'CCL thickness - Hccl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 1},
+         'Membrane thickness - Hmem (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 3},
+         'GDL porosity - ε_gdl': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 1, 'label_column': 5},
+         'MPL porosity - ε_mpl': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 2, 'label_column': 1},
+         'Ionomer volume fraction - ε_mc': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 2, 'label_column': 3},
+         'Compression ratio - ε_c': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 2, 'label_column': 5},
+         'Capillary exponent - e': {'value': tk.IntVar(undetermined_parameters_frame), 'label_row': 3, 'label_column': 1},
+         'Electron resistance\n- Re (µΩ.m²)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 1},
+         'Reference exchange current\ndensity - i0_c_ref (A/m²)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 3},
+         'Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 5},
+         'Overpotential correction\nexponent - κ_c': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 5, 'label_column': 1},
+         'Limit liquid saturation\ncoefficient - a_slim': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 5, 'label_column': 3},
+         'Limit liquid saturation\ncoefficient - b_slim': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 5, 'label_column': 5},
+         'Limit liquid saturation\ncoefficient - a_switch': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 6, 'label_column': 1},
+         'Volumetric space-charge layer\ncapacitance - C_scl (F/cm³)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 6, 'label_column': 3}}
 
     choice_current_density_parameters = \
-        {'Stabilisation time\n- Δt_ini_step (min)': {'value': tk.DoubleVar(current_density_parameters_frame, 120),
+        {'Stabilisation time\n- Δt_ini_step (min)': {'value': tk.DoubleVar(current_density_parameters_frame, step_current_parameters['delta_t_ini_step']/60),
                                                    'label_row': 0, 'label_column': 3},
-         'Loading time\n- Δt_load_step (s)': {'value': tk.DoubleVar(current_density_parameters_frame, 30),
+         'Loading time\n- Δt_load_step (s)': {'value': tk.DoubleVar(current_density_parameters_frame, step_current_parameters['delta_t_load_step']),
                                               'label_row': 0, 'label_column': 5},
-         'Breaking time\n- Δt_break_step (min)': {'value': tk.DoubleVar(current_density_parameters_frame, 15),
+         'Breaking time\n- Δt_break_step (min)': {'value': tk.DoubleVar(current_density_parameters_frame, step_current_parameters['delta_t_break_step']/60),
                                                 'label_row': 1, 'label_column': 3},
-         'Current density step\n- i_step (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, 1.5),
+         'Current density step\n- i_step (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, step_current_parameters['i_step']/1e4),
                                                 'label_row': 1, 'label_column': 5},
 
-         'Stabilisation time\n- Δt_ini_pola (min)': {'value': tk.DoubleVar(current_density_parameters_frame, 120),
+         'Stabilisation time\n- Δt_ini_pola (min)': {'value': tk.DoubleVar(current_density_parameters_frame, pola_current_parameters['delta_t_ini_pola']/60),
                                                    'label_row': 2, 'label_column': 3},
-         'Loading time\n- Δt_load_pola (s)': {'value': tk.DoubleVar(current_density_parameters_frame, 30),
+         'Loading time\n- Δt_load_pola (s)': {'value': tk.DoubleVar(current_density_parameters_frame, pola_current_parameters['delta_t_load_pola']),
                                               'label_row': 2, 'label_column': 5},
-         'Breaking time\n- Δt_break_pola (min)': {'value': tk.DoubleVar(current_density_parameters_frame, 15),
+         'Breaking time\n- Δt_break_pola (min)': {'value': tk.DoubleVar(current_density_parameters_frame, pola_current_parameters['delta_t_break_pola']/60),
                                                 'label_row': 3, 'label_column': 3},
-         'Current density step\n- Δi_pola (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, 0.1),
+         'Current density step\n- Δi_pola (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, pola_current_parameters['delta_i_pola']/1e4),
                                                      'label_row': 3, 'label_column': 5},
          'Maximum current density\n- i_max_pola (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, 1.5),
                                                            'label_row': 4, 'label_column': 3},
 
-         'Static current\n- i_EIS (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, 0.5),
+         'Static current\n- i_EIS (A/cm²)': {'value': tk.DoubleVar(current_density_parameters_frame, i_EIS),
                                              'label_row': 5, 'label_column': 3},
-         'Current ratio\n- ratio_EIS (%)': {'value': tk.DoubleVar(current_density_parameters_frame, 5),
+         'Current ratio\n- ratio_EIS (%)': {'value': tk.DoubleVar(current_density_parameters_frame, ratio_EIS),
                                             'label_row': 5, 'label_column': 5},
-         'Number of points\ncalculated - nb_points_EIS': {'value': tk.IntVar(current_density_parameters_frame, 50),
+         'Number of points\ncalculated - nb_points_EIS': {'value': tk.IntVar(current_density_parameters_frame, nb_points_EIS),
                                                           'label_row': 6, 'label_column': 3},
-         'Power of the\ninitial frequency\n- f_power_min_EIS': {'value': tk.IntVar(current_density_parameters_frame, -3),
+         'Power of the\ninitial frequency\n- f_power_min_EIS': {'value': tk.IntVar(current_density_parameters_frame, f_power_min_EIS),
                                                                 'label_row': 6, 'label_column': 5},
-         'Power of the\nfinal frequency\n- f_power_max_EIS': {'value': tk.IntVar(current_density_parameters_frame, 5),
+         'Power of the\nfinal frequency\n- f_power_max_EIS': {'value': tk.IntVar(current_density_parameters_frame, f_power_max_EIS),
                                                               'label_row': 7, 'label_column': 3},
-         'Number of frequencies\ntested - nb_f_EIS': {'value': tk.IntVar(current_density_parameters_frame, 60),
+         'Number of frequencies\ntested - nb_f_EIS': {'value': tk.IntVar(current_density_parameters_frame, nb_f_EIS),
                                                       'label_row': 7, 'label_column': 5}}
 
     choice_computing_parameters = \
-        {'Time for dynamic\ndisplay - Δt_dyn_step (s)': {'value': tk.DoubleVar(computing_parameters_frame, 300), 'label_row': 0,
-                             'label_column': 1},
-         'Purge time - t_purge (s)': {'value': tk.DoubleVar(computing_parameters_frame, 0.6), 'label_row': 0,
-                         'label_column': 3},
-         'Time between two purges\n- Δt_purge (s)': {'value': tk.DoubleVar(computing_parameters_frame, 15), 'label_row': 0,
-                          'label_column': 5},
-         'Number of GDL nodes - n_gdl': {'value': tk.IntVar(computing_parameters_frame, 5), 'label_row': 1, 'label_column': 1}}
+        {'Time for dynamic\ndisplay - Δt_dyn_step (s)': {'value': tk.DoubleVar(computing_parameters_frame, 300),
+                                                         'label_row': 0, 'label_column': 1},
+         'Purge time - t_purge (s)': {'value': tk.DoubleVar(computing_parameters_frame, 0.6),
+                                      'label_row': 0, 'label_column': 3},
+         'Time between two purges\n- Δt_purge (s)': {'value': tk.DoubleVar(computing_parameters_frame, 15),
+                                                     'label_row': 0, 'label_column': 5},
+         'Number of GDL nodes - n_gdl': {'value': tk.IntVar(computing_parameters_frame, 5),
+                                         'label_row': 1, 'label_column': 1}}
 
     choice_buttons = \
         {'type_fuel_cell': {'value': tk.StringVar(operating_conditions_frame, 'Enter your specifications'),
@@ -343,49 +353,66 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
 
     # Retrieves parameter values for predefined stacks and keeps them in their standard unit, or converts user-selected
     # quantities into standard units.
-    T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hmpl, Hcl, Hmem, Hgc, Wgc, Lgc, epsilon_gdl, \
-        epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, \
-        step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, \
-        t_EIS, t_purge, delta_t_purge, n_gdl, type_fuel_cell, type_auxiliary, type_control, type_purge,  type_display, \
-        type_plot = recover_for_use_operating_inputs_and_physical_parameters(choice_operating_conditions,
-                                                                             choice_accessible_parameters,
-                                                                             choice_undetermined_parameters,
-                                                                             choice_current_density_parameters,
-                                                                             choice_computing_parameters,
-                                                                             choice_buttons)
+    (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc, Hcgc, Wagc,
+            Wcgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
+            a_switch, C_scl, step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS,
+            ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, n_gdl, type_fuel_cell, type_auxiliary, type_control,
+            type_purge,  type_display, type_plot) = recover_for_use_operating_inputs_and_physical_parameters(
+                                                                           choice_operating_conditions,
+                                                                           choice_accessible_parameters,
+                                                                           choice_undetermined_parameters,
+                                                                           choice_current_density_parameters,
+                                                                           choice_computing_parameters,
+                                                                           choice_buttons)
+
+    # Initialize the operating inputs and parameters dictionaries.
+    current_parameters = {'step_current_parameters': step_current_parameters,
+                          'pola_current_parameters': pola_current_parameters,
+                          'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
+                          'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
+    accessible_physical_parameters = {'Aact': Aact, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc, 'Wcgc': Wcgc, 'Lgc': Lgc}
+    undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
+                                        'epsilon_gdl': epsilon_gdl, 'epsilon_mpl': epsilon_mpl,
+                                        'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c, 'e': e,
+                                        'kappa_co': kappa_co, 'i0_c_ref': i0_c_ref, 'kappa_c': kappa_c,
+                                        'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch,
+                                        'C_scl': C_scl}
 
     if current_button == 0:
         type_current = "step"
         current_density = step_current
-        launch_AlphaPEM_for_step_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
-                                         step_current_parameters, pola_current_parameters,
-                                         pola_current_for_cali_parameters, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
-                                         Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e,
-                                         i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge,
-                                         type_fuel_cell, type_current, type_auxiliary, type_control, type_purge,
-                                         type_display, type_plot)
+        operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
+                            'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des}
+        computing_parameters = {'n_gdl': n_gdl, 't_purge': t_purge, 'type_fuel_cell': type_fuel_cell,
+                                'type_current': type_current, 'type_auxiliary': type_auxiliary,
+                                'type_control': type_control, 'type_purge': type_purge, 'type_display': type_display,
+                                'type_plot': type_plot}
+        launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, accessible_physical_parameters,
+                                         undetermined_physical_parameters, computing_parameters)
 
     if current_button == 1:
         type_current = "polarization"
         current_density = polarization_current
-        launch_AlphaPEM_for_polarization_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
-                                                 step_current_parameters, pola_current_parameters,
-                                                 pola_current_for_cali_parameters, i_EIS, ratio_EIS, t_EIS, f_EIS,
-                                                 Aact, Hgdl, Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc,
-                                                 epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
-                                                 a_switch, C_scl, n_gdl, t_purge, type_fuel_cell, type_current,
-                                                 type_auxiliary, type_control, type_purge, type_display, type_plot)
+        operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
+                            'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des}
+        computing_parameters = {'n_gdl': n_gdl, 't_purge': t_purge, 'type_fuel_cell': type_fuel_cell,
+                                'type_current': type_current, 'type_auxiliary': type_auxiliary,
+                                'type_control': type_control, 'type_purge': type_purge, 'type_display': type_display,
+                                'type_plot': type_plot}
+        launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameters, accessible_physical_parameters,
+                                                 undetermined_physical_parameters, computing_parameters)
 
     if current_button == 2:
         type_current = "EIS"
         current_density = EIS_current
-        launch_AlphaPEM_for_EIS_current(current_density, T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des,
-                                        step_current_parameters, pola_current_parameters,
-                                        pola_current_for_cali_parameters, i_EIS, ratio_EIS, t_EIS, f_EIS, Aact, Hgdl,
-                                        Hmpl, Hmem, Hcl, Hgc, Wgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e,
-                                        i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, n_gdl, t_purge,
-                                        type_fuel_cell, type_current, type_auxiliary, type_control, type_purge,
-                                        type_display, type_plot)
+        operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
+                            'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des}
+        computing_parameters = {'n_gdl': n_gdl, 't_purge': t_purge, 'type_fuel_cell': type_fuel_cell,
+                                'type_current': type_current, 'type_auxiliary': type_auxiliary,
+                                'type_control': type_control, 'type_purge': type_purge, 'type_display': type_display,
+                                'type_plot': type_plot}
+        launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, accessible_physical_parameters,
+                                        undetermined_physical_parameters, computing_parameters)
 
 
 def about():

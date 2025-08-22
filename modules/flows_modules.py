@@ -47,8 +47,9 @@ def flows_int_values(sv, operating_inputs, parameters):
     T_ccl, T_cmpl, T_cgc = sv['T_ccl'], sv['T_cmpl'], sv['T_cgc']
     # Extraction of the operating inputs and the parameters
     epsilon_gdl, epsilon_mpl, epsilon_c = parameters['epsilon_gdl'], parameters['epsilon_mpl'], parameters['epsilon_c']
-    e, Hcl, Hmem, Hgdl = parameters['e'], parameters['Hcl'], parameters['Hmem'], parameters['Hgdl']
-    Hmpl, Wgc, Hgc, n_gdl = parameters['Hmpl'], parameters['Wgc'], parameters['Hgc'], parameters['n_gdl']
+    e, Hacl, Hccl, Hmem = parameters['e'], parameters['Hacl'], parameters['Hccl'], parameters['Hmem']
+    Hgdl, Hmpl, Wagc, Wcgc = parameters['Hgdl'], parameters['Hmpl'], parameters['Wagc'], parameters['Wcgc']
+    Hagc, Hcgc, n_gdl = parameters['Hagc'], parameters['Hcgc'], parameters['n_gdl']
 
     # Transitory parameter
     H_gdl_node = Hgdl / n_gdl
@@ -65,11 +66,11 @@ def flows_int_values(sv, operating_inputs, parameters):
 
     # Weighted mean values ...
     #       ... of the water content
-    lambda_acl_mem = average([lambda_acl, lambda_mem], weights = [Hcl / (Hcl + Hmem), Hmem / (Hcl + Hmem)])
-    lambda_mem_ccl = average([lambda_mem, lambda_ccl], weights = [Hmem / (Hmem + Hcl), Hcl / (Hmem + Hcl)])
+    lambda_acl_mem = average([lambda_acl, lambda_mem], weights = [Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem)])
+    lambda_mem_ccl = average([lambda_mem, lambda_ccl], weights = [Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl)])
     #       ... of the diffusion coefficient of water in the membrane
-    D_acl_mem = average([D(lambda_acl), D(lambda_mem)], weights = [Hcl / (Hcl + Hmem), Hmem / (Hcl + Hmem)])
-    D_mem_ccl = average([D(lambda_mem), D(lambda_ccl)], weights = [Hmem / (Hmem + Hcl), Hcl / (Hmem + Hcl)])
+    D_acl_mem = average([D(lambda_acl), D(lambda_mem)], weights = [Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem)])
+    D_mem_ccl = average([D(lambda_mem), D(lambda_ccl)], weights = [Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl)])
     #       ... of the capillary coefficient
     D_cap_agdl_agdl = [None] + [average([Dcap('gdl', sv[f's_agdl_{i}'], sv[f'T_agdl_{i}'], epsilon_gdl, e,
                                             epsilon_c=epsilon_c),
@@ -81,7 +82,7 @@ def flows_int_values(sv, operating_inputs, parameters):
                              weights=[H_gdl_node / (H_gdl_node + Hmpl), Hmpl / (H_gdl_node + Hmpl)])
     D_cap_ampl_acl = average([Dcap('mpl', s_ampl, T_ampl, epsilon_mpl, e),
                                     Dcap('cl', s_acl, T_acl, epsilon_cl, e)],
-                             weights=[Hmpl / (Hmpl + Hcl), Hcl / (Hmpl + Hcl)])
+                             weights=[Hmpl / (Hmpl + Hacl), Hacl / (Hmpl + Hacl)])
     D_cap_cgdl_cgdl = [None] + [average([Dcap('gdl', sv[f's_cgdl_{i}'], sv[f'T_cgdl_{i}'], epsilon_gdl, e,
                                             epsilon_c=epsilon_c),
                                         Dcap('gdl', sv[f's_cgdl_{i+1}'], sv[f'T_cgdl_{i+1}'], epsilon_gdl, e,
@@ -92,16 +93,16 @@ def flows_int_values(sv, operating_inputs, parameters):
                             weights = [Hmpl / (H_gdl_node + Hmpl), H_gdl_node / (H_gdl_node + Hmpl)])
     D_cap_ccl_cmpl = average([Dcap('cl', s_ccl, T_ccl, epsilon_cl, e),
                                     Dcap('mpl', s_cmpl, T_cmpl, epsilon_mpl, e)],
-                             weights=[Hcl / (Hmpl + Hcl), Hmpl / (Hmpl + Hcl)])
+                             weights=[Hccl / (Hmpl + Hccl), Hmpl / (Hmpl + Hccl)])
     #       ... of the effective diffusion coefficient between the gas channel and the gas diffusion layer
-    ha_Da_eff_agc_agdl = average([h_a(Pagc, T_agc, Wgc, Hgc) * Hgc,
+    ha_Da_eff_agc_agdl = average([h_a(Pagc, T_agc, Wagc, Hagc) * Hagc,
                                         Da_eff('gdl', sv['s_agdl_1'], sv['T_agdl_1'], Pagdl[1], epsilon_gdl,
                                              epsilon_c = epsilon_c)],
-                               weights = [Hgc / (Hgc + H_gdl_node), H_gdl_node / (Hgc + H_gdl_node)])
-    hc_Dc_eff_cgdl_cgc = average([h_c(Pcgc, T_cgc, Wgc, Hgc) * Hgc,
+                               weights = [Hagc / (Hagc + H_gdl_node), H_gdl_node / (Hagc + H_gdl_node)])
+    hc_Dc_eff_cgdl_cgc = average([h_c(Pcgc, T_cgc, Wcgc, Hcgc) * Hcgc,
                                         Dc_eff('gdl', sv[f's_cgdl_{n_gdl}'], sv[f'T_cgdl_{n_gdl}'], Pcgdl[n_gdl],
                                              epsilon_gdl, epsilon_c = epsilon_c)],
-                                 weights = [Hgc / (Hgc + H_gdl_node), H_gdl_node / (Hgc + H_gdl_node)])
+                                 weights = [Hcgc / (Hcgc + H_gdl_node), H_gdl_node / (Hcgc + H_gdl_node)])
     #       ... of the effective diffusion coefficient
     Da_eff_agdl_agdl = [None] + [average([Da_eff('gdl', sv[f's_agdl_{i}'], sv[f'T_agdl_{i}'], Pagdl[i],
                                               epsilon_gdl, epsilon_c = epsilon_c),
@@ -113,7 +114,7 @@ def flows_int_values(sv, operating_inputs, parameters):
                                weights = [H_gdl_node / (H_gdl_node + Hmpl), Hmpl / (H_gdl_node + Hmpl)])
     Da_eff_ampl_acl = average([Da_eff('mpl', s_ampl, T_ampl, Pampl, epsilon_mpl),
                                      Da_eff('cl', s_acl, T_acl, Pacl, epsilon_cl)],
-                              weights=[Hmpl / (Hmpl + Hcl), Hcl / (Hmpl + Hcl)])
+                              weights=[Hmpl / (Hmpl + Hacl), Hacl / (Hmpl + Hacl)])
     Dc_eff_cgdl_cgdl = [None] + [average([Dc_eff('gdl', sv[f's_cgdl_{i}'], sv[f'T_cgdl_{i}'], Pcgdl[i],
                                               epsilon_gdl, epsilon_c = epsilon_c),
                                         Dc_eff('gdl', sv[f's_cgdl_{i+1}'], sv[f'T_cgdl_{i+1}'], Pcgdl[i+1],
@@ -124,10 +125,10 @@ def flows_int_values(sv, operating_inputs, parameters):
                                weights = [Hmpl / (H_gdl_node + Hmpl), H_gdl_node / (H_gdl_node + Hmpl)])
     Dc_eff_ccl_cmpl = average([Dc_eff('cl', s_ccl, T_ccl, Pccl, epsilon_cl),
                                      Dc_eff('mpl', s_cmpl, T_cmpl, Pcmpl, epsilon_mpl)],
-                              weights=[Hcl / (Hmpl + Hcl), Hmpl / (Hmpl + Hcl)])
+                              weights=[Hccl / (Hmpl + Hccl), Hmpl / (Hmpl + Hccl)])
     #       ... of the temperature
     T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
-                               weights=[Hcl / (2 * Hcl + Hmem), Hmem / (2 * Hcl + Hmem), Hcl / (2 * Hcl + Hmem)])
+                        weights=[Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl), Hccl / (Hacl + Hmem + Hccl)])
 
     return (H_gdl_node, Pagc, Pcgc, lambda_acl_mem, lambda_mem_ccl, D_acl_mem, D_mem_ccl, D_cap_agdl_agdl,
             D_cap_agdl_ampl, D_cap_ampl_acl, D_cap_cgdl_cgdl, D_cap_cmpl_cgdl, D_cap_ccl_cmpl, ha_Da_eff_agc_agdl,

@@ -81,7 +81,7 @@ def auxiliaries_int_values(t, solver_variables, operating_inputs, parameters):
     Abp_a, Abp_c = solver_variables['Abp_a'], solver_variables['Abp_c']
     # Extraction of the operating inputs and the parameters
     T_des = operating_inputs['T_des']
-    Hmem, Hcl, kappa_co = parameters['Hmem'], parameters['Hcl'], parameters['kappa_co']
+    Hmem, Hacl, Hccl, kappa_co = parameters['Hmem'], parameters['Hacl'], parameters['Hccl'], parameters['kappa_co']
     t_purge, type_purge = parameters['t_purge'], parameters['type_purge']
 
     # Molar mass of the ambient air
@@ -107,7 +107,7 @@ def auxiliaries_int_values(t, solver_variables, operating_inputs, parameters):
 
     # Internal current density
     T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
-                                  weights=[Hcl / (2 * Hcl + Hmem), Hmem / (2 * Hcl + Hmem), Hcl / (2 * Hcl + Hmem)])
+                        weights=[Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl), Hccl / (Hacl + Hmem + Hccl)])
     i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
     i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
     i_n = i_H2 + i_O2

@@ -94,8 +94,8 @@ def auxiliaries(t, solver_variables, control_variables, i_fc, operating_inputs, 
     T_des, Pa_des, Pc_des = operating_inputs['T_des'], operating_inputs['Pa_des'], operating_inputs['Pc_des']
     Sa, Sc = operating_inputs['Sa'], operating_inputs['Sc']
     Phi_a_des, Phi_c_des = control_variables['Phi_a_des'], control_variables['Phi_c_des']
-    Aact, Hgc, Wgc = parameters['Aact'], parameters['Hgc'], parameters['Wgc']
-    type_auxiliary = parameters['type_auxiliary']
+    Aact, Hagc, Hcgc = parameters['Aact'], parameters['Hagc'], parameters['Hcgc']
+    Wagc, Wcgc, type_auxiliary = parameters['Wagc'], parameters['Wcgc'], parameters['type_auxiliary']
 
     # Intermediate values
     Mext, Pagc, Pcgc, Phi_agc, Phi_cgc, y_cgc, Magc, Mcgc, Pr_aem, Pr_cem, \
@@ -112,37 +112,37 @@ def auxiliaries(t, solver_variables, control_variables, i_fc, operating_inputs, 
         # Anode inlet
         Wasm_in = Ksm_in * (Pa_des - Pasm)  # kg.s-1
         Wasm_out = Ksm_out * (Pasm - Pagc)  # kg.s-1
-        Ja_in = Wasm_out / (Hgc * Wgc * Masm)  # mol.m-2.s-1
+        Ja_in = Wasm_out / (Hagc * Wagc * Masm)  # mol.m-2.s-1
         # Anode outlet
         Waem_in = Kem_in * (Pagc - Paem)  # kg.s-1
         Ware = n_cell * Maem * (Paem / (Paem - Phi_aem * Psat(T_des))) * (Sa - 1) * (i_fc + i_n) / (
                     2 * F) * Aact  # kg.s-1
         Waem_out = k_purge * C_D * A_T * Paem / (R * T_des)**0.5 * Pr_aem ** (1 / gamma_H2) * \
                    (Magc * 2 * gamma_H2 / (gamma_H2 - 1) * (1 - Pr_aem ** ((gamma_H2 - 1) / gamma_H2)))**0.5  # kg.s-1
-        Ja_out = Waem_in / (Hgc * Wgc * Magc)  # mol.m-2.s-1
+        Ja_out = Waem_in / (Hagc * Wagc * Magc)  # mol.m-2.s-1
 
     elif type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         # Anode inlet
         Wrd = n_cell * M_H2 * Sa * (i_fc + i_n) / (2 * F) * Aact  # kg.s-1
         Wasm_in = Wrd + Wa_inj  # kg.s-1
         Wasm_out = Ksm_out * (Pasm - Pagc)  # kg.s-1
-        Ja_in = Wasm_out / (Hgc * Wgc * Masm)  # mol.m-2.s-1
+        Ja_in = Wasm_out / (Hagc * Wagc * Masm)  # mol.m-2.s-1
         # Anode outlet
         Waem_in = Kem_in * (Pagc - Paem)  # kg.s-1
         Ware = 0  # kg.s-1
         Waem_out = C_D * Abp_a * Paem / (R * T_des)**0.5 * Pr_aem ** (1 / gamma_H2) * \
                    (Magc * 2 * gamma_H2 / (gamma_H2 - 1) * (1 - Pr_aem ** ((gamma_H2 - 1) / gamma_H2)))**0.5
         # kg.s-1
-        Ja_out = Waem_in / (Hgc * Wgc * Magc)  # mol.m-2.s-1
+        Ja_out = Waem_in / (Hagc * Wagc * Magc)  # mol.m-2.s-1
 
     else:  # elif type_auxiliary == "no_auxiliary" (only 1 cell):
         # Anode inlet
         Wasm_in, Wasm_out = 0, 0  # kg.s-1
         Ja_in = (1 + Phi_a_des * Psat(T_des) / (Pagc - Phi_a_des * Psat(T_des))) * \
-                Sa * (i_fc + i_n) / (2 * F) * Aact / (Hgc * Wgc)  # mol.m-2.s-1
+                Sa * (i_fc + i_n) / (2 * F) * Aact / (Hagc * Wagc)  # mol.m-2.s-1
         # Anode outlet
         Waem_in, Ware, Waem_out = 0, 0, 0  # kg.s-1
-        Ja_out = Kem_in * (Pagc - Pa_des) / (Hgc * Wgc * Magc)  # mol.m-2.s-1
+        Ja_out = Kem_in * (Pagc - Pa_des) / (Hagc * Wagc * Magc)  # mol.m-2.s-1
 
     # At the cathode side
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
@@ -150,21 +150,21 @@ def auxiliaries(t, solver_variables, control_variables, i_fc, operating_inputs, 
         # Cathode inlet         
         Wcsm_in = Wcp + Wc_inj  # kg.s-1
         Wcsm_out = Ksm_out * (Pcsm - Pcgc)  # kg.s-1
-        Jc_in = Wcsm_out / (Hgc * Wgc * Mcsm)  # mol.m-2.s-1
+        Jc_in = Wcsm_out / (Hcgc * Wcgc * Mcsm)  # mol.m-2.s-1
         # Cathode outlet
         Wcem_in = Kem_in * (Pcgc - Pcem)  # kg.s-1
         Wcem_out = C_D * Abp_c * Pcem / (R * T_des)**0.5 * Pr_cem ** (1 / gamma) * \
                    (Mcgc * 2 * gamma / (gamma - 1) * (1 - Pr_cem ** ((gamma - 1) / gamma)))**0.5  # kg.s-1
-        Jc_out = Wcem_in / (Hgc * Wgc * Mcgc)  # mol.m-2.s-1
+        Jc_out = Wcem_in / (Hcgc * Wcgc * Mcgc)  # mol.m-2.s-1
 
     else:  # elif type_auxiliary == "no_auxiliary" (only 1 cell):
         # Cathode inlet   
         Wcsm_in, Wcsm_out = 0, 0  # kg.s-1
         Jc_in = (1 + Phi_c_des * Psat(T_des) / (Pcgc - Phi_c_des * Psat(T_des))) * \
-                1 / yO2_ext * Sc * (i_fc + i_n) / (4 * F) * Aact / (Hgc * Wgc)  # mol.m-2.s-1
+                1 / yO2_ext * Sc * (i_fc + i_n) / (4 * F) * Aact / (Hcgc * Wcgc)  # mol.m-2.s-1
         # Cathode outlet
         Wcem_in, Wcem_out = 0, 0  # kg.s-1
-        Jc_out = Kem_in * (Pcgc - Pc_des) / (Hgc * Wgc * Mcgc)  # mol.m-2.s-1
+        Jc_out = Kem_in * (Pcgc - Pc_des) / (Hcgc * Wcgc * Mcgc)  # mol.m-2.s-1
 
     # ________________________________________Inlet and outlet specific flows___________________________________________
     """Specific flows here refer to flows that integrate only a single chemical species within the ensemble of species

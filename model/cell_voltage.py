@@ -41,13 +41,13 @@ def calculate_eta_c_intermediate_values(solver_variables, operating_inputs, para
     T_acl, T_mem, T_ccl = solver_variables['T_acl'], solver_variables['T_mem'], solver_variables['T_ccl']
     # Extraction of the operating inputs and the parameters
     Pc_des = operating_inputs['Pc_des']
-    Hmem, Hcl = parameters['Hmem'], parameters['Hcl']
+    Hmem, Hacl, Hccl = parameters['Hmem'], parameters['Hacl'], parameters['Hccl']
     i0_c_ref, kappa_co, kappa_c = parameters['i0_c_ref'], parameters['kappa_co'], parameters['kappa_c']
     a_slim, b_slim, a_switch = parameters['a_slim'], parameters['b_slim'], parameters['a_switch']
 
     # The crossover current density i_n
     T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
-                               weights=[Hcl / (2 * Hcl + Hmem), Hmem / (2 * Hcl + Hmem), Hcl / (2 * Hcl + Hmem)])
+                        weights=[Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl), Hccl / (Hacl + Hmem + Hccl)])
     i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
     i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
     i_n = i_H2 + i_O2
@@ -83,7 +83,8 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
     C_H2_acl_t, C_O2_ccl_t, eta_c_t = variables['C_H2_acl'], variables['C_O2_ccl'], variables['eta_c']
     T_acl_t, T_mem_t, T_ccl_t = variables['T_acl'], variables['T_mem'], variables['T_ccl']
     # Extraction of the operating inputs and the parameters
-    Hmem, Hcl, epsilon_mc, kappa_co = parameters['Hmem'], parameters['Hcl'], parameters['epsilon_mc'], parameters['kappa_co']
+    Hmem, Hacl, Hccl = parameters['Hmem'], parameters['Hacl'], parameters['Hccl']
+    epsilon_mc, kappa_co = parameters['epsilon_mc'], parameters['kappa_co']
 
     # Initialisation
     n = len(t)
@@ -107,7 +108,7 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
 
         # The crossover current density
         T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
-                                   weights=[Hcl/(2*Hcl + Hmem), Hmem/(2*Hcl + Hmem), Hcl/(2*Hcl + Hmem)])
+                              weights=[Hacl/(Hacl + Hmem + Hccl), Hmem/(Hacl + Hmem + Hccl), Hccl/(Hacl + Hmem + Hccl)])
         i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
         i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
         i_n = i_H2 + i_O2
@@ -116,7 +117,7 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
         #       The proton resistance at the membrane : Rmem
         Rmem = Hmem / sigma_p_eff('mem', lambda_mem, T_mem)
         #       The proton resistance at the cathode catalyst layer : Rccl
-        Rccl = Hcl / sigma_p_eff('ccl', lambda_ccl, T_ccl, epsilon_mc)
+        Rccl = Hccl / sigma_p_eff('ccl', lambda_ccl, T_ccl, epsilon_mc)
         #       The total proton resistance
         Rp = Rmem + Rccl  # its value is around [4-7]e-6 ohm.m².
 
