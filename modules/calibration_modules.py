@@ -334,6 +334,7 @@ def parameters_for_calibration(type_fuel_cell):
         #   Catalyst layer
         Hacl = 8.089e-6  # m. It is the thickness of the anode catalyst layer.
         Hccl = Hacl  # m. It is the thickness of the cathode catalyst layer.
+        epsilon_cl = 0.25  # It is the porosity of the catalyst layer, without units.
         epsilon_mc = 0.2111  # It is the volume fraction of ionomer in the CL.
         #   Membrane
         Hmem = 1.5e-5  # m. It is the thickness of the membrane.
@@ -391,7 +392,7 @@ def parameters_for_calibration(type_fuel_cell):
                           'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
     accessible_physical_parameters = {'Aact': Aact, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc, 'Wcgc': Wcgc, 'Lgc': Lgc}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
-                                        'epsilon_gdl': epsilon_gdl, 'epsilon_mpl': epsilon_mpl,
+                                        'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl, 'epsilon_mpl': epsilon_mpl,
                                         'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c, 'e': e,
                                         'kappa_co': kappa_co, 'i0_c_ref': i0_c_ref, 'kappa_c': kappa_c,
                                         'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch,
