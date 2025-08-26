@@ -10,6 +10,7 @@ This file is designated for executing the undetermined parameters' calibration.
 import sys
 import os
 import time
+import copy
 import pygad
 import matplotlib.pyplot as plt
 import numpy as np
@@ -97,7 +98,7 @@ def pola_points(ga_instance, solution, solution_idx): # Function to maximize.
 
     # Extraction of the undetermined parameters from the solution
     solution_of_undetermined_physical_parameters = update_undetermined_parameters(solution, varbound,
-                                                                      undetermined_physical_parameters)
+                                                                      copy.deepcopy(undetermined_physical_parameters))
 
     # Calculation of the model polarization curve
     Simulator_1 = AlphaPEM(operating_inputs_1, current_parameters, accessible_physical_parameters,
@@ -195,7 +196,7 @@ if __name__ == '__main__':
     solution_fitness = ga_instance.last_generation_fitness[idx] # Get the fitness value of the best solution.
     sim_error = 1.0 / solution_fitness  # The error is the inverse of the fitness value.
     undetermined_physical_parameters = update_undetermined_parameters(solution, varbound,
-                                                                      undetermined_physical_parameters)
+                                                                      copy.deepcopy(undetermined_physical_parameters))
 
     # Print of the parameter calibration results
     convergence = [float(1.0 / f) for f in ga_instance.best_solutions_fitness]

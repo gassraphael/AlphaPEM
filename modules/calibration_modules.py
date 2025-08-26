@@ -47,8 +47,7 @@ def parameter_bounds_for_calibration(type_fuel_cell):
         Hmem_min, Hmem_max = 1.5e-5, 5e-5  # m. It is the thickness of the membrane.
         epsilon_gdl_min, epsilon_gdl_max = 0.50, 0.90  # It is the anode/cathode GDL porosity, without units.
         epsilon_mc_min, epsilon_mc_max = 0.15, 0.40  # It is the volume fraction of ionomer in the CL.
-        # epsilon_c_min, epsilon_c_max = 0.15, 0.30  # It is the compression ratio of the GDL.
-        epsilon_c = 0.20  # It is the compression ratio of the GDL.
+        epsilon_c_min, epsilon_c_max = 0.15, 0.30  # It is the compression ratio of the GDL.
         #       Constants based on the interaction between water and the structure
         e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.
         #       Voltage polarization
@@ -57,12 +56,9 @@ def parameter_bounds_for_calibration(type_fuel_cell):
         # kappa_co = 1  # A.m-2. It is the crossover correction coefficient.
         kappa_c_min, kappa_c_max = 0.25, 4  # It is the overpotential correction exponent.
         #       The bounds on liquid saturation coefficients are constrained to facilitate calibration.
-        # a_slim_min, a_slim_max = 0.0, 0.2  # It is one of the limit liquid saturation coefficients.
-        # b_slim_min, b_slim_max = 0.05, 0.4  # It is one of the limit liquid saturation coefficients.
-        # a_switch_min, a_switch_max = 0.5, 0.95  # It is one of the limit liquid saturation coefficients.
-        a_slim = 0.05553  # It is one of the limit liquid saturation coefficients.
-        b_slim = 0.10514  # It is one of the limit liquid saturation coefficients.
-        a_switch = 0.63654  # It is one of the limit liquid saturation coefficients.
+        a_slim_min, a_slim_max = 0.0, 0.2  # It is one of the limit liquid saturation coefficients.
+        b_slim_min, b_slim_max = 0.05, 0.4  # It is one of the limit liquid saturation coefficients.
+        a_switch_min, a_switch_max = 0.5, 0.95  # It is one of the limit liquid saturation coefficients.
         #       Undetermined parameter which is not considered yet (require the use of EIS curves to be calibrated)
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
         #       Bounds gathering and type
