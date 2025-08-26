@@ -171,7 +171,7 @@
 
 
 <h2 id="configuration.settings.computing_parameters" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">computing_parameters</span><span class="p">(</span><span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">computing_parameters</span><span class="p">(</span><span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">)</span></code>
 
 </h2>
 
@@ -200,14 +200,6 @@
               </div>
             </li>
             <li>
-              <b><code>type_current</code></b>
-                  (<code>str</code>)
-              –
-              <div class="doc-md-description">
-                <p>Type of current density which is imposed to the fuel cell system. It can be "step", "polarization" or "EIS".</p>
-              </div>
-            </li>
-            <li>
               <b><code>Hgdl</code></b>
                   (<code>float</code>)
               –
@@ -216,11 +208,11 @@
               </div>
             </li>
             <li>
-              <b><code>Hcl</code></b>
+              <b><code>Hacl</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Thickness of the anode or cathode catalyst layer in meters.</p>
+                <p>Thickness of the anode catalyst layer in meters.</p>
               </div>
             </li>
         </ul>
@@ -239,13 +231,6 @@
       <th class="field-name">Returns:</th>
       <td class="field-body">
         <ul class="first simple">
-            <li>
-<b><code>max_step</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Maximum time step for the resolution of the system of differential equations.</p>
-              </div>
-            </li>
             <li>
 <b><code>n_gdl</code></b>(                  <code>int</code>
 )              –
@@ -285,21 +270,7 @@ internal states,
 </table>
             <details class="quote">
               <summary>Source code in <code>configuration/settings.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span>
-<span class="normal">267</span>
-<span class="normal">268</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">268</span>
 <span class="normal">269</span>
 <span class="normal">270</span>
 <span class="normal">271</span>
@@ -334,24 +305,24 @@ internal states,
 <span class="normal">300</span>
 <span class="normal">301</span>
 <span class="normal">302</span>
-<span class="normal">303</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">computing_parameters</span><span class="p">(</span><span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">):</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">computing_parameters</span><span class="p">(</span><span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function is used to set the computing parameters of the fuel cell system.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    step_current_parameters : dict</span>
 <span class="sd">        Parameters for the step current density function.</span>
-<span class="sd">    type_current : str</span>
-<span class="sd">        Type of current density which is imposed to the fuel cell system. It can be &quot;step&quot;, &quot;polarization&quot; or &quot;EIS&quot;.</span>
 <span class="sd">    Hgdl : float</span>
 <span class="sd">        Thickness of the gas diffusion layer in meters.</span>
-<span class="sd">    Hcl : float</span>
-<span class="sd">        Thickness of the anode or cathode catalyst layer in meters.</span>
+<span class="sd">    Hacl : float</span>
+<span class="sd">        Thickness of the anode catalyst layer in meters.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    max_step : float</span>
-<span class="sd">        Maximum time step for the resolution of the system of differential equations.</span>
 <span class="sd">    n_gdl : int</span>
 <span class="sd">        Number of model nodes placed inside each GDL.</span>
 <span class="sd">    t_purge : tuple</span>
@@ -371,19 +342,13 @@ internal states,
 <span class="sd">        - &#39;delta_t_dyn_step&#39;: the time (in seconds) for dynamic display of the step current density function.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="n">type_current</span> <span class="o">==</span> <span class="s2">&quot;polarization&quot;</span><span class="p">:</span>
-        <span class="n">max_step</span> <span class="o">=</span> <span class="mf">0.1</span>  <span class="c1"># Once the undetermined parameters are at their optimal values, this max_step can be used.</span>
-    <span class="k">elif</span> <span class="n">type_current</span> <span class="o">==</span> <span class="s2">&quot;step&quot;</span><span class="p">:</span>
-        <span class="n">max_step</span> <span class="o">=</span> <span class="mf">0.1</span>  <span class="c1"># it is good enough for having graphs without instabilities.</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">max_step</span> <span class="o">=</span> <span class="mf">0.1</span>
-    <span class="n">n_gdl</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">Hcl</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>  <span class="c1"># It is the number of model points placed inside each GDL.</span>
-    <span class="c1">#                              A good value is int(Hgdl/Hcl/4), which is usually around 5.</span>
+    <span class="n">n_gdl</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">Hacl</span> <span class="o">/</span> <span class="mi">4</span><span class="p">))</span>  <span class="c1"># It is the number of model points placed inside each GDL.</span>
+    <span class="c1">#                                       A good compromise is int(Hgdl/Hacl/4).</span>
     <span class="n">t_purge</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mi">15</span>  <span class="c1"># (s, s). It is the time parameters for purging the system.</span>
     <span class="n">delta_t_dyn_step</span> <span class="o">=</span> <span class="mi">5</span><span class="o">*</span><span class="mi">60</span>  <span class="c1"># (s). Time for dynamic display of the step current density function.</span>
 
     <span class="n">step_current_parameters</span><span class="p">[</span><span class="s1">&#39;delta_t_dyn_step&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta_t_dyn_step</span> <span class="c1"># Update the step current parameters.</span>
-    <span class="k">return</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">step_current_parameters</span>
+    <span class="k">return</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">step_current_parameters</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -394,7 +359,7 @@ internal states,
 
 
 <h2 id="configuration.settings.current_density_parameters" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">current_density_parameters</span><span class="p">(</span><span class="n">type_current</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">current_density_parameters</span><span class="p">(</span><span class="n">type_current</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h2>
 
@@ -416,7 +381,9 @@ internal states,
         <ul class="first simple">
             <li>
               <b><code>type_current</code></b>
-                  (<code>str</code>)
+                  (<code>str</code>, default:
+                      <code>None</code>
+)
               –
               <div class="doc-md-description">
                 <p>Type of current density which is imposed to the fuel cell system. It can be "step", "polarization" or "EIS".</p>
@@ -518,7 +485,7 @@ measuring the voltage response at each frequency 'delta_t_measurement_EIS' in se
               </div>
             </li>
             <li>
-<b><code>current_density</code></b>(                  <code>function</code>
+<b><code>current_density</code></b>(                  <code>function, optional.</code>
 )              –
               <div class="doc-md-description">
                 <p>Current density function.</p>
@@ -626,7 +593,8 @@ measuring the voltage response at each frequency 'delta_t_measurement_EIS' in se
 <span class="normal">109</span>
 <span class="normal">110</span>
 <span class="normal">111</span>
-<span class="normal">112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">current_density_parameters</span><span class="p">(</span><span class="n">type_current</span><span class="p">):</span>
+<span class="normal">112</span>
+<span class="normal">113</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">current_density_parameters</span><span class="p">(</span><span class="n">type_current</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function is used to set the parameters of the current density which is imposed to the fuel cell system.</span>
 
 <span class="sd">    Parameters</span>
@@ -680,7 +648,7 @@ measuring the voltage response at each frequency 'delta_t_measurement_EIS' in se
 <span class="sd">        &#39;tf_EIS&#39; in seconds, a list of time parameters which gives the estimated time for reaching equilibrium at each</span>
 <span class="sd">        frequency &#39;delta_t_break_EIS&#39; in seconds, and a list of time parameters which gives the estimated time for</span>
 <span class="sd">        measuring the voltage response at each frequency &#39;delta_t_measurement_EIS&#39; in seconds.</span>
-<span class="sd">    current_density : function</span>
+<span class="sd">    current_density : function, optional.</span>
 <span class="sd">        Current density function.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -718,6 +686,7 @@ measuring the voltage response at each frequency 'delta_t_measurement_EIS' in se
     <span class="k">elif</span> <span class="n">type_current</span> <span class="o">==</span> <span class="s2">&quot;polarization&quot;</span><span class="p">:</span> <span class="n">current_density</span> <span class="o">=</span> <span class="n">polarization_current</span>
     <span class="k">elif</span> <span class="n">type_current</span> <span class="o">==</span> <span class="s2">&quot;polarization_for_cali&quot;</span><span class="p">:</span> <span class="n">current_density</span> <span class="o">=</span> <span class="n">polarization_current_for_calibration</span>
     <span class="k">elif</span> <span class="n">type_current</span> <span class="o">==</span> <span class="s2">&quot;EIS&quot;</span><span class="p">:</span> <span class="n">current_density</span> <span class="o">=</span> <span class="n">EIS_current</span>
+    <span class="k">elif</span> <span class="n">type_current</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">current_density</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># No current density function is set.</span>
     <span class="k">else</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;You have to specify a type_current which is on the list.&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span>
@@ -855,8 +824,7 @@ internal states,
 </table>
             <details class="quote">
               <summary>Source code in <code>configuration/settings.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">115</span>
-<span class="normal">116</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">116</span>
 <span class="normal">117</span>
 <span class="normal">118</span>
 <span class="normal">119</span>
@@ -903,7 +871,10 @@ internal states,
 <span class="normal">160</span>
 <span class="normal">161</span>
 <span class="normal">162</span>
-<span class="normal">163</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">operating_inputs_function</span><span class="p">(</span><span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">):</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">operating_inputs_function</span><span class="p">(</span><span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function is used to set the operating inputs of the fuel cell system.</span>
 
 <span class="sd">    Parameters</span>
@@ -947,6 +918,8 @@ internal states,
         <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span> <span class="o">=</span> <span class="mf">1.2</span><span class="p">,</span> <span class="mf">2.0</span>  <span class="c1"># It is the stoichiometric ratio (of hydrogen and oxygen).</span>
         <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span> <span class="o">=</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.6</span>  <span class="c1"># It is the desired relative humidity.</span>
         <span class="n">i_max_pola</span> <span class="o">=</span> <span class="mf">3.0e4</span>  <span class="c1"># A.m-2. It is the maximum current density for the polarization curve.</span>
+    <span class="k">elif</span> <span class="n">type_fuel_cell</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">i_max_pola</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span> <span class="c1"># Stored setup in &quot;stored_operating_inputs&quot;.</span>
         <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">i_max_pola</span> <span class="o">=</span> <span class="n">stored_operating_inputs</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">)</span>
 
@@ -1008,10 +981,17 @@ or "manual_setup".</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-<b><code>Hcl</code></b>(                  <code>float</code>
+<b><code>Hacl</code></b>(                  <code>float</code>
 )              –
               <div class="doc-md-description">
-                <p>Thickness of the anode or cathode catalyst layer in meters.</p>
+                <p>Thickness of the anode catalyst layer in meters.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Hacl</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Thickness of the cathode catalyst layer in meters.</p>
               </div>
             </li>
             <li>
@@ -1019,13 +999,6 @@ or "manual_setup".</p>
 )              –
               <div class="doc-md-description">
                 <p>Volume fraction of ionomer in the catalyst layer.</p>
-              </div>
-            </li>
-            <li>
-<b><code>tau</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Pore structure coefficient in the CL.</p>
               </div>
             </li>
             <li>
@@ -1057,17 +1030,45 @@ or "manual_setup".</p>
               </div>
             </li>
             <li>
-<b><code>Hgc</code></b>(                  <code>float</code>
+<b><code>Hmpl</code></b>(                  <code>float</code>
 )              –
               <div class="doc-md-description">
-                <p>Thickness of the gas channel in meters.</p>
+                <p>Thickness of the microporous layer in meters.</p>
               </div>
             </li>
             <li>
-<b><code>Wgc</code></b>(                  <code>float</code>
+<b><code>epsilon_mpl</code></b>(                  <code>float</code>
 )              –
               <div class="doc-md-description">
-                <p>Width of the gas channel in meters.</p>
+                <p>Porosity of the microporous layer.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Hagc</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Thickness of the anode gas channel in meters.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Hcgc</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Thickness of the cathode gas channel in meters.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Wagc</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Width of the anode gas channel in meters.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Wcgc</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Width of the cathode gas channel in meters.</p>
               </div>
             </li>
             <li>
@@ -1089,13 +1090,6 @@ or "manual_setup".</p>
 )              –
               <div class="doc-md-description">
                 <p>Capillary exponent.</p>
-              </div>
-            </li>
-            <li>
-<b><code>Re</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Electron conduction resistance of the circuit in ohm.m².</p>
               </div>
             </li>
             <li>
@@ -1154,10 +1148,7 @@ or "manual_setup".</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>configuration/settings.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">169</span>
 <span class="normal">170</span>
 <span class="normal">171</span>
 <span class="normal">172</span>
@@ -1239,7 +1230,21 @@ or "manual_setup".</p>
 <span class="normal">248</span>
 <span class="normal">249</span>
 <span class="normal">250</span>
-<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">physical_parameters</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">):</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">physical_parameters</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function is used to set the physical parameters of the fuel cell system.</span>
 
 <span class="sd">    Parameters</span>
@@ -1250,12 +1255,12 @@ or "manual_setup".</p>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    Hcl : float</span>
-<span class="sd">        Thickness of the anode or cathode catalyst layer in meters.</span>
+<span class="sd">    Hacl : float</span>
+<span class="sd">        Thickness of the anode catalyst layer in meters.</span>
+<span class="sd">    Hacl : float</span>
+<span class="sd">        Thickness of the cathode catalyst layer in meters.</span>
 <span class="sd">    epsilon_mc : float</span>
 <span class="sd">        Volume fraction of ionomer in the catalyst layer.</span>
-<span class="sd">    tau : float</span>
-<span class="sd">        Pore structure coefficient in the CL.</span>
 <span class="sd">    Hmem : float</span>
 <span class="sd">        Thickness of the membrane in meters.</span>
 <span class="sd">    Hgdl : float</span>
@@ -1264,18 +1269,24 @@ or "manual_setup".</p>
 <span class="sd">        Anode/cathode GDL porosity.</span>
 <span class="sd">    epsilon_c : float</span>
 <span class="sd">        Compression ratio of the GDL.</span>
-<span class="sd">    Hgc : float</span>
-<span class="sd">        Thickness of the gas channel in meters.</span>
-<span class="sd">    Wgc : float</span>
-<span class="sd">        Width of the gas channel in meters.</span>
+<span class="sd">    Hmpl : float</span>
+<span class="sd">        Thickness of the microporous layer in meters.</span>
+<span class="sd">    epsilon_mpl : float</span>
+<span class="sd">        Porosity of the microporous layer.</span>
+<span class="sd">    Hagc : float</span>
+<span class="sd">        Thickness of the anode gas channel in meters.</span>
+<span class="sd">    Hcgc : float</span>
+<span class="sd">        Thickness of the cathode gas channel in meters.</span>
+<span class="sd">    Wagc : float</span>
+<span class="sd">        Width of the anode gas channel in meters.</span>
+<span class="sd">    Wcgc : float</span>
+<span class="sd">        Width of the cathode gas channel in meters.</span>
 <span class="sd">    Lgc : float</span>
 <span class="sd">        Length of the gas channel in meters.</span>
 <span class="sd">    Aact : float</span>
 <span class="sd">        Active area of the catalyst layer in meters squared.</span>
 <span class="sd">    e : float</span>
 <span class="sd">        Capillary exponent.</span>
-<span class="sd">    Re : float</span>
-<span class="sd">        Electron conduction resistance of the circuit in ohm.m².</span>
 <span class="sd">    i0_c_ref : float</span>
 <span class="sd">        Reference exchange current density at the cathode in A.m-2.</span>
 <span class="sd">    kappa_co : float</span>
@@ -1296,23 +1307,28 @@ or "manual_setup".</p>
         <span class="c1"># Fuel cell physical parameters: 𝜔 (which are not controllable by the system)</span>
         <span class="c1">#   Catalyst layer</span>
         <span class="n">Aact</span> <span class="o">=</span> <span class="mf">8.5e-3</span>  <span class="c1"># m². It is the active area of the catalyst layer.</span>
-        <span class="n">Hcl</span> <span class="o">=</span> <span class="mf">1e-5</span>  <span class="c1"># m. It is the thickness of the anode or cathode catalyst layer.</span>
+        <span class="n">Hacl</span> <span class="o">=</span> <span class="mf">8.089e-6</span>  <span class="c1"># m. It is the thickness of the anode catalyst layer.</span>
+        <span class="n">Hccl</span> <span class="o">=</span> <span class="n">Hacl</span>  <span class="c1"># m. It is the thickness of the cathode catalyst layer.</span>
+        <span class="n">epsilon_cl</span> <span class="o">=</span> <span class="mf">0.25</span>  <span class="c1"># It is the porosity of the catalyst layer, without units.</span>
         <span class="n">epsilon_mc</span> <span class="o">=</span> <span class="mf">0.3949198274842546</span>  <span class="c1"># It is the volume fraction of ionomer in the CL.</span>
-        <span class="n">tau</span> <span class="o">=</span> <span class="mf">1.015639135686993</span>  <span class="c1"># It is the pore structure coefficient in the CL, without units.</span>
         <span class="c1">#   Membrane</span>
         <span class="n">Hmem</span> <span class="o">=</span> <span class="mf">2e-5</span>  <span class="c1"># m. It is the thickness of the membrane.</span>
         <span class="c1">#   Gas diffusion layer</span>
         <span class="n">Hgdl</span> <span class="o">=</span> <span class="mf">2e-4</span>  <span class="c1"># m. It is the thickness of the gas diffusion layer.</span>
         <span class="n">epsilon_gdl</span> <span class="o">=</span> <span class="mf">0.7011156494971454</span>  <span class="c1"># It is the anode/cathode GDL porosity.</span>
         <span class="n">epsilon_c</span> <span class="o">=</span> <span class="mf">0.27052745219052654</span>  <span class="c1"># It is the compression ratio of the GDL.</span>
+        <span class="c1">#   Microporous layer</span>
+        <span class="n">Hmpl</span> <span class="o">=</span> <span class="mf">3e-5</span>  <span class="c1"># m. It is the thickness of the microporous layer.</span>
+        <span class="n">epsilon_mpl</span> <span class="o">=</span> <span class="mf">0.4</span>  <span class="c1"># It is the porosity of the microporous layer.</span>
         <span class="c1">#   Gas channel</span>
-        <span class="n">Hgc</span> <span class="o">=</span> <span class="mf">5e-4</span>  <span class="c1"># m. It is the thickness of the gas channel.</span>
-        <span class="n">Wgc</span> <span class="o">=</span> <span class="mf">4.5e-4</span>  <span class="c1"># m. It is the width of the gas channel.</span>
+        <span class="n">Hagc</span> <span class="o">=</span> <span class="mf">5e-4</span>  <span class="c1"># m. It is the thickness of the anode gas channel.</span>
+        <span class="n">Hcgc</span> <span class="o">=</span> <span class="n">Hagc</span>  <span class="c1"># m. It is the thickness of the cathode gas channel.</span>
+        <span class="n">Wagc</span> <span class="o">=</span> <span class="mf">4.5e-4</span>  <span class="c1"># m. It is the width of the anode gas channel.</span>
+        <span class="n">Wcgc</span> <span class="o">=</span> <span class="n">Wagc</span>  <span class="c1"># m. It is the width of the cathode gas channel.</span>
         <span class="n">Lgc</span> <span class="o">=</span> <span class="mf">9.67</span>  <span class="c1"># m. It is the length of the gas channel.</span>
         <span class="c1">#   Interaction parameters between water and PEMFC structure</span>
         <span class="n">e</span> <span class="o">=</span> <span class="mf">5.0</span>  <span class="c1"># It is the capillary exponent</span>
         <span class="c1">#   Voltage polarization</span>
-        <span class="n">Re</span> <span class="o">=</span> <span class="mf">5.694464714060734e-07</span>  <span class="c1"># ohm.m². It is the electron conduction resistance of the circuit.</span>
         <span class="n">i0_c_ref</span> <span class="o">=</span> <span class="mf">2.787917581303015</span>  <span class="c1"># A.m-2. It is the reference exchange current density at the cathode.</span>
         <span class="n">kappa_co</span> <span class="o">=</span> <span class="mf">29.793535549174077</span>  <span class="c1"># mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.</span>
         <span class="n">kappa_c</span> <span class="o">=</span> <span class="mf">1.6136446641573106</span>  <span class="c1"># It is the overpotential correction exponent.</span>
@@ -1320,11 +1336,11 @@ or "manual_setup".</p>
         <span class="c1">#                                                               liquid saturation coefficients.</span>
         <span class="n">C_scl</span> <span class="o">=</span> <span class="mf">2e7</span>  <span class="c1"># F.m-3. It is the volumetric space-charge layer capacitance.</span>
     <span class="k">else</span><span class="p">:</span> <span class="c1"># Stored setup in &quot;stored_physical_parameters&quot;.</span>
-        <span class="p">(</span><span class="n">Hcl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span>
-         <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">)</span> <span class="o">=</span> <span class="n">stored_physical_parameters</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_cl</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">Hmpl</span><span class="p">,</span> <span class="n">epsilon_mpl</span><span class="p">,</span> <span class="n">Hagc</span><span class="p">,</span> <span class="n">Hcgc</span><span class="p">,</span> <span class="n">Wagc</span><span class="p">,</span>
+         <span class="n">Wcgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">)</span> <span class="o">=</span> <span class="n">stored_physical_parameters</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="p">(</span><span class="n">Hcl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span>
-            <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_cl</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">Hmpl</span><span class="p">,</span> <span class="n">epsilon_mpl</span><span class="p">,</span> <span class="n">Hagc</span><span class="p">,</span> <span class="n">Hcgc</span><span class="p">,</span> <span class="n">Wagc</span><span class="p">,</span>
+            <span class="n">Wcgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

@@ -811,141 +811,152 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 <span class="normal">648</span>
 <span class="normal">649</span>
 <span class="normal">650</span>
-<span class="normal">651</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AlphaPEM</span><span class="p">:</span>
+<span class="normal">651</span>
+<span class="normal">652</span>
+<span class="normal">653</span>
+<span class="normal">654</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AlphaPEM</span><span class="p">:</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">step_current_parameters</span><span class="p">,</span>
-                 <span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span>
-                 <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span>
-                 <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span>
-                 <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">,</span> <span class="n">initial_variable_values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_interval</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">current_parameters</span><span class="p">,</span> <span class="n">accessible_physical_parameters</span><span class="p">,</span>
+                 <span class="n">undetermined_physical_parameters</span><span class="p">,</span> <span class="n">computing_parameters</span><span class="p">,</span> <span class="n">initial_variable_values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">time_interval</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise all parameters defining a fuel cell stack operation: nominal operating conditions,</span>
 <span class="sd">        applied electrical load, dimensions, and undetermined variables.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        current_density : function</span>
-<span class="sd">            Current density evolution over time (operating input). It is a function of time and parameters dictionary.</span>
-<span class="sd">        T_des : float</span>
-<span class="sd">            Desired fuel cell temperature in Kelvin (operating input).</span>
-<span class="sd">        Pa_des : float</span>
-<span class="sd">            Desired anode pressure in Pascal (operating input).</span>
-<span class="sd">        Pc_des : float</span>
-<span class="sd">            Desired cathode pressure in Pascal (operating input).</span>
-<span class="sd">        Sa : float</span>
-<span class="sd">            Stoichiometric ratio of hydrogen (operating input).</span>
-<span class="sd">        Sc : float</span>
-<span class="sd">            Stoichiometric ratio of oxygen (operating input).</span>
-<span class="sd">        Phi_a_des : float</span>
-<span class="sd">            Desired anode relative humidity (operating input).</span>
-<span class="sd">        Phi_c_des : float</span>
-<span class="sd">            Desired cathode relative humidity (operating input).</span>
-<span class="sd">       step_current_parameters : dict</span>
-<span class="sd">            Parameters for the step current density. It is a dictionary containing:</span>
-<span class="sd">            - &#39;delta_t_ini_step&#39;: the initial time (in seconds) at zero current density for the stabilisation of the</span>
-<span class="sd">            internal states,</span>
-<span class="sd">            - &#39;delta_t_load_step&#39;: the loading time (in seconds) for the step current density function, from 0 to</span>
-<span class="sd">            i_step,</span>
-<span class="sd">            - &#39;delta_t_break_step&#39;: the time (in seconds) at i_step current density for the stabilisation of the</span>
-<span class="sd">            internal states,</span>
-<span class="sd">            - &#39;i_step&#39;: the current density (in A.m-2) for the step current density function,</span>
-<span class="sd">            - &#39;delta_t_dyn_step&#39;: the time (in seconds) for dynamic display of the step current density function.</span>
-<span class="sd">        pola_current_parameters : dict</span>
-<span class="sd">            Parameters for the polarization current density. It is a dictionary containing:</span>
-<span class="sd">            - &#39;delta_t_ini_pola&#39;: the initial time (in seconds) at zero current density for the stabilisation of the</span>
-<span class="sd">            internal states,</span>
-<span class="sd">            - &#39;delta_t_load_pola&#39;: the loading time (in seconds) for one step current of the polarisation current</span>
-<span class="sd">            density function,</span>
-<span class="sd">            - &#39;delta_t_break_pola&#39;: the breaking time (in seconds) for one step current, for the stabilisation of the</span>
-<span class="sd">            internal states,</span>
-<span class="sd">            - &#39;delta_i_pola&#39;: the current density step (in A.m-2) for the polarisation current density function.</span>
-<span class="sd">            - &#39;i_max_pola&#39;: the maximum current density (in A.m-2) for the polarization curve.</span>
-<span class="sd">        pola_current_for_cali_parameters : dict</span>
-<span class="sd">            Parameters for the polarization current density for calibration. It is a dictionary containing:</span>
-<span class="sd">            - &#39;delta_t_ini_pola_cali&#39;: the initial time (in seconds) at zero current density for the stabilisation of</span>
-<span class="sd">            the internal states,</span>
-<span class="sd">            - &#39;delta_t_load_pola_cali&#39;: the loading time (in seconds) for one step current of the polarisation current</span>
-<span class="sd">            density function,</span>
-<span class="sd">            - &#39;delta_t_break_pola_cali&#39;: the breaking time (in seconds) for one step current, for the stabilisation of</span>
-<span class="sd">            the internal states.</span>
-<span class="sd">        i_EIS : float</span>
-<span class="sd">            Current for which a ratio_EIS perturbation is added (current parameter).</span>
-<span class="sd">        ratio_EIS : float</span>
-<span class="sd">            Value of the perturbation on the current density for building the EIS curve (current parameter).</span>
-<span class="sd">        t_EIS : tuple</span>
-<span class="sd">            EIS parameters (current parameters). It is a tuple containing the initial EIS time after stack equilibrium</span>
-<span class="sd">            &#39;t0_EIS&#39;, a list of time parameters which gives the beginning of each frequency change &#39;t_new_start_EIS&#39;,</span>
-<span class="sd">            the final time &#39;tf_EIS&#39;, a list of time parameters which gives the estimated time for reaching equilibrium</span>
-<span class="sd">            at each frequency &#39;delta_t_break_EIS&#39;, and a list of time parameters which gives the estimated time for</span>
-<span class="sd">            measuring the voltage response at each frequency &#39;delta_t_measurement_EIS&#39;.</span>
-<span class="sd">        f_EIS : tuple</span>
-<span class="sd">            EIS parameters (current parameters). It is a tuple containing the power of the initial frequency</span>
-<span class="sd">            &#39;f_power_min_EIS&#39;: f_min_EIS = 10**f_power_min_EIS, the power of the final frequency &#39;f_power_max_EIS&#39;, the</span>
-<span class="sd">            number of frequencies tested &#39;nb_f_EIS&#39; and the number of points calculated per specific period</span>
-<span class="sd">            &#39;nb_points_EIS&#39;.</span>
-<span class="sd">        Aact : float</span>
-<span class="sd">            Active area of the cell in m² (accessible physical parameter).</span>
-<span class="sd">        Hgdl : float</span>
-<span class="sd">            Thickness of the gas diffusion layer in m (accessible physical parameter).</span>
-<span class="sd">        Hmem : float</span>
-<span class="sd">            Thickness of the membrane in m (accessible physical parameter).</span>
-<span class="sd">        Hcl : float</span>
-<span class="sd">            Thickness of the catalyst layer in m (accessible physical parameter).</span>
-<span class="sd">        Hgc : float</span>
-<span class="sd">            Thickness of the gas channel in m (accessible physical parameter).</span>
-<span class="sd">        Wgc : float</span>
-<span class="sd">            Width of the gas channel in m (accessible physical parameter).</span>
-<span class="sd">        Lgc : float</span>
-<span class="sd">            Length of the gas channel in m (accessible physical parameter).</span>
-<span class="sd">        epsilon_gdl : float</span>
-<span class="sd">            Anode/cathode GDL porosity (undetermined physical parameter).</span>
-<span class="sd">        tau : float</span>
-<span class="sd">            Pore structure coefficient (undetermined physical parameter).</span>
-<span class="sd">        epsilon_mc : float</span>
-<span class="sd">            Volume fraction of ionomer in the CL (undetermined physical parameter).</span>
-<span class="sd">        epsilon_c : float</span>
-<span class="sd">            Compression ratio of the GDL (undetermined physical parameter).</span>
-<span class="sd">        e : float</span>
-<span class="sd">            Capillary exponent (undetermined physical parameter).</span>
-<span class="sd">        Re : float</span>
-<span class="sd">            Electron conduction resistance of the circuit in ohm.m² (undetermined physical parameter).</span>
-<span class="sd">        i0_c_ref : float</span>
-<span class="sd">            Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).</span>
-<span class="sd">        kappa_co : float</span>
-<span class="sd">            Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).</span>
-<span class="sd">        kappa_c : float</span>
-<span class="sd">            Overpotential correction exponent (undetermined physical parameter).</span>
-<span class="sd">        a_slim : float</span>
-<span class="sd">            One of the limit liquid saturation coefficients: the slop of slim function</span>
-<span class="sd">            (undetermined physical parameter).</span>
-<span class="sd">        b_slim : float</span>
-<span class="sd">            One of the limit liquid saturation coefficients: the intercept of slim function</span>
-<span class="sd">            (undetermined physical parameter).</span>
-<span class="sd">        a_switch : float</span>
-<span class="sd">            One of the limit liquid saturation coefficients: the slop of s_switch function</span>
-<span class="sd">            (undetermined physical parameter).</span>
-<span class="sd">        C_scl : float</span>
-<span class="sd">            Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).</span>
-<span class="sd">        max_step : float</span>
-<span class="sd">            Maximum time step for the solver (computing parameter).</span>
-<span class="sd">        n_gdl : int</span>
-<span class="sd">            Number of points considered in the GDL (computing parameter).</span>
-<span class="sd">        t_purge : tuple</span>
-<span class="sd">            Time parameters for purging the system (computing parameter).</span>
-<span class="sd">            It is the purge time interval &#39;purge_time&#39; and the time between two purges &#39;delta_purge&#39;.</span>
-<span class="sd">        type_fuel_cell : str</span>
-<span class="sd">            Type of fuel cell configuration (computing parameter).</span>
-<span class="sd">        type_current : str</span>
-<span class="sd">            Type of current density function (computing parameter).</span>
-<span class="sd">        type_auxiliary : str</span>
-<span class="sd">            Type of auxiliary system (computing parameter).</span>
-<span class="sd">        type_control : str</span>
-<span class="sd">            Type of control system (computing parameter).</span>
-<span class="sd">        type_purge : str</span>
-<span class="sd">            Type of purge system (computing parameter).</span>
-<span class="sd">        type_display : str</span>
-<span class="sd">            Type of display (computing parameter).</span>
-<span class="sd">        type_plot : str</span>
-<span class="sd">            Type of plot (computing parameter).</span>
+<span class="sd">        operating_inputs : dict</span>
+<span class="sd">            Dictionary containing the operating inputs for the simulation. It contains:</span>
+<span class="sd">                - current_density : function</span>
+<span class="sd">                    Current density evolution over time (operating input). It is a function of time and parameters dictionary.</span>
+<span class="sd">                - T_des : float</span>
+<span class="sd">                    Desired fuel cell temperature in Kelvin (operating input).</span>
+<span class="sd">                - Pa_des : float</span>
+<span class="sd">                    Desired anode pressure in Pascal (operating input).</span>
+<span class="sd">                - Pc_des : float</span>
+<span class="sd">                    Desired cathode pressure in Pascal (operating input).</span>
+<span class="sd">                - Sa : float</span>
+<span class="sd">                    Stoichiometric ratio of hydrogen (operating input).</span>
+<span class="sd">                - Sc : float</span>
+<span class="sd">                    Stoichiometric ratio of oxygen (operating input).</span>
+<span class="sd">                - Phi_a_des : float</span>
+<span class="sd">                    Desired anode relative humidity (operating input).</span>
+<span class="sd">                - Phi_c_des : float</span>
+<span class="sd">                    Desired cathode relative humidity (operating input).</span>
+<span class="sd">        current_parameters : dict</span>
+<span class="sd">            Dictionary containing the current parameters for the simulation. It contains:</span>
+<span class="sd">                - step_current_parameters : dict</span>
+<span class="sd">                    Parameters for the step current density. It is a dictionary containing:</span>
+<span class="sd">                    - &#39;delta_t_ini_step&#39;: the initial time (in seconds) at zero current density for the stabilisation of the</span>
+<span class="sd">                    internal states,</span>
+<span class="sd">                    - &#39;delta_t_load_step&#39;: the loading time (in seconds) for the step current density function, from 0 to</span>
+<span class="sd">                    i_step,</span>
+<span class="sd">                    - &#39;delta_t_break_step&#39;: the time (in seconds) at i_step current density for the stabilisation of the</span>
+<span class="sd">                    internal states,</span>
+<span class="sd">                    - &#39;i_step&#39;: the current density (in A.m-2) for the step current density function,</span>
+<span class="sd">                    - &#39;delta_t_dyn_step&#39;: the time (in seconds) for dynamic display of the step current density function.</span>
+<span class="sd">                - pola_current_parameters : dict</span>
+<span class="sd">                    Parameters for the polarization current density. It is a dictionary containing:</span>
+<span class="sd">                    - &#39;delta_t_ini_pola&#39;: the initial time (in seconds) at zero current density for the stabilisation of the</span>
+<span class="sd">                    internal states,</span>
+<span class="sd">                    - &#39;delta_t_load_pola&#39;: the loading time (in seconds) for one step current of the polarisation current</span>
+<span class="sd">                    density function,</span>
+<span class="sd">                    - &#39;delta_t_break_pola&#39;: the breaking time (in seconds) for one step current, for the stabilisation of the</span>
+<span class="sd">                    internal states,</span>
+<span class="sd">                    - &#39;delta_i_pola&#39;: the current density step (in A.m-2) for the polarisation current density function.</span>
+<span class="sd">                    - &#39;i_max_pola&#39;: the maximum current density (in A.m-2) for the polarization curve.</span>
+<span class="sd">                - pola_current_for_cali_parameters : dict</span>
+<span class="sd">                    Parameters for the polarization current density for calibration. It is a dictionary containing:</span>
+<span class="sd">                    - &#39;delta_t_ini_pola_cali&#39;: the initial time (in seconds) at zero current density for the stabilisation of</span>
+<span class="sd">                    the internal states,</span>
+<span class="sd">                    - &#39;delta_t_load_pola_cali&#39;: the loading time (in seconds) for one step current of the polarisation current</span>
+<span class="sd">                    density function,</span>
+<span class="sd">                    - &#39;delta_t_break_pola_cali&#39;: the breaking time (in seconds) for one step current, for the stabilisation of</span>
+<span class="sd">                    the internal states.</span>
+<span class="sd">                - i_EIS : float</span>
+<span class="sd">                    Current for which a ratio_EIS perturbation is added (current parameter).</span>
+<span class="sd">                - ratio_EIS : float</span>
+<span class="sd">                    Value of the perturbation on the current density for building the EIS curve (current parameter).</span>
+<span class="sd">                - t_EIS : tuple</span>
+<span class="sd">                    EIS parameters (current parameters). It is a tuple containing the initial EIS time after stack equilibrium</span>
+<span class="sd">                    &#39;t0_EIS&#39;, a list of time parameters which gives the beginning of each frequency change &#39;t_new_start_EIS&#39;,</span>
+<span class="sd">                    the final time &#39;tf_EIS&#39;, a list of time parameters which gives the estimated time for reaching equilibrium</span>
+<span class="sd">                    at each frequency &#39;delta_t_break_EIS&#39;, and a list of time parameters which gives the estimated time for</span>
+<span class="sd">                    measuring the voltage response at each frequency &#39;delta_t_measurement_EIS&#39;.</span>
+<span class="sd">                f_EIS : tuple</span>
+<span class="sd">                    EIS parameters (current parameters). It is a tuple containing the power of the initial frequency</span>
+<span class="sd">                    &#39;f_power_min_EIS&#39;: f_min_EIS = 10**f_power_min_EIS, the power of the final frequency &#39;f_power_max_EIS&#39;, the</span>
+<span class="sd">                    number of frequencies tested &#39;nb_f_EIS&#39; and the number of points calculated per specific period</span>
+<span class="sd">                    &#39;nb_points_EIS&#39;.</span>
+<span class="sd">        accessible_physical_parameters : dict</span>
+<span class="sd">            Dictionary containing the accessible physical parameters for the simulation. It contains:</span>
+<span class="sd">                - Aact : float</span>
+<span class="sd">                    Active area of the cell in m² (accessible physical parameter).</span>
+<span class="sd">                - Hagc : float</span>
+<span class="sd">                    Thickness of the anode gas channel in m (accessible physical parameter).</span>
+<span class="sd">                Hcgc : float</span>
+<span class="sd">                    Thickness of the cathode gas channel in m (accessible physical parameter).</span>
+<span class="sd">                Wagc : float</span>
+<span class="sd">                    Width of the anode gas channel in m (accessible physical parameter).</span>
+<span class="sd">                Wcgc : float</span>
+<span class="sd">                    Width of the cathode gas channel in m (accessible physical parameter).</span>
+<span class="sd">                Lgc : float</span>
+<span class="sd">                    Length of the gas channel in m (accessible physical parameter).</span>
+<span class="sd">        undetermined_physical_parameters : dict</span>
+<span class="sd">            Dictionary containing the undetermined physical parameters for the simulation. It contains:</span>
+<span class="sd">                - Hgdl : float</span>
+<span class="sd">                    Thickness of the gas diffusion layer in m (undetermined physical parameter).</span>
+<span class="sd">                - Hmem : float</span>
+<span class="sd">                    Thickness of the membrane in m (undetermined physical parameter).</span>
+<span class="sd">                - Hacl : float</span>
+<span class="sd">                    Thickness of the anode catalyst layer in m (undetermined physical parameter).</span>
+<span class="sd">                - Hccl : float</span>
+<span class="sd">                    Thickness of the cathode catalyst layer in m (undetermined physical parameter).</span>
+<span class="sd">                - epsilon_gdl : float</span>
+<span class="sd">                    Anode/cathode GDL porosity (undetermined physical parameter).</span>
+<span class="sd">                - epsilon_mc : float</span>
+<span class="sd">                    Volume fraction of ionomer in the CL (undetermined physical parameter).</span>
+<span class="sd">                - epsilon_c : float</span>
+<span class="sd">                    Compression ratio of the GDL (undetermined physical parameter).</span>
+<span class="sd">                - e : float</span>
+<span class="sd">                    Capillary exponent (undetermined physical parameter).</span>
+<span class="sd">                - i0_c_ref : float</span>
+<span class="sd">                    Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).</span>
+<span class="sd">                - kappa_co : float</span>
+<span class="sd">                    Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).</span>
+<span class="sd">                - kappa_c : float</span>
+<span class="sd">                    Overpotential correction exponent (undetermined physical parameter).</span>
+<span class="sd">                - a_slim : float</span>
+<span class="sd">                    One of the limit liquid saturation coefficients: the slop of slim function</span>
+<span class="sd">                    (undetermined physical parameter).</span>
+<span class="sd">                - b_slim : float</span>
+<span class="sd">                    One of the limit liquid saturation coefficients: the intercept of slim function</span>
+<span class="sd">                    (undetermined physical parameter).</span>
+<span class="sd">                - a_switch : float</span>
+<span class="sd">                    One of the limit liquid saturation coefficients: the slop of s_switch function</span>
+<span class="sd">                    (undetermined physical parameter).</span>
+<span class="sd">                - C_scl : float</span>
+<span class="sd">                    Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).</span>
+<span class="sd">        computing_parameters : dict</span>
+<span class="sd">            Dictionary containing the computing parameters for the simulation. It contains:</span>
+<span class="sd">                - n_gdl : int</span>
+<span class="sd">                    Number of points considered in the GDL (computing parameter).</span>
+<span class="sd">                - t_purge : tuple</span>
+<span class="sd">                    Time parameters for purging the system (computing parameter).</span>
+<span class="sd">                    It is the purge time interval &#39;purge_time&#39; and the time between two purges &#39;delta_purge&#39;.</span>
+<span class="sd">                - type_fuel_cell : str</span>
+<span class="sd">                    Type of fuel cell configuration (computing parameter).</span>
+<span class="sd">                - type_current : str</span>
+<span class="sd">                    Type of current density function (computing parameter).</span>
+<span class="sd">                - type_auxiliary : str</span>
+<span class="sd">                    Type of auxiliary system (computing parameter).</span>
+<span class="sd">                - type_control : str</span>
+<span class="sd">                    Type of control system (computing parameter).</span>
+<span class="sd">                - type_purge : str</span>
+<span class="sd">                    Type of purge system (computing parameter).</span>
+<span class="sd">                - type_display : str</span>
+<span class="sd">                    Type of display (computing parameter).</span>
+<span class="sd">                - type_plot : str</span>
+<span class="sd">                    Type of plot (computing parameter).</span>
 <span class="sd">        initial_variable_values : list, optional</span>
 <span class="sd">            Initial values of the solver variables. The default is None, which implies that initial values are</span>
 <span class="sd">            generated considering an equilibrium at the operating inputs without current.</span>
@@ -955,34 +966,24 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Initialize the operating inputs and parameters dictionaries.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;current_density&#39;</span><span class="p">:</span> <span class="n">current_density</span><span class="p">,</span> <span class="s1">&#39;T_des&#39;</span><span class="p">:</span> <span class="n">T_des</span><span class="p">,</span> <span class="s1">&#39;Pa_des&#39;</span><span class="p">:</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="s1">&#39;Pc_des&#39;</span><span class="p">:</span> <span class="n">Pc_des</span><span class="p">,</span>
-                                 <span class="s1">&#39;Sa&#39;</span><span class="p">:</span> <span class="n">Sa</span><span class="p">,</span> <span class="s1">&#39;Sc&#39;</span><span class="p">:</span> <span class="n">Sc</span><span class="p">,</span> <span class="s1">&#39;Phi_a_des&#39;</span><span class="p">:</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="s1">&#39;Phi_c_des&#39;</span><span class="p">:</span> <span class="n">Phi_c_des</span><span class="p">}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">current_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;step_current_parameters&#39;</span><span class="p">:</span> <span class="n">step_current_parameters</span><span class="p">,</span>
-                                   <span class="s1">&#39;pola_current_parameters&#39;</span><span class="p">:</span> <span class="n">pola_current_parameters</span><span class="p">,</span>
-                                   <span class="s1">&#39;pola_current_for_cali_parameters&#39;</span><span class="p">:</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span>
-                                   <span class="s1">&#39;i_EIS&#39;</span><span class="p">:</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="s1">&#39;ratio_EIS&#39;</span><span class="p">:</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="s1">&#39;t_EIS&#39;</span><span class="p">:</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="s1">&#39;f_EIS&#39;</span><span class="p">:</span> <span class="n">f_EIS</span><span class="p">}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">accessible_physical_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Aact&#39;</span><span class="p">:</span> <span class="n">Aact</span><span class="p">,</span> <span class="s1">&#39;Hgdl&#39;</span><span class="p">:</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="s1">&#39;Hmem&#39;</span><span class="p">:</span> <span class="n">Hmem</span><span class="p">,</span> <span class="s1">&#39;Hcl&#39;</span><span class="p">:</span> <span class="n">Hcl</span><span class="p">,</span> <span class="s1">&#39;Hgc&#39;</span><span class="p">:</span> <span class="n">Hgc</span><span class="p">,</span>
-                                               <span class="s1">&#39;Wgc&#39;</span><span class="p">:</span> <span class="n">Wgc</span><span class="p">,</span> <span class="s1">&#39;Lgc&#39;</span><span class="p">:</span> <span class="n">Lgc</span><span class="p">}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">undetermined_physical_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;epsilon_gdl&#39;</span><span class="p">:</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="s1">&#39;tau&#39;</span><span class="p">:</span> <span class="n">tau</span><span class="p">,</span> <span class="s1">&#39;epsilon_mc&#39;</span><span class="p">:</span> <span class="n">epsilon_mc</span><span class="p">,</span>
-                                                   <span class="s1">&#39;epsilon_c&#39;</span><span class="p">:</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">:</span> <span class="n">e</span><span class="p">,</span> <span class="s1">&#39;kappa_co&#39;</span><span class="p">:</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="s1">&#39;Re&#39;</span><span class="p">:</span> <span class="n">Re</span><span class="p">,</span>
-                                                   <span class="s1">&#39;i0_c_ref&#39;</span><span class="p">:</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="s1">&#39;kappa_c&#39;</span><span class="p">:</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="s1">&#39;a_slim&#39;</span><span class="p">:</span> <span class="n">a_slim</span><span class="p">,</span>
-                                                   <span class="s1">&#39;b_slim&#39;</span><span class="p">:</span> <span class="n">b_slim</span><span class="p">,</span> <span class="s1">&#39;a_switch&#39;</span><span class="p">:</span> <span class="n">a_switch</span><span class="p">,</span> <span class="s1">&#39;C_scl&#39;</span><span class="p">:</span> <span class="n">C_scl</span><span class="p">}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">computing_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;max_step&#39;</span><span class="p">:</span> <span class="n">max_step</span><span class="p">,</span> <span class="s1">&#39;n_gdl&#39;</span><span class="p">:</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="s1">&#39;t_purge&#39;</span><span class="p">:</span> <span class="n">t_purge</span><span class="p">,</span>
-                                     <span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">:</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="s1">&#39;type_current&#39;</span><span class="p">:</span> <span class="n">type_current</span><span class="p">,</span>
-                                     <span class="s1">&#39;type_auxiliary&#39;</span><span class="p">:</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="s1">&#39;type_control&#39;</span><span class="p">:</span> <span class="n">type_control</span><span class="p">,</span>
-                                     <span class="s1">&#39;type_purge&#39;</span><span class="p">:</span> <span class="n">type_purge</span><span class="p">,</span> <span class="s1">&#39;type_display&#39;</span><span class="p">:</span> <span class="n">type_display</span><span class="p">,</span> <span class="s1">&#39;type_plot&#39;</span><span class="p">:</span> <span class="n">type_plot</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span> <span class="o">=</span> <span class="n">operating_inputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_parameters</span> <span class="o">=</span> <span class="n">current_parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">accessible_physical_parameters</span> <span class="o">=</span> <span class="n">accessible_physical_parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">undetermined_physical_parameters</span> <span class="o">=</span> <span class="n">undetermined_physical_parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">computing_parameters</span> <span class="o">=</span> <span class="n">computing_parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">current_parameters</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">accessible_physical_parameters</span><span class="p">,</span>
                            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">undetermined_physical_parameters</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">computing_parameters</span><span class="p">}</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Pa_des&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">Pext</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Pc_des&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">Pext</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The desired pressure is too low. It cannot be lower than the pressure outside the stack.&#39;</span><span class="p">)</span>
 
         <span class="c1"># Initialize the variables&#39; dictionary.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;C_v_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;s_agdl&#39;</span><span class="p">,</span>
-                                      <span class="s1">&#39;s_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;lambda_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;lambda_mem&#39;</span><span class="p">,</span> <span class="s1">&#39;lambda_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_agc&#39;</span><span class="p">,</span>
-                                      <span class="s1">&#39;C_H2_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_N2&#39;</span><span class="p">,</span> <span class="s1">&#39;T_agc&#39;</span><span class="p">,</span>
-                                      <span class="s1">&#39;T_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_mem&#39;</span><span class="p">,</span> <span class="s1">&#39;T_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;eta_c&#39;</span><span class="p">,</span> <span class="s1">&#39;Pasm&#39;</span><span class="p">,</span> <span class="s1">&#39;Paem&#39;</span><span class="p">,</span>
-                                      <span class="s1">&#39;Pcsm&#39;</span><span class="p">,</span> <span class="s1">&#39;Pcem&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_asm&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_aem&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_csm&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_cem&#39;</span><span class="p">,</span> <span class="s1">&#39;Wcp&#39;</span><span class="p">,</span> <span class="s1">&#39;Wa_inj&#39;</span><span class="p">,</span>
-                                      <span class="s1">&#39;Wc_inj&#39;</span><span class="p">,</span> <span class="s1">&#39;Abp_a&#39;</span><span class="p">,</span> <span class="s1">&#39;Abp_c&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;C_v_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_cgdl&#39;</span><span class="p">,</span>
+                                      <span class="s1">&#39;C_v_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;s_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;lambda_acl&#39;</span><span class="p">,</span>
+                                      <span class="s1">&#39;lambda_mem&#39;</span><span class="p">,</span> <span class="s1">&#39;lambda_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_acl&#39;</span><span class="p">,</span>
+                                      <span class="s1">&#39;C_O2_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_N2&#39;</span><span class="p">,</span> <span class="s1">&#39;T_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;T_agdl&#39;</span><span class="p">,</span>
+                                      <span class="s1">&#39;T_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_mem&#39;</span><span class="p">,</span> <span class="s1">&#39;T_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;eta_c&#39;</span><span class="p">,</span> <span class="s1">&#39;Pasm&#39;</span><span class="p">,</span>
+                                      <span class="s1">&#39;Paem&#39;</span><span class="p">,</span> <span class="s1">&#39;Pcsm&#39;</span><span class="p">,</span> <span class="s1">&#39;Pcem&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_asm&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_aem&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_csm&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_cem&#39;</span><span class="p">,</span> <span class="s1">&#39;Wcp&#39;</span><span class="p">,</span>
+                                      <span class="s1">&#39;Wa_inj&#39;</span><span class="p">,</span> <span class="s1">&#39;Wc_inj&#39;</span><span class="p">,</span> <span class="s1">&#39;Abp_a&#39;</span><span class="p">,</span> <span class="s1">&#39;Abp_c&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names_extension</span><span class="p">()</span>  <span class="c1"># Several points are considered in each GDL and must be inserted into</span>
         <span class="c1">#                                        the solver_variable_names.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">all_variable_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Ucell&#39;</span><span class="p">,</span> <span class="s1">&#39;S_abs_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;S_abs_ccl&#39;</span><span class="p">]</span> <span class="o">+</span> \
@@ -1010,7 +1011,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
         <span class="c1">#       Resolution of the system of differential equations.</span>
         <span class="n">event_negative</span><span class="o">.</span><span class="n">terminal</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Integration is stopped if one of the crucial variables becomes negative.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sol</span> <span class="o">=</span> <span class="n">solve_ivp</span><span class="p">(</span><span class="n">dydt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_interval</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_variable_values</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;BDF&#39;</span><span class="p">,</span>
-                             <span class="n">max_step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;max_step&#39;</span><span class="p">],</span> <span class="n">events</span><span class="o">=</span><span class="n">event_negative</span><span class="p">,</span>
+                             <span class="n">rtol</span> <span class="o">=</span> <span class="mf">1e-5</span><span class="p">,</span> <span class="n">atol</span> <span class="o">=</span> <span class="mf">1e-8</span><span class="p">,</span> <span class="n">events</span><span class="o">=</span><span class="n">event_negative</span><span class="p">,</span>
                              <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="p">,</span>
                                    <span class="bp">self</span><span class="o">.</span><span class="n">control_variables</span><span class="p">))</span>
 
@@ -1144,29 +1145,30 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
         <span class="n">Abp_c_ini</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># It is the throttle area of the back pressure valve at the cathode.</span>
 
         <span class="c1"># Main variable initialization</span>
-        <span class="n">C_v_agc</span><span class="p">,</span> <span class="n">C_v_agdl</span><span class="p">,</span> <span class="n">C_v_acl</span><span class="p">,</span> <span class="n">C_v_ccl</span><span class="p">,</span> <span class="n">C_v_cgdl</span><span class="p">,</span> <span class="n">C_v_cgc</span> <span class="o">=</span> <span class="p">[</span><span class="n">C_v_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">6</span>
-        <span class="n">s_agdl</span><span class="p">,</span> <span class="n">s_acl</span><span class="p">,</span> <span class="n">s_ccl</span><span class="p">,</span> <span class="n">s_cgdl</span> <span class="o">=</span> <span class="p">[</span><span class="n">s_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+        <span class="n">C_v_agc</span><span class="p">,</span> <span class="n">C_v_agdl</span><span class="p">,</span> <span class="n">C_v_ampl</span><span class="p">,</span> <span class="n">C_v_acl</span><span class="p">,</span> <span class="n">C_v_ccl</span><span class="p">,</span> <span class="n">C_v_cmpl</span><span class="p">,</span> <span class="n">C_v_cgdl</span><span class="p">,</span> <span class="n">C_v_cgc</span> <span class="o">=</span> <span class="p">[</span><span class="n">C_v_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">8</span>
+        <span class="n">s_agdl</span><span class="p">,</span> <span class="n">s_ampl</span><span class="p">,</span> <span class="n">s_acl</span><span class="p">,</span> <span class="n">s_ccl</span><span class="p">,</span> <span class="n">s_cmpl</span><span class="p">,</span> <span class="n">s_cgdl</span> <span class="o">=</span> <span class="p">[</span><span class="n">s_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">6</span>
         <span class="n">s_boundary</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Dirichlet boundary condition</span>
         <span class="n">lambda_acl</span><span class="p">,</span> <span class="n">lambda_mem</span><span class="p">,</span> <span class="n">lambda_ccl</span> <span class="o">=</span> <span class="p">[</span><span class="n">lambda_mem_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
-        <span class="n">C_H2_agc</span><span class="p">,</span> <span class="n">C_H2_agdl</span><span class="p">,</span> <span class="n">C_H2_acl</span> <span class="o">=</span> <span class="n">C_H2_ini</span><span class="p">,</span> <span class="n">C_H2_ini</span><span class="p">,</span> <span class="n">C_H2_ini</span>
-        <span class="n">C_O2_ccl</span><span class="p">,</span> <span class="n">C_O2_cgdl</span><span class="p">,</span> <span class="n">C_O2_cgc</span> <span class="o">=</span> <span class="n">C_O2_ini</span><span class="p">,</span> <span class="n">C_O2_ini</span><span class="p">,</span> <span class="n">C_O2_ini</span>
+        <span class="n">C_H2_agc</span><span class="p">,</span> <span class="n">C_H2_agdl</span><span class="p">,</span> <span class="n">C_H2_ampl</span><span class="p">,</span> <span class="n">C_H2_acl</span> <span class="o">=</span> <span class="p">[</span><span class="n">C_H2_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+        <span class="n">C_O2_ccl</span><span class="p">,</span> <span class="n">C_O2_cmpl</span><span class="p">,</span> <span class="n">C_O2_cgdl</span><span class="p">,</span> <span class="n">C_O2_cgc</span> <span class="o">=</span> <span class="p">[</span><span class="n">C_O2_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
         <span class="n">C_N2</span> <span class="o">=</span> <span class="n">C_N2_ini</span>
-        <span class="n">T_agc</span><span class="p">,</span> <span class="n">T_agdl</span><span class="p">,</span> <span class="n">T_acl</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">,</span> <span class="n">T_cgdl</span><span class="p">,</span> <span class="n">T_cgc</span> <span class="o">=</span> <span class="p">[</span><span class="n">T_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">7</span>
+        <span class="n">T_agc</span><span class="p">,</span> <span class="n">T_agdl</span><span class="p">,</span> <span class="n">T_ampl</span><span class="p">,</span> <span class="n">T_acl</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">,</span> <span class="n">T_cmpl</span><span class="p">,</span> <span class="n">T_cgdl</span><span class="p">,</span> <span class="n">T_cgc</span> <span class="o">=</span> <span class="p">[</span><span class="n">T_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">9</span>
         <span class="n">eta_c</span> <span class="o">=</span> <span class="n">eta_c_ini</span>
         <span class="n">Pasm</span><span class="p">,</span> <span class="n">Paem</span><span class="p">,</span> <span class="n">Pcsm</span><span class="p">,</span> <span class="n">Pcem</span> <span class="o">=</span> <span class="n">Pasm_ini</span><span class="p">,</span> <span class="n">Paem_ini</span><span class="p">,</span> <span class="n">Pcsm_ini</span><span class="p">,</span> <span class="n">Pcem_ini</span>
         <span class="n">Phi_asm</span><span class="p">,</span> <span class="n">Phi_aem</span><span class="p">,</span> <span class="n">Phi_csm</span><span class="p">,</span> <span class="n">Phi_cem</span> <span class="o">=</span> <span class="n">Phi_asm_ini</span><span class="p">,</span> <span class="n">Phi_aem_ini</span><span class="p">,</span> <span class="n">Phi_csm_ini</span><span class="p">,</span> <span class="n">Phi_cem_ini</span>
         <span class="n">Wcp</span><span class="p">,</span> <span class="n">Wa_inj</span><span class="p">,</span> <span class="n">Wc_inj</span><span class="p">,</span> <span class="n">Abp_a</span><span class="p">,</span> <span class="n">Abp_c</span> <span class="o">=</span> <span class="n">Wcp_ini</span><span class="p">,</span> <span class="n">Wa_inj_ini</span><span class="p">,</span> <span class="n">Wc_inj_ini</span><span class="p">,</span> <span class="n">Abp_a_ini</span><span class="p">,</span> <span class="n">Abp_c_ini</span>
 
         <span class="c1"># Gathering of the variables initial value into one list</span>
-        <span class="n">initial_variable_values</span> <span class="o">=</span> <span class="p">([</span><span class="n">C_v_agc</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_v_agdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_v_acl</span><span class="p">,</span> <span class="n">C_v_ccl</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_v_cgdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_gdl</span> <span class="o">+</span> \
-                                  <span class="p">[</span><span class="n">C_v_cgc</span><span class="p">]</span> <span class="o">+</span> \
-                                  <span class="p">[</span><span class="n">s_boundary</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">s_agdl</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">s_acl</span><span class="p">,</span> <span class="n">s_ccl</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">s_cgdl</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> \
-                                  <span class="p">[</span><span class="n">s_boundary</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">lambda_acl</span><span class="p">,</span> <span class="n">lambda_mem</span><span class="p">,</span> <span class="n">lambda_ccl</span><span class="p">]</span> <span class="o">+</span> \
-                                  <span class="p">[</span><span class="n">C_H2_agc</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_H2_agdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_H2_acl</span><span class="p">,</span> <span class="n">C_O2_ccl</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_O2_cgdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_gdl</span> <span class="o">+</span> \
-                                  <span class="p">[</span><span class="n">C_O2_cgc</span><span class="p">,</span> <span class="n">C_N2</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">T_agc</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">T_agdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">T_acl</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">]</span> <span class="o">+</span> \
-                                  <span class="p">[</span><span class="n">T_cgdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">T_cgc</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">eta_c</span><span class="p">]</span> <span class="o">+</span> \
-                                  <span class="p">[</span><span class="n">Pasm</span><span class="p">,</span> <span class="n">Paem</span><span class="p">,</span> <span class="n">Pcsm</span><span class="p">,</span> <span class="n">Pcem</span><span class="p">,</span> <span class="n">Phi_asm</span><span class="p">,</span> <span class="n">Phi_aem</span><span class="p">,</span> <span class="n">Phi_csm</span><span class="p">,</span> <span class="n">Phi_cem</span><span class="p">]</span> <span class="o">+</span> \
-                                  <span class="p">[</span><span class="n">Wcp</span><span class="p">,</span> <span class="n">Wa_inj</span><span class="p">,</span> <span class="n">Wc_inj</span><span class="p">,</span> <span class="n">Abp_a</span><span class="p">,</span> <span class="n">Abp_c</span><span class="p">])</span>
+        <span class="n">initial_variable_values</span> <span class="o">=</span> <span class="p">([</span><span class="n">C_v_agc</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_v_agdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_v_ampl</span><span class="p">,</span> <span class="n">C_v_acl</span><span class="p">,</span> <span class="n">C_v_ccl</span><span class="p">,</span> <span class="n">C_v_cmpl</span><span class="p">]</span> <span class="o">+</span>
+                                   <span class="p">[</span><span class="n">C_v_cgdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_v_cgc</span><span class="p">]</span> <span class="o">+</span>
+                                   <span class="p">[</span><span class="n">s_boundary</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">s_agdl</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">s_ampl</span><span class="p">,</span> <span class="n">s_acl</span><span class="p">,</span> <span class="n">s_ccl</span><span class="p">,</span> <span class="n">s_cmpl</span><span class="p">]</span> <span class="o">+</span>
+                                   <span class="p">[</span><span class="n">s_cgdl</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span>  <span class="p">[</span><span class="n">s_boundary</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">lambda_acl</span><span class="p">,</span> <span class="n">lambda_mem</span><span class="p">,</span> <span class="n">lambda_ccl</span><span class="p">]</span> <span class="o">+</span>
+                                   <span class="p">[</span><span class="n">C_H2_agc</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_H2_agdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_H2_ampl</span><span class="p">,</span> <span class="n">C_H2_acl</span><span class="p">,</span> <span class="n">C_O2_ccl</span><span class="p">,</span> <span class="n">C_O2_cmpl</span><span class="p">]</span> <span class="o">+</span>
+                                   <span class="p">[</span><span class="n">C_O2_cgdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_O2_cgc</span><span class="p">,</span> <span class="n">C_N2</span><span class="p">]</span> <span class="o">+</span>
+                                   <span class="p">[</span><span class="n">T_agc</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">T_agdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">T_ampl</span><span class="p">,</span> <span class="n">T_acl</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">,</span> <span class="n">T_cmpl</span><span class="p">]</span> <span class="o">+</span>
+                                   <span class="p">[</span><span class="n">T_cgdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">T_cgc</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">eta_c</span><span class="p">]</span> <span class="o">+</span>
+                                   <span class="p">[</span><span class="n">Pasm</span><span class="p">,</span> <span class="n">Paem</span><span class="p">,</span> <span class="n">Pcsm</span><span class="p">,</span> <span class="n">Pcem</span><span class="p">,</span> <span class="n">Phi_asm</span><span class="p">,</span> <span class="n">Phi_aem</span><span class="p">,</span> <span class="n">Phi_csm</span><span class="p">,</span> <span class="n">Phi_cem</span><span class="p">]</span> <span class="o">+</span>
+                                   <span class="p">[</span><span class="n">Wcp</span><span class="p">,</span> <span class="n">Wa_inj</span><span class="p">,</span> <span class="n">Wc_inj</span><span class="p">,</span> <span class="n">Abp_a</span><span class="p">,</span> <span class="n">Abp_c</span><span class="p">])</span>
 
         <span class="k">return</span> <span class="n">initial_variable_values</span>
 
@@ -1299,6 +1301,10 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
                 <span class="n">plot_polarisation_curve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">)</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
 
+            <span class="k">elif</span> <span class="n">type_display</span> <span class="o">==</span> <span class="s2">&quot;no_display&quot;</span><span class="p">:</span>
+
+                <span class="n">plot_polarisation_curve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
         <span class="k">elif</span> <span class="n">type_current</span> <span class="o">==</span> <span class="s2">&quot;polarization_for_cali&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">type_display</span> <span class="o">==</span> <span class="s2">&quot;multiple&quot;</span><span class="p">:</span>
 
@@ -1364,7 +1370,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
             <span class="k">if</span> <span class="n">type_display</span> <span class="o">==</span> <span class="s2">&quot;multiple&quot;</span><span class="p">:</span>
                 <span class="k">pass</span>  <span class="c1"># saving instruction is directly implemented within AlphaPEM.Display for this situation.</span>
             <span class="k">if</span> <span class="n">type_display</span> <span class="o">==</span> <span class="s2">&quot;synthetic&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">Saving_instructions</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="n">subfolder_name</span><span class="p">,</span> <span class="s2">&quot;step_current_syn.pdf&quot;</span><span class="p">,</span> <span class="n">fig1</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Saving_instructions</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="n">subfolder_name</span><span class="p">,</span> <span class="s2">&quot;step_current_syn_1.pdf&quot;</span><span class="p">,</span> <span class="n">fig1</span><span class="p">)</span>
 
         <span class="c1"># For the polarization curve</span>
         <span class="k">elif</span> <span class="n">type_current</span> <span class="o">==</span> <span class="s2">&quot;polarization&quot;</span><span class="p">:</span>
@@ -1500,7 +1506,8 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 </table>
             <details class="quote">
               <summary>Source code in <code>model/AlphaPEM.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">436</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">435</span>
+<span class="normal">436</span>
 <span class="normal">437</span>
 <span class="normal">438</span>
 <span class="normal">439</span>
@@ -1628,7 +1635,10 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 <span class="normal">561</span>
 <span class="normal">562</span>
 <span class="normal">563</span>
-<span class="normal">564</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">Display</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax3</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">564</span>
+<span class="normal">565</span>
+<span class="normal">566</span>
+<span class="normal">567</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">Display</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax3</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Display the plots of the program.</span>
 
 <span class="sd">    Parameters</span>
@@ -1718,6 +1728,10 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 
             <span class="n">plot_polarisation_curve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
+
+        <span class="k">elif</span> <span class="n">type_display</span> <span class="o">==</span> <span class="s2">&quot;no_display&quot;</span><span class="p">:</span>
+
+            <span class="n">plot_polarisation_curve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">type_current</span> <span class="o">==</span> <span class="s2">&quot;polarization_for_cali&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">type_display</span> <span class="o">==</span> <span class="s2">&quot;multiple&quot;</span><span class="p">:</span>
@@ -1825,10 +1839,7 @@ type_display.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>model/AlphaPEM.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">566</span>
-<span class="normal">567</span>
-<span class="normal">568</span>
-<span class="normal">569</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">569</span>
 <span class="normal">570</span>
 <span class="normal">571</span>
 <span class="normal">572</span>
@@ -1875,7 +1886,10 @@ type_display.</p>
 <span class="normal">613</span>
 <span class="normal">614</span>
 <span class="normal">615</span>
-<span class="normal">616</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">Save_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig3</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">616</span>
+<span class="normal">617</span>
+<span class="normal">618</span>
+<span class="normal">619</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">Save_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig3</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Saves the plots. The names of the files are automatically generated according to the type_current and the</span>
 <span class="sd">    type_display.</span>
 
@@ -1901,7 +1915,7 @@ type_display.</p>
         <span class="k">if</span> <span class="n">type_display</span> <span class="o">==</span> <span class="s2">&quot;multiple&quot;</span><span class="p">:</span>
             <span class="k">pass</span>  <span class="c1"># saving instruction is directly implemented within AlphaPEM.Display for this situation.</span>
         <span class="k">if</span> <span class="n">type_display</span> <span class="o">==</span> <span class="s2">&quot;synthetic&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Saving_instructions</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="n">subfolder_name</span><span class="p">,</span> <span class="s2">&quot;step_current_syn.pdf&quot;</span><span class="p">,</span> <span class="n">fig1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Saving_instructions</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="n">subfolder_name</span><span class="p">,</span> <span class="s2">&quot;step_current_syn_1.pdf&quot;</span><span class="p">,</span> <span class="n">fig1</span><span class="p">)</span>
 
     <span class="c1"># For the polarization curve</span>
     <span class="k">elif</span> <span class="n">type_current</span> <span class="o">==</span> <span class="s2">&quot;polarization&quot;</span><span class="p">:</span>
@@ -1995,10 +2009,7 @@ type_display.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>model/AlphaPEM.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">618</span>
-<span class="normal">619</span>
-<span class="normal">620</span>
-<span class="normal">621</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">621</span>
 <span class="normal">622</span>
 <span class="normal">623</span>
 <span class="normal">624</span>
@@ -2028,7 +2039,10 @@ type_display.</p>
 <span class="normal">648</span>
 <span class="normal">649</span>
 <span class="normal">650</span>
-<span class="normal">651</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">Saving_instructions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_folder</span><span class="p">,</span> <span class="n">subfolder_name</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">fig</span><span class="p">):</span>
+<span class="normal">651</span>
+<span class="normal">652</span>
+<span class="normal">653</span>
+<span class="normal">654</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">Saving_instructions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_folder</span><span class="p">,</span> <span class="n">subfolder_name</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">fig</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Gives the saving instructions for the figures.</span>
 
 <span class="sd">    Parameters</span>
@@ -2072,7 +2086,7 @@ type_display.</p>
 
 
 <h3 id="model.AlphaPEM.AlphaPEM.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">,</span> <span class="n">initial_variable_values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_interval</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="n">current_parameters</span><span class="p">,</span> <span class="n">accessible_physical_parameters</span><span class="p">,</span> <span class="n">undetermined_physical_parameters</span><span class="p">,</span> <span class="n">computing_parameters</span><span class="p">,</span> <span class="n">initial_variable_values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_interval</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h3>
 
@@ -2080,141 +2094,209 @@ type_display.</p>
     <div class="doc doc-contents ">
 
         <p>Initialise all parameters defining a fuel cell stack operation: nominal operating conditions,
- applied electrical load, dimensions, and undetermined variables.</p>
+applied electrical load, dimensions, and undetermined variables.</p>
 
 
-<details class="-parameters" open>
-  <summary>Parameters</summary>
-  <p>current_density : function
-     Current density evolution over time (operating input). It is a function of time and parameters dictionary.
- T_des : float
-     Desired fuel cell temperature in Kelvin (operating input).
- Pa_des : float
-     Desired anode pressure in Pascal (operating input).
- Pc_des : float
-     Desired cathode pressure in Pascal (operating input).
- Sa : float
-     Stoichiometric ratio of hydrogen (operating input).
- Sc : float
-     Stoichiometric ratio of oxygen (operating input).
- Phi_a_des : float
-     Desired anode relative humidity (operating input).
- Phi_c_des : float
-     Desired cathode relative humidity (operating input).
-step_current_parameters : dict
-     Parameters for the step current density. It is a dictionary containing:
-     - 'delta_t_ini_step': the initial time (in seconds) at zero current density for the stabilisation of the
-     internal states,
-     - 'delta_t_load_step': the loading time (in seconds) for the step current density function, from 0 to
-     i_step,
-     - 'delta_t_break_step': the time (in seconds) at i_step current density for the stabilisation of the
-     internal states,
-     - 'i_step': the current density (in A.m-2) for the step current density function,
-     - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
- pola_current_parameters : dict
-     Parameters for the polarization current density. It is a dictionary containing:
-     - 'delta_t_ini_pola': the initial time (in seconds) at zero current density for the stabilisation of the
-     internal states,
-     - 'delta_t_load_pola': the loading time (in seconds) for one step current of the polarisation current
-     density function,
-     - 'delta_t_break_pola': the breaking time (in seconds) for one step current, for the stabilisation of the
-     internal states,
-     - 'delta_i_pola': the current density step (in A.m-2) for the polarisation current density function.
-     - 'i_max_pola': the maximum current density (in A.m-2) for the polarization curve.
- pola_current_for_cali_parameters : dict
-     Parameters for the polarization current density for calibration. It is a dictionary containing:
-     - 'delta_t_ini_pola_cali': the initial time (in seconds) at zero current density for the stabilisation of
-     the internal states,
-     - 'delta_t_load_pola_cali': the loading time (in seconds) for one step current of the polarisation current
-     density function,
-     - 'delta_t_break_pola_cali': the breaking time (in seconds) for one step current, for the stabilisation of
-     the internal states.
- i_EIS : float
-     Current for which a ratio_EIS perturbation is added (current parameter).
- ratio_EIS : float
-     Value of the perturbation on the current density for building the EIS curve (current parameter).
- t_EIS : tuple
-     EIS parameters (current parameters). It is a tuple containing the initial EIS time after stack equilibrium
-     't0_EIS', a list of time parameters which gives the beginning of each frequency change 't_new_start_EIS',
-     the final time 'tf_EIS', a list of time parameters which gives the estimated time for reaching equilibrium
-     at each frequency 'delta_t_break_EIS', and a list of time parameters which gives the estimated time for
-     measuring the voltage response at each frequency 'delta_t_measurement_EIS'.
- f_EIS : tuple
-     EIS parameters (current parameters). It is a tuple containing the power of the initial frequency
-     'f_power_min_EIS': f_min_EIS = 10**f_power_min_EIS, the power of the final frequency 'f_power_max_EIS', the
-     number of frequencies tested 'nb_f_EIS' and the number of points calculated per specific period
-     'nb_points_EIS'.
- Aact : float
-     Active area of the cell in m² (accessible physical parameter).
- Hgdl : float
-     Thickness of the gas diffusion layer in m (accessible physical parameter).
- Hmem : float
-     Thickness of the membrane in m (accessible physical parameter).
- Hcl : float
-     Thickness of the catalyst layer in m (accessible physical parameter).
- Hgc : float
-     Thickness of the gas channel in m (accessible physical parameter).
- Wgc : float
-     Width of the gas channel in m (accessible physical parameter).
- Lgc : float
-     Length of the gas channel in m (accessible physical parameter).
- epsilon_gdl : float
-     Anode/cathode GDL porosity (undetermined physical parameter).
- tau : float
-     Pore structure coefficient (undetermined physical parameter).
- epsilon_mc : float
-     Volume fraction of ionomer in the CL (undetermined physical parameter).
- epsilon_c : float
-     Compression ratio of the GDL (undetermined physical parameter).
- e : float
-     Capillary exponent (undetermined physical parameter).
- Re : float
-     Electron conduction resistance of the circuit in ohm.m² (undetermined physical parameter).
- i0_c_ref : float
-     Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
- kappa_co : float
-     Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
- kappa_c : float
-     Overpotential correction exponent (undetermined physical parameter).
- a_slim : float
-     One of the limit liquid saturation coefficients: the slop of slim function
-     (undetermined physical parameter).
- b_slim : float
-     One of the limit liquid saturation coefficients: the intercept of slim function
-     (undetermined physical parameter).
- a_switch : float
-     One of the limit liquid saturation coefficients: the slop of s_switch function
-     (undetermined physical parameter).
- C_scl : float
-     Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
- max_step : float
-     Maximum time step for the solver (computing parameter).
- n_gdl : int
-     Number of points considered in the GDL (computing parameter).
- t_purge : tuple
-     Time parameters for purging the system (computing parameter).
-     It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
- type_fuel_cell : str
-     Type of fuel cell configuration (computing parameter).
- type_current : str
-     Type of current density function (computing parameter).
- type_auxiliary : str
-     Type of auxiliary system (computing parameter).
- type_control : str
-     Type of control system (computing parameter).
- type_purge : str
-     Type of purge system (computing parameter).
- type_display : str
-     Type of display (computing parameter).
- type_plot : str
-     Type of plot (computing parameter).
- initial_variable_values : list, optional
-     Initial values of the solver variables. The default is None, which implies that initial values are
-     generated considering an equilibrium at the operating inputs without current.
- time_interval : list, optional
-     Time intervals for numerical resolution. The default is None, which implies that it is automatically
-     generated according to the data given in the current density parameters.</p>
-</details>
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>operating_inputs</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Dictionary containing the operating inputs for the simulation. It contains:
+    - current_density : function
+        Current density evolution over time (operating input). It is a function of time and parameters dictionary.
+    - T_des : float
+        Desired fuel cell temperature in Kelvin (operating input).
+    - Pa_des : float
+        Desired anode pressure in Pascal (operating input).
+    - Pc_des : float
+        Desired cathode pressure in Pascal (operating input).
+    - Sa : float
+        Stoichiometric ratio of hydrogen (operating input).
+    - Sc : float
+        Stoichiometric ratio of oxygen (operating input).
+    - Phi_a_des : float
+        Desired anode relative humidity (operating input).
+    - Phi_c_des : float
+        Desired cathode relative humidity (operating input).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>current_parameters</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Dictionary containing the current parameters for the simulation. It contains:
+    - step_current_parameters : dict
+        Parameters for the step current density. It is a dictionary containing:
+        - 'delta_t_ini_step': the initial time (in seconds) at zero current density for the stabilisation of the
+        internal states,
+        - 'delta_t_load_step': the loading time (in seconds) for the step current density function, from 0 to
+        i_step,
+        - 'delta_t_break_step': the time (in seconds) at i_step current density for the stabilisation of the
+        internal states,
+        - 'i_step': the current density (in A.m-2) for the step current density function,
+        - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
+    - pola_current_parameters : dict
+        Parameters for the polarization current density. It is a dictionary containing:
+        - 'delta_t_ini_pola': the initial time (in seconds) at zero current density for the stabilisation of the
+        internal states,
+        - 'delta_t_load_pola': the loading time (in seconds) for one step current of the polarisation current
+        density function,
+        - 'delta_t_break_pola': the breaking time (in seconds) for one step current, for the stabilisation of the
+        internal states,
+        - 'delta_i_pola': the current density step (in A.m-2) for the polarisation current density function.
+        - 'i_max_pola': the maximum current density (in A.m-2) for the polarization curve.
+    - pola_current_for_cali_parameters : dict
+        Parameters for the polarization current density for calibration. It is a dictionary containing:
+        - 'delta_t_ini_pola_cali': the initial time (in seconds) at zero current density for the stabilisation of
+        the internal states,
+        - 'delta_t_load_pola_cali': the loading time (in seconds) for one step current of the polarisation current
+        density function,
+        - 'delta_t_break_pola_cali': the breaking time (in seconds) for one step current, for the stabilisation of
+        the internal states.
+    - i_EIS : float
+        Current for which a ratio_EIS perturbation is added (current parameter).
+    - ratio_EIS : float
+        Value of the perturbation on the current density for building the EIS curve (current parameter).
+    - t_EIS : tuple
+        EIS parameters (current parameters). It is a tuple containing the initial EIS time after stack equilibrium
+        't0_EIS', a list of time parameters which gives the beginning of each frequency change 't_new_start_EIS',
+        the final time 'tf_EIS', a list of time parameters which gives the estimated time for reaching equilibrium
+        at each frequency 'delta_t_break_EIS', and a list of time parameters which gives the estimated time for
+        measuring the voltage response at each frequency 'delta_t_measurement_EIS'.
+    f_EIS : tuple
+        EIS parameters (current parameters). It is a tuple containing the power of the initial frequency
+        'f_power_min_EIS': f_min_EIS = 10**f_power_min_EIS, the power of the final frequency 'f_power_max_EIS', the
+        number of frequencies tested 'nb_f_EIS' and the number of points calculated per specific period
+        'nb_points_EIS'.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>accessible_physical_parameters</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Dictionary containing the accessible physical parameters for the simulation. It contains:
+    - Aact : float
+        Active area of the cell in m² (accessible physical parameter).
+    - Hagc : float
+        Thickness of the anode gas channel in m (accessible physical parameter).
+    Hcgc : float
+        Thickness of the cathode gas channel in m (accessible physical parameter).
+    Wagc : float
+        Width of the anode gas channel in m (accessible physical parameter).
+    Wcgc : float
+        Width of the cathode gas channel in m (accessible physical parameter).
+    Lgc : float
+        Length of the gas channel in m (accessible physical parameter).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>undetermined_physical_parameters</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Dictionary containing the undetermined physical parameters for the simulation. It contains:
+    - Hgdl : float
+        Thickness of the gas diffusion layer in m (undetermined physical parameter).
+    - Hmem : float
+        Thickness of the membrane in m (undetermined physical parameter).
+    - Hacl : float
+        Thickness of the anode catalyst layer in m (undetermined physical parameter).
+    - Hccl : float
+        Thickness of the cathode catalyst layer in m (undetermined physical parameter).
+    - epsilon_gdl : float
+        Anode/cathode GDL porosity (undetermined physical parameter).
+    - epsilon_mc : float
+        Volume fraction of ionomer in the CL (undetermined physical parameter).
+    - epsilon_c : float
+        Compression ratio of the GDL (undetermined physical parameter).
+    - e : float
+        Capillary exponent (undetermined physical parameter).
+    - i0_c_ref : float
+        Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
+    - kappa_co : float
+        Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
+    - kappa_c : float
+        Overpotential correction exponent (undetermined physical parameter).
+    - a_slim : float
+        One of the limit liquid saturation coefficients: the slop of slim function
+        (undetermined physical parameter).
+    - b_slim : float
+        One of the limit liquid saturation coefficients: the intercept of slim function
+        (undetermined physical parameter).
+    - a_switch : float
+        One of the limit liquid saturation coefficients: the slop of s_switch function
+        (undetermined physical parameter).
+    - C_scl : float
+        Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>computing_parameters</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>Dictionary containing the computing parameters for the simulation. It contains:
+    - n_gdl : int
+        Number of points considered in the GDL (computing parameter).
+    - t_purge : tuple
+        Time parameters for purging the system (computing parameter).
+        It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
+    - type_fuel_cell : str
+        Type of fuel cell configuration (computing parameter).
+    - type_current : str
+        Type of current density function (computing parameter).
+    - type_auxiliary : str
+        Type of auxiliary system (computing parameter).
+    - type_control : str
+        Type of control system (computing parameter).
+    - type_purge : str
+        Type of purge system (computing parameter).
+    - type_display : str
+        Type of display (computing parameter).
+    - type_plot : str
+        Type of plot (computing parameter).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>initial_variable_values</code></b>
+                  (<code>list</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Initial values of the solver variables. The default is None, which implies that initial values are
+generated considering an equilibrium at the operating inputs without current.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>time_interval</code></b>
+                  (<code>list</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Time intervals for numerical resolution. The default is None, which implies that it is automatically
+generated according to the data given in the current density parameters.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
             <details class="quote">
               <summary>Source code in <code>model/AlphaPEM.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 41</span>
@@ -2420,141 +2502,147 @@ step_current_parameters : dict
 <span class="normal">241</span>
 <span class="normal">242</span>
 <span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">step_current_parameters</span><span class="p">,</span>
-             <span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span>
-             <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span>
-             <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">max_step</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span>
-             <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">,</span> <span class="n">initial_variable_values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_interval</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">244</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">current_parameters</span><span class="p">,</span> <span class="n">accessible_physical_parameters</span><span class="p">,</span>
+             <span class="n">undetermined_physical_parameters</span><span class="p">,</span> <span class="n">computing_parameters</span><span class="p">,</span> <span class="n">initial_variable_values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">time_interval</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialise all parameters defining a fuel cell stack operation: nominal operating conditions,</span>
 <span class="sd">    applied electrical load, dimensions, and undetermined variables.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    current_density : function</span>
-<span class="sd">        Current density evolution over time (operating input). It is a function of time and parameters dictionary.</span>
-<span class="sd">    T_des : float</span>
-<span class="sd">        Desired fuel cell temperature in Kelvin (operating input).</span>
-<span class="sd">    Pa_des : float</span>
-<span class="sd">        Desired anode pressure in Pascal (operating input).</span>
-<span class="sd">    Pc_des : float</span>
-<span class="sd">        Desired cathode pressure in Pascal (operating input).</span>
-<span class="sd">    Sa : float</span>
-<span class="sd">        Stoichiometric ratio of hydrogen (operating input).</span>
-<span class="sd">    Sc : float</span>
-<span class="sd">        Stoichiometric ratio of oxygen (operating input).</span>
-<span class="sd">    Phi_a_des : float</span>
-<span class="sd">        Desired anode relative humidity (operating input).</span>
-<span class="sd">    Phi_c_des : float</span>
-<span class="sd">        Desired cathode relative humidity (operating input).</span>
-<span class="sd">   step_current_parameters : dict</span>
-<span class="sd">        Parameters for the step current density. It is a dictionary containing:</span>
-<span class="sd">        - &#39;delta_t_ini_step&#39;: the initial time (in seconds) at zero current density for the stabilisation of the</span>
-<span class="sd">        internal states,</span>
-<span class="sd">        - &#39;delta_t_load_step&#39;: the loading time (in seconds) for the step current density function, from 0 to</span>
-<span class="sd">        i_step,</span>
-<span class="sd">        - &#39;delta_t_break_step&#39;: the time (in seconds) at i_step current density for the stabilisation of the</span>
-<span class="sd">        internal states,</span>
-<span class="sd">        - &#39;i_step&#39;: the current density (in A.m-2) for the step current density function,</span>
-<span class="sd">        - &#39;delta_t_dyn_step&#39;: the time (in seconds) for dynamic display of the step current density function.</span>
-<span class="sd">    pola_current_parameters : dict</span>
-<span class="sd">        Parameters for the polarization current density. It is a dictionary containing:</span>
-<span class="sd">        - &#39;delta_t_ini_pola&#39;: the initial time (in seconds) at zero current density for the stabilisation of the</span>
-<span class="sd">        internal states,</span>
-<span class="sd">        - &#39;delta_t_load_pola&#39;: the loading time (in seconds) for one step current of the polarisation current</span>
-<span class="sd">        density function,</span>
-<span class="sd">        - &#39;delta_t_break_pola&#39;: the breaking time (in seconds) for one step current, for the stabilisation of the</span>
-<span class="sd">        internal states,</span>
-<span class="sd">        - &#39;delta_i_pola&#39;: the current density step (in A.m-2) for the polarisation current density function.</span>
-<span class="sd">        - &#39;i_max_pola&#39;: the maximum current density (in A.m-2) for the polarization curve.</span>
-<span class="sd">    pola_current_for_cali_parameters : dict</span>
-<span class="sd">        Parameters for the polarization current density for calibration. It is a dictionary containing:</span>
-<span class="sd">        - &#39;delta_t_ini_pola_cali&#39;: the initial time (in seconds) at zero current density for the stabilisation of</span>
-<span class="sd">        the internal states,</span>
-<span class="sd">        - &#39;delta_t_load_pola_cali&#39;: the loading time (in seconds) for one step current of the polarisation current</span>
-<span class="sd">        density function,</span>
-<span class="sd">        - &#39;delta_t_break_pola_cali&#39;: the breaking time (in seconds) for one step current, for the stabilisation of</span>
-<span class="sd">        the internal states.</span>
-<span class="sd">    i_EIS : float</span>
-<span class="sd">        Current for which a ratio_EIS perturbation is added (current parameter).</span>
-<span class="sd">    ratio_EIS : float</span>
-<span class="sd">        Value of the perturbation on the current density for building the EIS curve (current parameter).</span>
-<span class="sd">    t_EIS : tuple</span>
-<span class="sd">        EIS parameters (current parameters). It is a tuple containing the initial EIS time after stack equilibrium</span>
-<span class="sd">        &#39;t0_EIS&#39;, a list of time parameters which gives the beginning of each frequency change &#39;t_new_start_EIS&#39;,</span>
-<span class="sd">        the final time &#39;tf_EIS&#39;, a list of time parameters which gives the estimated time for reaching equilibrium</span>
-<span class="sd">        at each frequency &#39;delta_t_break_EIS&#39;, and a list of time parameters which gives the estimated time for</span>
-<span class="sd">        measuring the voltage response at each frequency &#39;delta_t_measurement_EIS&#39;.</span>
-<span class="sd">    f_EIS : tuple</span>
-<span class="sd">        EIS parameters (current parameters). It is a tuple containing the power of the initial frequency</span>
-<span class="sd">        &#39;f_power_min_EIS&#39;: f_min_EIS = 10**f_power_min_EIS, the power of the final frequency &#39;f_power_max_EIS&#39;, the</span>
-<span class="sd">        number of frequencies tested &#39;nb_f_EIS&#39; and the number of points calculated per specific period</span>
-<span class="sd">        &#39;nb_points_EIS&#39;.</span>
-<span class="sd">    Aact : float</span>
-<span class="sd">        Active area of the cell in m² (accessible physical parameter).</span>
-<span class="sd">    Hgdl : float</span>
-<span class="sd">        Thickness of the gas diffusion layer in m (accessible physical parameter).</span>
-<span class="sd">    Hmem : float</span>
-<span class="sd">        Thickness of the membrane in m (accessible physical parameter).</span>
-<span class="sd">    Hcl : float</span>
-<span class="sd">        Thickness of the catalyst layer in m (accessible physical parameter).</span>
-<span class="sd">    Hgc : float</span>
-<span class="sd">        Thickness of the gas channel in m (accessible physical parameter).</span>
-<span class="sd">    Wgc : float</span>
-<span class="sd">        Width of the gas channel in m (accessible physical parameter).</span>
-<span class="sd">    Lgc : float</span>
-<span class="sd">        Length of the gas channel in m (accessible physical parameter).</span>
-<span class="sd">    epsilon_gdl : float</span>
-<span class="sd">        Anode/cathode GDL porosity (undetermined physical parameter).</span>
-<span class="sd">    tau : float</span>
-<span class="sd">        Pore structure coefficient (undetermined physical parameter).</span>
-<span class="sd">    epsilon_mc : float</span>
-<span class="sd">        Volume fraction of ionomer in the CL (undetermined physical parameter).</span>
-<span class="sd">    epsilon_c : float</span>
-<span class="sd">        Compression ratio of the GDL (undetermined physical parameter).</span>
-<span class="sd">    e : float</span>
-<span class="sd">        Capillary exponent (undetermined physical parameter).</span>
-<span class="sd">    Re : float</span>
-<span class="sd">        Electron conduction resistance of the circuit in ohm.m² (undetermined physical parameter).</span>
-<span class="sd">    i0_c_ref : float</span>
-<span class="sd">        Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).</span>
-<span class="sd">    kappa_co : float</span>
-<span class="sd">        Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).</span>
-<span class="sd">    kappa_c : float</span>
-<span class="sd">        Overpotential correction exponent (undetermined physical parameter).</span>
-<span class="sd">    a_slim : float</span>
-<span class="sd">        One of the limit liquid saturation coefficients: the slop of slim function</span>
-<span class="sd">        (undetermined physical parameter).</span>
-<span class="sd">    b_slim : float</span>
-<span class="sd">        One of the limit liquid saturation coefficients: the intercept of slim function</span>
-<span class="sd">        (undetermined physical parameter).</span>
-<span class="sd">    a_switch : float</span>
-<span class="sd">        One of the limit liquid saturation coefficients: the slop of s_switch function</span>
-<span class="sd">        (undetermined physical parameter).</span>
-<span class="sd">    C_scl : float</span>
-<span class="sd">        Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).</span>
-<span class="sd">    max_step : float</span>
-<span class="sd">        Maximum time step for the solver (computing parameter).</span>
-<span class="sd">    n_gdl : int</span>
-<span class="sd">        Number of points considered in the GDL (computing parameter).</span>
-<span class="sd">    t_purge : tuple</span>
-<span class="sd">        Time parameters for purging the system (computing parameter).</span>
-<span class="sd">        It is the purge time interval &#39;purge_time&#39; and the time between two purges &#39;delta_purge&#39;.</span>
-<span class="sd">    type_fuel_cell : str</span>
-<span class="sd">        Type of fuel cell configuration (computing parameter).</span>
-<span class="sd">    type_current : str</span>
-<span class="sd">        Type of current density function (computing parameter).</span>
-<span class="sd">    type_auxiliary : str</span>
-<span class="sd">        Type of auxiliary system (computing parameter).</span>
-<span class="sd">    type_control : str</span>
-<span class="sd">        Type of control system (computing parameter).</span>
-<span class="sd">    type_purge : str</span>
-<span class="sd">        Type of purge system (computing parameter).</span>
-<span class="sd">    type_display : str</span>
-<span class="sd">        Type of display (computing parameter).</span>
-<span class="sd">    type_plot : str</span>
-<span class="sd">        Type of plot (computing parameter).</span>
+<span class="sd">    operating_inputs : dict</span>
+<span class="sd">        Dictionary containing the operating inputs for the simulation. It contains:</span>
+<span class="sd">            - current_density : function</span>
+<span class="sd">                Current density evolution over time (operating input). It is a function of time and parameters dictionary.</span>
+<span class="sd">            - T_des : float</span>
+<span class="sd">                Desired fuel cell temperature in Kelvin (operating input).</span>
+<span class="sd">            - Pa_des : float</span>
+<span class="sd">                Desired anode pressure in Pascal (operating input).</span>
+<span class="sd">            - Pc_des : float</span>
+<span class="sd">                Desired cathode pressure in Pascal (operating input).</span>
+<span class="sd">            - Sa : float</span>
+<span class="sd">                Stoichiometric ratio of hydrogen (operating input).</span>
+<span class="sd">            - Sc : float</span>
+<span class="sd">                Stoichiometric ratio of oxygen (operating input).</span>
+<span class="sd">            - Phi_a_des : float</span>
+<span class="sd">                Desired anode relative humidity (operating input).</span>
+<span class="sd">            - Phi_c_des : float</span>
+<span class="sd">                Desired cathode relative humidity (operating input).</span>
+<span class="sd">    current_parameters : dict</span>
+<span class="sd">        Dictionary containing the current parameters for the simulation. It contains:</span>
+<span class="sd">            - step_current_parameters : dict</span>
+<span class="sd">                Parameters for the step current density. It is a dictionary containing:</span>
+<span class="sd">                - &#39;delta_t_ini_step&#39;: the initial time (in seconds) at zero current density for the stabilisation of the</span>
+<span class="sd">                internal states,</span>
+<span class="sd">                - &#39;delta_t_load_step&#39;: the loading time (in seconds) for the step current density function, from 0 to</span>
+<span class="sd">                i_step,</span>
+<span class="sd">                - &#39;delta_t_break_step&#39;: the time (in seconds) at i_step current density for the stabilisation of the</span>
+<span class="sd">                internal states,</span>
+<span class="sd">                - &#39;i_step&#39;: the current density (in A.m-2) for the step current density function,</span>
+<span class="sd">                - &#39;delta_t_dyn_step&#39;: the time (in seconds) for dynamic display of the step current density function.</span>
+<span class="sd">            - pola_current_parameters : dict</span>
+<span class="sd">                Parameters for the polarization current density. It is a dictionary containing:</span>
+<span class="sd">                - &#39;delta_t_ini_pola&#39;: the initial time (in seconds) at zero current density for the stabilisation of the</span>
+<span class="sd">                internal states,</span>
+<span class="sd">                - &#39;delta_t_load_pola&#39;: the loading time (in seconds) for one step current of the polarisation current</span>
+<span class="sd">                density function,</span>
+<span class="sd">                - &#39;delta_t_break_pola&#39;: the breaking time (in seconds) for one step current, for the stabilisation of the</span>
+<span class="sd">                internal states,</span>
+<span class="sd">                - &#39;delta_i_pola&#39;: the current density step (in A.m-2) for the polarisation current density function.</span>
+<span class="sd">                - &#39;i_max_pola&#39;: the maximum current density (in A.m-2) for the polarization curve.</span>
+<span class="sd">            - pola_current_for_cali_parameters : dict</span>
+<span class="sd">                Parameters for the polarization current density for calibration. It is a dictionary containing:</span>
+<span class="sd">                - &#39;delta_t_ini_pola_cali&#39;: the initial time (in seconds) at zero current density for the stabilisation of</span>
+<span class="sd">                the internal states,</span>
+<span class="sd">                - &#39;delta_t_load_pola_cali&#39;: the loading time (in seconds) for one step current of the polarisation current</span>
+<span class="sd">                density function,</span>
+<span class="sd">                - &#39;delta_t_break_pola_cali&#39;: the breaking time (in seconds) for one step current, for the stabilisation of</span>
+<span class="sd">                the internal states.</span>
+<span class="sd">            - i_EIS : float</span>
+<span class="sd">                Current for which a ratio_EIS perturbation is added (current parameter).</span>
+<span class="sd">            - ratio_EIS : float</span>
+<span class="sd">                Value of the perturbation on the current density for building the EIS curve (current parameter).</span>
+<span class="sd">            - t_EIS : tuple</span>
+<span class="sd">                EIS parameters (current parameters). It is a tuple containing the initial EIS time after stack equilibrium</span>
+<span class="sd">                &#39;t0_EIS&#39;, a list of time parameters which gives the beginning of each frequency change &#39;t_new_start_EIS&#39;,</span>
+<span class="sd">                the final time &#39;tf_EIS&#39;, a list of time parameters which gives the estimated time for reaching equilibrium</span>
+<span class="sd">                at each frequency &#39;delta_t_break_EIS&#39;, and a list of time parameters which gives the estimated time for</span>
+<span class="sd">                measuring the voltage response at each frequency &#39;delta_t_measurement_EIS&#39;.</span>
+<span class="sd">            f_EIS : tuple</span>
+<span class="sd">                EIS parameters (current parameters). It is a tuple containing the power of the initial frequency</span>
+<span class="sd">                &#39;f_power_min_EIS&#39;: f_min_EIS = 10**f_power_min_EIS, the power of the final frequency &#39;f_power_max_EIS&#39;, the</span>
+<span class="sd">                number of frequencies tested &#39;nb_f_EIS&#39; and the number of points calculated per specific period</span>
+<span class="sd">                &#39;nb_points_EIS&#39;.</span>
+<span class="sd">    accessible_physical_parameters : dict</span>
+<span class="sd">        Dictionary containing the accessible physical parameters for the simulation. It contains:</span>
+<span class="sd">            - Aact : float</span>
+<span class="sd">                Active area of the cell in m² (accessible physical parameter).</span>
+<span class="sd">            - Hagc : float</span>
+<span class="sd">                Thickness of the anode gas channel in m (accessible physical parameter).</span>
+<span class="sd">            Hcgc : float</span>
+<span class="sd">                Thickness of the cathode gas channel in m (accessible physical parameter).</span>
+<span class="sd">            Wagc : float</span>
+<span class="sd">                Width of the anode gas channel in m (accessible physical parameter).</span>
+<span class="sd">            Wcgc : float</span>
+<span class="sd">                Width of the cathode gas channel in m (accessible physical parameter).</span>
+<span class="sd">            Lgc : float</span>
+<span class="sd">                Length of the gas channel in m (accessible physical parameter).</span>
+<span class="sd">    undetermined_physical_parameters : dict</span>
+<span class="sd">        Dictionary containing the undetermined physical parameters for the simulation. It contains:</span>
+<span class="sd">            - Hgdl : float</span>
+<span class="sd">                Thickness of the gas diffusion layer in m (undetermined physical parameter).</span>
+<span class="sd">            - Hmem : float</span>
+<span class="sd">                Thickness of the membrane in m (undetermined physical parameter).</span>
+<span class="sd">            - Hacl : float</span>
+<span class="sd">                Thickness of the anode catalyst layer in m (undetermined physical parameter).</span>
+<span class="sd">            - Hccl : float</span>
+<span class="sd">                Thickness of the cathode catalyst layer in m (undetermined physical parameter).</span>
+<span class="sd">            - epsilon_gdl : float</span>
+<span class="sd">                Anode/cathode GDL porosity (undetermined physical parameter).</span>
+<span class="sd">            - epsilon_mc : float</span>
+<span class="sd">                Volume fraction of ionomer in the CL (undetermined physical parameter).</span>
+<span class="sd">            - epsilon_c : float</span>
+<span class="sd">                Compression ratio of the GDL (undetermined physical parameter).</span>
+<span class="sd">            - e : float</span>
+<span class="sd">                Capillary exponent (undetermined physical parameter).</span>
+<span class="sd">            - i0_c_ref : float</span>
+<span class="sd">                Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).</span>
+<span class="sd">            - kappa_co : float</span>
+<span class="sd">                Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).</span>
+<span class="sd">            - kappa_c : float</span>
+<span class="sd">                Overpotential correction exponent (undetermined physical parameter).</span>
+<span class="sd">            - a_slim : float</span>
+<span class="sd">                One of the limit liquid saturation coefficients: the slop of slim function</span>
+<span class="sd">                (undetermined physical parameter).</span>
+<span class="sd">            - b_slim : float</span>
+<span class="sd">                One of the limit liquid saturation coefficients: the intercept of slim function</span>
+<span class="sd">                (undetermined physical parameter).</span>
+<span class="sd">            - a_switch : float</span>
+<span class="sd">                One of the limit liquid saturation coefficients: the slop of s_switch function</span>
+<span class="sd">                (undetermined physical parameter).</span>
+<span class="sd">            - C_scl : float</span>
+<span class="sd">                Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).</span>
+<span class="sd">    computing_parameters : dict</span>
+<span class="sd">        Dictionary containing the computing parameters for the simulation. It contains:</span>
+<span class="sd">            - n_gdl : int</span>
+<span class="sd">                Number of points considered in the GDL (computing parameter).</span>
+<span class="sd">            - t_purge : tuple</span>
+<span class="sd">                Time parameters for purging the system (computing parameter).</span>
+<span class="sd">                It is the purge time interval &#39;purge_time&#39; and the time between two purges &#39;delta_purge&#39;.</span>
+<span class="sd">            - type_fuel_cell : str</span>
+<span class="sd">                Type of fuel cell configuration (computing parameter).</span>
+<span class="sd">            - type_current : str</span>
+<span class="sd">                Type of current density function (computing parameter).</span>
+<span class="sd">            - type_auxiliary : str</span>
+<span class="sd">                Type of auxiliary system (computing parameter).</span>
+<span class="sd">            - type_control : str</span>
+<span class="sd">                Type of control system (computing parameter).</span>
+<span class="sd">            - type_purge : str</span>
+<span class="sd">                Type of purge system (computing parameter).</span>
+<span class="sd">            - type_display : str</span>
+<span class="sd">                Type of display (computing parameter).</span>
+<span class="sd">            - type_plot : str</span>
+<span class="sd">                Type of plot (computing parameter).</span>
 <span class="sd">    initial_variable_values : list, optional</span>
 <span class="sd">        Initial values of the solver variables. The default is None, which implies that initial values are</span>
 <span class="sd">        generated considering an equilibrium at the operating inputs without current.</span>
@@ -2564,34 +2652,24 @@ step_current_parameters : dict
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Initialize the operating inputs and parameters dictionaries.</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;current_density&#39;</span><span class="p">:</span> <span class="n">current_density</span><span class="p">,</span> <span class="s1">&#39;T_des&#39;</span><span class="p">:</span> <span class="n">T_des</span><span class="p">,</span> <span class="s1">&#39;Pa_des&#39;</span><span class="p">:</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="s1">&#39;Pc_des&#39;</span><span class="p">:</span> <span class="n">Pc_des</span><span class="p">,</span>
-                             <span class="s1">&#39;Sa&#39;</span><span class="p">:</span> <span class="n">Sa</span><span class="p">,</span> <span class="s1">&#39;Sc&#39;</span><span class="p">:</span> <span class="n">Sc</span><span class="p">,</span> <span class="s1">&#39;Phi_a_des&#39;</span><span class="p">:</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="s1">&#39;Phi_c_des&#39;</span><span class="p">:</span> <span class="n">Phi_c_des</span><span class="p">}</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">current_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;step_current_parameters&#39;</span><span class="p">:</span> <span class="n">step_current_parameters</span><span class="p">,</span>
-                               <span class="s1">&#39;pola_current_parameters&#39;</span><span class="p">:</span> <span class="n">pola_current_parameters</span><span class="p">,</span>
-                               <span class="s1">&#39;pola_current_for_cali_parameters&#39;</span><span class="p">:</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span>
-                               <span class="s1">&#39;i_EIS&#39;</span><span class="p">:</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="s1">&#39;ratio_EIS&#39;</span><span class="p">:</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="s1">&#39;t_EIS&#39;</span><span class="p">:</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="s1">&#39;f_EIS&#39;</span><span class="p">:</span> <span class="n">f_EIS</span><span class="p">}</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">accessible_physical_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Aact&#39;</span><span class="p">:</span> <span class="n">Aact</span><span class="p">,</span> <span class="s1">&#39;Hgdl&#39;</span><span class="p">:</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="s1">&#39;Hmem&#39;</span><span class="p">:</span> <span class="n">Hmem</span><span class="p">,</span> <span class="s1">&#39;Hcl&#39;</span><span class="p">:</span> <span class="n">Hcl</span><span class="p">,</span> <span class="s1">&#39;Hgc&#39;</span><span class="p">:</span> <span class="n">Hgc</span><span class="p">,</span>
-                                           <span class="s1">&#39;Wgc&#39;</span><span class="p">:</span> <span class="n">Wgc</span><span class="p">,</span> <span class="s1">&#39;Lgc&#39;</span><span class="p">:</span> <span class="n">Lgc</span><span class="p">}</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">undetermined_physical_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;epsilon_gdl&#39;</span><span class="p">:</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="s1">&#39;tau&#39;</span><span class="p">:</span> <span class="n">tau</span><span class="p">,</span> <span class="s1">&#39;epsilon_mc&#39;</span><span class="p">:</span> <span class="n">epsilon_mc</span><span class="p">,</span>
-                                               <span class="s1">&#39;epsilon_c&#39;</span><span class="p">:</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">:</span> <span class="n">e</span><span class="p">,</span> <span class="s1">&#39;kappa_co&#39;</span><span class="p">:</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="s1">&#39;Re&#39;</span><span class="p">:</span> <span class="n">Re</span><span class="p">,</span>
-                                               <span class="s1">&#39;i0_c_ref&#39;</span><span class="p">:</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="s1">&#39;kappa_c&#39;</span><span class="p">:</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="s1">&#39;a_slim&#39;</span><span class="p">:</span> <span class="n">a_slim</span><span class="p">,</span>
-                                               <span class="s1">&#39;b_slim&#39;</span><span class="p">:</span> <span class="n">b_slim</span><span class="p">,</span> <span class="s1">&#39;a_switch&#39;</span><span class="p">:</span> <span class="n">a_switch</span><span class="p">,</span> <span class="s1">&#39;C_scl&#39;</span><span class="p">:</span> <span class="n">C_scl</span><span class="p">}</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">computing_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;max_step&#39;</span><span class="p">:</span> <span class="n">max_step</span><span class="p">,</span> <span class="s1">&#39;n_gdl&#39;</span><span class="p">:</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="s1">&#39;t_purge&#39;</span><span class="p">:</span> <span class="n">t_purge</span><span class="p">,</span>
-                                 <span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">:</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="s1">&#39;type_current&#39;</span><span class="p">:</span> <span class="n">type_current</span><span class="p">,</span>
-                                 <span class="s1">&#39;type_auxiliary&#39;</span><span class="p">:</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="s1">&#39;type_control&#39;</span><span class="p">:</span> <span class="n">type_control</span><span class="p">,</span>
-                                 <span class="s1">&#39;type_purge&#39;</span><span class="p">:</span> <span class="n">type_purge</span><span class="p">,</span> <span class="s1">&#39;type_display&#39;</span><span class="p">:</span> <span class="n">type_display</span><span class="p">,</span> <span class="s1">&#39;type_plot&#39;</span><span class="p">:</span> <span class="n">type_plot</span><span class="p">}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span> <span class="o">=</span> <span class="n">operating_inputs</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current_parameters</span> <span class="o">=</span> <span class="n">current_parameters</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">accessible_physical_parameters</span> <span class="o">=</span> <span class="n">accessible_physical_parameters</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">undetermined_physical_parameters</span> <span class="o">=</span> <span class="n">undetermined_physical_parameters</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">computing_parameters</span> <span class="o">=</span> <span class="n">computing_parameters</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">current_parameters</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">accessible_physical_parameters</span><span class="p">,</span>
                        <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">undetermined_physical_parameters</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">computing_parameters</span><span class="p">}</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Pa_des&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">Pext</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Pc_des&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">Pext</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The desired pressure is too low. It cannot be lower than the pressure outside the stack.&#39;</span><span class="p">)</span>
 
     <span class="c1"># Initialize the variables&#39; dictionary.</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;C_v_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;s_agdl&#39;</span><span class="p">,</span>
-                                  <span class="s1">&#39;s_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;lambda_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;lambda_mem&#39;</span><span class="p">,</span> <span class="s1">&#39;lambda_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_agc&#39;</span><span class="p">,</span>
-                                  <span class="s1">&#39;C_H2_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_N2&#39;</span><span class="p">,</span> <span class="s1">&#39;T_agc&#39;</span><span class="p">,</span>
-                                  <span class="s1">&#39;T_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_mem&#39;</span><span class="p">,</span> <span class="s1">&#39;T_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;eta_c&#39;</span><span class="p">,</span> <span class="s1">&#39;Pasm&#39;</span><span class="p">,</span> <span class="s1">&#39;Paem&#39;</span><span class="p">,</span>
-                                  <span class="s1">&#39;Pcsm&#39;</span><span class="p">,</span> <span class="s1">&#39;Pcem&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_asm&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_aem&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_csm&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_cem&#39;</span><span class="p">,</span> <span class="s1">&#39;Wcp&#39;</span><span class="p">,</span> <span class="s1">&#39;Wa_inj&#39;</span><span class="p">,</span>
-                                  <span class="s1">&#39;Wc_inj&#39;</span><span class="p">,</span> <span class="s1">&#39;Abp_a&#39;</span><span class="p">,</span> <span class="s1">&#39;Abp_c&#39;</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;C_v_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_cgdl&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;C_v_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;s_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;lambda_acl&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;lambda_mem&#39;</span><span class="p">,</span> <span class="s1">&#39;lambda_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_acl&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;C_O2_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_N2&#39;</span><span class="p">,</span> <span class="s1">&#39;T_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;T_agdl&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;T_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_mem&#39;</span><span class="p">,</span> <span class="s1">&#39;T_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;eta_c&#39;</span><span class="p">,</span> <span class="s1">&#39;Pasm&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;Paem&#39;</span><span class="p">,</span> <span class="s1">&#39;Pcsm&#39;</span><span class="p">,</span> <span class="s1">&#39;Pcem&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_asm&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_aem&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_csm&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_cem&#39;</span><span class="p">,</span> <span class="s1">&#39;Wcp&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;Wa_inj&#39;</span><span class="p">,</span> <span class="s1">&#39;Wc_inj&#39;</span><span class="p">,</span> <span class="s1">&#39;Abp_a&#39;</span><span class="p">,</span> <span class="s1">&#39;Abp_c&#39;</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names_extension</span><span class="p">()</span>  <span class="c1"># Several points are considered in each GDL and must be inserted into</span>
     <span class="c1">#                                        the solver_variable_names.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">all_variable_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Ucell&#39;</span><span class="p">,</span> <span class="s1">&#39;S_abs_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;S_abs_ccl&#39;</span><span class="p">]</span> <span class="o">+</span> \
@@ -2619,7 +2697,7 @@ step_current_parameters : dict
     <span class="c1">#       Resolution of the system of differential equations.</span>
     <span class="n">event_negative</span><span class="o">.</span><span class="n">terminal</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Integration is stopped if one of the crucial variables becomes negative.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">sol</span> <span class="o">=</span> <span class="n">solve_ivp</span><span class="p">(</span><span class="n">dydt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_interval</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_variable_values</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;BDF&#39;</span><span class="p">,</span>
-                         <span class="n">max_step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;max_step&#39;</span><span class="p">],</span> <span class="n">events</span><span class="o">=</span><span class="n">event_negative</span><span class="p">,</span>
+                         <span class="n">rtol</span> <span class="o">=</span> <span class="mf">1e-5</span><span class="p">,</span> <span class="n">atol</span> <span class="o">=</span> <span class="mf">1e-8</span><span class="p">,</span> <span class="n">events</span><span class="o">=</span><span class="n">event_negative</span><span class="p">,</span>
                          <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="p">,</span>
                                <span class="bp">self</span><span class="o">.</span><span class="n">control_variables</span><span class="p">))</span>
 
@@ -2649,7 +2727,9 @@ step_current_parameters : dict
 
             <details class="quote">
               <summary>Source code in <code>model/AlphaPEM.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">248</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
 <span class="normal">249</span>
 <span class="normal">250</span>
 <span class="normal">251</span>
@@ -2658,9 +2738,7 @@ step_current_parameters : dict
 <span class="normal">254</span>
 <span class="normal">255</span>
 <span class="normal">256</span>
-<span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">solver_variable_names_extension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">257</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">solver_variable_names_extension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Several points are considered in each GDL and must be inserted into the solver_variable_names.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 

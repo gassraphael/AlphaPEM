@@ -171,7 +171,7 @@
 
 
 <h2 id="model.dif_eq.calculate_dyn_H2_O2_N2_evolution" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">calculate_dyn_H2_O2_N2_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">sv</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">J_H2_in</span><span class="p">,</span> <span class="n">J_H2_out</span><span class="p">,</span> <span class="n">J_O2_in</span><span class="p">,</span> <span class="n">J_O2_out</span><span class="p">,</span> <span class="n">J_N2_in</span><span class="p">,</span> <span class="n">J_N2_out</span><span class="p">,</span> <span class="n">J_H2_agc_agdl</span><span class="p">,</span> <span class="n">J_H2_agdl_agdl</span><span class="p">,</span> <span class="n">J_H2_agdl_acl</span><span class="p">,</span> <span class="n">J_O2_ccl_cgdl</span><span class="p">,</span> <span class="n">J_O2_cgdl_cgdl</span><span class="p">,</span> <span class="n">J_O2_cgdl_cgc</span><span class="p">,</span> <span class="n">S_H2_acl</span><span class="p">,</span> <span class="n">S_O2_ccl</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">calculate_dyn_H2_O2_N2_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">sv</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmpl</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">Hagc</span><span class="p">,</span> <span class="n">Hcgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_cl</span><span class="p">,</span> <span class="n">epsilon_mpl</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">J_H2_in</span><span class="p">,</span> <span class="n">J_H2_out</span><span class="p">,</span> <span class="n">J_O2_in</span><span class="p">,</span> <span class="n">J_O2_out</span><span class="p">,</span> <span class="n">J_N2_in</span><span class="p">,</span> <span class="n">J_N2_out</span><span class="p">,</span> <span class="n">J_H2_agc_agdl</span><span class="p">,</span> <span class="n">J_H2_agdl_agdl</span><span class="p">,</span> <span class="n">J_H2_agdl_ampl</span><span class="p">,</span> <span class="n">J_H2_ampl_acl</span><span class="p">,</span> <span class="n">J_O2_ccl_cmpl</span><span class="p">,</span> <span class="n">J_O2_cmpl_cgdl</span><span class="p">,</span> <span class="n">J_O2_cgdl_cgdl</span><span class="p">,</span> <span class="n">J_O2_cgdl_cgc</span><span class="p">,</span> <span class="n">S_H2_acl</span><span class="p">,</span> <span class="n">S_O2_ccl</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h2>
 
@@ -218,19 +218,43 @@ sv is a contraction of solver_variables for enhanced readability.</p>
               </div>
             </li>
             <li>
-              <b><code>Hcl</code></b>
+              <b><code>Hmpl</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Thickness of the catalyst layer (m).</p>
+                <p>Thickness of the microporous layer (m).</p>
               </div>
             </li>
             <li>
-              <b><code>Hgc</code></b>
+              <b><code>Hacl</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Thickness of the gas channel (m).</p>
+                <p>Thickness of the anode catalyst layer (m).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Hccl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Thickness of the cathode catalyst layer (m).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Hagc</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Thickness of the anode gas channel (m).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Hcgc</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Thickness of the cathode gas channel (m).</p>
               </div>
             </li>
             <li>
@@ -247,6 +271,22 @@ sv is a contraction of solver_variables for enhanced readability.</p>
               –
               <div class="doc-md-description">
                 <p>Anode/cathode GDL porosity.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>epsilon_cl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Anode/cathode CL porosity.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>epsilon_mpl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Anode/cathode MPL porosity.</p>
               </div>
             </li>
             <li>
@@ -322,19 +362,35 @@ sv is a contraction of solver_variables for enhanced readability.</p>
               </div>
             </li>
             <li>
-              <b><code>J_H2_agdl_acl</code></b>
+              <b><code>J_H2_agdl_ampl</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Hydrogen flow between the anode GDL and the anode CL (mol.m-2.s-1).</p>
+                <p>Hydrogen flow between the last node of the anode GDL and the anode microporous layer (mol.m-2.s-1).</p>
               </div>
             </li>
             <li>
-              <b><code>J_O2_ccl_cgdl</code></b>
+              <b><code>J_H2_ampl_acl</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Oxygen flow between the cathode CL and the cathode GDL (mol.m-2.s-1).</p>
+                <p>Hydrogen flow between the anode microporous layer and the anode catalyst layer (mol.m-2.s-1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>J_O2_ccl_cmpl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Oxygen flow between the cathode catalyst layer and the cathode microporous layer (mol.m-2.s-1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>J_O2_cmpl_cgdl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Oxygen flow between the cathode microporous layer and the first node of the cathode GDL (mol.m-2.s-1).</p>
               </div>
             </li>
             <li>
@@ -376,53 +432,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>model/dif_eq.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span>
-<span class="normal">296</span>
-<span class="normal">297</span>
-<span class="normal">298</span>
-<span class="normal">299</span>
-<span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span>
-<span class="normal">306</span>
-<span class="normal">307</span>
-<span class="normal">308</span>
-<span class="normal">309</span>
-<span class="normal">310</span>
-<span class="normal">311</span>
-<span class="normal">312</span>
-<span class="normal">313</span>
-<span class="normal">314</span>
-<span class="normal">315</span>
-<span class="normal">316</span>
-<span class="normal">317</span>
-<span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span>
-<span class="normal">323</span>
-<span class="normal">324</span>
-<span class="normal">325</span>
-<span class="normal">326</span>
-<span class="normal">327</span>
-<span class="normal">328</span>
-<span class="normal">329</span>
-<span class="normal">330</span>
-<span class="normal">331</span>
-<span class="normal">332</span>
-<span class="normal">333</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">333</span>
 <span class="normal">334</span>
 <span class="normal">335</span>
 <span class="normal">336</span>
@@ -460,9 +470,75 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 <span class="normal">368</span>
 <span class="normal">369</span>
 <span class="normal">370</span>
-<span class="normal">371</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_dyn_H2_O2_N2_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">sv</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">J_H2_in</span><span class="p">,</span> <span class="n">J_H2_out</span><span class="p">,</span> <span class="n">J_O2_in</span><span class="p">,</span>
-                                     <span class="n">J_O2_out</span><span class="p">,</span> <span class="n">J_N2_in</span><span class="p">,</span> <span class="n">J_N2_out</span><span class="p">,</span> <span class="n">J_H2_agc_agdl</span><span class="p">,</span> <span class="n">J_H2_agdl_agdl</span><span class="p">,</span> <span class="n">J_H2_agdl_acl</span><span class="p">,</span>
-                                     <span class="n">J_O2_ccl_cgdl</span><span class="p">,</span> <span class="n">J_O2_cgdl_cgdl</span><span class="p">,</span> <span class="n">J_O2_cgdl_cgc</span><span class="p">,</span> <span class="n">S_H2_acl</span><span class="p">,</span> <span class="n">S_O2_ccl</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_dyn_H2_O2_N2_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">sv</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmpl</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">Hagc</span><span class="p">,</span> <span class="n">Hcgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_cl</span><span class="p">,</span>
+                                     <span class="n">epsilon_mpl</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">J_H2_in</span><span class="p">,</span> <span class="n">J_H2_out</span><span class="p">,</span> <span class="n">J_O2_in</span><span class="p">,</span> <span class="n">J_O2_out</span><span class="p">,</span> <span class="n">J_N2_in</span><span class="p">,</span> <span class="n">J_N2_out</span><span class="p">,</span>
+                                     <span class="n">J_H2_agc_agdl</span><span class="p">,</span> <span class="n">J_H2_agdl_agdl</span><span class="p">,</span> <span class="n">J_H2_agdl_ampl</span><span class="p">,</span> <span class="n">J_H2_ampl_acl</span><span class="p">,</span> <span class="n">J_O2_ccl_cmpl</span><span class="p">,</span>
+                                     <span class="n">J_O2_cmpl_cgdl</span><span class="p">,</span> <span class="n">J_O2_cgdl_cgdl</span><span class="p">,</span> <span class="n">J_O2_cgdl_cgc</span><span class="p">,</span> <span class="n">S_H2_acl</span><span class="p">,</span> <span class="n">S_O2_ccl</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the dynamic evolution of the hydrogen, oxygen and nitrogen in the gas channels, the gas</span>
 <span class="sd">    diffusion layers and the catalyst layers.</span>
 
@@ -475,14 +551,24 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 <span class="sd">        sv is a contraction of solver_variables for enhanced readability.</span>
 <span class="sd">    Hgdl : float</span>
 <span class="sd">        Thickness of the gas diffusion layer (m).</span>
-<span class="sd">    Hcl : float</span>
-<span class="sd">        Thickness of the catalyst layer (m).</span>
-<span class="sd">    Hgc : float</span>
-<span class="sd">        Thickness of the gas channel (m).</span>
+<span class="sd">    Hmpl : float</span>
+<span class="sd">        Thickness of the microporous layer (m).</span>
+<span class="sd">    Hacl : float</span>
+<span class="sd">        Thickness of the anode catalyst layer (m).</span>
+<span class="sd">    Hccl : float</span>
+<span class="sd">        Thickness of the cathode catalyst layer (m).</span>
+<span class="sd">    Hagc : float</span>
+<span class="sd">        Thickness of the anode gas channel (m).</span>
+<span class="sd">    Hcgc : float</span>
+<span class="sd">        Thickness of the cathode gas channel (m).</span>
 <span class="sd">    Lgc : float</span>
 <span class="sd">        Length of the gas channel (m).</span>
 <span class="sd">    epsilon_gdl : float</span>
 <span class="sd">        Anode/cathode GDL porosity.</span>
+<span class="sd">    epsilon_cl : float</span>
+<span class="sd">        Anode/cathode CL porosity.</span>
+<span class="sd">    epsilon_mpl : float</span>
+<span class="sd">        Anode/cathode MPL porosity.</span>
 <span class="sd">    n_gdl : int</span>
 <span class="sd">        Number of model nodes placed inside each GDL.</span>
 <span class="sd">    J_H2_in : float</span>
@@ -501,10 +587,14 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 <span class="sd">        Hydrogen flow between the anode gas channel and the anode GDL (mol.m-2.s-1).</span>
 <span class="sd">    J_H2_agdl_agdl : list</span>
 <span class="sd">        Hydrogen flow between two nodes of the anode GDL (mol.m-2.s-1).</span>
-<span class="sd">    J_H2_agdl_acl : float</span>
-<span class="sd">        Hydrogen flow between the anode GDL and the anode CL (mol.m-2.s-1).</span>
-<span class="sd">    J_O2_ccl_cgdl : float</span>
-<span class="sd">        Oxygen flow between the cathode CL and the cathode GDL (mol.m-2.s-1).</span>
+<span class="sd">    J_H2_agdl_ampl : float</span>
+<span class="sd">        Hydrogen flow between the last node of the anode GDL and the anode microporous layer (mol.m-2.s-1).</span>
+<span class="sd">    J_H2_ampl_acl : float</span>
+<span class="sd">        Hydrogen flow between the anode microporous layer and the anode catalyst layer (mol.m-2.s-1).</span>
+<span class="sd">    J_O2_ccl_cmpl : float</span>
+<span class="sd">        Oxygen flow between the cathode catalyst layer and the cathode microporous layer (mol.m-2.s-1).</span>
+<span class="sd">    J_O2_cmpl_cgdl : float</span>
+<span class="sd">        Oxygen flow between the cathode microporous layer and the first node of the cathode GDL (mol.m-2.s-1).</span>
 <span class="sd">    J_O2_cgdl_cgdl : list</span>
 <span class="sd">        Oxygen flow between two nodes of the cathode GDL (mol.m-2.s-1).</span>
 <span class="sd">    J_O2_cgdl_cgc : float</span>
@@ -517,7 +607,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 
     <span class="c1"># At the anode side</span>
     <span class="c1">#      Inside the AGC</span>
-    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_H2_agc / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">J_H2_in</span> <span class="o">-</span> <span class="n">J_H2_out</span><span class="p">)</span> <span class="o">/</span> <span class="n">Lgc</span> <span class="o">-</span> <span class="n">J_H2_agc_agdl</span> <span class="o">/</span> <span class="n">Hgc</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_H2_agc / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">J_H2_in</span> <span class="o">-</span> <span class="n">J_H2_out</span><span class="p">)</span> <span class="o">/</span> <span class="n">Lgc</span> <span class="o">-</span> <span class="n">J_H2_agc_agdl</span> <span class="o">/</span> <span class="n">Hagc</span>
     <span class="c1">#      Inside the AGDL</span>
     <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_H2_agdl_1 / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_gdl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_agdl_1&#39;</span><span class="p">]))</span> <span class="o">*</span> \
                                   <span class="p">(</span><span class="n">J_H2_agc_agdl</span> <span class="o">-</span> <span class="n">J_H2_agdl_agdl</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span>
@@ -525,23 +615,27 @@ sv is a contraction of solver_variables for enhanced readability.</p>
         <span class="n">dif_eq</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;dC_H2_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_gdl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]))</span> <span class="o">*</span> \
                                          <span class="p">(</span><span class="n">J_H2_agdl_agdl</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">J_H2_agdl_agdl</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span>
     <span class="n">dif_eq</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;dC_H2_agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1"> / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_gdl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]))</span> <span class="o">*</span> \
-                                         <span class="p">(</span><span class="n">J_H2_agdl_agdl</span><span class="p">[</span><span class="n">n_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">J_H2_agdl_acl</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span>
+                                         <span class="p">(</span><span class="n">J_H2_agdl_agdl</span><span class="p">[</span><span class="n">n_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">J_H2_agdl_ampl</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span>
+    <span class="c1">#      Inside the AMPL</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_H2_ampl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_mpl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_ampl&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="p">(</span><span class="n">J_H2_agdl_ampl</span> <span class="o">-</span> <span class="n">J_H2_ampl_acl</span><span class="p">)</span> <span class="o">/</span> <span class="n">Hmpl</span>
     <span class="c1">#      Inside the ACL</span>
-    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_H2_acl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_cl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_acl&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="p">(</span><span class="n">J_H2_agdl_acl</span> <span class="o">/</span> <span class="n">Hcl</span> <span class="o">+</span> <span class="n">S_H2_acl</span><span class="p">)</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_H2_acl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_cl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_acl&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="p">(</span><span class="n">J_H2_ampl_acl</span> <span class="o">/</span> <span class="n">Hacl</span> <span class="o">+</span> <span class="n">S_H2_acl</span><span class="p">)</span>
 
     <span class="c1"># At the cathode side</span>
     <span class="c1">#      Inside the CCL</span>
-    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_O2_ccl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_cl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_ccl&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">J_O2_ccl_cgdl</span> <span class="o">/</span> <span class="n">Hcl</span> <span class="o">+</span> <span class="n">S_O2_ccl</span><span class="p">)</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_O2_ccl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_cl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_ccl&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">J_O2_ccl_cmpl</span> <span class="o">/</span> <span class="n">Hccl</span> <span class="o">+</span> <span class="n">S_O2_ccl</span><span class="p">)</span>
+    <span class="c1">#      Inside the CMPL</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_O2_cmpl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_mpl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_cmpl&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="p">(</span><span class="n">J_O2_ccl_cmpl</span> <span class="o">-</span> <span class="n">J_O2_cmpl_cgdl</span><span class="p">)</span> <span class="o">/</span> <span class="n">Hmpl</span>
     <span class="c1">#      Inside the CGDL</span>
     <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_O2_cgdl_1 / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_gdl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_cgdl_1&#39;</span><span class="p">]))</span> <span class="o">*</span> \
-                                  <span class="p">(</span><span class="n">J_O2_ccl_cgdl</span> <span class="o">-</span> <span class="n">J_O2_cgdl_cgdl</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span>
+                                  <span class="p">(</span><span class="n">J_O2_cmpl_cgdl</span> <span class="o">-</span> <span class="n">J_O2_cgdl_cgdl</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">):</span>
         <span class="n">dif_eq</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;dC_O2_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_gdl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]))</span> <span class="o">*</span> \
                                          <span class="p">(</span><span class="n">J_O2_cgdl_cgdl</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">J_O2_cgdl_cgdl</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span>
     <span class="n">dif_eq</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;dC_O2_cgdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1"> / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_gdl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_cgdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]))</span> <span class="o">*</span> \
                                          <span class="p">(</span><span class="n">J_O2_cgdl_cgdl</span><span class="p">[</span><span class="n">n_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">J_O2_cgdl_cgc</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span>
     <span class="c1">#      Inside the CGC</span>
-    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_O2_cgc / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">J_O2_in</span> <span class="o">-</span> <span class="n">J_O2_out</span><span class="p">)</span> <span class="o">/</span> <span class="n">Lgc</span> <span class="o">+</span> <span class="n">J_O2_cgdl_cgc</span> <span class="o">/</span> <span class="n">Hgc</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_O2_cgc / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">J_O2_in</span> <span class="o">-</span> <span class="n">J_O2_out</span><span class="p">)</span> <span class="o">/</span> <span class="n">Lgc</span> <span class="o">+</span> <span class="n">J_O2_cgdl_cgc</span> <span class="o">/</span> <span class="n">Hcgc</span>
 
     <span class="c1"># Inside the whole cell</span>
     <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_N2 / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">J_N2_in</span> <span class="o">-</span> <span class="n">J_N2_out</span><span class="p">)</span> <span class="o">/</span> <span class="n">Lgc</span>
@@ -646,47 +740,47 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>model/dif_eq.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">577</span>
-<span class="normal">578</span>
-<span class="normal">579</span>
-<span class="normal">580</span>
-<span class="normal">581</span>
-<span class="normal">582</span>
-<span class="normal">583</span>
-<span class="normal">584</span>
-<span class="normal">585</span>
-<span class="normal">586</span>
-<span class="normal">587</span>
-<span class="normal">588</span>
-<span class="normal">589</span>
-<span class="normal">590</span>
-<span class="normal">591</span>
-<span class="normal">592</span>
-<span class="normal">593</span>
-<span class="normal">594</span>
-<span class="normal">595</span>
-<span class="normal">596</span>
-<span class="normal">597</span>
-<span class="normal">598</span>
-<span class="normal">599</span>
-<span class="normal">600</span>
-<span class="normal">601</span>
-<span class="normal">602</span>
-<span class="normal">603</span>
-<span class="normal">604</span>
-<span class="normal">605</span>
-<span class="normal">606</span>
-<span class="normal">607</span>
-<span class="normal">608</span>
-<span class="normal">609</span>
-<span class="normal">610</span>
-<span class="normal">611</span>
-<span class="normal">612</span>
-<span class="normal">613</span>
-<span class="normal">614</span>
-<span class="normal">615</span>
-<span class="normal">616</span>
-<span class="normal">617</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_dyn_air_compressor_and_humidifier_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">Wcp_des</span><span class="p">,</span> <span class="n">Wa_inj_des</span><span class="p">,</span> <span class="n">Wc_inj_des</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">Wcp</span><span class="p">,</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">659</span>
+<span class="normal">660</span>
+<span class="normal">661</span>
+<span class="normal">662</span>
+<span class="normal">663</span>
+<span class="normal">664</span>
+<span class="normal">665</span>
+<span class="normal">666</span>
+<span class="normal">667</span>
+<span class="normal">668</span>
+<span class="normal">669</span>
+<span class="normal">670</span>
+<span class="normal">671</span>
+<span class="normal">672</span>
+<span class="normal">673</span>
+<span class="normal">674</span>
+<span class="normal">675</span>
+<span class="normal">676</span>
+<span class="normal">677</span>
+<span class="normal">678</span>
+<span class="normal">679</span>
+<span class="normal">680</span>
+<span class="normal">681</span>
+<span class="normal">682</span>
+<span class="normal">683</span>
+<span class="normal">684</span>
+<span class="normal">685</span>
+<span class="normal">686</span>
+<span class="normal">687</span>
+<span class="normal">688</span>
+<span class="normal">689</span>
+<span class="normal">690</span>
+<span class="normal">691</span>
+<span class="normal">692</span>
+<span class="normal">693</span>
+<span class="normal">694</span>
+<span class="normal">695</span>
+<span class="normal">696</span>
+<span class="normal">697</span>
+<span class="normal">698</span>
+<span class="normal">699</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_dyn_air_compressor_and_humidifier_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">Wcp_des</span><span class="p">,</span> <span class="n">Wa_inj_des</span><span class="p">,</span> <span class="n">Wc_inj_des</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">Wcp</span><span class="p">,</span>
                                                           <span class="n">Wa_inj</span><span class="p">,</span> <span class="n">Wc_inj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the dynamic evolution of the air compressor and the humidifiers.</span>
 
@@ -737,7 +831,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 
 
 <h2 id="model.dif_eq.calculate_dyn_dissoved_water_evolution" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">calculate_dyn_dissoved_water_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">S_abs_acl</span><span class="p">,</span> <span class="n">S_abs_ccl</span><span class="p">,</span> <span class="n">J_lambda_acl_mem</span><span class="p">,</span> <span class="n">J_lambda_mem_ccl</span><span class="p">,</span> <span class="n">Sp_acl</span><span class="p">,</span> <span class="n">Sp_ccl</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">calculate_dyn_dissoved_water_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">S_abs_acl</span><span class="p">,</span> <span class="n">S_abs_ccl</span><span class="p">,</span> <span class="n">J_lambda_acl_mem</span><span class="p">,</span> <span class="n">J_lambda_mem_ccl</span><span class="p">,</span> <span class="n">Sp_acl</span><span class="p">,</span> <span class="n">Sp_ccl</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h2>
 
@@ -774,11 +868,19 @@ sv is a contraction of solver_variables for enhanced readability.</p>
               </div>
             </li>
             <li>
-              <b><code>Hcl</code></b>
+              <b><code>Hacl</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Thickness of the catalyst layer (m).</p>
+                <p>Thickness of the anode catalyst layer (m).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Hccl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Thickness of the cathode catalyst layer (m).</p>
               </div>
             </li>
             <li>
@@ -875,7 +977,9 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 <span class="normal">124</span>
 <span class="normal">125</span>
 <span class="normal">126</span>
-<span class="normal">127</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_dyn_dissoved_water_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">S_abs_acl</span><span class="p">,</span> <span class="n">S_abs_ccl</span><span class="p">,</span> <span class="n">J_lambda_acl_mem</span><span class="p">,</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_dyn_dissoved_water_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">S_abs_acl</span><span class="p">,</span> <span class="n">S_abs_ccl</span><span class="p">,</span> <span class="n">J_lambda_acl_mem</span><span class="p">,</span>
                                            <span class="n">J_lambda_mem_ccl</span><span class="p">,</span> <span class="n">Sp_acl</span><span class="p">,</span> <span class="n">Sp_ccl</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function calculates the dynamic evolution of the dissolved water in the membrane and the catalyst layers.</span>
@@ -886,8 +990,10 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 <span class="sd">        Dictionary used for saving the differential equations.</span>
 <span class="sd">    Hmem : float</span>
 <span class="sd">        Thickness of the membrane (m).</span>
-<span class="sd">    Hcl : float</span>
-<span class="sd">        Thickness of the catalyst layer (m).</span>
+<span class="sd">    Hacl : float</span>
+<span class="sd">        Thickness of the anode catalyst layer (m).</span>
+<span class="sd">    Hccl : float</span>
+<span class="sd">        Thickness of the cathode catalyst layer (m).</span>
 <span class="sd">    epsilon_mc : float</span>
 <span class="sd">        Volume fraction of ionomer in the catalyst layer.</span>
 <span class="sd">    S_abs_acl : float</span>
@@ -904,9 +1010,9 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 <span class="sd">        Water produced in the membrane at the CCL through the chemical reaction and crossover (mol.m-3.s-1)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dlambda_acl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">M_eq</span> <span class="o">/</span> <span class="p">(</span><span class="n">rho_mem</span> <span class="o">*</span> <span class="n">epsilon_mc</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">J_lambda_acl_mem</span> <span class="o">/</span> <span class="n">Hcl</span> <span class="o">+</span> <span class="n">S_abs_acl</span> <span class="o">+</span> <span class="n">Sp_acl</span><span class="p">)</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dlambda_acl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">M_eq</span> <span class="o">/</span> <span class="p">(</span><span class="n">rho_mem</span> <span class="o">*</span> <span class="n">epsilon_mc</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">J_lambda_acl_mem</span> <span class="o">/</span> <span class="n">Hacl</span> <span class="o">+</span> <span class="n">S_abs_acl</span> <span class="o">+</span> <span class="n">Sp_acl</span><span class="p">)</span>
     <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dlambda_mem / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">M_eq</span> <span class="o">/</span> <span class="n">rho_mem</span> <span class="o">*</span> <span class="p">(</span><span class="n">J_lambda_acl_mem</span> <span class="o">-</span> <span class="n">J_lambda_mem_ccl</span><span class="p">)</span> <span class="o">/</span> <span class="n">Hmem</span>
-    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dlambda_ccl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">M_eq</span> <span class="o">/</span> <span class="p">(</span><span class="n">rho_mem</span> <span class="o">*</span> <span class="n">epsilon_mc</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">J_lambda_mem_ccl</span> <span class="o">/</span> <span class="n">Hcl</span> <span class="o">+</span> <span class="n">S_abs_ccl</span> <span class="o">+</span> <span class="n">Sp_ccl</span><span class="p">)</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dlambda_ccl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">M_eq</span> <span class="o">/</span> <span class="p">(</span><span class="n">rho_mem</span> <span class="o">*</span> <span class="n">epsilon_mc</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">J_lambda_mem_ccl</span> <span class="o">/</span> <span class="n">Hccl</span> <span class="o">+</span> <span class="n">S_abs_ccl</span> <span class="o">+</span> <span class="n">Sp_ccl</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -917,7 +1023,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 
 
 <h2 id="model.dif_eq.calculate_dyn_liquid_water_evolution" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">calculate_dyn_liquid_water_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">sv</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">Jl_agc_agdl</span><span class="p">,</span> <span class="n">Jl_agdl_agdl</span><span class="p">,</span> <span class="n">Jl_agdl_acl</span><span class="p">,</span> <span class="n">Jl_ccl_cgdl</span><span class="p">,</span> <span class="n">Jl_cgdl_cgdl</span><span class="p">,</span> <span class="n">Jl_cgdl_cgc</span><span class="p">,</span> <span class="n">Sl_agdl</span><span class="p">,</span> <span class="n">Sl_acl</span><span class="p">,</span> <span class="n">Sl_ccl</span><span class="p">,</span> <span class="n">Sl_cgdl</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">calculate_dyn_liquid_water_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">sv</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmpl</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_cl</span><span class="p">,</span> <span class="n">epsilon_mpl</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">Jl_agc_agdl</span><span class="p">,</span> <span class="n">Jl_agdl_agdl</span><span class="p">,</span> <span class="n">Jl_agdl_ampl</span><span class="p">,</span> <span class="n">Jl_ampl_acl</span><span class="p">,</span> <span class="n">Jl_ccl_cmpl</span><span class="p">,</span> <span class="n">Jl_cmpl_cgdl</span><span class="p">,</span> <span class="n">Jl_cgdl_cgdl</span><span class="p">,</span> <span class="n">Jl_cgdl_cgc</span><span class="p">,</span> <span class="n">Sl_agdl</span><span class="p">,</span> <span class="n">Sl_ampl</span><span class="p">,</span> <span class="n">Sl_acl</span><span class="p">,</span> <span class="n">Sl_ccl</span><span class="p">,</span> <span class="n">Sl_cmpl</span><span class="p">,</span> <span class="n">Sl_cgdl</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h2>
 
@@ -963,11 +1069,27 @@ sv is a contraction of solver_variables for enhanced readability.</p>
               </div>
             </li>
             <li>
-              <b><code>Hcl</code></b>
+              <b><code>Hmpl</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Thickness of the catalyst layer (m).</p>
+                <p>Thickness of the microporous layer (m).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Hacl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Thickness of the anode catalyst layer (m).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Hccl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Thickness of the cathode catalyst layer (m).</p>
               </div>
             </li>
             <li>
@@ -976,6 +1098,22 @@ sv is a contraction of solver_variables for enhanced readability.</p>
               –
               <div class="doc-md-description">
                 <p>Anode/cathode GDL porosity.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>epsilon_cl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Anode/cathode CL porosity.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>epsilon_mpl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Anode/cathode MPL porosity.</p>
               </div>
             </li>
             <li>
@@ -1003,19 +1141,35 @@ sv is a contraction of solver_variables for enhanced readability.</p>
               </div>
             </li>
             <li>
-              <b><code>Jl_agdl_acl</code></b>
+              <b><code>Jl_agdl_ampl</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Liquid water flow between the anode GDL and the anode CL (kg.m-2.s-1).</p>
+                <p>Liquid water flow between the last node of the anode GDL and the anode microporous layer (kg.m-2.s-1).</p>
               </div>
             </li>
             <li>
-              <b><code>Jl_ccl_cgdl</code></b>
+              <b><code>Jl_ampl_acl</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Liquid water flow between the cathode CL and the cathode GDL (kg.m-2.s-1).</p>
+                <p>Liquid water flow between the anode microporous layer and the anode catalyst layer (kg.m-2.s-1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Jl_ccl_cmpl</code></b>
+                  (<code>list</code>)
+              –
+              <div class="doc-md-description">
+                <p>Liquid water flow between the cathode catalyst layer and the cathode microporous layer (kg.m-2.s-1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Jl_cmpl_cgdl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Liquid water flow between the cathode microporous layer and the first node of the cathode GDL (kg.m-2.s-1).</p>
               </div>
             </li>
             <li>
@@ -1073,9 +1227,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>model/dif_eq.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">132</span>
 <span class="normal">133</span>
 <span class="normal">134</span>
 <span class="normal">135</span>
@@ -1139,8 +1291,32 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 <span class="normal">193</span>
 <span class="normal">194</span>
 <span class="normal">195</span>
-<span class="normal">196</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_dyn_liquid_water_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">sv</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">Jl_agc_agdl</span><span class="p">,</span> <span class="n">Jl_agdl_agdl</span><span class="p">,</span> <span class="n">Jl_agdl_acl</span><span class="p">,</span>
-                                         <span class="n">Jl_ccl_cgdl</span><span class="p">,</span> <span class="n">Jl_cgdl_cgdl</span><span class="p">,</span> <span class="n">Jl_cgdl_cgc</span><span class="p">,</span> <span class="n">Sl_agdl</span><span class="p">,</span> <span class="n">Sl_acl</span><span class="p">,</span> <span class="n">Sl_ccl</span><span class="p">,</span> <span class="n">Sl_cgdl</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_dyn_liquid_water_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">sv</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmpl</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_cl</span><span class="p">,</span> <span class="n">epsilon_mpl</span><span class="p">,</span>
+                                         <span class="n">n_gdl</span><span class="p">,</span> <span class="n">Jl_agc_agdl</span><span class="p">,</span> <span class="n">Jl_agdl_agdl</span><span class="p">,</span> <span class="n">Jl_agdl_ampl</span><span class="p">,</span> <span class="n">Jl_ampl_acl</span><span class="p">,</span> <span class="n">Jl_ccl_cmpl</span><span class="p">,</span>
+                                         <span class="n">Jl_cmpl_cgdl</span><span class="p">,</span> <span class="n">Jl_cgdl_cgdl</span><span class="p">,</span> <span class="n">Jl_cgdl_cgc</span><span class="p">,</span> <span class="n">Sl_agdl</span><span class="p">,</span> <span class="n">Sl_ampl</span><span class="p">,</span> <span class="n">Sl_acl</span><span class="p">,</span> <span class="n">Sl_ccl</span><span class="p">,</span>
+                                         <span class="n">Sl_cmpl</span><span class="p">,</span> <span class="n">Sl_cgdl</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function calculates the dynamic evolution of the liquid water in the gas diffusion and catalyst layers.</span>
 
@@ -1153,20 +1329,32 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 <span class="sd">        sv is a contraction of solver_variables for enhanced readability.</span>
 <span class="sd">    Hgdl : float</span>
 <span class="sd">        Thickness of the gas diffusion layer (m).</span>
-<span class="sd">    Hcl : float</span>
-<span class="sd">        Thickness of the catalyst layer (m).</span>
+<span class="sd">    Hmpl : float</span>
+<span class="sd">        Thickness of the microporous layer (m).</span>
+<span class="sd">    Hacl : float</span>
+<span class="sd">        Thickness of the anode catalyst layer (m).</span>
+<span class="sd">    Hccl : float</span>
+<span class="sd">        Thickness of the cathode catalyst layer (m).</span>
 <span class="sd">    epsilon_gdl : float</span>
 <span class="sd">        Anode/cathode GDL porosity.</span>
+<span class="sd">    epsilon_cl : float</span>
+<span class="sd">        Anode/cathode CL porosity.</span>
+<span class="sd">    epsilon_mpl : float</span>
+<span class="sd">        Anode/cathode MPL porosity.</span>
 <span class="sd">    n_gdl : int</span>
 <span class="sd">        Number of model nodes placed inside each GDL.</span>
 <span class="sd">    Jl_agc_agdl : float</span>
 <span class="sd">        Liquid water flow between the anode gas channel border and the anode GDL (kg.m-2.s-1).</span>
 <span class="sd">    Jl_agdl_agdl : list</span>
 <span class="sd">        Liquid water flow between two nodes of the anode GDL (kg.m-2.s-1).</span>
-<span class="sd">    Jl_agdl_acl : float</span>
-<span class="sd">        Liquid water flow between the anode GDL and the anode CL (kg.m-2.s-1).</span>
-<span class="sd">    Jl_ccl_cgdl : float</span>
-<span class="sd">        Liquid water flow between the cathode CL and the cathode GDL (kg.m-2.s-1).</span>
+<span class="sd">    Jl_agdl_ampl : float</span>
+<span class="sd">        Liquid water flow between the last node of the anode GDL and the anode microporous layer (kg.m-2.s-1).</span>
+<span class="sd">    Jl_ampl_acl : float</span>
+<span class="sd">        Liquid water flow between the anode microporous layer and the anode catalyst layer (kg.m-2.s-1).</span>
+<span class="sd">    Jl_ccl_cmpl : list</span>
+<span class="sd">        Liquid water flow between the cathode catalyst layer and the cathode microporous layer (kg.m-2.s-1).</span>
+<span class="sd">    Jl_cmpl_cgdl : float</span>
+<span class="sd">        Liquid water flow between the cathode microporous layer and the first node of the cathode GDL (kg.m-2.s-1).</span>
 <span class="sd">    Jl_cgdl_cgdl : list</span>
 <span class="sd">        Liquid water flow between two nodes of the cathode GDL (kg.m-2.s-1).</span>
 <span class="sd">    Jl_cgdl_cgc : float</span>
@@ -1190,17 +1378,23 @@ sv is a contraction of solver_variables for enhanced readability.</p>
                                       <span class="p">((</span><span class="n">Jl_agdl_agdl</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">Jl_agdl_agdl</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span> <span class="o">+</span>
                                        <span class="n">M_H2O</span> <span class="o">*</span> <span class="n">Sl_agdl</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
     <span class="n">dif_eq</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;ds_agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1"> / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">rho_H2O_l</span><span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">epsilon_gdl</span><span class="p">)</span> <span class="o">*</span> \
-                                      <span class="p">((</span><span class="n">Jl_agdl_agdl</span><span class="p">[</span><span class="n">n_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">Jl_agdl_acl</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span> <span class="o">+</span>
+                                      <span class="p">((</span><span class="n">Jl_agdl_agdl</span><span class="p">[</span><span class="n">n_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">Jl_agdl_ampl</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span> <span class="o">+</span>
                                        <span class="n">M_H2O</span> <span class="o">*</span> <span class="n">Sl_agdl</span><span class="p">[</span><span class="n">n_gdl</span><span class="p">])</span>
+    <span class="c1">#      Inside the AMPL</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;ds_ampl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">rho_H2O_l</span><span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_ampl&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">epsilon_mpl</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="n">Jl_agdl_ampl</span> <span class="o">-</span> <span class="n">Jl_ampl_acl</span><span class="p">)</span> <span class="o">/</span> <span class="n">Hmpl</span> <span class="o">+</span>
+                                                                            <span class="n">M_H2O</span> <span class="o">*</span> <span class="n">Sl_ampl</span><span class="p">)</span>
     <span class="c1">#      Inside the ACL</span>
-    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;ds_acl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">rho_H2O_l</span><span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_acl&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">epsilon_cl</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Jl_agdl_acl</span> <span class="o">/</span> <span class="n">Hcl</span> <span class="o">+</span> <span class="n">M_H2O</span> <span class="o">*</span> <span class="n">Sl_acl</span><span class="p">)</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;ds_acl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">rho_H2O_l</span><span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_acl&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">epsilon_cl</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Jl_ampl_acl</span> <span class="o">/</span> <span class="n">Hacl</span> <span class="o">+</span> <span class="n">M_H2O</span> <span class="o">*</span> <span class="n">Sl_acl</span><span class="p">)</span>
 
     <span class="c1"># At the cathode side</span>
     <span class="c1">#       Inside the CCL</span>
-    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;ds_ccl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">rho_H2O_l</span><span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_ccl&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">epsilon_cl</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span> <span class="n">Jl_ccl_cgdl</span> <span class="o">/</span> <span class="n">Hcl</span> <span class="o">+</span> <span class="n">M_H2O</span> <span class="o">*</span> <span class="n">Sl_ccl</span><span class="p">)</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;ds_ccl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">rho_H2O_l</span><span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_ccl&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">epsilon_cl</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span> <span class="n">Jl_ccl_cmpl</span> <span class="o">/</span> <span class="n">Hccl</span> <span class="o">+</span> <span class="n">M_H2O</span> <span class="o">*</span> <span class="n">Sl_ccl</span><span class="p">)</span>
+    <span class="c1">#       Inside the CMPL</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;ds_cmpl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">rho_H2O_l</span><span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_cmpl&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">epsilon_mpl</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="n">Jl_ccl_cmpl</span> <span class="o">-</span> <span class="n">Jl_cmpl_cgdl</span><span class="p">)</span> <span class="o">/</span> <span class="n">Hmpl</span> <span class="o">+</span>
+                                                                             <span class="n">M_H2O</span> <span class="o">*</span> <span class="n">Sl_cmpl</span><span class="p">)</span>
     <span class="c1">#       Inside the CGDL</span>
     <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;ds_cgdl_1 / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">rho_H2O_l</span><span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_cgdl_1&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">epsilon_gdl</span><span class="p">)</span> <span class="o">*</span> \
-                               <span class="p">((</span><span class="n">Jl_ccl_cgdl</span> <span class="o">-</span> <span class="n">Jl_cgdl_cgdl</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span> <span class="o">+</span> <span class="n">M_H2O</span> <span class="o">*</span> <span class="n">Sl_cgdl</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                               <span class="p">((</span><span class="n">Jl_cmpl_cgdl</span> <span class="o">-</span> <span class="n">Jl_cgdl_cgdl</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span> <span class="o">+</span> <span class="n">M_H2O</span> <span class="o">*</span> <span class="n">Sl_cgdl</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">):</span>
         <span class="n">dif_eq</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;ds_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">rho_H2O_l</span><span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">epsilon_gdl</span><span class="p">)</span> <span class="o">*</span> \
                                       <span class="p">((</span><span class="n">Jl_cgdl_cgdl</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">Jl_cgdl_cgdl</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span> <span class="o">+</span> <span class="n">M_H2O</span> <span class="o">*</span> <span class="n">Sl_cgdl</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
@@ -1216,7 +1410,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 
 
 <h2 id="model.dif_eq.calculate_dyn_manifold_pressure_and_humidity_evolution" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">calculate_dyn_manifold_pressure_and_humidity_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">Masm</span><span class="p">,</span> <span class="n">Maem</span><span class="p">,</span> <span class="n">Mcsm</span><span class="p">,</span> <span class="n">Mcem</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">Jv_a_in</span><span class="p">,</span> <span class="n">Jv_a_out</span><span class="p">,</span> <span class="n">Jv_c_in</span><span class="p">,</span> <span class="n">Jv_c_out</span><span class="p">,</span> <span class="n">Wasm_in</span><span class="p">,</span> <span class="n">Wasm_out</span><span class="p">,</span> <span class="n">Waem_in</span><span class="p">,</span> <span class="n">Waem_out</span><span class="p">,</span> <span class="n">Wcsm_in</span><span class="p">,</span> <span class="n">Wcsm_out</span><span class="p">,</span> <span class="n">Wcem_in</span><span class="p">,</span> <span class="n">Wcem_out</span><span class="p">,</span> <span class="n">Ware</span><span class="p">,</span> <span class="n">Wv_asm_in</span><span class="p">,</span> <span class="n">Wv_aem_out</span><span class="p">,</span> <span class="n">Wv_csm_in</span><span class="p">,</span> <span class="n">Wv_cem_out</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">calculate_dyn_manifold_pressure_and_humidity_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">Masm</span><span class="p">,</span> <span class="n">Maem</span><span class="p">,</span> <span class="n">Mcsm</span><span class="p">,</span> <span class="n">Mcem</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Hagc</span><span class="p">,</span> <span class="n">Hcgc</span><span class="p">,</span> <span class="n">Wagc</span><span class="p">,</span> <span class="n">Wcgc</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">Jv_a_in</span><span class="p">,</span> <span class="n">Jv_a_out</span><span class="p">,</span> <span class="n">Jv_c_in</span><span class="p">,</span> <span class="n">Jv_c_out</span><span class="p">,</span> <span class="n">Wasm_in</span><span class="p">,</span> <span class="n">Wasm_out</span><span class="p">,</span> <span class="n">Waem_in</span><span class="p">,</span> <span class="n">Waem_out</span><span class="p">,</span> <span class="n">Wcsm_in</span><span class="p">,</span> <span class="n">Wcsm_out</span><span class="p">,</span> <span class="n">Wcem_in</span><span class="p">,</span> <span class="n">Wcem_out</span><span class="p">,</span> <span class="n">Ware</span><span class="p">,</span> <span class="n">Wv_asm_in</span><span class="p">,</span> <span class="n">Wv_aem_out</span><span class="p">,</span> <span class="n">Wv_csm_in</span><span class="p">,</span> <span class="n">Wv_cem_out</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h2>
 
@@ -1285,19 +1479,35 @@ sv is a contraction of solver_variables for enhanced readability.</p>
               </div>
             </li>
             <li>
-              <b><code>Hgc</code></b>
+              <b><code>Hagc</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Thickness of the gas channel (m).</p>
+                <p>Thickness of the anode gas channel (m).</p>
               </div>
             </li>
             <li>
-              <b><code>Wgc</code></b>
+              <b><code>Hcgc</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Width of the gas channel (m).</p>
+                <p>Thickness of the cathode gas channel (m).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Wagc</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Width of the anode gas channel (m).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Wcgc</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Width of the cathode gas channel (m).</p>
               </div>
             </li>
             <li>
@@ -1451,85 +1661,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>model/dif_eq.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">485</span>
-<span class="normal">486</span>
-<span class="normal">487</span>
-<span class="normal">488</span>
-<span class="normal">489</span>
-<span class="normal">490</span>
-<span class="normal">491</span>
-<span class="normal">492</span>
-<span class="normal">493</span>
-<span class="normal">494</span>
-<span class="normal">495</span>
-<span class="normal">496</span>
-<span class="normal">497</span>
-<span class="normal">498</span>
-<span class="normal">499</span>
-<span class="normal">500</span>
-<span class="normal">501</span>
-<span class="normal">502</span>
-<span class="normal">503</span>
-<span class="normal">504</span>
-<span class="normal">505</span>
-<span class="normal">506</span>
-<span class="normal">507</span>
-<span class="normal">508</span>
-<span class="normal">509</span>
-<span class="normal">510</span>
-<span class="normal">511</span>
-<span class="normal">512</span>
-<span class="normal">513</span>
-<span class="normal">514</span>
-<span class="normal">515</span>
-<span class="normal">516</span>
-<span class="normal">517</span>
-<span class="normal">518</span>
-<span class="normal">519</span>
-<span class="normal">520</span>
-<span class="normal">521</span>
-<span class="normal">522</span>
-<span class="normal">523</span>
-<span class="normal">524</span>
-<span class="normal">525</span>
-<span class="normal">526</span>
-<span class="normal">527</span>
-<span class="normal">528</span>
-<span class="normal">529</span>
-<span class="normal">530</span>
-<span class="normal">531</span>
-<span class="normal">532</span>
-<span class="normal">533</span>
-<span class="normal">534</span>
-<span class="normal">535</span>
-<span class="normal">536</span>
-<span class="normal">537</span>
-<span class="normal">538</span>
-<span class="normal">539</span>
-<span class="normal">540</span>
-<span class="normal">541</span>
-<span class="normal">542</span>
-<span class="normal">543</span>
-<span class="normal">544</span>
-<span class="normal">545</span>
-<span class="normal">546</span>
-<span class="normal">547</span>
-<span class="normal">548</span>
-<span class="normal">549</span>
-<span class="normal">550</span>
-<span class="normal">551</span>
-<span class="normal">552</span>
-<span class="normal">553</span>
-<span class="normal">554</span>
-<span class="normal">555</span>
-<span class="normal">556</span>
-<span class="normal">557</span>
-<span class="normal">558</span>
-<span class="normal">559</span>
-<span class="normal">560</span>
-<span class="normal">561</span>
-<span class="normal">562</span>
-<span class="normal">563</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">563</span>
 <span class="normal">564</span>
 <span class="normal">565</span>
 <span class="normal">566</span>
@@ -1540,8 +1672,90 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 <span class="normal">571</span>
 <span class="normal">572</span>
 <span class="normal">573</span>
-<span class="normal">574</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_dyn_manifold_pressure_and_humidity_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">Masm</span><span class="p">,</span> <span class="n">Maem</span><span class="p">,</span> <span class="n">Mcsm</span><span class="p">,</span> <span class="n">Mcem</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span>
-                                                           <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">Jv_a_in</span><span class="p">,</span> <span class="n">Jv_a_out</span><span class="p">,</span> <span class="n">Jv_c_in</span><span class="p">,</span> <span class="n">Jv_c_out</span><span class="p">,</span>
+<span class="normal">574</span>
+<span class="normal">575</span>
+<span class="normal">576</span>
+<span class="normal">577</span>
+<span class="normal">578</span>
+<span class="normal">579</span>
+<span class="normal">580</span>
+<span class="normal">581</span>
+<span class="normal">582</span>
+<span class="normal">583</span>
+<span class="normal">584</span>
+<span class="normal">585</span>
+<span class="normal">586</span>
+<span class="normal">587</span>
+<span class="normal">588</span>
+<span class="normal">589</span>
+<span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span>
+<span class="normal">596</span>
+<span class="normal">597</span>
+<span class="normal">598</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
+<span class="normal">601</span>
+<span class="normal">602</span>
+<span class="normal">603</span>
+<span class="normal">604</span>
+<span class="normal">605</span>
+<span class="normal">606</span>
+<span class="normal">607</span>
+<span class="normal">608</span>
+<span class="normal">609</span>
+<span class="normal">610</span>
+<span class="normal">611</span>
+<span class="normal">612</span>
+<span class="normal">613</span>
+<span class="normal">614</span>
+<span class="normal">615</span>
+<span class="normal">616</span>
+<span class="normal">617</span>
+<span class="normal">618</span>
+<span class="normal">619</span>
+<span class="normal">620</span>
+<span class="normal">621</span>
+<span class="normal">622</span>
+<span class="normal">623</span>
+<span class="normal">624</span>
+<span class="normal">625</span>
+<span class="normal">626</span>
+<span class="normal">627</span>
+<span class="normal">628</span>
+<span class="normal">629</span>
+<span class="normal">630</span>
+<span class="normal">631</span>
+<span class="normal">632</span>
+<span class="normal">633</span>
+<span class="normal">634</span>
+<span class="normal">635</span>
+<span class="normal">636</span>
+<span class="normal">637</span>
+<span class="normal">638</span>
+<span class="normal">639</span>
+<span class="normal">640</span>
+<span class="normal">641</span>
+<span class="normal">642</span>
+<span class="normal">643</span>
+<span class="normal">644</span>
+<span class="normal">645</span>
+<span class="normal">646</span>
+<span class="normal">647</span>
+<span class="normal">648</span>
+<span class="normal">649</span>
+<span class="normal">650</span>
+<span class="normal">651</span>
+<span class="normal">652</span>
+<span class="normal">653</span>
+<span class="normal">654</span>
+<span class="normal">655</span>
+<span class="normal">656</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_dyn_manifold_pressure_and_humidity_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">Masm</span><span class="p">,</span> <span class="n">Maem</span><span class="p">,</span> <span class="n">Mcsm</span><span class="p">,</span> <span class="n">Mcem</span><span class="p">,</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Hagc</span><span class="p">,</span> <span class="n">Hcgc</span><span class="p">,</span> <span class="n">Wagc</span><span class="p">,</span>
+                                                           <span class="n">Wcgc</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">Jv_a_in</span><span class="p">,</span> <span class="n">Jv_a_out</span><span class="p">,</span> <span class="n">Jv_c_in</span><span class="p">,</span> <span class="n">Jv_c_out</span><span class="p">,</span>
                                                            <span class="n">Wasm_in</span><span class="p">,</span> <span class="n">Wasm_out</span><span class="p">,</span> <span class="n">Waem_in</span><span class="p">,</span> <span class="n">Waem_out</span><span class="p">,</span> <span class="n">Wcsm_in</span><span class="p">,</span> <span class="n">Wcsm_out</span><span class="p">,</span>
                                                            <span class="n">Wcem_in</span><span class="p">,</span> <span class="n">Wcem_out</span><span class="p">,</span> <span class="n">Ware</span><span class="p">,</span> <span class="n">Wv_asm_in</span><span class="p">,</span> <span class="n">Wv_aem_out</span><span class="p">,</span> <span class="n">Wv_csm_in</span><span class="p">,</span>
                                                            <span class="n">Wv_cem_out</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -1561,10 +1775,14 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 <span class="sd">        Molar mass of all the gaseous species inside the cathode exhaust manifold (kg.mol-1).</span>
 <span class="sd">    T_des : float</span>
 <span class="sd">        Fuel cell temperature (K).</span>
-<span class="sd">    Hgc : float</span>
-<span class="sd">        Thickness of the gas channel (m).</span>
-<span class="sd">    Wgc : float</span>
-<span class="sd">        Width of the gas channel (m).</span>
+<span class="sd">    Hagc : float</span>
+<span class="sd">        Thickness of the anode gas channel (m).</span>
+<span class="sd">    Hcgc : float</span>
+<span class="sd">        Thickness of the cathode gas channel (m).</span>
+<span class="sd">    Wagc : float</span>
+<span class="sd">        Width of the anode gas channel (m).</span>
+<span class="sd">    Wcgc : float</span>
+<span class="sd">        Width of the cathode gas channel (m).</span>
 <span class="sd">    type_auxiliary : str</span>
 <span class="sd">        Type of auxiliary components used in the fuel cell model.</span>
 <span class="sd">    Jv_a_in : float</span>
@@ -1619,15 +1837,15 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 
     <span class="c1"># Humidity evolution inside the manifolds</span>
     <span class="k">if</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_anodic_recirculation&quot;</span><span class="p">:</span>
-        <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dPhi_asm / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Wv_asm_in</span> <span class="o">-</span> <span class="n">Jv_a_in</span> <span class="o">*</span> <span class="n">Hgc</span> <span class="o">*</span> <span class="n">Wgc</span> <span class="o">*</span> <span class="n">n_cell</span><span class="p">)</span> <span class="o">/</span> <span class="n">Vsm</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span>
-        <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dPhi_aem / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Jv_a_out</span> <span class="o">*</span> <span class="n">Hgc</span> <span class="o">*</span> <span class="n">Wgc</span> <span class="o">*</span> <span class="n">n_cell</span> <span class="o">-</span> <span class="n">Wv_asm_in</span> <span class="o">-</span> <span class="n">Wv_aem_out</span><span class="p">)</span> <span class="o">/</span> <span class="n">Vem</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span>
-        <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dPhi_csm / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Wv_csm_in</span> <span class="o">-</span> <span class="n">Jv_c_in</span> <span class="o">*</span> <span class="n">Hgc</span> <span class="o">*</span> <span class="n">Wgc</span> <span class="o">*</span> <span class="n">n_cell</span><span class="p">)</span> <span class="o">/</span> <span class="n">Vsm</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span>
-        <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dPhi_cem / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Jv_c_out</span> <span class="o">*</span> <span class="n">Hgc</span> <span class="o">*</span> <span class="n">Wgc</span> <span class="o">*</span> <span class="n">n_cell</span> <span class="o">-</span> <span class="n">Wv_cem_out</span><span class="p">)</span> <span class="o">/</span> <span class="n">Vem</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span>
+        <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dPhi_asm / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Wv_asm_in</span> <span class="o">-</span> <span class="n">Jv_a_in</span> <span class="o">*</span> <span class="n">Hagc</span> <span class="o">*</span> <span class="n">Wagc</span> <span class="o">*</span> <span class="n">n_cell</span><span class="p">)</span> <span class="o">/</span> <span class="n">Vsm</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span>
+        <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dPhi_aem / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Jv_a_out</span> <span class="o">*</span> <span class="n">Hagc</span> <span class="o">*</span> <span class="n">Wagc</span> <span class="o">*</span> <span class="n">n_cell</span> <span class="o">-</span> <span class="n">Wv_asm_in</span> <span class="o">-</span> <span class="n">Wv_aem_out</span><span class="p">)</span> <span class="o">/</span> <span class="n">Vem</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span>
+        <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dPhi_csm / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Wv_csm_in</span> <span class="o">-</span> <span class="n">Jv_c_in</span> <span class="o">*</span> <span class="n">Hcgc</span> <span class="o">*</span> <span class="n">Wcgc</span> <span class="o">*</span> <span class="n">n_cell</span><span class="p">)</span> <span class="o">/</span> <span class="n">Vsm</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span>
+        <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dPhi_cem / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Jv_c_out</span> <span class="o">*</span> <span class="n">Hcgc</span> <span class="o">*</span> <span class="n">Wcgc</span> <span class="o">*</span> <span class="n">n_cell</span> <span class="o">-</span> <span class="n">Wv_cem_out</span><span class="p">)</span> <span class="o">/</span> <span class="n">Vem</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>
-        <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dPhi_asm / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Wv_asm_in</span> <span class="o">-</span> <span class="n">Jv_a_in</span> <span class="o">*</span> <span class="n">Hgc</span> <span class="o">*</span> <span class="n">Wgc</span> <span class="o">*</span> <span class="n">n_cell</span><span class="p">)</span> <span class="o">/</span> <span class="n">Vsm</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span>
-        <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dPhi_aem / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Jv_a_out</span> <span class="o">*</span> <span class="n">Hgc</span> <span class="o">*</span> <span class="n">Wgc</span> <span class="o">*</span> <span class="n">n_cell</span> <span class="o">-</span> <span class="n">Wv_aem_out</span><span class="p">)</span> <span class="o">/</span> <span class="n">Vem</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span>
-        <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dPhi_csm / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Wv_csm_in</span> <span class="o">-</span> <span class="n">Jv_c_in</span> <span class="o">*</span> <span class="n">Hgc</span> <span class="o">*</span> <span class="n">Wgc</span> <span class="o">*</span> <span class="n">n_cell</span><span class="p">)</span> <span class="o">/</span> <span class="n">Vsm</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span>
-        <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dPhi_cem / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Jv_c_out</span> <span class="o">*</span> <span class="n">Hgc</span> <span class="o">*</span> <span class="n">Wgc</span> <span class="o">*</span> <span class="n">n_cell</span> <span class="o">-</span> <span class="n">Wv_cem_out</span><span class="p">)</span> <span class="o">/</span> <span class="n">Vem</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span>
+        <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dPhi_asm / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Wv_asm_in</span> <span class="o">-</span> <span class="n">Jv_a_in</span> <span class="o">*</span> <span class="n">Hagc</span> <span class="o">*</span> <span class="n">Wagc</span> <span class="o">*</span> <span class="n">n_cell</span><span class="p">)</span> <span class="o">/</span> <span class="n">Vsm</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span>
+        <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dPhi_aem / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Jv_a_out</span> <span class="o">*</span> <span class="n">Hagc</span> <span class="o">*</span> <span class="n">Wagc</span> <span class="o">*</span> <span class="n">n_cell</span> <span class="o">-</span> <span class="n">Wv_aem_out</span><span class="p">)</span> <span class="o">/</span> <span class="n">Vem</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span>
+        <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dPhi_csm / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Wv_csm_in</span> <span class="o">-</span> <span class="n">Jv_c_in</span> <span class="o">*</span> <span class="n">Hcgc</span> <span class="o">*</span> <span class="n">Wcgc</span> <span class="o">*</span> <span class="n">n_cell</span><span class="p">)</span> <span class="o">/</span> <span class="n">Vsm</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span>
+        <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dPhi_cem / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Jv_c_out</span> <span class="o">*</span> <span class="n">Hcgc</span> <span class="o">*</span> <span class="n">Wcgc</span> <span class="o">*</span> <span class="n">n_cell</span> <span class="o">-</span> <span class="n">Wv_cem_out</span><span class="p">)</span> <span class="o">/</span> <span class="n">Vem</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>  <span class="c1"># elif type_auxiliary == &quot;no_auxiliary&quot;:</span>
         <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dPhi_asm / dt&#39;</span><span class="p">],</span> <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dPhi_aem / dt&#39;</span><span class="p">],</span> <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dPhi_csm / dt&#39;</span><span class="p">],</span> <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dPhi_cem / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
 </code></pre></div></td></tr></table></div>
@@ -1640,7 +1858,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 
 
 <h2 id="model.dif_eq.calculate_dyn_temperature_evolution" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">calculate_dyn_temperature_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">rho_Cp0</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">Jt</span><span class="p">,</span> <span class="n">Q_r</span><span class="p">,</span> <span class="n">Q_sorp</span><span class="p">,</span> <span class="n">Q_liq</span><span class="p">,</span> <span class="n">Q_p</span><span class="p">,</span> <span class="n">Q_e</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">calculate_dyn_temperature_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">rho_Cp0</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmpl</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">Jt</span><span class="p">,</span> <span class="n">Q_r</span><span class="p">,</span> <span class="n">Q_sorp</span><span class="p">,</span> <span class="n">Q_liq</span><span class="p">,</span> <span class="n">Q_p</span><span class="p">,</span> <span class="n">Q_e</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h2>
 
@@ -1685,11 +1903,27 @@ sv is a contraction of solver_variables for enhanced readability.</p>
               </div>
             </li>
             <li>
-              <b><code>Hcl</code></b>
+              <b><code>Hmpl</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Thickness of the catalyst layer, in m.</p>
+                <p>Thickness of the microporous layer, in m.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Hacl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Thickness of the anode catalyst layer, in m.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Hccl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Thickness of the cathode catalyst layer, in m.</p>
               </div>
             </li>
             <li>
@@ -1763,72 +1997,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>model/dif_eq.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">374</span>
-<span class="normal">375</span>
-<span class="normal">376</span>
-<span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span>
-<span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span>
-<span class="normal">383</span>
-<span class="normal">384</span>
-<span class="normal">385</span>
-<span class="normal">386</span>
-<span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span>
-<span class="normal">390</span>
-<span class="normal">391</span>
-<span class="normal">392</span>
-<span class="normal">393</span>
-<span class="normal">394</span>
-<span class="normal">395</span>
-<span class="normal">396</span>
-<span class="normal">397</span>
-<span class="normal">398</span>
-<span class="normal">399</span>
-<span class="normal">400</span>
-<span class="normal">401</span>
-<span class="normal">402</span>
-<span class="normal">403</span>
-<span class="normal">404</span>
-<span class="normal">405</span>
-<span class="normal">406</span>
-<span class="normal">407</span>
-<span class="normal">408</span>
-<span class="normal">409</span>
-<span class="normal">410</span>
-<span class="normal">411</span>
-<span class="normal">412</span>
-<span class="normal">413</span>
-<span class="normal">414</span>
-<span class="normal">415</span>
-<span class="normal">416</span>
-<span class="normal">417</span>
-<span class="normal">418</span>
-<span class="normal">419</span>
-<span class="normal">420</span>
-<span class="normal">421</span>
-<span class="normal">422</span>
-<span class="normal">423</span>
-<span class="normal">424</span>
-<span class="normal">425</span>
-<span class="normal">426</span>
-<span class="normal">427</span>
-<span class="normal">428</span>
-<span class="normal">429</span>
-<span class="normal">430</span>
-<span class="normal">431</span>
-<span class="normal">432</span>
-<span class="normal">433</span>
-<span class="normal">434</span>
-<span class="normal">435</span>
-<span class="normal">436</span>
-<span class="normal">437</span>
-<span class="normal">438</span>
-<span class="normal">439</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">439</span>
 <span class="normal">440</span>
 <span class="normal">441</span>
 <span class="normal">442</span>
@@ -1837,7 +2006,85 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 <span class="normal">445</span>
 <span class="normal">446</span>
 <span class="normal">447</span>
-<span class="normal">448</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_dyn_temperature_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">rho_Cp0</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">Jt</span><span class="p">,</span> <span class="n">Q_r</span><span class="p">,</span> <span class="n">Q_sorp</span><span class="p">,</span> <span class="n">Q_liq</span><span class="p">,</span> <span class="n">Q_p</span><span class="p">,</span> <span class="n">Q_e</span><span class="p">,</span>
+<span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span>
+<span class="normal">454</span>
+<span class="normal">455</span>
+<span class="normal">456</span>
+<span class="normal">457</span>
+<span class="normal">458</span>
+<span class="normal">459</span>
+<span class="normal">460</span>
+<span class="normal">461</span>
+<span class="normal">462</span>
+<span class="normal">463</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span>
+<span class="normal">471</span>
+<span class="normal">472</span>
+<span class="normal">473</span>
+<span class="normal">474</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span>
+<span class="normal">489</span>
+<span class="normal">490</span>
+<span class="normal">491</span>
+<span class="normal">492</span>
+<span class="normal">493</span>
+<span class="normal">494</span>
+<span class="normal">495</span>
+<span class="normal">496</span>
+<span class="normal">497</span>
+<span class="normal">498</span>
+<span class="normal">499</span>
+<span class="normal">500</span>
+<span class="normal">501</span>
+<span class="normal">502</span>
+<span class="normal">503</span>
+<span class="normal">504</span>
+<span class="normal">505</span>
+<span class="normal">506</span>
+<span class="normal">507</span>
+<span class="normal">508</span>
+<span class="normal">509</span>
+<span class="normal">510</span>
+<span class="normal">511</span>
+<span class="normal">512</span>
+<span class="normal">513</span>
+<span class="normal">514</span>
+<span class="normal">515</span>
+<span class="normal">516</span>
+<span class="normal">517</span>
+<span class="normal">518</span>
+<span class="normal">519</span>
+<span class="normal">520</span>
+<span class="normal">521</span>
+<span class="normal">522</span>
+<span class="normal">523</span>
+<span class="normal">524</span>
+<span class="normal">525</span>
+<span class="normal">526</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_dyn_temperature_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">rho_Cp0</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmpl</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">Jt</span><span class="p">,</span> <span class="n">Q_r</span><span class="p">,</span> <span class="n">Q_sorp</span><span class="p">,</span> <span class="n">Q_liq</span><span class="p">,</span> <span class="n">Q_p</span><span class="p">,</span> <span class="n">Q_e</span><span class="p">,</span>
                                         <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function calculates the dynamic evolution of the temperature in the fuel cell.</span>
@@ -1850,8 +2097,12 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 <span class="sd">        Volumetric heat capacity of the different components of the fuel cell system, in J.m-3.K-1.</span>
 <span class="sd">    Hgdl : float</span>
 <span class="sd">        Thickness of the gas diffusion layer, in m.</span>
-<span class="sd">    Hcl : float</span>
-<span class="sd">        Thickness of the catalyst layer, in m.</span>
+<span class="sd">    Hmpl : float</span>
+<span class="sd">        Thickness of the microporous layer, in m.</span>
+<span class="sd">    Hacl : float</span>
+<span class="sd">        Thickness of the anode catalyst layer, in m.</span>
+<span class="sd">    Hccl : float</span>
+<span class="sd">        Thickness of the cathode catalyst layer, in m.</span>
 <span class="sd">    Hmem : float</span>
 <span class="sd">        Thickness of the membrane, in m.</span>
 <span class="sd">    n_gdl : int</span>
@@ -1882,12 +2133,16 @@ sv is a contraction of solver_variables for enhanced readability.</p>
                                       <span class="p">(</span> <span class="p">(</span><span class="n">Jt</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agdl_agdl_</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">Jt</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agdl_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span> <span class="o">+</span>
                                         <span class="n">Q_liq</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Q_e</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="p">)</span>
     <span class="n">dif_eq</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;dT_agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1"> / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">rho_Cp0</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span> <span class="o">*</span> \
-                                      <span class="p">(</span> <span class="p">(</span><span class="n">Jt</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agdl_agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">Jt</span><span class="p">[</span><span class="s1">&#39;agdl_acl&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span> <span class="o">+</span>
+                                      <span class="p">(</span> <span class="p">(</span><span class="n">Jt</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agdl_agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">Jt</span><span class="p">[</span><span class="s1">&#39;agdl_ampl&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span> <span class="o">+</span>
                                         <span class="n">Q_liq</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Q_e</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="p">)</span>
+    <span class="c1">#      Inside the AMPL</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dT_ampl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">rho_Cp0</span><span class="p">[</span><span class="s1">&#39;ampl&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span> <span class="p">(</span><span class="n">Jt</span><span class="p">[</span><span class="s1">&#39;agdl_ampl&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">Jt</span><span class="p">[</span><span class="s1">&#39;ampl_acl&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">Hmpl</span> <span class="o">+</span>
+                              <span class="n">Q_liq</span><span class="p">[</span><span class="s1">&#39;ampl&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Q_e</span><span class="p">[</span><span class="s1">&#39;ampl&#39;</span><span class="p">]</span> <span class="p">)</span>
+
     <span class="c1">#      Inside the ACL</span>
     <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dT_acl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">rho_Cp0</span><span class="p">[</span><span class="s1">&#39;acl&#39;</span><span class="p">])</span> <span class="o">*</span> \
-                            <span class="p">(</span> <span class="p">(</span><span class="n">Jt</span><span class="p">[</span><span class="s1">&#39;agdl_acl&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">Jt</span><span class="p">[</span><span class="s1">&#39;acl_mem&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">Hcl</span> <span class="o">+</span>
-                              <span class="n">Q_r</span><span class="p">[</span><span class="s1">&#39;acl&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Q_sorp</span><span class="p">[</span><span class="s1">&#39;acl&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Q_liq</span><span class="p">[</span><span class="s1">&#39;acl&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Q_e</span><span class="p">[</span><span class="s1">&#39;acl&#39;</span><span class="p">]</span> <span class="p">)</span>
+                            <span class="p">(</span> <span class="p">(</span><span class="n">Jt</span><span class="p">[</span><span class="s1">&#39;ampl_acl&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">Jt</span><span class="p">[</span><span class="s1">&#39;acl_mem&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">Hacl</span> <span class="o">+</span>
+                             <span class="n">Q_r</span><span class="p">[</span><span class="s1">&#39;acl&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Q_sorp</span><span class="p">[</span><span class="s1">&#39;acl&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Q_liq</span><span class="p">[</span><span class="s1">&#39;acl&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Q_e</span><span class="p">[</span><span class="s1">&#39;acl&#39;</span><span class="p">]</span> <span class="p">)</span>
 
     <span class="c1"># Inside the membrane</span>
     <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dT_mem / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">rho_Cp0</span><span class="p">[</span><span class="s1">&#39;mem&#39;</span><span class="p">])</span> <span class="o">*</span> \
@@ -1897,11 +2152,16 @@ sv is a contraction of solver_variables for enhanced readability.</p>
     <span class="c1"># At the cathode side</span>
     <span class="c1">#       Inside the CCL</span>
     <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dT_ccl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">rho_Cp0</span><span class="p">[</span><span class="s1">&#39;ccl&#39;</span><span class="p">])</span> <span class="o">*</span> \
-                            <span class="p">(</span> <span class="p">(</span><span class="n">Jt</span><span class="p">[</span><span class="s1">&#39;mem_ccl&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">Jt</span><span class="p">[</span><span class="s1">&#39;ccl_cgdl&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">Hcl</span> <span class="o">+</span>
+                            <span class="p">(</span> <span class="p">(</span><span class="n">Jt</span><span class="p">[</span><span class="s1">&#39;mem_ccl&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">Jt</span><span class="p">[</span><span class="s1">&#39;ccl_cmpl&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">Hccl</span> <span class="o">+</span>
                               <span class="n">Q_r</span><span class="p">[</span><span class="s1">&#39;ccl&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Q_sorp</span><span class="p">[</span><span class="s1">&#39;acl&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Q_liq</span><span class="p">[</span><span class="s1">&#39;ccl&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Q_p</span><span class="p">[</span><span class="s1">&#39;ccl&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Q_e</span><span class="p">[</span><span class="s1">&#39;ccl&#39;</span><span class="p">]</span> <span class="p">)</span>
+
+    <span class="c1">#      Inside the CMPL</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dT_cmpl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">rho_Cp0</span><span class="p">[</span><span class="s1">&#39;cmpl&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="p">((</span><span class="n">Jt</span><span class="p">[</span><span class="s1">&#39;ccl_cmpl&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">Jt</span><span class="p">[</span><span class="s1">&#39;cmpl_cgdl&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">Hmpl</span> <span class="o">+</span>
+                                                      <span class="n">Q_liq</span><span class="p">[</span><span class="s1">&#39;cmpl&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Q_e</span><span class="p">[</span><span class="s1">&#39;cmpl&#39;</span><span class="p">])</span>
+
     <span class="c1">#       Inside the CGDL</span>
     <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dT_cgdl_1 / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">rho_Cp0</span><span class="p">[</span><span class="s1">&#39;cgdl_1&#39;</span><span class="p">])</span> <span class="o">*</span> \
-                               <span class="p">(</span> <span class="p">(</span><span class="n">Jt</span><span class="p">[</span><span class="s1">&#39;ccl_cgdl&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">Jt</span><span class="p">[</span><span class="s1">&#39;cgdl_cgdl_1&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span> <span class="o">+</span>
+                               <span class="p">(</span> <span class="p">(</span><span class="n">Jt</span><span class="p">[</span><span class="s1">&#39;cmpl_cgdl&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">Jt</span><span class="p">[</span><span class="s1">&#39;cgdl_cgdl_1&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span> <span class="o">+</span>
                                  <span class="n">Q_liq</span><span class="p">[</span><span class="s1">&#39;cgdl_1&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Q_e</span><span class="p">[</span><span class="s1">&#39;cgdl_1&#39;</span><span class="p">]</span> <span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">):</span>
         <span class="n">dif_eq</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;dT_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">rho_Cp0</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span> <span class="o">*</span> \
@@ -2030,60 +2290,60 @@ This function has to be executed after 'calculate_dyn_vapor_evolution' and 'calc
 </table>
             <details class="quote">
               <summary>Source code in <code>model/dif_eq.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">620</span>
-<span class="normal">621</span>
-<span class="normal">622</span>
-<span class="normal">623</span>
-<span class="normal">624</span>
-<span class="normal">625</span>
-<span class="normal">626</span>
-<span class="normal">627</span>
-<span class="normal">628</span>
-<span class="normal">629</span>
-<span class="normal">630</span>
-<span class="normal">631</span>
-<span class="normal">632</span>
-<span class="normal">633</span>
-<span class="normal">634</span>
-<span class="normal">635</span>
-<span class="normal">636</span>
-<span class="normal">637</span>
-<span class="normal">638</span>
-<span class="normal">639</span>
-<span class="normal">640</span>
-<span class="normal">641</span>
-<span class="normal">642</span>
-<span class="normal">643</span>
-<span class="normal">644</span>
-<span class="normal">645</span>
-<span class="normal">646</span>
-<span class="normal">647</span>
-<span class="normal">648</span>
-<span class="normal">649</span>
-<span class="normal">650</span>
-<span class="normal">651</span>
-<span class="normal">652</span>
-<span class="normal">653</span>
-<span class="normal">654</span>
-<span class="normal">655</span>
-<span class="normal">656</span>
-<span class="normal">657</span>
-<span class="normal">658</span>
-<span class="normal">659</span>
-<span class="normal">660</span>
-<span class="normal">661</span>
-<span class="normal">662</span>
-<span class="normal">663</span>
-<span class="normal">664</span>
-<span class="normal">665</span>
-<span class="normal">666</span>
-<span class="normal">667</span>
-<span class="normal">668</span>
-<span class="normal">669</span>
-<span class="normal">670</span>
-<span class="normal">671</span>
-<span class="normal">672</span>
-<span class="normal">673</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_dyn_throttle_area_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">Pagc</span><span class="p">,</span> <span class="n">Pcgc</span><span class="p">,</span> <span class="n">T_agc</span><span class="p">,</span> <span class="n">T_cgc</span><span class="p">,</span> <span class="n">Abp_a</span><span class="p">,</span> <span class="n">Abp_c</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">702</span>
+<span class="normal">703</span>
+<span class="normal">704</span>
+<span class="normal">705</span>
+<span class="normal">706</span>
+<span class="normal">707</span>
+<span class="normal">708</span>
+<span class="normal">709</span>
+<span class="normal">710</span>
+<span class="normal">711</span>
+<span class="normal">712</span>
+<span class="normal">713</span>
+<span class="normal">714</span>
+<span class="normal">715</span>
+<span class="normal">716</span>
+<span class="normal">717</span>
+<span class="normal">718</span>
+<span class="normal">719</span>
+<span class="normal">720</span>
+<span class="normal">721</span>
+<span class="normal">722</span>
+<span class="normal">723</span>
+<span class="normal">724</span>
+<span class="normal">725</span>
+<span class="normal">726</span>
+<span class="normal">727</span>
+<span class="normal">728</span>
+<span class="normal">729</span>
+<span class="normal">730</span>
+<span class="normal">731</span>
+<span class="normal">732</span>
+<span class="normal">733</span>
+<span class="normal">734</span>
+<span class="normal">735</span>
+<span class="normal">736</span>
+<span class="normal">737</span>
+<span class="normal">738</span>
+<span class="normal">739</span>
+<span class="normal">740</span>
+<span class="normal">741</span>
+<span class="normal">742</span>
+<span class="normal">743</span>
+<span class="normal">744</span>
+<span class="normal">745</span>
+<span class="normal">746</span>
+<span class="normal">747</span>
+<span class="normal">748</span>
+<span class="normal">749</span>
+<span class="normal">750</span>
+<span class="normal">751</span>
+<span class="normal">752</span>
+<span class="normal">753</span>
+<span class="normal">754</span>
+<span class="normal">755</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_dyn_throttle_area_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">Pagc</span><span class="p">,</span> <span class="n">Pcgc</span><span class="p">,</span> <span class="n">T_agc</span><span class="p">,</span> <span class="n">T_cgc</span><span class="p">,</span> <span class="n">Abp_a</span><span class="p">,</span> <span class="n">Abp_c</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span>
                                           <span class="n">type_auxiliary</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the dynamic evolution of the throttle area inside the anode and cathode auxiliaries.</span>
 <span class="sd">    This function has to be executed after &#39;calculate_dyn_vapor_evolution&#39; and &#39;calculate_dyn_H2_O2_N2_evolution&#39;.</span>
@@ -2147,7 +2407,7 @@ This function has to be executed after 'calculate_dyn_vapor_evolution' and 'calc
 
 
 <h2 id="model.dif_eq.calculate_dyn_vapor_evolution" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">calculate_dyn_vapor_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">sv</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">Jv_a_in</span><span class="p">,</span> <span class="n">Jv_a_out</span><span class="p">,</span> <span class="n">Jv_c_in</span><span class="p">,</span> <span class="n">Jv_c_out</span><span class="p">,</span> <span class="n">Jv_agc_agdl</span><span class="p">,</span> <span class="n">Jv_agdl_agdl</span><span class="p">,</span> <span class="n">Jv_agdl_acl</span><span class="p">,</span> <span class="n">S_abs_acl</span><span class="p">,</span> <span class="n">S_abs_ccl</span><span class="p">,</span> <span class="n">Jv_ccl_cgdl</span><span class="p">,</span> <span class="n">Jv_cgdl_cgdl</span><span class="p">,</span> <span class="n">Jv_cgdl_cgc</span><span class="p">,</span> <span class="n">Sv_agdl</span><span class="p">,</span> <span class="n">Sv_acl</span><span class="p">,</span> <span class="n">Sv_ccl</span><span class="p">,</span> <span class="n">Sv_cgdl</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">calculate_dyn_vapor_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">sv</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmpl</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">Hagc</span><span class="p">,</span> <span class="n">Hcgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_cl</span><span class="p">,</span> <span class="n">epsilon_mpl</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">Jv_a_in</span><span class="p">,</span> <span class="n">Jv_a_out</span><span class="p">,</span> <span class="n">Jv_c_in</span><span class="p">,</span> <span class="n">Jv_c_out</span><span class="p">,</span> <span class="n">Jv_agc_agdl</span><span class="p">,</span> <span class="n">Jv_agdl_agdl</span><span class="p">,</span> <span class="n">Jv_agdl_ampl</span><span class="p">,</span> <span class="n">Jv_ampl_acl</span><span class="p">,</span> <span class="n">S_abs_acl</span><span class="p">,</span> <span class="n">S_abs_ccl</span><span class="p">,</span> <span class="n">Jv_ccl_cmpl</span><span class="p">,</span> <span class="n">Jv_cmpl_cgdl</span><span class="p">,</span> <span class="n">Jv_cgdl_cgdl</span><span class="p">,</span> <span class="n">Jv_cgdl_cgc</span><span class="p">,</span> <span class="n">Sv_agdl</span><span class="p">,</span> <span class="n">Sv_ampl</span><span class="p">,</span> <span class="n">Sv_acl</span><span class="p">,</span> <span class="n">Sv_ccl</span><span class="p">,</span> <span class="n">Sv_cmpl</span><span class="p">,</span> <span class="n">Sv_cgdl</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h2>
 
@@ -2194,19 +2454,43 @@ sv is a contraction of solver_variables for enhanced readability.</p>
               </div>
             </li>
             <li>
-              <b><code>Hcl</code></b>
+              <b><code>Hmpl</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Thickness of the catalyst layer (m).</p>
+                <p>Thickness of the microporous layer (m).</p>
               </div>
             </li>
             <li>
-              <b><code>Hgc</code></b>
+              <b><code>Hacl</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Thickness of the gas channel (m).</p>
+                <p>Thickness of the anode catalyst layer (m).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Hccl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Thickness of the cathode catalyst layer (m).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Hagc</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Thickness of the anode gas channel (m).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Hcgc</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Thickness of the cathode gas channel (m).</p>
               </div>
             </li>
             <li>
@@ -2223,6 +2507,22 @@ sv is a contraction of solver_variables for enhanced readability.</p>
               –
               <div class="doc-md-description">
                 <p>Anode/cathode GDL porosity.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>epsilon_cl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Anode/cathode CL porosity.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>epsilon_mpl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Anode/cathode MPL porosity.</p>
               </div>
             </li>
             <li>
@@ -2275,18 +2575,26 @@ sv is a contraction of solver_variables for enhanced readability.</p>
             </li>
             <li>
               <b><code>Jv_agdl_agdl</code></b>
-                  (<code>list</code>)
+                  (<code>float</code>)
               –
               <div class="doc-md-description">
                 <p>Water vapor flow between two nodes of the anode GDL (mol.m-2.s-1).</p>
               </div>
             </li>
             <li>
-              <b><code>Jv_agdl_acl</code></b>
+              <b><code>Jv_agdl_ampl</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Water vapor flow between the anode GDL and the anode CL (mol.m-2.s-1).</p>
+                <p>Water vapor flow between the last node of the anode GDL and the anode microporous layer (mol.m-2.s-1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Jv_ampl_acl</code></b>
+                  (<code>list</code>)
+              –
+              <div class="doc-md-description">
+                <p>Water vapor flow between the anode microporous layer and the anode catalyst layer (mol.m-2.s-1).</p>
               </div>
             </li>
             <li>
@@ -2304,11 +2612,19 @@ sv is a contraction of solver_variables for enhanced readability.</p>
               </div>
             </li>
             <li>
-              <b><code>Jv_ccl_cgdl</code></b>
+              <b><code>Jv_ccl_cmpl</code></b>
+                  (<code>list</code>)
+              –
+              <div class="doc-md-description">
+                <p>Water vapor flow between the cathode catalyst layer and the cathode microporous layer (mol.m-2.s-1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Jv_cmpl_cgdl</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Water vapor flow between the cathode CL and the cathode GDL (mol.m-2.s-1).</p>
+                <p>Water vapor flow between the cathode microporous layer and the first node of the cathode GDL (mol.m-2.s-1).</p>
               </div>
             </li>
             <li>
@@ -2336,6 +2652,14 @@ sv is a contraction of solver_variables for enhanced readability.</p>
               </div>
             </li>
             <li>
+              <b><code>Sv_ampl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Water vapor produced in the anode microporous layer (mol.m-3.s-1).</p>
+              </div>
+            </li>
+            <li>
               <b><code>Sv_acl</code></b>
                   (<code>float</code>)
               –
@@ -2349,6 +2673,14 @@ sv is a contraction of solver_variables for enhanced readability.</p>
               –
               <div class="doc-md-description">
                 <p>Water vapor produced in the cathode CL (mol.m-3.s-1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Sv_cmpl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Water vapor produced in the cathode microporous layer (mol.m-3.s-1).</p>
               </div>
             </li>
             <li>
@@ -2366,29 +2698,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>model/dif_eq.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">199</span>
-<span class="normal">200</span>
-<span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">221</span>
 <span class="normal">222</span>
 <span class="normal">223</span>
 <span class="normal">224</span>
@@ -2451,9 +2761,57 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 <span class="normal">281</span>
 <span class="normal">282</span>
 <span class="normal">283</span>
-<span class="normal">284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_dyn_vapor_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">sv</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">Hgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">Jv_a_in</span><span class="p">,</span> <span class="n">Jv_a_out</span><span class="p">,</span> <span class="n">Jv_c_in</span><span class="p">,</span>
-                                  <span class="n">Jv_c_out</span><span class="p">,</span> <span class="n">Jv_agc_agdl</span><span class="p">,</span> <span class="n">Jv_agdl_agdl</span><span class="p">,</span> <span class="n">Jv_agdl_acl</span><span class="p">,</span> <span class="n">S_abs_acl</span><span class="p">,</span> <span class="n">S_abs_ccl</span><span class="p">,</span> <span class="n">Jv_ccl_cgdl</span><span class="p">,</span>
-                                  <span class="n">Jv_cgdl_cgdl</span><span class="p">,</span> <span class="n">Jv_cgdl_cgc</span><span class="p">,</span> <span class="n">Sv_agdl</span><span class="p">,</span> <span class="n">Sv_acl</span><span class="p">,</span> <span class="n">Sv_ccl</span><span class="p">,</span> <span class="n">Sv_cgdl</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_dyn_vapor_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">sv</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmpl</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">Hagc</span><span class="p">,</span> <span class="n">Hcgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_cl</span><span class="p">,</span>
+                                  <span class="n">epsilon_mpl</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">Jv_a_in</span><span class="p">,</span> <span class="n">Jv_a_out</span><span class="p">,</span> <span class="n">Jv_c_in</span><span class="p">,</span> <span class="n">Jv_c_out</span><span class="p">,</span> <span class="n">Jv_agc_agdl</span><span class="p">,</span> <span class="n">Jv_agdl_agdl</span><span class="p">,</span>
+                                  <span class="n">Jv_agdl_ampl</span><span class="p">,</span> <span class="n">Jv_ampl_acl</span><span class="p">,</span> <span class="n">S_abs_acl</span><span class="p">,</span> <span class="n">S_abs_ccl</span><span class="p">,</span> <span class="n">Jv_ccl_cmpl</span><span class="p">,</span> <span class="n">Jv_cmpl_cgdl</span><span class="p">,</span>
+                                  <span class="n">Jv_cgdl_cgdl</span><span class="p">,</span> <span class="n">Jv_cgdl_cgc</span><span class="p">,</span> <span class="n">Sv_agdl</span><span class="p">,</span> <span class="n">Sv_ampl</span><span class="p">,</span> <span class="n">Sv_acl</span><span class="p">,</span> <span class="n">Sv_ccl</span><span class="p">,</span> <span class="n">Sv_cmpl</span><span class="p">,</span> <span class="n">Sv_cgdl</span><span class="p">,</span>
+                                  <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the dynamic evolution of the vapor in the gas channels, the gas diffusion layers and the</span>
 <span class="sd">    catalyst layers.</span>
 
@@ -2466,14 +2824,24 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 <span class="sd">        sv is a contraction of solver_variables for enhanced readability.</span>
 <span class="sd">    Hgdl : float</span>
 <span class="sd">        Thickness of the gas diffusion layer (m).</span>
-<span class="sd">    Hcl : float</span>
-<span class="sd">        Thickness of the catalyst layer (m).</span>
-<span class="sd">    Hgc : float</span>
-<span class="sd">        Thickness of the gas channel (m).</span>
+<span class="sd">    Hmpl : float</span>
+<span class="sd">        Thickness of the microporous layer (m).</span>
+<span class="sd">    Hacl : float</span>
+<span class="sd">        Thickness of the anode catalyst layer (m).</span>
+<span class="sd">    Hccl : float</span>
+<span class="sd">        Thickness of the cathode catalyst layer (m).</span>
+<span class="sd">    Hagc : float</span>
+<span class="sd">        Thickness of the anode gas channel (m).</span>
+<span class="sd">    Hcgc : float</span>
+<span class="sd">        Thickness of the cathode gas channel (m).</span>
 <span class="sd">    Lgc : float</span>
 <span class="sd">        Length of the gas channel (m).</span>
 <span class="sd">    epsilon_gdl : float</span>
 <span class="sd">        Anode/cathode GDL porosity.</span>
+<span class="sd">    epsilon_cl : float</span>
+<span class="sd">        Anode/cathode CL porosity.</span>
+<span class="sd">    epsilon_mpl : float</span>
+<span class="sd">        Anode/cathode MPL porosity.</span>
 <span class="sd">    n_gdl : int</span>
 <span class="sd">        Number of model nodes placed inside each GDL.</span>
 <span class="sd">    Jv_a_in : float</span>
@@ -2486,33 +2854,41 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 <span class="sd">        Water vapor flow at the cathode outlet (mol.m-2.s-1).</span>
 <span class="sd">    Jv_agc_agdl : float</span>
 <span class="sd">        Water vapor flow between the anode gas channel and the anode GDL (mol.m-2.s-1).</span>
-<span class="sd">    Jv_agdl_agdl : list</span>
+<span class="sd">    Jv_agdl_agdl : float</span>
 <span class="sd">        Water vapor flow between two nodes of the anode GDL (mol.m-2.s-1).</span>
-<span class="sd">    Jv_agdl_acl : float</span>
-<span class="sd">        Water vapor flow between the anode GDL and the anode CL (mol.m-2.s-1).</span>
+<span class="sd">    Jv_agdl_ampl : float</span>
+<span class="sd">        Water vapor flow between the last node of the anode GDL and the anode microporous layer (mol.m-2.s-1).</span>
+<span class="sd">    Jv_ampl_acl : list</span>
+<span class="sd">        Water vapor flow between the anode microporous layer and the anode catalyst layer (mol.m-2.s-1).</span>
 <span class="sd">    S_abs_acl: float</span>
 <span class="sd">        Water vapor absorption in the anode CL (mol.m-3.s-1).</span>
 <span class="sd">    S_abs_ccl: float</span>
 <span class="sd">        Water vapor absorption in the cathode CL (mol.m-3.s-1).</span>
-<span class="sd">    Jv_ccl_cgdl : float</span>
-<span class="sd">        Water vapor flow between the cathode CL and the cathode GDL (mol.m-2.s-1).</span>
+<span class="sd">    Jv_ccl_cmpl : list</span>
+<span class="sd">        Water vapor flow between the cathode catalyst layer and the cathode microporous layer (mol.m-2.s-1).</span>
+<span class="sd">    Jv_cmpl_cgdl : float</span>
+<span class="sd">        Water vapor flow between the cathode microporous layer and the first node of the cathode GDL (mol.m-2.s-1).</span>
 <span class="sd">    Jv_cgdl_cgdl : list</span>
 <span class="sd">        Water vapor flow between two nodes of the cathode GDL (mol.m-2.s-1).</span>
 <span class="sd">    Jv_cgdl_cgc : float</span>
 <span class="sd">        Water vapor flow between the cathode GDL and the cathode gas channel (mol.m-2.s-1).</span>
 <span class="sd">    Sv_agdl : list</span>
 <span class="sd">        Water vapor produced in the anode GDL (mol.m-3.s-1).</span>
+<span class="sd">    Sv_ampl : float</span>
+<span class="sd">        Water vapor produced in the anode microporous layer (mol.m-3.s-1).</span>
 <span class="sd">    Sv_acl : float</span>
 <span class="sd">        Water vapor produced in the anode CL (mol.m-3.s-1).</span>
 <span class="sd">    Sv_ccl : float</span>
 <span class="sd">        Water vapor produced in the cathode CL (mol.m-3.s-1).</span>
+<span class="sd">    Sv_cmpl : float</span>
+<span class="sd">        Water vapor produced in the cathode microporous layer (mol.m-3.s-1).</span>
 <span class="sd">    Sv_cgdl : list</span>
 <span class="sd">        Water vapor produced in the cathode GDL (mol.m-3.s-1).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># At the anode side</span>
     <span class="c1">#       Inside the AGC</span>
-    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_v_agc / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Jv_a_in</span> <span class="o">-</span> <span class="n">Jv_a_out</span><span class="p">)</span> <span class="o">/</span> <span class="n">Lgc</span> <span class="o">-</span> <span class="n">Jv_agc_agdl</span> <span class="o">/</span> <span class="n">Hgc</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_v_agc / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Jv_a_in</span> <span class="o">-</span> <span class="n">Jv_a_out</span><span class="p">)</span> <span class="o">/</span> <span class="n">Lgc</span> <span class="o">-</span> <span class="n">Jv_agc_agdl</span> <span class="o">/</span> <span class="n">Hagc</span>
     <span class="c1">#       Inside the AGDL</span>
     <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_v_agdl_1 / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_gdl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_agdl_1&#39;</span><span class="p">]))</span> <span class="o">*</span> \
                                  <span class="p">((</span><span class="n">Jv_agc_agdl</span> <span class="o">-</span> <span class="n">Jv_agdl_agdl</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span> <span class="o">+</span> <span class="n">Sv_agdl</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
@@ -2520,23 +2896,27 @@ sv is a contraction of solver_variables for enhanced readability.</p>
         <span class="n">dif_eq</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;dC_v_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_gdl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_agdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]))</span> <span class="o">*</span> \
                                         <span class="p">((</span><span class="n">Jv_agdl_agdl</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">Jv_agdl_agdl</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span> <span class="o">+</span> <span class="n">Sv_agdl</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
     <span class="n">dif_eq</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;dC_v_agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1"> / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_gdl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]))</span> <span class="o">*</span> \
-                                        <span class="p">((</span><span class="n">Jv_agdl_agdl</span><span class="p">[</span><span class="n">n_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">Jv_agdl_acl</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span> <span class="o">+</span> <span class="n">Sv_agdl</span><span class="p">[</span><span class="n">n_gdl</span><span class="p">])</span>
+                                        <span class="p">((</span><span class="n">Jv_agdl_agdl</span><span class="p">[</span><span class="n">n_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">Jv_agdl_ampl</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span> <span class="o">+</span> <span class="n">Sv_agdl</span><span class="p">[</span><span class="n">n_gdl</span><span class="p">])</span>
+    <span class="c1">#       Inside the AMPL</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_v_ampl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_mpl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_ampl&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="p">((</span><span class="n">Jv_agdl_ampl</span> <span class="o">-</span> <span class="n">Jv_ampl_acl</span><span class="p">)</span> <span class="o">/</span> <span class="n">Hmpl</span> <span class="o">+</span> <span class="n">Sv_ampl</span><span class="p">)</span>
     <span class="c1">#       Inside the ACL</span>
-    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_v_acl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_cl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_acl&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="p">(</span><span class="n">Jv_agdl_acl</span> <span class="o">/</span> <span class="n">Hcl</span> <span class="o">-</span> <span class="n">S_abs_acl</span> <span class="o">+</span> <span class="n">Sv_acl</span><span class="p">)</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_v_acl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_cl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_acl&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="p">(</span><span class="n">Jv_ampl_acl</span> <span class="o">/</span> <span class="n">Hacl</span> <span class="o">-</span> <span class="n">S_abs_acl</span> <span class="o">+</span> <span class="n">Sv_acl</span><span class="p">)</span>
 
     <span class="c1"># At the cathode side</span>
     <span class="c1">#       Inside the CCL</span>
-    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_v_ccl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_cl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_ccl&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span> <span class="n">Jv_ccl_cgdl</span> <span class="o">/</span> <span class="n">Hcl</span> <span class="o">-</span> <span class="n">S_abs_ccl</span> <span class="o">+</span> <span class="n">Sv_ccl</span><span class="p">)</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_v_ccl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_cl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_ccl&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span> <span class="n">Jv_ccl_cmpl</span> <span class="o">/</span> <span class="n">Hccl</span> <span class="o">-</span> <span class="n">S_abs_ccl</span> <span class="o">+</span> <span class="n">Sv_ccl</span><span class="p">)</span>
+    <span class="c1">#       Inside the CMPL</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_v_cmpl / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_mpl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_cmpl&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="p">((</span><span class="n">Jv_ccl_cmpl</span> <span class="o">-</span> <span class="n">Jv_cmpl_cgdl</span><span class="p">)</span> <span class="o">/</span> <span class="n">Hmpl</span> <span class="o">+</span> <span class="n">Sv_cmpl</span><span class="p">)</span>
     <span class="c1">#       Inside the CGDL</span>
     <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_v_cgdl_1 / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_gdl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;s_cgdl_1&#39;</span><span class="p">]))</span> <span class="o">*</span> \
-                                 <span class="p">((</span><span class="n">Jv_ccl_cgdl</span> <span class="o">-</span> <span class="n">Jv_cgdl_cgdl</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span> <span class="o">+</span> <span class="n">Sv_cgdl</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                                 <span class="p">((</span><span class="n">Jv_cmpl_cgdl</span> <span class="o">-</span> <span class="n">Jv_cgdl_cgdl</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span> <span class="o">+</span> <span class="n">Sv_cgdl</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">):</span>
         <span class="n">dif_eq</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;dC_v_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_gdl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_cgdl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]))</span> <span class="o">*</span> \
                                         <span class="p">((</span><span class="n">Jv_cgdl_cgdl</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">Jv_cgdl_cgdl</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span> <span class="o">+</span> <span class="n">Sv_cgdl</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
     <span class="n">dif_eq</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;dC_v_cgdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1"> / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_gdl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_cgdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]))</span> <span class="o">*</span> \
                                         <span class="p">((</span><span class="n">Jv_cgdl_cgdl</span><span class="p">[</span><span class="n">n_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">Jv_cgdl_cgc</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">n_gdl</span><span class="p">)</span> <span class="o">+</span> <span class="n">Sv_cgdl</span><span class="p">[</span><span class="n">n_gdl</span><span class="p">])</span>
     <span class="c1">#       Inside the CGC</span>
-    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_v_cgc / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Jv_c_in</span> <span class="o">-</span> <span class="n">Jv_c_out</span><span class="p">)</span> <span class="o">/</span> <span class="n">Lgc</span> <span class="o">+</span> <span class="n">Jv_cgdl_cgc</span> <span class="o">/</span> <span class="n">Hgc</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;dC_v_cgc / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Jv_c_in</span> <span class="o">-</span> <span class="n">Jv_c_out</span><span class="p">)</span> <span class="o">/</span> <span class="n">Lgc</span> <span class="o">+</span> <span class="n">Jv_cgdl_cgc</span> <span class="o">/</span> <span class="n">Hcgc</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2547,7 +2927,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 
 
 <h2 id="model.dif_eq.calculate_dyn_voltage_evolution" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">calculate_dyn_voltage_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">i_fc</span><span class="p">,</span> <span class="n">C_O2_ccl</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">,</span> <span class="n">eta_c</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">i_n</span><span class="p">,</span> <span class="n">f_drop</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">calculate_dyn_voltage_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">i_fc</span><span class="p">,</span> <span class="n">C_O2_ccl</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">,</span> <span class="n">eta_c</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">i_n</span><span class="p">,</span> <span class="n">f_drop</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h2>
 
@@ -2608,11 +2988,11 @@ sv is a contraction of solver_variables for enhanced readability.</p>
               </div>
             </li>
             <li>
-              <b><code>Hcl</code></b>
+              <b><code>Hccl</code></b>
                   (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>Thickness of the catalyst layer (m).</p>
+                <p>Thickness of the cathode catalyst layer (m).</p>
               </div>
             </li>
             <li>
@@ -2662,38 +3042,38 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>model/dif_eq.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">451</span>
-<span class="normal">452</span>
-<span class="normal">453</span>
-<span class="normal">454</span>
-<span class="normal">455</span>
-<span class="normal">456</span>
-<span class="normal">457</span>
-<span class="normal">458</span>
-<span class="normal">459</span>
-<span class="normal">460</span>
-<span class="normal">461</span>
-<span class="normal">462</span>
-<span class="normal">463</span>
-<span class="normal">464</span>
-<span class="normal">465</span>
-<span class="normal">466</span>
-<span class="normal">467</span>
-<span class="normal">468</span>
-<span class="normal">469</span>
-<span class="normal">470</span>
-<span class="normal">471</span>
-<span class="normal">472</span>
-<span class="normal">473</span>
-<span class="normal">474</span>
-<span class="normal">475</span>
-<span class="normal">476</span>
-<span class="normal">477</span>
-<span class="normal">478</span>
-<span class="normal">479</span>
-<span class="normal">480</span>
-<span class="normal">481</span>
-<span class="normal">482</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_dyn_voltage_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">i_fc</span><span class="p">,</span> <span class="n">C_O2_ccl</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">,</span> <span class="n">eta_c</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">i_n</span><span class="p">,</span> <span class="n">f_drop</span><span class="p">,</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">529</span>
+<span class="normal">530</span>
+<span class="normal">531</span>
+<span class="normal">532</span>
+<span class="normal">533</span>
+<span class="normal">534</span>
+<span class="normal">535</span>
+<span class="normal">536</span>
+<span class="normal">537</span>
+<span class="normal">538</span>
+<span class="normal">539</span>
+<span class="normal">540</span>
+<span class="normal">541</span>
+<span class="normal">542</span>
+<span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span>
+<span class="normal">546</span>
+<span class="normal">547</span>
+<span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span>
+<span class="normal">551</span>
+<span class="normal">552</span>
+<span class="normal">553</span>
+<span class="normal">554</span>
+<span class="normal">555</span>
+<span class="normal">556</span>
+<span class="normal">557</span>
+<span class="normal">558</span>
+<span class="normal">559</span>
+<span class="normal">560</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_dyn_voltage_evolution</span><span class="p">(</span><span class="n">dif_eq</span><span class="p">,</span> <span class="n">i_fc</span><span class="p">,</span> <span class="n">C_O2_ccl</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">,</span> <span class="n">eta_c</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">i_n</span><span class="p">,</span> <span class="n">f_drop</span><span class="p">,</span>
                                     <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the dynamic evolution of the cell overpotential eta_c.</span>
 
@@ -2709,8 +3089,8 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 <span class="sd">        Fuel cell temperature in the cathode catalyst layer (K).</span>
 <span class="sd">    eta_c : float</span>
 <span class="sd">        Cell overpotential (V).</span>
-<span class="sd">    Hcl : float</span>
-<span class="sd">        Thickness of the catalyst layer (m).</span>
+<span class="sd">    Hccl : float</span>
+<span class="sd">        Thickness of the cathode catalyst layer (m).</span>
 <span class="sd">    i0_c_ref : float</span>
 <span class="sd">        Reference exchange current density at the cathode (A.m-2).</span>
 <span class="sd">    kappa_c : float</span>
@@ -2723,7 +3103,7 @@ sv is a contraction of solver_variables for enhanced readability.</p>
 <span class="sd">        Liquid water induced voltage drop function.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;deta_c / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">C_scl</span> <span class="o">*</span> <span class="n">Hcl</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="n">i_fc</span> <span class="o">+</span> <span class="n">i_n</span><span class="p">)</span> <span class="o">-</span> <span class="n">i0_c_ref</span> <span class="o">*</span> <span class="p">(</span><span class="n">C_O2_ccl</span> <span class="o">/</span> <span class="n">C_O2ref</span><span class="p">)</span> <span class="o">**</span> <span class="n">kappa_c</span> <span class="o">*</span>
+    <span class="n">dif_eq</span><span class="p">[</span><span class="s1">&#39;deta_c / dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">C_scl</span> <span class="o">*</span> <span class="n">Hccl</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="n">i_fc</span> <span class="o">+</span> <span class="n">i_n</span><span class="p">)</span> <span class="o">-</span> <span class="n">i0_c_ref</span> <span class="o">*</span> <span class="p">(</span><span class="n">C_O2_ccl</span> <span class="o">/</span> <span class="n">C_O2ref</span><span class="p">)</span> <span class="o">**</span> <span class="n">kappa_c</span> <span class="o">*</span>
                                                  <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">f_drop</span> <span class="o">*</span> <span class="n">alpha_c</span> <span class="o">*</span> <span class="n">F</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_ccl</span><span class="p">)</span> <span class="o">*</span> <span class="n">eta_c</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
             </details>

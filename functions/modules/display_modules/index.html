@@ -238,23 +238,23 @@ voltage. It is calculated as the maximum relative difference between the two vol
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1315</span>
-<span class="normal">1316</span>
-<span class="normal">1317</span>
-<span class="normal">1318</span>
-<span class="normal">1319</span>
-<span class="normal">1320</span>
-<span class="normal">1321</span>
-<span class="normal">1322</span>
-<span class="normal">1323</span>
-<span class="normal">1324</span>
-<span class="normal">1325</span>
-<span class="normal">1326</span>
-<span class="normal">1327</span>
-<span class="normal">1328</span>
-<span class="normal">1329</span>
-<span class="normal">1330</span>
-<span class="normal">1331</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_simulation_error</span><span class="p">(</span><span class="n">Ucell</span><span class="p">,</span> <span class="n">U_exp_t</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1338</span>
+<span class="normal">1339</span>
+<span class="normal">1340</span>
+<span class="normal">1341</span>
+<span class="normal">1342</span>
+<span class="normal">1343</span>
+<span class="normal">1344</span>
+<span class="normal">1345</span>
+<span class="normal">1346</span>
+<span class="normal">1347</span>
+<span class="normal">1348</span>
+<span class="normal">1349</span>
+<span class="normal">1350</span>
+<span class="normal">1351</span>
+<span class="normal">1352</span>
+<span class="normal">1353</span>
+<span class="normal">1354</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_simulation_error</span><span class="p">(</span><span class="n">Ucell</span><span class="p">,</span> <span class="n">U_exp_t</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the simulation error between the simulated cell voltage and the experimental cell</span>
 <span class="sd">    voltage. It is calculated as the maximum relative difference between the two voltages (in %).</span>
 
@@ -363,9 +363,7 @@ used in the FT.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">192</span>
 <span class="normal">193</span>
 <span class="normal">194</span>
 <span class="normal">195</span>
@@ -421,7 +419,9 @@ used in the FT.</p>
 <span class="normal">245</span>
 <span class="normal">246</span>
 <span class="normal">247</span>
-<span class="normal">248</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_Fourier_transformation</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_Fourier_transformation</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function calculates the Fourier transformation of both cell voltage and current density. It will be used to</span>
 <span class="sd">    display the Nyquist and Bode diagrams.</span>
@@ -452,7 +452,7 @@ used in the FT.</p>
     <span class="n">t</span><span class="p">,</span> <span class="n">Ucell_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;Ucell&#39;</span><span class="p">])</span>
     <span class="c1"># Extraction of the operating inputs and the parameters</span>
     <span class="n">current_density</span> <span class="o">=</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;current_density&#39;</span><span class="p">]</span>
-    <span class="n">t_EIS</span><span class="p">,</span> <span class="n">max_step</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;t_EIS&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;max_step&#39;</span><span class="p">]</span>
+    <span class="n">t_EIS</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;t_EIS&#39;</span><span class="p">]</span>
 
     <span class="c1"># Creation of ifc</span>
     <span class="n">ifc_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
@@ -475,7 +475,7 @@ used in the FT.</p>
         <span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Ucell_Fourier</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">N</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Ucell_Fourier</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span> <span class="o">//</span> <span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">N</span><span class="p">))</span>  <span class="c1"># Recovery of</span>
     <span class="c1">#                                                                             all amplitude values calculated by fft</span>
     <span class="n">A</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">A_period_t</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>  <span class="c1"># Amplitude at the frequency of the perturbation</span>
-    <span class="n">freq_t</span> <span class="o">=</span> <span class="n">fftfreq</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">max_step</span><span class="p">)[:</span><span class="n">N</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]</span>  <span class="c1"># Recovery of all frequency values used by fft</span>
+    <span class="n">freq_t</span> <span class="o">=</span> <span class="n">fftfreq</span><span class="p">(</span><span class="n">N</span><span class="p">)[:</span><span class="n">N</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]</span>  <span class="c1"># Recovery of all frequency values used by fft</span>
     <span class="n">f</span> <span class="o">=</span> <span class="n">freq_t</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">A_period_t</span> <span class="o">==</span> <span class="n">A</span><span class="p">)]</span>  <span class="c1"># Recovery of the studied frequency</span>
 
     <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;Ucell_Fourier&#39;</span><span class="p">:</span> <span class="n">Ucell_Fourier</span><span class="p">,</span> <span class="s1">&#39;ifc_Fourier&#39;</span><span class="p">:</span> <span class="n">ifc_Fourier</span><span class="p">,</span> <span class="s1">&#39;A_period_t&#39;</span><span class="p">:</span> <span class="n">A_period_t</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="n">A</span><span class="p">,</span>
@@ -533,36 +533,36 @@ used in the FT.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1599</span>
-<span class="normal">1600</span>
-<span class="normal">1601</span>
-<span class="normal">1602</span>
-<span class="normal">1603</span>
-<span class="normal">1604</span>
-<span class="normal">1605</span>
-<span class="normal">1606</span>
-<span class="normal">1607</span>
-<span class="normal">1608</span>
-<span class="normal">1609</span>
-<span class="normal">1610</span>
-<span class="normal">1611</span>
-<span class="normal">1612</span>
-<span class="normal">1613</span>
-<span class="normal">1614</span>
-<span class="normal">1615</span>
-<span class="normal">1616</span>
-<span class="normal">1617</span>
-<span class="normal">1618</span>
-<span class="normal">1619</span>
-<span class="normal">1620</span>
-<span class="normal">1621</span>
-<span class="normal">1622</span>
-<span class="normal">1623</span>
-<span class="normal">1624</span>
-<span class="normal">1625</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1625</span>
 <span class="normal">1626</span>
 <span class="normal">1627</span>
-<span class="normal">1628</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_Bode_amplitude_instructions</span><span class="p">(</span><span class="n">f_EIS</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">1628</span>
+<span class="normal">1629</span>
+<span class="normal">1630</span>
+<span class="normal">1631</span>
+<span class="normal">1632</span>
+<span class="normal">1633</span>
+<span class="normal">1634</span>
+<span class="normal">1635</span>
+<span class="normal">1636</span>
+<span class="normal">1637</span>
+<span class="normal">1638</span>
+<span class="normal">1639</span>
+<span class="normal">1640</span>
+<span class="normal">1641</span>
+<span class="normal">1642</span>
+<span class="normal">1643</span>
+<span class="normal">1644</span>
+<span class="normal">1645</span>
+<span class="normal">1646</span>
+<span class="normal">1647</span>
+<span class="normal">1648</span>
+<span class="normal">1649</span>
+<span class="normal">1650</span>
+<span class="normal">1651</span>
+<span class="normal">1652</span>
+<span class="normal">1653</span>
+<span class="normal">1654</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_Bode_amplitude_instructions</span><span class="p">(</span><span class="n">f_EIS</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function adds the instructions for amplitude Bode plots according to the type_input to the ax object.</span>
 
 <span class="sd">    Parameters</span>
@@ -645,38 +645,38 @@ used in the FT.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1631</span>
-<span class="normal">1632</span>
-<span class="normal">1633</span>
-<span class="normal">1634</span>
-<span class="normal">1635</span>
-<span class="normal">1636</span>
-<span class="normal">1637</span>
-<span class="normal">1638</span>
-<span class="normal">1639</span>
-<span class="normal">1640</span>
-<span class="normal">1641</span>
-<span class="normal">1642</span>
-<span class="normal">1643</span>
-<span class="normal">1644</span>
-<span class="normal">1645</span>
-<span class="normal">1646</span>
-<span class="normal">1647</span>
-<span class="normal">1648</span>
-<span class="normal">1649</span>
-<span class="normal">1650</span>
-<span class="normal">1651</span>
-<span class="normal">1652</span>
-<span class="normal">1653</span>
-<span class="normal">1654</span>
-<span class="normal">1655</span>
-<span class="normal">1656</span>
-<span class="normal">1657</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1657</span>
 <span class="normal">1658</span>
 <span class="normal">1659</span>
 <span class="normal">1660</span>
 <span class="normal">1661</span>
-<span class="normal">1662</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_Bode_phase_instructions</span><span class="p">(</span><span class="n">f_EIS</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">1662</span>
+<span class="normal">1663</span>
+<span class="normal">1664</span>
+<span class="normal">1665</span>
+<span class="normal">1666</span>
+<span class="normal">1667</span>
+<span class="normal">1668</span>
+<span class="normal">1669</span>
+<span class="normal">1670</span>
+<span class="normal">1671</span>
+<span class="normal">1672</span>
+<span class="normal">1673</span>
+<span class="normal">1674</span>
+<span class="normal">1675</span>
+<span class="normal">1676</span>
+<span class="normal">1677</span>
+<span class="normal">1678</span>
+<span class="normal">1679</span>
+<span class="normal">1680</span>
+<span class="normal">1681</span>
+<span class="normal">1682</span>
+<span class="normal">1683</span>
+<span class="normal">1684</span>
+<span class="normal">1685</span>
+<span class="normal">1686</span>
+<span class="normal">1687</span>
+<span class="normal">1688</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_Bode_phase_instructions</span><span class="p">(</span><span class="n">f_EIS</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function adds the instructions for phase Bode plots according to the type_input to the ax object.</span>
 
 <span class="sd">    Parameters</span>
@@ -769,21 +769,7 @@ used in the FT.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">751</span>
-<span class="normal">752</span>
-<span class="normal">753</span>
-<span class="normal">754</span>
-<span class="normal">755</span>
-<span class="normal">756</span>
-<span class="normal">757</span>
-<span class="normal">758</span>
-<span class="normal">759</span>
-<span class="normal">760</span>
-<span class="normal">761</span>
-<span class="normal">762</span>
-<span class="normal">763</span>
-<span class="normal">764</span>
-<span class="normal">765</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">765</span>
 <span class="normal">766</span>
 <span class="normal">767</span>
 <span class="normal">768</span>
@@ -813,7 +799,23 @@ used in the FT.</p>
 <span class="normal">792</span>
 <span class="normal">793</span>
 <span class="normal">794</span>
-<span class="normal">795</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_C_H2</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">795</span>
+<span class="normal">796</span>
+<span class="normal">797</span>
+<span class="normal">798</span>
+<span class="normal">799</span>
+<span class="normal">800</span>
+<span class="normal">801</span>
+<span class="normal">802</span>
+<span class="normal">803</span>
+<span class="normal">804</span>
+<span class="normal">805</span>
+<span class="normal">806</span>
+<span class="normal">807</span>
+<span class="normal">808</span>
+<span class="normal">809</span>
+<span class="normal">810</span>
+<span class="normal">811</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_C_H2</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function plots the hydrogen concentration at different spatial localisations, as a function of time.</span>
 
 <span class="sd">    Parameters</span>
@@ -844,13 +846,15 @@ used in the FT.</p>
     <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">C_H2_agc_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;C_H2_agc&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">C_H2_agdl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_H2_agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">C_H2_ampl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;C_H2_ampl&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">C_H2_acl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;C_H2_acl&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
 
     <span class="c1"># Plot the hydrogen concentration at different spatial localisations: C_H2</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_H2_agc_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_H2_agdl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_H2_acl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{H_</span><span class="si">{2}</span><span class="s1">,agc}}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{H_</span><span class="si">{2}</span><span class="s1">,agdl}}$&#39;</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_H2_ampl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_H2_acl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{H_</span><span class="si">{2}</span><span class="s1">,agc}}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{H_</span><span class="si">{2}</span><span class="s1">,agdl}}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{H_</span><span class="si">{2}</span><span class="s1">,ampl}}$&#39;</span><span class="p">,</span>
                <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{H_</span><span class="si">{2}</span><span class="s1">,acl}}$&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\mathbf</span><span class="si">{Time}</span><span class="s1">$ $\mathbf</span><span class="si">{t}</span><span class="s1">$ $\mathbf{\left( s \right)}$&#39;</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\mathbf</span><span class="si">{Hydrogen}</span><span class="s1">$ $\mathbf</span><span class="si">{concentration}</span><span class="s1">$ $\mathbf{C_{H_</span><span class="si">{2}</span><span class="s1">}}$ $\mathbf{\left( mol.m^{-3} \right)}$&#39;</span><span class="p">,</span>
@@ -911,25 +915,7 @@ used in the FT.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">845</span>
-<span class="normal">846</span>
-<span class="normal">847</span>
-<span class="normal">848</span>
-<span class="normal">849</span>
-<span class="normal">850</span>
-<span class="normal">851</span>
-<span class="normal">852</span>
-<span class="normal">853</span>
-<span class="normal">854</span>
-<span class="normal">855</span>
-<span class="normal">856</span>
-<span class="normal">857</span>
-<span class="normal">858</span>
-<span class="normal">859</span>
-<span class="normal">860</span>
-<span class="normal">861</span>
-<span class="normal">862</span>
-<span class="normal">863</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">863</span>
 <span class="normal">864</span>
 <span class="normal">865</span>
 <span class="normal">866</span>
@@ -948,7 +934,25 @@ used in the FT.</p>
 <span class="normal">879</span>
 <span class="normal">880</span>
 <span class="normal">881</span>
-<span class="normal">882</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_C_N2</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">882</span>
+<span class="normal">883</span>
+<span class="normal">884</span>
+<span class="normal">885</span>
+<span class="normal">886</span>
+<span class="normal">887</span>
+<span class="normal">888</span>
+<span class="normal">889</span>
+<span class="normal">890</span>
+<span class="normal">891</span>
+<span class="normal">892</span>
+<span class="normal">893</span>
+<span class="normal">894</span>
+<span class="normal">895</span>
+<span class="normal">896</span>
+<span class="normal">897</span>
+<span class="normal">898</span>
+<span class="normal">899</span>
+<span class="normal">900</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_C_N2</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function plots the nitrogen concentration as a function of time.</span>
 
 <span class="sd">    Parameters</span>
@@ -1047,23 +1051,7 @@ used in the FT.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">798</span>
-<span class="normal">799</span>
-<span class="normal">800</span>
-<span class="normal">801</span>
-<span class="normal">802</span>
-<span class="normal">803</span>
-<span class="normal">804</span>
-<span class="normal">805</span>
-<span class="normal">806</span>
-<span class="normal">807</span>
-<span class="normal">808</span>
-<span class="normal">809</span>
-<span class="normal">810</span>
-<span class="normal">811</span>
-<span class="normal">812</span>
-<span class="normal">813</span>
-<span class="normal">814</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">814</span>
 <span class="normal">815</span>
 <span class="normal">816</span>
 <span class="normal">817</span>
@@ -1091,7 +1079,25 @@ used in the FT.</p>
 <span class="normal">839</span>
 <span class="normal">840</span>
 <span class="normal">841</span>
-<span class="normal">842</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_C_O2</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">842</span>
+<span class="normal">843</span>
+<span class="normal">844</span>
+<span class="normal">845</span>
+<span class="normal">846</span>
+<span class="normal">847</span>
+<span class="normal">848</span>
+<span class="normal">849</span>
+<span class="normal">850</span>
+<span class="normal">851</span>
+<span class="normal">852</span>
+<span class="normal">853</span>
+<span class="normal">854</span>
+<span class="normal">855</span>
+<span class="normal">856</span>
+<span class="normal">857</span>
+<span class="normal">858</span>
+<span class="normal">859</span>
+<span class="normal">860</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_C_O2</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function plots the oxygen concentration at different spatial localisations, as a function of time.</span>
 
 <span class="sd">    Parameters</span>
@@ -1121,14 +1127,16 @@ used in the FT.</p>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
     <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">C_O2_ccl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;C_O2_ccl&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">C_O2_cmpl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;C_O2_cmpl&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">C_O2_cgdl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_O2_cgdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">C_O2_cgc_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;C_O2_cgc&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
 
     <span class="c1"># Plot the oxygen concentration at different spatial localisations: C_O2</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_O2_ccl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_O2_cgdl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_O2_cgc_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{O_</span><span class="si">{2}</span><span class="s1">,ccl}}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{O_</span><span class="si">{2}</span><span class="s1">,cgdl}}$&#39;</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_O2_ccl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_O2_cmpl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_O2_cgdl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">7</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_O2_cgc_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{O_</span><span class="si">{2}</span><span class="s1">,ccl}}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{O_</span><span class="si">{2}</span><span class="s1">,cmpl}}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{O_</span><span class="si">{2}</span><span class="s1">,cgdl}}$&#39;</span><span class="p">,</span>
                <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{O_</span><span class="si">{2}</span><span class="s1">,cgc}}$&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\mathbf</span><span class="si">{Time}</span><span class="s1">$ $\mathbf</span><span class="si">{t}</span><span class="s1">$ $\mathbf{\left( s \right)}$&#39;</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\mathbf</span><span class="si">{Oxygen}</span><span class="s1">$ $\mathbf</span><span class="si">{concentration}</span><span class="s1">$ $\mathbf{C_{O_</span><span class="si">{2}</span><span class="s1">}}$ $\mathbf{\left( mol.m^{-3} \right)}$&#39;</span><span class="p">,</span>
@@ -1197,9 +1205,7 @@ used in the FT.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">539</span>
-<span class="normal">540</span>
-<span class="normal">541</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">541</span>
 <span class="normal">542</span>
 <span class="normal">543</span>
 <span class="normal">544</span>
@@ -1251,7 +1257,13 @@ used in the FT.</p>
 <span class="normal">590</span>
 <span class="normal">591</span>
 <span class="normal">592</span>
-<span class="normal">593</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_C_v</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span>
+<span class="normal">596</span>
+<span class="normal">597</span>
+<span class="normal">598</span>
+<span class="normal">599</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_C_v</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function plots the vapor concentrations at different spatial localisations, as a function of time.</span>
 
 <span class="sd">    Parameters</span>
@@ -1282,8 +1294,10 @@ used in the FT.</p>
     <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">C_v_agc_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;C_v_agc&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">C_v_agdl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">C_v_ampl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;C_v_ampl&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">C_v_acl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;C_v_acl&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">C_v_ccl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;C_v_ccl&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">C_v_cmpl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;C_v_cmpl&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">C_v_cgdl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_cgdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">C_v_cgc_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;C_v_cgc&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">T_ccl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;T_ccl&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
@@ -1292,14 +1306,16 @@ used in the FT.</p>
     <span class="n">C_v_sat_ccl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">C_v_sat</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">T_ccl</span><span class="p">])</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_v_agc_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_v_agdl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_v_acl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_v_ccl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_v_cgdl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_v_cgc_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_v_ampl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_v_acl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_v_ccl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_v_cmpl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_v_cgdl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">7</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_v_cgc_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">C_v_sat_ccl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{v,agc}}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{v,agdl}}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{v,acl}}$&#39;</span><span class="p">,</span>
-               <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{v,ccl}}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{v,cgdl}}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{v,cgc}}$&#39;</span><span class="p">,</span>
-               <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{v,sat,ccl}}$&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{v,agc}}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{v,agdl}}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{v,ampl}}$&#39;</span><span class="p">,</span>
+               <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{v,acl}}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{v,ccl}}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{v,cmpl}}$&#39;</span><span class="p">,</span>
+               <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{v,cgdl}}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{v,cgc}}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{C_{v,sat,ccl}}$&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\mathbf</span><span class="si">{Time}</span><span class="s1">$ $\mathbf</span><span class="si">{t}</span><span class="s1">$ $\mathbf{\left( s \right)}$&#39;</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\mathbf</span><span class="si">{Vapor}</span><span class="s2">$ $\mathbf</span><span class="si">{concentration}</span><span class="s2">$ $\mathbf{C_</span><span class="si">{v}</span><span class="s2">}$ $\mathbf{\left( mol.m^{-3} \right)}$&quot;</span><span class="p">,</span>
                   <span class="n">labelpad</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
@@ -1383,33 +1399,7 @@ used in the FT.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1533</span>
-<span class="normal">1534</span>
-<span class="normal">1535</span>
-<span class="normal">1536</span>
-<span class="normal">1537</span>
-<span class="normal">1538</span>
-<span class="normal">1539</span>
-<span class="normal">1540</span>
-<span class="normal">1541</span>
-<span class="normal">1542</span>
-<span class="normal">1543</span>
-<span class="normal">1544</span>
-<span class="normal">1545</span>
-<span class="normal">1546</span>
-<span class="normal">1547</span>
-<span class="normal">1548</span>
-<span class="normal">1549</span>
-<span class="normal">1550</span>
-<span class="normal">1551</span>
-<span class="normal">1552</span>
-<span class="normal">1553</span>
-<span class="normal">1554</span>
-<span class="normal">1555</span>
-<span class="normal">1556</span>
-<span class="normal">1557</span>
-<span class="normal">1558</span>
-<span class="normal">1559</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1559</span>
 <span class="normal">1560</span>
 <span class="normal">1561</span>
 <span class="normal">1562</span>
@@ -1447,7 +1437,33 @@ used in the FT.</p>
 <span class="normal">1594</span>
 <span class="normal">1595</span>
 <span class="normal">1596</span>
-<span class="normal">1597</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_EIS_Nyquist_instructions</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">f_Fourier</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">1597</span>
+<span class="normal">1598</span>
+<span class="normal">1599</span>
+<span class="normal">1600</span>
+<span class="normal">1601</span>
+<span class="normal">1602</span>
+<span class="normal">1603</span>
+<span class="normal">1604</span>
+<span class="normal">1605</span>
+<span class="normal">1606</span>
+<span class="normal">1607</span>
+<span class="normal">1608</span>
+<span class="normal">1609</span>
+<span class="normal">1610</span>
+<span class="normal">1611</span>
+<span class="normal">1612</span>
+<span class="normal">1613</span>
+<span class="normal">1614</span>
+<span class="normal">1615</span>
+<span class="normal">1616</span>
+<span class="normal">1617</span>
+<span class="normal">1618</span>
+<span class="normal">1619</span>
+<span class="normal">1620</span>
+<span class="normal">1621</span>
+<span class="normal">1622</span>
+<span class="normal">1623</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_EIS_Nyquist_instructions</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">f_Fourier</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function adds the instructions for EIS plots according to the type_input to the ax object.</span>
 
 <span class="sd">    Parameters</span>
@@ -1576,9 +1592,7 @@ used in the FT.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">295</span>
 <span class="normal">296</span>
 <span class="normal">297</span>
 <span class="normal">298</span>
@@ -1608,7 +1622,9 @@ used in the FT.</p>
 <span class="normal">322</span>
 <span class="normal">323</span>
 <span class="normal">324</span>
-<span class="normal">325</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_EIS_curve_Bode_amplitude</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">Fourier_results</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_EIS_curve_Bode_amplitude</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">Fourier_results</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function is used to plot the amplitude Bode diagram of the EIS curves.</span>
 
 <span class="sd">    Parameters</span>
@@ -1698,9 +1714,7 @@ used in the FT.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">328</span>
-<span class="normal">329</span>
-<span class="normal">330</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">330</span>
 <span class="normal">331</span>
 <span class="normal">332</span>
 <span class="normal">333</span>
@@ -1736,7 +1750,9 @@ used in the FT.</p>
 <span class="normal">363</span>
 <span class="normal">364</span>
 <span class="normal">365</span>
-<span class="normal">366</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_EIS_curve_Bode_angle</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">Fourier_results</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_EIS_curve_Bode_angle</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">Fourier_results</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function is used to plot the angle Bode diagram. It only works with an entry signal made with a cosinus</span>
 <span class="sd">    (not a sinus).</span>
 
@@ -1839,9 +1855,7 @@ used in the FT.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">253</span>
 <span class="normal">254</span>
 <span class="normal">255</span>
 <span class="normal">256</span>
@@ -1878,7 +1892,9 @@ used in the FT.</p>
 <span class="normal">287</span>
 <span class="normal">288</span>
 <span class="normal">289</span>
-<span class="normal">290</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_EIS_curve_Nyquist</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">Fourier_results</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_EIS_curve_Nyquist</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">Fourier_results</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function is used to plot the Nyquist diagram of the EIS curves.</span>
 
@@ -1992,9 +2008,7 @@ used in the FT.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">369</span>
-<span class="normal">370</span>
-<span class="normal">371</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">371</span>
 <span class="normal">372</span>
 <span class="normal">373</span>
 <span class="normal">374</span>
@@ -2058,7 +2072,9 @@ used in the FT.</p>
 <span class="normal">432</span>
 <span class="normal">433</span>
 <span class="normal">434</span>
-<span class="normal">435</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_EIS_curve_tests</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">Fourier_results</span><span class="p">):</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_EIS_curve_tests</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">Fourier_results</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function is used to test the accuracy of the EIS results. It compares the reconstructed Ucell_Fourier(t)</span>
 <span class="sd">    from the Fourier transformation with the current density ifc(t), and displays Ucell(t) given by the model with the</span>
 <span class="sd">    reconstructed Ucell_Fourier(t).</span>
@@ -2186,9 +2202,7 @@ used in the FT.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">489</span>
-<span class="normal">490</span>
-<span class="normal">491</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">491</span>
 <span class="normal">492</span>
 <span class="normal">493</span>
 <span class="normal">494</span>
@@ -2233,7 +2247,9 @@ used in the FT.</p>
 <span class="normal">533</span>
 <span class="normal">534</span>
 <span class="normal">535</span>
-<span class="normal">536</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_J</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">536</span>
+<span class="normal">537</span>
+<span class="normal">538</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_J</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function plots the sorption and dissolved water flows as a function of time.</span>
 
 <span class="sd">    Parameters</span>
@@ -2246,7 +2262,7 @@ used in the FT.</p>
 <span class="sd">        Axes on which the flows will be plotted.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Extraction of the operating inputs and the parameters</span>
-    <span class="n">Hcl</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hcl&#39;</span><span class="p">]</span>
+    <span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hacl&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hccl&#39;</span><span class="p">]</span>
     <span class="n">type_current</span><span class="p">,</span> <span class="n">type_plot</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_current&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_plot&#39;</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">type_current</span> <span class="o">==</span> <span class="s1">&#39;step&#39;</span><span class="p">:</span>
         <span class="n">delta_t_ini</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;step_current_parameters&#39;</span><span class="p">][</span><span class="s1">&#39;delta_t_ini_step&#39;</span><span class="p">]</span>
@@ -2268,7 +2284,7 @@ used in the FT.</p>
     <span class="n">J_lambda_mem_ccl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;J_lambda_mem_ccl&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
 
     <span class="c1"># Plot the sorption and dissolved water flows: J</span>
-    <span class="n">J_abs_acl</span><span class="p">,</span> <span class="n">J_abs_ccl</span> <span class="o">=</span> <span class="n">S_abs_acl_t</span> <span class="o">*</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">S_abs_ccl_t</span> <span class="o">*</span> <span class="n">Hcl</span>  <span class="c1"># Conversion in mol.m⁻².s⁻¹ for comparison</span>
+    <span class="n">J_abs_acl</span><span class="p">,</span> <span class="n">J_abs_ccl</span> <span class="o">=</span> <span class="n">S_abs_acl_t</span> <span class="o">*</span> <span class="n">Hacl</span><span class="p">,</span> <span class="n">S_abs_ccl_t</span> <span class="o">*</span> <span class="n">Hccl</span>  <span class="c1"># Conversion in mol.m⁻².s⁻¹ for comparison</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">J_abs_acl</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">J_lambda_acl_mem_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">J_abs_ccl</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
@@ -2334,30 +2350,7 @@ used in the FT.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 984</span>
-<span class="normal"> 985</span>
-<span class="normal"> 986</span>
-<span class="normal"> 987</span>
-<span class="normal"> 988</span>
-<span class="normal"> 989</span>
-<span class="normal"> 990</span>
-<span class="normal"> 991</span>
-<span class="normal"> 992</span>
-<span class="normal"> 993</span>
-<span class="normal"> 994</span>
-<span class="normal"> 995</span>
-<span class="normal"> 996</span>
-<span class="normal"> 997</span>
-<span class="normal"> 998</span>
-<span class="normal"> 999</span>
-<span class="normal">1000</span>
-<span class="normal">1001</span>
-<span class="normal">1002</span>
-<span class="normal">1003</span>
-<span class="normal">1004</span>
-<span class="normal">1005</span>
-<span class="normal">1006</span>
-<span class="normal">1007</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1007</span>
 <span class="normal">1008</span>
 <span class="normal">1009</span>
 <span class="normal">1010</span>
@@ -2382,7 +2375,30 @@ used in the FT.</p>
 <span class="normal">1029</span>
 <span class="normal">1030</span>
 <span class="normal">1031</span>
-<span class="normal">1032</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_P</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">1032</span>
+<span class="normal">1033</span>
+<span class="normal">1034</span>
+<span class="normal">1035</span>
+<span class="normal">1036</span>
+<span class="normal">1037</span>
+<span class="normal">1038</span>
+<span class="normal">1039</span>
+<span class="normal">1040</span>
+<span class="normal">1041</span>
+<span class="normal">1042</span>
+<span class="normal">1043</span>
+<span class="normal">1044</span>
+<span class="normal">1045</span>
+<span class="normal">1046</span>
+<span class="normal">1047</span>
+<span class="normal">1048</span>
+<span class="normal">1049</span>
+<span class="normal">1050</span>
+<span class="normal">1051</span>
+<span class="normal">1052</span>
+<span class="normal">1053</span>
+<span class="normal">1054</span>
+<span class="normal">1055</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_P</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function plots the pressure at different spatial localisations as a function of time.</span>
 
 <span class="sd">    Parameters</span>
@@ -2492,30 +2508,7 @@ used in the FT.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1035</span>
-<span class="normal">1036</span>
-<span class="normal">1037</span>
-<span class="normal">1038</span>
-<span class="normal">1039</span>
-<span class="normal">1040</span>
-<span class="normal">1041</span>
-<span class="normal">1042</span>
-<span class="normal">1043</span>
-<span class="normal">1044</span>
-<span class="normal">1045</span>
-<span class="normal">1046</span>
-<span class="normal">1047</span>
-<span class="normal">1048</span>
-<span class="normal">1049</span>
-<span class="normal">1050</span>
-<span class="normal">1051</span>
-<span class="normal">1052</span>
-<span class="normal">1053</span>
-<span class="normal">1054</span>
-<span class="normal">1055</span>
-<span class="normal">1056</span>
-<span class="normal">1057</span>
-<span class="normal">1058</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1058</span>
 <span class="normal">1059</span>
 <span class="normal">1060</span>
 <span class="normal">1061</span>
@@ -2541,7 +2534,30 @@ used in the FT.</p>
 <span class="normal">1081</span>
 <span class="normal">1082</span>
 <span class="normal">1083</span>
-<span class="normal">1084</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_Phi_a</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">1084</span>
+<span class="normal">1085</span>
+<span class="normal">1086</span>
+<span class="normal">1087</span>
+<span class="normal">1088</span>
+<span class="normal">1089</span>
+<span class="normal">1090</span>
+<span class="normal">1091</span>
+<span class="normal">1092</span>
+<span class="normal">1093</span>
+<span class="normal">1094</span>
+<span class="normal">1095</span>
+<span class="normal">1096</span>
+<span class="normal">1097</span>
+<span class="normal">1098</span>
+<span class="normal">1099</span>
+<span class="normal">1100</span>
+<span class="normal">1101</span>
+<span class="normal">1102</span>
+<span class="normal">1103</span>
+<span class="normal">1104</span>
+<span class="normal">1105</span>
+<span class="normal">1106</span>
+<span class="normal">1107</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_Phi_a</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function plots the humidity at the anode side, at different spatial localisations, as a function of time.</span>
 
 <span class="sd">    Parameters</span>
@@ -2651,30 +2667,7 @@ used in the FT.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1087</span>
-<span class="normal">1088</span>
-<span class="normal">1089</span>
-<span class="normal">1090</span>
-<span class="normal">1091</span>
-<span class="normal">1092</span>
-<span class="normal">1093</span>
-<span class="normal">1094</span>
-<span class="normal">1095</span>
-<span class="normal">1096</span>
-<span class="normal">1097</span>
-<span class="normal">1098</span>
-<span class="normal">1099</span>
-<span class="normal">1100</span>
-<span class="normal">1101</span>
-<span class="normal">1102</span>
-<span class="normal">1103</span>
-<span class="normal">1104</span>
-<span class="normal">1105</span>
-<span class="normal">1106</span>
-<span class="normal">1107</span>
-<span class="normal">1108</span>
-<span class="normal">1109</span>
-<span class="normal">1110</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1110</span>
 <span class="normal">1111</span>
 <span class="normal">1112</span>
 <span class="normal">1113</span>
@@ -2700,7 +2693,30 @@ used in the FT.</p>
 <span class="normal">1133</span>
 <span class="normal">1134</span>
 <span class="normal">1135</span>
-<span class="normal">1136</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_Phi_c</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">1136</span>
+<span class="normal">1137</span>
+<span class="normal">1138</span>
+<span class="normal">1139</span>
+<span class="normal">1140</span>
+<span class="normal">1141</span>
+<span class="normal">1142</span>
+<span class="normal">1143</span>
+<span class="normal">1144</span>
+<span class="normal">1145</span>
+<span class="normal">1146</span>
+<span class="normal">1147</span>
+<span class="normal">1148</span>
+<span class="normal">1149</span>
+<span class="normal">1150</span>
+<span class="normal">1151</span>
+<span class="normal">1152</span>
+<span class="normal">1153</span>
+<span class="normal">1154</span>
+<span class="normal">1155</span>
+<span class="normal">1156</span>
+<span class="normal">1157</span>
+<span class="normal">1158</span>
+<span class="normal">1159</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_Phi_c</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function plots the humidity, at the cathode side, at different spatial localisations as a function of time.</span>
 
 <span class="sd">    Parameters</span>
@@ -2782,30 +2798,7 @@ ax : matplotlib.axes.Axes
 
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1139</span>
-<span class="normal">1140</span>
-<span class="normal">1141</span>
-<span class="normal">1142</span>
-<span class="normal">1143</span>
-<span class="normal">1144</span>
-<span class="normal">1145</span>
-<span class="normal">1146</span>
-<span class="normal">1147</span>
-<span class="normal">1148</span>
-<span class="normal">1149</span>
-<span class="normal">1150</span>
-<span class="normal">1151</span>
-<span class="normal">1152</span>
-<span class="normal">1153</span>
-<span class="normal">1154</span>
-<span class="normal">1155</span>
-<span class="normal">1156</span>
-<span class="normal">1157</span>
-<span class="normal">1158</span>
-<span class="normal">1159</span>
-<span class="normal">1160</span>
-<span class="normal">1161</span>
-<span class="normal">1162</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1162</span>
 <span class="normal">1163</span>
 <span class="normal">1164</span>
 <span class="normal">1165</span>
@@ -2856,7 +2849,30 @@ ax : matplotlib.axes.Axes
 <span class="normal">1210</span>
 <span class="normal">1211</span>
 <span class="normal">1212</span>
-<span class="normal">1213</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_Phi_des</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">1213</span>
+<span class="normal">1214</span>
+<span class="normal">1215</span>
+<span class="normal">1216</span>
+<span class="normal">1217</span>
+<span class="normal">1218</span>
+<span class="normal">1219</span>
+<span class="normal">1220</span>
+<span class="normal">1221</span>
+<span class="normal">1222</span>
+<span class="normal">1223</span>
+<span class="normal">1224</span>
+<span class="normal">1225</span>
+<span class="normal">1226</span>
+<span class="normal">1227</span>
+<span class="normal">1228</span>
+<span class="normal">1229</span>
+<span class="normal">1230</span>
+<span class="normal">1231</span>
+<span class="normal">1232</span>
+<span class="normal">1233</span>
+<span class="normal">1234</span>
+<span class="normal">1235</span>
+<span class="normal">1236</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_Phi_des</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function plots the controlled or uncontrolled desired humidity at the anode and cathode as a function of the</span>
 <span class="sd">    current density.</span>
 
@@ -3000,25 +3016,7 @@ ax : matplotlib.axes.Axes
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">885</span>
-<span class="normal">886</span>
-<span class="normal">887</span>
-<span class="normal">888</span>
-<span class="normal">889</span>
-<span class="normal">890</span>
-<span class="normal">891</span>
-<span class="normal">892</span>
-<span class="normal">893</span>
-<span class="normal">894</span>
-<span class="normal">895</span>
-<span class="normal">896</span>
-<span class="normal">897</span>
-<span class="normal">898</span>
-<span class="normal">899</span>
-<span class="normal">900</span>
-<span class="normal">901</span>
-<span class="normal">902</span>
-<span class="normal">903</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">903</span>
 <span class="normal">904</span>
 <span class="normal">905</span>
 <span class="normal">906</span>
@@ -3057,7 +3055,30 @@ ax : matplotlib.axes.Axes
 <span class="normal">939</span>
 <span class="normal">940</span>
 <span class="normal">941</span>
-<span class="normal">942</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_T</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">942</span>
+<span class="normal">943</span>
+<span class="normal">944</span>
+<span class="normal">945</span>
+<span class="normal">946</span>
+<span class="normal">947</span>
+<span class="normal">948</span>
+<span class="normal">949</span>
+<span class="normal">950</span>
+<span class="normal">951</span>
+<span class="normal">952</span>
+<span class="normal">953</span>
+<span class="normal">954</span>
+<span class="normal">955</span>
+<span class="normal">956</span>
+<span class="normal">957</span>
+<span class="normal">958</span>
+<span class="normal">959</span>
+<span class="normal">960</span>
+<span class="normal">961</span>
+<span class="normal">962</span>
+<span class="normal">963</span>
+<span class="normal">964</span>
+<span class="normal">965</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_T</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function plots the vapor concentrations at different spatial localisations, as a function of time.</span>
 
 <span class="sd">    Parameters</span>
@@ -3091,9 +3112,11 @@ ax : matplotlib.axes.Axes
     <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">T_agc_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;T_agc&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span> <span class="o">-</span> <span class="mf">273.15</span> <span class="c1"># Conversion in °C.</span>
     <span class="n">T_agdl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span> <span class="o">-</span> <span class="mf">273.15</span> <span class="c1"># Conversion in °C.</span>
-    <span class="n">T_acl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;T_acl&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span> <span class="o">-</span> <span class="mf">273.15</span> <span class="c1"># Conversion in °C.</span>
+    <span class="n">T_ampl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;T_ampl&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span> <span class="o">-</span> <span class="mf">273.15</span> <span class="c1"># Conversion in °C.</span>
+    <span class="n">T_acl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;T_acl&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span> <span class="o">-</span> <span class="mf">273.15</span>  <span class="c1"># Conversion in °C.</span>
     <span class="n">T_mem_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;T_mem&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span> <span class="o">-</span> <span class="mf">273.15</span> <span class="c1"># Conversion in °C.</span>
     <span class="n">T_ccl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;T_ccl&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span> <span class="o">-</span> <span class="mf">273.15</span> <span class="c1"># Conversion in °C.</span>
+    <span class="n">T_cmpl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;T_cmpl&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span> <span class="o">-</span> <span class="mf">273.15</span>  <span class="c1"># Conversion in °C.</span>
     <span class="n">T_cgdl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_cgdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span> <span class="o">-</span> <span class="mf">273.15</span> <span class="c1"># Conversion in °C.</span>
     <span class="n">T_cgc_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;T_cgc&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span> <span class="o">-</span> <span class="mf">273.15</span> <span class="c1"># Conversion in °C.</span>
 
@@ -3101,15 +3124,18 @@ ax : matplotlib.axes.Axes
     <span class="n">T_des_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">T_des</span> <span class="o">-</span> <span class="mf">273.15</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">T_agc_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">T_agdl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">T_acl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">T_mem_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">T_ccl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">T_cgdl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">T_cgc_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">T_ampl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">T_acl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">T_mem_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">T_ccl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">T_cmpl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">T_cgdl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">7</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">T_cgc_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">T_des_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="sa">r</span><span class="s1">&#39;$\mathregular{T_</span><span class="si">{agc}</span><span class="s1">}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{T_</span><span class="si">{agdl}</span><span class="s1">}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{T_</span><span class="si">{acl}</span><span class="s1">}$&#39;</span><span class="p">,</span>
-               <span class="sa">r</span><span class="s1">&#39;$\mathregular{T_</span><span class="si">{mem}</span><span class="s1">}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{T_</span><span class="si">{ccl}</span><span class="s1">}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{T_</span><span class="si">{cgdl}</span><span class="s1">}$&#39;</span><span class="p">,</span>
-               <span class="sa">r</span><span class="s1">&#39;$\mathregular{T_</span><span class="si">{cgc}</span><span class="s1">}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{T_</span><span class="si">{des}</span><span class="s1">}$&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="sa">r</span><span class="s1">&#39;$\mathregular{T_</span><span class="si">{agc}</span><span class="s1">}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{T_</span><span class="si">{agdl}</span><span class="s1">}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{T_</span><span class="si">{ampl}</span><span class="s1">}$&#39;</span><span class="p">,</span>
+               <span class="sa">r</span><span class="s1">&#39;$\mathregular{T_</span><span class="si">{acl}</span><span class="s1">}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{T_</span><span class="si">{mem}</span><span class="s1">}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{T_</span><span class="si">{ccl}</span><span class="s1">}$&#39;</span><span class="p">,</span>
+               <span class="sa">r</span><span class="s1">&#39;$\mathregular{T_</span><span class="si">{cmpl}</span><span class="s1">}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{T_</span><span class="si">{cgdl}</span><span class="s1">}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{T_</span><span class="si">{cgc}</span><span class="s1">}$&#39;</span><span class="p">,</span>
+               <span class="sa">r</span><span class="s1">&#39;$\mathregular{T_</span><span class="si">{des}</span><span class="s1">}$&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\mathbf</span><span class="si">{Time}</span><span class="s1">$ $\mathbf</span><span class="si">{t}</span><span class="s1">$ $\mathbf{\left( s \right)}$&#39;</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\mathbf</span><span class="si">{Temperature}</span><span class="s2">$ $\mathbf</span><span class="si">{T}</span><span class="s2">$ $\mathbf{\left( °C \right)}$&quot;</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 
@@ -3168,43 +3194,43 @@ ax : matplotlib.axes.Axes
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">945</span>
-<span class="normal">946</span>
-<span class="normal">947</span>
-<span class="normal">948</span>
-<span class="normal">949</span>
-<span class="normal">950</span>
-<span class="normal">951</span>
-<span class="normal">952</span>
-<span class="normal">953</span>
-<span class="normal">954</span>
-<span class="normal">955</span>
-<span class="normal">956</span>
-<span class="normal">957</span>
-<span class="normal">958</span>
-<span class="normal">959</span>
-<span class="normal">960</span>
-<span class="normal">961</span>
-<span class="normal">962</span>
-<span class="normal">963</span>
-<span class="normal">964</span>
-<span class="normal">965</span>
-<span class="normal">966</span>
-<span class="normal">967</span>
-<span class="normal">968</span>
-<span class="normal">969</span>
-<span class="normal">970</span>
-<span class="normal">971</span>
-<span class="normal">972</span>
-<span class="normal">973</span>
-<span class="normal">974</span>
-<span class="normal">975</span>
-<span class="normal">976</span>
-<span class="normal">977</span>
-<span class="normal">978</span>
-<span class="normal">979</span>
-<span class="normal">980</span>
-<span class="normal">981</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_Ucell</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 968</span>
+<span class="normal"> 969</span>
+<span class="normal"> 970</span>
+<span class="normal"> 971</span>
+<span class="normal"> 972</span>
+<span class="normal"> 973</span>
+<span class="normal"> 974</span>
+<span class="normal"> 975</span>
+<span class="normal"> 976</span>
+<span class="normal"> 977</span>
+<span class="normal"> 978</span>
+<span class="normal"> 979</span>
+<span class="normal"> 980</span>
+<span class="normal"> 981</span>
+<span class="normal"> 982</span>
+<span class="normal"> 983</span>
+<span class="normal"> 984</span>
+<span class="normal"> 985</span>
+<span class="normal"> 986</span>
+<span class="normal"> 987</span>
+<span class="normal"> 988</span>
+<span class="normal"> 989</span>
+<span class="normal"> 990</span>
+<span class="normal"> 991</span>
+<span class="normal"> 992</span>
+<span class="normal"> 993</span>
+<span class="normal"> 994</span>
+<span class="normal"> 995</span>
+<span class="normal"> 996</span>
+<span class="normal"> 997</span>
+<span class="normal"> 998</span>
+<span class="normal"> 999</span>
+<span class="normal">1000</span>
+<span class="normal">1001</span>
+<span class="normal">1002</span>
+<span class="normal">1003</span>
+<span class="normal">1004</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_Ucell</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function plots the cell voltage as a function of time.</span>
 
 <span class="sd">    Parameters</span>
@@ -3318,30 +3344,7 @@ ax : matplotlib.axes.Axes
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1260</span>
-<span class="normal">1261</span>
-<span class="normal">1262</span>
-<span class="normal">1263</span>
-<span class="normal">1264</span>
-<span class="normal">1265</span>
-<span class="normal">1266</span>
-<span class="normal">1267</span>
-<span class="normal">1268</span>
-<span class="normal">1269</span>
-<span class="normal">1270</span>
-<span class="normal">1271</span>
-<span class="normal">1272</span>
-<span class="normal">1273</span>
-<span class="normal">1274</span>
-<span class="normal">1275</span>
-<span class="normal">1276</span>
-<span class="normal">1277</span>
-<span class="normal">1278</span>
-<span class="normal">1279</span>
-<span class="normal">1280</span>
-<span class="normal">1281</span>
-<span class="normal">1282</span>
-<span class="normal">1283</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1283</span>
 <span class="normal">1284</span>
 <span class="normal">1285</span>
 <span class="normal">1286</span>
@@ -3368,7 +3371,30 @@ ax : matplotlib.axes.Axes
 <span class="normal">1307</span>
 <span class="normal">1308</span>
 <span class="normal">1309</span>
-<span class="normal">1310</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_cell_efficiency</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">1310</span>
+<span class="normal">1311</span>
+<span class="normal">1312</span>
+<span class="normal">1313</span>
+<span class="normal">1314</span>
+<span class="normal">1315</span>
+<span class="normal">1316</span>
+<span class="normal">1317</span>
+<span class="normal">1318</span>
+<span class="normal">1319</span>
+<span class="normal">1320</span>
+<span class="normal">1321</span>
+<span class="normal">1322</span>
+<span class="normal">1323</span>
+<span class="normal">1324</span>
+<span class="normal">1325</span>
+<span class="normal">1326</span>
+<span class="normal">1327</span>
+<span class="normal">1328</span>
+<span class="normal">1329</span>
+<span class="normal">1330</span>
+<span class="normal">1331</span>
+<span class="normal">1332</span>
+<span class="normal">1333</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_cell_efficiency</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function plots the fuel cell efficiency eta_fc as a function of the current density.</span>
 
 <span class="sd">    Parameters</span>
@@ -3391,7 +3417,7 @@ ax : matplotlib.axes.Axes
     <span class="n">T_acl_t</span><span class="p">,</span> <span class="n">T_mem_t</span><span class="p">,</span> <span class="n">T_ccl_t</span> <span class="o">=</span> <span class="n">variables</span><span class="p">[</span><span class="s1">&#39;T_acl&#39;</span><span class="p">],</span> <span class="n">variables</span><span class="p">[</span><span class="s1">&#39;T_mem&#39;</span><span class="p">],</span> <span class="n">variables</span><span class="p">[</span><span class="s1">&#39;T_ccl&#39;</span><span class="p">]</span>
     <span class="c1"># Extraction of the operating inputs and the parameters</span>
     <span class="n">current_density</span> <span class="o">=</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;current_density&#39;</span><span class="p">]</span>
-    <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">kappa_co</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hmem&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hcl&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;kappa_co&#39;</span><span class="p">]</span>
+    <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">kappa_co</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hmem&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hacl&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hccl&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;kappa_co&#39;</span><span class="p">]</span>
     <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_current&#39;</span><span class="p">]</span>
     <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_auxiliary&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_control&#39;</span><span class="p">]</span>
 
@@ -3404,7 +3430,7 @@ ax : matplotlib.axes.Axes
               <span class="n">R</span> <span class="o">*</span> <span class="n">T_ccl_t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">F</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_acl_t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">C_H2_acl_t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">Pref</span><span class="p">)</span> <span class="o">+</span>
                                           <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_ccl_t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">C_O2_ccl_t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">Pref</span><span class="p">))</span>
         <span class="n">T_acl_mem_ccl</span> <span class="o">=</span> <span class="n">average</span><span class="p">([</span><span class="n">T_acl_t</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">T_mem_t</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">T_ccl_t</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span>
-                                   <span class="n">weights</span><span class="o">=</span><span class="p">[</span><span class="n">Hcl</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Hcl</span> <span class="o">+</span> <span class="n">Hmem</span><span class="p">),</span> <span class="n">Hmem</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Hcl</span> <span class="o">+</span> <span class="n">Hmem</span><span class="p">),</span> <span class="n">Hcl</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Hcl</span> <span class="o">+</span> <span class="n">Hmem</span><span class="p">)])</span>
+                        <span class="n">weights</span><span class="o">=</span><span class="p">[</span><span class="n">Hacl</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hacl</span> <span class="o">+</span> <span class="n">Hmem</span> <span class="o">+</span> <span class="n">Hccl</span><span class="p">),</span> <span class="n">Hmem</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hacl</span> <span class="o">+</span> <span class="n">Hmem</span> <span class="o">+</span> <span class="n">Hccl</span><span class="p">),</span> <span class="n">Hccl</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hacl</span> <span class="o">+</span> <span class="n">Hmem</span> <span class="o">+</span> <span class="n">Hccl</span><span class="p">)])</span>
         <span class="n">i_H2</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">F</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_acl_mem_ccl</span> <span class="o">/</span> <span class="n">Hmem</span> <span class="o">*</span> <span class="n">C_H2_acl_t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">k_H2</span><span class="p">(</span><span class="n">lambda_mem_t</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">T_mem_t</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">kappa_co</span><span class="p">)</span>
         <span class="n">i_O2</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">F</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_acl_mem_ccl</span> <span class="o">/</span> <span class="n">Hmem</span> <span class="o">*</span> <span class="n">C_O2_ccl_t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">k_O2</span><span class="p">(</span><span class="n">lambda_mem_t</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">T_mem_t</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">kappa_co</span><span class="p">)</span>
         <span class="n">i_n</span> <span class="o">=</span> <span class="p">(</span><span class="n">i_H2</span> <span class="o">+</span> <span class="n">i_O2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1e4</span>  <span class="c1"># Conversion in A/cm²</span>
@@ -3464,33 +3490,33 @@ ax : matplotlib.axes.Axes
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1440</span>
-<span class="normal">1441</span>
-<span class="normal">1442</span>
-<span class="normal">1443</span>
-<span class="normal">1444</span>
-<span class="normal">1445</span>
-<span class="normal">1446</span>
-<span class="normal">1447</span>
-<span class="normal">1448</span>
-<span class="normal">1449</span>
-<span class="normal">1450</span>
-<span class="normal">1451</span>
-<span class="normal">1452</span>
-<span class="normal">1453</span>
-<span class="normal">1454</span>
-<span class="normal">1455</span>
-<span class="normal">1456</span>
-<span class="normal">1457</span>
-<span class="normal">1458</span>
-<span class="normal">1459</span>
-<span class="normal">1460</span>
-<span class="normal">1461</span>
-<span class="normal">1462</span>
-<span class="normal">1463</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1463</span>
 <span class="normal">1464</span>
 <span class="normal">1465</span>
-<span class="normal">1466</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_general_instructions</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">set_y</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="normal">1466</span>
+<span class="normal">1467</span>
+<span class="normal">1468</span>
+<span class="normal">1469</span>
+<span class="normal">1470</span>
+<span class="normal">1471</span>
+<span class="normal">1472</span>
+<span class="normal">1473</span>
+<span class="normal">1474</span>
+<span class="normal">1475</span>
+<span class="normal">1476</span>
+<span class="normal">1477</span>
+<span class="normal">1478</span>
+<span class="normal">1479</span>
+<span class="normal">1480</span>
+<span class="normal">1481</span>
+<span class="normal">1482</span>
+<span class="normal">1483</span>
+<span class="normal">1484</span>
+<span class="normal">1485</span>
+<span class="normal">1486</span>
+<span class="normal">1487</span>
+<span class="normal">1488</span>
+<span class="normal">1489</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_general_instructions</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">set_y</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function adds the common instructions for all the plots displayed by AlphaPEM to the ax object.</span>
 
 <span class="sd">    Parameters</span>
@@ -3594,9 +3620,7 @@ ax : matplotlib.axes.Axes
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">439</span>
-<span class="normal">440</span>
-<span class="normal">441</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">441</span>
 <span class="normal">442</span>
 <span class="normal">443</span>
 <span class="normal">444</span>
@@ -3641,7 +3665,9 @@ ax : matplotlib.axes.Axes
 <span class="normal">483</span>
 <span class="normal">484</span>
 <span class="normal">485</span>
-<span class="normal">486</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_ifc</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_ifc</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function plots the current density as a function of time.</span>
 
 <span class="sd">    Parameters</span>
@@ -3758,13 +3784,7 @@ ax : matplotlib.axes.Axes
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">596</span>
-<span class="normal">597</span>
-<span class="normal">598</span>
-<span class="normal">599</span>
-<span class="normal">600</span>
-<span class="normal">601</span>
-<span class="normal">602</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">602</span>
 <span class="normal">603</span>
 <span class="normal">604</span>
 <span class="normal">605</span>
@@ -3830,7 +3850,13 @@ ax : matplotlib.axes.Axes
 <span class="normal">665</span>
 <span class="normal">666</span>
 <span class="normal">667</span>
-<span class="normal">668</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_lambda</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">668</span>
+<span class="normal">669</span>
+<span class="normal">670</span>
+<span class="normal">671</span>
+<span class="normal">672</span>
+<span class="normal">673</span>
+<span class="normal">674</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_lambda</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function plots the water content at different spatial localisations, as a function of time.</span>
 
 <span class="sd">    Parameters</span>
@@ -3893,10 +3919,10 @@ ax : matplotlib.axes.Axes
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\mathbf</span><span class="si">{Current}</span><span class="s1">$ $\mathbf</span><span class="si">{density}</span><span class="s1">$ $\mathbf{i_</span><span class="si">{fc}</span><span class="s1">}$ $\mathbf{\left( A.cm^{-2} \right)}$&#39;</span><span class="p">,</span>
                       <span class="n">labelpad</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">lambda_acl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">lambda_mem_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">lambda_ccl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\mathbf</span><span class="si">{Time}</span><span class="s1">$ $\mathbf</span><span class="si">{t}</span><span class="s1">$ $\mathbf{\left( s \right)}$&#39;</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">lambda_acl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">lambda_mem_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">lambda_ccl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\mathbf</span><span class="si">{Time}</span><span class="s1">$ $\mathbf</span><span class="si">{t}</span><span class="s1">$ $\mathbf{\left( s \right)}$&#39;</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\mathbf</span><span class="si">{Water}</span><span class="s1">$ $\mathbf</span><span class="si">{content}</span><span class="s1">$ $\mathbf{\lambda}$&#39;</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="sa">r</span><span class="s1">&#39;$\mathregular{\lambda_</span><span class="si">{acl}</span><span class="s1">}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{\lambda_</span><span class="si">{mem}</span><span class="s1">}$&#39;</span><span class="p">,</span>
                <span class="sa">r</span><span class="s1">&#39;$\mathregular{\lambda_</span><span class="si">{ccl}</span><span class="s1">}$&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
@@ -3913,7 +3939,7 @@ ax : matplotlib.axes.Axes
 
 
 <h2 id="modules.display_modules.plot_pola_instructions" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">plot_pola_instructions</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">plot_pola_instructions</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
 
 </h2>
 
@@ -3949,6 +3975,16 @@ ax : matplotlib.axes.Axes
                 <p>Axes on which the instructions will be added.</p>
               </div>
             </li>
+            <li>
+              <b><code>show</code></b>
+                  (<code>bool</code>, default:
+                      <code>True</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>If True, the figure will be displayed. Default is True.</p>
+              </div>
+            </li>
         </ul>
       </td>
     </tr>
@@ -3956,30 +3992,7 @@ ax : matplotlib.axes.Axes
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1493</span>
-<span class="normal">1494</span>
-<span class="normal">1495</span>
-<span class="normal">1496</span>
-<span class="normal">1497</span>
-<span class="normal">1498</span>
-<span class="normal">1499</span>
-<span class="normal">1500</span>
-<span class="normal">1501</span>
-<span class="normal">1502</span>
-<span class="normal">1503</span>
-<span class="normal">1504</span>
-<span class="normal">1505</span>
-<span class="normal">1506</span>
-<span class="normal">1507</span>
-<span class="normal">1508</span>
-<span class="normal">1509</span>
-<span class="normal">1510</span>
-<span class="normal">1511</span>
-<span class="normal">1512</span>
-<span class="normal">1513</span>
-<span class="normal">1514</span>
-<span class="normal">1515</span>
-<span class="normal">1516</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1516</span>
 <span class="normal">1517</span>
 <span class="normal">1518</span>
 <span class="normal">1519</span>
@@ -3994,7 +4007,33 @@ ax : matplotlib.axes.Axes
 <span class="normal">1528</span>
 <span class="normal">1529</span>
 <span class="normal">1530</span>
-<span class="normal">1531</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_pola_instructions</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">1531</span>
+<span class="normal">1532</span>
+<span class="normal">1533</span>
+<span class="normal">1534</span>
+<span class="normal">1535</span>
+<span class="normal">1536</span>
+<span class="normal">1537</span>
+<span class="normal">1538</span>
+<span class="normal">1539</span>
+<span class="normal">1540</span>
+<span class="normal">1541</span>
+<span class="normal">1542</span>
+<span class="normal">1543</span>
+<span class="normal">1544</span>
+<span class="normal">1545</span>
+<span class="normal">1546</span>
+<span class="normal">1547</span>
+<span class="normal">1548</span>
+<span class="normal">1549</span>
+<span class="normal">1550</span>
+<span class="normal">1551</span>
+<span class="normal">1552</span>
+<span class="normal">1553</span>
+<span class="normal">1554</span>
+<span class="normal">1555</span>
+<span class="normal">1556</span>
+<span class="normal">1557</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_pola_instructions</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">show</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function adds the specific instructions for polarisation plots according to the type_input to the ax object.</span>
 
 <span class="sd">    Parameters</span>
@@ -4003,6 +4042,8 @@ ax : matplotlib.axes.Axes
 <span class="sd">        Type of fuel cell configuration.</span>
 <span class="sd">    ax : matplotlib.axes.Axes</span>
 <span class="sd">        Axes on which the instructions will be added.</span>
+<span class="sd">    show : bool, optional</span>
+<span class="sd">        If True, the figure will be displayed. Default is True.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># For EH-31 fuel cell</span>
@@ -4032,7 +4073,8 @@ ax : matplotlib.axes.Axes
     <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;out&#39;</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;minor&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;out&#39;</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>  <span class="c1"># Adjust layout to prevent overlap between labels and the figure</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>  <span class="c1"># Show the figure</span>
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>  <span class="c1"># Show the figure</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4043,7 +4085,7 @@ ax : matplotlib.axes.Axes
 
 
 <h2 id="modules.display_modules.plot_polarisation_curve" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">plot_polarisation_curve</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">plot_polarisation_curve</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
 
 </h2>
 
@@ -4100,6 +4142,16 @@ each polarisation point is recorded at the end of each delta_t_break_pola time.<
               –
               <div class="doc-md-description">
                 <p>Axes on which the polarisation curve will be plotted.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>show</code></b>
+                  (<code>bool</code>, default:
+                      <code>True</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>If True, the polarisation curve will be displayed. If False, it will not be displayed.</p>
               </div>
             </li>
         </ul>
@@ -4194,7 +4246,9 @@ each polarisation point is recorded at the end of each delta_t_break_pola time.<
 <span class="normal">110</span>
 <span class="normal">111</span>
 <span class="normal">112</span>
-<span class="normal">113</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_polarisation_curve</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_polarisation_curve</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function plots the model polarisation curve, and compare it to the experimental one (if it exists). The</span>
 <span class="sd">    polarisation curve is a classical representation of the cell performances, showing the cell voltage as a function</span>
@@ -4215,6 +4269,8 @@ each polarisation point is recorded at the end of each delta_t_break_pola time.<
 <span class="sd">        Parameters of the fuel cell model.</span>
 <span class="sd">    ax : matplotlib.axes.Axes</span>
 <span class="sd">        Axes on which the polarisation curve will be plotted.</span>
+<span class="sd">    show : bool, optional</span>
+<span class="sd">        If True, the polarisation curve will be displayed. If False, it will not be displayed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Extraction of the variables</span>
@@ -4265,7 +4321,7 @@ each polarisation point is recorded at the end of each delta_t_break_pola time.<
         <span class="c1"># Plot the model polarisation curve</span>
         <span class="n">plot_specific_line</span><span class="p">(</span><span class="n">ifc_discretized</span><span class="p">,</span> <span class="n">Ucell_discretized</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span>
                            <span class="n">type_control</span><span class="p">,</span> <span class="n">sim_error</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
-        <span class="n">plot_pola_instructions</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+        <span class="n">plot_pola_instructions</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">show</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>  <span class="c1"># type_plot == &quot;dynamic&quot;</span>
         <span class="c1"># Plot of the polarisation curve produced by the model</span>
@@ -4356,9 +4412,7 @@ each polarisation point is recorded at the end of each delta_t_break_pola time.<
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">117</span>
 <span class="normal">118</span>
 <span class="normal">119</span>
 <span class="normal">120</span>
@@ -4426,7 +4480,9 @@ each polarisation point is recorded at the end of each delta_t_break_pola time.<
 <span class="normal">182</span>
 <span class="normal">183</span>
 <span class="normal">184</span>
-<span class="normal">185</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_polarisation_curve_for_cali</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_polarisation_curve_for_cali</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function plots the model polarisation curve, and compare it to the experimental one. The</span>
 <span class="sd">    polarisation curve is a classical representation of the cell performances, showing the cell voltage as a function</span>
@@ -4574,30 +4630,7 @@ each polarisation point is recorded at the end of each delta_t_break_pola time.<
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1218</span>
-<span class="normal">1219</span>
-<span class="normal">1220</span>
-<span class="normal">1221</span>
-<span class="normal">1222</span>
-<span class="normal">1223</span>
-<span class="normal">1224</span>
-<span class="normal">1225</span>
-<span class="normal">1226</span>
-<span class="normal">1227</span>
-<span class="normal">1228</span>
-<span class="normal">1229</span>
-<span class="normal">1230</span>
-<span class="normal">1231</span>
-<span class="normal">1232</span>
-<span class="normal">1233</span>
-<span class="normal">1234</span>
-<span class="normal">1235</span>
-<span class="normal">1236</span>
-<span class="normal">1237</span>
-<span class="normal">1238</span>
-<span class="normal">1239</span>
-<span class="normal">1240</span>
-<span class="normal">1241</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1241</span>
 <span class="normal">1242</span>
 <span class="normal">1243</span>
 <span class="normal">1244</span>
@@ -4613,7 +4646,30 @@ each polarisation point is recorded at the end of each delta_t_break_pola time.<
 <span class="normal">1254</span>
 <span class="normal">1255</span>
 <span class="normal">1256</span>
-<span class="normal">1257</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_power_density_curve</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">1257</span>
+<span class="normal">1258</span>
+<span class="normal">1259</span>
+<span class="normal">1260</span>
+<span class="normal">1261</span>
+<span class="normal">1262</span>
+<span class="normal">1263</span>
+<span class="normal">1264</span>
+<span class="normal">1265</span>
+<span class="normal">1266</span>
+<span class="normal">1267</span>
+<span class="normal">1268</span>
+<span class="normal">1269</span>
+<span class="normal">1270</span>
+<span class="normal">1271</span>
+<span class="normal">1272</span>
+<span class="normal">1273</span>
+<span class="normal">1274</span>
+<span class="normal">1275</span>
+<span class="normal">1276</span>
+<span class="normal">1277</span>
+<span class="normal">1278</span>
+<span class="normal">1279</span>
+<span class="normal">1280</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_power_density_curve</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function plots the power density curve Pfc, produced by a cell, as a function of the current density.</span>
 
 <span class="sd">    Parameters</span>
@@ -4722,13 +4778,7 @@ each polarisation point is recorded at the end of each delta_t_break_pola time.<
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">671</span>
-<span class="normal">672</span>
-<span class="normal">673</span>
-<span class="normal">674</span>
-<span class="normal">675</span>
-<span class="normal">676</span>
-<span class="normal">677</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">677</span>
 <span class="normal">678</span>
 <span class="normal">679</span>
 <span class="normal">680</span>
@@ -4799,7 +4849,21 @@ each polarisation point is recorded at the end of each delta_t_break_pola time.<
 <span class="normal">745</span>
 <span class="normal">746</span>
 <span class="normal">747</span>
-<span class="normal">748</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_s</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">748</span>
+<span class="normal">749</span>
+<span class="normal">750</span>
+<span class="normal">751</span>
+<span class="normal">752</span>
+<span class="normal">753</span>
+<span class="normal">754</span>
+<span class="normal">755</span>
+<span class="normal">756</span>
+<span class="normal">757</span>
+<span class="normal">758</span>
+<span class="normal">759</span>
+<span class="normal">760</span>
+<span class="normal">761</span>
+<span class="normal">762</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_s</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function plots the liquid water saturation at different spatial localisations, as a function of time.</span>
 
 <span class="sd">    Parameters</span>
@@ -4833,8 +4897,10 @@ each polarisation point is recorded at the end of each delta_t_break_pola time.<
         <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
     <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">s_agdl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_agdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">s_ampl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;s_ampl&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">s_acl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;s_acl&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">s_ccl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;s_ccl&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">s_cmpl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;s_cmpl&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">s_cgdl_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s_cgdl_</span><span class="si">{</span><span class="n">n_gdl</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])[</span><span class="n">mask</span><span class="p">]</span>
 
     <span class="c1"># Plot the liquid water saturation at different spatial localisations: s</span>
@@ -4849,31 +4915,37 @@ each polarisation point is recorded at the end of each delta_t_break_pola time.<
         <span class="n">delta_t_break_pola</span> <span class="o">=</span> <span class="n">pola_current_parameters</span><span class="p">[</span><span class="s1">&#39;delta_t_break_pola&#39;</span><span class="p">]</span>
         <span class="n">nb_loads</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">pola_current_parameters</span><span class="p">[</span><span class="s1">&#39;i_max_pola&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">pola_current_parameters</span><span class="p">[</span><span class="s1">&#39;delta_i_pola&#39;</span><span class="p">])</span> <span class="c1"># Number of loads</span>
         <span class="n">ifc_discretized_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_loads</span><span class="p">)</span>
-        <span class="n">s_agdl_discretized_t</span><span class="p">,</span> <span class="n">s_acl_discretized_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_loads</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_loads</span><span class="p">)</span>
-        <span class="n">s_ccl_discretized_t</span><span class="p">,</span> <span class="n">s_cgdl_discretized_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_loads</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_loads</span><span class="p">)</span>
+        <span class="n">s_agdl_discretized_t</span><span class="p">,</span> <span class="n">s_ampl_discretized_t</span><span class="p">,</span> <span class="n">s_acl_discretized_t</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_loads</span><span class="p">)]</span> <span class="o">*</span> <span class="mi">3</span>
+        <span class="n">s_ccl_discretized_t</span><span class="p">,</span> <span class="n">s_cmpl_discretized_t</span><span class="p">,</span> <span class="n">s_cgdl_discretized_t</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_loads</span><span class="p">)]</span> <span class="o">*</span> <span class="mi">3</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_loads</span><span class="p">):</span>
             <span class="n">t_load</span> <span class="o">=</span> <span class="n">delta_t_ini_pola</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">delta_t_load_pola</span> <span class="o">+</span> <span class="n">delta_t_break_pola</span><span class="p">)</span>  <span class="c1"># time for measurement</span>
             <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">t_load</span><span class="p">))</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>  <span class="c1"># the corresponding index</span>
             <span class="n">ifc_discretized_t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ifc_t</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>  <span class="c1"># the last value at the end of each load</span>
             <span class="n">s_agdl_discretized_t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">s_agdl_t</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>  <span class="c1"># the last value at the end of each load</span>
+            <span class="n">s_ampl_discretized_t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">s_ampl_t</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>  <span class="c1"># the last value at the end of each load</span>
             <span class="n">s_acl_discretized_t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">s_acl_t</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>  <span class="c1"># the last value at the end of each load</span>
             <span class="n">s_ccl_discretized_t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">s_ccl_t</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>  <span class="c1"># the last value at the end of each load</span>
+            <span class="n">s_cmpl_discretized_t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">s_cmpl_t</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>  <span class="c1"># the last value at the end of each load</span>
             <span class="n">s_cgdl_discretized_t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span><span class="n">s_cgdl_t</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>  <span class="c1"># the last value at the end of each load</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">ifc_discretized_t</span><span class="p">,</span> <span class="n">s_agdl_discretized_t</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">ifc_discretized_t</span><span class="p">,</span> <span class="n">s_acl_discretized_t</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">ifc_discretized_t</span><span class="p">,</span> <span class="n">s_ccl_discretized_t</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">ifc_discretized_t</span><span class="p">,</span> <span class="n">s_cgdl_discretized_t</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">ifc_discretized_t</span><span class="p">,</span> <span class="n">s_ampl_discretized_t</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">ifc_discretized_t</span><span class="p">,</span> <span class="n">s_acl_discretized_t</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">ifc_discretized_t</span><span class="p">,</span> <span class="n">s_ccl_discretized_t</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">ifc_discretized_t</span><span class="p">,</span> <span class="n">s_cmpl_discretized_t</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">ifc_discretized_t</span><span class="p">,</span> <span class="n">s_cgdl_discretized_t</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">7</span><span class="p">))</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\mathbf</span><span class="si">{Current}</span><span class="s1">$ $\mathbf</span><span class="si">{density}</span><span class="s1">$ $\mathbf{i_</span><span class="si">{fc}</span><span class="s1">}$ $\mathbf{\left( A.cm^{-2} \right)}$&#39;</span><span class="p">,</span>
                       <span class="n">labelpad</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">s_agdl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">s_acl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">s_ccl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">s_cgdl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\mathbf</span><span class="si">{Time}</span><span class="s1">$ $\mathbf</span><span class="si">{t}</span><span class="s1">$ $\mathbf{\left( s \right)}$&#39;</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">s_ampl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">s_acl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">s_ccl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">s_cmpl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">s_cgdl_t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">(</span><span class="mi">7</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\mathbf</span><span class="si">{Time}</span><span class="s1">$ $\mathbf</span><span class="si">{t}</span><span class="s1">$ $\mathbf{\left( s \right)}$&#39;</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\mathbf</span><span class="si">{Liquid}</span><span class="s1">$ $\mathbf</span><span class="si">{water}</span><span class="s1">$ $\mathbf</span><span class="si">{saturation}</span><span class="s1">$ $\mathbf</span><span class="si">{s}</span><span class="s1">$&#39;</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="sa">r</span><span class="s1">&#39;$\mathregular{s_</span><span class="si">{agdl}</span><span class="s1">}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{s_</span><span class="si">{acl}</span><span class="s1">}$&#39;</span><span class="p">,</span>
-               <span class="sa">r</span><span class="s1">&#39;$\mathregular{s_</span><span class="si">{ccl}</span><span class="s1">}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{s_</span><span class="si">{cgdl}</span><span class="s1">}$&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="sa">r</span><span class="s1">&#39;$\mathregular{s_</span><span class="si">{agdl}</span><span class="s1">}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{s_</span><span class="si">{ampl}</span><span class="s1">}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{s_</span><span class="si">{acl}</span><span class="s1">}$&#39;</span><span class="p">,</span>
+               <span class="sa">r</span><span class="s1">&#39;$\mathregular{s_</span><span class="si">{ccl}</span><span class="s1">}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{s_</span><span class="si">{cmpl}</span><span class="s1">}$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\mathregular{s_</span><span class="si">{cgdl}</span><span class="s1">}$&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
 
     <span class="c1"># Plot instructions</span>
     <span class="n">plot_general_instructions</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
@@ -4978,30 +5050,7 @@ each polarisation point is recorded at the end of each delta_t_break_pola time.<
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1334</span>
-<span class="normal">1335</span>
-<span class="normal">1336</span>
-<span class="normal">1337</span>
-<span class="normal">1338</span>
-<span class="normal">1339</span>
-<span class="normal">1340</span>
-<span class="normal">1341</span>
-<span class="normal">1342</span>
-<span class="normal">1343</span>
-<span class="normal">1344</span>
-<span class="normal">1345</span>
-<span class="normal">1346</span>
-<span class="normal">1347</span>
-<span class="normal">1348</span>
-<span class="normal">1349</span>
-<span class="normal">1350</span>
-<span class="normal">1351</span>
-<span class="normal">1352</span>
-<span class="normal">1353</span>
-<span class="normal">1354</span>
-<span class="normal">1355</span>
-<span class="normal">1356</span>
-<span class="normal">1357</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1357</span>
 <span class="normal">1358</span>
 <span class="normal">1359</span>
 <span class="normal">1360</span>
@@ -5081,7 +5130,30 @@ each polarisation point is recorded at the end of each delta_t_break_pola time.<
 <span class="normal">1434</span>
 <span class="normal">1435</span>
 <span class="normal">1436</span>
-<span class="normal">1437</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_specific_line</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">sim_error</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="normal">1437</span>
+<span class="normal">1438</span>
+<span class="normal">1439</span>
+<span class="normal">1440</span>
+<span class="normal">1441</span>
+<span class="normal">1442</span>
+<span class="normal">1443</span>
+<span class="normal">1444</span>
+<span class="normal">1445</span>
+<span class="normal">1446</span>
+<span class="normal">1447</span>
+<span class="normal">1448</span>
+<span class="normal">1449</span>
+<span class="normal">1450</span>
+<span class="normal">1451</span>
+<span class="normal">1452</span>
+<span class="normal">1453</span>
+<span class="normal">1454</span>
+<span class="normal">1455</span>
+<span class="normal">1456</span>
+<span class="normal">1457</span>
+<span class="normal">1458</span>
+<span class="normal">1459</span>
+<span class="normal">1460</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_specific_line</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">sim_error</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; This function adds the appropriate plot configuration according to the type_input to the ax object.</span>
 
 <span class="sd">    Parameters</span>
@@ -5253,30 +5325,30 @@ each polarisation point is recorded at the end of each delta_t_break_pola time.<
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/display_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1468</span>
-<span class="normal">1469</span>
-<span class="normal">1470</span>
-<span class="normal">1471</span>
-<span class="normal">1472</span>
-<span class="normal">1473</span>
-<span class="normal">1474</span>
-<span class="normal">1475</span>
-<span class="normal">1476</span>
-<span class="normal">1477</span>
-<span class="normal">1478</span>
-<span class="normal">1479</span>
-<span class="normal">1480</span>
-<span class="normal">1481</span>
-<span class="normal">1482</span>
-<span class="normal">1483</span>
-<span class="normal">1484</span>
-<span class="normal">1485</span>
-<span class="normal">1486</span>
-<span class="normal">1487</span>
-<span class="normal">1488</span>
-<span class="normal">1489</span>
-<span class="normal">1490</span>
-<span class="normal">1491</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">round_nice</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1491</span>
+<span class="normal">1492</span>
+<span class="normal">1493</span>
+<span class="normal">1494</span>
+<span class="normal">1495</span>
+<span class="normal">1496</span>
+<span class="normal">1497</span>
+<span class="normal">1498</span>
+<span class="normal">1499</span>
+<span class="normal">1500</span>
+<span class="normal">1501</span>
+<span class="normal">1502</span>
+<span class="normal">1503</span>
+<span class="normal">1504</span>
+<span class="normal">1505</span>
+<span class="normal">1506</span>
+<span class="normal">1507</span>
+<span class="normal">1508</span>
+<span class="normal">1509</span>
+<span class="normal">1510</span>
+<span class="normal">1511</span>
+<span class="normal">1512</span>
+<span class="normal">1513</span>
+<span class="normal">1514</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">round_nice</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Round the main step to a &quot;nice&quot; number.</span>
 
 <span class="sd">    Parameters</span>

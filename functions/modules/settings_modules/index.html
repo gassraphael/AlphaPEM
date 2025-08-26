@@ -235,18 +235,7 @@ response at each frequency 'delta_t_measurement_EIS'.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/settings_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">212</span>
 <span class="normal">213</span>
 <span class="normal">214</span>
 <span class="normal">215</span>
@@ -285,7 +274,18 @@ response at each frequency 'delta_t_measurement_EIS'.</p>
 <span class="normal">248</span>
 <span class="normal">249</span>
 <span class="normal">250</span>
-<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">EIS_parameters</span><span class="p">(</span><span class="n">f_EIS</span><span class="p">):</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">EIS_parameters</span><span class="p">(</span><span class="n">f_EIS</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function gives the time parameters for the EIS_current density function.</span>
 
 <span class="sd">    Parameters</span>
@@ -547,39 +547,39 @@ response at each frequency 'delta_t_measurement_EIS'.</p>
 <span class="sd">        Maximum current density for the polarization curve.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="c1"># For the ZSW Generic Stack fuel cell</span>
+    <span class="k">if</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack&quot;</span><span class="p">:</span>
+        <span class="n">T_des</span> <span class="o">=</span> <span class="mi">68</span> <span class="o">+</span> <span class="mf">273.15</span>  <span class="c1"># K. It is the desired fuel cell temperature.</span>
+        <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mf">2.2e5</span><span class="p">,</span> <span class="mf">2.0e5</span>  <span class="c1"># Pa. It is the desired pressures of the fuel gas.</span>
+        <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span> <span class="o">=</span> <span class="mf">1.6</span><span class="p">,</span> <span class="mf">1.6</span>  <span class="c1"># It is the stoichiometric ratio (of hydrogen and oxygen).</span>
+        <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span> <span class="o">=</span> <span class="mf">0.398</span><span class="p">,</span> <span class="mf">0.50</span>  <span class="c1"># It is the desired relative humidity.</span>
+        <span class="n">i_max_pola</span> <span class="o">=</span> <span class="mf">2.5e4</span>  <span class="c1"># A.m-2. It is the maximum current density for the polarization curve.</span>
+
     <span class="c1"># For EH-31 fuel cell</span>
-    <span class="k">if</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_1.5&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_1.5&quot;</span><span class="p">:</span>
         <span class="n">T_des</span> <span class="o">=</span> <span class="mi">74</span> <span class="o">+</span> <span class="mf">273.15</span>  <span class="c1"># K. It is the desired fuel cell temperature.</span>
         <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mf">1.5e5</span><span class="p">,</span> <span class="mf">1.5e5</span>  <span class="c1"># Pa. It is the desired pressure of the fuel gas (at the anode/cathode).</span>
         <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span> <span class="o">=</span> <span class="mf">1.2</span><span class="p">,</span> <span class="mf">2.0</span>  <span class="c1"># It is the stoichiometric ratio (of hydrogen and oxygen).</span>
         <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span> <span class="o">=</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.6</span>  <span class="c1"># It is the desired relative humidity.</span>
-        <span class="n">i_max_pola</span> <span class="o">=</span> <span class="mf">3.0e4</span>  <span class="c1"># A.m-2. It is the maximum current density for the polarization curve.</span>
+        <span class="n">i_max_pola</span> <span class="o">=</span> <span class="mf">1.7e4</span>  <span class="c1"># A.m-2. It is the maximum current density for the polarization curve.</span>
     <span class="k">elif</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_2.0&quot;</span><span class="p">:</span>
         <span class="n">T_des</span> <span class="o">=</span> <span class="mi">74</span> <span class="o">+</span> <span class="mf">273.15</span>  <span class="c1"># K. It is the desired fuel cell temperature.</span>
         <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mf">2.0e5</span><span class="p">,</span> <span class="mf">2.0e5</span>  <span class="c1"># Pa. It is the desired pressure of the fuel gas (at the anode/cathode).</span>
         <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span> <span class="o">=</span> <span class="mf">1.2</span><span class="p">,</span> <span class="mf">2.0</span>  <span class="c1"># It is the stoichiometric ratio (of hydrogen and oxygen).</span>
         <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span> <span class="o">=</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.6</span>  <span class="c1"># It is the desired relative humidity.</span>
-        <span class="n">i_max_pola</span> <span class="o">=</span> <span class="mf">3.0e4</span>  <span class="c1"># A.m-2. It is the maximum current density for the polarization curve.</span>
+        <span class="n">i_max_pola</span> <span class="o">=</span> <span class="mf">1.7e4</span>  <span class="c1"># A.m-2. It is the maximum current density for the polarization curve.</span>
     <span class="k">elif</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_2.25&quot;</span><span class="p">:</span>
         <span class="n">T_des</span> <span class="o">=</span> <span class="mi">74</span> <span class="o">+</span> <span class="mf">273.15</span>  <span class="c1"># K. It is the desired fuel cell temperature.</span>
         <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mf">2.25e5</span><span class="p">,</span> <span class="mf">2.25e5</span>  <span class="c1"># Pa. It is the desired pressure of the fuel gas (at the anode/cathode).</span>
         <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span> <span class="o">=</span> <span class="mf">1.2</span><span class="p">,</span> <span class="mf">2.0</span>  <span class="c1"># It is the stoichiometric ratio (of hydrogen and oxygen).</span>
         <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span> <span class="o">=</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.6</span>  <span class="c1"># It is the desired relative humidity.</span>
-        <span class="n">i_max_pola</span> <span class="o">=</span> <span class="mf">3.0e4</span>  <span class="c1"># A.m-2. It is the maximum current density for the polarization curve.</span>
+        <span class="n">i_max_pola</span> <span class="o">=</span> <span class="mf">1.7e4</span>  <span class="c1"># A.m-2. It is the maximum current density for the polarization curve.</span>
     <span class="k">elif</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_2.5&quot;</span><span class="p">:</span>
         <span class="n">T_des</span> <span class="o">=</span> <span class="mi">74</span> <span class="o">+</span> <span class="mf">273.15</span>  <span class="c1"># K. It is the desired fuel cell temperature.</span>
         <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mf">2.5e5</span><span class="p">,</span> <span class="mf">2.5e5</span>  <span class="c1"># Pa. It is the desired pressures of the fuel gas.</span>
         <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span> <span class="o">=</span> <span class="mf">1.2</span><span class="p">,</span> <span class="mf">2.0</span>  <span class="c1"># It is the stoichiometric ratio (of hydrogen and oxygen).</span>
         <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span> <span class="o">=</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.6</span>  <span class="c1"># It is the desired relative humidity.</span>
-        <span class="n">i_max_pola</span> <span class="o">=</span> <span class="mf">3.0e4</span>  <span class="c1"># A.m-2. It is the maximum current density for the polarization curve.</span>
-
-    <span class="c1"># For LF fuel cell</span>
-    <span class="k">elif</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;LF&quot;</span><span class="p">:</span>
-        <span class="n">T_des</span> <span class="o">=</span> <span class="mi">80</span> <span class="o">+</span> <span class="mf">273.15</span>  <span class="c1"># K. It is the desired fuel cell temperature.</span>
-        <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mi">101325</span><span class="p">,</span> <span class="mi">101325</span>  <span class="c1"># Pa. It is the desired pressures of the fuel gas.</span>
-        <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.5</span>  <span class="c1"># It is the stoichiometric ratio (of hydrogen and oxygen).</span>
-        <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span> <span class="o">=</span> <span class="mf">0.84</span><span class="p">,</span> <span class="mf">0.59</span>  <span class="c1"># It is the desired relative humidity.</span>
-        <span class="n">i_max_pola</span> <span class="o">=</span> <span class="mf">1.6e4</span>  <span class="c1"># A.m-2. It is the maximum current density for the polarization curve.</span>
+        <span class="n">i_max_pola</span> <span class="o">=</span> <span class="mf">1.7e4</span>  <span class="c1"># A.m-2. It is the maximum current density for the polarization curve.</span>
 
     <span class="c1"># For other fuel cells</span>
     <span class="k">else</span><span class="p">:</span>
@@ -641,10 +641,17 @@ response at each frequency 'delta_t_measurement_EIS'.</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-<b><code>Hcl</code></b>(                  <code>float</code>
+<b><code>Hacl</code></b>(                  <code>float</code>
 )              –
               <div class="doc-md-description">
-                <p>Thickness of the catalyst layer in m.</p>
+                <p>Thickness of the anode catalyst layer in m.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Hccl</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Thickness of the cathode catalyst layer in m.</p>
               </div>
             </li>
             <li>
@@ -652,13 +659,6 @@ response at each frequency 'delta_t_measurement_EIS'.</p>
 )              –
               <div class="doc-md-description">
                 <p>Volume fraction of ionomer in the CL.</p>
-              </div>
-            </li>
-            <li>
-<b><code>tau</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Pore structure coefficient in the CL.</p>
               </div>
             </li>
             <li>
@@ -690,17 +690,31 @@ response at each frequency 'delta_t_measurement_EIS'.</p>
               </div>
             </li>
             <li>
-<b><code>Hgc</code></b>(                  <code>float</code>
+<b><code>Hagc</code></b>(                  <code>float</code>
 )              –
               <div class="doc-md-description">
-                <p>Thickness of the gas channel in m.</p>
+                <p>Thickness of the anode gas channel in m.</p>
               </div>
             </li>
             <li>
-<b><code>Wgc</code></b>(                  <code>float</code>
+<b><code>Hcgc</code></b>(                  <code>float</code>
 )              –
               <div class="doc-md-description">
-                <p>Width of the gas channel in m.</p>
+                <p>Thickness of the cathode gas channel in m.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Wagc</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Width of the anode gas channel in m.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Wcgc</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Width of the cathode gas channel in m.</p>
               </div>
             </li>
             <li>
@@ -722,13 +736,6 @@ response at each frequency 'delta_t_measurement_EIS'.</p>
 )              –
               <div class="doc-md-description">
                 <p>Capillary exponent.</p>
-              </div>
-            </li>
-            <li>
-<b><code>Re</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Electron conduction resistance of the circuit in ohm.m².</p>
               </div>
             </li>
             <li>
@@ -902,7 +909,18 @@ response at each frequency 'delta_t_measurement_EIS'.</p>
 <span class="normal">195</span>
 <span class="normal">196</span>
 <span class="normal">197</span>
-<span class="normal">198</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">stored_physical_parameters</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">):</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">stored_physical_parameters</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function gives the physical parameters which correspond to the given type_fuel_cell.</span>
 
 <span class="sd">    Parameters</span>
@@ -912,12 +930,12 @@ response at each frequency 'delta_t_measurement_EIS'.</p>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    Hcl : float</span>
-<span class="sd">        Thickness of the catalyst layer in m.</span>
+<span class="sd">    Hacl : float</span>
+<span class="sd">        Thickness of the anode catalyst layer in m.</span>
+<span class="sd">    Hccl : float</span>
+<span class="sd">        Thickness of the cathode catalyst layer in m.</span>
 <span class="sd">    epsilon_mc : float</span>
 <span class="sd">        Volume fraction of ionomer in the CL.</span>
-<span class="sd">    tau : float</span>
-<span class="sd">        Pore structure coefficient in the CL.</span>
 <span class="sd">    Hmem : float</span>
 <span class="sd">            Thickness of the membrane in m.</span>
 <span class="sd">    Hgdl : float</span>
@@ -926,18 +944,20 @@ response at each frequency 'delta_t_measurement_EIS'.</p>
 <span class="sd">        Anode/cathode GDL porosity.</span>
 <span class="sd">    epsilon_c : float</span>
 <span class="sd">        Compression ratio of the GDL.</span>
-<span class="sd">    Hgc : float</span>
-<span class="sd">        Thickness of the gas channel in m.</span>
-<span class="sd">    Wgc : float</span>
-<span class="sd">        Width of the gas channel in m.</span>
+<span class="sd">    Hagc : float</span>
+<span class="sd">        Thickness of the anode gas channel in m.</span>
+<span class="sd">    Hcgc : float</span>
+<span class="sd">        Thickness of the cathode gas channel in m.</span>
+<span class="sd">    Wagc : float</span>
+<span class="sd">        Width of the anode gas channel in m.</span>
+<span class="sd">    Wcgc : float</span>
+<span class="sd">        Width of the cathode gas channel in m.</span>
 <span class="sd">    Lgc : float</span>
 <span class="sd">        Length of the gas channel in m.</span>
 <span class="sd">    Aact : float</span>
 <span class="sd">            Active area of the cell in m².</span>
 <span class="sd">    e : float</span>
 <span class="sd">        Capillary exponent.</span>
-<span class="sd">    Re : float</span>
-<span class="sd">        Electron conduction resistance of the circuit in ohm.m².</span>
 <span class="sd">    i0_c_ref : float</span>
 <span class="sd">        Reference exchange current density at the cathode in A.m-2.</span>
 <span class="sd">    kappa_co : float</span>
@@ -954,70 +974,79 @@ response at each frequency 'delta_t_measurement_EIS'.</p>
 <span class="sd">        Volumetric double layer capacitance in F.m-3.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># For EH-31 fuel cell</span>
-    <span class="k">if</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_1.5&quot;</span> <span class="ow">or</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_2.0&quot;</span> <span class="ow">or</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_2.25&quot;</span> <span class="ow">or</span> \
-            <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_2.5&quot;</span><span class="p">:</span>
+    <span class="c1"># For the ZSW Generic Stack fuel cell</span>
+    <span class="k">if</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack&quot;</span><span class="p">:</span>
+        <span class="c1"># Global</span>
+        <span class="n">Aact</span> <span class="o">=</span> <span class="mf">279.72e-4</span>  <span class="c1"># m². It is the MEA active area.</span>
         <span class="c1"># Catalyst layer</span>
-        <span class="n">Aact</span> <span class="o">=</span> <span class="mf">8.5e-3</span>  <span class="c1"># m². It is the active area of the catalyst layer.</span>
-        <span class="n">Hcl</span> <span class="o">=</span> <span class="mf">1e-5</span>  <span class="c1"># m. It is the thickness of the anode or cathode catalyst layer.</span>
-        <span class="n">epsilon_mc</span> <span class="o">=</span> <span class="mf">0.399</span>  <span class="c1"># It is the volume fraction of ionomer in the CL.</span>
-        <span class="n">tau</span> <span class="o">=</span> <span class="mf">1.016</span>  <span class="c1"># It is the pore structure coefficient in the CL, without units.</span>
+        <span class="n">Hacl</span> <span class="o">=</span> <span class="mf">8e-6</span>  <span class="c1"># m. It is the thickness of the anode catalyst layer.</span>
+        <span class="n">Hccl</span> <span class="o">=</span> <span class="mf">17e-6</span>  <span class="c1"># m. It is the thickness of the cathode catalyst layer.</span>
+        <span class="n">epsilon_mc</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># It is the volume fraction of ionomer in the CL.</span>
         <span class="c1"># Membrane</span>
-        <span class="n">Hmem</span> <span class="o">=</span> <span class="mf">2e-5</span>  <span class="c1"># m. It is the thickness of the membrane.</span>
+        <span class="n">Hmem</span> <span class="o">=</span> <span class="mf">15e-6</span>  <span class="c1"># m. It is the thickness of the membrane.</span>
         <span class="c1"># Gas diffusion layer</span>
-        <span class="n">Hgdl</span> <span class="o">=</span> <span class="mf">2e-4</span>  <span class="c1"># m. It is the thickness of the gas diffusion layer.</span>
-        <span class="n">epsilon_gdl</span> <span class="o">=</span> <span class="mf">0.701</span>  <span class="c1"># It is the anode/cathode GDL porosity.</span>
-        <span class="n">epsilon_c</span> <span class="o">=</span> <span class="mf">0.271</span>  <span class="c1"># It is the compression ratio of the GDL.</span>
+        <span class="n">Hgdl</span> <span class="o">=</span> <span class="mf">127e-6</span>  <span class="c1"># m. It is the thickness of the gas diffusion layer.</span>
+        <span class="n">epsilon_gdl</span> <span class="o">=</span> <span class="mf">0.788</span>  <span class="c1"># It is the anode/cathode GDL porosity.</span>
+        <span class="n">epsilon_cl</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># It is the porosity of the catalyst layer, without units.</span>
+        <span class="n">epsilon_c</span> <span class="o">=</span> <span class="mf">0.2</span>  <span class="c1"># It is the compression ratio of the GDL.</span>
+        <span class="c1">#   Microporous layer</span>
+        <span class="n">Hmpl</span> <span class="o">=</span> <span class="mf">70e-6</span>  <span class="c1"># m. It is the thickness of the microporous layer.</span>
+        <span class="n">epsilon_mpl</span> <span class="o">=</span> <span class="mf">0.425</span>  <span class="c1"># It is the porosity of the microporous layer.</span>
         <span class="c1"># Gas channel</span>
-        <span class="n">Hgc</span> <span class="o">=</span> <span class="mf">5e-4</span>  <span class="c1"># m. It is the thickness of the gas channel.</span>
-        <span class="n">Wgc</span> <span class="o">=</span> <span class="mf">4.5e-4</span>  <span class="c1"># m. It is the width of the gas channel.</span>
-        <span class="n">Lgc</span> <span class="o">=</span> <span class="mf">9.67</span>  <span class="c1"># m. It is the length of the gas channel.</span>
+        <span class="n">Hagc</span> <span class="o">=</span> <span class="mf">230e-6</span>  <span class="c1"># m. It is the thickness of the anode gas channel.</span>
+        <span class="n">Hcgc</span> <span class="o">=</span> <span class="mf">300e-6</span>  <span class="c1"># m. It is the thickness of the cathode gas channel.</span>
+        <span class="n">Wagc</span> <span class="o">=</span> <span class="mf">430e-6</span>  <span class="c1"># m. It is the width of the anode gas channel.</span>
+        <span class="n">Wcgc</span> <span class="o">=</span> <span class="mf">532e-6</span>  <span class="c1"># m. It is the width of the cathode gas channel.</span>
+        <span class="n">Lgc</span> <span class="o">=</span> <span class="mf">23.31</span>  <span class="c1"># m. It is the length of the gas channel.</span>
         <span class="c1"># Interaction parameters between water and PEMFC structure</span>
-        <span class="n">e</span> <span class="o">=</span> <span class="mf">5.0</span>  <span class="c1"># It is the capillary exponent</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="mf">4.0</span>  <span class="c1"># It is the capillary exponent</span>
         <span class="c1"># Voltage polarization</span>
-        <span class="n">Re</span> <span class="o">=</span> <span class="mf">5.70e-07</span>  <span class="c1"># ohm.m². It is the electron conduction resistance of the circuit.</span>
-        <span class="n">i0_c_ref</span> <span class="o">=</span> <span class="mf">2.79</span>  <span class="c1"># A.m-2.It is the reference exchange current density at the cathode.</span>
-        <span class="n">kappa_co</span> <span class="o">=</span> <span class="mf">27.2</span>  <span class="c1"># mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.</span>
-        <span class="n">kappa_c</span> <span class="o">=</span> <span class="mf">1.61</span>  <span class="c1"># It is the overpotential correction exponent.</span>
+        <span class="n">i0_c_ref</span> <span class="o">=</span> <span class="mf">6.795</span>  <span class="c1"># A.m-2.It is the reference exchange current density at the cathode.</span>
+        <span class="n">kappa_co</span> <span class="o">=</span> <span class="mf">30.41</span>  <span class="c1"># mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.</span>
+        <span class="n">kappa_c</span> <span class="o">=</span> <span class="mf">1.026</span>  <span class="c1"># It is the overpotential correction exponent.</span>
         <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span> <span class="o">=</span> <span class="mf">0.05553</span><span class="p">,</span> <span class="mf">0.10514</span><span class="p">,</span> <span class="mf">0.63654</span>  <span class="c1"># It is the limit liquid saturation coefficients.</span>
         <span class="n">C_scl</span> <span class="o">=</span> <span class="mf">2e7</span>  <span class="c1"># F.m-3. It is the volumetric space-charge layer capacitance.</span>
 
-    <span class="c1"># For LF fuel cell</span>
-    <span class="k">elif</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;LF&quot;</span><span class="p">:</span>
+    <span class="c1"># For EH-31 fuel cell</span>
+    <span class="k">elif</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_1.5&quot;</span> <span class="ow">or</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_2.0&quot;</span> <span class="ow">or</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_2.25&quot;</span> <span class="ow">or</span> \
+            <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_2.5&quot;</span><span class="p">:</span>
+        <span class="c1"># Global</span>
+        <span class="n">Aact</span> <span class="o">=</span> <span class="mf">85e-4</span>  <span class="c1"># m². It is the active area of the catalyst layer.</span>
         <span class="c1"># Catalyst layer</span>
-        <span class="n">Hcl</span> <span class="o">=</span> <span class="mf">1e-5</span>  <span class="c1"># m. It is the thickness of the anode or cathode catalyst layer.</span>
-        <span class="n">epsilon_mc</span> <span class="o">=</span> <span class="mf">0.27</span>  <span class="c1"># It is the volume fraction of ionomer in the CL.</span>
-        <span class="n">tau</span> <span class="o">=</span> <span class="mf">1.2</span>  <span class="c1"># It is the pore structure coefficient in the CL, without units.</span>
+        <span class="n">Hacl</span> <span class="o">=</span> <span class="mf">8.089e-6</span>  <span class="c1"># m. It is the thickness of the anode catalyst layer.</span>
+        <span class="n">Hccl</span> <span class="o">=</span> <span class="n">Hacl</span>  <span class="c1"># m. It is the thickness of the cathode catalyst layer.</span>
+        <span class="n">epsilon_mc</span> <span class="o">=</span> <span class="mf">0.3823</span>  <span class="c1"># It is the volume fraction of ionomer in the CL.</span>
         <span class="c1"># Membrane</span>
-        <span class="n">Hmem</span> <span class="o">=</span> <span class="mf">5.08e-5</span>  <span class="c1"># m. It is the thickness of the membrane.</span>
+        <span class="n">Hmem</span> <span class="o">=</span> <span class="mf">16.97e-6</span>  <span class="c1"># m. It is the thickness of the membrane.</span>
         <span class="c1"># Gas diffusion layer</span>
-        <span class="n">Hgdl</span> <span class="o">=</span> <span class="mf">4.2e-4</span>  <span class="c1"># m. It is the thickness of the gas diffusion layer.</span>
-        <span class="n">epsilon_gdl</span> <span class="o">=</span> <span class="mf">0.6</span>  <span class="c1"># It is the anode/cathode GDL porosity.</span>
-        <span class="n">epsilon_c</span> <span class="o">=</span> <span class="mf">0.21</span>  <span class="c1"># It is the compression ratio of the GDL.</span>
-        <span class="c1"># Gas channel.</span>
-        <span class="n">Hgc</span> <span class="o">=</span> <span class="mf">1e-3</span>  <span class="c1"># m. It is the thickness of the gas channel.</span>
-        <span class="n">Wgc</span> <span class="o">=</span> <span class="mf">8e-4</span>  <span class="c1"># m. It is the width of the gas channel.</span>
-        <span class="n">Wrib</span> <span class="o">=</span> <span class="mf">7e-4</span>  <span class="c1"># m. It is the rib of the gas channel.</span>
-        <span class="n">L1gc</span> <span class="o">=</span> <span class="mf">0.1</span>  <span class="c1"># m. It is the length of 1 channel.</span>
-        <span class="n">Ngc</span> <span class="o">=</span> <span class="mi">16</span>  <span class="c1"># . It is the number of channels in the gas channel. It is taken to have Aact = 25cm².</span>
-        <span class="n">Lgc</span> <span class="o">=</span> <span class="p">(</span><span class="n">L1gc</span> <span class="o">+</span> <span class="n">Wrib</span><span class="p">)</span> <span class="o">*</span> <span class="n">Ngc</span>  <span class="c1"># m. It is the length of the gas channel.</span>
-        <span class="n">Aact</span> <span class="o">=</span> <span class="p">(</span><span class="n">L1gc</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Wrib</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Wgc</span> <span class="o">+</span> <span class="n">Wrib</span><span class="p">)</span> <span class="o">*</span> <span class="n">Ngc</span> <span class="o">+</span> <span class="p">(</span><span class="n">L1gc</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Wrib</span><span class="p">)</span> <span class="o">*</span> <span class="mf">7e-4</span>  <span class="c1"># m². It is the CL active area.</span>
+        <span class="n">Hgdl</span> <span class="o">=</span> <span class="mf">200e-6</span>  <span class="c1"># m. It is the thickness of the gas diffusion layer.</span>
+        <span class="n">epsilon_gdl</span> <span class="o">=</span> <span class="mf">0.7393</span>  <span class="c1"># It is the anode/cathode GDL porosity.</span>
+        <span class="n">epsilon_cl</span> <span class="o">=</span> <span class="mf">0.25</span>  <span class="c1"># It is the porosity of the catalyst layer, without units.</span>
+        <span class="n">epsilon_c</span> <span class="o">=</span> <span class="mf">0.2</span>  <span class="c1"># It is the compression ratio of the GDL.</span>
+        <span class="c1">#   Microporous layer</span>
+        <span class="n">Hmpl</span> <span class="o">=</span> <span class="mf">30e-6</span>  <span class="c1"># m. It is the thickness of the microporous layer.</span>
+        <span class="n">epsilon_mpl</span> <span class="o">=</span> <span class="mf">0.4</span>  <span class="c1"># It is the porosity of the microporous layer.</span>
+        <span class="c1"># Gas channel</span>
+        <span class="n">Hagc</span> <span class="o">=</span> <span class="mf">500e-6</span>  <span class="c1"># m. It is the thickness of the anode gas channel.</span>
+        <span class="n">Hcgc</span> <span class="o">=</span> <span class="n">Hagc</span>  <span class="c1"># m. It is the thickness of the cathode gas channel.</span>
+        <span class="n">Wagc</span> <span class="o">=</span> <span class="mf">450e-6</span>  <span class="c1"># m. It is the width of the anode gas channel.</span>
+        <span class="n">Wcgc</span> <span class="o">=</span> <span class="n">Wagc</span>  <span class="c1"># m. It is the width of the cathode gas channel.</span>
+        <span class="n">Lgc</span> <span class="o">=</span> <span class="mf">9.67</span>  <span class="c1"># m. It is the length of the gas channel.</span>
         <span class="c1"># Interaction parameters between water and PEMFC structure</span>
-        <span class="n">e</span> <span class="o">=</span> <span class="mf">3.0</span>  <span class="c1"># It is the capillary exponent</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="mf">4.0</span>  <span class="c1"># It is the capillary exponent</span>
         <span class="c1"># Voltage polarization</span>
-        <span class="n">Re</span> <span class="o">=</span> <span class="mf">1e-6</span>  <span class="c1"># ohm.m². It is the electron conduction resistance of the circuit.</span>
-        <span class="n">i0_c_ref</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># A.m-2.It is the reference exchange current density at the cathode.</span>
-        <span class="n">kappa_co</span> <span class="o">=</span> <span class="mi">25</span>  <span class="c1"># mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.</span>
-        <span class="n">kappa_c</span> <span class="o">=</span> <span class="mf">1.5</span>  <span class="c1"># It is the overpotential correction exponent.</span>
-        <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span>  <span class="c1"># It is the limit liquid saturation coefficients.</span>
-        <span class="n">C_scl</span> <span class="o">=</span> <span class="mf">2e7</span>  <span class="c1"># F.m-3. It is the volumetric space-charge layer capacitance.</span>
+        <span class="n">i0_c_ref</span> <span class="o">=</span> <span class="mf">6.795</span>  <span class="c1"># A.m-2.It is the reference exchange current density at the cathode.</span>
+        <span class="n">kappa_co</span> <span class="o">=</span> <span class="mf">30.41</span>  <span class="c1"># mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.</span>
+        <span class="n">kappa_c</span> <span class="o">=</span> <span class="mf">1.026</span>  <span class="c1"># It is the overpotential correction exponent.</span>
+        <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span> <span class="o">=</span> <span class="mf">0.05553</span><span class="p">,</span> <span class="mf">0.10514</span><span class="p">,</span> <span class="mf">0.63654</span>  <span class="c1"># It is the limit liquid saturation coefficients.</span>
+        <span class="n">C_scl</span> <span class="o">=</span> <span class="mf">20e6</span>  <span class="c1"># F.m-3. It is the volumetric space-charge layer capacitance.</span>
 
     <span class="c1"># For other fuel cells</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;the type_input given is not valid.&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">Hcl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> \
-        <span class="n">Hgc</span><span class="p">,</span> <span class="n">Wgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span>
+    <span class="k">return</span> <span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_cl</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">Hmpl</span><span class="p">,</span> <span class="n">epsilon_mpl</span><span class="p">,</span> \
+           <span class="n">Hagc</span><span class="p">,</span> <span class="n">Hcgc</span><span class="p">,</span> <span class="n">Wagc</span><span class="p">,</span> <span class="n">Wcgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
