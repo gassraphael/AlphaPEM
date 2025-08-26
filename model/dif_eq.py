@@ -9,8 +9,8 @@
 import math
 
 # Importing constants' value and functions
-from configuration.settings import C_O2ref, alpha_c, tau_cp, tau_hum, rho_mem, M_eq, epsilon_cl, F, R, M_H2O, \
-    n_cell, Vsm, Vem, A_T, Kp, Kd
+from configuration.settings import (C_O2ref, alpha_c, tau_cp, tau_hum, rho_mem, M_eq, F, R, M_H2O, n_cell, Vsm, Vem,
+                                    A_T, Kp, Kd)
 from model.flows import calculate_flows
 from model.cell_voltage import calculate_eta_c_intermediate_values
 from model.heat_transfer import calculate_heat_transfers
@@ -129,10 +129,10 @@ def calculate_dyn_dissoved_water_evolution(dif_eq, Hmem, Hacl, Hccl, epsilon_mc,
     dif_eq['dlambda_ccl / dt'] = M_eq / (rho_mem * epsilon_mc) * (J_lambda_mem_ccl / Hccl + S_abs_ccl + Sp_ccl)
 
 
-def calculate_dyn_liquid_water_evolution(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, epsilon_gdl, epsilon_mpl, n_gdl, Jl_agc_agdl,
-                                         Jl_agdl_agdl, Jl_agdl_ampl, Jl_ampl_acl, Jl_ccl_cmpl, Jl_cmpl_cgdl,
-                                         Jl_cgdl_cgdl, Jl_cgdl_cgc, Sl_agdl, Sl_ampl, Sl_acl, Sl_ccl, Sl_cmpl, Sl_cgdl,
-                                         **kwargs):
+def calculate_dyn_liquid_water_evolution(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, epsilon_gdl, epsilon_cl, epsilon_mpl,
+                                         n_gdl, Jl_agc_agdl, Jl_agdl_agdl, Jl_agdl_ampl, Jl_ampl_acl, Jl_ccl_cmpl,
+                                         Jl_cmpl_cgdl, Jl_cgdl_cgdl, Jl_cgdl_cgc, Sl_agdl, Sl_ampl, Sl_acl, Sl_ccl,
+                                         Sl_cmpl, Sl_cgdl, **kwargs):
     """
     This function calculates the dynamic evolution of the liquid water in the gas diffusion and catalyst layers.
 
@@ -153,6 +153,8 @@ def calculate_dyn_liquid_water_evolution(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, eps
         Thickness of the cathode catalyst layer (m).
     epsilon_gdl : float
         Anode/cathode GDL porosity.
+    epsilon_cl : float
+        Anode/cathode CL porosity.
     epsilon_mpl : float
         Anode/cathode MPL porosity.
     n_gdl : int
@@ -216,10 +218,11 @@ def calculate_dyn_liquid_water_evolution(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, eps
                                      ((Jl_cgdl_cgdl[n_gdl - 1] - Jl_cgdl_cgc) / (Hgdl / n_gdl) + M_H2O * Sl_cgdl[n_gdl])
 
 
-def calculate_dyn_vapor_evolution(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, Hagc, Hcgc, Lgc, epsilon_gdl, epsilon_mpl, n_gdl, Jv_a_in,
-                                  Jv_a_out, Jv_c_in, Jv_c_out, Jv_agc_agdl, Jv_agdl_agdl, Jv_agdl_ampl, Jv_ampl_acl,
-                                  S_abs_acl, S_abs_ccl, Jv_ccl_cmpl, Jv_cmpl_cgdl, Jv_cgdl_cgdl, Jv_cgdl_cgc,
-                                  Sv_agdl, Sv_ampl, Sv_acl, Sv_ccl, Sv_cmpl, Sv_cgdl, **kwargs):
+def calculate_dyn_vapor_evolution(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, Hagc, Hcgc, Lgc, epsilon_gdl, epsilon_cl,
+                                  epsilon_mpl, n_gdl, Jv_a_in, Jv_a_out, Jv_c_in, Jv_c_out, Jv_agc_agdl, Jv_agdl_agdl,
+                                  Jv_agdl_ampl, Jv_ampl_acl, S_abs_acl, S_abs_ccl, Jv_ccl_cmpl, Jv_cmpl_cgdl,
+                                  Jv_cgdl_cgdl, Jv_cgdl_cgc, Sv_agdl, Sv_ampl, Sv_acl, Sv_ccl, Sv_cmpl, Sv_cgdl,
+                                  **kwargs):
     """This function calculates the dynamic evolution of the vapor in the gas channels, the gas diffusion layers and the
     catalyst layers.
 
@@ -246,6 +249,8 @@ def calculate_dyn_vapor_evolution(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, Hagc, Hcgc
         Length of the gas channel (m).
     epsilon_gdl : float
         Anode/cathode GDL porosity.
+    epsilon_cl : float
+        Anode/cathode CL porosity.
     epsilon_mpl : float
         Anode/cathode MPL porosity.
     n_gdl : int
@@ -325,10 +330,10 @@ def calculate_dyn_vapor_evolution(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, Hagc, Hcgc
     dif_eq['dC_v_cgc / dt'] = (Jv_c_in - Jv_c_out) / Lgc + Jv_cgdl_cgc / Hcgc
 
 
-def calculate_dyn_H2_O2_N2_evolution(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, Hagc, Hcgc, Lgc, epsilon_gdl, epsilon_mpl, n_gdl, J_H2_in,
-                                     J_H2_out, J_O2_in, J_O2_out, J_N2_in, J_N2_out, J_H2_agc_agdl, J_H2_agdl_agdl,
-                                     J_H2_agdl_ampl, J_H2_ampl_acl, J_O2_ccl_cmpl, J_O2_cmpl_cgdl, J_O2_cgdl_cgdl,
-                                     J_O2_cgdl_cgc, S_H2_acl, S_O2_ccl, **kwargs):
+def calculate_dyn_H2_O2_N2_evolution(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, Hagc, Hcgc, Lgc, epsilon_gdl, epsilon_cl,
+                                     epsilon_mpl, n_gdl, J_H2_in, J_H2_out, J_O2_in, J_O2_out, J_N2_in, J_N2_out,
+                                     J_H2_agc_agdl, J_H2_agdl_agdl, J_H2_agdl_ampl, J_H2_ampl_acl, J_O2_ccl_cmpl,
+                                     J_O2_cmpl_cgdl, J_O2_cgdl_cgdl, J_O2_cgdl_cgc, S_H2_acl, S_O2_ccl, **kwargs):
     """This function calculates the dynamic evolution of the hydrogen, oxygen and nitrogen in the gas channels, the gas
     diffusion layers and the catalyst layers.
 
@@ -355,6 +360,8 @@ def calculate_dyn_H2_O2_N2_evolution(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, Hagc, H
         Length of the gas channel (m).
     epsilon_gdl : float
         Anode/cathode GDL porosity.
+    epsilon_cl : float
+        Anode/cathode CL porosity.
     epsilon_mpl : float
         Anode/cathode MPL porosity.
     n_gdl : int

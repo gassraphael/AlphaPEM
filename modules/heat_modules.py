@@ -6,7 +6,6 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import epsilon_cl
 from modules.transitory_functions import average, k_th_eff
 
 
@@ -58,7 +57,8 @@ def heat_transfer_int_values(sv, parameters):
     # Extraction of the operating inputs and the parameters
     Hgdl, Hmpl, Hacl, Hccl = parameters['Hgdl'], parameters['Hmpl'], parameters['Hacl'], parameters['Hccl']
     Hmem, epsilon_mc, epsilon_gdl = parameters['Hmem'], parameters['epsilon_mc'], parameters['epsilon_gdl']
-    epsilon_mpl, epsilon_c, n_gdl = parameters['epsilon_mpl'], parameters['epsilon_c'], parameters['n_gdl']
+    epsilon_cl, epsilon_mpl = parameters['epsilon_cl'], parameters['epsilon_mpl']
+    epsilon_c, n_gdl = parameters['epsilon_c'], parameters['n_gdl']
 
     # Weighted harmonic means of the effective thermal diffusivity
     k_th_eff_agc_agdl = k_th_eff('agdl', sv[f'T_agdl_{1}'], C_v=sv[f'C_v_agdl_{1}'], s=sv[f's_agdl_{1}'],

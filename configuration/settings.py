@@ -231,6 +231,7 @@ def physical_parameters(type_fuel_cell):
         Aact = 8.5e-3  # m². It is the active area of the catalyst layer.
         Hacl = 8.089e-6  # m. It is the thickness of the anode catalyst layer.
         Hccl = Hacl  # m. It is the thickness of the cathode catalyst layer.
+        epsilon_cl = 0.25  # It is the porosity of the catalyst layer, without units.
         epsilon_mc = 0.3949198274842546  # It is the volume fraction of ionomer in the CL.
         #   Membrane
         Hmem = 2e-5  # m. It is the thickness of the membrane.
@@ -257,11 +258,11 @@ def physical_parameters(type_fuel_cell):
         #                                                               liquid saturation coefficients.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
     else: # Stored setup in "stored_physical_parameters".
-        (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
-         Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
+        (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
+         Wcgc, Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
 
-    return (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
-            Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
+    return (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
+            Wcgc, Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
 
 
 def computing_parameters(step_current_parameters, Hgdl, Hacl):
@@ -327,7 +328,6 @@ yO2_ext = 0.2095  # . It is the molar fraction of O2 in dry air.
 # Model parameters for the cell
 rho_mem = 1980  # kg.m-3. It is the density of the dry membrane.
 M_eq = 1.1  # kg.mol-1. It is the equivalent molar mass of ionomer.
-epsilon_cl = 0.25  # It is the porosity of the catalyst layer, without units.
 tau_mpl = 4  # It is the pore structure coefficient in the MPL, without units [Gen Inoue 2016 Journal Power Sources].
 tau_cl = 6  # It is the pore structure coefficient in the CL, without units [Gen Inoue 2016 Journal Power Sources].
 Dp_gdl = 33.2e-6  # m. It is the pore diameter of the GDL [ZSW GenStack].

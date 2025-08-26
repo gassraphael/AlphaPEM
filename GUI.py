@@ -131,6 +131,7 @@ def main_frame(root, canvas):
          'CCL thickness - Hccl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 1},
          'Membrane thickness - Hmem (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 3},
          'GDL porosity - ε_gdl': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 1, 'label_column': 5},
+         'CL porosity - ε_cl': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 1, 'label_column': 5},
          'MPL porosity - ε_mpl': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 2, 'label_column': 1},
          'Ionomer volume fraction - ε_mc': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 2, 'label_column': 3},
          'Compression ratio - ε_c': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 2, 'label_column': 5},
@@ -354,7 +355,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
     # Retrieves parameter values for predefined stacks and keeps them in their standard unit, or converts user-selected
     # quantities into standard units.
     (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
+            Wcgc, Lgc, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
             a_switch, C_scl, step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS,
             ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, n_gdl, type_fuel_cell, type_auxiliary, type_control,
             type_purge,  type_display, type_plot) = recover_for_use_operating_inputs_and_physical_parameters(
@@ -372,11 +373,10 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
                           'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
     accessible_physical_parameters = {'Aact': Aact, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc, 'Wcgc': Wcgc, 'Lgc': Lgc}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
-                                        'epsilon_gdl': epsilon_gdl, 'epsilon_mpl': epsilon_mpl,
-                                        'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c, 'e': e,
-                                        'kappa_co': kappa_co, 'i0_c_ref': i0_c_ref, 'kappa_c': kappa_c,
-                                        'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch,
-                                        'C_scl': C_scl}
+                                        'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl,
+                                        'epsilon_mpl': epsilon_mpl, 'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c,
+                                        'e': e, 'kappa_co': kappa_co, 'i0_c_ref': i0_c_ref, 'kappa_c': kappa_c,
+                                        'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch, 'C_scl': C_scl}
 
     if current_button == 0:
         type_current = "step"

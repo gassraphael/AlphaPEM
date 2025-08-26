@@ -7,7 +7,7 @@ It is a component of the fuel cell model.
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import F, epsilon_cl, delta_s_HOR, delta_s_ORR
+from configuration.settings import F, delta_s_HOR, delta_s_ORR
 from modules.transitory_functions import sigma_p_eff, sigma_e_eff, delta_h_liq, delta_h_abs
 from modules.heat_modules import heat_transfer_int_values
 
@@ -59,7 +59,7 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl
     s_acl, s_ccl, eta_c = sv['s_acl'], sv['s_ccl'], sv['eta_c']
 
     # Extraction of the operating inputs and parameters
-    epsilon_mc, epsilon_gdl = parameters['epsilon_mc'], parameters['epsilon_gdl']
+    epsilon_mc, epsilon_gdl, epsilon_cl = parameters['epsilon_mc'], parameters['epsilon_gdl'], parameters['epsilon_cl']
     epsilon_mpl, epsilon_c, n_gdl = parameters['epsilon_mpl'], parameters['epsilon_c'], parameters['n_gdl']
     Hmem, Hgdl, Hmpl = parameters['Hmem'], parameters['Hgdl'], parameters['Hmpl']
     Hacl, Hccl = parameters['Hacl'], parameters['Hccl']

@@ -38,14 +38,48 @@ def parameter_bounds_for_calibration(type_fuel_cell):
     """
 
     if type_fuel_cell == "ZSW-GenStack":
-        pass
+        #       Fuel cell physical parameters
+        Hacl_min, Hacl_max = 6e-6, 1e-5  # m. It is the thickness of the ACL.
+        Hccl_min, Hccl_max = 1e-5, 2e-5  # m. It is the thickness of the CCL.
+        Hmem_min, Hmem_max = 1e-5, 2e-5  # m. It is the thickness of the membrane.
+        epsilon_gdl_min, epsilon_gdl_max = 0.696, 0.880  # It is the anode/cathode GDL porosity, without units.
+        epsilon_mpl_min, epsilon_mpl_max = 0.32, 0.54  # It is the anode/cathode MPL porosity, without units.
+        epsilon_cl_min, epsilon_cl_max = 0.40, 0.60  # It is the anode/cathode MPL porosity, without units.
+        epsilon_mc_min, epsilon_mc_max = 0.40, 0.60  # It is the volume fraction of ionomer in the CL.
+        #       Constants based on the interaction between water and the structure
+        e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.
+        #       Voltage polarization
+        i0_c_ref_min, i0_c_ref_max = 1e-3, 80  # A.m-2.It is the reference exchange current density at the cathode.
+        kappa_co_min, kappa_co_max = 0.01, 40  # A.m-2. It is the crossover correction coefficient.
+        kappa_c_min, kappa_c_max = 0.25, 4  # It is the overpotential correction exponent.
+        #       The bounds on liquid saturation coefficients are constrained to facilitate calibration.
+        a_slim_min, a_slim_max = 0.0, 0.2  # It is one of the limit liquid saturation coefficients.
+        b_slim_min, b_slim_max = 0.05, 0.4  # It is one of the limit liquid saturation coefficients.
+        a_switch_min, a_switch_max = 0.5, 0.95  # It is one of the limit liquid saturation coefficients.
+        #       Undetermined parameter which is not considered yet (require the use of EIS curves to be calibrated)
+        C_scl_min, C_sl_max = 2e7, 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
+        #       Bounds gathering and type
+        varbound = [['epsilon_gdl', epsilon_gdl_min, epsilon_gdl_max, 'real'],
+                    ['e', e_min, e_max, 'int'],
+                    ['i0_c_ref', i0_c_ref_min, i0_c_ref_max, 'real'],
+                    ['kappa_co', kappa_co_min, kappa_co_max, 'real'],
+                    ['kappa_c', kappa_c_min, kappa_c_max, 'real']]
+        gene_space = []  # List used to define the bounds of the undetermined parameters for pygad.
+        for i in range(len(varbound)):
+            name, min_val, max_val, type_val = varbound[i]
+            if type_val == 'int':
+                gene_space.append({'low': min_val, 'high': max_val, 'step': 1})
+            else:
+                gene_space.append({'low': min_val, 'high': max_val})
 
     elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
             type_fuel_cell == "EH-31_2.5":
         #       Fuel cell physical parameters
-        Hcl_min, Hcl_max = 8e-6, 2e-5  # m. It is the thickness of the CL.
+        Hacl_min, Hacl_max = 8e-6, 2e-5  # m. It is the thickness of the ACL.
         Hmem_min, Hmem_max = 1.5e-5, 5e-5  # m. It is the thickness of the membrane.
         epsilon_gdl_min, epsilon_gdl_max = 0.50, 0.90  # It is the anode/cathode GDL porosity, without units.
+        epsilon_mpl_min, epsilon_mpl_max = 0.30, 0.60  # It is the anode/cathode MPL porosity, without units.
+        epsilon_cl_min, epsilon_cl_max = 0.12, 0.50  # It is the anode/cathode MPL porosity, without units.
         epsilon_mc_min, epsilon_mc_max = 0.15, 0.40  # It is the volume fraction of ionomer in the CL.
         epsilon_c_min, epsilon_c_max = 0.15, 0.30  # It is the compression ratio of the GDL.
         #       Constants based on the interaction between water and the structure
@@ -53,16 +87,15 @@ def parameter_bounds_for_calibration(type_fuel_cell):
         #       Voltage polarization
         i0_c_ref_min, i0_c_ref_max = 1e-3, 80  # A.m-2.It is the reference exchange current density at the cathode.
         kappa_co_min, kappa_co_max = 0.01, 40  # A.m-2. It is the crossover correction coefficient.
-        # kappa_co = 1  # A.m-2. It is the crossover correction coefficient.
         kappa_c_min, kappa_c_max = 0.25, 4  # It is the overpotential correction exponent.
         #       The bounds on liquid saturation coefficients are constrained to facilitate calibration.
         a_slim_min, a_slim_max = 0.0, 0.2  # It is one of the limit liquid saturation coefficients.
         b_slim_min, b_slim_max = 0.05, 0.4  # It is one of the limit liquid saturation coefficients.
         a_switch_min, a_switch_max = 0.5, 0.95  # It is one of the limit liquid saturation coefficients.
         #       Undetermined parameter which is not considered yet (require the use of EIS curves to be calibrated)
-        C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
+        C_scl_min, C_sl_max = 2e7, 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
         #       Bounds gathering and type
-        varbound = [['Hcl', Hcl_min, Hcl_max, 'real'],
+        varbound = [['Hacl', Hacl_min, Hacl_max, 'real'],
                     ['Hmem', Hmem_min, Hmem_max, 'real'],
                     ['epsilon_gdl', epsilon_gdl_min, epsilon_gdl_max, 'real'],
                     ['epsilon_mc', epsilon_mc_min, epsilon_mc_max, 'real'],
@@ -195,7 +228,76 @@ def parameters_for_calibration(type_fuel_cell):
     """
 
     if type_fuel_cell == "ZSW-GenStack":
-        pass
+        # Given values by the author
+        #       Operating inputs
+        T_des = 68 + 273.15  # K. It is the temperature of the fuel cell.
+        Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
+        Phi_a_des, Phi_c_des = 39.8, 50  # It is the desired relative humidity.
+        Pa_des, Pc_des = 2.2e5, 2.0e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
+        #       Fuel cell physical parameters
+        Aact = 2.7972e-2  # m². It is the active area of the catalyst layer.
+        Hagc = 2.3e-4  # m. It is the thickness of the anode gas channel.
+        Hcgc = 3e-4  # m. It is the thickness of the cathode gas channel.
+        Wagc = 4.3e-4  # m. It is the width of the anode gas channel.
+        Wcgc = 5.32e-4  # m. It is the width of the cathode gas channel.
+        Lgc = 23.31  # m. It is the length of the gas channel.
+        #       Fuel cell undetermined physical parameters.
+        Hgdl = 1.27e-4  # m. It is the thickness of the gas diffusion layer.
+        Hmpl = 7e-5  # m. It is the thickness of the microporous layer.
+        epsilon_c = 0.2  # It is the compression ratio of the GDL.
+
+        # Estimated undetermined parameters for the initialisation
+        #   Gas diffusion layer
+        epsilon_gdl = 0.788  # It is the anode/cathode GDL porosity.
+        epsilon_mpl = 0.425  # It is the porosity of the microporous layer.
+        #   Catalyst layer
+        Hacl = 8e-6  # m. It is the thickness of the anode catalyst layer.
+        Hccl = 1.7e-5  # m. It is the thickness of the cathode catalyst layer.
+        epsilon_cl = 0.5  # It is the porosity of the microporous layer.
+        epsilon_mc = 0.5  # It is the volume fraction of ionomer in the CL.
+        #   Membrane
+        Hmem = 1.5e-5  # m. It is the thickness of the membrane.
+        #   Interaction parameters between water and PEMFC structure
+        e = 3.0  # It is the capillary exponent
+        #   Voltage polarization
+        i0_c_ref = 14.86  # A.m-2.It is the reference exchange current density at the cathode.
+        kappa_co = 1  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
+        kappa_c = 0.6386  # It is the overpotential correction exponent.
+        a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
+        C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
+
+        # Algorithm parameters for polarization curve generation
+        type_auxiliary = "forced-convective_cathode_with_flow-through_anode"
+        type_control = "no_control"
+        type_purge = "no_purge"
+        type_display = "no_display"
+        type_plot = "fixed"
+        type_current = "polarization_for_cali"
+        current_density = polarization_current_for_calibration
+        delta_t_ini_step = 120 * 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
+        delta_t_load_step = 1e-15  # (s). Loading time for the step current density function, from 0 to i_step.
+        delta_t_break_step = 0  # (s). Time at i_step current density for the stabilisation of the internal states.
+        i_step = 0  # (A.m-2). Current density for the step current density function.
+        step_current_parameters = {'delta_t_ini_step': delta_t_ini_step, 'delta_t_load_step': delta_t_load_step,
+                                   'delta_t_break_step': delta_t_break_step, 'i_step': i_step}
+        delta_t_ini_pola = 30 * 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
+        delta_t_load_pola = 30  # (s). Loading time for one step current of the polarisation current density function.
+        delta_t_break_pola = 15 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
+        delta_i_pola = 0.05e4  # (A.m-2). Current density step for the polarisation current density function.
+        i_max_pola = 1.7e4  # (A.m-2). It is the maximum current density for the polarization curve.
+        pola_current_parameters = {'delta_t_ini_pola': delta_t_ini_pola, 'delta_t_load_pola': delta_t_load_pola,
+                                   'delta_t_break_pola': delta_t_break_pola, 'delta_i_pola': delta_i_pola,
+                                   'i_max_pola': i_max_pola}
+        delta_t_ini_pola_cali = 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
+        delta_t_load_pola_cali = 30  # (s). Loading time for one step current of the polarisation current density function.
+        delta_t_break_pola_cali = 10 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
+        pola_current_for_cali_parameters = {'delta_t_ini_pola_cali': delta_t_ini_pola_cali,
+                                            'delta_t_load_pola_cali': delta_t_load_pola_cali,
+                                            'delta_t_break_pola_cali': delta_t_break_pola_cali}
+        i_EIS, ratio_EIS = np.nan, np.nan  # (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.
+        f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
+        t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
+        n_gdl = int(Hgdl / Hacl / 4)  # It is the number of model points placed inside each GDL.
 
     elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
             type_fuel_cell == "EH-31_2.5":
@@ -305,7 +407,7 @@ def parameters_for_calibration(type_fuel_cell):
     return (operating_inputs, current_parameters, accessible_physical_parameters, undetermined_physical_parameters,
             computing_parameters, i_exp, U_exp)
 
-def update_undetermined_parameters(solution, varbound, undetermined_physical_parameters):
+def update_undetermined_parameters(type_fuel_cell, solution, varbound, undetermined_physical_parameters):
     """
     Update the undetermined physical parameters dictionary with values from the solution.
 
@@ -323,10 +425,13 @@ def update_undetermined_parameters(solution, varbound, undetermined_physical_par
     dict
         Updated dictionary of undetermined physical parameters.
     """
-    for idx, val in enumerate(solution):
-        param_name = varbound[idx][0]
+    for i in range(len(solution)):
+        param_name = varbound[i][0]
         if param_name in undetermined_physical_parameters:
-            undetermined_physical_parameters[param_name] = val
+            undetermined_physical_parameters[param_name] = solution[i]
+        if type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
+            type_fuel_cell == "EH-31_2.5":
+            undetermined_physical_parameters['Hccl'] = undetermined_physical_parameters['Hacl']
     return undetermined_physical_parameters
 
 def calculate_simulation_error(Simulator_1, U_exp_1, i_exp_1, Simulator_2, U_exp_2, i_exp_2):

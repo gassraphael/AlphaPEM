@@ -6,7 +6,7 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import epsilon_cl, R
+from configuration.settings import R
 from modules.transitory_functions import average, Dcap, Da_eff, Dc_eff, h_a, h_c, D
 
 
@@ -46,7 +46,8 @@ def flows_int_values(sv, operating_inputs, parameters):
     T_agc, T_ampl, T_acl, T_mem = sv['T_agc'], sv['T_ampl'], sv['T_acl'], sv['T_mem']
     T_ccl, T_cmpl, T_cgc = sv['T_ccl'], sv['T_cmpl'], sv['T_cgc']
     # Extraction of the operating inputs and the parameters
-    epsilon_gdl, epsilon_mpl, epsilon_c = parameters['epsilon_gdl'], parameters['epsilon_mpl'], parameters['epsilon_c']
+    epsilon_gdl, epsilon_cl = parameters['epsilon_gdl'], parameters['epsilon_cl']
+    epsilon_mpl, epsilon_c = parameters['epsilon_mpl'], parameters['epsilon_c']
     e, Hacl, Hccl, Hmem = parameters['e'], parameters['Hacl'], parameters['Hccl'], parameters['Hmem']
     Hgdl, Hmpl, Wagc, Wcgc = parameters['Hgdl'], parameters['Hmpl'], parameters['Wagc'], parameters['Wcgc']
     Hagc, Hcgc, n_gdl = parameters['Hagc'], parameters['Hcgc'], parameters['n_gdl']

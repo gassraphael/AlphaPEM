@@ -6,7 +6,7 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import rho_mem, M_eq, epsilon_cl, gamma_cond, gamma_evap, F, R
+from configuration.settings import rho_mem, M_eq, gamma_cond, gamma_evap, F, R
 from model.auxiliaries import auxiliaries
 from modules.transitory_functions import Dcap, lambda_eq, gamma_sorp, Svl, k_H2, k_O2
 from modules.flows_modules import flows_int_values
@@ -54,7 +54,8 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     # Extraction of the operating inputs and parameters
     Hgdl, Hmpl, Hmem = parameters['Hgdl'], parameters['Hmpl'], parameters['Hmem']
     Hacl, Hccl = parameters['Hacl'], parameters['Hccl']
-    epsilon_gdl, epsilon_mpl, epsilon_c = parameters['epsilon_gdl'], parameters['epsilon_mpl'], parameters['epsilon_c']
+    epsilon_gdl, epsilon_cl = parameters['epsilon_gdl'], parameters['epsilon_cl']
+    epsilon_mpl, epsilon_c = parameters['epsilon_mpl'], parameters['epsilon_c']
     e, kappa_co, n_gdl = parameters['e'], parameters['kappa_co'], parameters['n_gdl']
 
     # Intermediate values

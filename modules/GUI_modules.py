@@ -342,8 +342,8 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
 
     T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
-    (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc, Aact,
-     e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
+    (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
+     Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
 
     n_gdl, t_purge, step_current_parameters = computing_parameters(step_current_parameters, Hgdl, Hacl)
 
@@ -369,6 +369,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_undetermined_parameters['CCL thickness - Hccl (µm)']['value'].set(round(Hccl * 1e6, 4))  # µm
     choice_undetermined_parameters['Membrane thickness - Hmem (µm)']['value'].set(round(Hmem * 1e6, 4))  # µm
     choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].set(round(epsilon_gdl, 4))
+    choice_undetermined_parameters['CL porosity - ε_cl']['value'].set(round(epsilon_cl, 4))
     choice_undetermined_parameters['MPL porosity - ε_mpl']['value'].set(round(epsilon_mpl, 4))
     choice_undetermined_parameters['Ionomer volume fraction - ε_mc']['value'].set(round(epsilon_mc, 4))
     choice_undetermined_parameters['Compression ratio - ε_c']['value'].set(round(epsilon_c, 4))
@@ -430,6 +431,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     Hccl = choice_undetermined_parameters['CCL thickness - Hccl (µm)']['value'].get() * 1e-6  # m
     Hmem = choice_undetermined_parameters['Membrane thickness - Hmem (µm)']['value'].get() * 1e-6  # m
     epsilon_gdl = choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].get()
+    epsilon_cl = choice_undetermined_parameters['CL porosity - ε_cl']['value'].get()
     epsilon_mpl = choice_undetermined_parameters['MPL porosity - ε_mpl']['value'].get()
     epsilon_mc = choice_undetermined_parameters['Ionomer volume fraction - ε_mc']['value'].get()
     epsilon_c = choice_undetermined_parameters['Compression ratio - ε_c']['value'].get()
@@ -516,7 +518,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
         type_plot = "dynamic"
 
     return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, epsilon_gdl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
+            Wcgc, Lgc, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
             a_switch, C_scl, step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS,
             ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, n_gdl, type_fuel_cell, type_auxiliary, type_control,
             type_purge,  type_display, type_plot)
@@ -608,6 +610,11 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
     if choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].get() < 0.50 or \
             choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].get() > 0.90:
         messagebox.showerror(title='GDL porosity', message='GDL porosity should be between 0.50 and 0.90.')
+        choices.clear()
+        return
+    if choice_undetermined_parameters['CL porosity - ε_cl']['value'].get() < 0.12 or \
+            choice_undetermined_parameters['CL porosity - ε_cl']['value'].get() > 0.60:
+        messagebox.showerror(title='GDL porosity', message='CL porosity should be between 0.12 and 0.60.')
         choices.clear()
         return
     if choice_undetermined_parameters['MPL porosity - ε_mpl']['value'].get() < 0.30 or \
@@ -863,6 +870,8 @@ def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, acces
                 Thickness of the cathode catalyst layer in m (undetermined physical parameter).
             - epsilon_gdl : float
                 Anode/cathode GDL porosity (undetermined physical parameter).
+            - epsilon_cl : float
+                Anode/cathode CL porosity (undetermined physical parameter).
             - epsilon_mc : float
                 Volume fraction of ionomer in the CL (undetermined physical parameter).
             - epsilon_c : float
@@ -1066,6 +1075,8 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
                 Thickness of the cathode catalyst layer in m (undetermined physical parameter).
             - epsilon_gdl : float
                 Anode/cathode GDL porosity (undetermined physical parameter).
+            - epsilon_cl : float
+                Anode/cathode CL porosity (undetermined physical parameter).
             - epsilon_mc : float
                 Volume fraction of ionomer in the CL (undetermined physical parameter).
             - epsilon_c : float

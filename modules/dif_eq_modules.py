@@ -7,7 +7,7 @@ and to implement integration events.
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import Text, Pext, Phi_ext, n_cell, M_H2, M_O2, M_N2, M_H2O, epsilon_cl, yO2_ext, R, F
+from configuration.settings import Text, Pext, Phi_ext, n_cell, M_H2, M_O2, M_N2, M_H2O, yO2_ext, R, F
 from modules.transitory_functions import average, Psat, C_v_sat, k_H2, k_O2, calculate_rho_Cp0
 
 
@@ -63,8 +63,9 @@ def dif_eq_int_values(sv, operating_inputs, control_variables, parameters):
     Pasm, Paem, Pcsm, Pcem = sv['Pasm'], sv['Paem'], sv['Pcsm'], sv['Pcem']
     # Extraction of the operating inputs and the parameters
     T_des, Phi_c_des = operating_inputs['T_des'], control_variables['Phi_c_des']
-    Hmem, Hacl, Hccl, epsilon_gdl = parameters['Hmem'], parameters['Hacl'], parameters['Hccl'], parameters['epsilon_gdl']
-    epsilon_mpl, kappa_co, epsilon_mc = parameters['epsilon_mpl'], parameters['kappa_co'], parameters['epsilon_mc']
+    Hmem, Hacl, Hccl = parameters['Hmem'], parameters['Hacl'], parameters['Hccl']
+    epsilon_gdl, epsilon_cl, epsilon_mpl = parameters['epsilon_gdl'], parameters['epsilon_cl'], parameters['epsilon_mpl']
+    kappa_co, epsilon_mc = parameters['kappa_co'], parameters['epsilon_mc']
     n_gdl = parameters['n_gdl']
 
     # Physical quantities outside the stack

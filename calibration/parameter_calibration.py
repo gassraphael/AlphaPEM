@@ -97,7 +97,7 @@ def pola_points(ga_instance, solution, solution_idx): # Function to maximize.
     """
 
     # Extraction of the undetermined parameters from the solution
-    solution_of_undetermined_physical_parameters = update_undetermined_parameters(solution, varbound,
+    solution_of_undetermined_physical_parameters = update_undetermined_parameters(type_fuel_cell_1, solution, varbound,
                                                                       copy.deepcopy(undetermined_physical_parameters))
 
     # Calculation of the model polarization curve
@@ -154,9 +154,9 @@ if __name__ == '__main__':
     start_time = time.time()
 
     # Initialization of the simulator in order to equilibrate the internal states of the fuel cell
-    operating_inputs_ini_1, computing_parameters_ini_1 = operating_inputs_1, computing_parameters_1
+    operating_inputs_ini_1, computing_parameters_ini_1 = copy.deepcopy(operating_inputs_1), copy.deepcopy(computing_parameters_1)
     operating_inputs_ini_1['current_density'], computing_parameters_ini_1['type_current'] = step_current, 'step'
-    operating_inputs_ini_2, computing_parameters_ini_2 = operating_inputs_2, computing_parameters_2
+    operating_inputs_ini_2, computing_parameters_ini_2 = copy.deepcopy(operating_inputs_2), copy.deepcopy(computing_parameters_2)
     operating_inputs_ini_2['current_density'], computing_parameters_ini_2['type_current'] = step_current, 'step'
     Simulator_ini_1 = AlphaPEM(operating_inputs_ini_1, current_parameters, accessible_physical_parameters,
                                undetermined_physical_parameters, computing_parameters_ini_1)
@@ -195,7 +195,7 @@ if __name__ == '__main__':
     solution = ga_instance.population[idx] # Get the best solution from the last generation.
     solution_fitness = ga_instance.last_generation_fitness[idx] # Get the fitness value of the best solution.
     sim_error = 1.0 / solution_fitness  # The error is the inverse of the fitness value.
-    undetermined_physical_parameters = update_undetermined_parameters(solution, varbound,
+    undetermined_physical_parameters = update_undetermined_parameters(type_fuel_cell_1, solution, varbound,
                                                                       copy.deepcopy(undetermined_physical_parameters))
 
     # Print of the parameter calibration results
