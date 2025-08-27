@@ -298,6 +298,8 @@ def parameters_for_calibration(type_fuel_cell):
         f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
         t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
         n_gdl = int(Hgdl / Hacl / 4)  # It is the number of model points placed inside each GDL.
+        rtol = 1e-7  # Relative tolerance for the system of ODEs solver.
+        atol = 1e-11  # Absolute tolerance for the system of ODEs solver.
 
     elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
             type_fuel_cell == "EH-31_2.5":
@@ -379,6 +381,8 @@ def parameters_for_calibration(type_fuel_cell):
         f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
         t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
         n_gdl = int(Hgdl / Hacl / 4)  # It is the number of model points placed inside each GDL.
+        rtol = 1e-7  # Relative tolerance for the system of ODEs solver.
+        atol = 1e-11  # Absolute tolerance for the system of ODEs solver.
 
     else:
         ValueError("A correct type_fuel_cell should be given.")
@@ -397,10 +401,10 @@ def parameters_for_calibration(type_fuel_cell):
                                         'kappa_co': kappa_co, 'i0_c_ref': i0_c_ref, 'kappa_c': kappa_c,
                                         'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch,
                                         'C_scl': C_scl}
-    computing_parameters = {'n_gdl': n_gdl, 't_purge': t_purge, 'type_fuel_cell': type_fuel_cell,
-                            'type_current': type_current, 'type_auxiliary': type_auxiliary,
-                            'type_control': type_control, 'type_purge': type_purge, 'type_display': type_display,
-                            'type_plot': type_plot}
+    computing_parameters = {'n_gdl': n_gdl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
+                            'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
+                            'type_auxiliary': type_auxiliary, 'type_control': type_control, 'type_purge': type_purge,
+                            'type_display': type_display, 'type_plot': type_plot}
 
     # Characteristic points of the experimental polarization curve
     i_exp, U_exp = pola_exp_values_calibration(type_fuel_cell)
