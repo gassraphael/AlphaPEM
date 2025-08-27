@@ -233,7 +233,7 @@ class AlphaPEM:
         #       Resolution of the system of differential equations.
         event_negative.terminal = True  # Integration is stopped if one of the crucial variables becomes negative.
         self.sol = solve_ivp(dydt, self.time_interval, self.initial_variable_values, method='BDF',
-                             rtol = 1e-5, atol = 1e-8, events=event_negative,
+                             rtol = 1e-7, atol = 1e-11, events=event_negative,
                              args=(self.operating_inputs, self.parameters, self.solver_variable_names,
                                    self.control_variables))
 
