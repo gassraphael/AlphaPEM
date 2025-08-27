@@ -383,8 +383,8 @@ def parameters_for_calibration(type_fuel_cell):
         f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
         t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
         n_gdl = int(Hgdl / Hacl / 4)  # It is the number of model points placed inside each GDL.
-        rtol = 1e-7  # Relative tolerance for the system of ODEs solver.
-        atol = 1e-11  # Absolute tolerance for the system of ODEs solver.
+        rtol = 1e-6  # Relative tolerance for the system of ODEs solver.
+        atol = 1e-10  # Absolute tolerance for the system of ODEs solver.
 
     else:
         ValueError("A correct type_fuel_cell should be given.")
