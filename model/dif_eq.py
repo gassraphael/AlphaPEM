@@ -58,10 +58,10 @@ def dydt(t, y, operating_inputs, parameters, solver_variable_names, control_vari
 
     # Intermediate values
     i_fc = operating_inputs['current_density'](t, parameters)
-    Mext, Pagc, Pcgc, i_n, Masm, Maem, Mcsm, Mcem, rho_Cp0 = dif_eq_int_values(solver_variables,
+    Mext, M_H2_N2_in, Pagc, Pcgc, i_n, Masm, Maem, Mcsm, Mcem, rho_Cp0 = dif_eq_int_values(solver_variables,
                                                                         operating_inputs, control_variables, parameters)
     Wcp_des, Wa_inj_des, Wc_inj_des = desired_flows(solver_variables, control_variables, i_n, i_fc, operating_inputs,
-                                                    parameters, Mext)
+                                                    parameters, Mext, M_H2_N2_in)
     eta_c_intermediate_values = calculate_eta_c_intermediate_values(solver_variables, operating_inputs, parameters)
 
     # Calculation of the flows
@@ -331,9 +331,10 @@ def calculate_dyn_vapor_evolution(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, Hagc, Hcgc
 
 
 def calculate_dyn_H2_O2_N2_evolution(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, Hagc, Hcgc, Lgc, epsilon_gdl, epsilon_cl,
-                                     epsilon_mpl, n_gdl, J_H2_in, J_H2_out, J_O2_in, J_O2_out, J_N2_in, J_N2_out,
-                                     J_H2_agc_agdl, J_H2_agdl_agdl, J_H2_agdl_ampl, J_H2_ampl_acl, J_O2_ccl_cmpl,
-                                     J_O2_cmpl_cgdl, J_O2_cgdl_cgdl, J_O2_cgdl_cgc, S_H2_acl, S_O2_ccl, **kwargs):
+                                     epsilon_mpl, n_gdl, type_auxiliary, J_H2_in, J_H2_out, J_O2_in, J_O2_out,
+                                     J_N2_a_in, J_N2_a_out, J_N2_c_in, J_N2_c_out, J_H2_agc_agdl, J_H2_agdl_agdl,
+                                     J_H2_agdl_ampl, J_H2_ampl_acl, J_O2_ccl_cmpl, J_O2_cmpl_cgdl, J_O2_cgdl_cgdl,
+                                     J_O2_cgdl_cgc, S_H2_acl, S_O2_ccl, **kwargs):
     """This function calculates the dynamic evolution of the hydrogen, oxygen and nitrogen in the gas channels, the gas
     diffusion layers and the catalyst layers.
 
@@ -366,6 +367,8 @@ def calculate_dyn_H2_O2_N2_evolution(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, Hagc, H
         Anode/cathode MPL porosity.
     n_gdl : int
         Number of model nodes placed inside each GDL.
+    type_auxiliary : str
+        Type of auxiliary components used in the fuel cell system.
     J_H2_in : float
         Hydrogen flow at the anode inlet (mol.m-2.s-1).
     J_H2_out : float
@@ -374,9 +377,13 @@ def calculate_dyn_H2_O2_N2_evolution(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, Hagc, H
         Oxygen flow at the cathode inlet (mol.m-2.s-1).
     J_O2_out : float
         Oxygen flow at the cathode outlet (mol.m-2.s-1).
-    J_N2_in : float
+    J_N2_a_in : float
+        Nitrogen flow at the anode inlet (mol.m-2.s-1).
+    J_N2_a_out : float
+        Nitrogen flow at the anode outlet (mol.m-2.s-1).
+    J_N2_c_in : float
         Nitrogen flow at the cathode inlet (mol.m-2.s-1).
-    J_N2_out : float
+    J_N2_c_out : float
         Nitrogen flow at the cathode outlet (mol.m-2.s-1).
     J_H2_agc_agdl : float
         Hydrogen flow between the anode gas channel and the anode GDL (mol.m-2.s-1).
@@ -432,8 +439,12 @@ def calculate_dyn_H2_O2_N2_evolution(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, Hagc, H
     #      Inside the CGC
     dif_eq['dC_O2_cgc / dt'] = (J_O2_in - J_O2_out) / Lgc + J_O2_cgdl_cgc / Hcgc
 
-    # Inside the whole cell
-    dif_eq['dC_N2 / dt'] = (J_N2_in - J_N2_out) / Lgc
+    # Inside each half cell
+    if type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
+        dif_eq['dC_N2_a / dt'] = (J_N2_a_in - J_N2_a_out) / Lgc  # Test bench: simulated H2 recirculation which leads to N2 in the anode.
+    else:
+        dif_eq['dC_N2_a / dt'] = 0
+    dif_eq['dC_N2_c / dt'] = (J_N2_c_in - J_N2_c_out) / Lgc
 
 
 def calculate_dyn_temperature_evolution(dif_eq, rho_Cp0, Hgdl, Hmpl, Hacl, Hccl, Hmem, n_gdl, Jt, Q_r, Q_sorp, Q_liq, Q_p, Q_e,
@@ -729,8 +740,8 @@ def calculate_dyn_throttle_area_evolution(dif_eq, Pagc, Pcgc, T_agc, T_cgc, Abp_
     """
 
     # Calculation of the pressure derivative inside the gas channels
-    dPagcdt = (dif_eq['dC_v_agc / dt'] + dif_eq['dC_H2_agc / dt']) * R * T_agc
-    dPcgcdt = (dif_eq['dC_v_cgc / dt'] + dif_eq['dC_O2_cgc / dt'] + dif_eq['dC_N2 / dt']) * R * T_cgc
+    dPagcdt = (dif_eq['dC_v_agc / dt'] + dif_eq['dC_H2_agc / dt'] + dif_eq['dC_N2_a / dt']) * R * T_agc
+    dPcgcdt = (dif_eq['dC_v_cgc / dt'] + dif_eq['dC_O2_cgc / dt'] + dif_eq['dC_N2_c / dt']) * R * T_cgc
 
     # Throttle area evolution inside the anode auxiliaries
     if type_auxiliary == "forced-convective_cathode_with_flow-through_anode":

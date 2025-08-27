@@ -156,14 +156,15 @@ def operating_inputs_function(pola_current_parameters, type_fuel_cell):
         Pa_des, Pc_des = 2.0e5, 2.0e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
+        y_H2_in = 1 # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
         i_max_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell is None:
-        T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = None, None, None, None, None, None, None, None
+        T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola = None, None, None, None, None, None, None, None, None
     else: # Stored setup in "stored_operating_inputs".
-        T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
+        T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
     pola_current_parameters['i_max_pola'] = i_max_pola  # Update the maximum current density for the polarization curve.
-    return T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, pola_current_parameters
+    return T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, pola_current_parameters
 
 
 def physical_parameters(type_fuel_cell):
@@ -323,7 +324,7 @@ gamma_H2 = 1.404  # . It is the heat capacity ratio of H2 at 100°C.
 Text = 298  # K. It is the outside temperature.
 Pext = 101325  # Pa. It is the outside pressure.
 Phi_ext = 0.4  # It is the outside relative humidity.
-yO2_ext = 0.2095  # . It is the molar fraction of O2 in dry air.
+y_O2_ext = 0.2095  # . It is the molar fraction of O2 in dry air.
 
 # Model parameters for the cell
 rho_mem = 1980  # kg.m-3. It is the density of the dry membrane.

@@ -23,7 +23,7 @@ from model.dif_eq import dydt
 from model.flows import calculate_flows
 from model.cell_voltage import calculate_cell_voltage
 from model.control import control_operating_conditions
-from configuration.settings import Pext, yO2_ext, C_O2ref, alpha_c, F, R
+from configuration.settings import Pext, y_O2_ext, C_O2ref, alpha_c, F, R
 from modules.dif_eq_modules import event_negative
 from modules.transitory_functions import lambda_eq, k_H2, k_O2
 from modules.display_modules import (plot_ifc, plot_J, plot_C_v, plot_lambda, plot_s, plot_C_O2, plot_C_H2, plot_C_N2,
@@ -202,10 +202,10 @@ class AlphaPEM:
         self.solver_variable_names = ['C_v_agc', 'C_v_agdl', 'C_v_ampl', 'C_v_acl', 'C_v_ccl', 'C_v_cmpl', 'C_v_cgdl',
                                       'C_v_cgc', 's_agdl', 's_ampl', 's_acl', 's_ccl', 's_cmpl', 's_cgdl', 'lambda_acl',
                                       'lambda_mem', 'lambda_ccl', 'C_H2_agc', 'C_H2_agdl', 'C_H2_ampl', 'C_H2_acl',
-                                      'C_O2_ccl', 'C_O2_cmpl', 'C_O2_cgdl', 'C_O2_cgc', 'C_N2', 'T_agc', 'T_agdl',
-                                      'T_ampl', 'T_acl', 'T_mem', 'T_ccl', 'T_cmpl', 'T_cgdl', 'T_cgc', 'eta_c', 'Pasm',
-                                      'Paem', 'Pcsm', 'Pcem', 'Phi_asm', 'Phi_aem', 'Phi_csm', 'Phi_cem', 'Wcp',
-                                      'Wa_inj', 'Wc_inj', 'Abp_a', 'Abp_c']
+                                      'C_O2_ccl', 'C_O2_cmpl', 'C_O2_cgdl', 'C_O2_cgc', 'C_N2_a', 'C_N2_c', 'T_agc',
+                                      'T_agdl', 'T_ampl', 'T_acl', 'T_mem', 'T_ccl', 'T_cmpl', 'T_cgdl', 'T_cgc',
+                                      'eta_c', 'Pasm', 'Paem', 'Pcsm', 'Pcem', 'Phi_asm', 'Phi_aem', 'Phi_csm',
+                                      'Phi_cem', 'Wcp', 'Wa_inj', 'Wc_inj', 'Abp_a', 'Abp_c']
         self.solver_variable_names_extension()  # Several points are considered in each GDL and must be inserted into
         #                                        the solver_variable_names.
         self.all_variable_names = self.solver_variable_names + ['t', 'Ucell', 'S_abs_acl', 'S_abs_ccl'] + \
@@ -319,6 +319,7 @@ class AlphaPEM:
         current_density, T_des = self.operating_inputs['current_density'], self.operating_inputs['T_des']
         Pa_des, Pc_des = self.operating_inputs['Pa_des'], self.operating_inputs['Pc_des']
         Phi_a_des, Phi_c_des = self.operating_inputs['Phi_a_des'], self.operating_inputs['Phi_c_des']
+        y_H2_in = self.operating_inputs['y_H2_in']
         Hmem, kappa_co, i0_c_ref, = self.parameters['Hmem'], self.parameters['kappa_co'], self.parameters['i0_c_ref']
         kappa_c = self.parameters['kappa_c']
         a_slim, b_slim, a_switch = self.parameters['a_slim'], self.parameters['b_slim'], self.parameters['a_switch']
@@ -337,12 +338,14 @@ class AlphaPEM:
         s_switch = a_switch * slim
         #   Initial fuel cell states
         C_v_ini = Phi_des_moy * Psat_ini / (R * T_ini)  # mol.m-3. It is the initial vapor concentration.
-        C_H2_ini = (P_des_moy - Phi_des_moy * Psat_ini) / (R * T_ini)  # mol.m-3. It is the initial H2 concentration
-        #                                                              in the fuel cell.
-        C_O2_ini = yO2_ext * (P_des_moy - Phi_des_moy * Psat_ini) / (R * T_ini)  # mol.m-3. It is the initial O2
+        C_H2_ini = y_H2_in * (P_des_moy - Phi_des_moy * Psat_ini) / (R * T_ini)  # mol.m-3. It is the initial H2
         #                                                                        concentration in the fuel cell.
-        C_N2_ini = (1 - yO2_ext) * (P_des_moy - Phi_des_moy * Psat_ini) / (R * T_ini)  # mol.m-3. It is the initial N2
-        #                                                                              concentration in the fuel cell.
+        C_O2_ini = y_O2_ext * (P_des_moy - Phi_des_moy * Psat_ini) / (R * T_ini)  # mol.m-3. It is the initial O2
+        #                                                                        concentration in the fuel cell.
+        C_N2_a_ini = (1 - y_H2_in) * (P_des_moy - Phi_des_moy * Psat_ini) / (R * T_ini) # mol.m-3. It is the initial N2
+        #                                                                          concentration in the anode fuel cell.
+        C_N2_c_ini = (1 - y_O2_ext) * (P_des_moy - Phi_des_moy * Psat_ini) / (R * T_ini) # mol.m-3. It is the initial N2
+        #                                                                          concentration in the anode fuel cell.
         s_ini = 0  # It is the initial liquid water saturation in the fuel cell.
         lambda_mem_ini = lambda_eq(C_v_ini, s_ini, T_ini)  # It is the initial water content in the fuel cell.
         i_fc_ini = current_density(self.time_interval[0], self.parameters)
@@ -373,7 +376,10 @@ class AlphaPEM:
         lambda_acl, lambda_mem, lambda_ccl = [lambda_mem_ini] * 3
         C_H2_agc, C_H2_agdl, C_H2_ampl, C_H2_acl = [C_H2_ini] * 4
         C_O2_ccl, C_O2_cmpl, C_O2_cgdl, C_O2_cgc = [C_O2_ini] * 4
-        C_N2 = C_N2_ini
+        if self.parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode":
+            C_N2_a, C_N2_c = C_N2_a_ini, C_N2_c_ini # Test bench: simulated H2 recirculation which leads to N2 in the anode.
+        else:
+            C_N2_a, C_N2_c = 0, C_N2_c_ini
         T_agc, T_agdl, T_ampl, T_acl, T_mem, T_ccl, T_cmpl, T_cgdl, T_cgc = [T_ini] * 9
         eta_c = eta_c_ini
         Pasm, Paem, Pcsm, Pcem = Pasm_ini, Paem_ini, Pcsm_ini, Pcem_ini
@@ -386,7 +392,7 @@ class AlphaPEM:
                                    [s_boundary] + [s_agdl] * (n_gdl - 1) + [s_ampl, s_acl, s_ccl, s_cmpl] +
                                    [s_cgdl] * (n_gdl - 1) +  [s_boundary] + [lambda_acl, lambda_mem, lambda_ccl] +
                                    [C_H2_agc] + [C_H2_agdl] * n_gdl + [C_H2_ampl, C_H2_acl, C_O2_ccl, C_O2_cmpl] +
-                                   [C_O2_cgdl] * n_gdl + [C_O2_cgc, C_N2] +
+                                   [C_O2_cgdl] * n_gdl + [C_O2_cgc, C_N2_a, C_N2_c] +
                                    [T_agc] + [T_agdl] * n_gdl + [T_ampl, T_acl, T_mem, T_ccl, T_cmpl] +
                                    [T_cgdl] * n_gdl + [T_cgc] + [eta_c] +
                                    [Pasm, Paem, Pcsm, Pcem, Phi_asm, Phi_aem, Phi_csm, Phi_cem] +

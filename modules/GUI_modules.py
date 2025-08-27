@@ -340,7 +340,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
      current_density) = current_density_parameters()
 
-    T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola = stored_operating_inputs(type_fuel_cell)
+    T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
     (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
      Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
@@ -355,6 +355,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_operating_conditions['Cathode stoichiometry - Sc']['value'].set(round(Sc, 4))
     choice_operating_conditions['Anode humidity - Φa']['value'].set(round(Phi_a_des, 4))
     choice_operating_conditions['Cathode humidity - Φc']['value'].set(round(Phi_c_des, 4))
+    choice_operating_conditions['Anode inlet H2 ratio - y_H2_in\n(flow-through anode only)']['value'].set(round(y_H2_in, 4))
     # accessible physical parameters recovery
     choice_accessible_parameters['Active area - Aact (cm²)']['value'].set(round(Aact * 1e4, 4))  # cm²
     choice_accessible_parameters['AGC thickness - Hagc (µm)']['value'].set(round(Hagc * 1e6, 4))  # µm
@@ -417,6 +418,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     Sc = choice_operating_conditions['Cathode stoichiometry - Sc']['value'].get()
     Phi_a_des = choice_operating_conditions['Anode humidity - Φa']['value'].get()
     Phi_c_des = choice_operating_conditions['Cathode humidity - Φc']['value'].get()
+    y_H2_in = choice_operating_conditions['Anode inlet H2 ratio - y_H2_in\n(flow-through anode only)']['value'].get()
     # accessible physical parameters
     Aact = choice_accessible_parameters['Active area - Aact (cm²)']['value'].get() * 1e-4  # m²
     Hagc = choice_accessible_parameters['AGC thickness - Hagc (µm)']['value'].get() * 1e-6  # m
@@ -573,6 +575,11 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
             choice_operating_conditions['Cathode humidity - Φc']['value'].get() < 0 or \
             choice_operating_conditions['Cathode humidity - Φc']['value'].get() > 1:
         messagebox.showerror(title='Desired humidity', message='The desired humidities should be between 0 and 1.')
+        choices.clear()
+        return
+    if choice_operating_conditions['Anode inlet H2 ratio - y_H2_in\n(flow-through anode only)']['value'].get() < 0 or \
+            choice_operating_conditions['Anode inlet H2 ratio - y_H2_in\n(flow-through anode only)']['value'].get() > 1:
+        messagebox.showerror(title='Anode inlet H2 ratio', message='The anode inlet H2 ratio should be between 0 and 1.')
         choices.clear()
         return
     if choice_accessible_parameters['Active area - Aact (cm²)']['value'].get() < 0:

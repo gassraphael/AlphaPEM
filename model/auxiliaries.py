@@ -6,7 +6,7 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import F, R, Text, Pext, Phi_ext, yO2_ext, gamma, gamma_H2, M_H2, M_H2O, n_cell, A_T, \
+from configuration.settings import F, R, Text, Pext, Phi_ext, y_O2_ext, gamma, gamma_H2, M_H2, M_H2O, n_cell, A_T, \
     Ksm_in, Ksm_out, Kem_in, C_D
 from modules.transitory_functions import Psat
 from modules.auxiliaries_modules import auxiliaries_int_values
@@ -50,9 +50,13 @@ def auxiliaries(t, solver_variables, control_variables, i_fc, operating_inputs, 
         O2 flow at the cathode gas channel inlet (mol.m-2.s-1).
     J_O2_out : float
         O2 flow at the cathode gas channel outlet (mol.m-2.s-1).
-    J_N2_in : float
+    J_N2_a_in : float
+        N2 flow at the anode gas channel inlet (mol.m-2.s-1).
+    J_N2_a_out : float
+        N2 flow at the anode gas channel outlet (mol.m-2.s-1).
+    J_N2_c_in : float
         N2 flow at the cathode gas channel inlet (mol.m-2.s-1).
-    J_N2_out : float
+    J_N2_c_out : float
         N2 flow at the cathode gas channel outlet (mol.m-2.s-1).
     Wasm_in : float
         Anode side supply manifold inlet flow (kg.s-1).
@@ -92,15 +96,14 @@ def auxiliaries(t, solver_variables, control_variables, i_fc, operating_inputs, 
 
     # Extraction of the operating inputs and the parameters
     T_des, Pa_des, Pc_des = operating_inputs['T_des'], operating_inputs['Pa_des'], operating_inputs['Pc_des']
-    Sa, Sc = operating_inputs['Sa'], operating_inputs['Sc']
+    Sa, Sc, y_H2_in = operating_inputs['Sa'], operating_inputs['Sc'], operating_inputs['y_H2_in']
     Phi_a_des, Phi_c_des = control_variables['Phi_a_des'], control_variables['Phi_c_des']
     Aact, Hagc, Hcgc = parameters['Aact'], parameters['Hagc'], parameters['Hcgc']
     Wagc, Wcgc, type_auxiliary = parameters['Wagc'], parameters['Wcgc'], parameters['type_auxiliary']
 
     # Intermediate values
-    Mext, Pagc, Pcgc, Phi_agc, Phi_cgc, y_cgc, Magc, Mcgc, Pr_aem, Pr_cem, \
-        Maem, Masm, Mcem, Mcsm, k_purge, Abp_a, Abp_c, i_n = \
-        auxiliaries_int_values(t, solver_variables, operating_inputs, parameters)
+    (Mext, M_H2_N2_in, Pagc, Pcgc, Phi_agc, Phi_cgc, y_H2_agc, y_O2_cgc, Magc, Mcgc, Pr_aem, Pr_cem, Maem, Masm, Mcem,
+     Mcsm, k_purge, Abp_a, Abp_c, i_n) = auxiliaries_int_values(t, solver_variables, operating_inputs, parameters)
 
     # _________________________________________Inlet and outlet global flows____________________________________________
     """Global flows here refer to flows that integrate all the chemical species circulating together.
@@ -115,15 +118,14 @@ def auxiliaries(t, solver_variables, control_variables, i_fc, operating_inputs, 
         Ja_in = Wasm_out / (Hagc * Wagc * Masm)  # mol.m-2.s-1
         # Anode outlet
         Waem_in = Kem_in * (Pagc - Paem)  # kg.s-1
-        Ware = n_cell * Maem * (Paem / (Paem - Phi_aem * Psat(T_des))) * (Sa - 1) * (i_fc + i_n) / (
-                    2 * F) * Aact  # kg.s-1
+        Ware = n_cell * Maem * (Paem / (Paem - Phi_aem * Psat(T_des))) * (Sa - 1) * (i_fc + i_n) / (2 * F) * Aact  # kg.s-1
         Waem_out = k_purge * C_D * A_T * Paem / (R * T_des)**0.5 * Pr_aem ** (1 / gamma_H2) * \
                    (Magc * 2 * gamma_H2 / (gamma_H2 - 1) * (1 - Pr_aem ** ((gamma_H2 - 1) / gamma_H2)))**0.5  # kg.s-1
         Ja_out = Waem_in / (Hagc * Wagc * Magc)  # mol.m-2.s-1
 
     elif type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         # Anode inlet
-        Wrd = n_cell * M_H2 * Sa * (i_fc + i_n) / (2 * F) * Aact  # kg.s-1
+        Wrd = n_cell * M_H2_N2_in / y_H2_in * Sa * (i_fc + i_n) / (2 * F) * Aact  # kg.s-1
         Wasm_in = Wrd + Wa_inj  # kg.s-1
         Wasm_out = Ksm_out * (Pasm - Pagc)  # kg.s-1
         Ja_in = Wasm_out / (Hagc * Wagc * Masm)  # mol.m-2.s-1
@@ -161,7 +163,7 @@ def auxiliaries(t, solver_variables, control_variables, i_fc, operating_inputs, 
         # Cathode inlet   
         Wcsm_in, Wcsm_out = 0, 0  # kg.s-1
         Jc_in = (1 + Phi_c_des * Psat(T_des) / (Pcgc - Phi_c_des * Psat(T_des))) * \
-                1 / yO2_ext * Sc * (i_fc + i_n) / (4 * F) * Aact / (Hcgc * Wcgc)  # mol.m-2.s-1
+                1 / y_O2_ext * Sc * (i_fc + i_n) / (4 * F) * Aact / (Hcgc * Wcgc)  # mol.m-2.s-1
         # Cathode outlet
         Wcem_in, Wcem_out = 0, 0  # kg.s-1
         Jc_out = Kem_in * (Pcgc - Pc_des) / (Hcgc * Wcgc * Mcgc)  # mol.m-2.s-1
@@ -183,28 +185,38 @@ def auxiliaries(t, solver_variables, control_variables, i_fc, operating_inputs, 
     Jv_c_out = Phi_cgc * Psat(T_des) / Pcgc * Jc_out
 
     # H2 flows at the GC (mol.m-2.s-1)
-    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
-       type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
         J_H2_in = (1 - Phi_asm * Psat(T_des) / Pasm) * Ja_in
+        J_H2_out = (1 - Phi_agc * Psat(T_des) / Pagc) * Ja_out
+    elif type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
+        J_H2_in = y_H2_in * (1 - Phi_asm * Psat(T_des) / Pasm) * Ja_in
+        J_H2_out = y_H2_agc * (1 - Phi_agc * Psat(T_des) / Pagc) * Ja_out
     else:  # elif type_auxiliary == "no_auxiliary":
         J_H2_in = (1 - Phi_a_des * Psat(T_des) / Pagc) * Ja_in
-    J_H2_out = (1 - Phi_agc * Psat(T_des) / Pagc) * Ja_out
+        J_H2_out = (1 - Phi_agc * Psat(T_des) / Pagc) * Ja_out
 
     # O2 flows at the GC (mol.m-2.s-1)
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
        type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-        J_O2_in = yO2_ext * (1 - Phi_csm * Psat(T_des) / Pcsm) * Jc_in
+        J_O2_in = y_O2_ext * (1 - Phi_csm * Psat(T_des) / Pcsm) * Jc_in
     else:  # elif type_auxiliary == "no_auxiliary":
-        J_O2_in = yO2_ext * (1 - Phi_c_des * Psat(T_des) / Pcgc) * Jc_in
-    J_O2_out = y_cgc * (1 - Phi_cgc * Psat(T_des) / Pcgc) * Jc_out
+        J_O2_in = y_O2_ext * (1 - Phi_c_des * Psat(T_des) / Pcgc) * Jc_in
+    J_O2_out = y_O2_cgc * (1 - Phi_cgc * Psat(T_des) / Pcgc) * Jc_out
 
     # N2 flows at the GC (mol.m-2.s-1)
-    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
-       type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-        J_N2_in = (1 - yO2_ext) * (1 - Phi_csm * Psat(T_des) / Pcsm) * Jc_in
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
+        J_N2_a_in = 0
+        J_N2_a_out = 0
+        J_N2_c_in = (1 - y_O2_ext) * (1 - Phi_csm * Psat(T_des) / Pcsm) * Jc_in
+    elif type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
+        J_N2_a_in = (1 - y_H2_in) * (1 - Phi_asm * Psat(T_des) / Pasm) * Ja_in
+        J_N2_a_out = (1 - y_H2_agc) * (1 - Phi_agc * Psat(T_des) / Pagc) * Ja_out
+        J_N2_c_in = (1 - y_O2_ext) * (1 - Phi_csm * Psat(T_des) / Pcsm) * Jc_in
     else:  # elif type_auxiliary == "no_auxiliary":
-        J_N2_in = (1 - yO2_ext) * (1 - Phi_c_des * Psat(T_des) / Pcgc) * Jc_in
-    J_N2_out = (1 - y_cgc) * (1 - Phi_cgc * Psat(T_des) / Pcgc) * Jc_out
+        J_N2_a_in = 0
+        J_N2_a_out = 0
+        J_N2_c_in = (1 - y_O2_ext) * (1 - Phi_c_des * Psat(T_des) / Pcgc) * Jc_in
+    J_N2_c_out = (1 - y_O2_cgc) * (1 - Phi_cgc * Psat(T_des) / Pcgc) * Jc_out
 
     # Vapor flows at the manifold (mol.s-1)
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
@@ -220,7 +232,6 @@ def auxiliaries(t, solver_variables, control_variables, i_fc, operating_inputs, 
     else:  # elif type_auxiliary == "no_auxiliary":
         Wv_asm_in, Wv_aem_out, Wv_csm_in, Wv_cem_out = [0] * 4
 
-    return Jv_a_in, Jv_a_out, Jv_c_in, Jv_c_out, \
-        J_H2_in, J_H2_out, J_O2_in, J_O2_out, J_N2_in, J_N2_out, \
-        Wasm_in, Wasm_out, Waem_in, Waem_out, Wcsm_in, Wcsm_out, Wcem_in, Wcem_out, Ware, \
-        Wv_asm_in, Wv_aem_out, Wv_csm_in, Wv_cem_out
+    return (Jv_a_in, Jv_a_out, Jv_c_in, Jv_c_out, J_H2_in, J_H2_out, J_O2_in, J_O2_out, J_N2_a_in, J_N2_a_out,
+            J_N2_c_in, J_N2_c_out, Wasm_in, Wasm_out, Waem_in, Waem_out, Wcsm_in, Wcsm_out, Wcem_in, Wcem_out, Ware,
+            Wv_asm_in, Wv_aem_out, Wv_csm_in, Wv_cem_out)

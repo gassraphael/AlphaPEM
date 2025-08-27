@@ -851,8 +851,8 @@ def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C
         Effective thermal conductivity in J.m-1.s-1.K-1."""
 
     if element == 'agdl' or element == 'cgdl': # The effective thermal conductivity at the GDL
-        if C_v==None or s==None or epsilon==None or epsilon_c==None:
-            raise ValueError("For the GDL, C_v, s, epsilon and epsilon_c must be provided.")
+        if C_v==None or s==None or C_N2 == None or epsilon==None or epsilon_c==None:
+            raise ValueError("For the GDL, C_v, s, C_N2, epsilon and epsilon_c must be provided.")
         # According to the GDL porosity, the GDL compression effect is different.
         if 0.50 <= epsilon < 0.67:
             beta3 = 4.04
@@ -864,13 +864,13 @@ def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C
         if element == 'agdl': # The thermal conductivity of the gas mixture in the AGDL
             if C_H2 == None:
                 raise ValueError("For the AGDL, C_H2 must be provided.")
-            k_th_gaz = k_th_gaz_mixture([k_th('H2O_v', T), k_th('H2', T)],
-                                        [mu_gaz('H2O_v', T), mu_gaz('H2', T)],
-                                        [C_v / (C_v + C_H2), C_H2 / (C_v + C_H2)],
-                                        [M_H2O, M_H2])
+            k_th_gaz = k_th_gaz_mixture([k_th('H2O_v', T), k_th('H2', T), k_th('N2', T)],
+                                        [mu_gaz('H2O_v', T), mu_gaz('H2', T), mu_gaz('N2', T)],
+                                        [C_v / (C_v + C_H2 + C_N2), C_H2 / (C_v + C_H2 + C_N2), C_N2 / (C_v + C_H2 + C_N2)],
+                                        [M_H2O, M_H2, M_N2])
         else:                 # The thermal conductivity of the gas mixture in the CGDL
-            if C_O2 == None or C_N2 == None:
-                raise ValueError("For the CGDL, C_O2 and C_N2 must be provided.")
+            if C_O2 == None:
+                raise ValueError("For the CGDL, C_O2 must be provided.")
             k_th_gaz = k_th_gaz_mixture([k_th('H2O_v', T), k_th('O2', T), k_th('N2', T)],
                                         [mu_gaz('H2O_v', T), mu_gaz('O2', T), mu_gaz('N2', T)],
                                         [C_v / (C_v + C_O2 + C_N2), C_O2 / (C_v + C_O2 + C_N2), C_N2 / (C_v + C_O2 + C_N2)],
@@ -879,18 +879,18 @@ def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C
                      weights=[1 - epsilon, epsilon * s, epsilon * (1 - s)])
 
     if element == 'ampl' or element == 'cmpl': # The effective thermal conductivity at the GDL
-        if C_v==None or s==None or epsilon==None:
-            raise ValueError("For the MPL, C_v, s and epsilon must be provided.")
+        if C_v==None or s==None or C_N2 == None or epsilon==None:
+            raise ValueError("For the MPL, C_v, s, C_N2 and epsilon must be provided.")
         if element == 'ampl': # The thermal conductivity of the gas mixture in the AGDL
             if C_H2 == None:
                 raise ValueError("For the AGDL, C_H2 must be provided.")
-            k_th_gaz = k_th_gaz_mixture([k_th('H2O_v', T), k_th('H2', T)],
-                                        [mu_gaz('H2O_v', T), mu_gaz('H2', T)],
-                                        [C_v / (C_v + C_H2), C_H2 / (C_v + C_H2)],
-                                        [M_H2O, M_H2])
+            k_th_gaz = k_th_gaz_mixture([k_th('H2O_v', T), k_th('H2', T), k_th('N2', T)],
+                                        [mu_gaz('H2O_v', T), mu_gaz('H2', T), mu_gaz('N2', T)],
+                                        [C_v / (C_v + C_H2 + C_N2), C_H2 / (C_v + C_H2 + C_N2), C_N2 / (C_v + C_H2 + C_N2)],
+                                        [M_H2O, M_H2, M_N2])
         else:                 # The thermal conductivity of the gas mixture in the CGDL
-            if C_O2 == None or C_N2 == None:
-                raise ValueError("For the CGDL, C_O2 and C_N2 must be provided.")
+            if C_O2 == None:
+                raise ValueError("For the CGDL, C_O2 must be provided.")
             k_th_gaz = k_th_gaz_mixture([k_th('H2O_v', T), k_th('O2', T), k_th('N2', T)],
                                         [mu_gaz('H2O_v', T), mu_gaz('O2', T), mu_gaz('N2', T)],
                                         [C_v / (C_v + C_O2 + C_N2), C_O2 / (C_v + C_O2 + C_N2), C_N2 / (C_v + C_O2 + C_N2)],
@@ -899,21 +899,21 @@ def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C
                      weights=[1 - epsilon, epsilon * s, epsilon * (1 - s)])
 
     elif element == 'acl' or element == 'ccl': # The effective thermal conductivity at the CL
-        if C_v==None or lambdaa==None or s==None or epsilon==None or epsilon_mc==None:
-            raise ValueError("For the CL, C_v, lambdaa, s, epsilon and epsilon_mc must be provided.")
+        if C_v==None or lambdaa==None or s==None or C_N2 == None or epsilon==None or epsilon_mc==None:
+            raise ValueError("For the CL, C_v, lambdaa, s, C_N2, epsilon and epsilon_mc must be provided.")
         k_th_eff_mem = hmean([k_th_mem, k_th('H2O_l', T)],
                              weights=[1 - fv(lambdaa, T), fv(lambdaa, T)]) # The effective thermal conductivity at the
         #                                                                    membrane
         if element == 'acl':  # The thermal conductivity of the gas mixture in the ACL
             if C_H2 == None:
                 raise ValueError("For the ACL, C_H2 must be provided.")
-            k_th_gaz = k_th_gaz_mixture([k_th('H2O_v', T), k_th('H2', T)],
-                                        [mu_gaz('H2O_v', T), mu_gaz('H2', T)],
-                                        [C_v / (C_v + C_H2), C_H2 / (C_v + C_H2)],
-                                        [M_H2O, M_H2])
+            k_th_gaz = k_th_gaz_mixture([k_th('H2O_v', T), k_th('H2', T), k_th('N2', T)],
+                                        [mu_gaz('H2O_v', T), mu_gaz('H2', T), mu_gaz('N2', T)],
+                                        [C_v / (C_v + C_H2 + C_N2), C_H2 / (C_v + C_H2 + C_N2), C_N2 / (C_v + C_H2 + C_N2)],
+                                        [M_H2O, M_H2, M_N2])
         else:  # The thermal conductivity of the gas mixture in the CCL
-            if C_O2 == None or C_N2 == None:
-                raise ValueError("For the CCL, C_O2 and C_N2 must be provided.")
+            if C_O2 == None:
+                raise ValueError("For the CCL, C_O2 must be provided.")
             k_th_gaz = k_th_gaz_mixture([k_th('H2O_v', T), k_th('O2', T), k_th('N2', T)],
                                         [mu_gaz('H2O_v', T), mu_gaz('O2', T), mu_gaz('N2', T)],
                                         [C_v / (C_v + C_O2 + C_N2), C_O2 / (C_v + C_O2 + C_N2), C_N2 / (C_v + C_O2 + C_N2)],
@@ -1038,10 +1038,11 @@ def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O
         if C_v is None or s is None or epsilon is None:
             raise ValueError("For the GDL, C_v, s and epsilon must be provided.")
         if element == 'agdl':  # The heat capacity of the gas mixture in the AGDL
-            if C_H2 is None:
-                raise ValueError("For the AGDL, C_H2 must be provided.")
-            rho_Cp0_gaz = average([M_H2O * C_v * Cp0('H2O_v', T), M_H2 * C_H2 * Cp0('H2', T)],
-                                    weights=[C_v / (C_v + C_H2), C_H2 / (C_v + C_H2)])
+            if C_H2 is None or C_N2 is None:
+                raise ValueError("For the AGDL, C_H2 and C_N2 must be provided.")
+            rho_Cp0_gaz = average([M_H2O * C_v * Cp0('H2O_v', T), M_H2 * C_H2 * Cp0('H2', T),
+                                     M_N2 * C_N2 * Cp0('N2', T)],
+                                    weights=[C_v / (C_v + C_H2 + C_N2), C_H2 / (C_v + C_H2 + C_N2), C_N2 / (C_v + C_H2 + C_N2)])
         else:  # The heat capacity of the gas mixture in the CGDL
             if C_O2 is None or C_N2 is None:
                 raise ValueError("For the CGDL, C_O2 and C_N2 must be provided.")
@@ -1057,8 +1058,9 @@ def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O
         if element == 'ampl':  # The heat capacity of the gas mixture in the AMPL
             if C_H2 is None:
                 raise ValueError("For the AMPL, C_H2 must be provided.")
-            rho_Cp0_gaz = average([M_H2O * C_v * Cp0('H2O_v', T), M_H2 * C_H2 * Cp0('H2', T)],
-                                    weights=[C_v / (C_v + C_H2), C_H2 / (C_v + C_H2)])
+            rho_Cp0_gaz = average([M_H2O * C_v * Cp0('H2O_v', T), M_H2 * C_H2 * Cp0('H2', T),
+                                     M_N2 * C_N2 * Cp0('N2', T)],
+                                    weights=[C_v / (C_v + C_H2 + C_N2), C_H2 / (C_v + C_H2 + C_N2), C_N2 / (C_v + C_H2 + C_N2)])
         else:  # The heat capacity of the gas mixture in the CMPL
             if C_O2 is None or C_N2 is None:
                 raise ValueError("For the CMPL, C_O2 and C_N2 must be provided.")
@@ -1074,8 +1076,9 @@ def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O
         if element == 'acl':  # The heat capacity of the gas mixture in the ACL
             if C_H2 is None:
                 raise ValueError("For the ACL, C_H2 must be provided.")
-            rho_Cp0_gaz = average([M_H2O * C_v * Cp0('H2O_v', T), M_H2 * C_H2 * Cp0('H2', T)],
-                                    weights=[C_v / (C_v + C_H2), C_H2 / (C_v + C_H2)])
+            rho_Cp0_gaz = average([M_H2O * C_v * Cp0('H2O_v', T), M_H2 * C_H2 * Cp0('H2', T),
+                                     M_N2 * C_N2 * Cp0('N2', T)],
+                                    weights=[C_v / (C_v + C_H2 + C_N2), C_H2 / (C_v + C_H2 + C_N2), C_N2 / (C_v + C_H2 + C_N2)])
         else:  # The heat capacity of the gas mixture in the CCL
             if C_O2 is None or C_N2 is None:
                 raise ValueError("For the CCL, C_O2 and C_N2 must be provided.")

@@ -887,11 +887,13 @@ def plot_C_N2(variables, parameters, ax):
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
     t = np.array(variables['t'])[mask]
-    C_N2_t = np.array(variables['C_N2'])[mask]
+    C_N2_a_t = np.array(variables['C_N2_a'])[mask]
+    C_N2_c_t = np.array(variables['C_N2_c'])[mask]
 
     # Plot C_N2
-    ax.plot(t, C_N2_t, color=colors(6))
-    ax.legend([r'$\mathregular{C_{N_{2}}}$'], loc='best')
+    ax.plot(t, C_N2_a_t, color=colors(6))
+    ax.plot(t, C_N2_c_t, color=colors(6))
+    ax.legend([r'$\mathregular{C_{N_{2},a}}$', r'$\mathregular{C_{N_{2},c}}$'], loc='best')
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r'$\mathbf{Nitrogen}$ $\mathbf{concentration}$ $\mathbf{C_{N_{2}}}$ $\mathbf{\left( mol.m^{-3} \right)}$',
                   labelpad=3)

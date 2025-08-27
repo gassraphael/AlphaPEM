@@ -114,7 +114,8 @@ def main_frame(root, canvas):
          'Anode stoichiometry - Sa': {'value': tk.DoubleVar(operating_conditions_frame), 'label_row': 3, 'label_column': 1},
          'Cathode stoichiometry - Sc': {'value': tk.DoubleVar(operating_conditions_frame), 'label_row': 3, 'label_column': 3},
          'Anode humidity - Φa': {'value': tk.DoubleVar(operating_conditions_frame), 'label_row': 4, 'label_column': 1},
-         'Cathode humidity - Φc': {'value': tk.DoubleVar(operating_conditions_frame), 'label_row': 4, 'label_column': 3}}
+         'Cathode humidity - Φc': {'value': tk.DoubleVar(operating_conditions_frame), 'label_row': 4, 'label_column': 3},
+         'Anode inlet H2 ratio - y_H2_in\n(flow-through anode only)': {'value': tk.DoubleVar(operating_conditions_frame), 'label_row': 4, 'label_column': 5}}
 
     choice_accessible_parameters = \
         {'AGC thickness - Hagc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 1},

@@ -45,6 +45,7 @@ def stored_operating_inputs(type_fuel_cell):
         Pa_des, Pc_des = 2.2e5, 2.0e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
+        y_H2_in = 0.7 # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
         i_max_pola = 2.5e4  # A.m-2. It is the maximum current density for the polarization curve.
 
     # For EH-31 fuel cell
@@ -53,31 +54,35 @@ def stored_operating_inputs(type_fuel_cell):
         Pa_des, Pc_des = 1.5e5, 1.5e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
+        y_H2_in = 1 # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
         i_max_pola = 1.7e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "EH-31_2.0":
         T_des = 74 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.0e5, 2.0e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
+        y_H2_in = 1  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
         i_max_pola = 1.7e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "EH-31_2.25":
         T_des = 74 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.25e5, 2.25e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
+        y_H2_in = 1  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
         i_max_pola = 1.7e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "EH-31_2.5":
         T_des = 74 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.5e5, 2.5e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
+        y_H2_in = 1  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
         i_max_pola = 1.7e4  # A.m-2. It is the maximum current density for the polarization curve.
 
     # For other fuel cells
     else:
         raise ValueError('the type_fuel_cell given is not valid.')
 
-    return T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, i_max_pola
+    return T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola
 
 
 def stored_physical_parameters(type_fuel_cell):

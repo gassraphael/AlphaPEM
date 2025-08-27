@@ -42,7 +42,7 @@ def flows_int_values(sv, operating_inputs, parameters):
     lambda_acl, lambda_mem, lambda_ccl = sv['lambda_acl'], sv['lambda_mem'], sv['lambda_ccl']
     C_H2_agc, C_H2_ampl, C_H2_acl = sv['C_H2_agc'], sv['C_H2_ampl'], sv['C_H2_acl']
     C_O2_ccl, C_O2_cmpl, C_O2_cgc = sv['C_O2_ccl'], sv['C_O2_cmpl'], sv['C_O2_cgc']
-    C_N2 = sv['C_N2']
+    C_N2_a, C_N2_c = sv['C_N2_a'], sv['C_N2_c']
     T_agc, T_ampl, T_acl, T_mem = sv['T_agc'], sv['T_ampl'], sv['T_acl'], sv['T_mem']
     T_ccl, T_cmpl, T_cgc = sv['T_ccl'], sv['T_cmpl'], sv['T_cgc']
     # Extraction of the operating inputs and the parameters
@@ -56,14 +56,14 @@ def flows_int_values(sv, operating_inputs, parameters):
     H_gdl_node = Hgdl / n_gdl
 
     # Pressures in the stack
-    Pagc = (C_v_agc + C_H2_agc) * R * T_agc
-    Pagdl = [None] + [(sv[f'C_v_agdl_{i}'] + sv[f'C_H2_agdl_{i}']) * R * sv[f'T_agdl_{i}'] for i in range(1, n_gdl + 1)]
-    Pampl = (C_v_ampl + C_H2_ampl) * R * T_ampl
-    Pacl = (C_v_acl + C_H2_acl) * R * T_acl
-    Pccl = (C_v_ccl + C_O2_ccl + C_N2) * R * T_ccl
-    Pcmpl = (C_v_cmpl + C_O2_cmpl + C_N2) * R * T_cmpl
-    Pcgdl = [None] + [(sv[f'C_v_cgdl_{i}'] + sv[f'C_O2_cgdl_{i}'] + C_N2) * R * sv[f'T_cgdl_{i}'] for i in range(1, n_gdl + 1)]
-    Pcgc = (C_v_cgc + C_O2_cgc + C_N2) * R * T_cgc
+    Pagc = (C_v_agc + C_H2_agc + C_N2_a) * R * T_agc
+    Pagdl = [None] + [(sv[f'C_v_agdl_{i}'] + sv[f'C_H2_agdl_{i}'] + C_N2_a) * R * sv[f'T_agdl_{i}'] for i in range(1, n_gdl + 1)]
+    Pampl = (C_v_ampl + C_H2_ampl + C_N2_a) * R * T_ampl
+    Pacl = (C_v_acl + C_H2_acl + C_N2_a) * R * T_acl
+    Pccl = (C_v_ccl + C_O2_ccl + C_N2_c) * R * T_ccl
+    Pcmpl = (C_v_cmpl + C_O2_cmpl + C_N2_c) * R * T_cmpl
+    Pcgdl = [None] + [(sv[f'C_v_cgdl_{i}'] + sv[f'C_O2_cgdl_{i}'] + C_N2_c) * R * sv[f'T_cgdl_{i}'] for i in range(1, n_gdl + 1)]
+    Pcgc = (C_v_cgc + C_O2_cgc + C_N2_c) * R * T_cgc
 
     # Weighted mean values ...
     #       ... of the water content

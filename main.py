@@ -32,7 +32,7 @@ if __name__ == '__main__':
     type_fuel_cell_3 = None
     type_fuel_cell_4 = None
     # Current density possibilities: "step", "polarization", "polarization_for_cali", "EIS".
-    type_current = "polarization"
+    type_current = "step"
     # Auxiliary system possibilities: "forced-convective_cathode_with_anodic_recirculation",
     #                                 "forced-convective_cathode_with_flow-through_anode", "no_auxiliary".
     type_auxiliary = "forced-convective_cathode_with_flow-through_anode"
@@ -60,13 +60,13 @@ if __name__ == '__main__':
     (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
      current_density) = current_density_parameters(type_current)
     #   Operating conditions
-    T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, pola_current_parameters_1 = \
+    T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, y_H2_in_1, pola_current_parameters_1 = \
         operating_inputs_function(copy.deepcopy(pola_current_parameters), type_fuel_cell_1)
-    T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2, pola_current_parameters_2 = \
+    T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2, y_H2_in_2, pola_current_parameters_2 = \
             operating_inputs_function(copy.deepcopy(pola_current_parameters), type_fuel_cell_2)
-    T_des_3, Pa_des_3, Pc_des_3, Sa_3, Sc_3, Phi_a_des_3, Phi_c_des_3, pola_current_parameters_3 = \
+    T_des_3, Pa_des_3, Pc_des_3, Sa_3, Sc_3, Phi_a_des_3, Phi_c_des_3, y_H2_in_3, pola_current_parameters_3 = \
             operating_inputs_function(copy.deepcopy(pola_current_parameters), type_fuel_cell_3)
-    T_des_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4, pola_current_parameters_4 = \
+    T_des_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4, y_H2_in_4, pola_current_parameters_4 = \
             operating_inputs_function(copy.deepcopy(pola_current_parameters), type_fuel_cell_4)
     #   Physical parameters
     (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
@@ -81,7 +81,8 @@ if __name__ == '__main__':
                         'Sa': [None, Sa_1, Sa_2, Sa_3, Sa_4],
                         'Sc': [None, Sc_1, Sc_2, Sc_3, Sc_4],
                         'Phi_a_des': [None, Phi_a_des_1, Phi_a_des_2, Phi_a_des_3, Phi_a_des_4],
-                        'Phi_c_des': [None, Phi_c_des_1, Phi_c_des_2, Phi_c_des_3, Phi_c_des_4]}
+                        'Phi_c_des': [None, Phi_c_des_1, Phi_c_des_2, Phi_c_des_3, Phi_c_des_4],
+                        'y_H2_in': [None, y_H2_in_1, y_H2_in_2, y_H2_in_3, y_H2_in_4]}
     current_parameters = {'step_current_parameters': step_current_parameters,
                           'pola_current_parameters': [None, pola_current_parameters_1, pola_current_parameters_2,
                                                       pola_current_parameters_3, pola_current_parameters_4],
