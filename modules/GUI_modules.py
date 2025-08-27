@@ -345,7 +345,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
      Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
 
-    n_gdl, t_purge, step_current_parameters = computing_parameters(step_current_parameters, Hgdl, Hacl)
+    n_gdl, t_purge, rtol, atol, step_current_parameters = computing_parameters(step_current_parameters, Hgdl, Hacl, type_fuel_cell)
 
     # operating conditions recovery
     choice_operating_conditions['Temperature - Tfc (°C)']['value'].set(round(T_des - 273.15, 4))  # °C
@@ -386,6 +386,8 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].set(round(i_max_pola / 1e4, 4))  # A/cm²
     # computing parameters recovery
     choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].set(n_gdl)
+    choice_computing_parameters['Solver relative tolerance - rtol']['value'].set(rtol)
+    choice_computing_parameters['Solver absolute tolerance - atol']['value'].set(atol)
 
 
 def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_conditions, choice_accessible_parameters,
@@ -474,6 +476,8 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     t_purge = choice_computing_parameters['Purge time - t_purge (s)']['value'].get()  # s
     delta_t_purge = choice_computing_parameters['Time between two purges\n- Δt_purge (s)']['value'].get()  # s
     n_gdl = choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].get()
+    rtol = choice_computing_parameters['Solver relative tolerance - rtol']['value'].get()
+    atol = choice_computing_parameters['Solver absolute tolerance - atol']['value'].get()
 
     if choice_buttons['type_fuel_cell']['value'].get() == "EH-31 1.5 bar (2021)":
         type_fuel_cell = "EH-31_1.5"
@@ -522,7 +526,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc, Hcgc, Wagc,
             Wcgc, Lgc, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
             a_switch, C_scl, step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS,
-            ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, n_gdl, type_fuel_cell, type_auxiliary, type_control,
+            ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, n_gdl, rtol, atol, type_fuel_cell, type_auxiliary, type_control,
             type_purge,  type_display, type_plot)
 
 
@@ -736,6 +740,13 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
             type(choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].get()) != int:
         messagebox.showerror(title='n gdl', message='The n_gdl value should be an integer bigger than 2. '
                                                     'A good compromise is 10.')
+        choices.clear()
+        return
+
+    if choice_computing_parameters['Solver relative tolerance - rtol']['value'].get() > 1e-3 or \
+            type(choice_computing_parameters['Solver absolute tolerance - atol']['value'].get()) > 1e-3:
+        messagebox.showerror(title='Solver tolerance', message='rtol and atol should be gretter than 1e-3 to limit the'
+                                                               ' numerical errors.')
         choices.clear()
         return
 

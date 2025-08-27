@@ -266,7 +266,7 @@ def physical_parameters(type_fuel_cell):
             Wcgc, Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
 
 
-def computing_parameters(step_current_parameters, Hgdl, Hacl):
+def computing_parameters(step_current_parameters, Hgdl, Hacl, type_fuel_cell):
     """This function is used to set the computing parameters of the fuel cell system.
 
     Parameters
@@ -277,6 +277,9 @@ def computing_parameters(step_current_parameters, Hgdl, Hacl):
         Thickness of the gas diffusion layer in meters.
     Hacl : float
         Thickness of the anode catalyst layer in meters.
+    type_fuel_cell : str
+        Type of fuel cell system. It can be "EH-31_1.5", "EH-31_2.0", "EH-31_2.25", "EH-31_2.5", "LF",
+        or "manual_setup".
 
     Returns
     -------
@@ -304,8 +307,18 @@ def computing_parameters(step_current_parameters, Hgdl, Hacl):
     t_purge = 0.6, 15  # (s, s). It is the time parameters for purging the system.
     delta_t_dyn_step = 5*60  # (s). Time for dynamic display of the step current density function.
 
+    if type_fuel_cell == "ZSW-GenStack":
+        rtol = 1e-7 # Relative tolerance for the system of ODEs solver.
+        atol = 1e-11 # Absolute tolerance for the system of ODEs solver.
+    elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
+            type_fuel_cell == "EH-31_2.5":
+        rtol = 1e-7  # Relative tolerance for the system of ODEs solver.
+        atol = 1e-11  # Absolute tolerance for the system of ODEs solver.
+    else:
+        raise ValueError('the type_input given is not valid.')
+
     step_current_parameters['delta_t_dyn_step'] = delta_t_dyn_step # Update the step current parameters.
-    return n_gdl, t_purge, step_current_parameters
+    return n_gdl, t_purge, rtol, atol, step_current_parameters
 
 # ____________________________________________Unchanged Physical parameters_____________________________________________
 """ These parameters remain unchanged no matter the setting configurations."""
