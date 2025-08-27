@@ -234,6 +234,7 @@ def parameters_for_calibration(type_fuel_cell):
         Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 39.8, 50  # It is the desired relative humidity.
         Pa_des, Pc_des = 2.2e5, 2.0e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
+        y_H2_in = 0.7 # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
         #       Fuel cell physical parameters
         Aact = 2.7972e-2  # m². It is the active area of the catalyst layer.
         Hagc = 2.3e-4  # m. It is the thickness of the anode gas channel.
@@ -316,6 +317,7 @@ def parameters_for_calibration(type_fuel_cell):
             Pa_des, Pc_des = 2.25e5, 2.25e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         else:  # type_fuel_cell == "EH-31_2.5":
             Pa_des, Pc_des = 2.5e5, 2.5e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
+        y_H2_in = 1  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
         #       Fuel cell physical parameters
         Aact = 8.5e-3  # m². It is the active area of the catalyst layer.
         Wagc = 4.5e-4  # m. It is the width of the anode gas channel.
@@ -389,7 +391,7 @@ def parameters_for_calibration(type_fuel_cell):
 
     # Initialize the operating inputs and parameters dictionaries.
     operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
-                        'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des}
+                        'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des, 'y_H2_in': y_H2_in}
     current_parameters = {'step_current_parameters': step_current_parameters,
                           'pola_current_parameters': pola_current_parameters,
                           'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
