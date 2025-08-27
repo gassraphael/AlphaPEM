@@ -41,7 +41,7 @@ varbound, gene_space = parameter_bounds_for_calibration(type_fuel_cell_1)
 
 # PyGAD parameters for the genetic algorithm:
     # Number of generations:
-num_generations = 1000 # 1000 generations should be enough.
+num_generations = 500 # 1000 generations should be enough.
     #                   10 generation of 128 elements takes approximatively 100min on my computer (16 CPU cores).
     #                   1000 generations of 128 elements take less than 80h on UR cluster (1 node of 32 CPU cores).
     # Initial population (one solution means a member of the population):
