@@ -308,12 +308,12 @@ def computing_parameters(step_current_parameters, Hgdl, Hacl, type_fuel_cell):
     delta_t_dyn_step = 5*60  # (s). Time for dynamic display of the step current density function.
 
     if type_fuel_cell == "ZSW-GenStack":
-        rtol = 1e-7 # Relative tolerance for the system of ODEs solver.
-        atol = 1e-11 # Absolute tolerance for the system of ODEs solver.
+        rtol = 1e-5 # Relative tolerance for the system of ODEs solver.
+        atol = 1e-8 # Absolute tolerance for the system of ODEs solver.
     elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
             type_fuel_cell == "EH-31_2.5":
-        rtol = 1e-4  # Relative tolerance for the system of ODEs solver.
-        atol = 1e-7  # Absolute tolerance for the system of ODEs solver.
+        rtol = 1e-5  # Relative tolerance for the system of ODEs solver.
+        atol = 1e-8  # Absolute tolerance for the system of ODEs solver.
     else:
         raise ValueError('the type_input given is not valid.')
 

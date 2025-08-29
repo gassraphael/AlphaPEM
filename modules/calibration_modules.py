@@ -45,7 +45,7 @@ def parameter_bounds_for_calibration(type_fuel_cell):
         epsilon_gdl_min, epsilon_gdl_max = 0.696, 0.880  # It is the anode/cathode GDL porosity, without units.
         epsilon_mpl_min, epsilon_mpl_max = 0.32, 0.54  # It is the anode/cathode MPL porosity, without units.
         epsilon_cl_min, epsilon_cl_max = 0.40, 0.60  # It is the anode/cathode MPL porosity, without units.
-        epsilon_mc_min, epsilon_mc_max = 0.40, 0.60  # It is the volume fraction of ionomer in the CL.
+        epsilon_mc_min, epsilon_mc_max = 0.15, 0.40  # It is the volume fraction of ionomer in the CL.
         #       Constants based on the interaction between water and the structure
         e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.
         #       Voltage polarization
@@ -60,6 +60,7 @@ def parameter_bounds_for_calibration(type_fuel_cell):
         C_scl_min, C_sl_max = 2e7, 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
         #       Bounds gathering and type
         varbound = [['epsilon_gdl', epsilon_gdl_min, epsilon_gdl_max, 'real'],
+                    ['epsilon_mc', epsilon_mc_min, epsilon_mc_max, 'real'],
                     ['e', e_min, e_max, 'int'],
                     ['i0_c_ref', i0_c_ref_min, i0_c_ref_max, 'real'],
                     ['kappa_co', kappa_co_min, kappa_co_max, 'real'],
@@ -299,8 +300,8 @@ def parameters_for_calibration(type_fuel_cell):
         f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
         t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
         n_gdl = int(Hgdl / Hacl / 4)  # It is the number of model points placed inside each GDL.
-        rtol = 1e-7  # Relative tolerance for the system of ODEs solver.
-        atol = 1e-11  # Absolute tolerance for the system of ODEs solver.
+        rtol = 1e-5  # Relative tolerance for the system of ODEs solver.
+        atol = 1e-8  # Absolute tolerance for the system of ODEs solver.
 
     elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
             type_fuel_cell == "EH-31_2.5":
@@ -383,8 +384,8 @@ def parameters_for_calibration(type_fuel_cell):
         f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
         t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
         n_gdl = int(Hgdl / Hacl / 4)  # It is the number of model points placed inside each GDL.
-        rtol = 1e-6  # Relative tolerance for the system of ODEs solver.
-        atol = 1e-10  # Absolute tolerance for the system of ODEs solver.
+        rtol = 1e-5  # Relative tolerance for the system of ODEs solver.
+        atol = 1e-8  # Absolute tolerance for the system of ODEs solver.
 
     else:
         ValueError("A correct type_fuel_cell should be given.")

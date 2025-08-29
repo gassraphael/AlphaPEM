@@ -201,18 +201,6 @@ def pola_exp_values(type_fuel_cell):
         U_exp_t[25], U_exp_t[26], U_exp_t[27], U_exp_t[28], U_exp_t[29] = 0.758, 0.750, 0.744, 0.738, 0.732
         U_exp_t[30], U_exp_t[31], U_exp_t[32] = 0.726, 0.719, 0.712
 
-    elif type_fuel_cell == "LF":
-        # Current density
-        i_exp_t = np.zeros(13)
-        i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.00, 0.04, 0.08, 0.16, 0.25
-        i_exp_t[5], i_exp_t[6], i_exp_t[7], i_exp_t[8], i_exp_t[9] = 0.32, 0.39, 0.48, 0.64, 0.80
-        i_exp_t[10], i_exp_t[11], i_exp_t[12] = 1.00, 1.20, 1.40
-        # Voltage
-        U_exp_t = np.zeros(13)
-        U_exp_t[0], U_exp_t[1], U_exp_t[2], U_exp_t[3], U_exp_t[4] = 0.98, 0.87, 0.84, 0.80, 0.77
-        U_exp_t[5], U_exp_t[6], U_exp_t[7], U_exp_t[8], U_exp_t[9] = 0.74, 0.72, 0.69, 0.65, 0.60
-        U_exp_t[10], U_exp_t[11], U_exp_t[12] = 0.54, 0.46, 0.32
-
     return i_exp_t * 1e4, U_exp_t # Conversion in A.m-2
 
 def pola_exp_values_calibration(type_fuel_cell):
