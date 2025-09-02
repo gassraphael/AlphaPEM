@@ -32,7 +32,7 @@ if __name__ == '__main__':
     type_fuel_cell_3 = None
     type_fuel_cell_4 = None
     # Current density possibilities: "step", "polarization", "polarization_for_cali", "EIS".
-    type_current = "polarization"
+    type_current = "step"
     # Auxiliary system possibilities: "forced-convective_cathode_with_anodic_recirculation",
     #                                 "forced-convective_cathode_with_flow-through_anode", "no_auxiliary".
     type_auxiliary = "forced-convective_cathode_with_flow-through_anode"
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
      Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = physical_parameters(type_fuel_cell_1)
     #   Computing parameters
-    n_gdl, t_purge, rtol, atol, step_current_parameters = computing_parameters(copy.deepcopy(step_current_parameters), Hgdl, Hacl, type_fuel_cell_1)
+    n_gdl, n_mpl, t_purge, rtol, atol, step_current_parameters = computing_parameters(copy.deepcopy(step_current_parameters), Hgdl, Hmpl, Hacl, type_fuel_cell_1)
 
     # Initialize the operating inputs and parameters dictionaries.
     operating_inputs = {'current_density': current_density, 'T_des': [None, T_des_1, T_des_2, T_des_3, T_des_4],
@@ -94,7 +94,7 @@ if __name__ == '__main__':
                                         'epsilon_mpl': epsilon_mpl, 'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c,
                                         'e': e, 'kappa_co': kappa_co, 'i0_c_ref': i0_c_ref, 'kappa_c': kappa_c,
                                         'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch, 'C_scl': C_scl}
-    computing_parameters = {'n_gdl': n_gdl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
+    computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
                             'type_fuel_cell': [None, type_fuel_cell_1, type_fuel_cell_2, type_fuel_cell_3, type_fuel_cell_4],
                             'type_current': type_current, 'type_auxiliary': type_auxiliary,
                             'type_control': [None, type_control_1, type_control_2, type_control_3, type_control_4],

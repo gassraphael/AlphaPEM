@@ -39,9 +39,9 @@ def parameter_bounds_for_calibration(type_fuel_cell):
 
     if type_fuel_cell == "ZSW-GenStack":
         #       Fuel cell physical parameters
-        Hacl_min, Hacl_max = 6e-6, 1e-5  # m. It is the thickness of the ACL.
-        Hccl_min, Hccl_max = 1e-5, 2e-5  # m. It is the thickness of the CCL.
-        Hmem_min, Hmem_max = 1e-5, 2e-5  # m. It is the thickness of the membrane.
+        Hacl_min, Hacl_max = 6e-6, 10e-6  # m. It is the thickness of the ACL.
+        Hccl_min, Hccl_max = 10e-6, 20e-6  # m. It is the thickness of the CCL.
+        Hmem_min, Hmem_max = 10e-6, 20e-6  # m. It is the thickness of the membrane.
         epsilon_gdl_min, epsilon_gdl_max = 0.696, 0.880  # It is the anode/cathode GDL porosity, without units.
         epsilon_mpl_min, epsilon_mpl_max = 0.32, 0.54  # It is the anode/cathode MPL porosity, without units.
         epsilon_cl_min, epsilon_cl_max = 0.40, 0.60  # It is the anode/cathode MPL porosity, without units.
@@ -76,8 +76,8 @@ def parameter_bounds_for_calibration(type_fuel_cell):
     elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
             type_fuel_cell == "EH-31_2.5":
         #       Fuel cell physical parameters
-        Hacl_min, Hacl_max = 8e-6, 2e-5  # m. It is the thickness of the ACL.
-        Hmem_min, Hmem_max = 1.5e-5, 5e-5  # m. It is the thickness of the membrane.
+        Hacl_min, Hacl_max = 8e-6, 20e-6  # m. It is the thickness of the ACL.
+        Hmem_min, Hmem_max = 15e-6, 50e-6  # m. It is the thickness of the membrane.
         epsilon_gdl_min, epsilon_gdl_max = 0.50, 0.90  # It is the anode/cathode GDL porosity, without units.
         epsilon_mpl_min, epsilon_mpl_max = 0.30, 0.60  # It is the anode/cathode MPL porosity, without units.
         epsilon_cl_min, epsilon_cl_max = 0.12, 0.50  # It is the anode/cathode MPL porosity, without units.
@@ -299,7 +299,8 @@ def parameters_for_calibration(type_fuel_cell):
         i_EIS, ratio_EIS = np.nan, np.nan  # (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.
         f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
         t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
-        n_gdl = int(Hgdl / Hacl / 4)  # It is the number of model points placed inside each GDL.
+        n_gdl = max(1, int(Hgdl / Hacl / 4))   # It is the number of model points placed inside each GDL.
+        n_mpl = max(1, int(Hmpl / Hacl / 1.5))  # It is the number of model points placed inside each MPL.
         rtol = 1e-5  # Relative tolerance for the system of ODEs solver.
         atol = 1e-8  # Absolute tolerance for the system of ODEs solver.
 
@@ -383,7 +384,8 @@ def parameters_for_calibration(type_fuel_cell):
         i_EIS, ratio_EIS = np.nan, np.nan  # (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.
         f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
         t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
-        n_gdl = int(Hgdl / Hacl / 4)  # It is the number of model points placed inside each GDL.
+        n_gdl = max(1, int(Hgdl / Hacl / 4))   # It is the number of model points placed inside each GDL.
+        n_mpl = max(1, int(Hmpl / Hacl / 1.5))  # It is the number of model points placed inside each MPL.
         rtol = 1e-5  # Relative tolerance for the system of ODEs solver.
         atol = 1e-8  # Absolute tolerance for the system of ODEs solver.
 
@@ -404,7 +406,7 @@ def parameters_for_calibration(type_fuel_cell):
                                         'kappa_co': kappa_co, 'i0_c_ref': i0_c_ref, 'kappa_c': kappa_c,
                                         'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch,
                                         'C_scl': C_scl}
-    computing_parameters = {'n_gdl': n_gdl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
+    computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
                             'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
                             'type_auxiliary': type_auxiliary, 'type_control': type_control, 'type_purge': type_purge,
                             'type_display': type_display, 'type_plot': type_plot}

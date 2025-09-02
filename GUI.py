@@ -189,10 +189,12 @@ def main_frame(root, canvas):
                                                      'label_row': 0, 'label_column': 5},
          'Number of GDL nodes - n_gdl': {'value': tk.IntVar(computing_parameters_frame, 5),
                                          'label_row': 1, 'label_column': 1},
-         'Solver relative tolerance - rtol': {'value': tk.IntVar(computing_parameters_frame, 1e-7),
+         'Number of MPL nodes - n_mpl': {'value': tk.IntVar(computing_parameters_frame, 5),
                                          'label_row': 1, 'label_column': 3},
+         'Solver relative tolerance - rtol': {'value': tk.IntVar(computing_parameters_frame, 1e-7),
+                                         'label_row': 2, 'label_column': 1},
          'Solver absolute tolerance - atol': {'value': tk.IntVar(computing_parameters_frame, 1e-11),
-                                         'label_row': 1, 'label_column': 5}
+                                         'label_row': 2, 'label_column': 3}
          }
 
     choice_buttons = \
@@ -363,14 +365,14 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
     (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc, Hcgc, Wagc,
             Wcgc, Lgc, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
             a_switch, C_scl, step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS,
-            ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, n_gdl, rtol, atol, type_fuel_cell, type_auxiliary, type_control,
-            type_purge,  type_display, type_plot) = recover_for_use_operating_inputs_and_physical_parameters(
-                                                                           choice_operating_conditions,
-                                                                           choice_accessible_parameters,
-                                                                           choice_undetermined_parameters,
-                                                                           choice_current_density_parameters,
-                                                                           choice_computing_parameters,
-                                                                           choice_buttons)
+            ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, n_gdl, n_mpl, rtol, atol, type_fuel_cell, type_auxiliary,
+            type_control, type_purge,  type_display, type_plot) = \
+        recover_for_use_operating_inputs_and_physical_parameters(choice_operating_conditions,
+                                                                 choice_accessible_parameters,
+                                                                 choice_undetermined_parameters,
+                                                                 choice_current_density_parameters,
+                                                                 choice_computing_parameters,
+                                                                 choice_buttons)
 
     # Initialize the operating inputs and parameters dictionaries.
     current_parameters = {'step_current_parameters': step_current_parameters,
@@ -389,7 +391,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         current_density = step_current
         operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
                             'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des}
-        computing_parameters = {'n_gdl': n_gdl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
+        computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
                                 'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
                                 'type_auxiliary': type_auxiliary, 'type_control': type_control,
                                 'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}
@@ -401,7 +403,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         current_density = polarization_current
         operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
                             'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des}
-        computing_parameters = {'n_gdl': n_gdl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
+        computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
                                 'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
                                 'type_auxiliary': type_auxiliary, 'type_control': type_control,
                                 'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}
@@ -413,7 +415,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         current_density = EIS_current
         operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
                             'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des}
-        computing_parameters = {'n_gdl': n_gdl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
+        computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
                                 'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
                                 'type_auxiliary': type_auxiliary, 'type_control': type_control,
                                 'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}

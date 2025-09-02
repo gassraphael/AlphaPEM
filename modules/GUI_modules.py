@@ -345,7 +345,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
      Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
 
-    n_gdl, t_purge, rtol, atol, step_current_parameters = computing_parameters(step_current_parameters, Hgdl, Hacl, type_fuel_cell)
+    n_gdl, n_mpl, t_purge, rtol, atol, step_current_parameters = computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, type_fuel_cell)
 
     # operating conditions recovery
     choice_operating_conditions['Temperature - Tfc (°C)']['value'].set(round(T_des - 273.15, 4))  # °C
@@ -386,6 +386,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].set(round(i_max_pola / 1e4, 4))  # A/cm²
     # computing parameters recovery
     choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].set(n_gdl)
+    choice_computing_parameters['Number of MPL nodes - n_mpl']['value'].set(n_mpl)
     choice_computing_parameters['Solver relative tolerance - rtol']['value'].set(rtol)
     choice_computing_parameters['Solver absolute tolerance - atol']['value'].set(atol)
 
@@ -476,6 +477,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     t_purge = choice_computing_parameters['Purge time - t_purge (s)']['value'].get()  # s
     delta_t_purge = choice_computing_parameters['Time between two purges\n- Δt_purge (s)']['value'].get()  # s
     n_gdl = choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].get()
+    n_mpl = choice_computing_parameters['Number of MPL nodes - n_mpl']['value'].get()
     rtol = choice_computing_parameters['Solver relative tolerance - rtol']['value'].get()
     atol = choice_computing_parameters['Solver absolute tolerance - atol']['value'].get()
 
@@ -524,10 +526,10 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
         type_plot = "dynamic"
 
     return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim,
-            a_switch, C_scl, step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS,
-            ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, n_gdl, rtol, atol, type_fuel_cell, type_auxiliary, type_control,
-            type_purge,  type_display, type_plot)
+            Wcgc, Lgc, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c,
+            a_slim, b_slim, a_switch, C_scl, step_current_parameters, pola_current_parameters,
+            pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, n_gdl, n_mpl,
+            rtol, atol, type_fuel_cell, type_auxiliary, type_control, type_purge,  type_display, type_plot)
 
 
 def value_control(choice_operating_conditions, choice_accessible_parameters, choice_undetermined_parameters,
@@ -736,10 +738,15 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
         choices.clear()
         return
 
-    if choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].get() < 2 or \
+    if choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].get() < 1 or \
             type(choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].get()) != int:
-        messagebox.showerror(title='n gdl', message='The n_gdl value should be an integer bigger than 2. '
-                                                    'A good compromise is 10.')
+        messagebox.showerror(title='n gdl', message='The n_gdl value should be an integer bigger or equal to 1.')
+        choices.clear()
+        return
+
+    if choice_computing_parameters['Number of MPL nodes - n_mpl']['value'].get() < 1 or \
+            type(choice_computing_parameters['Number of MPL nodes - n_mpl']['value'].get()) != int:
+        messagebox.showerror(title='n gdl', message='The n_mpl value should be an integer bigger or equal to 1.')
         choices.clear()
         return
 
@@ -917,6 +924,8 @@ def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, acces
         Dictionary containing the computing parameters for the simulation. It contains:
             - n_gdl : int
                 Number of points considered in the GDL (computing parameter).
+            - n_mpl : int
+                Number of points considered in the MPL (computing parameter).
             - t_purge : tuple
                 Time parameters for purging the system (computing parameter).
                 It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
@@ -1122,6 +1131,8 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
         Dictionary containing the computing parameters for the simulation. It contains:
             - n_gdl : int
                 Number of points considered in the GDL (computing parameter).
+            - n_mpl : int
+                Number of points considered in the MPL (computing parameter).
             - t_purge : tuple
                 Time parameters for purging the system (computing parameter).
                 It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
@@ -1324,6 +1335,8 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
         Dictionary containing the computing parameters for the simulation. It contains:
             - n_gdl : int
                 Number of points considered in the GDL (computing parameter).
+            - n_mpl : int
+                Number of points considered in the MPL (computing parameter).
             - t_purge : tuple
                 Time parameters for purging the system (computing parameter).
                 It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.

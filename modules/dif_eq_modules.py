@@ -53,15 +53,12 @@ def dif_eq_int_values(sv, operating_inputs, control_variables, parameters):
         """
 
     # Extraction of the variables
-    C_v_agc, C_v_ampl, C_v_acl = sv['C_v_agc'], sv['C_v_ampl'], sv['C_v_acl']
-    C_v_ccl, C_v_cmpl, C_v_cgc = sv['C_v_ccl'], sv['C_v_cmpl'], sv['C_v_cgc']
-    s_ampl, s_acl, s_ccl, s_cmpl = sv['s_ampl'], sv['s_acl'], sv['s_ccl'], sv['s_cmpl']
+    C_v_agc, C_v_acl, C_v_ccl, C_v_cgc = sv['C_v_agc'], sv['C_v_acl'], sv['C_v_ccl'], sv['C_v_cgc']
+    s_acl, s_ccl = sv['s_acl'], sv['s_ccl']
     lambda_acl, lambda_mem, lambda_ccl = sv['lambda_acl'], sv['lambda_mem'], sv['lambda_ccl']
-    C_H2_agc, C_H2_ampl, C_H2_acl = sv['C_H2_agc'], sv['C_H2_ampl'], sv['C_H2_acl']
-    C_O2_ccl, C_O2_cmpl, C_O2_cgc = sv['C_O2_ccl'], sv['C_O2_cmpl'], sv['C_O2_cgc']
+    C_H2_agc, C_H2_acl, C_O2_ccl, C_O2_cgc = sv['C_H2_agc'], sv['C_H2_acl'], sv['C_O2_ccl'], sv['C_O2_cgc']
     C_N2_a, C_N2_c = sv['C_N2_a'], sv['C_N2_c']
-    T_agc, T_ampl, T_acl, T_mem = sv['T_agc'], sv['T_ampl'], sv['T_acl'], sv['T_mem']
-    T_ccl, T_cmpl, T_cgc = sv['T_ccl'], sv['T_cmpl'], sv['T_cgc']
+    T_agc, T_acl, T_mem, T_ccl, T_cgc = sv['T_agc'], sv['T_acl'], sv['T_mem'], sv['T_ccl'], sv['T_cgc']
     Pasm, Paem, Pcsm, Pcem = sv['Pasm'], sv['Paem'], sv['Pcsm'], sv['Pcem']
     # Extraction of the operating inputs and the parameters
     T_des, y_H2_in = operating_inputs['T_des'], operating_inputs['y_H2_in']
@@ -69,7 +66,7 @@ def dif_eq_int_values(sv, operating_inputs, control_variables, parameters):
     Hmem, Hacl, Hccl = parameters['Hmem'], parameters['Hacl'], parameters['Hccl']
     epsilon_gdl, epsilon_cl, epsilon_mpl = parameters['epsilon_gdl'], parameters['epsilon_cl'], parameters['epsilon_mpl']
     kappa_co, epsilon_mc = parameters['kappa_co'], parameters['epsilon_mc']
-    n_gdl = parameters['n_gdl']
+    n_gdl, n_mpl = parameters['n_gdl'], parameters['n_mpl']
 
     # Physical quantities outside the stack
     # Molar masses
@@ -99,14 +96,17 @@ def dif_eq_int_values(sv, operating_inputs, control_variables, parameters):
         **{f'agdl_{i}': calculate_rho_Cp0('agdl', sv[f'T_agdl_{i}'], C_v=sv[f'C_v_agdl_{i}'],
                                           s=sv[f's_agdl_{i}'], C_H2=sv[f'C_H2_agdl_{i}'], C_N2=C_N2_a, epsilon=epsilon_gdl)
            for i in range(1, n_gdl + 1)},
-        'ampl': calculate_rho_Cp0('ampl', T_ampl, C_v=C_v_ampl, s=s_ampl, C_H2=C_H2_ampl, C_N2=C_N2_a, epsilon=epsilon_mpl),
+        **{f'ampl_{i}': calculate_rho_Cp0('ampl', sv[f'T_ampl_{i}'], C_v=sv[f'C_v_ampl_{i}'],
+                                          s=sv[f's_ampl_{i}'], C_H2=sv[f'C_H2_ampl_{i}'], C_N2=C_N2_a, epsilon=epsilon_mpl)
+           for i in range(1, n_mpl + 1)},
         'acl': calculate_rho_Cp0('acl', T_acl, C_v=C_v_acl, s=s_acl, lambdaa=lambda_acl, C_N2=C_N2_a, C_H2=C_H2_acl,
                                  epsilon=epsilon_cl, epsilon_mc=epsilon_mc),
         'mem': calculate_rho_Cp0('mem', T_mem, lambdaa=lambda_mem),
         'ccl': calculate_rho_Cp0('ccl', T_ccl, C_v=C_v_ccl, s=s_ccl, lambdaa=lambda_ccl, C_O2=C_O2_ccl, C_N2=C_N2_c,
                                  epsilon=epsilon_cl, epsilon_mc=epsilon_mc),
-        'cmpl': calculate_rho_Cp0('cmpl', T_cmpl, C_v=C_v_cmpl, s=s_cmpl, C_O2=C_O2_cmpl, C_N2=C_N2_c,
-                                 epsilon=epsilon_mpl),
+        **{f'cmpl_{i}': calculate_rho_Cp0('cmpl', sv[f'T_cmpl_{i}'], C_v=sv[f'C_v_cmpl_{i}'],
+                                          s=sv[f's_cmpl_{i}'], C_O2=sv[f'C_O2_cmpl_{i}'], C_N2=C_N2_c, epsilon=epsilon_mpl)
+           for i in range(1, n_mpl + 1)},
         **{f'cgdl_{i}': calculate_rho_Cp0('cgdl', sv[f'T_cgdl_{i}'], C_v=sv[f'C_v_cgdl_{i}'],
                                           s=sv[f's_cgdl_{i}'], C_O2=sv[f'C_O2_cgdl_{i}'], C_N2=C_N2_c, epsilon=epsilon_gdl)
            for i in range(1, n_gdl + 1)}

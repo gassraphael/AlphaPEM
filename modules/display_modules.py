@@ -545,14 +545,14 @@ def plot_C_v(variables, parameters, ax):
     ----------
     variables : dict
         Variables calculated by the solver. They correspond to the fuel cell internal states.
-    n_gdl : int
-        Number of model nodes placed inside each GDL.
+    parameters : dict
+        Parameters of the fuel cell model.
     ax : matplotlib.axes.Axes
         Axes on which the vapor concentration will be plotted.
     """
 
     # Extraction of the parameter
-    n_gdl, type_current, type_plot = parameters['n_gdl'], parameters['type_current'], parameters['type_plot']
+    n_gdl, n_mpl, type_current, type_plot = parameters['n_gdl'], parameters['n_mpl'], parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
         delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
     elif type_current == 'polarization':
@@ -568,12 +568,12 @@ def plot_C_v(variables, parameters, ax):
         mask = np.ones_like(variables['t'], dtype=bool)
     t = np.array(variables['t'])[mask]
     C_v_agc_t = np.array(variables['C_v_agc'])[mask]
-    C_v_agdl_t = np.array(variables[f'C_v_agdl_{n_gdl // 2}'])[mask]
-    C_v_ampl_t = np.array(variables['C_v_ampl'])[mask]
+    C_v_agdl_t = np.array(variables[f'C_v_agdl_{int(np.ceil(n_gdl / 2))}'])[mask]
+    C_v_ampl_t = np.array(variables[f'C_v_ampl_{int(np.ceil(n_mpl / 2))}'])[mask]
     C_v_acl_t = np.array(variables['C_v_acl'])[mask]
     C_v_ccl_t = np.array(variables['C_v_ccl'])[mask]
-    C_v_cmpl_t = np.array(variables['C_v_cmpl'])[mask]
-    C_v_cgdl_t = np.array(variables[f'C_v_cgdl_{n_gdl // 2}'])[mask]
+    C_v_cmpl_t = np.array(variables[f'C_v_cmpl_{int(np.ceil(n_mpl / 2))}'])[mask]
+    C_v_cgdl_t = np.array(variables[f'C_v_cgdl_{int(np.ceil(n_gdl / 2))}'])[mask]
     C_v_cgc_t = np.array(variables['C_v_cgc'])[mask]
     T_ccl = np.array(variables['T_ccl'])[mask]
 
@@ -691,7 +691,7 @@ def plot_s(variables, operating_inputs, parameters, ax):
 
     # Extraction of the operating inputs and the parameters
     current_density = operating_inputs['current_density']
-    n_gdl, pola_current_parameters = parameters['n_gdl'], parameters['pola_current_parameters']
+    n_gdl, n_mpl, pola_current_parameters = parameters['n_gdl'], parameters['n_mpl'], parameters['pola_current_parameters']
     type_current, type_plot = parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
         delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
@@ -707,12 +707,12 @@ def plot_s(variables, operating_inputs, parameters, ax):
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
     t = np.array(variables['t'])[mask]
-    s_agdl_t = np.array(variables[f's_agdl_{n_gdl // 2}'])[mask]
-    s_ampl_t = np.array(variables['s_ampl'])[mask]
+    s_agdl_t = np.array(variables[f's_agdl_{int(np.ceil(n_gdl / 2))}'])[mask]
+    s_ampl_t = np.array(variables[f's_ampl_{int(np.ceil(n_mpl / 2))}'])[mask]
     s_acl_t = np.array(variables['s_acl'])[mask]
     s_ccl_t = np.array(variables['s_ccl'])[mask]
-    s_cmpl_t = np.array(variables['s_cmpl'])[mask]
-    s_cgdl_t = np.array(variables[f's_cgdl_{n_gdl // 2}'])[mask]
+    s_cmpl_t = np.array(variables[f's_cmpl_{int(np.ceil(n_mpl / 2))}'])[mask]
+    s_cgdl_t = np.array(variables[f's_cgdl_{int(np.ceil(n_gdl / 2))}'])[mask]
 
     # Plot the liquid water saturation at different spatial localisations: s
     if type_current == "polarization":
@@ -769,14 +769,14 @@ def plot_C_H2(variables, parameters, ax):
     ----------
     variables : dict
         Variables calculated by the solver. They correspond to the fuel cell internal states.
-    n_gdl : int
-        Number of model nodes placed inside each GDL.
+    parameters : dict
+        Parameters of the fuel cell model.
     ax : matplotlib.axes.Axes
         Axes on which the hydrogen concentration will be plotted.
     """
 
     # Extraction of the parameters
-    n_gdl, type_current, type_plot = parameters['n_gdl'], parameters['type_current'], parameters['type_plot']
+    n_gdl, n_mpl, type_current, type_plot = parameters['n_gdl'], parameters['n_mpl'], parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
         delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
     elif type_current == 'polarization':
@@ -792,8 +792,8 @@ def plot_C_H2(variables, parameters, ax):
         mask = np.ones_like(variables['t'], dtype=bool)
     t = np.array(variables['t'])[mask]
     C_H2_agc_t = np.array(variables['C_H2_agc'])[mask]
-    C_H2_agdl_t = np.array(variables[f'C_H2_agdl_{n_gdl // 2}'])[mask]
-    C_H2_ampl_t = np.array(variables['C_H2_ampl'])[mask]
+    C_H2_agdl_t = np.array(variables[f'C_H2_agdl_{int(np.ceil(n_gdl / 2))}'])[mask]
+    C_H2_ampl_t = np.array(variables[f'C_H2_ampl_{int(np.ceil(n_mpl / 2))}'])[mask]
     C_H2_acl_t = np.array(variables['C_H2_acl'])[mask]
 
     # Plot the hydrogen concentration at different spatial localisations: C_H2
@@ -818,14 +818,14 @@ def plot_C_O2(variables, parameters, ax):
     ----------
     variables : dict
         Variables calculated by the solver. They correspond to the fuel cell internal states.
-    n_gdl : int
-        Number of model nodes placed inside each GDL.
+    parameters : dict
+        Parameters of the fuel cell model.
     ax : matplotlib.axes.Axes
         Axes on which the oxygen concentration will be plotted.
     """
 
     # Extraction of the parameters
-    n_gdl, type_current, type_plot = parameters['n_gdl'], parameters['type_current'], parameters['type_plot']
+    n_gdl, n_mpl, type_current, type_plot = parameters['n_gdl'], parameters['n_mpl'], parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
         delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
     elif type_current == 'polarization':
@@ -841,8 +841,8 @@ def plot_C_O2(variables, parameters, ax):
         mask = np.ones_like(variables['t'], dtype=bool)
     t = np.array(variables['t'])[mask]
     C_O2_ccl_t = np.array(variables['C_O2_ccl'])[mask]
-    C_O2_cmpl_t = np.array(variables['C_O2_cmpl'])[mask]
-    C_O2_cgdl_t = np.array(variables[f'C_O2_cgdl_{n_gdl // 2}'])[mask]
+    C_O2_cmpl_t = np.array(variables[f'C_O2_cmpl_{int(np.ceil(n_mpl / 2))}'])[mask]
+    C_O2_cgdl_t = np.array(variables[f'C_O2_cgdl_{int(np.ceil(n_gdl / 2))}'])[mask]
     C_O2_cgc_t = np.array(variables['C_O2_cgc'])[mask]
 
     # Plot the oxygen concentration at different spatial localisations: C_O2
@@ -911,15 +911,15 @@ def plot_T(variables, operating_inputs, parameters, ax):
         Variables calculated by the solver. They correspond to the fuel cell internal states.
     operating_inputs : dict
         Operating inputs of the fuel cell.
-    n_gdl : int
-        Number of model nodes placed inside each GDL.
+    parameters : dict
+        Parameters of the fuel cell model.
     ax : matplotlib.axes.Axes
         Axes on which the vapor concentration will be plotted.
     """
 
     # Extraction of the operating inputs and parameters
     T_des = operating_inputs['T_des']
-    n_gdl, type_current, type_plot = parameters['n_gdl'], parameters['type_current'], parameters['type_plot']
+    n_gdl, n_mpl, type_current, type_plot = parameters['n_gdl'], parameters['n_mpl'], parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
         delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
     elif type_current == 'polarization':
@@ -935,13 +935,13 @@ def plot_T(variables, operating_inputs, parameters, ax):
         mask = np.ones_like(variables['t'], dtype=bool)
     t = np.array(variables['t'])[mask]
     T_agc_t = np.array(variables['T_agc'])[mask] - 273.15 # Conversion in °C.
-    T_agdl_t = np.array(variables[f'T_agdl_{n_gdl // 2}'])[mask] - 273.15 # Conversion in °C.
-    T_ampl_t = np.array(variables['T_ampl'])[mask] - 273.15 # Conversion in °C.
+    T_agdl_t = np.array(variables[f'T_agdl_{int(np.ceil(n_gdl / 2))}'])[mask] - 273.15 # Conversion in °C.
+    T_ampl_t = np.array(variables[f'T_ampl_{int(np.ceil(n_mpl / 2))}'])[mask] - 273.15 # Conversion in °C.
     T_acl_t = np.array(variables['T_acl'])[mask] - 273.15  # Conversion in °C.
     T_mem_t = np.array(variables['T_mem'])[mask] - 273.15 # Conversion in °C.
     T_ccl_t = np.array(variables['T_ccl'])[mask] - 273.15 # Conversion in °C.
-    T_cmpl_t = np.array(variables['T_cmpl'])[mask] - 273.15  # Conversion in °C.
-    T_cgdl_t = np.array(variables[f'T_cgdl_{n_gdl // 2}'])[mask] - 273.15 # Conversion in °C.
+    T_cmpl_t = np.array(variables[f'T_cmpl_{int(np.ceil(n_mpl / 2))}'])[mask] - 273.15  # Conversion in °C.
+    T_cgdl_t = np.array(variables[f'T_cgdl_{int(np.ceil(n_gdl / 2))}'])[mask] - 273.15 # Conversion in °C.
     T_cgc_t = np.array(variables['T_cgc'])[mask] - 273.15 # Conversion in °C.
 
     # Plot the temperature at different spatial localisations

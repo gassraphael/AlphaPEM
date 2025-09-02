@@ -266,7 +266,7 @@ def physical_parameters(type_fuel_cell):
             Wcgc, Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
 
 
-def computing_parameters(step_current_parameters, Hgdl, Hacl, type_fuel_cell):
+def computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, type_fuel_cell):
     """This function is used to set the computing parameters of the fuel cell system.
 
     Parameters
@@ -285,6 +285,8 @@ def computing_parameters(step_current_parameters, Hgdl, Hacl, type_fuel_cell):
     -------
     n_gdl : int
         Number of model nodes placed inside each GDL.
+    n_mpl : int
+        Number of model nodes placed inside each MPL.
     t_purge : tuple
         Time parameters for purging the system.
         It is a tuple containing the purge time 'purge_time' in seconds, and the time between two purges
@@ -304,6 +306,8 @@ def computing_parameters(step_current_parameters, Hgdl, Hacl, type_fuel_cell):
 
     n_gdl = max(1, int(Hgdl / Hacl / 4))  # It is the number of model points placed inside each GDL.
     #                                       A good compromise is int(Hgdl/Hacl/4).
+    n_mpl = max(1, int(Hmpl / Hacl / 1.5))  # It is the number of model points placed inside each MPL.
+    #                                       A good compromise is int(Hmpl/Hacl/1.5).
     t_purge = 0.6, 15  # (s, s). It is the time parameters for purging the system.
     delta_t_dyn_step = 5*60  # (s). Time for dynamic display of the step current density function.
 
@@ -318,7 +322,7 @@ def computing_parameters(step_current_parameters, Hgdl, Hacl, type_fuel_cell):
         raise ValueError('the type_input given is not valid.')
 
     step_current_parameters['delta_t_dyn_step'] = delta_t_dyn_step # Update the step current parameters.
-    return n_gdl, t_purge, rtol, atol, step_current_parameters
+    return n_gdl, n_mpl, t_purge, rtol, atol, step_current_parameters
 
 # ____________________________________________Unchanged Physical parameters_____________________________________________
 """ These parameters remain unchanged no matter the setting configurations."""

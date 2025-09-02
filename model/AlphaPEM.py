@@ -162,6 +162,8 @@ class AlphaPEM:
             Dictionary containing the computing parameters for the simulation. It contains:
                 - n_gdl : int
                     Number of points considered in the GDL (computing parameter).
+                - n_mpl : int
+                    Number of points considered in the MPL (computing parameter).
                 - t_purge : tuple
                     Time parameters for purging the system (computing parameter).
                     It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
@@ -247,14 +249,20 @@ class AlphaPEM:
         """Several points are considered in each GDL and must be inserted into the solver_variable_names.
         """
 
-        new_points_location = ['C_v_agdl', 'C_v_cgdl', 's_agdl', 's_cgdl', 'C_H2_agdl', 'C_O2_cgdl', 'T_agdl', 'T_cgdl']
+        new_points_location = ['C_v_agdl', 'C_v_ampl', 'C_v_cmpl', 'C_v_cgdl', 's_agdl', 's_ampl', 's_cmpl', 's_cgdl',
+                               'C_H2_agdl', 'C_H2_ampl', 'C_O2_cmpl', 'C_O2_cgdl', 'T_agdl', 'T_ampl', 'T_cmpl',
+                               'T_cgdl']
         for variable in new_points_location:
             index = self.solver_variable_names.index(variable)
             # Delete the previous points
             self.solver_variable_names.pop(index)
             # Increase the number of points
-            self.solver_variable_names[index:index] = [f'{variable}_{i}' for i in
-                                                       range(1, self.parameters['n_gdl'] + 1)]
+            if variable.endswith('gdl'):
+                self.solver_variable_names[index:index] = [f'{variable}_{i}' for i in
+                                                           range(1, self.parameters['n_gdl'] + 1)]
+            elif variable.endswith('mpl'):
+                self.solver_variable_names[index:index] = [f'{variable}_{i}' for i in
+                                                           range(1, self.parameters['n_mpl'] + 1)]
 
     def _create_time_interval(self):
         """Calculate the time intervals for numerical resolution, according to the current chosen,
@@ -323,7 +331,7 @@ class AlphaPEM:
         Hmem, kappa_co, i0_c_ref, = self.parameters['Hmem'], self.parameters['kappa_co'], self.parameters['i0_c_ref']
         kappa_c = self.parameters['kappa_c']
         a_slim, b_slim, a_switch = self.parameters['a_slim'], self.parameters['b_slim'], self.parameters['a_switch']
-        n_gdl = self.parameters['n_gdl']
+        n_gdl, n_mpl = self.parameters['n_gdl'], self.parameters['n_mpl']
 
         # Mean value of the operating inputs
         Phi_des_moy = (Phi_a_des + Phi_c_des) / 2
@@ -387,14 +395,15 @@ class AlphaPEM:
         Wcp, Wa_inj, Wc_inj, Abp_a, Abp_c = Wcp_ini, Wa_inj_ini, Wc_inj_ini, Abp_a_ini, Abp_c_ini
 
         # Gathering of the variables initial value into one list
-        initial_variable_values = ([C_v_agc] + [C_v_agdl] * n_gdl + [C_v_ampl, C_v_acl, C_v_ccl, C_v_cmpl] +
-                                   [C_v_cgdl] * n_gdl + [C_v_cgc] +
-                                   [s_boundary] + [s_agdl] * (n_gdl - 1) + [s_ampl, s_acl, s_ccl, s_cmpl] +
-                                   [s_cgdl] * (n_gdl - 1) +  [s_boundary] + [lambda_acl, lambda_mem, lambda_ccl] +
-                                   [C_H2_agc] + [C_H2_agdl] * n_gdl + [C_H2_ampl, C_H2_acl, C_O2_ccl, C_O2_cmpl] +
+        initial_variable_values = ([C_v_agc] + [C_v_agdl] * n_gdl + [C_v_ampl] * n_mpl + [C_v_acl, C_v_ccl] +
+                                   [C_v_cmpl] * n_mpl + [C_v_cgdl] * n_gdl + [C_v_cgc] + [s_boundary] +
+                                   [s_agdl] * (n_gdl - 1) + [s_ampl] * n_mpl + [s_acl, s_ccl] +
+                                   [s_cmpl] * n_mpl + [s_cgdl] * (n_gdl - 1) +  [s_boundary] +
+                                   [lambda_acl, lambda_mem, lambda_ccl] + [C_H2_agc] + [C_H2_agdl] * n_gdl +
+                                   [C_H2_ampl] * n_mpl + [C_H2_acl, C_O2_ccl] + [C_O2_cmpl] * n_mpl +
                                    [C_O2_cgdl] * n_gdl + [C_O2_cgc, C_N2_a, C_N2_c] +
-                                   [T_agc] + [T_agdl] * n_gdl + [T_ampl, T_acl, T_mem, T_ccl, T_cmpl] +
-                                   [T_cgdl] * n_gdl + [T_cgc] + [eta_c] +
+                                   [T_agc] + [T_agdl] * n_gdl + [T_ampl] * n_mpl + [T_acl, T_mem, T_ccl] +
+                                   [T_cmpl] * n_mpl + [T_cgdl] * n_gdl + [T_cgc] + [eta_c] +
                                    [Pasm, Paem, Pcsm, Pcem, Phi_asm, Phi_aem, Phi_csm, Phi_cem] +
                                    [Wcp, Wa_inj, Wc_inj, Abp_a, Abp_c])
 
