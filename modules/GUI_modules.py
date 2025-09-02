@@ -525,11 +525,11 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     else:
         type_plot = "dynamic"
 
-    return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, Aact, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc, Hcgc, Wagc,
+    return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc, Hcgc, Wagc,
             Wcgc, Lgc, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c,
             a_slim, b_slim, a_switch, C_scl, step_current_parameters, pola_current_parameters,
             pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, n_gdl, n_mpl,
-            rtol, atol, type_fuel_cell, type_auxiliary, type_control, type_purge,  type_display, type_plot)
+            rtol, atol, type_fuel_cell, type_auxiliary, type_control, type_purge, type_display, type_plot)
 
 
 def value_control(choice_operating_conditions, choice_accessible_parameters, choice_undetermined_parameters,
@@ -751,8 +751,8 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
         return
 
     if choice_computing_parameters['Solver relative tolerance - rtol']['value'].get() > 1e-3 or \
-            type(choice_computing_parameters['Solver absolute tolerance - atol']['value'].get()) > 1e-3:
-        messagebox.showerror(title='Solver tolerance', message='rtol and atol should be gretter than 1e-3 to limit the'
+            choice_computing_parameters['Solver absolute tolerance - atol']['value'].get() > 1e-3:
+        messagebox.showerror(title='Solver tolerance', message='rtol and atol should be lower than 1e-3 to limit the'
                                                                ' numerical errors.')
         choices.clear()
         return
