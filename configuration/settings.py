@@ -346,8 +346,11 @@ y_O2_ext = 0.2095  # . It is the molar fraction of O2 in dry air.
 # Model parameters for the cell
 rho_mem = 1980  # kg.m-3. It is the density of the dry membrane.
 M_eq = 1.1  # kg.mol-1. It is the equivalent molar mass of ionomer.
-tau_mpl = 4  # It is the pore structure coefficient in the MPL, without units [Gen Inoue 2016 Journal Power Sources].
-tau_cl = 6  # It is the pore structure coefficient in the CL, without units [Gen Inoue 2016 Journal Power Sources].
+tau_mpl = 2  # It is the pore structure coefficient in the MPL, without units [Gen Inoue 2016 Journal Power Sources].
+tau_cl = 4  # It is the pore structure coefficient in the CL, without units [Gen Inoue 2016 Journal Power Sources].
+r_s_gdl = 2.0 # It is the exponent pore blockage in the GDL.
+r_s_mpl = 2.5 # It is the exponent pore blockage in the MPL.
+r_s_cl = 2.5 # It is the exponent pore blockage in the CL.
 Dp_gdl = 33.2e-6  # m. It is the pore diameter of the GDL [ZSW GenStack].
 Dp_mpl = 17.4e-6 # m. It is the pore diameter of the MPL [morganUnderstandingGasDiffusion2014].
 Dp_cl = 0.15e-6  # m. It is the pore diameter of the CL [Ali Malekian 2019 International Journal of Hydrogen Energy].

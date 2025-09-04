@@ -11,9 +11,9 @@ import math
 
 # Importing constants' value
 from configuration.settings import (M_eq, rho_mem, Dp_mpl, Dp_cl, theta_c_gdl, theta_c_mpl, theta_c_cl, M_H2, M_O2,
-                                    M_N2, M_H2O, R, Kshape, epsilon_p, alpha_p, tau_mpl, tau_cl, k_th_gdl, k_th_mpl,
-                                    k_th_cl, k_th_mem, Cp_gdl, Cp_mpl, Cp_cl, Cp_mem, rho_gdl, rho_cl, sigma_e_gdl,
-                                    sigma_e_mpl, sigma_e_cl)
+                                    M_N2, M_H2O, R, Kshape, epsilon_p, alpha_p, tau_mpl, tau_cl, r_s_gdl, r_s_mpl,
+                                    r_s_cl, k_th_gdl, k_th_mpl, k_th_cl, k_th_mem, Cp_gdl, Cp_mpl, Cp_cl, Cp_mem,
+                                    rho_gdl, rho_cl, sigma_e_gdl, sigma_e_mpl, sigma_e_cl)
 
 
 # _________________________________________________Transitory functions_________________________________________________
@@ -298,13 +298,13 @@ def Da_eff(element, s, T, P, epsilon, epsilon_c=None):
         else:
             raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
                              "epsilon_gdl should be between 0.50 and 0.90.")
-        return epsilon * ((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p * math.exp(beta2 * epsilon_c) * (1 - s) ** 2 * Da(P, T)
+        return epsilon * ((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p * math.exp(beta2 * epsilon_c) * (1 - s) ** r_s_gdl * Da(P, T)
 
     elif element == 'mpl': # The effective diffusion coefficient at the MPL using Bruggeman model.
-        return epsilon ** tau_mpl * (1 - s) ** tau_mpl * Da(P, T)
+        return epsilon / tau_mpl * (1 - s) ** r_s_mpl * Da(P, T)
 
     elif element == 'cl': # The effective diffusion coefficient at the CL using Bruggeman model.
-        return epsilon ** tau_cl * (1 - s) ** tau_cl * Da(P, T)
+        return epsilon / tau_cl * (1 - s) ** r_s_cl * Da(P, T)
 
     else:
         raise ValueError("The element should be either 'gdl', 'mpl' or 'cl'.")
@@ -348,13 +348,13 @@ def Dc_eff(element, s, T, P, epsilon, epsilon_c=None):
         else:
             raise ValueError("In order to calculate the effects of the GDL compression on its structure, "
                              "epsilon_gdl should be between 0.50 and 0.90.")
-        return epsilon * ((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p * math.exp(beta2 * epsilon_c) * (1 - s) ** 2 * Dc(P, T)
+        return epsilon * ((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p * math.exp(beta2 * epsilon_c) * (1 - s) ** r_s_gdl * Dc(P, T)
 
     elif element == 'mpl': # The effective diffusion coefficient at the MPL using Bruggeman model.
-        return epsilon ** tau_mpl * (1 - s) ** tau_mpl * Dc(P, T)
+        return epsilon / tau_mpl * (1 - s) ** r_s_mpl * Dc(P, T)
 
     elif element == 'cl': # The effective diffusion coefficient at the CL using Bruggeman model.
-        return epsilon ** tau_cl * (1 - s) ** tau_cl * Dc(P, T)
+        return epsilon / tau_cl * (1 - s) ** r_s_cl * Dc(P, T)
 
     else:
         raise ValueError("The element should be either 'gdl', 'mpl' or 'cl'.")
