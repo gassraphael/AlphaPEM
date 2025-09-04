@@ -306,7 +306,7 @@ def computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, type_fuel_ce
 
     n_gdl = max(1, int(Hgdl / Hacl / 4))  # It is the number of model points placed inside each GDL.
     #                                       A good compromise is int(Hgdl/Hacl/4).
-    n_mpl = max(1, int(Hmpl / Hacl / 1.5))  # It is the number of model points placed inside each MPL.
+    n_mpl = max(1, int(Hmpl / Hacl / 2))  # It is the number of model points placed inside each MPL.
     #                                       A good compromise is int(Hmpl/Hacl/1.5).
     t_purge = 0.6, 15  # (s, s). It is the time parameters for purging the system.
     delta_t_dyn_step = 5*60  # (s). Time for dynamic display of the step current density function.

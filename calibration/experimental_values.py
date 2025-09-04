@@ -30,7 +30,120 @@ def pola_exp_values(type_fuel_cell):
         Experimental values of the voltage.
 
     """
-    if type_fuel_cell == "EH-31_1.5":  # at 1.5 bar
+    if type_fuel_cell == "ZSW-GenStack_Pa_1.61_PC_1.41":
+        # Current density
+        i_exp_t = np.zeros(18)
+        i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.001, 0.050, 0.099, 0.150, 0.200
+        i_exp_t[5], i_exp_t[6], i_exp_t[7], i_exp_t[8], i_exp_t[9] = 0.300, 0.400, 0.498, 0.700, 0.900
+        i_exp_t[10], i_exp_t[11], i_exp_t[12], i_exp_t[13], i_exp_t[14] = 0.999, 1.099, 1.300, 1.500, 1.700
+        i_exp_t[15], i_exp_t[16], i_exp_t[17] = 1.900, 2.000, 2.171
+        # Voltage
+        U_exp_t = np.zeros(18)
+        U_exp_t[0], U_exp_t[1], U_exp_t[2], U_exp_t[3], U_exp_t[4] = 0.936, 0.835, 0.809, 0.795, 0.783
+        U_exp_t[5], U_exp_t[6], U_exp_t[7], U_exp_t[8], U_exp_t[9] = 0.759, 0.741, 0.725, 0.701, 0.670
+        U_exp_t[10], U_exp_t[11], U_exp_t[12], U_exp_t[13], U_exp_t[14] = 0.661, 0.633, 0.587, 0.541, 0.500
+        U_exp_t[15], U_exp_t[16], U_exp_t[17] = 0.457, 0.437, 0.402
+
+    elif type_fuel_cell == "ZSW-GenStack_Pa_2.01_PC_1.81":
+        # Current density
+        i_exp_t = np.zeros(19)
+        i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.001, 0.050, 0.099, 0.150, 0.199
+        i_exp_t[5], i_exp_t[6], i_exp_t[7], i_exp_t[8], i_exp_t[9] = 0.299, 0.400, 0.498, 0.700, 0.901
+        i_exp_t[10], i_exp_t[11], i_exp_t[12], i_exp_t[13], i_exp_t[14] = 0.999, 1.099, 1.300, 1.500, 1.700
+        i_exp_t[15], i_exp_t[16], i_exp_t[17], i_exp_t[18] = 1.900, 2.000, 2.200, 2.415
+        # Voltage
+        U_exp_t = np.zeros(19)
+        U_exp_t[0], U_exp_t[1], U_exp_t[2], U_exp_t[3], U_exp_t[4] = 0.946, 0.855, 0.830, 0.811, 0.795
+        U_exp_t[5], U_exp_t[6], U_exp_t[7], U_exp_t[8], U_exp_t[9] = 0.770, 0.752, 0.736, 0.717, 0.697
+        U_exp_t[10], U_exp_t[11], U_exp_t[12], U_exp_t[13], U_exp_t[14] = 0.685, 0.677, 0.655, 0.629, 0.599
+        U_exp_t[15], U_exp_t[16], U_exp_t[17], U_exp_t[18] = 0.564, 0.545, 0.502, 0.450
+
+    elif type_fuel_cell == "ZSW-GenStack_Pa_2.2_PC_2.0":
+        # Current density
+        i_exp_t = np.zeros(19)
+        i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.001, 0.050, 0.099, 0.150, 0.200
+        i_exp_t[5], i_exp_t[6], i_exp_t[7], i_exp_t[8], i_exp_t[9] = 0.299, 0.400, 0.498, 0.700, 0.901
+        i_exp_t[10], i_exp_t[11], i_exp_t[12], i_exp_t[13], i_exp_t[14] = 0.999, 1.099, 1.300, 1.500, 1.700
+        i_exp_t[15], i_exp_t[16], i_exp_t[17], i_exp_t[18] = 1.900, 2.000, 2.200, 2.500
+        # Voltage
+        U_exp_t = np.zeros(19)
+        U_exp_t[0], U_exp_t[1], U_exp_t[2], U_exp_t[3], U_exp_t[4] = 0.953, 0.864, 0.838, 0.819, 0.804
+        U_exp_t[5], U_exp_t[6], U_exp_t[7], U_exp_t[8], U_exp_t[9] = 0.778, 0.760, 0.743, 0.721, 0.703
+        U_exp_t[10], U_exp_t[11], U_exp_t[12], U_exp_t[13], U_exp_t[14] = 0.694, 0.685, 0.666, 0.644, 0.620
+        U_exp_t[15], U_exp_t[16], U_exp_t[17], U_exp_t[18] = 0.593, 0.579, 0.546, 0.486
+
+    elif type_fuel_cell == "ZSW-GenStack_Pa_2.4_PC_2.2":
+        # Current density
+        i_exp_t = np.zeros(19)
+        i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.001, 0.050, 0.099, 0.150, 0.200
+        i_exp_t[5], i_exp_t[6], i_exp_t[7], i_exp_t[8], i_exp_t[9] = 0.300, 0.400, 0.498, 0.700, 0.901
+        i_exp_t[10], i_exp_t[11], i_exp_t[12], i_exp_t[13], i_exp_t[14] = 0.999, 1.099, 1.300, 1.500, 1.700
+        i_exp_t[15], i_exp_t[16], i_exp_t[17], i_exp_t[18] = 1.900, 2.000, 2.200, 2.500
+        # Voltage
+        U_exp_t = np.zeros(19)
+        U_exp_t[0], U_exp_t[1], U_exp_t[2], U_exp_t[3], U_exp_t[4] = 0.949, 0.867, 0.841, 0.821, 0.807
+        U_exp_t[5], U_exp_t[6], U_exp_t[7], U_exp_t[8], U_exp_t[9] = 0.781, 0.763, 0.746, 0.725, 0.706
+        U_exp_t[10], U_exp_t[11], U_exp_t[12], U_exp_t[13], U_exp_t[14] = 0.697, 0.687, 0.670, 0.651, 0.630
+        U_exp_t[15], U_exp_t[16], U_exp_t[17], U_exp_t[18] = 0.607, 0.595, 0.566, 0.514
+
+    elif type_fuel_cell == "ZSW-GenStack_Pa_2.8_PC_2.6":
+        # Current density
+        i_exp_t = np.zeros(19)
+        i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.001, 0.050, 0.099, 0.150, 0.199
+        i_exp_t[5], i_exp_t[6], i_exp_t[7], i_exp_t[8], i_exp_t[9] = 0.299, 0.400, 0.498, 0.700, 0.901
+        i_exp_t[10], i_exp_t[11], i_exp_t[12], i_exp_t[13], i_exp_t[14] = 0.999, 1.099, 1.300, 1.500, 1.700
+        i_exp_t[15], i_exp_t[16], i_exp_t[17], i_exp_t[18] = 1.900, 2.000, 2.200, 2.500
+        # Voltage
+        U_exp_t = np.zeros(19)
+        U_exp_t[0], U_exp_t[1], U_exp_t[2], U_exp_t[3], U_exp_t[4] = 0.947, 0.872, 0.846, 0.827, 0.812
+        U_exp_t[5], U_exp_t[6], U_exp_t[7], U_exp_t[8], U_exp_t[9] = 0.787, 0.768, 0.752, 0.731, 0.711
+        U_exp_t[10], U_exp_t[11], U_exp_t[12], U_exp_t[13], U_exp_t[14] = 0.703, 0.694, 0.676, 0.659, 0.641
+        U_exp_t[15], U_exp_t[16], U_exp_t[17], U_exp_t[18] = 0.622, 0.610, 0.588, 0.547
+
+    elif type_fuel_cell == "ZSW-GenStack_T_62" :
+        # Current density
+        i_exp_t = np.zeros(19)
+        i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.001, 0.050, 0.099, 0.150, 0.199
+        i_exp_t[5], i_exp_t[6], i_exp_t[7], i_exp_t[8], i_exp_t[9] = 0.299, 0.400, 0.498, 0.700, 0.901
+        i_exp_t[10], i_exp_t[11], i_exp_t[12], i_exp_t[13], i_exp_t[14] = 0.999, 1.099, 1.300, 1.500, 1.700
+        i_exp_t[15], i_exp_t[16], i_exp_t[17], i_exp_t[18] = 1.900, 2.000, 2.200, 2.500
+        # Voltage
+        U_exp_t = np.zeros(19)
+        U_exp_t[0], U_exp_t[1], U_exp_t[2], U_exp_t[3], U_exp_t[4] = 0.944, 0.855, 0.827, 0.808, 0.795
+        U_exp_t[5], U_exp_t[6], U_exp_t[7], U_exp_t[8], U_exp_t[9] = 0.771, 0.754, 0.739, 0.717, 0.696
+        U_exp_t[10], U_exp_t[11], U_exp_t[12], U_exp_t[13], U_exp_t[14] = 0.685, 0.675, 0.653, 0.631, 0.606
+        U_exp_t[15], U_exp_t[16], U_exp_t[17], U_exp_t[18] = 0.581, 0.566, 0.532, 0.471
+
+    elif type_fuel_cell == "ZSW-GenStack_T_76" :
+        # Current density
+        i_exp_t = np.zeros(19)
+        i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.001, 0.050, 0.099, 0.150, 0.199
+        i_exp_t[5], i_exp_t[6], i_exp_t[7], i_exp_t[8], i_exp_t[9] = 0.299, 0.400, 0.498, 0.700, 0.900
+        i_exp_t[10], i_exp_t[11], i_exp_t[12], i_exp_t[13], i_exp_t[14] = 0.999, 1.099, 1.300, 1.500, 1.700
+        i_exp_t[15], i_exp_t[16], i_exp_t[17], i_exp_t[18] = 1.900, 2.000, 2.200, 2.500
+        # Voltage
+        U_exp_t = np.zeros(19)
+        U_exp_t[0], U_exp_t[1], U_exp_t[2], U_exp_t[3], U_exp_t[4] = 0.946, 0.849, 0.825, 0.811, 0.799
+        U_exp_t[5], U_exp_t[6], U_exp_t[7], U_exp_t[8], U_exp_t[9] = 0.776, 0.759, 0.744, 0.724, 0.702
+        U_exp_t[10], U_exp_t[11], U_exp_t[12], U_exp_t[13], U_exp_t[14] = 0.691, 0.679, 0.652, 0.621, 0.587
+        U_exp_t[15], U_exp_t[16], U_exp_t[17], U_exp_t[18] = 0.547, 0.527, 0.482, 0.406
+
+    elif type_fuel_cell == "ZSW-GenStack_T_84":
+        # Current density
+        i_exp_t = np.zeros(17)
+        i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.001, 0.050, 0.099, 0.150, 0.199
+        i_exp_t[5], i_exp_t[6], i_exp_t[7], i_exp_t[8], i_exp_t[9] = 0.300, 0.400, 0.498, 0.700, 0.901
+        i_exp_t[10], i_exp_t[11], i_exp_t[12], i_exp_t[13], i_exp_t[14] = 0.999, 1.099, 1.300, 1.500, 1.700
+        i_exp_t[15], i_exp_t[16] = 1.900, 2.000
+        # Voltage
+        U_exp_t = np.zeros(17)
+        U_exp_t[0], U_exp_t[1], U_exp_t[2], U_exp_t[3], U_exp_t[4] = 0.930, 0.847, 0.820, 0.805, 0.794
+        U_exp_t[5], U_exp_t[6], U_exp_t[7], U_exp_t[8], U_exp_t[9] = 0.772, 0.756, 0.741, 0.718, 0.686
+        U_exp_t[10], U_exp_t[11], U_exp_t[12], U_exp_t[13], U_exp_t[14] = 0.668, 0.650, 0.614, 0.575, 0.532
+        U_exp_t[15], U_exp_t[16] = 0.486, 0.461
+
+
+    elif type_fuel_cell == "EH-31_1.5":  # at 1.5 bar
         # # Current density
         # i_exp_t = np.zeros(37)
         # i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.050, 0.068, 0.089, 0.110, 0.147
