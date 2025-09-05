@@ -547,7 +547,7 @@ def pola_exp_values_calibration(type_fuel_cell):
         i_exp_t = np.zeros(4)
         i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3] = 0.001, 0.050, 0.300, 0.700
         # Voltage
-        U_exp_t = np.zeros(4
+        U_exp_t = np.zeros(4)
         U_exp_t[0], U_exp_t[1], U_exp_t[2], U_exp_t[3] = 0.930, 0.847, 0.772, 0.718
 
     # EH-31 fuel cell
