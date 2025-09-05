@@ -343,7 +343,8 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
     (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
-     Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
+     Lgc, Vsm, Vem, A_T, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = \
+        stored_physical_parameters(type_fuel_cell)
 
     n_gdl, n_mpl, t_purge, rtol, atol, step_current_parameters = computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, type_fuel_cell)
 
@@ -363,6 +364,9 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_accessible_parameters['AGC width - Wagc (µm)']['value'].set(round(Wagc * 1e6, 4))  # µm
     choice_accessible_parameters['CGC width - Wcgc (µm)']['value'].set(round(Wcgc * 1e6, 4))  # µm
     choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].set(round(Lgc, 4))  # µm
+    choice_accessible_parameters['Supply manifold volume - Vsm (dm³)']['value'].set(round(Vsm * 1e3, 4))  # dm³
+    choice_accessible_parameters['Exhaust manifold volume - Vem (dm³)']['value'].set(round(Vem * 1e3, 4))  # dm³
+    choice_accessible_parameters['Exhaust manifold throttle area - A_T (cm²)']['value'].set(round(A_T * 1e4, 4))  # cm²
     # undetermined physical parameters recovery
     choice_undetermined_parameters['GDL thickness - Hgdl (µm)']['value'].set(round(Hgdl * 1e6, 4))  # µm
     choice_undetermined_parameters['MPL thickness - Hmpl (µm)']['value'].set(round(Hmpl * 1e6, 4))  # µm
@@ -429,6 +433,9 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     Wagc = choice_accessible_parameters['AGC width - Wagc (µm)']['value'].get() * 1e-6  # m
     Wcgc = choice_accessible_parameters['CGC width - Wcgc (µm)']['value'].get() * 1e-6  # m
     Lgc = choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].get()  # m
+    Vsm = choice_accessible_parameters['Supply manifold volume - Vsm (dm³)']['value'].get() * 1e-3  # m³
+    Vem = choice_accessible_parameters['Exhaust manifold volume - Vem (dm³)']['value'].get() * 1e-3 # m³
+    A_T = choice_accessible_parameters['Exhaust manifold throttle area - A_T (cm²)']['value'].get() * 1e-4  # m²
     # undetermined physical parameters
     Hgdl = choice_undetermined_parameters['GDL thickness - Hgdl (µm)']['value'].get() * 1e-6  # m
     Hmpl = choice_undetermined_parameters['MPL thickness - Hmpl (µm)']['value'].get() * 1e-6  # m
@@ -590,6 +597,12 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
         return
     if choice_accessible_parameters['Active area - Aact (cm²)']['value'].get() < 0:
         messagebox.showerror(title='Active area', message='Negative active area is impossible.')
+        choices.clear()
+        return
+    if choice_accessible_parameters['Supply manifold volume - Vsm (dm³)']['value'].get() < 0 or \
+            choice_accessible_parameters['Exhaust manifold volume - Vem (dm³)']['value'].get() < 0 or \
+            choice_accessible_parameters['Exhaust manifold throttle area - A_T (cm²)']['value'].get() < 0:
+        messagebox.showerror(title='Manifold parameters', message='Negative volumes or area are impossible.')
         choices.clear()
         return
     if choice_accessible_parameters['AGC thickness - Hagc (µm)']['value'].get() < 10 or \

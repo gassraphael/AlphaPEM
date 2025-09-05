@@ -34,7 +34,7 @@ if __name__ == '__main__':
     type_fuel_cell_3 = None
     type_fuel_cell_4 = None
     # Current density possibilities: "step", "polarization", "polarization_for_cali", "EIS".
-    type_current = "polarization"
+    type_current = "step"
     # Auxiliary system possibilities: "forced-convective_cathode_with_anodic_recirculation",
     #                                 "forced-convective_cathode_with_flow-through_anode", "no_auxiliary".
     type_auxiliary = "no_auxiliary"
@@ -72,7 +72,8 @@ if __name__ == '__main__':
             operating_inputs_function(copy.deepcopy(pola_current_parameters), type_fuel_cell_4)
     #   Physical parameters
     (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
-     Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = physical_parameters(type_fuel_cell_1)
+     Lgc, Vsm, Vem, A_T, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = \
+        physical_parameters(type_fuel_cell_1)
     #   Computing parameters
     n_gdl, n_mpl, t_purge, rtol, atol, step_current_parameters = computing_parameters(copy.deepcopy(step_current_parameters), Hgdl, Hmpl, Hacl, type_fuel_cell_1)
 
@@ -90,7 +91,8 @@ if __name__ == '__main__':
                                                       pola_current_parameters_3, pola_current_parameters_4],
                           'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
                           'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
-    accessible_physical_parameters = {'Aact': Aact, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc, 'Wcgc': Wcgc, 'Lgc': Lgc}
+    accessible_physical_parameters = {'Aact': Aact, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc, 'Wcgc': Wcgc, 'Lgc': Lgc,
+                                      'Vsm': Vsm, 'Vem': Vem, 'A_T': A_T}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
                                         'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl,
                                         'epsilon_mpl': epsilon_mpl, 'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c,

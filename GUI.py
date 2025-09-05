@@ -123,7 +123,10 @@ def main_frame(root, canvas):
          'AGC width - Wagc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 5},
          'CGC width - Wcgc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 1},
          'GC cumulated length - Lgc (m)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 3},
-         'Active area - Aact (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 5}}
+         'Active area - Aact (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 5},
+         'Supply manifold volume - Vsm (dm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 1},
+         'Exhaust manifold volume - Vem (dm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 3},
+         'Exhaust manifold throttle area - A_T (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 5}}
 
     choice_undetermined_parameters = \
         {'GDL thickness - Hgdl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 1},

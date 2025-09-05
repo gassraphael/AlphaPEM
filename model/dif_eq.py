@@ -9,8 +9,7 @@
 import math
 
 # Importing constants' value and functions
-from configuration.settings import (C_O2ref, alpha_c, tau_cp, tau_hum, rho_mem, M_eq, F, R, M_H2O, n_cell, Vsm, Vem,
-                                    A_T, Kp, Kd)
+from configuration.settings import (C_O2ref, alpha_c, tau_cp, tau_hum, rho_mem, M_eq, F, R, M_H2O, n_cell, Kp, Kd)
 from model.flows import calculate_flows
 from model.cell_voltage import calculate_eta_c_intermediate_values
 from model.heat_transfer import calculate_heat_transfers
@@ -195,7 +194,7 @@ def calculate_dyn_liquid_water_evolution(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, eps
     #       Inside the AGDL
     if n_gdl == 1:
         dif_eq['ds_agdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_agdl_1']) * epsilon_gdl) * \
-                                   ((Jl_agc_agdl - Jl_agdl_ampl) / Hgdl + M_H2O * Sl_agdl)
+                                   ((Jl_agc_agdl - Jl_agdl_ampl) / Hgdl + M_H2O * Sl_agdl[1])
     elif n_gdl == 2:
         dif_eq['ds_agdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_agdl_1']) * epsilon_gdl) * \
                                    ((Jl_agc_agdl - Jl_agdl_agdl[1]) / (Hgdl / n_gdl) + M_H2O * Sl_agdl[1])
@@ -258,7 +257,7 @@ def calculate_dyn_liquid_water_evolution(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, eps
     #       Inside the CGDL
     if n_gdl == 1:
         dif_eq['ds_cgdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_cgdl_1']) * epsilon_gdl) * \
-                                 ((Jl_cmpl_cgdl - Jl_cgdl_cgc) / Hgdl + M_H2O * Sl_cgdl)
+                                 ((Jl_cmpl_cgdl - Jl_cgdl_cgc) / Hgdl + M_H2O * Sl_cgdl[1])
     elif n_gdl == 2:
         dif_eq['ds_cgdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_cgdl_1']) * epsilon_gdl) * \
                                    ((Jl_cmpl_cgdl - Jl_cgdl_cgdl[1]) / (Hgdl / n_gdl) + M_H2O * Sl_cgdl[1])
@@ -365,7 +364,7 @@ def calculate_dyn_vapor_evolution(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, Hagc, Hcgc
     #       Inside the AGDL
     if n_gdl == 1:
         dif_eq['dC_v_agdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_agdl_1'])) * \
-                                   ((Jv_agc_agdl - Jv_agdl_ampl) / Hgdl + Sv_agdl)
+                                   ((Jv_agc_agdl - Jv_agdl_ampl) / Hgdl + Sv_agdl[1])
     elif n_gdl == 2:
         dif_eq['dC_v_agdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_agdl_1'])) * \
                                    ((Jv_agc_agdl - Jv_agdl_agdl[1]) / (Hgdl / n_gdl) + Sv_agdl[1])
@@ -422,7 +421,7 @@ def calculate_dyn_vapor_evolution(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, Hagc, Hcgc
     #       Inside the CGDL
     if n_gdl == 1:
         dif_eq['dC_v_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * ((Jv_cmpl_cgdl - Jv_cgdl_cgc) / Hgdl +
-                                                                                 Sv_cgdl)
+                                                                                 Sv_cgdl[1])
     elif n_gdl == 2:
         dif_eq['dC_v_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * \
                                    ((Jv_cmpl_cgdl - Jv_cgdl_cgdl[1]) / (Hgdl / n_gdl) + Sv_cgdl[1])
@@ -789,7 +788,7 @@ def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hccl, 
 
 
 def calculate_dyn_manifold_pressure_and_humidity_evolution(dif_eq, Masm, Maem, Mcsm, Mcem, T_des, Hagc, Hcgc, Wagc,
-                                                           Wcgc, type_auxiliary, Jv_a_in, Jv_a_out, Jv_c_in, Jv_c_out,
+                                                           Wcgc, Vsm, Vem, type_auxiliary, Jv_a_in, Jv_a_out, Jv_c_in, Jv_c_out,
                                                            Wasm_in, Wasm_out, Waem_in, Waem_out, Wcsm_in, Wcsm_out,
                                                            Wcem_in, Wcem_out, Ware, Wv_asm_in, Wv_aem_out, Wv_csm_in,
                                                            Wv_cem_out, **kwargs):
@@ -927,7 +926,7 @@ def calculate_dyn_air_compressor_and_humidifier_evolution(dif_eq, Wcp_des, Wa_in
         dif_eq['dWa_inj / dt'], dif_eq['dWc_inj / dt'] = 0, 0
 
 
-def calculate_dyn_throttle_area_evolution(dif_eq, Pagc, Pcgc, T_agc, T_cgc, Abp_a, Abp_c, Pa_des, Pc_des,
+def calculate_dyn_throttle_area_evolution(dif_eq, Pagc, Pcgc, T_agc, T_cgc, Abp_a, Abp_c, Pa_des, Pc_des, A_T,
                                           type_auxiliary, **kwargs):
     """This function calculates the dynamic evolution of the throttle area inside the anode and cathode auxiliaries.
     This function has to be executed after 'calculate_dyn_vapor_evolution' and 'calculate_dyn_H2_O2_N2_evolution'.

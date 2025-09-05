@@ -76,7 +76,7 @@ def current_density_parameters(type_current=None):
     delta_t_ini_step = 30 * 60 # (s). Initial time at zero current density for the stabilisation of the internal states (standard value).
     delta_t_load_step = 30 # (s). Loading time for the step current density function, from 0 to i_step.
     delta_t_break_step = 15 * 60  # (s). Time at i_step current density for the stabilisation of the internal states.
-    i_step = 1.5e4 # (A.m-2). Current density for the step current density function.
+    i_step = 2.0e4 # (A.m-2). Current density for the step current density function.
     step_current_parameters = {'delta_t_ini_step': delta_t_ini_step, 'delta_t_load_step': delta_t_load_step,
                                'delta_t_break_step': delta_t_break_step,'i_step': i_step}
 
@@ -248,6 +248,10 @@ def physical_parameters(type_fuel_cell):
         Wagc = 4.5e-4  # m. It is the width of the anode gas channel.
         Wcgc = Wagc  # m. It is the width of the cathode gas channel.
         Lgc = 9.67  # m. It is the length of the gas channel.
+        #   Auxiliaries
+        Vsm = 7.0e-3  # m³. It is the supply manifold volume.
+        Vem = 2.4e-3  # m³. It is the exhaust manifold volume.
+        A_T = 11.8e-4  # m². It is the exhaust manifold throttle area
         #   Interaction parameters between water and PEMFC structure
         e = 5.0  # It is the capillary exponent
         #   Voltage polarization
@@ -259,10 +263,11 @@ def physical_parameters(type_fuel_cell):
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
     else: # Stored setup in "stored_physical_parameters".
         (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-         Wcgc, Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
+         Wcgc, Lgc, Vsm, Vem, A_T, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = \
+            stored_physical_parameters(type_fuel_cell)
 
     return (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
+            Wcgc, Lgc, Vsm, Vem, A_T, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
 
 
 def computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, type_fuel_cell):
@@ -301,20 +306,19 @@ def computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, type_fuel_ce
         - 'i_step': the current density (in A.m-2) for the step current density function,
         - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
     """
-
-    n_gdl = max(1, int(Hgdl / Hacl / 4))  # It is the number of model points placed inside each GDL.
-    #                                       A good compromise is int(Hgdl/Hacl/4).
-    n_mpl = max(1, int(Hmpl / Hacl / 2))  # It is the number of model points placed inside each MPL.
-    #                                       A good compromise is int(Hmpl/Hacl/1.5).
     t_purge = 0.6, 15  # (s, s). It is the time parameters for purging the system.
     delta_t_dyn_step = 5*60  # (s). Time for dynamic display of the step current density function.
+
+    n_gdl = max(1, int(Hgdl / Hacl / 4))  # It is the number of model points placed inside each GDL.
+    n_mpl = max(1, int(Hmpl / Hacl))      # It is the number of model points placed inside each MPL.
 
     if type_fuel_cell == "ZSW-GenStack" or type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41" or \
             type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81" or type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2" or \
             type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6" or type_fuel_cell == "ZSW-GenStack_T_62" or \
             type_fuel_cell == "ZSW-GenStack_T_76" or type_fuel_cell == "ZSW-GenStack_T_84":
-        rtol = 1e-5 # Relative tolerance for the system of ODEs solver.
+        rtol = 1e-4 # Relative tolerance for the system of ODEs solver.
         atol = 1e-8 # Absolute tolerance for the system of ODEs solver.
+
     elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
             type_fuel_cell == "EH-31_2.5":
         rtol = 1e-5  # Relative tolerance for the system of ODEs solver.
@@ -396,12 +400,7 @@ delta_s_HOR = 0.104  # J.mol-1.K-1. It is the HOR molar reaction entropy [vetter
 delta_s_ORR = -163.3  # J.mol-1.K-1. It is the ORR molar reaction entropy [vetterFreeOpenReference2019].
 
 # Model parameters for the balance of plant
-#   Physical parameters
 n_cell = 1 # . It is the number of cell in the stack.
-Vsm = 7.0e-3  # m3. It is the supply manifold volume.
-Vem = 2.4e-3  # m-3. It is the exhaust manifold volume.
-A_T = 1.18e-3  # m². It is the exhaust manifold throttle area
-#   Model parameters
 tau_cp = 1  # s. It is the air compressor time constant.
 tau_hum = 5  # s. It is the humidifier time constant.
 Kp = 5e-8  # m².s-1.Pa-1. It is the proportional constant of the PD controller at the back pressure valve.

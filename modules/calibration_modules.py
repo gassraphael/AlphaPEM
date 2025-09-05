@@ -259,6 +259,9 @@ def parameters_for_calibration(type_fuel_cell):
         Wagc = 4.3e-4  # m. It is the width of the anode gas channel.
         Wcgc = 5.32e-4  # m. It is the width of the cathode gas channel.
         Lgc = 23.31  # m. It is the length of the gas channel.
+        Vsm = 7.0e-3  # m³. It is the supply manifold volume.
+        Vem = 2.4e-3  # m³. It is the exhaust manifold volume.
+        A_T = 1.18e-3  # m². It is the exhaust manifold throttle area
         #       Fuel cell undetermined physical parameters.
         Hgdl = 1.27e-4  # m. It is the thickness of the gas diffusion layer.
         Hmpl = 7e-5  # m. It is the thickness of the microporous layer.
@@ -348,6 +351,9 @@ def parameters_for_calibration(type_fuel_cell):
         epsilon_mpl = 0.4  # It is the porosity of the microporous layer.
         Hagc = 5e-4  # m. It is the thickness of the anode gas channel.
         Hcgc = Hagc  # m. It is the thickness of the cathode gas channel.
+        Vsm = 7.0e-3  # m³. It is the supply manifold volume.
+        Vem = 2.4e-3  # m³. It is the exhaust manifold volume.
+        A_T = 1.18e-3  # m². It is the exhaust manifold throttle area
 
         # Estimated undetermined parameters for the initialisation
         #   Gas diffusion layer
@@ -415,7 +421,8 @@ def parameters_for_calibration(type_fuel_cell):
                           'pola_current_parameters': pola_current_parameters,
                           'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
                           'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
-    accessible_physical_parameters = {'Aact': Aact, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc, 'Wcgc': Wcgc, 'Lgc': Lgc}
+    accessible_physical_parameters = {'Aact': Aact, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc, 'Wcgc': Wcgc, 'Lgc': Lgc,
+                                      'Vsm': Vsm, 'Vem': Vem, 'A_T': A_T}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
                                         'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl, 'epsilon_mpl': epsilon_mpl,
                                         'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c, 'e': e,

@@ -600,7 +600,7 @@ class AlphaPEM:
         type_display = self.parameters['type_display']
 
         # Folder name
-        subfolder_name = type_fuel_cell[:type_fuel_cell.rfind('_')] if type_fuel_cell.rfind('_') != -1 else type_fuel_cell
+        subfolder_name = type_fuel_cell.split('_')[0]
 
         # For the step current
         if type_current == "step":

@@ -6,8 +6,8 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import F, R, Text, Pext, Phi_ext, y_O2_ext, gamma, gamma_H2, M_H2, M_H2O, n_cell, A_T, \
-    Ksm_in, Ksm_out, Kem_in, C_D
+from configuration.settings import (F, R, Text, Pext, Phi_ext, y_O2_ext, gamma, gamma_H2, M_H2O, n_cell, Ksm_in, Ksm_out,
+                                    Kem_in, C_D)
 from modules.transitory_functions import Psat
 from modules.auxiliaries_modules import auxiliaries_int_values
 
@@ -99,7 +99,8 @@ def auxiliaries(t, solver_variables, control_variables, i_fc, operating_inputs, 
     Sa, Sc, y_H2_in = operating_inputs['Sa'], operating_inputs['Sc'], operating_inputs['y_H2_in']
     Phi_a_des, Phi_c_des = control_variables['Phi_a_des'], control_variables['Phi_c_des']
     Aact, Hagc, Hcgc = parameters['Aact'], parameters['Hagc'], parameters['Hcgc']
-    Wagc, Wcgc, type_auxiliary = parameters['Wagc'], parameters['Wcgc'], parameters['type_auxiliary']
+    Wagc, Wcgc, A_T = parameters['Wagc'], parameters['Wcgc'], parameters['A_T']
+    type_auxiliary = parameters['type_auxiliary']
 
     # Intermediate values
     (Mext, M_H2_N2_in, Pagc, Pcgc, Phi_agc, Phi_cgc, y_H2_agc, y_O2_cgc, Magc, Mcgc, Pr_aem, Pr_cem, Maem, Masm, Mcem,

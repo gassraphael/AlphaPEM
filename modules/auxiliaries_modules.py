@@ -9,7 +9,7 @@
 import numpy as np
 
 # Importing constants' value and functions
-from configuration.settings import Text, Pext, Phi_ext, M_H2, M_O2, M_N2, M_H2O, y_O2_ext, R, F, A_T
+from configuration.settings import Text, Pext, Phi_ext, M_H2, M_O2, M_N2, M_H2O, y_O2_ext, R, F
 from modules.transitory_functions import average, Psat, C_v_sat, k_H2, k_O2
 
 
@@ -84,8 +84,8 @@ def auxiliaries_int_values(t, solver_variables, operating_inputs, parameters):
     Abp_a, Abp_c = solver_variables['Abp_a'], solver_variables['Abp_c']
     # Extraction of the operating inputs and the parameters
     T_des, y_H2_in = operating_inputs['T_des'], operating_inputs['y_H2_in']
-    Hmem, Hacl, Hccl, kappa_co = parameters['Hmem'], parameters['Hacl'], parameters['Hccl'], parameters['kappa_co']
-    t_purge, type_purge = parameters['t_purge'], parameters['type_purge']
+    Hmem, Hacl, Hccl, A_T = parameters['Hmem'], parameters['Hacl'], parameters['Hccl'], parameters['A_T']
+    kappa_co, t_purge, type_purge = parameters['kappa_co'], parameters['t_purge'], parameters['type_purge']
 
     # Molar mass of the ambient air
     Mext = Phi_ext * Psat(Text) / Pext * M_H2O + \
