@@ -22,20 +22,22 @@ from modules.main_modules import (select_nth_elements, launch_AlphaPEM_for_step_
 """
 
 if __name__ == '__main__':
-    # Fuel cell possibilities: "ZSW-GenStack"(2022), "EH-31_1.5"(2021), "EH-31_2.0"(2021), "EH-31_2.25"(2021),
+    # Fuel cell possibilities: "ZSW-GenStack"(2022), "ZSW-GenStack_Pa_1.61_Pc_1.41", "ZSW-GenStack_Pa_2.01_Pc_1.81",
+    #                          "ZSW-GenStack_Pa_2.4_Pc_2.2", "ZSW-GenStack_Pa_2.8_Pc_2.6", "ZSW-GenStack_T_62",
+    #                          "ZSW-GenStack_T_76", "ZSW-GenStack_T_84", "EH-31_1.5"(2021), "EH-31_2.0"(2021), "EH-31_2.25"(2021),
     #                          "EH-31_2.5"(2021), "manual_setup".
     # This parameter includes the fuel cell used in the model and the corresponding operating conditions.
-    # - EH-31 is a fuel cell developed by EH GROUP. 1.5, 2.0, 2.25 and 2.5 corresponds to the different pressure options.
     # - GenStack is a fuel cell developed in open source by ZSW (https://zenodo.org/records/14223364).
-    type_fuel_cell_1 = "EH-31_2.0"
+    # - EH-31 is a fuel cell developed by EH GROUP. 1.5, 2.0, 2.25 and 2.5 corresponds to the different pressure options.
+    type_fuel_cell_1 = "ZSW-GenStack"
     type_fuel_cell_2 = None
     type_fuel_cell_3 = None
     type_fuel_cell_4 = None
     # Current density possibilities: "step", "polarization", "polarization_for_cali", "EIS".
-    type_current = "step"
+    type_current = "polarization"
     # Auxiliary system possibilities: "forced-convective_cathode_with_anodic_recirculation",
     #                                 "forced-convective_cathode_with_flow-through_anode", "no_auxiliary".
-    type_auxiliary = "forced-convective_cathode_with_flow-through_anode"
+    type_auxiliary = "no_auxiliary"
     # Control strategy for the operating inputs: "Phi_des", "no_control".
     type_control_1 = "no_control"
     type_control_2 = "no_control"

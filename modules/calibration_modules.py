@@ -231,10 +231,26 @@ def parameters_for_calibration(type_fuel_cell):
     if type_fuel_cell == "ZSW-GenStack":
         # Given values by the author
         #       Operating inputs
-        T_des = 68 + 273.15  # K. It is the temperature of the fuel cell.
+        if type_fuel_cell == "ZSW-GenStack_T_62":
+            T_des = 62 + 273.15  # K. It is the temperature of the fuel cell.
+        elif type_fuel_cell == "ZSW-GenStack_T_76":
+            T_des = 76 + 273.15  # K. It is the temperature of the fuel cell.
+        elif type_fuel_cell == "ZSW-GenStack_T_84":
+            T_des = 84 + 273.15  # K. It is the temperature of the fuel cell.
+        else:
+            T_des = 68 + 273.15  # K. It is the temperature of the fuel cell.
         Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
-        Phi_a_des, Phi_c_des = 39.8, 50  # It is the desired relative humidity.
-        Pa_des, Pc_des = 2.2e5, 2.0e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
+        Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
+        if type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41":
+            Pa_des, Pc_des = 1.61e5, 1.41e5  # Pa. It is the desired pressure of the inlet fuel gas (at the anode/cathode).
+        elif type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81":
+            Pa_des, Pc_des = 2.01e5, 1.81e5  # Pa. It is the desired pressure of the inlet fuel gas (at the anode/cathode).
+        elif type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2":
+            Pa_des, Pc_des = 2.4e5, 2.2e5  # Pa. It is the desired pressure of the inlet fuel gas (at the anode/cathode).
+        elif type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6":
+            Pa_des, Pc_des = 2.8e5, 2.6e5  # Pa. It is the desired pressure of the inlet fuel gas (at the anode/cathode).
+        else:
+            Pa_des, Pc_des = 2.2e5, 2.0e5  # Pa. It is the desired pressure of the inlet fuel gas (at the anode/cathode).
         y_H2_in = 0.7 # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
         #       Fuel cell physical parameters
         Aact = 2.7972e-2  # m². It is the active area of the catalyst layer.
@@ -254,7 +270,7 @@ def parameters_for_calibration(type_fuel_cell):
         epsilon_mpl = 0.425  # It is the porosity of the microporous layer.
         #   Catalyst layer
         Hacl = 8e-6  # m. It is the thickness of the anode catalyst layer.
-        Hccl = 1.7e-5  # m. It is the thickness of the cathode catalyst layer.
+        Hccl = 17e-6  # m. It is the thickness of the cathode catalyst layer.
         epsilon_cl = 0.5  # It is the porosity of the microporous layer.
         epsilon_mc = 0.5  # It is the volume fraction of ionomer in the CL.
         #   Membrane
@@ -286,7 +302,7 @@ def parameters_for_calibration(type_fuel_cell):
         delta_t_load_pola = 30  # (s). Loading time for one step current of the polarisation current density function.
         delta_t_break_pola = 15 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
         delta_i_pola = 0.05e4  # (A.m-2). Current density step for the polarisation current density function.
-        i_max_pola = 1.7e4  # (A.m-2). It is the maximum current density for the polarization curve.
+        i_max_pola = 1.9e4  # (A.m-2). It is the maximum current density for the polarization curve.
         pola_current_parameters = {'delta_t_ini_pola': delta_t_ini_pola, 'delta_t_load_pola': delta_t_load_pola,
                                    'delta_t_break_pola': delta_t_break_pola, 'delta_i_pola': delta_i_pola,
                                    'i_max_pola': i_max_pola}
@@ -300,7 +316,7 @@ def parameters_for_calibration(type_fuel_cell):
         f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
         t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
         n_gdl = max(1, int(Hgdl / Hacl / 4))   # It is the number of model points placed inside each GDL.
-        n_mpl = max(1, int(Hmpl / Hacl / 1.5))  # It is the number of model points placed inside each MPL.
+        n_mpl = max(1, int(Hmpl / Hacl / 2))  # It is the number of model points placed inside each MPL.
         rtol = 1e-5  # Relative tolerance for the system of ODEs solver.
         atol = 1e-8  # Absolute tolerance for the system of ODEs solver.
 
@@ -385,7 +401,7 @@ def parameters_for_calibration(type_fuel_cell):
         f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
         t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
         n_gdl = max(1, int(Hgdl / Hacl / 4))   # It is the number of model points placed inside each GDL.
-        n_mpl = max(1, int(Hmpl / Hacl / 1.5))  # It is the number of model points placed inside each MPL.
+        n_mpl = max(1, int(Hmpl / Hacl / 2))  # It is the number of model points placed inside each MPL.
         rtol = 1e-5  # Relative tolerance for the system of ODEs solver.
         atol = 1e-8  # Absolute tolerance for the system of ODEs solver.
 

@@ -1410,10 +1410,6 @@ def plot_specific_line(x, y, type_fuel_cell, type_current, type_auxiliary, type_
             elif type_fuel_cell == "EH-31_2.5" and type_auxiliary != "forced-convective_cathode_with_flow-through_anode":
                 ax.plot(x, y, color=colors(3), label='Sim - P = 2.5 bar')
 
-        # For LF fuel cell
-        elif type_fuel_cell == "LF":
-            ax.plot(x, y, color=colors(0), label='Simulation')
-
         # For other fuel cell
         else:
             ax.plot(x, y, color=colors(0), label='Simulation')
@@ -1449,10 +1445,6 @@ def plot_specific_line(x, y, type_fuel_cell, type_current, type_auxiliary, type_
                         label='Sim - P = 2.5 bar' + r' - $ΔU_{max}$ =' f' {sim_error} %')
             elif type_fuel_cell == "EH-31_2.5" and type_auxiliary != "forced-convective_cathode_with_flow-through_anode":
                 ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(3), label='Sim - P = 2.5 bar')
-
-        # For LF fuel cell
-        elif type_fuel_cell == "LF":
-            ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(0), label='Simulation')
 
         # For other fuel cell
         else:
@@ -1537,15 +1529,6 @@ def plot_pola_instructions(type_fuel_cell, ax, show = True):
         ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.1 / 5))
         ax.set_xlim(0, 3.0)
         ax.set_ylim(0.4, 1.04)
-
-    # For LF fuel cell
-    elif type_fuel_cell == "LF":
-        ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(0.4))
-        ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.4 / 5))
-        ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.2))
-        ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.2 / 5))
-        ax.set_xlim(-0.05, 1.6)
-        ax.set_ylim(0, 1.0)
 
     # For other fuel cell
     else:

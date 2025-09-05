@@ -73,7 +73,7 @@ def current_density_parameters(type_current=None):
     """
 
     # Setting the parameters of the step current density function
-    delta_t_ini_step = 120*60 # (s). Initial time at zero current density for the stabilisation of the internal states.
+    delta_t_ini_step = 30 * 60 # (s). Initial time at zero current density for the stabilisation of the internal states (standard value).
     delta_t_load_step = 30 # (s). Loading time for the step current density function, from 0 to i_step.
     delta_t_break_step = 15 * 60  # (s). Time at i_step current density for the stabilisation of the internal states.
     i_step = 1.5e4 # (A.m-2). Current density for the step current density function.
@@ -173,8 +173,7 @@ def physical_parameters(type_fuel_cell):
     Parameters
     ----------
     type_fuel_cell : str
-        Type of fuel cell system. It can be "EH-31_1.5", "EH-31_2.0", "EH-31_2.25", "EH-31_2.5", "LF",
-        or "manual_setup".
+        Type of fuel cell system.
 
     Returns
     -------
@@ -278,8 +277,7 @@ def computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, type_fuel_ce
     Hacl : float
         Thickness of the anode catalyst layer in meters.
     type_fuel_cell : str
-        Type of fuel cell system. It can be "EH-31_1.5", "EH-31_2.0", "EH-31_2.25", "EH-31_2.5", "LF",
-        or "manual_setup".
+        Type of fuel cell system.
 
     Returns
     -------
@@ -311,7 +309,10 @@ def computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, type_fuel_ce
     t_purge = 0.6, 15  # (s, s). It is the time parameters for purging the system.
     delta_t_dyn_step = 5*60  # (s). Time for dynamic display of the step current density function.
 
-    if type_fuel_cell == "ZSW-GenStack":
+    if type_fuel_cell == "ZSW-GenStack" or type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41" or \
+            type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81" or type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2" or \
+            type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6" or type_fuel_cell == "ZSW-GenStack_T_62" or \
+            type_fuel_cell == "ZSW-GenStack_T_76" or type_fuel_cell == "ZSW-GenStack_T_84":
         rtol = 1e-5 # Relative tolerance for the system of ODEs solver.
         atol = 1e-8 # Absolute tolerance for the system of ODEs solver.
     elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \

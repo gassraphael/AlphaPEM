@@ -26,9 +26,10 @@ colors = mpl.colormaps['tab10']
 
 def step_current(t, parameters):
     """ This function represents a step current density experiment. For the first delta_t_ini_step seconds, the current
-    density is set to 0 A.m-2 to allow the internal states of the fuel cell to stabilise. Then, the current density
-    increases from 0 to i_step A.m-2 in a step change over delta_t_load seconds. Finally, the current density remains at
-    i_step A.m-2. This is a C∞ function, which is advantageous for enhancing the overall stability of the results.
+    density is set to i_ini A.m-2 to allow the internal states of the fuel cell to stabilise. Then, the current density
+    increases from i_ini to i_step A.m-2 in a step change over delta_t_load seconds. Finally, the current density
+    remains at i_step A.m-2.
+    This is a C∞ function, which is advantageous for enhancing the overall stability of the results.
 
     Parameters:
     ----------
@@ -46,21 +47,24 @@ def step_current(t, parameters):
     # Extraction of the parameters
     #   Initial time at zero current density for the stabilisation of the internal states.
     delta_t_ini_step = parameters['step_current_parameters']['delta_t_ini_step'] # (s).
+    #   Initial current density used for the stabilisation of the internal states.
+    i_ini = 1.0e4  # (A.m-2). This is the standard value for the initialisation.
     #   Loading time for the step current density function, from 0 to i_step.
     delta_t_load_step = parameters['step_current_parameters']['delta_t_load_step'] # (s).
     #   Current density for the step current density function.
     i_step = parameters['step_current_parameters']['i_step'] # (A.m-2).
 
     # Step current density
-    return i_step * (1.0 + math.tanh(4 * (t - delta_t_ini_step - (delta_t_load_step / 2)) / (delta_t_load_step / 2))) / 2
+    return i_ini + (i_step - i_ini) * (1.0 + math.tanh(4 * (t - delta_t_ini_step - (delta_t_load_step / 2)) /
+                                                       (delta_t_load_step / 2))) / 2
 
 
 def polarization_current(t, parameters):
-    """ This function represents a current density used for creating a polarization curve. For the first delta_t_ini_step seconds, the current
-    density is set to 0 A.m-2 to allow the internal states of the fuel cell to stabilise. Then, the current density
-    increases by the value of delta_i_pola every delta_t, following C∞ step current increments, until it reaches
-    i_max_pola. Each increment lasts for delta_t_load_pola seconds. After each increment, there is a pause of
-    delta_t_break_pola seconds to allow the stack to reach equilibrium.
+    """ This function represents a current density used for creating a polarization curve. For the first
+    delta_t_ini_step seconds, the current density is set to i_ini A.m-2 to allow the internal states of the fuel cell to
+    stabilise. Then, the current density increases by the value of delta_i_pola every delta_t, following C∞ step current
+    increments, until it reaches i_max_pola. Each increment lasts for delta_t_load_pola seconds. After each increment,
+    there is a pause of delta_t_break_pola seconds to allow the stack to reach equilibrium.
 
     Parameters:
     ----------
