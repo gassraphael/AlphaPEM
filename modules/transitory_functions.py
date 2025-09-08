@@ -10,10 +10,10 @@ import numpy as np
 import math
 
 # Importing constants' value
-from configuration.settings import (M_eq, rho_mem, Dp_mpl, Dp_cl, theta_c_gdl, theta_c_mpl, theta_c_cl, M_H2, M_O2,
-                                    M_N2, M_H2O, R, Kshape, epsilon_p, alpha_p, tau_mpl, tau_cl, r_s_gdl, r_s_mpl,
-                                    r_s_cl, k_th_gdl, k_th_mpl, k_th_cl, k_th_mem, Cp_gdl, Cp_mpl, Cp_cl, Cp_mem,
-                                    rho_gdl, rho_cl, sigma_e_gdl, sigma_e_mpl, sigma_e_cl)
+from configuration.settings import (M_eq, rho_mem, Dp_mpl, Dp_cl, theta_c_gdl, theta_c_mpl, theta_c_cl, gamma_cond,
+                                    gamma_evap, M_H2, M_O2, M_N2, M_H2O, R, Kshape, epsilon_p, alpha_p, tau_mpl, tau_cl,
+                                    r_s_gdl, r_s_mpl, r_s_cl, k_th_gdl, k_th_mpl, k_th_cl, k_th_mem, Cp_gdl, Cp_mpl,
+                                    Cp_cl, Cp_mem, rho_gdl, rho_cl, sigma_e_gdl, sigma_e_mpl, sigma_e_cl)
 
 
 # _________________________________________________Transitory functions_________________________________________________
@@ -490,11 +490,13 @@ def gamma_sorp(C_v, s, lambdaa, T, Hcl):
         return (4.59e-5 * fv(lambdaa, T)) / Hcl * math.exp(2416 * (1 / 303 - 1 / T))
 
 
-def Svl(s, C_v, Ctot, T, epsilon, gamma_cond, gamma_evap):
+def Svl(element, s, C_v, Ctot, T, epsilon):
     """This function calculates the phase transfer rate of water condensation or evaporation, in mol.m-3.s-1.
 
     Parameters
     ----------
+    element : str
+        Specifies the element for which the phase transfer rate is calculated.
     s : float
         Liquid water saturation variable.
     C_v : float
@@ -516,10 +518,20 @@ def Svl(s, C_v, Ctot, T, epsilon, gamma_cond, gamma_evap):
         Phase transfer rate of water condensation or evaporation in mol.m-3.s-1.
     """
 
+    # Determination of the diffusion coefficient at the anode or the cathode
+    if element == 'anode':
+        D = Da # Diffusion coefficient at the anode
+    else: # element == 'cathode'
+        D = Dc # Diffusion coefficient at the cathode
+
+    # Calculation of the total and partial pressures
+    Ptot = Ctot * R * T
+    P_v = C_v * R * T
+
     if C_v > C_v_sat(T):  # condensation
-        return gamma_cond * epsilon * (1 - s) * (C_v / Ctot) * (C_v - C_v_sat(T))
+        return gamma_cond * M_H2O / (R * T) * epsilon * (1 - s) * D(Ptot, T) * Ptot * np.log((Ptot - Psat(T)) / (Ptot - P_v))
     else:  # evaporation
-        return -gamma_evap * epsilon * s * rho_H2O_l(T) / M_H2O * R * T * (C_v_sat(T) - C_v)
+        return gamma_evap * M_H2O / (R * T) * epsilon * s * D(Ptot, T) * Ptot * np.log((Ptot - Psat(T)) / (Ptot - P_v))
 
 
 def sigma(T):

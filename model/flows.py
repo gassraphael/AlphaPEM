@@ -6,7 +6,7 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import rho_mem, M_eq, gamma_cond, gamma_evap, F, R
+from configuration.settings import rho_mem, M_eq, F, R
 from model.auxiliaries import auxiliaries
 from modules.transitory_functions import Dcap, lambda_eq, gamma_sorp, Svl, k_H2, k_O2
 from modules.flows_modules import flows_int_values
@@ -179,17 +179,21 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
 
     # Liquid water generated through vapor condensation or degenerated through evaporation
     #   Anode side
-    Sl_agdl = [None] + [Svl(sv[f's_agdl_{i}'], sv[f'C_v_agdl_{i}'], sv[f'C_v_agdl_{i}'] + sv[f'C_H2_agdl_{i}'] + C_N2_a,
-                            sv[f'T_agdl_{i}'], epsilon_gdl, gamma_cond, gamma_evap) for i in range(1, n_gdl + 1)]
-    Sl_ampl = [None] + [Svl(sv[f's_ampl_{i}'], sv[f'C_v_ampl_{i}'], sv[f'C_v_ampl_{i}'] + sv[f'C_H2_ampl_{i}'] + C_N2_a,
-                            sv[f'T_ampl_{i}'], epsilon_mpl, gamma_cond, gamma_evap) for i in range(1, n_mpl + 1)]
-    Sl_acl = Svl(s_acl, C_v_acl, C_v_acl + C_H2_acl + C_N2_a, T_acl, epsilon_cl, gamma_cond, gamma_evap)
+    Sl_agdl = [None] + [Svl(element='anode', s=sv[f's_agdl_{i}'], C_v=sv[f'C_v_agdl_{i}'],
+                            Ctot=sv[f'C_v_agdl_{i}'] + sv[f'C_H2_agdl_{i}'] + C_N2_a,
+                            T=sv[f'T_agdl_{i}'], epsilon=epsilon_gdl) for i in range(1, n_gdl + 1)]
+    Sl_ampl = [None] + [Svl(element='anode', s=sv[f's_ampl_{i}'], C_v=sv[f'C_v_ampl_{i}'],
+                            Ctot=sv[f'C_v_ampl_{i}'] + sv[f'C_H2_ampl_{i}'] + C_N2_a,
+                            T=sv[f'T_ampl_{i}'], epsilon=epsilon_mpl) for i in range(1, n_mpl + 1)]
+    Sl_acl = Svl(element='anode', s=s_acl, C_v=C_v_acl, Ctot=C_v_acl + C_H2_acl + C_N2_a, T=T_acl, epsilon=epsilon_cl)
     #   Cathode side
-    Sl_ccl = Svl(s_ccl, C_v_ccl, C_v_ccl + C_O2_ccl + C_N2_c, T_ccl, epsilon_cl, gamma_cond, gamma_evap)
-    Sl_cmpl = [None] + [Svl(sv[f's_cmpl_{i}'], sv[f'C_v_cmpl_{i}'], sv[f'C_v_cmpl_{i}'] + sv[f'C_O2_cmpl_{i}'] + C_N2_c,
-                            sv[f'T_cmpl_{i}'], epsilon_mpl, gamma_cond, gamma_evap) for i in range(1, n_mpl + 1)]
-    Sl_cgdl = [None] + [Svl(sv[f's_cgdl_{i}'], sv[f'C_v_cgdl_{i}'], sv[f'C_v_cgdl_{i}'] + sv[f'C_O2_cgdl_{i}'] + C_N2_c,
-                            sv[f'T_cgdl_{i}'], epsilon_gdl, gamma_cond, gamma_evap) for i in range(1, n_gdl + 1)]
+    Sl_ccl = Svl(element='cathode', s=s_ccl, C_v=C_v_ccl, Ctot=C_v_ccl + C_O2_ccl + C_N2_c, T=T_ccl, epsilon=epsilon_cl)
+    Sl_cmpl = [None] + [Svl(element='cathode', s=sv[f's_cmpl_{i}'], C_v=sv[f'C_v_cmpl_{i}'],
+                            Ctot=sv[f'C_v_cmpl_{i}'] + sv[f'C_O2_cmpl_{i}'] + C_N2_c,
+                            T=sv[f'T_cmpl_{i}'], epsilon=epsilon_mpl) for i in range(1, n_mpl + 1)]
+    Sl_cgdl = [None] + [Svl(element='cathode', s=sv[f's_cgdl_{i}'], C_v=sv[f'C_v_cgdl_{i}'],
+                            Ctot=sv[f'C_v_cgdl_{i}'] + sv[f'C_O2_cgdl_{i}'] + C_N2_c,
+                            T=sv[f'T_cgdl_{i}'], epsilon=epsilon_gdl) for i in range(1, n_gdl + 1)]
 
     # Vapor generated through liquid water evaporation or degenerated through condensation
     #   Anode side
