@@ -9,7 +9,8 @@
 import math
 
 # Importing constants' value and functions
-from configuration.settings import (C_O2ref, alpha_c, tau_cp, tau_hum, rho_mem, M_eq, F, R, M_H2O, n_cell, Kp, Kd)
+from configuration.settings import (C_O2ref, alpha_c, i0_h_c_ref, tau_cp, tau_hum, rho_mem, M_eq, F, R, M_H2O, n_cell,
+                                    Kp, Kd)
 from model.flows import calculate_flows
 from model.cell_voltage import calculate_eta_c_intermediate_values
 from model.heat_transfer import calculate_heat_transfers
@@ -753,7 +754,7 @@ def calculate_dyn_temperature_evolution(dif_eq, rho_Cp0, Hgdl, Hmpl, Hacl, Hccl,
     dif_eq['dT_cgc / dt'] = 0  # Dirichlet boundary condition. T_cgc is initialized to T_fc and remains constant.
 
 
-def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hccl, i0_c_ref, kappa_c, C_scl, i_n, f_drop,
+def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hccl, i0_d_c_ref, kappa_c, C_scl, i_n, f_drop,
                                     **kwargs):
     """This function calculates the dynamic evolution of the cell overpotential eta_c.
 
@@ -783,9 +784,11 @@ def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hccl, 
         Liquid water induced voltage drop function.
     """
 
-    dif_eq['deta_c / dt'] = 1 / (C_scl * Hccl) * ((i_fc + i_n) - i0_c_ref * (C_O2_ccl / C_O2ref) ** kappa_c *
-                                                 math.exp(f_drop * alpha_c * F / (R * T_ccl) * eta_c))
+    # dif_eq['deta_c / dt'] = 1 / (C_scl * Hccl) * ((i_fc + i_n) - i0_c_ref * (C_O2_ccl / C_O2ref) ** kappa_c *
+    #                                              math.exp(f_drop * alpha_c * F / (R * T_ccl) * eta_c))
 
+    dif_eq['deta_c / dt'] = 1 / (C_scl * Hccl) * ((i_fc + i_n) - (i0_d_c_ref ** f_drop * i0_h_c_ref ** (1 - f_drop)) *
+                                                  (C_O2_ccl / C_O2ref) ** kappa_c * math.exp(alpha_c * F / (R * T_ccl) * eta_c))
 
 def calculate_dyn_manifold_pressure_and_humidity_evolution(dif_eq, Masm, Maem, Mcsm, Mcem, T_des, Hagc, Hcgc, Wagc,
                                                            Wcgc, Vsm, Vem, type_auxiliary, Jv_a_in, Jv_a_out, Jv_c_in, Jv_c_out,

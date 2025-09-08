@@ -273,11 +273,10 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
         delta_t_load_pola = current_parameters['pola_current_parameters'][1]['delta_t_load_pola']  # (s).
         delta_t_break_pola = current_parameters['pola_current_parameters'][1]['delta_t_break_pola']  # (s).
         delta_i_pola = current_parameters['pola_current_parameters'][1]['delta_i_pola']  # (A.m-2).
-        i_max_pola_1 = current_parameters['pola_current_parameters'][1]['i_max_pola_1']  # (A.m-2).
+        i_max_pola = current_parameters['pola_current_parameters'][1]['i_max_pola']  # (A.m-2).
         #           Calculation
         delta_t_pola = delta_t_load_pola + delta_t_break_pola  # s. It is the time of one load.
-        tf = delta_t_ini_pola + int(
-            i_max_pola_1 / delta_i_pola) * delta_t_pola  # s. It is the polarization current duration.
+        tf = delta_t_ini_pola + int(i_max_pola / delta_i_pola) * delta_t_pola  # s. It is the polarization current duration.
         n = int(tf / delta_t_pola)  # It is the plot update number.
         time_interval = [0, delta_t_ini_pola + delta_t_pola]  # It is the initial time interval.
 

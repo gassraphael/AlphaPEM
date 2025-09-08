@@ -103,7 +103,10 @@ def parameter_bounds_for_calibration(type_fuel_cell):
                     ['e', e_min, e_max, 'int'],
                     ['i0_c_ref', i0_c_ref_min, i0_c_ref_max, 'real'],
                     ['kappa_co', kappa_co_min, kappa_co_max, 'real'],
-                    ['kappa_c', kappa_c_min, kappa_c_max, 'real']]
+                    ['kappa_c', kappa_c_min, kappa_c_max, 'real'],
+                    ['a_slim', a_slim_min, a_slim_max, 'real'],
+                    ['b_slim', b_slim_min, b_slim_max, 'real'],
+                    ['a_switch', a_switch_min, a_switch_max, 'real']]
         gene_space = []  # List used to define the bounds of the undetermined parameters for pygad.
         for i in range(len(varbound)):
             name, min_val, max_val, type_val = varbound[i]
@@ -281,7 +284,7 @@ def parameters_for_calibration(type_fuel_cell):
         #   Interaction parameters between water and PEMFC structure
         e = 3.0  # It is the capillary exponent
         #   Voltage polarization
-        i0_c_ref = 14.86  # A.m-2.It is the reference exchange current density at the cathode.
+        i0_d_c_ref = 14.86  # A.m-2.It is the reference exchange current density at the cathode.
         kappa_co = 1  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 0.6386  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
@@ -369,7 +372,7 @@ def parameters_for_calibration(type_fuel_cell):
         #   Interaction parameters between water and PEMFC structure
         e = 3.0  # It is the capillary exponent
         #   Voltage polarization
-        i0_c_ref = 14.86  # A.m-2.It is the reference exchange current density at the cathode.
+        i0_d_c_ref = 14.86  # A.m-2.It is the reference exchange current density at the cathode.
         kappa_co = 1  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 0.6386  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
@@ -393,7 +396,7 @@ def parameters_for_calibration(type_fuel_cell):
         delta_t_load_pola = 30  # (s). Loading time for one step current of the polarisation current density function.
         delta_t_break_pola = 15 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
         delta_i_pola = 0.05e4  # (A.m-2). Current density step for the polarisation current density function.
-        i_max_pola = 1.7e4  # (A.m-2). It is the maximum current density for the polarization curve.
+        i_max_pola = 3.0e4  # (A.m-2). It is the maximum current density for the polarization curve.
         pola_current_parameters = {'delta_t_ini_pola': delta_t_ini_pola, 'delta_t_load_pola': delta_t_load_pola,
                                    'delta_t_break_pola': delta_t_break_pola, 'delta_i_pola': delta_i_pola,
                                    'i_max_pola': i_max_pola}
@@ -426,7 +429,7 @@ def parameters_for_calibration(type_fuel_cell):
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
                                         'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl, 'epsilon_mpl': epsilon_mpl,
                                         'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c, 'e': e,
-                                        'kappa_co': kappa_co, 'i0_c_ref': i0_c_ref, 'kappa_c': kappa_c,
+                                        'kappa_co': kappa_co, 'i0_d_c_ref': i0_d_c_ref, 'kappa_c': kappa_c,
                                         'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch,
                                         'C_scl': C_scl}
     computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,

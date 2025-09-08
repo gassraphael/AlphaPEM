@@ -42,7 +42,7 @@ def calculate_eta_c_intermediate_values(solver_variables, operating_inputs, para
     # Extraction of the operating inputs and the parameters
     Pc_des = operating_inputs['Pc_des']
     Hmem, Hacl, Hccl = parameters['Hmem'], parameters['Hacl'], parameters['Hccl']
-    i0_c_ref, kappa_co, kappa_c = parameters['i0_c_ref'], parameters['kappa_co'], parameters['kappa_c']
+    kappa_co, kappa_c = parameters['kappa_co'], parameters['kappa_c']
     a_slim, b_slim, a_switch = parameters['a_slim'], parameters['b_slim'], parameters['a_switch']
 
     # The crossover current density i_n

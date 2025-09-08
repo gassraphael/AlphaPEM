@@ -552,78 +552,78 @@ def pola_exp_values_calibration(type_fuel_cell):
 
     # EH-31 fuel cell
     elif type_fuel_cell == "EH-31_1.5":  # at 1.5 bar
-        # # Current density
-        # i_exp_cali_t = np.zeros(7)
-        # i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.050, 0.110, 0.293, 1.039
-        # i_exp_cali_t[4], i_exp_cali_t[5], i_exp_cali_t[6] = 1.683, 1.966, 2.246
-        # # Voltage
-        # U_exp_cali_t = np.zeros(7)
-        # U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.900, 0.850, 0.794, 0.681
-        # U_exp_cali_t[4], U_exp_cali_t[5], U_exp_cali_t[6] = 0.599, 0.556, 0.500
         # Current density
-        i_exp_cali_t = np.zeros(5)
+        i_exp_cali_t = np.zeros(7)
         i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.050, 0.110, 0.293, 1.039
-        i_exp_cali_t[4] = 1.683
+        i_exp_cali_t[4], i_exp_cali_t[5], i_exp_cali_t[6] = 1.683, 1.966, 2.246
         # Voltage
-        U_exp_cali_t = np.zeros(5)
+        U_exp_cali_t = np.zeros(7)
         U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.900, 0.850, 0.794, 0.681
-        U_exp_cali_t[4] = 0.599
+        U_exp_cali_t[4], U_exp_cali_t[5], U_exp_cali_t[6] = 0.599, 0.556, 0.500
+        # # Current density
+        # i_exp_cali_t = np.zeros(5)
+        # i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.050, 0.110, 0.293, 1.039
+        # i_exp_cali_t[4] = 1.683
+        # # Voltage
+        # U_exp_cali_t = np.zeros(5)
+        # U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.900, 0.850, 0.794, 0.681
+        # U_exp_cali_t[4] = 0.599
 
     elif type_fuel_cell == "EH-31_2.0":  # at 2.0 bar
-        # # Current density
-        # i_exp_cali_t = np.zeros(8)
-        # i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.050, 0.106, 0.242, 0.681
-        # i_exp_cali_t[4], i_exp_cali_t[5], i_exp_cali_t[6], i_exp_cali_t[7] = 1.242, 1.501, 1.979, 2.459
-        # # Voltage
-        # U_exp_cali_t = np.zeros(8)
-        # U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.900, 0.860, 0.830, 0.759
-        # U_exp_cali_t[4], U_exp_cali_t[5], U_exp_cali_t[6], U_exp_cali_t[7] = 0.698, 0.668, 0.598, 0.502
         # Current density
-        i_exp_cali_t = np.zeros(5)
+        i_exp_cali_t = np.zeros(8)
         i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.050, 0.106, 0.242, 0.681
-        i_exp_cali_t[4] = 1.242
+        i_exp_cali_t[4], i_exp_cali_t[5], i_exp_cali_t[6], i_exp_cali_t[7] = 1.242, 1.501, 1.979, 2.459
         # Voltage
-        U_exp_cali_t = np.zeros(5)
+        U_exp_cali_t = np.zeros(8)
         U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.900, 0.860, 0.830, 0.759
-        U_exp_cali_t[4] = 0.698
+        U_exp_cali_t[4], U_exp_cali_t[5], U_exp_cali_t[6], U_exp_cali_t[7] = 0.698, 0.668, 0.598, 0.502
+        # # Current density
+        # i_exp_cali_t = np.zeros(5)
+        # i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.050, 0.106, 0.242, 0.681
+        # i_exp_cali_t[4] = 1.242
+        # # Voltage
+        # U_exp_cali_t = np.zeros(5)
+        # U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.900, 0.860, 0.830, 0.759
+        # U_exp_cali_t[4] = 0.698
 
     elif type_fuel_cell == "EH-31_2.25":  # at 2.25 bar
-        # # Current density
-        # i_exp_cali_t = np.zeros(8)
-        # i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.056, 0.183, 0.364, 1.011
-        # i_exp_cali_t[4], i_exp_cali_t[5], i_exp_cali_t[6], i_exp_cali_t[7] = 1.675, 1.918, 2.356, 2.794
-        # # Voltage
-        # U_exp_cali_t = np.zeros(8)
-        # U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.894, 0.854, 0.819, 0.746
-        # U_exp_cali_t[4], U_exp_cali_t[5], U_exp_cali_t[6], U_exp_cali_t[7] = 0.678, 0.647, 0.580, 0.497
         # Current density
-        i_exp_cali_t = np.zeros(5)
+        i_exp_cali_t = np.zeros(8)
         i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.056, 0.183, 0.364, 1.011
-        i_exp_cali_t[4] = 1.675
+        i_exp_cali_t[4], i_exp_cali_t[5], i_exp_cali_t[6], i_exp_cali_t[7] = 1.675, 1.918, 2.356, 2.794
         # Voltage
-        U_exp_cali_t = np.zeros(5)
+        U_exp_cali_t = np.zeros(8)
         U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.894, 0.854, 0.819, 0.746
-        U_exp_cali_t[4] = 0.678
+        U_exp_cali_t[4], U_exp_cali_t[5], U_exp_cali_t[6], U_exp_cali_t[7] = 0.678, 0.647, 0.580, 0.497
+        # # Current density
+        # i_exp_cali_t = np.zeros(5)
+        # i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.056, 0.183, 0.364, 1.011
+        # i_exp_cali_t[4] = 1.675
+        # # Voltage
+        # U_exp_cali_t = np.zeros(5)
+        # U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.894, 0.854, 0.819, 0.746
+        # U_exp_cali_t[4] = 0.678
 
     elif type_fuel_cell == "EH-31_2.5":  # at 2.5 bar
-        # # Current density
-        # i_exp_cali_t = np.zeros(10)
-        # i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.057, 0.127, 0.296, 0.527
-        # i_exp_cali_t[4], i_exp_cali_t[5], i_exp_cali_t[6], i_exp_cali_t[7] = 1.030, 1.514, 1.972, 2.358
-        # i_exp_cali_t[8], i_exp_cali_t[9] = 2.691, 2.988
-        # # Voltage
-        # U_exp_cali_t = np.zeros(10)
-        # U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.900, 0.866, 0.835, 0.800
-        # U_exp_cali_t[4], U_exp_cali_t[5], U_exp_cali_t[6], U_exp_cali_t[7] = 0.758, 0.712, 0.663, 0.621
-        # U_exp_cali_t[8], U_exp_cali_t[9] = 0.575, 0.524
         # Current density
-        i_exp_cali_t = np.zeros(6)
+        i_exp_cali_t = np.zeros(10)
         i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.057, 0.127, 0.296, 0.527
-        i_exp_cali_t[4], i_exp_cali_t[5] = 1.030, 1.514
+        i_exp_cali_t[4], i_exp_cali_t[5], i_exp_cali_t[6], i_exp_cali_t[7] = 1.030, 1.514, 1.972, 2.358
+        i_exp_cali_t[8], i_exp_cali_t[9] = 2.691, 2.988
         # Voltage
-        U_exp_cali_t = np.zeros(6)
+        U_exp_cali_t = np.zeros(10)
         U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.900, 0.866, 0.835, 0.800
-        U_exp_cali_t[4], U_exp_cali_t[5] = 0.758, 0.712
+        U_exp_cali_t[4], U_exp_cali_t[5], U_exp_cali_t[6], U_exp_cali_t[7] = 0.758, 0.712, 0.663, 0.621
+        U_exp_cali_t[8], U_exp_cali_t[9] = 0.575, 0.524
+        # # Current density
+        # i_exp_cali_t = np.zeros(6)
+        # i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.057, 0.127, 0.296, 0.527
+        # i_exp_cali_t[4], i_exp_cali_t[5] = 1.030, 1.514
+        # # Voltage
+        # U_exp_cali_t = np.zeros(6)
+        # U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.900, 0.866, 0.835, 0.800
+        # U_exp_cali_t[4], U_exp_cali_t[5] = 0.758, 0.712
 
     return i_exp_cali_t * 1e4, U_exp_cali_t # Conversion in A.m-2
 
