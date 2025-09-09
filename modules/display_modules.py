@@ -918,8 +918,11 @@ def plot_T(variables, operating_inputs, parameters, ax):
     """
 
     # Extraction of the operating inputs and parameters
+    current_density = operating_inputs['current_density']
     T_des = operating_inputs['T_des']
-    n_gdl, n_mpl, type_current, type_plot = parameters['n_gdl'], parameters['n_mpl'], parameters['type_current'], parameters['type_plot']
+    n_gdl, n_mpl = parameters['n_gdl'], parameters['n_mpl']
+    pola_current_parameters = parameters['pola_current_parameters']
+    type_current, type_plot = parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
         delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
     elif type_current == 'polarization':
@@ -945,22 +948,63 @@ def plot_T(variables, operating_inputs, parameters, ax):
     T_cgc_t = np.array(variables['T_cgc'])[mask] - 273.15 # Conversion in °C.
 
     # Plot the temperature at different spatial localisations
-    T_des_t = np.array([T_des - 273.15] * len(t))
-    ax.plot(t, T_agc_t, color=colors(0))
-    ax.plot(t, T_agdl_t, color=colors(1))
-    ax.plot(t, T_ampl_t, color=colors(2))
-    ax.plot(t, T_acl_t, color=colors(3))
-    ax.plot(t, T_mem_t, color=colors(4))
-    ax.plot(t, T_ccl_t, color=colors(5))
-    ax.plot(t, T_cmpl_t, color=colors(6))
-    ax.plot(t, T_cgdl_t, color=colors(7))
-    ax.plot(t, T_cgc_t, color=colors(8))
-    ax.plot(t, T_des_t, color='k')
+    if type_current == "polarization":
+        n = len(t)
+        ifc_t = np.zeros(n)
+        for i in range(n):  # Creation of i_fc
+            ifc_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
+        # Recovery of the internal states from the model after each stack stabilisation
+        delta_t_ini_pola = pola_current_parameters['delta_t_ini_pola']
+        delta_t_load_pola = pola_current_parameters['delta_t_load_pola']
+        delta_t_break_pola = pola_current_parameters['delta_t_break_pola']
+        nb_loads = int(pola_current_parameters['i_max_pola'] / pola_current_parameters['delta_i_pola']) # Number of loads
+        ifc_discretized_t = np.zeros(nb_loads)
+        T_agc_discretized_t, T_agdl_discretized_t, T_ampl_discretized_t, T_acl_discretized_t = [np.zeros(nb_loads)] * 4
+        T_mem_discretized_t, T_ccl_discretized_t, T_cmpl_discretized_t, T_cgdl_discretized_t = [np.zeros(nb_loads)] * 4
+        T_cgc_discretized_t = np.zeros(nb_loads)
+        for i in range(nb_loads):
+            t_load = delta_t_ini_pola + (i + 1) * (delta_t_load_pola + delta_t_break_pola)  # time for measurement
+            idx = (np.abs(t - t_load)).argmin()  # the corresponding index
+            ifc_discretized_t[i] = ifc_t[idx]  # the last value at the end of each load
+            T_agc_discretized_t[i] = T_agc_t[idx] # the last value at the end of each load
+            T_agdl_discretized_t[i] = T_agdl_t[idx]  # the last value at the end of each load
+            T_ampl_discretized_t[i] = T_ampl_t[idx]  # the last value at the end of each load
+            T_acl_discretized_t[i] = T_acl_t[idx]  # the last value at the end of each load
+            T_mem_discretized_t[i] = T_mem_t[idx]  # the last value at the end of each load
+            T_ccl_discretized_t[i] = T_ccl_t[idx]  # the last value at the end of each load
+            T_cmpl_discretized_t[i] = T_cmpl_t[idx]  # the last value at the end of each load
+            T_cgdl_discretized_t[i] = T_cgdl_t[idx]  # the last value at the end of each load
+            T_cgc_discretized_t[i] = T_cgc_t[idx]  # the last value at the end of each load
+        T_des_discretized_t = np.array([T_des - 273.15] * len(ifc_discretized_t))
+        ax.scatter(ifc_discretized_t, T_agc_discretized_t, marker='o', color=colors(0))
+        ax.scatter(ifc_discretized_t, T_agdl_discretized_t, marker='o', color=colors(1))
+        ax.scatter(ifc_discretized_t, T_ampl_discretized_t, marker='o', color=colors(2))
+        ax.scatter(ifc_discretized_t, T_acl_discretized_t, marker='o', color=colors(3))
+        ax.scatter(ifc_discretized_t, T_mem_discretized_t, marker='o', color=colors(4))
+        ax.scatter(ifc_discretized_t, T_ccl_discretized_t, marker='o', color=colors(5))
+        ax.scatter(ifc_discretized_t, T_cmpl_discretized_t, marker='o', color=colors(6))
+        ax.scatter(ifc_discretized_t, T_cgdl_discretized_t, marker='o', color=colors(7))
+        ax.scatter(ifc_discretized_t, T_cgc_discretized_t, marker='o', color=colors(8))
+        ax.scatter(ifc_discretized_t, T_des_discretized_t, marker='o', color='k')
+        ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
+                      labelpad=3)
+    else:
+        T_des_t = np.array([T_des - 273.15] * len(t))
+        ax.plot(t, T_agc_t, color=colors(0))
+        ax.plot(t, T_agdl_t, color=colors(1))
+        ax.plot(t, T_ampl_t, color=colors(2))
+        ax.plot(t, T_acl_t, color=colors(3))
+        ax.plot(t, T_mem_t, color=colors(4))
+        ax.plot(t, T_ccl_t, color=colors(5))
+        ax.plot(t, T_cmpl_t, color=colors(6))
+        ax.plot(t, T_cgdl_t, color=colors(7))
+        ax.plot(t, T_cgc_t, color=colors(8))
+        ax.plot(t, T_des_t, color='k')
+        ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.legend([r'$\mathregular{T_{agc}}$', r'$\mathregular{T_{agdl}}$', r'$\mathregular{T_{ampl}}$',
                r'$\mathregular{T_{acl}}$', r'$\mathregular{T_{mem}}$', r'$\mathregular{T_{ccl}}$',
                r'$\mathregular{T_{cmpl}}$', r'$\mathregular{T_{cgdl}}$', r'$\mathregular{T_{cgc}}$',
                r'$\mathregular{T_{des}}$'], loc='best')
-    ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r"$\mathbf{Temperature}$ $\mathbf{T}$ $\mathbf{\left( °C \right)}$", labelpad=3)
 
     # Plot instructions

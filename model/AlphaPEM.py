@@ -531,6 +531,7 @@ class AlphaPEM:
                 plot_Phi_des(self.variables, self.operating_inputs, self.parameters, ax2[0])
                 plot_lambda(self.variables, self.operating_inputs, self.parameters, ax2[1])
                 plot_s(self.variables, self.operating_inputs, self.parameters, ax2[2])
+                plot_T(self.variables, self.operating_inputs, self.parameters, ax2[3])
 
                 plt.pause(0.01)  # A break is necessary to plot the new points in dynamic mode
 

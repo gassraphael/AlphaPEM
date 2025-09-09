@@ -34,7 +34,7 @@ if __name__ == '__main__':
     type_fuel_cell_3 = None
     type_fuel_cell_4 = None
     # Current density possibilities: "step", "polarization", "polarization_for_cali", "EIS".
-    type_current = "polarization"
+    type_current = "step"
     # Auxiliary system possibilities: "forced-convective_cathode_with_anodic_recirculation",
     #                                 "forced-convective_cathode_with_flow-through_anode", "no_auxiliary".
     type_auxiliary = "forced-convective_cathode_with_flow-through_anode"

@@ -696,14 +696,13 @@ def calculate_dyn_temperature_evolution(dif_eq, rho_Cp0, Hgdl, Hmpl, Hacl, Hccl,
 
     # Inside the membrane
     dif_eq['dT_mem / dt'] = (1 / rho_Cp0['mem']) * \
-                            ( (Jt['acl_mem'] - Jt['mem_ccl']) / Hmem +
-                              Q_p['mem'] )
+                            ( (Jt['acl_mem'] - Jt['mem_ccl']) / Hmem + Q_p['mem'] )
 
     # At the cathode side
     #       Inside the CCL
     dif_eq['dT_ccl / dt'] = (1 / rho_Cp0['ccl']) * \
                             ( (Jt['mem_ccl'] - Jt['ccl_cmpl']) / Hccl +
-                              Q_r['ccl'] + Q_sorp['acl'] + Q_liq['ccl'] + Q_p['ccl'] + Q_e['ccl'] )
+                              Q_r['ccl'] + Q_sorp['ccl'] + Q_liq['ccl'] + Q_p['ccl'] + Q_e['ccl'] )
 
     #      Inside the CMPL
     if n_mpl == 1:

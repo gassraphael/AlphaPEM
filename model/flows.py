@@ -91,23 +91,22 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
 
     # Cathode side
     s_cgc = 0  # Dirichlet boundary condition (taken at the cgc/cgdl border).
-    Jl_ccl_cmpl = - 2 * D_cap_ccl_cmpl * (sv['s_cmpl_1'] - s_ccl) / (H_mpl_node + Hccl)
+    Jl_ccl_cmpl = - 2 * D_cap_ccl_cmpl * (sv['s_cmpl_1'] - s_ccl) / (Hccl + H_mpl_node)
     Jl_cmpl_cmpl = [None] + [- D_cap_cmpl_cmpl[i] * (sv[f's_cmpl_{i + 1}'] - sv[f's_cmpl_{i}']) / H_mpl_node
                             for i in range(1, n_mpl)]
-    Jl_cmpl_cgdl = - 2 * D_cap_cmpl_cgdl * (sv['s_cgdl_1'] - sv[f's_cmpl_{n_mpl}']) / (H_gdl_node + H_mpl_node)
+    Jl_cmpl_cgdl = - 2 * D_cap_cmpl_cgdl * (sv['s_cgdl_1'] - sv[f's_cmpl_{n_mpl}']) / (H_mpl_node + H_gdl_node)
     Jl_cgdl_cgdl = [None] + [- D_cap_cgdl_cgdl[i] * (sv[f's_cgdl_{i + 1}'] - sv[f's_cgdl_{i}']) / H_gdl_node
                              for i in range(1, n_gdl)]
     Jl_cgdl_cgc = - 2 * Dcap('gdl', sv[f's_cgdl_{n_gdl}'], sv[f'T_cgdl_{n_gdl}'], epsilon_gdl, e,
-                             epsilon_c=epsilon_c) * \
-                    (s_cgc - sv[f's_cgdl_{n_gdl}']) / H_gdl_node
+                             epsilon_c=epsilon_c) * (s_cgc - sv[f's_cgdl_{n_gdl}']) / H_gdl_node
 
     # _____________________________________________Vapor flows (mol.m-2.s-1)____________________________________________
 
     # Convective vapor flows
     #   Anode side
-    Jv_agc_agdl = - 2 * ha_Da_eff_agc_agdl * (sv['C_v_agdl_1'] - C_v_agc) / (H_gdl_node + Hacl)
+    Jv_agc_agdl = - 2 * ha_Da_eff_agc_agdl * (sv['C_v_agdl_1'] - C_v_agc) / H_gdl_node
     #   Cathode side
-    Jv_cgdl_cgc = - 2 * hc_Dc_eff_cgdl_cgc * (C_v_cgc - sv[f'C_v_cgdl_{n_gdl}']) / (H_gdl_node + Hccl)
+    Jv_cgdl_cgc = - 2 * hc_Dc_eff_cgdl_cgc * (C_v_cgc - sv[f'C_v_cgdl_{n_gdl}']) / H_gdl_node
 
     # Conductive vapor flows
     #   Anode side
@@ -122,7 +121,7 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     Jv_ccl_cmpl = - 2 * Dc_eff_ccl_cmpl * (sv['C_v_cmpl_1'] - C_v_ccl) / (Hccl + H_mpl_node)
     Jv_cmpl_cmpl = [None] + [- Dc_eff_cmpl_cmpl[i] * (sv[f'C_v_cmpl_{i + 1}'] - sv[f'C_v_cmpl_{i}']) / H_mpl_node
                              for i in range(1, n_mpl)]
-    Jv_cmpl_cgdl = - 2 * Dc_eff_cmpl_cgdl * (sv['C_v_cgdl_1'] - sv[f'C_v_cmpl_{n_mpl}']) / (H_gdl_node + H_mpl_node)
+    Jv_cmpl_cgdl = - 2 * Dc_eff_cmpl_cgdl * (sv['C_v_cgdl_1'] - sv[f'C_v_cmpl_{n_mpl}']) / (H_mpl_node + H_gdl_node)
     Jv_cgdl_cgdl = [None] + [- Dc_eff_cgdl_cgdl[i] * (sv[f'C_v_cgdl_{i + 1}'] - sv[f'C_v_cgdl_{i}']) / H_gdl_node
                              for i in range(1, n_gdl)]
 
@@ -140,9 +139,9 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
 
     # Conductive-convective H2 and O2 flows
     #   Anode side
-    J_H2_agc_agdl = - 2 * ha_Da_eff_agc_agdl * (sv['C_H2_agdl_1'] - C_H2_agc) / (H_gdl_node + Hacl)
+    J_H2_agc_agdl = - 2 * ha_Da_eff_agc_agdl * (sv['C_H2_agdl_1'] - C_H2_agc) / H_gdl_node
     #   Cathode side
-    J_O2_cgdl_cgc = - 2 * hc_Dc_eff_cgdl_cgc * (C_O2_cgc - sv[f'C_O2_cgdl_{n_gdl}']) / (H_gdl_node + Hccl)
+    J_O2_cgdl_cgc = - 2 * hc_Dc_eff_cgdl_cgc * (C_O2_cgc - sv[f'C_O2_cgdl_{n_gdl}']) / H_gdl_node
 
     # Conductive H2 and O2 flows
     #   Anode side
@@ -154,7 +153,7 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     J_H2_ampl_acl = - 2 * Da_eff_ampl_acl * (C_H2_acl - sv[f'C_H2_ampl_{n_mpl}']) / (H_mpl_node + Hacl)
 
     #   Cathode side
-    J_O2_ccl_cmpl = - 2 * Dc_eff_ccl_cmpl * (sv['C_O2_cmpl_1'] - C_O2_ccl) / (H_mpl_node + Hccl)
+    J_O2_ccl_cmpl = - 2 * Dc_eff_ccl_cmpl * (sv['C_O2_cmpl_1'] - C_O2_ccl) / (Hccl + H_mpl_node)
     J_O2_cmpl_cmpl = [None] + [- Dc_eff_cmpl_cmpl[i] * (sv[f'C_O2_cmpl_{i + 1}'] - sv[f'C_O2_cmpl_{i}']) / H_mpl_node
                                for i in range(1, n_mpl)]
     J_O2_cmpl_cgdl = - 2 * Dc_eff_cmpl_cgdl * (sv['C_O2_cgdl_1'] - sv[f'C_O2_cmpl_{n_mpl}']) / (H_mpl_node + H_gdl_node)

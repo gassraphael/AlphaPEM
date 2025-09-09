@@ -66,7 +66,7 @@ def figures_preparation(computing_parameters):
         if computing_parameters['type_display'] == "multiple":
             mpl.rcParams['font.size'] = 11  # Font size for all text
             fig1, ax1 = plt.subplots(1, 3, figsize=(14, 4.7))
-            fig2, ax2 = plt.subplots(1, 3, figsize=(14, 4.7))
+            fig2, ax2 = plt.subplots(1, 4, figsize=(18.7, 4.7))
             fig3, ax3 = None, None  # Here, additional plots are unnecessary
             plt.subplots_adjust(left=0.04, right=0.98, top=0.96, bottom=0.07, wspace=0.2, hspace=0.15)
         elif computing_parameters['type_display'] == "synthetic":

@@ -71,7 +71,7 @@ def heat_transfer_int_values(sv, parameters):
                                                    s=sv[f's_agdl_{i}'], C_H2=sv[f'C_H2_agdl_{i}'], C_N2=C_N2_a, epsilon=epsilon_gdl,
                                                      epsilon_c=epsilon_c),
                                           k_th_eff('agdl', sv[f'T_agdl_{i + 1}'], C_v=sv[f'C_v_agdl_{i + 1}'],
-                                                   s=sv[f's_agdl_{i+1}'], C_H2=sv[f'C_H2_agdl_{i+1}'], C_N2=C_N2_a,
+                                                   s=sv[f's_agdl_{i + 1}'], C_H2=sv[f'C_H2_agdl_{i + 1}'], C_N2=C_N2_a,
                                                    epsilon=epsilon_gdl, epsilon_c=epsilon_c)])
                                    for i in range(1, n_gdl)]
 
@@ -87,7 +87,7 @@ def heat_transfer_int_values(sv, parameters):
                                                      s=sv[f's_ampl_{i}'], C_H2=sv[f'C_H2_ampl_{i}'], C_N2=C_N2_a,
                                                      epsilon=epsilon_mpl),
                                             k_th_eff('ampl', sv[f'T_ampl_{i + 1}'], C_v=sv[f'C_v_ampl_{i + 1}'],
-                                                     s=sv[f's_ampl_{i+1}'], C_H2=sv[f'C_H2_ampl_{i+1}'], C_N2=C_N2_a,
+                                                     s=sv[f's_ampl_{i + 1}'], C_H2=sv[f'C_H2_ampl_{i + 1}'], C_N2=C_N2_a,
                                                      epsilon=epsilon_mpl)])
                                    for i in range(1, n_mpl)]
 
@@ -103,10 +103,10 @@ def heat_transfer_int_values(sv, parameters):
                                       k_th_eff('mem', T_mem, lambdaa=lambda_mem)],
                                weights=[Hacl / 2, Hmem / 2])
 
-    k_th_eff_mem_ccl = average([k_th_eff('ccl', T_ccl, C_v=C_v_ccl, s=s_ccl, lambdaa=lambda_ccl,
-                                         C_O2=C_O2_ccl, C_N2=C_N2_c, epsilon=epsilon_cl, epsilon_mc=epsilon_mc),
-                                      k_th_eff('mem', T_mem, lambdaa=lambda_mem)],
-                               weights=[Hccl / 2, Hmem / 2])
+    k_th_eff_mem_ccl = average([k_th_eff('mem', T_mem, lambdaa=lambda_mem),
+                                      k_th_eff('ccl', T_ccl, C_v=C_v_ccl, s=s_ccl, lambdaa=lambda_ccl,
+                                                C_O2=C_O2_ccl, C_N2=C_N2_c, epsilon=epsilon_cl, epsilon_mc=epsilon_mc)],
+                               weights=[Hmem / 2, Hccl / 2])
 
     k_th_eff_ccl_cmpl = average([k_th_eff('ccl', T_ccl, C_v=C_v_ccl, s=s_ccl, lambdaa=lambda_ccl, C_O2=C_O2_ccl,
                                                 C_N2=C_N2_c, epsilon=epsilon_cl, epsilon_mc=epsilon_mc),
@@ -119,7 +119,7 @@ def heat_transfer_int_values(sv, parameters):
                                                    s=sv[f's_cmpl_{i}'], C_O2=sv[f'C_O2_cmpl_{i}'], C_N2=C_N2_c,
                                                    epsilon=epsilon_mpl),
                                             k_th_eff('cmpl', sv[f'T_cmpl_{i + 1}'], C_v=sv[f'C_v_cmpl_{i + 1}'],
-                                                    s=sv[f's_cmpl_{i+1}'], C_O2=sv[f'C_O2_cmpl_{i+1}'], C_N2=C_N2_c,
+                                                    s=sv[f's_cmpl_{i + 1}'], C_O2=sv[f'C_O2_cmpl_{i + 1}'], C_N2=C_N2_c,
                                                     epsilon=epsilon_mpl)])
                                       for i in range(1, n_mpl)]
 
@@ -134,7 +134,7 @@ def heat_transfer_int_values(sv, parameters):
                                                    s=sv[f's_cgdl_{i}'], C_O2=sv[f'C_O2_cgdl_{i}'], C_N2=C_N2_c,
                                                    epsilon=epsilon_gdl, epsilon_c=epsilon_c),
                                             k_th_eff('cgdl', sv[f'T_cgdl_{i + 1}'], C_v=sv[f'C_v_cgdl_{i + 1}'],
-                                                   s=sv[f's_cgdl_{i+1}'], C_O2=sv[f'C_O2_cgdl_{i+1}'], C_N2=C_N2_c,
+                                                   s=sv[f's_cgdl_{i + 1}'], C_O2=sv[f'C_O2_cgdl_{i + 1}'], C_N2=C_N2_c,
                                                    epsilon=epsilon_gdl, epsilon_c=epsilon_c)])
                                    for i in range(1, n_gdl)]
 

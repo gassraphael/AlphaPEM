@@ -83,13 +83,13 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl
 
     # Membrane side
     Jt_acl_mem = - 2 * k_th_eff_acl_mem * (T_mem - T_acl) / (Hacl + Hmem)
-    Jt_mem_ccl = - 2 * k_th_eff_mem_ccl * (T_ccl - T_mem) / (Hccl + Hmem)
+    Jt_mem_ccl = - 2 * k_th_eff_mem_ccl * (T_ccl - T_mem) / (Hmem + Hccl)
 
     # Cathode side
-    Jt_ccl_cmpl = - 2 * k_th_eff_ccl_cmpl * (sv['T_cmpl_1'] - T_ccl) / (Hmpl / n_mpl + Hccl)
+    Jt_ccl_cmpl = - 2 * k_th_eff_ccl_cmpl * (sv['T_cmpl_1'] - T_ccl) / (Hccl + Hmpl / n_mpl)
     Jt_cmpl_cmpl = {f'cmpl_cmpl_{i}': -k_th_eff_cmpl_cmpl[i] * (sv[f'T_cmpl_{i+1}'] - sv[f'T_cmpl_{i}']) / (Hmpl/n_mpl)
                     for i in range(1, n_mpl)}
-    Jt_cmpl_cgdl = - 2 * k_th_eff_cmpl_cgdl * (sv['T_cgdl_1'] - sv[f'T_cmpl_{n_mpl}']) / (Hgdl / n_gdl + Hmpl / n_mpl)
+    Jt_cmpl_cgdl = - 2 * k_th_eff_cmpl_cgdl * (sv['T_cgdl_1'] - sv[f'T_cmpl_{n_mpl}']) / (Hmpl / n_mpl + Hgdl / n_gdl)
     Jt_cgdl_cgdl = {f'cgdl_cgdl_{i}': -k_th_eff_cgdl_cgdl[i] * (sv[f'T_cgdl_{i+1}'] - sv[f'T_cgdl_{i}']) / (Hgdl/n_gdl)
                     for i in range(1, n_gdl)}
 
