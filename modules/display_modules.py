@@ -737,7 +737,7 @@ def plot_s(variables, operating_inputs, parameters, ax):
             s_acl_discretized_t[i] = s_acl_t[idx]  # the last value at the end of each load
             s_ccl_discretized_t[i] = s_ccl_t[idx]  # the last value at the end of each load
             s_cmpl_discretized_t[i] = s_cmpl_t[idx]  # the last value at the end of each load
-            s_cgdl_discretized_t[i] =s_cgdl_t[idx]  # the last value at the end of each load
+            s_cgdl_discretized_t[i] = s_cgdl_t[idx]  # the last value at the end of each load
         ax.scatter(ifc_discretized_t, s_agdl_discretized_t, marker='o', color=colors(1))
         ax.scatter(ifc_discretized_t, s_ampl_discretized_t, marker='o', color=colors(2))
         ax.scatter(ifc_discretized_t, s_acl_discretized_t, marker='o', color=colors(3))

@@ -55,8 +55,9 @@ def step_current(t, parameters):
     i_step = parameters['step_current_parameters']['i_step'] # (A.m-2).
 
     # Step current density
-    return i_ini + (i_step - i_ini) * (1.0 + math.tanh(4 * (t - delta_t_ini_step - (delta_t_load_step / 2)) /
-                                                       (delta_t_load_step / 2))) / 2
+    return i_ini * (1.0 + math.tanh(4 * (t - (delta_t_load_step / 2)) / (delta_t_load_step / 2))) / 2 + \
+           (i_step - i_ini) * (1.0 + math.tanh(4 * (t - delta_t_ini_step - (delta_t_load_step / 2)) /
+                                               (delta_t_load_step / 2))) / 2
 
 
 def polarization_current(t, parameters):
