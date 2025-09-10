@@ -23,12 +23,10 @@ from modules.calibration_modules import (parameter_bounds_for_calibration, param
                                          update_undetermined_parameters, calculate_simulation_error,
                                          print_calibration_results, save_calibration_results)
 
-# _________________________________________________Calibration settings_________________________________________________
+# ________________________________________________Determined parameters_________________________________________________
 """
-Users can select here the fuel cell to calibrate, along with the undetermined parameters to modify, and the parameters 
-for the Genetic Algorithm. The experimental fuel cell data are stored in the files calibration_modules.py and 
-experimental_values.py.
-The parameters employed for the Genetic Algorithm here have proven to be effective, though not necessarily optimal.
+Users can select here the fuel cell to calibrate. The determined parameters of the experimental stack, along with the 
+different operating conditions, are imported from the calibration_module.py.
 """
 
 # Fuel cell possibilities: "EH-31_1.5"(2021), "EH-31_2.0"(2021), "EH-31_2.25"(2021), "EH-31_2.5"(2021),
@@ -36,8 +34,26 @@ The parameters employed for the Genetic Algorithm here have proven to be effecti
 type_fuel_cell_1 = "EH-31_2.0"
 type_fuel_cell_2 = "EH-31_2.25"
 
+# Calibration zone: "before_voltage_drop", "after_voltage_drop".
+calibration_zone = "after_voltage_drop"
+
+(operating_inputs_1, current_parameters, accessible_physical_parameters, undetermined_physical_parameters,
+ computing_parameters_1, i_exp_1, U_exp_1) \
+    = parameters_for_calibration(type_fuel_cell_1, calibration_zone)
+
+(operating_inputs_2, current_parameters, accessible_physical_parameters, undetermined_physical_parameters,
+ computing_parameters_2, i_exp_2, U_exp_2) \
+    = parameters_for_calibration(type_fuel_cell_2, calibration_zone)
+
+# _________________________________________________Calibration settings_________________________________________________
+"""
+Users can select here the parameters for the Genetic Algorithm. The experimental fuel cell data are stored in the files 
+calibration_modules.py and  experimental_values.py.
+The parameters employed for the Genetic Algorithm here have proven to be effective, though not necessarily optimal.
+"""
+
 # Parameter bounds
-varbound, gene_space = parameter_bounds_for_calibration(type_fuel_cell_1)
+varbound, gene_space = parameter_bounds_for_calibration(type_fuel_cell_1, calibration_zone, operating_inputs_1, operating_inputs_2)
 
 # PyGAD parameters for the genetic algorithm:
     # Number of generations:
@@ -57,21 +73,6 @@ num_genes = len(varbound) # Number of genes in the solution. It is the number of
 num_parents_mating = int(0.2 * sol_per_pop) # Here it is 20% of the population, the best found (has to be an integer).
     # Number of genes to mutate.
 mutation_num_genes = 1 # It is the number of undetermined parameters to mutate, here taken to 1. It is the best found.
-
-# ________________________________________________Determined parameters_________________________________________________
-"""
-The determined parameters of the experimental stack, along with the different operating conditions, are imported from 
-the calibration_module.py.
-This section should remain unaltered for regular program usage.
-"""
-
-(operating_inputs_1, current_parameters, accessible_physical_parameters, undetermined_physical_parameters,
- computing_parameters_1, i_exp_1, U_exp_1) \
-    = parameters_for_calibration(type_fuel_cell_1)
-
-(operating_inputs_2, current_parameters, accessible_physical_parameters, undetermined_physical_parameters,
- computing_parameters_2, i_exp_2, U_exp_2) \
-    = parameters_for_calibration(type_fuel_cell_2)
 
 # _______________________________________________________Functions______________________________________________________
 
@@ -100,13 +101,43 @@ def pola_points(ga_instance, solution, solution_idx): # Function to maximize.
     solution_of_undetermined_physical_parameters = update_undetermined_parameters(type_fuel_cell_1, solution, varbound,
                                                                       copy.deepcopy(undetermined_physical_parameters))
 
+    # Refuse invalid combinations of parameters
+    if solution_of_undetermined_physical_parameters['i0_h_c_ref'] >= solution_of_undetermined_physical_parameters['i0_d_c_ref']:
+        return 1e-12  # Very low fitness value to refuse this solution
+
     # Calculation of the model polarization curve
-    Simulator_1 = AlphaPEM(operating_inputs_1, current_parameters, accessible_physical_parameters,
-                           solution_of_undetermined_physical_parameters, computing_parameters_1,
-                           initial_variable_values_1)
-    Simulator_2 = AlphaPEM(operating_inputs_2, current_parameters, accessible_physical_parameters,
-                           solution_of_undetermined_physical_parameters, computing_parameters_2,
-                           initial_variable_values_2)
+    try:
+        Simulator_1 = AlphaPEM(operating_inputs_1, current_parameters, accessible_physical_parameters,
+                               solution_of_undetermined_physical_parameters, computing_parameters_1)
+    except Exception as e:
+        print("\nAn error occurred during the evaluation of the solution.")
+        params = []
+        for key in ['epsilon_c', 'i0_h_c_ref', 'a_switch']:
+            params.append(f"{key}: {solution_of_undetermined_physical_parameters.get(key)}")
+        a_slim = solution_of_undetermined_physical_parameters.get('a_slim')
+        b_slim = solution_of_undetermined_physical_parameters.get('b_slim')
+        Pc_des = operating_inputs_1.get('Pc_des')
+        slim = a_slim * (Pc_des / 1e5) + b_slim
+        params.append(f"slim: {slim}")
+        print("Attempted parameters: " + " | ".join(params))
+        print("Exception :", e)
+        raise  # To stop the program immediately
+    try:
+        Simulator_2 = AlphaPEM(operating_inputs_2, current_parameters, accessible_physical_parameters,
+                               solution_of_undetermined_physical_parameters, computing_parameters_2)
+    except Exception as e:
+        print("\nAn error occurred during the evaluation of the solution.")
+        params = []
+        for key in ["i0_d_c_ref", "i0_h_c_ref", "a_switch"]:
+            params.append(f"{key}: {solution_of_undetermined_physical_parameters.get(key)}")
+        a_slim = solution_of_undetermined_physical_parameters.get("a_slim")
+        b_slim = solution_of_undetermined_physical_parameters.get("b_slim")
+        Pc_des = operating_inputs_2.get("Pc_des")
+        slim = a_slim * (Pc_des / 1e5) + b_slim
+        params.append(f"slim: {slim}")
+        print("Attempted parameters: " + " | ".join(params))
+        print("Exception :", e)
+        raise  # To stop the program immediately
 
     # Calculation of the simulation error between the simulated and experimental polarization curves
     sim_error = calculate_simulation_error(Simulator_1, U_exp_1, i_exp_1, Simulator_2, U_exp_2, i_exp_2)
@@ -153,21 +184,6 @@ if __name__ == '__main__':
     # Starting time
     start_time = time.time()
 
-    # Initialization of the simulator in order to equilibrate the internal states of the fuel cell
-    operating_inputs_ini_1, computing_parameters_ini_1 = copy.deepcopy(operating_inputs_1), copy.deepcopy(computing_parameters_1)
-    operating_inputs_ini_1['current_density'], computing_parameters_ini_1['type_current'] = step_current, 'step'
-    operating_inputs_ini_2, computing_parameters_ini_2 = copy.deepcopy(operating_inputs_2), copy.deepcopy(computing_parameters_2)
-    operating_inputs_ini_2['current_density'], computing_parameters_ini_2['type_current'] = step_current, 'step'
-    Simulator_ini_1 = AlphaPEM(operating_inputs_ini_1, current_parameters, accessible_physical_parameters,
-                               undetermined_physical_parameters, computing_parameters_ini_1)
-    Simulator_ini_2 = AlphaPEM(operating_inputs_ini_2, current_parameters, accessible_physical_parameters,
-                               undetermined_physical_parameters, computing_parameters_ini_2)
-    #   Recovery of the internal states from the end of the preceding simulation.
-    initial_variable_values_1, initial_variable_values_2 = [], []
-    for x in Simulator_ini_1.solver_variable_names:
-        initial_variable_values_1.append(Simulator_ini_1.variables[x][-1])
-        initial_variable_values_2.append(Simulator_ini_2.variables[x][-1])
-
     # pYGAD execution
     ga_instance = pygad.GA( # 1 iteration takes 720s = 12min = 0.2h inside LIS cluster with 80 nodes.
     #                         800 iterations takes 160h = 6.67j.
@@ -212,9 +228,9 @@ if __name__ == '__main__':
     operating_inputs_final_2, computing_parameters_final_2 = operating_inputs_2, computing_parameters_2
     operating_inputs_final_2['current_density'], computing_parameters_final_2['type_current'] = polarization_current, 'polarization'
     Simulator_final_1 = AlphaPEM(operating_inputs_final_1, current_parameters, accessible_physical_parameters,
-                                 undetermined_physical_parameters, computing_parameters_final_1, initial_variable_values_1)
+                                 undetermined_physical_parameters, computing_parameters_final_1)
     Simulator_final_2 = AlphaPEM(operating_inputs_final_2, current_parameters, accessible_physical_parameters,
-                                 undetermined_physical_parameters, computing_parameters_final_2, initial_variable_values_2)
+                                 undetermined_physical_parameters, computing_parameters_final_2)
     #       Display the calibrated and experimental polarization curve
     fig, ax = plt.subplots(figsize=(8, 8))
     Simulator_final_1.Display(ax)
