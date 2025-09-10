@@ -223,7 +223,7 @@ def stored_physical_parameters(type_fuel_cell):
         e = 4.0  # It is the capillary exponent
         # Voltage polarization
         i0_d_c_ref = 14.43  # A.m-2. It is the dry reference exchange current density at the cathode.
-        i0_h_c_ref = 1.0e3  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
+        i0_h_c_ref = 1.0  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
         kappa_co = 5 # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 1.026  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
@@ -262,7 +262,7 @@ def stored_physical_parameters(type_fuel_cell):
         e = 4.0  # It is the capillary exponent
         # Voltage polarization
         i0_d_c_ref = 14.43  # A.m-2. It is the dry reference exchange current density at the cathode.
-        i0_h_c_ref = 1.0e3  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
+        i0_h_c_ref = 1.0  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
         kappa_co = 30.63  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 0.4152  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.82  # It is the limit liquid saturation coefficients.

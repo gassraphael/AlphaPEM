@@ -49,7 +49,8 @@ def parameter_bounds_for_calibration(type_fuel_cell):
         #       Constants based on the interaction between water and the structure
         e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.
         #       Voltage polarization
-        i0_c_ref_min, i0_c_ref_max = 1e-3, 80  # A.m-2.It is the reference exchange current density at the cathode.
+        i0_d_c_ref_min, i0_d_c_ref_max = 1e-1, 100  # A.m-2.It is the dry reference exchange current density at the cathode.
+        i0_h_c_ref_min, i0_h_c_ref_max = 1e-2, 10  # A.m-2.It is the humid reference exchange current density at the cathode.
         kappa_co_min, kappa_co_max = 0.01, 40  # A.m-2. It is the crossover correction coefficient.
         kappa_c_min, kappa_c_max = 0.25, 4  # It is the overpotential correction exponent.
         #       The bounds on liquid saturation coefficients are constrained to facilitate calibration.
@@ -86,7 +87,8 @@ def parameter_bounds_for_calibration(type_fuel_cell):
         #       Constants based on the interaction between water and the structure
         e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.
         #       Voltage polarization
-        i0_c_ref_min, i0_c_ref_max = 1e-3, 80  # A.m-2.It is the reference exchange current density at the cathode.
+        i0_d_c_ref_min, i0_d_c_ref_max = 1e-1, 100  # A.m-2.It is the dry reference exchange current density at the cathode.
+        i0_h_c_ref_min, i0_h_c_ref_max = 1e-2, 10  # A.m-2.It is the humid reference exchange current density at the cathode.
         kappa_co_min, kappa_co_max = 0.01, 40  # A.m-2. It is the crossover correction coefficient.
         kappa_c_min, kappa_c_max = 0.25, 4  # It is the overpotential correction exponent.
         #       The bounds on liquid saturation coefficients are constrained to facilitate calibration.
@@ -102,7 +104,8 @@ def parameter_bounds_for_calibration(type_fuel_cell):
                     ['epsilon_mc', epsilon_mc_min, epsilon_mc_max, 'real'],
                     ['epsilon_c', epsilon_c_min, epsilon_c_max, 'real'],
                     ['e', e_min, e_max, 'int'],
-                    ['i0_c_ref', i0_c_ref_min, i0_c_ref_max, 'real'],
+                    ['i0_d_c_ref', i0_d_c_ref_min, i0_d_c_ref_max, 'real'],
+                    ['i0_h_c_ref', i0_h_c_ref_min, i0_h_c_ref_max, 'real'],
                     ['kappa_co', kappa_co_min, kappa_co_max, 'real'],
                     ['kappa_c', kappa_c_min, kappa_c_max, 'real'],
                     ['a_slim', a_slim_min, a_slim_max, 'real'],
@@ -286,7 +289,7 @@ def parameters_for_calibration(type_fuel_cell):
         e = 3.0  # It is the capillary exponent
         #   Voltage polarization
         i0_d_c_ref = 14.86  # A.m-2.It is the dry reference exchange current density at the cathode.
-        i0_h_c_ref = 1.0e3  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
+        i0_h_c_ref = 1.0  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
         kappa_co = 1  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 0.6386  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
