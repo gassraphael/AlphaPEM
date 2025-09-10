@@ -121,7 +121,7 @@ def pola_points(ga_instance, solution, solution_idx): # Function to maximize.
         params.append(f"slim: {slim}")
         print("Attempted parameters: " + " | ".join(params))
         print("Exception :", e)
-        raise  # To stop the program immediately
+        raise  # Erase this simulation without stopping the calibration.
     try:
         Simulator_2 = AlphaPEM(operating_inputs_2, current_parameters, accessible_physical_parameters,
                                solution_of_undetermined_physical_parameters, computing_parameters_2)
@@ -137,7 +137,7 @@ def pola_points(ga_instance, solution, solution_idx): # Function to maximize.
         params.append(f"slim: {slim}")
         print("Attempted parameters: " + " | ".join(params))
         print("Exception :", e)
-        raise  # To stop the program immediately
+        raise  # Erase this simulation without stopping the calibration.
 
     # Calculation of the simulation error between the simulated and experimental polarization curves
     sim_error = calculate_simulation_error(Simulator_1, U_exp_1, i_exp_1, Simulator_2, U_exp_2, i_exp_2)
