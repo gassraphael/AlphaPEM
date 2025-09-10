@@ -100,6 +100,7 @@ def parameter_bounds_for_calibration(type_fuel_cell):
                     ['Hmem', Hmem_min, Hmem_max, 'real'],
                     ['epsilon_gdl', epsilon_gdl_min, epsilon_gdl_max, 'real'],
                     ['epsilon_mc', epsilon_mc_min, epsilon_mc_max, 'real'],
+                    ['epsilon_c', epsilon_c_min, epsilon_c_max, 'real'],
                     ['e', e_min, e_max, 'int'],
                     ['i0_c_ref', i0_c_ref_min, i0_c_ref_max, 'real'],
                     ['kappa_co', kappa_co_min, kappa_co_max, 'real'],
@@ -284,7 +285,8 @@ def parameters_for_calibration(type_fuel_cell):
         #   Interaction parameters between water and PEMFC structure
         e = 3.0  # It is the capillary exponent
         #   Voltage polarization
-        i0_d_c_ref = 14.86  # A.m-2.It is the reference exchange current density at the cathode.
+        i0_d_c_ref = 14.86  # A.m-2.It is the dry reference exchange current density at the cathode.
+        i0_h_c_ref = 1.0e3  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
         kappa_co = 1  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 0.6386  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
@@ -373,6 +375,7 @@ def parameters_for_calibration(type_fuel_cell):
         e = 3.0  # It is the capillary exponent
         #   Voltage polarization
         i0_d_c_ref = 14.86  # A.m-2.It is the reference exchange current density at the cathode.
+        i0_h_c_ref = 1.0e3  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
         kappa_co = 1  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 0.6386  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
@@ -429,7 +432,7 @@ def parameters_for_calibration(type_fuel_cell):
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
                                         'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl, 'epsilon_mpl': epsilon_mpl,
                                         'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c, 'e': e,
-                                        'kappa_co': kappa_co, 'i0_d_c_ref': i0_d_c_ref, 'kappa_c': kappa_c,
+                                        'kappa_co': kappa_co, 'i0_d_c_ref': i0_d_c_ref, 'i0_h_c_ref': i0_h_c_ref, 'kappa_c': kappa_c,
                                         'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch,
                                         'C_scl': C_scl}
     computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,

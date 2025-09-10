@@ -1430,7 +1430,6 @@ def plot_f_drop(variables, operating_inputs, parameters, ax):
         ax.plot(t, f_drop_t, color=colors(5))
         ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r'$f_{drop}$', labelpad=3)
-    ax.legend(loc='best')
 
     # Plot instructions
     plot_general_instructions(ax)
