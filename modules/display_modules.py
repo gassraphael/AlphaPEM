@@ -1379,6 +1379,63 @@ def plot_cell_efficiency(variables, operating_inputs, parameters, n, ax):
     plot_general_instructions(ax)
 
 
+def plot_f_drop(variables, operating_inputs, parameters, ax):
+    # Extraction of the operating inputs and the parameters
+    current_density = operating_inputs['current_density']
+    a_switch, pola_current_parameters = parameters['a_switch'], parameters['pola_current_parameters']
+    type_current, type_plot = parameters['type_current'], parameters['type_plot']
+    if type_current == 'step':
+        delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
+    elif type_current == 'polarization':
+        delta_t_ini = parameters['pola_current_parameters']['delta_t_ini_pola']
+    elif type_current == 'polarization_for_cali':
+        delta_t_ini = parameters['pola_current_for_cali_parameters']['delta_t_ini_pola_cali']
+    else:
+        delta_t_ini = 0
+    # Extraction of the variables
+    if type_plot == "fixed":
+        mask = np.array(variables['t']) >= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
+    else: # type_plot == "dynamic"
+        mask = np.ones_like(variables['t'], dtype=bool)
+    t = np.array(variables['t'])[mask]
+    s_ccl_t = np.array(variables['s_ccl'])[mask]
+
+    # slim = a_slim * (Pc_des / 1e5) + b_slim
+    slim = 0.085
+    s_switch = a_switch * slim
+    f_drop_t = 0.5 * (1.0 - np.tanh((4 * s_ccl_t - 2 * slim - 2 * s_switch) / (slim - s_switch)))
+
+    # Plot the liquid water saturation at different spatial localisations: s
+    if type_current == "polarization":
+        n = len(t)
+        ifc_t = np.zeros(n)
+        for i in range(n):  # Creation of i_fc
+            ifc_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
+        # Recovery of the internal states from the model after each stack stabilisation
+        delta_t_ini_pola = pola_current_parameters['delta_t_ini_pola']
+        delta_t_load_pola = pola_current_parameters['delta_t_load_pola']
+        delta_t_break_pola = pola_current_parameters['delta_t_break_pola']
+        nb_loads = int(pola_current_parameters['i_max_pola'] / pola_current_parameters['delta_i_pola']) # Number of loads
+        ifc_discretized_t = np.zeros(nb_loads)
+        f_drop_discretized_t = np.zeros(nb_loads)
+        for i in range(nb_loads):
+            t_load = delta_t_ini_pola + (i + 1) * (delta_t_load_pola + delta_t_break_pola)  # time for measurement
+            idx = (np.abs(t - t_load)).argmin()  # the corresponding index
+            ifc_discretized_t[i] = ifc_t[idx]  # the last value at the end of each load
+            f_drop_discretized_t[i] = 0.5 * (1.0 - np.tanh((4 * s_ccl_t[idx] - 2 * slim - 2 * s_switch) / (slim - s_switch)))  # the last value at the end of each load
+        ax.scatter(ifc_discretized_t, f_drop_discretized_t, marker='o', color=colors(5))
+        ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
+                      labelpad=3)
+    else:
+        ax.plot(t, f_drop_t, color=colors(5))
+        ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
+    ax.set_ylabel(r'$f_{drop}$', labelpad=3)
+    ax.legend(loc='best')
+
+    # Plot instructions
+    plot_general_instructions(ax)
+
+
 # ______________________________________________________Instructions____________________________________________________
 
 def calculate_simulation_error(Ucell, U_exp_t):

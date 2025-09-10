@@ -343,7 +343,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
     (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
-     Lgc, Vsm, Vem, A_T, Aact, e, i0_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = \
+     Lgc, Vsm, Vem, A_T, Aact, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = \
         stored_physical_parameters(type_fuel_cell)
 
     n_gdl, n_mpl, t_purge, rtol, atol, step_current_parameters = computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, type_fuel_cell)
@@ -379,7 +379,8 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_undetermined_parameters['Ionomer volume fraction - ε_mc']['value'].set(round(epsilon_mc, 4))
     choice_undetermined_parameters['Compression ratio - ε_c']['value'].set(round(epsilon_c, 4))
     choice_undetermined_parameters['Capillary exponent - e']['value'].set(e)
-    choice_undetermined_parameters['Reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].set(round(i0_c_ref, 4))  # A.m-2
+    choice_undetermined_parameters['Dry reference exchange current\ndensity - i0_d_c_ref (A/m²)']['value'].set(round(i0_d_c_ref, 4))  # A.m-2
+    choice_undetermined_parameters['Humid reference exchange current\ndensity - i0_h_c_ref (A/m²)']['value'].set(round(i0_h_c_ref, 4))  # A.m-2
     choice_undetermined_parameters['Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))']['value'].set(round(kappa_co, 4))  # mol.m-1.s-1.Pa-1
     choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].set(round(kappa_c, 4))
     choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_slim']['value'].set(round(a_slim, 7))
@@ -448,7 +449,8 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     epsilon_mc = choice_undetermined_parameters['Ionomer volume fraction - ε_mc']['value'].get()
     epsilon_c = choice_undetermined_parameters['Compression ratio - ε_c']['value'].get()
     e = choice_undetermined_parameters['Capillary exponent - e']['value'].get()
-    i0_c_ref = choice_undetermined_parameters['Reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].get()  # A.m-2
+    i0_d_c_ref = choice_undetermined_parameters['Dry reference exchange current\ndensity - i0_d_c_ref (A/m²)']['value'].get()  # A.m-2
+    i0_h_c_ref = choice_undetermined_parameters['Humid reference exchange current\ndensity - i0_h_c_ref (A/m²)']['value'].get()  # A.m-2
     kappa_co = choice_undetermined_parameters['Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))']['value'].get()  # mol.m-1.s-1.Pa-1
     kappa_c = choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].get()
     a_slim = choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_slim']['value'].get()
@@ -533,7 +535,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
         type_plot = "dynamic"
 
     return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c,
+            Wcgc, Lgc, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c,
             a_slim, b_slim, a_switch, C_scl, step_current_parameters, pola_current_parameters,
             pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, n_gdl, n_mpl,
             rtol, atol, type_fuel_cell, type_auxiliary, type_control, type_purge, type_display, type_plot)
@@ -663,11 +665,13 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
                                                                  'being an integer.')
         choices.clear()
         return
-    if choice_undetermined_parameters['Reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].get() < 0.001 or \
-            choice_undetermined_parameters['Reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].get() > 500:
-        messagebox.showerror(title='Referenced exchange current density', message='The referenced exchange current '
-                                                                                  'density is generally between 0.001 '
-                                                                                  'and 500 A.m-2.')
+    if choice_undetermined_parameters['Dry reference exchange current\ndensity - i0_d_c_ref (A/m²)']['value'].get() < 0.001 or \
+            choice_undetermined_parameters['Dry reference exchange current\ndensity - i0_d_c_ref (A/m²)']['value'].get() > 100 or \
+            choice_undetermined_parameters['Humid reference exchange current\ndensity - i0_h_c_ref (A/m²)']['value'].get() < 0.001 or \
+            choice_undetermined_parameters['Humid reference exchange current\ndensity - i0_h_c_ref (A/m²)']['value'].get() > 100:
+        messagebox.showerror(title='Referenced exchange current densities', message='The referenced exchange current '
+                                                                                  'densities are generally between 0.001 '
+                                                                                  'and 100 A.m-2.')
         choices.clear()
         return
     if choice_undetermined_parameters['Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))']['value'].get() < 0.01 or \
@@ -916,8 +920,10 @@ def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, acces
                 Compression ratio of the GDL (undetermined physical parameter).
             - e : float
                 Capillary exponent (undetermined physical parameter).
-            - i0_c_ref : float
-                Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
+            - i0_d_c_ref : float
+                Dry reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
+            - i0_h_c_ref : float
+                Humid reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
             - kappa_co : float
                 Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
             - kappa_c : float
@@ -1123,8 +1129,10 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
                 Compression ratio of the GDL (undetermined physical parameter).
             - e : float
                 Capillary exponent (undetermined physical parameter).
-            - i0_c_ref : float
-                Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
+            - i0_d_c_ref : float
+                Dry reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
+            - i0_h_c_ref : float
+                Humid reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
             - kappa_co : float
                 Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
             - kappa_c : float
@@ -1327,8 +1335,10 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
                 Compression ratio of the GDL (undetermined physical parameter).
             - e : float
                 Capillary exponent (undetermined physical parameter).
-            - i0_c_ref : float
-                Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
+            - i0_d_c_ref : float
+                Dry reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
+            - i0_h_c_ref : float
+                Humid reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
             - kappa_co : float
                 Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
             - kappa_c : float

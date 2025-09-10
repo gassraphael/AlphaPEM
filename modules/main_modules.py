@@ -70,8 +70,8 @@ def figures_preparation(computing_parameters):
             fig3, ax3 = None, None  # Here, additional plots are unnecessary
             plt.subplots_adjust(left=0.04, right=0.98, top=0.96, bottom=0.07, wspace=0.2, hspace=0.15)
         elif computing_parameters['type_display'] == "synthetic":
-            mpl.rcParams['font.size'] = 18  # Font size for all text
-            fig1, ax1 = plt.subplots(figsize=(8, 8))
+            mpl.rcParams['font.size'] = 11  # Font size for all text
+            fig1, ax1 = plt.subplots(1, 3, figsize=(14, 4.7))
             fig2, ax2 = None, None  # Here, additional plots are unnecessary
             fig3, ax3 = None, None  # Here, additional plots are unnecessary
 
@@ -205,6 +205,8 @@ def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, acces
     algo_time = time.time() - start_time
     print('Time of the algorithm in second :', algo_time)
 
+    return Simulator
+
 
 def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameters, accessible_physical_parameters,
                                              undetermined_physical_parameters, computing_parameters):
@@ -337,6 +339,8 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
     algo_time = time.time() - start_time
     print('Time of the algorithm in second :', algo_time)
 
+    return Simulator_1
+
 
 def launch_AlphaPEM_for_polarization_current_for_calibration(operating_inputs, current_parameters,
                                                              accessible_physical_parameters,
@@ -454,6 +458,8 @@ def launch_AlphaPEM_for_polarization_current_for_calibration(operating_inputs, c
     algo_time = time.time() - start_time
     print('Time of the algorithm in second :', algo_time)
 
+    return Simulator_1
+
 
 def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, accessible_physical_parameters,
                                     undetermined_physical_parameters, computing_parameters):
@@ -547,3 +553,5 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
     # Ending time
     algo_time = time.time() - start_time
     print('Time of the algorithm in second :', algo_time)
+
+    return Simulator

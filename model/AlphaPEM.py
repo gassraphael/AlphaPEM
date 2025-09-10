@@ -23,7 +23,7 @@ from model.dif_eq import dydt
 from model.flows import calculate_flows
 from model.cell_voltage import calculate_cell_voltage
 from model.control import control_operating_conditions
-from configuration.settings import Pext, y_O2_ext, C_O2ref, alpha_c, F, R, i0_h_c_ref
+from configuration.settings import Pext, y_O2_ext, C_O2ref, alpha_c, F, R
 from modules.dif_eq_modules import event_negative
 from modules.transitory_functions import lambda_eq, k_H2, k_O2
 from modules.display_modules import (plot_ifc, plot_J, plot_C_v, plot_lambda, plot_s, plot_C_O2, plot_C_H2, plot_C_N2,
@@ -31,7 +31,7 @@ from modules.display_modules import (plot_ifc, plot_J, plot_C_v, plot_lambda, pl
                                      plot_polarisation_curve, plot_polarisation_curve_for_cali,
                                      make_Fourier_transformation, plot_EIS_curve_Nyquist, plot_EIS_curve_Bode_amplitude,
                                      plot_EIS_curve_Bode_angle, plot_EIS_curve_tests, plot_power_density_curve,
-                                     plot_cell_efficiency)
+                                     plot_cell_efficiency, plot_f_drop)
 from calibration.experimental_values import pola_exp_values_calibration
 
 # _______________________________________________________AlphaPEM_______________________________________________________
@@ -328,8 +328,8 @@ class AlphaPEM:
         Pa_des, Pc_des = self.operating_inputs['Pa_des'], self.operating_inputs['Pc_des']
         Phi_a_des, Phi_c_des = self.operating_inputs['Phi_a_des'], self.operating_inputs['Phi_c_des']
         y_H2_in = self.operating_inputs['y_H2_in']
-        Hmem, kappa_co, i0_d_c_ref = self.parameters['Hmem'], self.parameters['kappa_co'], self.parameters['i0_d_c_ref']
-        kappa_c = self.parameters['kappa_c']
+        Hmem, kappa_co, kappa_c = self.parameters['Hmem'], self.parameters['kappa_co'], self.parameters['kappa_c']
+        i0_d_c_ref, i0_h_c_ref = self.parameters['i0_d_c_ref'], self.parameters['i0_h_c_ref']
         a_slim, b_slim, a_switch = self.parameters['a_slim'], self.parameters['b_slim'], self.parameters['a_switch']
         n_gdl, n_mpl = self.parameters['n_gdl'], self.parameters['n_mpl']
 
@@ -537,7 +537,9 @@ class AlphaPEM:
 
             elif type_display == "synthetic":
 
-                plot_polarisation_curve(self.variables, self.operating_inputs, self.parameters, ax1)
+                plot_polarisation_curve(self.variables, self.operating_inputs, self.parameters, ax1[0])
+                plot_f_drop(self.variables, self.operating_inputs, self.parameters, ax1[1])
+                plot_s(self.variables, self.operating_inputs, self.parameters, ax1[2])
                 plt.pause(0.01)  # A break is necessary to plot the new points in dynamic mode
 
             elif type_display == "no_display":

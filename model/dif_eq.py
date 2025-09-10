@@ -9,7 +9,7 @@
 import math
 
 # Importing constants' value and functions
-from configuration.settings import (C_O2ref, alpha_c, i0_h_c_ref, tau_cp, tau_hum, rho_mem, M_eq, F, R, M_H2O, n_cell,
+from configuration.settings import (C_O2ref, alpha_c, tau_cp, tau_hum, rho_mem, M_eq, F, R, M_H2O, n_cell,
                                     Kp, Kd)
 from model.flows import calculate_flows
 from model.cell_voltage import calculate_eta_c_intermediate_values
@@ -753,8 +753,8 @@ def calculate_dyn_temperature_evolution(dif_eq, rho_Cp0, Hgdl, Hmpl, Hacl, Hccl,
     dif_eq['dT_cgc / dt'] = 0  # Dirichlet boundary condition. T_cgc is initialized to T_fc and remains constant.
 
 
-def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hccl, i0_d_c_ref, kappa_c, C_scl, i_n, f_drop,
-                                    **kwargs):
+def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hccl, i0_d_c_ref, i0_h_c_ref, kappa_c, C_scl,
+                                    i_n, f_drop, **kwargs):
     """This function calculates the dynamic evolution of the cell overpotential eta_c.
 
     Parameters

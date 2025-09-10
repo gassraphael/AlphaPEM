@@ -34,7 +34,7 @@ if __name__ == '__main__':
     type_fuel_cell_3 = None
     type_fuel_cell_4 = None
     # Current density possibilities: "step", "polarization", "polarization_for_cali", "EIS".
-    type_current = "step"
+    type_current = "polarization"
     # Auxiliary system possibilities: "forced-convective_cathode_with_anodic_recirculation",
     #                                 "forced-convective_cathode_with_flow-through_anode", "no_auxiliary".
     type_auxiliary = "forced-convective_cathode_with_flow-through_anode"
@@ -72,7 +72,7 @@ if __name__ == '__main__':
             operating_inputs_function(copy.deepcopy(pola_current_parameters), type_fuel_cell_4)
     #   Physical parameters
     (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
-     Lgc, Vsm, Vem, A_T, Aact, e, i0_d_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = \
+     Lgc, Vsm, Vem, A_T, Aact, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = \
         physical_parameters(type_fuel_cell_1)
     #   Computing parameters
     n_gdl, n_mpl, t_purge, rtol, atol, step_current_parameters = computing_parameters(copy.deepcopy(step_current_parameters), Hgdl, Hmpl, Hacl, type_fuel_cell_1)
@@ -96,8 +96,9 @@ if __name__ == '__main__':
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
                                         'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl,
                                         'epsilon_mpl': epsilon_mpl, 'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c,
-                                        'e': e, 'kappa_co': kappa_co, 'i0_d_c_ref': i0_d_c_ref, 'kappa_c': kappa_c,
-                                        'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch, 'C_scl': C_scl}
+                                        'e': e, 'kappa_co': kappa_co, 'i0_d_c_ref': i0_d_c_ref, 'i0_h_c_ref': i0_h_c_ref,
+                                        'kappa_c': kappa_c, 'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch,
+                                        'C_scl': C_scl}
     computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
                             'type_fuel_cell': [None, type_fuel_cell_1, type_fuel_cell_2, type_fuel_cell_3, type_fuel_cell_4],
                             'type_current': type_current, 'type_auxiliary': type_auxiliary,
@@ -106,19 +107,19 @@ if __name__ == '__main__':
 
     # Check if the type_current is valid and launch the simulation
     if type_current == "step":
-        launch_AlphaPEM_for_step_current(select_nth_elements(operating_inputs,1),
+        Simulator = launch_AlphaPEM_for_step_current(select_nth_elements(operating_inputs,1),
                                          select_nth_elements(current_parameters, 1),
                                          accessible_physical_parameters, undetermined_physical_parameters,
                                          select_nth_elements(computing_parameters, 1))
     elif type_current == "polarization":
-        launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameters, accessible_physical_parameters,
+        Simulator = launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameters, accessible_physical_parameters,
                                                  undetermined_physical_parameters, computing_parameters)
     elif type_current == "polarization_for_cali":
-        launch_AlphaPEM_for_polarization_current_for_calibration(operating_inputs, current_parameters,
+        Simulator = launch_AlphaPEM_for_polarization_current_for_calibration(operating_inputs, current_parameters,
                                                                  accessible_physical_parameters,
                                                                  undetermined_physical_parameters, computing_parameters)
     elif type_current == "EIS":
-        launch_AlphaPEM_for_EIS_current(select_nth_elements(operating_inputs,1),
+        Simulator = launch_AlphaPEM_for_EIS_current(select_nth_elements(operating_inputs,1),
                                         select_nth_elements(current_parameters, 1),
                                         accessible_physical_parameters, undetermined_physical_parameters,
                                         select_nth_elements(computing_parameters, 1))

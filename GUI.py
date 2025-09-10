@@ -141,7 +141,7 @@ def main_frame(root, canvas):
          'Compression ratio - ε_c': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 2, 'label_column': 5},
          'Capillary exponent - e': {'value': tk.IntVar(undetermined_parameters_frame), 'label_row': 3, 'label_column': 1},
          'Electron resistance\n- Re (µΩ.m²)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 1},
-         'Reference exchange current\ndensity - i0_c_ref (A/m²)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 3},
+         'Dry reference exchange current\ndensity - i0_d_c_ref (A/m²)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 3},
          'Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 5},
          'Overpotential correction\nexponent - κ_c': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 5, 'label_column': 1},
          'Limit liquid saturation\ncoefficient - a_slim': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 5, 'label_column': 3},
@@ -366,7 +366,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
     # Retrieves parameter values for predefined stacks and keeps them in their standard unit, or converts user-selected
     # quantities into standard units.
     (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_c_ref, kappa_co, kappa_c,
+            Wcgc, Lgc, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c,
             a_slim, b_slim, a_switch, C_scl, step_current_parameters, pola_current_parameters,
             pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, n_gdl, n_mpl,
             rtol, atol, type_fuel_cell, type_auxiliary, type_control, type_purge, type_display, type_plot) = \
@@ -386,8 +386,9 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
                                         'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl,
                                         'epsilon_mpl': epsilon_mpl, 'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c,
-                                        'e': e, 'kappa_co': kappa_co, 'i0_c_ref': i0_c_ref, 'kappa_c': kappa_c,
-                                        'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch, 'C_scl': C_scl}
+                                        'e': e, 'kappa_co': kappa_co, 'i0_d_c_ref': i0_d_c_ref, 'i0_h_c_ref': i0_h_c_ref,
+                                        'kappa_c': kappa_c, 'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch,
+                                        'C_scl': C_scl}
 
     if current_button == 0:
         type_current = "step"

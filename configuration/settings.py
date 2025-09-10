@@ -256,6 +256,7 @@ def physical_parameters(type_fuel_cell):
         e = 5.0  # It is the capillary exponent
         #   Voltage polarization
         i0_d_c_ref = 14.43  # A.m-2. It is the dry reference exchange current density at the cathode.
+        i0_l_c_ref = 1.0e3  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
         kappa_co = 29.793535549174077  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 1.6136446641573106  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.0555312850726664, 0.10514269908118055, 0.6365424991141914  # It is the limit
@@ -263,11 +264,11 @@ def physical_parameters(type_fuel_cell):
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
     else: # Stored setup in "stored_physical_parameters".
         (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-         Wcgc, Lgc, Vsm, Vem, A_T, Aact, e, i0_d_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = \
+         Wcgc, Lgc, Vsm, Vem, A_T, Aact, e, i0_d_c_ref, i0_l_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = \
             stored_physical_parameters(type_fuel_cell)
 
     return (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, Vsm, Vem, A_T, Aact, e, i0_d_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
+            Wcgc, Lgc, Vsm, Vem, A_T, Aact, e, i0_d_c_ref, i0_l_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
 
 
 def computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, type_fuel_cell):
@@ -375,7 +376,6 @@ alpha_c = 0.5  # It is the transfer coefficient of the cathode.
 E0 = 1.229  # V. It is the standard-state reversible voltage.
 Pref = 1e5  # Pa. It is the reference pressure.
 Eact = 73.2e3  # J.mol-1. It is the activation energy.
-i0_h_c_ref = 1e-10  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
 
 # Model parameters for the heat transfer calculation
 #   Thermal conductivities
