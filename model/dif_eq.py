@@ -789,10 +789,10 @@ def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hccl, 
                                                   (C_O2_ccl / C_O2ref) ** kappa_c * math.exp(alpha_c * F / (R * T_ccl) * eta_c))
 
 def calculate_dyn_manifold_pressure_and_humidity_evolution(dif_eq, Masm, Maem, Mcsm, Mcem, T_des, n_cell, Hagc, Hcgc,
-                                                           Wagc, Wcgc, Vsm, Vem, type_auxiliary, Jv_a_in, Jv_a_out,
-                                                           Jv_c_in, Jv_c_out, Wasm_in, Wasm_out, Waem_in, Waem_out,
-                                                           Wcsm_in, Wcsm_out, Wcem_in, Wcem_out, Ware, Wv_asm_in,
-                                                           Wv_aem_out, Wv_csm_in, Wv_cem_out, **kwargs):
+                                                           Wagc, Wcgc, Vsm_a, Vsm_c, Vem_a, Vem_c, type_auxiliary,
+                                                           Jv_a_in, Jv_a_out, Jv_c_in, Jv_c_out, Wasm_in, Wasm_out,
+                                                           Waem_in, Waem_out, Wcsm_in, Wcsm_out, Wcem_in, Wcem_out,
+                                                           Ware, Wv_asm_in, Wv_aem_out, Wv_csm_in, Wv_cem_out, **kwargs):
     """This function calculates the dynamic evolution of the pressure and humidity inside the manifolds.
 
     Parameters
@@ -857,29 +857,29 @@ def calculate_dyn_manifold_pressure_and_humidity_evolution(dif_eq, Masm, Maem, M
 
     # Pressure evolution inside the manifolds
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
-        dif_eq['dPasm / dt'] = (Wasm_in + Ware - n_cell * Wasm_out) / (Vsm * Masm) * R * T_des
-        dif_eq['dPaem / dt'] = (n_cell * Waem_in - Ware - Waem_out) / (Vem * Maem) * R * T_des
-        dif_eq['dPcsm / dt'] = (Wcsm_in - n_cell * Wcsm_out) / (Vsm * Mcsm) * R * T_des
-        dif_eq['dPcem / dt'] = (n_cell * Wcem_in - Wcem_out) / (Vem * Mcem) * R * T_des
+        dif_eq['dPasm / dt'] = (Wasm_in + Ware - n_cell * Wasm_out) / (Vsm_a * Masm) * R * T_des
+        dif_eq['dPaem / dt'] = (n_cell * Waem_in - Ware - Waem_out) / (Vem_a * Maem) * R * T_des
+        dif_eq['dPcsm / dt'] = (Wcsm_in - n_cell * Wcsm_out) / (Vsm_c * Mcsm) * R * T_des
+        dif_eq['dPcem / dt'] = (n_cell * Wcem_in - Wcem_out) / (Vem_c * Mcem) * R * T_des
     elif type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-        dif_eq['dPasm / dt'] = (Wasm_in - n_cell * Wasm_out) / (Vsm * Masm) * R * T_des
-        dif_eq['dPaem / dt'] = (n_cell * Waem_in - Waem_out) / (Vem * Maem) * R * T_des
-        dif_eq['dPcsm / dt'] = (Wcsm_in - n_cell * Wcsm_out) / (Vsm * Mcsm) * R * T_des
-        dif_eq['dPcem / dt'] = (n_cell * Wcem_in - Wcem_out) / (Vem * Mcem) * R * T_des
+        dif_eq['dPasm / dt'] = (Wasm_in - n_cell * Wasm_out) / (Vsm_a * Masm) * R * T_des
+        dif_eq['dPaem / dt'] = (n_cell * Waem_in - Waem_out) / (Vem_a * Maem) * R * T_des
+        dif_eq['dPcsm / dt'] = (Wcsm_in - n_cell * Wcsm_out) / (Vsm_c * Mcsm) * R * T_des
+        dif_eq['dPcem / dt'] = (n_cell * Wcem_in - Wcem_out) / (Vem_c * Mcem) * R * T_des
     else:  # elif type_auxiliary == "no_auxiliary":
         dif_eq['dPasm / dt'], dif_eq['dPaem / dt'], dif_eq['dPcsm / dt'], dif_eq['dPcem / dt'] = 0, 0, 0, 0
 
     # Humidity evolution inside the manifolds
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
-        dif_eq['dPhi_asm / dt'] = (Wv_asm_in - Jv_a_in * Hagc * Wagc * n_cell) / Vsm * R * T_des / Psat(T_des)
-        dif_eq['dPhi_aem / dt'] = (Jv_a_out * Hagc * Wagc * n_cell - Wv_asm_in - Wv_aem_out) / Vem * R * T_des / Psat(T_des)
-        dif_eq['dPhi_csm / dt'] = (Wv_csm_in - Jv_c_in * Hcgc * Wcgc * n_cell) / Vsm * R * T_des / Psat(T_des)
-        dif_eq['dPhi_cem / dt'] = (Jv_c_out * Hcgc * Wcgc * n_cell - Wv_cem_out) / Vem * R * T_des / Psat(T_des)
+        dif_eq['dPhi_asm / dt'] = (Wv_asm_in - Jv_a_in * Hagc * Wagc * n_cell) / Vsm_a * R * T_des / Psat(T_des)
+        dif_eq['dPhi_aem / dt'] = (Jv_a_out * Hagc * Wagc * n_cell - Wv_asm_in - Wv_aem_out) / Vem_a * R * T_des / Psat(T_des)
+        dif_eq['dPhi_csm / dt'] = (Wv_csm_in - Jv_c_in * Hcgc * Wcgc * n_cell) / Vsm_c * R * T_des / Psat(T_des)
+        dif_eq['dPhi_cem / dt'] = (Jv_c_out * Hcgc * Wcgc * n_cell - Wv_cem_out) / Vem_c * R * T_des / Psat(T_des)
     elif type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-        dif_eq['dPhi_asm / dt'] = (Wv_asm_in - Jv_a_in * Hagc * Wagc * n_cell) / Vsm * R * T_des / Psat(T_des)
-        dif_eq['dPhi_aem / dt'] = (Jv_a_out * Hagc * Wagc * n_cell - Wv_aem_out) / Vem * R * T_des / Psat(T_des)
-        dif_eq['dPhi_csm / dt'] = (Wv_csm_in - Jv_c_in * Hcgc * Wcgc * n_cell) / Vsm * R * T_des / Psat(T_des)
-        dif_eq['dPhi_cem / dt'] = (Jv_c_out * Hcgc * Wcgc * n_cell - Wv_cem_out) / Vem * R * T_des / Psat(T_des)
+        dif_eq['dPhi_asm / dt'] = (Wv_asm_in - Jv_a_in * Hagc * Wagc * n_cell) / Vsm_a * R * T_des / Psat(T_des)
+        dif_eq['dPhi_aem / dt'] = (Jv_a_out * Hagc * Wagc * n_cell - Wv_aem_out) / Vem_a * R * T_des / Psat(T_des)
+        dif_eq['dPhi_csm / dt'] = (Wv_csm_in - Jv_c_in * Hcgc * Wcgc * n_cell) / Vsm_c * R * T_des / Psat(T_des)
+        dif_eq['dPhi_cem / dt'] = (Jv_c_out * Hcgc * Wcgc * n_cell - Wv_cem_out) / Vem_c * R * T_des / Psat(T_des)
     else:  # elif type_auxiliary == "no_auxiliary":
         dif_eq['dPhi_asm / dt'], dif_eq['dPhi_aem / dt'], dif_eq['dPhi_csm / dt'], dif_eq['dPhi_cem / dt'] = 0, 0, 0, 0
 

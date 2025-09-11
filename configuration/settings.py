@@ -207,6 +207,20 @@ def physical_parameters(type_fuel_cell):
         Length of the gas channel in meters.
     Aact : float
         Active area of the catalyst layer in meters squared.
+    n_cell : int
+        Number of cell in the stack.
+    Vsm_a : float
+        Supply manifold volume at the anode in m³.
+    Vsm_c : float
+        Supply manifold volume at the cathode in m³.
+    Vem_a : float
+        Exhaust manifold volume at the anode in m³.
+    Vem_c : float
+        Exhaust manifold volume at the cathode in m³.
+    A_T_a : float
+        Exhaust anode manifold throttle area in m².
+    A_T_c : float
+        Exhaust cathode manifold throttle area in m².
     e : float
         Capillary exponent.
     i0_c_ref : float
@@ -251,8 +265,8 @@ def physical_parameters(type_fuel_cell):
         Wcgc = Wagc  # m. It is the width of the cathode gas channel.
         Lgc = 9.67  # m. It is the length of the gas channel.
         #   Auxiliaries
-        Vsm = 7.0e-3  # m³. It is the supply manifold volume.
-        Vem = 2.4e-3  # m³. It is the exhaust manifold volume.
+        Vsm_a, Vsm_c = 7.0e-3, 7.0e-3  # m3. It is the supply manifold volume.
+        Vem_a, Vem_c = 2.4e-3, 2.4e-3  # m-3. It is the exhaust manifold volume.
         A_T_a = 11.8e-4  # m². It is the exhaust anode manifold throttle area
         A_T_c = A_T_a  # m². It is the exhaust cathode manifold throttle area
         #   Interaction parameters between water and PEMFC structure
@@ -267,11 +281,11 @@ def physical_parameters(type_fuel_cell):
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
     else: # Stored setup in "stored_physical_parameters".
         (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-         Wcgc, Lgc, Vsm, Vem, A_T_a, A_T_c, Aact, n_cell, e, i0_d_c_ref, i0_l_c_ref, kappa_co, kappa_c, a_slim, b_slim,
+         Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, i0_d_c_ref, i0_l_c_ref, kappa_co, kappa_c, a_slim, b_slim,
          a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
 
     return (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, Vsm, Vem, A_T_a, A_T_c, Aact, n_cell, e, i0_d_c_ref, i0_l_c_ref, kappa_co, kappa_c, a_slim,
+            Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, i0_d_c_ref, i0_l_c_ref, kappa_co, kappa_c, a_slim,
             b_slim, a_switch, C_scl)
 
 

@@ -341,7 +341,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
     (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
-     Lgc, Vsm, Vem, A_T_a, A_T_c, Aact, n_cell, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
+     Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
      C_scl) = stored_physical_parameters(type_fuel_cell)
 
     n_gdl, n_mpl, t_purge, rtol, atol, step_current_parameters = computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, type_fuel_cell)
@@ -363,8 +363,10 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_accessible_parameters['AGC width - Wagc (µm)']['value'].set(round(Wagc * 1e6, 4))  # µm
     choice_accessible_parameters['CGC width - Wcgc (µm)']['value'].set(round(Wcgc * 1e6, 4))  # µm
     choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].set(round(Lgc, 4))  # µm
-    choice_accessible_parameters['Supply manifold volume - Vsm (dm³)']['value'].set(round(Vsm * 1e3, 4))  # dm³
-    choice_accessible_parameters['Exhaust manifold volume - Vem (dm³)']['value'].set(round(Vem * 1e3, 4))  # dm³
+    choice_accessible_parameters['Supply anode manifold volume - Vsm_a (cm³)']['value'].set(round(Vsm_a * 1e6, 4))  # dm³
+    choice_accessible_parameters['Supply cathode manifold volume - Vsm_c (cm³)']['value'].set(round(Vsm_c * 1e6, 4))  # dm³
+    choice_accessible_parameters['Exhaust anode manifold volume - Vem_a (cm³)']['value'].set(round(Vem_a * 1e6, 4))  # dm³
+    choice_accessible_parameters['Exhaust cathode manifold volume - Vem_c (cm³)']['value'].set(round(Vem_c * 1e6, 4))  # dm³
     choice_accessible_parameters['Exhaust anode manifold throttle area - A_T_a (cm²)']['value'].set(round(A_T_a * 1e4, 4))  # cm²
     choice_accessible_parameters['Exhaust cathode manifold throttle area - A_T_c (cm²)']['value'].set(round(A_T_c * 1e4, 4))  # cm²
     # undetermined physical parameters recovery
@@ -435,8 +437,10 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     Wagc = choice_accessible_parameters['AGC width - Wagc (µm)']['value'].get() * 1e-6  # m
     Wcgc = choice_accessible_parameters['CGC width - Wcgc (µm)']['value'].get() * 1e-6  # m
     Lgc = choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].get()  # m
-    Vsm = choice_accessible_parameters['Supply manifold volume - Vsm (dm³)']['value'].get() * 1e-3  # m³
-    Vem = choice_accessible_parameters['Exhaust manifold volume - Vem (dm³)']['value'].get() * 1e-3 # m³
+    Vsm_a = choice_accessible_parameters['Supply anode manifold volume - Vsm_a (cm³)']['value'].get() * 1e-6  # m³
+    Vsm_c = choice_accessible_parameters['Supply cathode manifold volume - Vsm_c (cm³)']['value'].get() * 1e-6  # m³
+    Vem_a = choice_accessible_parameters['Exhaust anode manifold volume - Vem_a (cm³)']['value'].get() * 1e-6 # m³
+    Vem_c = choice_accessible_parameters['Exhaust cathode manifold volume - Vem_c (cm³)']['value'].get() * 1e-6  # m³
     A_T_a = choice_accessible_parameters['Exhaust anode manifold throttle area - A_T_a (cm²)']['value'].get() * 1e-4  # m²
     A_T_c = choice_accessible_parameters['Exhaust cathode manifold throttle area - A_T_c (cm²)']['value'].get() * 1e-4  # m²
     # undetermined physical parameters
@@ -535,8 +539,8 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
         type_plot = "dynamic"
 
     return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, n_cell, Hgdl, Hmpl, Hacl, Hccl, Hmem,
-            Hagc, Hcgc, Wagc, Wcgc, Lgc, Vsm, Vem, A_T_a, A_T_c, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc,
-            epsilon_c, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl,
+            Hagc, Hcgc, Wagc, Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, epsilon_gdl, epsilon_cl, epsilon_mpl,
+            epsilon_mc, epsilon_c, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl,
             step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS,
             t_EIS, t_purge, delta_t_purge, n_gdl, n_mpl, rtol, atol, type_fuel_cell, type_auxiliary, type_control,
             type_purge, type_display, type_plot)
@@ -606,8 +610,10 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
         messagebox.showerror(title='Number of cells', message='Negative number of cells is impossible.')
         choices.clear()
         return
-    if choice_accessible_parameters['Supply manifold volume - Vsm (dm³)']['value'].get() < 0 or \
-            choice_accessible_parameters['Exhaust manifold volume - Vem (dm³)']['value'].get() < 0 or \
+    if choice_accessible_parameters['Supply anode manifold volume - Vsm_a (cm³)']['value'].get() < 0 or \
+            choice_accessible_parameters['Supply cathode manifold volume - Vsm_c (cm³)']['value'].get() < 0 or \
+            choice_accessible_parameters['Exhaust anode manifold volume - Vem_a (cm³)']['value'].get() < 0 or \
+            choice_accessible_parameters['Exhaust cathode manifold volume - Vem_c (cm³)']['value'].get() < 0 or \
             choice_accessible_parameters['Exhaust anode manifold throttle area - A_T_a (cm²)']['value'].get() < 0 or \
             choice_accessible_parameters['Exhaust cathode manifold throttle area - A_T_c (cm²)']['value'].get() < 0:
         messagebox.showerror(title='Manifold parameters', message='Negative volumes or area are impossible.')

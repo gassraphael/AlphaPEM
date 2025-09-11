@@ -46,56 +46,56 @@ def stored_operating_inputs(type_fuel_cell):
         Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-        i_max_pola = 1.9e4  # A.m-2. It is the maximum current density for the polarization curve.
+        i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41":
         T_des = 68 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 1.61e5, 1.41e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         y_H2_in = 0.7 # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-        i_max_pola = 1.9e4  # A.m-2. It is the maximum current density for the polarization curve.
+        i_max_pola = 2.171e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81":
         T_des = 68 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.01e5, 1.81e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-        i_max_pola = 1.9e4  # A.m-2. It is the maximum current density for the polarization curve.
+        i_max_pola = 2.415e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2":
         T_des = 68 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.4e5, 2.2e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-        i_max_pola = 1.9e4  # A.m-2. It is the maximum current density for the polarization curve.
+        i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6":
         T_des = 68 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.8e5, 2.6e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-        i_max_pola = 1.9e4  # A.m-2. It is the maximum current density for the polarization curve.
+        i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "ZSW-GenStack_T_62":
         T_des = 62 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.2e5, 2.0e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-        i_max_pola = 1.9e4  # A.m-2. It is the maximum current density for the polarization curve.
+        i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "ZSW-GenStack_T_76":
         T_des = 76 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.2e5, 2.0e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-        i_max_pola = 1.9e4  # A.m-2. It is the maximum current density for the polarization curve.
+        i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "ZSW-GenStack_T_84":
         T_des = 84 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.2e5, 2.0e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-        i_max_pola = 1.9e4  # A.m-2. It is the maximum current density for the polarization curve.
+        i_max_pola = 2.000e4  # A.m-2. It is the maximum current density for the polarization curve.
 
     # For EH-31 fuel cell
     elif type_fuel_cell == "EH-31_1.5":
@@ -217,10 +217,10 @@ def stored_physical_parameters(type_fuel_cell):
         Wcgc = 532e-6  # m. It is the width of the cathode gas channel.
         Lgc = 23.31  # m. It is the length of the gas channel.
         #   Auxiliaries
-        A_T_a = 9.10e-4  # m². It is the exhaust anode manifold throttle area
-        A_T_c = 22.83e-4  # m². It is the exhaust cathode manifold throttle area
-        Vsm = 7.0e-3  # m3. It is the supply manifold volume.
-        Vem = 2.4e-3  # m-3. It is the exhaust manifold volume.
+        A_T_a = 9.01e-4  # m². It is the exhaust anode manifold throttle area
+        A_T_c = 22.61e-4  # m². It is the exhaust cathode manifold throttle area
+        Vsm_a, Vsm_c = 56.8e-6, 145e-6  # m3. It is the supply manifold volume.
+        Vem_a, Vem_c = Vsm_a, Vsm_c  # m-3. It is the exhaust manifold volume.
         # Interaction parameters between water and PEMFC structure
         e = 4.0  # It is the capillary exponent
         # Voltage polarization
@@ -258,8 +258,8 @@ def stored_physical_parameters(type_fuel_cell):
         Wcgc = Wagc  # m. It is the width of the cathode gas channel.
         Lgc = 9.67  # m. It is the length of the gas channel.
         #   Auxiliaries
-        Vsm = 7.0e-3  # m3. It is the supply manifold volume.
-        Vem = 2.4e-3  # m-3. It is the exhaust manifold volume.
+        Vsm_a, Vsm_c = 7.0e-3, 7.0e-3  # m3. It is the supply manifold volume.
+        Vem_a, Vem_c = 2.4e-3, 2.4e-3  # m-3. It is the exhaust manifold volume.
         A_T_a = 11.8e-4  # m². It is the exhaust anode manifold throttle area
         A_T_c = A_T_a  # m². It is the exhaust cathode manifold throttle area
         # Interaction parameters between water and PEMFC structure
@@ -277,8 +277,8 @@ def stored_physical_parameters(type_fuel_cell):
         raise ValueError('the type_input given is not valid.')
 
     return (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, Vsm, Vem, A_T_a, A_T_c, Aact, n_cell, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim,
-            a_switch, C_scl)
+            Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, i0_d_c_ref, i0_h_c_ref, kappa_co,
+            kappa_c, a_slim, b_slim, a_switch, C_scl)
 
 
 def EIS_parameters(f_EIS):

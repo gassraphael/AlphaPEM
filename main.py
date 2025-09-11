@@ -29,7 +29,7 @@ if __name__ == '__main__':
     # This parameter includes the fuel cell used in the model and the corresponding operating conditions.
     # - GenStack is a fuel cell developed in open source by ZSW (https://zenodo.org/records/14223364).
     # - EH-31 is a fuel cell developed by EH GROUP. 1.5, 2.0, 2.25 and 2.5 corresponds to the different pressure options.
-    type_fuel_cell_1 = "EH-31_2.25"
+    type_fuel_cell_1 = "ZSW-GenStack"
     type_fuel_cell_2 = None
     type_fuel_cell_3 = None
     type_fuel_cell_4 = None
@@ -72,7 +72,7 @@ if __name__ == '__main__':
             operating_inputs_function(copy.deepcopy(pola_current_parameters), type_fuel_cell_4)
     #   Physical parameters
     (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
-     Lgc, Vsm, Vem, A_T_a, A_T_c, Aact, n_cell, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
+     Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
      C_scl) = physical_parameters(type_fuel_cell_1)
     #   Computing parameters
     n_gdl, n_mpl, t_purge, rtol, atol, step_current_parameters = computing_parameters(copy.deepcopy(step_current_parameters), Hgdl, Hmpl, Hacl, type_fuel_cell_1)
@@ -92,7 +92,8 @@ if __name__ == '__main__':
                           'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
                           'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
     accessible_physical_parameters = {'Aact': Aact, 'n_cell': n_cell, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc,
-                                      'Wcgc': Wcgc, 'Lgc': Lgc, 'Vsm': Vsm, 'Vem': Vem, 'A_T_a': A_T_a, 'A_T_c': A_T_c}
+                                      'Wcgc': Wcgc, 'Lgc': Lgc, 'Vsm_a': Vsm_a, 'Vsm_c': Vsm_c, 'Vem_a': Vem_a,
+                                      'Vem_c': Vem_c, 'A_T_a': A_T_a, 'A_T_c': A_T_c}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
                                         'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl,
                                         'epsilon_mpl': epsilon_mpl, 'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c,

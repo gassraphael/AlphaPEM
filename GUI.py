@@ -125,10 +125,12 @@ def main_frame(root, canvas):
          'GC cumulated length - Lgc (m)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 3},
          'Active area - Aact (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 5},
          'Number of cells - n_cell': {'value': tk.IntVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 1},
-         'Supply manifold volume - Vsm (dm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 3},
-         'Exhaust manifold volume - Vem (dm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 5},
-         'Exhaust anode manifold throttle area - A_T_a (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 1},
-         'Exhaust cathode manifold throttle area - A_T_c (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 3}}
+         'Supply anode manifold volume - Vsm_a (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 3},
+         'Supply cathode manifold volume - Vsm_c (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 5},
+         'Exhaust anode manifold volume - Vem_a (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 1},
+         'Exhaust cathode manifold volume - Vem_c (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 3},
+         'Exhaust anode manifold throttle area - A_T_a (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 5},
+         'Exhaust cathode manifold throttle area - A_T_c (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 5, 'label_column': 1}}
 
     choice_undetermined_parameters = \
         {'GDL thickness - Hgdl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 1},
@@ -369,8 +371,8 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
     # Retrieves parameter values for predefined stacks and keeps them in their standard unit, or converts user-selected
     # quantities into standard units.
     (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, n_cell, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc,
-     Hcgc, Wagc, Wcgc, Lgc, Vsm, Vem, A_T_a, A_T_c, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e,
-     i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, step_current_parameters,
+     Hcgc, Wagc, Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc,
+     epsilon_c, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, step_current_parameters,
      pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge,
      n_gdl, n_mpl, rtol, atol, type_fuel_cell, type_auxiliary, type_control, type_purge, type_display, type_plot) = \
         recover_for_use_operating_inputs_and_physical_parameters(choice_operating_conditions,
@@ -386,7 +388,8 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
                           'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
                           'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
     accessible_physical_parameters = {'Aact': Aact, 'n_cell': n_cell, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc,
-                                      'Wcgc': Wcgc, 'Lgc': Lgc, 'Vsm': Vsm, 'Vem': Vem, 'A_T_a': A_T_a, 'A_T_c': A_T_c}
+                                      'Wcgc': Wcgc, 'Lgc': Lgc, 'Vsm_a': Vsm_a, 'Vsm_c': Vsm_c, 'Vem_a': Vem_a,
+                                      'Vem_c': Vem_c, 'A_T_a': A_T_a, 'A_T_c': A_T_c}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
                                         'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl,
                                         'epsilon_mpl': epsilon_mpl, 'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c,

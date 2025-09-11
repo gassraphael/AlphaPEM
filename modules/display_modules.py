@@ -1605,7 +1605,7 @@ def plot_specific_line(x, y, type_fuel_cell, type_current, type_auxiliary, type_
             ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(7), label='Sim. - T = 84 °C')
 
         # EH-31 fuel cell
-        if type_fuel_cell == "EH-31_1.5" and type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
+        elif type_fuel_cell == "EH-31_1.5" and type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
             ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(0),
                        label='Sim. - P = 1.5 bar' + r' - $ΔU_{max}$ =' f' {sim_error} %')
         elif type_fuel_cell == "EH-31_1.5" and type_auxiliary != "forced-convective_cathode_with_flow-through_anode":
