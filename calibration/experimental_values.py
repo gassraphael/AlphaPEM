@@ -476,8 +476,8 @@ def pola_exp_values_calibration(type_fuel_cell, calibration_zone = 'full'):
             i_exp_cali_t[4], i_exp_cali_t[5], i_exp_cali_t[6] = 0.900, 1.500, 2.171
             # Voltage
             U_exp_cali_t = np.zeros(7)
-            U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[5], U_exp_cali_t[8] = 0.936, 0.835, 0.759, 0.701
-            U_exp_cali_t[9], U_exp_cali_t[13], U_exp_cali_t[17] = 0.670, 0.541, 0.402
+            U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.936, 0.835, 0.759, 0.701
+            U_exp_cali_t[4], U_exp_cali_t[5], U_exp_cali_t[6] = 0.670, 0.541, 0.402
         else: # calibration_zone == 'before_voltage_drop'
             # Current density
             i_exp_cali_t = np.zeros(4)
