@@ -11,7 +11,7 @@ import numpy as np
 
 # ___________________________________________________Experimental data__________________________________________________
 
-def pola_exp_values(type_fuel_cell, calibration_zone = 'after_voltage_drop'):
+def pola_exp_values(type_fuel_cell, calibration_zone = 'full'):
     """
     This function returns the experimental values of polarisation curves made on different fuel cells at different
     operating conditions. The experimental values are used to compare the model results with the experimental data.
@@ -22,7 +22,7 @@ def pola_exp_values(type_fuel_cell, calibration_zone = 'after_voltage_drop'):
         Type of fuel cell used in the model. This parameter includes the fuel cell used in the model and the
         corresponding operating conditions.
     calibration_zone : str
-        Zone of the polarization curve used for the calibration. It can be 'after_voltage_drop' or 'before_voltage_drop'.
+        Zone of the polarization curve used for the calibration. It can be 'full' or 'before_voltage_drop'.
 
     Returns
     -------
@@ -34,7 +34,7 @@ def pola_exp_values(type_fuel_cell, calibration_zone = 'after_voltage_drop'):
     """
     # ZSW fuel cell
     if type_fuel_cell == "ZSW-GenStack":
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_t = np.zeros(19)
             i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.001, 0.050, 0.099, 0.150, 0.200
@@ -60,7 +60,7 @@ def pola_exp_values(type_fuel_cell, calibration_zone = 'after_voltage_drop'):
             U_exp_t[10], U_exp_t[11], U_exp_t[12], U_exp_t[13], U_exp_t[14] = 0.694, 0.685, 0.666, 0.644, 0.620
 
     elif type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41":
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_t = np.zeros(18)
             i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.001, 0.050, 0.099, 0.150, 0.200
@@ -84,7 +84,7 @@ def pola_exp_values(type_fuel_cell, calibration_zone = 'after_voltage_drop'):
             U_exp_t[5], U_exp_t[6], U_exp_t[7], U_exp_t[8] = 0.759, 0.741, 0.725, 0.701
 
     elif type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81":
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_t = np.zeros(19)
             i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.001, 0.050, 0.099, 0.150, 0.199
@@ -110,7 +110,7 @@ def pola_exp_values(type_fuel_cell, calibration_zone = 'after_voltage_drop'):
             U_exp_t[10], U_exp_t[11], U_exp_t[12] = 0.685, 0.677, 0.655
 
     elif type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2":
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_t = np.zeros(19)
             i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.001, 0.050, 0.099, 0.150, 0.200
@@ -138,7 +138,7 @@ def pola_exp_values(type_fuel_cell, calibration_zone = 'after_voltage_drop'):
             U_exp_t[15] = 0.607
 
     elif type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6":
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_t = np.zeros(19)
             i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.001, 0.050, 0.099, 0.150, 0.199
@@ -166,7 +166,7 @@ def pola_exp_values(type_fuel_cell, calibration_zone = 'after_voltage_drop'):
             U_exp_t[15] = 0.622
 
     elif type_fuel_cell == "ZSW-GenStack_T_62":
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_t = np.zeros(19)
             i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.001, 0.050, 0.099, 0.150, 0.199
@@ -192,7 +192,7 @@ def pola_exp_values(type_fuel_cell, calibration_zone = 'after_voltage_drop'):
             U_exp_t[10], U_exp_t[11], U_exp_t[12], U_exp_t[13] = 0.685, 0.675, 0.653, 0.631
 
     elif type_fuel_cell == "ZSW-GenStack_T_76":
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_t = np.zeros(19)
             i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.001, 0.050, 0.099, 0.150, 0.199
@@ -218,7 +218,7 @@ def pola_exp_values(type_fuel_cell, calibration_zone = 'after_voltage_drop'):
             U_exp_t[10], U_exp_t[11] = 0.691, 0.679
 
     elif type_fuel_cell == "ZSW-GenStack_T_84":
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_t = np.zeros(17)
             i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.001, 0.050, 0.099, 0.150, 0.199
@@ -243,7 +243,7 @@ def pola_exp_values(type_fuel_cell, calibration_zone = 'after_voltage_drop'):
 
     # EH-31 fuel cell
     elif type_fuel_cell == "EH-31_1.5":  # at 1.5 bar
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_t = np.zeros(37)
             i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.050, 0.068, 0.089, 0.110, 0.147
@@ -283,7 +283,7 @@ def pola_exp_values(type_fuel_cell, calibration_zone = 'after_voltage_drop'):
             U_exp_t[25], U_exp_t[26], U_exp_t[27], U_exp_t[28] = 0.634, 0.622, 0.610, 0.599
 
     elif type_fuel_cell == "EH-31_2.0":  # at 2.0 bar
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_t = np.zeros(49)
             i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.050, 0.057, 0.079, 0.106, 0.135
@@ -327,7 +327,7 @@ def pola_exp_values(type_fuel_cell, calibration_zone = 'after_voltage_drop'):
             U_exp_t[25], U_exp_t[26], U_exp_t[27] = 0.710, 0.702, 0.698
 
     elif type_fuel_cell == "EH-31_2.25":  # at 2.25 bar
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_t = np.zeros(54)
             i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.056, 0.095, 0.120, 0.138, 0.160
@@ -375,7 +375,7 @@ def pola_exp_values(type_fuel_cell, calibration_zone = 'after_voltage_drop'):
             U_exp_t[30], U_exp_t[31], U_exp_t[32] = 0.692, 0.686, 0.678
 
     elif type_fuel_cell == "EH-31_2.5":  # at 2.5 bar
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_t = np.zeros(56)
             i_exp_t[0], i_exp_t[1], i_exp_t[2], i_exp_t[3], i_exp_t[4] = 0.057, 0.070, 0.082, 0.101, 0.127
@@ -426,7 +426,7 @@ def pola_exp_values(type_fuel_cell, calibration_zone = 'after_voltage_drop'):
 
     return i_exp_t * 1e4, U_exp_t # Conversion in A.m-2
 
-def pola_exp_values_calibration(type_fuel_cell, calibration_zone = 'after_voltage_drop'):
+def pola_exp_values_calibration(type_fuel_cell, calibration_zone = 'full'):
     """
     This function returns the experimental values of polarisation curves made on different fuel cells at different
     operating conditions. The experimental values are used for calibrating the model and so are composed of a reduced
@@ -439,7 +439,7 @@ def pola_exp_values_calibration(type_fuel_cell, calibration_zone = 'after_voltag
         Type of fuel cell used in the model. This parameter includes the fuel cell used in the model and the
         corresponding operating conditions.
     calibration_zone : str
-        Zone of the polarization curve used for the calibration. It can be 'after_voltage_drop' or 'before_voltage_drop'.
+        Zone of the polarization curve used for the calibration. It can be 'full' or 'before_voltage_drop'.
 
     Returns
     -------
@@ -451,7 +451,7 @@ def pola_exp_values_calibration(type_fuel_cell, calibration_zone = 'after_voltag
     """
     # ZSW fuel cell
     if type_fuel_cell == "ZSW-GenStack":
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_cali_t = np.zeros(7)
             i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.001, 0.050, 0.498, 1.099
@@ -469,7 +469,7 @@ def pola_exp_values_calibration(type_fuel_cell, calibration_zone = 'after_voltag
             U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3], U_exp_cali_t[4] = 0.953, 0.864, 0.743, 0.685, 0.620
 
     elif type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41":
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_cali_t = np.zeros(7)
             i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.001, 0.050, 0.300, 0.700
@@ -487,7 +487,7 @@ def pola_exp_values_calibration(type_fuel_cell, calibration_zone = 'after_voltag
             U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.936, 0.835, 0.759, 0.701
 
     elif type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81":
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_cali_t = np.zeros(6)
             i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2] = 0.001, 0.050, 0.498
@@ -505,7 +505,7 @@ def pola_exp_values_calibration(type_fuel_cell, calibration_zone = 'after_voltag
             U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.946, 0.855, 0.736, 0.655
 
     elif type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2":
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_cali_t = np.zeros(7)
             i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.001, 0.050, 0.498, 1.099
@@ -523,7 +523,7 @@ def pola_exp_values_calibration(type_fuel_cell, calibration_zone = 'after_voltag
             U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3], U_exp_cali_t[4] = 0.949, 0.867, 0.746, 0.687, 0.607
 
     elif type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6":
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_cali_t = np.zeros(7)
             i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.001, 0.050, 0.498, 1.099
@@ -541,7 +541,7 @@ def pola_exp_values_calibration(type_fuel_cell, calibration_zone = 'after_voltag
             U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3], U_exp_cali_t[4] = 0.947, 0.872, 0.752, 0.703, 0.622
 
     elif type_fuel_cell == "ZSW-GenStack_T_62":
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_cali_t = np.zeros(6)
             i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2] = 0.001, 0.050, 0.498
@@ -559,7 +559,7 @@ def pola_exp_values_calibration(type_fuel_cell, calibration_zone = 'after_voltag
             U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.944, 0.855, 0.739, 0.631
 
     elif type_fuel_cell == "ZSW-GenStack_T_76":
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_cali_t = np.zeros(7)
             i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.001, 0.050, 0.498, 1.099
@@ -577,7 +577,7 @@ def pola_exp_values_calibration(type_fuel_cell, calibration_zone = 'after_voltag
             U_exp_cali_t[0], U_exp_cali_t[1], U_exp_cali_t[2], U_exp_cali_t[3] = 0.946, 0.849, 0.744, 0.679
 
     elif type_fuel_cell == "ZSW-GenStack_T_84":
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_cali_t = np.zeros(7)
             i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.001, 0.050, 0.300, 0.700
@@ -596,7 +596,7 @@ def pola_exp_values_calibration(type_fuel_cell, calibration_zone = 'after_voltag
 
     # EH-31 fuel cell
     elif type_fuel_cell == "EH-31_1.5":  # at 1.5 bar
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_cali_t = np.zeros(7)
             i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.050, 0.110, 0.293, 1.039
@@ -616,7 +616,7 @@ def pola_exp_values_calibration(type_fuel_cell, calibration_zone = 'after_voltag
             U_exp_cali_t[4] = 0.599
 
     elif type_fuel_cell == "EH-31_2.0":  # at 2.0 bar
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_cali_t = np.zeros(8)
             i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.050, 0.106, 0.242, 0.681
@@ -636,7 +636,7 @@ def pola_exp_values_calibration(type_fuel_cell, calibration_zone = 'after_voltag
             U_exp_cali_t[4] = 0.698
 
     elif type_fuel_cell == "EH-31_2.25":  # at 2.25 bar
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_cali_t = np.zeros(8)
             i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.056, 0.183, 0.364, 1.011
@@ -656,7 +656,7 @@ def pola_exp_values_calibration(type_fuel_cell, calibration_zone = 'after_voltag
             U_exp_cali_t[4] = 0.678
 
     elif type_fuel_cell == "EH-31_2.5":  # at 2.5 bar
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             # Current density
             i_exp_cali_t = np.zeros(10)
             i_exp_cali_t[0], i_exp_cali_t[1], i_exp_cali_t[2], i_exp_cali_t[3] = 0.057, 0.127, 0.296, 0.527

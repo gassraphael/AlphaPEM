@@ -26,7 +26,7 @@ def parameter_bounds_for_calibration(type_fuel_cell, calibration_zone, operating
        type_fuel_cell : str
             Type of fuel cell configuration.
          calibration_zone : str
-            Zone of calibration: "before_voltage_drop", "after_voltage_drop".
+            Zone of calibration: "before_voltage_drop", "full".
        operating_inputs_1 : dict
             Operating inputs for the first fuel cell configuration.
        operating_inputs_2 : dict
@@ -84,7 +84,7 @@ def parameter_bounds_for_calibration(type_fuel_cell, calibration_zone, operating
                         ['i0_d_c_ref', i0_d_c_ref_min, i0_d_c_ref_max, 'real'],
                         ['kappa_co', kappa_co_min, kappa_co_max, 'real'],
                         ['kappa_c', kappa_c_min, kappa_c_max, 'real']]
-        else: # calibration_zone == "after_voltage_drop"
+        else: # calibration_zone == "full"
             varbound = [['i0_h_c_ref', i0_h_c_ref_min, i0_h_c_ref_max, 'real'],
                         ['a_slim', a_slim_min, a_slim_max, 'real'],
                         ['b_slim', b_slim_min, b_slim_max, 'real'],
@@ -132,7 +132,7 @@ def parameter_bounds_for_calibration(type_fuel_cell, calibration_zone, operating
                         ['i0_d_c_ref', i0_d_c_ref_min, i0_d_c_ref_max, 'real'],
                         ['kappa_co', kappa_co_min, kappa_co_max, 'real'],
                         ['kappa_c', kappa_c_min, kappa_c_max, 'real']]
-        else: # calibration_zone == "after_voltage_drop"
+        else: # calibration_zone == "full"
             varbound = [['epsilon_c', epsilon_c_min, epsilon_c_max, 'real'],
                         ['i0_h_c_ref', i0_h_c_ref_min, i0_h_c_ref_max, 'real'],
                         ['a_slim', a_slim_min, a_slim_max, 'real'],
@@ -262,7 +262,10 @@ def parameters_for_calibration(type_fuel_cell, calibration_zone):
         Experimental values of the voltage.
     """
 
-    if type_fuel_cell == "ZSW-GenStack":
+    if type_fuel_cell == "ZSW-GenStack" or type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41" or \
+            type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81" or type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2" or \
+            type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6" or type_fuel_cell == "ZSW-GenStack_T_62" or \
+            type_fuel_cell == "ZSW-GenStack_T_76" or type_fuel_cell == "ZSW-GenStack_T_84":
         # Given values by the author
         #       Operating inputs
         if type_fuel_cell == "ZSW-GenStack_T_62":
@@ -294,10 +297,10 @@ def parameters_for_calibration(type_fuel_cell, calibration_zone):
         Wagc = 4.3e-4  # m. It is the width of the anode gas channel.
         Wcgc = 5.32e-4  # m. It is the width of the cathode gas channel.
         Lgc = 23.31  # m. It is the length of the gas channel.
-        Vsm = 7.0e-3  # m³. It is the supply manifold volume.
-        Vem = 2.4e-3  # m³. It is the exhaust manifold volume.
-        A_T_a = 9.10e-4  # m². It is the exhaust anode manifold throttle area
-        A_T_c = 22.83e-4  # m². It is the exhaust cathode manifold throttle area
+        A_T_a = 9.01e-4  # m². It is the exhaust anode manifold throttle area
+        A_T_c = 22.61e-4  # m². It is the exhaust cathode manifold throttle area
+        Vsm_a, Vsm_c = 56.8e-6, 145e-6  # m3. It is the supply manifold volume.
+        Vem_a, Vem_c = Vsm_a, Vsm_c  # m-3. It is the exhaust manifold volume.
         #       Fuel cell undetermined physical parameters.
         Hgdl = 1.27e-4  # m. It is the thickness of the gas diffusion layer.
         Hmpl = 7e-5  # m. It is the thickness of the microporous layer.
@@ -342,7 +345,7 @@ def parameters_for_calibration(type_fuel_cell, calibration_zone):
         delta_t_load_pola = 30  # (s). Loading time for one step current of the polarisation current density function.
         delta_t_break_pola = 15 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
         delta_i_pola = 0.05e4  # (A.m-2). Current density step for the polarisation current density function.
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             i_max_pola = 2.5e4  # (A.m-2). It is the maximum current density for the polarization curve.
         else: # calibration_zone == 'before_voltage_drop'
             i_max_pola = 1.9e4
@@ -392,10 +395,10 @@ def parameters_for_calibration(type_fuel_cell, calibration_zone):
         epsilon_mpl = 0.4  # It is the porosity of the microporous layer.
         Hagc = 500e-6  # m. It is the thickness of the anode gas channel.
         Hcgc = Hagc  # m. It is the thickness of the cathode gas channel.
-        Vsm = 7.0e-3  # m³. It is the supply manifold volume.
-        Vem = 2.4e-3  # m³. It is the exhaust manifold volume.
-        A_T_a = 11.8e-4  # m². It is the anode exhaust manifold throttle area
-        A_T_c = A_T_a  # m². It is the cathode exhaust manifold throttle area
+        Vsm_a, Vsm_c = 7.0e-3, 7.0e-3  # m3. It is the supply manifold volume.
+        Vem_a, Vem_c = 2.4e-3, 2.4e-3  # m-3. It is the exhaust manifold volume.
+        A_T_a = 11.8e-4  # m². It is the exhaust anode manifold throttle area
+        A_T_c = A_T_a  # m². It is the exhaust cathode manifold throttle area
 
         # Estimated undetermined parameters for the initialisation
         #   Gas diffusion layer
@@ -436,7 +439,7 @@ def parameters_for_calibration(type_fuel_cell, calibration_zone):
         delta_t_load_pola = 30  # (s). Loading time for one step current of the polarisation current density function.
         delta_t_break_pola = 15 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
         delta_i_pola = 0.05e4  # (A.m-2). Current density step for the polarisation current density function.
-        if calibration_zone == 'after_voltage_drop':
+        if calibration_zone == 'full':
             i_max_pola = 3.0e4  # (A.m-2). It is the maximum current density for the polarization curve.
         else:  # calibration_zone == 'before_voltage_drop'
             i_max_pola = 1.7e4
@@ -468,7 +471,7 @@ def parameters_for_calibration(type_fuel_cell, calibration_zone):
                           'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
                           'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
     accessible_physical_parameters = {'Aact': Aact, 'n_cell': n_cell, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc, 'Wcgc': Wcgc, 'Lgc': Lgc,
-                                      'Vsm': Vsm, 'Vem': Vem, 'A_T_a': A_T_a, 'A_T_c': A_T_c}
+                                      'Vsm_a': Vsm_a, 'Vsm_c': Vsm_c, 'Vem_a': Vem_a, 'Vem_c': Vem_c, 'A_T_a': A_T_a, 'A_T_c': A_T_c}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
                                         'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl, 'epsilon_mpl': epsilon_mpl,
                                         'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c, 'e': e,
