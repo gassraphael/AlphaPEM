@@ -288,6 +288,7 @@ def parameters_for_calibration(type_fuel_cell, calibration_zone):
         y_H2_in = 0.7 # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
         #       Fuel cell physical parameters
         Aact = 2.7972e-2  # m². It is the active area of the catalyst layer.
+        n_cell = 26  # . It is the number of cell in the stack.
         Hagc = 2.3e-4  # m. It is the thickness of the anode gas channel.
         Hcgc = 3e-4  # m. It is the thickness of the cathode gas channel.
         Wagc = 4.3e-4  # m. It is the width of the anode gas channel.
@@ -295,7 +296,8 @@ def parameters_for_calibration(type_fuel_cell, calibration_zone):
         Lgc = 23.31  # m. It is the length of the gas channel.
         Vsm = 7.0e-3  # m³. It is the supply manifold volume.
         Vem = 2.4e-3  # m³. It is the exhaust manifold volume.
-        A_T = 1.18e-3  # m². It is the exhaust manifold throttle area
+        A_T_a = 9.10e-4  # m². It is the exhaust anode manifold throttle area
+        A_T_c = 22.83e-4  # m². It is the exhaust cathode manifold throttle area
         #       Fuel cell undetermined physical parameters.
         Hgdl = 1.27e-4  # m. It is the thickness of the gas diffusion layer.
         Hmpl = 7e-5  # m. It is the thickness of the microporous layer.
@@ -384,6 +386,7 @@ def parameters_for_calibration(type_fuel_cell, calibration_zone):
         Lgc = 9.67  # m. It is the length of the gas channel.
 
         # Extrapolated physical parameters
+        n_cell = 1  # . It is the number of cell in the stack.
         Hgdl = 200e-6  # m. It is the thickness of the gas diffusion layer.
         Hmpl = 30e-6  # m. It is the thickness of the microporous layer.
         epsilon_mpl = 0.4  # It is the porosity of the microporous layer.
@@ -391,7 +394,8 @@ def parameters_for_calibration(type_fuel_cell, calibration_zone):
         Hcgc = Hagc  # m. It is the thickness of the cathode gas channel.
         Vsm = 7.0e-3  # m³. It is the supply manifold volume.
         Vem = 2.4e-3  # m³. It is the exhaust manifold volume.
-        A_T = 11.8e-4  # m². It is the exhaust manifold throttle area
+        A_T_a = 11.8e-4  # m². It is the anode exhaust manifold throttle area
+        A_T_c = A_T_a  # m². It is the cathode exhaust manifold throttle area
 
         # Estimated undetermined parameters for the initialisation
         #   Gas diffusion layer
@@ -463,8 +467,8 @@ def parameters_for_calibration(type_fuel_cell, calibration_zone):
                           'pola_current_parameters': pola_current_parameters,
                           'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
                           'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
-    accessible_physical_parameters = {'Aact': Aact, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc, 'Wcgc': Wcgc, 'Lgc': Lgc,
-                                      'Vsm': Vsm, 'Vem': Vem, 'A_T': A_T}
+    accessible_physical_parameters = {'Aact': Aact, 'n_cell': n_cell, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc, 'Wcgc': Wcgc, 'Lgc': Lgc,
+                                      'Vsm': Vsm, 'Vem': Vem, 'A_T_a': A_T_a, 'A_T_c': A_T_c}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
                                         'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl, 'epsilon_mpl': epsilon_mpl,
                                         'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c, 'e': e,

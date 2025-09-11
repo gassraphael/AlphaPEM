@@ -35,7 +35,7 @@ type_fuel_cell_1 = "EH-31_2.0"
 type_fuel_cell_2 = "EH-31_2.25"
 
 # Calibration zone: "before_voltage_drop", "after_voltage_drop".
-calibration_zone = "after_voltage_drop"
+calibration_zone = "before_voltage_drop"
 
 (operating_inputs_1, current_parameters, accessible_physical_parameters, undetermined_physical_parameters,
  computing_parameters_1, i_exp_1, U_exp_1) \
