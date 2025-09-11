@@ -124,9 +124,11 @@ def main_frame(root, canvas):
          'CGC width - Wcgc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 1},
          'GC cumulated length - Lgc (m)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 3},
          'Active area - Aact (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 5},
-         'Supply manifold volume - Vsm (dm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 1},
-         'Exhaust manifold volume - Vem (dm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 3},
-         'Exhaust manifold throttle area - A_T (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 5}}
+         'Number of cells - n_cell': {'value': tk.IntVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 1},
+         'Supply manifold volume - Vsm (dm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 3},
+         'Exhaust manifold volume - Vem (dm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 5},
+         'Exhaust anode manifold throttle area - A_T_a (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 1},
+         'Exhaust cathode manifold throttle area - A_T_c (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 3}}
 
     choice_undetermined_parameters = \
         {'GDL thickness - Hgdl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 1},
@@ -142,12 +144,13 @@ def main_frame(root, canvas):
          'Capillary exponent - e': {'value': tk.IntVar(undetermined_parameters_frame), 'label_row': 3, 'label_column': 1},
          'Electron resistance\n- Re (µΩ.m²)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 1},
          'Dry reference exchange current\ndensity - i0_d_c_ref (A/m²)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 3},
-         'Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 5},
-         'Overpotential correction\nexponent - κ_c': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 5, 'label_column': 1},
-         'Limit liquid saturation\ncoefficient - a_slim': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 5, 'label_column': 3},
-         'Limit liquid saturation\ncoefficient - b_slim': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 5, 'label_column': 5},
-         'Limit liquid saturation\ncoefficient - a_switch': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 6, 'label_column': 1},
-         'Volumetric space-charge layer\ncapacitance - C_scl (F/cm³)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 6, 'label_column': 3}}
+         'Humid reference exchange current\ndensity - i0_h_c_ref (A/m²)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 5},
+         'Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 5, 'label_column': 1},
+         'Overpotential correction\nexponent - κ_c': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 5, 'label_column': 3},
+         'Limit liquid saturation\ncoefficient - a_slim': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 5, 'label_column': 5},
+         'Limit liquid saturation\ncoefficient - b_slim': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 6, 'label_column': 1},
+         'Limit liquid saturation\ncoefficient - a_switch': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 6, 'label_column': 3},
+         'Volumetric space-charge layer\ncapacitance - C_scl (F/cm³)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 6, 'label_column': 5}}
 
     choice_current_density_parameters = \
         {'Stabilisation time\n- Δt_ini_step (min)': {'value': tk.DoubleVar(current_density_parameters_frame, step_current_parameters['delta_t_ini_step']/60),
@@ -241,7 +244,7 @@ def main_frame(root, canvas):
         grid(row=0, column=0, columnspan=2)
     ttk.OptionMenu(operating_conditions_frame, choice_buttons['type_fuel_cell']['value'],
                    'Enter your specifications', 'Enter your specifications', 'EH-31 1.5 bar (2021)',
-                   'EH-31 2.0 bar (2021)', 'EH-31 2.25 bar (2021)', 'EH-31 2.5 bar (2021)', 'Linhao Fan (2010)',
+                   'EH-31 2.0 bar (2021)', 'EH-31 2.25 bar (2021)', 'EH-31 2.5 bar (2021)',
                    command=lambda value: changeValue(operating_conditions_frame, accessible_parameters_frame,
                                                      undetermined_parameters_frame, current_density_parameters_frame,
                                                      computing_parameters_frame, choice_operating_conditions,
@@ -365,11 +368,11 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
 
     # Retrieves parameter values for predefined stacks and keeps them in their standard unit, or converts user-selected
     # quantities into standard units.
-    (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c,
-            a_slim, b_slim, a_switch, C_scl, step_current_parameters, pola_current_parameters,
-            pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, n_gdl, n_mpl,
-            rtol, atol, type_fuel_cell, type_auxiliary, type_control, type_purge, type_display, type_plot) = \
+    (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, n_cell, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc,
+     Hcgc, Wagc, Wcgc, Lgc, Vsm, Vem, A_T_a, A_T_c, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e,
+     i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, step_current_parameters,
+     pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge,
+     n_gdl, n_mpl, rtol, atol, type_fuel_cell, type_auxiliary, type_control, type_purge, type_display, type_plot) = \
         recover_for_use_operating_inputs_and_physical_parameters(choice_operating_conditions,
                                                                  choice_accessible_parameters,
                                                                  choice_undetermined_parameters,
@@ -382,7 +385,8 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
                           'pola_current_parameters': pola_current_parameters,
                           'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
                           'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
-    accessible_physical_parameters = {'Aact': Aact, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc, 'Wcgc': Wcgc, 'Lgc': Lgc}
+    accessible_physical_parameters = {'Aact': Aact, 'n_cell': n_cell, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc,
+                                      'Wcgc': Wcgc, 'Lgc': Lgc, 'Vsm': Vsm, 'Vem': Vem, 'A_T_a': A_T_a, 'A_T_c': A_T_c}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
                                         'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl,
                                         'epsilon_mpl': epsilon_mpl, 'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c,

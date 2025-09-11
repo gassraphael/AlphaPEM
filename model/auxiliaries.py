@@ -6,7 +6,7 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import (F, R, Text, Pext, Phi_ext, y_O2_ext, gamma, gamma_H2, M_H2O, n_cell, Ksm_in, Ksm_out,
+from configuration.settings import (F, R, Text, Pext, Phi_ext, y_O2_ext, gamma, gamma_H2, M_H2O, Ksm_in, Ksm_out,
                                     Kem_in, C_D)
 from modules.transitory_functions import Psat
 from modules.auxiliaries_modules import auxiliaries_int_values
@@ -98,8 +98,8 @@ def auxiliaries(t, solver_variables, control_variables, i_fc, operating_inputs, 
     T_des, Pa_des, Pc_des = operating_inputs['T_des'], operating_inputs['Pa_des'], operating_inputs['Pc_des']
     Sa, Sc, y_H2_in = operating_inputs['Sa'], operating_inputs['Sc'], operating_inputs['y_H2_in']
     Phi_a_des, Phi_c_des = control_variables['Phi_a_des'], control_variables['Phi_c_des']
-    Aact, Hagc, Hcgc = parameters['Aact'], parameters['Hagc'], parameters['Hcgc']
-    Wagc, Wcgc, A_T = parameters['Wagc'], parameters['Wcgc'], parameters['A_T']
+    Aact, n_cell, Hagc, Hcgc = parameters['Aact'], parameters['n_cell'], parameters['Hagc'], parameters['Hcgc']
+    Wagc, Wcgc, A_T_a = parameters['Wagc'], parameters['Wcgc'], parameters['A_T_a']
     type_auxiliary = parameters['type_auxiliary']
 
     # Intermediate values
@@ -120,7 +120,7 @@ def auxiliaries(t, solver_variables, control_variables, i_fc, operating_inputs, 
         # Anode outlet
         Waem_in = Kem_in * (Pagc - Paem)  # kg.s-1
         Ware = n_cell * Maem * (Paem / (Paem - Phi_aem * Psat(T_des))) * (Sa - 1) * (i_fc + i_n) / (2 * F) * Aact  # kg.s-1
-        Waem_out = k_purge * C_D * A_T * Paem / (R * T_des)**0.5 * Pr_aem ** (1 / gamma_H2) * \
+        Waem_out = k_purge * C_D * A_T_a * Paem / (R * T_des)**0.5 * Pr_aem ** (1 / gamma_H2) * \
                    (Magc * 2 * gamma_H2 / (gamma_H2 - 1) * (1 - Pr_aem ** ((gamma_H2 - 1) / gamma_H2)))**0.5  # kg.s-1
         Ja_out = Waem_in / (Hagc * Wagc * Magc)  # mol.m-2.s-1
 

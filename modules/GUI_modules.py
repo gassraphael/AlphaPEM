@@ -334,8 +334,6 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
         type_fuel_cell = "EH-31_2.25"
     elif choice_buttons['type_fuel_cell']['value'].get() == "EH-31 2.5 bar (2021)":
         type_fuel_cell = "EH-31_2.5"
-    elif choice_buttons['type_fuel_cell']['value'].get() == "Linhao Fan (2010)":
-        type_fuel_cell = "LF"
 
     (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
      current_density) = current_density_parameters()
@@ -343,8 +341,8 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola = stored_operating_inputs(type_fuel_cell)
 
     (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
-     Lgc, Vsm, Vem, A_T, Aact, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = \
-        stored_physical_parameters(type_fuel_cell)
+     Lgc, Vsm, Vem, A_T_a, A_T_c, Aact, n_cell, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
+     C_scl) = stored_physical_parameters(type_fuel_cell)
 
     n_gdl, n_mpl, t_purge, rtol, atol, step_current_parameters = computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, type_fuel_cell)
 
@@ -359,6 +357,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_operating_conditions['Anode inlet H2 ratio - y_H2_in\n(flow-through anode only)']['value'].set(round(y_H2_in, 4))
     # accessible physical parameters recovery
     choice_accessible_parameters['Active area - Aact (cm²)']['value'].set(round(Aact * 1e4, 4))  # cm²
+    choice_accessible_parameters['Number of cells - n_cell']['value'].set(int(n_cell))
     choice_accessible_parameters['AGC thickness - Hagc (µm)']['value'].set(round(Hagc * 1e6, 4))  # µm
     choice_accessible_parameters['CGC thickness - Hcgc (µm)']['value'].set(round(Hcgc * 1e6, 4))  # µm
     choice_accessible_parameters['AGC width - Wagc (µm)']['value'].set(round(Wagc * 1e6, 4))  # µm
@@ -366,7 +365,8 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].set(round(Lgc, 4))  # µm
     choice_accessible_parameters['Supply manifold volume - Vsm (dm³)']['value'].set(round(Vsm * 1e3, 4))  # dm³
     choice_accessible_parameters['Exhaust manifold volume - Vem (dm³)']['value'].set(round(Vem * 1e3, 4))  # dm³
-    choice_accessible_parameters['Exhaust manifold throttle area - A_T (cm²)']['value'].set(round(A_T * 1e4, 4))  # cm²
+    choice_accessible_parameters['Exhaust anode manifold throttle area - A_T_a (cm²)']['value'].set(round(A_T_a * 1e4, 4))  # cm²
+    choice_accessible_parameters['Exhaust cathode manifold throttle area - A_T_c (cm²)']['value'].set(round(A_T_c * 1e4, 4))  # cm²
     # undetermined physical parameters recovery
     choice_undetermined_parameters['GDL thickness - Hgdl (µm)']['value'].set(round(Hgdl * 1e6, 4))  # µm
     choice_undetermined_parameters['MPL thickness - Hmpl (µm)']['value'].set(round(Hmpl * 1e6, 4))  # µm
@@ -429,6 +429,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     y_H2_in = choice_operating_conditions['Anode inlet H2 ratio - y_H2_in\n(flow-through anode only)']['value'].get()
     # accessible physical parameters
     Aact = choice_accessible_parameters['Active area - Aact (cm²)']['value'].get() * 1e-4  # m²
+    n_cell = int(choice_accessible_parameters['Number of cells - n_cell']['value'].get())
     Hagc = choice_accessible_parameters['AGC thickness - Hagc (µm)']['value'].get() * 1e-6  # m
     Hcgc = choice_accessible_parameters['CGC thickness - Hcgc (µm)']['value'].get() * 1e-6  # m
     Wagc = choice_accessible_parameters['AGC width - Wagc (µm)']['value'].get() * 1e-6  # m
@@ -436,7 +437,8 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     Lgc = choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].get()  # m
     Vsm = choice_accessible_parameters['Supply manifold volume - Vsm (dm³)']['value'].get() * 1e-3  # m³
     Vem = choice_accessible_parameters['Exhaust manifold volume - Vem (dm³)']['value'].get() * 1e-3 # m³
-    A_T = choice_accessible_parameters['Exhaust manifold throttle area - A_T (cm²)']['value'].get() * 1e-4  # m²
+    A_T_a = choice_accessible_parameters['Exhaust anode manifold throttle area - A_T_a (cm²)']['value'].get() * 1e-4  # m²
+    A_T_c = choice_accessible_parameters['Exhaust cathode manifold throttle area - A_T_c (cm²)']['value'].get() * 1e-4  # m²
     # undetermined physical parameters
     Hgdl = choice_undetermined_parameters['GDL thickness - Hgdl (µm)']['value'].get() * 1e-6  # m
     Hmpl = choice_undetermined_parameters['MPL thickness - Hmpl (µm)']['value'].get() * 1e-6  # m
@@ -498,8 +500,6 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
         type_fuel_cell = "EH-31_2.25"
     elif choice_buttons['type_fuel_cell']['value'].get() == "EH-31 2.5 bar (2021)":
         type_fuel_cell = "EH-31_2.5"
-    elif choice_buttons['type_fuel_cell']['value'].get() == "Linhao Fan (2010)":
-        type_fuel_cell = "LF"
     elif choice_buttons['type_fuel_cell']['value'].get() == "Enter your specifications":
         type_fuel_cell = "manual_setup"
 
@@ -534,11 +534,12 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     else:
         type_plot = "dynamic"
 
-    return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c,
-            a_slim, b_slim, a_switch, C_scl, step_current_parameters, pola_current_parameters,
-            pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, n_gdl, n_mpl,
-            rtol, atol, type_fuel_cell, type_auxiliary, type_control, type_purge, type_display, type_plot)
+    return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, n_cell, Hgdl, Hmpl, Hacl, Hccl, Hmem,
+            Hagc, Hcgc, Wagc, Wcgc, Lgc, Vsm, Vem, A_T_a, A_T_c, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc,
+            epsilon_c, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl,
+            step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS,
+            t_EIS, t_purge, delta_t_purge, n_gdl, n_mpl, rtol, atol, type_fuel_cell, type_auxiliary, type_control,
+            type_purge, type_display, type_plot)
 
 
 def value_control(choice_operating_conditions, choice_accessible_parameters, choice_undetermined_parameters,
@@ -601,9 +602,14 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
         messagebox.showerror(title='Active area', message='Negative active area is impossible.')
         choices.clear()
         return
+    if choice_accessible_parameters['Number of cells - n_cell']['value'].get() < 0:
+        messagebox.showerror(title='Number of cells', message='Negative number of cells is impossible.')
+        choices.clear()
+        return
     if choice_accessible_parameters['Supply manifold volume - Vsm (dm³)']['value'].get() < 0 or \
             choice_accessible_parameters['Exhaust manifold volume - Vem (dm³)']['value'].get() < 0 or \
-            choice_accessible_parameters['Exhaust manifold throttle area - A_T (cm²)']['value'].get() < 0:
+            choice_accessible_parameters['Exhaust anode manifold throttle area - A_T_a (cm²)']['value'].get() < 0 or \
+            choice_accessible_parameters['Exhaust cathode manifold throttle area - A_T_c (cm²)']['value'].get() < 0:
         messagebox.showerror(title='Manifold parameters', message='Negative volumes or area are impossible.')
         choices.clear()
         return
@@ -890,6 +896,8 @@ def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, acces
         Dictionary containing the accessible physical parameters for the simulation. It contains:
             - Aact : float
                 Active area of the cell in m² (accessible physical parameter).
+            - n_cell : int
+                Number of cells in the stack (accessible physical parameter).
             - Hagc : float
                 Thickness of the anode gas channel in m (accessible physical parameter).
             Hcgc : float
@@ -1099,6 +1107,8 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
         Dictionary containing the accessible physical parameters for the simulation. It contains:
             - Aact : float
                 Active area of the cell in m² (accessible physical parameter).
+            - n_cell : int
+                Number of cells in the stack (accessible physical parameter).
             - Hagc : float
                 Thickness of the anode gas channel in m (accessible physical parameter).
             Hcgc : float
@@ -1307,6 +1317,8 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
         Dictionary containing the accessible physical parameters for the simulation. It contains:
             - Aact : float
                 Active area of the cell in m² (accessible physical parameter).
+            - n_cell : int
+                Number of cells in the stack (accessible physical parameter).
             - Hagc : float
                 Thickness of the anode gas channel in m (accessible physical parameter).
             Hcgc : float

@@ -227,8 +227,10 @@ def physical_parameters(type_fuel_cell):
 
     if type_fuel_cell == "manual_setup": # Setup which are not stored in "stored_physical_parameters".
         # Fuel cell physical parameters: 𝜔 (which are not controllable by the system)
+        # Global
+        Aact = 279.72e-4  # m². It is the MEA active area.
+        n_cell = 1  # . It is the number of cell in the stack.
         #   Catalyst layer
-        Aact = 8.5e-3  # m². It is the active area of the catalyst layer.
         Hacl = 8.089e-6  # m. It is the thickness of the anode catalyst layer.
         Hccl = Hacl  # m. It is the thickness of the cathode catalyst layer.
         epsilon_cl = 0.25  # It is the porosity of the catalyst layer, without units.
@@ -251,7 +253,8 @@ def physical_parameters(type_fuel_cell):
         #   Auxiliaries
         Vsm = 7.0e-3  # m³. It is the supply manifold volume.
         Vem = 2.4e-3  # m³. It is the exhaust manifold volume.
-        A_T = 11.8e-4  # m². It is the exhaust manifold throttle area
+        A_T_a = 11.8e-4  # m². It is the exhaust anode manifold throttle area
+        A_T_c = A_T_a  # m². It is the exhaust cathode manifold throttle area
         #   Interaction parameters between water and PEMFC structure
         e = 5.0  # It is the capillary exponent
         #   Voltage polarization
@@ -264,11 +267,12 @@ def physical_parameters(type_fuel_cell):
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
     else: # Stored setup in "stored_physical_parameters".
         (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-         Wcgc, Lgc, Vsm, Vem, A_T, Aact, e, i0_d_c_ref, i0_l_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = \
-            stored_physical_parameters(type_fuel_cell)
+         Wcgc, Lgc, Vsm, Vem, A_T_a, A_T_c, Aact, n_cell, e, i0_d_c_ref, i0_l_c_ref, kappa_co, kappa_c, a_slim, b_slim,
+         a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
 
     return (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, Vsm, Vem, A_T, Aact, e, i0_d_c_ref, i0_l_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
+            Wcgc, Lgc, Vsm, Vem, A_T_a, A_T_c, Aact, n_cell, e, i0_d_c_ref, i0_l_c_ref, kappa_co, kappa_c, a_slim,
+            b_slim, a_switch, C_scl)
 
 
 def computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, type_fuel_cell):
@@ -401,7 +405,6 @@ delta_s_HOR = 0.104  # J.mol-1.K-1. It is the HOR molar reaction entropy [vetter
 delta_s_ORR = -163.3  # J.mol-1.K-1. It is the ORR molar reaction entropy [vetterFreeOpenReference2019].
 
 # Model parameters for the balance of plant
-n_cell = 1 # . It is the number of cell in the stack.
 tau_cp = 1  # s. It is the air compressor time constant.
 tau_hum = 5  # s. It is the humidifier time constant.
 Kp = 5e-8  # m².s-1.Pa-1. It is the proportional constant of the PD controller at the back pressure valve.

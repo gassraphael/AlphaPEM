@@ -113,6 +113,8 @@ class AlphaPEM:
             Dictionary containing the accessible physical parameters for the simulation. It contains:
                 - Aact : float
                     Active area of the cell in m² (accessible physical parameter).
+                - n_cell : int
+                    Number of cells in the stack (accessible physical parameter).
                 - Hagc : float
                     Thickness of the anode gas channel in m (accessible physical parameter).
                 Hcgc : float

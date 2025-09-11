@@ -7,7 +7,7 @@ and to implement integration events.
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import Text, Pext, Phi_ext, n_cell, M_H2, M_O2, M_N2, M_H2O, y_O2_ext, R, F
+from configuration.settings import Text, Pext, Phi_ext, M_H2, M_O2, M_N2, M_H2O, y_O2_ext, R, F
 from modules.transitory_functions import average, Psat, C_v_sat, k_H2, k_O2, calculate_rho_Cp0
 
 
@@ -186,7 +186,7 @@ def desired_flows(solver_variables, control_variables, i_n, i_fc, operating_inpu
     T_des, Sa, Sc = operating_inputs['T_des'], operating_inputs['Sa'], operating_inputs['Sc']
     y_H2_in = operating_inputs['y_H2_in']
     Phi_a_des, Phi_c_des = control_variables['Phi_a_des'], control_variables['Phi_c_des']
-    Aact, type_auxiliary = parameters['Aact'], parameters['type_auxiliary']
+    Aact, n_cell, type_auxiliary = parameters['Aact'], parameters['n_cell'], parameters['type_auxiliary']
 
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
        type_auxiliary == "forced-convective_cathode_with_flow-through_anode":

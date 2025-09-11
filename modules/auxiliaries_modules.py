@@ -84,7 +84,8 @@ def auxiliaries_int_values(t, solver_variables, operating_inputs, parameters):
     Abp_a, Abp_c = solver_variables['Abp_a'], solver_variables['Abp_c']
     # Extraction of the operating inputs and the parameters
     T_des, y_H2_in = operating_inputs['T_des'], operating_inputs['y_H2_in']
-    Hmem, Hacl, Hccl, A_T = parameters['Hmem'], parameters['Hacl'], parameters['Hccl'], parameters['A_T']
+    Hmem, Hacl, Hccl = parameters['Hmem'], parameters['Hacl'], parameters['Hccl']
+    A_T_a, A_T_c = parameters['A_T_a'], parameters['A_T_c']
     kappa_co, t_purge, type_purge = parameters['kappa_co'], parameters['t_purge'], parameters['type_purge']
 
     # Molar mass of the ambient air
@@ -160,12 +161,12 @@ def auxiliaries_int_values(t, solver_variables, operating_inputs, parameters):
         else:
             raise ValueError("The type_purge variable should be correctly referenced.")
         # Back pressure valve area
-        if Abp_a > A_T:
-            Abp_a = A_T
+        if Abp_a > A_T_a:
+            Abp_a = A_T_a
         elif Abp_a < 0:
             Abp_a = 0
-        if Abp_c > A_T:
-            Abp_c = A_T
+        if Abp_c > A_T_c:
+            Abp_c = A_T_c
         elif Abp_c < 0:
             Abp_c = 0
     else:  # parameters["type_auxiliary"] == "no_auxiliary"

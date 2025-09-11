@@ -9,8 +9,7 @@
 import math
 
 # Importing constants' value and functions
-from configuration.settings import (C_O2ref, alpha_c, tau_cp, tau_hum, rho_mem, M_eq, F, R, M_H2O, n_cell,
-                                    Kp, Kd)
+from configuration.settings import (C_O2ref, alpha_c, tau_cp, tau_hum, rho_mem, M_eq, F, R, M_H2O, Kp, Kd)
 from model.flows import calculate_flows
 from model.cell_voltage import calculate_eta_c_intermediate_values
 from model.heat_transfer import calculate_heat_transfers
@@ -789,11 +788,11 @@ def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hccl, 
     dif_eq['deta_c / dt'] = 1 / (C_scl * Hccl) * ((i_fc + i_n) - (i0_d_c_ref ** f_drop * i0_h_c_ref ** (1 - f_drop)) *
                                                   (C_O2_ccl / C_O2ref) ** kappa_c * math.exp(alpha_c * F / (R * T_ccl) * eta_c))
 
-def calculate_dyn_manifold_pressure_and_humidity_evolution(dif_eq, Masm, Maem, Mcsm, Mcem, T_des, Hagc, Hcgc, Wagc,
-                                                           Wcgc, Vsm, Vem, type_auxiliary, Jv_a_in, Jv_a_out, Jv_c_in, Jv_c_out,
-                                                           Wasm_in, Wasm_out, Waem_in, Waem_out, Wcsm_in, Wcsm_out,
-                                                           Wcem_in, Wcem_out, Ware, Wv_asm_in, Wv_aem_out, Wv_csm_in,
-                                                           Wv_cem_out, **kwargs):
+def calculate_dyn_manifold_pressure_and_humidity_evolution(dif_eq, Masm, Maem, Mcsm, Mcem, T_des, n_cell, Hagc, Hcgc,
+                                                           Wagc, Wcgc, Vsm, Vem, type_auxiliary, Jv_a_in, Jv_a_out,
+                                                           Jv_c_in, Jv_c_out, Wasm_in, Wasm_out, Waem_in, Waem_out,
+                                                           Wcsm_in, Wcsm_out, Wcem_in, Wcem_out, Ware, Wv_asm_in,
+                                                           Wv_aem_out, Wv_csm_in, Wv_cem_out, **kwargs):
     """This function calculates the dynamic evolution of the pressure and humidity inside the manifolds.
 
     Parameters
@@ -928,7 +927,7 @@ def calculate_dyn_air_compressor_and_humidifier_evolution(dif_eq, Wcp_des, Wa_in
         dif_eq['dWa_inj / dt'], dif_eq['dWc_inj / dt'] = 0, 0
 
 
-def calculate_dyn_throttle_area_evolution(dif_eq, Pagc, Pcgc, T_agc, T_cgc, Abp_a, Abp_c, Pa_des, Pc_des, A_T,
+def calculate_dyn_throttle_area_evolution(dif_eq, Pagc, Pcgc, T_agc, T_cgc, Abp_a, Abp_c, Pa_des, Pc_des, A_T_a, A_T_c,
                                           type_auxiliary, **kwargs):
     """This function calculates the dynamic evolution of the throttle area inside the anode and cathode auxiliaries.
     This function has to be executed after 'calculate_dyn_vapor_evolution' and 'calculate_dyn_H2_O2_N2_evolution'.
@@ -964,7 +963,7 @@ def calculate_dyn_throttle_area_evolution(dif_eq, Pagc, Pcgc, T_agc, T_cgc, Abp_
     # Throttle area evolution inside the anode auxiliaries
     if type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         dif_eq['dAbp_a / dt'] = - Kp * (Pa_des - Pagc) + Kd * dPagcdt  # PD controller
-        if Abp_a > A_T and dif_eq['dAbp_a / dt'] > 0:  # The throttle area cannot be higher than the maximum value
+        if Abp_a > A_T_a and dif_eq['dAbp_a / dt'] > 0:  # The throttle area cannot be higher than the maximum value
             dif_eq['dAbp_a / dt'] = 0
         elif Abp_a < 0 and dif_eq['dAbp_a / dt'] < 0:  # The throttle area cannot be lower than 0
             dif_eq['dAbp_a / dt'] = 0
@@ -976,7 +975,7 @@ def calculate_dyn_throttle_area_evolution(dif_eq, Pagc, Pcgc, T_agc, T_cgc, Abp_
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
        type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         dif_eq['dAbp_c / dt'] = - Kp * (Pc_des - Pcgc) + Kd * dPcgcdt  # PD controller
-        if Abp_c > A_T and dif_eq['dAbp_c / dt'] > 0:  # The throttle area cannot be higher than the maximum value
+        if Abp_c > A_T_c and dif_eq['dAbp_c / dt'] > 0:  # The throttle area cannot be higher than the maximum value
             dif_eq['dAbp_c / dt'] = 0
         elif Abp_c < 0 and dif_eq['dAbp_c / dt'] < 0:  # The throttle area cannot be lower than 0
             dif_eq['dAbp_c / dt'] = 0

@@ -195,6 +195,7 @@ def stored_physical_parameters(type_fuel_cell):
             type_fuel_cell == "ZSW-GenStack_T_76" or type_fuel_cell == "ZSW-GenStack_T_84":
         # Global
         Aact = 279.72e-4  # m². It is the MEA active area.
+        n_cell = 26  # . It is the number of cell in the stack.
         # Catalyst layer
         Hacl = 8e-6  # m. It is the thickness of the anode catalyst layer.
         Hccl = 17e-6  # m. It is the thickness of the cathode catalyst layer.
@@ -216,9 +217,10 @@ def stored_physical_parameters(type_fuel_cell):
         Wcgc = 532e-6  # m. It is the width of the cathode gas channel.
         Lgc = 23.31  # m. It is the length of the gas channel.
         #   Auxiliaries
+        A_T_a = 9.10e-4  # m². It is the exhaust anode manifold throttle area
+        A_T_c = 22.83e-4  # m². It is the exhaust cathode manifold throttle area
         Vsm = 7.0e-3  # m3. It is the supply manifold volume.
         Vem = 2.4e-3  # m-3. It is the exhaust manifold volume.
-        A_T = 11.8e-4  # m². It is the exhaust manifold throttle area
         # Interaction parameters between water and PEMFC structure
         e = 4.0  # It is the capillary exponent
         # Voltage polarization
@@ -234,6 +236,7 @@ def stored_physical_parameters(type_fuel_cell):
             type_fuel_cell == "EH-31_2.5":
         # Global
         Aact = 85e-4  # m². It is the active area of the catalyst layer.
+        n_cell = 1  # . It is the number of cell in the stack.
         # Catalyst layer
         Hacl = 8.593e-6  # m. It is the thickness of the anode catalyst layer.
         Hccl = Hacl  # m. It is the thickness of the cathode catalyst layer.
@@ -257,7 +260,8 @@ def stored_physical_parameters(type_fuel_cell):
         #   Auxiliaries
         Vsm = 7.0e-3  # m3. It is the supply manifold volume.
         Vem = 2.4e-3  # m-3. It is the exhaust manifold volume.
-        A_T = 11.8e-4  # m². It is the exhaust manifold throttle area
+        A_T_a = 11.8e-4  # m². It is the exhaust anode manifold throttle area
+        A_T_c = A_T_a  # m². It is the exhaust cathode manifold throttle area
         # Interaction parameters between water and PEMFC structure
         e = 4.0  # It is the capillary exponent
         # Voltage polarization
@@ -273,7 +277,8 @@ def stored_physical_parameters(type_fuel_cell):
         raise ValueError('the type_input given is not valid.')
 
     return (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, Vsm, Vem, A_T, Aact, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
+            Wcgc, Lgc, Vsm, Vem, A_T_a, A_T_c, Aact, n_cell, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim,
+            a_switch, C_scl)
 
 
 def EIS_parameters(f_EIS):
