@@ -6,6 +6,8 @@ A detailed [presentation](https://doi.org/10.48550/arXiv.2407.12373) of this pro
 
 Improvements to **AlphaPEM**, such as the addition of auxiliary cooling system modeling and spatial extension to 1D+1D, will be available in the future.
 
+Important note: AlphaPEM is an ongoing research project and is not a commercial product. Therefore, the latest online version may contain bugs, and not all features may be available. Relatively stable versions are listed in the [Major updates](#major-updates) section.
+
 ![AlphaPEM graphical user interface](docs/images/demo.png "AlphaPEM graphical user interface (GUI)")
 
 # Table of Contents

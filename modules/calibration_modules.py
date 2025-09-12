@@ -416,7 +416,7 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         #   Voltage polarization
         i0_d_c_ref = 14.43  # A.m-2.It is the reference exchange current density at the cathode.
         i0_h_c_ref = 1.0  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
-        kappa_co = 30.63  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
+        kappa_co = 30.42  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 0.4152  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
         C_scl = 20e6  # F.m-3. It is the volumetric space-charge layer capacitance.
@@ -479,7 +479,7 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
                                         'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch,
                                         'C_scl': C_scl}
     computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
-                            'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
+                            'type_fuel_cell': type_fuel_cell, 'type_current': type_current, 'voltage_zone': voltage_zone,
                             'type_auxiliary': type_auxiliary, 'type_control': type_control, 'type_purge': type_purge,
                             'type_display': type_display, 'type_plot': type_plot}
 
