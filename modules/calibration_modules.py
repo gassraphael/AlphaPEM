@@ -363,8 +363,8 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
         n_gdl = max(1, int(Hgdl / Hacl / 4))  # It is the number of model points placed inside each GDL.
         n_mpl = max(1, int(Hmpl / Hacl))  # It is the number of model points placed inside each MPL.
-        rtol = 1e-4  # Relative tolerance for the system of ODEs solver.
-        atol = 1e-8  # Absolute tolerance for the system of ODEs solver.
+        rtol = 1e-6  # Relative tolerance for the system of ODEs solver.
+        atol = 1e-10  # Absolute tolerance for the system of ODEs solver.
 
     elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
             type_fuel_cell == "EH-31_2.5":
@@ -457,8 +457,8 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
         n_gdl = max(1, int(Hgdl / Hacl / 4))  # It is the number of model points placed inside each GDL.
         n_mpl = max(1, int(Hmpl / Hacl))  # It is the number of model points placed inside each MPL.
-        rtol = 1e-5  # Relative tolerance for the system of ODEs solver.
-        atol = 1e-8  # Absolute tolerance for the system of ODEs solver.
+        rtol = 1e-6  # Relative tolerance for the system of ODEs solver.
+        atol = 1e-10  # Absolute tolerance for the system of ODEs solver.
 
     else:
         ValueError("A correct type_fuel_cell should be given.")

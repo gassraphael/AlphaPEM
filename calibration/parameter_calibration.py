@@ -29,10 +29,12 @@ Users can select here the fuel cell to calibrate. The determined parameters of t
 different operating conditions, are imported from the calibration_module.py.
 """
 
-# Fuel cell possibilities: "EH-31_1.5"(2021), "EH-31_2.0"(2021), "EH-31_2.25"(2021), "EH-31_2.5"(2021),
-#                          "BX_1.0"(2015), "BX_1.35"(2015), "LF"(2010), "manual_setup".
+# Fuel cell possibilities: "ZSW-GenStack"(2022), "ZSW-GenStack_Pa_1.61_Pc_1.41", "ZSW-GenStack_Pa_2.01_Pc_1.81",
+#                          "ZSW-GenStack_Pa_2.4_Pc_2.2", "ZSW-GenStack_Pa_2.8_Pc_2.6", "ZSW-GenStack_T_62",
+#                          "ZSW-GenStack_T_76", "ZSW-GenStack_T_84", "EH-31_1.5"(2021), "EH-31_2.0"(2021),
+#                          "EH-31_2.25"(2021), "EH-31_2.5"(2021)
 type_fuel_cell_1 = "EH-31_2.0"
-type_fuel_cell_2 = "EH-31_2.25"
+type_fuel_cell_2 = "EH-31_2.5"
 
 # Calibration zone: "before_voltage_drop", "full".
 voltage_zone = "before_voltage_drop"

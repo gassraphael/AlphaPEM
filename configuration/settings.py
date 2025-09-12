@@ -333,19 +333,8 @@ def computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, type_fuel_ce
     n_gdl = max(1, int(Hgdl / Hacl / 4))  # It is the number of model points placed inside each GDL.
     n_mpl = max(1, int(Hmpl / Hacl))      # It is the number of model points placed inside each MPL.
 
-    if type_fuel_cell == "ZSW-GenStack" or type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41" or \
-            type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81" or type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2" or \
-            type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6" or type_fuel_cell == "ZSW-GenStack_T_62" or \
-            type_fuel_cell == "ZSW-GenStack_T_76" or type_fuel_cell == "ZSW-GenStack_T_84":
-        rtol = 1e-4 # Relative tolerance for the system of ODEs solver.
-        atol = 1e-8 # Absolute tolerance for the system of ODEs solver.
-
-    elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
-            type_fuel_cell == "EH-31_2.5":
-        rtol = 1e-5  # Relative tolerance for the system of ODEs solver.
-        atol = 1e-8  # Absolute tolerance for the system of ODEs solver.
-    else:
-        raise ValueError('the type_input given is not valid.')
+    rtol = 1e-6  # Relative tolerance for the system of ODEs solver.
+    atol = 1e-10  # Absolute tolerance for the system of ODEs solver.
 
     step_current_parameters['delta_t_dyn_step'] = delta_t_dyn_step # Update the step current parameters.
     return n_gdl, n_mpl, t_purge, rtol, atol, step_current_parameters
