@@ -143,6 +143,8 @@ class AlphaPEM:
                     Compression ratio of the GDL (undetermined physical parameter).
                 - e : float
                     Capillary exponent (undetermined physical parameter).
+                - Re : float
+                    Electron conduction resistance in Ω.m2 (undetermined physical parameter).
                 - i0_d_c_ref : float
                     Dry reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
                 - kappa_co : float

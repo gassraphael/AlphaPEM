@@ -61,6 +61,7 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
         #       Constants based on the interaction between water and the structure
         e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.
         #       Voltage polarization
+        Re_min, Re_max = 5e-7, 5e-6  # Ω.m². It is the electron conduction resistance of the circuit.
         i0_d_c_ref_min, i0_d_c_ref_max = 1e-1, 100  # A.m-2.It is the dry reference exchange current density at the cathode.
         i0_h_c_ref_min, i0_h_c_ref_max = 1e-2, 10  # A.m-2.It is the humid reference exchange current density at the cathode.
         kappa_co_min, kappa_co_max = 0.01, 40  # A.m-2. It is the crossover correction coefficient.
@@ -77,10 +78,9 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
                         ['Hccl', Hccl_min, Hccl_max, 'real'],
                         ['Hmem', Hmem_min, Hmem_max, 'real'],
                         ['epsilon_gdl', epsilon_gdl_min, epsilon_gdl_max, 'real'],
-                        ['epsilon_mpl', epsilon_mpl_min, epsilon_mpl_max, 'real'],
-                        ['epsilon_cl', epsilon_cl_min, epsilon_cl_max, 'real'],
                         ['epsilon_mc', epsilon_mc_min, epsilon_mc_max, 'real'],
                         ['e', e_min, e_max, 'int'],
+                        ['Re', Re_min, Re_max, 'real'],
                         ['i0_d_c_ref', i0_d_c_ref_min, i0_d_c_ref_max, 'real'],
                         ['kappa_co', kappa_co_min, kappa_co_max, 'real'],
                         ['kappa_c', kappa_c_min, kappa_c_max, 'real']]
@@ -110,6 +110,7 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
         #       Constants based on the interaction between water and the structure
         e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.
         #       Voltage polarization
+        Re_min, Re_max = 5e-7, 5e-6 # Ω.m². It is the electron conduction resistance of the circuit.
         i0_d_c_ref_min, i0_d_c_ref_max = 1e-1, 100  # A.m-2.It is the dry reference exchange current density at the cathode.
         i0_h_c_ref_min, i0_h_c_ref_max = 1e-2, 10  # A.m-2.It is the humid reference exchange current density at the cathode.
         kappa_co_min, kappa_co_max = 0.01, 40  # A.m-2. It is the crossover correction coefficient.
@@ -125,10 +126,9 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
             varbound = [['Hacl', Hacl_min, Hacl_max, 'real'],
                         ['Hmem', Hmem_min, Hmem_max, 'real'],
                         ['epsilon_gdl', epsilon_gdl_min, epsilon_gdl_max, 'real'],
-                        ['epsilon_mpl', epsilon_mpl_min, epsilon_mpl_max, 'real'],
-                        ['epsilon_cl', epsilon_cl_min, epsilon_cl_max, 'real'],
                         ['epsilon_mc', epsilon_mc_min, epsilon_mc_max, 'real'],
                         ['e', e_min, e_max, 'int'],
+                        ['Re', Re_min, Re_max, 'real'],
                         ['i0_d_c_ref', i0_d_c_ref_min, i0_d_c_ref_max, 'real'],
                         ['kappa_co', kappa_co_min, kappa_co_max, 'real'],
                         ['kappa_c', kappa_c_min, kappa_c_max, 'real']]
@@ -320,6 +320,7 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         #   Interaction parameters between water and PEMFC structure
         e = 3.0  # It is the capillary exponent
         #   Voltage polarization
+        Re = 1e-06  # ohm.m². It is the electron conduction resistance of the circuit.
         i0_d_c_ref = 14.86  # A.m-2.It is the dry reference exchange current density at the cathode.
         i0_h_c_ref = 1.0  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
         kappa_co = 1  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
@@ -414,6 +415,7 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         #   Interaction parameters between water and PEMFC structure
         e = 4.0  # It is the capillary exponent
         #   Voltage polarization
+        Re = 1e-06  # ohm.m². It is the electron conduction resistance of the circuit.
         i0_d_c_ref = 14.43  # A.m-2.It is the reference exchange current density at the cathode.
         i0_h_c_ref = 1.0  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
         kappa_co = 30.42  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
@@ -474,9 +476,9 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
                                       'Vsm_a': Vsm_a, 'Vsm_c': Vsm_c, 'Vem_a': Vem_a, 'Vem_c': Vem_c, 'A_T_a': A_T_a, 'A_T_c': A_T_c}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
                                         'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl, 'epsilon_mpl': epsilon_mpl,
-                                        'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c, 'e': e,
-                                        'kappa_co': kappa_co, 'i0_d_c_ref': i0_d_c_ref, 'i0_h_c_ref': i0_h_c_ref, 'kappa_c': kappa_c,
-                                        'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch,
+                                        'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c, 'e': e, 'Re': Re,
+                                        'i0_d_c_ref': i0_d_c_ref, 'i0_h_c_ref': i0_h_c_ref, 'kappa_co': kappa_co,
+                                        'kappa_c': kappa_c, 'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch,
                                         'C_scl': C_scl}
     computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
                             'type_fuel_cell': type_fuel_cell, 'type_current': type_current, 'voltage_zone': voltage_zone,

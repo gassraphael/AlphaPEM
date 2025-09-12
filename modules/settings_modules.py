@@ -262,6 +262,7 @@ def stored_physical_parameters(type_fuel_cell):
         # Interaction parameters between water and PEMFC structure
         e = 4.0  # It is the capillary exponent
         # Voltage polarization
+        Re = 1e-06  # ohm.m². It is the electron conduction resistance of the circuit.
         i0_d_c_ref = 14.43  # A.m-2. It is the dry reference exchange current density at the cathode.
         i0_h_c_ref = 1.0  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
         kappa_co = 5 # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
@@ -303,6 +304,7 @@ def stored_physical_parameters(type_fuel_cell):
         # Interaction parameters between water and PEMFC structure
         e = 4.0  # It is the capillary exponent
         # Voltage polarization
+        Re = 1e-06  # ohm.m². It is the electron conduction resistance of the circuit.
         i0_d_c_ref = 14.43  # A.m-2. It is the dry reference exchange current density at the cathode.
         i0_h_c_ref = 1.0  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
         kappa_co = 30.42  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
@@ -315,7 +317,7 @@ def stored_physical_parameters(type_fuel_cell):
         raise ValueError('the type_input given is not valid.')
 
     return (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, i0_d_c_ref, i0_h_c_ref, kappa_co,
+            Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, Re, i0_d_c_ref, i0_h_c_ref, kappa_co,
             kappa_c, a_slim, b_slim, a_switch, C_scl)
 
 

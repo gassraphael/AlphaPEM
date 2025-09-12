@@ -274,6 +274,7 @@ def physical_parameters(type_fuel_cell):
         #   Interaction parameters between water and PEMFC structure
         e = 5.0  # It is the capillary exponent
         #   Voltage polarization
+        Re = 1e-06  # Ω.m². It is the electron conduction resistance of the circuit.
         i0_d_c_ref = 14.43  # A.m-2. It is the dry reference exchange current density at the cathode.
         i0_l_c_ref = 1.0e3  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
         kappa_co = 29.793535549174077  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
@@ -283,11 +284,11 @@ def physical_parameters(type_fuel_cell):
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
     else: # Stored setup in "stored_physical_parameters".
         (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-         Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, i0_d_c_ref, i0_l_c_ref, kappa_co, kappa_c, a_slim, b_slim,
+         Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, Re, i0_d_c_ref, i0_l_c_ref, kappa_co, kappa_c, a_slim, b_slim,
          a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
 
     return (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, i0_d_c_ref, i0_l_c_ref, kappa_co, kappa_c, a_slim,
+            Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, Re, i0_d_c_ref, i0_l_c_ref, kappa_co, kappa_c, a_slim,
             b_slim, a_switch, C_scl)
 
 
@@ -379,7 +380,6 @@ alpha_p = 0.785 #. It is a fitted value for the effective matter transfer in the
 Kshape = 2  # . Mathematical factor governing lambda_eq smoothing.
 
 # Model parameters for the voltage calculation
-Re = 1e-06  # ohm.m². It is the estimated electron conduction resistance of the circuit.
 C_O2ref = 3.39  # mol.m-3. It is the reference concentration of oxygen.
 alpha_c = 0.5  # It is the transfer coefficient of the cathode.
 E0 = 1.229  # V. It is the standard-state reversible voltage.

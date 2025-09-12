@@ -139,12 +139,12 @@ def main_frame(root, canvas):
          'CCL thickness - Hccl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 1},
          'Membrane thickness - Hmem (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 3},
          'GDL porosity - ε_gdl': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 1, 'label_column': 5},
-         'CL porosity - ε_cl': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 1, 'label_column': 5},
-         'MPL porosity - ε_mpl': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 2, 'label_column': 1},
-         'Ionomer volume fraction - ε_mc': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 2, 'label_column': 3},
-         'Compression ratio - ε_c': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 2, 'label_column': 5},
-         'Capillary exponent - e': {'value': tk.IntVar(undetermined_parameters_frame), 'label_row': 3, 'label_column': 1},
-         'Electron resistance\n- Re (µΩ.m²)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 1},
+         'CL porosity - ε_cl': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 2, 'label_column': 1},
+         'MPL porosity - ε_mpl': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 2, 'label_column': 3},
+         'Ionomer volume fraction - ε_mc': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 2, 'label_column': 5},
+         'Compression ratio - ε_c': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 3, 'label_column': 1},
+         'Capillary exponent - e': {'value': tk.IntVar(undetermined_parameters_frame), 'label_row': 3, 'label_column': 3},
+         'Electron conduction resistance - Re (Ω.mm²)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 1},
          'Dry reference exchange current\ndensity - i0_d_c_ref (A/m²)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 3},
          'Humid reference exchange current\ndensity - i0_h_c_ref (A/m²)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 5},
          'Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 5, 'label_column': 1},
@@ -373,9 +373,10 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
     # quantities into standard units.
     (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, n_cell, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc,
      Hcgc, Wagc, Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc,
-     epsilon_c, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, step_current_parameters,
-     pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge,
-     n_gdl, n_mpl, rtol, atol, type_fuel_cell, voltage_zone, type_auxiliary, type_control, type_purge, type_display, type_plot) = \
+     epsilon_c, e, Re, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl,
+     step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
+     t_purge, delta_t_purge, n_gdl, n_mpl, rtol, atol, type_fuel_cell, voltage_zone, type_auxiliary, type_control,
+     type_purge, type_display, type_plot) = \
         recover_for_use_operating_inputs_and_physical_parameters(choice_operating_conditions,
                                                                  choice_accessible_parameters,
                                                                  choice_undetermined_parameters,
@@ -394,9 +395,9 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
                                         'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl,
                                         'epsilon_mpl': epsilon_mpl, 'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c,
-                                        'e': e, 'kappa_co': kappa_co, 'i0_d_c_ref': i0_d_c_ref, 'i0_h_c_ref': i0_h_c_ref,
-                                        'kappa_c': kappa_c, 'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch,
-                                        'C_scl': C_scl}
+                                        'e': e, 'Re': Re, 'i0_d_c_ref': i0_d_c_ref, 'i0_h_c_ref': i0_h_c_ref,
+                                        'kappa_co': kappa_co, 'kappa_c': kappa_c, 'a_slim': a_slim, 'b_slim': b_slim,
+                                        'a_switch': a_switch, 'C_scl': C_scl}
 
     if current_button == 0:
         type_current = "step"
