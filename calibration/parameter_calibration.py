@@ -35,15 +35,15 @@ type_fuel_cell_1 = "ZSW-GenStack_Pa_1.61_Pc_1.41"
 type_fuel_cell_2 = "ZSW-GenStack_Pa_2.8_Pc_2.6"
 
 # Calibration zone: "before_voltage_drop", "full".
-calibration_zone = "before_voltage_drop"
+voltage_zone = "before_voltage_drop"
 
 (operating_inputs_1, current_parameters, accessible_physical_parameters, undetermined_physical_parameters,
  computing_parameters_1, i_exp_1, U_exp_1) \
-    = parameters_for_calibration(type_fuel_cell_1, calibration_zone)
+    = parameters_for_calibration(type_fuel_cell_1, voltage_zone)
 
 (operating_inputs_2, current_parameters, accessible_physical_parameters, undetermined_physical_parameters,
  computing_parameters_2, i_exp_2, U_exp_2) \
-    = parameters_for_calibration(type_fuel_cell_2, calibration_zone)
+    = parameters_for_calibration(type_fuel_cell_2, voltage_zone)
 
 # _________________________________________________Calibration settings_________________________________________________
 """
@@ -53,7 +53,7 @@ The parameters employed for the Genetic Algorithm here have proven to be effecti
 """
 
 # Parameter bounds
-varbound, gene_space = parameter_bounds_for_calibration(type_fuel_cell_1, calibration_zone, operating_inputs_1, operating_inputs_2)
+varbound, gene_space = parameter_bounds_for_calibration(type_fuel_cell_1, voltage_zone, operating_inputs_1, operating_inputs_2)
 
 # PyGAD parameters for the genetic algorithm:
     # Number of generations:

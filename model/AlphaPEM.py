@@ -281,6 +281,7 @@ class AlphaPEM:
         pola_current_parameters = self.parameters['pola_current_parameters']
         pola_current_for_cali_parameters = self.parameters['pola_current_for_cali_parameters']
         type_fuel_cell, type_current = self.parameters['type_fuel_cell'], self.parameters['type_current']
+        voltage_zone = self.parameters['voltage_zone']
 
         # Recovery of the good time interval
         if type_current == "step":
@@ -302,7 +303,7 @@ class AlphaPEM:
             delta_t_ini_pola_cali = pola_current_for_cali_parameters['delta_t_ini_pola_cali']  # (s).
             delta_t_load_pola_cali = pola_current_for_cali_parameters['delta_t_load_pola_cali']  # (s).
             delta_t_break_pola_cali = pola_current_for_cali_parameters['delta_t_break_pola_cali']  # (s).
-            i_exp_cali_t, U_exp_cali_t = pola_exp_values_calibration(type_fuel_cell)  # (A.m-2, V).
+            i_exp_cali_t, U_exp_cali_t = pola_exp_values_calibration(type_fuel_cell, voltage_zone)  # (A.m-2, V).
             # Calculation
             delta_t_cali = delta_t_load_pola_cali + delta_t_break_pola_cali  # s. It is the time of one load.
             t0_interval = 0

@@ -11,13 +11,15 @@ import numpy as np
 
 # ___________________________________________________Settings modules___________________________________________________
 
-def stored_operating_inputs(type_fuel_cell):
+def stored_operating_inputs(type_fuel_cell, voltage_zone):
     """This function gives the operating inputs which correspond to the given type_fuel_cell.
 
     Parameters
     ----------
     type_fuel_cell : str
         Type of fuel cell configuration.
+    voltage_zone : str
+        Zone of the polarization curve which is considered.
 
     Returns
     -------
@@ -46,56 +48,80 @@ def stored_operating_inputs(type_fuel_cell):
         Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-        i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+        if voltage_zone == "full":
+            i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 1.700e4 # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41":
         T_des = 68 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 1.61e5, 1.41e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         y_H2_in = 0.7 # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-        i_max_pola = 2.171e4  # A.m-2. It is the maximum current density for the polarization curve.
+        if voltage_zone == "full":
+            i_max_pola = 2.200e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 0.700e4 # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81":
         T_des = 68 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.01e5, 1.81e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-        i_max_pola = 2.415e4  # A.m-2. It is the maximum current density for the polarization curve.
+        if voltage_zone == "full":
+            i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 1.300e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2":
         T_des = 68 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.4e5, 2.2e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-        i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+        if voltage_zone == "full":
+            i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 1.900e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6":
         T_des = 68 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.8e5, 2.6e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-        i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+        if voltage_zone == "full":
+            i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 1.900e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "ZSW-GenStack_T_62":
         T_des = 62 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.2e5, 2.0e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-        i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+        if voltage_zone == "full":
+            i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 1.500e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "ZSW-GenStack_T_76":
         T_des = 76 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.2e5, 2.0e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-        i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+        if voltage_zone == "full":
+            i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 1.100e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "ZSW-GenStack_T_84":
         T_des = 84 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.2e5, 2.0e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-        i_max_pola = 2.000e4  # A.m-2. It is the maximum current density for the polarization curve.
+        if voltage_zone == "full":
+            i_max_pola = 2.000e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 0.700e4  # A.m-2. It is the maximum current density for the polarization curve.
 
     # For EH-31 fuel cell
     elif type_fuel_cell == "EH-31_1.5":
@@ -104,28 +130,40 @@ def stored_operating_inputs(type_fuel_cell):
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
         y_H2_in = 1 # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-        i_max_pola = 2.3e4  # A.m-2. It is the maximum current density for the polarization curve.
+        if voltage_zone == "full":
+            i_max_pola = 2.300e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 1.700e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "EH-31_2.0":
         T_des = 74 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.0e5, 2.0e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
         y_H2_in = 1  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-        i_max_pola = 2.5e4  # A.m-2. It is the maximum current density for the polarization curve.
+        if voltage_zone == "full":
+            i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 1.300e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "EH-31_2.25":
         T_des = 74 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.25e5, 2.25e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
         y_H2_in = 1  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-        i_max_pola = 2.8e4  # A.m-2. It is the maximum current density for the polarization curve.
+        if voltage_zone == "full":
+            i_max_pola = 2.800e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 1.700e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "EH-31_2.5":
         T_des = 74 + 273.15  # K. It is the desired fuel cell temperature.
         Pa_des, Pc_des = 2.5e5, 2.5e5  # Pa. It is the desired pressures of the fuel gas.
         Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
         y_H2_in = 1  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-        i_max_pola = 3.0e4  # A.m-2. It is the maximum current density for the polarization curve.
+        if voltage_zone == "full":
+            i_max_pola = 3.000e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 1.600e4  # A.m-2. It is the maximum current density for the polarization curve.
 
     # For other fuel cells
     else:
@@ -267,7 +305,7 @@ def stored_physical_parameters(type_fuel_cell):
         # Voltage polarization
         i0_d_c_ref = 14.43  # A.m-2. It is the dry reference exchange current density at the cathode.
         i0_h_c_ref = 1.0  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
-        kappa_co = 30.63  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
+        kappa_co = 30.42  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 0.4152  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.82  # It is the limit liquid saturation coefficients.
         C_scl = 20e6  # F.m-3. It is the volumetric space-charge layer capacitance.

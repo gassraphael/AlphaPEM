@@ -113,7 +113,7 @@ def current_density_parameters(type_current=None):
             i_EIS, ratio_EIS, f_EIS, t_EIS, current_density)
 
 
-def operating_inputs_function(pola_current_parameters, type_fuel_cell):
+def operating_inputs_function(pola_current_parameters, type_fuel_cell, voltage_zone):
     """This function is used to set the operating inputs of the fuel cell system.
 
     Parameters
@@ -122,6 +122,8 @@ def operating_inputs_function(pola_current_parameters, type_fuel_cell):
         Parameters for the polarization current density function.
     type_fuel_cell : str
         Type of fuel cell system.
+    voltage_zone : str
+        Zone of the polarization curve which is considered. It can be 'full' or 'before_voltage_drop'.
 
     Returns
     -------
@@ -161,7 +163,7 @@ def operating_inputs_function(pola_current_parameters, type_fuel_cell):
     elif type_fuel_cell is None:
         T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola = None, None, None, None, None, None, None, None, None
     else: # Stored setup in "stored_operating_inputs".
-        T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola = stored_operating_inputs(type_fuel_cell)
+        T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola = stored_operating_inputs(type_fuel_cell, voltage_zone)
 
     pola_current_parameters['i_max_pola'] = i_max_pola  # Update the maximum current density for the polarization curve.
     return T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, pola_current_parameters

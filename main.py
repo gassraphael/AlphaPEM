@@ -29,12 +29,17 @@ if __name__ == '__main__':
     # This parameter includes the fuel cell used in the model and the corresponding operating conditions.
     # - GenStack is a fuel cell developed in open source by ZSW (https://zenodo.org/records/14223364).
     # - EH-31 is a fuel cell developed by EH GROUP. 1.5, 2.0, 2.25 and 2.5 corresponds to the different pressure options.
-    type_fuel_cell_1 = "ZSW-GenStack"
-    type_fuel_cell_2 = None
+    type_fuel_cell_1 = "EH-31_2.0"
+    type_fuel_cell_2 = "EH-31_2.25"
     type_fuel_cell_3 = None
     type_fuel_cell_4 = None
     # Current density possibilities: "step", "polarization", "polarization_for_cali", "EIS".
     type_current = "polarization"
+    # Calibration zone: "before_voltage_drop", "full".
+    if type_current == "polarization" or type_current == "polarization_for_cali":
+        voltage_zone = "before_voltage_drop"
+    else:
+        voltage_zone = None
     # Auxiliary system possibilities: "forced-convective_cathode_with_anodic_recirculation",
     #                                 "forced-convective_cathode_with_flow-through_anode", "no_auxiliary".
     type_auxiliary = "forced-convective_cathode_with_flow-through_anode"
@@ -63,13 +68,13 @@ if __name__ == '__main__':
      current_density) = current_density_parameters(type_current)
     #   Operating conditions
     T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, y_H2_in_1, pola_current_parameters_1 = \
-        operating_inputs_function(copy.deepcopy(pola_current_parameters), type_fuel_cell_1)
+        operating_inputs_function(copy.deepcopy(pola_current_parameters), type_fuel_cell_1, voltage_zone)
     T_des_2, Pa_des_2, Pc_des_2, Sa_2, Sc_2, Phi_a_des_2, Phi_c_des_2, y_H2_in_2, pola_current_parameters_2 = \
-            operating_inputs_function(copy.deepcopy(pola_current_parameters), type_fuel_cell_2)
+            operating_inputs_function(copy.deepcopy(pola_current_parameters), type_fuel_cell_2, voltage_zone)
     T_des_3, Pa_des_3, Pc_des_3, Sa_3, Sc_3, Phi_a_des_3, Phi_c_des_3, y_H2_in_3, pola_current_parameters_3 = \
-            operating_inputs_function(copy.deepcopy(pola_current_parameters), type_fuel_cell_3)
+            operating_inputs_function(copy.deepcopy(pola_current_parameters), type_fuel_cell_3, voltage_zone)
     T_des_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4, y_H2_in_4, pola_current_parameters_4 = \
-            operating_inputs_function(copy.deepcopy(pola_current_parameters), type_fuel_cell_4)
+            operating_inputs_function(copy.deepcopy(pola_current_parameters), type_fuel_cell_4, voltage_zone)
     #   Physical parameters
     (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
      Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
@@ -102,7 +107,7 @@ if __name__ == '__main__':
                                         'C_scl': C_scl}
     computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
                             'type_fuel_cell': [None, type_fuel_cell_1, type_fuel_cell_2, type_fuel_cell_3, type_fuel_cell_4],
-                            'type_current': type_current, 'type_auxiliary': type_auxiliary,
+                            'type_current': type_current, 'voltage_zone': voltage_zone, 'type_auxiliary': type_auxiliary,
                             'type_control': [None, type_control_1, type_control_2, type_control_3, type_control_4],
                             'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}
 

@@ -256,6 +256,16 @@ def display_radiobuttons(model_possibilities_frame, choices_buttons):
         grid(row=choices_buttons['type_auxiliary']['label_row'], column=4, sticky="w")
 
     # Ask the user to choose an option and save it
+    ttk.Label(model_possibilities_frame, text='Voltage zone: ', font=('cmr10', 12)). \
+        grid(row=choices_buttons['voltage_zone']['label_row'], column=0, columnspan=2, sticky="w")
+    ttk.Radiobutton(model_possibilities_frame, text='Full', value=0,
+                    variable=choices_buttons['voltage_zone']['value']). \
+        grid(row=choices_buttons['voltage_zone']['label_row'], column=2, sticky="w")
+    ttk.Radiobutton(model_possibilities_frame, text='Before voltage drop', value=1,
+                    variable=choices_buttons['voltage_zone']['value']). \
+        grid(row=choices_buttons['voltage_zone']['label_row'], column=3, sticky="w")
+
+    # Ask the user to choose an option and save it
     ttk.Label(model_possibilities_frame, text='Control: ', font=('cmr10', 12)). \
         grid(row=choices_buttons['type_control']['label_row'], column=0, columnspan=2, sticky="w")
     ttk.Radiobutton(model_possibilities_frame, text='No control', value=0,
@@ -326,6 +336,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
         A dictionary containing the button information.
     """
 
+    # type_fuel_cell recovery
     if choice_buttons['type_fuel_cell']['value'].get() == "EH-31 1.5 bar (2021)":
         type_fuel_cell = "EH-31_1.5"
     elif choice_buttons['type_fuel_cell']['value'].get() == "EH-31 2.0 bar (2021)":
@@ -335,10 +346,15 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     elif choice_buttons['type_fuel_cell']['value'].get() == "EH-31 2.5 bar (2021)":
         type_fuel_cell = "EH-31_2.5"
 
+    if choice_buttons['voltage_zone']['value'].get() == 0:
+        voltage_zone = "full"
+    else:
+        voltage_zone = "before_voltage_drop"
+
     (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
      current_density) = current_density_parameters()
 
-    T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola = stored_operating_inputs(type_fuel_cell)
+    T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola = stored_operating_inputs(type_fuel_cell, voltage_zone)
 
     (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
      Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
@@ -514,6 +530,11 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     else:
         type_auxiliary = "forced-convective_cathode_with_flow-through_anode"
 
+    if choice_buttons['voltage_zone']['value'].get() == 0:
+        voltage_zone = "full"
+    else:
+        voltage_zone = "before_voltage_drop"
+
     if choice_buttons['type_control']['value'].get() == 0:
         type_control = "no_control"
     else:
@@ -542,7 +563,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
             Hagc, Hcgc, Wagc, Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, epsilon_gdl, epsilon_cl, epsilon_mpl,
             epsilon_mc, epsilon_c, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl,
             step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS,
-            t_EIS, t_purge, delta_t_purge, n_gdl, n_mpl, rtol, atol, type_fuel_cell, type_auxiliary, type_control,
+            t_EIS, t_purge, delta_t_purge, n_gdl, n_mpl, rtol, atol, type_fuel_cell, voltage_zone, type_auxiliary, type_control,
             type_purge, type_display, type_plot)
 
 
@@ -966,6 +987,8 @@ def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, acces
                 Type of fuel cell configuration (computing parameter).
             - type_current : str
                 Type of current density function (computing parameter).
+            - voltage_zone : str
+                Zone of interest for the polarization curve (computing parameter).
             - type_auxiliary : str
                 Type of auxiliary system (computing parameter).
             - type_control : str
@@ -1177,6 +1200,8 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
                 Type of fuel cell configuration (computing parameter).
             - type_current : str
                 Type of current density function (computing parameter).
+            - voltage_zone : str
+                Zone of interest for the polarization curve (computing parameter).
             - type_auxiliary : str
                 Type of auxiliary system (computing parameter).
             - type_control : str
@@ -1385,6 +1410,8 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
                 Type of fuel cell configuration (computing parameter).
             - type_current : str
                 Type of current density function (computing parameter).
+            - voltage_zone : str
+                Zone of interest for the polarization curve (computing parameter).
             - type_auxiliary : str
                 Type of auxiliary system (computing parameter).
             - type_control : str

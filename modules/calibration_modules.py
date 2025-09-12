@@ -17,7 +17,7 @@ from calibration.experimental_values import pola_exp_values_calibration
 
 # _________________________________________________Calibration modules__________________________________________________
 
-def parameter_bounds_for_calibration(type_fuel_cell, calibration_zone, operating_inputs_1, operating_inputs_2):
+def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inputs_1, operating_inputs_2):
     """This function is used to determine the parameter bounds of the fuel cell model for the calibration when a
     registered type_fuel_cell is considered.
 
@@ -25,7 +25,7 @@ def parameter_bounds_for_calibration(type_fuel_cell, calibration_zone, operating
        ----------
        type_fuel_cell : str
             Type of fuel cell configuration.
-         calibration_zone : str
+         voltage_zone : str
             Zone of calibration: "before_voltage_drop", "full".
        operating_inputs_1 : dict
             Operating inputs for the first fuel cell configuration.
@@ -72,7 +72,7 @@ def parameter_bounds_for_calibration(type_fuel_cell, calibration_zone, operating
         #       Undetermined parameter which is not considered yet (require the use of EIS curves to be calibrated)
         C_scl_min, C_sl_max = 2e7, 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
         #       Bounds gathering and type
-        if calibration_zone == "before_voltage_drop":
+        if voltage_zone == "before_voltage_drop":
             varbound = [['Hacl', Hacl_min, Hacl_max, 'real'],
                         ['Hccl', Hccl_min, Hccl_max, 'real'],
                         ['Hmem', Hmem_min, Hmem_max, 'real'],
@@ -84,7 +84,7 @@ def parameter_bounds_for_calibration(type_fuel_cell, calibration_zone, operating
                         ['i0_d_c_ref', i0_d_c_ref_min, i0_d_c_ref_max, 'real'],
                         ['kappa_co', kappa_co_min, kappa_co_max, 'real'],
                         ['kappa_c', kappa_c_min, kappa_c_max, 'real']]
-        else: # calibration_zone == "full"
+        else: # voltage_zone == "full"
             varbound = [['i0_h_c_ref', i0_h_c_ref_min, i0_h_c_ref_max, 'real'],
                         ['a_slim', a_slim_min, a_slim_max, 'real'],
                         ['b_slim', b_slim_min, b_slim_max, 'real'],
@@ -121,7 +121,7 @@ def parameter_bounds_for_calibration(type_fuel_cell, calibration_zone, operating
         #       Undetermined parameter which is not considered yet (require the use of EIS curves to be calibrated)
         C_scl_min, C_sl_max = 2e7, 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
         #       Bounds gathering and type
-        if calibration_zone == "before_voltage_drop":
+        if voltage_zone == "before_voltage_drop":
             varbound = [['Hacl', Hacl_min, Hacl_max, 'real'],
                         ['Hmem', Hmem_min, Hmem_max, 'real'],
                         ['epsilon_gdl', epsilon_gdl_min, epsilon_gdl_max, 'real'],
@@ -132,7 +132,7 @@ def parameter_bounds_for_calibration(type_fuel_cell, calibration_zone, operating
                         ['i0_d_c_ref', i0_d_c_ref_min, i0_d_c_ref_max, 'real'],
                         ['kappa_co', kappa_co_min, kappa_co_max, 'real'],
                         ['kappa_c', kappa_c_min, kappa_c_max, 'real']]
-        else: # calibration_zone == "full"
+        else: # voltage_zone == "full"
             varbound = [['epsilon_c', epsilon_c_min, epsilon_c_max, 'real'],
                         ['i0_h_c_ref', i0_h_c_ref_min, i0_h_c_ref_max, 'real'],
                         ['a_slim', a_slim_min, a_slim_max, 'real'],
@@ -150,7 +150,7 @@ def parameter_bounds_for_calibration(type_fuel_cell, calibration_zone, operating
 
     return varbound, gene_space
 
-def parameters_for_calibration(type_fuel_cell, calibration_zone):
+def parameters_for_calibration(type_fuel_cell, voltage_zone):
     """This function is used to determine the parameters of the fuel cell model for the calibration when a registered
     type_fuel_cell is considered.
 
@@ -345,9 +345,9 @@ def parameters_for_calibration(type_fuel_cell, calibration_zone):
         delta_t_load_pola = 30  # (s). Loading time for one step current of the polarisation current density function.
         delta_t_break_pola = 15 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
         delta_i_pola = 0.05e4  # (A.m-2). Current density step for the polarisation current density function.
-        if calibration_zone == 'full':
+        if voltage_zone == 'full':
             i_max_pola = 2.5e4  # (A.m-2). It is the maximum current density for the polarization curve.
-        else: # calibration_zone == 'before_voltage_drop'
+        else: # voltage_zone == 'before_voltage_drop'
             i_max_pola = 1.9e4
         pola_current_parameters = {'delta_t_ini_pola': delta_t_ini_pola, 'delta_t_load_pola': delta_t_load_pola,
                                    'delta_t_break_pola': delta_t_break_pola, 'delta_i_pola': delta_i_pola,
@@ -439,9 +439,9 @@ def parameters_for_calibration(type_fuel_cell, calibration_zone):
         delta_t_load_pola = 30  # (s). Loading time for one step current of the polarisation current density function.
         delta_t_break_pola = 15 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
         delta_i_pola = 0.05e4  # (A.m-2). Current density step for the polarisation current density function.
-        if calibration_zone == 'full':
+        if voltage_zone == 'full':
             i_max_pola = 3.0e4  # (A.m-2). It is the maximum current density for the polarization curve.
-        else:  # calibration_zone == 'before_voltage_drop'
+        else:  # voltage_zone == 'before_voltage_drop'
             i_max_pola = 1.7e4
         pola_current_parameters = {'delta_t_ini_pola': delta_t_ini_pola, 'delta_t_load_pola': delta_t_load_pola,
                                    'delta_t_break_pola': delta_t_break_pola, 'delta_i_pola': delta_i_pola,
@@ -484,7 +484,7 @@ def parameters_for_calibration(type_fuel_cell, calibration_zone):
                             'type_display': type_display, 'type_plot': type_plot}
 
     # Characteristic points of the experimental polarization curve
-    i_exp, U_exp = pola_exp_values_calibration(type_fuel_cell, calibration_zone)
+    i_exp, U_exp = pola_exp_values_calibration(type_fuel_cell, voltage_zone)
 
     return (operating_inputs, current_parameters, accessible_physical_parameters, undetermined_physical_parameters,
             computing_parameters, i_exp, U_exp)

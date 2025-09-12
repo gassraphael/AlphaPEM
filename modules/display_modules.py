@@ -60,10 +60,10 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax, show=Tr
     delta_t_break_pola = pola_current_parameters['delta_t_break_pola']
     delta_i_pola, i_max_pola = pola_current_parameters['delta_i_pola'], pola_current_parameters['i_max_pola']
     type_fuel_cell, type_current = parameters['type_fuel_cell'], parameters['type_current']
-    type_auxiliary, type_control = parameters['type_auxiliary'], parameters['type_control']
-    type_plot = parameters['type_plot']
+    voltage_zone, type_auxiliary = parameters['voltage_zone'], parameters['type_auxiliary']
+    type_control, type_plot = parameters['type_control'], parameters['type_plot']
     # Extraction of the experimental current density and voltage values.
-    i_exp_t, U_exp_t = pola_exp_values(type_fuel_cell)  # (A.m-2, V).
+    i_exp_t, U_exp_t = pola_exp_values(type_fuel_cell, voltage_zone)  # (A.m-2, V).
 
     if type_plot == "fixed":
         # Creation of ifc_t
@@ -147,10 +147,10 @@ def plot_polarisation_curve_for_cali(variables, operating_inputs, parameters, ax
     delta_t_load_pola_cali = pola_current_for_cali_parameters['delta_t_load_pola_cali']
     delta_t_break_pola_cali = pola_current_for_cali_parameters['delta_t_break_pola_cali']
     type_fuel_cell, type_current = parameters['type_fuel_cell'], parameters['type_current']
-    type_auxiliary, type_control = parameters['type_auxiliary'], parameters['type_control']
-    type_plot = parameters['type_plot']
+    voltage_zone, type_auxiliary = parameters['voltage_zone'], parameters['type_auxiliary']
+    type_control, type_plot = parameters['type_control'], parameters['type_plot']
     # Extraction of the experimental current density and voltage values for the calibration.
-    i_exp_cali_t, U_exp_cali_t = pola_exp_values_calibration(parameters['type_fuel_cell'])  # (A.m-2, V).
+    i_exp_cali_t, U_exp_cali_t = pola_exp_values_calibration(type_fuel_cell, voltage_zone)  # (A.m-2, V).
 
     # Creation of ifc_t
     n = len(t)

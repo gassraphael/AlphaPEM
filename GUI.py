@@ -209,10 +209,11 @@ def main_frame(root, canvas):
         {'type_fuel_cell': {'value': tk.StringVar(operating_conditions_frame, 'Enter your specifications'),
                             'label_row': 0},
          'type_auxiliary': {'value': tk.IntVar(model_possibilities_frame, 2), 'label_row': 1},
-         'type_control': {'value': tk.IntVar(model_possibilities_frame, 0), 'label_row': 2},
-         'type_purge': {'value': tk.IntVar(model_possibilities_frame, 0), 'label_row': 3},
-         'type_display': {'value': tk.IntVar(model_possibilities_frame, 1), 'label_row': 4},
-         'type_plot': {'value': tk.IntVar(model_possibilities_frame, 0), 'label_row': 5}}
+         'voltage_zone': {'value': tk.IntVar(model_possibilities_frame, 0), 'label_row': 2},
+         'type_control': {'value': tk.IntVar(model_possibilities_frame, 0), 'label_row': 3},
+         'type_purge': {'value': tk.IntVar(model_possibilities_frame, 0), 'label_row': 4},
+         'type_display': {'value': tk.IntVar(model_possibilities_frame, 1), 'label_row': 5},
+         'type_plot': {'value': tk.IntVar(model_possibilities_frame, 0), 'label_row': 6}}
 
     # Displays operating conditions and physical parameters on the screen (without their values)
     #   Display the dropdown menu buttons
@@ -265,24 +266,24 @@ def main_frame(root, canvas):
                                                       choice_undetermined_parameters, choice_current_density_parameters,
                                                       choice_computing_parameters, choice_buttons,
                                                       current_button['Step curve'])) \
-        .grid(row=6, column=2, padx=10, pady=20)
+        .grid(row=7, column=2, padx=10, pady=20)
     #       Button to generate the Pola curve
     ttk.Button(model_possibilities_frame, text='Pola curve', style='Green.TButton',
                command=lambda: control_current_button(choice_operating_conditions, choice_accessible_parameters,
                                                       choice_undetermined_parameters, choice_current_density_parameters,
                                                       choice_computing_parameters, choice_buttons,
                                                       current_button['Pola curve'])) \
-        .grid(row=6, column=3, padx=10, pady=20)
+        .grid(row=7, column=3, padx=10, pady=20)
     #       Button to generate the EIS curve
     ttk.Button(model_possibilities_frame, text='EIS curve', style='Red.TButton',
                command=lambda: control_current_button(choice_operating_conditions, choice_accessible_parameters,
                                                       choice_undetermined_parameters, choice_current_density_parameters,
                                                       choice_computing_parameters, choice_buttons,
                                                       current_button['EIS curve'])) \
-        .grid(row=6, column=4, padx=10, pady=20)
+        .grid(row=7, column=4, padx=10, pady=20)
     #       About button
     ttk.Button(model_possibilities_frame, text='About', style='Black.TButton', command=about) \
-        .grid(row=6, column=5, ipadx=12)
+        .grid(row=7, column=5, ipadx=12)
 
     # Ensure the frame sizes are updated
     root.update_idletasks()
@@ -374,7 +375,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
      Hcgc, Wagc, Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc,
      epsilon_c, e, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, step_current_parameters,
      pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge,
-     n_gdl, n_mpl, rtol, atol, type_fuel_cell, type_auxiliary, type_control, type_purge, type_display, type_plot) = \
+     n_gdl, n_mpl, rtol, atol, type_fuel_cell, voltage_zone, type_auxiliary, type_control, type_purge, type_display, type_plot) = \
         recover_for_use_operating_inputs_and_physical_parameters(choice_operating_conditions,
                                                                  choice_accessible_parameters,
                                                                  choice_undetermined_parameters,
@@ -404,8 +405,9 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
                             'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des, 'y_H2_in': y_H2_in}
         computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
                                 'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
-                                'type_auxiliary': type_auxiliary, 'type_control': type_control,
-                                'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}
+                                'voltage_zone': voltage_zone, 'type_auxiliary': type_auxiliary,
+                                'type_control': type_control, 'type_purge': type_purge, 'type_display': type_display,
+                                'type_plot': type_plot}
         launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, accessible_physical_parameters,
                                          undetermined_physical_parameters, computing_parameters)
 
@@ -415,7 +417,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
                             'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des, 'y_H2_in': y_H2_in}
         computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
-                                'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
+                                'type_fuel_cell': type_fuel_cell, 'type_current': type_current, 'voltage_zone': voltage_zone,
                                 'type_auxiliary': type_auxiliary, 'type_control': type_control,
                                 'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}
         launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameters, accessible_physical_parameters,
@@ -427,7 +429,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
                             'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des, 'y_H2_in': y_H2_in}
         computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
-                                'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
+                                'type_fuel_cell': type_fuel_cell, 'type_current': type_current, 'voltage_zone': voltage_zone,
                                 'type_auxiliary': type_auxiliary, 'type_control': type_control,
                                 'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}
         launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, accessible_physical_parameters,

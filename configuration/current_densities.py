@@ -133,8 +133,8 @@ def polarization_current_for_calibration(t, parameters):
     delta_t_load_pola_cali = parameters['pola_current_for_cali_parameters']['delta_t_load_pola_cali']  # (s).
     #   Breaking time for one step current, for the stabilisation of the internal states.
     delta_t_break_pola_cali = parameters['pola_current_for_cali_parameters']['delta_t_break_pola_cali']  # (s).
-    type_fuel_cell = parameters['type_fuel_cell']  # The fuel cell for which the calibration is performed.
-    i_exp_cali_t, U_exp_cali_t = pola_exp_values_calibration(type_fuel_cell)  # (A.m-2, V). It is the experimental
+    type_fuel_cell, voltage_zone = parameters['type_fuel_cell'], parameters['voltage_zone']  # The fuel cell for which the calibration is performed.
+    i_exp_cali_t, U_exp_cali_t = pola_exp_values_calibration(type_fuel_cell, voltage_zone)  # (A.m-2, V). It is the experimental
     #                                                           current density and voltage values for the calibration.
 
     # Calculation of the time parameters
@@ -263,8 +263,9 @@ if __name__ == "__main__":
     pola_current_for_cali_parameters = {'delta_t_ini_pola_cali': delta_t_ini_pola_cali,
                                         'delta_t_load_pola_cali': delta_t_load_pola_cali,
                                         'delta_t_break_pola_cali': delta_t_break_pola_cali}
-    parameters = {'pola_current_for_cali_parameters': pola_current_for_cali_parameters, 'type_fuel_cell': "EH-31_2.0"}
-    i_exp_cali_t, U_exp_cali_t = pola_exp_values_calibration(parameters['type_fuel_cell'])  # (A.m-2, V). Experimental
+    parameters = {'pola_current_for_cali_parameters': pola_current_for_cali_parameters, 'type_fuel_cell': "EH-31_2.0",
+                  'voltage_zone': "full"}
+    i_exp_cali_t, U_exp_cali_t = pola_exp_values_calibration(parameters['type_fuel_cell'], parameters['voltage_zone'])  # (A.m-2, V). Experimental
     #                                                            current density and voltage values for the calibration.
     #   Display
     n = 10000

@@ -235,25 +235,25 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
     # Condition to fill for the comparison with experimental values
     if computing_parameters['type_fuel_cell'][1] is not None and computing_parameters['type_fuel_cell'][1] != "manual_setup" and \
             computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode":  # Experimental points are accessible
-        i_exp_t_1, U_exp_t_1 = pola_exp_values(computing_parameters['type_fuel_cell'][1])
+        i_exp_t_1, U_exp_t_1 = pola_exp_values(computing_parameters['type_fuel_cell'][1], computing_parameters['voltage_zone'])
         if current_parameters['pola_current_parameters'][1]['i_max_pola'] < i_exp_t_1[-1]:
             raise ValueError('The given maximum current density of the polarization curve i_max_pola_1 is lower than the '
                              'maximum current density of the experimental values. Please increase it.')
     if computing_parameters['type_fuel_cell'][2] is not None and computing_parameters['type_fuel_cell'][2] != "manual_setup" and \
             computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode":  # Experimental points are accessible
-        i_exp_t_2, U_exp_t_2 = pola_exp_values(computing_parameters['type_fuel_cell'][2])
+        i_exp_t_2, U_exp_t_2 = pola_exp_values(computing_parameters['type_fuel_cell'][2], computing_parameters['voltage_zone'])
         if current_parameters['pola_current_parameters'][2]['i_max_pola'] < i_exp_t_2[-1]:
             raise ValueError('The given maximum current density of the polarization curve i_max_pola_2 is lower than the '
                              'maximum current density of the experimental values. Please increase it.')
     if computing_parameters['type_fuel_cell'][3] is not None and computing_parameters['type_fuel_cell'][3] != "manual_setup" and \
             computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode":  # Experimental points are accessible
-        i_exp_t_3, U_exp_t_3 = pola_exp_values(computing_parameters['type_fuel_cell'][3])
+        i_exp_t_3, U_exp_t_3 = pola_exp_values(computing_parameters['type_fuel_cell'][3], computing_parameters['voltage_zone'])
         if current_parameters['pola_current_parameters'][3]['i_max_pola'] < i_exp_t_3[-1]:
             raise ValueError('The given maximum current density of the polarization curve i_max_pola_3 is lower than the '
                              'maximum current density of the experimental values. Please increase it.')
     if computing_parameters['type_fuel_cell'][4] is not None and computing_parameters['type_fuel_cell'][4] != "manual_setup" and \
             computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode":  # Experimental points are accessible
-        i_exp_t_4, U_exp_t_4 = pola_exp_values(computing_parameters['type_fuel_cell'][4])
+        i_exp_t_4, U_exp_t_4 = pola_exp_values(computing_parameters['type_fuel_cell'][4], computing_parameters['voltage_zone'])
         if current_parameters['pola_current_parameters'][4]['i_max_pola'] < i_exp_t_4[-1]:
             raise ValueError('The given maximum current density of the polarization curve i_max_pola_4 is lower than the '
                              'maximum current density of the experimental values. Please increase it.')
@@ -386,7 +386,8 @@ def launch_AlphaPEM_for_polarization_current_for_calibration(operating_inputs, c
         delta_t_ini_pola_cali = current_parameters['pola_current_parameters'][1]['delta_t_ini_pola_cali']  # (s).
         delta_t_load_pola_cali = current_parameters['pola_current_parameters'][1]['delta_t_load_pola_cali']  # (s).
         delta_t_break_pola_cali = current_parameters['pola_current_parameters'][1]['delta_t_break_pola_cali']  # (s).
-        i_exp_cali_t, U_exp_cali_t = pola_exp_values_calibration(computing_parameters['type_fuel_cell'][1])  # (A.m-2, V).
+        i_exp_cali_t, U_exp_cali_t = pola_exp_values_calibration(computing_parameters['type_fuel_cell'][1],
+                                                                 computing_parameters['voltage_zone'])  # (A.m-2, V).
         #           Calculation
         delta_t_pola_cali = delta_t_load_pola_cali + delta_t_break_pola_cali  # s. It is the time of one load.
         tf = delta_t_ini_pola_cali + len(
