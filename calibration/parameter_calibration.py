@@ -113,13 +113,9 @@ def pola_points(ga_instance, solution, solution_idx): # Function to maximize.
                                solution_of_undetermined_physical_parameters, computing_parameters_1)
     except Exception as e:
         print("\nAn error occurred during the evaluation of the solution.")
-        params = []
-        for key in ['epsilon_c', 'i0_h_c_ref', 'a_switch']:
-            params.append(f"{key}: {solution_of_undetermined_physical_parameters.get(key)}")
-        a_slim = solution_of_undetermined_physical_parameters.get('a_slim')
-        b_slim = solution_of_undetermined_physical_parameters.get('b_slim')
-        Pc_des = operating_inputs_1.get('Pc_des')
-        slim = a_slim * (Pc_des / 1e5) + b_slim
+        params = [f"{k}: {v}" for k, v in solution_of_undetermined_physical_parameters.items()]
+        slim = solution_of_undetermined_physical_parameters['a_slim'] * (operating_inputs_1['Pc_des'] / 1e5) + \
+               solution_of_undetermined_physical_parameters['b_slim']
         params.append(f"slim: {slim}")
         print("Attempted parameters: " + " | ".join(params))
         print("Exception :", e)
@@ -129,13 +125,9 @@ def pola_points(ga_instance, solution, solution_idx): # Function to maximize.
                                solution_of_undetermined_physical_parameters, computing_parameters_2)
     except Exception as e:
         print("\nAn error occurred during the evaluation of the solution.")
-        params = []
-        for key in ["i0_d_c_ref", "i0_h_c_ref", "a_switch"]:
-            params.append(f"{key}: {solution_of_undetermined_physical_parameters.get(key)}")
-        a_slim = solution_of_undetermined_physical_parameters.get("a_slim")
-        b_slim = solution_of_undetermined_physical_parameters.get("b_slim")
-        Pc_des = operating_inputs_2.get("Pc_des")
-        slim = a_slim * (Pc_des / 1e5) + b_slim
+        params = [f"{k}: {v}" for k, v in solution_of_undetermined_physical_parameters.items()]
+        slim = solution_of_undetermined_physical_parameters['a_slim'] * (operating_inputs_1['Pc_des'] / 1e5) + \
+               solution_of_undetermined_physical_parameters['b_slim']
         params.append(f"slim: {slim}")
         print("Attempted parameters: " + " | ".join(params))
         print("Exception :", e)
