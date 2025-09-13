@@ -7,6 +7,7 @@
 
 # Importing the necessary libraries
 import math
+import numpy as np
 
 # Importing constants' value and functions
 from configuration.settings import (C_O2ref, alpha_c, tau_cp, tau_hum, rho_mem, M_eq, F, R, M_H2O, Kp, Kd)
@@ -84,9 +85,7 @@ def dydt(t, y, operating_inputs, parameters, solver_variable_names, control_vari
     calculate_dyn_throttle_area_evolution(dif_eq, Pagc, Pcgc, **solver_variables, **operating_inputs, **parameters)
 
     # dif_eq is converted to dydt because the solver requires an ordered list to work
-    dydt = []
-    for key in solver_variable_names:
-        dydt.append(dif_eq['d' + key + ' / dt'])
+    dydt = np.array([dif_eq['d' + key + ' / dt'] for key in solver_variable_names])
     return dydt
 
 
