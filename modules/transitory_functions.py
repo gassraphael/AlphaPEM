@@ -42,7 +42,10 @@ def hmean(terms, weights=None):
         raise ValueError("The length of terms and weights must be the same.")
 
     # Calculate the weighted harmonic mean
-    weighted_sum = sum((w / t) for w, t in zip(weights, terms) if t != 0)
+    weighted_sum = 0
+    for w, t in zip(weights, terms):
+        if t != 0:
+            weighted_sum += w / t
     total_weight = sum(weights)
 
     if weighted_sum == 0:
@@ -809,10 +812,17 @@ def k_th_gaz_mixture(k_th_g, mu_g, x, M):
     epsilon_TS = 0.85 # Value suggested by Tandon and Saxena in 1965.
 
     # Calculation of A_W using Maxon and Saxena suggestion.
-    A_W = [[1.0 if i == j else
-            (epsilon_TS * (1 + (mu_g[i] / mu_g[j]) ** 0.5 * (M[j] / M[i]) ** 0.25) ** 2) /
-            (8 * (1 + M[i] / M[j])) ** 0.5
-            for j in range(n)] for i in range(n)]
+    A_W = []
+    for i in range(n):
+        row = []
+        for j in range(n):
+            if i == j:
+                row.append(1.0)
+            else:
+                val = (epsilon_TS * (1 + (mu_g[i] / mu_g[j]) ** 0.5 * (M[j] / M[i]) ** 0.25) ** 2) / \
+                      (8 * (1 + M[i] / M[j])) ** 0.5
+                row.append(val)
+        A_W.append(row)
 
     # Calculation of the thermal conductivity of the gas mixture.
     k_th_gaz_mixture = 0.0
