@@ -44,10 +44,11 @@ def hmean(terms, weights=None):
 
     # Calculate the weighted harmonic mean
     weighted_sum = 0
+    total_weight = 0
     for w, t in zip(weights, terms):
         if t != 0:
             weighted_sum += w / t
-    total_weight = sum(weights)
+        total_weight += w
 
     if weighted_sum == 0:
         return float('inf')  # Avoid division by zero
@@ -75,7 +76,9 @@ def average(terms, weights=None):
     n = len(terms)
     if weights is None:
         total_weight = n
-        weighted_sum = sum(terms)
+        weighted_sum = 0.0
+        for t in terms:
+            weighted_sum += t
     else:
         if n != len(weights):
             raise ValueError("The length of terms and weights must be the same.")
@@ -806,7 +809,10 @@ def k_th_gaz_mixture(k_th_g, mu_g, x, M):
     -----
     Source : [wuMathematicalModelingTransient2009] and [polingPropertiesGasesLiquids2001]"""
 
-    if abs(sum(x) - 1.0) > 1e-6:
+    total_x = 0.0
+    for xi in x:
+        total_x += xi
+    if abs(total_x - 1.0) > 1e-6:
         raise ValueError("The sum of the molar fractions should be 1.")
 
     n = len(k_th_g)
