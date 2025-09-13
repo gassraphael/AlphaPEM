@@ -804,22 +804,21 @@ def k_th_gaz_mixture(k_th_g, mu_g, x, M):
         raise ValueError("The sum of the molar fractions should be 1.")
 
     n = len(k_th_g)
-    A_W = np.zeros((n, n)) # Interaction coefficient from Wassiljewa equation.
     epsilon_TS = 0.85 # Value suggested by Tandon and Saxena in 1965.
 
     # Calculation of A_W using Maxon and Saxena suggestion.
-    for i in range(n):
-        for j in range(n):
-            if i == j:
-                A_W[i, j] = 1.0
-            else:
-                A_W[i, j] = (epsilon_TS * (1 + (mu_g[i] / mu_g[j])**0.5 * (M[j] / M[i]) ** 0.25) ** 2) /  \
-                            (8 * (1 + M[i] / M[j]))**0.5
+    A_W = [[1.0 if i == j else
+            (epsilon_TS * (1 + (mu_g[i] / mu_g[j]) ** 0.5 * (M[j] / M[i]) ** 0.25) ** 2) /
+            (8 * (1 + M[i] / M[j])) ** 0.5
+            for j in range(n)] for i in range(n)]
 
     # Calculation of the thermal conductivity of the gas mixture.
     k_th_gaz_mixture = 0.0
     for i in range(n):
-        k_th_gaz_mixture += x[i] * k_th_g[i] / sum([x[j] * A_W[i, j] for j in range(n)])
+        denom = 0.0
+        for j in range(n):
+            denom += x[j] * A_W[i][j]
+        k_th_gaz_mixture += x[i] * k_th_g[i] / denom
 
     return k_th_gaz_mixture
 
