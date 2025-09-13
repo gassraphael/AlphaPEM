@@ -1060,21 +1060,23 @@ def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O
     float
         Volumetric heat capacity in J.m-3.K-1."""
 
-    if element == 'agdl' or element == 'cgdl':  # The volumetric heat capacity at the GDL
+    if element in ('agdl', 'cgdl'):  # The volumetric heat capacity at the GDL
         if C_v is None or s is None or epsilon is None:
             raise ValueError("For the GDL, C_v, s and epsilon must be provided.")
         if element == 'agdl':  # The heat capacity of the gas mixture in the AGDL
             if C_H2 is None or C_N2 is None:
                 raise ValueError("For the AGDL, C_H2 and C_N2 must be provided.")
+            sum_C_v_C_H2_C_N2 = C_v + C_H2 + C_N2
             rho_Cp0_gaz = average([M_H2O * C_v * Cp0('H2O_v', T), M_H2 * C_H2 * Cp0('H2', T),
                                      M_N2 * C_N2 * Cp0('N2', T)],
-                                    weights=[C_v / (C_v + C_H2 + C_N2), C_H2 / (C_v + C_H2 + C_N2), C_N2 / (C_v + C_H2 + C_N2)])
+                                    weights=[C_v / sum_C_v_C_H2_C_N2, C_H2 / sum_C_v_C_H2_C_N2, C_N2 / sum_C_v_C_H2_C_N2])
         else:  # The heat capacity of the gas mixture in the CGDL
             if C_O2 is None or C_N2 is None:
                 raise ValueError("For the CGDL, C_O2 and C_N2 must be provided.")
+            sum_C_v_C_O2_C_N2 = C_v + C_O2 + C_N2
             rho_Cp0_gaz = average([M_H2O * C_v * Cp0('H2O_v', T), M_O2 * C_O2 * Cp0('O2', T),
                                      M_N2 * C_N2 * Cp0('N2', T)],
-                                    weights=[C_v / (C_v + C_O2 + C_N2), C_O2 / (C_v + C_O2 + C_N2), C_N2 / (C_v + C_O2 + C_N2)])
+                                    weights=[C_v / sum_C_v_C_O2_C_N2, C_O2 / sum_C_v_C_O2_C_N2, C_N2 / sum_C_v_C_O2_C_N2])
         return average([rho_gdl * Cp_gdl, rho_H2O_l(T) * Cp0('H2O_l', T), rho_Cp0_gaz],
                           weights=[1 - epsilon, epsilon * s, epsilon * (1 - s)])
 
@@ -1084,15 +1086,17 @@ def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O
         if element == 'ampl':  # The heat capacity of the gas mixture in the AMPL
             if C_H2 is None:
                 raise ValueError("For the AMPL, C_H2 must be provided.")
+            sum_C_v_C_H2_C_N2 = C_v + C_H2 + C_N2
             rho_Cp0_gaz = average([M_H2O * C_v * Cp0('H2O_v', T), M_H2 * C_H2 * Cp0('H2', T),
                                      M_N2 * C_N2 * Cp0('N2', T)],
-                                    weights=[C_v / (C_v + C_H2 + C_N2), C_H2 / (C_v + C_H2 + C_N2), C_N2 / (C_v + C_H2 + C_N2)])
+                                    weights=[C_v / sum_C_v_C_H2_C_N2, C_H2 / sum_C_v_C_H2_C_N2, C_N2 / sum_C_v_C_H2_C_N2])
         else:  # The heat capacity of the gas mixture in the CMPL
             if C_O2 is None or C_N2 is None:
                 raise ValueError("For the CMPL, C_O2 and C_N2 must be provided.")
+            sum_C_v_C_O2_C_N2 = C_v + C_O2 + C_N2
             rho_Cp0_gaz = average([M_H2O * C_v * Cp0('H2O_v', T), M_O2 * C_O2 * Cp0('O2', T),
                                      M_N2 * C_N2 * Cp0('N2', T)],
-                                    weights=[C_v / (C_v + C_O2 + C_N2), C_O2 / (C_v + C_O2 + C_N2), C_N2 / (C_v + C_O2 + C_N2)])
+                                    weights=[C_v / sum_C_v_C_O2_C_N2, C_O2 / sum_C_v_C_O2_C_N2, C_N2 / sum_C_v_C_O2_C_N2])
         return average([rho_gdl * Cp_mpl, rho_H2O_l(T) * Cp0('H2O_l', T), rho_Cp0_gaz],
                           weights=[1 - epsilon, epsilon * s, epsilon * (1 - s)])
 
@@ -1102,23 +1106,26 @@ def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O
         if element == 'acl':  # The heat capacity of the gas mixture in the ACL
             if C_H2 is None:
                 raise ValueError("For the ACL, C_H2 must be provided.")
+            sum_C_v_C_H2_C_N2 = C_v + C_H2 + C_N2
             rho_Cp0_gaz = average([M_H2O * C_v * Cp0('H2O_v', T), M_H2 * C_H2 * Cp0('H2', T),
                                      M_N2 * C_N2 * Cp0('N2', T)],
-                                    weights=[C_v / (C_v + C_H2 + C_N2), C_H2 / (C_v + C_H2 + C_N2), C_N2 / (C_v + C_H2 + C_N2)])
+                                    weights=[C_v / sum_C_v_C_H2_C_N2, C_H2 / sum_C_v_C_H2_C_N2, C_N2 / sum_C_v_C_H2_C_N2])
         else:  # The heat capacity of the gas mixture in the CCL
             if C_O2 is None or C_N2 is None:
                 raise ValueError("For the CCL, C_O2 and C_N2 must be provided.")
+            sum_C_v_C_O2_C_N2 = C_v + C_O2 + C_N2
             rho_Cp0_gaz = average([M_H2O * C_v * Cp0('H2O_v', T), M_O2 * C_O2 * Cp0('O2', T),
                                      M_N2 * C_N2 * Cp0('N2', T)],
-                                    weights=[C_v / (C_v + C_O2 + C_N2), C_O2 / (C_v + C_O2 + C_N2), C_N2 / (C_v + C_O2 + C_N2)])
+                                    weights=[C_v / sum_C_v_C_O2_C_N2, C_O2 / sum_C_v_C_O2_C_N2, C_N2 / sum_C_v_C_O2_C_N2])
         return average([rho_cl * Cp_cl, rho_mem * Cp_mem, rho_H2O_l(T) * Cp0('H2O_l', T), rho_Cp0_gaz],
                           weights=[1 - epsilon - epsilon_mc, epsilon_mc, epsilon * s, epsilon * (1 - s)])
 
     elif element == 'mem':  # The volumetric heat capacity at the membrane
         if lambdaa is None:
             raise ValueError("For the membrane, lambdaa must be provided.")
+        fv_val = fv(lambdaa, T)
         return average([rho_mem * Cp_mem, rho_H2O_l(T) * Cp0('H2O_l', T)],
-                          weights=[1 - fv(lambdaa, T), fv(lambdaa, T)])
+                          weights=[1 - fv_val, fv_val])
 
     else:
         raise ValueError("The element should be either 'agdl', 'cgdl', 'ampl', 'cmpl', 'acl', 'ccl' or 'mem'.")
