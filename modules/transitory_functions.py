@@ -9,6 +9,7 @@
 import math
 
 # Importing constants' value
+from functools import lru_cache
 from configuration.settings import (M_eq, rho_mem, Dp_mpl, Dp_cl, theta_c_gdl, theta_c_mpl, theta_c_cl, gamma_cond,
                                     gamma_evap, M_H2, M_O2, M_N2, M_H2O, R, Kshape, epsilon_p, alpha_p, tau_mpl, tau_cl,
                                     r_s_gdl, r_s_mpl, r_s_cl, k_th_gdl, k_th_mpl, k_th_cl, k_th_mem, Cp_gdl, Cp_mpl,
@@ -559,6 +560,7 @@ def sigma(T):
     return 235.8e-3 * ((647.15 - T) / 647.15) ** 1.256 * (1 - 0.625 * (647.15 - T) / 647.15)
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def K0(element, epsilon, epsilon_c=None):
     """This function calculates the intrinsic permeability, in m², considering GDL compression.
 
@@ -705,6 +707,7 @@ def sigma_p_eff(element, lambdaa, T, epsilon_mc=None):
         raise ValueError("The element should be either 'mem' or 'ccl'.")
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def sigma_e_eff(element, epsilon, epsilon_c=None, epsilon_mc=None):
     """This function calculates the effective electrical conductivity, in Ω-1.m-1, in either the GDL, the MPL or the CL,
     considering GDL compression.
