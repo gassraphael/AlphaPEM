@@ -334,8 +334,8 @@ def computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, type_fuel_ce
     n_gdl = max(1, int(Hgdl / Hacl / 4))  # It is the number of model points placed inside each GDL.
     n_mpl = max(1, int(Hmpl / Hacl))      # It is the number of model points placed inside each MPL.
 
-    rtol = 1e-6  # Relative tolerance for the system of ODEs solver.
-    atol = 1e-10  # Absolute tolerance for the system of ODEs solver.
+    rtol = 1e-8  # Relative tolerance for the system of ODEs solver.
+    atol = 1e-11  # Absolute tolerance for the system of ODEs solver.
 
     step_current_parameters['delta_t_dyn_step'] = delta_t_dyn_step # Update the step current parameters.
     return n_gdl, n_mpl, t_purge, rtol, atol, step_current_parameters

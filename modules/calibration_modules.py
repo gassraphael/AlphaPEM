@@ -262,6 +262,38 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         Experimental values of the voltage.
     """
 
+    # Algorithm parameters for polarization curve generation
+    type_auxiliary = "forced-convective_cathode_with_flow-through_anode"
+    type_control = "no_control"
+    type_purge = "no_purge"
+    type_display = "no_display"
+    type_plot = "fixed"
+    type_current = "polarization_for_cali"
+    current_density = polarization_current_for_calibration
+    delta_t_ini_step = 30 * 60  # (s). Initial time at zero current density for the stabilisation of the internal states (standard value).
+    delta_t_load_step = 1e-15  # (s). Loading time for the step current density function, from 0 to i_step.
+    delta_t_break_step = 0  # (s). Time at i_step current density for the stabilisation of the internal states.
+    i_step = 1.0e4  # (A.m-2). Current density for the step current density function.
+    step_current_parameters = {'delta_t_ini_step': delta_t_ini_step, 'delta_t_load_step': delta_t_load_step,
+                               'delta_t_break_step': delta_t_break_step, 'i_step': i_step}
+    delta_t_ini_pola = 30 * 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
+    delta_t_load_pola = 30  # (s). Loading time for one step current of the polarisation current density function.
+    delta_t_break_pola = 15 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
+    delta_i_pola = 0.05e4  # (A.m-2). Current density step for the polarisation current density function.
+    pola_current_parameters = {'delta_t_ini_pola': delta_t_ini_pola, 'delta_t_load_pola': delta_t_load_pola,
+                               'delta_t_break_pola': delta_t_break_pola, 'delta_i_pola': delta_i_pola}
+    delta_t_ini_pola_cali = 30 * 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
+    delta_t_load_pola_cali = 30  # (s). Loading time for one step current of the polarisation current density function.
+    delta_t_break_pola_cali = 15 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
+    pola_current_for_cali_parameters = {'delta_t_ini_pola_cali': delta_t_ini_pola_cali,
+                                        'delta_t_load_pola_cali': delta_t_load_pola_cali,
+                                        'delta_t_break_pola_cali': delta_t_break_pola_cali}
+    i_EIS, ratio_EIS = np.nan, np.nan  # (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.
+    f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
+    t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
+    rtol = 1e-8  # Relative tolerance for the system of ODEs solver.
+    atol = 1e-11  # Absolute tolerance for the system of ODEs solver.
+
     if type_fuel_cell == "ZSW-GenStack" or type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41" or \
             type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81" or type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2" or \
             type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6" or type_fuel_cell == "ZSW-GenStack_T_62" or \
@@ -289,6 +321,12 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         else:
             Pa_des, Pc_des = 2.2e5, 2.0e5  # Pa. It is the desired pressure of the inlet fuel gas (at the anode/cathode).
         y_H2_in = 0.7 # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        if voltage_zone == 'full':
+            i_max_pola = 2.5e4  # (A.m-2). It is the maximum current density for the polarization curve.
+        else: # voltage_zone == 'before_voltage_drop'
+            i_max_pola = 1.9e4
+        pola_current_parameters.update({'i_max_pola': i_max_pola})
+
         #       Fuel cell physical parameters
         Aact = 2.7972e-2  # m². It is the active area of the catalyst layer.
         n_cell = 26  # . It is the number of cell in the stack.
@@ -328,44 +366,9 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
 
-        # Algorithm parameters for polarization curve generation
-        type_auxiliary = "forced-convective_cathode_with_flow-through_anode"
-        type_control = "no_control"
-        type_purge = "no_purge"
-        type_display = "no_display"
-        type_plot = "fixed"
-        type_current = "polarization_for_cali"
-        current_density = polarization_current_for_calibration
-        delta_t_ini_step = 30 * 60  # (s). Initial time at zero current density for the stabilisation of the internal states (standard value).
-        delta_t_load_step = 1e-15  # (s). Loading time for the step current density function, from 0 to i_step.
-        delta_t_break_step = 0  # (s). Time at i_step current density for the stabilisation of the internal states.
-        i_step = 1.0e4  # (A.m-2). Current density for the step current density function.
-        step_current_parameters = {'delta_t_ini_step': delta_t_ini_step, 'delta_t_load_step': delta_t_load_step,
-                                   'delta_t_break_step': delta_t_break_step, 'i_step': i_step}
-        delta_t_ini_pola = 30 * 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
-        delta_t_load_pola = 30  # (s). Loading time for one step current of the polarisation current density function.
-        delta_t_break_pola = 15 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
-        delta_i_pola = 0.05e4  # (A.m-2). Current density step for the polarisation current density function.
-        if voltage_zone == 'full':
-            i_max_pola = 2.5e4  # (A.m-2). It is the maximum current density for the polarization curve.
-        else: # voltage_zone == 'before_voltage_drop'
-            i_max_pola = 1.9e4
-        pola_current_parameters = {'delta_t_ini_pola': delta_t_ini_pola, 'delta_t_load_pola': delta_t_load_pola,
-                                   'delta_t_break_pola': delta_t_break_pola, 'delta_i_pola': delta_i_pola,
-                                   'i_max_pola': i_max_pola}
-        delta_t_ini_pola_cali = 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
-        delta_t_load_pola_cali = 30  # (s). Loading time for one step current of the polarisation current density function.
-        delta_t_break_pola_cali = 10 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
-        pola_current_for_cali_parameters = {'delta_t_ini_pola_cali': delta_t_ini_pola_cali,
-                                            'delta_t_load_pola_cali': delta_t_load_pola_cali,
-                                            'delta_t_break_pola_cali': delta_t_break_pola_cali}
-        i_EIS, ratio_EIS = np.nan, np.nan  # (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.
-        f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
-        t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
+        # Computing parameters
         n_gdl = max(1, int(Hgdl / Hacl / 4))  # It is the number of model points placed inside each GDL.
         n_mpl = max(1, int(Hmpl / Hacl))  # It is the number of model points placed inside each MPL.
-        rtol = 1e-6  # Relative tolerance for the system of ODEs solver.
-        atol = 1e-10  # Absolute tolerance for the system of ODEs solver.
 
     elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
             type_fuel_cell == "EH-31_2.5":
@@ -383,6 +386,12 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         else:  # type_fuel_cell == "EH-31_2.5":
             Pa_des, Pc_des = 2.5e5, 2.5e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
         y_H2_in = 1  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        if voltage_zone == 'full':
+            i_max_pola = 3.0e4  # (A.m-2). It is the maximum current density for the polarization curve.
+        else:  # voltage_zone == 'before_voltage_drop'
+            i_max_pola = 1.7e4
+        pola_current_parameters.update({'i_max_pola': i_max_pola})
+
         #       Fuel cell physical parameters
         Aact = 85e-4  # m². It is the active area of the catalyst layer.
         Wagc = 450e-6  # m. It is the width of the anode gas channel.
@@ -423,44 +432,9 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
         C_scl = 20e6  # F.m-3. It is the volumetric space-charge layer capacitance.
 
-        # Algorithm parameters for polarization curve generation
-        type_auxiliary = "forced-convective_cathode_with_flow-through_anode"
-        type_control = "no_control"
-        type_purge = "no_purge"
-        type_display = "no_display"
-        type_plot = "fixed"
-        type_current = "polarization_for_cali"
-        current_density = polarization_current_for_calibration
-        delta_t_ini_step = 30 * 60  # (s). Initial time at zero current density for the stabilisation of the internal states (standard value).
-        delta_t_load_step = 1e-15  # (s). Loading time for the step current density function, from 0 to i_step.
-        delta_t_break_step = 0  # (s). Time at i_step current density for the stabilisation of the internal states.
-        i_step = 1.0e4  # (A.m-2). Current density for the step current density function.
-        step_current_parameters = {'delta_t_ini_step': delta_t_ini_step, 'delta_t_load_step': delta_t_load_step,
-                                   'delta_t_break_step': delta_t_break_step, 'i_step': i_step}
-        delta_t_ini_pola = 30 * 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
-        delta_t_load_pola = 30  # (s). Loading time for one step current of the polarisation current density function.
-        delta_t_break_pola = 15 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
-        delta_i_pola = 0.05e4  # (A.m-2). Current density step for the polarisation current density function.
-        if voltage_zone == 'full':
-            i_max_pola = 3.0e4  # (A.m-2). It is the maximum current density for the polarization curve.
-        else:  # voltage_zone == 'before_voltage_drop'
-            i_max_pola = 1.7e4
-        pola_current_parameters = {'delta_t_ini_pola': delta_t_ini_pola, 'delta_t_load_pola': delta_t_load_pola,
-                                   'delta_t_break_pola': delta_t_break_pola, 'delta_i_pola': delta_i_pola,
-                                   'i_max_pola': i_max_pola}
-        delta_t_ini_pola_cali = 30 * 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
-        delta_t_load_pola_cali = 30  # (s). Loading time for one step current of the polarisation current density function.
-        delta_t_break_pola_cali = 10 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
-        pola_current_for_cali_parameters = {'delta_t_ini_pola_cali': delta_t_ini_pola_cali,
-                                            'delta_t_load_pola_cali': delta_t_load_pola_cali,
-                                            'delta_t_break_pola_cali': delta_t_break_pola_cali}
-        i_EIS, ratio_EIS = np.nan, np.nan  # (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.
-        f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
-        t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
+        # Computing parameters
         n_gdl = max(1, int(Hgdl / Hacl / 4))  # It is the number of model points placed inside each GDL.
         n_mpl = max(1, int(Hmpl / Hacl))  # It is the number of model points placed inside each MPL.
-        rtol = 1e-6  # Relative tolerance for the system of ODEs solver.
-        atol = 1e-10  # Absolute tolerance for the system of ODEs solver.
 
     else:
         ValueError("A correct type_fuel_cell should be given.")
