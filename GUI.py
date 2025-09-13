@@ -17,7 +17,7 @@ from modules.GUI_modules import display_parameter_labels, \
     display_radiobuttons, changeValue, value_control, set_equal_width, launch_AlphaPEM_for_step_current, \
     launch_AlphaPEM_for_polarization_current, launch_AlphaPEM_for_EIS_current
 from configuration.current_densities import step_current, polarization_current, EIS_current
-from configuration.settings import current_density_parameters
+from configuration.settings import calculate_current_density_parameters
 
 
 # ____________________________________________________GUI functions____________________________________________________
@@ -102,7 +102,7 @@ def main_frame(root, canvas):
 
     # Import the current density parameters from the settings file for default value
     (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
-     current_density) = current_density_parameters()
+     current_density) = calculate_current_density_parameters()
     f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = f_EIS
 
 

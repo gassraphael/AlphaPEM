@@ -14,7 +14,7 @@ from configuration.current_densities import (step_current, polarization_current,
 from modules.settings_modules import stored_operating_inputs, stored_physical_parameters, EIS_parameters
 
 # _______________________________________________________Settings_______________________________________________________
-def current_density_parameters(type_current=None):
+def calculate_current_density_parameters(type_current=None):
     """This function is used to set the parameters of the current density which is imposed to the fuel cell system.
 
     Parameters
@@ -113,7 +113,7 @@ def current_density_parameters(type_current=None):
             i_EIS, ratio_EIS, f_EIS, t_EIS, current_density)
 
 
-def operating_inputs_function(pola_current_parameters, type_fuel_cell, voltage_zone):
+def calculate_operating_inputs(pola_current_parameters, type_fuel_cell, voltage_zone):
     """This function is used to set the operating inputs of the fuel cell system.
 
     Parameters
@@ -169,7 +169,7 @@ def operating_inputs_function(pola_current_parameters, type_fuel_cell, voltage_z
     return T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, pola_current_parameters
 
 
-def physical_parameters(type_fuel_cell):
+def calculate_physical_parameters(type_fuel_cell):
     """This function is used to set the physical parameters of the fuel cell system.
 
     Parameters
@@ -292,7 +292,7 @@ def physical_parameters(type_fuel_cell):
             b_slim, a_switch, C_scl)
 
 
-def computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, type_fuel_cell):
+def calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl):
     """This function is used to set the computing parameters of the fuel cell system.
 
     Parameters
@@ -303,8 +303,6 @@ def computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, type_fuel_ce
         Thickness of the gas diffusion layer in meters.
     Hacl : float
         Thickness of the anode catalyst layer in meters.
-    type_fuel_cell : str
-        Type of fuel cell system.
 
     Returns
     -------

@@ -13,7 +13,7 @@ from tkinter import messagebox
 from tkinter import ttk
 
 # Importing constants' value and functions
-from configuration.settings import current_density_parameters, computing_parameters
+from configuration.settings import calculate_current_density_parameters, calculate_computing_parameters
 from model.AlphaPEM import AlphaPEM
 from modules.settings_modules import stored_operating_inputs, stored_physical_parameters, EIS_parameters
 from modules.main_modules import figures_preparation
@@ -352,7 +352,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
         voltage_zone = "before_voltage_drop"
 
     (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
-     current_density) = current_density_parameters()
+     current_density) = calculate_current_density_parameters()
 
     T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola = stored_operating_inputs(type_fuel_cell, voltage_zone)
 
@@ -360,7 +360,8 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
      Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, Re, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c,
      a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
 
-    n_gdl, n_mpl, t_purge, rtol, atol, step_current_parameters = computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, type_fuel_cell)
+    n_gdl, n_mpl, t_purge, rtol, atol, step_current_parameters = calculate_computing_parameters(step_current_parameters, Hgdl,
+                                                                                                Hmpl, Hacl)
 
     # operating conditions recovery
     choice_operating_conditions['Temperature - Tfc (°C)']['value'].set(round(T_des - 273.15, 4))  # °C
