@@ -68,20 +68,22 @@ def average(terms, weights=None):
     float:
         The weighted arithmetic mean.
     """
+    n = len(terms)
     if weights is None:
-        # If no weights are provided, use uniform weights
-        weights = [1] * len(terms)
-
-    if len(terms) != len(weights):
-        raise ValueError("The length of terms and weights must be the same.")
-
-    # Calculate the weighted arithmetic mean
-    weighted_sum = sum(w * t for w, t in zip(weights, terms))
-    total_weight = sum(weights)
+        total_weight = n
+        weighted_sum = sum(terms)
+    else:
+        if n != len(weights):
+            raise ValueError("The length of terms and weights must be the same.")
+        total_weight = 0.0
+        weighted_sum = 0.0
+        for i in range(n):
+            w = weights[i]
+            total_weight += w
+            weighted_sum += w * terms[i]
 
     if total_weight == 0:
-        return float('nan')  # Avoid division by zero
-
+        return float('nan')
     return weighted_sum / total_weight
 
 
