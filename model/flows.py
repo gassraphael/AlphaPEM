@@ -56,11 +56,11 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     e, kappa_co, n_gdl, n_mpl = parameters['e'], parameters['kappa_co'], parameters['n_gdl'], parameters['n_mpl']
 
     # Intermediate values
-    (H_gdl_node, H_mpl_node, Pagc, Pcgc, lambda_acl_mem, lambda_mem_ccl, D_acl_mem, D_mem_ccl, D_cap_agdl_agdl,
-     D_cap_agdl_ampl, D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_cgdl_cgdl, D_cap_cmpl_cgdl, D_cap_cmpl_cmpl,
-     D_cap_ccl_cmpl, ha_Da_eff_agc_agdl, hc_Dc_eff_cgdl_cgc, Da_eff_agdl_agdl, Da_eff_agdl_ampl, Da_eff_ampl_ampl,
-     Da_eff_ampl_acl, Dc_eff_cgdl_cgdl, Dc_eff_cmpl_cgdl, Dc_eff_cmpl_cmpl, Dc_eff_ccl_cmpl, T_acl_mem_ccl) = \
-        flows_int_values(sv, operating_inputs, parameters)
+    (H_gdl_node, H_mpl_node, Pagc, Pcgc, J_EOD_acl_mem, J_EOD_mem_ccl, D_acl_mem, D_mem_ccl, D_cap_agdl_agdl, D_cap_agdl_ampl, D_cap_ampl_ampl,
+     D_cap_ampl_acl, D_cap_cgdl_cgdl, D_cap_cmpl_cgdl, D_cap_cmpl_cmpl, D_cap_ccl_cmpl, ha_Da_eff_agc_agdl,
+     hc_Dc_eff_cgdl_cgc, Da_eff_agdl_agdl, Da_eff_agdl_ampl, Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_cgdl_cgdl,
+     Dc_eff_cmpl_cgdl, Dc_eff_cmpl_cmpl, Dc_eff_ccl_cmpl, T_acl_mem_ccl) = \
+        flows_int_values(sv, i_fc, parameters)
 
     # Inlet and outlet flows
     (Jv_a_in, Jv_a_out, Jv_c_in, Jv_c_out, J_H2_in, J_H2_out, J_O2_in, J_O2_out, J_N2_a_in, J_N2_a_out, J_N2_c_in,
@@ -70,11 +70,9 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     # ________________________________________Dissolved water flows (mol.m-2.s-1)_______________________________________
 
     # Anode side
-    J_lambda_acl_mem = 2.5 / 22 * i_fc / F * lambda_acl_mem - \
-                       2 * rho_mem / M_eq * D_acl_mem * (lambda_mem - lambda_acl) / (Hmem + Hacl)
+    J_lambda_acl_mem = J_EOD_acl_mem - 2 * rho_mem / M_eq * D_acl_mem * (lambda_mem - lambda_acl) / (Hmem + Hacl)
     # Cathode side
-    J_lambda_mem_ccl = 2.5 / 22 * i_fc / F * lambda_mem_ccl - \
-                       2 * rho_mem / M_eq * D_mem_ccl * (lambda_ccl - lambda_mem) / (Hmem + Hccl)
+    J_lambda_mem_ccl = J_EOD_mem_ccl - 2 * rho_mem / M_eq * D_mem_ccl * (lambda_ccl - lambda_mem) / (Hmem + Hccl)
 
     # _________________________________________Liquid water flows (kg.m-2.s-1)__________________________________________
 

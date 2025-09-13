@@ -6,13 +6,13 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import R
+from configuration.settings import R, F
 from modules.transitory_functions import average, Dcap, Da_eff, Dc_eff, h_a, h_c, D
 
 
 # _____________________________________________________Flow modules_____________________________________________________
 
-def flows_int_values(sv, operating_inputs, parameters):
+def flows_int_values(sv, i_fc, parameters):
     """This functions calculates intermediate values for the flows calculation.
 
     Parameters
@@ -20,8 +20,8 @@ def flows_int_values(sv, operating_inputs, parameters):
     sv : dict
         Variables calculated by the solver. They correspond to the fuel cell internal states.
         sv is a contraction of solver_variables for enhanced readability.
-    operating_inputs : dict
-        Operating inputs of the fuel cell.
+    i_fc : float
+        Current density of the fuel cell (A/m²).
     parameters : dict
         Parameters of the fuel cell model.
 
@@ -64,9 +64,9 @@ def flows_int_values(sv, operating_inputs, parameters):
     Pcgc = (C_v_cgc + C_O2_cgc + C_N2_c) * R * T_cgc
 
     # Weighted mean values ...
-    #       ... of the water content
-    lambda_acl_mem = average([lambda_acl, lambda_mem], weights = [Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem)])
-    lambda_mem_ccl = average([lambda_mem, lambda_ccl], weights = [Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl)])
+    #       ... of the EOD flow of water in the membrane
+    J_EOD_acl_mem = 2.5 / 22 * i_fc / F * average([lambda_acl, lambda_mem], weights=[Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem)])
+    J_EOD_mem_ccl = 2.5 / 22 * i_fc / F * average([lambda_mem, lambda_ccl], weights=[Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl)])
     #       ... of the diffusion coefficient of water in the membrane
     D_acl_mem = average([D(lambda_acl), D(lambda_mem)], weights = [Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem)])
     D_mem_ccl = average([D(lambda_mem), D(lambda_ccl)], weights = [Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl)])
@@ -145,7 +145,7 @@ def flows_int_values(sv, operating_inputs, parameters):
     T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
                         weights=[Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl), Hccl / (Hacl + Hmem + Hccl)])
 
-    return (H_gdl_node, H_mpl_node, Pagc, Pcgc, lambda_acl_mem, lambda_mem_ccl, D_acl_mem, D_mem_ccl, D_cap_agdl_agdl,
+    return (H_gdl_node, H_mpl_node, Pagc, Pcgc, J_EOD_acl_mem, J_EOD_mem_ccl, D_acl_mem, D_mem_ccl, D_cap_agdl_agdl,
             D_cap_agdl_ampl, D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_cgdl_cgdl, D_cap_cmpl_cgdl, D_cap_cmpl_cmpl,
             D_cap_ccl_cmpl, ha_Da_eff_agc_agdl, hc_Dc_eff_cgdl_cgc, Da_eff_agdl_agdl, Da_eff_agdl_ampl,
             Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_cgdl_cgdl, Dc_eff_cmpl_cgdl, Dc_eff_cmpl_cmpl, Dc_eff_ccl_cmpl,
