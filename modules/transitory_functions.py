@@ -752,6 +752,7 @@ def sigma_e_eff(element, epsilon, epsilon_c=None, epsilon_mc=None):
         raise ValueError("The element should be either 'gdl', 'mpl' or 'cl'.")
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def k_th(component, T):
     """This function calculates the thermal conductivity of fluids, in J.m-1.s-1.K-1, as a function of the
     temperature.
