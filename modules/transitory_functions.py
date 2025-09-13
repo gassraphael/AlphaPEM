@@ -6,7 +6,6 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing the necessary libraries
-import numpy as np
 import math
 
 # Importing constants' value
@@ -536,9 +535,9 @@ def Svl(element, s, C_v, Ctot, T, epsilon):
     P_v = C_v * R * T
 
     if C_v > C_v_sat(T):  # condensation
-        return gamma_cond * M_H2O / (R * T) * epsilon * (1 - s) * D(Ptot, T) * Ptot * np.log((Ptot - Psat(T)) / (Ptot - P_v))
+        return gamma_cond * M_H2O / (R * T) * epsilon * (1 - s) * D(Ptot, T) * Ptot * math.log((Ptot - Psat(T)) / (Ptot - P_v))
     else:  # evaporation
-        return gamma_evap * M_H2O / (R * T) * epsilon * s * D(Ptot, T) * Ptot * np.log((Ptot - Psat(T)) / (Ptot - P_v))
+        return gamma_evap * M_H2O / (R * T) * epsilon * s * D(Ptot, T) * Ptot * math.log((Ptot - Psat(T)) / (Ptot - P_v))
 
 
 def sigma(T):
