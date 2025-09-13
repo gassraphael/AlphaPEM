@@ -35,10 +35,12 @@ def hmean(terms, weights=None):
     float:
         The weighted harmonic mean.
     """
-    if weights is None:
-        weights = [1] * len(terms)  # Assign equal weights if not provided
 
-    if len(terms) != len(weights):
+    n = len(terms)
+    if weights is None:
+        weights = [1] * n  # Assign equal weights if not provided
+
+    if len(weights) != n:
         raise ValueError("The length of terms and weights must be the same.")
 
     # Calculate the weighted harmonic mean
