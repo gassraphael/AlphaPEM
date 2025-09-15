@@ -361,7 +361,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
      a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
 
     n_gdl, n_mpl, t_purge, rtol, atol, step_current_parameters = calculate_computing_parameters(step_current_parameters, Hgdl,
-                                                                                                Hmpl, Hacl)
+                                                                                                Hmpl, Hacl, type_fuel_cell)
 
     # operating conditions recovery
     choice_operating_conditions['Temperature - Tfc (°C)']['value'].set(round(T_des - 273.15, 4))  # °C

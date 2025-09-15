@@ -291,8 +291,6 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
     i_EIS, ratio_EIS = np.nan, np.nan  # (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.
     f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
     t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
-    rtol = 1e-8  # Relative tolerance for the system of ODEs solver.
-    atol = 1e-12  # Absolute tolerance for the system of ODEs solver.
 
     if type_fuel_cell == "ZSW-GenStack" or type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41" or \
             type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81" or type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2" or \
@@ -369,6 +367,8 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         # Computing parameters
         n_gdl = max(1, int(Hgdl / Hacl / 4))  # It is the number of model points placed inside each GDL.
         n_mpl = max(1, int(Hmpl / Hacl))  # It is the number of model points placed inside each MPL.
+        rtol = 1e-6  # Relative tolerance for the system of ODEs solver.
+        atol = 1e-10  # Absolute tolerance for the system of ODEs solver.
 
     elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
             type_fuel_cell == "EH-31_2.5":
@@ -435,6 +435,8 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         # Computing parameters
         n_gdl = max(1, int(Hgdl / Hacl / 4))  # It is the number of model points placed inside each GDL.
         n_mpl = max(1, int(Hmpl / Hacl))  # It is the number of model points placed inside each MPL.
+        rtol = 1e-8  # Relative tolerance for the system of ODEs solver.
+        atol = 1e-12  # Absolute tolerance for the system of ODEs solver.
 
     else:
         ValueError("A correct type_fuel_cell should be given.")

@@ -80,7 +80,7 @@ def main():
      a_slim, b_slim, a_switch, C_scl) = calculate_physical_parameters(type_fuel_cell_1)
     #   Computing parameters
     n_gdl, n_mpl, t_purge, rtol, atol, step_current_parameters = calculate_computing_parameters(
-        copy.deepcopy(step_current_parameters), Hgdl, Hmpl, Hacl)
+        copy.deepcopy(step_current_parameters), Hgdl, Hmpl, Hacl, type_fuel_cell_1)
 
     # Initialize the operating inputs and parameters dictionaries.
     operating_inputs = {'current_density': current_density, 'T_des': [None, T_des_1, T_des_2, T_des_3, T_des_4],
