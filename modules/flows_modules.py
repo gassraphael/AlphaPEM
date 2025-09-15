@@ -7,7 +7,7 @@
 
 # Importing constants' value and functions
 from configuration.settings import R, F
-from modules.transitory_functions import average, Dcap, Da_eff, Dc_eff, h_a, h_c, D
+from modules.transitory_functions import average, hmean, Dcap, Da_eff, Dc_eff, h_a, h_c, D
 
 
 # _____________________________________________________Flow modules_____________________________________________________
@@ -68,76 +68,76 @@ def flows_int_values(sv, i_fc, parameters):
     J_EOD_acl_mem = 2.5 / 22 * i_fc / F * average([lambda_acl, lambda_mem], weights=[Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem)])
     J_EOD_mem_ccl = 2.5 / 22 * i_fc / F * average([lambda_mem, lambda_ccl], weights=[Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl)])
     #       ... of the diffusion coefficient of water in the membrane
-    D_acl_mem = average([D(lambda_acl), D(lambda_mem)], weights = [Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem)])
-    D_mem_ccl = average([D(lambda_mem), D(lambda_ccl)], weights = [Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl)])
+    D_acl_mem = hmean([D(lambda_acl), D(lambda_mem)], weights = [Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem)])
+    D_mem_ccl = hmean([D(lambda_mem), D(lambda_ccl)], weights = [Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl)])
     #       ... of the capillary coefficient
-    D_cap_agdl_agdl = [None] + [average([Dcap('gdl', sv[f's_agdl_{i}'], sv[f'T_agdl_{i}'], epsilon_gdl, e,
+    D_cap_agdl_agdl = [None] + [hmean([Dcap('gdl', sv[f's_agdl_{i}'], sv[f'T_agdl_{i}'], epsilon_gdl, e,
                                             epsilon_c=epsilon_c),
                                          Dcap('gdl', sv[f's_agdl_{i+1}'], sv[f'T_agdl_{i+1}'], epsilon_gdl, e,
                                             epsilon_c=epsilon_c)]) for i in range(1, n_gdl)]
-    D_cap_agdl_ampl = average([Dcap('gdl', sv[f's_agdl_{n_gdl}'], sv[f'T_agdl_{n_gdl}'], epsilon_gdl, e,
+    D_cap_agdl_ampl = hmean([Dcap('gdl', sv[f's_agdl_{n_gdl}'], sv[f'T_agdl_{n_gdl}'], epsilon_gdl, e,
                                    epsilon_c=epsilon_c),
                                      Dcap('mpl', sv['s_ampl_1'], sv['T_ampl_1'], epsilon_mpl, e)],
                              weights=[H_gdl_node / (H_gdl_node + H_mpl_node), H_mpl_node / (H_gdl_node + H_mpl_node)])
-    D_cap_ampl_ampl = [None] + [average([Dcap('mpl', sv[f's_ampl_{i}'], sv[f'T_ampl_{i}'], epsilon_mpl, e),
+    D_cap_ampl_ampl = [None] + [hmean([Dcap('mpl', sv[f's_ampl_{i}'], sv[f'T_ampl_{i}'], epsilon_mpl, e),
                                          Dcap('mpl', sv[f's_ampl_{i+1}'], sv[f'T_ampl_{i+1}'], epsilon_mpl, e)])
                                 for i in range(1, n_mpl)]
-    D_cap_ampl_acl = average([Dcap('mpl', sv[f's_ampl_{n_mpl}'], sv[f'T_ampl_{n_mpl}'], epsilon_mpl, e),
+    D_cap_ampl_acl = hmean([Dcap('mpl', sv[f's_ampl_{n_mpl}'], sv[f'T_ampl_{n_mpl}'], epsilon_mpl, e),
                                     Dcap('cl', s_acl, T_acl, epsilon_cl, e)],
                              weights=[H_mpl_node / (H_mpl_node + Hacl), Hacl / (H_mpl_node + Hacl)])
-    D_cap_cgdl_cgdl = [None] + [average([Dcap('gdl', sv[f's_cgdl_{i}'], sv[f'T_cgdl_{i}'], epsilon_gdl, e,
+    D_cap_cgdl_cgdl = [None] + [hmean([Dcap('gdl', sv[f's_cgdl_{i}'], sv[f'T_cgdl_{i}'], epsilon_gdl, e,
                                             epsilon_c=epsilon_c),
                                         Dcap('gdl', sv[f's_cgdl_{i+1}'], sv[f'T_cgdl_{i+1}'], epsilon_gdl, e,
                                             epsilon_c=epsilon_c)]) for i in range(1, n_gdl)]
-    D_cap_cmpl_cgdl = average([Dcap('mpl', sv[f's_cmpl_{n_mpl}'], sv[f'T_cmpl_{n_mpl}'], epsilon_mpl, e),
+    D_cap_cmpl_cgdl = hmean([Dcap('mpl', sv[f's_cmpl_{n_mpl}'], sv[f'T_cmpl_{n_mpl}'], epsilon_mpl, e),
                                      Dcap('gdl', sv['s_cgdl_1'], sv['T_cgdl_1'], epsilon_gdl, e,
                                            epsilon_c=epsilon_c)],
                             weights = [H_mpl_node / (H_mpl_node + H_gdl_node), H_gdl_node / (H_mpl_node + H_gdl_node)])
-    D_cap_cmpl_cmpl = [None] + [average([Dcap('mpl', sv[f's_cmpl_{i}'], sv[f'T_cmpl_{i}'], epsilon_mpl, e),
+    D_cap_cmpl_cmpl = [None] + [hmean([Dcap('mpl', sv[f's_cmpl_{i}'], sv[f'T_cmpl_{i}'], epsilon_mpl, e),
                                         Dcap('mpl', sv[f's_cmpl_{i+1}'], sv[f'T_cmpl_{i+1}'], epsilon_mpl, e)])
                                 for i in range(1, n_mpl)]
-    D_cap_ccl_cmpl = average([Dcap('cl', s_ccl, T_ccl, epsilon_cl, e),
+    D_cap_ccl_cmpl = hmean([Dcap('cl', s_ccl, T_ccl, epsilon_cl, e),
                                     Dcap('mpl', sv['s_cmpl_1'], sv['T_cmpl_1'], epsilon_mpl, e)],
                              weights=[Hccl / (Hccl + H_mpl_node), H_mpl_node / (Hccl + H_mpl_node)])
     #       ... of the effective diffusion coefficient between the gas channel and the gas diffusion layer
-    ha_Da_eff_agc_agdl = average([h_a(Pagc, T_agc, Wagc, Hagc) * Hagc,
+    ha_Da_eff_agc_agdl = hmean([h_a(Pagc, T_agc, Wagc, Hagc) * Hagc,
                                         Da_eff('gdl', sv['s_agdl_1'], sv['T_agdl_1'], Pagdl[1], epsilon_gdl,
                                              epsilon_c = epsilon_c)],
                                   weights = [Hagc / (Hagc + H_gdl_node), H_gdl_node / (Hagc + H_gdl_node)])
-    hc_Dc_eff_cgdl_cgc = average([Dc_eff('gdl', sv[f's_cgdl_{n_gdl}'], sv[f'T_cgdl_{n_gdl}'], Pcgdl[n_gdl],
+    hc_Dc_eff_cgdl_cgc = hmean([Dc_eff('gdl', sv[f's_cgdl_{n_gdl}'], sv[f'T_cgdl_{n_gdl}'], Pcgdl[n_gdl],
                                              epsilon_gdl, epsilon_c = epsilon_c),
                                         h_c(Pcgc, T_cgc, Wcgc, Hcgc) * Hcgc],
                                   weights = [H_gdl_node / (H_gdl_node + Hcgc), Hcgc / (H_gdl_node + Hcgc)])
     #       ... of the effective diffusion coefficient
-    Da_eff_agdl_agdl = [None] + [average([Da_eff('gdl', sv[f's_agdl_{i}'], sv[f'T_agdl_{i}'], Pagdl[i],
+    Da_eff_agdl_agdl = [None] + [hmean([Da_eff('gdl', sv[f's_agdl_{i}'], sv[f'T_agdl_{i}'], Pagdl[i],
                                               epsilon_gdl, epsilon_c = epsilon_c),
                                           Da_eff('gdl', sv[f's_agdl_{i+1}'], sv[f'T_agdl_{i+1}'], Pagdl[i+1],
                                               epsilon_gdl, epsilon_c = epsilon_c)]) for i in range(1, n_gdl)]
-    Da_eff_agdl_ampl = average([Da_eff('gdl', sv[f's_agdl_{n_gdl}'], sv[f'T_agdl_{n_gdl}'], Pagdl[n_gdl],
+    Da_eff_agdl_ampl = hmean([Da_eff('gdl', sv[f's_agdl_{n_gdl}'], sv[f'T_agdl_{n_gdl}'], Pagdl[n_gdl],
                                           epsilon_gdl, epsilon_c = epsilon_c),
                                       Da_eff('mpl', sv['s_ampl_1'], sv['T_ampl_1'], Pampl[1], epsilon_mpl)],
                                weights = [H_gdl_node / (H_gdl_node + H_mpl_node), H_mpl_node / (H_gdl_node + H_mpl_node)])
-    Da_eff_ampl_ampl = [None] + [average([Da_eff('mpl', sv[f's_ampl_{i}'], sv[f'T_ampl_{i}'], Pampl[i],
+    Da_eff_ampl_ampl = [None] + [hmean([Da_eff('mpl', sv[f's_ampl_{i}'], sv[f'T_ampl_{i}'], Pampl[i],
                                               epsilon_mpl),
                                         Da_eff('mpl', sv[f's_ampl_{i+1}'], sv[f'T_ampl_{i+1}'], Pampl[i+1],
                                               epsilon_mpl)]) for i in range(1, n_mpl)]
-    Da_eff_ampl_acl = average([Da_eff('mpl', sv[f's_ampl_{n_mpl}'], sv[f'T_ampl_{n_mpl}'], Pampl[n_mpl],
+    Da_eff_ampl_acl = hmean([Da_eff('mpl', sv[f's_ampl_{n_mpl}'], sv[f'T_ampl_{n_mpl}'], Pampl[n_mpl],
                                             epsilon_mpl),
                                      Da_eff('cl', s_acl, T_acl, Pacl, epsilon_cl)],
                               weights=[H_mpl_node / (H_mpl_node + Hacl), Hacl / (H_mpl_node + Hacl)])
-    Dc_eff_ccl_cmpl = average([Dc_eff('cl', s_ccl, T_ccl, Pccl, epsilon_cl),
+    Dc_eff_ccl_cmpl = hmean([Dc_eff('cl', s_ccl, T_ccl, Pccl, epsilon_cl),
                                Dc_eff('mpl', sv['s_cmpl_1'], sv['T_cmpl_1'], Pcmpl[1], epsilon_mpl)],
                               weights=[Hccl / (H_mpl_node + Hccl), H_mpl_node / (H_mpl_node + Hccl)])
-    Dc_eff_cmpl_cmpl = [None] + [average([Dc_eff('mpl', sv[f's_cmpl_{i}'], sv[f'T_cmpl_{i}'], Pcmpl[i],
+    Dc_eff_cmpl_cmpl = [None] + [hmean([Dc_eff('mpl', sv[f's_cmpl_{i}'], sv[f'T_cmpl_{i}'], Pcmpl[i],
                                                  epsilon_mpl),
                                           Dc_eff('mpl', sv[f's_cmpl_{i + 1}'], sv[f'T_cmpl_{i + 1}'], Pcmpl[i + 1],
                                                  epsilon_mpl)]) for i in range(1, n_mpl)]
-    Dc_eff_cmpl_cgdl = average([Dc_eff('mpl', sv[f's_cmpl_{n_mpl}'], sv[f'T_cmpl_{n_mpl}'], Pcmpl[n_mpl],
+    Dc_eff_cmpl_cgdl = hmean([Dc_eff('mpl', sv[f's_cmpl_{n_mpl}'], sv[f'T_cmpl_{n_mpl}'], Pcmpl[n_mpl],
                                        epsilon_mpl),
                                 Dc_eff('gdl', sv['s_cgdl_1'], sv['T_cgdl_1'], Pcgdl[1],
                                        epsilon_gdl, epsilon_c=epsilon_c)],
                                weights=[H_mpl_node / (H_mpl_node + H_gdl_node), H_gdl_node / (H_mpl_node + H_gdl_node)])
-    Dc_eff_cgdl_cgdl = [None] + [average([Dc_eff('gdl', sv[f's_cgdl_{i}'], sv[f'T_cgdl_{i}'], Pcgdl[i],
+    Dc_eff_cgdl_cgdl = [None] + [hmean([Dc_eff('gdl', sv[f's_cgdl_{i}'], sv[f'T_cgdl_{i}'], Pcgdl[i],
                                               epsilon_gdl, epsilon_c = epsilon_c),
                                         Dc_eff('gdl', sv[f's_cgdl_{i+1}'], sv[f'T_cgdl_{i+1}'], Pcgdl[i+1],
                                               epsilon_gdl, epsilon_c = epsilon_c)]) for i in range(1, n_gdl)]
