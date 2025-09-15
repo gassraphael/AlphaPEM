@@ -11,9 +11,10 @@ import math
 # Importing constants' value
 from functools import lru_cache
 from configuration.settings import (M_eq, rho_mem, Dp_mpl, Dp_cl, theta_c_gdl, theta_c_mpl, theta_c_cl, gamma_cond,
-                                    gamma_evap, M_H2, M_O2, M_N2, M_H2O, R, Kshape, epsilon_p, alpha_p, tau_mpl, tau_cl,
-                                    r_s_gdl, r_s_mpl, r_s_cl, k_th_gdl, k_th_mpl, k_th_cl, k_th_mem, Cp_gdl, Cp_mpl,
-                                    Cp_cl, Cp_mem, rho_gdl, rho_cl, sigma_e_gdl, sigma_e_mpl, sigma_e_cl)
+                                    gamma_evap, M_H2, M_O2, M_N2, M_H2O, R, Kshape, K_transition, epsilon_p, alpha_p,
+                                    tau_mpl, tau_cl, r_s_gdl, r_s_mpl, r_s_cl, k_th_gdl, k_th_mpl, k_th_cl, k_th_mem,
+                                    Cp_gdl, Cp_mpl, Cp_cl, Cp_mem, rho_gdl, rho_cl, sigma_e_gdl, sigma_e_mpl,
+                                    sigma_e_cl)
 
 
 # _________________________________________________Transitory functions_________________________________________________
@@ -416,6 +417,40 @@ def h_c(P, T, Wgc, Hgc):
     return Sh * Dc(P, T) / Hgc
 
 
+def lambda_v_eq(a_w):
+    """This function calculates the equilibrium water content in the membrane from the vapor phase. Hinatsu's expression
+     has been selected.
+
+    Parameters
+    ----------
+    a_w: float
+        Water activity.
+
+    Returns
+    -------
+    float
+        Equilibrium water content in the membrane from the vapor phase.
+    """
+    return 0.300 + 10.8 * a_w - 16.0 * a_w ** 2 + 14.1 * a_w ** 3
+
+
+def lambda_l_eq(T):
+    """This function calculates the equilibrium water content in the membrane from the liquid phase.
+    Hinatsu's expression has been selected. It is valid for N-form membranes for 25 to 100 °C.
+
+    Parameters
+    ----------
+    T : float
+        Temperature in K.
+
+    Returns
+    -------
+    float
+        Equilibrium water content in the membrane from the liquid phase.
+    """
+    return 10.0 * 1.84e-2 * (T - 273.15) + 9.90e-4 * (T - 273.15)**2
+
+
 def lambda_eq(C_v, s, T):
     """This function calculates the equilibrium water content in the membrane. Hinatsu's expression modified with
     Bao's formulation has been selected.
@@ -435,8 +470,9 @@ def lambda_eq(C_v, s, T):
         Equilibrium water content in the membrane.
     """
     a_w = C_v / C_v_sat(T) + 2 * s  # water activity
-    return 0.5 * (0.300 + 10.8 * a_w - 16.0 * a_w ** 2 + 14.1 * a_w ** 3) * (1 - math.tanh(100 * (a_w - 1))) \
-        + 0.5 * (9.2 + 8.6 * (1 - math.exp(-Kshape * (a_w - 1)))) * (1 + math.tanh(100 * (a_w - 1)))
+    return 0.5 * lambda_v_eq(a_w)                                          * (1 - math.tanh(100 * (a_w - 1))) + \
+           0.5 * (lambda_v_eq(1) + ((lambda_l_eq(T) - lambda_v_eq(1)) / 2) * (1 - math.exp(-Kshape * (a_w - 1)))) * \
+                                                                             (1 + math.tanh(100 * (a_w - 1)))
 
 
 def D(lambdaa):
@@ -494,10 +530,11 @@ def gamma_sorp(C_v, s, lambdaa, T, Hcl):
         Sorption rate of water in the membrane in s-1.
     """
 
-    if lambda_eq(C_v, s, T) >= lambdaa:  # absorption
-        return (1.14e-5 * fv(lambdaa, T)) / Hcl * math.exp(2416 * (1 / 303 - 1 / T))
-    else:  #                               desorption
-        return (4.59e-5 * fv(lambdaa, T)) / Hcl * math.exp(2416 * (1 / 303 - 1 / T))
+    fv_value = fv(lambdaa, T)
+    gamma_abs = (1.14e-5 * fv_value) / Hcl * math.exp(2416 * (1 / 303 - 1 / T))
+    gamma_des = (4.59e-5 * fv_value) / Hcl * math.exp(2416 * (1 / 303 - 1 / T))
+    w = 0.5 * (1 + math.tanh(K_transition * (lambda_eq(C_v, s, T) - lambdaa))) # transition function
+    return w * gamma_abs + (1 - w) * gamma_des # interpolation between absorption and desorption
 
 
 def Svl(element, s, C_v, Ctot, T, epsilon):
@@ -528,20 +565,20 @@ def Svl(element, s, C_v, Ctot, T, epsilon):
         Phase transfer rate of water condensation or evaporation in mol.m-3.s-1.
     """
 
+    # Calculation of the total and partial pressures
+    Ptot = Ctot * R * T # Total pressure
+    P_v = C_v * R * T # Partial pressure of vapor
+
     # Determination of the diffusion coefficient at the anode or the cathode
     if element == 'anode':
-        D = Da # Diffusion coefficient at the anode
-    else: # element == 'cathode'
-        D = Dc # Diffusion coefficient at the cathode
+        D_value = Da(Ptot, T)  # Diffusion coefficient at the anode
+    else:  # element == 'cathode'
+        D_value = Dc(Ptot, T)  # Diffusion coefficient at the cathode
 
-    # Calculation of the total and partial pressures
-    Ptot = Ctot * R * T
-    P_v = C_v * R * T
-
-    if C_v > C_v_sat(T):  # condensation
-        return gamma_cond * M_H2O / (R * T) * epsilon * (1 - s) * D(Ptot, T) * Ptot * math.log((Ptot - Psat(T)) / (Ptot - P_v))
-    else:  # evaporation
-        return gamma_evap * M_H2O / (R * T) * epsilon * s * D(Ptot, T) * Ptot * math.log((Ptot - Psat(T)) / (Ptot - P_v))
+    Svl_cond = gamma_cond * M_H2O / (R * T) * epsilon * (1 - s) * D_value * Ptot * math.log((Ptot - Psat(T)) / (Ptot - P_v))
+    Svl_evap = gamma_evap * M_H2O / (R * T) * epsilon * s * D_value * Ptot * math.log((Ptot - Psat(T)) / (Ptot - P_v))
+    w = 0.5 * (1 + math.tanh(K_transition * (C_v_sat(T) - C_v))) # transition function
+    return w * Svl_evap + (1 - w) * Svl_cond # interpolation between condensation and evaporation
 
 
 def sigma(T):
@@ -631,14 +668,14 @@ def k_H2(lambdaa, T, kappa_co):
 
     # Initialisation of the constants
     E_H2_v = 2.1e4  # J.mol-1. It is the activation energy of H2 for crossover in the under saturated membrane.
-    E_H2_l = 1.8e4  # J.mol-1. It is the activation energy of H2 for crossover in the liquide-equilibrated membrane.
+    E_H2_l = 1.8e4  # J.mol-1. It is the activation energy of H2 for crossover in the liquid-equilibrated membrane.
     Tref = 303.15  # K.
 
     # Calculation of the permeability coefficient of the membrane for hydrogen
-    if lambdaa < 17.6:
-        return kappa_co * (0.29 + 2.2 * fv(lambdaa, T)) * 1e-14 * math.exp(E_H2_v / R * (1 / Tref - 1 / T))
-    else:
-        return kappa_co * 1.8 * 1e-14 * math.exp(E_H2_l / R * (1 / Tref - 1 / T))
+    k_H2_d = kappa_co * (0.29 + 2.2 * fv(lambdaa, T)) * 1e-14 * math.exp(E_H2_v / R * (1 / Tref - 1 / T))
+    k_H2_l = kappa_co * 1.8 * 1e-14 * math.exp(E_H2_l / R * (1 / Tref - 1 / T))
+    w = 0.5 * (1 + math.tanh(K_transition * (lambda_l_eq(T) - lambdaa)))  # transition function
+    return w * k_H2_d + (1 - w) * k_H2_l  # interpolation between under-saturated and liquid-equilibrated H2 crossover
 
 
 def k_O2(lambdaa, T, kappa_co):
@@ -661,14 +698,14 @@ def k_O2(lambdaa, T, kappa_co):
 
     # Initialisation of the constants
     E_O2_v = 2.2e4  # J.mol-1. It is the activation energy of oxygen for crossover in the under saturated membrane.
-    E_O2_l = 2.0e4  # J.mol-1. It is the activation energy of oxygen for crossover in the liquide-equilibrated membrane.
+    E_O2_l = 2.0e4  # J.mol-1. It is the activation energy of oxygen for crossover in the liquid-equilibrated membrane.
     Tref = 303.15  # K.
 
     # Calculation of the permeability coefficient of the membrane for oxygen
-    if lambdaa < 17.6:
-        return kappa_co * (0.11 + 1.9 * fv(lambdaa, T)) * 1e-14 * math.exp(E_O2_v / R * (1 / Tref - 1 / T))
-    else:
-        return kappa_co * 1.2 * 1e-14 * math.exp(E_O2_l / R * (1 / Tref - 1 / T))
+    k_O2_v = kappa_co * (0.11 + 1.9 * fv(lambdaa, T)) * 1e-14 * math.exp(E_O2_v / R * (1 / Tref - 1 / T))
+    k_O2_l = kappa_co * 1.2 * 1e-14 * math.exp(E_O2_l / R * (1 / Tref - 1 / T))
+    w = 0.5 * (1 + math.tanh(K_transition * (lambda_l_eq(T) - lambdaa)))  # transition function
+    return w * k_O2_v + (1 - w) * k_O2_l  # interpolation between under-saturated and liquid-equilibrated O2 crossover
 
 
 def sigma_p_eff(element, lambdaa, T, epsilon_mc=None):
@@ -691,20 +728,20 @@ def sigma_p_eff(element, lambdaa, T, epsilon_mc=None):
     float
         Proton conductivity in Ω-1.m-1.
     """
+
+    lambda_transition = 1
+
     if element == 'mem': # The proton conductivity at the membrane
-        if lambdaa >= 1:
-            return (0.5139 * lambdaa - 0.326) * math.exp(1268 * (1 / 303.15 - 1 / T))
-        else:
-            return 0.1879 * math.exp(1268 * (1 / 303.15 - 1 / T))
+        sigma_p_eff_low = 0.1879 * math.exp(1268 * (1 / 303.15 - 1 / T))
+        sigma_p_eff_high = (0.5139 * lambdaa - 0.326) * math.exp(1268 * (1 / 303.15 - 1 / T))
     elif element == 'ccl': # The effective proton conductivity at the cathode catalyst layer
-        if epsilon_mc==None:
-            raise ValueError("For the CCL, epsilon_mc must be provided.")
-        if lambdaa >= 1:
-            return epsilon_mc * (0.5139 * lambdaa - 0.326) * math.exp(1268 * (1 / 303.15 - 1 / T))
-        else:
-            return epsilon_mc * 0.1879 * math.exp(1268 * (1 / 303.15 - 1 / T))
+        sigma_p_eff_low = epsilon_mc * 0.1879 * math.exp(1268 * (1 / 303.15 - 1 / T))
+        sigma_p_eff_high = epsilon_mc * (0.5139 * lambdaa - 0.326) * math.exp(1268 * (1 / 303.15 - 1 / T))
     else:
         raise ValueError("The element should be either 'mem' or 'ccl'.")
+
+    w = 0.5 * (1 + math.tanh(K_transition * (lambda_transition - lambdaa)))  # transition function
+    return w * sigma_p_eff_low + (1 - w) * sigma_p_eff_high  # interpolation between sigma_p_eff value at low and high lambda.
 
 
 @lru_cache(maxsize=None) # Cache the results to optimize performance
