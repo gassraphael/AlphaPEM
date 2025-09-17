@@ -360,8 +360,8 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
      Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, Re, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c,
      a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
 
-    n_gdl, n_mpl, t_purge, rtol, atol, step_current_parameters = calculate_computing_parameters(step_current_parameters, Hgdl,
-                                                                                                Hmpl, Hacl, type_fuel_cell)
+    n_gdl, n_mpl, n_tl, t_purge, rtol, atol = \
+        calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl)
 
     # operating conditions recovery
     choice_operating_conditions['Temperature - Tfc (°C)']['value'].set(round(T_des - 273.15, 4))  # °C
@@ -387,8 +387,8 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_accessible_parameters['Exhaust anode manifold throttle area - A_T_a (cm²)']['value'].set(round(A_T_a * 1e4, 4))  # cm²
     choice_accessible_parameters['Exhaust cathode manifold throttle area - A_T_c (cm²)']['value'].set(round(A_T_c * 1e4, 4))  # cm²
     # undetermined physical parameters recovery
-    choice_undetermined_parameters['GDL thickness - Hgdl (µm)']['value'].set(round(Hgdl * 1e6, 4))  # µm
-    choice_undetermined_parameters['MPL thickness - Hmpl (µm)']['value'].set(round(Hmpl * 1e6, 4))  # µm
+    choice_undetermined_parameters['GDL thickness - Hgdl (µm)\n(without the transition layer)']['value'].set(round(Hgdl * 1e6, 4))  # µm
+    choice_undetermined_parameters['MPL thickness - Hmpl (µm)\n(without the transition layer)\n(without the transition layer)']['value'].set(round(Hmpl * 1e6, 4))  # µm
     choice_undetermined_parameters['ACL thickness - Hacl (µm)']['value'].set(round(Hacl * 1e6, 4))  # µm
     choice_undetermined_parameters['CCL thickness - Hccl (µm)']['value'].set(round(Hccl * 1e6, 4))  # µm
     choice_undetermined_parameters['Membrane thickness - Hmem (µm)']['value'].set(round(Hmem * 1e6, 4))  # µm
@@ -412,6 +412,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     # computing parameters recovery
     choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].set(n_gdl)
     choice_computing_parameters['Number of MPL nodes - n_mpl']['value'].set(n_mpl)
+    choice_computing_parameters['Number of TL nodes - n_tl']['value'].set(n_tl)
     choice_computing_parameters['Solver relative tolerance - rtol']['value'].set(rtol)
     choice_computing_parameters['Solver absolute tolerance - atol']['value'].set(atol)
 
@@ -462,8 +463,8 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     A_T_a = choice_accessible_parameters['Exhaust anode manifold throttle area - A_T_a (cm²)']['value'].get() * 1e-4  # m²
     A_T_c = choice_accessible_parameters['Exhaust cathode manifold throttle area - A_T_c (cm²)']['value'].get() * 1e-4  # m²
     # undetermined physical parameters
-    Hgdl = choice_undetermined_parameters['GDL thickness - Hgdl (µm)']['value'].get() * 1e-6  # m
-    Hmpl = choice_undetermined_parameters['MPL thickness - Hmpl (µm)']['value'].get() * 1e-6  # m
+    Hgdl = choice_undetermined_parameters['GDL thickness - Hgdl (µm)\n(without the transition layer)']['value'].get() * 1e-6  # m
+    Hmpl = choice_undetermined_parameters['MPL thickness - Hmpl (µm)\n(without the transition layer)']['value'].get() * 1e-6  # m
     Hacl = choice_undetermined_parameters['ACL thickness - Hacl (µm)']['value'].get() * 1e-6  # m
     Hccl = choice_undetermined_parameters['CCL thickness - Hccl (µm)']['value'].get() * 1e-6  # m
     Hmem = choice_undetermined_parameters['Membrane thickness - Hmem (µm)']['value'].get() * 1e-6  # m
@@ -512,6 +513,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     delta_t_purge = choice_computing_parameters['Time between two purges\n- Δt_purge (s)']['value'].get()  # s
     n_gdl = choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].get()
     n_mpl = choice_computing_parameters['Number of MPL nodes - n_mpl']['value'].get()
+    n_tl = choice_computing_parameters['Number of TL nodes - n_tl']['value'].get()
     rtol = choice_computing_parameters['Solver relative tolerance - rtol']['value'].get()
     atol = choice_computing_parameters['Solver absolute tolerance - atol']['value'].get()
 
@@ -566,7 +568,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
             Hagc, Hcgc, Wagc, Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, epsilon_gdl, epsilon_cl, epsilon_mpl,
             epsilon_mc, epsilon_c, e, Re, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl,
             step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS,
-            t_EIS, t_purge, delta_t_purge, n_gdl, n_mpl, rtol, atol, type_fuel_cell, voltage_zone, type_auxiliary, type_control,
+            t_EIS, t_purge, delta_t_purge, n_gdl, n_mpl, n_tl, rtol, atol, type_fuel_cell, voltage_zone, type_auxiliary, type_control,
             type_purge, type_display, type_plot)
 
 
@@ -657,23 +659,23 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
                                                            '10mm. Also, GC length is generally between 0 and 100m')
         choices.clear()
         return
-    if choice_undetermined_parameters['GDL thickness - Hgdl (µm)']['value'].get() < 1 or \
-            choice_undetermined_parameters['GDL thickness - Hgdl (µm)']['value'].get() > 1000 or \
-            choice_undetermined_parameters['MPL thickness - Hmpl (µm)']['value'].get() < 1 or \
-            choice_undetermined_parameters['MPL thickness - Hmpl (µm)']['value'].get() > 1000 or \
+    if (choice_undetermined_parameters['GDL thickness - Hgdl (µm)\n(without the transition layer)']['value'].get() < 1 or \
+            choice_undetermined_parameters['GDL thickness - Hgdl (µm)\n(without the transition layer)']['value'].get() > 1000 or \
+            choice_undetermined_parameters['MPL thickness - Hmpl (µm)\n(without the transition layer)']['value'].get() < 1 or \
+            choice_undetermined_parameters['MPL thickness - Hmpl (µm)\n(without the transition layer)']['value'].get() > 1000 or
             choice_undetermined_parameters['ACL thickness - Hacl (µm)']['value'].get() < 1 or \
             choice_undetermined_parameters['ACL thickness - Hacl (µm)']['value'].get() > 1000 or \
             choice_undetermined_parameters['CCL thickness - Hccl (µm)']['value'].get() < 1 or \
             choice_undetermined_parameters['CCL thickness - Hccl (µm)']['value'].get() > 1000 or \
             choice_undetermined_parameters['Membrane thickness - Hmem (µm)']['value'].get() < 1 or \
-            choice_undetermined_parameters['Membrane thickness - Hmem (µm)']['value'].get() > 1000:
+            choice_undetermined_parameters['Membrane thickness - Hmem (µm)']['value'].get() > 1000):
         messagebox.showerror(title='MEA thickness', message='All MEA components generally have a thickness between '
                                                             '1µm and 1mm.')
         choices.clear()
         return
-    if choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].get() < 0.50 or \
-            choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].get() > 0.90:
-        messagebox.showerror(title='GDL porosity', message='GDL porosity should be between 0.50 and 0.90.')
+    if choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].get() < 0.4 or \
+            choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].get() > 0.95:
+        messagebox.showerror(title='GDL porosity', message='GDL porosity should be between 0.4 and 0.95.')
         choices.clear()
         return
     if choice_undetermined_parameters['CL porosity - ε_cl']['value'].get() < 0.12 or \
@@ -797,13 +799,25 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
 
     if choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].get() < 1 or \
             type(choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].get()) != int:
-        messagebox.showerror(title='n gdl', message='The n_gdl value should be an integer bigger or equal to 1.')
+        messagebox.showerror(title='n_gdl', message='The n_gdl value should be an integer bigger or equal to 1.')
         choices.clear()
         return
 
     if choice_computing_parameters['Number of MPL nodes - n_mpl']['value'].get() < 1 or \
             type(choice_computing_parameters['Number of MPL nodes - n_mpl']['value'].get()) != int:
-        messagebox.showerror(title='n gdl', message='The n_mpl value should be an integer bigger or equal to 1.')
+        messagebox.showerror(title='n_mpl', message='The n_mpl value should be an integer bigger or equal to 1.')
+        choices.clear()
+        return
+
+    if choice_computing_parameters['Number of TL nodes - n_tl']['value'].get() < 2 or \
+            type(choice_computing_parameters['Number of TL nodes - n_tl']['value'].get()) != int or \
+            choice_computing_parameters['Number of TL nodes - n_tl']['value'].get() % 2 != 0:
+        messagebox.showerror(title='n_tl', message='The n_tl value should be an even integer bigger or equal to 2.')
+        choices.clear()
+        return
+
+    if choice_computing_parameters['Number of TL nodes - n_tl']['value'].get() != 2:
+        messagebox.showerror(title='n_tl_temp', message='n_tl should be equal to 2 for now.')
         choices.clear()
         return
 
@@ -985,13 +999,21 @@ def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, acces
                 Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
     computing_parameters : dict
         Dictionary containing the computing parameters for the simulation. It contains:
+            - Htl : float
+                Thickness of the transition layers in meters (computing parameter).
             - n_gdl : int
                 Number of points considered in the GDL (computing parameter).
             - n_mpl : int
                 Number of points considered in the MPL (computing parameter).
+            - n_tl : int
+                Number of points considered in the transitory layer (computing parameter).
             - t_purge : tuple
                 Time parameters for purging the system (computing parameter).
                 It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
+            - rtol : float
+                Relative tolerance for the solver (computing parameter).
+            - atol : float
+                Absolute tolerance for the solver (computing parameter).
             - type_fuel_cell : str
                 Type of fuel cell configuration (computing parameter).
             - type_current : str
@@ -1200,13 +1222,21 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
                 Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
     computing_parameters : dict
         Dictionary containing the computing parameters for the simulation. It contains:
+            - Htl : float
+                Thickness of the transition layers in meters (computing parameter).
             - n_gdl : int
                 Number of points considered in the GDL (computing parameter).
             - n_mpl : int
                 Number of points considered in the MPL (computing parameter).
+            - n_tl : int
+                Number of points considered in the transitory layer (computing parameter).
             - t_purge : tuple
                 Time parameters for purging the system (computing parameter).
                 It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
+            - rtol : float
+                Relative tolerance for the solver (computing parameter).
+            - atol : float
+                Absolute tolerance for the solver (computing parameter).
             - type_fuel_cell : str
                 Type of fuel cell configuration (computing parameter).
             - type_current : str
@@ -1412,13 +1442,21 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
                 Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
     computing_parameters : dict
         Dictionary containing the computing parameters for the simulation. It contains:
+            - Htl : float
+                Thickness of the transition layers in meters (computing parameter).
             - n_gdl : int
                 Number of points considered in the GDL (computing parameter).
             - n_mpl : int
                 Number of points considered in the MPL (computing parameter).
+            - n_tl : int
+                Number of points considered in the transitory layer (computing parameter).
             - t_purge : tuple
                 Time parameters for purging the system (computing parameter).
                 It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
+            - rtol : float
+                Relative tolerance for the solver (computing parameter).
+            - atol : float
+                Absolute tolerance for the solver (computing parameter).
             - type_fuel_cell : str
                 Type of fuel cell configuration (computing parameter).
             - type_current : str

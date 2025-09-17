@@ -66,7 +66,8 @@ def dif_eq_int_values(sv, operating_inputs, control_variables, parameters):
     Hmem, Hacl, Hccl = parameters['Hmem'], parameters['Hacl'], parameters['Hccl']
     epsilon_gdl, epsilon_cl, epsilon_mpl = parameters['epsilon_gdl'], parameters['epsilon_cl'], parameters['epsilon_mpl']
     kappa_co, epsilon_mc = parameters['kappa_co'], parameters['epsilon_mc']
-    n_gdl, n_mpl = parameters['n_gdl'], parameters['n_mpl']
+    epsilon_atl, epsilon_ctl = parameters['epsilon_atl'], parameters['epsilon_ctl']
+    Htl, n_gdl, n_mpl, n_tl = parameters['Htl'], parameters['n_gdl'], parameters['n_mpl'], parameters['n_tl']
 
     # Physical quantities outside the stack
     # Molar masses
@@ -96,6 +97,10 @@ def dif_eq_int_values(sv, operating_inputs, control_variables, parameters):
         **{f'agdl_{i}': calculate_rho_Cp0('agdl', sv[f'T_agdl_{i}'], C_v=sv[f'C_v_agdl_{i}'],
                                           s=sv[f's_agdl_{i}'], C_H2=sv[f'C_H2_agdl_{i}'], C_N2=C_N2_a, epsilon=epsilon_gdl)
            for i in range(1, n_gdl + 1)},
+        **{f'atl_{i}': calculate_rho_Cp0('atl', sv[f'T_atl_{i}'], C_v=sv[f'C_v_atl_{i}'], s=sv[f's_atl_{i}'],
+                                         C_H2=sv[f'C_H2_atl_{i}'], C_N2=C_N2_a, epsilon=epsilon_atl[i], n_tl=n_tl,
+                                         Htl=Htl, node=i)
+           for i in range(1, n_tl + 1)},
         **{f'ampl_{i}': calculate_rho_Cp0('ampl', sv[f'T_ampl_{i}'], C_v=sv[f'C_v_ampl_{i}'],
                                           s=sv[f's_ampl_{i}'], C_H2=sv[f'C_H2_ampl_{i}'], C_N2=C_N2_a, epsilon=epsilon_mpl)
            for i in range(1, n_mpl + 1)},
@@ -107,6 +112,10 @@ def dif_eq_int_values(sv, operating_inputs, control_variables, parameters):
         **{f'cmpl_{i}': calculate_rho_Cp0('cmpl', sv[f'T_cmpl_{i}'], C_v=sv[f'C_v_cmpl_{i}'],
                                           s=sv[f's_cmpl_{i}'], C_O2=sv[f'C_O2_cmpl_{i}'], C_N2=C_N2_c, epsilon=epsilon_mpl)
            for i in range(1, n_mpl + 1)},
+        **{f'ctl_{i}': calculate_rho_Cp0('ctl', sv[f'T_ctl_{i}'], C_v=sv[f'C_v_ctl_{i}'], s=sv[f's_ctl_{i}'],
+                                         C_O2=sv[f'C_O2_ctl_{i}'], C_N2=C_N2_c, epsilon=epsilon_ctl[i], n_tl=n_tl,
+                                         Htl=Htl, node=i)
+           for i in range(1, n_tl + 1)},
         **{f'cgdl_{i}': calculate_rho_Cp0('cgdl', sv[f'T_cgdl_{i}'], C_v=sv[f'C_v_cgdl_{i}'],
                                           s=sv[f's_cgdl_{i}'], C_O2=sv[f'C_O2_cgdl_{i}'], C_N2=C_N2_c, epsilon=epsilon_gdl)
            for i in range(1, n_gdl + 1)}

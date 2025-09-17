@@ -133,8 +133,8 @@ def main_frame(root, canvas):
          'Exhaust cathode manifold throttle area - A_T_c (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 5, 'label_column': 1}}
 
     choice_undetermined_parameters = \
-        {'GDL thickness - Hgdl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 1},
-         'MPL thickness - Hmpl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 3},
+        {'GDL thickness - Hgdl (µm)\n(without the transition layer)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 1},
+         'MPL thickness - Hmpl (µm)\n(without the transition layer)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 3},
          'ACL thickness - Hacl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 5},
          'CCL thickness - Hccl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 1},
          'Membrane thickness - Hmem (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 3},
@@ -199,9 +199,11 @@ def main_frame(root, canvas):
                                          'label_row': 1, 'label_column': 1},
          'Number of MPL nodes - n_mpl': {'value': tk.IntVar(computing_parameters_frame, 5),
                                          'label_row': 1, 'label_column': 3},
-         'Solver relative tolerance - rtol': {'value': tk.DoubleVar(computing_parameters_frame, 1e-7),
+         'Number of TL nodes - n_tl': {'value': tk.IntVar(computing_parameters_frame, 2),
+                                         'label_row': 1, 'label_column': 5},
+         'Solver relative tolerance - rtol': {'value': tk.DoubleVar(computing_parameters_frame, 1e-5),
                                          'label_row': 2, 'label_column': 1},
-         'Solver absolute tolerance - atol': {'value': tk.DoubleVar(computing_parameters_frame, 1e-11),
+         'Solver absolute tolerance - atol': {'value': tk.DoubleVar(computing_parameters_frame, 1e-8),
                                          'label_row': 2, 'label_column': 3}
          }
 
@@ -375,7 +377,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
      Hcgc, Wagc, Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc,
      epsilon_c, e, Re, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl,
      step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
-     t_purge, delta_t_purge, n_gdl, n_mpl, rtol, atol, type_fuel_cell, voltage_zone, type_auxiliary, type_control,
+     t_purge, delta_t_purge, n_gdl, n_mpl, n_tl, rtol, atol, type_fuel_cell, voltage_zone, type_auxiliary, type_control,
      type_purge, type_display, type_plot) = \
         recover_for_use_operating_inputs_and_physical_parameters(choice_operating_conditions,
                                                                  choice_accessible_parameters,
@@ -404,11 +406,11 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         current_density = step_current
         operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
                             'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des, 'y_H2_in': y_H2_in}
-        computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
-                                'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
-                                'voltage_zone': voltage_zone, 'type_auxiliary': type_auxiliary,
-                                'type_control': type_control, 'type_purge': type_purge, 'type_display': type_display,
-                                'type_plot': type_plot}
+        computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 'n_tl': n_tl, 't_purge': t_purge,
+                                'rtol': rtol, 'atol': atol, 'type_fuel_cell': type_fuel_cell,
+                                'type_current': type_current, 'voltage_zone': voltage_zone,
+                                'type_auxiliary': type_auxiliary, 'type_control': type_control,
+                                'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}
         launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, accessible_physical_parameters,
                                          undetermined_physical_parameters, computing_parameters)
 
@@ -417,8 +419,9 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         current_density = polarization_current
         operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
                             'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des, 'y_H2_in': y_H2_in}
-        computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
-                                'type_fuel_cell': type_fuel_cell, 'type_current': type_current, 'voltage_zone': voltage_zone,
+        computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 'n_tl': n_tl, 't_purge': t_purge,
+                                'rtol': rtol, 'atol': atol, 'type_fuel_cell': type_fuel_cell,
+                                'type_current': type_current, 'voltage_zone': voltage_zone,
                                 'type_auxiliary': type_auxiliary, 'type_control': type_control,
                                 'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}
         launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameters, accessible_physical_parameters,
@@ -429,8 +432,9 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         current_density = EIS_current
         operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
                             'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des, 'y_H2_in': y_H2_in}
-        computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
-                                'type_fuel_cell': type_fuel_cell, 'type_current': type_current, 'voltage_zone': voltage_zone,
+        computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 'n_tl': n_tl, 't_purge': t_purge,
+                                'rtol': rtol, 'atol': atol, 'type_fuel_cell': type_fuel_cell,
+                                'type_current': type_current, 'voltage_zone': voltage_zone,
                                 'type_auxiliary': type_auxiliary, 'type_control': type_control,
                                 'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}
         launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, accessible_physical_parameters,

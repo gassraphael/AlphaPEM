@@ -30,12 +30,12 @@ def main():
     # This parameter includes the fuel cell used in the model and the corresponding operating conditions.
     # - GenStack is a fuel cell developed in open source by ZSW (https://zenodo.org/records/14223364).
     # - EH-31 is a fuel cell developed by EH GROUP. 1.5, 2.0, 2.25 and 2.5 corresponds to the different pressure options.
-    type_fuel_cell_1 = "ZSW-GenStack"
+    type_fuel_cell_1 = "EH-31_2.0"
     type_fuel_cell_2 = None
     type_fuel_cell_3 = None
     type_fuel_cell_4 = None
     # Current density possibilities: "step", "polarization", "polarization_for_cali", "EIS".
-    type_current = "step"
+    type_current = "polarization"
     # Calibration zone : "before_voltage_drop", "full".
     # (only for "polarization" and "polarization_for_cali" currend densities
     voltage_zone = "before_voltage_drop"
@@ -79,8 +79,8 @@ def main():
      Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, Re, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c,
      a_slim, b_slim, a_switch, C_scl) = calculate_physical_parameters(type_fuel_cell_1)
     #   Computing parameters
-    n_gdl, n_mpl, t_purge, rtol, atol, step_current_parameters = calculate_computing_parameters(
-        copy.deepcopy(step_current_parameters), Hgdl, Hmpl, Hacl, type_fuel_cell_1)
+    n_gdl, n_mpl, n_tl, t_purge, rtol, atol = \
+        calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl)
 
     # Initialize the operating inputs and parameters dictionaries.
     operating_inputs = {'current_density': current_density, 'T_des': [None, T_des_1, T_des_2, T_des_3, T_des_4],
@@ -99,13 +99,13 @@ def main():
     accessible_physical_parameters = {'Aact': Aact, 'n_cell': n_cell, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc,
                                       'Wcgc': Wcgc, 'Lgc': Lgc, 'Vsm_a': Vsm_a, 'Vsm_c': Vsm_c, 'Vem_a': Vem_a,
                                       'Vem_c': Vem_c, 'A_T_a': A_T_a, 'A_T_c': A_T_c}
-    undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
-                                        'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl,
+    undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl,
+                                        'Hccl': Hccl, 'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl,
                                         'epsilon_mpl': epsilon_mpl, 'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c,
                                         'e': e, 'Re': Re, 'i0_d_c_ref': i0_d_c_ref, 'i0_h_c_ref': i0_h_c_ref,
                                         'kappa_co': kappa_co, 'kappa_c': kappa_c, 'a_slim': a_slim, 'b_slim': b_slim,
                                         'a_switch': a_switch, 'C_scl': C_scl}
-    computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
+    computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 'n_tl': n_tl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
                             'type_fuel_cell': [None, type_fuel_cell_1, type_fuel_cell_2, type_fuel_cell_3,
                                                type_fuel_cell_4],
                             'type_current': type_current, 'voltage_zone': voltage_zone,

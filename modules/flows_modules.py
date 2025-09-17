@@ -47,19 +47,24 @@ def flows_int_values(sv, i_fc, parameters):
     epsilon_mpl, epsilon_c = parameters['epsilon_mpl'], parameters['epsilon_c']
     e, Hacl, Hccl, Hmem = parameters['e'], parameters['Hacl'], parameters['Hccl'], parameters['Hmem']
     Hgdl, Hmpl, Wagc, Wcgc = parameters['Hgdl'], parameters['Hmpl'], parameters['Wagc'], parameters['Wcgc']
-    Hagc, Hcgc, n_gdl, n_mpl = parameters['Hagc'], parameters['Hcgc'], parameters['n_gdl'], parameters['n_mpl']
+    Hagc, Hcgc, Htl = parameters['Hagc'], parameters['Hcgc'], parameters['Htl']
+    epsilon_atl, epsilon_ctl = parameters['epsilon_atl'], parameters['epsilon_ctl']
+    n_gdl, n_tl, n_mpl = parameters['n_gdl'], parameters['n_tl'], parameters['n_mpl']
 
     # Transitory parameter
     H_gdl_node = Hgdl / n_gdl
     H_mpl_node = Hmpl / n_mpl
+    H_tl_node = Htl / n_tl
 
     # Pressures in the stack
     Pagc = (C_v_agc + C_H2_agc + C_N2_a) * R * T_agc
     Pagdl = [None] + [(sv[f'C_v_agdl_{i}'] + sv[f'C_H2_agdl_{i}'] + C_N2_a) * R * sv[f'T_agdl_{i}'] for i in range(1, n_gdl + 1)]
+    Patl = [None] + [(sv[f'C_v_atl_{i}'] + sv[f'C_H2_atl_{i}'] + C_N2_a) * R * sv[f'T_atl_{i}'] for i in range(1, n_tl + 1)]
     Pampl = [None] + [(sv[f'C_v_ampl_{i}'] + sv[f'C_H2_ampl_{i}'] + C_N2_a) * R * sv[f'T_ampl_{i}'] for i in range(1, n_mpl + 1)]
     Pacl = (C_v_acl + C_H2_acl + C_N2_a) * R * T_acl
     Pccl = (C_v_ccl + C_O2_ccl + C_N2_c) * R * T_ccl
     Pcmpl = [None] + [(sv[f'C_v_cmpl_{i}'] + sv[f'C_O2_cmpl_{i}'] + C_N2_c) * R * sv[f'T_cmpl_{i}'] for i in range(1, n_mpl + 1)]
+    Pctl = [None] + [(sv[f'C_v_ctl_{i}'] + sv[f'C_O2_ctl_{i}'] + C_N2_c) * R * sv[f'T_ctl_{i}'] for i in range(1, n_tl + 1)]
     Pcgdl = [None] + [(sv[f'C_v_cgdl_{i}'] + sv[f'C_O2_cgdl_{i}'] + C_N2_c) * R * sv[f'T_cgdl_{i}'] for i in range(1, n_gdl + 1)]
     Pcgc = (C_v_cgc + C_O2_cgc + C_N2_c) * R * T_cgc
 
@@ -75,10 +80,20 @@ def flows_int_values(sv, i_fc, parameters):
                                             epsilon_c=epsilon_c),
                                          Dcap('gdl', sv[f's_agdl_{i+1}'], sv[f'T_agdl_{i+1}'], epsilon_gdl, e,
                                             epsilon_c=epsilon_c)]) for i in range(1, n_gdl)]
-    D_cap_agdl_ampl = hmean([Dcap('gdl', sv[f's_agdl_{n_gdl}'], sv[f'T_agdl_{n_gdl}'], epsilon_gdl, e,
+    D_cap_agdl_atl = hmean([Dcap('gdl', sv[f's_agdl_{n_gdl}'], sv[f'T_agdl_{n_gdl}'], epsilon_gdl, e,
                                    epsilon_c=epsilon_c),
-                                     Dcap('mpl', sv['s_ampl_1'], sv['T_ampl_1'], epsilon_mpl, e)],
-                             weights=[H_gdl_node / (H_gdl_node + H_mpl_node), H_mpl_node / (H_gdl_node + H_mpl_node)])
+                                  Dcap('atl', sv['s_atl_1'], sv['T_atl_1'], epsilon_atl[1], e,
+                                       epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl, node=1)],
+                             weights=[H_gdl_node / (H_gdl_node + H_tl_node), H_tl_node / (H_gdl_node + H_tl_node)])
+    D_cap_atl_atl = [None] + [hmean([Dcap('atl', sv[f's_atl_{i}'], sv[f'T_atl_{i}'], epsilon_atl[i], e,
+                                          epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl, node=i),
+                                       Dcap('atl', sv[f's_atl_{i + 1}'], sv[f'T_atl_{i + 1}'], epsilon_atl[i+1], e,
+                                          epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl, node=i + 1)])
+                                for i in range(1, n_tl)]
+    D_cap_atl_ampl = hmean([Dcap('atl', sv[f's_atl_{n_tl}'], sv[f'T_atl_{n_tl}'], epsilon_atl[n_tl], e,
+                                  epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl, node=n_tl),
+                             Dcap('mpl', sv['s_ampl_1'], sv['T_ampl_1'], epsilon_mpl, e)],
+                            weights=[H_tl_node / (H_tl_node + H_mpl_node), H_mpl_node / (H_tl_node + H_mpl_node)])
     D_cap_ampl_ampl = [None] + [hmean([Dcap('mpl', sv[f's_ampl_{i}'], sv[f'T_ampl_{i}'], epsilon_mpl, e),
                                          Dcap('mpl', sv[f's_ampl_{i+1}'], sv[f'T_ampl_{i+1}'], epsilon_mpl, e)])
                                 for i in range(1, n_mpl)]
@@ -89,10 +104,20 @@ def flows_int_values(sv, i_fc, parameters):
                                             epsilon_c=epsilon_c),
                                         Dcap('gdl', sv[f's_cgdl_{i+1}'], sv[f'T_cgdl_{i+1}'], epsilon_gdl, e,
                                             epsilon_c=epsilon_c)]) for i in range(1, n_gdl)]
-    D_cap_cmpl_cgdl = hmean([Dcap('mpl', sv[f's_cmpl_{n_mpl}'], sv[f'T_cmpl_{n_mpl}'], epsilon_mpl, e),
-                                     Dcap('gdl', sv['s_cgdl_1'], sv['T_cgdl_1'], epsilon_gdl, e,
-                                           epsilon_c=epsilon_c)],
-                            weights = [H_mpl_node / (H_mpl_node + H_gdl_node), H_gdl_node / (H_mpl_node + H_gdl_node)])
+    D_cap_cmpl_ctl = hmean([Dcap('mpl', sv[f's_cmpl_{n_mpl}'], sv[f'T_cmpl_{n_mpl}'], epsilon_mpl, e),
+                                  Dcap('ctl', sv['s_ctl_1'], sv['T_ctl_1'], epsilon_ctl[1], e, epsilon_c=epsilon_c,
+                                       n_tl=n_tl, Htl=Htl, node=1)],
+                            weights = [H_mpl_node / (H_mpl_node + H_tl_node), H_tl_node / (H_mpl_node + H_tl_node)])
+    D_cap_ctl_ctl = [None] + [hmean([Dcap('ctl', sv[f's_ctl_{i}'], sv[f'T_ctl_{i}'], epsilon_ctl[i], e,
+                                          epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl, node=i),
+                                       Dcap('ctl', sv[f's_ctl_{i + 1}'], sv[f'T_ctl_{i + 1}'], epsilon_ctl[i+1],
+                                            e, epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl, node=i + 1)])
+                                for i in range(1, n_tl)]
+    D_cap_ctl_cgdl = hmean([Dcap('ctl', sv[f's_ctl_{n_tl}'], sv[f'T_ctl_{n_tl}'], epsilon_ctl[n_tl], e,
+                                        epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl, node=n_tl),
+                             Dcap('gdl', sv['s_cgdl_1'], sv['T_cgdl_1'], epsilon_gdl, e,
+                                  epsilon_c=epsilon_c)],
+                            weights=[H_tl_node / (H_tl_node + H_gdl_node), H_gdl_node / (H_tl_node + H_gdl_node)])
     D_cap_cmpl_cmpl = [None] + [hmean([Dcap('mpl', sv[f's_cmpl_{i}'], sv[f'T_cmpl_{i}'], epsilon_mpl, e),
                                         Dcap('mpl', sv[f's_cmpl_{i+1}'], sv[f'T_cmpl_{i+1}'], epsilon_mpl, e)])
                                 for i in range(1, n_mpl)]
@@ -113,10 +138,20 @@ def flows_int_values(sv, i_fc, parameters):
                                               epsilon_gdl, epsilon_c = epsilon_c),
                                           Da_eff('gdl', sv[f's_agdl_{i+1}'], sv[f'T_agdl_{i+1}'], Pagdl[i+1],
                                               epsilon_gdl, epsilon_c = epsilon_c)]) for i in range(1, n_gdl)]
-    Da_eff_agdl_ampl = hmean([Da_eff('gdl', sv[f's_agdl_{n_gdl}'], sv[f'T_agdl_{n_gdl}'], Pagdl[n_gdl],
+    Da_eff_agdl_atl = hmean([Da_eff('gdl', sv[f's_agdl_{n_gdl}'], sv[f'T_agdl_{n_gdl}'], Pagdl[n_gdl],
                                           epsilon_gdl, epsilon_c = epsilon_c),
-                                      Da_eff('mpl', sv['s_ampl_1'], sv['T_ampl_1'], Pampl[1], epsilon_mpl)],
-                               weights = [H_gdl_node / (H_gdl_node + H_mpl_node), H_mpl_node / (H_gdl_node + H_mpl_node)])
+                                      Da_eff('tl', sv['s_atl_1'], sv['T_atl_1'], Patl[1], epsilon_atl[1],
+                                             epsilon_c = epsilon_c, n_tl=n_tl, Htl=Htl, node=1)],
+                               weights = [H_gdl_node / (H_gdl_node + H_tl_node), H_tl_node / (H_gdl_node + H_tl_node)])
+    Da_eff_atl_atl = [None] + [hmean([Da_eff('tl', sv[f's_atl_{i}'], sv[f'T_atl_{i}'], Patl[i], epsilon_atl[i],
+                                             epsilon_c = epsilon_c, n_tl=n_tl, Htl=Htl, node=i),
+                                        Da_eff('tl', sv[f's_atl_{i + 1}'], sv[f'T_atl_{i + 1}'], Patl[i + 1],
+                                               epsilon_atl[i + 1], epsilon_c = epsilon_c, n_tl=n_tl, Htl=Htl, node=i + 1)])
+                               for i in range(1, n_tl)]
+    Da_eff_atl_ampl = hmean([Da_eff('tl', sv[f's_atl_{n_tl}'], sv[f'T_atl_{n_tl}'], Patl[n_tl],
+                                     epsilon_atl[n_tl], epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl, node=n_tl),
+                              Da_eff('mpl', sv['s_ampl_1'], sv['T_ampl_1'], Pampl[1], epsilon_mpl)],
+                             weights=[H_tl_node / (H_tl_node + H_mpl_node), H_mpl_node / (H_tl_node + H_mpl_node)])
     Da_eff_ampl_ampl = [None] + [hmean([Da_eff('mpl', sv[f's_ampl_{i}'], sv[f'T_ampl_{i}'], Pampl[i],
                                               epsilon_mpl),
                                         Da_eff('mpl', sv[f's_ampl_{i+1}'], sv[f'T_ampl_{i+1}'], Pampl[i+1],
@@ -132,11 +167,21 @@ def flows_int_values(sv, i_fc, parameters):
                                                  epsilon_mpl),
                                           Dc_eff('mpl', sv[f's_cmpl_{i + 1}'], sv[f'T_cmpl_{i + 1}'], Pcmpl[i + 1],
                                                  epsilon_mpl)]) for i in range(1, n_mpl)]
-    Dc_eff_cmpl_cgdl = hmean([Dc_eff('mpl', sv[f's_cmpl_{n_mpl}'], sv[f'T_cmpl_{n_mpl}'], Pcmpl[n_mpl],
+    Dc_eff_cmpl_ctl = hmean([Dc_eff('mpl', sv[f's_cmpl_{n_mpl}'], sv[f'T_cmpl_{n_mpl}'], Pcmpl[n_mpl],
                                        epsilon_mpl),
-                                Dc_eff('gdl', sv['s_cgdl_1'], sv['T_cgdl_1'], Pcgdl[1],
-                                       epsilon_gdl, epsilon_c=epsilon_c)],
-                               weights=[H_mpl_node / (H_mpl_node + H_gdl_node), H_gdl_node / (H_mpl_node + H_gdl_node)])
+                                   Dc_eff('tl', sv['s_ctl_1'], sv['T_ctl_1'], Pctl[1], epsilon_ctl[1],
+                                          epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl, node=1)],
+                               weights=[H_mpl_node / (H_mpl_node + H_tl_node), H_tl_node / (H_mpl_node + H_tl_node)])
+    Dc_eff_ctl_ctl = [None] + [hmean([Dc_eff('tl', sv[f's_ctl_{i}'], sv[f'T_ctl_{i}'], Pctl[i], epsilon_ctl[i],
+                                             epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl, node=i),
+                                      Dc_eff('tl', sv[f's_ctl_{i + 1}'], sv[f'T_ctl_{i + 1}'], Pctl[i + 1],
+                                             epsilon_ctl[i+1], epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl, node=i + 1)])
+                               for i in range(1, n_tl)]
+    Dc_eff_ctl_cgdl = hmean([Dc_eff('tl', sv[f's_ctl_{n_tl}'], sv[f'T_ctl_{n_tl}'], Pctl[n_tl],
+                                     epsilon_ctl[n_tl], epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl, node=n_tl),
+                              Dc_eff('gdl', sv['s_cgdl_1'], sv['T_cgdl_1'], Pcgdl[1],
+                                     epsilon_gdl, epsilon_c=epsilon_c)],
+                             weights=[H_tl_node / (H_tl_node + H_gdl_node), H_gdl_node / (H_tl_node + H_gdl_node)])
     Dc_eff_cgdl_cgdl = [None] + [hmean([Dc_eff('gdl', sv[f's_cgdl_{i}'], sv[f'T_cgdl_{i}'], Pcgdl[i],
                                               epsilon_gdl, epsilon_c = epsilon_c),
                                         Dc_eff('gdl', sv[f's_cgdl_{i+1}'], sv[f'T_cgdl_{i+1}'], Pcgdl[i+1],
@@ -145,8 +190,9 @@ def flows_int_values(sv, i_fc, parameters):
     T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
                         weights=[Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl), Hccl / (Hacl + Hmem + Hccl)])
 
-    return (H_gdl_node, H_mpl_node, Pagc, Pcgc, J_EOD_acl_mem, J_EOD_mem_ccl, D_acl_mem, D_mem_ccl, D_cap_agdl_agdl,
-            D_cap_agdl_ampl, D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_cgdl_cgdl, D_cap_cmpl_cgdl, D_cap_cmpl_cmpl,
-            D_cap_ccl_cmpl, ha_Da_eff_agc_agdl, hc_Dc_eff_cgdl_cgc, Da_eff_agdl_agdl, Da_eff_agdl_ampl,
-            Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_cgdl_cgdl, Dc_eff_cmpl_cgdl, Dc_eff_cmpl_cmpl, Dc_eff_ccl_cmpl,
-            T_acl_mem_ccl)
+    return (H_gdl_node, H_tl_node, H_mpl_node, Pagc, Pcgc, J_EOD_acl_mem, J_EOD_mem_ccl, D_acl_mem, D_mem_ccl,
+            D_cap_agdl_agdl, D_cap_agdl_atl, D_cap_atl_atl, D_cap_atl_ampl, D_cap_ampl_ampl, D_cap_ampl_acl,
+            D_cap_ccl_cmpl, D_cap_cmpl_cmpl, D_cap_cmpl_ctl, D_cap_ctl_ctl, D_cap_ctl_cgdl, D_cap_cgdl_cgdl,
+            ha_Da_eff_agc_agdl, hc_Dc_eff_cgdl_cgc, Da_eff_agdl_agdl, Da_eff_agdl_atl, Da_eff_atl_atl, Da_eff_atl_ampl,
+            Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl, Dc_eff_cmpl_ctl, Dc_eff_ctl_ctl,
+            Dc_eff_ctl_cgdl, Dc_eff_cgdl_cgdl, T_acl_mem_ccl)

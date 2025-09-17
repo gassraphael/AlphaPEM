@@ -14,8 +14,8 @@ from modules.heat_modules import heat_transfer_int_values
 
 # ____________________________________________________Heat transfers____________________________________________________
 
-def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl, Sl_ampl, Sl_acl, Sl_ccl, Sl_cmpl,
-                             Sl_cgdl, **kwargs):
+def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl, Sl_atl, Sl_ampl, Sl_acl, Sl_ccl,
+                             Sl_cmpl, Sl_ctl, Sl_cgdl, **kwargs):
     """This function calculates the heat transfers occurring inside the fuel cell system.
 
     Parameters
@@ -33,6 +33,8 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl
         Water absorption in the CCL (mol.m-3.s-1).
     Sl_agdl : list
         Liquid water generated through vapor water liquefaction in the AGDL (mol.m-3.s-1).
+    Sl_atl : list
+        Liquid water generated through vapor water liquefaction in the ATL (mol.m-3.s-1).
     Sl_ampl : list
         Liquid water generated through vapor water liquefaction in the AMPL (mol.m-3.s-1).
     Sl_acl : float
@@ -41,6 +43,8 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl
         Liquid water generated through vapor water liquefaction in the CCL (mol.m-3.s-1).
     Sl_cmpl : list
         Liquid water generated through vapor water liquefaction in the CMPL (mol.m-3.s-1).
+    Sl_ctl : list
+        Liquid water generated through vapor water liquefaction in the CTL (mol.m-3.s-1).
     Sl_cgdl : list
         Liquid water generated through vapor water liquefaction in the CGDL (mol.m-3.s-1).
 
@@ -62,11 +66,13 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl
     epsilon_mpl, epsilon_c = parameters['epsilon_mpl'], parameters['epsilon_c']
     n_gdl, n_mpl = parameters['n_gdl'], parameters['n_mpl']
     Hmem, Hgdl, Hmpl = parameters['Hmem'], parameters['Hgdl'], parameters['Hmpl']
-    Hacl, Hccl = parameters['Hacl'], parameters['Hccl']
+    Hacl, Hccl, Htl, n_tl = parameters['Hacl'], parameters['Hccl'], parameters['Htl'], parameters['n_tl']
+    epsilon_atl, epsilon_ctl = parameters['epsilon_atl'], parameters['epsilon_ctl']
 
     # Intermediate values
-    (k_th_eff_agc_agdl, k_th_eff_agdl_agdl, k_th_eff_agdl_ampl, k_th_eff_ampl_ampl, k_th_eff_ampl_acl, k_th_eff_acl_mem,
-     k_th_eff_mem_ccl, k_th_eff_ccl_cmpl, k_th_eff_cmpl_cmpl, k_th_eff_cmpl_cgdl, k_th_eff_cgdl_cgdl, k_th_eff_cgdl_cgc) \
+    (k_th_eff_agc_agdl, k_th_eff_agdl_agdl, k_th_eff_agdl_atl, k_th_eff_atl_atl, k_th_eff_atl_ampl, k_th_eff_ampl_ampl,
+     k_th_eff_ampl_acl, k_th_eff_acl_mem, k_th_eff_mem_ccl, k_th_eff_ccl_cmpl, k_th_eff_cmpl_cmpl, k_th_eff_cmpl_ctl,
+     k_th_eff_ctl_ctl, k_th_eff_ctl_cgdl, k_th_eff_cgdl_cgdl, k_th_eff_cgdl_cgc) \
             =  heat_transfer_int_values(sv, parameters)
 
     # ______________________________________________Heat flows (J.m-2.s-1)______________________________________________
@@ -76,7 +82,10 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl
     Jt_agdl_agdl = {f'agdl_agdl_{i}': -k_th_eff_agdl_agdl[i] * (sv[f'T_agdl_{i+1}'] - sv[f'T_agdl_{i}']) / (Hgdl/n_gdl)
                     for i in range(1, n_gdl)}
 
-    Jt_agdl_ampl = - 2 * k_th_eff_agdl_ampl * (sv['T_ampl_1'] - sv[f'T_agdl_{n_gdl}']) / (Hgdl / n_gdl + Hmpl / n_mpl)
+    Jt_agdl_atl = - 2 * k_th_eff_agdl_atl * (sv['T_atl_1'] - sv[f'T_agdl_{n_gdl}']) / (Hgdl / n_gdl + Htl / n_tl)
+    Jt_atl_atl = {f'atl_atl_{i}': -k_th_eff_atl_atl[i] * (sv[f'T_atl_{i + 1}'] - sv[f'T_atl_{i}']) / (Htl / n_tl)
+                  for i in range(1, n_tl)}
+    Jt_atl_ampl = - 2 * k_th_eff_atl_ampl * (sv['T_ampl_1'] - sv[f'T_atl_{n_tl}']) / (Htl / n_tl + Hmpl / n_mpl)
     Jt_ampl_ampl = {f'ampl_ampl_{i}': -k_th_eff_ampl_ampl[i] * (sv[f'T_ampl_{i+1}'] - sv[f'T_ampl_{i}']) / (Hmpl/n_mpl)
                     for i in range(1, n_mpl)}
     Jt_ampl_acl = - 2 * k_th_eff_ampl_acl * (T_acl - sv[f'T_ampl_{n_mpl}']) / (Hmpl / n_mpl + Hacl)
@@ -89,15 +98,19 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl
     Jt_ccl_cmpl = - 2 * k_th_eff_ccl_cmpl * (sv['T_cmpl_1'] - T_ccl) / (Hccl + Hmpl / n_mpl)
     Jt_cmpl_cmpl = {f'cmpl_cmpl_{i}': -k_th_eff_cmpl_cmpl[i] * (sv[f'T_cmpl_{i+1}'] - sv[f'T_cmpl_{i}']) / (Hmpl/n_mpl)
                     for i in range(1, n_mpl)}
-    Jt_cmpl_cgdl = - 2 * k_th_eff_cmpl_cgdl * (sv['T_cgdl_1'] - sv[f'T_cmpl_{n_mpl}']) / (Hmpl / n_mpl + Hgdl / n_gdl)
+    Jt_cmpl_ctl = - 2 * k_th_eff_cmpl_ctl * (sv['T_ctl_1'] - sv[f'T_cmpl_{n_mpl}']) / (Htl / n_tl + Hgdl / n_gdl)
+    Jt_ctl_ctl = {f'ctl_ctl_{i}': -k_th_eff_ctl_ctl[i] * (sv[f'T_ctl_{i + 1}'] - sv[f'T_ctl_{i}']) / (Htl / n_tl)
+                  for i in range(1, n_tl)}
+    Jt_ctl_cgdl = - 2 * k_th_eff_ctl_cgdl * (sv['T_cgdl_1'] - sv[f'T_ctl_{n_tl}']) / (Htl / n_tl + Hgdl / n_gdl)
     Jt_cgdl_cgdl = {f'cgdl_cgdl_{i}': -k_th_eff_cgdl_cgdl[i] * (sv[f'T_cgdl_{i+1}'] - sv[f'T_cgdl_{i}']) / (Hgdl/n_gdl)
                     for i in range(1, n_gdl)}
 
     Jt_cgdl_cgc = - 2 * k_th_eff_cgdl_cgc * (T_cgc - sv[f'T_cgdl_{n_gdl}']) / (Hgdl / n_gdl)
 
-    Jt = {'agc_agdl': Jt_agc_agdl, **Jt_agdl_agdl, 'agdl_ampl': Jt_agdl_ampl, **Jt_ampl_ampl, 'ampl_acl': Jt_ampl_acl,
-          'acl_mem': Jt_acl_mem, 'mem_ccl': Jt_mem_ccl, 'ccl_cmpl': Jt_ccl_cmpl, **Jt_cmpl_cmpl,
-          'cmpl_cgdl': Jt_cmpl_cgdl, **Jt_cgdl_cgdl, 'cgdl_cgc': Jt_cgdl_cgc}
+    Jt = {'agc_agdl': Jt_agc_agdl, **Jt_agdl_agdl, 'agdl_atl': Jt_agdl_atl, **Jt_atl_atl, 'atl_ampl': Jt_atl_ampl,
+          **Jt_ampl_ampl, 'ampl_acl': Jt_ampl_acl, 'acl_mem': Jt_acl_mem, 'mem_ccl': Jt_mem_ccl, 'ccl_cmpl': Jt_ccl_cmpl,
+          **Jt_cmpl_cmpl, 'cmpl_ctl': Jt_cmpl_ctl, **Jt_ctl_ctl, 'ctl_cgdl': Jt_ctl_cgdl, **Jt_cgdl_cgdl,
+          'cgdl_cgc': Jt_cgdl_cgc}
 
     # ____________________________________________Heat generated (J.m-3.s-1)____________________________________________
 
@@ -115,6 +128,8 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl
     # The heat dissipated by the liquefaction of vapor water, in J.m-3.s-1.
     Q_liq = {**{f'agdl_{i}': Sl_agdl[i] * (- delta_h_liq(sv[f'T_agdl_{i}'])) for i in range(1, n_gdl + 1)},
              **{f'cgdl_{i}': Sl_cgdl[i] * (- delta_h_liq(sv[f'T_cgdl_{i}'])) for i in range(1, n_gdl + 1)},
+             **{f'atl_{i}': Sl_atl[i] * (- delta_h_liq(sv[f'T_atl_{i}'])) for i in range(1, n_tl + 1)},
+             **{f'ctl_{i}': Sl_ctl[i] * (- delta_h_liq(sv[f'T_ctl_{i}'])) for i in range(1, n_tl + 1)},
              **{f'ampl_{i}': Sl_ampl[i] * (- delta_h_liq(sv[f'T_ampl_{i}'])) for i in range(1, n_mpl + 1)},
              **{f'cmpl_{i}': Sl_cmpl[i] * (- delta_h_liq(sv[f'T_cmpl_{i}'])) for i in range(1, n_mpl + 1)},
              'acl': Sl_acl * (-delta_h_liq(T_acl)),
@@ -126,10 +141,12 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl
 
     # The heat dissipated by the electric currents (Joule heating + Ohm's law), in J.m-3.s-1.
     Q_e = {**{f'agdl_{i}': i_fc ** 2 / sigma_e_eff('gdl', epsilon_gdl, epsilon_c=epsilon_c) for i in range(1, n_gdl + 1)},
-           'acl': i_fc ** 2 / sigma_e_eff('cl', epsilon_cl, epsilon_mc=epsilon_mc),
+           **{f'atl_{i}': i_fc ** 2 / sigma_e_eff('atl', epsilon_atl[i], epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl, node=i) for i in range(1, n_tl + 1)},
            **{f'ampl_{i}': i_fc ** 2 / sigma_e_eff('mpl', epsilon_mpl) for i in range(1, n_mpl + 1)},
+           'acl': i_fc ** 2 / sigma_e_eff('cl', epsilon_cl, epsilon_mc=epsilon_mc),
            'ccl': i_fc ** 2 / (3 * sigma_e_eff('cl', epsilon_cl, epsilon_mc=epsilon_mc)),
            **{f'cmpl_{i}': i_fc ** 2 / sigma_e_eff('mpl', epsilon_mpl) for i in range(1, n_mpl + 1)},
+           **{f'ctl_{i}': i_fc ** 2 / sigma_e_eff('ctl', epsilon_ctl[i], epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl, node=i) for i in range(1, n_tl + 1)},
            **{f'cgdl_{i}': i_fc ** 2 / sigma_e_eff('gdl', epsilon_gdl, epsilon_c=epsilon_c) for i in range(1, n_gdl + 1)}}
 
     return {'Jt': Jt, 'Q_r': Q_r, 'Q_sorp': Q_sorp, 'Q_liq': Q_liq, 'Q_p': Q_p, 'Q_e': Q_e}

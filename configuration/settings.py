@@ -292,7 +292,7 @@ def calculate_physical_parameters(type_fuel_cell):
             b_slim, a_switch, C_scl)
 
 
-def calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, type_fuel_cell):
+def calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl):
     """This function is used to set the computing parameters of the fuel cell system.
 
     Parameters
@@ -305,8 +305,6 @@ def calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, ty
         Thickness of the microporous layer in meters.
     Hacl : float
         Thickness of the anode catalyst layer in meters.
-    type_fuel_cell : str
-        Type of fuel cell system.
 
     Returns
     -------
@@ -314,11 +312,17 @@ def calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, ty
         Number of model nodes placed inside each GDL.
     n_mpl : int
         Number of model nodes placed inside each MPL.
+    n_tl : int
+        Number of model nodes placed inside each transition layer.
     t_purge : tuple
         Time parameters for purging the system.
         It is a tuple containing the purge time 'purge_time' in seconds, and the time between two purges
         'delta_purge' in seconds.
         delta_t_dyn_step : float
+    rtol : float
+        Relative tolerance for the system of ODEs solver.
+    atol : float
+        Absolute tolerance for the system of ODEs solver.
     step_current_parameters : dict
         Parameters for the step current density. It is a dictionary containing:
         - 'delta_t_ini_step': the initial time (in seconds) at zero current density for the stabilisation of the
@@ -330,28 +334,33 @@ def calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl, ty
         - 'i_step': the current density (in A.m-2) for the step current density function,
         - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
     """
+
+    n_tl = 2  # It is the number of model points placed inside each transition layer.
+    if n_tl % 2 != 0:
+        raise ValueError("n_tl should be an even number.")
+    if n_tl != 2:
+        raise Warning("n_tl should be equal to 2 for now.")
+
+    k_node_min = math.ceil((n_tl / 2 + 1) * Hacl / Hmpl)  # It is a coefficient to determine the minimum thickness of a
+    # model node. It is calculated to ensure that there is at least one node inside the MPL, considering the transition
+    # layer (also re-calculated in AlphaPEM.py).
+    H_node_min = Hacl / k_node_min  # m. It is the minimum thickness of the model node.
+
+    # Setting the number of model points placed inside each layer:
+    n_gdl = max(1, int(Hgdl / H_node_min / 4))  # It is the number of model points placed inside each GDL.
+    n_mpl = max(1, int(Hmpl / H_node_min))      # It is the number of model points placed inside each MPL.
+
+    # Setting the purging parameters of the system and the dynamic display of the step current density function:
     t_purge = 0.6, 15  # (s, s). It is the time parameters for purging the system.
-    delta_t_dyn_step = 5*60  # (s). Time for dynamic display of the step current density function.
+    delta_t_dyn_step = 5 * 60  # (s). Time for dynamic display of the step current density function.
 
-    n_gdl = max(1, int(Hgdl / Hacl / 4))  # It is the number of model points placed inside each GDL.
-    n_mpl = max(1, int(Hmpl / Hacl))      # It is the number of model points placed inside each MPL.
+    # Setting the tolerances for the system of ODEs solver:
+    rtol = 1e-6  # Relative tolerance for the system of ODEs solver.
+    atol = 1e-10  # Absolute tolerance for the system of ODEs solver.
 
-    if type_fuel_cell == "ZSW-GenStack" or type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41" or \
-            type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81" or type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2" or \
-            type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6" or type_fuel_cell == "ZSW-GenStack_T_62" or \
-            type_fuel_cell == "ZSW-GenStack_T_76" or type_fuel_cell == "ZSW-GenStack_T_84":
-        rtol = 1e-6  # Relative tolerance for the system of ODEs solver.
-        atol = 1e-10  # Absolute tolerance for the system of ODEs solver.
-    elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
-         type_fuel_cell == "EH-31_2.5":
-        rtol = 1e-8  # Relative tolerance for the system of ODEs solver.
-        atol = 1e-11  # Absolute tolerance for the system of ODEs solver.
-    else:
-        rtol = 1e-6  # Relative tolerance for the system of ODEs solver.
-        atol = 1e-10  # Absolute tolerance for the system of ODEs solver.
-
-    step_current_parameters['delta_t_dyn_step'] = delta_t_dyn_step # Update the step current parameters.
-    return n_gdl, n_mpl, t_purge, rtol, atol, step_current_parameters
+    # Update the step current parameters.
+    step_current_parameters['delta_t_dyn_step'] = delta_t_dyn_step
+    return n_gdl, n_mpl, n_tl, t_purge, rtol, atol
 
 # ____________________________________________Unchanged Physical parameters_____________________________________________
 """ These parameters remain unchanged no matter the setting configurations."""
