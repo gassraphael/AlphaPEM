@@ -33,8 +33,8 @@ different operating conditions, are imported from the calibration_module.py.
 #                          "ZSW-GenStack_Pa_2.4_Pc_2.2", "ZSW-GenStack_Pa_2.8_Pc_2.6", "ZSW-GenStack_T_62",
 #                          "ZSW-GenStack_T_76", "ZSW-GenStack_T_84", "EH-31_1.5"(2021), "EH-31_2.0"(2021),
 #                          "EH-31_2.25"(2021), "EH-31_2.5"(2021)
-type_fuel_cell_1 = "EH-31_2.0"
-type_fuel_cell_2 = "EH-31_2.5"
+type_fuel_cell_1 = "ZSW-GenStack_Pa_1.61_Pc_1.41"
+type_fuel_cell_2 = "ZSW-GenStack_Pa_2.8_Pc_2.6"
 
 # Calibration zone: "before_voltage_drop", "full".
 voltage_zone = "before_voltage_drop"
@@ -59,7 +59,7 @@ varbound, gene_space = parameter_bounds_for_calibration(type_fuel_cell_1, voltag
 
 # PyGAD parameters for the genetic algorithm:
     # Number of generations:
-num_generations = 400 # 1000 generations should be enough.
+num_generations = 100 # 1000 generations should be enough.
     #                   10 generation of 128 elements takes approximatively 100min on my computer (16 CPU cores).
     #                   1000 generations of 128 elements take less than 80h on UR cluster (1 node of 32 CPU cores).
     # Initial population (one solution means a member of the population):

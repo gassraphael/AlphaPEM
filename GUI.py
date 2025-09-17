@@ -199,7 +199,7 @@ def main_frame(root, canvas):
                                          'label_row': 1, 'label_column': 1},
          'Number of MPL nodes - n_mpl': {'value': tk.IntVar(computing_parameters_frame, 5),
                                          'label_row': 1, 'label_column': 3},
-         'Number of TL nodes - n_tl': {'value': tk.IntVar(computing_parameters_frame, 2),
+         'Number of TL nodes - n_tl': {'value': tk.IntVar(computing_parameters_frame, 4),
                                          'label_row': 1, 'label_column': 5},
          'Solver relative tolerance - rtol': {'value': tk.DoubleVar(computing_parameters_frame, 1e-5),
                                          'label_row': 2, 'label_column': 1},
