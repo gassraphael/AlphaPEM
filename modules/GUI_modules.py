@@ -816,11 +816,6 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
         choices.clear()
         return
 
-    if choice_computing_parameters['Number of TL nodes - n_tl']['value'].get() != 2:
-        messagebox.showerror(title='n_tl_temp', message='n_tl should be equal to 2 for now.')
-        choices.clear()
-        return
-
     if choice_computing_parameters['Solver relative tolerance - rtol']['value'].get() > 1e-3 or \
             choice_computing_parameters['Solver absolute tolerance - atol']['value'].get() > 1e-3:
         messagebox.showerror(title='Solver tolerance', message='rtol and atol should be lower than 1e-3 to limit the'

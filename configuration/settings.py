@@ -335,11 +335,9 @@ def calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl):
         - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
     """
 
-    n_tl = 2  # It is the number of model points placed inside each transition layer.
+    n_tl = 4  # It is the number of model points placed inside each transition layer.
     if n_tl % 2 != 0:
         raise ValueError("n_tl should be an even number.")
-    if n_tl != 2:
-        raise Warning("n_tl should be equal to 2 for now.")
 
     k_node_min = math.ceil((n_tl / 2 + 1) * Hacl / Hmpl)  # It is a coefficient to determine the minimum thickness of a
     # model node. It is calculated to ensure that there is at least one node inside the MPL, considering the transition
@@ -355,8 +353,8 @@ def calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl):
     delta_t_dyn_step = 5 * 60  # (s). Time for dynamic display of the step current density function.
 
     # Setting the tolerances for the system of ODEs solver:
-    rtol = 1e-6  # Relative tolerance for the system of ODEs solver.
-    atol = 1e-10  # Absolute tolerance for the system of ODEs solver.
+    rtol = 1e-5  # Relative tolerance for the system of ODEs solver.
+    atol = 1e-8  # Absolute tolerance for the system of ODEs solver.
 
     # Update the step current parameters.
     step_current_parameters['delta_t_dyn_step'] = delta_t_dyn_step
