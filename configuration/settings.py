@@ -335,18 +335,25 @@ def calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl):
         - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
     """
 
-    n_tl = 4  # It is the number of model points placed inside each transition layer.
+    # Setting the number of model points placed inside each transition layer.
+    n_tl = 4
     if n_tl % 2 != 0:
         raise ValueError("n_tl should be an even number.")
 
+    # Calculation of the minimum thickness of the model node
     k_node_min = math.ceil((n_tl / 2 + 1) * Hacl / Hmpl)  # It is a coefficient to determine the minimum thickness of a
     # model node. It is calculated to ensure that there is at least one node inside the MPL, considering the transition
     # layer (also re-calculated in AlphaPEM.py).
     H_node_min = Hacl / k_node_min  # m. It is the minimum thickness of the model node.
 
+    # Calculation of the transition layer parameters
+    Htl = n_tl * H_node_min  # m. It is the thickness of the transition layers.
+    Hgdl_virtual = Hgdl - Htl / 2  # m. It is the effective thickness of the GDL without the transition layers.
+    Hmpl_virtual = Hmpl - Htl / 2  # m. It is the effective thickness of the MPL without the transition layers.
+
     # Setting the number of model points placed inside each layer:
-    n_gdl = max(1, int(Hgdl / H_node_min / 4))  # It is the number of model points placed inside each GDL.
-    n_mpl = max(1, int(Hmpl / H_node_min))      # It is the number of model points placed inside each MPL.
+    n_gdl = max(1, int(Hgdl_virtual / H_node_min / 4))  # It is the number of model points placed inside each GDL.
+    n_mpl = max(1, int(Hmpl_virtual / H_node_min / 2))  # It is the number of model points placed inside each MPL.
 
     # Setting the purging parameters of the system and the dynamic display of the step current density function:
     t_purge = 0.6, 15  # (s, s). It is the time parameters for purging the system.
