@@ -32,7 +32,7 @@ def pola_exp_values(type_fuel_cell, voltage_zone):
         Experimental values of the voltage.
 
     """
-    # ZSW fuel cell
+    # GenStack is a fuel cell developed in open source by ZSW (https://zenodo.org/records/14223364).
     if type_fuel_cell == "ZSW-GenStack":
         if voltage_zone == 'full':
             # Current density

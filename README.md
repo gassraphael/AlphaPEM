@@ -48,6 +48,9 @@ To install **AlphaPEM**, follow these steps in a shell:
 
 # Major updates
 
+- V1.2 - in progress - This version of AlphaPEM includes: 
+	- the addition of the MPL to the simulated cell, in both the anode and cathode. To ensure good numerical stability, a transition layer between each GDL and MPL is also included.
+	- the addition of the open-source [ZSW GenStack](https://zenodo.org/records/14223364) as a calibrated fuel cell case study. 
 - [V1.1](https://github.com/gassraphael/AlphaPEM/tree/11f07bd084a09cc6432f441b010d89d2a4229e4e) - 2025.08.18 - This version of AlphaPEM includes: 
 	- the addition of heat transfer to the program, in cooperation with Pedro Affonso Nobrega (PERSEE, MINES PSL).
 	- an improvement of the initial variable values: the algorithm waits for a given time (approximately 2 virtual hours) to reach equilibrium, and then the experiment starts (step/pola/EIS).
@@ -90,13 +93,16 @@ The detailed model description and simulation results can be found in the follow
 
 ## Authors
 
-AlphaPEM is firstly developed by [Raphaël Gass](https://gassraphael.github.io/) during his PhD thesis from 2021 to 2024, supervised by Prof. Zhongliang Li, Prof. Rachid Outbib, Prof. Samir Jemei and Prof. Daniel Hissel.
+- AlphaPEM is firstly developed by [Raphaël Gass](https://gassraphael.github.io/) during his PhD thesis in control engineering at the [LIS Laboratory](https://www.lis-lab.fr/) in [Aix-Marseille University](https://www.univ-amu.fr/), and in co-supervision with [FEMTO-ST Institute](https://www.femto-st.fr/en), within the [FCLab](https://www.fclab.fr/), in [Franche-Comté University](https://www.univ-fcomte.fr/), from 2021 to 2024. This work has been supervised by Prof. Zhongliang Li (FEMTO-ST), Prof. Rachid Outbib (LIS), Prof. Samir Jemei (FEMTO-ST) and Prof. Daniel Hissel (FEMTO-ST).
+
+- The development of AlphaPEM was subsequently continued by Raphaël Gass during his postdoctoral research from 2025 to 2027 at [ENERGY-Lab](https://www.energylab.re/), [University of Reunion island](https://www.univ-reunion.fr/), in partnership with the [ZSW Institute](https://www.zsw-bw.de/) in Ulm, Germany. This work was supervised by Prof. Michel Benne (ENERGY-Lab), Associate Prof. Cédric Damour (ENERGY-Lab), Associate Prof. Dominique Grondin (ENERGY-Lab), and Dr. Florian Wilhelm (ZSW).
     
 ## Financial support
 
 This work has been supported:
 
 - from 2021 to 2024 by French National Research Agency via project [DEAL](https://deal.lis-lab.fr/) (Grant no. ANR-20-CE05-0016-01), the Region Provence-Alpes-Côte d’Azur, the EIPHI Graduate School (contract ANR-17-EURE-0002) and the Region Bourgogne Franche-Comté.
+- from 2025 to 2027 by European FEDER funds via project [OPUS-H2](https://www.energylab.re/projets/projets-en-cours/opus-h2/) and the Region Reunion.
 
 ## Licenses
 

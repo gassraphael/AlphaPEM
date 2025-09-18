@@ -447,22 +447,32 @@ def about():
     """
     msg = "AlphaPEM is an open-source software package for simulating proton exchange membrane fuel cell (PEMFC) " \
           "systems using physics-based models for embedded applications. \nIt is based on a physics-based, " \
-          "one-dimensional (1D), dynamic, two-phase, and isothermal model. It can quickly simulate the internal " \
+          "one-dimensional (1D), dynamic, two-phase, and non-isothermal model. It can quickly simulate the internal " \
           "states and voltage dynamics of PEMFC systems, and produce polarization and EIS curves. It can also " \
           "automatically calibrate the undetermined parameters of the model to simulate a given real fuel cell " \
           "system." \
-          "\n\nAlphaPEM is firstly developed by Raphaël Gass during his PhD thesis from 2021 to 2024, supervised by " \
-          "Prof. Zhongliang Li, Prof. Rachid Outbib, Prof. Samir Jemei and Prof. Daniel Hissel. \nIt has been " \
-          "supported by French National Research Agency via project DEAL (Grant no. ANR-20-CE05-0016-01), the Region " \
-          "Provence-Alpes-Côte d’Azur, the EIPHI Graduate School (contract ANR-17-EURE-0002) and the Region " \
-          "Bourgogne Franche-Comté." \
+          "\n\nAlphaPEM is firstly developed by Raphaël Gass during his PhD thesis in control engineering at the" \
+          "LIS Laboratory in Aix-Marseille University, and in co-supervision with FEMTO-ST Institute, within the FCLab," \ 
+          "in Franche-Comté University, from 2021 to 2024. This work has been supervised by Prof. Zhongliang Li (FEMTO-ST)," \ 
+          "Prof. Rachid Outbib (LIS), Prof. Samir Jemei (FEMTO-ST) and Prof. Daniel Hissel (FEMTO-ST)." \
+          "\nIt has been supported by French National Research Agency via project DEAL (Grant no. ANR-20-CE05-0016-01," \ 
+          "https://deal.lis-lab.fr/), the Region Provence-Alpes-Côte d’Azur, the EIPHI Graduate School" \
+          "(contract ANR-17-EURE-0002) and the Region Bourgogne Franche-Comté." \
+          "\n\nThe development of AlphaPEM was subsequently continued by Raphaël Gass during his postdoctoral research" \
+          "from 2025 to 2027 at ENERGY-Lab, University of Reunion island, in partnership with the ZSW Institute in Ulm, Germany." \ 
+          "This work was supervised by Prof. Michel Benne (ENERGY-Lab), Associate Prof. Cédric Damour (ENERGY-Lab)," \
+          "Associate Prof. Dominique Grondin (ENERGY-Lab), and Dr. Florian Wilhelm (ZSW)." \
+          "\nIt has been supported by European FEDER funds via project OPUS-H2" \
+          "(https://www.energylab.re/projets/projets-en-cours/opus-h2/) and the Region Reunion." \
           "\n\nIt is related to the following articles:" \
           "\n    - Gass et al 2024 J. Electrochem. Soc. https://doi.org/10.1149/1945-7111/ad305a," \
-          "\n    - Gass et al 2024 SSRN http://dx.doi.org/10.2139/ssrn.4812343." \
+          "\n    - Gass et al 2025 I.J. of Hydrogen Energy https://doi.org/10.1016/j.ijhydene.2024.11.374." \
+          "\n    - Gass et al 2025 SoftwareX https://doi.org/10.1016/j.softx.2024.102002." \
           "\n\nMore information can be found in:" \
-          "\n    - GitHub webpage: https://github.com/gassraphael/AlphaPEM" \
-          "\n    - Documentation webpage: to do" \
-          "\n\nIf you want to contact me, please send an email to: gassraphael@proton.me."
+          "\n    - AlphaPEM GitHub webpage: https://github.com/gassraphael/AlphaPEM" \
+          "\n    - AlphaPEM documentation webpage: https://gassraphael.github.io/AlphaPEM/" \
+          "\n    - Author webpage: https://gassraphael.github.io/" \
+          "\n\nIf you want to contact me, please send an email to: raphael.gass@univ-reunion.fr."
 
     # Create a new top-level window
     about_window = tk.Toplevel()

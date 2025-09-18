@@ -39,9 +39,13 @@ To install **AlphaPEM**, follow these steps in a shell:
 
 # Major updates
 
-- V1.1 - 2025.07.16 - This version of AlphaPEM includes: 
+- V1.2 - in progress - This version of AlphaPEM includes: 
+	- the addition of the MPL to the simulated cell, in both the anode and cathode. To ensure good numerical stability, a transition layer between each GDL and MPL is also included.
+	- the addition of the open-source [ZSW GenStack](https://zenodo.org/records/14223364) as a calibrated fuel cell case study. 
+- [V1.1](https://github.com/gassraphael/AlphaPEM/tree/11f07bd084a09cc6432f441b010d89d2a4229e4e) - 2025.08.18 - This version of AlphaPEM includes: 
 	- the addition of heat transfer to the program, in cooperation with Pedro Affonso Nobrega (PERSEE, MINES PSL).
 	- an improvement of the initial variable values: the algorithm waits for a given time (approximately 2 virtual hours) to reach equilibrium, and then the experiment starts (step/pola/EIS).
+	- the limit liquid water saturation coefficient ($s_{lim}$) is temporarily removed for future refinement.
 - [V1.0](https://github.com/gassraphael/AlphaPEM/tree/2b042c3d16d53fcd16779a5ffdc81eea75a9d012) - 2024.09.05 - This version of AlphaPEM corresponds to the one developed during Raphaël Gass's PhD from 2021 to 2024. 
 	- It is based on a physics-based, one-dimensional (1D), dynamic, two-phase, and isothermal model.
 
