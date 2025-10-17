@@ -11,6 +11,8 @@ import math
 # Importing functions
 from configuration.current_densities import (step_current, polarization_current, polarization_current_for_calibration,
                                              EIS_current)
+from configuration.derivative_current_densities import (dstep_currentdt, dpolarization_currentdt,
+                                                        dpolarization_current_for_calibrationdt, dEIS_currentdt)
 from modules.settings_modules import stored_operating_inputs, stored_physical_parameters, EIS_parameters
 
 # _______________________________________________________Settings_______________________________________________________
@@ -102,15 +104,23 @@ def calculate_current_density_parameters(type_current=None):
     t_EIS = EIS_parameters(f_EIS)  # Time parameters for the EIS_current density function.
 
     # Setting the current density function:
-    if type_current == "step": current_density = step_current
-    elif type_current == "polarization": current_density = polarization_current
-    elif type_current == "polarization_for_cali": current_density = polarization_current_for_calibration
-    elif type_current == "EIS": current_density = EIS_current
+    if type_current == "step":
+        current_density = step_current
+        dcurrent_densitydt = dstep_currentdt
+    elif type_current == "polarization":
+        current_density = polarization_current
+        dcurrent_densitydt = dpolarization_currentdt
+    elif type_current == "polarization_for_cali":
+        current_density = polarization_current_for_calibration
+        dcurrent_densitydt = dpolarization_current_for_calibrationdt
+    elif type_current == "EIS":
+        current_density = EIS_current
+        dcurrent_densitydt = dEIS_currentdt
     elif type_current is None: current_density = None  # No current density function is set.
     else: raise ValueError('You have to specify a type_current which is on the list.')
 
     return (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters,
-            i_EIS, ratio_EIS, f_EIS, t_EIS, current_density)
+            i_EIS, ratio_EIS, f_EIS, t_EIS, current_density, dcurrent_densitydt)
 
 
 def calculate_operating_inputs(pola_current_parameters, type_fuel_cell, voltage_zone):
@@ -211,18 +221,26 @@ def calculate_physical_parameters(type_fuel_cell):
         Active area of the catalyst layer in meters squared.
     n_cell : int
         Number of cell in the stack.
-    Vsm_a : float
-        Supply manifold volume at the anode in m³.
-    Vsm_c : float
-        Supply manifold volume at the cathode in m³.
-    Vem_a : float
-        Exhaust manifold volume at the anode in m³.
-    Vem_c : float
-        Exhaust manifold volume at the cathode in m³.
     A_T_a : float
         Exhaust anode manifold throttle area in m².
     A_T_c : float
         Exhaust cathode manifold throttle area in m².
+    Vasm : float
+        Supply manifold volume at the anode in m³.
+    Vcsm : float
+        Supply manifold volume at the cathode in m³.
+    Vaem : float
+        Exhaust manifold volume at the anode in m³.
+    Vcem : float
+        Exhaust manifold volume at the cathode in m³.
+    V_endplate_a : float
+        Anode endplate volume in m³.
+    V_endplate_c : float
+        Cathode endplate volume in m³.
+    V_man_agc : float
+        Volume connecting the anode manifold to the gas channel in m³.
+    V_man_cgc : float
+        Volume connecting the cathode manifold to the gas channel in m³.
     e : float
         Capillary exponent.
     i0_c_ref : float
@@ -267,10 +285,17 @@ def calculate_physical_parameters(type_fuel_cell):
         Wcgc = Wagc  # m. It is the width of the cathode gas channel.
         Lgc = 9.67  # m. It is the length of the gas channel.
         #   Auxiliaries
-        Vsm_a, Vsm_c = 7.0e-3, 7.0e-3  # m3. It is the supply manifold volume.
-        Vem_a, Vem_c = 2.4e-3, 2.4e-3  # m-3. It is the exhaust manifold volume.
-        A_T_a = 11.8e-4  # m². It is the exhaust anode manifold throttle area
-        A_T_c = A_T_a  # m². It is the exhaust cathode manifold throttle area
+        Lm = 25.8e-3  # m. It is the length of the manifold.
+        L_endplate = 46.8e-3  # m. It is the length of the endplate.
+        L_man_gc = 8.74e-3  # m. It is the length of the volume connecting the manifold to the gas channel.
+        A_T_a = 11.8e-4  # m². It is the inlet/exhaust anode manifold throttle area
+        A_T_c = A_T_a  # m². It is the inlet/exhaust cathode manifold throttle area
+        Vasm, Vcsm = 7000e-6, 7000e-6  # m3. It is the supply manifold volume.
+        Vaem, Vcem = 2400e-6, 2400e-6  # m-3. It is the exhaust manifold volume.
+        V_endplate_a = 33.6e-6  # m3. It is the anode endplate volume.
+        V_endplate_c = 86.6e-6  # m3. It is the cathode endplate volume.
+        V_man_agc = L_man_gc * Hagc * Wagc  # m3. It is the volume of the volume connecting the anode manifold to the gas channel.
+        V_man_cgc = L_man_gc * Hcgc * Wcgc  # m3. It is the volume of the volume connecting the cathode manifold to the gas channel.
         #   Interaction parameters between water and PEMFC structure
         e = 5.0  # It is the capillary exponent
         #   Voltage polarization
@@ -284,12 +309,14 @@ def calculate_physical_parameters(type_fuel_cell):
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
     else: # Stored setup in "stored_physical_parameters".
         (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-         Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, Re, i0_d_c_ref, i0_l_c_ref, kappa_co, kappa_c, a_slim, b_slim,
-         a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
+         Wcgc, Lgc, Lm, L_endplate, L_man_gc, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, V_endplate_a, V_endplate_c,
+         V_man_agc, V_man_cgc, Aact, n_cell, e, Re, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch,
+         C_scl) = stored_physical_parameters(type_fuel_cell)
 
     return (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, Re, i0_d_c_ref, i0_l_c_ref, kappa_co, kappa_c, a_slim,
-            b_slim, a_switch, C_scl)
+            Wcgc, Lgc, Lm, L_endplate, L_man_gc, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, V_endplate_a, V_endplate_c,
+            V_man_agc, V_man_cgc, Aact, n_cell, e, Re, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim,
+            a_switch, C_scl)
 
 
 def calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl):
@@ -352,20 +379,21 @@ def calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl):
     Hmpl_virtual = Hmpl - Htl / 2  # m. It is the effective thickness of the MPL without the transition layers.
 
     # Setting the number of model points placed inside each layer:
+    n_gc = 1  # It is the number of model points placed inside each gas channel.                                        # Ca ne fonctionne plus quand n_gc != 1. Il y a donc une erreur quelque part avec ce nombre.
     n_gdl = max(1, int(Hgdl_virtual / H_node_min / 4))  # It is the number of model points placed inside each GDL.
     n_mpl = max(1, int(Hmpl_virtual / H_node_min / 2))  # It is the number of model points placed inside each MPL.
 
     # Setting the purging parameters of the system and the dynamic display of the step current density function:
     t_purge = 0.6, 15  # (s, s). It is the time parameters for purging the system.
-    delta_t_dyn_step = 5 * 60  # (s). Time for dynamic display of the step current density function.
+    delta_t_dyn_step = 2 * 60  # (s). Time for dynamic display of the step current density function.
 
     # Setting the tolerances for the system of ODEs solver:
-    rtol = 1e-6  # Relative tolerance for the system of ODEs solver.
-    atol = 1e-10  # Absolute tolerance for the system of ODEs solver.
+    rtol = 1e-3  # Relative tolerance for the system of ODEs solver.
+    atol = 1e-6  # Absolute tolerance for the system of ODEs solver.
 
     # Update the step current parameters.
     step_current_parameters['delta_t_dyn_step'] = delta_t_dyn_step
-    return n_gdl, n_mpl, n_tl, t_purge, rtol, atol
+    return n_gc, n_gdl, n_mpl, n_tl, t_purge, rtol, atol
 
 # ____________________________________________Unchanged Physical parameters_____________________________________________
 """ These parameters remain unchanged no matter the setting configurations."""
@@ -406,7 +434,7 @@ epsilon_p = 0.11 #. It is the percolation threshold porosity of the GDL.
 alpha_p = 0.785 #. It is a fitted value for the effective matter transfer in the GDL, for through plane direction.
 Kshape = 2  # . Mathematical factor governing lambda_eq smoothing.
 K_transition = 20  # It is a constant that defines the sharpness of the transition between two states.
-                    # The higher it is, the sharper the transition is.
+                   # The higher it is, the sharper the transition is.
 
 # Model parameters for the voltage calculation
 C_O2ref = 3.39  # mol.m-3. It is the reference concentration of oxygen.
@@ -441,10 +469,9 @@ delta_s_ORR = -163.3  # J.mol-1.K-1. It is the ORR molar reaction entropy [vette
 # Model parameters for the balance of plant
 tau_cp = 1  # s. It is the air compressor time constant.
 tau_hum = 5  # s. It is the humidifier time constant.
-Kp = 5e-8  # m².s-1.Pa-1. It is the proportional constant of the PD controller at the back pressure valve.
-Kd = 1e-8  # m².Pa-1. It is the derivative constant of the PD controller at the back pressure valve.
-C_D = 5e-2  # . It is the throttle discharge coefficient.
-Ksm_in = 1.0e-5  # kg.s-1.Pa-1. It is the supply manifold inlet orifice constant.
-Ksm_out = 8.0e-6  # kg.s-1.Pa-1. It is the supply manifold outlet orifice constant.
-Kem_in = Ksm_out  # kg.s-1.Pa-1. It is the exhaust manifold inlet orifice constant.
-Kem_out = Ksm_in  # kg.s-1.Pa-1. It is the exhaust manifold outlet orifice constant.
+Kp_acp = 1.6e5  # Pa.mol-1. Proportional constant of the PD anode controller.                                                   # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Kd_acp = 1.9e6  # Pa.s.mol-1. Derivative constant of the PD anode controller.                                                   # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Kp_ccp = 1.6e5  # Pa.mol-1. Proportional constant of the PD cathode controller.                                                   # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Kd_ccp = 1.9e6  # Pa.s.mol-1. Derivative constant of the PD cathode controller.                                                   # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Kp_T = 5e-8  # m².s-1.Pa-1. It is the proportional constant of the PD controller at the back pressure valve.
+Kd_T = 1e-8  # m².Pa-1. It is the derivative constant of the PD controller at the back pressure valve.

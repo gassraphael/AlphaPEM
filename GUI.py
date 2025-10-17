@@ -102,7 +102,7 @@ def main_frame(root, canvas):
 
     # Import the current density parameters from the settings file for default value
     (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
-     current_density) = calculate_current_density_parameters()
+     current_density, dcurrent_densitydt) = calculate_current_density_parameters()
     f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = f_EIS
 
 
@@ -125,12 +125,17 @@ def main_frame(root, canvas):
          'GC cumulated length - Lgc (m)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 3},
          'Active area - Aact (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 5},
          'Number of cells - n_cell': {'value': tk.IntVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 1},
-         'Supply anode manifold volume - Vsm_a (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 3},
-         'Supply cathode manifold volume - Vsm_c (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 5},
-         'Exhaust anode manifold volume - Vem_a (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 1},
-         'Exhaust cathode manifold volume - Vem_c (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 3},
-         'Exhaust anode manifold throttle area - A_T_a (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 5},
-         'Exhaust cathode manifold throttle area - A_T_c (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 5, 'label_column': 1}}
+         'Exhaust anode manifold throttle area - A_T_a (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 3},
+         'Exhaust cathode manifold throttle area - A_T_c (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 5},
+         'Supply anode manifold volume - Vasm (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 1},
+         'Supply cathode manifold volume - Vcsm (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 3},
+         'Exhaust anode manifold volume - Vaem (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 5},
+         'Exhaust cathode manifold volume - Vcem (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 5, 'label_column': 1},
+         'Anode endplate volume - V_endplate_a (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 5, 'label_column': 3},
+         'Cathode endplate volume - V_endplate_c (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 5, 'label_column': 5},
+         'Volume connecting the manifold and the AGC - V_man_agc (mm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 6, 'label_column': 1},
+         'Volume connecting the manifold and the CGC  - V_man_cgc (mm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 6, 'label_column': 3}}
+
 
     choice_undetermined_parameters = \
         {'GDL thickness - Hgdl (µm)\n(without the transition layer)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 1},
@@ -374,11 +379,11 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
     # Retrieves parameter values for predefined stacks and keeps them in their standard unit, or converts user-selected
     # quantities into standard units.
     (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, n_cell, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc,
-     Hcgc, Wagc, Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc,
-     epsilon_c, e, Re, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl,
-     step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
-     t_purge, delta_t_purge, n_gdl, n_mpl, n_tl, rtol, atol, type_fuel_cell, voltage_zone, type_auxiliary, type_control,
-     type_purge, type_display, type_plot) = \
+     Hcgc, Wagc, Wcgc, Lgc, Lm, L_endplate, L_man_gc, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, V_endplate_a, V_endplate_c,
+     V_man_agc, V_man_cgc, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, Re, i0_d_c_ref, i0_h_c_ref,
+     kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, step_current_parameters, pola_current_parameters,
+     pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, n_gdl, n_mpl, n_tl, rtol,
+     atol, type_fuel_cell, voltage_zone, type_auxiliary, type_control, type_purge, type_display, type_plot) = \
         recover_for_use_operating_inputs_and_physical_parameters(choice_operating_conditions,
                                                                  choice_accessible_parameters,
                                                                  choice_undetermined_parameters,
@@ -392,8 +397,9 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
                           'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
                           'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
     accessible_physical_parameters = {'Aact': Aact, 'n_cell': n_cell, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc,
-                                      'Wcgc': Wcgc, 'Lgc': Lgc, 'Vsm_a': Vsm_a, 'Vsm_c': Vsm_c, 'Vem_a': Vem_a,
-                                      'Vem_c': Vem_c, 'A_T_a': A_T_a, 'A_T_c': A_T_c}
+                                      'Wcgc': Wcgc, 'Lgc': Lgc, 'A_T_a': A_T_a, 'A_T_c': A_T_c, 'Vasm': Vasm,
+                                      'Vcsm': Vcsm, 'Vaem': Vaem, 'Vcem': Vcem, 'V_endplate_a': V_endplate_a,
+                                      'V_endplate_c': V_endplate_c, 'V_man_agc': V_man_agc, 'V_man_cgc': V_man_cgc}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
                                         'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl,
                                         'epsilon_mpl': epsilon_mpl, 'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c,

@@ -352,13 +352,14 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
         voltage_zone = "before_voltage_drop"
 
     (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
-     current_density) = calculate_current_density_parameters()
+     current_density, dcurrent_densitydt) = calculate_current_density_parameters()
 
     T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola = stored_operating_inputs(type_fuel_cell, voltage_zone)
 
     (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
-     Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, Re, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c,
-     a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
+     Lgc, Lm, L_endplate, L_man_gc, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, V_endplate_a, V_endplate_c, V_man_agc,
+     V_man_cgc, Aact, n_cell, e, Re, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) \
+        = stored_physical_parameters(type_fuel_cell)
 
     n_gdl, n_mpl, n_tl, t_purge, rtol, atol = \
         calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl)
@@ -380,12 +381,19 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_accessible_parameters['AGC width - Wagc (µm)']['value'].set(round(Wagc * 1e6, 4))  # µm
     choice_accessible_parameters['CGC width - Wcgc (µm)']['value'].set(round(Wcgc * 1e6, 4))  # µm
     choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].set(round(Lgc, 4))  # µm
-    choice_accessible_parameters['Supply anode manifold volume - Vsm_a (cm³)']['value'].set(round(Vsm_a * 1e6, 4))  # dm³
-    choice_accessible_parameters['Supply cathode manifold volume - Vsm_c (cm³)']['value'].set(round(Vsm_c * 1e6, 4))  # dm³
-    choice_accessible_parameters['Exhaust anode manifold volume - Vem_a (cm³)']['value'].set(round(Vem_a * 1e6, 4))  # dm³
-    choice_accessible_parameters['Exhaust cathode manifold volume - Vem_c (cm³)']['value'].set(round(Vem_c * 1e6, 4))  # dm³
+    choice_accessible_parameters['Manifold length - Lm (mm)']['value'].set(round(Lm * 1e3, 4))  # mm
+    choice_accessible_parameters['Endplate length - L_endplate (mm)']['value'].set(round(L_endplate * 1e3, 4))  # mm
+    choice_accessible_parameters['Manifold-GC connection length - L_man_gc (mm)']['value'].set(round(L_man_gc * 1e3, 4))  # mm
     choice_accessible_parameters['Exhaust anode manifold throttle area - A_T_a (cm²)']['value'].set(round(A_T_a * 1e4, 4))  # cm²
     choice_accessible_parameters['Exhaust cathode manifold throttle area - A_T_c (cm²)']['value'].set(round(A_T_c * 1e4, 4))  # cm²
+    choice_accessible_parameters['Supply anode manifold volume - Vasm (cm³)']['value'].set(round(Vasm * 1e6, 4))  # cm³
+    choice_accessible_parameters['Supply cathode manifold volume - Vcsm (cm³)']['value'].set(round(Vcsm * 1e6, 4))  # cm³
+    choice_accessible_parameters['Exhaust anode manifold volume - Vaem (cm³)']['value'].set(round(Vaem * 1e6, 4))  # cm³
+    choice_accessible_parameters['Exhaust cathode manifold volume - Vcem (cm³)']['value'].set(round(Vcem * 1e6, 4))  # cm³
+    choice_accessible_parameters['Anode endplate volume - V_endplate_a (cm³)']['value'].set(round(V_endplate_a * 1e6, 4))  # cm³
+    choice_accessible_parameters['Cathode endplate volume - V_endplate_c (cm³)']['value'].set(round(V_endplate_c * 1e6, 4))  # cm³
+    choice_accessible_parameters['Volume connecting the manifold and the AGC - V_man_agc (mm³)']['value'].set(round(V_man_agc * 1e9, 4))  # mm³
+    choice_accessible_parameters['Volume connecting the manifold and the CGC - V_man_cgc (mm³)']['value'].set(round(V_man_cgc * 1e9, 4)) # mm³
     # undetermined physical parameters recovery
     choice_undetermined_parameters['GDL thickness - Hgdl (µm)\n(without the transition layer)']['value'].set(round(Hgdl * 1e6, 4))  # µm
     choice_undetermined_parameters['MPL thickness - Hmpl (µm)\n(without the transition layer)\n(without the transition layer)']['value'].set(round(Hmpl * 1e6, 4))  # µm
@@ -456,12 +464,19 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     Wagc = choice_accessible_parameters['AGC width - Wagc (µm)']['value'].get() * 1e-6  # m
     Wcgc = choice_accessible_parameters['CGC width - Wcgc (µm)']['value'].get() * 1e-6  # m
     Lgc = choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].get()  # m
-    Vsm_a = choice_accessible_parameters['Supply anode manifold volume - Vsm_a (cm³)']['value'].get() * 1e-6  # m³
-    Vsm_c = choice_accessible_parameters['Supply cathode manifold volume - Vsm_c (cm³)']['value'].get() * 1e-6  # m³
-    Vem_a = choice_accessible_parameters['Exhaust anode manifold volume - Vem_a (cm³)']['value'].get() * 1e-6 # m³
-    Vem_c = choice_accessible_parameters['Exhaust cathode manifold volume - Vem_c (cm³)']['value'].get() * 1e-6  # m³
+    Lm = choice_accessible_parameters['Manifold length - Lm (mm)']['value'].get() * 1e-3  # m
+    L_endplate = choice_accessible_parameters['Endplate length - L_endplate (mm)']['value'].get() * 1e-3  # m
+    L_man_gc = choice_accessible_parameters['Manifold-GC connection length - L_man_gc (mm)']['value'].get() * 1e-3  # m
     A_T_a = choice_accessible_parameters['Exhaust anode manifold throttle area - A_T_a (cm²)']['value'].get() * 1e-4  # m²
     A_T_c = choice_accessible_parameters['Exhaust cathode manifold throttle area - A_T_c (cm²)']['value'].get() * 1e-4  # m²
+    Vasm = choice_accessible_parameters['Supply anode manifold volume - Vasm (cm³)']['value'].get() * 1e-6  # m³
+    Vcsm = choice_accessible_parameters['Supply cathode manifold volume - Vcsm (cm³)']['value'].get() * 1e-6  # m³
+    Vaem = choice_accessible_parameters['Exhaust anode manifold volume - Vaem (cm³)']['value'].get() * 1e-6 # m³
+    Vcem = choice_accessible_parameters['Exhaust cathode manifold volume - Vcem (cm³)']['value'].get() * 1e-6  # m³
+    V_endplate_a = choice_accessible_parameters['Anode endplate volume - V_endplate_c (cm³)']['value'].get() * 1e-6  # m³
+    V_endplate_c = choice_accessible_parameters['Cathode endplate volume - V_endplate_c (cm³)']['value'].get() * 1e-6  # m³
+    V_man_agc = choice_accessible_parameters['Volume connecting the manifold and the AGC (mm³)']['value'].get() * 1e-9  # m³
+    V_man_cgc = choice_accessible_parameters['Volume connecting the manifold and the CGC (mm³)']['value'].get() * 1e-9  # m³
     # undetermined physical parameters
     Hgdl = choice_undetermined_parameters['GDL thickness - Hgdl (µm)\n(without the transition layer)']['value'].get() * 1e-6  # m
     Hmpl = choice_undetermined_parameters['MPL thickness - Hmpl (µm)\n(without the transition layer)']['value'].get() * 1e-6  # m
@@ -565,10 +580,11 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
         type_plot = "dynamic"
 
     return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, n_cell, Hgdl, Hmpl, Hacl, Hccl, Hmem,
-            Hagc, Hcgc, Wagc, Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, epsilon_gdl, epsilon_cl, epsilon_mpl,
-            epsilon_mc, epsilon_c, e, Re, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl,
-            step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS,
-            t_EIS, t_purge, delta_t_purge, n_gdl, n_mpl, n_tl, rtol, atol, type_fuel_cell, voltage_zone, type_auxiliary, type_control,
+            Hagc, Hcgc, Wagc, Wcgc, Lgc, Lm, L_endplate, L_man_gc, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, V_endplate_a,
+            V_endplate_c, V_man_agc, V_man_cgc, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, Re,
+            i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, step_current_parameters,
+            pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge,
+            delta_t_purge, n_gdl, n_mpl, n_tl, rtol, atol, type_fuel_cell, voltage_zone, type_auxiliary, type_control,
             type_purge, type_display, type_plot)
 
 
@@ -636,12 +652,16 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
         messagebox.showerror(title='Number of cells', message='Negative number of cells is impossible.')
         choices.clear()
         return
-    if choice_accessible_parameters['Supply anode manifold volume - Vsm_a (cm³)']['value'].get() < 0 or \
-            choice_accessible_parameters['Supply cathode manifold volume - Vsm_c (cm³)']['value'].get() < 0 or \
-            choice_accessible_parameters['Exhaust anode manifold volume - Vem_a (cm³)']['value'].get() < 0 or \
-            choice_accessible_parameters['Exhaust cathode manifold volume - Vem_c (cm³)']['value'].get() < 0 or \
-            choice_accessible_parameters['Exhaust anode manifold throttle area - A_T_a (cm²)']['value'].get() < 0 or \
-            choice_accessible_parameters['Exhaust cathode manifold throttle area - A_T_c (cm²)']['value'].get() < 0:
+    if choice_accessible_parameters['Exhaust anode manifold throttle area - A_T_a (cm²)']['value'].get() < 0 or \
+            choice_accessible_parameters['Exhaust cathode manifold throttle area - A_T_c (cm²)']['value'].get() < 0 or \
+            choice_accessible_parameters['Supply anode manifold volume - Vasm (cm³)']['value'].get() < 0 or \
+            choice_accessible_parameters['Supply cathode manifold volume - Vcsm (cm³)']['value'].get() < 0 or \
+            choice_accessible_parameters['Exhaust anode manifold volume - Vaem (cm³)']['value'].get() < 0 or \
+            choice_accessible_parameters['Exhaust cathode manifold volume - Vcem (cm³)']['value'].get() < 0 or \
+            choice_accessible_parameters['Anode endplate volume - V_endplate_a (cm³)']['value'].get() < 0 or \
+            choice_accessible_parameters['Cathode endplate volume - V_endplate_c (cm³)']['value'].get() < 0 or \
+            choice_accessible_parameters['Volume connecting the manifold and the AGC (mm³)']['value'].get() < 0 or \
+            choice_accessible_parameters['Volume connecting the manifold and the CGC (mm³)']['value'].get() < 0:
         messagebox.showerror(title='Manifold parameters', message='Negative volumes or area are impossible.')
         choices.clear()
         return
@@ -654,7 +674,10 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
             choice_accessible_parameters['CGC width - Wcgc (µm)']['value'].get() < 10 or \
             choice_accessible_parameters['CGC width - Wcgc (µm)']['value'].get() > 10000 or \
             choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].get() < 0 or \
-            choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].get() > 100:
+            choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].get() > 100 or \
+            choice_accessible_parameters['Manifold length - Lm (mm)']['value'].get() < 0 or \
+            choice_accessible_parameters['Endplate length - L_endplate (mm)']['value'].get() <0 or \
+            choice_accessible_parameters['Manifold-GC connection length - L_man_gc (mm)']['value'].get() < 0:
         messagebox.showerror(title='GC distances', message='GC generally have a thickness and a width between 10µm and '
                                                            '10mm. Also, GC length is generally between 0 and 100m')
         choices.clear()
@@ -943,14 +966,36 @@ def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, acces
                 Number of cells in the stack (accessible physical parameter).
             - Hagc : float
                 Thickness of the anode gas channel in m (accessible physical parameter).
-            Hcgc : float
+            - Hcgc : float
                 Thickness of the cathode gas channel in m (accessible physical parameter).
-            Wagc : float
+            - Wagc : float
                 Width of the anode gas channel in m (accessible physical parameter).
-            Wcgc : float
+            - Wcgc : float
                 Width of the cathode gas channel in m (accessible physical parameter).
-            Lgc : float
+            - Lgc : float
                 Length of the gas channel in m (accessible physical parameter).
+            - Lm : float
+                Length of the manifold in m (accessible physical parameter).
+            - L_endplate : float
+                Length of the endplate in m (accessible physical parameter).
+            - L_man_gc : float
+                Length connecting the manifold and the gas channel in m (accessible physical parameter).
+            - A_T_a : float
+                Exhaust anode manifold throttle area in m² (accessible physical parameter).
+            - A_T_c : float
+                Exhaust cathode manifold throttle area in m² (accessible physical parameter).
+            - Vasm : float
+                Supply anode manifold volume in m³ (accessible physical parameter).
+            - Vcsm : float
+                Supply cathode manifold volume in m³ (accessible physical parameter).
+            - Vaem : float
+                Exhaust anode manifold volume in m³ (accessible physical parameter).
+            - Vcem : float
+                Exhaust cathode manifold volume in m³ (accessible physical parameter).
+            - V_endplate_a : float
+                Anode endplate volume in m³ (accessible physical parameter).
+            - V_endplate_c : float
+                Cathode endplate volume in m³ (accessible physical parameter).
     undetermined_physical_parameters : dict
         Dictionary containing the undetermined physical parameters for the simulation. It contains:
             - Hgdl : float
@@ -1166,14 +1211,36 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
                 Number of cells in the stack (accessible physical parameter).
             - Hagc : float
                 Thickness of the anode gas channel in m (accessible physical parameter).
-            Hcgc : float
+            - Hcgc : float
                 Thickness of the cathode gas channel in m (accessible physical parameter).
-            Wagc : float
+            - Wagc : float
                 Width of the anode gas channel in m (accessible physical parameter).
-            Wcgc : float
+            - Wcgc : float
                 Width of the cathode gas channel in m (accessible physical parameter).
-            Lgc : float
+            - Lgc : float
                 Length of the gas channel in m (accessible physical parameter).
+            - Lm : float
+                Length of the manifold in m (accessible physical parameter).
+            - L_endplate : float
+                Length of the endplate in m (accessible physical parameter).
+            - L_man_gc : float
+                Length connecting the manifold and the gas channel in m (accessible physical parameter).
+            - A_T_a : float
+                Exhaust anode manifold throttle area in m² (accessible physical parameter).
+            - A_T_c : float
+                Exhaust cathode manifold throttle area in m² (accessible physical parameter).
+            - Vasm : float
+                Supply anode manifold volume in m³ (accessible physical parameter).
+            - Vcsm : float
+                Supply cathode manifold volume in m³ (accessible physical parameter).
+            - Vaem : float
+                Exhaust anode manifold volume in m³ (accessible physical parameter).
+            - Vcem : float
+                Exhaust cathode manifold volume in m³ (accessible physical parameter).
+            - V_endplate_a : float
+                Anode endplate volume in m³ (accessible physical parameter).
+            - V_endplate_c : float
+                Cathode endplate volume in m³ (accessible physical parameter).
     undetermined_physical_parameters : dict
         Dictionary containing the undetermined physical parameters for the simulation. It contains:
             - Hgdl : float
@@ -1388,14 +1455,36 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
                 Number of cells in the stack (accessible physical parameter).
             - Hagc : float
                 Thickness of the anode gas channel in m (accessible physical parameter).
-            Hcgc : float
+            - Hcgc : float
                 Thickness of the cathode gas channel in m (accessible physical parameter).
-            Wagc : float
+            - Wagc : float
                 Width of the anode gas channel in m (accessible physical parameter).
-            Wcgc : float
+            - Wcgc : float
                 Width of the cathode gas channel in m (accessible physical parameter).
-            Lgc : float
+            - Lgc : float
                 Length of the gas channel in m (accessible physical parameter).
+            - Lm : float
+                Length of the manifold in m (accessible physical parameter).
+            - L_endplate : float
+                Length of the endplate in m (accessible physical parameter).
+            - L_man_gc : float
+                Length connecting the manifold and the gas channel in m (accessible physical parameter).
+            - A_T_a : float
+                Exhaust anode manifold throttle area in m² (accessible physical parameter).
+            - A_T_c : float
+                Exhaust cathode manifold throttle area in m² (accessible physical parameter).
+            - Vasm : float
+                Supply anode manifold volume in m³ (accessible physical parameter).
+            - Vcsm : float
+                Supply cathode manifold volume in m³ (accessible physical parameter).
+            - Vaem : float
+                Exhaust anode manifold volume in m³ (accessible physical parameter).
+            - Vcem : float
+                Exhaust cathode manifold volume in m³ (accessible physical parameter).
+            - V_endplate_a : float
+                Anode endplate volume in m³ (accessible physical parameter).
+            - V_endplate_c : float
+                Cathode endplate volume in m³ (accessible physical parameter).
     undetermined_physical_parameters : dict
         Dictionary containing the undetermined physical parameters for the simulation. It contains:
             - Hgdl : float

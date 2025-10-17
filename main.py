@@ -30,18 +30,18 @@ def main():
     # This parameter includes the fuel cell used in the model and the corresponding operating conditions.
     # - GenStack is a fuel cell developed in open source by ZSW (https://zenodo.org/records/14223364).
     # - EH-31 is a fuel cell developed by EH GROUP. 1.5, 2.0, 2.25 and 2.5 corresponds to the different pressure options.
-    type_fuel_cell_1 = "EH-31_2.25"
+    type_fuel_cell_1 = "EH-31_2.0"
     type_fuel_cell_2 = None
     type_fuel_cell_3 = None
     type_fuel_cell_4 = None
     # Current density possibilities: "step", "polarization", "polarization_for_cali", "EIS".
-    type_current = "polarization"
+    type_current = "step"
     # Calibration zone : "before_voltage_drop", "full".
     # (only for "polarization" and "polarization_for_cali" currend densities
     voltage_zone = "before_voltage_drop"
     # Auxiliary system possibilities: "forced-convective_cathode_with_anodic_recirculation",
     #                                 "forced-convective_cathode_with_flow-through_anode", "no_auxiliary".
-    type_auxiliary = "forced-convective_cathode_with_flow-through_anode"
+    type_auxiliary = "no_auxiliary"
     # Control strategy for the operating inputs: "Phi_des", "no_control".
     type_control_1 = "no_control"
     type_control_2 = "no_control"
@@ -64,7 +64,7 @@ def main():
     # Retrieving parameters from the settings.py file
     #   Imposed inputs
     (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
-     current_density) = calculate_current_density_parameters(type_current)
+     current_density, dcurrent_densitydt) = calculate_current_density_parameters(type_current)
     #   Operating conditions
     T_des_1, Pa_des_1, Pc_des_1, Sa_1, Sc_1, Phi_a_des_1, Phi_c_des_1, y_H2_in_1, pola_current_parameters_1 = \
         calculate_operating_inputs(copy.deepcopy(pola_current_parameters), type_fuel_cell_1, voltage_zone)
@@ -76,14 +76,16 @@ def main():
         calculate_operating_inputs(copy.deepcopy(pola_current_parameters), type_fuel_cell_4, voltage_zone)
     #   Physical parameters
     (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
-     Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, Re, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c,
-     a_slim, b_slim, a_switch, C_scl) = calculate_physical_parameters(type_fuel_cell_1)
+     Lgc, Lm, L_endplate, L_man_gc, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, V_endplate_a, V_endplate_c, V_man_agc,
+     V_man_cgc, Aact, n_cell, e, Re, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) \
+        = calculate_physical_parameters(type_fuel_cell_1)
     #   Computing parameters
-    n_gdl, n_mpl, n_tl, t_purge, rtol, atol = \
+    n_gc, n_gdl, n_mpl, n_tl, t_purge, rtol, atol = \
         calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl)
 
     # Initialize the operating inputs and parameters dictionaries.
-    operating_inputs = {'current_density': current_density, 'T_des': [None, T_des_1, T_des_2, T_des_3, T_des_4],
+    operating_inputs = {'current_density': current_density, 'dcurrent_density / dt' :dcurrent_densitydt,
+                        'T_des': [None, T_des_1, T_des_2, T_des_3, T_des_4],
                         'Pa_des': [None, Pa_des_1, Pa_des_2, Pa_des_3, Pa_des_4],
                         'Pc_des': [None, Pc_des_1, Pc_des_2, Pc_des_3, Pc_des_4],
                         'Sa': [None, Sa_1, Sa_2, Sa_3, Sa_4],
@@ -97,15 +99,18 @@ def main():
                           'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
                           'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
     accessible_physical_parameters = {'Aact': Aact, 'n_cell': n_cell, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc,
-                                      'Wcgc': Wcgc, 'Lgc': Lgc, 'Vsm_a': Vsm_a, 'Vsm_c': Vsm_c, 'Vem_a': Vem_a,
-                                      'Vem_c': Vem_c, 'A_T_a': A_T_a, 'A_T_c': A_T_c}
+                                      'Wcgc': Wcgc, 'Lgc': Lgc, 'Lm': Lm, 'L_endplate': L_endplate,
+                                      'L_man_gc': L_man_gc, 'A_T_a': A_T_a, 'A_T_c': A_T_c, 'Vasm': Vasm, 'Vcsm': Vcsm,
+                                      'Vaem': Vaem, 'Vcem': Vcem, 'V_endplate_a': V_endplate_a,
+                                      'V_endplate_c': V_endplate_c, 'V_man_agc': V_man_agc, 'V_man_cgc': V_man_cgc}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl,
                                         'Hccl': Hccl, 'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl,
                                         'epsilon_mpl': epsilon_mpl, 'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c,
                                         'e': e, 'Re': Re, 'i0_d_c_ref': i0_d_c_ref, 'i0_h_c_ref': i0_h_c_ref,
                                         'kappa_co': kappa_co, 'kappa_c': kappa_c, 'a_slim': a_slim, 'b_slim': b_slim,
                                         'a_switch': a_switch, 'C_scl': C_scl}
-    computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 'n_tl': n_tl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
+    computing_parameters = {'n_gc': n_gc, 'n_gdl': n_gdl, 'n_mpl': n_mpl, 'n_tl': n_tl, 't_purge': t_purge,
+                            'rtol': rtol, 'atol': atol,
                             'type_fuel_cell': [None, type_fuel_cell_1, type_fuel_cell_2, type_fuel_cell_3,
                                                type_fuel_cell_4],
                             'type_current': type_current, 'voltage_zone': voltage_zone,

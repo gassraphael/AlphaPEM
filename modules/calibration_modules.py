@@ -7,6 +7,8 @@
 
 # Importing the necessary libraries
 import os
+from multiprocessing.managers import Value
+
 from colorama import Fore, Style
 import math
 import numpy as np
@@ -337,10 +339,17 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         Wagc = 4.3e-4  # m. It is the width of the anode gas channel.
         Wcgc = 5.32e-4  # m. It is the width of the cathode gas channel.
         Lgc = 23.31  # m. It is the length of the gas channel.
-        A_T_a = 9.01e-4  # m². It is the exhaust anode manifold throttle area
-        A_T_c = 22.61e-4  # m². It is the exhaust cathode manifold throttle area
-        Vsm_a, Vsm_c = 56.8e-6, 145e-6  # m3. It is the supply manifold volume.
-        Vem_a, Vem_c = Vsm_a, Vsm_c  # m-3. It is the exhaust manifold volume.
+        Lm = 25.8e-3  # m. It is the length of the manifold.
+        L_endplate = 46.8e-3  # m. It is the length of the endplate.
+        L_man_gc = 8.74e-3  # m. It is the length of the volume connecting the manifold to the gas channel.
+        A_T_a = 9.01e-4  # m². It is the inlet/exhaust anode manifold throttle area
+        A_T_c = 22.61e-4  # m². It is the inlet/exhaust cathode manifold throttle area
+        Vasm, Vcsm = Lm * A_T_a, Lm * A_T_c  # m3. It is the supply manifold volume.
+        Vaem, Vcem = Vasm, Vcsm  # m-3. It is the exhaust manifold volume.
+        V_endplate_a = L_man_gc * A_T_a  # m3. It is the anode endplate volume.
+        V_endplate_c = L_man_gc * A_T_c  # m3. It is the cathode endplate volume.
+        V_man_agc = L_man_gc * Hagc * Wagc  # m3. It is the volume of the volume connecting the anode manifold to the gas channel.
+        V_man_cgc = L_man_gc * Hcgc * Wcgc  # m3. It is the volume of the volume connecting the cathode manifold to the gas channel.
         #       Fuel cell undetermined physical parameters.
         Hgdl = 1.27e-4  # m. It is the thickness of the gas diffusion layer.
         Hmpl = 7e-5  # m. It is the thickness of the microporous layer.
@@ -411,10 +420,17 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         epsilon_mpl = 0.4  # It is the porosity of the microporous layer.
         Hagc = 500e-6  # m. It is the thickness of the anode gas channel.
         Hcgc = Hagc  # m. It is the thickness of the cathode gas channel.
-        Vsm_a, Vsm_c = 7.0e-3, 7.0e-3  # m3. It is the supply manifold volume.
-        Vem_a, Vem_c = 2.4e-3, 2.4e-3  # m-3. It is the exhaust manifold volume.
-        A_T_a = 11.8e-4  # m². It is the exhaust anode manifold throttle area
-        A_T_c = A_T_a  # m². It is the exhaust cathode manifold throttle area
+        Lm = 2.03e-3  # m. It is the length of the manifold.
+        L_endplate = 46.8e-3  # m. It is the length of the endplate.
+        L_man_gc = 8.74e-3  # m. It is the length of the volume connecting the manifold to the gas channel.
+        A_T_a = 11.8e-4  # m². It is the inlet/exhaust anode manifold throttle area
+        A_T_c = 34.4e-4  # m². It is the inlet/exhaust cathode manifold throttle area
+        Vasm, Vcsm = Lm * A_T_a, Lm * A_T_c  # m3. It is the supply manifold volume.
+        Vaem, Vcem = Vasm, Vcsm  # m-3. It is the exhaust manifold volume.
+        V_endplate_a = L_man_gc * A_T_a  # m3. It is the anode endplate volume.
+        V_endplate_c = L_man_gc * A_T_c  # m3. It is the cathode endplate volume.
+        V_man_agc = L_man_gc * Hagc * Wagc  # m3. It is the volume of the volume connecting the anode manifold to the gas channel.
+        V_man_cgc = L_man_gc * Hcgc * Wcgc  # m3. It is the volume of the volume connecting the cathode manifold to the gas channel.
 
         # Estimated undetermined parameters for the initialisation
         #   Gas diffusion layer
@@ -456,8 +472,11 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
                           'pola_current_parameters': pola_current_parameters,
                           'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
                           'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
-    accessible_physical_parameters = {'Aact': Aact, 'n_cell': n_cell, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc, 'Wcgc': Wcgc, 'Lgc': Lgc,
-                                      'Vsm_a': Vsm_a, 'Vsm_c': Vsm_c, 'Vem_a': Vem_a, 'Vem_c': Vem_c, 'A_T_a': A_T_a, 'A_T_c': A_T_c}
+    accessible_physical_parameters = {'Aact': Aact, 'n_cell': n_cell, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc,
+                                      'Wcgc': Wcgc, 'Lgc': Lgc, 'Lm': Lm, 'L_endplate': L_endplate,
+                                      'L_man_gc': L_man_gc, 'A_T_a': A_T_a, 'A_T_c': A_T_c, 'Vasm': Vasm, 'Vcsm': Vcsm,
+                                      'Vaem': Vaem, 'Vcem': Vcem, 'V_endplate_a': V_endplate_a,
+                                      'V_endplate_c': V_endplate_c, 'V_man_agc': V_man_agc, 'V_man_cgc': V_man_cgc}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
                                         'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl, 'epsilon_mpl': epsilon_mpl,
                                         'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c, 'e': e, 'Re': Re,

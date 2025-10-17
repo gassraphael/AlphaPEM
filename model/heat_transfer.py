@@ -14,7 +14,7 @@ from modules.heat_modules import heat_transfer_int_values
 
 # ____________________________________________________Heat transfers____________________________________________________
 
-def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl, Sl_atl, Sl_ampl, Sl_acl, Sl_ccl,
+def calculate_heat_transfers(sv, i_fc, operating_inputs, parameters, S_abs_acl, S_abs_ccl, Sl_agdl, Sl_atl, Sl_ampl, Sl_acl, Sl_ccl,
                              Sl_cmpl, Sl_ctl, Sl_cgdl, **kwargs):
     """This function calculates the heat transfers occurring inside the fuel cell system.
 
@@ -57,11 +57,12 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl
     # ___________________________________________________Preliminaries__________________________________________________
 
     # Extraction of the variables
-    T_agc, T_acl, T_mem, T_ccl, T_cgc = sv['T_agc'], sv['T_acl'], sv['T_mem'], sv['T_ccl'], sv['T_cgc']
+    T_acl, T_mem, T_ccl = sv['T_acl'], sv['T_mem'], sv['T_ccl']
     lambda_acl, lambda_mem, lambda_ccl = sv['lambda_acl'], sv['lambda_mem'], sv['lambda_ccl']
     s_acl, s_ccl, eta_c = sv['s_acl'], sv['s_ccl'], sv['eta_c']
 
     # Extraction of the operating inputs and parameters
+    T_des = operating_inputs['T_des']
     epsilon_mc, epsilon_gdl, epsilon_cl = parameters['epsilon_mc'], parameters['epsilon_gdl'], parameters['epsilon_cl']
     epsilon_mpl, epsilon_c = parameters['epsilon_mpl'], parameters['epsilon_c']
     n_gdl, n_mpl = parameters['n_gdl'], parameters['n_mpl']
@@ -78,7 +79,9 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl
     # ______________________________________________Heat flows (J.m-2.s-1)______________________________________________
 
     # Anode side
-    Jt_agc_agdl = - 2 * k_th_eff_agc_agdl * (sv['T_agdl_1'] - T_agc) / (Hgdl / n_gdl)
+    T_agc_mean = T_des
+    T_cgc_mean = T_des
+    Jt_agc_agdl = - 2 * k_th_eff_agc_agdl * (sv['T_agdl_1'] - T_agc_mean) / (Hgdl / n_gdl)
     Jt_agdl_agdl = {f'agdl_agdl_{i}': -k_th_eff_agdl_agdl[i] * (sv[f'T_agdl_{i+1}'] - sv[f'T_agdl_{i}']) / (Hgdl/n_gdl)
                     for i in range(1, n_gdl)}
 
@@ -105,7 +108,7 @@ def calculate_heat_transfers(sv, i_fc, parameters, S_abs_acl, S_abs_ccl, Sl_agdl
     Jt_cgdl_cgdl = {f'cgdl_cgdl_{i}': -k_th_eff_cgdl_cgdl[i] * (sv[f'T_cgdl_{i+1}'] - sv[f'T_cgdl_{i}']) / (Hgdl/n_gdl)
                     for i in range(1, n_gdl)}
 
-    Jt_cgdl_cgc = - 2 * k_th_eff_cgdl_cgc * (T_cgc - sv[f'T_cgdl_{n_gdl}']) / (Hgdl / n_gdl)
+    Jt_cgdl_cgc = - 2 * k_th_eff_cgdl_cgc * (T_cgc_mean - sv[f'T_cgdl_{n_gdl}']) / (Hgdl / n_gdl)
 
     Jt = {'agc_agdl': Jt_agc_agdl, **Jt_agdl_agdl, 'agdl_atl': Jt_agdl_atl, **Jt_atl_atl, 'atl_ampl': Jt_atl_ampl,
           **Jt_ampl_ampl, 'ampl_acl': Jt_ampl_acl, 'acl_mem': Jt_acl_mem, 'mem_ccl': Jt_mem_ccl, 'ccl_cmpl': Jt_ccl_cmpl,

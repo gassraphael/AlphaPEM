@@ -7,12 +7,12 @@
 
 # Importing constants' value and functions
 from configuration.settings import R, F
-from modules.transitory_functions import average, hmean, Dcap, Da_eff, Dc_eff, h_a, h_c, D
+from modules.transitory_functions import hmean, average, interpolate, Dcap, Da_eff, Dc_eff, h_a, h_c, D
 
 
 # _____________________________________________________Flow modules_____________________________________________________
 
-def flows_int_values(sv, i_fc, parameters):
+def flows_int_values(sv, i_fc, operating_inputs, parameters):
     """This functions calculates intermediate values for the flows calculation.
 
     Parameters
@@ -36,20 +36,20 @@ def flows_int_values(sv, i_fc, parameters):
     """
 
     # Extraction of the variables
-    C_v_agc, C_v_acl, C_v_ccl, C_v_cgc = sv['C_v_agc'], sv['C_v_acl'], sv['C_v_ccl'], sv['C_v_cgc']
+    C_v_acl, C_v_ccl = sv['C_v_acl'], sv['C_v_ccl']
     s_acl, s_ccl = sv['s_acl'], sv['s_ccl']
     lambda_acl, lambda_mem, lambda_ccl = sv['lambda_acl'], sv['lambda_mem'], sv['lambda_ccl']
-    C_H2_agc, C_H2_acl, C_O2_ccl, C_O2_cgc = sv['C_H2_agc'], sv['C_H2_acl'], sv['C_O2_ccl'], sv['C_O2_cgc']
-    C_N2_a, C_N2_c = sv['C_N2_a'], sv['C_N2_c']
-    T_agc, T_acl, T_mem, T_ccl, T_cgc = sv['T_agc'], sv['T_acl'], sv['T_mem'], sv['T_ccl'], sv['T_cgc']
+    C_H2_acl, C_O2_ccl, C_N2_a, C_N2_c = sv['C_H2_acl'], sv['C_O2_ccl'], sv['C_N2_a'], sv['C_N2_c']
+    T_acl, T_mem, T_ccl = sv['T_acl'], sv['T_mem'], sv['T_ccl']
     # Extraction of the operating inputs and the parameters
+    T_des = operating_inputs['T_des']
     epsilon_gdl, epsilon_cl = parameters['epsilon_gdl'], parameters['epsilon_cl']
     epsilon_mpl, epsilon_c = parameters['epsilon_mpl'], parameters['epsilon_c']
     e, Hacl, Hccl, Hmem = parameters['e'], parameters['Hacl'], parameters['Hccl'], parameters['Hmem']
     Hgdl, Hmpl, Wagc, Wcgc = parameters['Hgdl'], parameters['Hmpl'], parameters['Wagc'], parameters['Wcgc']
     Hagc, Hcgc, Htl = parameters['Hagc'], parameters['Hcgc'], parameters['Htl']
     epsilon_atl, epsilon_ctl = parameters['epsilon_atl'], parameters['epsilon_ctl']
-    n_gdl, n_tl, n_mpl = parameters['n_gdl'], parameters['n_tl'], parameters['n_mpl']
+    n_gc, n_gdl, n_tl, n_mpl = parameters['n_gc'], parameters['n_gdl'], parameters['n_tl'], parameters['n_mpl']
 
     # Transitory parameter
     H_gdl_node = Hgdl / n_gdl
@@ -57,7 +57,7 @@ def flows_int_values(sv, i_fc, parameters):
     H_tl_node = Htl / n_tl
 
     # Pressures in the stack
-    Pagc = (C_v_agc + C_H2_agc + C_N2_a) * R * T_agc
+    Pagc = [None] + [(sv[f'C_v_agc_{i}'] + sv[f'C_H2_agc_{i}'] + C_N2_a) * R * sv[f'T_agc_{i}'] for i in range(1, n_gc + 1)]
     Pagdl = [None] + [(sv[f'C_v_agdl_{i}'] + sv[f'C_H2_agdl_{i}'] + C_N2_a) * R * sv[f'T_agdl_{i}'] for i in range(1, n_gdl + 1)]
     Patl = [None] + [(sv[f'C_v_atl_{i}'] + sv[f'C_H2_atl_{i}'] + C_N2_a) * R * sv[f'T_atl_{i}'] for i in range(1, n_tl + 1)]
     Pampl = [None] + [(sv[f'C_v_ampl_{i}'] + sv[f'C_H2_ampl_{i}'] + C_N2_a) * R * sv[f'T_ampl_{i}'] for i in range(1, n_mpl + 1)]
@@ -66,12 +66,12 @@ def flows_int_values(sv, i_fc, parameters):
     Pcmpl = [None] + [(sv[f'C_v_cmpl_{i}'] + sv[f'C_O2_cmpl_{i}'] + C_N2_c) * R * sv[f'T_cmpl_{i}'] for i in range(1, n_mpl + 1)]
     Pctl = [None] + [(sv[f'C_v_ctl_{i}'] + sv[f'C_O2_ctl_{i}'] + C_N2_c) * R * sv[f'T_ctl_{i}'] for i in range(1, n_tl + 1)]
     Pcgdl = [None] + [(sv[f'C_v_cgdl_{i}'] + sv[f'C_O2_cgdl_{i}'] + C_N2_c) * R * sv[f'T_cgdl_{i}'] for i in range(1, n_gdl + 1)]
-    Pcgc = (C_v_cgc + C_O2_cgc + C_N2_c) * R * T_cgc
+    Pcgc = [None] + [(sv[f'C_v_cgc_{i}'] + sv[f'C_O2_cgc_{i}'] + C_N2_c) * R * sv[f'T_cgc_{i}'] for i in range(1, n_gc + 1)]
 
     # Weighted mean values ...
     #       ... of the EOD flow of water in the membrane
-    J_EOD_acl_mem = 2.5 / 22 * i_fc / F * average([lambda_acl, lambda_mem], weights=[Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem)])
-    J_EOD_mem_ccl = 2.5 / 22 * i_fc / F * average([lambda_mem, lambda_ccl], weights=[Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl)])
+    J_EOD_acl_mem = 2.5 / 22 * i_fc / F * interpolate([lambda_acl, lambda_mem], [Hacl, Hmem])
+    J_EOD_mem_ccl = 2.5 / 22 * i_fc / F * interpolate([lambda_mem, lambda_ccl], [Hmem, Hccl])
     #       ... of the diffusion coefficient of water in the membrane
     D_acl_mem = hmean([D(lambda_acl), D(lambda_mem)], weights = [Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem)])
     D_mem_ccl = hmean([D(lambda_mem), D(lambda_ccl)], weights = [Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl)])
@@ -125,14 +125,16 @@ def flows_int_values(sv, i_fc, parameters):
                                     Dcap('mpl', sv['s_cmpl_1'], sv['T_cmpl_1'], epsilon_mpl, e)],
                              weights=[Hccl / (Hccl + H_mpl_node), H_mpl_node / (Hccl + H_mpl_node)])
     #       ... of the effective diffusion coefficient between the gas channel and the gas diffusion layer
-    ha_Da_eff_agc_agdl = hmean([h_a(Pagc, T_agc, Wagc, Hagc) * Hagc,
-                                        Da_eff('gdl', sv['s_agdl_1'], sv['T_agdl_1'], Pagdl[1], epsilon_gdl,
-                                             epsilon_c = epsilon_c)],
-                                  weights = [Hagc / (Hagc + H_gdl_node), H_gdl_node / (Hagc + H_gdl_node)])
-    hc_Dc_eff_cgdl_cgc = hmean([Dc_eff('gdl', sv[f's_cgdl_{n_gdl}'], sv[f'T_cgdl_{n_gdl}'], Pcgdl[n_gdl],
-                                             epsilon_gdl, epsilon_c = epsilon_c),
-                                        h_c(Pcgc, T_cgc, Wcgc, Hcgc) * Hcgc],
-                                  weights = [H_gdl_node / (H_gdl_node + Hcgc), Hcgc / (H_gdl_node + Hcgc)])
+    ha_Da_eff_agc_agdl = [None] + [hmean([h_a(Pagc[i], T_des, Wagc, Hagc) * Hagc,
+                                         Da_eff('gdl', sv['s_agdl_1'], sv['T_agdl_1'], Pagdl[1], epsilon_gdl,
+                                                epsilon_c = epsilon_c)],
+                                         weights = [Hagc / (Hagc + H_gdl_node), H_gdl_node / (Hagc + H_gdl_node)])
+                                   for i in range(1, n_gc + 1)]
+    hc_Dc_eff_cgdl_cgc = [None] + [hmean([Dc_eff('gdl', sv[f's_cgdl_{n_gdl}'], sv[f'T_cgdl_{n_gdl}'], Pcgdl[n_gdl],
+                                                       epsilon_gdl, epsilon_c = epsilon_c),
+                                                h_c(Pcgc[i], T_des, Wcgc, Hcgc) * Hcgc],
+                                          weights = [H_gdl_node / (H_gdl_node + Hcgc), Hcgc / (H_gdl_node + Hcgc)])
+                                   for i in range(1, n_gc + 1)]
     #       ... of the effective diffusion coefficient
     Da_eff_agdl_agdl = [None] + [hmean([Da_eff('gdl', sv[f's_agdl_{i}'], sv[f'T_agdl_{i}'], Pagdl[i],
                                               epsilon_gdl, epsilon_c = epsilon_c),
@@ -190,7 +192,7 @@ def flows_int_values(sv, i_fc, parameters):
     T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
                         weights=[Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl), Hccl / (Hacl + Hmem + Hccl)])
 
-    return (H_gdl_node, H_tl_node, H_mpl_node, Pagc, Pcgc, J_EOD_acl_mem, J_EOD_mem_ccl, D_acl_mem, D_mem_ccl,
+    return (H_gdl_node, H_tl_node, H_mpl_node, J_EOD_acl_mem, J_EOD_mem_ccl, D_acl_mem, D_mem_ccl,
             D_cap_agdl_agdl, D_cap_agdl_atl, D_cap_atl_atl, D_cap_atl_ampl, D_cap_ampl_ampl, D_cap_ampl_acl,
             D_cap_ccl_cmpl, D_cap_cmpl_cmpl, D_cap_cmpl_ctl, D_cap_ctl_ctl, D_cap_ctl_cgdl, D_cap_cgdl_cgdl,
             ha_Da_eff_agc_agdl, hc_Dc_eff_cgdl_cgc, Da_eff_agdl_agdl, Da_eff_agdl_atl, Da_eff_atl_atl, Da_eff_atl_ampl,

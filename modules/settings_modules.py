@@ -255,10 +255,17 @@ def stored_physical_parameters(type_fuel_cell):
         Wcgc = 532e-6  # m. It is the width of the cathode gas channel.
         Lgc = 23.31  # m. It is the length of the gas channel.
         #   Auxiliaries
-        A_T_a = 9.01e-4  # m². It is the exhaust anode manifold throttle area
-        A_T_c = 22.61e-4  # m². It is the exhaust cathode manifold throttle area
-        Vsm_a, Vsm_c = 56.8e-6, 145e-6  # m3. It is the supply manifold volume.
-        Vem_a, Vem_c = Vsm_a, Vsm_c  # m-3. It is the exhaust manifold volume.
+        Lm = 25.8e-3  # m. It is the length of the manifold.
+        L_endplate = 46.8e-3  # m. It is the length of the endplate.
+        L_man_gc = 8.74e-3  # m. It is the length of the volume connecting the manifold to the gas channel.
+        A_T_a = 9.01e-4  # m². It is the inlet/exhaust anode manifold throttle area
+        A_T_c = 22.61e-4  # m². It is the inlet/exhaust cathode manifold throttle area
+        Vasm, Vcsm = Lm * A_T_a, Lm * A_T_c  # m3. It is the supply manifold volume.
+        Vaem, Vcem = Vasm, Vcsm  # m-3. It is the exhaust manifold volume.
+        V_endplate_a = L_man_gc * A_T_a  # m3. It is the anode endplate volume.
+        V_endplate_c = L_man_gc * A_T_c  # m3. It is the cathode endplate volume.
+        V_man_agc = L_man_gc * Hagc * Wagc  # m3. It is the volume of the volume connecting the anode manifold to the gas channel.
+        V_man_cgc = L_man_gc * Hcgc * Wcgc  # m3. It is the volume of the volume connecting the cathode manifold to the gas channel.
         # Interaction parameters between water and PEMFC structure
         e = 4.0  # It is the capillary exponent
         # Voltage polarization
@@ -297,10 +304,17 @@ def stored_physical_parameters(type_fuel_cell):
         Wcgc = Wagc  # m. It is the width of the cathode gas channel.
         Lgc = 9.67  # m. It is the length of the gas channel.
         #   Auxiliaries
-        Vsm_a, Vsm_c = 7.0e-3, 7.0e-3  # m3. It is the supply manifold volume.
-        Vem_a, Vem_c = 2.4e-3, 2.4e-3  # m-3. It is the exhaust manifold volume.
-        A_T_a = 11.8e-4  # m². It is the exhaust anode manifold throttle area
-        A_T_c = A_T_a  # m². It is the exhaust cathode manifold throttle area
+        Lm = 2.03  # m. It is the length of the manifold.
+        L_endplate = 46.8e-3  # m. It is the length of the endplate.
+        L_man_gc = 8.74e-3  # m. It is the length of the volume connecting the manifold to the gas channel.
+        A_T_a = 11.8e-4  # m². It is the inlet/exhaust anode manifold throttle area
+        A_T_c = 34.4e-4  # m². It is the inlet/exhaust cathode manifold throttle area
+        Vasm, Vcsm = Lm * A_T_a, Lm * A_T_c  # m3. It is the supply manifold volume.
+        Vaem, Vcem = Vasm, Vcsm  # m-3. It is the exhaust manifold volume.
+        V_endplate_a = L_man_gc * A_T_a  # m3. It is the anode endplate volume.
+        V_endplate_c = L_man_gc * A_T_c  # m3. It is the cathode endplate volume.
+        V_man_agc = L_man_gc * Hagc * Wagc  # m3. It is the volume of the volume connecting the anode manifold to the gas channel.
+        V_man_cgc = L_man_gc * Hcgc * Wcgc  # m3. It is the volume of the volume connecting the cathode manifold to the gas channel.
         # Interaction parameters between water and PEMFC structure
         e = 4.0  # It is the capillary exponent
         # Voltage polarization
@@ -317,8 +331,9 @@ def stored_physical_parameters(type_fuel_cell):
         raise ValueError('the type_input given is not valid.')
 
     return (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, Vsm_a, Vsm_c, Vem_a, Vem_c, A_T_a, A_T_c, Aact, n_cell, e, Re, i0_d_c_ref, i0_h_c_ref, kappa_co,
-            kappa_c, a_slim, b_slim, a_switch, C_scl)
+            Wcgc, Lgc, Lm, L_endplate, L_man_gc, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, V_endplate_a, V_endplate_c,
+            V_man_agc, V_man_cgc, Aact, n_cell, e, Re, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim,
+            a_switch, C_scl)
 
 
 def EIS_parameters(f_EIS):

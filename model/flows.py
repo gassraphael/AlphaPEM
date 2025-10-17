@@ -42,11 +42,10 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     # ___________________________________________________Preliminaries__________________________________________________
 
     # Extraction of the variables
-    C_v_agc, C_v_acl, C_v_ccl, C_v_cgc = sv['C_v_agc'], sv['C_v_acl'], sv['C_v_ccl'], sv['C_v_cgc']
+    C_v_acl, C_v_ccl = sv['C_v_acl'], sv['C_v_ccl']
     s_acl, s_ccl = sv['s_acl'], sv['s_ccl']
     lambda_acl, lambda_mem, lambda_ccl = sv['lambda_acl'], sv['lambda_mem'], sv['lambda_ccl']
-    C_H2_agc, C_H2_acl, C_O2_ccl, C_O2_cgc = sv['C_H2_agc'], sv['C_H2_acl'], sv['C_O2_ccl'], sv['C_O2_cgc']
-    C_N2_a, C_N2_c = sv['C_N2_a'], sv['C_N2_c']
+    C_H2_acl, C_O2_ccl, C_N2_a, C_N2_c = sv['C_H2_acl'], sv['C_O2_ccl'], sv['C_N2_a'], sv['C_N2_c']
     T_acl, T_mem, T_ccl = sv['T_acl'], sv['T_mem'], sv['T_ccl']
 
     # Extraction of the operating inputs and parameters
@@ -55,20 +54,18 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     epsilon_mpl, epsilon_c = parameters['epsilon_mpl'], parameters['epsilon_c']
     e, kappa_co = parameters['e'], parameters['kappa_co']
     epsilon_atl, epsilon_ctl = parameters['epsilon_atl'], parameters['epsilon_ctl']
-    n_gdl, n_tl, n_mpl = parameters['n_gdl'], parameters['n_tl'], parameters['n_mpl']
+    n_gc, n_gdl, n_tl, n_mpl = parameters['n_gc'], parameters['n_gdl'], parameters['n_tl'], parameters['n_mpl']
 
     # Intermediate values
-    (H_gdl_node, H_tl_node, H_mpl_node, Pagc, Pcgc, J_EOD_acl_mem, J_EOD_mem_ccl, D_acl_mem, D_mem_ccl, D_cap_agdl_agdl,
-     D_cap_agdl_atl, D_cap_atl_atl, D_cap_atl_ampl, D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_ccl_cmpl, D_cap_cmpl_cmpl,
-     D_cap_cmpl_ctl, D_cap_ctl_ctl, D_cap_ctl_cgdl, D_cap_cgdl_cgdl, ha_Da_eff_agc_agdl, hc_Dc_eff_cgdl_cgc,
-     Da_eff_agdl_agdl, Da_eff_agdl_atl, Da_eff_atl_atl, Da_eff_atl_ampl, Da_eff_ampl_ampl, Da_eff_ampl_acl,
-     Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl, Dc_eff_cmpl_ctl, Dc_eff_ctl_ctl, Dc_eff_ctl_cgdl, Dc_eff_cgdl_cgdl,
-     T_acl_mem_ccl) = flows_int_values(sv, i_fc, parameters)
+    (H_gdl_node, H_tl_node, H_mpl_node, J_EOD_acl_mem, J_EOD_mem_ccl, D_acl_mem, D_mem_ccl,
+            D_cap_agdl_agdl, D_cap_agdl_atl, D_cap_atl_atl, D_cap_atl_ampl, D_cap_ampl_ampl, D_cap_ampl_acl,
+            D_cap_ccl_cmpl, D_cap_cmpl_cmpl, D_cap_cmpl_ctl, D_cap_ctl_ctl, D_cap_ctl_cgdl, D_cap_cgdl_cgdl,
+            ha_Da_eff_agc_agdl, hc_Dc_eff_cgdl_cgc, Da_eff_agdl_agdl, Da_eff_agdl_atl, Da_eff_atl_atl, Da_eff_atl_ampl,
+            Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl, Dc_eff_cmpl_ctl, Dc_eff_ctl_ctl,
+            Dc_eff_ctl_cgdl, Dc_eff_cgdl_cgdl, T_acl_mem_ccl) = flows_int_values(sv, i_fc, operating_inputs, parameters)
 
     # Inlet and outlet flows
-    (Jv_a_in, Jv_a_out, Jv_c_in, Jv_c_out, J_H2_in, J_H2_out, J_O2_in, J_O2_out, J_N2_a_in, J_N2_a_out, J_N2_c_in,
-     J_N2_c_out, Wasm_in, Wasm_out, Waem_in, Waem_out, Wcsm_in, Wcsm_out, Wcem_in, Wcem_out, Ware, Wv_asm_in,
-     Wv_aem_out, Wv_csm_in, Wv_cem_out) = auxiliaries(t, sv, control_variables, i_fc, operating_inputs, parameters)
+    auxiliary_flows_dico = auxiliaries(t, sv, control_variables, i_fc, operating_inputs, parameters)
 
     # ________________________________________Dissolved water flows (mol.m-2.s-1)_______________________________________
 
@@ -111,9 +108,11 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
 
     # Convective vapor flows
     #   Anode side
-    Jv_agc_agdl = - 2 * ha_Da_eff_agc_agdl * (sv['C_v_agdl_1'] - C_v_agc) / H_gdl_node
+    Jv_agc_agdl = [None] + [- 2 * ha_Da_eff_agc_agdl[i] * (sv['C_v_agdl_1'] - sv[f'C_v_agc_{i}']) / H_gdl_node
+                            for i in range(1, n_gc + 1)]
     #   Cathode side
-    Jv_cgdl_cgc = - 2 * hc_Dc_eff_cgdl_cgc * (C_v_cgc - sv[f'C_v_cgdl_{n_gdl}']) / H_gdl_node
+    Jv_cgdl_cgc = [None] + [- 2 * hc_Dc_eff_cgdl_cgc[i] * (sv[f'C_v_cgc_{i}'] - sv[f'C_v_cgdl_{n_gdl}']) / H_gdl_node
+                            for i in range(1, n_gc + 1)]
 
     # Conductive vapor flows
     #   Anode side
@@ -152,9 +151,11 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
 
     # Conductive-convective H2 and O2 flows
     #   Anode side
-    J_H2_agc_agdl = - 2 * ha_Da_eff_agc_agdl * (sv['C_H2_agdl_1'] - C_H2_agc) / H_gdl_node
+    J_H2_agc_agdl = [None] + [- 2 * ha_Da_eff_agc_agdl[i] * (sv['C_H2_agdl_1'] - sv[f'C_H2_agc_{i}']) / H_gdl_node
+                            for i in range(1, n_gc + 1)]
     #   Cathode side
-    J_O2_cgdl_cgc = - 2 * hc_Dc_eff_cgdl_cgc * (C_O2_cgc - sv[f'C_O2_cgdl_{n_gdl}']) / H_gdl_node
+    J_O2_cgdl_cgc = [None] + [- 2 * hc_Dc_eff_cgdl_cgc[i] * (sv[f'C_O2_cgc_{i}'] - sv[f'C_O2_cgdl_{n_gdl}']) / H_gdl_node
+                            for i in range(1, n_gc + 1)]
 
     # Conductive H2 and O2 flows
     #   Anode side
@@ -231,28 +232,23 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     Sv_ctl = [None] + [-x for x in Sl_ctl[1:]]
     Sv_cgdl = [None] + [-x for x in Sl_cgdl[1:]]
 
-    return {'Jv_a_in': Jv_a_in, 'Jv_a_out': Jv_a_out, 'Jv_c_in': Jv_c_in, 'Jv_c_out': Jv_c_out, 'J_H2_in': J_H2_in,
-            'J_H2_out': J_H2_out, 'J_O2_in': J_O2_in, 'J_O2_out': J_O2_out, 'J_N2_a_in': J_N2_a_in,
-            'J_N2_a_out': J_N2_a_out, 'J_N2_c_in': J_N2_c_in, 'J_N2_c_out': J_N2_c_out, 'Jv_agc_agdl': Jv_agc_agdl,
+    return {**auxiliary_flows_dico, 'Jv_agc_agdl': Jv_agc_agdl,
             'Jv_agdl_agdl': Jv_agdl_agdl, 'Jv_agdl_atl': Jv_agdl_atl, 'Jv_atl_atl': Jv_atl_atl,
             'Jv_atl_ampl': Jv_atl_ampl, 'Jv_ampl_ampl': Jv_ampl_ampl, 'Jv_ampl_acl': Jv_ampl_acl,
             'S_abs_acl': S_abs_acl, 'S_abs_ccl': S_abs_ccl, 'Jv_ccl_cmpl': Jv_ccl_cmpl, 'Jv_cmpl_cmpl': Jv_cmpl_cmpl,
-            'Jv_cmpl_ctl': Jv_cmpl_ctl, 'Jv_ctl_ctl': Jv_ctl_ctl, 'Jv_ctl_cgdl': Jv_ctl_cgdl, 'Jv_cgdl_cgdl': Jv_cgdl_cgdl,
-            'Jv_cgdl_cgc': Jv_cgdl_cgc, 'Jl_agc_agdl': Jl_agc_agdl, 'Jl_agdl_agdl': Jl_agdl_agdl,
-            'Jl_agdl_atl': Jl_agdl_atl, 'Jl_atl_atl': Jl_atl_atl, 'Jl_atl_ampl': Jl_atl_ampl,
-            'Jl_ampl_ampl': Jl_ampl_ampl, 'Jl_ampl_acl': Jl_ampl_acl, 'J_lambda_acl_mem': J_lambda_acl_mem,
-            'J_lambda_mem_ccl': J_lambda_mem_ccl, 'Jl_ccl_cmpl': Jl_ccl_cmpl, 'Jl_cmpl_cmpl': Jl_cmpl_cmpl,
-            'Jl_cmpl_ctl': Jl_cmpl_ctl, 'Jl_ctl_ctl': Jl_ctl_ctl, 'Jl_ctl_cgdl': Jl_ctl_cgdl,
-            'Jl_cgdl_cgdl': Jl_cgdl_cgdl, 'Jl_cgdl_cgc': Jl_cgdl_cgc, 'Sp_acl': Sp_acl, 'Sp_ccl': Sp_ccl,
-            'J_H2_agc_agdl': J_H2_agc_agdl, 'J_H2_agdl_agdl': J_H2_agdl_agdl, 'J_H2_agdl_atl': J_H2_agdl_atl,
-            'J_H2_atl_atl': J_H2_atl_atl, 'J_H2_atl_ampl': J_H2_atl_ampl, 'J_H2_ampl_ampl': J_H2_ampl_ampl,
-            'J_H2_ampl_acl': J_H2_ampl_acl, 'J_O2_ccl_cmpl': J_O2_ccl_cmpl, 'J_O2_cmpl_cmpl': J_O2_cmpl_cmpl,
-            'J_O2_cmpl_ctl': J_O2_cmpl_ctl, 'J_O2_ctl_ctl': J_O2_ctl_ctl, 'J_O2_ctl_cgdl': J_O2_ctl_cgdl,
-            'J_O2_cgdl_cgdl': J_O2_cgdl_cgdl, 'J_O2_cgdl_cgc': J_O2_cgdl_cgc, 'S_H2_acl': S_H2_acl, 'S_O2_ccl': S_O2_ccl,
-            'Sv_agdl': Sv_agdl, 'Sv_atl': Sv_atl, 'Sv_ampl': Sv_ampl, 'Sv_acl': Sv_acl, 'Sv_ccl': Sv_ccl,
-            'Sv_cmpl': Sv_cmpl, 'Sv_ctl': Sv_ctl, 'Sv_cgdl': Sv_cgdl, 'Sl_agdl': Sl_agdl, 'Sl_atl': Sl_atl,
-            'Sl_ampl': Sl_ampl, 'Sl_acl': Sl_acl, 'Sl_ccl': Sl_ccl, 'Sl_cmpl': Sl_cmpl, 'Sl_ctl': Sl_ctl,
-            'Sl_cgdl': Sl_cgdl, 'Pagc': Pagc, 'Pcgc': Pcgc, 'Wasm_in': Wasm_in, 'Wasm_out': Wasm_out, 'Waem_in': Waem_in,
-            'Waem_out': Waem_out, 'Wcsm_in': Wcsm_in, 'Wcsm_out': Wcsm_out, 'Wcem_in': Wcem_in, 'Wcem_out': Wcem_out,
-            'Ware': Ware, 'Wv_asm_in': Wv_asm_in, 'Wv_aem_out': Wv_aem_out, 'Wv_csm_in': Wv_csm_in,
-            'Wv_cem_out': Wv_cem_out}
+            'Jv_cmpl_ctl': Jv_cmpl_ctl, 'Jv_ctl_ctl': Jv_ctl_ctl, 'Jv_ctl_cgdl': Jv_ctl_cgdl,
+            'Jv_cgdl_cgdl': Jv_cgdl_cgdl, 'Jv_cgdl_cgc': Jv_cgdl_cgc, 'Jl_agc_agdl': Jl_agc_agdl,
+            'Jl_agdl_agdl': Jl_agdl_agdl, 'Jl_agdl_atl': Jl_agdl_atl, 'Jl_atl_atl': Jl_atl_atl,
+            'Jl_atl_ampl': Jl_atl_ampl, 'Jl_ampl_ampl': Jl_ampl_ampl, 'Jl_ampl_acl': Jl_ampl_acl,
+            'J_lambda_acl_mem': J_lambda_acl_mem, 'J_lambda_mem_ccl': J_lambda_mem_ccl,  'Jl_ccl_cmpl': Jl_ccl_cmpl,
+            'Jl_cmpl_cmpl': Jl_cmpl_cmpl, 'Jl_cmpl_ctl': Jl_cmpl_ctl, 'Jl_ctl_ctl': Jl_ctl_ctl,
+            'Jl_ctl_cgdl': Jl_ctl_cgdl, 'Jl_cgdl_cgdl': Jl_cgdl_cgdl, 'Jl_cgdl_cgc': Jl_cgdl_cgc, 'Sp_acl': Sp_acl,
+            'Sp_ccl': Sp_ccl, 'J_H2_agc_agdl': J_H2_agc_agdl, 'J_H2_agdl_agdl': J_H2_agdl_agdl,
+            'J_H2_agdl_atl': J_H2_agdl_atl, 'J_H2_atl_atl': J_H2_atl_atl, 'J_H2_atl_ampl': J_H2_atl_ampl,
+            'J_H2_ampl_ampl': J_H2_ampl_ampl, 'J_H2_ampl_acl': J_H2_ampl_acl, 'J_O2_ccl_cmpl': J_O2_ccl_cmpl,
+            'J_O2_cmpl_cmpl': J_O2_cmpl_cmpl, 'J_O2_cmpl_ctl': J_O2_cmpl_ctl, 'J_O2_ctl_ctl': J_O2_ctl_ctl,
+            'J_O2_ctl_cgdl': J_O2_ctl_cgdl, 'J_O2_cgdl_cgdl': J_O2_cgdl_cgdl, 'J_O2_cgdl_cgc': J_O2_cgdl_cgc,
+            'S_H2_acl': S_H2_acl, 'S_O2_ccl': S_O2_ccl, 'Sv_agdl': Sv_agdl, 'Sv_atl': Sv_atl, 'Sv_ampl': Sv_ampl,
+            'Sv_acl': Sv_acl, 'Sv_ccl': Sv_ccl, 'Sv_cmpl': Sv_cmpl, 'Sv_ctl': Sv_ctl, 'Sv_cgdl': Sv_cgdl,
+            'Sl_agdl': Sl_agdl, 'Sl_atl': Sl_atl, 'Sl_ampl': Sl_ampl, 'Sl_acl': Sl_acl, 'Sl_ccl': Sl_ccl,
+            'Sl_cmpl': Sl_cmpl, 'Sl_ctl': Sl_ctl, 'Sl_cgdl': Sl_cgdl}

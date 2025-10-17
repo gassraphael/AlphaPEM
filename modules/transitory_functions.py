@@ -96,6 +96,96 @@ def average(terms, weights=None):
     return weighted_sum / total_weight
 
 
+def interpolate(terms, distances):
+    """
+    Fast inverse distance interpolation for exactly 2 points.
+
+    Parameters
+    ----------
+    terms : list of float
+        The values at each node ([y1, y2]).
+    distances : list of float
+        The distances from each node to the interpolation point ([d1, d2]).
+
+    Returns
+    -------
+    float
+        The interpolated value.
+    """
+    if len(terms) != 2 or len(distances) != 2:
+        raise ValueError("This function only supports interpolation with 2 points.")
+    y1, y2 = terms
+    d1, d2 = distances
+    if d1 == 0: return y1
+    if d2 == 0: return y2
+    w1 = 1.0 / d1
+    w2 = 1.0 / d2
+    return (w1 * y1 + w2 * y2) / (w1 + w2)
+
+
+
+def d_dx(y_minus, y_0, y_plus, dx_minus, dx_plus = None):
+    """
+    Computes the centered first derivative (second order) with different steps to the left and right.
+
+    Parameters
+    ----------
+    y_minus : float
+        Value at the left point (i-1).
+    y_0 : float
+        Value at the central point (i).
+    y_plus : float
+        Value at the right point (i+1).
+    dx_minus : float
+        Step between (i-1) and i.
+    dx_plus : float
+        Step between i and (i+1).
+
+    Returns
+    -------
+    float
+        Approximation of the first derivative at i.
+    """
+
+    if dx_plus is None:
+        dx = dx_minus
+        return (y_plus - y_minus) / (2 * dx)
+    else:
+        return (y_plus * dx_minus**2 + y_0 * (dx_plus**2 - dx_minus**2) - y_minus * dx_plus**2)  / \
+               (dx_minus * dx_plus * (dx_minus + dx_plus))
+
+
+def d2_dx2(y_minus, y_0, y_plus, dx_minus, dx_plus = None):
+    """
+    Computes the centered second derivative (second order) with different steps to the left and right.
+
+    Parameters
+    ----------
+    y_minus : float
+        Value at the left point (i-1).
+    y_0 : float
+        Value at the central point (i).
+    y_plus : float
+        Value at the right point (i+1).
+    dx_minus : float
+        Step between (i-1) and i.
+    dx_plus : float
+        Step between i and (i+1).
+
+    Returns
+    -------
+    float
+        Approximation of the second derivative at i.
+    """
+
+    if dx_plus is None:
+        dx = dx_minus
+        return (y_plus - 2 * y_0 + y_minus)  / dx**2
+    else:
+        return 2 * (y_plus * dx_minus - y_0 * (dx_minus + dx_plus) + y_minus * dx_plus)  / \
+                   (dx_minus * dx_plus * (dx_minus + dx_plus))
+
+
 def rho_H2O_l(T):
     """This function calculates the water density, in kg.m-3, as a function of the temperature.
 
@@ -161,6 +251,49 @@ def mu_gaz(component, T):
         return (4.4656 + 6.3814e-1 * T - 2.6596e-4 * T ** 2 + 5.4113e-8 * T ** 3) * 10**-7
     else:
         raise ValueError("The element should be either 'H2O_v', 'H2', 'O2' or 'N2'.")
+
+
+def mu_mixture_gases(components, x, T):
+    """This function calculates the dynamic viscosity of a gas mixture, in Pa.s, as a function of the temperature.
+
+    Parameters
+    ----------
+    components : list of str
+        List of gas components in the mixture. Each component must be either 'H2O_v' (vapor), 'H2' (hydrogen),
+        'O2' (oxygen), or 'N2' (nitrogen).
+    x : list of float
+        List of mole fractions corresponding to each gas component in the mixture.
+    T : float
+        Temperature in K.
+
+    Returns
+    -------
+    float
+        Dynamic viscosity of the gas mixture in Pa.s.
+
+    Notes
+    -----
+    A simple mixture law is used here to calculate the dynamic viscosity of the gas mixture.
+    """
+
+    # Calculate the dynamic viscosities of each gas component in Pa.s.
+    mu_values = [mu_gaz(comp, T) for comp in components]
+
+    # Calculate the molar mass of the gas mixture in kg/mol.
+    M_mix = 0.0
+    for j in range(len(components)):
+        M_j = M_H2O if components[j] == 'H2O_v' else M_H2 if components[j] == 'H2' else M_O2 if components[j] == 'O2' \
+              else M_N2 if components[j] == 'N2' else None
+        M_mix += M_j * x[j]
+
+    inv_mu_mix = 0.0
+    for j, mu_j in enumerate(mu_values):
+        M_j = M_H2O if components[j] == 'H2O_v' else M_H2 if components[j] == 'H2' else M_O2 if components[j] == 'O2' else M_N2
+        c_j = M_j * x[j] / M_mix
+        inv_mu_mix += c_j / mu_j
+
+    return 1 / inv_mu_mix
+
 
 
 def Psat(T):
