@@ -118,9 +118,7 @@ def interpolate(terms, distances):
     d1, d2 = distances
     if d1 == 0: return y1
     if d2 == 0: return y2
-    w1 = 1.0 / d1
-    w2 = 1.0 / d2
-    return (w1 * y1 + w2 * y2) / (w1 + w2)
+    return (d2 * y1 + d1 * y2) / (d1 + d2)
 
 
 

@@ -14,8 +14,8 @@ from numpy.fft import fft, fftfreq
 from scipy.interpolate import interp1d
 
 # Importing constants' value and functions
-from configuration.settings import F, R, E0, Pref
-from modules.transitory_functions import average, Psat, C_v_sat, k_H2, k_O2
+from configuration.settings import F, R, E0, Pref, M_H2, M_O2, M_H2O, M_N2
+from modules.transitory_functions import average, Psat, C_v_sat, k_H2, k_O2, mu_mixture_gases
 from calibration.experimental_values import (pola_exp_values, plot_experimental_polarisation_curve,
                                              pola_exp_values_calibration)
 
@@ -552,7 +552,7 @@ def plot_C_v(variables, parameters, ax):
     """
 
     # Extraction of the parameter
-    n_gc, n_gdl, n_mpl, type_current, type_plot = parameters['n_gc'], parameters['n_gdl'], parameters['n_mpl'], parameters['type_current'], parameters['type_plot']
+    nb_gc, nb_gdl, nb_mpl, type_current, type_plot = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl'], parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
         delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
     elif type_current == 'polarization':
@@ -567,14 +567,14 @@ def plot_C_v(variables, parameters, ax):
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
     t = np.array(variables['t'])[mask]
-    C_v_agc_t = np.array(variables[f'C_v_agc_{int(np.ceil(n_gc / 2))}'])[mask]
-    C_v_agdl_t = np.array(variables[f'C_v_agdl_{int(np.ceil(n_gdl / 2))}'])[mask]
-    C_v_ampl_t = np.array(variables[f'C_v_ampl_{int(np.ceil(n_mpl / 2))}'])[mask]
+    C_v_agc_t = np.array(variables[f'C_v_agc_{int(np.ceil(nb_gc / 2))}'])[mask]
+    C_v_agdl_t = np.array(variables[f'C_v_agdl_{int(np.ceil(nb_gdl / 2))}'])[mask]
+    C_v_ampl_t = np.array(variables[f'C_v_ampl_{int(np.ceil(nb_mpl / 2))}'])[mask]
     C_v_acl_t = np.array(variables['C_v_acl'])[mask]
     C_v_ccl_t = np.array(variables['C_v_ccl'])[mask]
-    C_v_cmpl_t = np.array(variables[f'C_v_cmpl_{int(np.ceil(n_mpl / 2))}'])[mask]
-    C_v_cgdl_t = np.array(variables[f'C_v_cgdl_{int(np.ceil(n_gdl / 2))}'])[mask]
-    C_v_cgc_t = np.array(variables[f'C_v_cgc_{int(np.ceil(n_gc / 2))}'])[mask]
+    C_v_cmpl_t = np.array(variables[f'C_v_cmpl_{int(np.ceil(nb_mpl / 2))}'])[mask]
+    C_v_cgdl_t = np.array(variables[f'C_v_cgdl_{int(np.ceil(nb_gdl / 2))}'])[mask]
+    C_v_cgc_t = np.array(variables[f'C_v_cgc_{int(np.ceil(nb_gc / 2))}'])[mask]
     T_ccl = np.array(variables['T_ccl'])[mask]
 
     # Plot the vapor concentrations at different spatial localisations Cv
@@ -691,7 +691,7 @@ def plot_s(variables, operating_inputs, parameters, ax):
 
     # Extraction of the operating inputs and the parameters
     current_density = operating_inputs['current_density']
-    n_gdl, n_mpl, pola_current_parameters = parameters['n_gdl'], parameters['n_mpl'], parameters['pola_current_parameters']
+    nb_gdl, nb_mpl, pola_current_parameters = parameters['nb_gdl'], parameters['nb_mpl'], parameters['pola_current_parameters']
     type_current, type_plot = parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
         delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
@@ -707,12 +707,12 @@ def plot_s(variables, operating_inputs, parameters, ax):
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
     t = np.array(variables['t'])[mask]
-    s_agdl_t = np.array(variables[f's_agdl_{int(np.ceil(n_gdl / 2))}'])[mask]
-    s_ampl_t = np.array(variables[f's_ampl_{int(np.ceil(n_mpl / 2))}'])[mask]
+    s_agdl_t = np.array(variables[f's_agdl_{int(np.ceil(nb_gdl / 2))}'])[mask]
+    s_ampl_t = np.array(variables[f's_ampl_{int(np.ceil(nb_mpl / 2))}'])[mask]
     s_acl_t = np.array(variables['s_acl'])[mask]
     s_ccl_t = np.array(variables['s_ccl'])[mask]
-    s_cmpl_t = np.array(variables[f's_cmpl_{int(np.ceil(n_mpl / 2))}'])[mask]
-    s_cgdl_t = np.array(variables[f's_cgdl_{int(np.ceil(n_gdl / 2))}'])[mask]
+    s_cmpl_t = np.array(variables[f's_cmpl_{int(np.ceil(nb_mpl / 2))}'])[mask]
+    s_cgdl_t = np.array(variables[f's_cgdl_{int(np.ceil(nb_gdl / 2))}'])[mask]
 
     # Plot the liquid water saturation at different spatial localisations: s
     if type_current == "polarization":
@@ -776,7 +776,7 @@ def plot_C_H2(variables, parameters, ax):
     """
 
     # Extraction of the parameters
-    n_gc, n_gdl, n_mpl, type_current, type_plot = parameters['n_gc'], parameters['n_gdl'], parameters['n_mpl'], parameters['type_current'], parameters['type_plot']
+    nb_gc, nb_gdl, nb_mpl, type_current, type_plot = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl'], parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
         delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
     elif type_current == 'polarization':
@@ -791,9 +791,9 @@ def plot_C_H2(variables, parameters, ax):
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
     t = np.array(variables['t'])[mask]
-    C_H2_agc_t = np.array(variables[f'C_H2_agc_{int(np.ceil(n_gc / 2))}'])[mask]
-    C_H2_agdl_t = np.array(variables[f'C_H2_agdl_{int(np.ceil(n_gdl / 2))}'])[mask]
-    C_H2_ampl_t = np.array(variables[f'C_H2_ampl_{int(np.ceil(n_mpl / 2))}'])[mask]
+    C_H2_agc_t = np.array(variables[f'C_H2_agc_{int(np.ceil(nb_gc / 2))}'])[mask]
+    C_H2_agdl_t = np.array(variables[f'C_H2_agdl_{int(np.ceil(nb_gdl / 2))}'])[mask]
+    C_H2_ampl_t = np.array(variables[f'C_H2_ampl_{int(np.ceil(nb_mpl / 2))}'])[mask]
     C_H2_acl_t = np.array(variables['C_H2_acl'])[mask]
 
     # Plot the hydrogen concentration at different spatial localisations: C_H2
@@ -825,7 +825,7 @@ def plot_C_O2(variables, parameters, ax):
     """
 
     # Extraction of the parameters
-    n_gc, n_gdl, n_mpl, type_current, type_plot = parameters['n_gc'], parameters['n_gdl'], parameters['n_mpl'], parameters['type_current'], parameters['type_plot']
+    nb_gc, nb_gdl, nb_mpl, type_current, type_plot = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl'], parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
         delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
     elif type_current == 'polarization':
@@ -841,9 +841,9 @@ def plot_C_O2(variables, parameters, ax):
         mask = np.ones_like(variables['t'], dtype=bool)
     t = np.array(variables['t'])[mask]
     C_O2_ccl_t = np.array(variables['C_O2_ccl'])[mask]
-    C_O2_cmpl_t = np.array(variables[f'C_O2_cmpl_{int(np.ceil(n_mpl / 2))}'])[mask]
-    C_O2_cgdl_t = np.array(variables[f'C_O2_cgdl_{int(np.ceil(n_gdl / 2))}'])[mask]
-    C_O2_cgc_t = np.array(variables[f'C_O2_cgc_{int(np.ceil(n_gc / 2))}'])[mask]
+    C_O2_cmpl_t = np.array(variables[f'C_O2_cmpl_{int(np.ceil(nb_mpl / 2))}'])[mask]
+    C_O2_cgdl_t = np.array(variables[f'C_O2_cgdl_{int(np.ceil(nb_gdl / 2))}'])[mask]
+    C_O2_cgc_t = np.array(variables[f'C_O2_cgc_{int(np.ceil(nb_gc / 2))}'])[mask]
 
     # Plot the oxygen concentration at different spatial localisations: C_O2
     ax.plot(t, C_O2_ccl_t, color=colors(5))
@@ -920,7 +920,7 @@ def plot_T(variables, operating_inputs, parameters, ax):
     # Extraction of the operating inputs and parameters
     current_density = operating_inputs['current_density']
     T_des = operating_inputs['T_des']
-    n_gc, n_gdl, n_mpl = parameters['n_gc'], parameters['n_gdl'], parameters['n_mpl']
+    nb_gc, nb_gdl, nb_mpl = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl']
     pola_current_parameters = parameters['pola_current_parameters']
     type_current, type_plot = parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
@@ -937,15 +937,15 @@ def plot_T(variables, operating_inputs, parameters, ax):
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
     t = np.array(variables['t'])[mask]
-    T_agc_t = np.array(variables[f'T_agc_{int(np.ceil(n_gc / 2))}'])[mask] - 273.15 # Conversion in °C.
-    T_agdl_t = np.array(variables[f'T_agdl_{int(np.ceil(n_gdl / 2))}'])[mask] - 273.15 # Conversion in °C.
-    T_ampl_t = np.array(variables[f'T_ampl_{int(np.ceil(n_mpl / 2))}'])[mask] - 273.15 # Conversion in °C.
+    T_agc_t = np.array(variables[f'T_agc_{int(np.ceil(nb_gc / 2))}'])[mask] - 273.15 # Conversion in °C.
+    T_agdl_t = np.array(variables[f'T_agdl_{int(np.ceil(nb_gdl / 2))}'])[mask] - 273.15 # Conversion in °C.
+    T_ampl_t = np.array(variables[f'T_ampl_{int(np.ceil(nb_mpl / 2))}'])[mask] - 273.15 # Conversion in °C.
     T_acl_t = np.array(variables['T_acl'])[mask] - 273.15  # Conversion in °C.
     T_mem_t = np.array(variables['T_mem'])[mask] - 273.15 # Conversion in °C.
     T_ccl_t = np.array(variables['T_ccl'])[mask] - 273.15 # Conversion in °C.
-    T_cmpl_t = np.array(variables[f'T_cmpl_{int(np.ceil(n_mpl / 2))}'])[mask] - 273.15  # Conversion in °C.
-    T_cgdl_t = np.array(variables[f'T_cgdl_{int(np.ceil(n_gdl / 2))}'])[mask] - 273.15 # Conversion in °C.
-    T_cgc_t = np.array(variables[f'T_cgc_{int(np.ceil(n_gc / 2))}'])[mask] - 273.15 # Conversion in °C.
+    T_cmpl_t = np.array(variables[f'T_cmpl_{int(np.ceil(nb_mpl / 2))}'])[mask] - 273.15  # Conversion in °C.
+    T_cgdl_t = np.array(variables[f'T_cgdl_{int(np.ceil(nb_gdl / 2))}'])[mask] - 273.15 # Conversion in °C.
+    T_cgc_t = np.array(variables[f'T_cgc_{int(np.ceil(nb_gc / 2))}'])[mask] - 273.15 # Conversion in °C.
 
     # Plot the temperature at different spatial localisations
     if type_current == "polarization":
@@ -1050,19 +1050,24 @@ def plot_Ucell(variables, parameters, ax):
     plot_general_instructions(ax)
 
 
-def plot_P(variables, parameters, ax):
+def plot_P(variables, operating_inputs, parameters, ax):
     """This function plots the pressure at different spatial localisations as a function of time.
 
     Parameters
     ----------
     variables : dict
         Variables calculated by the solver. They correspond to the fuel cell internal states.
+    operating_inputs : dict
+        Operating inputs of the fuel cell.
+    parameters : dict
+        Parameters of the fuel cell model.
     ax : matplotlib.axes.Axes
         Axes on which the pressure will be plotted.
     """
 
     # Extraction of the parameters
-    n_gc, type_current, type_plot = parameters['n_gc'], parameters['type_current'], parameters['type_plot']
+    Pa_des, Pc_des = operating_inputs['Pa_des'], operating_inputs['Pc_des']
+    nb_gc, type_current, type_plot = parameters['nb_gc'], parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
         delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
     elif type_current == 'polarization':
@@ -1076,28 +1081,28 @@ def plot_P(variables, parameters, ax):
         mask = np.array(variables['t']) >= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
-    t = np.array(variables['t'])[mask]
-    n_gc_mid = int(np.ceil(n_gc / 2))
-    C_v_agc = np.array(variables[f'C_v_agc_{n_gc_mid}'])[mask]
-    C_H2_agc = np.array(variables[f'C_H2_agc_{n_gc_mid}'])[mask]
-    C_N2_a = np.array(variables['C_N2_a'])[mask]
-    T_agc = np.array(variables[f'T_agc_{n_gc_mid}'])[mask]
-    C_v_cgc = np.array(variables[f'C_v_cgc_{n_gc_mid}'])[mask]
-    C_O2_cgc = np.array(variables[f'C_O2_cgc_{n_gc_mid}'])[mask]
-    C_N2_c = np.array(variables['C_N2_c'])[mask]
-    T_cgc = np.array(variables[f'T_cgc_{n_gc_mid}'])[mask]
-    Pagc_t = (C_v_agc + C_H2_agc + C_N2_a) * R * T_agc / 1e5  # Conversion in atm
-    Pcgc_t = (C_v_cgc + C_O2_cgc + C_N2_c) * R * T_cgc / 1e5 # Conversion in atm
+    t = np.array(variables['t'])
+    nb_gc_mid = int(np.ceil(nb_gc / 2))
+    C_v_agc = np.array(variables[f'C_v_agc_{nb_gc_mid}'])
+    C_H2_agc = np.array(variables[f'C_H2_agc_{nb_gc_mid}'])
+    C_N2_a = np.array(variables['C_N2_a'])
+    T_agc = np.array(variables[f'T_agc_{nb_gc_mid}'])
+    C_v_cgc = np.array(variables[f'C_v_cgc_{nb_gc_mid}'])
+    C_O2_cgc = np.array(variables[f'C_O2_cgc_{nb_gc_mid}'])
+    C_N2_c = np.array(variables['C_N2_c'])
+    T_cgc = np.array(variables[f'T_cgc_{nb_gc_mid}'])
+    Pagc_t = (C_v_agc + C_H2_agc + C_N2_a) * R * T_agc / 1e5  # Conversion in bar
+    Pcgc_t = (C_v_cgc + C_O2_cgc + C_N2_c) * R * T_cgc / 1e5 # Conversion in bar
     if parameters['type_auxiliary'] != 'no_auxiliary':
-        Pasm_t = np.array(variables['Pasm'])[mask] / 1e5 # Conversion in atm
-        Paem_t = np.array(variables['Paem'])[mask] / 1e5 # Conversion in atm
-        Pcsm_t = np.array(variables['Pcsm'])[mask] / 1e5 # Conversion in atm
-        Pcem_t = np.array(variables['Pcem'])[mask] / 1e5 # Conversion in atm
+        Pasm_t = np.array(variables['Pasm'])[mask] / 1e5 # Conversion in bar
+        Paem_t = np.array(variables['Paem'])[mask] / 1e5 # Conversion in bar
+        Pcsm_t = np.array(variables['Pcsm'])[mask] / 1e5 # Conversion in bar
+        Pcem_t = np.array(variables['Pcem'])[mask] / 1e5 # Conversion in bar
     else: # parameters['type_auxiliary'] == 'no_auxiliary'
-        Pasm_out_t = np.array(variables['Pasm_out'])[mask] / 1e5 # Conversion in atm
-        Paem_in_t = np.array(variables['Paem_in'])[mask] / 1e5 # Conversion in atm
-        Pcsm_out_t = np.array(variables['Pcsm_out'])[mask] / 1e5 # Conversion in atm
-        Pcem_in_t = np.array(variables['Pcem_in'])[mask] / 1e5 # Conversion in atm
+        Pa_in_t = np.array(variables['Pa_in']) / 1e5 # Conversion in bar
+        Pa_out_t = np.array([Pa_des] * len(t)) / 1e5 # Conversion in bar
+        Pc_in_t = np.array(variables['Pc_in']) / 1e5 # Conversion in bar
+        Pc_out_t = np.array([Pc_des] * len(t)) / 1e5 # Conversion in bar
 
     # Plot the pressure at different spatial localisations: P
     ax.plot(t, Pagc_t, color=colors(0))
@@ -1108,16 +1113,16 @@ def plot_P(variables, parameters, ax):
         ax.plot(t, Pcsm_t, color=colors(9))
         ax.plot(t, Pcem_t, color=colors(10))
     else: # parameters['type_auxiliary'] == 'no_auxiliary'
-        ax.plot(t, Pasm_out_t, color=colors(7))
-        ax.plot(t, Paem_in_t, color=colors(8))
-        ax.plot(t, Pcsm_out_t, color=colors(9))
-        ax.plot(t, Pcem_in_t, color=colors(10))
+        ax.plot(t, Pa_in_t, color=colors(7))
+        ax.plot(t, Pa_out_t, color=colors(8))
+        ax.plot(t, Pc_in_t, color=colors(9))
+        ax.plot(t, Pc_out_t, color=colors(10))
     if parameters['type_auxiliary'] != 'no_auxiliary':
         ax.legend([r'$\mathregular{P_{agc}}$', r'$\mathregular{P_{cgc}}$', r'$\mathregular{P_{asm}}$',
                    r'$\mathregular{P_{aem}}$', r'$\mathregular{P_{csm}}$', r'$\mathregular{P_{cem}}$'], loc='best')
     else: # parameters['type_auxiliary'] == 'no_auxiliary'
-        ax.legend([r'$\mathregular{P_{agc}}$', r'$\mathregular{P_{cgc}}$', r'$\mathregular{P_{asm,out}}$',
-                  r'$\mathregular{P_{aem,in}}$', r'$\mathregular{P_{csm,out}}$', r'$\mathregular{P_{cem,in}}$'], loc='best')
+        ax.legend([r'$\mathregular{P_{agc}}$', r'$\mathregular{P_{cgc}}$', r'$\mathregular{P_{a,in}}$',
+                  r'$\mathregular{P_{a,out}}$', r'$\mathregular{P_{c,in}}$', r'$\mathregular{P_{c,out}}$'], loc='best')
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r'$\mathbf{Pressure}$ $\mathbf{P}$ $\mathbf{\left( bar \right)}$', labelpad=3)
     ax.ticklabel_format(style='scientific', axis='y', scilimits=(0, 0))
@@ -1307,18 +1312,20 @@ def plot_Phi_des(variables, operating_inputs, parameters, ax):
     plot_general_instructions(ax)
 
 def plot_v(variables, parameters, ax):
-    """This function plots the velocity at different spatial localisations as a function of time.
+    """This function plots the velocity at the anode and the cathode as a function of time.
 
     Parameters
     ----------
     variables : dict
         Variables calculated by the solver. They correspond to the fuel cell internal states.
+    parameters: dict
+        Parameters of the fuel cell model.
     ax : matplotlib.axes.Axes
         Axes on which the pressure will be plotted.
     """
 
     # Extraction of the parameters
-    n_gc, type_current, type_plot = parameters['n_gc'], parameters['type_current'], parameters['type_plot']
+    nb_gc, type_current, type_plot = parameters['nb_gc'], parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
         delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
     elif type_current == 'polarization':
@@ -1332,42 +1339,90 @@ def plot_v(variables, parameters, ax):
         mask = np.array(variables['t']) >= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
-    t = np.array(variables['t'])[mask]
-    n_gc_mid = int(np.ceil(n_gc / 2))
-    v_agc_t = np.array(variables[f'v_agc_{n_gc_mid}'])[mask]
-    v_cgc_t = np.array(variables[f'v_cgc_{n_gc_mid}'])[mask]
-    if parameters['type_auxiliary'] != 'no_auxiliary':
-        v_asm_in_t = np.array(variables['v_asm_in'])[mask]
-        v_aem_out_t = np.array(variables['v_aem_out'])[mask]
-        v_csm_in_t = np.array(variables['v_csm_in'])[mask]
-        v_cem_out_t = np.array(variables['v_cem_out'])[mask]
-    else: # parameters['type_auxiliary'] == 'no_auxiliary'
-        v_asm_out_t = np.array(variables['v_asm_out'])[mask]
-        v_aem_in_t = np.array(variables['v_aem_in'])[mask]
-        v_csm_out_t = np.array(variables['v_csm_out'])[mask]
-        v_cem_in_t = np.array(variables['v_cem_in'])[mask]
+    t = np.array(variables['t'])
+    v_a_t = np.array(variables['v_a'])
+    v_c_t = np.array(variables['v_c'])
 
     # Plot the pressure at different spatial localisations: P
-    ax.plot(t, v_agc_t, color=colors(0))
-    ax.plot(t, v_cgc_t, color=colors(6))
-    if parameters['type_auxiliary'] != 'no_auxiliary':
-        ax.plot(t, v_asm_in_t, color=colors(7))
-        ax.plot(t, v_aem_out_t, color=colors(8))
-        ax.plot(t, v_csm_in_t, color=colors(9))
-        ax.plot(t, v_cem_out_t, color=colors(3))
-    else: # parameters['type_auxiliary'] == 'no_auxiliary'
-        ax.plot(t, v_asm_out_t, color=colors(7))
-        ax.plot(t, v_aem_in_t, color=colors(8))
-        ax.plot(t, v_csm_out_t, color=colors(9))
-        ax.plot(t, v_cem_in_t, color=colors(3))
-    if parameters['type_auxiliary'] != 'no_auxiliary':
-        ax.legend([r'$\mathregular{v_{agc}}$', r'$\mathregular{v_{cgc}}$', r'$\mathregular{v_{asm,in}}$',
-                   r'$\mathregular{v_{aem,out}}$', r'$\mathregular{v_{csm,in}}$', r'$\mathregular{v_{cem,out}}$'], loc='best')
-    else: # parameters['type_auxiliary'] == 'no_auxiliary'
-        ax.legend([r'$\mathregular{v_{agc}}$', r'$\mathregular{v_{cgc}}$', r'$\mathregular{v_{asm,out}}$',
-                   r'$\mathregular{v_{aem,in}}$', r'$\mathregular{v_{csm,out}}$', r'$\mathregular{v_{cem,in}}$'], loc='best')
+    ax.plot(t, v_a_t, color=colors(0))
+    ax.plot(t, v_c_t, color=colors(6))
+    ax.legend([r'$\mathregular{v_{a}}$', r'$\mathregular{v_{c}}$'], loc='best')
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
-    ax.set_ylabel(r'$\mathbf{Velocities}$ $\mathbf{P}$ $\mathbf{\left( m.s^{-1} \right)}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Velocities}$ $\mathbf{v}$ $\mathbf{\left( m.s^{-1} \right)}$', labelpad=3)
+    ax.ticklabel_format(style='scientific', axis='y', scilimits=(0, 0))
+
+    # Plot instructions
+    plot_general_instructions(ax)
+
+
+def plot_Re_nb(variables, parameters, ax):
+    """This function plots the Reynold number at the center of the AGC and the CGC as a function of time.
+
+    Parameters
+    ----------
+    variables : dict
+        Variables calculated by the solver. They correspond to the fuel cell internal states.
+    ax : matplotlib.axes.Axes
+        Axes on which the pressure will be plotted.
+    """
+
+    # Extraction of the parameters
+    Hcgc, Wcgc = parameters['Hcgc'], parameters['Wcgc']
+    nb_gc, type_current, type_plot = parameters['nb_gc'], parameters['type_current'], parameters['type_plot']
+    if type_current == 'step':
+        delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
+    elif type_current == 'polarization':
+        delta_t_ini = parameters['pola_current_parameters']['delta_t_ini_pola']
+    elif type_current == 'polarization_for_cali':
+        delta_t_ini = parameters['pola_current_for_cali_parameters']['delta_t_ini_pola_cali']
+    else:
+        delta_t_ini = 0
+    # Extraction of the variables
+    if type_plot == "fixed":
+        mask = np.array(variables['t']) >= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
+    else: # type_plot == "dynamic"
+        mask = np.ones_like(variables['t'], dtype=bool)
+    t = np.array(variables['t'])
+    v_a_t = np.array(variables['v_a'])
+    v_c_t = np.array(variables['v_c'])
+    C_v_agc_t = np.array(variables[f'C_v_agc_{int(np.ceil(nb_gc / 2))}'])
+    C_v_cgc_t = np.array(variables[f'C_v_cgc_{int(np.ceil(nb_gc / 2))}'])
+    C_H2_agc_t = np.array(variables[f'C_H2_agc_{int(np.ceil(nb_gc / 2))}'])
+    C_O2_cgc_t = np.array(variables[f'C_O2_cgc_{int(np.ceil(nb_gc / 2))}'])
+    C_N2_c_t = np.array(variables['C_N2_c'])
+    T_agc_t = np.array(variables[f'T_agc_{int(np.ceil(nb_gc / 2))}'])
+    T_cgc_t = np.array(variables[f'T_cgc_{int(np.ceil(nb_gc / 2))}'])
+
+    # Calculation of the Reynold Number
+    d_pipe = np.sqrt(4 * Hcgc * Wcgc / np.pi)
+    P_agc = (C_v_agc_t + C_H2_agc_t) * R * T_agc_t
+    P_cgc = (C_v_cgc_t + C_O2_cgc_t + C_N2_c_t) * R * T_cgc_t
+    M_agc = C_v_agc_t * R * T_agc_t / P_agc * M_H2O + \
+            C_H2_agc_t * R * T_agc_t / P_agc * M_H2
+    M_cgc = C_v_cgc_t * R * T_cgc_t / P_cgc * M_H2O + \
+            C_O2_cgc_t * R * T_cgc_t / P_cgc * M_O2 + \
+            C_N2_c_t * R * T_cgc_t / P_cgc * M_N2
+    rho_agc = P_agc / (R * T_agc_t) * M_agc
+    rho_cgc = P_cgc / (R * T_cgc_t) * M_cgc
+    x_H2O_v_agc = C_v_agc_t / (C_v_agc_t + C_H2_agc_t)
+    x_H2O_v_cgc = C_v_cgc_t / (C_v_cgc_t + C_O2_cgc_t + C_N2_c_t)
+    y_O2_cgc = C_O2_cgc_t / (C_O2_cgc_t + C_N2_c_t)
+    mu_agc = mu_mixture_gases(['H2O_v', 'H2'],
+                              [x_H2O_v_agc, (1 - x_H2O_v_agc)],
+                              T_agc_t)
+    mu_cgc = mu_mixture_gases(['H2O_v', 'O2', 'N2'],
+                              [x_H2O_v_cgc, y_O2_cgc * (1 - x_H2O_v_cgc),
+                               (1 - y_O2_cgc) * (1 - x_H2O_v_cgc)],
+                              T_cgc_t)
+    Re_nb_a_t = (rho_agc * v_a_t * d_pipe) / mu_agc  # Reynolds number at the anode side
+    Re_nb_c_t = (rho_cgc * v_c_t * d_pipe) / mu_cgc  # Reynolds number at the anode side
+
+    # Plot the pressure at different spatial localisations: P
+    ax.plot(t, Re_nb_a_t, color=colors(0))
+    ax.plot(t, Re_nb_c_t, color=colors(6))
+    ax.legend([r'$\mathregular{Re_{a}}$', r'$\mathregular{Re_{c}}$'], loc='best')
+    ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Reynold}$ $\mathbf{number}$ $\mathbf{Re}$', labelpad=3)
     ax.ticklabel_format(style='scientific', axis='y', scilimits=(0, 0))
 
     # Plot instructions

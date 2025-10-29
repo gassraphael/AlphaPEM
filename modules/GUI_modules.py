@@ -352,7 +352,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
         voltage_zone = "before_voltage_drop"
 
     (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
-     current_density, dcurrent_densitydt) = calculate_current_density_parameters()
+     current_density) = calculate_current_density_parameters()
 
     T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola = stored_operating_inputs(type_fuel_cell, voltage_zone)
 

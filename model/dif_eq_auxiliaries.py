@@ -6,7 +6,7 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import F, Text, Pext, Phi_ext, y_O2_ext, tau_cp, tau_hum, R, Kp_acp, Kd_acp, Kp_ccp, Kd_ccp, Kp_T, Kd_T
+from configuration.settings import F, Text, Pext, Phi_ext, y_O2_ext, tau_cp, tau_hum, R, Kp_T, Kd_T
 from modules.transitory_functions import Psat
 
 
@@ -21,42 +21,11 @@ def calculate_dyn_air_compressor_evolution(dif_eq, Pacp_des, Pasm_out, Pccp_des,
     dif_eq : dict
         Dictionary used for saving the differential equations.
     """
-    if type_auxiliary == "no_auxiliary":
-        # At the anode side
-        dif_eq['dPasm_out / dt'] = (Pacp_des - Pasm_out) / tau_cp
-        # At the cathode side
-        dif_eq['dPcsm_out / dt'] = (Pccp_des - Pcsm_out) / tau_cp
+    pass
+    # dif_eq['dPasm_out / dt'] = (Pacp_des - Pasm_out) / tau_cp # Estimation at the first order.
 
 
-def calculate_dyn_air_compressor_controler_evolution(dif_eq, Wacp_des, dWacp_desdt, Wa_inj_des, dWa_inj_desdt,
-                                                     Wccp_des, dWccp_desdt, Wc_inj_des, dWc_inj_desdt, Pasm_out,
-                                                     Pcsm_out, v_asm_out, v_csm_out, T_des, Hagc, Hcgc, Wagc, Wcgc,
-                                                     type_auxiliary, **kwargs):
-
-    if type_auxiliary == "no_auxiliary":
-        # At the anode side
-        Wacp_to_asm_out = Pasm_out * v_asm_out * Hagc * Wagc / (R * T_des)                                                     # Volume flow rate at the anode compressor outlet (mol.s-1)
-        dWacp_to_asm_outdt = (v_asm_out * dif_eq['dPasm_out / dt'] + Pasm_out * dif_eq['dv_asm_out / dt']) * Hagc * Wagc / (R * T_des)  # Derivative of the anode volume flow rate (mol.s-2). This is calculated assuming an isothermal flow.
-
-        Wa_des = Wacp_des + Wa_inj_des
-        # dWa_desdt = dWacp_desdt + dWa_inj_desdt
-        dWa_desdt = 0                                                                                                   # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-        dif_eq['dPacp_des / dt'] = Kp_acp * (Wa_des - Wacp_to_asm_out) + Kd_acp * (dWa_desdt - dWacp_to_asm_outdt)                      # PD controller for the anode compressor outlet pressure
-        # dif_eq['dPacp_des / dt'] = 0                                                                                    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # At the cathode side
-        Wccp_to_csm_out = Pcsm_out * v_csm_out * Hcgc * Wcgc / (R * T_des)                                                     # Volume flow rate at the cathode compressor outlet (mol.s-1)
-        dWccp_to_csm_outdt = (v_csm_out * dif_eq['dPcsm_out / dt'] + Pcsm_out * dif_eq['dv_csm_out / dt']) * Hcgc * Wcgc / (R * T_des)  # Derivative of the cathode volume flow rate (mol.s-2). This is calculated assuming an isothermal flow.
-
-        Wc_des = Wccp_des + Wc_inj_des  # Desired volume flow rate at the entry of the cathode side (mol.s-1)
-        # dWc_desdt = dWccp_desdt + dWc_inj_desdt
-        dWc_desdt = 0                                                                                                   # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-        dif_eq['dPccp_des / dt'] = Kp_ccp * (Wc_des - Wccp_to_csm_out) + Kd_ccp * (dWc_desdt - dWccp_to_csm_outdt)                      # PD controller for the cathode compressor outlet pressure
-        # dif_eq['dPccp_des / dt'] = 0                                                                                  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
-def calculate_dyn_humidifier_evolution(dif_eq, Wa_inj_des, Wc_inj_des, Wa_inj, Wc_inj, type_auxiliary, **kwargs):
+def calculate_dyn_humidifier_evolution(dif_eq, Wa_inj, Wc_inj, type_auxiliary, Wa_inj_des, Wc_inj_des, **kwargs):
     # Anode and cathode humidifiers evolution
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
         dif_eq['dWa_inj / dt'] = 0

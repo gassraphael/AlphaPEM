@@ -102,7 +102,7 @@ def main_frame(root, canvas):
 
     # Import the current density parameters from the settings file for default value
     (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
-     current_density, dcurrent_densitydt) = calculate_current_density_parameters()
+     current_density) = calculate_current_density_parameters()
     f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = f_EIS
 
 

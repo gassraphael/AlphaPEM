@@ -69,8 +69,8 @@ def heat_transfer_int_values(sv, parameters):
     Hgdl, Hmpl, Hacl, Hccl = parameters['Hgdl'], parameters['Hmpl'], parameters['Hacl'], parameters['Hccl']
     Hmem, epsilon_mc, epsilon_gdl = parameters['Hmem'], parameters['epsilon_mc'], parameters['epsilon_gdl']
     epsilon_cl, epsilon_mpl = parameters['epsilon_cl'], parameters['epsilon_mpl']
-    epsilon_c, n_gdl, n_mpl = parameters['epsilon_c'], parameters['n_gdl'], parameters['n_mpl']
-    n_tl, Htl = parameters['n_tl'], parameters['Htl']
+    epsilon_c, nb_gdl, nb_mpl = parameters['epsilon_c'], parameters['nb_gdl'], parameters['nb_mpl']
+    nb_tl, Htl = parameters['nb_tl'], parameters['Htl']
     epsilon_atl, epsilon_ctl = parameters['epsilon_atl'], parameters['epsilon_ctl']
 
     # Weighted harmonic means of the effective thermal diffusivity
@@ -83,31 +83,31 @@ def heat_transfer_int_values(sv, parameters):
                                           k_th_eff('agdl', sv[f'T_agdl_{i + 1}'], C_v=sv[f'C_v_agdl_{i + 1}'],
                                                    s=sv[f's_agdl_{i + 1}'], C_H2=sv[f'C_H2_agdl_{i + 1}'], C_N2=C_N2_a,
                                                    epsilon=epsilon_gdl, epsilon_c=epsilon_c)])
-                                   for i in range(1, n_gdl)]
+                                   for i in range(1, nb_gdl)]
 
-    k_th_eff_agdl_atl = hmean([k_th_eff('agdl', sv[f'T_agdl_{n_gdl}'], C_v=sv[f'C_v_agdl_{n_gdl}'],
-                                               s=sv[f's_agdl_{n_gdl}'], C_H2=sv[f'C_H2_agdl_{n_gdl}'], C_N2=C_N2_a,
+    k_th_eff_agdl_atl = hmean([k_th_eff('agdl', sv[f'T_agdl_{nb_gdl}'], C_v=sv[f'C_v_agdl_{nb_gdl}'],
+                                               s=sv[f's_agdl_{nb_gdl}'], C_H2=sv[f'C_H2_agdl_{nb_gdl}'], C_N2=C_N2_a,
                                                epsilon=epsilon_gdl, epsilon_c=epsilon_c),
                                      k_th_eff('atl', sv[f'T_atl_{1}'], C_v=sv[f'C_v_atl_{1}'],
                                               s=sv[f's_atl_{1}'], C_H2=sv[f'C_H2_atl_{1}'], C_N2=C_N2_a,
-                                              epsilon=epsilon_atl[1], epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl, node=1)],
-                                   weights=[(Hgdl / n_gdl) / 2, (Htl / n_tl) / 2])
+                                              epsilon=epsilon_atl[1], epsilon_c=epsilon_c, n_tl=nb_tl, Htl=Htl, node=1)],
+                                   weights=[(Hgdl / nb_gdl) / 2, (Htl / nb_tl) / 2])
 
     k_th_eff_atl_atl = [None] + [hmean([k_th_eff('atl', sv[f'T_atl_{i}'], C_v=sv[f'C_v_atl_{i}'],
                                                      s=sv[f's_atl_{i}'], C_H2=sv[f'C_H2_atl_{i}'], C_N2=C_N2_a,
-                                                     epsilon=epsilon_atl[i], epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl, node=i),
+                                                     epsilon=epsilon_atl[i], epsilon_c=epsilon_c, n_tl=nb_tl, Htl=Htl, node=i),
                                             k_th_eff('atl', sv[f'T_atl_{i + 1}'], C_v=sv[f'C_v_atl_{i + 1}'],
                                                      s=sv[f's_atl_{i + 1}'], C_H2=sv[f'C_H2_atl_{i + 1}'], C_N2=C_N2_a,
-                                                     epsilon=epsilon_atl[i + 1], epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl, node=i + 1)])
-                                   for i in range(1, n_tl)]
+                                                     epsilon=epsilon_atl[i + 1], epsilon_c=epsilon_c, n_tl=nb_tl, Htl=Htl, node=i + 1)])
+                                   for i in range(1, nb_tl)]
 
-    k_th_eff_atl_ampl = hmean([k_th_eff('atl', sv[f'T_atl_{n_tl}'], C_v=sv[f'C_v_atl_{n_tl}'],
-                                         s=sv[f's_atl_{n_tl}'], C_H2=sv[f'C_H2_atl_{n_tl}'], C_N2=C_N2_a,
-                                         epsilon=epsilon_atl[n_tl], epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl, node=n_tl),
+    k_th_eff_atl_ampl = hmean([k_th_eff('atl', sv[f'T_atl_{nb_tl}'], C_v=sv[f'C_v_atl_{nb_tl}'],
+                                         s=sv[f's_atl_{nb_tl}'], C_H2=sv[f'C_H2_atl_{nb_tl}'], C_N2=C_N2_a,
+                                         epsilon=epsilon_atl[nb_tl], epsilon_c=epsilon_c, n_tl=nb_tl, Htl=Htl, node=nb_tl),
                                       k_th_eff('ampl', sv[f'T_ampl_{1}'], C_v=sv[f'C_v_ampl_{1}'],
                                          s=sv[f's_ampl_{1}'], C_H2=sv[f'C_H2_ampl_{1}'], C_N2=C_N2_a,
                                          epsilon=epsilon_mpl)],
-                               weights=[(Htl / n_tl) / 2, (Hmpl / n_mpl) / 2])
+                               weights=[(Htl / nb_tl) / 2, (Hmpl / nb_mpl) / 2])
 
     k_th_eff_ampl_ampl = [None] + [hmean([k_th_eff('ampl', sv[f'T_ampl_{i}'], C_v=sv[f'C_v_ampl_{i}'],
                                                    s=sv[f's_ampl_{i}'], C_H2=sv[f'C_H2_ampl_{i}'], C_N2=C_N2_a,
@@ -115,14 +115,14 @@ def heat_transfer_int_values(sv, parameters):
                                           k_th_eff('ampl', sv[f'T_ampl_{i + 1}'], C_v=sv[f'C_v_ampl_{i + 1}'],
                                                    s=sv[f's_ampl_{i + 1}'], C_H2=sv[f'C_H2_ampl_{i + 1}'], C_N2=C_N2_a,
                                                    epsilon=epsilon_mpl)])
-                                   for i in range(1, n_mpl)]
+                                   for i in range(1, nb_mpl)]
 
-    k_th_eff_ampl_acl = hmean([k_th_eff('ampl', sv[f'T_ampl_{n_mpl}'], C_v=sv[f'C_v_ampl_{n_mpl}'],
-                                                  s=sv[f's_ampl_{n_mpl}'], C_H2=sv[f'C_H2_ampl_{n_mpl}'],
+    k_th_eff_ampl_acl = hmean([k_th_eff('ampl', sv[f'T_ampl_{nb_mpl}'], C_v=sv[f'C_v_ampl_{nb_mpl}'],
+                                                  s=sv[f's_ampl_{nb_mpl}'], C_H2=sv[f'C_H2_ampl_{nb_mpl}'],
                                                  C_N2=C_N2_a, epsilon=epsilon_mpl),
                                  k_th_eff('acl', T_acl, C_v=C_v_acl, s=s_acl, lambdaa=lambda_acl,
                                           C_H2=C_H2_acl, C_N2=C_N2_a, epsilon=epsilon_cl, epsilon_mc=epsilon_mc)],
-                                weights=[(Hmpl / n_mpl) / 2, Hacl / 2])
+                                weights=[(Hmpl / nb_mpl) / 2, Hacl / 2])
 
     k_th_eff_acl_mem = hmean([k_th_eff('acl', T_acl, C_v=C_v_acl, s=s_acl, lambdaa=lambda_acl,
                                        C_H2=C_H2_acl, C_N2=C_N2_a, epsilon=epsilon_cl, epsilon_mc=epsilon_mc),
@@ -139,7 +139,7 @@ def heat_transfer_int_values(sv, parameters):
                                        k_th_eff('cmpl', sv[f'T_cmpl_{1}'], C_v=sv[f'C_v_cmpl_{1}'],
                                                  s=sv[f's_cmpl_{1}'], C_O2=sv[f'C_O2_cmpl_{1}'], C_N2=C_N2_c,
                                                 epsilon=epsilon_mpl)],
-                                weights=[Hccl / 2, (Hmpl / n_mpl) / 2])
+                                weights=[Hccl / 2, (Hmpl / nb_mpl) / 2])
 
     k_th_eff_cmpl_cmpl = [None] + [hmean([k_th_eff('cmpl', sv[f'T_cmpl_{i}'], C_v=sv[f'C_v_cmpl_{i}'],
                                                    s=sv[f's_cmpl_{i}'], C_O2=sv[f'C_O2_cmpl_{i}'], C_N2=C_N2_c,
@@ -147,34 +147,34 @@ def heat_transfer_int_values(sv, parameters):
                                             k_th_eff('cmpl', sv[f'T_cmpl_{i + 1}'], C_v=sv[f'C_v_cmpl_{i + 1}'],
                                                     s=sv[f's_cmpl_{i + 1}'], C_O2=sv[f'C_O2_cmpl_{i + 1}'], C_N2=C_N2_c,
                                                     epsilon=epsilon_mpl)])
-                                      for i in range(1, n_mpl)]
+                                      for i in range(1, nb_mpl)]
 
-    k_th_eff_cmpl_ctl = hmean([k_th_eff('cmpl', sv[f'T_cmpl_{n_mpl}'], C_v=sv[f'C_v_cmpl_{n_mpl}'],
-                                                  s=sv[f's_cmpl_{n_mpl}'], C_O2=sv[f'C_O2_cmpl_{n_mpl}'], C_N2=C_N2_c,
+    k_th_eff_cmpl_ctl = hmean([k_th_eff('cmpl', sv[f'T_cmpl_{nb_mpl}'], C_v=sv[f'C_v_cmpl_{nb_mpl}'],
+                                                  s=sv[f's_cmpl_{nb_mpl}'], C_O2=sv[f'C_O2_cmpl_{nb_mpl}'], C_N2=C_N2_c,
                                                   epsilon=epsilon_mpl),
                                         k_th_eff('ctl', sv['T_ctl_1'], C_v=sv['C_v_ctl_1'], s=sv['s_ctl_1'],
                                                  C_O2=sv[f'C_O2_ctl_1'], C_N2=C_N2_c, epsilon=epsilon_ctl[1],
-                                                 epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl, node=1)],
-                                weights=[(Hmpl / n_mpl) / 2, (Htl / n_tl) / 2])
+                                                 epsilon_c=epsilon_c, n_tl=nb_tl, Htl=Htl, node=1)],
+                                weights=[(Hmpl / nb_mpl) / 2, (Htl / nb_tl) / 2])
 
     k_th_eff_ctl_ctl = [None] + [hmean([k_th_eff('ctl', sv[f'T_ctl_{i}'], C_v=sv[f'C_v_ctl_{i}'],
                                                  s=sv[f's_ctl_{i}'], C_O2=sv[f'C_O2_ctl_{i}'], C_N2=C_N2_c,
-                                                 epsilon=epsilon_ctl[i], epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl,
+                                                 epsilon=epsilon_ctl[i], epsilon_c=epsilon_c, n_tl=nb_tl, Htl=Htl,
                                                  node=i),
                                         k_th_eff('ctl', sv[f'T_ctl_{i + 1}'], C_v=sv[f'C_v_ctl_{i + 1}'],
                                                  s=sv[f's_ctl_{i + 1}'], C_O2=sv[f'C_O2_ctl_{i + 1}'], C_N2=C_N2_c,
-                                                 epsilon=epsilon_ctl[i + 1], epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl,
+                                                 epsilon=epsilon_ctl[i + 1], epsilon_c=epsilon_c, n_tl=nb_tl, Htl=Htl,
                                                  node=i + 1)])
-                                   for i in range(1, n_tl)]
+                                   for i in range(1, nb_tl)]
 
-    k_th_eff_ctl_cgdl = hmean([k_th_eff('ctl', sv[f'T_ctl_{n_tl}'], C_v=sv[f'C_v_ctl_{n_tl}'],
-                                               s=sv[f's_ctl_{n_tl}'], C_O2=sv[f'C_O2_ctl_{n_tl}'], C_N2=C_N2_c,
-                                               epsilon=epsilon_ctl[n_tl], epsilon_c=epsilon_c, n_tl=n_tl, Htl=Htl,
-                                               node=n_tl),
+    k_th_eff_ctl_cgdl = hmean([k_th_eff('ctl', sv[f'T_ctl_{nb_tl}'], C_v=sv[f'C_v_ctl_{nb_tl}'],
+                                               s=sv[f's_ctl_{nb_tl}'], C_O2=sv[f'C_O2_ctl_{nb_tl}'], C_N2=C_N2_c,
+                                               epsilon=epsilon_ctl[nb_tl], epsilon_c=epsilon_c, n_tl=nb_tl, Htl=Htl,
+                                               node=nb_tl),
                                      k_th_eff('cgdl', sv['T_cgdl_1'], C_v=sv['C_v_cgdl_1'], s=sv['s_cgdl_1'],
                                               C_O2=sv[f'C_O2_cgdl_1'], C_N2=C_N2_c, epsilon=epsilon_gdl,
                                               epsilon_c=epsilon_c)],
-                               weights=[(Htl / n_tl) / 2, (Hgdl / n_gdl) / 2])
+                               weights=[(Htl / nb_tl) / 2, (Hgdl / nb_gdl) / 2])
 
     k_th_eff_cgdl_cgdl = [None] + [hmean([k_th_eff('cgdl', sv[f'T_cgdl_{i}'], C_v=sv[f'C_v_cgdl_{i}'],
                                                    s=sv[f's_cgdl_{i}'], C_O2=sv[f'C_O2_cgdl_{i}'], C_N2=C_N2_c,
@@ -182,10 +182,10 @@ def heat_transfer_int_values(sv, parameters):
                                           k_th_eff('cgdl', sv[f'T_cgdl_{i + 1}'], C_v=sv[f'C_v_cgdl_{i + 1}'],
                                                    s=sv[f's_cgdl_{i + 1}'], C_O2=sv[f'C_O2_cgdl_{i + 1}'], C_N2=C_N2_c,
                                                    epsilon=epsilon_gdl, epsilon_c=epsilon_c)])
-                                   for i in range(1, n_gdl)]
+                                   for i in range(1, nb_gdl)]
 
-    k_th_eff_cgdl_cgc = k_th_eff('cgdl', sv[f'T_cgdl_{n_gdl}'], C_v=sv[f'C_v_cgdl_{n_gdl}'],
-                                 s=sv[f's_cgdl_{n_gdl}'], C_O2=sv[f'C_O2_cgdl_{n_gdl}'], C_N2=C_N2_c, epsilon=epsilon_gdl,
+    k_th_eff_cgdl_cgc = k_th_eff('cgdl', sv[f'T_cgdl_{nb_gdl}'], C_v=sv[f'C_v_cgdl_{nb_gdl}'],
+                                 s=sv[f's_cgdl_{nb_gdl}'], C_O2=sv[f'C_O2_cgdl_{nb_gdl}'], C_N2=C_N2_c, epsilon=epsilon_gdl,
                                  epsilon_c=epsilon_c)
 
     return (k_th_eff_agc_agdl, k_th_eff_agdl_agdl, k_th_eff_agdl_atl, k_th_eff_atl_atl, k_th_eff_atl_ampl,

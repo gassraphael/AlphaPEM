@@ -233,7 +233,7 @@ def stored_physical_parameters(type_fuel_cell):
             type_fuel_cell == "ZSW-GenStack_T_76" or type_fuel_cell == "ZSW-GenStack_T_84":
         # Global
         Aact = 279.72e-4  # m². It is the MEA active area.
-        n_cell = 26  # . It is the number of cell in the stack.
+        nb_cell = 26  # . It is the number of cell in the stack.
         # Catalyst layer
         Hacl = 8e-6  # m. It is the thickness of the anode catalyst layer.
         Hccl = 17e-6  # m. It is the thickness of the cathode catalyst layer.
@@ -253,19 +253,14 @@ def stored_physical_parameters(type_fuel_cell):
         Hcgc = 300e-6  # m. It is the thickness of the cathode gas channel.
         Wagc = 430e-6  # m. It is the width of the anode gas channel.
         Wcgc = 532e-6  # m. It is the width of the cathode gas channel.
-        Lgc = 23.31  # m. It is the length of the gas channel.
+        Lgc = 222e-3  # m. It is the length of one channel in the bipolar plate.
+        nb_channel_in_gc = 105 # . It is the number of channels in the bipolar plate.
         #   Auxiliaries
         Lm = 25.8e-3  # m. It is the length of the manifold.
-        L_endplate = 46.8e-3  # m. It is the length of the endplate.
-        L_man_gc = 8.74e-3  # m. It is the length of the volume connecting the manifold to the gas channel.
         A_T_a = 9.01e-4  # m². It is the inlet/exhaust anode manifold throttle area
         A_T_c = 22.61e-4  # m². It is the inlet/exhaust cathode manifold throttle area
         Vasm, Vcsm = Lm * A_T_a, Lm * A_T_c  # m3. It is the supply manifold volume.
         Vaem, Vcem = Vasm, Vcsm  # m-3. It is the exhaust manifold volume.
-        V_endplate_a = L_man_gc * A_T_a  # m3. It is the anode endplate volume.
-        V_endplate_c = L_man_gc * A_T_c  # m3. It is the cathode endplate volume.
-        V_man_agc = L_man_gc * Hagc * Wagc  # m3. It is the volume of the volume connecting the anode manifold to the gas channel.
-        V_man_cgc = L_man_gc * Hcgc * Wcgc  # m3. It is the volume of the volume connecting the cathode manifold to the gas channel.
         # Interaction parameters between water and PEMFC structure
         e = 4.0  # It is the capillary exponent
         # Voltage polarization
@@ -282,7 +277,7 @@ def stored_physical_parameters(type_fuel_cell):
             type_fuel_cell == "EH-31_2.5":
         # Global
         Aact = 85e-4  # m². It is the active area of the catalyst layer.
-        n_cell = 1  # . It is the number of cell in the stack.
+        nb_cell = 1  # . It is the number of cell in the stack.
         # Catalyst layer
         Hacl = 8.593e-6  # m. It is the thickness of the anode catalyst layer.
         Hccl = Hacl  # m. It is the thickness of the cathode catalyst layer.
@@ -302,19 +297,14 @@ def stored_physical_parameters(type_fuel_cell):
         Hcgc = Hagc  # m. It is the thickness of the cathode gas channel.
         Wagc = 450e-6  # m. It is the width of the anode gas channel.
         Wcgc = Wagc  # m. It is the width of the cathode gas channel.
-        Lgc = 9.67  # m. It is the length of the gas channel.
+        Lgc = 144e-3  # m. It is the length of one channel in the bipolar plate.
+        nb_channel_in_gc = 67  # . It is the number of channels in the bipolar plate.
         #   Auxiliaries
         Lm = 2.03  # m. It is the length of the manifold.
-        L_endplate = 46.8e-3  # m. It is the length of the endplate.
-        L_man_gc = 8.74e-3  # m. It is the length of the volume connecting the manifold to the gas channel.
         A_T_a = 11.8e-4  # m². It is the inlet/exhaust anode manifold throttle area
         A_T_c = 34.4e-4  # m². It is the inlet/exhaust cathode manifold throttle area
         Vasm, Vcsm = Lm * A_T_a, Lm * A_T_c  # m3. It is the supply manifold volume.
         Vaem, Vcem = Vasm, Vcsm  # m-3. It is the exhaust manifold volume.
-        V_endplate_a = L_man_gc * A_T_a  # m3. It is the anode endplate volume.
-        V_endplate_c = L_man_gc * A_T_c  # m3. It is the cathode endplate volume.
-        V_man_agc = L_man_gc * Hagc * Wagc  # m3. It is the volume of the volume connecting the anode manifold to the gas channel.
-        V_man_cgc = L_man_gc * Hcgc * Wcgc  # m3. It is the volume of the volume connecting the cathode manifold to the gas channel.
         # Interaction parameters between water and PEMFC structure
         e = 4.0  # It is the capillary exponent
         # Voltage polarization
@@ -331,9 +321,8 @@ def stored_physical_parameters(type_fuel_cell):
         raise ValueError('the type_input given is not valid.')
 
     return (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, Lm, L_endplate, L_man_gc, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, V_endplate_a, V_endplate_c,
-            V_man_agc, V_man_cgc, Aact, n_cell, e, Re, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim,
-            a_switch, C_scl)
+            Wcgc, Lgc, nb_channel_in_gc, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
+            i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
 
 
 def EIS_parameters(f_EIS):

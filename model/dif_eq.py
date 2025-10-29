@@ -13,16 +13,14 @@ from model.flows import calculate_flows
 from model.cell_voltage import calculate_eta_c_intermediate_values
 from model.heat_transfer import calculate_heat_transfers
 from model.control import control_operating_conditions
-from modules.dif_eq_modules import calculate_dif_eq_int_values, desired_flows
+from modules.dif_eq_modules import calculate_dif_eq_int_values
 from model.dif_eq_MEA import (calculate_dyn_dissoved_water_evolution_inside_MEA, calculate_dyn_liquid_water_evolution_inside_MEA,
                               calculate_dyn_vapor_evolution_inside_MEA, calculate_dyn_H2_O2_N2_evolution_inside_MEA,
                               calculate_dyn_voltage_evolution, calculate_dyn_temperature_evolution_inside_MEA)
 from model.dif_eq_GC_manifold import (calculate_dyn_gas_evolution_inside_gas_channel,
                                       calculate_dyn_temperature_evolution_inside_gas_channel,
-                                      calculate_dyn_velocity_evolution,
                                       calculate_dyn_manifold_pressure_and_humidity_evolution)
-from model.dif_eq_auxiliaries import (calculate_dyn_air_compressor_controler_evolution,
-                                      calculate_dyn_air_compressor_evolution, calculate_dyn_humidifier_evolution,
+from model.dif_eq_auxiliaries import (calculate_dyn_air_compressor_evolution, calculate_dyn_humidifier_evolution,
                                       calculate_dyn_throttle_area_controler)
 
 # ______________________Objective function to solve. It gives the system of differential equations______________________
@@ -62,17 +60,15 @@ def dydt(t, y, operating_inputs, parameters, solver_variable_names, control_vari
     if parameters["type_control"] != "no_control":
         control_operating_conditions(t, solver_variables, operating_inputs, parameters, control_variables)
 
-    # Calculation of the flows
+    # Intermediate values
     i_fc = operating_inputs['current_density'](t, parameters)
-    di_fcdt = operating_inputs['dcurrent_density / dt'](t, parameters)
+    dif_eq_int_values = calculate_dif_eq_int_values(t, solver_variables, control_variables, i_fc, operating_inputs,
+                                                    parameters)
+    eta_c_intermediate_values = calculate_eta_c_intermediate_values(solver_variables, operating_inputs, parameters)
+
+    # Calculation of the flows
     matter_flows_dico = calculate_flows(t, solver_variables, control_variables, i_fc, operating_inputs, parameters)
     heat_flows_dico = calculate_heat_transfers(solver_variables, i_fc, operating_inputs, parameters, **matter_flows_dico)
-
-    # Intermediate values
-    dif_eq_int_values = calculate_dif_eq_int_values(t, solver_variables, operating_inputs, parameters,
-                                                    **matter_flows_dico)
-    dif_eq_int_values_and_matter_flow_dico = {**dif_eq_int_values, **matter_flows_dico}
-    eta_c_intermediate_values = calculate_eta_c_intermediate_values(solver_variables, operating_inputs, parameters)
 
     # Calculation of the dynamic evolutions
     #       Inside the MEA
@@ -83,20 +79,15 @@ def dydt(t, y, operating_inputs, parameters, solver_variable_names, control_vari
     calculate_dyn_voltage_evolution(dif_eq, i_fc, **solver_variables, **operating_inputs, **parameters,
                                     **eta_c_intermediate_values)
     calculate_dyn_temperature_evolution_inside_MEA(dif_eq, **parameters, **dif_eq_int_values, **heat_flows_dico)
-    #       Inside the gaz channels, the manifolds and the auxiliary systems
+    #       Inside the gaz channels and the manifolds
     calculate_dyn_gas_evolution_inside_gas_channel(dif_eq, **parameters, **matter_flows_dico)
     calculate_dyn_temperature_evolution_inside_gas_channel(dif_eq, **parameters)
-    calculate_dyn_air_compressor_evolution(dif_eq, **solver_variables, **parameters)
-    calculate_dyn_manifold_pressure_and_humidity_evolution(dif_eq, **operating_inputs, **parameters, **matter_flows_dico)
-    calculate_dyn_velocity_evolution(dif_eq, solver_variables, **operating_inputs, **parameters, **dif_eq_int_values_and_matter_flow_dico)
-    Wacp_des, dWacp_desdt, Wa_inj_des, dWa_inj_desdt, Wccp_des, dWccp_desdt, Wc_inj_des, dWc_inj_desdt = \
-        desired_flows(dif_eq, solver_variables, control_variables, i_fc, di_fcdt, operating_inputs, parameters,
-                      **dif_eq_int_values)
-    calculate_dyn_air_compressor_controler_evolution(dif_eq, Wacp_des, dWacp_desdt, Wa_inj_des, dWa_inj_desdt, Wccp_des,
-                                                     dWccp_desdt, Wc_inj_des, dWc_inj_desdt, **solver_variables,
-                                                     **operating_inputs, **parameters)
     if parameters['type_auxiliary'] != "no_auxiliary":
-        calculate_dyn_humidifier_evolution(dif_eq, Wa_inj_des, Wc_inj_des, **solver_variables, **parameters)
+        calculate_dyn_manifold_pressure_and_humidity_evolution(dif_eq, **operating_inputs, **parameters, **matter_flows_dico)
+    #       Inside the auxiliaries
+    if parameters['type_auxiliary'] != "no_auxiliary":
+        calculate_dyn_air_compressor_evolution(dif_eq, **solver_variables, **parameters)
+        calculate_dyn_humidifier_evolution(dif_eq, **solver_variables, **parameters, **dif_eq_int_values)
         calculate_dyn_throttle_area_controler(dif_eq, solver_variables, **operating_inputs, **parameters,
                                               **matter_flows_dico)
 
