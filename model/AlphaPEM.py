@@ -218,7 +218,7 @@ class AlphaPEM:
                                       'C_v_ctl', 'C_v_cgdl', 'C_v_cgc', 's_agdl', 's_atl', 's_ampl', 's_acl', 's_ccl',
                                       's_cmpl', 's_ctl', 's_cgdl', 'lambda_acl', 'lambda_mem', 'lambda_ccl', 'C_H2_agc',
                                       'C_H2_agdl', 'C_H2_atl', 'C_H2_ampl', 'C_H2_acl', 'C_O2_ccl', 'C_O2_cmpl',
-                                      'C_O2_ctl', 'C_O2_cgdl', 'C_O2_cgc', 'C_N2_a', 'C_N2_c', 'T_agc', 'T_agdl',
+                                      'C_O2_ctl', 'C_O2_cgdl', 'C_O2_cgc', 'C_N2_agc', 'C_N2_cgc', 'T_agc', 'T_agdl',
                                       'T_atl', 'T_ampl', 'T_acl', 'T_mem', 'T_ccl', 'T_cmpl', 'T_ctl', 'T_cgdl',
                                       'T_cgc', 'eta_c']
         if self.parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
@@ -297,8 +297,10 @@ class AlphaPEM:
         """
 
         new_points_location = ['C_v_agc', 'C_v_agdl', 'C_v_atl', 'C_v_ampl', 'C_v_cmpl', 'C_v_ctl', 'C_v_cgdl',
-                               'C_v_cgc', 's_agdl', 's_atl', 's_ampl', 's_cmpl', 's_ctl', 's_cgdl', 'C_H2_agc',
-                               'C_H2_agdl', 'C_H2_atl', 'C_H2_ampl', 'C_O2_cmpl', 'C_O2_ctl', 'C_O2_cgdl', 'C_O2_cgc',
+                               'C_v_cgc', 's_agdl', 's_atl', 's_ampl', 's_cmpl', 's_ctl', 's_cgdl',
+                               'C_H2_agc', 'C_H2_agdl', 'C_H2_atl', 'C_H2_ampl',
+                               'C_O2_cmpl', 'C_O2_ctl', 'C_O2_cgdl', 'C_O2_cgc',
+                               'C_N2_agc', 'C_N2_cgc',
                                'T_agc', 'T_agdl', 'T_atl', 'T_ampl', 'T_cmpl', 'T_ctl', 'T_cgdl', 'T_cgc']
         for variable in new_points_location:
             index = self.solver_variable_names.index(variable)
@@ -410,17 +412,17 @@ class AlphaPEM:
         C_v_c_ini = Phi_c_ini * Psat_ini / (R * T_ini)  # mol.m-3. It is the initial vapor concentration.
         C_O2_ini = y_O2_ext * (Pc_ini - Phi_c_ini * Psat_ini) / (R * T_ini)  # mol.m-3. It is the initial O2
         #                                                                        concentration in the fuel cell.
-        C_N2_c_ini = (1 - y_O2_ext) * (Pc_ini - Phi_c_ini * Psat_ini) / (R * T_ini)  # mol.m-3. It is the initial N2
+        C_N2_cgc_ini = (1 - y_O2_ext) * (Pc_ini - Phi_c_ini * Psat_ini) / (R * T_ini)  # mol.m-3. It is the initial N2
         #                                                                          concentration in the anode fuel cell.
         if type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
             C_H2_ini = y_H2_in * (Pa_ini - Phi_a_ini * Psat_ini) / (R * T_ini)  # mol.m-3. It is the initial H2
         #                                                                        concentration in the fuel cell.
-            C_N2_a_ini = (1 - y_H2_in) * (Pa_ini - Phi_a_ini * Psat_ini) / (R * T_ini)  # mol.m-3. It is the initial N2
+            C_N2_agc_ini = (1 - y_H2_in) * (Pa_ini - Phi_a_ini * Psat_ini) / (R * T_ini)  # mol.m-3. It is the initial N2
             #                                                                       concentration in the anode fuel cell.
         else:
             C_H2_ini = (Pa_ini - Phi_a_ini * Psat_ini) / (R * T_ini)  # mol.m-3. It is the initial H2
             #                                                                        concentration in the fuel cell.
-            C_N2_a_ini = 0                                            # mol.m-3. It is the initial N2
+            C_N2_agc_ini = 0                                            # mol.m-3. It is the initial N2
             #                                                                      concentration in the anode fuel cell.
         s_ini = 0  # It is the initial liquid water saturation in the fuel cell.
         lambda_mem_ini = lambda_eq(C_v_c_ini, s_ini, T_ini)  # It is the initial water content in the fuel cell.
@@ -449,9 +451,9 @@ class AlphaPEM:
         C_H2_agc, C_H2_agdl, C_H2_atl, C_H2_ampl, C_H2_acl = [C_H2_ini] * 5
         C_O2_ccl, C_O2_cmpl, C_O2_ctl, C_O2_cgdl, C_O2_cgc = [C_O2_ini] * 5
         if type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-            C_N2_a, C_N2_c = C_N2_a_ini, C_N2_c_ini # Test bench: simulated H2 recirculation which leads to N2 in the anode.
+            C_N2_agc, C_N2_cgc = C_N2_agc_ini, C_N2_cgc_ini # Test bench: simulated H2 recirculation which leads to N2 in the anode.
         else:
-            C_N2_a, C_N2_c = 0, C_N2_c_ini
+            C_N2_agc, C_N2_cgc = 0, C_N2_cgc_ini
         T_agc, T_agdl, T_atl, T_ampl, T_acl, T_mem, T_ccl, T_cmpl, T_ctl, T_cgdl, T_cgc = [T_ini] * 11
         eta_c = eta_c_ini
         Pasm, Paem = [Pa_ini] * 2
@@ -468,9 +470,10 @@ class AlphaPEM:
                                    [s_cgdl] * (nb_gdl - 1) +  [s_boundary] + [lambda_acl, lambda_mem, lambda_ccl] +
                                    [C_H2_agc] * nb_gc + [C_H2_agdl] * nb_gdl + [C_H2_atl] * nb_tl + [C_H2_ampl] * nb_mpl +
                                    [C_H2_acl, C_O2_ccl] + [C_O2_cmpl] * nb_mpl + [C_O2_ctl] * nb_tl +
-                                   [C_O2_cgdl] * nb_gdl + [C_O2_cgc] * nb_gc + [C_N2_a, C_N2_c] + [T_agc] * nb_gc + [T_agdl] * nb_gdl +
-                                   [T_atl] * nb_tl + [T_ampl] * nb_mpl + [T_acl, T_mem, T_ccl] + [T_cmpl] * nb_mpl +
-                                   [T_ctl] * nb_tl + [T_cgdl] * nb_gdl + [T_cgc] * nb_gc + [eta_c])
+                                   [C_O2_cgdl] * nb_gdl + [C_O2_cgc] * nb_gc + [C_N2_agc] * nb_gc + [C_N2_cgc] * nb_gc +
+                                   [T_agc] * nb_gc + [T_agdl] * nb_gdl + [T_atl] * nb_tl + [T_ampl] * nb_mpl +
+                                   [T_acl, T_mem, T_ccl] + [T_cmpl] * nb_mpl + [T_ctl] * nb_tl + [T_cgdl] * nb_gdl +
+                                   [T_cgc] * nb_gc + [eta_c])
         if type_auxiliary == "forced-convective_cathode_with_flow-through_anode" or \
                 type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
                 initial_variable_values.extend([Pasm, Paem, Pcsm, Pcem] + [Phi_asm, Phi_aem] + [Phi_csm, Phi_cem] +

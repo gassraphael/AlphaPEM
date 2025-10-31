@@ -43,57 +43,81 @@ def calculate_dyn_gas_evolution_inside_gas_channel(dif_eq, Hagc, Hcgc, Lgc, nb_g
     """
 
     # At the anode side, inside the AGC
+    Jv['agc_agdl'] = [0] * (nb_gc + 1)                                                                                  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    J_H2['agc_agdl'] = [0] * (nb_gc + 1)                                                                                # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    Jv['cgdl_cgc'] = [0] * (nb_gc + 1)                                                                                  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    J_O2['cgdl_cgc'] = [0] * (nb_gc + 1)                                                                                # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
     if nb_gc == 1:
-        dif_eq['dC_v_agc_1 / dt'] = (Jv['a_in'] - Jv['a_out']) / Lgc - Jv['agc_agdl'][1] / Hagc
+        dif_eq['dC_v_agc_1 / dt'] = (Jv['agc_in'] - Jv['agc_out']) / Lgc - Jv['agc_agdl'][1] / Hagc
     elif nb_gc == 2:
-        dif_eq['dC_v_agc_1 / dt'] = (Jv['a_in'] - Jv['agc_agc'][1]) / (Lgc / nb_gc) - Jv['agc_agdl'][1] / Hagc
-        dif_eq['dC_v_agc_2 / dt'] = (Jv['agc_agc'][1] - Jv['a_out']) / (Lgc / nb_gc) - Jv['agc_agdl'][2] / Hagc
+        dif_eq['dC_v_agc_1 / dt'] = (Jv['agc_in'] - Jv['agc_agc'][1]) / (Lgc / nb_gc) - Jv['agc_agdl'][1] / Hagc
+        dif_eq['dC_v_agc_2 / dt'] = (Jv['agc_agc'][1] - Jv['agc_out']) / (Lgc / nb_gc) - Jv['agc_agdl'][2] / Hagc
     else: # n_gc > 2:
-        dif_eq['dC_v_agc_1 / dt'] = (Jv['a_in'] - Jv['agc_agc'][1]) / (Lgc / nb_gc) - Jv['agc_agdl'][1] / Hagc
+        dif_eq['dC_v_agc_1 / dt'] = (Jv['agc_in'] - Jv['agc_agc'][1]) / (Lgc / nb_gc) - Jv['agc_agdl'][1] / Hagc
         for i in range(2, nb_gc):
             dif_eq[f'dC_v_agc_{i} / dt'] = (Jv['agc_agc'][i - 1] - Jv['agc_agc'][i]) / (Lgc / nb_gc) - Jv['agc_agdl'][i] / Hagc
-        dif_eq[f'dC_v_agc_{nb_gc} / dt'] = (Jv['agc_agc'][nb_gc - 1] - Jv['a_out']) / (Lgc / nb_gc) - Jv['agc_agdl'][nb_gc] / Hagc
+        dif_eq[f'dC_v_agc_{nb_gc} / dt'] = (Jv['agc_agc'][nb_gc - 1] - Jv['agc_out']) / (Lgc / nb_gc) - Jv['agc_agdl'][nb_gc] / Hagc
 
     if nb_gc == 1:
-        dif_eq['dC_H2_agc_1 / dt'] = (J_H2['in'] - J_H2['out']) / Lgc - J_H2['agc_agdl'][1] / Hagc
+        dif_eq['dC_H2_agc_1 / dt'] = (J_H2['agc_in'] - J_H2['agc_out']) / Lgc - J_H2['agc_agdl'][1] / Hagc
     elif nb_gc == 2:
-        dif_eq['dC_H2_agc_1 / dt'] = (J_H2['in'] - J_H2['agc_agc'][1]) / (Lgc / nb_gc) - J_H2['agc_agdl'][1] / Hagc
-        dif_eq['dC_H2_agc_2 / dt'] = (J_H2['agc_agc'][1] - J_H2['out']) / (Lgc / nb_gc) - J_H2['agc_agdl'][2] / Hagc
+        dif_eq['dC_H2_agc_1 / dt'] = (J_H2['agc_in'] - J_H2['agc_agc'][1]) / (Lgc / nb_gc) - J_H2['agc_agdl'][1] / Hagc
+        dif_eq['dC_H2_agc_2 / dt'] = (J_H2['agc_agc'][1] - J_H2['agc_out']) / (Lgc / nb_gc) - J_H2['agc_agdl'][2] / Hagc
     else: # n_gc > 2:
-        dif_eq['dC_H2_agc_1 / dt'] = (J_H2['in'] - J_H2['agc_agc'][1]) / (Lgc / nb_gc) - J_H2['agc_agdl'][1] / Hagc
+        dif_eq['dC_H2_agc_1 / dt'] = (J_H2['agc_in'] - J_H2['agc_agc'][1]) / (Lgc / nb_gc) - J_H2['agc_agdl'][1] / Hagc
         for i in range(2, nb_gc):
             dif_eq[f'dC_H2_agc_{i} / dt'] = (J_H2['agc_agc'][i - 1] - J_H2['agc_agc'][i]) / (Lgc / nb_gc) - J_H2['agc_agdl'][i] / Hagc
-        dif_eq[f'dC_H2_agc_{nb_gc} / dt'] = (J_H2['agc_agc'][nb_gc - 1] - J_H2['out']) / (Lgc / nb_gc) - J_H2['agc_agdl'][nb_gc] / Hagc
+        dif_eq[f'dC_H2_agc_{nb_gc} / dt'] = (J_H2['agc_agc'][nb_gc - 1] - J_H2['agc_out']) / (Lgc / nb_gc) - J_H2['agc_agdl'][nb_gc] / Hagc
 
-    if type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-        dif_eq['dC_N2_a / dt'] = (J_N2['a_in'] - J_N2['a_out']) / Lgc  # Test bench: simulated H2 recirculation which leads to N2 in the anode.
+    if type_auxiliary == "forced-convective_cathode_with_flow-through_anode":                                           # Test bench: simulated H2 recirculation which leads to N2 in the anode.
+        if nb_gc == 1:
+            dif_eq['dC_N2_agc_1 / dt'] = (J_N2['agc_in'] - J_N2['agc_out']) / Lgc
+        elif nb_gc == 2:
+            dif_eq['dC_N2_agc_1 / dt'] = (J_N2['agc_in'] - J_N2['agc_agc'][1]) / (Lgc / nb_gc)
+            dif_eq['dC_N2_agc_2 / dt'] = (J_N2['agc_agc'][1] - J_N2['agc_out']) / (Lgc / nb_gc)
+        else: # n_gc > 2:
+            dif_eq['dC_N2_agc_1 / dt'] = (J_N2['agc_in'] - J_N2['agc_agc'][1]) / (Lgc / nb_gc)
+            for i in range(2, nb_gc):
+                dif_eq[f'dC_N2_agc_{i} / dt'] = (J_N2['agc_agc'][i - 1] - J_N2['agc_agc'][i]) / (Lgc / nb_gc)
+            dif_eq[f'dC_N2_agc_{nb_gc} / dt'] = (J_N2['agc_agc'][nb_gc - 1] - J_N2['agc_out']) / (Lgc / nb_gc)
     else:
-        dif_eq['dC_N2_a / dt'] = 0
+        for i in range(1, nb_gc+1):
+            dif_eq[f'dC_N2_agc_{i} / dt'] = 0
 
     # At the cathode side, inside the CGC
     if nb_gc == 1:
-        dif_eq['dC_v_cgc_1 / dt'] = (Jv['c_in'] - Jv['c_out']) / Lgc + Jv['cgdl_cgc'][1] / Hcgc
+        dif_eq['dC_v_cgc_1 / dt'] = (Jv['cgc_in'] - Jv['cgc_out']) / Lgc + Jv['cgdl_cgc'][1] / Hcgc
     elif nb_gc == 2:
-        dif_eq['dC_v_cgc_1 / dt'] = (Jv['c_in'] - Jv['cgc_cgc'][1]) / (Lgc / nb_gc) + Jv['cgdl_cgc'][1] / Hcgc
-        dif_eq['dC_v_cgc_2 / dt'] = (Jv['cgc_cgc'][1] - Jv['c_out']) / (Lgc / nb_gc) + Jv['cgdl_cgc'][2] / Hcgc
+        dif_eq['dC_v_cgc_1 / dt'] = (Jv['cgc_in'] - Jv['cgc_cgc'][1]) / (Lgc / nb_gc) + Jv['cgdl_cgc'][1] / Hcgc
+        dif_eq['dC_v_cgc_2 / dt'] = (Jv['cgc_cgc'][1] - Jv['cgc_out']) / (Lgc / nb_gc) + Jv['cgdl_cgc'][2] / Hcgc
     else: # n_gc > 2:
-        dif_eq['dC_v_cgc_1 / dt'] = (Jv['c_in'] - Jv['cgc_cgc'][1]) / (Lgc / nb_gc) + Jv['cgdl_cgc'][1] / Hcgc
+        dif_eq['dC_v_cgc_1 / dt'] = (Jv['cgc_in'] - Jv['cgc_cgc'][1]) / (Lgc / nb_gc) + Jv['cgdl_cgc'][1] / Hcgc
         for i in range(2, nb_gc):
             dif_eq[f'dC_v_cgc_{i} / dt'] = (Jv['cgc_cgc'][i - 1] - Jv['cgc_cgc'][i]) / (Lgc / nb_gc) + Jv['cgdl_cgc'][i] / Hcgc
-        dif_eq[f'dC_v_cgc_{nb_gc} / dt'] = (Jv['cgc_cgc'][nb_gc - 1] - Jv['c_out']) / (Lgc / nb_gc) + Jv['cgdl_cgc'][nb_gc] / Hcgc
+        dif_eq[f'dC_v_cgc_{nb_gc} / dt'] = (Jv['cgc_cgc'][nb_gc - 1] - Jv['cgc_out']) / (Lgc / nb_gc) + Jv['cgdl_cgc'][nb_gc] / Hcgc
 
     if nb_gc == 1:
-        dif_eq['dC_O2_cgc_1 / dt'] = (J_O2['in'] - J_O2['out']) / Lgc + J_O2['cgdl_cgc'][1] / Hcgc
+        dif_eq['dC_O2_cgc_1 / dt'] = (J_O2['cgc_in'] - J_O2['out']) / Lgc + J_O2['cgdl_cgc'][1] / Hcgc
     elif nb_gc == 2:
-        dif_eq['dC_O2_cgc_1 / dt'] = (J_O2['in'] - J_O2['cgc_cgc'][1]) / (Lgc / nb_gc) + J_O2['cgdl_cgc'][1] / Hcgc
-        dif_eq['dC_O2_cgc_2 / dt'] = (J_O2['cgc_cgc'][1] - J_O2['out']) / (Lgc / nb_gc) + J_O2['cgdl_cgc'][2] / Hcgc
+        dif_eq['dC_O2_cgc_1 / dt'] = (J_O2['cgc_in'] - J_O2['cgc_cgc'][1]) / (Lgc / nb_gc) + J_O2['cgdl_cgc'][1] / Hcgc
+        dif_eq['dC_O2_cgc_2 / dt'] = (J_O2['cgc_cgc'][1] - J_O2['cgc_out']) / (Lgc / nb_gc) + J_O2['cgdl_cgc'][2] / Hcgc
     else: # n_gc > 2:
-        dif_eq['dC_O2_cgc_1 / dt'] = (J_O2['in'] - J_O2['cgc_cgc'][1]) / (Lgc / nb_gc) + J_O2['cgdl_cgc'][1] / Hcgc
+        dif_eq['dC_O2_cgc_1 / dt'] = (J_O2['cgc_in'] - J_O2['cgc_cgc'][1]) / (Lgc / nb_gc) + J_O2['cgdl_cgc'][1] / Hcgc
         for i in range(2, nb_gc):
             dif_eq[f'dC_O2_cgc_{i} / dt'] = (J_O2['cgc_cgc'][i - 1] - J_O2['cgc_cgc'][i]) / (Lgc / nb_gc) + J_O2['cgdl_cgc'][i] / Hcgc
-        dif_eq[f'dC_O2_cgc_{nb_gc} / dt'] = (J_O2['cgc_cgc'][nb_gc - 1] - J_O2['out']) / (Lgc / nb_gc) + J_O2['cgdl_cgc'][nb_gc] / Hcgc
+        dif_eq[f'dC_O2_cgc_{nb_gc} / dt'] = (J_O2['cgc_cgc'][nb_gc - 1] - J_O2['cgc_out']) / (Lgc / nb_gc) + J_O2['cgdl_cgc'][nb_gc] / Hcgc
 
-    dif_eq['dC_N2_c / dt'] = (J_N2['c_in'] - J_N2['c_out']) / Lgc
+    if nb_gc == 1:
+        dif_eq['dC_N2_cgc_1 / dt'] = (J_N2['cgc_in'] - J_N2['cgc_out']) / Lgc
+    elif nb_gc == 2:
+        dif_eq['dC_N2_cgc_1 / dt'] = (J_N2['cgc_in'] - J_N2['cgc_cgc'][1]) / (Lgc / nb_gc)
+        dif_eq['dC_N2_cgc_2 / dt'] = (J_N2['cgc_cgc'][1] - J_N2['cgc_out']) / (Lgc / nb_gc)
+    else: # n_gc > 2:
+        dif_eq['dC_N2_cgc_1 / dt'] = (J_N2['cgc_in'] - J_N2['cgc_cgc'][1]) / (Lgc / nb_gc)
+        for i in range(2, nb_gc):
+            dif_eq[f'dC_N2_cgc_{i} / dt'] = (J_N2['cgc_cgc'][i - 1] - J_N2['cgc_cgc'][i]) / (Lgc / nb_gc)
+        dif_eq[f'dC_N2_cgc_{nb_gc} / dt'] = (J_N2['cgc_cgc'][nb_gc - 1] - J_N2['cgc_out']) / (Lgc / nb_gc)
 
 
 def calculate_dyn_temperature_evolution_inside_gas_channel(dif_eq, nb_gc, **kwarks):

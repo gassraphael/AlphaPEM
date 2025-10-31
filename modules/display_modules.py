@@ -1085,14 +1085,14 @@ def plot_P(variables, operating_inputs, parameters, ax):
     nb_gc_mid = int(np.ceil(nb_gc / 2))
     C_v_agc = np.array(variables[f'C_v_agc_{nb_gc_mid}'])
     C_H2_agc = np.array(variables[f'C_H2_agc_{nb_gc_mid}'])
-    C_N2_a = np.array(variables['C_N2_a'])
+    C_N2_agc = np.array(variables[f'C_N2_agc_{nb_gc_mid}'])
     T_agc = np.array(variables[f'T_agc_{nb_gc_mid}'])
     C_v_cgc = np.array(variables[f'C_v_cgc_{nb_gc_mid}'])
     C_O2_cgc = np.array(variables[f'C_O2_cgc_{nb_gc_mid}'])
-    C_N2_c = np.array(variables['C_N2_c'])
+    C_N2_cgc = np.array(variables[f'C_N2_cgc_{nb_gc_mid}'])
     T_cgc = np.array(variables[f'T_cgc_{nb_gc_mid}'])
-    Pagc_t = (C_v_agc + C_H2_agc + C_N2_a) * R * T_agc / 1e5  # Conversion in bar
-    Pcgc_t = (C_v_cgc + C_O2_cgc + C_N2_c) * R * T_cgc / 1e5 # Conversion in bar
+    Pagc_t = (C_v_agc + C_H2_agc + C_N2_agc) * R * T_agc / 1e5  # Conversion in bar
+    Pcgc_t = (C_v_cgc + C_O2_cgc + C_N2_cgc) * R * T_cgc / 1e5 # Conversion in bar
     if parameters['type_auxiliary'] != 'no_auxiliary':
         Pasm_t = np.array(variables['Pasm'])[mask] / 1e5 # Conversion in bar
         Paem_t = np.array(variables['Paem'])[mask] / 1e5 # Conversion in bar
@@ -1389,30 +1389,32 @@ def plot_Re_nb(variables, parameters, ax):
     C_v_cgc_t = np.array(variables['C_v_cgc_1'])
     C_H2_agc_t = np.array(variables['C_H2_agc_1'])
     C_O2_cgc_t = np.array(variables['C_O2_cgc_1'])
-    C_N2_c_t = np.array(variables['C_N2_c'])
+    C_N2_agc_t = np.array(variables['C_N2_agc_1'])
+    C_N2_cgc_t = np.array(variables['C_N2_cgc_1'])
     T_agc_t = np.array(variables['T_agc_1'])
     T_cgc_t = np.array(variables['T_cgc_1'])
 
     # Calculation of the Reynold Number
     d_pipe = np.sqrt(4 * Hcgc * Wcgc / np.pi)
-    P_agc = (C_v_agc_t + C_H2_agc_t) * R * T_agc_t
-    P_cgc = (C_v_cgc_t + C_O2_cgc_t + C_N2_c_t) * R * T_cgc_t
+    P_agc = (C_v_agc_t + C_H2_agc_t + C_N2_agc_t) * R * T_agc_t
+    P_cgc = (C_v_cgc_t + C_O2_cgc_t + C_N2_cgc_t) * R * T_cgc_t
     M_agc = C_v_agc_t * R * T_agc_t / P_agc * M_H2O + \
-            C_H2_agc_t * R * T_agc_t / P_agc * M_H2
+            C_H2_agc_t * R * T_agc_t / P_agc * M_H2 + \
+            C_N2_agc_t * R * T_agc_t / P_agc * M_N2
     M_cgc = C_v_cgc_t * R * T_cgc_t / P_cgc * M_H2O + \
             C_O2_cgc_t * R * T_cgc_t / P_cgc * M_O2 + \
-            C_N2_c_t * R * T_cgc_t / P_cgc * M_N2
+            C_N2_cgc_t * R * T_cgc_t / P_cgc * M_N2
     rho_agc = P_agc / (R * T_agc_t) * M_agc
     rho_cgc = P_cgc / (R * T_cgc_t) * M_cgc
-    x_H2O_v_agc = C_v_agc_t / (C_v_agc_t + C_H2_agc_t)
-    x_H2O_v_cgc = C_v_cgc_t / (C_v_cgc_t + C_O2_cgc_t + C_N2_c_t)
-    y_O2_cgc = C_O2_cgc_t / (C_O2_cgc_t + C_N2_c_t)
-    mu_agc = mu_mixture_gases(['H2O_v', 'H2'],
-                              [x_H2O_v_agc, (1 - x_H2O_v_agc)],
+    x_H2O_v_agc = C_v_agc_t / (C_v_agc_t + C_H2_agc_t + C_N2_agc_t)
+    x_H2O_v_cgc = C_v_cgc_t / (C_v_cgc_t + C_O2_cgc_t + C_N2_cgc_t)
+    y_H2_agc = C_H2_agc_t / (C_H2_agc_t + C_N2_agc_t)
+    y_O2_cgc = C_O2_cgc_t / (C_O2_cgc_t + C_N2_cgc_t)
+    mu_agc = mu_mixture_gases(['H2O_v', 'H2', 'N2'],
+                              [x_H2O_v_agc, y_H2_agc * (1 - x_H2O_v_agc), (1 - y_H2_agc) * (1 - x_H2O_v_agc)],
                               T_agc_t)
     mu_cgc = mu_mixture_gases(['H2O_v', 'O2', 'N2'],
-                              [x_H2O_v_cgc, y_O2_cgc * (1 - x_H2O_v_cgc),
-                               (1 - y_O2_cgc) * (1 - x_H2O_v_cgc)],
+                              [x_H2O_v_cgc, y_O2_cgc * (1 - x_H2O_v_cgc), (1 - y_O2_cgc) * (1 - x_H2O_v_cgc)],
                               T_cgc_t)
     Re_nb_a_t = (rho_agc * v_a_in_t * d_pipe) / mu_agc  # Reynolds number at the anode side
     Re_nb_c_t = (rho_cgc * v_c_in_t * d_pipe) / mu_cgc  # Reynolds number at the anode side

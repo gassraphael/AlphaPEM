@@ -42,7 +42,7 @@ def auxiliaries_int_values_which_are_commun_with_dif_eq(t, sv, operating_inputs,
 
     # Extraction of the variables
     lambda_mem = sv['lambda_mem']
-    C_H2_acl, C_O2_ccl, C_N2_a, C_N2_c =  sv['C_H2_acl'], sv['C_O2_ccl'], sv['C_N2_a'], sv['C_N2_c']
+    C_H2_acl, C_O2_ccl =  sv['C_H2_acl'], sv['C_O2_ccl']
     Pasm, Paem, Pcsm, Pcem = sv.get('Pasm', None), sv.get('Paem', None), sv.get('Pcsm', None), sv.get('Pcem', None)
     Phi_asm, Phi_aem = sv.get('Phi_asm', None), sv.get('Phi_aem', None)
     Phi_csm, Phi_cem = sv.get('Phi_csm', None), sv.get('Phi_cem', None)
@@ -64,8 +64,8 @@ def auxiliaries_int_values_which_are_commun_with_dif_eq(t, sv, operating_inputs,
     #       Pressures
     P = {}
     for i in range(1, nb_gc + 1):
-        P[f'agc_{i}'] = (sv[f'C_v_agc_{i}'] + sv[f'C_H2_agc_{i}'] + C_N2_a) * R * sv[f'T_agc_{i}']
-        P[f'cgc_{i}'] = (sv[f'C_v_cgc_{i}'] + sv[f'C_O2_cgc_{i}'] + C_N2_c) * R * sv[f'T_cgc_{i}']
+        P[f'agc_{i}'] = (sv[f'C_v_agc_{i}'] + sv[f'C_H2_agc_{i}'] + sv[f'C_N2_agc_{i}']) * R * sv[f'T_agc_{i}']
+        P[f'cgc_{i}'] = (sv[f'C_v_cgc_{i}'] + sv[f'C_O2_cgc_{i}'] + sv[f'C_N2_cgc_{i}']) * R * sv[f'T_cgc_{i}']
     #       Humidities
     Phi = {}
     for i in range(1, nb_gc + 1):
@@ -75,13 +75,13 @@ def auxiliaries_int_values_which_are_commun_with_dif_eq(t, sv, operating_inputs,
     y_O2 = {}
     y_H2 = {}
     for i in range(1, nb_gc + 1):
-        y_H2[f'agc_{i}'] = sv[f'C_H2_agc_{i}'] / (sv[f'C_H2_agc_{i}'] + C_N2_a)
-        y_O2[f'cgc_{i}'] = sv[f'C_O2_cgc_{i}'] / (sv[f'C_O2_cgc_{i}'] + C_N2_c)
+        y_H2[f'agc_{i}'] = sv[f'C_H2_agc_{i}'] / (sv[f'C_H2_agc_{i}'] + sv[f'C_N2_agc_{i}'])
+        y_O2[f'cgc_{i}'] = sv[f'C_O2_cgc_{i}'] / (sv[f'C_O2_cgc_{i}'] + sv[f'C_N2_cgc_{i}'])
     #       Molar masses
     for i in range(1, nb_gc + 1):
         M[f'agc_{i}'] = sv[f'C_v_agc_{i}'] * R * T_des / P[f'agc_{i}'] * M_H2O + \
                         sv[f'C_H2_agc_{i}'] * R * T_des / P[f'agc_{i}'] * M_H2 + \
-                        C_N2_a * R * T_des / P[f'agc_{i}'] * M_N2
+                        sv[f'C_N2_agc_{i}'] * R * T_des / P[f'agc_{i}'] * M_N2
         M[f'cgc_{i}'] = Phi[f'cgc_{i}'] * Psat(T_des) / P[f'cgc_{i}'] * M_H2O + \
                         y_O2[f'cgc_{i}'] * (1 - Phi[f'cgc_{i}'] * Psat(T_des) / P[f'cgc_{i}']) * M_O2 + \
                         (1 - y_O2[f'cgc_{i}']) * (1 - Phi[f'cgc_{i}'] * Psat(T_des) / P[f'cgc_{i}']) * M_N2
@@ -94,9 +94,9 @@ def auxiliaries_int_values_which_are_commun_with_dif_eq(t, sv, operating_inputs,
     #       Vapor ratio over the gas mixture.
     x_H2O_v = {}
     for i in range(1, nb_gc + 1):
-        x_H2O_v[f'agc_{i}'] = sv[f'C_v_agc_{i}'] / (sv[f'C_v_agc_{i}'] + sv[f'C_H2_agc_{i}'] + C_N2_a)
+        x_H2O_v[f'agc_{i}'] = sv[f'C_v_agc_{i}'] / (sv[f'C_v_agc_{i}'] + sv[f'C_H2_agc_{i}'] + sv[f'C_N2_agc_{i}'])
     for i in range(1, nb_gc + 1):
-        x_H2O_v[f'cgc_{i}'] = sv[f'C_v_cgc_{i}'] / (sv[f'C_v_cgc_{i}'] + sv[f'C_O2_cgc_{i}'] + C_N2_c)
+        x_H2O_v[f'cgc_{i}'] = sv[f'C_v_cgc_{i}'] / (sv[f'C_v_cgc_{i}'] + sv[f'C_O2_cgc_{i}'] + sv[f'C_N2_cgc_{i}'])
 
     #       Dynamic viscosity of the gas mixture.
     mu_gaz = {}

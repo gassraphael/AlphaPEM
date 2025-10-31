@@ -66,6 +66,11 @@ def calculate_velocity_evolution(sv, control_variables, i_fc, Jv_agc_agdl, Jv_cg
     nb_channel_in_gc, nb_cell, type_auxiliary = parameters['nb_channel_in_gc'], parameters['nb_cell'], parameters['type_auxiliary']
     nb_gc, nb_gdl = parameters['nb_gc'], parameters['nb_gdl']
 
+    Jv_agc_agdl = [0] * (nb_gc + 1)                                                                                     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    J_H2_agc_agdl = [0] * (nb_gc + 1)                                                                                   # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    Jv_cgdl_cgc = [0] * (nb_gc + 1)                                                                                     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    J_O2_cgdl_cgc = [0] * (nb_gc + 1)                                                                                   # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
     # Intermediate calculation
     L_node_gc = Lgc / nb_gc                                                                                             # Length of one gas channel node (m).
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
@@ -75,10 +80,12 @@ def calculate_velocity_evolution(sv, control_variables, i_fc, Jv_agc_agdl, Jv_cg
     else:  # elif type_auxiliary == "no_auxiliary":
         Pa_ext = Pa_des
         Pc_ext = Pc_des
+    C_N2_a_mean = (sum(sv[f'C_N2_agc_{i}'] for i in range(1, nb_gc + 1)) / nb_gc)
+    C_N2_c_mean = (sum(sv[f'C_N2_cgc_{i}'] for i in range(1, nb_gc + 1)) / nb_gc)
 
     # Calculation of the boundary conditions at the GC/GDL interface
-    C_tot_agdl = sv['C_v_agdl_1'] + sv['C_H2_agdl_1']
-    C_tot_cgdl = sv[f'C_v_cgdl_{nb_gdl}'] + sv[f'C_O2_cgdl_{nb_gdl}'] + sv['C_N2_c']
+    C_tot_agdl = sv['C_v_agdl_1'] + sv['C_H2_agdl_1'] + C_N2_a_mean
+    C_tot_cgdl = sv[f'C_v_cgdl_{nb_gdl}'] + sv[f'C_O2_cgdl_{nb_gdl}'] + C_N2_c_mean
     J_tot_agc_agdl = [None] + [0.0] * nb_gc
     J_tot_cgdl_cgc = [None] + [0.0] * nb_gc
     for i in range(1, nb_gc + 1):
@@ -135,7 +142,7 @@ def calculate_velocity_evolution(sv, control_variables, i_fc, Jv_agc_agdl, Jv_cg
     lb = [1e-8, 1e-8]
     ub = [v_max * P_max / (R * T_des), v_max * P_max / (R * T_des)]
     #       Solver call
-    sol = least_squares(residuals, x0, bounds=(lb, ub), xtol=1e-10, ftol=1e-10, max_nfev=2000, method='trf')
+    sol = least_squares(residuals, x0, bounds=(lb, ub), method='trf')
     #       Check for convergence
     if not sol.success:
         raise RuntimeError(f"Convergence failed in calculate_velocity_evolution: {sol.message}")

@@ -39,7 +39,7 @@ def flows_int_values(sv, i_fc, operating_inputs, parameters):
     C_v_acl, C_v_ccl = sv['C_v_acl'], sv['C_v_ccl']
     s_acl, s_ccl = sv['s_acl'], sv['s_ccl']
     lambda_acl, lambda_mem, lambda_ccl = sv['lambda_acl'], sv['lambda_mem'], sv['lambda_ccl']
-    C_H2_acl, C_O2_ccl, C_N2_a, C_N2_c = sv['C_H2_acl'], sv['C_O2_ccl'], sv['C_N2_a'], sv['C_N2_c']
+    C_H2_acl, C_O2_ccl = sv['C_H2_acl'], sv['C_O2_ccl']
     T_acl, T_mem, T_ccl = sv['T_acl'], sv['T_mem'], sv['T_ccl']
     # Extraction of the operating inputs and the parameters
     T_des = operating_inputs['T_des']
@@ -55,18 +55,20 @@ def flows_int_values(sv, i_fc, operating_inputs, parameters):
     H_gdl_node = Hgdl / nb_gdl
     H_mpl_node = Hmpl / nb_mpl
     H_tl_node = Htl / nb_tl
+    C_N2_a_mean = (sum(sv[f'C_N2_agc_{i}'] for i in range(1, nb_gc + 1)) / nb_gc)
+    C_N2_c_mean = (sum(sv[f'C_N2_cgc_{i}'] for i in range(1, nb_gc + 1)) / nb_gc)
 
     # Pressures in the stack
-    Pagc = [None] + [(sv[f'C_v_agc_{i}'] + sv[f'C_H2_agc_{i}'] + C_N2_a) * R * sv[f'T_agc_{i}'] for i in range(1, nb_gc + 1)]
-    Pagdl = [None] + [(sv[f'C_v_agdl_{i}'] + sv[f'C_H2_agdl_{i}'] + C_N2_a) * R * sv[f'T_agdl_{i}'] for i in range(1, nb_gdl + 1)]
-    Patl = [None] + [(sv[f'C_v_atl_{i}'] + sv[f'C_H2_atl_{i}'] + C_N2_a) * R * sv[f'T_atl_{i}'] for i in range(1, nb_tl + 1)]
-    Pampl = [None] + [(sv[f'C_v_ampl_{i}'] + sv[f'C_H2_ampl_{i}'] + C_N2_a) * R * sv[f'T_ampl_{i}'] for i in range(1, nb_mpl + 1)]
-    Pacl = (C_v_acl + C_H2_acl + C_N2_a) * R * T_acl
-    Pccl = (C_v_ccl + C_O2_ccl + C_N2_c) * R * T_ccl
-    Pcmpl = [None] + [(sv[f'C_v_cmpl_{i}'] + sv[f'C_O2_cmpl_{i}'] + C_N2_c) * R * sv[f'T_cmpl_{i}'] for i in range(1, nb_mpl + 1)]
-    Pctl = [None] + [(sv[f'C_v_ctl_{i}'] + sv[f'C_O2_ctl_{i}'] + C_N2_c) * R * sv[f'T_ctl_{i}'] for i in range(1, nb_tl + 1)]
-    Pcgdl = [None] + [(sv[f'C_v_cgdl_{i}'] + sv[f'C_O2_cgdl_{i}'] + C_N2_c) * R * sv[f'T_cgdl_{i}'] for i in range(1, nb_gdl + 1)]
-    Pcgc = [None] + [(sv[f'C_v_cgc_{i}'] + sv[f'C_O2_cgc_{i}'] + C_N2_c) * R * sv[f'T_cgc_{i}'] for i in range(1, nb_gc + 1)]
+    Pagc = [None] + [(sv[f'C_v_agc_{i}'] + sv[f'C_H2_agc_{i}'] + sv[f'C_N2_agc_{i}']) * R * sv[f'T_agc_{i}'] for i in range(1, nb_gc + 1)]
+    Pagdl = [None] + [(sv[f'C_v_agdl_{i}'] + sv[f'C_H2_agdl_{i}'] + C_N2_a_mean) * R * sv[f'T_agdl_{i}'] for i in range(1, nb_gdl + 1)]
+    Patl = [None] + [(sv[f'C_v_atl_{i}'] + sv[f'C_H2_atl_{i}'] + C_N2_a_mean) * R * sv[f'T_atl_{i}'] for i in range(1, nb_tl + 1)]
+    Pampl = [None] + [(sv[f'C_v_ampl_{i}'] + sv[f'C_H2_ampl_{i}'] + C_N2_a_mean) * R * sv[f'T_ampl_{i}'] for i in range(1, nb_mpl + 1)]
+    Pacl = (C_v_acl + C_H2_acl + C_N2_a_mean) * R * T_acl
+    Pccl = (C_v_ccl + C_O2_ccl + C_N2_c_mean) * R * T_ccl
+    Pcmpl = [None] + [(sv[f'C_v_cmpl_{i}'] + sv[f'C_O2_cmpl_{i}'] + C_N2_c_mean) * R * sv[f'T_cmpl_{i}'] for i in range(1, nb_mpl + 1)]
+    Pctl = [None] + [(sv[f'C_v_ctl_{i}'] + sv[f'C_O2_ctl_{i}'] + C_N2_c_mean) * R * sv[f'T_ctl_{i}'] for i in range(1, nb_tl + 1)]
+    Pcgdl = [None] + [(sv[f'C_v_cgdl_{i}'] + sv[f'C_O2_cgdl_{i}'] + C_N2_c_mean) * R * sv[f'T_cgdl_{i}'] for i in range(1, nb_gdl + 1)]
+    Pcgc = [None] + [(sv[f'C_v_cgc_{i}'] + sv[f'C_O2_cgc_{i}'] + sv[f'C_N2_cgc_{i}']) * R * sv[f'T_cgc_{i}'] for i in range(1, nb_gc + 1)]
 
     # Weighted mean values ...
     #       ... of the EOD flow of water in the membrane

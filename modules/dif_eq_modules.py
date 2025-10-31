@@ -63,7 +63,6 @@ def calculate_dif_eq_int_values(t, sv, control_variables, i_fc, operating_inputs
     s_acl, s_ccl = sv['s_acl'], sv['s_ccl']
     lambda_acl, lambda_mem, lambda_ccl = sv['lambda_acl'], sv['lambda_mem'], sv['lambda_ccl']
     C_H2_acl, C_O2_ccl = sv['C_H2_acl'], sv['C_O2_ccl']
-    C_N2_a, C_N2_c = sv['C_N2_a'], sv['C_N2_c']
     T_acl, T_mem, T_ccl = sv['T_acl'], sv['T_mem'], sv['T_ccl']
     Pasm, Paem, Pcsm, Pcem = sv.get('Pasm', None), sv.get('Paem', None), sv.get('Pcsm', None), sv.get('Pcem', None)
     Phi_asm, Phi_aem = sv.get('Phi_asm', None), sv.get('Phi_aem', None)
@@ -78,6 +77,10 @@ def calculate_dif_eq_int_values(t, sv, control_variables, i_fc, operating_inputs
     Htl, nb_gc, nb_gdl, nb_mpl, nb_tl = parameters['Htl'], parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl'], parameters['nb_tl']
     t_purge, type_auxiliary, type_purge = parameters['t_purge'], parameters['type_auxiliary'], parameters['type_purge']
 
+    # Calculation of intermediate values
+    C_N2_a_mean = (sum(sv[f'C_N2_agc_{i}'] for i in range(1, nb_gc + 1)) / nb_gc)
+    C_N2_c_mean = (sum(sv[f'C_N2_cgc_{i}'] for i in range(1, nb_gc + 1)) / nb_gc)
+
     # Physical quantities outside the stack
     #       Molar masses
     M = {}
@@ -90,13 +93,13 @@ def calculate_dif_eq_int_values(t, sv, control_variables, i_fc, operating_inputs
     #       Pressures
     P = {}
     for i in range(1, nb_gc + 1):
-        P[f'agc_{i}'] = (sv[f'C_v_agc_{i}'] + sv[f'C_H2_agc_{i}'] + C_N2_a) * R * sv[f'T_agc_{i}']
-        P[f'cgc_{i}'] = (sv[f'C_v_cgc_{i}'] + sv[f'C_O2_cgc_{i}'] + C_N2_c) * R * sv[f'T_cgc_{i}']
+        P[f'agc_{i}'] = (sv[f'C_v_agc_{i}'] + sv[f'C_H2_agc_{i}'] + sv[f'C_N2_agc_{i}']) * R * sv[f'T_agc_{i}']
+        P[f'cgc_{i}'] = (sv[f'C_v_cgc_{i}'] + sv[f'C_O2_cgc_{i}'] + sv[f'C_N2_cgc_{i}']) * R * sv[f'T_cgc_{i}']
     #       Total concentration
     C_tot = {}
     for i in range(1, nb_gc + 1):
-        C_tot[f'agc_{i}'] = sv[f'C_v_agc_{i}'] + sv[f'C_H2_agc_{i}'] + C_N2_a
-        C_tot[f'cgc_{i}'] = sv[f'C_v_cgc_{i}'] + sv[f'C_O2_cgc_{i}'] + C_N2_c
+        C_tot[f'agc_{i}'] = sv[f'C_v_agc_{i}'] + sv[f'C_H2_agc_{i}'] + sv[f'C_N2_agc_{i}']
+        C_tot[f'cgc_{i}'] = sv[f'C_v_cgc_{i}'] + sv[f'C_O2_cgc_{i}'] + sv[f'C_N2_cgc_{i}']
 
     #       Humidities
     Phi = {}
@@ -106,16 +109,16 @@ def calculate_dif_eq_int_values(t, sv, control_variables, i_fc, operating_inputs
     #       H2/O2 ratio in the dry anode/cathode gas mixture (H2/N2 or O2/N2) at the GC
     y_O2 = {}
     for i in range(1, nb_gc + 1):
-        y_O2[f'cgc_{i}'] = sv[f'C_O2_cgc_{i}'] / (sv[f'C_O2_cgc_{i}'] + C_N2_c)
+        y_O2[f'cgc_{i}'] = sv[f'C_O2_cgc_{i}'] / (sv[f'C_O2_cgc_{i}'] + sv[f'C_N2_cgc_{i}'])
 
     #       Molar masses
     for i in range(1, nb_gc + 1):
         M[f'agc_{i}'] = sv[f'C_v_agc_{i}'] * R * T_des / P[f'agc_{i}'] * M_H2O + \
                sv[f'C_H2_agc_{i}'] * R * T_des / P[f'agc_{i}'] * M_H2 + \
-               C_N2_a * R * T_des / P[f'agc_{i}'] * M_N2
+               sv[f'C_N2_agc_{i}'] * R * T_des / P[f'agc_{i}'] * M_N2
         M[f'cgc_{i}'] = sv[f'C_v_cgc_{i}'] * R * T_des / P[f'cgc_{i}'] * M_H2O + \
                         sv[f'C_O2_cgc_{i}'] * R * T_des / P[f'cgc_{i}'] * M_O2 + \
-                        C_N2_c * R * T_des / P[f'cgc_{i}'] * M_N2
+                        sv[f'C_N2_cgc_{i}'] * R * T_des / P[f'cgc_{i}'] * M_N2
 
     #       Density of the gas mixture.
     rho = {}
@@ -127,9 +130,9 @@ def calculate_dif_eq_int_values(t, sv, control_variables, i_fc, operating_inputs
     #       Vapor ratio over the gas mixture.
     x_H2O_v = {}
     for i in range(1, nb_gc + 1):
-        x_H2O_v[f'agc_{i}'] = sv[f'C_v_agc_{i}'] / (sv[f'C_v_agc_{i}'] + sv[f'C_H2_agc_{i}'] + C_N2_a)
+        x_H2O_v[f'agc_{i}'] = sv[f'C_v_agc_{i}'] / (sv[f'C_v_agc_{i}'] + sv[f'C_H2_agc_{i}'] + sv[f'C_N2_agc_{i}'])
     for i in range(1, nb_gc + 1):
-        x_H2O_v[f'cgc_{i}'] = sv[f'C_v_cgc_{i}'] / (sv[f'C_v_cgc_{i}'] + sv[f'C_O2_cgc_{i}'] + C_N2_c)
+        x_H2O_v[f'cgc_{i}'] = sv[f'C_v_cgc_{i}'] / (sv[f'C_v_cgc_{i}'] + sv[f'C_O2_cgc_{i}'] + sv[f'C_N2_cgc_{i}'])
 
     #       Dynamic viscosity of the gas mixture.
     mu_gaz = {}
@@ -146,29 +149,29 @@ def calculate_dif_eq_int_values(t, sv, control_variables, i_fc, operating_inputs
     #       Volumetric heat capacity (J.m-3.K-1)
     rho_Cp0 = {
         **{f'agdl_{i}': calculate_rho_Cp0('agdl', sv[f'T_agdl_{i}'], C_v=sv[f'C_v_agdl_{i}'],
-                                          s=sv[f's_agdl_{i}'], C_H2=sv[f'C_H2_agdl_{i}'], C_N2=C_N2_a, epsilon=epsilon_gdl)
+                                          s=sv[f's_agdl_{i}'], C_H2=sv[f'C_H2_agdl_{i}'], C_N2=C_N2_a_mean, epsilon=epsilon_gdl)
            for i in range(1, nb_gdl + 1)},
         **{f'atl_{i}': calculate_rho_Cp0('atl', sv[f'T_atl_{i}'], C_v=sv[f'C_v_atl_{i}'], s=sv[f's_atl_{i}'],
-                                         C_H2=sv[f'C_H2_atl_{i}'], C_N2=C_N2_a, epsilon=epsilon_atl[i], n_tl=nb_tl,
+                                         C_H2=sv[f'C_H2_atl_{i}'], C_N2=C_N2_a_mean, epsilon=epsilon_atl[i], n_tl=nb_tl,
                                          Htl=Htl, node=i)
            for i in range(1, nb_tl + 1)},
         **{f'ampl_{i}': calculate_rho_Cp0('ampl', sv[f'T_ampl_{i}'], C_v=sv[f'C_v_ampl_{i}'],
-                                          s=sv[f's_ampl_{i}'], C_H2=sv[f'C_H2_ampl_{i}'], C_N2=C_N2_a, epsilon=epsilon_mpl)
+                                          s=sv[f's_ampl_{i}'], C_H2=sv[f'C_H2_ampl_{i}'], C_N2=C_N2_a_mean, epsilon=epsilon_mpl)
            for i in range(1, nb_mpl + 1)},
-        'acl': calculate_rho_Cp0('acl', T_acl, C_v=C_v_acl, s=s_acl, lambdaa=lambda_acl, C_N2=C_N2_a, C_H2=C_H2_acl,
+        'acl': calculate_rho_Cp0('acl', T_acl, C_v=C_v_acl, s=s_acl, lambdaa=lambda_acl, C_N2=C_N2_a_mean, C_H2=C_H2_acl,
                                  epsilon=epsilon_cl, epsilon_mc=epsilon_mc),
         'mem': calculate_rho_Cp0('mem', T_mem, lambdaa=lambda_mem),
-        'ccl': calculate_rho_Cp0('ccl', T_ccl, C_v=C_v_ccl, s=s_ccl, lambdaa=lambda_ccl, C_O2=C_O2_ccl, C_N2=C_N2_c,
+        'ccl': calculate_rho_Cp0('ccl', T_ccl, C_v=C_v_ccl, s=s_ccl, lambdaa=lambda_ccl, C_O2=C_O2_ccl, C_N2=C_N2_c_mean,
                                  epsilon=epsilon_cl, epsilon_mc=epsilon_mc),
         **{f'cmpl_{i}': calculate_rho_Cp0('cmpl', sv[f'T_cmpl_{i}'], C_v=sv[f'C_v_cmpl_{i}'],
-                                          s=sv[f's_cmpl_{i}'], C_O2=sv[f'C_O2_cmpl_{i}'], C_N2=C_N2_c, epsilon=epsilon_mpl)
+                                          s=sv[f's_cmpl_{i}'], C_O2=sv[f'C_O2_cmpl_{i}'], C_N2=C_N2_c_mean, epsilon=epsilon_mpl)
            for i in range(1, nb_mpl + 1)},
         **{f'ctl_{i}': calculate_rho_Cp0('ctl', sv[f'T_ctl_{i}'], C_v=sv[f'C_v_ctl_{i}'], s=sv[f's_ctl_{i}'],
-                                         C_O2=sv[f'C_O2_ctl_{i}'], C_N2=C_N2_c, epsilon=epsilon_ctl[i], n_tl=nb_tl,
+                                         C_O2=sv[f'C_O2_ctl_{i}'], C_N2=C_N2_c_mean, epsilon=epsilon_ctl[i], n_tl=nb_tl,
                                          Htl=Htl, node=i)
            for i in range(1, nb_tl + 1)},
         **{f'cgdl_{i}': calculate_rho_Cp0('cgdl', sv[f'T_cgdl_{i}'], C_v=sv[f'C_v_cgdl_{i}'],
-                                          s=sv[f's_cgdl_{i}'], C_O2=sv[f'C_O2_cgdl_{i}'], C_N2=C_N2_c, epsilon=epsilon_gdl)
+                                          s=sv[f's_cgdl_{i}'], C_O2=sv[f'C_O2_cgdl_{i}'], C_N2=C_N2_c_mean, epsilon=epsilon_gdl)
            for i in range(1, nb_gdl + 1)}
         }
 

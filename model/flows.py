@@ -45,7 +45,7 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     C_v_acl, C_v_ccl = sv['C_v_acl'], sv['C_v_ccl']
     s_acl, s_ccl = sv['s_acl'], sv['s_ccl']
     lambda_acl, lambda_mem, lambda_ccl = sv['lambda_acl'], sv['lambda_mem'], sv['lambda_ccl']
-    C_H2_acl, C_O2_ccl, C_N2_a, C_N2_c = sv['C_H2_acl'], sv['C_O2_ccl'], sv['C_N2_a'], sv['C_N2_c']
+    C_H2_acl, C_O2_ccl = sv['C_H2_acl'], sv['C_O2_ccl']
     T_acl, T_mem, T_ccl = sv['T_acl'], sv['T_mem'], sv['T_ccl']
 
     # Extraction of the operating inputs and parameters
@@ -66,6 +66,8 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
      Da_eff_atl_ampl, Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl, Dc_eff_cmpl_ctl,
      Dc_eff_ctl_ctl, Dc_eff_ctl_cgdl, Dc_eff_cgdl_cgdl, T_acl_mem_ccl) = \
         flows_int_values(sv, i_fc, operating_inputs, parameters)
+    C_N2_a_mean = (sum(sv[f'C_N2_agc_{i}'] for i in range(1, nb_gc + 1)) / nb_gc)
+    C_N2_c_mean = (sum(sv[f'C_N2_cgc_{i}'] for i in range(1, nb_gc + 1)) / nb_gc)
 
     # ________________________________________Dissolved water flows (mol.m-2.s-1)_______________________________________
 
@@ -200,25 +202,25 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     # Liquid water generated through vapor condensation or degenerated through evaporation
     #   Anode side
     Sl_agdl = [None] + [Svl(element='anode', s=sv[f's_agdl_{i}'], C_v=sv[f'C_v_agdl_{i}'],
-                            Ctot=sv[f'C_v_agdl_{i}'] + sv[f'C_H2_agdl_{i}'] + C_N2_a,
+                            Ctot=sv[f'C_v_agdl_{i}'] + sv[f'C_H2_agdl_{i}'] + C_N2_a_mean,
                             T=sv[f'T_agdl_{i}'], epsilon=epsilon_gdl) for i in range(1, nb_gdl + 1)]
     Sl_atl = [None] + [Svl(element='anode', s=sv[f's_atl_{i}'], C_v=sv[f'C_v_atl_{i}'],
-                            Ctot=sv[f'C_v_atl_{i}'] + sv[f'C_H2_atl_{i}'] + C_N2_a,
+                            Ctot=sv[f'C_v_atl_{i}'] + sv[f'C_H2_atl_{i}'] + C_N2_a_mean,
                             T=sv[f'T_atl_{i}'], epsilon=epsilon_atl[i]) for i in range(1, nb_tl + 1)]
     Sl_ampl = [None] + [Svl(element='anode', s=sv[f's_ampl_{i}'], C_v=sv[f'C_v_ampl_{i}'],
-                            Ctot=sv[f'C_v_ampl_{i}'] + sv[f'C_H2_ampl_{i}'] + C_N2_a,
+                            Ctot=sv[f'C_v_ampl_{i}'] + sv[f'C_H2_ampl_{i}'] + C_N2_a_mean,
                             T=sv[f'T_ampl_{i}'], epsilon=epsilon_mpl) for i in range(1, nb_mpl + 1)]
-    Sl_acl = Svl(element='anode', s=s_acl, C_v=C_v_acl, Ctot=C_v_acl + C_H2_acl + C_N2_a, T=T_acl, epsilon=epsilon_cl)
+    Sl_acl = Svl(element='anode', s=s_acl, C_v=C_v_acl, Ctot=C_v_acl + C_H2_acl + C_N2_a_mean, T=T_acl, epsilon=epsilon_cl)
     #   Cathode side
-    Sl_ccl = Svl(element='cathode', s=s_ccl, C_v=C_v_ccl, Ctot=C_v_ccl + C_O2_ccl + C_N2_c, T=T_ccl, epsilon=epsilon_cl)
+    Sl_ccl = Svl(element='cathode', s=s_ccl, C_v=C_v_ccl, Ctot=C_v_ccl + C_O2_ccl + C_N2_c_mean, T=T_ccl, epsilon=epsilon_cl)
     Sl_cmpl = [None] + [Svl(element='cathode', s=sv[f's_cmpl_{i}'], C_v=sv[f'C_v_cmpl_{i}'],
-                            Ctot=sv[f'C_v_cmpl_{i}'] + sv[f'C_O2_cmpl_{i}'] + C_N2_c,
+                            Ctot=sv[f'C_v_cmpl_{i}'] + sv[f'C_O2_cmpl_{i}'] + C_N2_c_mean,
                             T=sv[f'T_cmpl_{i}'], epsilon=epsilon_mpl) for i in range(1, nb_mpl + 1)]
     Sl_ctl = [None] + [Svl(element='cathode', s=sv[f's_ctl_{i}'], C_v=sv[f'C_v_ctl_{i}'],
-                            Ctot=sv[f'C_v_ctl_{i}'] + sv[f'C_O2_ctl_{i}'] + C_N2_c,
+                            Ctot=sv[f'C_v_ctl_{i}'] + sv[f'C_O2_ctl_{i}'] + C_N2_c_mean,
                             T=sv[f'T_ctl_{i}'], epsilon=epsilon_ctl[i]) for i in range(1, nb_tl + 1)]
     Sl_cgdl = [None] + [Svl(element='cathode', s=sv[f's_cgdl_{i}'], C_v=sv[f'C_v_cgdl_{i}'],
-                            Ctot=sv[f'C_v_cgdl_{i}'] + sv[f'C_O2_cgdl_{i}'] + C_N2_c,
+                            Ctot=sv[f'C_v_cgdl_{i}'] + sv[f'C_O2_cgdl_{i}'] + C_N2_c_mean,
                             T=sv[f'T_cgdl_{i}'], epsilon=epsilon_gdl) for i in range(1, nb_gdl + 1)]
 
     # Vapor generated through liquid water evaporation or degenerated through condensation
