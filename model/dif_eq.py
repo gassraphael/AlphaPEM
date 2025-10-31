@@ -60,6 +60,9 @@ def dydt(t, y, operating_inputs, parameters, solver_variable_names, control_vari
     if parameters["type_control"] != "no_control":
         control_operating_conditions(t, solver_variables, operating_inputs, parameters, control_variables)
 
+    if parameters['type_auxiliary'] != "no_auxiliary":
+        raise ValueError("Currently, the simulation with auxiliaries are in reconstruction. Please set 'type_auxiliary' to 'no_auxiliary'.")
+
     # Intermediate values
     i_fc = operating_inputs['current_density'](t, parameters)
     dif_eq_int_values = calculate_dif_eq_int_values(t, solver_variables, control_variables, i_fc, operating_inputs,

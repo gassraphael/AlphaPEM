@@ -66,11 +66,6 @@ def calculate_velocity_evolution(sv, control_variables, i_fc, Jv_agc_agdl, Jv_cg
     nb_channel_in_gc, nb_cell, type_auxiliary = parameters['nb_channel_in_gc'], parameters['nb_cell'], parameters['type_auxiliary']
     nb_gc, nb_gdl = parameters['nb_gc'], parameters['nb_gdl']
 
-    Jv_agc_agdl = [0] * (nb_gc + 1)                                                                                     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    J_H2_agc_agdl = [0] * (nb_gc + 1)                                                                                   # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    Jv_cgdl_cgc = [0] * (nb_gc + 1)                                                                                     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    J_O2_cgdl_cgc = [0] * (nb_gc + 1)                                                                                   # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
     # Intermediate calculation
     L_node_gc = Lgc / nb_gc                                                                                             # Length of one gas channel node (m).
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
@@ -102,8 +97,8 @@ def calculate_velocity_evolution(sv, control_variables, i_fc, Jv_agc_agdl, Jv_cg
 
         # Continuity equation are used for calculating the molar flows at all points along the GC at stationary state.
         for i in range(1, nb_gc + 1):
-            J_a[i] = J_a[i-1] + J_tot_agc_agdl[i] * L_node_gc / Hagc
-            J_c[i] = J_c[i-1] - J_tot_cgdl_cgc[i] * L_node_gc / Hcgc
+            J_a[i] = J_a[i-1] - J_tot_agc_agdl[i] * L_node_gc / Hagc
+            J_c[i] = J_c[i-1] + J_tot_cgdl_cgc[i] * L_node_gc / Hcgc
 
         # Velocities at the outlets of the GCs (m/s).
         v_a[-1] = J_a[-1] / P_a[-1] * R * T_des
@@ -157,8 +152,8 @@ def calculate_velocity_evolution(sv, control_variables, i_fc, Jv_agc_agdl, Jv_cg
 
     #       Continuity equation are used for calculating the molar flows at all points along the GC at stationary state.
     for i in range(1, nb_gc + 1):
-        J_a[i] = J_a[i - 1] + J_tot_agc_agdl[i] * L_node_gc / Hagc
-        J_c[i] = J_c[i - 1] - J_tot_cgdl_cgc[i] * L_node_gc / Hcgc
+        J_a[i] = J_a[i - 1] - J_tot_agc_agdl[i] * L_node_gc / Hagc
+        J_c[i] = J_c[i - 1] + J_tot_cgdl_cgc[i] * L_node_gc / Hcgc
 
     #       Velocities at the outlets of the GCs (m/s).
     v_a[-1] = J_a[-1] / P_a[-1] * R * T_des
