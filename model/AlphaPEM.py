@@ -228,7 +228,7 @@ class AlphaPEM:
 
         self.solver_variable_names_extension()  # Several points are considered in each GC, GDL and MPL. This must be
         #                                        inserted into the solver_variable_names.
-        self.all_variable_names = self.solver_variable_names + ['t', 'Ucell', 'v_a', 'v_c', 'Pa_in', 'Pc_in'] + \
+        self.all_variable_names = self.solver_variable_names + ['t', 'Ucell', 'v_a_in', 'v_c_in', 'Pa_in', 'Pc_in'] + \
                                                                ['Phi_a_des', 'Phi_c_des']
         self.variables = {key: [] for key in self.all_variable_names}
 
@@ -258,8 +258,7 @@ class AlphaPEM:
                                    self.control_variables))
 
         #       Recover the variable values calculated by the solver into the dictionary.
-        if self.parameters['type_display'] != "no_display":
-            self._recovery()
+        self._recovery()
 
         #       Calculate the cell voltage after computing the internal states of the cell.
         self.variables["Ucell"].extend(calculate_cell_voltage(self.variables, self.operating_inputs, self.parameters))
@@ -493,29 +492,30 @@ class AlphaPEM:
             self.variables[key].extend(list(self.sol.y[index]))
 
         # Recovery of more variables
-        #   The control variables should be reinitialized. To be reviewed.
-        if self.parameters['type_current'] == "step":
-            self.control_variables['t_control_Phi'] = 0
-        else:
-            self.control_variables['t_control_Phi'] = 0
-        self.control_variables['Phi_a_des'] = self.operating_inputs['Phi_a_des']
-        self.control_variables['Phi_c_des'] = self.operating_inputs['Phi_c_des']
+        if self.parameters['type_display'] != "no_display":
+            #   The control variables should be reinitialized. To be reviewed.
+            if self.parameters['type_current'] == "step":
+                self.control_variables['t_control_Phi'] = 0
+            else:
+                self.control_variables['t_control_Phi'] = 0
+            self.control_variables['Phi_a_des'] = self.operating_inputs['Phi_a_des']
+            self.control_variables['Phi_c_des'] = self.operating_inputs['Phi_c_des']
 
-        for j in range(len(self.sol.t)):  # For each time...
-            # ... recovery of i_fc.
-            i_fc = self.operating_inputs["current_density"](self.variables['t'][j], self.parameters)
-            # ... recovery of S_abs_acl, S_abs_ccl, Jmem_acl, Jmem_ccl.
-            last_solver_variables = {key: self.variables[key][j] for key in self.solver_variable_names}
-            flows_recovery = calculate_flows(self.variables['t'][j], last_solver_variables, self.control_variables,
-                                             i_fc, self.operating_inputs, self.parameters)
-            for key in ['v_a', 'v_c', 'Pa_in', 'Pc_in']:
-                self.variables[key].append(flows_recovery[key])
-            # ... recovery of Phi_a_des and Phi_c_des.
-            if self.parameters["type_control"] == "Phi_des":
-                sv = {'lambda_mem': self.variables['lambda_mem'][j], 's_ccl': self.variables['s_ccl'][j]}
-                control_operating_conditions(self.variables['t'][j], sv, self.operating_inputs,
-                                             self.parameters, self.control_variables)
-                for key in ['Phi_a_des', 'Phi_c_des']: self.variables[key].append(self.control_variables[key])
+            for j in range(len(self.sol.t)):  # For each time...
+                # ... recovery of i_fc.
+                i_fc = self.operating_inputs["current_density"](self.variables['t'][j], self.parameters)
+                # ... recovery of S_abs_acl, S_abs_ccl, Jmem_acl, Jmem_ccl.
+                last_solver_variables = {key: self.variables[key][j] for key in self.solver_variable_names}
+                flows_recovery = calculate_flows(self.variables['t'][j], last_solver_variables, self.control_variables,
+                                                 i_fc, self.operating_inputs, self.parameters)
+                for key in ['v_a_in', 'v_c_in', 'Pa_in', 'Pc_in']:
+                    self.variables[key].append(flows_recovery[key])
+                # ... recovery of Phi_a_des and Phi_c_des.
+                if self.parameters["type_control"] == "Phi_des":
+                    sv = {'lambda_mem': self.variables['lambda_mem'][j], 's_ccl': self.variables['s_ccl'][j]}
+                    control_operating_conditions(self.variables['t'][j], sv, self.operating_inputs,
+                                                 self.parameters, self.control_variables)
+                    for key in ['Phi_a_des', 'Phi_c_des']: self.variables[key].append(self.control_variables[key])
 
     def Display(self, ax1=None, ax2=None, ax3=None):
         """Display the plots of the program.

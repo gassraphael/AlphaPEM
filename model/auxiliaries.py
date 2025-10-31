@@ -9,7 +9,7 @@
 from configuration.settings import F, R, Text, Pext, Phi_ext, y_O2_ext, M_H2O
 from modules.transitory_functions import Psat
 from modules.auxiliaries_modules import auxiliaries_int_values_which_are_commun_with_dif_eq
-from model.velocity import calculate_velocity_evolution, calculate_inlet_pressure_evolution, desired_flows
+from model.velocity import calculate_velocity_evolution, desired_flows
 
 
 # ______________________________________________________Auxiliaries_____________________________________________________
@@ -43,56 +43,26 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
 
     Returns
     -------
-    Jv_a_in : float
-        Vapor flow at the anode gas channel inlet (mol.m-2.s-1).
-    Jv_a_out : float
-        Vapor flow at the anode gas channel outlet (mol.m-2.s-1).
-    Jv_c_in : float
-        Vapor flow at the cathode gas channel inlet (mol.m-2.s-1).
-    Jv_c_out : float
-        Vapor flow at the cathode gas channel outlet (mol.m-2.s-1).
-    J_H2_in : float
-        H2 flow at the anode gas channel inlet (mol.m-2.s-1).
-    J_H2_out : float
-        H2 flow at the anode gas channel outlet (mol.m-2.s-1).
-    J_O2_in : float
-        O2 flow at the cathode gas channel inlet (mol.m-2.s-1).
-    J_O2_out : float
-        O2 flow at the cathode gas channel outlet (mol.m-2.s-1).
-    J_N2_a_in : float
-        N2 flow at the anode gas channel inlet (mol.m-2.s-1).
-    J_N2_a_out : float
-        N2 flow at the anode gas channel outlet (mol.m-2.s-1).
-    J_N2_c_in : float
-        N2 flow at the cathode gas channel inlet (mol.m-2.s-1).
-    J_N2_c_out : float
-        N2 flow at the cathode gas channel outlet (mol.m-2.s-1).
-    Wasm_ext_to_in : float
-        Anode side supply manifold inlet flow (kg.s-1).
-    Wasm_out : float
-        Anode side supply manifold outlet flow (kg.s-1).
-    Waem_in : float
-        Anode side external manifold inlet flow (kg.s-1).
-    Wa_out : float
-        Anode side external manifold outlet flow (kg.s-1).
-    Wcsm_ext_to_in : float
-        Cathode side supply manifold inlet flow (kg.s-1).
-    Wcsm_out : float
-        Cathode side supply manifold outlet flow (kg.s-1).
-    Wcem_in : float
-        Cathode side external manifold inlet flow (kg.s-1).
-    Wc_out : float
-        Cathode side external manifold outlet flow (kg.s-1).
-    Ware : float
-        Anode side recirculation flow (kg.s-1).
-    Wv_asm_ext_to_in : float
-        Vapor flow at the anode supply manifold inlet (mol.s-1).
-    Wv_a_out : float
-        Vapor flow at the anode external manifold outlet (mol.s-1).
-    Wv_csm_ext_to_in : float
-        Vapor flow at the cathode supply manifold inlet (mol.s-1).
-    Wv_c_out : float
-        Vapor flow at the cathode external manifold outlet (mol.s-1).
+    Jv : dict
+        Vapor flow between the different layers (mol.m-2.s-1).
+    J_H2 : dict
+        Hydrogen flow between the different layers (mol.m-2.s-1).
+    J_O2 : dict
+        Oxygen flow between the different layers (mol.m-2.s-1).
+    J_N2 : dict
+        Nitrogen flow between the different layers (mol.m-2.s-1).
+    W : dict
+        Global flows through the auxiliaries (mol.s-1).
+    W_v : dict
+        Vapor flows through the auxiliaries (mol.s-1).
+    v_a_in : float
+        Velocity evolution at the inlet of the anode (m.s-1).
+    v_c_in : float
+        Velocity evolution at the inlet of the cathode (m.s-1).
+    Pa_in : float
+        Inlet pressure at the anode side (Pa).
+    Pc_in : float
+        Inlet pressure at the cathode side (Pa).
     """
 
     # __________________________________________________Preliminaries___________________________________________________
@@ -116,10 +86,8 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
         # Commun intermediate values with dif_eq_modules.py which allows to avoid redundant calculations
     P, Phi, y_H2, y_O2, M, rho, k_purge, Abp_a, Abp_c, mu_gaz = \
         auxiliaries_int_values_which_are_commun_with_dif_eq(t, sv, operating_inputs, parameters)
-    v_a, v_c = calculate_velocity_evolution(sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_agc_agdl,
+    v_a, v_c, Pa_in, Pc_in = calculate_velocity_evolution(sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_agc_agdl,
                                             J_O2_cgdl_cgc, operating_inputs, parameters, rho, mu_gaz)
-    Pa_in, Pc_in = calculate_inlet_pressure_evolution(sv, v_a, v_c, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_agc_agdl,
-                                                      J_O2_cgdl_cgc, rho, mu_gaz, **operating_inputs, **parameters)
     W_des = desired_flows(sv, control_variables, i_fc, Pa_in, Pc_in, operating_inputs, parameters)
 
     # _________________________________________Inlet and outlet global flows____________________________________________
@@ -150,7 +118,7 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
             Wa_out = rho_aem_out_to_ext * v_a * Abp_a
     else:  # elif type_auxiliary == "no_auxiliary" (only 1 cell):
         Wa_in = W_des['H2'] + W_des['H2O_inj_a']  # This expression is also present in calculate_velocity_evolution.
-        Wa_out = P[f'agc_{nb_gc}'] * v_a * Hagc * Wagc / (R * T_des) * nb_channel_in_gc * nb_cell
+        Wa_out = P[f'agc_{nb_gc}'] * v_a[nb_gc] * Hagc * Wagc / (R * T_des) * nb_channel_in_gc * nb_cell
         Ware, Wasm_to_agc, Wagc_to_aem = [None] * 3
     # Anode flow entering/leaving the stack in mol.m-2.s-1
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
@@ -173,7 +141,7 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
         Wc_out = rho_cem_out_to_ext * v_c * Abp_c
     else:  # elif type_auxiliary == "no_auxiliary" (only 1 cell):
         Wc_in = W_des['dry_air'] + W_des['H2O_inj_c']  # This expression is also present in calculate_velocity_evolution.
-        Wc_out = P[f'cgc_{nb_gc}'] * v_c * Hcgc * Wcgc / (R * T_des) * nb_channel_in_gc * nb_cell
+        Wc_out = P[f'cgc_{nb_gc}'] * v_c[nb_gc] * Hcgc * Wcgc / (R * T_des) * nb_channel_in_gc * nb_cell
         Wcsm_to_cgc, Wcgc_to_cem = [None] * 2
 
     # Cathode flow entering/leaving the stack in mol.m-2.s-1
@@ -191,14 +159,14 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
         Jv_a_in = Phi_asm * Psat(T_des) / Pasm * Ja_in
     else:  # elif type_auxiliary == "no_auxiliary":
         Jv_a_in = Phi_a_des * Psat(T_des) / Pa_in * Ja_in
-    Jv_agc_agc = [None] + [sv[f'C_v_agc_{i}'] * v_a for i in range(1, nb_gc)]
+    Jv_agc_agc = [None] + [sv[f'C_v_agc_{i}'] * v_a[i] for i in range(1, nb_gc)]
     Jv_a_out = sv[f'C_v_agc_{nb_gc}'] * R * T_des / P[f'agc_{nb_gc}'] * Ja_out
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
             type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         Jv_c_in = Phi_csm * Psat(T_des) / Pcsm * Jc_in
     else:  # elif type_auxiliary == "no_auxiliary":
         Jv_c_in = Phi_c_des * Psat(T_des) / Pc_in * Jc_in
-    Jv_cgc_cgc = [None] + [sv[f'C_v_cgc_{i}'] * v_c for i in range(1, nb_gc)]
+    Jv_cgc_cgc = [None] + [sv[f'C_v_cgc_{i}'] * v_c[i] for i in range(1, nb_gc)]
     Jv_c_out = sv[f'C_v_cgc_{nb_gc}'] * R * T_des / P[f'cgc_{nb_gc}'] * Jc_out
 
     # H2 flows at the GC (mol.m-2.s-1)
@@ -208,7 +176,7 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
         J_H2_out = y_H2_agc * (1 - Phi_agc_to_aem_in * Psat(T_des) / Pagc_to_aem_in) * Ja_out
     else:  # elif type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or type_auxiliary == "no_auxiliary":
         J_H2_in = (1 - Phi_a_des * Psat(T_des) / Pa_in) * Ja_in
-        J_H2_agc_agc = [None] + [sv[f'C_H2_agc_{i}'] * v_a for i in range(1, nb_gc)]
+        J_H2_agc_agc = [None] + [sv[f'C_H2_agc_{i}'] * v_a[i] for i in range(1, nb_gc)]
         J_H2_out = sv[f'C_H2_agc_{nb_gc}'] * R * T_des / P[f'agc_{nb_gc}'] * Ja_out
 
     # O2 flows at the GC (mol.m-2.s-1)
@@ -217,7 +185,7 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
         J_O2_in = y_O2_csm * (1 - Phi_csm * Psat(T_des) / Pcsm) * Jc_in
     else:  # elif type_auxiliary == "no_auxiliary":
         J_O2_in = y_O2_ext * (1 - Phi_c_des * Psat(T_des) / Pc_in) * Jc_in
-    J_O2_cgc_cgc = [None] + [sv[f'C_O2_cgc_{i}'] * v_c for i in range(1, nb_gc)]
+    J_O2_cgc_cgc = [None] + [sv[f'C_O2_cgc_{i}'] * v_c[i] for i in range(1, nb_gc)]
     J_O2_out = sv[f'C_O2_cgc_{nb_gc}'] * R * T_des / P[f'cgc_{nb_gc}'] * Jc_out
 
     # N2 flows at the GC (mol.m-2.s-1)
@@ -278,4 +246,4 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
             'W_v': {'a_in': Wv_a_in, 'are': Wv_are, 'asm_to_agc': Wv_asm_to_agc, 'agc_to_aem': Wv_agc_to_aem,
                     'a_out': Wv_a_out, 'c_in': Wv_c_in, 'csm_to_cgc': Wv_csm_to_cgc, 'cgc_to_cem': Wv_cgc_to_cem,
                     'c_out': Wv_c_out},
-            'v_a': v_a, 'v_c': v_c, 'Pa_in': Pa_in, 'Pc_in': Pc_in}
+            'v_a_in': v_a[0], 'v_c_in': v_c[0], 'Pa_in': Pa_in, 'Pc_in': Pc_in}

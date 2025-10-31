@@ -202,8 +202,9 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl
                                            ((Jl['cgdl_cgdl'][nb_gdl - 1] - Jl['cgdl_cgc']) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][nb_gdl])
 
 
-def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, epsilon_gdl, epsilon_cl, epsilon_mpl,
-                                             epsilon_atl, epsilon_ctl, Htl, nb_gc, nb_gdl, nb_tl, nb_mpl, Jv, Sv, S_abs,
+def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, nb_channel_in_gc, Hgdl, Hmpl, Hacl,
+                                             Hccl, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_atl, epsilon_ctl, Htl,
+                                             nb_gc, nb_gdl, nb_tl, nb_mpl, Jv, Sv, S_abs,
                                              **kwargs):
     """This function calculates the dynamic evolution of the vapor in the gas diffusion layers, the microporous layers,
     and the catalyst layers.
@@ -215,6 +216,16 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl,
     sv : dict
         Variables calculated by the solver. They correspond to the fuel cell internal states.
         sv is a contraction of solver_variables for enhanced readability.
+    Aact : float
+        Active area of one cell (m²).
+    Wagc : float
+        Width of the anode gas channel (m).
+    Wcgc : float
+        Width of the cathode gas channel (m).
+    Lgc : float
+        Length of one channel of the gas channel (m).
+    nb_channel_in_gc : int
+        Number of channels in the gas channel.
     Hgdl : float
         Thickness of the gas diffusion layer (m).
     Hmpl : float
@@ -251,7 +262,7 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl,
 
     # At the anode side
     #       Inside the AGDL
-    Jv_agc_agdl_avg = sum(Jv['agc_agdl'][1:nb_gc+1]) / nb_gc # Average vapor flow from the gas channel to the GDL
+    Jv_agc_agdl_avg = (sum(Jv['agc_agdl'][1:nb_gc+1]) / nb_gc) * (Wagc * Lgc) / (Aact / nb_channel_in_gc)               # Average vapor flow from the gas channel to the GDL. There is a surface reduction due to the presence of the ribs, which is taken into account here.
     if nb_gdl == 1:
         dif_eq['dC_v_agdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_agdl_1'])) * \
                                    ((Jv_agc_agdl_avg - Jv['agdl_atl']) / Hgdl + Sv['agdl'][1])
@@ -337,7 +348,7 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl,
         dif_eq[f'dC_v_ctl_{nb_tl} / dt'] = 1 / (epsilon_ctl[nb_tl] * (1 - sv[f's_ctl_{nb_tl}'])) * \
                                            ((Jv['ctl_ctl'][nb_tl - 1] - Jv['ctl_cgdl']) / (Htl / nb_tl) + Sv['ctl'][nb_tl])
     #       Inside the CGDL
-    Jv_cgdl_cgc_avg = sum(Jv['cgdl_cgc'][1:nb_gc + 1]) / nb_gc  # Average vapor flow from the GDL to the gas channel
+    Jv_cgdl_cgc_avg = (sum(Jv['cgdl_cgc'][1:nb_gc + 1]) / nb_gc) * (Wcgc * Lgc) / (Aact / nb_channel_in_gc)             # Average vapor flow from the GDL to the gas channel. There is a surface reduction due to the presence of the ribs, which is taken into account here.
     if nb_gdl == 1:
         dif_eq['dC_v_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * ((Jv['ctl_cgdl'] - Jv_cgdl_cgc_avg) / Hgdl +
                                                                                  Sv['cgdl'][1])
@@ -356,9 +367,9 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl,
                                              ((Jv['cgdl_cgdl'][nb_gdl - 1] - Jv_cgdl_cgc_avg) / (Hgdl / nb_gdl) + Sv['cgdl'][nb_gdl])
 
 
-def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, epsilon_gdl, epsilon_cl,
-                                                epsilon_mpl, epsilon_atl, epsilon_ctl, Htl, nb_gdl, nb_tl, nb_mpl,
-                                                nb_gc, J_H2, J_O2, S_H2, S_O2, **kwargs):
+def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, nb_channel_in_gc, Hgdl, Hmpl, Hacl,
+                                                Hccl, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_atl, epsilon_ctl,
+                                                Htl, nb_gdl, nb_tl, nb_mpl, nb_gc, J_H2, J_O2, S_H2, S_O2, **kwargs):
     """This function calculates the dynamic evolution of the hydrogen, oxygen and nitrogen in the gas diffusion layers,
     the microporous layers, and the catalyst layers.
 
@@ -369,6 +380,16 @@ def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl, Hc
     sv : dict
         Variables calculated by the solver. They correspond to the fuel cell internal states.
         sv is a contraction of solver_variables for enhanced readability.
+    Aact : float
+        Active area of one cell (m²).
+    Wagc : float
+        Width of the anode gas channel (m).
+    Wcgc : float
+        Width of the cathode gas channel (m).
+    Lgc : float
+        Length of one channel of the gas channel (m).
+    nb_channel_in_gc : int
+        Number of channels in the gas channel.
     Hgdl : float
         Thickness of the gas diffusion layer (m).
     Hmpl : float
@@ -407,7 +428,7 @@ def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl, Hc
 
     # At the anode side
     #      Inside the AGDL
-    J_H2_agc_agdl_avg = sum(J_H2['agc_agdl'][1:nb_gc + 1]) / nb_gc  # Average H2 flow from the gas channel to the GDL
+    J_H2_agc_agdl_avg = (sum(J_H2['agc_agdl'][1:nb_gc + 1]) / nb_gc) * (Wagc * Lgc) / (Aact / nb_channel_in_gc)         # Average hydrogen flow from the gas channel to the GDL. There is a surface reduction due to the presence of the ribs, which is taken into account here.
     if nb_gdl == 1:
         dif_eq['dC_H2_agdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_agdl_1'])) * \
                                       (J_H2_agc_agdl_avg - J_H2['agdl_atl']) / Hgdl
@@ -491,7 +512,7 @@ def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl, Hc
         dif_eq[f'dC_O2_ctl_{nb_tl} / dt'] = 1 / (epsilon_ctl[nb_tl] * (1 - sv[f's_ctl_{nb_tl}'])) * \
                                             (J_O2['ctl_ctl'][nb_tl - 1] - J_O2['ctl_cgdl']) / (Htl / nb_tl)
     #      Inside the CGDL
-    J_O2_cgdl_cgc_avg = sum(J_O2['cgdl_cgc'][1:nb_gc + 1]) / nb_gc  # Average O2 flow from the GDL to the gas channel
+    J_O2_cgdl_cgc_avg = (sum(J_O2['cgdl_cgc'][1:nb_gc + 1]) / nb_gc) * (Wcgc * Lgc) / (Aact / nb_channel_in_gc)         # Average oxygen flow from the GDL to the gas channel. There is a surface reduction due to the presence of the ribs, which is taken into account here.
     if nb_gdl == 1:
         dif_eq['dC_O2_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * (J_O2['ctl_cgdl'] - J_O2_cgdl_cgc_avg) / Hgdl
     elif nb_gdl == 2:

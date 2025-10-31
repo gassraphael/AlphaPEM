@@ -1340,15 +1340,15 @@ def plot_v(variables, parameters, ax):
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
     t = np.array(variables['t'])
-    v_a_t = np.array(variables['v_a'])
-    v_c_t = np.array(variables['v_c'])
+    v_a_in_t = np.array(variables['v_a_in'])
+    v_c_in_t = np.array(variables['v_c_in'])
 
     # Plot the pressure at different spatial localisations: P
-    ax.plot(t, v_a_t, color=colors(0))
-    ax.plot(t, v_c_t, color=colors(6))
-    ax.legend([r'$\mathregular{v_{a}}$', r'$\mathregular{v_{c}}$'], loc='best')
+    ax.plot(t, v_a_in_t, color=colors(0))
+    ax.plot(t, v_c_in_t, color=colors(6))
+    ax.legend([r'$\mathregular{v_{a,in}}$', r'$\mathregular{v_{c,in}}$'], loc='best')
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
-    ax.set_ylabel(r'$\mathbf{Velocities}$ $\mathbf{v}$ $\mathbf{\left( m.s^{-1} \right)}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Inlet velocities}$ $\mathbf{v}$ $\mathbf{\left( m.s^{-1} \right)}$', labelpad=3)
     ax.ticklabel_format(style='scientific', axis='y', scilimits=(0, 0))
 
     # Plot instructions
@@ -1383,15 +1383,15 @@ def plot_Re_nb(variables, parameters, ax):
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
     t = np.array(variables['t'])
-    v_a_t = np.array(variables['v_a'])
-    v_c_t = np.array(variables['v_c'])
-    C_v_agc_t = np.array(variables[f'C_v_agc_{int(np.ceil(nb_gc / 2))}'])
-    C_v_cgc_t = np.array(variables[f'C_v_cgc_{int(np.ceil(nb_gc / 2))}'])
-    C_H2_agc_t = np.array(variables[f'C_H2_agc_{int(np.ceil(nb_gc / 2))}'])
-    C_O2_cgc_t = np.array(variables[f'C_O2_cgc_{int(np.ceil(nb_gc / 2))}'])
+    v_a_in_t = np.array(variables['v_a_in'])
+    v_c_in_t = np.array(variables['v_c_in'])
+    C_v_agc_t = np.array(variables['C_v_agc_1'])
+    C_v_cgc_t = np.array(variables['C_v_cgc_1'])
+    C_H2_agc_t = np.array(variables['C_H2_agc_1'])
+    C_O2_cgc_t = np.array(variables['C_O2_cgc_1'])
     C_N2_c_t = np.array(variables['C_N2_c'])
-    T_agc_t = np.array(variables[f'T_agc_{int(np.ceil(nb_gc / 2))}'])
-    T_cgc_t = np.array(variables[f'T_cgc_{int(np.ceil(nb_gc / 2))}'])
+    T_agc_t = np.array(variables['T_agc_1'])
+    T_cgc_t = np.array(variables['T_cgc_1'])
 
     # Calculation of the Reynold Number
     d_pipe = np.sqrt(4 * Hcgc * Wcgc / np.pi)
@@ -1414,15 +1414,15 @@ def plot_Re_nb(variables, parameters, ax):
                               [x_H2O_v_cgc, y_O2_cgc * (1 - x_H2O_v_cgc),
                                (1 - y_O2_cgc) * (1 - x_H2O_v_cgc)],
                               T_cgc_t)
-    Re_nb_a_t = (rho_agc * v_a_t * d_pipe) / mu_agc  # Reynolds number at the anode side
-    Re_nb_c_t = (rho_cgc * v_c_t * d_pipe) / mu_cgc  # Reynolds number at the anode side
+    Re_nb_a_t = (rho_agc * v_a_in_t * d_pipe) / mu_agc  # Reynolds number at the anode side
+    Re_nb_c_t = (rho_cgc * v_c_in_t * d_pipe) / mu_cgc  # Reynolds number at the anode side
 
     # Plot the pressure at different spatial localisations: P
     ax.plot(t, Re_nb_a_t, color=colors(0))
     ax.plot(t, Re_nb_c_t, color=colors(6))
     ax.legend([r'$\mathregular{Re_{a}}$', r'$\mathregular{Re_{c}}$'], loc='best')
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
-    ax.set_ylabel(r'$\mathbf{Reynold}$ $\mathbf{number}$ $\mathbf{Re}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Reynold}$ $\mathbf{number}$ $\mathbf{at}$ $\mathbf{the}$ $\mathbf{inlet,}$ $\mathbf{Re}$', labelpad=3)
     ax.ticklabel_format(style='scientific', axis='y', scilimits=(0, 0))
 
     # Plot instructions

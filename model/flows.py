@@ -108,12 +108,10 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
 
     # Convective vapor flows
     #   Anode side
-    Jv_agc_agdl = [None] + [h_a(Pagc[i], T_des, Wagc, Hagc) * (sv[f'C_v_agc_{i}'] - sv['C_v_agdl_1']) *
-                            (Aact / nb_channel_in_gc) / (Wagc * Lgc)
+    Jv_agc_agdl = [None] + [h_a(Pagc[i], T_des, Wagc, Hagc) * (sv[f'C_v_agc_{i}'] - sv['C_v_agdl_1'])
                             for i in range(1, nb_gc + 1)]
     #   Cathode side
-    Jv_cgdl_cgc = [None] + [h_c(Pcgc[i], T_des, Wcgc, Hcgc) * (sv[f'C_v_cgdl_{nb_gdl}'] - sv[f'C_v_cgc_{i}']) *
-                            (Aact / nb_channel_in_gc) / (Wcgc * Lgc)
+    Jv_cgdl_cgc = [None] + [h_c(Pcgc[i], T_des, Wcgc, Hcgc) * (sv[f'C_v_cgdl_{nb_gdl}'] - sv[f'C_v_cgc_{i}'])
                             for i in range(1, nb_gc + 1)]
 
     # Conductive vapor flows
@@ -154,7 +152,6 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     # Conductive-convective H2 and O2 flows
     #   Anode side
     J_H2_agc_agdl = [None] + [h_a(Pagc[i], T_des, Wagc, Hagc) * (sv[f'C_H2_agc_{i}'] - sv['C_H2_agdl_1'])
-                              * (Aact / nb_channel_in_gc) / (Wagc * Lgc)
                             for i in range(1, nb_gc + 1)]
     #   Cathode side
     J_O2_cgdl_cgc = [None] + [h_c(Pcgc[i], T_des, Wcgc, Hcgc) * (sv[f'C_O2_cgdl_{nb_gdl}'] - sv[f'C_O2_cgc_{i}']) *

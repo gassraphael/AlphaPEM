@@ -142,10 +142,6 @@ def calculate_dif_eq_int_values(t, sv, control_variables, i_fc, operating_inputs
                                                (1 - y_O2[f'cgc_{i}']) * (1 - x_H2O_v[f'cgc_{i}'])],
                                               sv[f'T_cgc_{i}'])
 
-    #       Products of dynamic viscosity by lengths
-    mu_a_times_Lgc = sum(mu_gaz[f'agc_{i}'] for i in range(1, nb_gc + 1)) * Lgc / nb_gc
-    mu_c_times_Lgc = sum(mu_gaz[f'cgc_{i}'] for i in range(1, nb_gc + 1)) * Lgc / nb_gc
-
 
     #       Volumetric heat capacity (J.m-3.K-1)
     rho_Cp0 = {
@@ -297,8 +293,7 @@ def calculate_dif_eq_int_values(t, sv, control_variables, i_fc, operating_inputs
         # Set to None the variables not used when "no_auxiliary" system is considered
         v_re, Lman_to_endplate, Lman_to_man_gc, k_purge = [None] * 4
 
-    return {'rho_Cp0': rho_Cp0, 'v_re': v_re, 'k_purge': k_purge, 'rho': rho, 'C_tot': C_tot, 'mu_gaz': mu_gaz,
-            'mu_a_times_Lgc': mu_a_times_Lgc, 'mu_c_times_Lgc': mu_c_times_Lgc, 'P': P}
+    return {'rho_Cp0': rho_Cp0, 'v_re': v_re, 'k_purge': k_purge, 'rho': rho, 'C_tot': C_tot, 'mu_gaz': mu_gaz, 'P': P}
 
 
 # ______________________________________Function which gives the integration event______________________________________
