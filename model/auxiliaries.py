@@ -97,24 +97,25 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
     # Anode flow through the auxiliaries in mol.s-1
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
          type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-        Wa_in = rho_asm_in_to_asm * v_a * A_T_a
-        Wasm_to_asm_out = rho_asm_to_asm_out * v_a * Hagc * Wagc
-        Wasm_out_to_agc = rho_asm_out_to_agc * v_a * Hagc * Wagc
-        Wagc_to_aem_in = rho_agc_to_aem_in * v_a * Hagc * Wagc
-        Waem_in_to_aem = rho_aem_in_to_aem * v_a * Hagc * Wagc
-        if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":                                     # Attention: prévoir un débit minimal pour la pompe, comme les débits entrants.
-            Ware = Maem_out_re * (Paem_out_re / (Paem_out_re - Phi_aem_out_re * Psat(T_des))) * \
-                   (Sa - 1) * i_fc / (2 * F) * (nb_cell * Aact)                                                  # The pump exactly compensates the pressure drop.
-            Wasm_in_re_to_asm = rho_asm_in_re_to_asm * v_a * A_T_a
-            Waem_to_aem_out_re = rho_aem_to_aem_out_re * v_a * A_T_a
-            Waem_to_aem_out = k_purge * rho_aem_to_aem_out * v_a * A_T_a
-            Wa_out = k_purge * rho_aem_out_to_ext * v_a * A_T_a
-        else: # type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-            Ware = None
-            Wasm_in_re_to_asm = None
-            Waem_to_aem_out_re = None
-            Waem_to_aem_out = rho_aem_to_aem_out * v_a * Abp_a
-            Wa_out = rho_aem_out_to_ext * v_a * Abp_a
+        pass
+        # Wa_in = rho_asm_in_to_asm * v_a * A_T_a
+        # Wasm_to_asm_out = rho_asm_to_asm_out * v_a * Hagc * Wagc
+        # Wasm_out_to_agc = rho_asm_out_to_agc * v_a * Hagc * Wagc
+        # Wagc_to_aem_in = rho_agc_to_aem_in * v_a * Hagc * Wagc
+        # Waem_in_to_aem = rho_aem_in_to_aem * v_a * Hagc * Wagc
+        # if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":                                     # Attention: prévoir un débit minimal pour la pompe, comme les débits entrants.
+        #     Ware = Maem_out_re * (Paem_out_re / (Paem_out_re - Phi_aem_out_re * Psat(T_des))) * \
+        #            (Sa - 1) * i_fc / (2 * F) * (nb_cell * Aact)                                                  # The pump exactly compensates the pressure drop.
+        #     Wasm_in_re_to_asm = rho_asm_in_re_to_asm * v_a * A_T_a
+        #     Waem_to_aem_out_re = rho_aem_to_aem_out_re * v_a * A_T_a
+        #     Waem_to_aem_out = k_purge * rho_aem_to_aem_out * v_a * A_T_a
+        #     Wa_out = k_purge * rho_aem_out_to_ext * v_a * A_T_a
+        # else: # type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
+        #     Ware = None
+        #     Wasm_in_re_to_asm = None
+        #     Waem_to_aem_out_re = None
+        #     Waem_to_aem_out = rho_aem_to_aem_out * v_a * Abp_a
+        #     Wa_out = rho_aem_out_to_ext * v_a * Abp_a
     else:  # elif type_auxiliary == "no_auxiliary" (only 1 cell):
         Wa_in = W_des['H2'] + W_des['H2O_inj_a']  # This expression is also present in calculate_velocity_evolution.
         Wa_out = P[f'agc_{nb_gc}'] / (R * T_des) * v_a[nb_gc] * Hagc * Wagc * nb_cell * nb_channel_in_gc
@@ -122,8 +123,9 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
     # Anode flow entering/leaving the stack in mol.m-2.s-1
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
             type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-        Ja_in = 0
-        Ja_out = 0
+        pass
+        # Ja_in = 0
+        # Ja_out = 0
     else:  # elif type_auxiliary == "no_auxiliary" (only 1 cell):
         Ja_in = Wa_in / (Hagc * Wagc) / nb_cell / nb_channel_in_gc # This expression is also present in calculate_velocity_evolution.
         Ja_out = Wa_out / (Hagc * Wagc) / nb_cell / nb_channel_in_gc
@@ -131,13 +133,14 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
     # Cathode flow through the auxiliaries in mol.s-1
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
        type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-        Wc_in = rho_csm_in_to_csm * v_c * A_T_c
-        Wcsm_to_csm_out = rho_csm_to_csm_out * v_c * Hcgc * Wcgc
-        Wcsm_out_to_cgc = rho_csm_out_to_cgc * v_c * Hcgc * Wcgc
-        Wcgc_to_cem_in = rho_cgc_to_cem_in * v_c * Hcgc * Wcgc
-        Wcem_in_to_cem = rho_cem_in_to_cem * v_c * Hcgc * Wcgc
-        Wcem_to_cem_out = rho_cem_to_cem_out * v_c * Abp_c
-        Wc_out = rho_cem_out_to_ext * v_c * Abp_c
+        pass
+        # Wc_in = rho_csm_in_to_csm * v_c * A_T_c
+        # Wcsm_to_csm_out = rho_csm_to_csm_out * v_c * Hcgc * Wcgc
+        # Wcsm_out_to_cgc = rho_csm_out_to_cgc * v_c * Hcgc * Wcgc
+        # Wcgc_to_cem_in = rho_cgc_to_cem_in * v_c * Hcgc * Wcgc
+        # Wcem_in_to_cem = rho_cem_in_to_cem * v_c * Hcgc * Wcgc
+        # Wcem_to_cem_out = rho_cem_to_cem_out * v_c * Abp_c
+        # Wc_out = rho_cem_out_to_ext * v_c * Abp_c
     else:  # elif type_auxiliary == "no_auxiliary" (only 1 cell):
         Wc_in = W_des['dry_air'] + W_des['H2O_inj_c']  # This expression is also present in calculate_velocity_evolution.
         Wc_out = P[f'cgc_{nb_gc}'] / (R * T_des) * v_c[nb_gc] * Hcgc * Wcgc * nb_cell * nb_channel_in_gc
@@ -155,14 +158,16 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
     # Vapor flows at the GC (mol.m-2.s-1)
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
             type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-        Jv_agc_in = Phi_asm * Psat(T_des) / Pasm * Ja_in
+        pass
+        # Jv_agc_in = Phi_asm * Psat(T_des) / Pasm * Ja_in
     else:  # elif type_auxiliary == "no_auxiliary":
         Jv_agc_in = Phi_a_des * Psat(T_des) / Pa_in * Ja_in
     Jv_agc_agc = [None] + [sv[f'C_v_agc_{i}'] * v_a[i] for i in range(1, nb_gc)]
     Jv_agc_out = sv[f'C_v_agc_{nb_gc}'] * R * T_des / P[f'agc_{nb_gc}'] * Ja_out
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
             type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-        Jv_cgc_in = Phi_csm * Psat(T_des) / Pcsm * Jc_in
+        pass
+        # Jv_cgc_in = Phi_csm * Psat(T_des) / Pcsm * Jc_in
     else:  # elif type_auxiliary == "no_auxiliary":
         Jv_cgc_in = Phi_c_des * Psat(T_des) / Pc_in * Jc_in
     Jv_cgc_cgc = [None] + [sv[f'C_v_cgc_{i}'] * v_c[i] for i in range(1, nb_gc)]
@@ -170,9 +175,10 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
 
     # H2 flows at the GC (mol.m-2.s-1)
     if type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-        J_H2_agc_in = y_H2['asm_out'] * (1 - Phi_asm_out_to_agc * Psat(T_des) / Pasm_out_to_agc) * Ja_in
-        J_H2_agc_agc = None
-        J_H2_agc_out = y_H2_agc * (1 - Phi_agc_to_aem_in * Psat(T_des) / Pagc_to_aem_in) * Ja_out
+        pass
+        # J_H2_agc_in = y_H2['asm_out'] * (1 - Phi_asm_out_to_agc * Psat(T_des) / Pasm_out_to_agc) * Ja_in
+        # J_H2_agc_agc = None
+        # J_H2_agc_out = y_H2_agc * (1 - Phi_agc_to_aem_in * Psat(T_des) / Pagc_to_aem_in) * Ja_out
     else:  # elif type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or type_auxiliary == "no_auxiliary":
         J_H2_agc_in = (1 - Phi_a_des * Psat(T_des) / Pa_in) * Ja_in
         J_H2_agc_agc = [None] + [sv[f'C_H2_agc_{i}'] * v_a[i] for i in range(1, nb_gc)]
@@ -181,7 +187,8 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
     # O2 flows at the GC (mol.m-2.s-1)
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
             type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-        J_O2_cgc_in = y_O2_csm * (1 - Phi_csm * Psat(T_des) / Pcsm) * Jc_in
+        pass
+        # J_O2_cgc_in = y_O2_csm * (1 - Phi_csm * Psat(T_des) / Pcsm) * Jc_in
     else:  # elif type_auxiliary == "no_auxiliary":
         J_O2_cgc_in = y_O2_ext * (1 - Phi_c_des * Psat(T_des) / Pc_in) * Jc_in
     J_O2_cgc_cgc = [None] + [sv[f'C_O2_cgc_{i}'] * v_c[i] for i in range(1, nb_gc)]
@@ -190,10 +197,11 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
     # N2 flows at the GC (mol.m-2.s-1)
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
             type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-        J_N2_agc_in = (1 - y_H2['asm_out']) * (1 - Phi_asm_out_to_agc * Psat(T_des) / Pasm_out_to_agc) * Ja_in
-        J_N2_agc_out = (1 - y_H2_agc) * (1 - Phi_agc_to_aem_in * Psat(T_des) / Pagc_to_aem_in) * Ja_out
-        J_N2_cgc_in = (1 - y_O2_csm_out_to_cgc) * (1 - Phi_csm_out_to_cgc * Psat(T_des) / Pcsm_out_to_cgc) * Jc_in
-        J_N2_cgc_out = (1 - y_O2_cgc_to_cem_in) * (1 - Phi_cgc_to_cem_in * Psat(T_des) / Pcgc_to_cem_in) * Jc_out
+        pass
+        # J_N2_agc_in = (1 - y_H2['asm_out']) * (1 - Phi_asm_out_to_agc * Psat(T_des) / Pasm_out_to_agc) * Ja_in
+        # J_N2_agc_out = (1 - y_H2_agc) * (1 - Phi_agc_to_aem_in * Psat(T_des) / Pagc_to_aem_in) * Ja_out
+        # J_N2_cgc_in = (1 - y_O2_csm_out_to_cgc) * (1 - Phi_csm_out_to_cgc * Psat(T_des) / Pcsm_out_to_cgc) * Jc_in
+        # J_N2_cgc_out = (1 - y_O2_cgc_to_cem_in) * (1 - Phi_cgc_to_cem_in * Psat(T_des) / Pcgc_to_cem_in) * Jc_out
     else:  # elif type_auxiliary == "no_auxiliary":
         J_N2_agc_in = 0
         J_N2_agc_agc = [None] + [0] * (nb_gc - 1)
@@ -205,34 +213,35 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
     # Vapor flows at the manifold (mol.s-1)
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
             type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-        Wv_asm_in_to_asm = Phi_asm_in_to_asm * Psat(T_des) / Pasm_in_to_asm * Wa_in
-        Wv_asm_to_asm_out = Phi_asm_to_asm_out * Psat(T_des) / Pasm_to_asm_out * Wasm_to_asm_out
-        Wv_asm_out_to_agc = Phi_asm_out_to_agc * Psat(T_des) / Pasm_out_to_agc * Wasm_out_to_agc
-        Wv_agc_to_aem_in = Phi_agc_to_aem_in * Psat(T_des) / Pagc_to_aem_in * Wagc_to_aem_in
-        Wv_aem_in_to_aem = Phi_aem_in_to_aem * Psat(T_des) / Paem_in_to_aem * Waem_in_to_aem
-        Wv_aem_to_aem_out = Phi_aem_to_aem_out * Psat(T_des) / Paem_to_aem_out * Waem_to_aem_out
-        Wv_a_out = Phi_aem_out * Psat(T_des) / Paem_out * Wa_out
-        if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
-            # At the anode side
-            Wv_asm_ext_to_in = 0
-            Wv_asm_in_re_to_asm = Phi_asm_in_re_to_asm * Psat(T_des) / Pasm_in_re_to_asm * Wasm_in_re_to_asm
-            Wv_aem_to_aem_out_re = Phi_aem_to_aem_out_re * Psat(T_des) / Paem_to_aem_out_re * Waem_to_aem_out_re
-            Wv_are = Phi_aem_out_re * Psat(T_des) / Paem_out_re * (Ware / M['aem_out_re']) # The pump exactly compensates the pressure drop.
-        else: # type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-            # At the anode side
-            Wv_asm_ext_to_in = Wa_inj / M_H2O
-            Wv_asm_in_re_to_asm = None
-            Wv_aem_to_aem_out_re = None
-            Wv_are = None
-        # At the cathode side
-        Wv_csm_ext_to_in = Phi_ext * Psat(Text) / Pext * (Wcp / M['ext']) + Wc_inj / M_H2O
-        Wv_csm_in_to_csm = Phi_csm_in_to_csm * Psat(T_des) / Pcsm_in_to_csm * Wc_in
-        Wv_csm_to_csm_out = Phi_csm_to_csm_out * Psat(T_des) / Pcsm_to_csm_out * Wcsm_to_csm_out
-        Wv_csm_out_to_cgc = Phi_csm_out_to_cgc * Psat(T_des) / Pcsm_out_to_cgc * Wcsm_out_to_cgc
-        Wv_cgc_to_cem_in = Phi_cgc_to_cem_in * Psat(T_des) / Pcgc_to_cem_in * Wcgc_to_cem_in
-        Wv_cem_in_to_cem = Phi_cem_in_to_cem * Psat(T_des) / Pcem_in_to_cem * Wcem_in_to_cem
-        Wv_cem_to_cem_out = Phi_cem_to_cem_out * Psat(T_des) / Pcem_to_cem_out * Wcem_to_cem_out
-        Wv_c_out = Phi_cem_out * Psat(T_des) / Pcem_out * Wc_out
+        pass
+        # Wv_asm_in_to_asm = Phi_asm_in_to_asm * Psat(T_des) / Pasm_in_to_asm * Wa_in
+        # Wv_asm_to_asm_out = Phi_asm_to_asm_out * Psat(T_des) / Pasm_to_asm_out * Wasm_to_asm_out
+        # Wv_asm_out_to_agc = Phi_asm_out_to_agc * Psat(T_des) / Pasm_out_to_agc * Wasm_out_to_agc
+        # Wv_agc_to_aem_in = Phi_agc_to_aem_in * Psat(T_des) / Pagc_to_aem_in * Wagc_to_aem_in
+        # Wv_aem_in_to_aem = Phi_aem_in_to_aem * Psat(T_des) / Paem_in_to_aem * Waem_in_to_aem
+        # Wv_aem_to_aem_out = Phi_aem_to_aem_out * Psat(T_des) / Paem_to_aem_out * Waem_to_aem_out
+        # Wv_a_out = Phi_aem_out * Psat(T_des) / Paem_out * Wa_out
+        # if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
+        #     # At the anode side
+        #     Wv_asm_ext_to_in = 0
+        #     Wv_asm_in_re_to_asm = Phi_asm_in_re_to_asm * Psat(T_des) / Pasm_in_re_to_asm * Wasm_in_re_to_asm
+        #     Wv_aem_to_aem_out_re = Phi_aem_to_aem_out_re * Psat(T_des) / Paem_to_aem_out_re * Waem_to_aem_out_re
+        #     Wv_are = Phi_aem_out_re * Psat(T_des) / Paem_out_re * (Ware / M['aem_out_re']) # The pump exactly compensates the pressure drop.
+        # else: # type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
+        #     # At the anode side
+        #     Wv_asm_ext_to_in = Wa_inj / M_H2O
+        #     Wv_asm_in_re_to_asm = None
+        #     Wv_aem_to_aem_out_re = None
+        #     Wv_are = None
+        # # At the cathode side
+        # Wv_csm_ext_to_in = Phi_ext * Psat(Text) / Pext * (Wcp / M['ext']) + Wc_inj / M_H2O
+        # Wv_csm_in_to_csm = Phi_csm_in_to_csm * Psat(T_des) / Pcsm_in_to_csm * Wc_in
+        # Wv_csm_to_csm_out = Phi_csm_to_csm_out * Psat(T_des) / Pcsm_to_csm_out * Wcsm_to_csm_out
+        # Wv_csm_out_to_cgc = Phi_csm_out_to_cgc * Psat(T_des) / Pcsm_out_to_cgc * Wcsm_out_to_cgc
+        # Wv_cgc_to_cem_in = Phi_cgc_to_cem_in * Psat(T_des) / Pcgc_to_cem_in * Wcgc_to_cem_in
+        # Wv_cem_in_to_cem = Phi_cem_in_to_cem * Psat(T_des) / Pcem_in_to_cem * Wcem_in_to_cem
+        # Wv_cem_to_cem_out = Phi_cem_to_cem_out * Psat(T_des) / Pcem_to_cem_out * Wcem_to_cem_out
+        # Wv_c_out = Phi_cem_out * Psat(T_des) / Pcem_out * Wc_out
     else:  # elif type_auxiliary == "no_auxiliary":
         Wv_are, Wv_a_in, Wv_asm_to_agc, Wv_agc_to_aem, Wv_a_out = [None] * 5
         Wv_c_in, Wv_csm_to_cgc, Wv_cgc_to_cem, Wv_c_out = [None] * 4

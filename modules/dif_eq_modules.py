@@ -180,117 +180,118 @@ def calculate_dif_eq_int_values(t, sv, control_variables, i_fc, operating_inputs
     # Physical quantities inside the auxiliary system
     if parameters["type_auxiliary"] == "forced-convective_cathode_with_anodic_recirculation" or \
        parameters["type_auxiliary"] == "forced-convective_cathode_with_flow-through_anode":
-        # Purge
-        if type_purge == "no_purge":
-            k_purge = 0
-        elif type_purge == "constant_purge":
-            k_purge = 1
-        elif type_purge == "periodic_purge":
-            purge_time, delta_purge = t_purge
-            if (t - int(t / (purge_time + delta_purge)) * (purge_time + delta_purge)) <= purge_time:
-                k_purge = 1
-            else:
-                k_purge = 0
-        else:
-            raise ValueError("The type_purge variable should be correctly referenced.")
-
-        # H2/O2 ratio in the dry anode/cathode gas mixture (H2/N2 or O2/N2) at the EM
-        y_H2_aem = (Paem - Phi_aem * Psat(T_des) - C_N2_a * R * T_des) / (Paem - Phi_aem * Psat(T_des))
-        y_O2_cem = (Pcem - Phi_cem * Psat(T_cgc) - C_N2_c * R * T_cgc) / (Pcem - Phi_cem * Psat(T_cgc))
-
-        # Molar masses at the anode side
-        if parameters["type_auxiliary"] == "forced-convective_cathode_with_anodic_recirculation":
-            M['asm'] = Phi_asm * Psat(T_des) / Pasm * M_H2O + \
-                   (1 - Phi_asm * Psat(T_des) / Pasm) * M_H2
-            M['aem'] = Phi_aem * Psat(T_des) / Paem * M_H2O + \
-                   (1 - Phi_aem * Psat(T_des) / Paem) * M_H2
-        else: #parameters["type_auxiliary"] == "forced-convective_cathode_with_flow-through_anode":
-            M['asm'] = Phi_asm * Psat(T_des) / Pasm * M_H2O + \
-                   y_H2_in * (1 - Phi_asm * Psat(T_des) / Pasm) * M_H2 + \
-                   (1 - y_H2_in) * (1 - Phi_asm * Psat(T_des) / Pasm) * M_N2
-            M['aem'] = Phi_aem * Psat(T_des) / Paem * M_H2O + \
-                   y_H2_aem * (1 - Phi_aem * Psat(T_des) / Paem) * M_H2 + \
-                   (1 - y_H2_aem) * (1 - Phi_aem * Psat(T_des) / Paem) * M_N2
-        # Molar masses at the cathode side
-        M['csm'] = Phi_csm * Psat(T_des) / Pcsm * M_H2O + \
-               y_O2_ext * (1 - Phi_csm * Psat(T_des) / Pcsm) * M_O2 + \
-               (1 - y_O2_ext) * (1 - Phi_csm * Psat(T_des) / Pcsm) * M_N2
-        M['cem'] = Phi_cem * Psat(T_des) / Pcem * M_H2O + \
-               y_O2_cem * (1 - Phi_cem * Psat(T_des) / Pcem) * M_O2 + \
-               (1 - y_O2_cem) * (1 - Phi_cem * Psat(T_des) / Pcem) * M_N2
-
-        # Density/concentration of the gas mixture.
-        C_tot_a_in = Pasm_in / (R * T_des)
-        rho_asm = Pasm / (R * T_des) * Masm
-        rho_agc = P[f'agc_{i}'] / (R * sv[f'T_agc_{i}']) * Magc
-        rho_aem = Paem / (R * T_des) * Maem
-        if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
-            rho_asm_in_re = Pasm_in_re / (R * T_des) * Masm_in_re
-            rho_aem_out_re = Paem_out_re / (R * T_des) * Maem_out_re
-        else:
-            rho_asm_in_re, rho_aem_out_re = None, None
-        rho_a_ext = Pext / (R * T_des) * Maem_out
-        C_tot_a_ext = Pext / (R * T_des)                                                                                # Boundary condition: at the exit, pressure and temperature are fixed. So, the total concentration is fixed.
-        C_tot_c_in = Pcsm_in / (R * T_des)
-        rho_csm = Pcsm / (R * T_des) * Mcsm
-        rho_cgc = P[f'cgc_{i}'] / (R * sv[f'T_cgc_{i}']) * Mcgc
-        rho_cem = Pcem / (R * T_cgc) * Mcem
-        rho_c_ext = Pext / (R * T_des) * Mcem_out
-        C_tot_c_ext = Pext * Mcem_out / (R * T_des)                                                                     # Boundary condition: at the exit, pressure and temperature are fixed. So, the total concentration is fixed.
-
-        # Vapor ratio over the gas mixture.
-        x_H2O_v_asm = Phi_asm * Psat(T_des) / Pasm
-        x_H2O_v_agc = C_v_agc / (C_v_agc + C_H2_agc + C_N2_a)
-        x_H2O_v_aem = Phi_aem * Psat(T_des) / Paem
-        x_H2O_v_a_ext = Phi_a_ext * Psat(T_des) / Pext
-        x_H2O_v_csm = Phi_csm * Psat(T_des) / Pcsm
-        x_H2O_v_cgc = C_v_cgc / (C_v_cgc + C_O2_cgc + C_N2_c)
-        x_H2O_v_cem = Phi_cem * Psat(T_des) / Pcem
-        x_H2O_v_c_ext = Phi_c_ext * Psat(T_des) / Pext
-
-        # Molar fraction of H2 in the dry gas mixture (H2/N2)
-        y_H2_agc = C_H2_agc / (C_H2_agc + C_N2_a)
-        y_O2_cgc = C_O2_cgc / (C_O2_cgc + C_N2_c)
-
-        # Dynamic viscosity of the gas mixture at the anode side.
-        if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
-            mu_gaz_asm = mu_mixture_gases(['H2O_v', 'H2'], [x_H2O_v_asm, 1 - x_H2O_v_asm], T_des)
-            mu_gaz_agc = mu_mixture_gases(['H2O_v', 'H2'], [x_H2O_v_agc, 1 - x_H2O_v_agc], T_agc)
-            mu_gaz_aem = mu_mixture_gases(['H2O_v', 'H2'], [x_H2O_v_aem, 1 - x_H2O_v_aem], T_des)
-            mu_gaz_a_ext = mu_mixture_gases(['H2O_v', 'H2'], [x_H2O_v_a_ext, 1 - x_H2O_v_a_ext], T_des)
-        else:  # type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
-            mu_gaz_asm = mu_mixture_gases(['H2O_v', 'H2', 'N2'],
-                                          [x_H2O_v_asm, y_H2_in * (1 - x_H2O_v_asm), (1 - y_H2_in) * (1 - x_H2O_v_asm)],
-                                          T_des)
-            mu_gaz_agc = mu_mixture_gases(['H2O_v', 'H2', 'N2'],
-                                          [x_H2O_v_agc, y_H2_agc * (1 - x_H2O_v_agc),
-                                           (1 - y_H2_agc) * (1 - x_H2O_v_agc)], T_agc)
-            mu_gaz_aem = mu_mixture_gases(['H2O_v', 'H2', 'N2'],
-                                          [x_H2O_v_aem, y_H2_aem * (1 - x_H2O_v_aem),
-                                           (1 - y_H2_aem) * (1 - x_H2O_v_aem)], T_des)
-            mu_gaz_a_ext = mu_mixture_gases(['H2O_v', 'H2', 'N2'],
-                                            [x_H2O_v_a_ext, y_H2_aem_out * (1 - x_H2O_v_a_ext), (1 - y_H2_aem_out) * (1 - x_H2O_v_a_ext)],
-                                            T_des)
-        # Dynamic viscosity of the gas mixture at the cathode side.
-        mu_gaz_csm = mu_mixture_gases(['H2O_v', 'O2', 'N2'],
-                                      [x_H2O_v_csm, y_O2_ext * (1 - x_H2O_v_csm), (1 - y_O2_ext) * (1 - x_H2O_v_csm)],
-                                      T_des)
-        mu_gaz_cgc = mu_mixture_gases(['H2O_v', 'O2', 'N2'],
-                                      [x_H2O_v_cgc, y_O2_cgc * (1 - x_H2O_v_cgc), (1 - y_O2_cgc) * (1 - x_H2O_v_cgc)],
-                                      T_cgc)
-        mu_gaz_cem = mu_mixture_gases(['H2O_v', 'O2', 'N2'],
-                                      [x_H2O_v_cem, y_O2_cem * (1 - x_H2O_v_cem), (1 - y_O2_cem) * (1 - x_H2O_v_cem)],
-                                      T_des)
-        mu_gas_c_ext = mu_mixture_gases(['H2O_v', 'O2', 'N2'],
-                                        [x_H2O_v_c_ext, y_O2_cem_out * (1 - x_H2O_v_c_ext),
-                                         (1 - y_O2_cem_out) * (1 - x_H2O_v_c_ext)],
-                                        T_des)
-
-        # Boundary velocities
-        if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
-            v_re = Ware / rho_aem_out_re / A_T_a
-        else:  # type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
-            v_re = None
+        pass
+        # # Purge
+        # if type_purge == "no_purge":
+        #     k_purge = 0
+        # elif type_purge == "constant_purge":
+        #     k_purge = 1
+        # elif type_purge == "periodic_purge":
+        #     purge_time, delta_purge = t_purge
+        #     if (t - int(t / (purge_time + delta_purge)) * (purge_time + delta_purge)) <= purge_time:
+        #         k_purge = 1
+        #     else:
+        #         k_purge = 0
+        # else:
+        #     raise ValueError("The type_purge variable should be correctly referenced.")
+        #
+        # # H2/O2 ratio in the dry anode/cathode gas mixture (H2/N2 or O2/N2) at the EM
+        # y_H2_aem = (Paem - Phi_aem * Psat(T_des) - C_N2_a * R * T_des) / (Paem - Phi_aem * Psat(T_des))
+        # y_O2_cem = (Pcem - Phi_cem * Psat(T_cgc) - C_N2_c * R * T_cgc) / (Pcem - Phi_cem * Psat(T_cgc))
+        #
+        # # Molar masses at the anode side
+        # if parameters["type_auxiliary"] == "forced-convective_cathode_with_anodic_recirculation":
+        #     M['asm'] = Phi_asm * Psat(T_des) / Pasm * M_H2O + \
+        #            (1 - Phi_asm * Psat(T_des) / Pasm) * M_H2
+        #     M['aem'] = Phi_aem * Psat(T_des) / Paem * M_H2O + \
+        #            (1 - Phi_aem * Psat(T_des) / Paem) * M_H2
+        # else: #parameters["type_auxiliary"] == "forced-convective_cathode_with_flow-through_anode":
+        #     M['asm'] = Phi_asm * Psat(T_des) / Pasm * M_H2O + \
+        #            y_H2_in * (1 - Phi_asm * Psat(T_des) / Pasm) * M_H2 + \
+        #            (1 - y_H2_in) * (1 - Phi_asm * Psat(T_des) / Pasm) * M_N2
+        #     M['aem'] = Phi_aem * Psat(T_des) / Paem * M_H2O + \
+        #            y_H2_aem * (1 - Phi_aem * Psat(T_des) / Paem) * M_H2 + \
+        #            (1 - y_H2_aem) * (1 - Phi_aem * Psat(T_des) / Paem) * M_N2
+        # # Molar masses at the cathode side
+        # M['csm'] = Phi_csm * Psat(T_des) / Pcsm * M_H2O + \
+        #        y_O2_ext * (1 - Phi_csm * Psat(T_des) / Pcsm) * M_O2 + \
+        #        (1 - y_O2_ext) * (1 - Phi_csm * Psat(T_des) / Pcsm) * M_N2
+        # M['cem'] = Phi_cem * Psat(T_des) / Pcem * M_H2O + \
+        #        y_O2_cem * (1 - Phi_cem * Psat(T_des) / Pcem) * M_O2 + \
+        #        (1 - y_O2_cem) * (1 - Phi_cem * Psat(T_des) / Pcem) * M_N2
+        #
+        # # Density/concentration of the gas mixture.
+        # C_tot_a_in = Pasm_in / (R * T_des)
+        # rho_asm = Pasm / (R * T_des) * Masm
+        # rho_agc = P[f'agc_{i}'] / (R * sv[f'T_agc_{i}']) * Magc
+        # rho_aem = Paem / (R * T_des) * Maem
+        # if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
+        #     rho_asm_in_re = Pasm_in_re / (R * T_des) * Masm_in_re
+        #     rho_aem_out_re = Paem_out_re / (R * T_des) * Maem_out_re
+        # else:
+        #     rho_asm_in_re, rho_aem_out_re = None, None
+        # rho_a_ext = Pext / (R * T_des) * Maem_out
+        # C_tot_a_ext = Pext / (R * T_des)                                                                                # Boundary condition: at the exit, pressure and temperature are fixed. So, the total concentration is fixed.
+        # C_tot_c_in = Pcsm_in / (R * T_des)
+        # rho_csm = Pcsm / (R * T_des) * Mcsm
+        # rho_cgc = P[f'cgc_{i}'] / (R * sv[f'T_cgc_{i}']) * Mcgc
+        # rho_cem = Pcem / (R * T_cgc) * Mcem
+        # rho_c_ext = Pext / (R * T_des) * Mcem_out
+        # C_tot_c_ext = Pext * Mcem_out / (R * T_des)                                                                     # Boundary condition: at the exit, pressure and temperature are fixed. So, the total concentration is fixed.
+        #
+        # # Vapor ratio over the gas mixture.
+        # x_H2O_v_asm = Phi_asm * Psat(T_des) / Pasm
+        # x_H2O_v_agc = C_v_agc / (C_v_agc + C_H2_agc + C_N2_a)
+        # x_H2O_v_aem = Phi_aem * Psat(T_des) / Paem
+        # x_H2O_v_a_ext = Phi_a_ext * Psat(T_des) / Pext
+        # x_H2O_v_csm = Phi_csm * Psat(T_des) / Pcsm
+        # x_H2O_v_cgc = C_v_cgc / (C_v_cgc + C_O2_cgc + C_N2_c)
+        # x_H2O_v_cem = Phi_cem * Psat(T_des) / Pcem
+        # x_H2O_v_c_ext = Phi_c_ext * Psat(T_des) / Pext
+        #
+        # # Molar fraction of H2 in the dry gas mixture (H2/N2)
+        # y_H2_agc = C_H2_agc / (C_H2_agc + C_N2_a)
+        # y_O2_cgc = C_O2_cgc / (C_O2_cgc + C_N2_c)
+        #
+        # # Dynamic viscosity of the gas mixture at the anode side.
+        # if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
+        #     mu_gaz_asm = mu_mixture_gases(['H2O_v', 'H2'], [x_H2O_v_asm, 1 - x_H2O_v_asm], T_des)
+        #     mu_gaz_agc = mu_mixture_gases(['H2O_v', 'H2'], [x_H2O_v_agc, 1 - x_H2O_v_agc], T_agc)
+        #     mu_gaz_aem = mu_mixture_gases(['H2O_v', 'H2'], [x_H2O_v_aem, 1 - x_H2O_v_aem], T_des)
+        #     mu_gaz_a_ext = mu_mixture_gases(['H2O_v', 'H2'], [x_H2O_v_a_ext, 1 - x_H2O_v_a_ext], T_des)
+        # else:  # type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+        #     mu_gaz_asm = mu_mixture_gases(['H2O_v', 'H2', 'N2'],
+        #                                   [x_H2O_v_asm, y_H2_in * (1 - x_H2O_v_asm), (1 - y_H2_in) * (1 - x_H2O_v_asm)],
+        #                                   T_des)
+        #     mu_gaz_agc = mu_mixture_gases(['H2O_v', 'H2', 'N2'],
+        #                                   [x_H2O_v_agc, y_H2_agc * (1 - x_H2O_v_agc),
+        #                                    (1 - y_H2_agc) * (1 - x_H2O_v_agc)], T_agc)
+        #     mu_gaz_aem = mu_mixture_gases(['H2O_v', 'H2', 'N2'],
+        #                                   [x_H2O_v_aem, y_H2_aem * (1 - x_H2O_v_aem),
+        #                                    (1 - y_H2_aem) * (1 - x_H2O_v_aem)], T_des)
+        #     mu_gaz_a_ext = mu_mixture_gases(['H2O_v', 'H2', 'N2'],
+        #                                     [x_H2O_v_a_ext, y_H2_aem_out * (1 - x_H2O_v_a_ext), (1 - y_H2_aem_out) * (1 - x_H2O_v_a_ext)],
+        #                                     T_des)
+        # # Dynamic viscosity of the gas mixture at the cathode side.
+        # mu_gaz_csm = mu_mixture_gases(['H2O_v', 'O2', 'N2'],
+        #                               [x_H2O_v_csm, y_O2_ext * (1 - x_H2O_v_csm), (1 - y_O2_ext) * (1 - x_H2O_v_csm)],
+        #                               T_des)
+        # mu_gaz_cgc = mu_mixture_gases(['H2O_v', 'O2', 'N2'],
+        #                               [x_H2O_v_cgc, y_O2_cgc * (1 - x_H2O_v_cgc), (1 - y_O2_cgc) * (1 - x_H2O_v_cgc)],
+        #                               T_cgc)
+        # mu_gaz_cem = mu_mixture_gases(['H2O_v', 'O2', 'N2'],
+        #                               [x_H2O_v_cem, y_O2_cem * (1 - x_H2O_v_cem), (1 - y_O2_cem) * (1 - x_H2O_v_cem)],
+        #                               T_des)
+        # mu_gas_c_ext = mu_mixture_gases(['H2O_v', 'O2', 'N2'],
+        #                                 [x_H2O_v_c_ext, y_O2_cem_out * (1 - x_H2O_v_c_ext),
+        #                                  (1 - y_O2_cem_out) * (1 - x_H2O_v_c_ext)],
+        #                                 T_des)
+        #
+        # # Boundary velocities
+        # if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
+        #     v_re = Ware / rho_aem_out_re / A_T_a
+        # else:  # type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+        #     v_re = None
 
     else:  # parameters["type_auxiliary"] == "no_auxiliary"
         # Set to None the variables not used when "no_auxiliary" system is considered

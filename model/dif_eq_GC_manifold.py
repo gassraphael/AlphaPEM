@@ -161,30 +161,31 @@ def calculate_dyn_manifold_pressure_and_humidity_evolution(dif_eq, T_des, nb_cel
         Vapor flows between the different layers (mol.s-1).
     """
 
-    # Pressure evolution inside the manifolds
-    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
-            type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-        # At the anode side
-        if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
-            dif_eq['dPasm / dt'] = (W['a_in'] + W['asm_in_re_to_asm'] - nb_cell * Wasm_to_asm_out) / Vasm * R * T_des
-            dif_eq['dPaem / dt'] = (nb_cell * Waem_in_to_aem - Waem_to_aem_out - Waem_to_aem_out_re) / Vaem * R * T_des
-        else: # type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
-            dif_eq['dPasm / dt'] = (W['a_in'] - nb_cell * Wasm_to_asm_out) / Vasm * R * T_des
-            dif_eq['dPaem / dt'] = (nb_cell * Waem_in_to_aem - Waem_to_aem_out) / Vaem * R * T_des
-        # At the cathode side
-        dif_eq['dPcsm / dt'] = (Wc_in - nb_cell * Wcsm_to_csm_out) / Vcsm * R * T_des
-        dif_eq['dPcem / dt'] = (nb_cell * Wcem_in_to_cem - Wcem_to_cem_out) / Vcem * R * T_des
-
-    # Humidity evolution inside the manifolds
-    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
-            type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-        # At the anode side
-        if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
-            dif_eq['dPhi_asm / dt'] = (Wv_asm_in_to_asm + Wv_asm_in_re_to_asm - nb_cell * Wv_asm_to_asm_out) / Vasm * R * T_des / Psat(T_des)
-            dif_eq['dPhi_aem / dt'] = (nb_cell * Wv_aem_in_to_aem - Wv_aem_to_aem_out_re - Wv_aem_to_aem_out) / Vaem * R * T_des / Psat(T_des)
-        else: # type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
-            dif_eq['dPhi_asm / dt'] = (Wv_asm_in_to_asm - nb_cell * Wv_asm_to_asm_out) / Vasm * R * T_des / Psat(T_des)
-            dif_eq['dPhi_aem / dt'] = (nb_cell * Wv_aem_in_to_aem - Wv_aem_to_aem_out) / Vaem * R * T_des / Psat(T_des)
-        # At the cathode side
-        dif_eq['dPhi_csm / dt'] = (Wv_csm_in_to_csm - nb_cell * Wv_csm_to_csm_out) / Vcsm * R * T_des / Psat(T_des)
-        dif_eq['dPhi_cem / dt'] = None
+    pass
+    # # Pressure evolution inside the manifolds
+    # if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
+    #         type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
+    #     # At the anode side
+    #     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
+    #         dif_eq['dPasm / dt'] = (W['a_in'] + W['asm_in_re_to_asm'] - nb_cell * Wasm_to_asm_out) / Vasm * R * T_des
+    #         dif_eq['dPaem / dt'] = (nb_cell * Waem_in_to_aem - Waem_to_aem_out - Waem_to_aem_out_re) / Vaem * R * T_des
+    #     else: # type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+    #         dif_eq['dPasm / dt'] = (W['a_in'] - nb_cell * Wasm_to_asm_out) / Vasm * R * T_des
+    #         dif_eq['dPaem / dt'] = (nb_cell * Waem_in_to_aem - Waem_to_aem_out) / Vaem * R * T_des
+    #     # At the cathode side
+    #     dif_eq['dPcsm / dt'] = (Wc_in - nb_cell * Wcsm_to_csm_out) / Vcsm * R * T_des
+    #     dif_eq['dPcem / dt'] = (nb_cell * Wcem_in_to_cem - Wcem_to_cem_out) / Vcem * R * T_des
+    #
+    # # Humidity evolution inside the manifolds
+    # if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
+    #         type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
+    #     # At the anode side
+    #     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
+    #         dif_eq['dPhi_asm / dt'] = (Wv_asm_in_to_asm + Wv_asm_in_re_to_asm - nb_cell * Wv_asm_to_asm_out) / Vasm * R * T_des / Psat(T_des)
+    #         dif_eq['dPhi_aem / dt'] = (nb_cell * Wv_aem_in_to_aem - Wv_aem_to_aem_out_re - Wv_aem_to_aem_out) / Vaem * R * T_des / Psat(T_des)
+    #     else: # type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
+    #         dif_eq['dPhi_asm / dt'] = (Wv_asm_in_to_asm - nb_cell * Wv_asm_to_asm_out) / Vasm * R * T_des / Psat(T_des)
+    #         dif_eq['dPhi_aem / dt'] = (nb_cell * Wv_aem_in_to_aem - Wv_aem_to_aem_out) / Vaem * R * T_des / Psat(T_des)
+    #     # At the cathode side
+    #     dif_eq['dPhi_csm / dt'] = (Wv_csm_in_to_csm - nb_cell * Wv_csm_to_csm_out) / Vcsm * R * T_des / Psat(T_des)
+    #     dif_eq['dPhi_cem / dt'] = None

@@ -112,60 +112,61 @@ def auxiliaries_int_values_which_are_commun_with_dif_eq(t, sv, operating_inputs,
     # Physical quantities in the auxiliary system
     if parameters["type_auxiliary"] == "forced-convective_cathode_with_anodic_recirculation" or \
        parameters["type_auxiliary"] == "forced-convective_cathode_with_flow-through_anode":
-        # H2/O2 ratio in the dry anode/cathode gas mixture (H2/N2 or O2/N2) at the EM
-        y_H2_aem = (Paem - Phi_aem * Psat(T_des) - C_N2_a * R * T_des) / (Paem - Phi_aem * Psat(T_des))
-        y_O2_cem = (Pcem - Phi_cem * Psat(T_cgc) - C_N2_c * R * T_cgc) / (Pcem - Phi_cem * Psat(T_cgc))
-
-        # Molar masses
-        if parameters["type_auxiliary"] == "forced-convective_cathode_with_anodic_recirculation":
-            Masm = Phi_asm * Psat(T_des) / Pasm * M_H2O + \
-                   (1 - Phi_asm * Psat(T_des) / Pasm) * M_H2
-            Maem = Phi_aem * Psat(T_des) / Paem * M_H2O + \
-                   (1 - Phi_aem * Psat(T_des) / Paem) * M_H2
-        else:  # parameters["type_auxiliary"] == "forced-convective_cathode_with_flow-through_anode":
-            Masm = Phi_asm * Psat(T_des) / Pasm * M_H2O + \
-                   y_H2_in * (1 - Phi_asm * Psat(T_des) / Pasm) * M_H2 + \
-                   (1 - y_H2_in) * (1 - Phi_asm * Psat(T_des) / Pasm) * M_N2
-            Maem = Phi_aem * Psat(T_des) / Paem * M_H2O + \
-                   y_H2_aem * (1 - Phi_aem * Psat(T_des) / Paem) * M_H2 + \
-                   (1 - y_H2_aem) * (1 - Phi_aem * Psat(T_des) / Paem) * M_N2
-        # Molar masses at the cathode side
-        Mcsm = Phi_csm * Psat(T_des) / Pcsm * M_H2O + \
-               y_O2_ext * (1 - Phi_csm * Psat(T_des) / Pcsm) * M_O2 + \
-               (1 - y_O2_ext) * (1 - Phi_csm * Psat(T_des) / Pcsm) * M_N2
-        Mcem = Phi_cem * Psat(T_des) / Pcem * M_H2O + \
-               y_O2_cem * (1 - Phi_cem * Psat(T_des) / Pcem) * M_O2 + \
-               (1 - y_O2_cem) * (1 - Phi_cem * Psat(T_des) / Pcem) * M_N2
-
-        # Density of the gas mixture.
-        rho_asm = Pasm / (R * T_des) * Masm
-        rho_aem = Paem / (R * T_des) * Maem
-        rho_csm = Pcsm / (R * T_des) * Mcsm
-        rho_cgc = Pcgc / (R * T_cgc) * Mcgc
-        rho_cem = Pcem / (R * T_cgc) * Mcem
-
-        # Purge
-        if type_purge == "no_purge":
-            k_purge = 0
-        elif type_purge == "constant_purge":
-            k_purge = 1
-        elif type_purge == "periodic_purge":
-            purge_time, delta_purge = t_purge
-            if (t - int(t / (purge_time + delta_purge)) * (purge_time + delta_purge)) <= purge_time:
-                k_purge = 1
-            else:
-                k_purge = 0
-        else:
-            raise ValueError("The type_purge variable should be correctly referenced.")
-        # Back pressure valve area
-        if Abp_a > A_T_a:
-            Abp_a = A_T_a
-        elif Abp_a < 0:
-            Abp_a = 0
-        if Abp_c > A_T_c:
-            Abp_c = A_T_c
-        elif Abp_c < 0:
-            Abp_c = 0
+        pass
+        # # H2/O2 ratio in the dry anode/cathode gas mixture (H2/N2 or O2/N2) at the EM
+        # y_H2_aem = (Paem - Phi_aem * Psat(T_des) - C_N2_a * R * T_des) / (Paem - Phi_aem * Psat(T_des))
+        # y_O2_cem = (Pcem - Phi_cem * Psat(T_cgc) - C_N2_c * R * T_cgc) / (Pcem - Phi_cem * Psat(T_cgc))
+        #
+        # # Molar masses
+        # if parameters["type_auxiliary"] == "forced-convective_cathode_with_anodic_recirculation":
+        #     Masm = Phi_asm * Psat(T_des) / Pasm * M_H2O + \
+        #            (1 - Phi_asm * Psat(T_des) / Pasm) * M_H2
+        #     Maem = Phi_aem * Psat(T_des) / Paem * M_H2O + \
+        #            (1 - Phi_aem * Psat(T_des) / Paem) * M_H2
+        # else:  # parameters["type_auxiliary"] == "forced-convective_cathode_with_flow-through_anode":
+        #     Masm = Phi_asm * Psat(T_des) / Pasm * M_H2O + \
+        #            y_H2_in * (1 - Phi_asm * Psat(T_des) / Pasm) * M_H2 + \
+        #            (1 - y_H2_in) * (1 - Phi_asm * Psat(T_des) / Pasm) * M_N2
+        #     Maem = Phi_aem * Psat(T_des) / Paem * M_H2O + \
+        #            y_H2_aem * (1 - Phi_aem * Psat(T_des) / Paem) * M_H2 + \
+        #            (1 - y_H2_aem) * (1 - Phi_aem * Psat(T_des) / Paem) * M_N2
+        # # Molar masses at the cathode side
+        # Mcsm = Phi_csm * Psat(T_des) / Pcsm * M_H2O + \
+        #        y_O2_ext * (1 - Phi_csm * Psat(T_des) / Pcsm) * M_O2 + \
+        #        (1 - y_O2_ext) * (1 - Phi_csm * Psat(T_des) / Pcsm) * M_N2
+        # Mcem = Phi_cem * Psat(T_des) / Pcem * M_H2O + \
+        #        y_O2_cem * (1 - Phi_cem * Psat(T_des) / Pcem) * M_O2 + \
+        #        (1 - y_O2_cem) * (1 - Phi_cem * Psat(T_des) / Pcem) * M_N2
+        #
+        # # Density of the gas mixture.
+        # rho_asm = Pasm / (R * T_des) * Masm
+        # rho_aem = Paem / (R * T_des) * Maem
+        # rho_csm = Pcsm / (R * T_des) * Mcsm
+        # rho_cgc = Pcgc / (R * T_cgc) * Mcgc
+        # rho_cem = Pcem / (R * T_cgc) * Mcem
+        #
+        # # Purge
+        # if type_purge == "no_purge":
+        #     k_purge = 0
+        # elif type_purge == "constant_purge":
+        #     k_purge = 1
+        # elif type_purge == "periodic_purge":
+        #     purge_time, delta_purge = t_purge
+        #     if (t - int(t / (purge_time + delta_purge)) * (purge_time + delta_purge)) <= purge_time:
+        #         k_purge = 1
+        #     else:
+        #         k_purge = 0
+        # else:
+        #     raise ValueError("The type_purge variable should be correctly referenced.")
+        # # Back pressure valve area
+        # if Abp_a > A_T_a:
+        #     Abp_a = A_T_a
+        # elif Abp_a < 0:
+        #     Abp_a = 0
+        # if Abp_c > A_T_c:
+        #     Abp_c = A_T_c
+        # elif Abp_c < 0:
+        #     Abp_c = 0
 
     else:  # parameters["type_auxiliary"] == "no_auxiliary"
         k_purge, Abp_a, Abp_c = [None] * 3

@@ -25,8 +25,8 @@ from modules.main_modules import (select_nth_elements, launch_AlphaPEM_for_step_
 def main():
     # Fuel cell possibilities: "ZSW-GenStack"(2022), "ZSW-GenStack_Pa_1.61_Pc_1.41", "ZSW-GenStack_Pa_2.01_Pc_1.81",
     #                          "ZSW-GenStack_Pa_2.4_Pc_2.2", "ZSW-GenStack_Pa_2.8_Pc_2.6", "ZSW-GenStack_T_62",
-    #                          "ZSW-GenStack_T_76", "ZSW-GenStack_T_84", "EH-31_1.5"(2021), "EH-31_2.0"(2021), "EH-31_2.25"(2021),
-    #                          "EH-31_2.5"(2021), "manual_setup".
+    #                          "ZSW-GenStack_T_76", "ZSW-GenStack_T_84", "EH-31_1.5"(2021), "EH-31_2.0"(2021),
+    #                          "EH-31_2.25"(2021), "EH-31_2.5"(2021), "manual_setup".
     # This parameter includes the fuel cell used in the model and the corresponding operating conditions.
     # - GenStack is a fuel cell developed in open source by ZSW (https://zenodo.org/records/14223364).
     # - EH-31 is a fuel cell developed by EH GROUP. 1.5, 2.0, 2.25 and 2.5 corresponds to the different pressure options.
