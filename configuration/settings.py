@@ -366,7 +366,7 @@ def calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl):
     Hmpl_virtual = Hmpl - Htl / 2  # m. It is the effective thickness of the MPL without the transition layers.
 
     # Setting the number of model points placed inside each layer:
-    nb_gc = 5  # It is the number of model points placed inside each gas channel.
+    nb_gc = 1  # It is the number of model points placed inside each gas channel.
     nb_gdl = max(1, int(Hgdl_virtual / H_node_min / 4))  # It is the number of model points placed inside each GDL.
     nb_mpl = max(1, int(Hmpl_virtual / H_node_min / 2))  # It is the number of model points placed inside each MPL.
 
