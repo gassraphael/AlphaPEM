@@ -275,6 +275,7 @@ def calculate_physical_parameters(type_fuel_cell):
         Wcgc = Wagc  # m. It is the width of the cathode gas channel.
         Lgc = 144e-3  # m. It is the length of one channel in the bipolar plate.
         nb_channel_in_gc = 67  # . It is the number of channels in the bipolar plate.
+        Ldist = 5e-2  # m. It is the estimated length of the distributor, which is the volume between the gas channel and the manifold.
         #   Auxiliaries
         Lm = 25.8e-3  # m. It is the length of the manifold.
         L_endplate = 46.8e-3  # m. It is the length of the endplate.
@@ -297,11 +298,11 @@ def calculate_physical_parameters(type_fuel_cell):
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
     else: # Stored setup in "stored_physical_parameters".
         (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-         Wcgc, Lgc, nb_channel_in_gc, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
+         Wcgc, Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
          i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
 
     return (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, nb_channel_in_gc, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
+            Wcgc, Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
             i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
 
 

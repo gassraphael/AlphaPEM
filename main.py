@@ -76,8 +76,8 @@ def main():
         calculate_operating_inputs(copy.deepcopy(pola_current_parameters), type_fuel_cell_4, voltage_zone)
     #   Physical parameters
     (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
-     Lgc, nb_channel_in_gc, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref, i0_h_c_ref,
-     kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) \
+     Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
+     i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) \
         = calculate_physical_parameters(type_fuel_cell_1)
     #   Computing parameters
     nb_gc, nb_gdl, nb_mpl, nb_tl, t_purge, rtol, atol = \
@@ -99,9 +99,9 @@ def main():
                           'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
                           'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
     accessible_physical_parameters = {'Aact': Aact, 'nb_cell': nb_cell, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc,
-                                      'Wcgc': Wcgc, 'Lgc': Lgc, 'nb_channel_in_gc': nb_channel_in_gc, 'Lm': Lm,
-                                      'A_T_a': A_T_a, 'A_T_c': A_T_c, 'Vasm': Vasm, 'Vcsm': Vcsm, 'Vaem': Vaem,
-                                      'Vcem': Vcem}
+                                      'Wcgc': Wcgc, 'Lgc': Lgc, 'nb_channel_in_gc': nb_channel_in_gc, 'Ldist': Ldist,
+                                      'Lm': Lm, 'A_T_a': A_T_a, 'A_T_c': A_T_c, 'Vasm': Vasm, 'Vcsm': Vcsm,
+                                      'Vaem': Vaem, 'Vcem': Vcem}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl,
                                         'Hccl': Hccl, 'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl,
                                         'epsilon_mpl': epsilon_mpl, 'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c,

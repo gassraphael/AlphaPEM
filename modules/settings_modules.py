@@ -232,7 +232,7 @@ def stored_physical_parameters(type_fuel_cell):
             type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6" or type_fuel_cell == "ZSW-GenStack_T_62" or \
             type_fuel_cell == "ZSW-GenStack_T_76" or type_fuel_cell == "ZSW-GenStack_T_84":
         # Global
-        Aact = 279.72e-4  # m². It is the MEA active area.
+        Aact = 283.87e-4  # m². It is the MEA active area.
         nb_cell = 26  # . It is the number of cell in the stack.
         # Catalyst layer
         Hacl = 8e-6  # m. It is the thickness of the anode catalyst layer.
@@ -253,8 +253,9 @@ def stored_physical_parameters(type_fuel_cell):
         Hcgc = 300e-6  # m. It is the thickness of the cathode gas channel.
         Wagc = 430e-6  # m. It is the width of the anode gas channel.
         Wcgc = 532e-6  # m. It is the width of the cathode gas channel.
-        Lgc = 222e-3  # m. It is the length of one channel in the bipolar plate.
+        Lgc = 115.3e-3  # m. It is the length of one channel in the bipolar plate.
         nb_channel_in_gc = 105 # . It is the number of channels in the bipolar plate.
+        Ldist = 7.11e-2 # m. It is the length of the distributor, which is the volume between the gas channel and the manifold.
         #   Auxiliaries
         Lm = 25.8e-3  # m. It is the length of the manifold.
         A_T_a = 9.01e-4  # m². It is the inlet/exhaust anode manifold throttle area
@@ -299,6 +300,7 @@ def stored_physical_parameters(type_fuel_cell):
         Wcgc = Wagc  # m. It is the width of the cathode gas channel.
         Lgc = 144e-3  # m. It is the length of one channel in the bipolar plate.
         nb_channel_in_gc = 67  # . It is the number of channels in the bipolar plate.
+        Ldist = 5e-2  # m. It is the estimated length of the distributor, which is the volume between the gas channel and the manifold.
         #   Auxiliaries
         Lm = 2.03  # m. It is the length of the manifold.
         A_T_a = 11.8e-4  # m². It is the inlet/exhaust anode manifold throttle area
@@ -321,7 +323,7 @@ def stored_physical_parameters(type_fuel_cell):
         raise ValueError('the type_input given is not valid.')
 
     return (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, nb_channel_in_gc, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
+            Wcgc, Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
             i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
 
 
