@@ -93,7 +93,7 @@ def calculate_dyn_gas_evolution_inside_gas_channel(dif_eq, Hagc, Hcgc, Lgc, nb_g
         dif_eq[f'dC_v_cgc_{nb_gc} / dt'] = (Jv['cgc_cgc'][nb_gc - 1] - Jv['cgc_out']) / (Lgc / nb_gc) + Jv['cgdl_cgc'][nb_gc] / Hcgc
 
     if nb_gc == 1:
-        dif_eq['dC_O2_cgc_1 / dt'] = (J_O2['cgc_in'] - J_O2['out']) / Lgc + J_O2['cgdl_cgc'][1] / Hcgc
+        dif_eq['dC_O2_cgc_1 / dt'] = (J_O2['cgc_in'] - J_O2['cgc_out']) / Lgc + J_O2['cgdl_cgc'][1] / Hcgc
     elif nb_gc == 2:
         dif_eq['dC_O2_cgc_1 / dt'] = (J_O2['cgc_in'] - J_O2['cgc_cgc'][1]) / (Lgc / nb_gc) + J_O2['cgdl_cgc'][1] / Hcgc
         dif_eq['dC_O2_cgc_2 / dt'] = (J_O2['cgc_cgc'][1] - J_O2['cgc_out']) / (Lgc / nb_gc) + J_O2['cgdl_cgc'][2] / Hcgc

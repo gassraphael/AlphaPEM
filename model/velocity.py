@@ -62,7 +62,8 @@ def calculate_velocity_evolution(sv, control_variables, i_fc, Jv_agc_agdl, Jv_cg
         """
 
     T_des, Pa_des, Pc_des = operating_inputs['T_des'], operating_inputs['Pa_des'], operating_inputs['Pc_des']
-    Hagc, Hcgc, Wagc, Wcgc, Lgc = parameters['Hagc'], parameters['Hcgc'], parameters['Wagc'], parameters['Wcgc'], parameters['Lgc']
+    Hagc, Hcgc, Wagc, Wcgc = parameters['Hagc'], parameters['Hcgc'], parameters['Wagc'], parameters['Wcgc']
+    Lgc, Ldist = parameters['Lgc'], parameters['Ldist']
     nb_channel_in_gc, nb_cell, type_auxiliary = parameters['nb_channel_in_gc'], parameters['nb_cell'], parameters['type_auxiliary']
     nb_gc, nb_gdl = parameters['nb_gc'], parameters['nb_gdl']
 
@@ -91,20 +92,26 @@ def calculate_velocity_evolution(sv, control_variables, i_fc, Jv_agc_agdl, Jv_cg
     def residuals(J_in_guessed):
         # Intermediate values
         J_a_in_guesses, J_c_in_guessed = float(J_in_guessed[0]), float(J_in_guessed[1])                                 # Inlet molar flows at anode and cathode (mol/s).
-        J_a, J_c = [J_a_in_guesses] + [0] * nb_gc, [J_c_in_guessed] + [0] * nb_gc                                       # J[0] is the inlet molar flow, and J[i] is the outlet molar flow at node i.
-        P_a, P_c = [0] * nb_gc + [Pa_ext], [0] * nb_gc + [Pc_ext]                                                       # P[0] is the inlet pressure, and P[i] is the outlet pressure at node i.
-        v_a, v_c = [0] * (nb_gc + 1), [0] * (nb_gc + 1)                                                                 # v[0] is the inlet velocity, and v[i] is the outlet velocity at node i.
+        J_a, J_c = [J_a_in_guesses] + [0] * (nb_gc + 1), [J_c_in_guessed] + [0] * (nb_gc + 1)                           # J[0] is the cell inlet molar flow, J[i] is the outlet molar flow at node i (upwind numerical scheme), and J[-1] is the cell outlet molar flow.
+        P_a, P_c = [0] * (nb_gc + 1) + [Pa_ext], [0] * (nb_gc + 1) + [Pc_ext]                                           # P[0] is the inlet pressure, P[i] is the pressure at the outlet of node i, and P[-1] is the outlet pressure.
+        v_a, v_c = [0] * (nb_gc + 2), [0] * (nb_gc + 2)                                                                 # v[0] is the inlet velocity, v[i] is the velocity at the outlet of node i, and v[-1] is the outlet velocity.
 
         # Continuity equation are used for calculating the molar flows at all points along the GC at stationary state.
         for i in range(1, nb_gc + 1):
             J_a[i] = J_a[i-1] - J_tot_agc_agdl[i] * L_node_gc / Hagc
             J_c[i] = J_c[i-1] + J_tot_cgdl_cgc[i] * L_node_gc / Hcgc
+        J_a[-1] = J_a[nb_gc]                                                                                            # Inside the distributor, there are no mass transfer with the GDL.
+        J_c[-1] = J_c[nb_gc]                                                                                            # Inside the distributor, there are no mass transfer with the GDL.
 
         # Velocities at the outlets of the GCs (m/s).
         v_a[-1] = J_a[-1] / P_a[-1] * R * T_des
         v_c[-1] = J_c[-1] / P_c[-1] * R * T_des
 
         # Backward calculation of pressures and velocities along the GC using modified Hagen-Poiseuille equation
+        P_a[nb_gc] = P_a[-1] + 8 * math.pi * mu_gaz[f'agc_{nb_gc}'] * Ldist / (Hagc * Wagc) * v_a[-1]                   # Hagen-Poiseuille equation inside the distributor.
+        v_a[nb_gc] = J_a[nb_gc] / P_a[nb_gc] * R * T_des                                                                # It is considered that mu_gaz[-1] at static state is closed to mu_gaz[f'cgc_{nb_gc}'] in order to simplify the calculations.
+        P_c[nb_gc] = P_c[-1] + 8 * math.pi * mu_gaz[f'cgc_{nb_gc}'] * Ldist / (Hcgc * Wcgc) * v_c[-1]
+        v_c[nb_gc] = J_c[nb_gc] / P_c[nb_gc] * R * T_des
         for i in range(nb_gc, 0, -1):
             # At the node side
             P_a[i-1] = P_a[i] + 8 * math.pi * mu_gaz[f'agc_{i}'] * L_node_gc / (Hagc * Wagc) * \
@@ -146,14 +153,16 @@ def calculate_velocity_evolution(sv, control_variables, i_fc, Jv_agc_agdl, Jv_cg
 
     # Calculation of the velocity profiles along the gas channels using the found inlet molar flows
     #       Intermediate values
-    J_a, J_c = [J_a_in] + [0] * nb_gc, [J_c_in] + [0] * nb_gc                                                           # J[0] is the inlet molar flow, and J[i] is the outlet molar flow at node i.
-    P_a, P_c = [0] * nb_gc + [Pa_ext], [0] * nb_gc + [Pc_ext]                                                           # P[0] is the inlet pressure, and P[i] is the outlet pressure at node i.
-    v_a, v_c = [0] * (nb_gc + 1), [0] * (nb_gc + 1)                                                                     # v[0] is the inlet velocity, and v[i] is the outlet velocity at node i.
+    J_a, J_c = [J_a_in] + [0] * (nb_gc + 1), [J_c_in] + [0] * (nb_gc + 1)                                               # J[0] is the cell inlet molar flow, J[i] is the outlet molar flow at node i (upwind numerical scheme), and J[-1] is the cell outlet molar flow.
+    P_a, P_c = [0] * (nb_gc + 1) + [Pa_ext], [0] * (nb_gc + 1) + [Pc_ext]                                               # P[0] is the inlet pressure, P[i] is the pressure at the outlet of node i, and P[-1] is the outlet pressure.
+    v_a, v_c = [0] * (nb_gc + 2), [0] * (nb_gc + 2)                                                                     # v[0] is the inlet velocity, v[i] is the velocity at the outlet of node i, and v[-1] is the outlet velocity.
 
     #       Continuity equation are used for calculating the molar flows at all points along the GC at stationary state.
     for i in range(1, nb_gc + 1):
         J_a[i] = J_a[i - 1] - J_tot_agc_agdl[i] * L_node_gc / Hagc
         J_c[i] = J_c[i - 1] + J_tot_cgdl_cgc[i] * L_node_gc / Hcgc
+    J_a[-1] = J_a[nb_gc]                                                                                                # Inside the distributor, there are no mass transfer with the GDL.
+    J_c[-1] = J_c[nb_gc]                                                                                                # Inside the distributor, there are no mass transfer with the GDL.
 
     #       Velocities at the outlets of the GCs (m/s).
     v_a[-1] = J_a[-1] / P_a[-1] * R * T_des
@@ -161,6 +170,10 @@ def calculate_velocity_evolution(sv, control_variables, i_fc, Jv_agc_agdl, Jv_cg
 
     #       Backward calculation of pressures and velocities along the GC using modified Hagen-Poiseuille equation
     #       It is considered that mu_gaz at static state is closed to mu_gaz[f'cgc_{i}'] in order to simplify the calculations.
+    P_a[nb_gc] = P_a[-1] + 8 * math.pi * mu_gaz[f'agc_{nb_gc}'] * Ldist / (Hagc * Wagc) * v_a[-1]                       # Hagen-Poiseuille equation inside the distributor.
+    v_a[nb_gc] = J_a[nb_gc] / P_a[nb_gc] * R * T_des                                                                    # It is considered that mu_gaz[-1] at static state is closed to mu_gaz[f'cgc_{nb_gc}'] in order to simplify the calculations.
+    P_c[nb_gc] = P_c[-1] + 8 * math.pi * mu_gaz[f'cgc_{nb_gc}'] * Ldist / (Hcgc * Wcgc) * v_c[-1]
+    v_c[nb_gc] = J_c[nb_gc] / P_c[nb_gc] * R * T_des
     for i in range(nb_gc, 0, -1):
         #       At the node side
         P_a[i - 1] = P_a[i] + 8 * math.pi * mu_gaz[f'agc_{i}'] * L_node_gc / (Hagc * Wagc) * \
