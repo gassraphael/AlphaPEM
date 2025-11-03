@@ -253,7 +253,7 @@ def stored_physical_parameters(type_fuel_cell):
         Hcgc = 300e-6  # m. It is the thickness of the cathode gas channel.
         Wagc = 430e-6  # m. It is the width of the anode gas channel.
         Wcgc = 532e-6  # m. It is the width of the cathode gas channel.
-        Lgc = 115.3e-3  # m. It is the length of one channel in the bipolar plate.
+        Lgc = 246.2e-3  # m. It is the length of one channel in the bipolar plate.
         nb_channel_in_gc = 105 # . It is the number of channels in the bipolar plate.
         Ldist = 7.11e-2 # m. It is the length of the distributor, which is the volume between the gas channel and the manifold.
         #   Auxiliaries
