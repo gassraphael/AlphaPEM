@@ -237,6 +237,11 @@ class AlphaPEM:
                                   'Phi_a_des': self.operating_inputs['Phi_a_des'],
                                   'Phi_c_des': self.operating_inputs['Phi_c_des']}
 
+        # Temporary action: simulations with auxiliaries are in reconstruction.
+        if self.parameters['type_auxiliary'] != "no_auxiliary":
+            self.parameters['type_auxiliary'] == "no_auxiliary"
+            print("Auxiliary considerations are temporarily removed, as they require reconstruction.")
+
         # Create the dynamic evolution.
         #       Create time intervals
         if time_interval is not None:  # Initial time interval may be given to the Simulator.
