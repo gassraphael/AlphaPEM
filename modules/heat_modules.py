@@ -76,6 +76,9 @@ def heat_transfer_int_values(sv, parameters):
     # Calculation of intermediate values
     C_N2_a_mean = (sum(sv[f'C_N2_agc_{i}'] for i in range(1, nb_gc + 1)) / nb_gc)
     C_N2_c_mean = (sum(sv[f'C_N2_cgc_{i}'] for i in range(1, nb_gc + 1)) / nb_gc)
+    Hgdl_node = Hgdl / nb_gdl
+    Htl_node = Htl / nb_tl
+    Hmpl_node = Hmpl / nb_mpl
 
     # Weighted harmonic means of the effective thermal diffusivity
     k_th_eff_agc_agdl = k_th_eff('agdl', sv[f'T_agdl_{1}'], C_v=sv[f'C_v_agdl_{1}'], s=sv[f's_agdl_{1}'],
@@ -192,7 +195,7 @@ def heat_transfer_int_values(sv, parameters):
                                  s=sv[f's_cgdl_{nb_gdl}'], C_O2=sv[f'C_O2_cgdl_{nb_gdl}'], C_N2=C_N2_c_mean, epsilon=epsilon_gdl,
                                  epsilon_c=epsilon_c)
 
-    return (k_th_eff_agc_agdl, k_th_eff_agdl_agdl, k_th_eff_agdl_atl, k_th_eff_atl_atl, k_th_eff_atl_ampl,
-            k_th_eff_ampl_ampl, k_th_eff_ampl_acl, k_th_eff_acl_mem, k_th_eff_mem_ccl, k_th_eff_ccl_cmpl,
-            k_th_eff_cmpl_cmpl, k_th_eff_cmpl_ctl, k_th_eff_ctl_ctl, k_th_eff_ctl_cgdl, k_th_eff_cgdl_cgdl,
-            k_th_eff_cgdl_cgc)
+    return (Hgdl_node, Htl_node, Hmpl_node, k_th_eff_agc_agdl, k_th_eff_agdl_agdl, k_th_eff_agdl_atl, k_th_eff_atl_atl,
+            k_th_eff_atl_ampl, k_th_eff_ampl_ampl, k_th_eff_ampl_acl, k_th_eff_acl_mem, k_th_eff_mem_ccl,
+            k_th_eff_ccl_cmpl, k_th_eff_cmpl_cmpl, k_th_eff_cmpl_ctl, k_th_eff_ctl_ctl, k_th_eff_ctl_cgdl,
+            k_th_eff_cgdl_cgdl, k_th_eff_cgdl_cgc)

@@ -8,7 +8,7 @@ It is a component of the fuel cell model.
 
 # Importing constants' value and functions
 from configuration.settings import F, delta_s_HOR, delta_s_ORR
-from modules.transitory_functions import sigma_p_eff, sigma_e_eff, delta_h_liq, delta_h_abs
+from modules.transitory_functions import d_dx, sigma_p_eff, sigma_e_eff, delta_h_liq, delta_h_abs
 from modules.heat_modules import heat_transfer_int_values
 
 
@@ -54,9 +54,9 @@ def calculate_heat_transfers(sv, i_fc, operating_inputs, parameters, S_abs, Sl, 
     epsilon_atl, epsilon_ctl = parameters['epsilon_atl'], parameters['epsilon_ctl']
 
     # Intermediate values
-    (k_th_eff_agc_agdl, k_th_eff_agdl_agdl, k_th_eff_agdl_atl, k_th_eff_atl_atl, k_th_eff_atl_ampl, k_th_eff_ampl_ampl,
-     k_th_eff_ampl_acl, k_th_eff_acl_mem, k_th_eff_mem_ccl, k_th_eff_ccl_cmpl, k_th_eff_cmpl_cmpl, k_th_eff_cmpl_ctl,
-     k_th_eff_ctl_ctl, k_th_eff_ctl_cgdl, k_th_eff_cgdl_cgdl, k_th_eff_cgdl_cgc) \
+    (Hgdl_node, Htl_node, Hmpl_node, k_th_eff_agc_agdl, k_th_eff_agdl_agdl, k_th_eff_agdl_atl, k_th_eff_atl_atl,
+     k_th_eff_atl_ampl, k_th_eff_ampl_ampl, k_th_eff_ampl_acl, k_th_eff_acl_mem, k_th_eff_mem_ccl, k_th_eff_ccl_cmpl,
+     k_th_eff_cmpl_cmpl, k_th_eff_cmpl_ctl, k_th_eff_ctl_ctl, k_th_eff_ctl_cgdl, k_th_eff_cgdl_cgdl, k_th_eff_cgdl_cgc) \
             =  heat_transfer_int_values(sv, parameters)
 
     # ______________________________________________Heat flows (J.m-2.s-1)______________________________________________
@@ -64,34 +64,50 @@ def calculate_heat_transfers(sv, i_fc, operating_inputs, parameters, S_abs, Sl, 
     # Anode side
     T_agc_mean = T_des
     T_cgc_mean = T_des
-    Jt_agc_agdl = - 2 * k_th_eff_agc_agdl * (sv['T_agdl_1'] - T_agc_mean) / (Hgdl / nb_gdl)
-    Jt_agdl_agdl = {f'agdl_agdl_{i}': -k_th_eff_agdl_agdl[i] * (sv[f'T_agdl_{i+1}'] - sv[f'T_agdl_{i}']) / (Hgdl/nb_gdl)
+    Jt_agc_agdl = - k_th_eff_agc_agdl * d_dx(y_minus = T_agc_mean, y_plus = sv['T_agdl_1'],
+                                             dx = Hgdl_node / 2)
+    Jt_agdl_agdl = {f'agdl_agdl_{i}': -k_th_eff_agdl_agdl[i] * d_dx(y_minus = sv[f'T_agdl_{i}'], y_plus = sv[f'T_agdl_{i+1}'],
+                                                                    dx = Hgdl_node / 2)
                     for i in range(1, nb_gdl)}
 
-    Jt_agdl_atl = - 2 * k_th_eff_agdl_atl * (sv['T_atl_1'] - sv[f'T_agdl_{nb_gdl}']) / (Hgdl / nb_gdl + Htl / nb_tl)
-    Jt_atl_atl = {f'atl_atl_{i}': -k_th_eff_atl_atl[i] * (sv[f'T_atl_{i + 1}'] - sv[f'T_atl_{i}']) / (Htl / nb_tl)
+    Jt_agdl_atl = - k_th_eff_agdl_atl * d_dx(y_minus = sv[f'T_agdl_{nb_gdl}'], y_plus = sv['T_atl_1'],
+                                             dx_minus = Hgdl_node / 2, dx_plus = Htl_node / 2)
+    Jt_atl_atl = {f'atl_atl_{i}': -k_th_eff_atl_atl[i] * d_dx(y_minus = sv[f'T_atl_{i}'], y_plus = sv[f'T_atl_{i + 1}'],
+                                                              dx = Htl_node / 2)
                   for i in range(1, nb_tl)}
-    Jt_atl_ampl = - 2 * k_th_eff_atl_ampl * (sv['T_ampl_1'] - sv[f'T_atl_{nb_tl}']) / (Htl / nb_tl + Hmpl / nb_mpl)
-    Jt_ampl_ampl = {f'ampl_ampl_{i}': -k_th_eff_ampl_ampl[i] * (sv[f'T_ampl_{i+1}'] - sv[f'T_ampl_{i}']) / (Hmpl/nb_mpl)
+    Jt_atl_ampl = - k_th_eff_atl_ampl * d_dx(y_minus = sv[f'T_atl_{nb_tl}'], y_plus = sv['T_ampl_1'],
+                                             dx_minus = Htl_node / 2, dx_plus = Hmpl_node / 2)
+    Jt_ampl_ampl = {f'ampl_ampl_{i}': -k_th_eff_ampl_ampl[i] * d_dx(y_minus = sv[f'T_ampl_{i}'], y_plus = sv[f'T_ampl_{i+1}'],
+                                                                    dx = Hmpl_node / 2)
                     for i in range(1, nb_mpl)}
-    Jt_ampl_acl = - 2 * k_th_eff_ampl_acl * (T_acl - sv[f'T_ampl_{nb_mpl}']) / (Hmpl / nb_mpl + Hacl)
+    Jt_ampl_acl = - k_th_eff_ampl_acl * d_dx(y_minus = sv[f'T_ampl_{nb_mpl}'], y_plus = T_acl,
+                                             dx_minus = Hmpl_node / 2, dx_plus = Hacl / 2)
 
     # Membrane side
-    Jt_acl_mem = - 2 * k_th_eff_acl_mem * (T_mem - T_acl) / (Hacl + Hmem)
-    Jt_mem_ccl = - 2 * k_th_eff_mem_ccl * (T_ccl - T_mem) / (Hmem + Hccl)
+    Jt_acl_mem = - k_th_eff_acl_mem * d_dx(y_minus = T_acl, y_plus = T_mem,
+                                           dx_minus = Hacl / 2, dx_plus = Hmem / 2)
+    Jt_mem_ccl = - k_th_eff_mem_ccl * d_dx(y_minus = T_mem, y_plus = T_ccl,
+                                           dx_minus = Hmem / 2, dx_plus = Hccl / 2)
 
     # Cathode side
-    Jt_ccl_cmpl = - 2 * k_th_eff_ccl_cmpl * (sv['T_cmpl_1'] - T_ccl) / (Hccl + Hmpl / nb_mpl)
-    Jt_cmpl_cmpl = {f'cmpl_cmpl_{i}': -k_th_eff_cmpl_cmpl[i] * (sv[f'T_cmpl_{i+1}'] - sv[f'T_cmpl_{i}']) / (Hmpl/nb_mpl)
+    Jt_ccl_cmpl = - k_th_eff_ccl_cmpl * d_dx(y_minus = T_ccl, y_plus = sv['T_cmpl_1'],
+                                             dx_minus = Hccl / 2, dx_plus = Hmpl_node / 2)
+    Jt_cmpl_cmpl = {f'cmpl_cmpl_{i}': -k_th_eff_cmpl_cmpl[i] * d_dx(y_minus = sv[f'T_cmpl_{i}'], y_plus = sv[f'T_cmpl_{i+1}'],
+                                                                    dx = Hmpl_node / 2)
                     for i in range(1, nb_mpl)}
-    Jt_cmpl_ctl = - 2 * k_th_eff_cmpl_ctl * (sv['T_ctl_1'] - sv[f'T_cmpl_{nb_mpl}']) / (Htl / nb_tl + Hgdl / nb_gdl)
-    Jt_ctl_ctl = {f'ctl_ctl_{i}': -k_th_eff_ctl_ctl[i] * (sv[f'T_ctl_{i + 1}'] - sv[f'T_ctl_{i}']) / (Htl / nb_tl)
+    Jt_cmpl_ctl = - k_th_eff_cmpl_ctl * d_dx(y_minus = sv[f'T_cmpl_{nb_mpl}'], y_plus = sv['T_ctl_1'],
+                                             dx_minus = Hmpl_node / 2, dx_plus = Htl_node / 2)
+    Jt_ctl_ctl = {f'ctl_ctl_{i}': -k_th_eff_ctl_ctl[i] * d_dx(y_minus = sv[f'T_ctl_{i}'], y_plus = sv[f'T_ctl_{i + 1}'],
+                                                              dx = Htl_node / 2)
                   for i in range(1, nb_tl)}
-    Jt_ctl_cgdl = - 2 * k_th_eff_ctl_cgdl * (sv['T_cgdl_1'] - sv[f'T_ctl_{nb_tl}']) / (Htl / nb_tl + Hgdl / nb_gdl)
-    Jt_cgdl_cgdl = {f'cgdl_cgdl_{i}': -k_th_eff_cgdl_cgdl[i] * (sv[f'T_cgdl_{i+1}'] - sv[f'T_cgdl_{i}']) / (Hgdl/nb_gdl)
+    Jt_ctl_cgdl = - k_th_eff_ctl_cgdl * d_dx(y_minus = sv[f'T_ctl_{nb_tl}'], y_plus = sv['T_cgdl_1'],
+                                             dx_minus = Htl_node, dx_plus = Hgdl_node)
+    Jt_cgdl_cgdl = {f'cgdl_cgdl_{i}': -k_th_eff_cgdl_cgdl[i] * d_dx(y_minus = sv[f'T_cgdl_{i}'], y_plus = sv[f'T_cgdl_{i+1}'],
+                                                                    dx = Hgdl_node / 2)
                     for i in range(1, nb_gdl)}
 
-    Jt_cgdl_cgc = - 2 * k_th_eff_cgdl_cgc * (T_cgc_mean - sv[f'T_cgdl_{nb_gdl}']) / (Hgdl / nb_gdl)
+    Jt_cgdl_cgc = - k_th_eff_cgdl_cgc * d_dx(y_minus = sv[f'T_cgdl_{nb_gdl}'], y_plus = T_cgc_mean,
+                                             dx = Hgdl_node / 2)
 
     Jt = {'agc_agdl': Jt_agc_agdl, **Jt_agdl_agdl, 'agdl_atl': Jt_agdl_atl, **Jt_atl_atl, 'atl_ampl': Jt_atl_ampl,
           **Jt_ampl_ampl, 'ampl_acl': Jt_ampl_acl, 'acl_mem': Jt_acl_mem, 'mem_ccl': Jt_mem_ccl, 'ccl_cmpl': Jt_ccl_cmpl,

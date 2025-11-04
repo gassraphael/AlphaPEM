@@ -122,7 +122,7 @@ def interpolate(terms, distances):
 
 
 
-def d_dx(y_minus, y_0, y_plus, dx_minus, dx_plus = None):
+def d_dx(y_minus, y_plus, dx = None, dx_minus = None, dx_plus = None):
     """
     Computes the centered first derivative (second order) with different steps to the left and right.
 
@@ -134,6 +134,8 @@ def d_dx(y_minus, y_0, y_plus, dx_minus, dx_plus = None):
         Value at the central point (i).
     y_plus : float
         Value at the right point (i+1).
+    dx : float
+        Step between (i-1) and (i+1) when dx_minus = dx_plus.
     dx_minus : float
         Step between (i-1) and i.
     dx_plus : float
@@ -145,12 +147,21 @@ def d_dx(y_minus, y_0, y_plus, dx_minus, dx_plus = None):
         Approximation of the first derivative at i.
     """
 
-    if dx_plus is None:
-        dx = dx_minus
-        return (y_plus - y_minus) / (2 * dx)
+    # Case of uniform grid spacing
+    if dx is None:
+        if dx_minus is None or dx_plus is None:
+            raise ValueError("Either dx or both dx_minus and dx_plus must be provided.")
     else:
-        return (y_plus * dx_minus**2 + y_0 * (dx_plus**2 - dx_minus**2) - y_minus * dx_plus**2)  / \
-               (dx_minus * dx_plus * (dx_minus + dx_plus))
+        if dx == 0:
+            raise ValueError("dx must be non-zero.")
+        return (y_plus - y_minus) / (2.0 * dx)
+
+    # Case of non-uniform grid spacing (dx is None and dx_minus and dx_plus are provided)
+    if dx_minus <= 0 or dx_plus <= 0:
+        raise ValueError("dx_minus and dx_plus must be positive non-zero values.")
+    y_0 = interpolate([y_minus, y_plus], [dx_minus, dx_plus])
+    return (y_plus * dx_minus**2 + y_0 * (dx_plus**2 - dx_minus**2) - y_minus * dx_plus**2)  / \
+           (dx_minus * dx_plus * (dx_minus + dx_plus))
 
 
 def d2_dx2(y_minus, y_0, y_plus, dx_minus, dx_plus = None):

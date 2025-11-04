@@ -8,7 +8,7 @@
 # Importing constants' value and functions
 from configuration.settings import rho_mem, M_eq, F, R
 from model.auxiliaries import auxiliaries
-from modules.transitory_functions import Dcap, h_a, h_c, lambda_eq, gamma_sorp, Svl, k_H2, k_O2
+from modules.transitory_functions import interpolate, d_dx, Dcap, h_a, h_c, lambda_eq, gamma_sorp, Svl, k_H2, k_O2
 from modules.flows_modules import flows_int_values
 
 
@@ -72,39 +72,53 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     # ________________________________________Dissolved water flows (mol.m-2.s-1)_______________________________________
 
     # Anode side
-    J_lambda_acl_mem = J_EOD_acl_mem - 2 * rho_mem / M_eq * D_acl_mem * (lambda_mem - lambda_acl) / (Hmem + Hacl)
+    J_lambda_acl_mem = J_EOD_acl_mem - rho_mem / M_eq * D_acl_mem * d_dx(y_minus = lambda_acl, y_plus = lambda_mem,
+                                                                         dx_minus = Hacl / 2, dx_plus = Hmem / 2)
     # Cathode side
-    J_lambda_mem_ccl = J_EOD_mem_ccl - 2 * rho_mem / M_eq * D_mem_ccl * (lambda_ccl - lambda_mem) / (Hmem + Hccl)
+    J_lambda_mem_ccl = J_EOD_mem_ccl - rho_mem / M_eq * D_mem_ccl * d_dx(y_minus = lambda_mem, y_plus = lambda_ccl,
+                                                                         dx_minus = Hmem / 2, dx_plus = Hccl / 2)
 
     # _________________________________________Liquid water flows (kg.m-2.s-1)__________________________________________
 
     # Anode side
     s_agc = 0  # Dirichlet boundary condition (taken at the agc/agdl border).
-    Jl_agc_agdl = - 2 * Dcap('gdl', sv['s_agdl_1'], sv['T_agdl_1'], epsilon_gdl, e, epsilon_c=epsilon_c) * \
-                    (sv['s_agdl_1'] - s_agc) / H_gdl_node
-    Jl_agdl_agdl = [None] + [- D_cap_agdl_agdl[i] * (sv[f's_agdl_{i + 1}'] - sv[f's_agdl_{i}']) / H_gdl_node
+    Jl_agc_agdl = - Dcap('gdl', sv['s_agdl_1'], sv['T_agdl_1'], epsilon_gdl, e, epsilon_c=epsilon_c) * \
+                    d_dx(y_minus = s_agc, y_plus = sv['s_agdl_1'], dx = H_gdl_node / 2)
+    Jl_agdl_agdl = [None] + [- D_cap_agdl_agdl[i] * d_dx(y_minus = sv[f's_agdl_{i}'], y_plus = sv[f's_agdl_{i + 1}'],
+                                                         dx = H_gdl_node / 2)
                              for i in range(1, nb_gdl)]
-    Jl_agdl_atl = - 2 * D_cap_agdl_atl * (sv['s_atl_1'] - sv[f's_agdl_{nb_gdl}']) / (H_gdl_node + H_tl_node)
-    Jl_atl_atl = [None] + [- D_cap_atl_atl[i] * (sv[f's_atl_{i + 1}'] - sv[f's_atl_{i}']) / H_tl_node
+    Jl_agdl_atl = - D_cap_agdl_atl * d_dx(y_minus = sv[f's_agdl_{nb_gdl}'], y_plus = sv['s_atl_1'],
+                                          dx_minus = H_gdl_node / 2, dx_plus = H_tl_node / 2)
+    Jl_atl_atl = [None] + [- D_cap_atl_atl[i] * d_dx(y_minus = sv[f's_atl_{i}'], y_plus = sv[f's_atl_{i + 1}'],
+                                                     dx = H_tl_node / 2)
                              for i in range(1, nb_tl)]
-    Jl_atl_ampl = - 2 * D_cap_atl_ampl * (sv['s_ampl_1'] - sv[f's_atl_{nb_tl}']) / (H_tl_node + H_mpl_node)
-    Jl_ampl_ampl = [None] + [- D_cap_ampl_ampl[i] * (sv[f's_ampl_{i + 1}'] - sv[f's_ampl_{i}']) / H_mpl_node
+    Jl_atl_ampl = - D_cap_atl_ampl * d_dx(y_minus = sv[f's_atl_{nb_tl}'], y_plus = sv['s_ampl_1'],
+                                          dx_minus = H_tl_node / 2 , dx_plus = H_mpl_node / 2)
+    Jl_ampl_ampl = [None] + [- D_cap_ampl_ampl[i] * d_dx(y_minus = sv[f's_ampl_{i}'], y_plus = sv[f's_ampl_{i + 1}'],
+                                                         dx = H_mpl_node / 2)
                              for i in range(1, nb_mpl)]
-    Jl_ampl_acl = - 2 * D_cap_ampl_acl * (s_acl - sv[f's_ampl_{nb_mpl}']) / (H_mpl_node + Hacl)
+    Jl_ampl_acl = - D_cap_ampl_acl * d_dx(y_minus = sv[f's_ampl_{nb_mpl}'], y_plus = s_acl,
+                                          dx_minus = H_mpl_node / 2, dx_plus = Hacl / 2)
 
     # Cathode side
     s_cgc = 0  # Dirichlet boundary condition (taken at the cgc/cgdl border).
-    Jl_ccl_cmpl = - 2 * D_cap_ccl_cmpl * (sv['s_cmpl_1'] - s_ccl) / (Hccl + H_mpl_node)
-    Jl_cmpl_cmpl = [None] + [- D_cap_cmpl_cmpl[i] * (sv[f's_cmpl_{i + 1}'] - sv[f's_cmpl_{i}']) / H_mpl_node
+    Jl_ccl_cmpl = - D_cap_ccl_cmpl * d_dx(y_minus = s_ccl, y_plus = sv['s_cmpl_1'],
+                                          dx_minus = Hccl / 2, dx_plus = H_mpl_node / 2)
+    Jl_cmpl_cmpl = [None] + [- D_cap_cmpl_cmpl[i] * d_dx(y_minus = sv[f's_cmpl_{i}'], y_plus = sv[f's_cmpl_{i + 1}'],
+                                                         dx = H_mpl_node / 2)
                             for i in range(1, nb_mpl)]
-    Jl_cmpl_ctl = - 2 * D_cap_cmpl_ctl * (sv['s_ctl_1'] - sv[f's_cmpl_{nb_mpl}']) / (H_mpl_node + H_tl_node)
-    Jl_ctl_ctl = [None] + [- D_cap_ctl_ctl[i] * (sv[f's_ctl_{i + 1}'] - sv[f's_ctl_{i}']) / H_tl_node
+    Jl_cmpl_ctl = - D_cap_cmpl_ctl * d_dx(y_minus = sv[f's_cmpl_{nb_mpl}'], y_plus = sv['s_ctl_1'],
+                                          dx_minus = H_mpl_node / 2, dx_plus = H_tl_node / 2)
+    Jl_ctl_ctl = [None] + [- D_cap_ctl_ctl[i] * d_dx(y_minus = sv[f's_ctl_{i}'], y_plus = sv[f's_ctl_{i + 1}'],
+                                                     dx = H_tl_node / 2)
                              for i in range(1, nb_tl)]
-    Jl_ctl_cgdl = - 2 * D_cap_ctl_cgdl * (sv['s_cgdl_1'] - sv[f's_ctl_{nb_tl}']) / (H_tl_node + H_gdl_node)
-    Jl_cgdl_cgdl = [None] + [- D_cap_cgdl_cgdl[i] * (sv[f's_cgdl_{i + 1}'] - sv[f's_cgdl_{i}']) / H_gdl_node
+    Jl_ctl_cgdl = - D_cap_ctl_cgdl * d_dx(y_minus = sv[f's_ctl_{nb_tl}'], y_plus = sv['s_cgdl_1'],
+                                          dx_minus = H_tl_node / 2, dx_plus = H_gdl_node / 2)
+    Jl_cgdl_cgdl = [None] + [- D_cap_cgdl_cgdl[i] * d_dx(y_minus = sv[f's_cgdl_{i}'], y_plus = sv[f's_cgdl_{i + 1}'],
+                                                         dx = H_gdl_node / 2)
                              for i in range(1, nb_gdl)]
-    Jl_cgdl_cgc = - 2 * Dcap('gdl', sv[f's_cgdl_{nb_gdl}'], sv[f'T_cgdl_{nb_gdl}'], epsilon_gdl, e,
-                             epsilon_c=epsilon_c) * (s_cgc - sv[f's_cgdl_{nb_gdl}']) / H_gdl_node
+    Jl_cgdl_cgc = - Dcap('gdl', sv[f's_cgdl_{nb_gdl}'], sv[f'T_cgdl_{nb_gdl}'], epsilon_gdl, e, epsilon_c=epsilon_c) * \
+                  d_dx(y_minus = sv[f's_cgdl_{nb_gdl}'], y_plus = s_cgc, dx = H_gdl_node / 2)
 
     # _____________________________________________Vapor flows (mol.m-2.s-1)____________________________________________
 
@@ -118,25 +132,37 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
 
     # Conductive vapor flows
     #   Anode side
-    Jv_agdl_agdl = [None] + [- Da_eff_agdl_agdl[i] * (sv[f'C_v_agdl_{i + 1}'] - sv[f'C_v_agdl_{i}']) / H_gdl_node
+    Jv_agdl_agdl = [None] + [- Da_eff_agdl_agdl[i] * d_dx(y_minus = sv[f'C_v_agdl_{i}'], y_plus = sv[f'C_v_agdl_{i + 1}'],
+                                                          dx = H_gdl_node / 2)
                              for i in range(1, nb_gdl)]
-    Jv_agdl_atl = - 2 * Da_eff_agdl_atl * (sv['C_v_atl_1'] - sv[f'C_v_agdl_{nb_gdl}']) / (H_gdl_node + H_tl_node)
-    Jv_atl_atl = [None] + [- Da_eff_atl_atl[i] * (sv[f'C_v_atl_{i + 1}'] - sv[f'C_v_atl_{i}']) / H_tl_node
+    Jv_agdl_atl = - Da_eff_agdl_atl * d_dx(y_minus = sv[f'C_v_agdl_{nb_gdl}'], y_plus = sv['C_v_atl_1'],
+                                           dx_minus = H_gdl_node / 2, dx_plus = H_tl_node / 2)
+    Jv_atl_atl = [None] + [- Da_eff_atl_atl[i] * d_dx(y_minus = sv[f'C_v_atl_{i}'], y_plus = sv[f'C_v_atl_{i + 1}'],
+                                                      dx = H_tl_node / 2)
                              for i in range(1, nb_tl)]
-    Jv_atl_ampl = - 2 * Da_eff_atl_ampl * (sv['C_v_ampl_1'] - sv[f'C_v_atl_{nb_tl}']) / (H_tl_node + H_mpl_node)
-    Jv_ampl_ampl = [None] + [- Da_eff_ampl_ampl[i] * (sv[f'C_v_ampl_{i + 1}'] - sv[f'C_v_ampl_{i}']) / H_mpl_node
+    Jv_atl_ampl = - Da_eff_atl_ampl * d_dx(y_minus = sv[f'C_v_atl_{nb_tl}'], y_plus = sv['C_v_ampl_1'],
+                                           dx_minus = H_tl_node / 2, dx_plus = H_mpl_node / 2)
+    Jv_ampl_ampl = [None] + [- Da_eff_ampl_ampl[i] * d_dx(y_minus = sv[f'C_v_ampl_{i}'], y_plus = sv[f'C_v_ampl_{i + 1}'],
+                                                          dx = H_mpl_node / 2)
                              for i in range(1, nb_mpl)]
-    Jv_ampl_acl = - 2 * Da_eff_ampl_acl * (C_v_acl - sv[f'C_v_ampl_{nb_mpl}']) / (H_mpl_node + Hacl)
+    Jv_ampl_acl = - Da_eff_ampl_acl * d_dx(y_minus = sv[f'C_v_ampl_{nb_mpl}'], y_plus = C_v_acl,
+                                           dx_minus = H_mpl_node / 2, dx_plus = Hacl / 2)
 
     #   Cathode side
-    Jv_ccl_cmpl = - 2 * Dc_eff_ccl_cmpl * (sv['C_v_cmpl_1'] - C_v_ccl) / (Hccl + H_mpl_node)
-    Jv_cmpl_cmpl = [None] + [- Dc_eff_cmpl_cmpl[i] * (sv[f'C_v_cmpl_{i + 1}'] - sv[f'C_v_cmpl_{i}']) / H_mpl_node
+    Jv_ccl_cmpl = - Dc_eff_ccl_cmpl * d_dx(y_minus = C_v_ccl, y_plus = sv['C_v_cmpl_1'],
+                                           dx_minus = Hccl / 2, dx_plus = H_mpl_node / 2)
+    Jv_cmpl_cmpl = [None] + [- Dc_eff_cmpl_cmpl[i] * d_dx(y_minus = sv[f'C_v_cmpl_{i}'], y_plus = sv[f'C_v_cmpl_{i + 1}'],
+                                                          dx = H_mpl_node / 2)
                              for i in range(1, nb_mpl)]
-    Jv_cmpl_ctl = - 2 * Dc_eff_cmpl_ctl * (sv['C_v_ctl_1'] - sv[f'C_v_cmpl_{nb_mpl}']) / (H_mpl_node + H_tl_node)
-    Jv_ctl_ctl = [None] + [- Dc_eff_ctl_ctl[i] * (sv[f'C_v_ctl_{i + 1}'] - sv[f'C_v_ctl_{i}']) / H_tl_node
+    Jv_cmpl_ctl = - Dc_eff_cmpl_ctl * d_dx(y_minus = sv[f'C_v_cmpl_{nb_mpl}'], y_plus = sv['C_v_ctl_1'],
+                                           dx_minus = H_mpl_node / 2, dx_plus = H_tl_node / 2)
+    Jv_ctl_ctl = [None] + [- Dc_eff_ctl_ctl[i] * d_dx(y_minus = sv[f'C_v_ctl_{i}'], y_plus = sv[f'C_v_ctl_{i + 1}'],
+                                                      dx = H_tl_node / 2)
                              for i in range(1, nb_tl)]
-    Jv_ctl_cgdl = - 2 * Dc_eff_ctl_cgdl * (sv['C_v_cgdl_1'] - sv[f'C_v_ctl_{nb_tl}']) / (H_tl_node + H_gdl_node)
-    Jv_cgdl_cgdl = [None] + [- Dc_eff_cgdl_cgdl[i] * (sv[f'C_v_cgdl_{i + 1}'] - sv[f'C_v_cgdl_{i}']) / H_gdl_node
+    Jv_ctl_cgdl = - Dc_eff_ctl_cgdl * d_dx(y_minus = sv[f'C_v_ctl_{nb_tl}'], y_plus = sv['C_v_cgdl_1'],
+                                           dx_minus = H_tl_node / 2, dx_plus = H_gdl_node / 2)
+    Jv_cgdl_cgdl = [None] + [- Dc_eff_cgdl_cgdl[i] * d_dx(y_minus = sv[f'C_v_cgdl_{i}'], y_plus = sv[f'C_v_cgdl_{i + 1}'],
+                                                          dx = H_gdl_node / 2)
                              for i in range(1, nb_gdl)]
 
     # __________________________________________H2 and O2 flows (mol.m-2.s-1)___________________________________________
@@ -154,33 +180,44 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     # Conductive-convective H2 and O2 flows
     #   Anode side
     J_H2_agc_agdl = [None] + [h_a(Pagc[i], T_des, Wagc, Hagc) * (sv[f'C_H2_agc_{i}'] - sv['C_H2_agdl_1'])
-                            for i in range(1, nb_gc + 1)]
+                              for i in range(1, nb_gc + 1)]
     #   Cathode side
-    J_O2_cgdl_cgc = [None] + [h_c(Pcgc[i], T_des, Wcgc, Hcgc) * (sv[f'C_O2_cgdl_{nb_gdl}'] - sv[f'C_O2_cgc_{i}']) *
-                              (Aact / nb_channel_in_gc) / (Wcgc * Lgc)
-                            for i in range(1, nb_gc + 1)]
+    J_O2_cgdl_cgc = [None] + [h_c(Pcgc[i], T_des, Wcgc, Hcgc) * (sv[f'C_O2_cgdl_{nb_gdl}'] - sv[f'C_O2_cgc_{i}'])
+                              for i in range(1, nb_gc + 1)]
 
     # Conductive H2 and O2 flows
     #   Anode side
-    J_H2_agdl_agdl = [None] + [- Da_eff_agdl_agdl[i] * (sv[f'C_H2_agdl_{i+1}'] - sv[f'C_H2_agdl_{i}']) / H_gdl_node
+    J_H2_agdl_agdl = [None] + [- Da_eff_agdl_agdl[i] * d_dx(y_minus = sv[f'C_H2_agdl_{i}'], y_plus = sv[f'C_H2_agdl_{i+1}'],
+                                                            dx = H_gdl_node / 2)
                                for i in range(1, nb_gdl)]
-    J_H2_agdl_atl = - 2 * Da_eff_agdl_atl * (sv['C_H2_atl_1'] - sv[f'C_H2_agdl_{nb_gdl}']) / (H_gdl_node + H_tl_node)
-    J_H2_atl_atl = [None] + [- Da_eff_atl_atl[i] * (sv[f'C_H2_atl_{i + 1}'] - sv[f'C_H2_atl_{i}']) / H_tl_node
+    J_H2_agdl_atl = - Da_eff_agdl_atl * d_dx(y_minus = sv[f'C_H2_agdl_{nb_gdl}'], y_plus = sv['C_H2_atl_1'],
+                                             dx_minus = H_gdl_node / 2, dx_plus = H_tl_node / 2)
+    J_H2_atl_atl = [None] + [- Da_eff_atl_atl[i] * d_dx(y_minus = sv[f'C_H2_atl_{i}'], y_plus = sv[f'C_H2_atl_{i + 1}'],
+                                                        dx = H_tl_node / 2)
                                for i in range(1, nb_tl)]
-    J_H2_atl_ampl = - 2 * Da_eff_atl_ampl * (sv['C_H2_ampl_1'] - sv[f'C_H2_atl_{nb_tl}']) / (H_tl_node + H_mpl_node)
-    J_H2_ampl_ampl = [None] + [- Da_eff_ampl_ampl[i] * (sv[f'C_H2_ampl_{i + 1}'] - sv[f'C_H2_ampl_{i}']) / H_mpl_node
+    J_H2_atl_ampl = - Da_eff_atl_ampl * d_dx(y_minus = sv[f'C_H2_atl_{nb_tl}'], y_plus = sv['C_H2_ampl_1'],
+                                             dx_minus = H_tl_node / 2, dx_plus = H_mpl_node / 2)
+    J_H2_ampl_ampl = [None] + [- Da_eff_ampl_ampl[i] * d_dx(y_minus = sv[f'C_H2_ampl_{i}'], y_plus = sv[f'C_H2_ampl_{i + 1}'],
+                                                            dx = H_mpl_node / 2)
                                for i in range(1, nb_mpl)]
-    J_H2_ampl_acl = - 2 * Da_eff_ampl_acl * (C_H2_acl - sv[f'C_H2_ampl_{nb_mpl}']) / (H_mpl_node + Hacl)
+    J_H2_ampl_acl = - Da_eff_ampl_acl * d_dx(y_minus = sv[f'C_H2_ampl_{nb_mpl}'], y_plus = C_H2_acl,
+                                             dx_minus = H_mpl_node / 2, dx_plus = Hacl / 2)
 
     #   Cathode side
-    J_O2_ccl_cmpl = - 2 * Dc_eff_ccl_cmpl * (sv['C_O2_cmpl_1'] - C_O2_ccl) / (Hccl + H_mpl_node)
-    J_O2_cmpl_cmpl = [None] + [- Dc_eff_cmpl_cmpl[i] * (sv[f'C_O2_cmpl_{i + 1}'] - sv[f'C_O2_cmpl_{i}']) / H_mpl_node
+    J_O2_ccl_cmpl = - Dc_eff_ccl_cmpl * d_dx(y_minus = C_O2_ccl, y_plus = sv['C_O2_cmpl_1'],
+                                             dx_minus = Hccl / 2, dx_plus = H_mpl_node / 2)
+    J_O2_cmpl_cmpl = [None] + [- Dc_eff_cmpl_cmpl[i] * d_dx(y_minus = sv[f'C_O2_cmpl_{i}'], y_plus = sv[f'C_O2_cmpl_{i + 1}'],
+                                                            dx = H_mpl_node / 2)
                                for i in range(1, nb_mpl)]
-    J_O2_cmpl_ctl = - 2 * Dc_eff_cmpl_ctl * (sv['C_O2_ctl_1'] - sv[f'C_O2_cmpl_{nb_mpl}']) / (H_mpl_node + H_tl_node)
-    J_O2_ctl_ctl = [None] + [- Dc_eff_ctl_ctl[i] * (sv[f'C_O2_ctl_{i + 1}'] - sv[f'C_O2_ctl_{i}']) / H_tl_node
+    J_O2_cmpl_ctl = - Dc_eff_cmpl_ctl * d_dx(y_minus = sv[f'C_O2_cmpl_{nb_mpl}'], y_plus = sv['C_O2_ctl_1'],
+                                             dx_minus = H_mpl_node / 2, dx_plus = H_tl_node / 2)
+    J_O2_ctl_ctl = [None] + [- Dc_eff_ctl_ctl[i] * d_dx(y_minus = sv[f'C_O2_ctl_{i}'], y_plus = sv[f'C_O2_ctl_{i + 1}'],
+                                                        dx = H_tl_node / 2)
                                for i in range(1, nb_tl)]
-    J_O2_ctl_cgdl = - 2 * Dc_eff_ctl_cgdl * (sv['C_O2_cgdl_1'] - sv[f'C_O2_ctl_{nb_tl}']) / (H_tl_node + H_gdl_node)
-    J_O2_cgdl_cgdl = [None] + [- Dc_eff_cgdl_cgdl[i] * (sv[f'C_O2_cgdl_{i + 1}'] - sv[f'C_O2_cgdl_{i}']) / H_gdl_node
+    J_O2_ctl_cgdl = - Dc_eff_ctl_cgdl * d_dx(y_minus = sv[f'C_O2_ctl_{nb_tl}'], y_plus = sv['C_O2_cgdl_1'],
+                                             dx_minus = H_tl_node / 2, dx_plus = H_gdl_node / 2)
+    J_O2_cgdl_cgdl = [None] + [- Dc_eff_cgdl_cgdl[i] * d_dx(y_minus = sv[f'C_O2_cgdl_{i}'], y_plus = sv[f'C_O2_cgdl_{i + 1}'],
+                                                            dx = H_gdl_node / 2)
                                for i in range(1, nb_gdl)]
 
     # __________________________________________Water generated (mol.m-3.s-1)___________________________________________
