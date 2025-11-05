@@ -30,7 +30,7 @@ def main():
     # This parameter includes the fuel cell used in the model and the corresponding operating conditions.
     # - GenStack is a fuel cell developed in open source by ZSW (https://zenodo.org/records/14223364).
     # - EH-31 is a fuel cell developed by EH GROUP. 1.5, 2.0, 2.25 and 2.5 corresponds to the different pressure options.
-    type_fuel_cell_1 = "EH-31_2.0"
+    type_fuel_cell_1 = "ZSW-GenStack"
     type_fuel_cell_2 = None
     type_fuel_cell_3 = None
     type_fuel_cell_4 = None
