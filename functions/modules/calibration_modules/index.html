@@ -271,87 +271,87 @@ experimental data, are considered as it is the minimum amount of data which is r
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/calibration_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">437</span>
-<span class="normal">438</span>
-<span class="normal">439</span>
-<span class="normal">440</span>
-<span class="normal">441</span>
-<span class="normal">442</span>
-<span class="normal">443</span>
-<span class="normal">444</span>
-<span class="normal">445</span>
-<span class="normal">446</span>
-<span class="normal">447</span>
-<span class="normal">448</span>
-<span class="normal">449</span>
-<span class="normal">450</span>
-<span class="normal">451</span>
-<span class="normal">452</span>
-<span class="normal">453</span>
-<span class="normal">454</span>
-<span class="normal">455</span>
-<span class="normal">456</span>
-<span class="normal">457</span>
-<span class="normal">458</span>
-<span class="normal">459</span>
-<span class="normal">460</span>
-<span class="normal">461</span>
-<span class="normal">462</span>
-<span class="normal">463</span>
-<span class="normal">464</span>
-<span class="normal">465</span>
-<span class="normal">466</span>
-<span class="normal">467</span>
-<span class="normal">468</span>
-<span class="normal">469</span>
-<span class="normal">470</span>
-<span class="normal">471</span>
-<span class="normal">472</span>
-<span class="normal">473</span>
-<span class="normal">474</span>
-<span class="normal">475</span>
-<span class="normal">476</span>
-<span class="normal">477</span>
-<span class="normal">478</span>
-<span class="normal">479</span>
-<span class="normal">480</span>
-<span class="normal">481</span>
-<span class="normal">482</span>
-<span class="normal">483</span>
-<span class="normal">484</span>
-<span class="normal">485</span>
-<span class="normal">486</span>
-<span class="normal">487</span>
-<span class="normal">488</span>
-<span class="normal">489</span>
-<span class="normal">490</span>
-<span class="normal">491</span>
-<span class="normal">492</span>
-<span class="normal">493</span>
-<span class="normal">494</span>
-<span class="normal">495</span>
-<span class="normal">496</span>
-<span class="normal">497</span>
-<span class="normal">498</span>
-<span class="normal">499</span>
-<span class="normal">500</span>
-<span class="normal">501</span>
-<span class="normal">502</span>
-<span class="normal">503</span>
-<span class="normal">504</span>
-<span class="normal">505</span>
-<span class="normal">506</span>
-<span class="normal">507</span>
-<span class="normal">508</span>
-<span class="normal">509</span>
-<span class="normal">510</span>
-<span class="normal">511</span>
-<span class="normal">512</span>
-<span class="normal">513</span>
-<span class="normal">514</span>
-<span class="normal">515</span>
-<span class="normal">516</span>
-<span class="normal">517</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_simulation_error</span><span class="p">(</span><span class="n">Simulator_1</span><span class="p">,</span> <span class="n">U_exp_1</span><span class="p">,</span> <span class="n">i_exp_1</span><span class="p">,</span> <span class="n">Simulator_2</span><span class="p">,</span> <span class="n">U_exp_2</span><span class="p">,</span> <span class="n">i_exp_2</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">521</span>
+<span class="normal">522</span>
+<span class="normal">523</span>
+<span class="normal">524</span>
+<span class="normal">525</span>
+<span class="normal">526</span>
+<span class="normal">527</span>
+<span class="normal">528</span>
+<span class="normal">529</span>
+<span class="normal">530</span>
+<span class="normal">531</span>
+<span class="normal">532</span>
+<span class="normal">533</span>
+<span class="normal">534</span>
+<span class="normal">535</span>
+<span class="normal">536</span>
+<span class="normal">537</span>
+<span class="normal">538</span>
+<span class="normal">539</span>
+<span class="normal">540</span>
+<span class="normal">541</span>
+<span class="normal">542</span>
+<span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span>
+<span class="normal">546</span>
+<span class="normal">547</span>
+<span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span>
+<span class="normal">551</span>
+<span class="normal">552</span>
+<span class="normal">553</span>
+<span class="normal">554</span>
+<span class="normal">555</span>
+<span class="normal">556</span>
+<span class="normal">557</span>
+<span class="normal">558</span>
+<span class="normal">559</span>
+<span class="normal">560</span>
+<span class="normal">561</span>
+<span class="normal">562</span>
+<span class="normal">563</span>
+<span class="normal">564</span>
+<span class="normal">565</span>
+<span class="normal">566</span>
+<span class="normal">567</span>
+<span class="normal">568</span>
+<span class="normal">569</span>
+<span class="normal">570</span>
+<span class="normal">571</span>
+<span class="normal">572</span>
+<span class="normal">573</span>
+<span class="normal">574</span>
+<span class="normal">575</span>
+<span class="normal">576</span>
+<span class="normal">577</span>
+<span class="normal">578</span>
+<span class="normal">579</span>
+<span class="normal">580</span>
+<span class="normal">581</span>
+<span class="normal">582</span>
+<span class="normal">583</span>
+<span class="normal">584</span>
+<span class="normal">585</span>
+<span class="normal">586</span>
+<span class="normal">587</span>
+<span class="normal">588</span>
+<span class="normal">589</span>
+<span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span>
+<span class="normal">596</span>
+<span class="normal">597</span>
+<span class="normal">598</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
+<span class="normal">601</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_simulation_error</span><span class="p">(</span><span class="n">Simulator_1</span><span class="p">,</span> <span class="n">U_exp_1</span><span class="p">,</span> <span class="n">i_exp_1</span><span class="p">,</span> <span class="n">Simulator_2</span><span class="p">,</span> <span class="n">U_exp_2</span><span class="p">,</span> <span class="n">i_exp_2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function is used to calculate the simulation maximal error between the experimental and the simulated</span>
 <span class="sd">    polarization curves. Two simulations on different operating conditions and on the same stack, and so two set of</span>
 <span class="sd">    experimental data, are considered as it is the minimum amount of data which is required for the calibration.</span>
@@ -442,7 +442,7 @@ experimental data, are considered as it is the minimum amount of data which is r
 
 
 <h2 id="modules.calibration_modules.parameter_bounds_for_calibration" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">parameter_bounds_for_calibration</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">parameter_bounds_for_calibration</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">voltage_zone</span><span class="p">,</span> <span class="n">operating_inputs_1</span><span class="p">,</span> <span class="n">operating_inputs_2</span><span class="p">)</span></code>
 
 </h2>
 
@@ -456,7 +456,13 @@ registered type_fuel_cell is considered.</p>
 <details class="---parameters" open>
   <summary>Parameters</summary>
   <p>type_fuel_cell : str
-           Type of fuel cell configuration.</p>
+        Type of fuel cell configuration.
+     voltage_zone : str
+        Zone of calibration: "before_voltage_drop", "full".
+   operating_inputs_1 : dict
+        Operating inputs for the first fuel cell configuration.
+   operating_inputs_2 : dict
+        Operating inputs for the second fuel cell configuration.</p>
 </details>
 
 <details class="---returns" open>
@@ -471,10 +477,7 @@ registered type_fuel_cell is considered.</p>
 </details>
             <details class="quote">
               <summary>Source code in <code>modules/calibration_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 20</span>
-<span class="normal"> 21</span>
-<span class="normal"> 22</span>
-<span class="normal"> 23</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 23</span>
 <span class="normal"> 24</span>
 <span class="normal"> 25</span>
 <span class="normal"> 26</span>
@@ -567,14 +570,59 @@ registered type_fuel_cell is considered.</p>
 <span class="normal">113</span>
 <span class="normal">114</span>
 <span class="normal">115</span>
-<span class="normal">116</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parameter_bounds_for_calibration</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">):</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parameter_bounds_for_calibration</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">voltage_zone</span><span class="p">,</span> <span class="n">operating_inputs_1</span><span class="p">,</span> <span class="n">operating_inputs_2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function is used to determine the parameter bounds of the fuel cell model for the calibration when a</span>
 <span class="sd">    registered type_fuel_cell is considered.</span>
 
 <span class="sd">       Parameters</span>
 <span class="sd">       ----------</span>
 <span class="sd">       type_fuel_cell : str</span>
-<span class="sd">               Type of fuel cell configuration.</span>
+<span class="sd">            Type of fuel cell configuration.</span>
+<span class="sd">         voltage_zone : str</span>
+<span class="sd">            Zone of calibration: &quot;before_voltage_drop&quot;, &quot;full&quot;.</span>
+<span class="sd">       operating_inputs_1 : dict</span>
+<span class="sd">            Operating inputs for the first fuel cell configuration.</span>
+<span class="sd">       operating_inputs_2 : dict</span>
+<span class="sd">            Operating inputs for the second fuel cell configuration.</span>
+
 
 <span class="sd">       Returns</span>
 <span class="sd">       -------</span>
@@ -587,33 +635,51 @@ registered type_fuel_cell is considered.</p>
 <span class="sd">            integer parameters.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack&quot;</span><span class="p">:</span>
+    <span class="n">Pc_des_1</span><span class="p">,</span> <span class="n">Pc_des_2</span> <span class="o">=</span> <span class="n">operating_inputs_1</span><span class="p">[</span><span class="s1">&#39;Pc_des&#39;</span><span class="p">],</span> <span class="n">operating_inputs_2</span><span class="p">[</span><span class="s1">&#39;Pc_des&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack&quot;</span> <span class="ow">or</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_Pa_1.61_Pc_1.41&quot;</span> <span class="ow">or</span> \
+            <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_Pa_2.01_Pc_1.81&quot;</span> <span class="ow">or</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_Pa_2.4_Pc_2.2&quot;</span> <span class="ow">or</span> \
+            <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_Pa_2.8_Pc_2.6&quot;</span> <span class="ow">or</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_T_62&quot;</span> <span class="ow">or</span> \
+            <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_T_76&quot;</span> <span class="ow">or</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_T_84&quot;</span><span class="p">:</span>
         <span class="c1">#       Fuel cell physical parameters</span>
-        <span class="n">Hacl_min</span><span class="p">,</span> <span class="n">Hacl_max</span> <span class="o">=</span> <span class="mf">6e-6</span><span class="p">,</span> <span class="mf">1e-5</span>  <span class="c1"># m. It is the thickness of the ACL.</span>
-        <span class="n">Hccl_min</span><span class="p">,</span> <span class="n">Hccl_max</span> <span class="o">=</span> <span class="mf">1e-5</span><span class="p">,</span> <span class="mf">2e-5</span>  <span class="c1"># m. It is the thickness of the CCL.</span>
-        <span class="n">Hmem_min</span><span class="p">,</span> <span class="n">Hmem_max</span> <span class="o">=</span> <span class="mf">1e-5</span><span class="p">,</span> <span class="mf">2e-5</span>  <span class="c1"># m. It is the thickness of the membrane.</span>
+        <span class="n">Hacl_min</span><span class="p">,</span> <span class="n">Hacl_max</span> <span class="o">=</span> <span class="mf">6e-6</span><span class="p">,</span> <span class="mf">10e-6</span>  <span class="c1"># m. It is the thickness of the ACL.</span>
+        <span class="n">Hccl_min</span><span class="p">,</span> <span class="n">Hccl_max</span> <span class="o">=</span> <span class="mf">10e-6</span><span class="p">,</span> <span class="mf">20e-6</span>  <span class="c1"># m. It is the thickness of the CCL.</span>
+        <span class="n">Hmem_min</span><span class="p">,</span> <span class="n">Hmem_max</span> <span class="o">=</span> <span class="mf">10e-6</span><span class="p">,</span> <span class="mf">20e-6</span>  <span class="c1"># m. It is the thickness of the membrane.</span>
         <span class="n">epsilon_gdl_min</span><span class="p">,</span> <span class="n">epsilon_gdl_max</span> <span class="o">=</span> <span class="mf">0.696</span><span class="p">,</span> <span class="mf">0.880</span>  <span class="c1"># It is the anode/cathode GDL porosity, without units.</span>
         <span class="n">epsilon_mpl_min</span><span class="p">,</span> <span class="n">epsilon_mpl_max</span> <span class="o">=</span> <span class="mf">0.32</span><span class="p">,</span> <span class="mf">0.54</span>  <span class="c1"># It is the anode/cathode MPL porosity, without units.</span>
         <span class="n">epsilon_cl_min</span><span class="p">,</span> <span class="n">epsilon_cl_max</span> <span class="o">=</span> <span class="mf">0.40</span><span class="p">,</span> <span class="mf">0.60</span>  <span class="c1"># It is the anode/cathode MPL porosity, without units.</span>
-        <span class="n">epsilon_mc_min</span><span class="p">,</span> <span class="n">epsilon_mc_max</span> <span class="o">=</span> <span class="mf">0.40</span><span class="p">,</span> <span class="mf">0.60</span>  <span class="c1"># It is the volume fraction of ionomer in the CL.</span>
+        <span class="n">epsilon_mc_min</span><span class="p">,</span> <span class="n">epsilon_mc_max</span> <span class="o">=</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.40</span>  <span class="c1"># It is the volume fraction of ionomer in the CL.</span>
         <span class="c1">#       Constants based on the interaction between water and the structure</span>
         <span class="n">e_min</span><span class="p">,</span> <span class="n">e_max</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span>  <span class="c1"># It is the capillary exponent, and should be an int number.</span>
         <span class="c1">#       Voltage polarization</span>
-        <span class="n">i0_c_ref_min</span><span class="p">,</span> <span class="n">i0_c_ref_max</span> <span class="o">=</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="mi">80</span>  <span class="c1"># A.m-2.It is the reference exchange current density at the cathode.</span>
+        <span class="n">Re_min</span><span class="p">,</span> <span class="n">Re_max</span> <span class="o">=</span> <span class="mf">5e-7</span><span class="p">,</span> <span class="mf">5e-6</span>  <span class="c1"># Ω.m². It is the electron conduction resistance of the circuit.</span>
+        <span class="n">i0_d_c_ref_min</span><span class="p">,</span> <span class="n">i0_d_c_ref_max</span> <span class="o">=</span> <span class="mf">1e-1</span><span class="p">,</span> <span class="mi">100</span>  <span class="c1"># A.m-2.It is the dry reference exchange current density at the cathode.</span>
+        <span class="n">i0_h_c_ref_min</span><span class="p">,</span> <span class="n">i0_h_c_ref_max</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">,</span> <span class="mi">10</span>  <span class="c1"># A.m-2.It is the humid reference exchange current density at the cathode.</span>
         <span class="n">kappa_co_min</span><span class="p">,</span> <span class="n">kappa_co_max</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mi">40</span>  <span class="c1"># A.m-2. It is the crossover correction coefficient.</span>
         <span class="n">kappa_c_min</span><span class="p">,</span> <span class="n">kappa_c_max</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mi">4</span>  <span class="c1"># It is the overpotential correction exponent.</span>
         <span class="c1">#       The bounds on liquid saturation coefficients are constrained to facilitate calibration.</span>
-        <span class="n">a_slim_min</span><span class="p">,</span> <span class="n">a_slim_max</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span>  <span class="c1"># It is one of the limit liquid saturation coefficients.</span>
-        <span class="n">b_slim_min</span><span class="p">,</span> <span class="n">b_slim_max</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.4</span>  <span class="c1"># It is one of the limit liquid saturation coefficients.</span>
+        <span class="n">a_slim_min</span><span class="p">,</span> <span class="n">a_slim_max</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.25</span> <span class="o">/</span> <span class="nb">min</span><span class="p">(</span><span class="n">Pc_des_1</span><span class="o">/</span><span class="mf">1e5</span><span class="p">,</span> <span class="n">Pc_des_2</span><span class="o">/</span><span class="mf">1e5</span><span class="p">)</span>  <span class="c1"># It is one of the limit liquid saturation coefficients.</span>
+        <span class="n">b_slim_min</span><span class="p">,</span> <span class="n">b_slim_max</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.3</span>  <span class="c1"># It is one of the limit liquid saturation coefficients.</span>
         <span class="n">a_switch_min</span><span class="p">,</span> <span class="n">a_switch_max</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.95</span>  <span class="c1"># It is one of the limit liquid saturation coefficients.</span>
         <span class="c1">#       Undetermined parameter which is not considered yet (require the use of EIS curves to be calibrated)</span>
         <span class="n">C_scl_min</span><span class="p">,</span> <span class="n">C_sl_max</span> <span class="o">=</span> <span class="mf">2e7</span><span class="p">,</span> <span class="mf">2e7</span>  <span class="c1"># F.m-3. It is the volumetric space-charge layer capacitance.</span>
         <span class="c1">#       Bounds gathering and type</span>
-        <span class="n">varbound</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;epsilon_gdl&#39;</span><span class="p">,</span> <span class="n">epsilon_gdl_min</span><span class="p">,</span> <span class="n">epsilon_gdl_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
-                    <span class="p">[</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="n">e_min</span><span class="p">,</span> <span class="n">e_max</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">],</span>
-                    <span class="p">[</span><span class="s1">&#39;i0_c_ref&#39;</span><span class="p">,</span> <span class="n">i0_c_ref_min</span><span class="p">,</span> <span class="n">i0_c_ref_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
-                    <span class="p">[</span><span class="s1">&#39;kappa_co&#39;</span><span class="p">,</span> <span class="n">kappa_co_min</span><span class="p">,</span> <span class="n">kappa_co_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
-                    <span class="p">[</span><span class="s1">&#39;kappa_c&#39;</span><span class="p">,</span> <span class="n">kappa_c_min</span><span class="p">,</span> <span class="n">kappa_c_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="n">voltage_zone</span> <span class="o">==</span> <span class="s2">&quot;before_voltage_drop&quot;</span><span class="p">:</span>
+            <span class="n">varbound</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;Hacl&#39;</span><span class="p">,</span> <span class="n">Hacl_min</span><span class="p">,</span> <span class="n">Hacl_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;Hccl&#39;</span><span class="p">,</span> <span class="n">Hccl_min</span><span class="p">,</span> <span class="n">Hccl_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;Hmem&#39;</span><span class="p">,</span> <span class="n">Hmem_min</span><span class="p">,</span> <span class="n">Hmem_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;epsilon_gdl&#39;</span><span class="p">,</span> <span class="n">epsilon_gdl_min</span><span class="p">,</span> <span class="n">epsilon_gdl_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;epsilon_mc&#39;</span><span class="p">,</span> <span class="n">epsilon_mc_min</span><span class="p">,</span> <span class="n">epsilon_mc_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="n">e_min</span><span class="p">,</span> <span class="n">e_max</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;Re&#39;</span><span class="p">,</span> <span class="n">Re_min</span><span class="p">,</span> <span class="n">Re_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;i0_d_c_ref&#39;</span><span class="p">,</span> <span class="n">i0_d_c_ref_min</span><span class="p">,</span> <span class="n">i0_d_c_ref_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;kappa_co&#39;</span><span class="p">,</span> <span class="n">kappa_co_min</span><span class="p">,</span> <span class="n">kappa_co_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;kappa_c&#39;</span><span class="p">,</span> <span class="n">kappa_c_min</span><span class="p">,</span> <span class="n">kappa_c_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c1"># voltage_zone == &quot;full&quot;</span>
+            <span class="n">varbound</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;i0_h_c_ref&#39;</span><span class="p">,</span> <span class="n">i0_h_c_ref_min</span><span class="p">,</span> <span class="n">i0_h_c_ref_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;a_slim&#39;</span><span class="p">,</span> <span class="n">a_slim_min</span><span class="p">,</span> <span class="n">a_slim_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;b_slim&#39;</span><span class="p">,</span> <span class="n">b_slim_min</span><span class="p">,</span> <span class="n">b_slim_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;a_switch&#39;</span><span class="p">,</span> <span class="n">a_switch_min</span><span class="p">,</span> <span class="n">a_switch_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">]]</span>
         <span class="n">gene_space</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># List used to define the bounds of the undetermined parameters for pygad.</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">varbound</span><span class="p">)):</span>
             <span class="n">name</span><span class="p">,</span> <span class="n">min_val</span><span class="p">,</span> <span class="n">max_val</span><span class="p">,</span> <span class="n">type_val</span> <span class="o">=</span> <span class="n">varbound</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
@@ -625,9 +691,9 @@ registered type_fuel_cell is considered.</p>
     <span class="k">elif</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_1.5&quot;</span> <span class="ow">or</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_2.0&quot;</span> <span class="ow">or</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_2.25&quot;</span> <span class="ow">or</span> \
             <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_2.5&quot;</span><span class="p">:</span>
         <span class="c1">#       Fuel cell physical parameters</span>
-        <span class="n">Hacl_min</span><span class="p">,</span> <span class="n">Hacl_max</span> <span class="o">=</span> <span class="mf">8e-6</span><span class="p">,</span> <span class="mf">2e-5</span>  <span class="c1"># m. It is the thickness of the ACL.</span>
-        <span class="n">Hmem_min</span><span class="p">,</span> <span class="n">Hmem_max</span> <span class="o">=</span> <span class="mf">1.5e-5</span><span class="p">,</span> <span class="mf">5e-5</span>  <span class="c1"># m. It is the thickness of the membrane.</span>
-        <span class="n">epsilon_gdl_min</span><span class="p">,</span> <span class="n">epsilon_gdl_max</span> <span class="o">=</span> <span class="mf">0.50</span><span class="p">,</span> <span class="mf">0.90</span>  <span class="c1"># It is the anode/cathode GDL porosity, without units.</span>
+        <span class="n">Hacl_min</span><span class="p">,</span> <span class="n">Hacl_max</span> <span class="o">=</span> <span class="mf">8e-6</span><span class="p">,</span> <span class="mf">20e-6</span>  <span class="c1"># m. It is the thickness of the ACL.</span>
+        <span class="n">Hmem_min</span><span class="p">,</span> <span class="n">Hmem_max</span> <span class="o">=</span> <span class="mf">15e-6</span><span class="p">,</span> <span class="mf">50e-6</span>  <span class="c1"># m. It is the thickness of the membrane.</span>
+        <span class="n">epsilon_gdl_min</span><span class="p">,</span> <span class="n">epsilon_gdl_max</span> <span class="o">=</span> <span class="mf">0.40</span><span class="p">,</span> <span class="mf">0.95</span>  <span class="c1"># It is the anode/cathode GDL porosity, without units.</span>
         <span class="n">epsilon_mpl_min</span><span class="p">,</span> <span class="n">epsilon_mpl_max</span> <span class="o">=</span> <span class="mf">0.30</span><span class="p">,</span> <span class="mf">0.60</span>  <span class="c1"># It is the anode/cathode MPL porosity, without units.</span>
         <span class="n">epsilon_cl_min</span><span class="p">,</span> <span class="n">epsilon_cl_max</span> <span class="o">=</span> <span class="mf">0.12</span><span class="p">,</span> <span class="mf">0.50</span>  <span class="c1"># It is the anode/cathode MPL porosity, without units.</span>
         <span class="n">epsilon_mc_min</span><span class="p">,</span> <span class="n">epsilon_mc_max</span> <span class="o">=</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.40</span>  <span class="c1"># It is the volume fraction of ionomer in the CL.</span>
@@ -635,24 +701,34 @@ registered type_fuel_cell is considered.</p>
         <span class="c1">#       Constants based on the interaction between water and the structure</span>
         <span class="n">e_min</span><span class="p">,</span> <span class="n">e_max</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span>  <span class="c1"># It is the capillary exponent, and should be an int number.</span>
         <span class="c1">#       Voltage polarization</span>
-        <span class="n">i0_c_ref_min</span><span class="p">,</span> <span class="n">i0_c_ref_max</span> <span class="o">=</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="mi">80</span>  <span class="c1"># A.m-2.It is the reference exchange current density at the cathode.</span>
+        <span class="n">Re_min</span><span class="p">,</span> <span class="n">Re_max</span> <span class="o">=</span> <span class="mf">5e-7</span><span class="p">,</span> <span class="mf">5e-6</span> <span class="c1"># Ω.m². It is the electron conduction resistance of the circuit.</span>
+        <span class="n">i0_d_c_ref_min</span><span class="p">,</span> <span class="n">i0_d_c_ref_max</span> <span class="o">=</span> <span class="mf">1e-1</span><span class="p">,</span> <span class="mi">100</span>  <span class="c1"># A.m-2.It is the dry reference exchange current density at the cathode.</span>
+        <span class="n">i0_h_c_ref_min</span><span class="p">,</span> <span class="n">i0_h_c_ref_max</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">,</span> <span class="mi">10</span>  <span class="c1"># A.m-2.It is the humid reference exchange current density at the cathode.</span>
         <span class="n">kappa_co_min</span><span class="p">,</span> <span class="n">kappa_co_max</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mi">40</span>  <span class="c1"># A.m-2. It is the crossover correction coefficient.</span>
         <span class="n">kappa_c_min</span><span class="p">,</span> <span class="n">kappa_c_max</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mi">4</span>  <span class="c1"># It is the overpotential correction exponent.</span>
         <span class="c1">#       The bounds on liquid saturation coefficients are constrained to facilitate calibration.</span>
-        <span class="n">a_slim_min</span><span class="p">,</span> <span class="n">a_slim_max</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span>  <span class="c1"># It is one of the limit liquid saturation coefficients.</span>
-        <span class="n">b_slim_min</span><span class="p">,</span> <span class="n">b_slim_max</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.4</span>  <span class="c1"># It is one of the limit liquid saturation coefficients.</span>
+        <span class="n">a_slim_min</span><span class="p">,</span> <span class="n">a_slim_max</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.25</span> <span class="o">/</span> <span class="nb">min</span><span class="p">(</span><span class="n">Pc_des_1</span><span class="o">/</span><span class="mf">1e5</span><span class="p">,</span> <span class="n">Pc_des_2</span><span class="o">/</span><span class="mf">1e5</span><span class="p">)</span>  <span class="c1"># It is one of the limit liquid saturation coefficients.</span>
+        <span class="n">b_slim_min</span><span class="p">,</span> <span class="n">b_slim_max</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.3</span>  <span class="c1"># It is one of the limit liquid saturation coefficients.</span>
         <span class="n">a_switch_min</span><span class="p">,</span> <span class="n">a_switch_max</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.95</span>  <span class="c1"># It is one of the limit liquid saturation coefficients.</span>
         <span class="c1">#       Undetermined parameter which is not considered yet (require the use of EIS curves to be calibrated)</span>
         <span class="n">C_scl_min</span><span class="p">,</span> <span class="n">C_sl_max</span> <span class="o">=</span> <span class="mf">2e7</span><span class="p">,</span> <span class="mf">2e7</span>  <span class="c1"># F.m-3. It is the volumetric space-charge layer capacitance.</span>
         <span class="c1">#       Bounds gathering and type</span>
-        <span class="n">varbound</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;Hacl&#39;</span><span class="p">,</span> <span class="n">Hacl_min</span><span class="p">,</span> <span class="n">Hacl_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
-                    <span class="p">[</span><span class="s1">&#39;Hmem&#39;</span><span class="p">,</span> <span class="n">Hmem_min</span><span class="p">,</span> <span class="n">Hmem_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
-                    <span class="p">[</span><span class="s1">&#39;epsilon_gdl&#39;</span><span class="p">,</span> <span class="n">epsilon_gdl_min</span><span class="p">,</span> <span class="n">epsilon_gdl_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
-                    <span class="p">[</span><span class="s1">&#39;epsilon_mc&#39;</span><span class="p">,</span> <span class="n">epsilon_mc_min</span><span class="p">,</span> <span class="n">epsilon_mc_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
-                    <span class="p">[</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="n">e_min</span><span class="p">,</span> <span class="n">e_max</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">],</span>
-                    <span class="p">[</span><span class="s1">&#39;i0_c_ref&#39;</span><span class="p">,</span> <span class="n">i0_c_ref_min</span><span class="p">,</span> <span class="n">i0_c_ref_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
-                    <span class="p">[</span><span class="s1">&#39;kappa_co&#39;</span><span class="p">,</span> <span class="n">kappa_co_min</span><span class="p">,</span> <span class="n">kappa_co_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
-                    <span class="p">[</span><span class="s1">&#39;kappa_c&#39;</span><span class="p">,</span> <span class="n">kappa_c_min</span><span class="p">,</span> <span class="n">kappa_c_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="n">voltage_zone</span> <span class="o">==</span> <span class="s2">&quot;before_voltage_drop&quot;</span><span class="p">:</span>
+            <span class="n">varbound</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;Hacl&#39;</span><span class="p">,</span> <span class="n">Hacl_min</span><span class="p">,</span> <span class="n">Hacl_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;Hmem&#39;</span><span class="p">,</span> <span class="n">Hmem_min</span><span class="p">,</span> <span class="n">Hmem_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;epsilon_gdl&#39;</span><span class="p">,</span> <span class="n">epsilon_gdl_min</span><span class="p">,</span> <span class="n">epsilon_gdl_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;epsilon_mc&#39;</span><span class="p">,</span> <span class="n">epsilon_mc_min</span><span class="p">,</span> <span class="n">epsilon_mc_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="n">e_min</span><span class="p">,</span> <span class="n">e_max</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;Re&#39;</span><span class="p">,</span> <span class="n">Re_min</span><span class="p">,</span> <span class="n">Re_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;i0_d_c_ref&#39;</span><span class="p">,</span> <span class="n">i0_d_c_ref_min</span><span class="p">,</span> <span class="n">i0_d_c_ref_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;kappa_co&#39;</span><span class="p">,</span> <span class="n">kappa_co_min</span><span class="p">,</span> <span class="n">kappa_co_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;kappa_c&#39;</span><span class="p">,</span> <span class="n">kappa_c_min</span><span class="p">,</span> <span class="n">kappa_c_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c1"># voltage_zone == &quot;full&quot;</span>
+            <span class="n">varbound</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;epsilon_c&#39;</span><span class="p">,</span> <span class="n">epsilon_c_min</span><span class="p">,</span> <span class="n">epsilon_c_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;i0_h_c_ref&#39;</span><span class="p">,</span> <span class="n">i0_h_c_ref_min</span><span class="p">,</span> <span class="n">i0_h_c_ref_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;a_slim&#39;</span><span class="p">,</span> <span class="n">a_slim_min</span><span class="p">,</span> <span class="n">a_slim_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;b_slim&#39;</span><span class="p">,</span> <span class="n">b_slim_min</span><span class="p">,</span> <span class="n">b_slim_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">],</span>
+                        <span class="p">[</span><span class="s1">&#39;a_switch&#39;</span><span class="p">,</span> <span class="n">a_switch_min</span><span class="p">,</span> <span class="n">a_switch_max</span><span class="p">,</span> <span class="s1">&#39;real&#39;</span><span class="p">]]</span>
         <span class="n">gene_space</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># List used to define the bounds of the undetermined parameters for pygad.</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">varbound</span><span class="p">)):</span>
             <span class="n">name</span><span class="p">,</span> <span class="n">min_val</span><span class="p">,</span> <span class="n">max_val</span><span class="p">,</span> <span class="n">type_val</span> <span class="o">=</span> <span class="n">varbound</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
@@ -674,7 +750,7 @@ registered type_fuel_cell is considered.</p>
 
 
 <h2 id="modules.calibration_modules.parameters_for_calibration" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">parameters_for_calibration</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">parameters_for_calibration</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">voltage_zone</span><span class="p">)</span></code>
 
 </h2>
 
@@ -1001,45 +1077,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/calibration_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">156</span>
 <span class="normal">157</span>
 <span class="normal">158</span>
 <span class="normal">159</span>
@@ -1291,7 +1329,91 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 <span class="normal">405</span>
 <span class="normal">406</span>
 <span class="normal">407</span>
-<span class="normal">408</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parameters_for_calibration</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">):</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span>
+<span class="normal">454</span>
+<span class="normal">455</span>
+<span class="normal">456</span>
+<span class="normal">457</span>
+<span class="normal">458</span>
+<span class="normal">459</span>
+<span class="normal">460</span>
+<span class="normal">461</span>
+<span class="normal">462</span>
+<span class="normal">463</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span>
+<span class="normal">471</span>
+<span class="normal">472</span>
+<span class="normal">473</span>
+<span class="normal">474</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span>
+<span class="normal">489</span>
+<span class="normal">490</span>
+<span class="normal">491</span>
+<span class="normal">492</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parameters_for_calibration</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">voltage_zone</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function is used to determine the parameters of the fuel cell model for the calibration when a registered</span>
 <span class="sd">    type_fuel_cell is considered.</span>
 
@@ -1403,20 +1525,92 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 <span class="sd">        Experimental values of the voltage.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack&quot;</span><span class="p">:</span>
+    <span class="c1"># Algorithm parameters for polarization curve generation</span>
+    <span class="n">type_auxiliary</span> <span class="o">=</span> <span class="s2">&quot;no_auxiliary&quot;</span>                                                                                     <span class="c1"># !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! This should be changed in the future to &quot;forced-convective_cathode_with_flow-through_anode&quot;.</span>
+    <span class="n">type_control</span> <span class="o">=</span> <span class="s2">&quot;no_control&quot;</span>
+    <span class="n">type_purge</span> <span class="o">=</span> <span class="s2">&quot;no_purge&quot;</span>
+    <span class="n">type_display</span> <span class="o">=</span> <span class="s2">&quot;no_display&quot;</span>
+    <span class="n">type_plot</span> <span class="o">=</span> <span class="s2">&quot;fixed&quot;</span>
+    <span class="n">type_current</span> <span class="o">=</span> <span class="s2">&quot;polarization_for_cali&quot;</span>
+    <span class="n">current_density</span> <span class="o">=</span> <span class="n">polarization_current_for_calibration</span>
+    <span class="n">delta_t_ini_step</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># (s). Initial time at zero current density for the stabilisation of the internal states (standard value).</span>
+    <span class="n">delta_t_load_step</span> <span class="o">=</span> <span class="mf">1e-15</span>  <span class="c1"># (s). Loading time for the step current density function, from 0 to i_step.</span>
+    <span class="n">delta_t_break_step</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># (s). Time at i_step current density for the stabilisation of the internal states.</span>
+    <span class="n">i_step</span> <span class="o">=</span> <span class="mf">1.0e4</span>  <span class="c1"># (A.m-2). Current density for the step current density function.</span>
+    <span class="n">step_current_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;delta_t_ini_step&#39;</span><span class="p">:</span> <span class="n">delta_t_ini_step</span><span class="p">,</span> <span class="s1">&#39;delta_t_load_step&#39;</span><span class="p">:</span> <span class="n">delta_t_load_step</span><span class="p">,</span>
+                               <span class="s1">&#39;delta_t_break_step&#39;</span><span class="p">:</span> <span class="n">delta_t_break_step</span><span class="p">,</span> <span class="s1">&#39;i_step&#39;</span><span class="p">:</span> <span class="n">i_step</span><span class="p">}</span>
+    <span class="n">delta_t_ini_pola</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># (s). Initial time at zero current density for the stabilisation of the internal states.</span>
+    <span class="n">delta_t_load_pola</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># (s). Loading time for one step current of the polarisation current density function.</span>
+    <span class="n">delta_t_break_pola</span> <span class="o">=</span> <span class="mi">15</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># (s). Breaking time for one step current, for the stabilisation of the internal states.</span>
+    <span class="n">delta_i_pola</span> <span class="o">=</span> <span class="mf">0.05e4</span>  <span class="c1"># (A.m-2). Current density step for the polarisation current density function.</span>
+    <span class="n">pola_current_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;delta_t_ini_pola&#39;</span><span class="p">:</span> <span class="n">delta_t_ini_pola</span><span class="p">,</span> <span class="s1">&#39;delta_t_load_pola&#39;</span><span class="p">:</span> <span class="n">delta_t_load_pola</span><span class="p">,</span>
+                               <span class="s1">&#39;delta_t_break_pola&#39;</span><span class="p">:</span> <span class="n">delta_t_break_pola</span><span class="p">,</span> <span class="s1">&#39;delta_i_pola&#39;</span><span class="p">:</span> <span class="n">delta_i_pola</span><span class="p">}</span>
+    <span class="n">delta_t_ini_pola_cali</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># (s). Initial time at zero current density for the stabilisation of the internal states.</span>
+    <span class="n">delta_t_load_pola_cali</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># (s). Loading time for one step current of the polarisation current density function.</span>
+    <span class="n">delta_t_break_pola_cali</span> <span class="o">=</span> <span class="mi">15</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># (s). Breaking time for one step current, for the stabilisation of the internal states.</span>
+    <span class="n">pola_current_for_cali_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;delta_t_ini_pola_cali&#39;</span><span class="p">:</span> <span class="n">delta_t_ini_pola_cali</span><span class="p">,</span>
+                                        <span class="s1">&#39;delta_t_load_pola_cali&#39;</span><span class="p">:</span> <span class="n">delta_t_load_pola_cali</span><span class="p">,</span>
+                                        <span class="s1">&#39;delta_t_break_pola_cali&#39;</span><span class="p">:</span> <span class="n">delta_t_break_pola_cali</span><span class="p">}</span>
+    <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.</span>
+    <span class="n">f_EIS</span><span class="p">,</span> <span class="n">t_EIS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># It is the EIS parameters.</span>
+    <span class="n">t_purge</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mi">15</span>  <span class="c1"># s It is the purge time and the distance between two purges.</span>
+    <span class="n">rtol</span> <span class="o">=</span> <span class="mf">1e-3</span>  <span class="c1"># Relative tolerance for the system of ODEs solver.</span>
+    <span class="n">atol</span> <span class="o">=</span> <span class="mf">1e-6</span>  <span class="c1"># Absolute tolerance for the system of ODEs solver.</span>
+
+    <span class="k">if</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack&quot;</span> <span class="ow">or</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_Pa_1.61_Pc_1.41&quot;</span> <span class="ow">or</span> \
+            <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_Pa_2.01_Pc_1.81&quot;</span> <span class="ow">or</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_Pa_2.4_Pc_2.2&quot;</span> <span class="ow">or</span> \
+            <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_Pa_2.8_Pc_2.6&quot;</span> <span class="ow">or</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_T_62&quot;</span> <span class="ow">or</span> \
+            <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_T_76&quot;</span> <span class="ow">or</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_T_84&quot;</span><span class="p">:</span>
         <span class="c1"># Given values by the author</span>
         <span class="c1">#       Operating inputs</span>
-        <span class="n">T_des</span> <span class="o">=</span> <span class="mi">68</span> <span class="o">+</span> <span class="mf">273.15</span>  <span class="c1"># K. It is the temperature of the fuel cell.</span>
+        <span class="k">if</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_T_62&quot;</span><span class="p">:</span>
+            <span class="n">T_des</span> <span class="o">=</span> <span class="mi">62</span> <span class="o">+</span> <span class="mf">273.15</span>  <span class="c1"># K. It is the temperature of the fuel cell.</span>
+        <span class="k">elif</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_T_76&quot;</span><span class="p">:</span>
+            <span class="n">T_des</span> <span class="o">=</span> <span class="mi">76</span> <span class="o">+</span> <span class="mf">273.15</span>  <span class="c1"># K. It is the temperature of the fuel cell.</span>
+        <span class="k">elif</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_T_84&quot;</span><span class="p">:</span>
+            <span class="n">T_des</span> <span class="o">=</span> <span class="mi">84</span> <span class="o">+</span> <span class="mf">273.15</span>  <span class="c1"># K. It is the temperature of the fuel cell.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">T_des</span> <span class="o">=</span> <span class="mi">68</span> <span class="o">+</span> <span class="mf">273.15</span>  <span class="c1"># K. It is the temperature of the fuel cell.</span>
         <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span> <span class="o">=</span> <span class="mf">1.6</span><span class="p">,</span> <span class="mf">1.6</span>  <span class="c1"># It is the stoichiometric ratio (of hydrogen and oxygen).</span>
-        <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span> <span class="o">=</span> <span class="mf">39.8</span><span class="p">,</span> <span class="mi">50</span>  <span class="c1"># It is the desired relative humidity.</span>
-        <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mf">2.2e5</span><span class="p">,</span> <span class="mf">2.0e5</span>  <span class="c1"># Pa. It is the desired pressure of the fuel gas (at the anode/cathode).</span>
+        <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span> <span class="o">=</span> <span class="mf">0.398</span><span class="p">,</span> <span class="mf">0.50</span>  <span class="c1"># It is the desired relative humidity.</span>
+        <span class="k">if</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_Pa_1.61_Pc_1.41&quot;</span><span class="p">:</span>
+            <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mf">1.61e5</span><span class="p">,</span> <span class="mf">1.41e5</span>  <span class="c1"># Pa. It is the desired pressure of the inlet fuel gas (at the anode/cathode).</span>
+        <span class="k">elif</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_Pa_2.01_Pc_1.81&quot;</span><span class="p">:</span>
+            <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mf">2.01e5</span><span class="p">,</span> <span class="mf">1.81e5</span>  <span class="c1"># Pa. It is the desired pressure of the inlet fuel gas (at the anode/cathode).</span>
+        <span class="k">elif</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_Pa_2.4_Pc_2.2&quot;</span><span class="p">:</span>
+            <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mf">2.4e5</span><span class="p">,</span> <span class="mf">2.2e5</span>  <span class="c1"># Pa. It is the desired pressure of the inlet fuel gas (at the anode/cathode).</span>
+        <span class="k">elif</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;ZSW-GenStack_Pa_2.8_Pc_2.6&quot;</span><span class="p">:</span>
+            <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mf">2.8e5</span><span class="p">,</span> <span class="mf">2.6e5</span>  <span class="c1"># Pa. It is the desired pressure of the inlet fuel gas (at the anode/cathode).</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mf">2.2e5</span><span class="p">,</span> <span class="mf">2.0e5</span>  <span class="c1"># Pa. It is the desired pressure of the inlet fuel gas (at the anode/cathode).</span>
+        <span class="n">y_H2_in</span> <span class="o">=</span> <span class="mf">0.7</span> <span class="c1"># It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.</span>
+        <span class="k">if</span> <span class="n">voltage_zone</span> <span class="o">==</span> <span class="s1">&#39;full&#39;</span><span class="p">:</span>
+            <span class="n">i_max_pola</span> <span class="o">=</span> <span class="mf">2.5e4</span>  <span class="c1"># (A.m-2). It is the maximum current density for the polarization curve.</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c1"># voltage_zone == &#39;before_voltage_drop&#39;</span>
+            <span class="n">i_max_pola</span> <span class="o">=</span> <span class="mf">1.9e4</span>
+        <span class="n">pola_current_parameters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;i_max_pola&#39;</span><span class="p">:</span> <span class="n">i_max_pola</span><span class="p">})</span>
+
         <span class="c1">#       Fuel cell physical parameters</span>
-        <span class="n">Aact</span> <span class="o">=</span> <span class="mf">2.7972e-2</span>  <span class="c1"># m². It is the active area of the catalyst layer.</span>
+        <span class="n">Aact</span> <span class="o">=</span> <span class="mf">283.87e-4</span>  <span class="c1"># m². It is the active area of the catalyst layer.</span>
+        <span class="n">nb_cell</span> <span class="o">=</span> <span class="mi">26</span>  <span class="c1"># . It is the number of cell in the stack.</span>
         <span class="n">Hagc</span> <span class="o">=</span> <span class="mf">2.3e-4</span>  <span class="c1"># m. It is the thickness of the anode gas channel.</span>
         <span class="n">Hcgc</span> <span class="o">=</span> <span class="mf">3e-4</span>  <span class="c1"># m. It is the thickness of the cathode gas channel.</span>
         <span class="n">Wagc</span> <span class="o">=</span> <span class="mf">4.3e-4</span>  <span class="c1"># m. It is the width of the anode gas channel.</span>
         <span class="n">Wcgc</span> <span class="o">=</span> <span class="mf">5.32e-4</span>  <span class="c1"># m. It is the width of the cathode gas channel.</span>
-        <span class="n">Lgc</span> <span class="o">=</span> <span class="mf">23.31</span>  <span class="c1"># m. It is the length of the gas channel.</span>
+        <span class="n">Lgc</span> <span class="o">=</span> <span class="mf">246.2e-3</span>  <span class="c1"># m. It is the length of the gas channel.</span>
+        <span class="n">nb_channel_in_gc</span> <span class="o">=</span> <span class="mi">105</span>  <span class="c1"># . It is the number of channels in the bipolar plate.</span>
+        <span class="n">Ldist</span> <span class="o">=</span> <span class="mf">7.11e-2</span>  <span class="c1"># m. It is the length of the distributor, which is the volume between the gas channel and the manifold.</span>
+        <span class="n">Lm</span> <span class="o">=</span> <span class="mf">25.8e-3</span>  <span class="c1"># m. It is the length of the manifold.</span>
+        <span class="n">L_endplate</span> <span class="o">=</span> <span class="mf">46.8e-3</span>  <span class="c1"># m. It is the length of the endplate.</span>
+        <span class="n">L_man_gc</span> <span class="o">=</span> <span class="mf">8.74e-3</span>  <span class="c1"># m. It is the length of the volume connecting the manifold to the gas channel.</span>
+        <span class="n">A_T_a</span> <span class="o">=</span> <span class="mf">9.01e-4</span>  <span class="c1"># m². It is the inlet/exhaust anode manifold throttle area</span>
+        <span class="n">A_T_c</span> <span class="o">=</span> <span class="mf">22.61e-4</span>  <span class="c1"># m². It is the inlet/exhaust cathode manifold throttle area</span>
+        <span class="n">Vasm</span><span class="p">,</span> <span class="n">Vcsm</span> <span class="o">=</span> <span class="n">Lm</span> <span class="o">*</span> <span class="n">A_T_a</span><span class="p">,</span> <span class="n">Lm</span> <span class="o">*</span> <span class="n">A_T_c</span>  <span class="c1"># m3. It is the supply manifold volume.</span>
+        <span class="n">Vaem</span><span class="p">,</span> <span class="n">Vcem</span> <span class="o">=</span> <span class="n">Vasm</span><span class="p">,</span> <span class="n">Vcsm</span>  <span class="c1"># m-3. It is the exhaust manifold volume.</span>
+        <span class="n">V_endplate_a</span> <span class="o">=</span> <span class="n">L_man_gc</span> <span class="o">*</span> <span class="n">A_T_a</span>  <span class="c1"># m3. It is the anode endplate volume.</span>
+        <span class="n">V_endplate_c</span> <span class="o">=</span> <span class="n">L_man_gc</span> <span class="o">*</span> <span class="n">A_T_c</span>  <span class="c1"># m3. It is the cathode endplate volume.</span>
+        <span class="n">V_man_agc</span> <span class="o">=</span> <span class="n">L_man_gc</span> <span class="o">*</span> <span class="n">Hagc</span> <span class="o">*</span> <span class="n">Wagc</span>  <span class="c1"># m3. It is the volume of the volume connecting the anode manifold to the gas channel.</span>
+        <span class="n">V_man_cgc</span> <span class="o">=</span> <span class="n">L_man_gc</span> <span class="o">*</span> <span class="n">Hcgc</span> <span class="o">*</span> <span class="n">Wcgc</span>  <span class="c1"># m3. It is the volume of the volume connecting the cathode manifold to the gas channel.</span>
         <span class="c1">#       Fuel cell undetermined physical parameters.</span>
         <span class="n">Hgdl</span> <span class="o">=</span> <span class="mf">1.27e-4</span>  <span class="c1"># m. It is the thickness of the gas diffusion layer.</span>
         <span class="n">Hmpl</span> <span class="o">=</span> <span class="mf">7e-5</span>  <span class="c1"># m. It is the thickness of the microporous layer.</span>
@@ -1428,7 +1622,7 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
         <span class="n">epsilon_mpl</span> <span class="o">=</span> <span class="mf">0.425</span>  <span class="c1"># It is the porosity of the microporous layer.</span>
         <span class="c1">#   Catalyst layer</span>
         <span class="n">Hacl</span> <span class="o">=</span> <span class="mf">8e-6</span>  <span class="c1"># m. It is the thickness of the anode catalyst layer.</span>
-        <span class="n">Hccl</span> <span class="o">=</span> <span class="mf">1.7e-5</span>  <span class="c1"># m. It is the thickness of the cathode catalyst layer.</span>
+        <span class="n">Hccl</span> <span class="o">=</span> <span class="mf">17e-6</span>  <span class="c1"># m. It is the thickness of the cathode catalyst layer.</span>
         <span class="n">epsilon_cl</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># It is the porosity of the microporous layer.</span>
         <span class="n">epsilon_mc</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># It is the volume fraction of ionomer in the CL.</span>
         <span class="c1">#   Membrane</span>
@@ -1436,44 +1630,18 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
         <span class="c1">#   Interaction parameters between water and PEMFC structure</span>
         <span class="n">e</span> <span class="o">=</span> <span class="mf">3.0</span>  <span class="c1"># It is the capillary exponent</span>
         <span class="c1">#   Voltage polarization</span>
-        <span class="n">i0_c_ref</span> <span class="o">=</span> <span class="mf">14.86</span>  <span class="c1"># A.m-2.It is the reference exchange current density at the cathode.</span>
+        <span class="n">Re</span> <span class="o">=</span> <span class="mf">1e-06</span>  <span class="c1"># ohm.m². It is the electron conduction resistance of the circuit.</span>
+        <span class="n">i0_d_c_ref</span> <span class="o">=</span> <span class="mf">14.86</span>  <span class="c1"># A.m-2.It is the dry reference exchange current density at the cathode.</span>
+        <span class="n">i0_h_c_ref</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># A.m-2. It is the fully humidified reference exchange current density at the cathode.</span>
         <span class="n">kappa_co</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.</span>
         <span class="n">kappa_c</span> <span class="o">=</span> <span class="mf">0.6386</span>  <span class="c1"># It is the overpotential correction exponent.</span>
         <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span> <span class="o">=</span> <span class="mf">0.05553</span><span class="p">,</span> <span class="mf">0.10514</span><span class="p">,</span> <span class="mf">0.63654</span>  <span class="c1"># It is the limit liquid saturation coefficients.</span>
         <span class="n">C_scl</span> <span class="o">=</span> <span class="mf">2e7</span>  <span class="c1"># F.m-3. It is the volumetric space-charge layer capacitance.</span>
 
-        <span class="c1"># Algorithm parameters for polarization curve generation</span>
-        <span class="n">type_auxiliary</span> <span class="o">=</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span>
-        <span class="n">type_control</span> <span class="o">=</span> <span class="s2">&quot;no_control&quot;</span>
-        <span class="n">type_purge</span> <span class="o">=</span> <span class="s2">&quot;no_purge&quot;</span>
-        <span class="n">type_display</span> <span class="o">=</span> <span class="s2">&quot;no_display&quot;</span>
-        <span class="n">type_plot</span> <span class="o">=</span> <span class="s2">&quot;fixed&quot;</span>
-        <span class="n">type_current</span> <span class="o">=</span> <span class="s2">&quot;polarization_for_cali&quot;</span>
-        <span class="n">current_density</span> <span class="o">=</span> <span class="n">polarization_current_for_calibration</span>
-        <span class="n">delta_t_ini_step</span> <span class="o">=</span> <span class="mi">120</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># (s). Initial time at zero current density for the stabilisation of the internal states.</span>
-        <span class="n">delta_t_load_step</span> <span class="o">=</span> <span class="mf">1e-15</span>  <span class="c1"># (s). Loading time for the step current density function, from 0 to i_step.</span>
-        <span class="n">delta_t_break_step</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># (s). Time at i_step current density for the stabilisation of the internal states.</span>
-        <span class="n">i_step</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># (A.m-2). Current density for the step current density function.</span>
-        <span class="n">step_current_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;delta_t_ini_step&#39;</span><span class="p">:</span> <span class="n">delta_t_ini_step</span><span class="p">,</span> <span class="s1">&#39;delta_t_load_step&#39;</span><span class="p">:</span> <span class="n">delta_t_load_step</span><span class="p">,</span>
-                                   <span class="s1">&#39;delta_t_break_step&#39;</span><span class="p">:</span> <span class="n">delta_t_break_step</span><span class="p">,</span> <span class="s1">&#39;i_step&#39;</span><span class="p">:</span> <span class="n">i_step</span><span class="p">}</span>
-        <span class="n">delta_t_ini_pola</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># (s). Initial time at zero current density for the stabilisation of the internal states.</span>
-        <span class="n">delta_t_load_pola</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># (s). Loading time for one step current of the polarisation current density function.</span>
-        <span class="n">delta_t_break_pola</span> <span class="o">=</span> <span class="mi">15</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># (s). Breaking time for one step current, for the stabilisation of the internal states.</span>
-        <span class="n">delta_i_pola</span> <span class="o">=</span> <span class="mf">0.05e4</span>  <span class="c1"># (A.m-2). Current density step for the polarisation current density function.</span>
-        <span class="n">i_max_pola</span> <span class="o">=</span> <span class="mf">1.7e4</span>  <span class="c1"># (A.m-2). It is the maximum current density for the polarization curve.</span>
-        <span class="n">pola_current_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;delta_t_ini_pola&#39;</span><span class="p">:</span> <span class="n">delta_t_ini_pola</span><span class="p">,</span> <span class="s1">&#39;delta_t_load_pola&#39;</span><span class="p">:</span> <span class="n">delta_t_load_pola</span><span class="p">,</span>
-                                   <span class="s1">&#39;delta_t_break_pola&#39;</span><span class="p">:</span> <span class="n">delta_t_break_pola</span><span class="p">,</span> <span class="s1">&#39;delta_i_pola&#39;</span><span class="p">:</span> <span class="n">delta_i_pola</span><span class="p">,</span>
-                                   <span class="s1">&#39;i_max_pola&#39;</span><span class="p">:</span> <span class="n">i_max_pola</span><span class="p">}</span>
-        <span class="n">delta_t_ini_pola_cali</span> <span class="o">=</span> <span class="mi">60</span>  <span class="c1"># (s). Initial time at zero current density for the stabilisation of the internal states.</span>
-        <span class="n">delta_t_load_pola_cali</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># (s). Loading time for one step current of the polarisation current density function.</span>
-        <span class="n">delta_t_break_pola_cali</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># (s). Breaking time for one step current, for the stabilisation of the internal states.</span>
-        <span class="n">pola_current_for_cali_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;delta_t_ini_pola_cali&#39;</span><span class="p">:</span> <span class="n">delta_t_ini_pola_cali</span><span class="p">,</span>
-                                            <span class="s1">&#39;delta_t_load_pola_cali&#39;</span><span class="p">:</span> <span class="n">delta_t_load_pola_cali</span><span class="p">,</span>
-                                            <span class="s1">&#39;delta_t_break_pola_cali&#39;</span><span class="p">:</span> <span class="n">delta_t_break_pola_cali</span><span class="p">}</span>
-        <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.</span>
-        <span class="n">f_EIS</span><span class="p">,</span> <span class="n">t_EIS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># It is the EIS parameters.</span>
-        <span class="n">t_purge</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mi">15</span>  <span class="c1"># s It is the purge time and the distance between two purges.</span>
-        <span class="n">n_gdl</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">Hacl</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>  <span class="c1"># It is the number of model points placed inside each GDL.</span>
+        <span class="c1"># Computing parameters</span>
+        <span class="n">nb_gc</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># It is the number of model points placed inside each gas channel.</span>
+        <span class="n">nb_gdl</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">Hacl</span> <span class="o">/</span> <span class="mi">4</span><span class="p">))</span>  <span class="c1"># It is the number of model points placed inside each GDL.</span>
+        <span class="n">nb_mpl</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">Hmpl</span> <span class="o">/</span> <span class="n">Hacl</span> <span class="o">/</span> <span class="mi">3</span><span class="p">))</span>  <span class="c1"># It is the number of model points placed inside each MPL.</span>
 
     <span class="k">elif</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_1.5&quot;</span> <span class="ow">or</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_2.0&quot;</span> <span class="ow">or</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_2.25&quot;</span> <span class="ow">or</span> \
             <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;EH-31_2.5&quot;</span><span class="p">:</span>
@@ -1490,95 +1658,95 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
             <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mf">2.25e5</span><span class="p">,</span> <span class="mf">2.25e5</span>  <span class="c1"># Pa. It is the desired pressure of the fuel gas (at the anode/cathode).</span>
         <span class="k">else</span><span class="p">:</span>  <span class="c1"># type_fuel_cell == &quot;EH-31_2.5&quot;:</span>
             <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mf">2.5e5</span><span class="p">,</span> <span class="mf">2.5e5</span>  <span class="c1"># Pa. It is the desired pressure of the fuel gas (at the anode/cathode).</span>
+        <span class="n">y_H2_in</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.</span>
+        <span class="k">if</span> <span class="n">voltage_zone</span> <span class="o">==</span> <span class="s1">&#39;full&#39;</span><span class="p">:</span>
+            <span class="n">i_max_pola</span> <span class="o">=</span> <span class="mf">3.0e4</span>  <span class="c1"># (A.m-2). It is the maximum current density for the polarization curve.</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># voltage_zone == &#39;before_voltage_drop&#39;</span>
+            <span class="n">i_max_pola</span> <span class="o">=</span> <span class="mf">1.7e4</span>
+        <span class="n">pola_current_parameters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;i_max_pola&#39;</span><span class="p">:</span> <span class="n">i_max_pola</span><span class="p">})</span>
+
         <span class="c1">#       Fuel cell physical parameters</span>
-        <span class="n">Aact</span> <span class="o">=</span> <span class="mf">8.5e-3</span>  <span class="c1"># m². It is the active area of the catalyst layer.</span>
-        <span class="n">Wagc</span> <span class="o">=</span> <span class="mf">4.5e-4</span>  <span class="c1"># m. It is the width of the anode gas channel.</span>
+        <span class="n">Aact</span> <span class="o">=</span> <span class="mf">85e-4</span>  <span class="c1"># m². It is the active area of the catalyst layer.</span>
+        <span class="n">Wagc</span> <span class="o">=</span> <span class="mf">450e-6</span>  <span class="c1"># m. It is the width of the anode gas channel.</span>
         <span class="n">Wcgc</span> <span class="o">=</span> <span class="n">Wagc</span>  <span class="c1"># m. It is the width of the cathode gas channel.</span>
-        <span class="n">Lgc</span> <span class="o">=</span> <span class="mf">9.67</span>  <span class="c1"># m. It is the length of the gas channel.</span>
+        <span class="n">Lgc</span> <span class="o">=</span> <span class="mf">144e-3</span>  <span class="c1"># m. It is the length of one channel in the bipolar plate.</span>
+        <span class="n">nb_channel_in_gc</span> <span class="o">=</span> <span class="mi">67</span>  <span class="c1"># . It is the number of channels in the bipolar plate.</span>
 
         <span class="c1"># Extrapolated physical parameters</span>
-        <span class="n">Hgdl</span> <span class="o">=</span> <span class="mf">2e-4</span>  <span class="c1"># m. It is the thickness of the gas diffusion layer.</span>
-        <span class="n">Hmpl</span> <span class="o">=</span> <span class="mf">3e-5</span>  <span class="c1"># m. It is the thickness of the microporous layer.</span>
+        <span class="n">nb_cell</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># . It is the number of cell in the stack.</span>
+        <span class="n">Hgdl</span> <span class="o">=</span> <span class="mf">200e-6</span>  <span class="c1"># m. It is the thickness of the gas diffusion layer.</span>
+        <span class="n">Hmpl</span> <span class="o">=</span> <span class="mf">30e-6</span>  <span class="c1"># m. It is the thickness of the microporous layer.</span>
         <span class="n">epsilon_mpl</span> <span class="o">=</span> <span class="mf">0.4</span>  <span class="c1"># It is the porosity of the microporous layer.</span>
-        <span class="n">Hagc</span> <span class="o">=</span> <span class="mf">5e-4</span>  <span class="c1"># m. It is the thickness of the anode gas channel.</span>
+        <span class="n">Hagc</span> <span class="o">=</span> <span class="mf">500e-6</span>  <span class="c1"># m. It is the thickness of the anode gas channel.</span>
         <span class="n">Hcgc</span> <span class="o">=</span> <span class="n">Hagc</span>  <span class="c1"># m. It is the thickness of the cathode gas channel.</span>
+        <span class="n">Ldist</span> <span class="o">=</span> <span class="mf">5e-2</span>  <span class="c1"># m. It is the estimated length of the distributor, which is the volume between the gas channel and the manifold.</span>
+        <span class="n">Lm</span> <span class="o">=</span> <span class="mf">2.03e-3</span>  <span class="c1"># m. It is the length of the manifold.</span>
+        <span class="n">L_endplate</span> <span class="o">=</span> <span class="mf">46.8e-3</span>  <span class="c1"># m. It is the length of the endplate.</span>
+        <span class="n">L_man_gc</span> <span class="o">=</span> <span class="mf">8.74e-3</span>  <span class="c1"># m. It is the length of the volume connecting the manifold to the gas channel.</span>
+        <span class="n">A_T_a</span> <span class="o">=</span> <span class="mf">11.8e-4</span>  <span class="c1"># m². It is the inlet/exhaust anode manifold throttle area</span>
+        <span class="n">A_T_c</span> <span class="o">=</span> <span class="mf">34.4e-4</span>  <span class="c1"># m². It is the inlet/exhaust cathode manifold throttle area</span>
+        <span class="n">Vasm</span><span class="p">,</span> <span class="n">Vcsm</span> <span class="o">=</span> <span class="n">Lm</span> <span class="o">*</span> <span class="n">A_T_a</span><span class="p">,</span> <span class="n">Lm</span> <span class="o">*</span> <span class="n">A_T_c</span>  <span class="c1"># m3. It is the supply manifold volume.</span>
+        <span class="n">Vaem</span><span class="p">,</span> <span class="n">Vcem</span> <span class="o">=</span> <span class="n">Vasm</span><span class="p">,</span> <span class="n">Vcsm</span>  <span class="c1"># m-3. It is the exhaust manifold volume.</span>
+        <span class="n">V_endplate_a</span> <span class="o">=</span> <span class="n">L_man_gc</span> <span class="o">*</span> <span class="n">A_T_a</span>  <span class="c1"># m3. It is the anode endplate volume.</span>
+        <span class="n">V_endplate_c</span> <span class="o">=</span> <span class="n">L_man_gc</span> <span class="o">*</span> <span class="n">A_T_c</span>  <span class="c1"># m3. It is the cathode endplate volume.</span>
+        <span class="n">V_man_agc</span> <span class="o">=</span> <span class="n">L_man_gc</span> <span class="o">*</span> <span class="n">Hagc</span> <span class="o">*</span> <span class="n">Wagc</span>  <span class="c1"># m3. It is the volume of the volume connecting the anode manifold to the gas channel.</span>
+        <span class="n">V_man_cgc</span> <span class="o">=</span> <span class="n">L_man_gc</span> <span class="o">*</span> <span class="n">Hcgc</span> <span class="o">*</span> <span class="n">Wcgc</span>  <span class="c1"># m3. It is the volume of the volume connecting the cathode manifold to the gas channel.</span>
 
         <span class="c1"># Estimated undetermined parameters for the initialisation</span>
         <span class="c1">#   Gas diffusion layer</span>
-        <span class="n">epsilon_gdl</span> <span class="o">=</span> <span class="mf">0.7943</span>  <span class="c1"># It is the anode/cathode GDL porosity.</span>
+        <span class="n">epsilon_gdl</span> <span class="o">=</span> <span class="mf">0.5002</span>  <span class="c1"># It is the anode/cathode GDL porosity.</span>
         <span class="n">epsilon_c</span> <span class="o">=</span> <span class="mf">0.2</span>  <span class="c1"># It is the compression ratio of the GDL.</span>
         <span class="c1">#   Catalyst layer</span>
-        <span class="n">Hacl</span> <span class="o">=</span> <span class="mf">8.089e-6</span>  <span class="c1"># m. It is the thickness of the anode catalyst layer.</span>
+        <span class="n">Hacl</span> <span class="o">=</span> <span class="mf">8.593e-6</span>  <span class="c1"># m. It is the thickness of the anode catalyst layer.</span>
         <span class="n">Hccl</span> <span class="o">=</span> <span class="n">Hacl</span>  <span class="c1"># m. It is the thickness of the cathode catalyst layer.</span>
-        <span class="n">epsilon_mc</span> <span class="o">=</span> <span class="mf">0.2111</span>  <span class="c1"># It is the volume fraction of ionomer in the CL.</span>
+        <span class="n">epsilon_cl</span> <span class="o">=</span> <span class="mf">0.25</span>  <span class="c1"># It is the porosity of the catalyst layer, without units.</span>
+        <span class="n">epsilon_mc</span> <span class="o">=</span> <span class="mf">0.3986</span>  <span class="c1"># It is the volume fraction of ionomer in the CL.</span>
         <span class="c1">#   Membrane</span>
-        <span class="n">Hmem</span> <span class="o">=</span> <span class="mf">1.5e-5</span>  <span class="c1"># m. It is the thickness of the membrane.</span>
+        <span class="n">Hmem</span> <span class="o">=</span> <span class="mf">16.06e-6</span>  <span class="c1"># m. It is the thickness of the membrane.</span>
         <span class="c1">#   Interaction parameters between water and PEMFC structure</span>
-        <span class="n">e</span> <span class="o">=</span> <span class="mf">3.0</span>  <span class="c1"># It is the capillary exponent</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="mf">4.0</span>  <span class="c1"># It is the capillary exponent</span>
         <span class="c1">#   Voltage polarization</span>
-        <span class="n">i0_c_ref</span> <span class="o">=</span> <span class="mf">14.86</span>  <span class="c1"># A.m-2.It is the reference exchange current density at the cathode.</span>
-        <span class="n">kappa_co</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.</span>
-        <span class="n">kappa_c</span> <span class="o">=</span> <span class="mf">0.6386</span>  <span class="c1"># It is the overpotential correction exponent.</span>
+        <span class="n">Re</span> <span class="o">=</span> <span class="mf">1e-06</span>  <span class="c1"># ohm.m². It is the electron conduction resistance of the circuit.</span>
+        <span class="n">i0_d_c_ref</span> <span class="o">=</span> <span class="mf">14.43</span>  <span class="c1"># A.m-2.It is the reference exchange current density at the cathode.</span>
+        <span class="n">i0_h_c_ref</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># A.m-2. It is the fully humidified reference exchange current density at the cathode.</span>
+        <span class="n">kappa_co</span> <span class="o">=</span> <span class="mf">30.42</span>  <span class="c1"># mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.</span>
+        <span class="n">kappa_c</span> <span class="o">=</span> <span class="mf">0.4152</span>  <span class="c1"># It is the overpotential correction exponent.</span>
         <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span> <span class="o">=</span> <span class="mf">0.05553</span><span class="p">,</span> <span class="mf">0.10514</span><span class="p">,</span> <span class="mf">0.63654</span>  <span class="c1"># It is the limit liquid saturation coefficients.</span>
-        <span class="n">C_scl</span> <span class="o">=</span> <span class="mf">2e7</span>  <span class="c1"># F.m-3. It is the volumetric space-charge layer capacitance.</span>
+        <span class="n">C_scl</span> <span class="o">=</span> <span class="mf">20e6</span>  <span class="c1"># F.m-3. It is the volumetric space-charge layer capacitance.</span>
 
-        <span class="c1"># Algorithm parameters for polarization curve generation</span>
-        <span class="n">type_auxiliary</span> <span class="o">=</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span>
-        <span class="n">type_control</span> <span class="o">=</span> <span class="s2">&quot;no_control&quot;</span>
-        <span class="n">type_purge</span> <span class="o">=</span> <span class="s2">&quot;no_purge&quot;</span>
-        <span class="n">type_display</span> <span class="o">=</span> <span class="s2">&quot;no_display&quot;</span>
-        <span class="n">type_plot</span> <span class="o">=</span> <span class="s2">&quot;fixed&quot;</span>
-        <span class="n">type_current</span> <span class="o">=</span> <span class="s2">&quot;polarization_for_cali&quot;</span>
-        <span class="n">current_density</span> <span class="o">=</span> <span class="n">polarization_current_for_calibration</span>
-        <span class="n">delta_t_ini_step</span> <span class="o">=</span> <span class="mi">120</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># (s). Initial time at zero current density for the stabilisation of the internal states.</span>
-        <span class="n">delta_t_load_step</span> <span class="o">=</span> <span class="mf">1e-15</span>  <span class="c1"># (s). Loading time for the step current density function, from 0 to i_step.</span>
-        <span class="n">delta_t_break_step</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># (s). Time at i_step current density for the stabilisation of the internal states.</span>
-        <span class="n">i_step</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># (A.m-2). Current density for the step current density function.</span>
-        <span class="n">step_current_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;delta_t_ini_step&#39;</span><span class="p">:</span> <span class="n">delta_t_ini_step</span><span class="p">,</span> <span class="s1">&#39;delta_t_load_step&#39;</span><span class="p">:</span> <span class="n">delta_t_load_step</span><span class="p">,</span>
-                                   <span class="s1">&#39;delta_t_break_step&#39;</span><span class="p">:</span> <span class="n">delta_t_break_step</span><span class="p">,</span> <span class="s1">&#39;i_step&#39;</span><span class="p">:</span> <span class="n">i_step</span><span class="p">}</span>
-        <span class="n">delta_t_ini_pola</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># (s). Initial time at zero current density for the stabilisation of the internal states.</span>
-        <span class="n">delta_t_load_pola</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># (s). Loading time for one step current of the polarisation current density function.</span>
-        <span class="n">delta_t_break_pola</span> <span class="o">=</span> <span class="mi">15</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># (s). Breaking time for one step current, for the stabilisation of the internal states.</span>
-        <span class="n">delta_i_pola</span> <span class="o">=</span> <span class="mf">0.05e4</span>  <span class="c1"># (A.m-2). Current density step for the polarisation current density function.</span>
-        <span class="n">i_max_pola</span> <span class="o">=</span> <span class="mf">1.7e4</span>  <span class="c1"># (A.m-2). It is the maximum current density for the polarization curve.</span>
-        <span class="n">pola_current_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;delta_t_ini_pola&#39;</span><span class="p">:</span> <span class="n">delta_t_ini_pola</span><span class="p">,</span> <span class="s1">&#39;delta_t_load_pola&#39;</span><span class="p">:</span> <span class="n">delta_t_load_pola</span><span class="p">,</span>
-                                   <span class="s1">&#39;delta_t_break_pola&#39;</span><span class="p">:</span> <span class="n">delta_t_break_pola</span><span class="p">,</span> <span class="s1">&#39;delta_i_pola&#39;</span><span class="p">:</span> <span class="n">delta_i_pola</span><span class="p">,</span>
-                                   <span class="s1">&#39;i_max_pola&#39;</span><span class="p">:</span> <span class="n">i_max_pola</span><span class="p">}</span>
-        <span class="n">delta_t_ini_pola_cali</span> <span class="o">=</span> <span class="mi">60</span>  <span class="c1"># (s). Initial time at zero current density for the stabilisation of the internal states.</span>
-        <span class="n">delta_t_load_pola_cali</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># (s). Loading time for one step current of the polarisation current density function.</span>
-        <span class="n">delta_t_break_pola_cali</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># (s). Breaking time for one step current, for the stabilisation of the internal states.</span>
-        <span class="n">pola_current_for_cali_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;delta_t_ini_pola_cali&#39;</span><span class="p">:</span> <span class="n">delta_t_ini_pola_cali</span><span class="p">,</span>
-                                            <span class="s1">&#39;delta_t_load_pola_cali&#39;</span><span class="p">:</span> <span class="n">delta_t_load_pola_cali</span><span class="p">,</span>
-                                            <span class="s1">&#39;delta_t_break_pola_cali&#39;</span><span class="p">:</span> <span class="n">delta_t_break_pola_cali</span><span class="p">}</span>
-        <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.</span>
-        <span class="n">f_EIS</span><span class="p">,</span> <span class="n">t_EIS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># It is the EIS parameters.</span>
-        <span class="n">t_purge</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mi">15</span>  <span class="c1"># s It is the purge time and the distance between two purges.</span>
-        <span class="n">n_gdl</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">Hacl</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>  <span class="c1"># It is the number of model points placed inside each GDL.</span>
+        <span class="c1"># Computing parameters</span>
+        <span class="n">nb_gc</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># It is the number of model points placed inside each gas channel.</span>
+        <span class="n">nb_gdl</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">Hacl</span> <span class="o">/</span> <span class="mi">4</span><span class="p">))</span>  <span class="c1"># It is the number of model points placed inside each GDL.</span>
+        <span class="n">nb_mpl</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">Hmpl</span> <span class="o">/</span> <span class="n">Hacl</span> <span class="o">/</span> <span class="mi">3</span><span class="p">))</span>  <span class="c1"># It is the number of model points placed inside each MPL.</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;A correct type_fuel_cell should be given.&quot;</span><span class="p">)</span>
 
     <span class="c1"># Initialize the operating inputs and parameters dictionaries.</span>
     <span class="n">operating_inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;current_density&#39;</span><span class="p">:</span> <span class="n">current_density</span><span class="p">,</span> <span class="s1">&#39;T_des&#39;</span><span class="p">:</span> <span class="n">T_des</span><span class="p">,</span> <span class="s1">&#39;Pa_des&#39;</span><span class="p">:</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="s1">&#39;Pc_des&#39;</span><span class="p">:</span> <span class="n">Pc_des</span><span class="p">,</span>
-                        <span class="s1">&#39;Sa&#39;</span><span class="p">:</span> <span class="n">Sa</span><span class="p">,</span> <span class="s1">&#39;Sc&#39;</span><span class="p">:</span> <span class="n">Sc</span><span class="p">,</span> <span class="s1">&#39;Phi_a_des&#39;</span><span class="p">:</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="s1">&#39;Phi_c_des&#39;</span><span class="p">:</span> <span class="n">Phi_c_des</span><span class="p">}</span>
+                        <span class="s1">&#39;Sa&#39;</span><span class="p">:</span> <span class="n">Sa</span><span class="p">,</span> <span class="s1">&#39;Sc&#39;</span><span class="p">:</span> <span class="n">Sc</span><span class="p">,</span> <span class="s1">&#39;Phi_a_des&#39;</span><span class="p">:</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="s1">&#39;Phi_c_des&#39;</span><span class="p">:</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="s1">&#39;y_H2_in&#39;</span><span class="p">:</span> <span class="n">y_H2_in</span><span class="p">}</span>
     <span class="n">current_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;step_current_parameters&#39;</span><span class="p">:</span> <span class="n">step_current_parameters</span><span class="p">,</span>
                           <span class="s1">&#39;pola_current_parameters&#39;</span><span class="p">:</span> <span class="n">pola_current_parameters</span><span class="p">,</span>
                           <span class="s1">&#39;pola_current_for_cali_parameters&#39;</span><span class="p">:</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span>
                           <span class="s1">&#39;i_EIS&#39;</span><span class="p">:</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="s1">&#39;ratio_EIS&#39;</span><span class="p">:</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="s1">&#39;t_EIS&#39;</span><span class="p">:</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="s1">&#39;f_EIS&#39;</span><span class="p">:</span> <span class="n">f_EIS</span><span class="p">}</span>
-    <span class="n">accessible_physical_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Aact&#39;</span><span class="p">:</span> <span class="n">Aact</span><span class="p">,</span> <span class="s1">&#39;Hagc&#39;</span><span class="p">:</span> <span class="n">Hagc</span><span class="p">,</span> <span class="s1">&#39;Hcgc&#39;</span><span class="p">:</span> <span class="n">Hcgc</span><span class="p">,</span> <span class="s1">&#39;Wagc&#39;</span><span class="p">:</span> <span class="n">Wagc</span><span class="p">,</span> <span class="s1">&#39;Wcgc&#39;</span><span class="p">:</span> <span class="n">Wcgc</span><span class="p">,</span> <span class="s1">&#39;Lgc&#39;</span><span class="p">:</span> <span class="n">Lgc</span><span class="p">}</span>
-    <span class="n">undetermined_physical_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Hgdl&#39;</span><span class="p">:</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="s1">&#39;Hmpl&#39;</span><span class="p">:</span> <span class="n">Hmpl</span><span class="p">,</span> <span class="s1">&#39;Hmem&#39;</span><span class="p">:</span> <span class="n">Hmem</span><span class="p">,</span> <span class="s1">&#39;Hacl&#39;</span><span class="p">:</span> <span class="n">Hacl</span><span class="p">,</span> <span class="s1">&#39;Hccl&#39;</span><span class="p">:</span> <span class="n">Hccl</span><span class="p">,</span>
-                                        <span class="s1">&#39;epsilon_gdl&#39;</span><span class="p">:</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="s1">&#39;epsilon_mpl&#39;</span><span class="p">:</span> <span class="n">epsilon_mpl</span><span class="p">,</span>
-                                        <span class="s1">&#39;epsilon_mc&#39;</span><span class="p">:</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="s1">&#39;epsilon_c&#39;</span><span class="p">:</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">:</span> <span class="n">e</span><span class="p">,</span>
-                                        <span class="s1">&#39;kappa_co&#39;</span><span class="p">:</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="s1">&#39;i0_c_ref&#39;</span><span class="p">:</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="s1">&#39;kappa_c&#39;</span><span class="p">:</span> <span class="n">kappa_c</span><span class="p">,</span>
-                                        <span class="s1">&#39;a_slim&#39;</span><span class="p">:</span> <span class="n">a_slim</span><span class="p">,</span> <span class="s1">&#39;b_slim&#39;</span><span class="p">:</span> <span class="n">b_slim</span><span class="p">,</span> <span class="s1">&#39;a_switch&#39;</span><span class="p">:</span> <span class="n">a_switch</span><span class="p">,</span>
-                                        <span class="s1">&#39;C_scl&#39;</span><span class="p">:</span> <span class="n">C_scl</span><span class="p">}</span>
-    <span class="n">computing_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;n_gdl&#39;</span><span class="p">:</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="s1">&#39;t_purge&#39;</span><span class="p">:</span> <span class="n">t_purge</span><span class="p">,</span> <span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">:</span> <span class="n">type_fuel_cell</span><span class="p">,</span>
-                            <span class="s1">&#39;type_current&#39;</span><span class="p">:</span> <span class="n">type_current</span><span class="p">,</span> <span class="s1">&#39;type_auxiliary&#39;</span><span class="p">:</span> <span class="n">type_auxiliary</span><span class="p">,</span>
+    <span class="n">accessible_physical_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Aact&#39;</span><span class="p">:</span> <span class="n">Aact</span><span class="p">,</span> <span class="s1">&#39;nb_cell&#39;</span><span class="p">:</span> <span class="n">nb_cell</span><span class="p">,</span> <span class="s1">&#39;Hagc&#39;</span><span class="p">:</span> <span class="n">Hagc</span><span class="p">,</span> <span class="s1">&#39;Hcgc&#39;</span><span class="p">:</span> <span class="n">Hcgc</span><span class="p">,</span> <span class="s1">&#39;Wagc&#39;</span><span class="p">:</span> <span class="n">Wagc</span><span class="p">,</span>
+                                      <span class="s1">&#39;Wcgc&#39;</span><span class="p">:</span> <span class="n">Wcgc</span><span class="p">,</span> <span class="s1">&#39;Lgc&#39;</span><span class="p">:</span> <span class="n">Lgc</span><span class="p">,</span> <span class="s1">&#39;nb_channel_in_gc&#39;</span><span class="p">:</span> <span class="n">nb_channel_in_gc</span><span class="p">,</span> <span class="s1">&#39;Ldist&#39;</span><span class="p">:</span> <span class="n">Ldist</span><span class="p">,</span>
+                                      <span class="s1">&#39;Lm&#39;</span><span class="p">:</span> <span class="n">Lm</span><span class="p">,</span> <span class="s1">&#39;A_T_a&#39;</span><span class="p">:</span> <span class="n">A_T_a</span><span class="p">,</span> <span class="s1">&#39;A_T_c&#39;</span><span class="p">:</span> <span class="n">A_T_c</span><span class="p">,</span> <span class="s1">&#39;Vasm&#39;</span><span class="p">:</span> <span class="n">Vasm</span><span class="p">,</span> <span class="s1">&#39;Vcsm&#39;</span><span class="p">:</span> <span class="n">Vcsm</span><span class="p">,</span>
+                                      <span class="s1">&#39;Vaem&#39;</span><span class="p">:</span> <span class="n">Vaem</span><span class="p">,</span> <span class="s1">&#39;Vcem&#39;</span><span class="p">:</span> <span class="n">Vcem</span><span class="p">}</span>
+    <span class="n">undetermined_physical_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Hgdl&#39;</span><span class="p">:</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="s1">&#39;Hmpl&#39;</span><span class="p">:</span> <span class="n">Hmpl</span><span class="p">,</span> <span class="s1">&#39;Hmem&#39;</span><span class="p">:</span> <span class="n">Hmem</span><span class="p">,</span> <span class="s1">&#39;Hacl&#39;</span><span class="p">:</span> <span class="n">Hacl</span><span class="p">,</span>
+                                        <span class="s1">&#39;Hccl&#39;</span><span class="p">:</span> <span class="n">Hccl</span><span class="p">,</span> <span class="s1">&#39;epsilon_gdl&#39;</span><span class="p">:</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="s1">&#39;epsilon_cl&#39;</span><span class="p">:</span> <span class="n">epsilon_cl</span><span class="p">,</span>
+                                        <span class="s1">&#39;epsilon_mpl&#39;</span><span class="p">:</span> <span class="n">epsilon_mpl</span><span class="p">,</span> <span class="s1">&#39;epsilon_mc&#39;</span><span class="p">:</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="s1">&#39;epsilon_c&#39;</span><span class="p">:</span> <span class="n">epsilon_c</span><span class="p">,</span>
+                                        <span class="s1">&#39;e&#39;</span><span class="p">:</span> <span class="n">e</span><span class="p">,</span> <span class="s1">&#39;Re&#39;</span><span class="p">:</span> <span class="n">Re</span><span class="p">,</span> <span class="s1">&#39;i0_d_c_ref&#39;</span><span class="p">:</span> <span class="n">i0_d_c_ref</span><span class="p">,</span> <span class="s1">&#39;i0_h_c_ref&#39;</span><span class="p">:</span> <span class="n">i0_h_c_ref</span><span class="p">,</span>
+                                        <span class="s1">&#39;kappa_co&#39;</span><span class="p">:</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="s1">&#39;kappa_c&#39;</span><span class="p">:</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="s1">&#39;a_slim&#39;</span><span class="p">:</span> <span class="n">a_slim</span><span class="p">,</span> <span class="s1">&#39;b_slim&#39;</span><span class="p">:</span> <span class="n">b_slim</span><span class="p">,</span>
+                                        <span class="s1">&#39;a_switch&#39;</span><span class="p">:</span> <span class="n">a_switch</span><span class="p">,</span> <span class="s1">&#39;C_scl&#39;</span><span class="p">:</span> <span class="n">C_scl</span><span class="p">}</span>
+    <span class="n">computing_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;nb_gc&#39;</span><span class="p">:</span> <span class="n">nb_gc</span><span class="p">,</span> <span class="s1">&#39;nb_gdl&#39;</span><span class="p">:</span> <span class="n">nb_gdl</span><span class="p">,</span> <span class="s1">&#39;nb_mpl&#39;</span><span class="p">:</span> <span class="n">nb_mpl</span><span class="p">,</span> <span class="s1">&#39;t_purge&#39;</span><span class="p">:</span> <span class="n">t_purge</span><span class="p">,</span>
+                            <span class="s1">&#39;rtol&#39;</span><span class="p">:</span> <span class="n">rtol</span><span class="p">,</span> <span class="s1">&#39;atol&#39;</span><span class="p">:</span> <span class="n">atol</span><span class="p">,</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">:</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="s1">&#39;type_current&#39;</span><span class="p">:</span> <span class="n">type_current</span><span class="p">,</span>
+                            <span class="s1">&#39;voltage_zone&#39;</span><span class="p">:</span> <span class="n">voltage_zone</span><span class="p">,</span> <span class="s1">&#39;type_auxiliary&#39;</span><span class="p">:</span> <span class="n">type_auxiliary</span><span class="p">,</span>
                             <span class="s1">&#39;type_control&#39;</span><span class="p">:</span> <span class="n">type_control</span><span class="p">,</span> <span class="s1">&#39;type_purge&#39;</span><span class="p">:</span> <span class="n">type_purge</span><span class="p">,</span> <span class="s1">&#39;type_display&#39;</span><span class="p">:</span> <span class="n">type_display</span><span class="p">,</span>
                             <span class="s1">&#39;type_plot&#39;</span><span class="p">:</span> <span class="n">type_plot</span><span class="p">}</span>
 
     <span class="c1"># Characteristic points of the experimental polarization curve</span>
-    <span class="n">i_exp</span><span class="p">,</span> <span class="n">U_exp</span> <span class="o">=</span> <span class="n">pola_exp_values_calibration</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">)</span>
+    <span class="n">i_exp</span><span class="p">,</span> <span class="n">U_exp</span> <span class="o">=</span> <span class="n">pola_exp_values_calibration</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">voltage_zone</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="n">current_parameters</span><span class="p">,</span> <span class="n">accessible_physical_parameters</span><span class="p">,</span> <span class="n">undetermined_physical_parameters</span><span class="p">,</span>
             <span class="n">computing_parameters</span><span class="p">,</span> <span class="n">i_exp</span><span class="p">,</span> <span class="n">U_exp</span><span class="p">)</span>
@@ -1659,31 +1827,31 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/calibration_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">520</span>
-<span class="normal">521</span>
-<span class="normal">522</span>
-<span class="normal">523</span>
-<span class="normal">524</span>
-<span class="normal">525</span>
-<span class="normal">526</span>
-<span class="normal">527</span>
-<span class="normal">528</span>
-<span class="normal">529</span>
-<span class="normal">530</span>
-<span class="normal">531</span>
-<span class="normal">532</span>
-<span class="normal">533</span>
-<span class="normal">534</span>
-<span class="normal">535</span>
-<span class="normal">536</span>
-<span class="normal">537</span>
-<span class="normal">538</span>
-<span class="normal">539</span>
-<span class="normal">540</span>
-<span class="normal">541</span>
-<span class="normal">542</span>
-<span class="normal">543</span>
-<span class="normal">544</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">print_calibration_results</span><span class="p">(</span><span class="n">convergence</span><span class="p">,</span> <span class="n">ga_instance</span><span class="p">,</span> <span class="n">solution</span><span class="p">,</span> <span class="n">varbound</span><span class="p">,</span> <span class="n">sim_error</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">604</span>
+<span class="normal">605</span>
+<span class="normal">606</span>
+<span class="normal">607</span>
+<span class="normal">608</span>
+<span class="normal">609</span>
+<span class="normal">610</span>
+<span class="normal">611</span>
+<span class="normal">612</span>
+<span class="normal">613</span>
+<span class="normal">614</span>
+<span class="normal">615</span>
+<span class="normal">616</span>
+<span class="normal">617</span>
+<span class="normal">618</span>
+<span class="normal">619</span>
+<span class="normal">620</span>
+<span class="normal">621</span>
+<span class="normal">622</span>
+<span class="normal">623</span>
+<span class="normal">624</span>
+<span class="normal">625</span>
+<span class="normal">626</span>
+<span class="normal">627</span>
+<span class="normal">628</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">print_calibration_results</span><span class="p">(</span><span class="n">convergence</span><span class="p">,</span> <span class="n">ga_instance</span><span class="p">,</span> <span class="n">solution</span><span class="p">,</span> <span class="n">varbound</span><span class="p">,</span> <span class="n">sim_error</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function prints the calibration results by associating each optimized value with its parameter name.</span>
 
@@ -1817,56 +1985,56 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/calibration_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">547</span>
-<span class="normal">548</span>
-<span class="normal">549</span>
-<span class="normal">550</span>
-<span class="normal">551</span>
-<span class="normal">552</span>
-<span class="normal">553</span>
-<span class="normal">554</span>
-<span class="normal">555</span>
-<span class="normal">556</span>
-<span class="normal">557</span>
-<span class="normal">558</span>
-<span class="normal">559</span>
-<span class="normal">560</span>
-<span class="normal">561</span>
-<span class="normal">562</span>
-<span class="normal">563</span>
-<span class="normal">564</span>
-<span class="normal">565</span>
-<span class="normal">566</span>
-<span class="normal">567</span>
-<span class="normal">568</span>
-<span class="normal">569</span>
-<span class="normal">570</span>
-<span class="normal">571</span>
-<span class="normal">572</span>
-<span class="normal">573</span>
-<span class="normal">574</span>
-<span class="normal">575</span>
-<span class="normal">576</span>
-<span class="normal">577</span>
-<span class="normal">578</span>
-<span class="normal">579</span>
-<span class="normal">580</span>
-<span class="normal">581</span>
-<span class="normal">582</span>
-<span class="normal">583</span>
-<span class="normal">584</span>
-<span class="normal">585</span>
-<span class="normal">586</span>
-<span class="normal">587</span>
-<span class="normal">588</span>
-<span class="normal">589</span>
-<span class="normal">590</span>
-<span class="normal">591</span>
-<span class="normal">592</span>
-<span class="normal">593</span>
-<span class="normal">594</span>
-<span class="normal">595</span>
-<span class="normal">596</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_calibration_results</span><span class="p">(</span><span class="n">convergence</span><span class="p">,</span> <span class="n">ga_instance</span><span class="p">,</span> <span class="n">solution</span><span class="p">,</span> <span class="n">varbound</span><span class="p">,</span> <span class="n">sim_error</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">631</span>
+<span class="normal">632</span>
+<span class="normal">633</span>
+<span class="normal">634</span>
+<span class="normal">635</span>
+<span class="normal">636</span>
+<span class="normal">637</span>
+<span class="normal">638</span>
+<span class="normal">639</span>
+<span class="normal">640</span>
+<span class="normal">641</span>
+<span class="normal">642</span>
+<span class="normal">643</span>
+<span class="normal">644</span>
+<span class="normal">645</span>
+<span class="normal">646</span>
+<span class="normal">647</span>
+<span class="normal">648</span>
+<span class="normal">649</span>
+<span class="normal">650</span>
+<span class="normal">651</span>
+<span class="normal">652</span>
+<span class="normal">653</span>
+<span class="normal">654</span>
+<span class="normal">655</span>
+<span class="normal">656</span>
+<span class="normal">657</span>
+<span class="normal">658</span>
+<span class="normal">659</span>
+<span class="normal">660</span>
+<span class="normal">661</span>
+<span class="normal">662</span>
+<span class="normal">663</span>
+<span class="normal">664</span>
+<span class="normal">665</span>
+<span class="normal">666</span>
+<span class="normal">667</span>
+<span class="normal">668</span>
+<span class="normal">669</span>
+<span class="normal">670</span>
+<span class="normal">671</span>
+<span class="normal">672</span>
+<span class="normal">673</span>
+<span class="normal">674</span>
+<span class="normal">675</span>
+<span class="normal">676</span>
+<span class="normal">677</span>
+<span class="normal">678</span>
+<span class="normal">679</span>
+<span class="normal">680</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_calibration_results</span><span class="p">(</span><span class="n">convergence</span><span class="p">,</span> <span class="n">ga_instance</span><span class="p">,</span> <span class="n">solution</span><span class="p">,</span> <span class="n">varbound</span><span class="p">,</span> <span class="n">sim_error</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function saves the calibration results in a text file and a PyGAD file.</span>
 
@@ -2000,32 +2168,32 @@ It is the purge time interval 'purge_time' and the time between two purges 'delt
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/calibration_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">410</span>
-<span class="normal">411</span>
-<span class="normal">412</span>
-<span class="normal">413</span>
-<span class="normal">414</span>
-<span class="normal">415</span>
-<span class="normal">416</span>
-<span class="normal">417</span>
-<span class="normal">418</span>
-<span class="normal">419</span>
-<span class="normal">420</span>
-<span class="normal">421</span>
-<span class="normal">422</span>
-<span class="normal">423</span>
-<span class="normal">424</span>
-<span class="normal">425</span>
-<span class="normal">426</span>
-<span class="normal">427</span>
-<span class="normal">428</span>
-<span class="normal">429</span>
-<span class="normal">430</span>
-<span class="normal">431</span>
-<span class="normal">432</span>
-<span class="normal">433</span>
-<span class="normal">434</span>
-<span class="normal">435</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_undetermined_parameters</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">solution</span><span class="p">,</span> <span class="n">varbound</span><span class="p">,</span> <span class="n">undetermined_physical_parameters</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">494</span>
+<span class="normal">495</span>
+<span class="normal">496</span>
+<span class="normal">497</span>
+<span class="normal">498</span>
+<span class="normal">499</span>
+<span class="normal">500</span>
+<span class="normal">501</span>
+<span class="normal">502</span>
+<span class="normal">503</span>
+<span class="normal">504</span>
+<span class="normal">505</span>
+<span class="normal">506</span>
+<span class="normal">507</span>
+<span class="normal">508</span>
+<span class="normal">509</span>
+<span class="normal">510</span>
+<span class="normal">511</span>
+<span class="normal">512</span>
+<span class="normal">513</span>
+<span class="normal">514</span>
+<span class="normal">515</span>
+<span class="normal">516</span>
+<span class="normal">517</span>
+<span class="normal">518</span>
+<span class="normal">519</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_undetermined_parameters</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">solution</span><span class="p">,</span> <span class="n">varbound</span><span class="p">,</span> <span class="n">undetermined_physical_parameters</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Update the undetermined physical parameters dictionary with values from the solution.</span>
 

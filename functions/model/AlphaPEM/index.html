@@ -814,8 +814,70 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 <span class="normal">651</span>
 <span class="normal">652</span>
 <span class="normal">653</span>
-<span class="normal">654</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AlphaPEM</span><span class="p">:</span>
-
+<span class="normal">654</span>
+<span class="normal">655</span>
+<span class="normal">656</span>
+<span class="normal">657</span>
+<span class="normal">658</span>
+<span class="normal">659</span>
+<span class="normal">660</span>
+<span class="normal">661</span>
+<span class="normal">662</span>
+<span class="normal">663</span>
+<span class="normal">664</span>
+<span class="normal">665</span>
+<span class="normal">666</span>
+<span class="normal">667</span>
+<span class="normal">668</span>
+<span class="normal">669</span>
+<span class="normal">670</span>
+<span class="normal">671</span>
+<span class="normal">672</span>
+<span class="normal">673</span>
+<span class="normal">674</span>
+<span class="normal">675</span>
+<span class="normal">676</span>
+<span class="normal">677</span>
+<span class="normal">678</span>
+<span class="normal">679</span>
+<span class="normal">680</span>
+<span class="normal">681</span>
+<span class="normal">682</span>
+<span class="normal">683</span>
+<span class="normal">684</span>
+<span class="normal">685</span>
+<span class="normal">686</span>
+<span class="normal">687</span>
+<span class="normal">688</span>
+<span class="normal">689</span>
+<span class="normal">690</span>
+<span class="normal">691</span>
+<span class="normal">692</span>
+<span class="normal">693</span>
+<span class="normal">694</span>
+<span class="normal">695</span>
+<span class="normal">696</span>
+<span class="normal">697</span>
+<span class="normal">698</span>
+<span class="normal">699</span>
+<span class="normal">700</span>
+<span class="normal">701</span>
+<span class="normal">702</span>
+<span class="normal">703</span>
+<span class="normal">704</span>
+<span class="normal">705</span>
+<span class="normal">706</span>
+<span class="normal">707</span>
+<span class="normal">708</span>
+<span class="normal">709</span>
+<span class="normal">710</span>
+<span class="normal">711</span>
+<span class="normal">712</span>
+<span class="normal">713</span>
+<span class="normal">714</span>
+<span class="normal">715</span>
+<span class="normal">716</span>
+<span class="normal">717</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AlphaPEM</span><span class="p">:</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">current_parameters</span><span class="p">,</span> <span class="n">accessible_physical_parameters</span><span class="p">,</span>
                  <span class="n">undetermined_physical_parameters</span><span class="p">,</span> <span class="n">computing_parameters</span><span class="p">,</span> <span class="n">initial_variable_values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">time_interval</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -891,6 +953,8 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 <span class="sd">            Dictionary containing the accessible physical parameters for the simulation. It contains:</span>
 <span class="sd">                - Aact : float</span>
 <span class="sd">                    Active area of the cell in m² (accessible physical parameter).</span>
+<span class="sd">                - n_cell : int</span>
+<span class="sd">                    Number of cells in the stack (accessible physical parameter).</span>
 <span class="sd">                - Hagc : float</span>
 <span class="sd">                    Thickness of the anode gas channel in m (accessible physical parameter).</span>
 <span class="sd">                Hcgc : float</span>
@@ -919,8 +983,10 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 <span class="sd">                    Compression ratio of the GDL (undetermined physical parameter).</span>
 <span class="sd">                - e : float</span>
 <span class="sd">                    Capillary exponent (undetermined physical parameter).</span>
-<span class="sd">                - i0_c_ref : float</span>
-<span class="sd">                    Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).</span>
+<span class="sd">                - Re : float</span>
+<span class="sd">                    Electron conduction resistance in Ω.m2 (undetermined physical parameter).</span>
+<span class="sd">                - i0_d_c_ref : float</span>
+<span class="sd">                    Dry reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).</span>
 <span class="sd">                - kappa_co : float</span>
 <span class="sd">                    Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).</span>
 <span class="sd">                - kappa_c : float</span>
@@ -938,11 +1004,21 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 <span class="sd">                    Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).</span>
 <span class="sd">        computing_parameters : dict</span>
 <span class="sd">            Dictionary containing the computing parameters for the simulation. It contains:</span>
+<span class="sd">                - Htl : float</span>
+<span class="sd">                    Thickness of the transition layers in meters (computing parameter).</span>
 <span class="sd">                - n_gdl : int</span>
 <span class="sd">                    Number of points considered in the GDL (computing parameter).</span>
+<span class="sd">                - n_mpl : int</span>
+<span class="sd">                    Number of points considered in the MPL (computing parameter).</span>
+<span class="sd">                - n_tl : int</span>
+<span class="sd">                    Number of points considered in the transitory layer (computing parameter).</span>
 <span class="sd">                - t_purge : tuple</span>
 <span class="sd">                    Time parameters for purging the system (computing parameter).</span>
 <span class="sd">                    It is the purge time interval &#39;purge_time&#39; and the time between two purges &#39;delta_purge&#39;.</span>
+<span class="sd">                - rtol : float</span>
+<span class="sd">                    Relative tolerance for the solver (computing parameter).</span>
+<span class="sd">                - atol : float</span>
+<span class="sd">                    Absolute tolerance for the solver (computing parameter).</span>
 <span class="sd">                - type_fuel_cell : str</span>
 <span class="sd">                    Type of fuel cell configuration (computing parameter).</span>
 <span class="sd">                - type_current : str</span>
@@ -980,20 +1056,29 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
         <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;C_v_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_cgdl&#39;</span><span class="p">,</span>
                                       <span class="s1">&#39;C_v_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;s_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;lambda_acl&#39;</span><span class="p">,</span>
                                       <span class="s1">&#39;lambda_mem&#39;</span><span class="p">,</span> <span class="s1">&#39;lambda_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_acl&#39;</span><span class="p">,</span>
-                                      <span class="s1">&#39;C_O2_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_N2&#39;</span><span class="p">,</span> <span class="s1">&#39;T_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;T_agdl&#39;</span><span class="p">,</span>
-                                      <span class="s1">&#39;T_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_mem&#39;</span><span class="p">,</span> <span class="s1">&#39;T_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;eta_c&#39;</span><span class="p">,</span> <span class="s1">&#39;Pasm&#39;</span><span class="p">,</span>
-                                      <span class="s1">&#39;Paem&#39;</span><span class="p">,</span> <span class="s1">&#39;Pcsm&#39;</span><span class="p">,</span> <span class="s1">&#39;Pcem&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_asm&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_aem&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_csm&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_cem&#39;</span><span class="p">,</span> <span class="s1">&#39;Wcp&#39;</span><span class="p">,</span>
-                                      <span class="s1">&#39;Wa_inj&#39;</span><span class="p">,</span> <span class="s1">&#39;Wc_inj&#39;</span><span class="p">,</span> <span class="s1">&#39;Abp_a&#39;</span><span class="p">,</span> <span class="s1">&#39;Abp_c&#39;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names_extension</span><span class="p">()</span>  <span class="c1"># Several points are considered in each GDL and must be inserted into</span>
-        <span class="c1">#                                        the solver_variable_names.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">all_variable_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Ucell&#39;</span><span class="p">,</span> <span class="s1">&#39;S_abs_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;S_abs_ccl&#39;</span><span class="p">]</span> <span class="o">+</span> \
-                                  <span class="p">[</span><span class="s1">&#39;J_lambda_acl_mem&#39;</span><span class="p">,</span> <span class="s1">&#39;J_lambda_mem_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;Pagc&#39;</span><span class="p">,</span> <span class="s1">&#39;Pcgc&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_a_des&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]</span>
+                                      <span class="s1">&#39;C_O2_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_N2_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_N2_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;T_agc&#39;</span><span class="p">,</span>
+                                      <span class="s1">&#39;T_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_mem&#39;</span><span class="p">,</span> <span class="s1">&#39;T_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgc&#39;</span><span class="p">,</span>
+                                      <span class="s1">&#39;eta_c&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_auxiliary&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span> <span class="ow">or</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_auxiliary&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_anodic_recirculation&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;Pasm&#39;</span><span class="p">,</span> <span class="s1">&#39;Paem&#39;</span><span class="p">,</span> <span class="s1">&#39;Pcsm&#39;</span><span class="p">,</span> <span class="s1">&#39;Pcem&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_asm&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_aem&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_csm&#39;</span><span class="p">,</span>
+                                               <span class="s1">&#39;Phi_cem&#39;</span><span class="p">,</span> <span class="s1">&#39;Wcp&#39;</span><span class="p">,</span> <span class="s1">&#39;Wa_inj&#39;</span><span class="p">,</span> <span class="s1">&#39;Wc_inj&#39;</span><span class="p">,</span> <span class="s1">&#39;Abp_a&#39;</span><span class="p">,</span> <span class="s1">&#39;Abp_c&#39;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names_extension</span><span class="p">()</span>  <span class="c1"># Several points are considered in each GC, GDL and MPL. This must be</span>
+        <span class="c1">#                                        inserted into the solver_variable_names.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_variable_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Ucell&#39;</span><span class="p">,</span> <span class="s1">&#39;v_a_in&#39;</span><span class="p">,</span> <span class="s1">&#39;v_c_in&#39;</span><span class="p">,</span> <span class="s1">&#39;Pa_in&#39;</span><span class="p">,</span> <span class="s1">&#39;Pc_in&#39;</span><span class="p">]</span> <span class="o">+</span> \
+                                                               <span class="p">[</span><span class="s1">&#39;Phi_a_des&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_variable_names</span><span class="p">}</span>
 
         <span class="c1"># Initialize the control_variables dictionary.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">control_variables</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;t_control_Phi&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
                                   <span class="s1">&#39;Phi_a_des&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Phi_a_des&#39;</span><span class="p">],</span>
                                   <span class="s1">&#39;Phi_c_des&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]}</span>
+
+        <span class="c1"># Temporary action: simulations with auxiliaries are in reconstruction.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_auxiliary&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;no_auxiliary&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_auxiliary&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;no_auxiliary&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Auxiliary considerations are temporarily removed, as they require reconstruction.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Create the dynamic evolution.</span>
         <span class="c1">#       Create time intervals</span>
@@ -1011,7 +1096,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
         <span class="c1">#       Resolution of the system of differential equations.</span>
         <span class="n">event_negative</span><span class="o">.</span><span class="n">terminal</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Integration is stopped if one of the crucial variables becomes negative.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sol</span> <span class="o">=</span> <span class="n">solve_ivp</span><span class="p">(</span><span class="n">dydt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_interval</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_variable_values</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;BDF&#39;</span><span class="p">,</span>
-                             <span class="n">rtol</span> <span class="o">=</span> <span class="mf">1e-5</span><span class="p">,</span> <span class="n">atol</span> <span class="o">=</span> <span class="mf">1e-8</span><span class="p">,</span> <span class="n">events</span><span class="o">=</span><span class="n">event_negative</span><span class="p">,</span>
+                             <span class="n">rtol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;rtol&#39;</span><span class="p">],</span> <span class="n">atol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;atol&#39;</span><span class="p">],</span> <span class="n">events</span><span class="o">=</span><span class="n">event_negative</span><span class="p">,</span>
                              <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="p">,</span>
                                    <span class="bp">self</span><span class="o">.</span><span class="n">control_variables</span><span class="p">))</span>
 
@@ -1025,14 +1110,25 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Several points are considered in each GDL and must be inserted into the solver_variable_names.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">new_points_location</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;C_v_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgdl&#39;</span><span class="p">]</span>
+        <span class="n">new_points_location</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;C_v_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_cgc&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;s_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_cgdl&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;C_H2_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgc&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;C_N2_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_N2_cgc&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;T_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;T_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgc&#39;</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">new_points_location</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">variable</span><span class="p">)</span>
             <span class="c1"># Delete the previous points</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
             <span class="c1"># Increase the number of points</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="p">[</span><span class="n">index</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>
-                                                       <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;n_gdl&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="n">variable</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;gc&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="p">[</span><span class="n">index</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>
+                                                           <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;nb_gc&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="n">variable</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;gdl&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="p">[</span><span class="n">index</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>
+                                                           <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;nb_gdl&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+            <span class="k">elif</span> <span class="n">variable</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;mpl&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="p">[</span><span class="n">index</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>
+                                                           <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;nb_mpl&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_time_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the time intervals for numerical resolution, according to the current chosen,</span>
@@ -1049,6 +1145,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
         <span class="n">pola_current_parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;pola_current_parameters&#39;</span><span class="p">]</span>
         <span class="n">pola_current_for_cali_parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;pola_current_for_cali_parameters&#39;</span><span class="p">]</span>
         <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_current&#39;</span><span class="p">]</span>
+        <span class="n">voltage_zone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;voltage_zone&#39;</span><span class="p">]</span>
 
         <span class="c1"># Recovery of the good time interval</span>
         <span class="k">if</span> <span class="n">type_current</span> <span class="o">==</span> <span class="s2">&quot;step&quot;</span><span class="p">:</span>
@@ -1060,7 +1157,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
             <span class="n">delta_t_ini_pola</span> <span class="o">=</span> <span class="n">pola_current_parameters</span><span class="p">[</span><span class="s1">&#39;delta_t_ini_pola&#39;</span><span class="p">]</span>  <span class="c1"># (s).</span>
             <span class="n">delta_t_load_pola</span> <span class="o">=</span> <span class="n">pola_current_parameters</span><span class="p">[</span><span class="s1">&#39;delta_t_load_pola&#39;</span><span class="p">]</span>  <span class="c1"># (s).</span>
             <span class="n">delta_t_break_pola</span> <span class="o">=</span> <span class="n">pola_current_parameters</span><span class="p">[</span><span class="s1">&#39;delta_t_break_pola&#39;</span><span class="p">]</span>  <span class="c1"># (s).</span>
-            <span class="n">delta_i_pola</span> <span class="o">=</span> <span class="n">pola_current_parameters</span><span class="p">[</span><span class="s1">&#39;delta_i_pola&#39;</span><span class="p">]</span>  <span class="c1"># (A.m-2).</span>
+            <span class="n">delta_i_pola</span> <span class="o">=</span> <span class="n">pola_current_parameters</span><span class="p">[</span><span class="s1">&#39;delta_i_pola&#39;</span><span class="p">]</span>  <span class="c1"># (A.m-2).Wccp_des,</span>
             <span class="n">i_max_pola</span> <span class="o">=</span> <span class="n">pola_current_parameters</span><span class="p">[</span><span class="s1">&#39;i_max_pola&#39;</span><span class="p">]</span>  <span class="c1"># (A.m-2).</span>
             <span class="c1"># Calculation</span>
             <span class="n">t0_interval</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># s.</span>
@@ -1070,7 +1167,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
             <span class="n">delta_t_ini_pola_cali</span> <span class="o">=</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">[</span><span class="s1">&#39;delta_t_ini_pola_cali&#39;</span><span class="p">]</span>  <span class="c1"># (s).</span>
             <span class="n">delta_t_load_pola_cali</span> <span class="o">=</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">[</span><span class="s1">&#39;delta_t_load_pola_cali&#39;</span><span class="p">]</span>  <span class="c1"># (s).</span>
             <span class="n">delta_t_break_pola_cali</span> <span class="o">=</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">[</span><span class="s1">&#39;delta_t_break_pola_cali&#39;</span><span class="p">]</span>  <span class="c1"># (s).</span>
-            <span class="n">i_exp_cali_t</span><span class="p">,</span> <span class="n">U_exp_cali_t</span> <span class="o">=</span> <span class="n">pola_exp_values_calibration</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">)</span>  <span class="c1"># (A.m-2, V).</span>
+            <span class="n">i_exp_cali_t</span><span class="p">,</span> <span class="n">U_exp_cali_t</span> <span class="o">=</span> <span class="n">pola_exp_values_calibration</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">voltage_zone</span><span class="p">)</span>  <span class="c1"># (A.m-2, V).</span>
             <span class="c1"># Calculation</span>
             <span class="n">delta_t_cali</span> <span class="o">=</span> <span class="n">delta_t_load_pola_cali</span> <span class="o">+</span> <span class="n">delta_t_break_pola_cali</span>  <span class="c1"># s. It is the time of one load.</span>
             <span class="n">t0_interval</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1085,7 +1182,8 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_initial_variable_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the initial values of the solver variables if it is not provided.</span>
-<span class="sd">        It is generated considering an equilibrium at the operating inputs without current.</span>
+<span class="sd">        It is generated considering an equilibrium inside the fuel cell with H2, O2 and N2, at the external pressure,</span>
+<span class="sd">        humidity and temperature, without flow or current.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1097,47 +1195,57 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
         <span class="n">current_density</span><span class="p">,</span> <span class="n">T_des</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;current_density&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;T_des&#39;</span><span class="p">]</span>
         <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Pa_des&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Pc_des&#39;</span><span class="p">]</span>
         <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Phi_a_des&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]</span>
-        <span class="n">Hmem</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hmem&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;kappa_co&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;i0_c_ref&#39;</span><span class="p">]</span>
-        <span class="n">kappa_c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;kappa_c&#39;</span><span class="p">]</span>
+        <span class="n">y_H2_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;y_H2_in&#39;</span><span class="p">]</span>
+        <span class="n">Hmem</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hmem&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;kappa_co&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;kappa_c&#39;</span><span class="p">]</span>
+        <span class="n">i0_d_c_ref</span><span class="p">,</span> <span class="n">i0_h_c_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;i0_d_c_ref&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;i0_h_c_ref&#39;</span><span class="p">]</span>
         <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;a_slim&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;b_slim&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;a_switch&#39;</span><span class="p">]</span>
-        <span class="n">n_gdl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;n_gdl&#39;</span><span class="p">]</span>
-
-        <span class="c1"># Mean value of the operating inputs</span>
-        <span class="n">Phi_des_moy</span> <span class="o">=</span> <span class="p">(</span><span class="n">Phi_a_des</span> <span class="o">+</span> <span class="n">Phi_c_des</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
-        <span class="n">P_des_moy</span> <span class="o">=</span> <span class="p">(</span><span class="n">Pa_des</span> <span class="o">+</span> <span class="n">Pc_des</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">nb_gc</span><span class="p">,</span> <span class="n">nb_gdl</span><span class="p">,</span> <span class="n">nb_mpl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;nb_gc&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;nb_gdl&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;nb_mpl&#39;</span><span class="p">]</span>
+        <span class="n">type_auxiliary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_auxiliary&#39;</span><span class="p">]</span>
 
         <span class="c1"># Initial fuel cell states</span>
         <span class="c1">#   Intermediate values</span>
-        <span class="n">T_ini</span> <span class="o">=</span> <span class="n">T_des</span>  <span class="c1"># K. It is the initial temperature in the fuel cell.</span>
+        <span class="n">T_ini</span> <span class="o">=</span> <span class="n">T_des</span>  <span class="c1"># K. It is the initial temperature in the fuel cell. For now, the temperature dynamic evolution</span>
+        <span class="c1">#                   is not considered inside the gas channel and bipolar plates.</span>
+        <span class="k">if</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_anodic_recirculation&quot;</span> <span class="ow">or</span> \
+                <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>
+            <span class="n">Pa_ini</span><span class="p">,</span> <span class="n">Pc_ini</span> <span class="o">=</span> <span class="n">Pext</span><span class="p">,</span> <span class="n">Pext</span>  <span class="c1"># Pa. It is the initial pressure in the fuel cell.</span>
+            <span class="n">Phi_a_ini</span><span class="p">,</span> <span class="n">Phi_c_ini</span> <span class="o">=</span> <span class="n">Phi_ext</span><span class="p">,</span> <span class="n">Phi_ext</span>  <span class="c1"># It is the initial relative humidity in the fuel cell.</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c1"># type_auxiliary == &quot;no_auxiliaries&quot;. For the no_auxiliaries case, the desired values are directly taken as initial values.</span>
+            <span class="n">Pa_ini</span><span class="p">,</span> <span class="n">Pc_ini</span> <span class="o">=</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="c1"># Indeed, the dynamics of the auxiliaries are not considered.</span>
+            <span class="n">Phi_a_ini</span><span class="p">,</span> <span class="n">Phi_c_ini</span> <span class="o">=</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span> <span class="c1"># Choosing other values would create an imbalance in the initial state.</span>
         <span class="n">Psat_ini</span> <span class="o">=</span> <span class="mi">101325</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">2.1794</span> <span class="o">+</span> <span class="mf">0.02953</span> <span class="o">*</span> <span class="p">(</span><span class="n">T_ini</span> <span class="o">-</span> <span class="mf">273.15</span><span class="p">)</span> <span class="o">-</span> <span class="mf">9.1837e-5</span> <span class="o">*</span> <span class="p">(</span><span class="n">T_ini</span> <span class="o">-</span> <span class="mf">273.15</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span>
                                    <span class="mf">1.4454e-7</span> <span class="o">*</span> <span class="p">(</span><span class="n">T_ini</span> <span class="o">-</span> <span class="mf">273.15</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
-        <span class="n">slim</span> <span class="o">=</span> <span class="n">a_slim</span> <span class="o">*</span> <span class="p">(</span><span class="n">Pc_des</span> <span class="o">/</span> <span class="mf">1e5</span><span class="p">)</span> <span class="o">+</span> <span class="n">b_slim</span>
+        <span class="n">slim</span> <span class="o">=</span> <span class="n">a_slim</span> <span class="o">*</span> <span class="p">(</span><span class="n">Pc_ini</span> <span class="o">/</span> <span class="mf">1e5</span><span class="p">)</span> <span class="o">+</span> <span class="n">b_slim</span>
         <span class="n">s_switch</span> <span class="o">=</span> <span class="n">a_switch</span> <span class="o">*</span> <span class="n">slim</span>
         <span class="c1">#   Initial fuel cell states</span>
-        <span class="n">C_v_ini</span> <span class="o">=</span> <span class="n">Phi_des_moy</span> <span class="o">*</span> <span class="n">Psat_ini</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_ini</span><span class="p">)</span>  <span class="c1"># mol.m-3. It is the initial vapor concentration.</span>
-        <span class="n">C_H2_ini</span> <span class="o">=</span> <span class="p">(</span><span class="n">P_des_moy</span> <span class="o">-</span> <span class="n">Phi_des_moy</span> <span class="o">*</span> <span class="n">Psat_ini</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_ini</span><span class="p">)</span>  <span class="c1"># mol.m-3. It is the initial H2 concentration</span>
-        <span class="c1">#                                                              in the fuel cell.</span>
-        <span class="n">C_O2_ini</span> <span class="o">=</span> <span class="n">yO2_ext</span> <span class="o">*</span> <span class="p">(</span><span class="n">P_des_moy</span> <span class="o">-</span> <span class="n">Phi_des_moy</span> <span class="o">*</span> <span class="n">Psat_ini</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_ini</span><span class="p">)</span>  <span class="c1"># mol.m-3. It is the initial O2</span>
+        <span class="n">C_v_a_ini</span> <span class="o">=</span> <span class="n">Phi_a_ini</span> <span class="o">*</span> <span class="n">Psat_ini</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_ini</span><span class="p">)</span>  <span class="c1"># mol.m-3. It is the initial vapor concentration.</span>
+        <span class="n">C_v_c_ini</span> <span class="o">=</span> <span class="n">Phi_c_ini</span> <span class="o">*</span> <span class="n">Psat_ini</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_ini</span><span class="p">)</span>  <span class="c1"># mol.m-3. It is the initial vapor concentration.</span>
+        <span class="n">C_O2_ini</span> <span class="o">=</span> <span class="n">y_O2_ext</span> <span class="o">*</span> <span class="p">(</span><span class="n">Pc_ini</span> <span class="o">-</span> <span class="n">Phi_c_ini</span> <span class="o">*</span> <span class="n">Psat_ini</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_ini</span><span class="p">)</span>  <span class="c1"># mol.m-3. It is the initial O2</span>
         <span class="c1">#                                                                        concentration in the fuel cell.</span>
-        <span class="n">C_N2_ini</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">yO2_ext</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">P_des_moy</span> <span class="o">-</span> <span class="n">Phi_des_moy</span> <span class="o">*</span> <span class="n">Psat_ini</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_ini</span><span class="p">)</span>  <span class="c1"># mol.m-3. It is the initial N2</span>
-        <span class="c1">#                                                                              concentration in the fuel cell.</span>
+        <span class="n">C_N2_cgc_ini</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y_O2_ext</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Pc_ini</span> <span class="o">-</span> <span class="n">Phi_c_ini</span> <span class="o">*</span> <span class="n">Psat_ini</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_ini</span><span class="p">)</span>  <span class="c1"># mol.m-3. It is the initial N2</span>
+        <span class="c1">#                                                                          concentration in the anode fuel cell.</span>
+        <span class="k">if</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>
+            <span class="n">C_H2_ini</span> <span class="o">=</span> <span class="n">y_H2_in</span> <span class="o">*</span> <span class="p">(</span><span class="n">Pa_ini</span> <span class="o">-</span> <span class="n">Phi_a_ini</span> <span class="o">*</span> <span class="n">Psat_ini</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_ini</span><span class="p">)</span>  <span class="c1"># mol.m-3. It is the initial H2</span>
+        <span class="c1">#                                                                        concentration in the fuel cell.</span>
+            <span class="n">C_N2_agc_ini</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y_H2_in</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Pa_ini</span> <span class="o">-</span> <span class="n">Phi_a_ini</span> <span class="o">*</span> <span class="n">Psat_ini</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_ini</span><span class="p">)</span>  <span class="c1"># mol.m-3. It is the initial N2</span>
+            <span class="c1">#                                                                       concentration in the anode fuel cell.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">C_H2_ini</span> <span class="o">=</span> <span class="p">(</span><span class="n">Pa_ini</span> <span class="o">-</span> <span class="n">Phi_a_ini</span> <span class="o">*</span> <span class="n">Psat_ini</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_ini</span><span class="p">)</span>  <span class="c1"># mol.m-3. It is the initial H2</span>
+            <span class="c1">#                                                                        concentration in the fuel cell.</span>
+            <span class="n">C_N2_agc_ini</span> <span class="o">=</span> <span class="mi">0</span>                                            <span class="c1"># mol.m-3. It is the initial N2</span>
+            <span class="c1">#                                                                      concentration in the anode fuel cell.</span>
         <span class="n">s_ini</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># It is the initial liquid water saturation in the fuel cell.</span>
-        <span class="n">lambda_mem_ini</span> <span class="o">=</span> <span class="n">lambda_eq</span><span class="p">(</span><span class="n">C_v_ini</span><span class="p">,</span> <span class="n">s_ini</span><span class="p">,</span> <span class="n">T_ini</span><span class="p">)</span>  <span class="c1"># It is the initial water content in the fuel cell.</span>
+        <span class="n">lambda_mem_ini</span> <span class="o">=</span> <span class="n">lambda_eq</span><span class="p">(</span><span class="n">C_v_c_ini</span><span class="p">,</span> <span class="n">s_ini</span><span class="p">,</span> <span class="n">T_ini</span><span class="p">)</span>  <span class="c1"># It is the initial water content in the fuel cell.</span>
         <span class="n">i_fc_ini</span> <span class="o">=</span> <span class="n">current_density</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_interval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
         <span class="n">i_n_ini</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">F</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_ini</span> <span class="o">/</span> <span class="n">Hmem</span> <span class="o">*</span> <span class="n">C_H2_ini</span> <span class="o">*</span> <span class="n">k_H2</span><span class="p">(</span><span class="n">lambda_mem_ini</span><span class="p">,</span> <span class="n">T_ini</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">)</span> <span class="o">+</span> \
                   <span class="mi">4</span> <span class="o">*</span> <span class="n">F</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_ini</span> <span class="o">/</span> <span class="n">Hmem</span> <span class="o">*</span> <span class="n">C_O2_ini</span> <span class="o">*</span> <span class="n">k_O2</span><span class="p">(</span><span class="n">lambda_mem_ini</span><span class="p">,</span> <span class="n">T_ini</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">)</span>
         <span class="n">f_drop_ini</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">tanh</span><span class="p">((</span><span class="mi">4</span> <span class="o">*</span> <span class="n">s_ini</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">slim</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">s_switch</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">slim</span> <span class="o">-</span> <span class="n">s_switch</span><span class="p">)))</span>
-        <span class="n">eta_c_ini</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">f_drop_ini</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_ini</span> <span class="o">/</span> <span class="p">(</span><span class="n">alpha_c</span> <span class="o">*</span> <span class="n">F</span><span class="p">)</span> <span class="o">*</span> \
-                    <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">i_fc_ini</span> <span class="o">+</span> <span class="n">i_n_ini</span><span class="p">)</span> <span class="o">/</span> <span class="n">i0_c_ref</span> <span class="o">*</span> <span class="p">(</span><span class="n">C_O2ref</span> <span class="o">/</span> <span class="n">C_O2_ini</span><span class="p">)</span> <span class="o">**</span> <span class="n">kappa_c</span><span class="p">)</span>  <span class="c1"># It is the initial</span>
+        <span class="n">eta_c_ini</span> <span class="o">=</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_ini</span> <span class="o">/</span> <span class="p">(</span><span class="n">alpha_c</span> <span class="o">*</span> <span class="n">F</span><span class="p">)</span> <span class="o">*</span> \
+                    <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">i_fc_ini</span> <span class="o">+</span> <span class="n">i_n_ini</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">i0_d_c_ref</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">f_drop_ini</span><span class="p">)</span> <span class="o">*</span> <span class="n">i0_h_c_ref</span> <span class="o">**</span> <span class="n">f_drop_ini</span><span class="p">)</span> <span class="o">*</span>
+                             <span class="p">(</span><span class="n">C_O2ref</span> <span class="o">/</span> <span class="n">C_O2_ini</span><span class="p">)</span> <span class="o">**</span> <span class="n">kappa_c</span><span class="p">)</span>  <span class="c1"># It is the initial</span>
         <span class="c1">#                                                                       cathode overpotential in the fuel cell.</span>
 
         <span class="c1"># Initial auxiliary system state</span>
-        <span class="n">Pasm_ini</span><span class="p">,</span> <span class="n">Paem_ini</span> <span class="o">=</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">P_des_moy</span>  <span class="c1"># Pa. It is the supply/exhaust manifold pressure at the anode side.</span>
-        <span class="n">Pcsm_ini</span><span class="p">,</span> <span class="n">Pcem_ini</span> <span class="o">=</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">P_des_moy</span>  <span class="c1"># Pa. It is the supply/exhaust manifold pressure at the cathode side.</span>
-        <span class="n">Phi_asm_ini</span><span class="p">,</span> <span class="n">Phi_aem_ini</span> <span class="o">=</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_des_moy</span>  <span class="c1"># It is the supply/exhaust manifold relative humidity</span>
-        <span class="c1">#                                                  at the anode side.</span>
-        <span class="n">Phi_csm_ini</span><span class="p">,</span> <span class="n">Phi_cem_ini</span> <span class="o">=</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">Phi_des_moy</span>  <span class="c1"># It is the supply/exhaust manifold relative humidity</span>
-        <span class="c1">#                                                  at the cathode side.</span>
         <span class="n">Wcp_ini</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># kg.s-1. It is the flow rate of the air compressor.</span>
         <span class="n">Wa_inj_ini</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># kg.s-1. It is the flow rate of the air compressor at the anode side.</span>
         <span class="n">Wc_inj_ini</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># kg.s-1. It is the flow rate of the air compressor at the cathode side.</span>
@@ -1145,30 +1253,42 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
         <span class="n">Abp_c_ini</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># It is the throttle area of the back pressure valve at the cathode.</span>
 
         <span class="c1"># Main variable initialization</span>
-        <span class="n">C_v_agc</span><span class="p">,</span> <span class="n">C_v_agdl</span><span class="p">,</span> <span class="n">C_v_ampl</span><span class="p">,</span> <span class="n">C_v_acl</span><span class="p">,</span> <span class="n">C_v_ccl</span><span class="p">,</span> <span class="n">C_v_cmpl</span><span class="p">,</span> <span class="n">C_v_cgdl</span><span class="p">,</span> <span class="n">C_v_cgc</span> <span class="o">=</span> <span class="p">[</span><span class="n">C_v_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">8</span>
+        <span class="n">C_v_agc</span><span class="p">,</span> <span class="n">C_v_agdl</span><span class="p">,</span> <span class="n">C_v_ampl</span><span class="p">,</span> <span class="n">C_v_acl</span> <span class="o">=</span> <span class="p">[</span><span class="n">C_v_a_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+        <span class="n">C_v_ccl</span><span class="p">,</span> <span class="n">C_v_cmpl</span><span class="p">,</span> <span class="n">C_v_cgdl</span><span class="p">,</span> <span class="n">C_v_cgc</span> <span class="o">=</span> <span class="p">[</span><span class="n">C_v_c_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
         <span class="n">s_agdl</span><span class="p">,</span> <span class="n">s_ampl</span><span class="p">,</span> <span class="n">s_acl</span><span class="p">,</span> <span class="n">s_ccl</span><span class="p">,</span> <span class="n">s_cmpl</span><span class="p">,</span> <span class="n">s_cgdl</span> <span class="o">=</span> <span class="p">[</span><span class="n">s_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">6</span>
         <span class="n">s_boundary</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Dirichlet boundary condition</span>
         <span class="n">lambda_acl</span><span class="p">,</span> <span class="n">lambda_mem</span><span class="p">,</span> <span class="n">lambda_ccl</span> <span class="o">=</span> <span class="p">[</span><span class="n">lambda_mem_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
         <span class="n">C_H2_agc</span><span class="p">,</span> <span class="n">C_H2_agdl</span><span class="p">,</span> <span class="n">C_H2_ampl</span><span class="p">,</span> <span class="n">C_H2_acl</span> <span class="o">=</span> <span class="p">[</span><span class="n">C_H2_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
         <span class="n">C_O2_ccl</span><span class="p">,</span> <span class="n">C_O2_cmpl</span><span class="p">,</span> <span class="n">C_O2_cgdl</span><span class="p">,</span> <span class="n">C_O2_cgc</span> <span class="o">=</span> <span class="p">[</span><span class="n">C_O2_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
-        <span class="n">C_N2</span> <span class="o">=</span> <span class="n">C_N2_ini</span>
+        <span class="k">if</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>
+            <span class="n">C_N2_agc</span><span class="p">,</span> <span class="n">C_N2_cgc</span> <span class="o">=</span> <span class="n">C_N2_agc_ini</span><span class="p">,</span> <span class="n">C_N2_cgc_ini</span> <span class="c1"># Test bench: simulated H2 recirculation which leads to N2 in the anode.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">C_N2_agc</span><span class="p">,</span> <span class="n">C_N2_cgc</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">C_N2_cgc_ini</span>
         <span class="n">T_agc</span><span class="p">,</span> <span class="n">T_agdl</span><span class="p">,</span> <span class="n">T_ampl</span><span class="p">,</span> <span class="n">T_acl</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">,</span> <span class="n">T_cmpl</span><span class="p">,</span> <span class="n">T_cgdl</span><span class="p">,</span> <span class="n">T_cgc</span> <span class="o">=</span> <span class="p">[</span><span class="n">T_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">9</span>
         <span class="n">eta_c</span> <span class="o">=</span> <span class="n">eta_c_ini</span>
-        <span class="n">Pasm</span><span class="p">,</span> <span class="n">Paem</span><span class="p">,</span> <span class="n">Pcsm</span><span class="p">,</span> <span class="n">Pcem</span> <span class="o">=</span> <span class="n">Pasm_ini</span><span class="p">,</span> <span class="n">Paem_ini</span><span class="p">,</span> <span class="n">Pcsm_ini</span><span class="p">,</span> <span class="n">Pcem_ini</span>
-        <span class="n">Phi_asm</span><span class="p">,</span> <span class="n">Phi_aem</span><span class="p">,</span> <span class="n">Phi_csm</span><span class="p">,</span> <span class="n">Phi_cem</span> <span class="o">=</span> <span class="n">Phi_asm_ini</span><span class="p">,</span> <span class="n">Phi_aem_ini</span><span class="p">,</span> <span class="n">Phi_csm_ini</span><span class="p">,</span> <span class="n">Phi_cem_ini</span>
+        <span class="n">Pasm</span><span class="p">,</span> <span class="n">Paem</span> <span class="o">=</span> <span class="p">[</span><span class="n">Pa_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="n">Pcsm</span><span class="p">,</span> <span class="n">Pcem</span> <span class="o">=</span> <span class="p">[</span><span class="n">Pc_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="n">Phi_asm</span><span class="p">,</span> <span class="n">Phi_aem</span> <span class="o">=</span> <span class="p">[</span><span class="n">Phi_a_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="n">Phi_csm</span><span class="p">,</span> <span class="n">Phi_cem</span> <span class="o">=</span> <span class="p">[</span><span class="n">Phi_c_ini</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
         <span class="n">Wcp</span><span class="p">,</span> <span class="n">Wa_inj</span><span class="p">,</span> <span class="n">Wc_inj</span><span class="p">,</span> <span class="n">Abp_a</span><span class="p">,</span> <span class="n">Abp_c</span> <span class="o">=</span> <span class="n">Wcp_ini</span><span class="p">,</span> <span class="n">Wa_inj_ini</span><span class="p">,</span> <span class="n">Wc_inj_ini</span><span class="p">,</span> <span class="n">Abp_a_ini</span><span class="p">,</span> <span class="n">Abp_c_ini</span>
 
         <span class="c1"># Gathering of the variables initial value into one list</span>
-        <span class="n">initial_variable_values</span> <span class="o">=</span> <span class="p">([</span><span class="n">C_v_agc</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_v_agdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_v_ampl</span><span class="p">,</span> <span class="n">C_v_acl</span><span class="p">,</span> <span class="n">C_v_ccl</span><span class="p">,</span> <span class="n">C_v_cmpl</span><span class="p">]</span> <span class="o">+</span>
-                                   <span class="p">[</span><span class="n">C_v_cgdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_v_cgc</span><span class="p">]</span> <span class="o">+</span>
-                                   <span class="p">[</span><span class="n">s_boundary</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">s_agdl</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">s_ampl</span><span class="p">,</span> <span class="n">s_acl</span><span class="p">,</span> <span class="n">s_ccl</span><span class="p">,</span> <span class="n">s_cmpl</span><span class="p">]</span> <span class="o">+</span>
-                                   <span class="p">[</span><span class="n">s_cgdl</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span>  <span class="p">[</span><span class="n">s_boundary</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">lambda_acl</span><span class="p">,</span> <span class="n">lambda_mem</span><span class="p">,</span> <span class="n">lambda_ccl</span><span class="p">]</span> <span class="o">+</span>
-                                   <span class="p">[</span><span class="n">C_H2_agc</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_H2_agdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_H2_ampl</span><span class="p">,</span> <span class="n">C_H2_acl</span><span class="p">,</span> <span class="n">C_O2_ccl</span><span class="p">,</span> <span class="n">C_O2_cmpl</span><span class="p">]</span> <span class="o">+</span>
-                                   <span class="p">[</span><span class="n">C_O2_cgdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_O2_cgc</span><span class="p">,</span> <span class="n">C_N2</span><span class="p">]</span> <span class="o">+</span>
-                                   <span class="p">[</span><span class="n">T_agc</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">T_agdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">T_ampl</span><span class="p">,</span> <span class="n">T_acl</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">,</span> <span class="n">T_cmpl</span><span class="p">]</span> <span class="o">+</span>
-                                   <span class="p">[</span><span class="n">T_cgdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">T_cgc</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">eta_c</span><span class="p">]</span> <span class="o">+</span>
-                                   <span class="p">[</span><span class="n">Pasm</span><span class="p">,</span> <span class="n">Paem</span><span class="p">,</span> <span class="n">Pcsm</span><span class="p">,</span> <span class="n">Pcem</span><span class="p">,</span> <span class="n">Phi_asm</span><span class="p">,</span> <span class="n">Phi_aem</span><span class="p">,</span> <span class="n">Phi_csm</span><span class="p">,</span> <span class="n">Phi_cem</span><span class="p">]</span> <span class="o">+</span>
-                                   <span class="p">[</span><span class="n">Wcp</span><span class="p">,</span> <span class="n">Wa_inj</span><span class="p">,</span> <span class="n">Wc_inj</span><span class="p">,</span> <span class="n">Abp_a</span><span class="p">,</span> <span class="n">Abp_c</span><span class="p">])</span>
+        <span class="n">initial_variable_values</span> <span class="o">=</span> <span class="p">([</span><span class="n">C_v_agc</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_gc</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_v_agdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_v_ampl</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_mpl</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_v_acl</span><span class="p">,</span> <span class="n">C_v_ccl</span><span class="p">]</span> <span class="o">+</span>
+                                   <span class="p">[</span><span class="n">C_v_cmpl</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_mpl</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_v_cgdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_v_cgc</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_gc</span> <span class="o">+</span>
+                                   <span class="p">[</span><span class="n">s_boundary</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">s_agdl</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">nb_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">s_ampl</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_mpl</span> <span class="o">+</span> <span class="p">[</span><span class="n">s_acl</span><span class="p">,</span> <span class="n">s_ccl</span><span class="p">]</span> <span class="o">+</span>
+                                   <span class="p">[</span><span class="n">s_cmpl</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_mpl</span> <span class="o">+</span> <span class="p">[</span><span class="n">s_cgdl</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">nb_gdl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">s_boundary</span><span class="p">]</span> <span class="o">+</span>
+                                   <span class="p">[</span><span class="n">lambda_acl</span><span class="p">,</span> <span class="n">lambda_mem</span><span class="p">,</span> <span class="n">lambda_ccl</span><span class="p">]</span> <span class="o">+</span>
+                                   <span class="p">[</span><span class="n">C_H2_agc</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_gc</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_H2_agdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_H2_ampl</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_mpl</span> <span class="o">+</span>
+                                   <span class="p">[</span><span class="n">C_H2_acl</span><span class="p">,</span> <span class="n">C_O2_ccl</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_O2_cmpl</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_mpl</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_O2_cgdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_gdl</span> <span class="o">+</span>
+                                   <span class="p">[</span><span class="n">C_O2_cgc</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_gc</span> <span class="o">+</span>
+                                   <span class="p">[</span><span class="n">C_N2_agc</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_gc</span> <span class="o">+</span> <span class="p">[</span><span class="n">C_N2_cgc</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_gc</span> <span class="o">+</span>
+                                   <span class="p">[</span><span class="n">T_agc</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_gc</span> <span class="o">+</span> <span class="p">[</span><span class="n">T_agdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">T_ampl</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_mpl</span> <span class="o">+</span> <span class="p">[</span><span class="n">T_acl</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">]</span> <span class="o">+</span>
+                                   <span class="p">[</span><span class="n">T_cmpl</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_mpl</span> <span class="o">+</span> <span class="p">[</span><span class="n">T_cgdl</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_gdl</span> <span class="o">+</span> <span class="p">[</span><span class="n">T_cgc</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_gc</span> <span class="o">+</span>
+                                   <span class="p">[</span><span class="n">eta_c</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span> <span class="ow">or</span> \
+                <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_anodic_recirculation&quot;</span><span class="p">:</span>
+                <span class="n">initial_variable_values</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">Pasm</span><span class="p">,</span> <span class="n">Paem</span><span class="p">,</span> <span class="n">Pcsm</span><span class="p">,</span> <span class="n">Pcem</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">Phi_asm</span><span class="p">,</span> <span class="n">Phi_aem</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">Phi_csm</span><span class="p">,</span> <span class="n">Phi_cem</span><span class="p">]</span> <span class="o">+</span>
+                                               <span class="p">[</span><span class="n">Wcp</span><span class="p">,</span> <span class="n">Wa_inj</span><span class="p">,</span> <span class="n">Wc_inj</span><span class="p">,</span> <span class="n">Abp_a</span><span class="p">,</span> <span class="n">Abp_c</span><span class="p">])</span>
 
         <span class="k">return</span> <span class="n">initial_variable_values</span>
 
@@ -1186,29 +1306,30 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
             <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sol</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">index</span><span class="p">]))</span>
 
         <span class="c1"># Recovery of more variables</span>
-        <span class="c1">#   The control variables should be reinitialized. To be reviewed.</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_current&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;step&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;t_control_Phi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;t_control_Phi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_a_des&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Phi_a_des&#39;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_display&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;no_display&quot;</span><span class="p">:</span>
+            <span class="c1">#   The control variables should be reinitialized. To be reviewed.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_current&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;step&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;t_control_Phi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;t_control_Phi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_a_des&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Phi_a_des&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]</span>
 
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sol</span><span class="o">.</span><span class="n">t</span><span class="p">)):</span>  <span class="c1"># For each time...</span>
-            <span class="c1"># ... recovery of i_fc.</span>
-            <span class="n">i_fc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s2">&quot;current_density&quot;</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
-            <span class="c1"># ... recovery of S_abs_acl, S_abs_ccl, Jmem_acl, Jmem_ccl, Pagc, Pcgc.</span>
-            <span class="n">last_solver_variables</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="p">}</span>
-            <span class="n">flows_recovery</span> <span class="o">=</span> <span class="n">calculate_flows</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="n">last_solver_variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">control_variables</span><span class="p">,</span>
-                                             <span class="n">i_fc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;S_abs_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;S_abs_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;J_lambda_acl_mem&#39;</span><span class="p">,</span> <span class="s1">&#39;J_lambda_mem_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;Pagc&#39;</span><span class="p">,</span> <span class="s1">&#39;Pcgc&#39;</span><span class="p">]:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">flows_recovery</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
-            <span class="c1"># ... recovery of Phi_a_des and Phi_c_des.</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;type_control&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Phi_des&quot;</span><span class="p">:</span>
-                <span class="n">sv</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;lambda_mem&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;lambda_mem&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="s1">&#39;s_ccl&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;s_ccl&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">]}</span>
-                <span class="n">control_operating_conditions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="n">sv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span>
-                                             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">control_variables</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Phi_a_des&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">control_variables</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sol</span><span class="o">.</span><span class="n">t</span><span class="p">)):</span>  <span class="c1"># For each time...</span>
+                <span class="c1"># ... recovery of i_fc.</span>
+                <span class="n">i_fc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s2">&quot;current_density&quot;</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+                <span class="c1"># ... recovery of S_abs_acl, S_abs_ccl, Jmem_acl, Jmem_ccl.</span>
+                <span class="n">last_solver_variables</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="p">}</span>
+                <span class="n">flows_recovery</span> <span class="o">=</span> <span class="n">calculate_flows</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="n">last_solver_variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">control_variables</span><span class="p">,</span>
+                                                 <span class="n">i_fc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;v_a_in&#39;</span><span class="p">,</span> <span class="s1">&#39;v_c_in&#39;</span><span class="p">,</span> <span class="s1">&#39;Pa_in&#39;</span><span class="p">,</span> <span class="s1">&#39;Pc_in&#39;</span><span class="p">]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">flows_recovery</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                <span class="c1"># ... recovery of Phi_a_des and Phi_c_des.</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;type_control&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Phi_des&quot;</span><span class="p">:</span>
+                    <span class="n">sv</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;lambda_mem&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;lambda_mem&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="s1">&#39;s_ccl&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;s_ccl&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">]}</span>
+                    <span class="n">control_operating_conditions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="n">sv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">control_variables</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Phi_a_des&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">control_variables</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">Display</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax3</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Display the plots of the program.</span>
@@ -1224,7 +1345,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Extraction of the operating inputs and parameters</span>
-        <span class="n">n_gdl</span><span class="p">,</span> <span class="n">type_fuel_cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;n_gdl&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">]</span>
+        <span class="n">nb_gdl</span><span class="p">,</span> <span class="n">type_fuel_cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;nb_gdl&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">]</span>
         <span class="n">type_current</span><span class="p">,</span> <span class="n">type_display</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_current&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_display&#39;</span><span class="p">]</span>
 
         <span class="c1"># Parameters&#39; preparation</span>
@@ -1248,7 +1369,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
                 <span class="n">plot_C_N2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>
                 <span class="n">plot_T</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">8</span><span class="p">])</span>
                 <span class="n">plot_Ucell</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span>
-                <span class="n">plot_P</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">10</span><span class="p">])</span>
+                <span class="n">plot_P</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">10</span><span class="p">])</span>
                 <span class="n">plot_Phi_a</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">11</span><span class="p">])</span>
                 <span class="n">plot_Phi_c</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">12</span><span class="p">])</span>
 
@@ -1267,7 +1388,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
                 <span class="bp">self</span><span class="o">.</span><span class="n">Saving_instructions</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="n">subfolder_name</span><span class="p">,</span> <span class="s2">&quot;step_current_Phi_a_1.pdf&quot;</span><span class="p">,</span> <span class="n">figs</span><span class="p">[</span><span class="mi">11</span><span class="p">])</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">Saving_instructions</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="n">subfolder_name</span><span class="p">,</span> <span class="s2">&quot;step_current_Phi_c_1.pdf&quot;</span><span class="p">,</span> <span class="n">figs</span><span class="p">[</span><span class="mi">12</span><span class="p">])</span>
 
-                <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
 
             <span class="k">elif</span> <span class="n">type_display</span> <span class="o">==</span> <span class="s2">&quot;synthetic&quot;</span><span class="p">:</span>
 
@@ -1279,9 +1400,12 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
                 <span class="n">plot_lambda</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
                 <span class="n">plot_C_H2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
                 <span class="n">plot_C_O2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-                <span class="n">plot_P</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+                <span class="n">plot_P</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
 
-                <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
+                <span class="n">plot_v</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">plot_Re_nb</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+                <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
 
         <span class="k">elif</span> <span class="n">type_current</span> <span class="o">==</span> <span class="s2">&quot;polarization&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">type_display</span> <span class="o">==</span> <span class="s2">&quot;multiple&quot;</span><span class="p">:</span>
@@ -1293,13 +1417,15 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
                 <span class="n">plot_Phi_des</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                 <span class="n">plot_lambda</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
                 <span class="n">plot_s</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax2</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                <span class="n">plot_T</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax2</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
 
-                <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
 
             <span class="k">elif</span> <span class="n">type_display</span> <span class="o">==</span> <span class="s2">&quot;synthetic&quot;</span><span class="p">:</span>
 
-                <span class="n">plot_polarisation_curve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">)</span>
-                <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
+                <span class="n">plot_polarisation_curve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">plot_s</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
 
             <span class="k">elif</span> <span class="n">type_display</span> <span class="o">==</span> <span class="s2">&quot;no_display&quot;</span><span class="p">:</span>
 
@@ -1312,7 +1438,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
                 <span class="n">plot_lambda</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
                 <span class="n">plot_s</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
-                <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
 
             <span class="k">elif</span> <span class="n">type_display</span> <span class="o">==</span> <span class="s2">&quot;synthetic&quot;</span><span class="p">:</span>
 
@@ -1363,7 +1489,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
         <span class="n">type_display</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_display&#39;</span><span class="p">]</span>
 
         <span class="c1"># Folder name</span>
-        <span class="n">subfolder_name</span> <span class="o">=</span> <span class="n">type_fuel_cell</span><span class="p">[:</span><span class="n">type_fuel_cell</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)]</span> <span class="k">if</span> <span class="n">type_fuel_cell</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">type_fuel_cell</span>
+        <span class="n">subfolder_name</span> <span class="o">=</span> <span class="n">type_fuel_cell</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c1"># For the step current</span>
         <span class="k">if</span> <span class="n">type_current</span> <span class="o">==</span> <span class="s2">&quot;step&quot;</span><span class="p">:</span>
@@ -1506,65 +1632,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 </table>
             <details class="quote">
               <summary>Source code in <code>model/AlphaPEM.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">435</span>
-<span class="normal">436</span>
-<span class="normal">437</span>
-<span class="normal">438</span>
-<span class="normal">439</span>
-<span class="normal">440</span>
-<span class="normal">441</span>
-<span class="normal">442</span>
-<span class="normal">443</span>
-<span class="normal">444</span>
-<span class="normal">445</span>
-<span class="normal">446</span>
-<span class="normal">447</span>
-<span class="normal">448</span>
-<span class="normal">449</span>
-<span class="normal">450</span>
-<span class="normal">451</span>
-<span class="normal">452</span>
-<span class="normal">453</span>
-<span class="normal">454</span>
-<span class="normal">455</span>
-<span class="normal">456</span>
-<span class="normal">457</span>
-<span class="normal">458</span>
-<span class="normal">459</span>
-<span class="normal">460</span>
-<span class="normal">461</span>
-<span class="normal">462</span>
-<span class="normal">463</span>
-<span class="normal">464</span>
-<span class="normal">465</span>
-<span class="normal">466</span>
-<span class="normal">467</span>
-<span class="normal">468</span>
-<span class="normal">469</span>
-<span class="normal">470</span>
-<span class="normal">471</span>
-<span class="normal">472</span>
-<span class="normal">473</span>
-<span class="normal">474</span>
-<span class="normal">475</span>
-<span class="normal">476</span>
-<span class="normal">477</span>
-<span class="normal">478</span>
-<span class="normal">479</span>
-<span class="normal">480</span>
-<span class="normal">481</span>
-<span class="normal">482</span>
-<span class="normal">483</span>
-<span class="normal">484</span>
-<span class="normal">485</span>
-<span class="normal">486</span>
-<span class="normal">487</span>
-<span class="normal">488</span>
-<span class="normal">489</span>
-<span class="normal">490</span>
-<span class="normal">491</span>
-<span class="normal">492</span>
-<span class="normal">493</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">493</span>
 <span class="normal">494</span>
 <span class="normal">495</span>
 <span class="normal">496</span>
@@ -1638,7 +1706,70 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 <span class="normal">564</span>
 <span class="normal">565</span>
 <span class="normal">566</span>
-<span class="normal">567</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">Display</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax3</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">567</span>
+<span class="normal">568</span>
+<span class="normal">569</span>
+<span class="normal">570</span>
+<span class="normal">571</span>
+<span class="normal">572</span>
+<span class="normal">573</span>
+<span class="normal">574</span>
+<span class="normal">575</span>
+<span class="normal">576</span>
+<span class="normal">577</span>
+<span class="normal">578</span>
+<span class="normal">579</span>
+<span class="normal">580</span>
+<span class="normal">581</span>
+<span class="normal">582</span>
+<span class="normal">583</span>
+<span class="normal">584</span>
+<span class="normal">585</span>
+<span class="normal">586</span>
+<span class="normal">587</span>
+<span class="normal">588</span>
+<span class="normal">589</span>
+<span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span>
+<span class="normal">596</span>
+<span class="normal">597</span>
+<span class="normal">598</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
+<span class="normal">601</span>
+<span class="normal">602</span>
+<span class="normal">603</span>
+<span class="normal">604</span>
+<span class="normal">605</span>
+<span class="normal">606</span>
+<span class="normal">607</span>
+<span class="normal">608</span>
+<span class="normal">609</span>
+<span class="normal">610</span>
+<span class="normal">611</span>
+<span class="normal">612</span>
+<span class="normal">613</span>
+<span class="normal">614</span>
+<span class="normal">615</span>
+<span class="normal">616</span>
+<span class="normal">617</span>
+<span class="normal">618</span>
+<span class="normal">619</span>
+<span class="normal">620</span>
+<span class="normal">621</span>
+<span class="normal">622</span>
+<span class="normal">623</span>
+<span class="normal">624</span>
+<span class="normal">625</span>
+<span class="normal">626</span>
+<span class="normal">627</span>
+<span class="normal">628</span>
+<span class="normal">629</span>
+<span class="normal">630</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">Display</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax3</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Display the plots of the program.</span>
 
 <span class="sd">    Parameters</span>
@@ -1652,7 +1783,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Extraction of the operating inputs and parameters</span>
-    <span class="n">n_gdl</span><span class="p">,</span> <span class="n">type_fuel_cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;n_gdl&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">]</span>
+    <span class="n">nb_gdl</span><span class="p">,</span> <span class="n">type_fuel_cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;nb_gdl&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">]</span>
     <span class="n">type_current</span><span class="p">,</span> <span class="n">type_display</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_current&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_display&#39;</span><span class="p">]</span>
 
     <span class="c1"># Parameters&#39; preparation</span>
@@ -1676,7 +1807,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
             <span class="n">plot_C_N2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>
             <span class="n">plot_T</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">8</span><span class="p">])</span>
             <span class="n">plot_Ucell</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span>
-            <span class="n">plot_P</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">10</span><span class="p">])</span>
+            <span class="n">plot_P</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">10</span><span class="p">])</span>
             <span class="n">plot_Phi_a</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">11</span><span class="p">])</span>
             <span class="n">plot_Phi_c</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">12</span><span class="p">])</span>
 
@@ -1695,7 +1826,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
             <span class="bp">self</span><span class="o">.</span><span class="n">Saving_instructions</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="n">subfolder_name</span><span class="p">,</span> <span class="s2">&quot;step_current_Phi_a_1.pdf&quot;</span><span class="p">,</span> <span class="n">figs</span><span class="p">[</span><span class="mi">11</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">Saving_instructions</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="n">subfolder_name</span><span class="p">,</span> <span class="s2">&quot;step_current_Phi_c_1.pdf&quot;</span><span class="p">,</span> <span class="n">figs</span><span class="p">[</span><span class="mi">12</span><span class="p">])</span>
 
-            <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
 
         <span class="k">elif</span> <span class="n">type_display</span> <span class="o">==</span> <span class="s2">&quot;synthetic&quot;</span><span class="p">:</span>
 
@@ -1707,9 +1838,12 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
             <span class="n">plot_lambda</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
             <span class="n">plot_C_H2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
             <span class="n">plot_C_O2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-            <span class="n">plot_P</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+            <span class="n">plot_P</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
 
-            <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
+            <span class="n">plot_v</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">plot_Re_nb</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+            <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
 
     <span class="k">elif</span> <span class="n">type_current</span> <span class="o">==</span> <span class="s2">&quot;polarization&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">type_display</span> <span class="o">==</span> <span class="s2">&quot;multiple&quot;</span><span class="p">:</span>
@@ -1721,13 +1855,15 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
             <span class="n">plot_Phi_des</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">plot_lambda</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">plot_s</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax2</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">plot_T</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax2</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
 
-            <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
 
         <span class="k">elif</span> <span class="n">type_display</span> <span class="o">==</span> <span class="s2">&quot;synthetic&quot;</span><span class="p">:</span>
 
-            <span class="n">plot_polarisation_curve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
+            <span class="n">plot_polarisation_curve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">plot_s</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
 
         <span class="k">elif</span> <span class="n">type_display</span> <span class="o">==</span> <span class="s2">&quot;no_display&quot;</span><span class="p">:</span>
 
@@ -1740,7 +1876,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
             <span class="n">plot_lambda</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">plot_s</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">ax1</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
-            <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>  <span class="c1"># A break is necessary to plot the new points in dynamic mode</span>
 
         <span class="k">elif</span> <span class="n">type_display</span> <span class="o">==</span> <span class="s2">&quot;synthetic&quot;</span><span class="p">:</span>
 
@@ -1839,57 +1975,57 @@ type_display.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>model/AlphaPEM.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">569</span>
-<span class="normal">570</span>
-<span class="normal">571</span>
-<span class="normal">572</span>
-<span class="normal">573</span>
-<span class="normal">574</span>
-<span class="normal">575</span>
-<span class="normal">576</span>
-<span class="normal">577</span>
-<span class="normal">578</span>
-<span class="normal">579</span>
-<span class="normal">580</span>
-<span class="normal">581</span>
-<span class="normal">582</span>
-<span class="normal">583</span>
-<span class="normal">584</span>
-<span class="normal">585</span>
-<span class="normal">586</span>
-<span class="normal">587</span>
-<span class="normal">588</span>
-<span class="normal">589</span>
-<span class="normal">590</span>
-<span class="normal">591</span>
-<span class="normal">592</span>
-<span class="normal">593</span>
-<span class="normal">594</span>
-<span class="normal">595</span>
-<span class="normal">596</span>
-<span class="normal">597</span>
-<span class="normal">598</span>
-<span class="normal">599</span>
-<span class="normal">600</span>
-<span class="normal">601</span>
-<span class="normal">602</span>
-<span class="normal">603</span>
-<span class="normal">604</span>
-<span class="normal">605</span>
-<span class="normal">606</span>
-<span class="normal">607</span>
-<span class="normal">608</span>
-<span class="normal">609</span>
-<span class="normal">610</span>
-<span class="normal">611</span>
-<span class="normal">612</span>
-<span class="normal">613</span>
-<span class="normal">614</span>
-<span class="normal">615</span>
-<span class="normal">616</span>
-<span class="normal">617</span>
-<span class="normal">618</span>
-<span class="normal">619</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">Save_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig3</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">632</span>
+<span class="normal">633</span>
+<span class="normal">634</span>
+<span class="normal">635</span>
+<span class="normal">636</span>
+<span class="normal">637</span>
+<span class="normal">638</span>
+<span class="normal">639</span>
+<span class="normal">640</span>
+<span class="normal">641</span>
+<span class="normal">642</span>
+<span class="normal">643</span>
+<span class="normal">644</span>
+<span class="normal">645</span>
+<span class="normal">646</span>
+<span class="normal">647</span>
+<span class="normal">648</span>
+<span class="normal">649</span>
+<span class="normal">650</span>
+<span class="normal">651</span>
+<span class="normal">652</span>
+<span class="normal">653</span>
+<span class="normal">654</span>
+<span class="normal">655</span>
+<span class="normal">656</span>
+<span class="normal">657</span>
+<span class="normal">658</span>
+<span class="normal">659</span>
+<span class="normal">660</span>
+<span class="normal">661</span>
+<span class="normal">662</span>
+<span class="normal">663</span>
+<span class="normal">664</span>
+<span class="normal">665</span>
+<span class="normal">666</span>
+<span class="normal">667</span>
+<span class="normal">668</span>
+<span class="normal">669</span>
+<span class="normal">670</span>
+<span class="normal">671</span>
+<span class="normal">672</span>
+<span class="normal">673</span>
+<span class="normal">674</span>
+<span class="normal">675</span>
+<span class="normal">676</span>
+<span class="normal">677</span>
+<span class="normal">678</span>
+<span class="normal">679</span>
+<span class="normal">680</span>
+<span class="normal">681</span>
+<span class="normal">682</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">Save_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig3</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Saves the plots. The names of the files are automatically generated according to the type_current and the</span>
 <span class="sd">    type_display.</span>
 
@@ -1908,7 +2044,7 @@ type_display.</p>
     <span class="n">type_display</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_display&#39;</span><span class="p">]</span>
 
     <span class="c1"># Folder name</span>
-    <span class="n">subfolder_name</span> <span class="o">=</span> <span class="n">type_fuel_cell</span><span class="p">[:</span><span class="n">type_fuel_cell</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)]</span> <span class="k">if</span> <span class="n">type_fuel_cell</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">type_fuel_cell</span>
+    <span class="n">subfolder_name</span> <span class="o">=</span> <span class="n">type_fuel_cell</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="c1"># For the step current</span>
     <span class="k">if</span> <span class="n">type_current</span> <span class="o">==</span> <span class="s2">&quot;step&quot;</span><span class="p">:</span>
@@ -2009,40 +2145,40 @@ type_display.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>model/AlphaPEM.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">621</span>
-<span class="normal">622</span>
-<span class="normal">623</span>
-<span class="normal">624</span>
-<span class="normal">625</span>
-<span class="normal">626</span>
-<span class="normal">627</span>
-<span class="normal">628</span>
-<span class="normal">629</span>
-<span class="normal">630</span>
-<span class="normal">631</span>
-<span class="normal">632</span>
-<span class="normal">633</span>
-<span class="normal">634</span>
-<span class="normal">635</span>
-<span class="normal">636</span>
-<span class="normal">637</span>
-<span class="normal">638</span>
-<span class="normal">639</span>
-<span class="normal">640</span>
-<span class="normal">641</span>
-<span class="normal">642</span>
-<span class="normal">643</span>
-<span class="normal">644</span>
-<span class="normal">645</span>
-<span class="normal">646</span>
-<span class="normal">647</span>
-<span class="normal">648</span>
-<span class="normal">649</span>
-<span class="normal">650</span>
-<span class="normal">651</span>
-<span class="normal">652</span>
-<span class="normal">653</span>
-<span class="normal">654</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">Saving_instructions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_folder</span><span class="p">,</span> <span class="n">subfolder_name</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">fig</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">684</span>
+<span class="normal">685</span>
+<span class="normal">686</span>
+<span class="normal">687</span>
+<span class="normal">688</span>
+<span class="normal">689</span>
+<span class="normal">690</span>
+<span class="normal">691</span>
+<span class="normal">692</span>
+<span class="normal">693</span>
+<span class="normal">694</span>
+<span class="normal">695</span>
+<span class="normal">696</span>
+<span class="normal">697</span>
+<span class="normal">698</span>
+<span class="normal">699</span>
+<span class="normal">700</span>
+<span class="normal">701</span>
+<span class="normal">702</span>
+<span class="normal">703</span>
+<span class="normal">704</span>
+<span class="normal">705</span>
+<span class="normal">706</span>
+<span class="normal">707</span>
+<span class="normal">708</span>
+<span class="normal">709</span>
+<span class="normal">710</span>
+<span class="normal">711</span>
+<span class="normal">712</span>
+<span class="normal">713</span>
+<span class="normal">714</span>
+<span class="normal">715</span>
+<span class="normal">716</span>
+<span class="normal">717</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">Saving_instructions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_folder</span><span class="p">,</span> <span class="n">subfolder_name</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">fig</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Gives the saving instructions for the figures.</span>
 
 <span class="sd">    Parameters</span>
@@ -2190,6 +2326,8 @@ applied electrical load, dimensions, and undetermined variables.</p>
                 <p>Dictionary containing the accessible physical parameters for the simulation. It contains:
     - Aact : float
         Active area of the cell in m² (accessible physical parameter).
+    - n_cell : int
+        Number of cells in the stack (accessible physical parameter).
     - Hagc : float
         Thickness of the anode gas channel in m (accessible physical parameter).
     Hcgc : float
@@ -2224,8 +2362,10 @@ applied electrical load, dimensions, and undetermined variables.</p>
         Compression ratio of the GDL (undetermined physical parameter).
     - e : float
         Capillary exponent (undetermined physical parameter).
-    - i0_c_ref : float
-        Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
+    - Re : float
+        Electron conduction resistance in Ω.m2 (undetermined physical parameter).
+    - i0_d_c_ref : float
+        Dry reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
     - kappa_co : float
         Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
     - kappa_c : float
@@ -2249,11 +2389,21 @@ applied electrical load, dimensions, and undetermined variables.</p>
               –
               <div class="doc-md-description">
                 <p>Dictionary containing the computing parameters for the simulation. It contains:
+    - Htl : float
+        Thickness of the transition layers in meters (computing parameter).
     - n_gdl : int
         Number of points considered in the GDL (computing parameter).
+    - n_mpl : int
+        Number of points considered in the MPL (computing parameter).
+    - n_tl : int
+        Number of points considered in the transitory layer (computing parameter).
     - t_purge : tuple
         Time parameters for purging the system (computing parameter).
         It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
+    - rtol : float
+        Relative tolerance for the solver (computing parameter).
+    - atol : float
+        Absolute tolerance for the solver (computing parameter).
     - type_fuel_cell : str
         Type of fuel cell configuration (computing parameter).
     - type_current : str
@@ -2299,7 +2449,8 @@ generated according to the data given in the current density parameters.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>model/AlphaPEM.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 41</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 40</span>
+<span class="normal"> 41</span>
 <span class="normal"> 42</span>
 <span class="normal"> 43</span>
 <span class="normal"> 44</span>
@@ -2502,7 +2653,29 @@ generated according to the data given in the current density parameters.</p>
 <span class="normal">241</span>
 <span class="normal">242</span>
 <span class="normal">243</span>
-<span class="normal">244</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">current_parameters</span><span class="p">,</span> <span class="n">accessible_physical_parameters</span><span class="p">,</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">current_parameters</span><span class="p">,</span> <span class="n">accessible_physical_parameters</span><span class="p">,</span>
              <span class="n">undetermined_physical_parameters</span><span class="p">,</span> <span class="n">computing_parameters</span><span class="p">,</span> <span class="n">initial_variable_values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
              <span class="n">time_interval</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialise all parameters defining a fuel cell stack operation: nominal operating conditions,</span>
@@ -2577,6 +2750,8 @@ generated according to the data given in the current density parameters.</p>
 <span class="sd">        Dictionary containing the accessible physical parameters for the simulation. It contains:</span>
 <span class="sd">            - Aact : float</span>
 <span class="sd">                Active area of the cell in m² (accessible physical parameter).</span>
+<span class="sd">            - n_cell : int</span>
+<span class="sd">                Number of cells in the stack (accessible physical parameter).</span>
 <span class="sd">            - Hagc : float</span>
 <span class="sd">                Thickness of the anode gas channel in m (accessible physical parameter).</span>
 <span class="sd">            Hcgc : float</span>
@@ -2605,8 +2780,10 @@ generated according to the data given in the current density parameters.</p>
 <span class="sd">                Compression ratio of the GDL (undetermined physical parameter).</span>
 <span class="sd">            - e : float</span>
 <span class="sd">                Capillary exponent (undetermined physical parameter).</span>
-<span class="sd">            - i0_c_ref : float</span>
-<span class="sd">                Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).</span>
+<span class="sd">            - Re : float</span>
+<span class="sd">                Electron conduction resistance in Ω.m2 (undetermined physical parameter).</span>
+<span class="sd">            - i0_d_c_ref : float</span>
+<span class="sd">                Dry reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).</span>
 <span class="sd">            - kappa_co : float</span>
 <span class="sd">                Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).</span>
 <span class="sd">            - kappa_c : float</span>
@@ -2624,11 +2801,21 @@ generated according to the data given in the current density parameters.</p>
 <span class="sd">                Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).</span>
 <span class="sd">    computing_parameters : dict</span>
 <span class="sd">        Dictionary containing the computing parameters for the simulation. It contains:</span>
+<span class="sd">            - Htl : float</span>
+<span class="sd">                Thickness of the transition layers in meters (computing parameter).</span>
 <span class="sd">            - n_gdl : int</span>
 <span class="sd">                Number of points considered in the GDL (computing parameter).</span>
+<span class="sd">            - n_mpl : int</span>
+<span class="sd">                Number of points considered in the MPL (computing parameter).</span>
+<span class="sd">            - n_tl : int</span>
+<span class="sd">                Number of points considered in the transitory layer (computing parameter).</span>
 <span class="sd">            - t_purge : tuple</span>
 <span class="sd">                Time parameters for purging the system (computing parameter).</span>
 <span class="sd">                It is the purge time interval &#39;purge_time&#39; and the time between two purges &#39;delta_purge&#39;.</span>
+<span class="sd">            - rtol : float</span>
+<span class="sd">                Relative tolerance for the solver (computing parameter).</span>
+<span class="sd">            - atol : float</span>
+<span class="sd">                Absolute tolerance for the solver (computing parameter).</span>
 <span class="sd">            - type_fuel_cell : str</span>
 <span class="sd">                Type of fuel cell configuration (computing parameter).</span>
 <span class="sd">            - type_current : str</span>
@@ -2666,20 +2853,29 @@ generated according to the data given in the current density parameters.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;C_v_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_cgdl&#39;</span><span class="p">,</span>
                                   <span class="s1">&#39;C_v_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;s_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;lambda_acl&#39;</span><span class="p">,</span>
                                   <span class="s1">&#39;lambda_mem&#39;</span><span class="p">,</span> <span class="s1">&#39;lambda_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_acl&#39;</span><span class="p">,</span>
-                                  <span class="s1">&#39;C_O2_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_N2&#39;</span><span class="p">,</span> <span class="s1">&#39;T_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;T_agdl&#39;</span><span class="p">,</span>
-                                  <span class="s1">&#39;T_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_mem&#39;</span><span class="p">,</span> <span class="s1">&#39;T_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;eta_c&#39;</span><span class="p">,</span> <span class="s1">&#39;Pasm&#39;</span><span class="p">,</span>
-                                  <span class="s1">&#39;Paem&#39;</span><span class="p">,</span> <span class="s1">&#39;Pcsm&#39;</span><span class="p">,</span> <span class="s1">&#39;Pcem&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_asm&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_aem&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_csm&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_cem&#39;</span><span class="p">,</span> <span class="s1">&#39;Wcp&#39;</span><span class="p">,</span>
-                                  <span class="s1">&#39;Wa_inj&#39;</span><span class="p">,</span> <span class="s1">&#39;Wc_inj&#39;</span><span class="p">,</span> <span class="s1">&#39;Abp_a&#39;</span><span class="p">,</span> <span class="s1">&#39;Abp_c&#39;</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names_extension</span><span class="p">()</span>  <span class="c1"># Several points are considered in each GDL and must be inserted into</span>
-    <span class="c1">#                                        the solver_variable_names.</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">all_variable_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Ucell&#39;</span><span class="p">,</span> <span class="s1">&#39;S_abs_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;S_abs_ccl&#39;</span><span class="p">]</span> <span class="o">+</span> \
-                              <span class="p">[</span><span class="s1">&#39;J_lambda_acl_mem&#39;</span><span class="p">,</span> <span class="s1">&#39;J_lambda_mem_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;Pagc&#39;</span><span class="p">,</span> <span class="s1">&#39;Pcgc&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_a_des&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]</span>
+                                  <span class="s1">&#39;C_O2_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_N2_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_N2_cgc&#39;</span><span class="p">,</span> <span class="s1">&#39;T_agc&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;T_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_acl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_mem&#39;</span><span class="p">,</span> <span class="s1">&#39;T_ccl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgc&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;eta_c&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_auxiliary&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span> <span class="ow">or</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_auxiliary&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_anodic_recirculation&quot;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;Pasm&#39;</span><span class="p">,</span> <span class="s1">&#39;Paem&#39;</span><span class="p">,</span> <span class="s1">&#39;Pcsm&#39;</span><span class="p">,</span> <span class="s1">&#39;Pcem&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_asm&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_aem&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_csm&#39;</span><span class="p">,</span>
+                                           <span class="s1">&#39;Phi_cem&#39;</span><span class="p">,</span> <span class="s1">&#39;Wcp&#39;</span><span class="p">,</span> <span class="s1">&#39;Wa_inj&#39;</span><span class="p">,</span> <span class="s1">&#39;Wc_inj&#39;</span><span class="p">,</span> <span class="s1">&#39;Abp_a&#39;</span><span class="p">,</span> <span class="s1">&#39;Abp_c&#39;</span><span class="p">])</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names_extension</span><span class="p">()</span>  <span class="c1"># Several points are considered in each GC, GDL and MPL. This must be</span>
+    <span class="c1">#                                        inserted into the solver_variable_names.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">all_variable_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Ucell&#39;</span><span class="p">,</span> <span class="s1">&#39;v_a_in&#39;</span><span class="p">,</span> <span class="s1">&#39;v_c_in&#39;</span><span class="p">,</span> <span class="s1">&#39;Pa_in&#39;</span><span class="p">,</span> <span class="s1">&#39;Pc_in&#39;</span><span class="p">]</span> <span class="o">+</span> \
+                                                           <span class="p">[</span><span class="s1">&#39;Phi_a_des&#39;</span><span class="p">,</span> <span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_variable_names</span><span class="p">}</span>
 
     <span class="c1"># Initialize the control_variables dictionary.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">control_variables</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;t_control_Phi&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
                               <span class="s1">&#39;Phi_a_des&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Phi_a_des&#39;</span><span class="p">],</span>
                               <span class="s1">&#39;Phi_c_des&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]}</span>
+
+    <span class="c1"># Temporary action: simulations with auxiliaries are in reconstruction.</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_auxiliary&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;no_auxiliary&quot;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_auxiliary&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;no_auxiliary&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Auxiliary considerations are temporarily removed, as they require reconstruction.&quot;</span><span class="p">)</span>
 
     <span class="c1"># Create the dynamic evolution.</span>
     <span class="c1">#       Create time intervals</span>
@@ -2697,7 +2893,7 @@ generated according to the data given in the current density parameters.</p>
     <span class="c1">#       Resolution of the system of differential equations.</span>
     <span class="n">event_negative</span><span class="o">.</span><span class="n">terminal</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Integration is stopped if one of the crucial variables becomes negative.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">sol</span> <span class="o">=</span> <span class="n">solve_ivp</span><span class="p">(</span><span class="n">dydt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_interval</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_variable_values</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;BDF&#39;</span><span class="p">,</span>
-                         <span class="n">rtol</span> <span class="o">=</span> <span class="mf">1e-5</span><span class="p">,</span> <span class="n">atol</span> <span class="o">=</span> <span class="mf">1e-8</span><span class="p">,</span> <span class="n">events</span><span class="o">=</span><span class="n">event_negative</span><span class="p">,</span>
+                         <span class="n">rtol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;rtol&#39;</span><span class="p">],</span> <span class="n">atol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;atol&#39;</span><span class="p">],</span> <span class="n">events</span><span class="o">=</span><span class="n">event_negative</span><span class="p">,</span>
                          <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="p">,</span>
                                <span class="bp">self</span><span class="o">.</span><span class="n">control_variables</span><span class="p">))</span>
 
@@ -2727,29 +2923,51 @@ generated according to the data given in the current density parameters.</p>
 
             <details class="quote">
               <summary>Source code in <code>model/AlphaPEM.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">solver_variable_names_extension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">solver_variable_names_extension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Several points are considered in each GDL and must be inserted into the solver_variable_names.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">new_points_location</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;C_v_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgdl&#39;</span><span class="p">]</span>
+    <span class="n">new_points_location</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;C_v_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_v_cgc&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;s_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;s_cgdl&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;C_H2_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_H2_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;C_O2_cgc&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;C_N2_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;C_N2_cgc&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;T_agc&#39;</span><span class="p">,</span> <span class="s1">&#39;T_agdl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_ampl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cmpl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgdl&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cgc&#39;</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">new_points_location</span><span class="p">:</span>
         <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">variable</span><span class="p">)</span>
         <span class="c1"># Delete the previous points</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
         <span class="c1"># Increase the number of points</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="p">[</span><span class="n">index</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>
-                                                   <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;n_gdl&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">variable</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;gc&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="p">[</span><span class="n">index</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>
+                                                       <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;nb_gc&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">variable</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;gdl&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="p">[</span><span class="n">index</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>
+                                                       <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;nb_gdl&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="k">elif</span> <span class="n">variable</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;mpl&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">solver_variable_names</span><span class="p">[</span><span class="n">index</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>
+                                                       <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;nb_mpl&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

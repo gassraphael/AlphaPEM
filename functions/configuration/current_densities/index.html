@@ -199,12 +199,7 @@ parameters : dict
 </details>
             <details class="quote">
               <summary>Source code in <code>configuration/current_densities.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">158</span>
 <span class="normal">159</span>
 <span class="normal">160</span>
 <span class="normal">161</span>
@@ -242,7 +237,12 @@ parameters : dict
 <span class="normal">193</span>
 <span class="normal">194</span>
 <span class="normal">195</span>
-<span class="normal">196</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">EIS_current</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">EIS_current</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Represents a current density used for creating an EIS curve and Bode diagrams.</span>
 <span class="sd">    The current density is first equilibrated at i_EIS A.m-2 from 0 to t0_EIS seconds using a step increase.</span>
@@ -303,11 +303,11 @@ parameters : dict
 
     <div class="doc doc-contents ">
 
-        <p>This function represents a current density used for creating a polarization curve. For the first delta_t_ini_step seconds, the current
-density is set to 0 A.m-2 to allow the internal states of the fuel cell to stabilise. Then, the current density
-increases by the value of delta_i_pola every delta_t, following C∞ step current increments, until it reaches
-i_max_pola. Each increment lasts for delta_t_load_pola seconds. After each increment, there is a pause of
-delta_t_break_pola seconds to allow the stack to reach equilibrium.</p>
+        <p>This function represents a current density used for creating a polarization curve. For the first
+delta_t_ini_step seconds, the current density is set to i_ini A.m-2 to allow the internal states of the fuel cell to
+stabilise. Then, the current density increases by the value of delta_i_pola every delta_t, following C∞ step current
+increments, until it reaches i_max_pola. Each increment lasts for delta_t_load_pola seconds. After each increment,
+there is a pause of delta_t_break_pola seconds to allow the stack to reach equilibrium.</p>
 
 
 <details class="parameters:" open>
@@ -325,12 +325,7 @@ parameters : dict
 </details>
             <details class="quote">
               <summary>Source code in <code>configuration/current_densities.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 58</span>
-<span class="normal"> 59</span>
-<span class="normal"> 60</span>
-<span class="normal"> 61</span>
-<span class="normal"> 62</span>
-<span class="normal"> 63</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 63</span>
 <span class="normal"> 64</span>
 <span class="normal"> 65</span>
 <span class="normal"> 66</span>
@@ -370,12 +365,17 @@ parameters : dict
 <span class="normal">100</span>
 <span class="normal">101</span>
 <span class="normal">102</span>
-<span class="normal">103</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">polarization_current</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; This function represents a current density used for creating a polarization curve. For the first delta_t_ini_step seconds, the current</span>
-<span class="sd">    density is set to 0 A.m-2 to allow the internal states of the fuel cell to stabilise. Then, the current density</span>
-<span class="sd">    increases by the value of delta_i_pola every delta_t, following C∞ step current increments, until it reaches</span>
-<span class="sd">    i_max_pola. Each increment lasts for delta_t_load_pola seconds. After each increment, there is a pause of</span>
-<span class="sd">    delta_t_break_pola seconds to allow the stack to reach equilibrium.</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">polarization_current</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; This function represents a current density used for creating a polarization curve. For the first</span>
+<span class="sd">    delta_t_ini_step seconds, the current density is set to i_ini A.m-2 to allow the internal states of the fuel cell to</span>
+<span class="sd">    stabilise. Then, the current density increases by the value of delta_i_pola every delta_t, following C∞ step current</span>
+<span class="sd">    increments, until it reaches i_max_pola. Each increment lasts for delta_t_load_pola seconds. After each increment,</span>
+<span class="sd">    there is a pause of delta_t_break_pola seconds to allow the stack to reach equilibrium.</span>
 
 <span class="sd">    Parameters:</span>
 <span class="sd">    ----------</span>
@@ -453,12 +453,7 @@ parameters : dict
 </details>
             <details class="quote">
               <summary>Source code in <code>configuration/current_densities.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">111</span>
 <span class="normal">112</span>
 <span class="normal">113</span>
 <span class="normal">114</span>
@@ -497,7 +492,12 @@ parameters : dict
 <span class="normal">147</span>
 <span class="normal">148</span>
 <span class="normal">149</span>
-<span class="normal">150</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">polarization_current_for_calibration</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">polarization_current_for_calibration</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function represents a current density used for creating a polarisation curve dedicated to the calibration of</span>
 <span class="sd">    a specific fuel cell. The principle is similar to the polarization_current function, but it uses experimental values</span>
 <span class="sd">    for the current density load.</span>
@@ -522,8 +522,8 @@ parameters : dict
     <span class="n">delta_t_load_pola_cali</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;pola_current_for_cali_parameters&#39;</span><span class="p">][</span><span class="s1">&#39;delta_t_load_pola_cali&#39;</span><span class="p">]</span>  <span class="c1"># (s).</span>
     <span class="c1">#   Breaking time for one step current, for the stabilisation of the internal states.</span>
     <span class="n">delta_t_break_pola_cali</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;pola_current_for_cali_parameters&#39;</span><span class="p">][</span><span class="s1">&#39;delta_t_break_pola_cali&#39;</span><span class="p">]</span>  <span class="c1"># (s).</span>
-    <span class="n">type_fuel_cell</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">]</span>  <span class="c1"># The fuel cell for which the calibration is performed.</span>
-    <span class="n">i_exp_cali_t</span><span class="p">,</span> <span class="n">U_exp_cali_t</span> <span class="o">=</span> <span class="n">pola_exp_values_calibration</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">)</span>  <span class="c1"># (A.m-2, V). It is the experimental</span>
+    <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">voltage_zone</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;voltage_zone&#39;</span><span class="p">]</span>  <span class="c1"># The fuel cell for which the calibration is performed.</span>
+    <span class="n">i_exp_cali_t</span><span class="p">,</span> <span class="n">U_exp_cali_t</span> <span class="o">=</span> <span class="n">pola_exp_values_calibration</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">voltage_zone</span><span class="p">)</span>  <span class="c1"># (A.m-2, V). It is the experimental</span>
     <span class="c1">#                                                           current density and voltage values for the calibration.</span>
 
     <span class="c1"># Calculation of the time parameters</span>
@@ -560,9 +560,10 @@ parameters : dict
     <div class="doc doc-contents ">
 
         <p>This function represents a step current density experiment. For the first delta_t_ini_step seconds, the current
-density is set to 0 A.m-2 to allow the internal states of the fuel cell to stabilise. Then, the current density
-increases from 0 to i_step A.m-2 in a step change over delta_t_load seconds. Finally, the current density remains at
-i_step A.m-2. This is a C∞ function, which is advantageous for enhancing the overall stability of the results.</p>
+density is set to i_ini A.m-2 to allow the internal states of the fuel cell to stabilise. Then, the current density
+increases from i_ini to i_step A.m-2 in a step change over delta_t_load seconds. Finally, the current density
+remains at i_step A.m-2.
+This is a C∞ function, which is advantageous for enhancing the overall stability of the results.</p>
 
 
 <details class="parameters:" open>
@@ -608,11 +609,17 @@ parameters : dict
 <span class="normal">52</span>
 <span class="normal">53</span>
 <span class="normal">54</span>
-<span class="normal">55</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">step_current</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">step_current</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; This function represents a step current density experiment. For the first delta_t_ini_step seconds, the current</span>
-<span class="sd">    density is set to 0 A.m-2 to allow the internal states of the fuel cell to stabilise. Then, the current density</span>
-<span class="sd">    increases from 0 to i_step A.m-2 in a step change over delta_t_load seconds. Finally, the current density remains at</span>
-<span class="sd">    i_step A.m-2. This is a C∞ function, which is advantageous for enhancing the overall stability of the results.</span>
+<span class="sd">    density is set to i_ini A.m-2 to allow the internal states of the fuel cell to stabilise. Then, the current density</span>
+<span class="sd">    increases from i_ini to i_step A.m-2 in a step change over delta_t_load seconds. Finally, the current density</span>
+<span class="sd">    remains at i_step A.m-2.</span>
+<span class="sd">    This is a C∞ function, which is advantageous for enhancing the overall stability of the results.</span>
 
 <span class="sd">    Parameters:</span>
 <span class="sd">    ----------</span>
@@ -630,13 +637,17 @@ parameters : dict
     <span class="c1"># Extraction of the parameters</span>
     <span class="c1">#   Initial time at zero current density for the stabilisation of the internal states.</span>
     <span class="n">delta_t_ini_step</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;step_current_parameters&#39;</span><span class="p">][</span><span class="s1">&#39;delta_t_ini_step&#39;</span><span class="p">]</span> <span class="c1"># (s).</span>
+    <span class="c1">#   Initial current density used for the stabilisation of the internal states.</span>
+    <span class="n">i_ini</span> <span class="o">=</span> <span class="mf">1.0e4</span>  <span class="c1"># (A.m-2). This is the standard value for the initialisation.</span>
     <span class="c1">#   Loading time for the step current density function, from 0 to i_step.</span>
     <span class="n">delta_t_load_step</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;step_current_parameters&#39;</span><span class="p">][</span><span class="s1">&#39;delta_t_load_step&#39;</span><span class="p">]</span> <span class="c1"># (s).</span>
     <span class="c1">#   Current density for the step current density function.</span>
     <span class="n">i_step</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;step_current_parameters&#39;</span><span class="p">][</span><span class="s1">&#39;i_step&#39;</span><span class="p">]</span> <span class="c1"># (A.m-2).</span>
 
     <span class="c1"># Step current density</span>
-    <span class="k">return</span> <span class="n">i_step</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">delta_t_ini_step</span> <span class="o">-</span> <span class="p">(</span><span class="n">delta_t_load_step</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">delta_t_load_step</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)))</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">i_ini</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="p">(</span><span class="n">delta_t_load_step</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">delta_t_load_step</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)))</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> \
+           <span class="p">(</span><span class="n">i_step</span> <span class="o">-</span> <span class="n">i_ini</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">delta_t_ini_step</span> <span class="o">-</span> <span class="p">(</span><span class="n">delta_t_load_step</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span> <span class="o">/</span>
+                                               <span class="p">(</span><span class="n">delta_t_load_step</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)))</span> <span class="o">/</span> <span class="mi">2</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

@@ -183,64 +183,90 @@ clicked.</p>
 
             <details class="quote">
               <summary>Source code in <code>GUI.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">418</span>
-<span class="normal">419</span>
-<span class="normal">420</span>
-<span class="normal">421</span>
-<span class="normal">422</span>
-<span class="normal">423</span>
-<span class="normal">424</span>
-<span class="normal">425</span>
-<span class="normal">426</span>
-<span class="normal">427</span>
-<span class="normal">428</span>
-<span class="normal">429</span>
-<span class="normal">430</span>
-<span class="normal">431</span>
-<span class="normal">432</span>
-<span class="normal">433</span>
-<span class="normal">434</span>
-<span class="normal">435</span>
-<span class="normal">436</span>
-<span class="normal">437</span>
-<span class="normal">438</span>
-<span class="normal">439</span>
-<span class="normal">440</span>
-<span class="normal">441</span>
-<span class="normal">442</span>
-<span class="normal">443</span>
-<span class="normal">444</span>
-<span class="normal">445</span>
-<span class="normal">446</span>
-<span class="normal">447</span>
-<span class="normal">448</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">448</span>
 <span class="normal">449</span>
 <span class="normal">450</span>
 <span class="normal">451</span>
 <span class="normal">452</span>
 <span class="normal">453</span>
-<span class="normal">454</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">about</span><span class="p">():</span>
+<span class="normal">454</span>
+<span class="normal">455</span>
+<span class="normal">456</span>
+<span class="normal">457</span>
+<span class="normal">458</span>
+<span class="normal">459</span>
+<span class="normal">460</span>
+<span class="normal">461</span>
+<span class="normal">462</span>
+<span class="normal">463</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span>
+<span class="normal">471</span>
+<span class="normal">472</span>
+<span class="normal">473</span>
+<span class="normal">474</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span>
+<span class="normal">489</span>
+<span class="normal">490</span>
+<span class="normal">491</span>
+<span class="normal">492</span>
+<span class="normal">493</span>
+<span class="normal">494</span>
+<span class="normal">495</span>
+<span class="normal">496</span>
+<span class="normal">497</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">about</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function displays information about the program and its author in a dialog box when the &quot;About&quot; button is</span>
 <span class="sd">    clicked.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;AlphaPEM is an open-source software package for simulating proton exchange membrane fuel cell (PEMFC) &quot;</span> \
-          <span class="s2">&quot;systems using physics-based models for embedded applications. </span><span class="se">\n</span><span class="s2">It is based on a physics-based, &quot;</span> \
-          <span class="s2">&quot;one-dimensional (1D), dynamic, two-phase, and isothermal model. It can quickly simulate the internal &quot;</span> \
-          <span class="s2">&quot;states and voltage dynamics of PEMFC systems, and produce polarization and EIS curves. It can also &quot;</span> \
-          <span class="s2">&quot;automatically calibrate the undetermined parameters of the model to simulate a given real fuel cell &quot;</span> \
-          <span class="s2">&quot;system.&quot;</span> \
-          <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">AlphaPEM is firstly developed by Raphaël Gass during his PhD thesis from 2021 to 2024, supervised by &quot;</span> \
-          <span class="s2">&quot;Prof. Zhongliang Li, Prof. Rachid Outbib, Prof. Samir Jemei and Prof. Daniel Hissel. </span><span class="se">\n</span><span class="s2">It has been &quot;</span> \
-          <span class="s2">&quot;supported by French National Research Agency via project DEAL (Grant no. ANR-20-CE05-0016-01), the Region &quot;</span> \
-          <span class="s2">&quot;Provence-Alpes-Côte d’Azur, the EIPHI Graduate School (contract ANR-17-EURE-0002) and the Region &quot;</span> \
-          <span class="s2">&quot;Bourgogne Franche-Comté.&quot;</span> \
-          <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">It is related to the following articles:&quot;</span> \
-          <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">    - Gass et al 2024 J. Electrochem. Soc. https://doi.org/10.1149/1945-7111/ad305a,&quot;</span> \
-          <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">    - Gass et al 2024 SSRN http://dx.doi.org/10.2139/ssrn.4812343.&quot;</span> \
-          <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">More information can be found in:&quot;</span> \
-          <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">    - GitHub webpage: https://github.com/gassraphael/AlphaPEM&quot;</span> \
-          <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">    - Documentation webpage: to do&quot;</span> \
-          <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">If you want to contact me, please send an email to: gassraphael@proton.me.&quot;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;AlphaPEM is an open-source software package for simulating proton exchange membrane fuel cell (PEMFC) </span>
+<span class="s2">     systems using physics-based models for embedded applications. It is based on a physics-based, finite-volume,</span>
+<span class="s2">     one-dimensional (1D), dynamic, two-phase, and non-isothermal model. It can quickly simulate the internal states and </span>
+<span class="s2">     voltage dynamics of PEMFC systems, and produce polarization and EIS curves. It can also automatically calibrate </span>
+<span class="s2">     the undetermined parameters of the model to simulate a given real fuel cell system.</span>
+
+<span class="s2">     AlphaPEM is firstly developed by Raphaël Gass during his PhD thesis in control engineering at the LIS Laboratory in </span>
+<span class="s2">     Aix-Marseille University, and in co-supervision with FEMTO-ST Institute, within the FCLab, in Franche-Comté </span>
+<span class="s2">     University, from 2021 to 2024. This work has been supervised by Prof. Zhongliang Li (FEMTO-ST), Prof. Rachid Outbib </span>
+<span class="s2">     (LIS), Prof. Samir Jemei (FEMTO-ST) and Prof. Daniel Hissel (FEMTO-ST). It has been supported by French National </span>
+<span class="s2">     Research Agency via project DEAL (Grant no. ANR-20-CE05-0016-01, https://deal.lis-lab.fr/), the Region </span>
+<span class="s2">     Provence-Alpes-Côte d’Azur, the EIPHI Graduate School (contract ANR-17-EURE-0002) and the Region Bourgogne </span>
+<span class="s2">     Franche-Comté.</span>
+
+<span class="s2">     The development of AlphaPEM was subsequently continued by Raphaël Gass during his postdoctoral research from 2025 </span>
+<span class="s2">     to 2027 at ENERGY-Lab, University of Reunion island, in partnership with the ZSW Institute in Ulm, Germany. </span>
+<span class="s2">     This work was supervised by Prof. Michel Benne (ENERGY-Lab), Associate Prof. Cédric Damour (ENERGY-Lab), Associate</span>
+<span class="s2">     Prof. Dominique Grondin (ENERGY-Lab), and Dr. Florian Wilhelm (ZSW). It has been supported by European FEDER funds </span>
+<span class="s2">     via project OPUS-H2 (https://www.energylab.re/projets/projets-en-cours/opus-h2/) and the Region Reunion.</span>
+
+<span class="s2">     It is related to the following articles:</span>
+<span class="s2">         - Gass et al 2024 J. Electrochem. Soc. https://doi.org/10.1149/1945-7111/ad305a,</span>
+<span class="s2">         - Gass et al 2025 I.J. of Hydrogen Energy https://doi.org/10.1016/j.ijhydene.2024.11.374.</span>
+<span class="s2">         - Gass et al 2025 SoftwareX https://doi.org/10.1016/j.softx.2024.102002.</span>
+
+<span class="s2">     More information can be found in:</span>
+<span class="s2">         - AlphaPEM GitHub webpage: https://github.com/gassraphael/AlphaPEM</span>
+<span class="s2">         - AlphaPEM documentation webpage: https://gassraphael.github.io/AlphaPEM/</span>
+<span class="s2">         - Author webpage: https://gassraphael.github.io/</span>
+
+<span class="s2">     If you want to contact me, please send an email to: raphael.gass@univ-reunion.fr.&quot;&quot;&quot;</span>
 
     <span class="c1"># Create a new top-level window</span>
     <span class="n">about_window</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Toplevel</span><span class="p">()</span>
@@ -350,36 +376,36 @@ is valid, it then calls the show_current_button function to perform the requeste
 </table>
             <details class="quote">
               <summary>Source code in <code>GUI.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span>
-<span class="normal">306</span>
-<span class="normal">307</span>
-<span class="normal">308</span>
-<span class="normal">309</span>
-<span class="normal">310</span>
-<span class="normal">311</span>
-<span class="normal">312</span>
-<span class="normal">313</span>
-<span class="normal">314</span>
-<span class="normal">315</span>
-<span class="normal">316</span>
-<span class="normal">317</span>
-<span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span>
-<span class="normal">323</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">323</span>
 <span class="normal">324</span>
 <span class="normal">325</span>
 <span class="normal">326</span>
 <span class="normal">327</span>
 <span class="normal">328</span>
 <span class="normal">329</span>
-<span class="normal">330</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">control_current_button</span><span class="p">(</span><span class="n">choice_operating_conditions</span><span class="p">,</span> <span class="n">choice_accessible_parameters</span><span class="p">,</span> <span class="n">choice_undetermined_parameters</span><span class="p">,</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">control_current_button</span><span class="p">(</span><span class="n">choice_operating_conditions</span><span class="p">,</span> <span class="n">choice_accessible_parameters</span><span class="p">,</span> <span class="n">choice_undetermined_parameters</span><span class="p">,</span>
                            <span class="n">choice_current_density_parameters</span><span class="p">,</span> <span class="n">choice_computing_parameters</span><span class="p">,</span> <span class="n">choice_buttons</span><span class="p">,</span>
                            <span class="n">current_button</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function is responsible for validating the user inputs by calling the value_control() function. If the input</span>
@@ -735,7 +761,29 @@ canvas : tk.Canvas
 <span class="normal">271</span>
 <span class="normal">272</span>
 <span class="normal">273</span>
-<span class="normal">274</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">main_frame</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">canvas</span><span class="p">):</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">main_frame</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">canvas</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function creates the main graphical elements, such as labels, entry widgets, radio buttons, and buttons.</span>
 <span class="sd">    It arranges them in the application window (root). It also initializes the choice dictionary variables for various</span>
 <span class="sd">    parameters and settings.</span>
@@ -786,7 +834,7 @@ canvas : tk.Canvas
 
     <span class="c1"># Import the current density parameters from the settings file for default value</span>
     <span class="p">(</span><span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span>
-     <span class="n">current_density</span><span class="p">)</span> <span class="o">=</span> <span class="n">current_density_parameters</span><span class="p">()</span>
+     <span class="n">current_density</span><span class="p">)</span> <span class="o">=</span> <span class="n">calculate_current_density_parameters</span><span class="p">()</span>
     <span class="n">f_power_min_EIS</span><span class="p">,</span> <span class="n">f_power_max_EIS</span><span class="p">,</span> <span class="n">nb_f_EIS</span><span class="p">,</span> <span class="n">nb_points_EIS</span> <span class="o">=</span> <span class="n">f_EIS</span>
 
 
@@ -798,36 +846,48 @@ canvas : tk.Canvas
          <span class="s1">&#39;Anode stoichiometry - Sa&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">operating_conditions_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
          <span class="s1">&#39;Cathode stoichiometry - Sc&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">operating_conditions_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
          <span class="s1">&#39;Anode humidity - Φa&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">operating_conditions_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-         <span class="s1">&#39;Cathode humidity - Φc&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">operating_conditions_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}}</span>
+         <span class="s1">&#39;Cathode humidity - Φc&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">operating_conditions_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+         <span class="s1">&#39;Anode inlet H2 ratio - y_H2_in</span><span class="se">\n</span><span class="s1">(flow-through anode only)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">operating_conditions_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}}</span>
 
     <span class="n">choice_accessible_parameters</span> <span class="o">=</span> \
-        <span class="p">{</span><span class="s1">&#39;AGC thickness - Hagc (µm)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-         <span class="s1">&#39;CGC thickness - Hcgc (µm)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
-         <span class="s1">&#39;AGC width - Wagc (µm)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
-         <span class="s1">&#39;CGC width - Wcgc (µm)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-         <span class="s1">&#39;GC cumulated length - Lgc (m)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
-         <span class="s1">&#39;Active area - Aact (cm²)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}}</span>
+        <span class="p">{</span><span class="s1">&#39;Active area - Aact (cm²)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+         <span class="s1">&#39;Number of cells - nb_cell&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+         <span class="s1">&#39;Anode gas channel</span><span class="se">\n</span><span class="s1">thickness - Hagc (µm)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+         <span class="s1">&#39;Cathode gas channel</span><span class="se">\n</span><span class="s1">thickness - Hcgc (µm)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+         <span class="s1">&#39;Anode gas channel</span><span class="se">\n</span><span class="s1">width - Wagc (µm)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+         <span class="s1">&#39;Cathode gas channel</span><span class="se">\n</span><span class="s1">width - Wcgc (µm)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+         <span class="s1">&#39;Gas channel</span><span class="se">\n</span><span class="s1">length - Lgc (mm)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+         <span class="s1">&#39;Number of channels inside the</span><span class="se">\n</span><span class="s1">gas channel - nb_channel_in_gc&#39;</span> <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+         <span class="s1">&#39;Distributor length - Ldist (mm)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+         <span class="s1">&#39;Exhaust anode manifold throttle</span><span class="se">\n</span><span class="s1">area - A_T_a (cm²)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+         <span class="s1">&#39;Exhaust cathode manifold throttle</span><span class="se">\n</span><span class="s1">area - A_T_c (cm²)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+         <span class="s1">&#39;Supply anode manifold</span><span class="se">\n</span><span class="s1">volume - Vasm (cm³)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+         <span class="s1">&#39;Supply cathode manifold</span><span class="se">\n</span><span class="s1">volume - Vcsm (cm³)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+         <span class="s1">&#39;Exhaust anode manifold</span><span class="se">\n</span><span class="s1">volume - Vaem (cm³)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+         <span class="s1">&#39;Exhaust cathode manifold</span><span class="se">\n</span><span class="s1">volume - Vcem (cm³)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}}</span>
+
 
     <span class="n">choice_undetermined_parameters</span> <span class="o">=</span> \
-        <span class="p">{</span><span class="s1">&#39;GDL thickness - Hgdl (µm)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-         <span class="s1">&#39;MPL thickness - Hmpl (µm)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+        <span class="p">{</span><span class="s1">&#39;GDL thickness - Hgdl (µm)</span><span class="se">\n</span><span class="s1">(without the transition layer)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+         <span class="s1">&#39;MPL thickness - Hmpl (µm)</span><span class="se">\n</span><span class="s1">(without the transition layer)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
          <span class="s1">&#39;ACL thickness - Hacl (µm)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
          <span class="s1">&#39;CCL thickness - Hccl (µm)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
          <span class="s1">&#39;Membrane thickness - Hmem (µm)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">accessible_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
          <span class="s1">&#39;GDL porosity - ε_gdl&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
-         <span class="s1">&#39;CL porosity - ε_cl&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
-         <span class="s1">&#39;MPL porosity - ε_mpl&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-         <span class="s1">&#39;Ionomer volume fraction - ε_mc&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
-         <span class="s1">&#39;Compression ratio - ε_c&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
-         <span class="s1">&#39;Capillary exponent - e&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-         <span class="s1">&#39;Electron resistance</span><span class="se">\n</span><span class="s1">- Re (µΩ.m²)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-         <span class="s1">&#39;Reference exchange current</span><span class="se">\n</span><span class="s1">density - i0_c_ref (A/m²)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
-         <span class="s1">&#39;Crossover correction coefficient</span><span class="se">\n</span><span class="s1">- κ_co (mol/(m.s.Pa))&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
-         <span class="s1">&#39;Overpotential correction</span><span class="se">\n</span><span class="s1">exponent - κ_c&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-         <span class="s1">&#39;Limit liquid saturation</span><span class="se">\n</span><span class="s1">coefficient - a_slim&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
-         <span class="s1">&#39;Limit liquid saturation</span><span class="se">\n</span><span class="s1">coefficient - b_slim&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
-         <span class="s1">&#39;Limit liquid saturation</span><span class="se">\n</span><span class="s1">coefficient - a_switch&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-         <span class="s1">&#39;Volumetric space-charge layer</span><span class="se">\n</span><span class="s1">capacitance - C_scl (F/cm³)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}}</span>
+         <span class="s1">&#39;CL porosity - ε_cl&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+         <span class="s1">&#39;MPL porosity - ε_mpl&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+         <span class="s1">&#39;Ionomer volume fraction - ε_mc&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+         <span class="s1">&#39;Compression ratio - ε_c&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+         <span class="s1">&#39;Capillary exponent - e&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+         <span class="s1">&#39;Electron conduction</span><span class="se">\n</span><span class="s1">resistance - Re (Ω.mm²)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+         <span class="s1">&#39;Dry reference exchange current</span><span class="se">\n</span><span class="s1">density - i0_d_c_ref (A/m²)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+         <span class="s1">&#39;Humid reference exchange current</span><span class="se">\n</span><span class="s1">density - i0_h_c_ref (A/m²)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+         <span class="s1">&#39;Crossover correction coefficient</span><span class="se">\n</span><span class="s1">- κ_co (mol/(m.s.Pa))&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+         <span class="s1">&#39;Overpotential correction</span><span class="se">\n</span><span class="s1">exponent - κ_c&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+         <span class="s1">&#39;Limit liquid saturation</span><span class="se">\n</span><span class="s1">coefficient - a_slim&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+         <span class="s1">&#39;Limit liquid saturation</span><span class="se">\n</span><span class="s1">coefficient - b_slim&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+         <span class="s1">&#39;Limit liquid saturation</span><span class="se">\n</span><span class="s1">coefficient - a_switch&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+         <span class="s1">&#39;Volumetric space-charge layer</span><span class="se">\n</span><span class="s1">capacitance - C_scl (F/cm³)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">undetermined_parameters_frame</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}}</span>
 
     <span class="n">choice_current_density_parameters</span> <span class="o">=</span> \
         <span class="p">{</span><span class="s1">&#39;Stabilisation time</span><span class="se">\n</span><span class="s1">- Δt_ini_step (min)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">current_density_parameters_frame</span><span class="p">,</span> <span class="n">step_current_parameters</span><span class="p">[</span><span class="s1">&#39;delta_t_ini_step&#39;</span><span class="p">]</span><span class="o">/</span><span class="mi">60</span><span class="p">),</span>
@@ -870,17 +930,27 @@ canvas : tk.Canvas
                                       <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
          <span class="s1">&#39;Time between two purges</span><span class="se">\n</span><span class="s1">- Δt_purge (s)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">computing_parameters_frame</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
                                                      <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
-         <span class="s1">&#39;Number of GDL nodes - n_gdl&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">(</span><span class="n">computing_parameters_frame</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
-                                         <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}</span>
+         <span class="s1">&#39;Number of GC nodes - nb_gc&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">(</span><span class="n">computing_parameters_frame</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+                                            <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+         <span class="s1">&#39;Number of GDL nodes - nb_gdl&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">(</span><span class="n">computing_parameters_frame</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+                                         <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+         <span class="s1">&#39;Number of MPL nodes - nb_mpl&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">(</span><span class="n">computing_parameters_frame</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+                                         <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+         <span class="s1">&#39;Solver relative tolerance - rtol&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">computing_parameters_frame</span><span class="p">,</span> <span class="mf">1e-5</span><span class="p">),</span>
+                                         <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+         <span class="s1">&#39;Solver absolute tolerance - atol&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(</span><span class="n">computing_parameters_frame</span><span class="p">,</span> <span class="mf">1e-8</span><span class="p">),</span>
+                                         <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;label_column&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+         <span class="p">}</span>
 
     <span class="n">choice_buttons</span> <span class="o">=</span> \
         <span class="p">{</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">StringVar</span><span class="p">(</span><span class="n">operating_conditions_frame</span><span class="p">,</span> <span class="s1">&#39;Enter your specifications&#39;</span><span class="p">),</span>
                             <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
          <span class="s1">&#39;type_auxiliary&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">(</span><span class="n">model_possibilities_frame</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-         <span class="s1">&#39;type_control&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">(</span><span class="n">model_possibilities_frame</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
-         <span class="s1">&#39;type_purge&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">(</span><span class="n">model_possibilities_frame</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
-         <span class="s1">&#39;type_display&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">(</span><span class="n">model_possibilities_frame</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">},</span>
-         <span class="s1">&#39;type_plot&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">(</span><span class="n">model_possibilities_frame</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}}</span>
+         <span class="s1">&#39;voltage_zone&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">(</span><span class="n">model_possibilities_frame</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+         <span class="s1">&#39;type_control&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">(</span><span class="n">model_possibilities_frame</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+         <span class="s1">&#39;type_purge&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">(</span><span class="n">model_possibilities_frame</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">},</span>
+         <span class="s1">&#39;type_display&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">(</span><span class="n">model_possibilities_frame</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+         <span class="s1">&#39;type_plot&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">(</span><span class="n">model_possibilities_frame</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s1">&#39;label_row&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">}}</span>
 
     <span class="c1"># Displays operating conditions and physical parameters on the screen (without their values)</span>
     <span class="c1">#   Display the dropdown menu buttons</span>
@@ -914,7 +984,7 @@ canvas : tk.Canvas
         <span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">columnspan</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">ttk</span><span class="o">.</span><span class="n">OptionMenu</span><span class="p">(</span><span class="n">operating_conditions_frame</span><span class="p">,</span> <span class="n">choice_buttons</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">],</span>
                    <span class="s1">&#39;Enter your specifications&#39;</span><span class="p">,</span> <span class="s1">&#39;Enter your specifications&#39;</span><span class="p">,</span> <span class="s1">&#39;EH-31 1.5 bar (2021)&#39;</span><span class="p">,</span>
-                   <span class="s1">&#39;EH-31 2.0 bar (2021)&#39;</span><span class="p">,</span> <span class="s1">&#39;EH-31 2.25 bar (2021)&#39;</span><span class="p">,</span> <span class="s1">&#39;EH-31 2.5 bar (2021)&#39;</span><span class="p">,</span> <span class="s1">&#39;Linhao Fan (2010)&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;EH-31 2.0 bar (2021)&#39;</span><span class="p">,</span> <span class="s1">&#39;EH-31 2.25 bar (2021)&#39;</span><span class="p">,</span> <span class="s1">&#39;EH-31 2.5 bar (2021)&#39;</span><span class="p">,</span>
                    <span class="n">command</span><span class="o">=</span><span class="k">lambda</span> <span class="n">value</span><span class="p">:</span> <span class="n">changeValue</span><span class="p">(</span><span class="n">operating_conditions_frame</span><span class="p">,</span> <span class="n">accessible_parameters_frame</span><span class="p">,</span>
                                                      <span class="n">undetermined_parameters_frame</span><span class="p">,</span> <span class="n">current_density_parameters_frame</span><span class="p">,</span>
                                                      <span class="n">computing_parameters_frame</span><span class="p">,</span> <span class="n">choice_operating_conditions</span><span class="p">,</span>
@@ -933,24 +1003,24 @@ canvas : tk.Canvas
                                                       <span class="n">choice_undetermined_parameters</span><span class="p">,</span> <span class="n">choice_current_density_parameters</span><span class="p">,</span>
                                                       <span class="n">choice_computing_parameters</span><span class="p">,</span> <span class="n">choice_buttons</span><span class="p">,</span>
                                                       <span class="n">current_button</span><span class="p">[</span><span class="s1">&#39;Step curve&#39;</span><span class="p">]))</span> \
-        <span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
     <span class="c1">#       Button to generate the Pola curve</span>
     <span class="n">ttk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">model_possibilities_frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Pola curve&#39;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s1">&#39;Green.TButton&#39;</span><span class="p">,</span>
                <span class="n">command</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">control_current_button</span><span class="p">(</span><span class="n">choice_operating_conditions</span><span class="p">,</span> <span class="n">choice_accessible_parameters</span><span class="p">,</span>
                                                       <span class="n">choice_undetermined_parameters</span><span class="p">,</span> <span class="n">choice_current_density_parameters</span><span class="p">,</span>
                                                       <span class="n">choice_computing_parameters</span><span class="p">,</span> <span class="n">choice_buttons</span><span class="p">,</span>
                                                       <span class="n">current_button</span><span class="p">[</span><span class="s1">&#39;Pola curve&#39;</span><span class="p">]))</span> \
-        <span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
     <span class="c1">#       Button to generate the EIS curve</span>
     <span class="n">ttk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">model_possibilities_frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;EIS curve&#39;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s1">&#39;Red.TButton&#39;</span><span class="p">,</span>
                <span class="n">command</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">control_current_button</span><span class="p">(</span><span class="n">choice_operating_conditions</span><span class="p">,</span> <span class="n">choice_accessible_parameters</span><span class="p">,</span>
                                                       <span class="n">choice_undetermined_parameters</span><span class="p">,</span> <span class="n">choice_current_density_parameters</span><span class="p">,</span>
                                                       <span class="n">choice_computing_parameters</span><span class="p">,</span> <span class="n">choice_buttons</span><span class="p">,</span>
                                                       <span class="n">current_button</span><span class="p">[</span><span class="s1">&#39;EIS curve&#39;</span><span class="p">]))</span> \
-        <span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
     <span class="c1">#       About button</span>
     <span class="n">ttk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">model_possibilities_frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;About&#39;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s1">&#39;Black.TButton&#39;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="n">about</span><span class="p">)</span> \
-        <span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">ipadx</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">ipadx</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
 
     <span class="c1"># Ensure the frame sizes are updated</span>
     <span class="n">root</span><span class="o">.</span><span class="n">update_idletasks</span><span class="p">()</span>
@@ -1049,29 +1119,7 @@ canvas : tk.Canvas
 </table>
             <details class="quote">
               <summary>Source code in <code>GUI.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">333</span>
-<span class="normal">334</span>
-<span class="normal">335</span>
-<span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span>
-<span class="normal">345</span>
-<span class="normal">346</span>
-<span class="normal">347</span>
-<span class="normal">348</span>
-<span class="normal">349</span>
-<span class="normal">350</span>
-<span class="normal">351</span>
-<span class="normal">352</span>
-<span class="normal">353</span>
-<span class="normal">354</span>
-<span class="normal">355</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">355</span>
 <span class="normal">356</span>
 <span class="normal">357</span>
 <span class="normal">358</span>
@@ -1131,7 +1179,37 @@ canvas : tk.Canvas
 <span class="normal">412</span>
 <span class="normal">413</span>
 <span class="normal">414</span>
-<span class="normal">415</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">show_current_button</span><span class="p">(</span><span class="n">choice_operating_conditions</span><span class="p">,</span> <span class="n">choice_accessible_parameters</span><span class="p">,</span> <span class="n">choice_undetermined_parameters</span><span class="p">,</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">show_current_button</span><span class="p">(</span><span class="n">choice_operating_conditions</span><span class="p">,</span> <span class="n">choice_accessible_parameters</span><span class="p">,</span> <span class="n">choice_undetermined_parameters</span><span class="p">,</span>
                         <span class="n">choice_current_density_parameters</span><span class="p">,</span> <span class="n">choice_computing_parameters</span><span class="p">,</span> <span class="n">choice_buttons</span><span class="p">,</span> <span class="n">current_button</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function determines the action to be performed based on the button_type.</span>
 
@@ -1155,39 +1233,45 @@ canvas : tk.Canvas
 
     <span class="c1"># Retrieves parameter values for predefined stacks and keeps them in their standard unit, or converts user-selected</span>
     <span class="c1"># quantities into standard units.</span>
-    <span class="p">(</span><span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmpl</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hagc</span><span class="p">,</span> <span class="n">Hcgc</span><span class="p">,</span> <span class="n">Wagc</span><span class="p">,</span>
-            <span class="n">Wcgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_cl</span><span class="p">,</span> <span class="n">epsilon_mpl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span>
-            <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span>
-            <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">delta_t_purge</span><span class="p">,</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span>
-            <span class="n">type_purge</span><span class="p">,</span>  <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">)</span> <span class="o">=</span> <span class="n">recover_for_use_operating_inputs_and_physical_parameters</span><span class="p">(</span>
-                                                                           <span class="n">choice_operating_conditions</span><span class="p">,</span>
-                                                                           <span class="n">choice_accessible_parameters</span><span class="p">,</span>
-                                                                           <span class="n">choice_undetermined_parameters</span><span class="p">,</span>
-                                                                           <span class="n">choice_current_density_parameters</span><span class="p">,</span>
-                                                                           <span class="n">choice_computing_parameters</span><span class="p">,</span>
-                                                                           <span class="n">choice_buttons</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">y_H2_in</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">nb_cell</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmpl</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hagc</span><span class="p">,</span>
+     <span class="n">Hcgc</span><span class="p">,</span> <span class="n">Wagc</span><span class="p">,</span> <span class="n">Wcgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">Lm</span><span class="p">,</span> <span class="n">L_endplate</span><span class="p">,</span> <span class="n">L_man_gc</span><span class="p">,</span> <span class="n">A_T_a</span><span class="p">,</span> <span class="n">A_T_c</span><span class="p">,</span> <span class="n">Vasm</span><span class="p">,</span> <span class="n">Vcsm</span><span class="p">,</span> <span class="n">Vaem</span><span class="p">,</span> <span class="n">Vcem</span><span class="p">,</span> <span class="n">V_endplate_a</span><span class="p">,</span> <span class="n">V_endplate_c</span><span class="p">,</span>
+     <span class="n">V_man_agc</span><span class="p">,</span> <span class="n">V_man_cgc</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_cl</span><span class="p">,</span> <span class="n">epsilon_mpl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_d_c_ref</span><span class="p">,</span> <span class="n">i0_h_c_ref</span><span class="p">,</span>
+     <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">,</span> <span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">pola_current_parameters</span><span class="p">,</span>
+     <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="n">f_EIS</span><span class="p">,</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">delta_t_purge</span><span class="p">,</span> <span class="n">nb_gdl</span><span class="p">,</span> <span class="n">nb_mpl</span><span class="p">,</span> <span class="n">nb_tl</span><span class="p">,</span> <span class="n">rtol</span><span class="p">,</span>
+     <span class="n">atol</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">voltage_zone</span><span class="p">,</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="n">type_control</span><span class="p">,</span> <span class="n">type_purge</span><span class="p">,</span> <span class="n">type_display</span><span class="p">,</span> <span class="n">type_plot</span><span class="p">)</span> <span class="o">=</span> \
+        <span class="n">recover_for_use_operating_inputs_and_physical_parameters</span><span class="p">(</span><span class="n">choice_operating_conditions</span><span class="p">,</span>
+                                                                 <span class="n">choice_accessible_parameters</span><span class="p">,</span>
+                                                                 <span class="n">choice_undetermined_parameters</span><span class="p">,</span>
+                                                                 <span class="n">choice_current_density_parameters</span><span class="p">,</span>
+                                                                 <span class="n">choice_computing_parameters</span><span class="p">,</span>
+                                                                 <span class="n">choice_buttons</span><span class="p">)</span>
 
     <span class="c1"># Initialize the operating inputs and parameters dictionaries.</span>
     <span class="n">current_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;step_current_parameters&#39;</span><span class="p">:</span> <span class="n">step_current_parameters</span><span class="p">,</span>
                           <span class="s1">&#39;pola_current_parameters&#39;</span><span class="p">:</span> <span class="n">pola_current_parameters</span><span class="p">,</span>
                           <span class="s1">&#39;pola_current_for_cali_parameters&#39;</span><span class="p">:</span> <span class="n">pola_current_for_cali_parameters</span><span class="p">,</span>
                           <span class="s1">&#39;i_EIS&#39;</span><span class="p">:</span> <span class="n">i_EIS</span><span class="p">,</span> <span class="s1">&#39;ratio_EIS&#39;</span><span class="p">:</span> <span class="n">ratio_EIS</span><span class="p">,</span> <span class="s1">&#39;t_EIS&#39;</span><span class="p">:</span> <span class="n">t_EIS</span><span class="p">,</span> <span class="s1">&#39;f_EIS&#39;</span><span class="p">:</span> <span class="n">f_EIS</span><span class="p">}</span>
-    <span class="n">accessible_physical_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Aact&#39;</span><span class="p">:</span> <span class="n">Aact</span><span class="p">,</span> <span class="s1">&#39;Hagc&#39;</span><span class="p">:</span> <span class="n">Hagc</span><span class="p">,</span> <span class="s1">&#39;Hcgc&#39;</span><span class="p">:</span> <span class="n">Hcgc</span><span class="p">,</span> <span class="s1">&#39;Wagc&#39;</span><span class="p">:</span> <span class="n">Wagc</span><span class="p">,</span> <span class="s1">&#39;Wcgc&#39;</span><span class="p">:</span> <span class="n">Wcgc</span><span class="p">,</span> <span class="s1">&#39;Lgc&#39;</span><span class="p">:</span> <span class="n">Lgc</span><span class="p">}</span>
+    <span class="n">accessible_physical_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Aact&#39;</span><span class="p">:</span> <span class="n">Aact</span><span class="p">,</span> <span class="s1">&#39;nb_cell&#39;</span><span class="p">:</span> <span class="n">nb_cell</span><span class="p">,</span> <span class="s1">&#39;Hagc&#39;</span><span class="p">:</span> <span class="n">Hagc</span><span class="p">,</span> <span class="s1">&#39;Hcgc&#39;</span><span class="p">:</span> <span class="n">Hcgc</span><span class="p">,</span> <span class="s1">&#39;Wagc&#39;</span><span class="p">:</span> <span class="n">Wagc</span><span class="p">,</span>
+                                      <span class="s1">&#39;Wcgc&#39;</span><span class="p">:</span> <span class="n">Wcgc</span><span class="p">,</span> <span class="s1">&#39;Lgc&#39;</span><span class="p">:</span> <span class="n">Lgc</span><span class="p">,</span> <span class="s1">&#39;nb_channel_in_gc&#39;</span><span class="p">:</span> <span class="n">nb_channel_in_gc</span><span class="p">,</span> <span class="s1">&#39;Ldist&#39;</span><span class="p">:</span> <span class="n">Ldist</span><span class="p">,</span>
+                                      <span class="s1">&#39;Lm&#39;</span><span class="p">:</span> <span class="n">Lm</span><span class="p">,</span> <span class="s1">&#39;A_T_a&#39;</span><span class="p">:</span> <span class="n">A_T_a</span><span class="p">,</span> <span class="s1">&#39;A_T_c&#39;</span><span class="p">:</span> <span class="n">A_T_c</span><span class="p">,</span> <span class="s1">&#39;Vasm&#39;</span><span class="p">:</span> <span class="n">Vasm</span><span class="p">,</span> <span class="s1">&#39;Vcsm&#39;</span><span class="p">:</span> <span class="n">Vcsm</span><span class="p">,</span>
+                                      <span class="s1">&#39;Vaem&#39;</span><span class="p">:</span> <span class="n">Vaem</span><span class="p">,</span> <span class="s1">&#39;Vcem&#39;</span><span class="p">:</span> <span class="n">Vcem</span><span class="p">}</span>
     <span class="n">undetermined_physical_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Hgdl&#39;</span><span class="p">:</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="s1">&#39;Hmpl&#39;</span><span class="p">:</span> <span class="n">Hmpl</span><span class="p">,</span> <span class="s1">&#39;Hmem&#39;</span><span class="p">:</span> <span class="n">Hmem</span><span class="p">,</span> <span class="s1">&#39;Hacl&#39;</span><span class="p">:</span> <span class="n">Hacl</span><span class="p">,</span> <span class="s1">&#39;Hccl&#39;</span><span class="p">:</span> <span class="n">Hccl</span><span class="p">,</span>
                                         <span class="s1">&#39;epsilon_gdl&#39;</span><span class="p">:</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="s1">&#39;epsilon_cl&#39;</span><span class="p">:</span> <span class="n">epsilon_cl</span><span class="p">,</span>
                                         <span class="s1">&#39;epsilon_mpl&#39;</span><span class="p">:</span> <span class="n">epsilon_mpl</span><span class="p">,</span> <span class="s1">&#39;epsilon_mc&#39;</span><span class="p">:</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="s1">&#39;epsilon_c&#39;</span><span class="p">:</span> <span class="n">epsilon_c</span><span class="p">,</span>
-                                        <span class="s1">&#39;e&#39;</span><span class="p">:</span> <span class="n">e</span><span class="p">,</span> <span class="s1">&#39;kappa_co&#39;</span><span class="p">:</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="s1">&#39;i0_c_ref&#39;</span><span class="p">:</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="s1">&#39;kappa_c&#39;</span><span class="p">:</span> <span class="n">kappa_c</span><span class="p">,</span>
-                                        <span class="s1">&#39;a_slim&#39;</span><span class="p">:</span> <span class="n">a_slim</span><span class="p">,</span> <span class="s1">&#39;b_slim&#39;</span><span class="p">:</span> <span class="n">b_slim</span><span class="p">,</span> <span class="s1">&#39;a_switch&#39;</span><span class="p">:</span> <span class="n">a_switch</span><span class="p">,</span> <span class="s1">&#39;C_scl&#39;</span><span class="p">:</span> <span class="n">C_scl</span><span class="p">}</span>
+                                        <span class="s1">&#39;e&#39;</span><span class="p">:</span> <span class="n">e</span><span class="p">,</span> <span class="s1">&#39;Re&#39;</span><span class="p">:</span> <span class="n">Re</span><span class="p">,</span> <span class="s1">&#39;i0_d_c_ref&#39;</span><span class="p">:</span> <span class="n">i0_d_c_ref</span><span class="p">,</span> <span class="s1">&#39;i0_h_c_ref&#39;</span><span class="p">:</span> <span class="n">i0_h_c_ref</span><span class="p">,</span>
+                                        <span class="s1">&#39;kappa_co&#39;</span><span class="p">:</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="s1">&#39;kappa_c&#39;</span><span class="p">:</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="s1">&#39;a_slim&#39;</span><span class="p">:</span> <span class="n">a_slim</span><span class="p">,</span> <span class="s1">&#39;b_slim&#39;</span><span class="p">:</span> <span class="n">b_slim</span><span class="p">,</span>
+                                        <span class="s1">&#39;a_switch&#39;</span><span class="p">:</span> <span class="n">a_switch</span><span class="p">,</span> <span class="s1">&#39;C_scl&#39;</span><span class="p">:</span> <span class="n">C_scl</span><span class="p">}</span>
 
     <span class="k">if</span> <span class="n">current_button</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">type_current</span> <span class="o">=</span> <span class="s2">&quot;step&quot;</span>
         <span class="n">current_density</span> <span class="o">=</span> <span class="n">step_current</span>
         <span class="n">operating_inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;current_density&#39;</span><span class="p">:</span> <span class="n">current_density</span><span class="p">,</span> <span class="s1">&#39;T_des&#39;</span><span class="p">:</span> <span class="n">T_des</span><span class="p">,</span> <span class="s1">&#39;Pa_des&#39;</span><span class="p">:</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="s1">&#39;Pc_des&#39;</span><span class="p">:</span> <span class="n">Pc_des</span><span class="p">,</span>
-                            <span class="s1">&#39;Sa&#39;</span><span class="p">:</span> <span class="n">Sa</span><span class="p">,</span> <span class="s1">&#39;Sc&#39;</span><span class="p">:</span> <span class="n">Sc</span><span class="p">,</span> <span class="s1">&#39;Phi_a_des&#39;</span><span class="p">:</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="s1">&#39;Phi_c_des&#39;</span><span class="p">:</span> <span class="n">Phi_c_des</span><span class="p">}</span>
-        <span class="n">computing_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;n_gdl&#39;</span><span class="p">:</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="s1">&#39;t_purge&#39;</span><span class="p">:</span> <span class="n">t_purge</span><span class="p">,</span> <span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">:</span> <span class="n">type_fuel_cell</span><span class="p">,</span>
-                                <span class="s1">&#39;type_current&#39;</span><span class="p">:</span> <span class="n">type_current</span><span class="p">,</span> <span class="s1">&#39;type_auxiliary&#39;</span><span class="p">:</span> <span class="n">type_auxiliary</span><span class="p">,</span>
-                                <span class="s1">&#39;type_control&#39;</span><span class="p">:</span> <span class="n">type_control</span><span class="p">,</span> <span class="s1">&#39;type_purge&#39;</span><span class="p">:</span> <span class="n">type_purge</span><span class="p">,</span> <span class="s1">&#39;type_display&#39;</span><span class="p">:</span> <span class="n">type_display</span><span class="p">,</span>
-                                <span class="s1">&#39;type_plot&#39;</span><span class="p">:</span> <span class="n">type_plot</span><span class="p">}</span>
+                            <span class="s1">&#39;Sa&#39;</span><span class="p">:</span> <span class="n">Sa</span><span class="p">,</span> <span class="s1">&#39;Sc&#39;</span><span class="p">:</span> <span class="n">Sc</span><span class="p">,</span> <span class="s1">&#39;Phi_a_des&#39;</span><span class="p">:</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="s1">&#39;Phi_c_des&#39;</span><span class="p">:</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="s1">&#39;y_H2_in&#39;</span><span class="p">:</span> <span class="n">y_H2_in</span><span class="p">}</span>
+        <span class="n">computing_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;nb_gc&#39;</span><span class="p">:</span> <span class="n">nb_gc</span><span class="p">,</span> <span class="s1">&#39;nb_gdl&#39;</span><span class="p">:</span> <span class="n">nb_gdl</span><span class="p">,</span> <span class="s1">&#39;nb_mpl&#39;</span><span class="p">:</span> <span class="n">nb_mpl</span><span class="p">,</span> <span class="s1">&#39;nb_tl&#39;</span><span class="p">:</span> <span class="n">nb_tl</span><span class="p">,</span> <span class="s1">&#39;t_purge&#39;</span><span class="p">:</span> <span class="n">t_purge</span><span class="p">,</span>
+                                <span class="s1">&#39;rtol&#39;</span><span class="p">:</span> <span class="n">rtol</span><span class="p">,</span> <span class="s1">&#39;atol&#39;</span><span class="p">:</span> <span class="n">atol</span><span class="p">,</span> <span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">:</span> <span class="n">type_fuel_cell</span><span class="p">,</span>
+                                <span class="s1">&#39;type_current&#39;</span><span class="p">:</span> <span class="n">type_current</span><span class="p">,</span> <span class="s1">&#39;voltage_zone&#39;</span><span class="p">:</span> <span class="n">voltage_zone</span><span class="p">,</span>
+                                <span class="s1">&#39;type_auxiliary&#39;</span><span class="p">:</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="s1">&#39;type_control&#39;</span><span class="p">:</span> <span class="n">type_control</span><span class="p">,</span>
+                                <span class="s1">&#39;type_purge&#39;</span><span class="p">:</span> <span class="n">type_purge</span><span class="p">,</span> <span class="s1">&#39;type_display&#39;</span><span class="p">:</span> <span class="n">type_display</span><span class="p">,</span> <span class="s1">&#39;type_plot&#39;</span><span class="p">:</span> <span class="n">type_plot</span><span class="p">}</span>
         <span class="n">launch_AlphaPEM_for_step_current</span><span class="p">(</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="n">current_parameters</span><span class="p">,</span> <span class="n">accessible_physical_parameters</span><span class="p">,</span>
                                          <span class="n">undetermined_physical_parameters</span><span class="p">,</span> <span class="n">computing_parameters</span><span class="p">)</span>
 
@@ -1195,11 +1279,12 @@ canvas : tk.Canvas
         <span class="n">type_current</span> <span class="o">=</span> <span class="s2">&quot;polarization&quot;</span>
         <span class="n">current_density</span> <span class="o">=</span> <span class="n">polarization_current</span>
         <span class="n">operating_inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;current_density&#39;</span><span class="p">:</span> <span class="n">current_density</span><span class="p">,</span> <span class="s1">&#39;T_des&#39;</span><span class="p">:</span> <span class="n">T_des</span><span class="p">,</span> <span class="s1">&#39;Pa_des&#39;</span><span class="p">:</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="s1">&#39;Pc_des&#39;</span><span class="p">:</span> <span class="n">Pc_des</span><span class="p">,</span>
-                            <span class="s1">&#39;Sa&#39;</span><span class="p">:</span> <span class="n">Sa</span><span class="p">,</span> <span class="s1">&#39;Sc&#39;</span><span class="p">:</span> <span class="n">Sc</span><span class="p">,</span> <span class="s1">&#39;Phi_a_des&#39;</span><span class="p">:</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="s1">&#39;Phi_c_des&#39;</span><span class="p">:</span> <span class="n">Phi_c_des</span><span class="p">}</span>
-        <span class="n">computing_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;n_gdl&#39;</span><span class="p">:</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="s1">&#39;t_purge&#39;</span><span class="p">:</span> <span class="n">t_purge</span><span class="p">,</span> <span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">:</span> <span class="n">type_fuel_cell</span><span class="p">,</span>
-                                <span class="s1">&#39;type_current&#39;</span><span class="p">:</span> <span class="n">type_current</span><span class="p">,</span> <span class="s1">&#39;type_auxiliary&#39;</span><span class="p">:</span> <span class="n">type_auxiliary</span><span class="p">,</span>
-                                <span class="s1">&#39;type_control&#39;</span><span class="p">:</span> <span class="n">type_control</span><span class="p">,</span> <span class="s1">&#39;type_purge&#39;</span><span class="p">:</span> <span class="n">type_purge</span><span class="p">,</span> <span class="s1">&#39;type_display&#39;</span><span class="p">:</span> <span class="n">type_display</span><span class="p">,</span>
-                                <span class="s1">&#39;type_plot&#39;</span><span class="p">:</span> <span class="n">type_plot</span><span class="p">}</span>
+                            <span class="s1">&#39;Sa&#39;</span><span class="p">:</span> <span class="n">Sa</span><span class="p">,</span> <span class="s1">&#39;Sc&#39;</span><span class="p">:</span> <span class="n">Sc</span><span class="p">,</span> <span class="s1">&#39;Phi_a_des&#39;</span><span class="p">:</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="s1">&#39;Phi_c_des&#39;</span><span class="p">:</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="s1">&#39;y_H2_in&#39;</span><span class="p">:</span> <span class="n">y_H2_in</span><span class="p">}</span>
+        <span class="n">computing_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;nb_gc&#39;</span><span class="p">:</span> <span class="n">nb_gc</span><span class="p">,</span> <span class="s1">&#39;nb_gdl&#39;</span><span class="p">:</span> <span class="n">nb_gdl</span><span class="p">,</span> <span class="s1">&#39;nb_mpl&#39;</span><span class="p">:</span> <span class="n">nb_mpl</span><span class="p">,</span> <span class="s1">&#39;nb_tl&#39;</span><span class="p">:</span> <span class="n">nb_tl</span><span class="p">,</span> <span class="s1">&#39;t_purge&#39;</span><span class="p">:</span> <span class="n">t_purge</span><span class="p">,</span>
+                                <span class="s1">&#39;rtol&#39;</span><span class="p">:</span> <span class="n">rtol</span><span class="p">,</span> <span class="s1">&#39;atol&#39;</span><span class="p">:</span> <span class="n">atol</span><span class="p">,</span> <span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">:</span> <span class="n">type_fuel_cell</span><span class="p">,</span>
+                                <span class="s1">&#39;type_current&#39;</span><span class="p">:</span> <span class="n">type_current</span><span class="p">,</span> <span class="s1">&#39;voltage_zone&#39;</span><span class="p">:</span> <span class="n">voltage_zone</span><span class="p">,</span>
+                                <span class="s1">&#39;type_auxiliary&#39;</span><span class="p">:</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="s1">&#39;type_control&#39;</span><span class="p">:</span> <span class="n">type_control</span><span class="p">,</span>
+                                <span class="s1">&#39;type_purge&#39;</span><span class="p">:</span> <span class="n">type_purge</span><span class="p">,</span> <span class="s1">&#39;type_display&#39;</span><span class="p">:</span> <span class="n">type_display</span><span class="p">,</span> <span class="s1">&#39;type_plot&#39;</span><span class="p">:</span> <span class="n">type_plot</span><span class="p">}</span>
         <span class="n">launch_AlphaPEM_for_polarization_current</span><span class="p">(</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="n">current_parameters</span><span class="p">,</span> <span class="n">accessible_physical_parameters</span><span class="p">,</span>
                                                  <span class="n">undetermined_physical_parameters</span><span class="p">,</span> <span class="n">computing_parameters</span><span class="p">)</span>
 
@@ -1207,11 +1292,12 @@ canvas : tk.Canvas
         <span class="n">type_current</span> <span class="o">=</span> <span class="s2">&quot;EIS&quot;</span>
         <span class="n">current_density</span> <span class="o">=</span> <span class="n">EIS_current</span>
         <span class="n">operating_inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;current_density&#39;</span><span class="p">:</span> <span class="n">current_density</span><span class="p">,</span> <span class="s1">&#39;T_des&#39;</span><span class="p">:</span> <span class="n">T_des</span><span class="p">,</span> <span class="s1">&#39;Pa_des&#39;</span><span class="p">:</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="s1">&#39;Pc_des&#39;</span><span class="p">:</span> <span class="n">Pc_des</span><span class="p">,</span>
-                            <span class="s1">&#39;Sa&#39;</span><span class="p">:</span> <span class="n">Sa</span><span class="p">,</span> <span class="s1">&#39;Sc&#39;</span><span class="p">:</span> <span class="n">Sc</span><span class="p">,</span> <span class="s1">&#39;Phi_a_des&#39;</span><span class="p">:</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="s1">&#39;Phi_c_des&#39;</span><span class="p">:</span> <span class="n">Phi_c_des</span><span class="p">}</span>
-        <span class="n">computing_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;n_gdl&#39;</span><span class="p">:</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="s1">&#39;t_purge&#39;</span><span class="p">:</span> <span class="n">t_purge</span><span class="p">,</span> <span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">:</span> <span class="n">type_fuel_cell</span><span class="p">,</span>
-                                <span class="s1">&#39;type_current&#39;</span><span class="p">:</span> <span class="n">type_current</span><span class="p">,</span> <span class="s1">&#39;type_auxiliary&#39;</span><span class="p">:</span> <span class="n">type_auxiliary</span><span class="p">,</span>
-                                <span class="s1">&#39;type_control&#39;</span><span class="p">:</span> <span class="n">type_control</span><span class="p">,</span> <span class="s1">&#39;type_purge&#39;</span><span class="p">:</span> <span class="n">type_purge</span><span class="p">,</span> <span class="s1">&#39;type_display&#39;</span><span class="p">:</span> <span class="n">type_display</span><span class="p">,</span>
-                                <span class="s1">&#39;type_plot&#39;</span><span class="p">:</span> <span class="n">type_plot</span><span class="p">}</span>
+                            <span class="s1">&#39;Sa&#39;</span><span class="p">:</span> <span class="n">Sa</span><span class="p">,</span> <span class="s1">&#39;Sc&#39;</span><span class="p">:</span> <span class="n">Sc</span><span class="p">,</span> <span class="s1">&#39;Phi_a_des&#39;</span><span class="p">:</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="s1">&#39;Phi_c_des&#39;</span><span class="p">:</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="s1">&#39;y_H2_in&#39;</span><span class="p">:</span> <span class="n">y_H2_in</span><span class="p">}</span>
+        <span class="n">computing_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;nb_gc&#39;</span><span class="p">:</span> <span class="n">nb_gc</span><span class="p">,</span> <span class="s1">&#39;nb_gdl&#39;</span><span class="p">:</span> <span class="n">nb_gdl</span><span class="p">,</span> <span class="s1">&#39;nb_mpl&#39;</span><span class="p">:</span> <span class="n">nb_mpl</span><span class="p">,</span> <span class="s1">&#39;nb_tl&#39;</span><span class="p">:</span> <span class="n">nb_tl</span><span class="p">,</span> <span class="s1">&#39;t_purge&#39;</span><span class="p">:</span> <span class="n">t_purge</span><span class="p">,</span>
+                                <span class="s1">&#39;rtol&#39;</span><span class="p">:</span> <span class="n">rtol</span><span class="p">,</span> <span class="s1">&#39;atol&#39;</span><span class="p">:</span> <span class="n">atol</span><span class="p">,</span> <span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">:</span> <span class="n">type_fuel_cell</span><span class="p">,</span>
+                                <span class="s1">&#39;type_current&#39;</span><span class="p">:</span> <span class="n">type_current</span><span class="p">,</span> <span class="s1">&#39;voltage_zone&#39;</span><span class="p">:</span> <span class="n">voltage_zone</span><span class="p">,</span>
+                                <span class="s1">&#39;type_auxiliary&#39;</span><span class="p">:</span> <span class="n">type_auxiliary</span><span class="p">,</span> <span class="s1">&#39;type_control&#39;</span><span class="p">:</span> <span class="n">type_control</span><span class="p">,</span>
+                                <span class="s1">&#39;type_purge&#39;</span><span class="p">:</span> <span class="n">type_purge</span><span class="p">,</span> <span class="s1">&#39;type_display&#39;</span><span class="p">:</span> <span class="n">type_display</span><span class="p">,</span> <span class="s1">&#39;type_plot&#39;</span><span class="p">:</span> <span class="n">type_plot</span><span class="p">}</span>
         <span class="n">launch_AlphaPEM_for_EIS_current</span><span class="p">(</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="n">current_parameters</span><span class="p">,</span> <span class="n">accessible_physical_parameters</span><span class="p">,</span>
                                         <span class="n">undetermined_physical_parameters</span><span class="p">,</span> <span class="n">computing_parameters</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -1275,28 +1361,28 @@ canvas : tk.Canvas
 </table>
             <details class="quote">
               <summary>Source code in <code>GUI.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
-<span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span>
-<span class="normal">296</span>
-<span class="normal">297</span>
-<span class="normal">298</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">toggle_info</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">show_info</span><span class="p">,</span> <span class="n">canvas</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">toggle_info</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">show_info</span><span class="p">,</span> <span class="n">canvas</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Toggles the visibility of the given frame and updates the scroll region of the given canvas.</span>
 

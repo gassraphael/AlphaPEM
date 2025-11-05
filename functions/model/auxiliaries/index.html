@@ -171,7 +171,7 @@
 
 
 <h2 id="model.auxiliaries.auxiliaries" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">auxiliaries</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">solver_variables</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">,</span> <span class="n">i_fc</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">auxiliaries</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">sv</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">,</span> <span class="n">i_fc</span><span class="p">,</span> <span class="n">Jv_agc_agdl</span><span class="p">,</span> <span class="n">Jv_cgdl_cgc</span><span class="p">,</span> <span class="n">J_H2_agc_agdl</span><span class="p">,</span> <span class="n">J_O2_cgdl_cgc</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span></code>
 
 </h2>
 
@@ -200,7 +200,7 @@
               </div>
             </li>
             <li>
-              <b><code>solver_variables</code></b>
+              <b><code>sv</code></b>
                   (<code>dict</code>)
               –
               <div class="doc-md-description">
@@ -221,6 +221,38 @@
               –
               <div class="doc-md-description">
                 <p>Fuel cell current density at time t (A.m-2).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Jv_agc_agdl</code></b>
+                  (<code>list</code>)
+              –
+              <div class="doc-md-description">
+                <p>Vapor flow between the AGC and the AGDL at each GC node (mol.m-2.s-1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Jv_cgdl_cgc</code></b>
+                  (<code>list</code>)
+              –
+              <div class="doc-md-description">
+                <p>Vapor flow between the CGDL and the CGC at each GC node (mol.m-2.s-1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>J_H2_agc_agdl</code></b>
+                  (<code>list</code>)
+              –
+              <div class="doc-md-description">
+                <p>H2 flow between the AGC and the AGDL at each GC node (mol.m-2.s-1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>J_O2_cgdl_cgc</code></b>
+                  (<code>list</code>)
+              –
+              <div class="doc-md-description">
+                <p>O2 flow between the CGDL and the CGC at each GC node (mol.m-2.s-1).</p>
               </div>
             </li>
             <li>
@@ -256,164 +288,73 @@
       <td class="field-body">
         <ul class="first simple">
             <li>
-<b><code>Jv_a_in</code></b>(                  <code>float</code>
+<b><code>Jv</code></b>(                  <code>dict</code>
 )              –
               <div class="doc-md-description">
-                <p>Vapor flow at the anode gas channel inlet (mol.m-2.s-1).</p>
+                <p>Vapor flow between the different layers (mol.m-2.s-1).</p>
               </div>
             </li>
             <li>
-<b><code>Jv_a_out</code></b>(                  <code>float</code>
+<b><code>J_H2</code></b>(                  <code>dict</code>
 )              –
               <div class="doc-md-description">
-                <p>Vapor flow at the anode gas channel outlet (mol.m-2.s-1).</p>
+                <p>Hydrogen flow between the different layers (mol.m-2.s-1).</p>
               </div>
             </li>
             <li>
-<b><code>Jv_c_in</code></b>(                  <code>float</code>
+<b><code>J_O2</code></b>(                  <code>dict</code>
 )              –
               <div class="doc-md-description">
-                <p>Vapor flow at the cathode gas channel inlet (mol.m-2.s-1).</p>
+                <p>Oxygen flow between the different layers (mol.m-2.s-1).</p>
               </div>
             </li>
             <li>
-<b><code>Jv_c_out</code></b>(                  <code>float</code>
+<b><code>J_N2</code></b>(                  <code>dict</code>
 )              –
               <div class="doc-md-description">
-                <p>Vapor flow at the cathode gas channel outlet (mol.m-2.s-1).</p>
+                <p>Nitrogen flow between the different layers (mol.m-2.s-1).</p>
               </div>
             </li>
             <li>
-<b><code>J_H2_in</code></b>(                  <code>float</code>
+<b><code>W</code></b>(                  <code>dict</code>
 )              –
               <div class="doc-md-description">
-                <p>H2 flow at the anode gas channel inlet (mol.m-2.s-1).</p>
+                <p>Global flows through the auxiliaries (mol.s-1).</p>
               </div>
             </li>
             <li>
-<b><code>J_H2_out</code></b>(                  <code>float</code>
+<b><code>W_v</code></b>(                  <code>dict</code>
 )              –
               <div class="doc-md-description">
-                <p>H2 flow at the anode gas channel outlet (mol.m-2.s-1).</p>
+                <p>Vapor flows through the auxiliaries (mol.s-1).</p>
               </div>
             </li>
             <li>
-<b><code>J_O2_in</code></b>(                  <code>float</code>
+<b><code>v_a_in</code></b>(                  <code>float</code>
 )              –
               <div class="doc-md-description">
-                <p>O2 flow at the cathode gas channel inlet (mol.m-2.s-1).</p>
+                <p>Velocity evolution at the inlet of the anode (m.s-1).</p>
               </div>
             </li>
             <li>
-<b><code>J_O2_out</code></b>(                  <code>float</code>
+<b><code>v_c_in</code></b>(                  <code>float</code>
 )              –
               <div class="doc-md-description">
-                <p>O2 flow at the cathode gas channel outlet (mol.m-2.s-1).</p>
+                <p>Velocity evolution at the inlet of the cathode (m.s-1).</p>
               </div>
             </li>
             <li>
-<b><code>J_N2_in</code></b>(                  <code>float</code>
+<b><code>Pa_in</code></b>(                  <code>float</code>
 )              –
               <div class="doc-md-description">
-                <p>N2 flow at the cathode gas channel inlet (mol.m-2.s-1).</p>
+                <p>Inlet pressure at the anode side (Pa).</p>
               </div>
             </li>
             <li>
-<b><code>J_N2_out</code></b>(                  <code>float</code>
+<b><code>Pc_in</code></b>(                  <code>float</code>
 )              –
               <div class="doc-md-description">
-                <p>N2 flow at the cathode gas channel outlet (mol.m-2.s-1).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Wasm_in</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Anode side supply manifold inlet flow (kg.s-1).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Wasm_out</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Anode side supply manifold outlet flow (kg.s-1).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Waem_in</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Anode side external manifold inlet flow (kg.s-1).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Waem_out</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Anode side external manifold outlet flow (kg.s-1).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Wcsm_in</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Cathode side supply manifold inlet flow (kg.s-1).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Wcsm_out</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Cathode side supply manifold outlet flow (kg.s-1).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Wcem_in</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Cathode side external manifold inlet flow (kg.s-1).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Wcem_out</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Cathode side external manifold outlet flow (kg.s-1).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Ware</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Anode side recirculation flow (kg.s-1).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Wv_asm_in</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Vapor flow at the anode supply manifold inlet (mol.s-1).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Wv_aem_out</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Vapor flow at the anode external manifold outlet (mol.s-1).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Wv_csm_in</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Vapor flow at the cathode supply manifold inlet (mol.s-1).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Wv_cem_out</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Vapor flow at the cathode external manifold outlet (mol.s-1).</p>
+                <p>Inlet pressure at the cathode side (Pa).</p>
               </div>
             </li>
         </ul>
@@ -632,19 +573,62 @@
 <span class="normal">223</span>
 <span class="normal">224</span>
 <span class="normal">225</span>
-<span class="normal">226</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">auxiliaries</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">solver_variables</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">,</span> <span class="n">i_fc</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">auxiliaries</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">sv</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">,</span> <span class="n">i_fc</span><span class="p">,</span> <span class="n">Jv_agc_agdl</span><span class="p">,</span> <span class="n">Jv_cgdl_cgc</span><span class="p">,</span> <span class="n">J_H2_agc_agdl</span><span class="p">,</span> <span class="n">J_O2_cgdl_cgc</span><span class="p">,</span>
+                <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the flows passing through the auxiliaries.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    t : float</span>
 <span class="sd">        Time (s).</span>
-<span class="sd">    solver_variables : dict</span>
+<span class="sd">    sv : dict</span>
 <span class="sd">        Variables calculated by the solver. They correspond to the fuel cell internal states.</span>
 <span class="sd">    control_variables : dict</span>
 <span class="sd">        Variables controlled by the user.</span>
 <span class="sd">    i_fc : float</span>
 <span class="sd">        Fuel cell current density at time t (A.m-2).</span>
+<span class="sd">    Jv_agc_agdl : list</span>
+<span class="sd">        Vapor flow between the AGC and the AGDL at each GC node (mol.m-2.s-1).</span>
+<span class="sd">    Jv_cgdl_cgc : list</span>
+<span class="sd">        Vapor flow between the CGDL and the CGC at each GC node (mol.m-2.s-1).</span>
+<span class="sd">    J_H2_agc_agdl : list</span>
+<span class="sd">        H2 flow between the AGC and the AGDL at each GC node (mol.m-2.s-1).</span>
+<span class="sd">    J_O2_cgdl_cgc : list</span>
+<span class="sd">        O2 flow between the CGDL and the CGC at each GC node (mol.m-2.s-1).</span>
 <span class="sd">    operating_inputs : dict</span>
 <span class="sd">        Operating inputs of the fuel cell.</span>
 <span class="sd">    parameters : dict</span>
@@ -652,137 +636,112 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    Jv_a_in : float</span>
-<span class="sd">        Vapor flow at the anode gas channel inlet (mol.m-2.s-1).</span>
-<span class="sd">    Jv_a_out : float</span>
-<span class="sd">        Vapor flow at the anode gas channel outlet (mol.m-2.s-1).</span>
-<span class="sd">    Jv_c_in : float</span>
-<span class="sd">        Vapor flow at the cathode gas channel inlet (mol.m-2.s-1).</span>
-<span class="sd">    Jv_c_out : float</span>
-<span class="sd">        Vapor flow at the cathode gas channel outlet (mol.m-2.s-1).</span>
-<span class="sd">    J_H2_in : float</span>
-<span class="sd">        H2 flow at the anode gas channel inlet (mol.m-2.s-1).</span>
-<span class="sd">    J_H2_out : float</span>
-<span class="sd">        H2 flow at the anode gas channel outlet (mol.m-2.s-1).</span>
-<span class="sd">    J_O2_in : float</span>
-<span class="sd">        O2 flow at the cathode gas channel inlet (mol.m-2.s-1).</span>
-<span class="sd">    J_O2_out : float</span>
-<span class="sd">        O2 flow at the cathode gas channel outlet (mol.m-2.s-1).</span>
-<span class="sd">    J_N2_in : float</span>
-<span class="sd">        N2 flow at the cathode gas channel inlet (mol.m-2.s-1).</span>
-<span class="sd">    J_N2_out : float</span>
-<span class="sd">        N2 flow at the cathode gas channel outlet (mol.m-2.s-1).</span>
-<span class="sd">    Wasm_in : float</span>
-<span class="sd">        Anode side supply manifold inlet flow (kg.s-1).</span>
-<span class="sd">    Wasm_out : float</span>
-<span class="sd">        Anode side supply manifold outlet flow (kg.s-1).</span>
-<span class="sd">    Waem_in : float</span>
-<span class="sd">        Anode side external manifold inlet flow (kg.s-1).</span>
-<span class="sd">    Waem_out : float</span>
-<span class="sd">        Anode side external manifold outlet flow (kg.s-1).</span>
-<span class="sd">    Wcsm_in : float</span>
-<span class="sd">        Cathode side supply manifold inlet flow (kg.s-1).</span>
-<span class="sd">    Wcsm_out : float</span>
-<span class="sd">        Cathode side supply manifold outlet flow (kg.s-1).</span>
-<span class="sd">    Wcem_in : float</span>
-<span class="sd">        Cathode side external manifold inlet flow (kg.s-1).</span>
-<span class="sd">    Wcem_out : float</span>
-<span class="sd">        Cathode side external manifold outlet flow (kg.s-1).</span>
-<span class="sd">    Ware : float</span>
-<span class="sd">        Anode side recirculation flow (kg.s-1).</span>
-<span class="sd">    Wv_asm_in : float</span>
-<span class="sd">        Vapor flow at the anode supply manifold inlet (mol.s-1).</span>
-<span class="sd">    Wv_aem_out : float</span>
-<span class="sd">        Vapor flow at the anode external manifold outlet (mol.s-1).</span>
-<span class="sd">    Wv_csm_in : float</span>
-<span class="sd">        Vapor flow at the cathode supply manifold inlet (mol.s-1).</span>
-<span class="sd">    Wv_cem_out : float</span>
-<span class="sd">        Vapor flow at the cathode external manifold outlet (mol.s-1).</span>
+<span class="sd">    Jv : dict</span>
+<span class="sd">        Vapor flow between the different layers (mol.m-2.s-1).</span>
+<span class="sd">    J_H2 : dict</span>
+<span class="sd">        Hydrogen flow between the different layers (mol.m-2.s-1).</span>
+<span class="sd">    J_O2 : dict</span>
+<span class="sd">        Oxygen flow between the different layers (mol.m-2.s-1).</span>
+<span class="sd">    J_N2 : dict</span>
+<span class="sd">        Nitrogen flow between the different layers (mol.m-2.s-1).</span>
+<span class="sd">    W : dict</span>
+<span class="sd">        Global flows through the auxiliaries (mol.s-1).</span>
+<span class="sd">    W_v : dict</span>
+<span class="sd">        Vapor flows through the auxiliaries (mol.s-1).</span>
+<span class="sd">    v_a_in : float</span>
+<span class="sd">        Velocity evolution at the inlet of the anode (m.s-1).</span>
+<span class="sd">    v_c_in : float</span>
+<span class="sd">        Velocity evolution at the inlet of the cathode (m.s-1).</span>
+<span class="sd">    Pa_in : float</span>
+<span class="sd">        Inlet pressure at the anode side (Pa).</span>
+<span class="sd">    Pc_in : float</span>
+<span class="sd">        Inlet pressure at the cathode side (Pa).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># __________________________________________________Preliminaries___________________________________________________</span>
 
     <span class="c1"># Extraction of the variables</span>
-    <span class="n">Pasm</span><span class="p">,</span> <span class="n">Paem</span><span class="p">,</span> <span class="n">Pcsm</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Pasm&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Paem&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Pcsm&#39;</span><span class="p">]</span>
-    <span class="n">Pcem</span><span class="p">,</span> <span class="n">Phi_asm</span><span class="p">,</span> <span class="n">Phi_aem</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Pcem&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Phi_asm&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Phi_aem&#39;</span><span class="p">]</span>
-    <span class="n">Phi_csm</span><span class="p">,</span> <span class="n">Phi_cem</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Phi_csm&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Phi_cem&#39;</span><span class="p">]</span>
-    <span class="n">Wcp</span><span class="p">,</span> <span class="n">Wa_inj</span><span class="p">,</span> <span class="n">Wc_inj</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Wcp&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Wa_inj&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Wc_inj&#39;</span><span class="p">]</span>
+    <span class="n">Pasm</span><span class="p">,</span> <span class="n">Paem</span><span class="p">,</span> <span class="n">Pcsm</span><span class="p">,</span> <span class="n">Pcem</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Pasm&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Paem&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Pcsm&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Pcem&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">Phi_asm</span><span class="p">,</span> <span class="n">Phi_aem</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Phi_asm&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Phi_aem&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">Phi_csm</span><span class="p">,</span> <span class="n">Phi_cem</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Phi_csm&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Phi_cem&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">Wcp</span><span class="p">,</span> <span class="n">Wa_inj</span><span class="p">,</span> <span class="n">Wc_inj</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Wcp&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Wa_inj&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Wc_inj&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="c1"># Extraction of the operating inputs and the parameters</span>
-    <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;T_des&#39;</span><span class="p">],</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Pa_des&#39;</span><span class="p">],</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Pc_des&#39;</span><span class="p">]</span>
-    <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span> <span class="o">=</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Sa&#39;</span><span class="p">],</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Sc&#39;</span><span class="p">]</span>
-    <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span> <span class="o">=</span> <span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_a_des&#39;</span><span class="p">],</span> <span class="n">control_variables</span><span class="p">[</span><span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]</span>
-    <span class="n">Aact</span><span class="p">,</span> <span class="n">Hagc</span><span class="p">,</span> <span class="n">Hcgc</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Aact&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hagc&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hcgc&#39;</span><span class="p">]</span>
-    <span class="n">Wagc</span><span class="p">,</span> <span class="n">Wcgc</span><span class="p">,</span> <span class="n">type_auxiliary</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Wagc&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Wcgc&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_auxiliary&#39;</span><span class="p">]</span>
+    <span class="n">T_des</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span> <span class="o">=</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;T_des&#39;</span><span class="p">],</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Phi_a_des&#39;</span><span class="p">],</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Phi_c_des&#39;</span><span class="p">]</span>
+    <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">y_H2_in</span> <span class="o">=</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Sa&#39;</span><span class="p">],</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Sc&#39;</span><span class="p">],</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;y_H2_in&#39;</span><span class="p">]</span>
+    <span class="n">Aact</span><span class="p">,</span> <span class="n">nb_cell</span><span class="p">,</span> <span class="n">Hagc</span><span class="p">,</span> <span class="n">Hcgc</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Aact&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;nb_cell&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hagc&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hcgc&#39;</span><span class="p">]</span>
+    <span class="n">Wagc</span><span class="p">,</span> <span class="n">Wcgc</span><span class="p">,</span> <span class="n">nb_channel_in_gc</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Wagc&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Wcgc&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;nb_channel_in_gc&#39;</span><span class="p">]</span>
+    <span class="n">A_T_a</span><span class="p">,</span> <span class="n">A_T_c</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;A_T_a&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;A_T_c&#39;</span><span class="p">]</span>
+    <span class="n">nb_gc</span><span class="p">,</span> <span class="n">type_auxiliary</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;nb_gc&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_auxiliary&#39;</span><span class="p">]</span>
 
     <span class="c1"># Intermediate values</span>
-    <span class="n">Mext</span><span class="p">,</span> <span class="n">Pagc</span><span class="p">,</span> <span class="n">Pcgc</span><span class="p">,</span> <span class="n">Phi_agc</span><span class="p">,</span> <span class="n">Phi_cgc</span><span class="p">,</span> <span class="n">y_cgc</span><span class="p">,</span> <span class="n">Magc</span><span class="p">,</span> <span class="n">Mcgc</span><span class="p">,</span> <span class="n">Pr_aem</span><span class="p">,</span> <span class="n">Pr_cem</span><span class="p">,</span> \
-        <span class="n">Maem</span><span class="p">,</span> <span class="n">Masm</span><span class="p">,</span> <span class="n">Mcem</span><span class="p">,</span> <span class="n">Mcsm</span><span class="p">,</span> <span class="n">k_purge</span><span class="p">,</span> <span class="n">Abp_a</span><span class="p">,</span> <span class="n">Abp_c</span><span class="p">,</span> <span class="n">i_n</span> <span class="o">=</span> \
-        <span class="n">auxiliaries_int_values</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">solver_variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
+        <span class="c1"># Commun intermediate values with dif_eq_modules.py which allows to avoid redundant calculations</span>
+    <span class="n">P</span><span class="p">,</span> <span class="n">Phi</span><span class="p">,</span> <span class="n">y_H2</span><span class="p">,</span> <span class="n">y_O2</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">k_purge</span><span class="p">,</span> <span class="n">Abp_a</span><span class="p">,</span> <span class="n">Abp_c</span><span class="p">,</span> <span class="n">mu_gaz</span><span class="p">,</span> <span class="n">i_n</span> <span class="o">=</span> \
+        <span class="n">auxiliaries_int_values_which_are_commun_with_dif_eq</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">sv</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
+    <span class="n">v_a</span><span class="p">,</span> <span class="n">v_c</span><span class="p">,</span> <span class="n">Pa_in</span><span class="p">,</span> <span class="n">Pc_in</span> <span class="o">=</span> <span class="n">calculate_velocity_evolution</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">,</span> <span class="n">i_fc</span><span class="p">,</span> <span class="n">i_n</span><span class="p">,</span> <span class="n">Jv_agc_agdl</span><span class="p">,</span> <span class="n">Jv_cgdl_cgc</span><span class="p">,</span> <span class="n">J_H2_agc_agdl</span><span class="p">,</span>
+                                            <span class="n">J_O2_cgdl_cgc</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">mu_gaz</span><span class="p">)</span>
+    <span class="n">W_des</span> <span class="o">=</span> <span class="n">desired_flows</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="n">control_variables</span><span class="p">,</span> <span class="n">i_fc</span><span class="p">,</span> <span class="n">i_n</span><span class="p">,</span> <span class="n">Pa_in</span><span class="p">,</span> <span class="n">Pc_in</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
 
     <span class="c1"># _________________________________________Inlet and outlet global flows____________________________________________</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Global flows here refer to flows that integrate all the chemical species circulating together.</span>
 <span class="sd">    Slight differences are to be noted in the expression of these flows depending on the type of auxiliary selected.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># At the anode side</span>
-    <span class="k">if</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_anodic_recirculation&quot;</span><span class="p">:</span>
-        <span class="c1"># Anode inlet</span>
-        <span class="n">Wasm_in</span> <span class="o">=</span> <span class="n">Ksm_in</span> <span class="o">*</span> <span class="p">(</span><span class="n">Pa_des</span> <span class="o">-</span> <span class="n">Pasm</span><span class="p">)</span>  <span class="c1"># kg.s-1</span>
-        <span class="n">Wasm_out</span> <span class="o">=</span> <span class="n">Ksm_out</span> <span class="o">*</span> <span class="p">(</span><span class="n">Pasm</span> <span class="o">-</span> <span class="n">Pagc</span><span class="p">)</span>  <span class="c1"># kg.s-1</span>
-        <span class="n">Ja_in</span> <span class="o">=</span> <span class="n">Wasm_out</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hagc</span> <span class="o">*</span> <span class="n">Wagc</span> <span class="o">*</span> <span class="n">Masm</span><span class="p">)</span>  <span class="c1"># mol.m-2.s-1</span>
-        <span class="c1"># Anode outlet</span>
-        <span class="n">Waem_in</span> <span class="o">=</span> <span class="n">Kem_in</span> <span class="o">*</span> <span class="p">(</span><span class="n">Pagc</span> <span class="o">-</span> <span class="n">Paem</span><span class="p">)</span>  <span class="c1"># kg.s-1</span>
-        <span class="n">Ware</span> <span class="o">=</span> <span class="n">n_cell</span> <span class="o">*</span> <span class="n">Maem</span> <span class="o">*</span> <span class="p">(</span><span class="n">Paem</span> <span class="o">/</span> <span class="p">(</span><span class="n">Paem</span> <span class="o">-</span> <span class="n">Phi_aem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)))</span> <span class="o">*</span> <span class="p">(</span><span class="n">Sa</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">i_fc</span> <span class="o">+</span> <span class="n">i_n</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
-                    <span class="mi">2</span> <span class="o">*</span> <span class="n">F</span><span class="p">)</span> <span class="o">*</span> <span class="n">Aact</span>  <span class="c1"># kg.s-1</span>
-        <span class="n">Waem_out</span> <span class="o">=</span> <span class="n">k_purge</span> <span class="o">*</span> <span class="n">C_D</span> <span class="o">*</span> <span class="n">A_T</span> <span class="o">*</span> <span class="n">Paem</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">Pr_aem</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">gamma_H2</span><span class="p">)</span> <span class="o">*</span> \
-                   <span class="p">(</span><span class="n">Magc</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">gamma_H2</span> <span class="o">/</span> <span class="p">(</span><span class="n">gamma_H2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Pr_aem</span> <span class="o">**</span> <span class="p">((</span><span class="n">gamma_H2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">gamma_H2</span><span class="p">)))</span><span class="o">**</span><span class="mf">0.5</span>  <span class="c1"># kg.s-1</span>
-        <span class="n">Ja_out</span> <span class="o">=</span> <span class="n">Waem_in</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hagc</span> <span class="o">*</span> <span class="n">Wagc</span> <span class="o">*</span> <span class="n">Magc</span><span class="p">)</span>  <span class="c1"># mol.m-2.s-1</span>
-
-    <span class="k">elif</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>
-        <span class="c1"># Anode inlet</span>
-        <span class="n">Wrd</span> <span class="o">=</span> <span class="n">n_cell</span> <span class="o">*</span> <span class="n">M_H2</span> <span class="o">*</span> <span class="n">Sa</span> <span class="o">*</span> <span class="p">(</span><span class="n">i_fc</span> <span class="o">+</span> <span class="n">i_n</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">F</span><span class="p">)</span> <span class="o">*</span> <span class="n">Aact</span>  <span class="c1"># kg.s-1</span>
-        <span class="n">Wasm_in</span> <span class="o">=</span> <span class="n">Wrd</span> <span class="o">+</span> <span class="n">Wa_inj</span>  <span class="c1"># kg.s-1</span>
-        <span class="n">Wasm_out</span> <span class="o">=</span> <span class="n">Ksm_out</span> <span class="o">*</span> <span class="p">(</span><span class="n">Pasm</span> <span class="o">-</span> <span class="n">Pagc</span><span class="p">)</span>  <span class="c1"># kg.s-1</span>
-        <span class="n">Ja_in</span> <span class="o">=</span> <span class="n">Wasm_out</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hagc</span> <span class="o">*</span> <span class="n">Wagc</span> <span class="o">*</span> <span class="n">Masm</span><span class="p">)</span>  <span class="c1"># mol.m-2.s-1</span>
-        <span class="c1"># Anode outlet</span>
-        <span class="n">Waem_in</span> <span class="o">=</span> <span class="n">Kem_in</span> <span class="o">*</span> <span class="p">(</span><span class="n">Pagc</span> <span class="o">-</span> <span class="n">Paem</span><span class="p">)</span>  <span class="c1"># kg.s-1</span>
-        <span class="n">Ware</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># kg.s-1</span>
-        <span class="n">Waem_out</span> <span class="o">=</span> <span class="n">C_D</span> <span class="o">*</span> <span class="n">Abp_a</span> <span class="o">*</span> <span class="n">Paem</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">Pr_aem</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">gamma_H2</span><span class="p">)</span> <span class="o">*</span> \
-                   <span class="p">(</span><span class="n">Magc</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">gamma_H2</span> <span class="o">/</span> <span class="p">(</span><span class="n">gamma_H2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Pr_aem</span> <span class="o">**</span> <span class="p">((</span><span class="n">gamma_H2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">gamma_H2</span><span class="p">)))</span><span class="o">**</span><span class="mf">0.5</span>
-        <span class="c1"># kg.s-1</span>
-        <span class="n">Ja_out</span> <span class="o">=</span> <span class="n">Waem_in</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hagc</span> <span class="o">*</span> <span class="n">Wagc</span> <span class="o">*</span> <span class="n">Magc</span><span class="p">)</span>  <span class="c1"># mol.m-2.s-1</span>
-
+    <span class="c1"># Anode flow through the auxiliaries in mol.s-1</span>
+    <span class="k">if</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_anodic_recirculation&quot;</span> <span class="ow">or</span> \
+         <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>
+        <span class="k">pass</span>
+        <span class="c1"># Wa_in = rho_asm_in_to_asm * v_a * A_T_a</span>
+        <span class="c1"># Wasm_to_asm_out = rho_asm_to_asm_out * v_a * Hagc * Wagc</span>
+        <span class="c1"># Wasm_out_to_agc = rho_asm_out_to_agc * v_a * Hagc * Wagc</span>
+        <span class="c1"># Wagc_to_aem_in = rho_agc_to_aem_in * v_a * Hagc * Wagc</span>
+        <span class="c1"># Waem_in_to_aem = rho_aem_in_to_aem * v_a * Hagc * Wagc</span>
+        <span class="c1"># if type_auxiliary == &quot;forced-convective_cathode_with_anodic_recirculation&quot;:                                     # Attention: prévoir un débit minimal pour la pompe, comme les débits entrants.</span>
+        <span class="c1">#     Ware = Maem_out_re * (Paem_out_re / (Paem_out_re - Phi_aem_out_re * Psat(T_des))) * \</span>
+        <span class="c1">#            (Sa - 1) * i_fc / (2 * F) * (nb_cell * Aact)                                                  # The pump exactly compensates the pressure drop.</span>
+        <span class="c1">#     Wasm_in_re_to_asm = rho_asm_in_re_to_asm * v_a * A_T_a</span>
+        <span class="c1">#     Waem_to_aem_out_re = rho_aem_to_aem_out_re * v_a * A_T_a</span>
+        <span class="c1">#     Waem_to_aem_out = k_purge * rho_aem_to_aem_out * v_a * A_T_a</span>
+        <span class="c1">#     Wa_out = k_purge * rho_aem_out_to_ext * v_a * A_T_a</span>
+        <span class="c1"># else: # type_auxiliary == &quot;forced-convective_cathode_with_flow-through_anode&quot;:</span>
+        <span class="c1">#     Ware = None</span>
+        <span class="c1">#     Wasm_in_re_to_asm = None</span>
+        <span class="c1">#     Waem_to_aem_out_re = None</span>
+        <span class="c1">#     Waem_to_aem_out = rho_aem_to_aem_out * v_a * Abp_a</span>
+        <span class="c1">#     Wa_out = rho_aem_out_to_ext * v_a * Abp_a</span>
     <span class="k">else</span><span class="p">:</span>  <span class="c1"># elif type_auxiliary == &quot;no_auxiliary&quot; (only 1 cell):</span>
-        <span class="c1"># Anode inlet</span>
-        <span class="n">Wasm_in</span><span class="p">,</span> <span class="n">Wasm_out</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>  <span class="c1"># kg.s-1</span>
-        <span class="n">Ja_in</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">Phi_a_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Pagc</span> <span class="o">-</span> <span class="n">Phi_a_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)))</span> <span class="o">*</span> \
-                <span class="n">Sa</span> <span class="o">*</span> <span class="p">(</span><span class="n">i_fc</span> <span class="o">+</span> <span class="n">i_n</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">F</span><span class="p">)</span> <span class="o">*</span> <span class="n">Aact</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hagc</span> <span class="o">*</span> <span class="n">Wagc</span><span class="p">)</span>  <span class="c1"># mol.m-2.s-1</span>
-        <span class="c1"># Anode outlet</span>
-        <span class="n">Waem_in</span><span class="p">,</span> <span class="n">Ware</span><span class="p">,</span> <span class="n">Waem_out</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>  <span class="c1"># kg.s-1</span>
-        <span class="n">Ja_out</span> <span class="o">=</span> <span class="n">Kem_in</span> <span class="o">*</span> <span class="p">(</span><span class="n">Pagc</span> <span class="o">-</span> <span class="n">Pa_des</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hagc</span> <span class="o">*</span> <span class="n">Wagc</span> <span class="o">*</span> <span class="n">Magc</span><span class="p">)</span>  <span class="c1"># mol.m-2.s-1</span>
+        <span class="n">Wa_in</span> <span class="o">=</span> <span class="n">W_des</span><span class="p">[</span><span class="s1">&#39;H2&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">W_des</span><span class="p">[</span><span class="s1">&#39;H2O_inj_a&#39;</span><span class="p">]</span>  <span class="c1"># This expression is also present in calculate_velocity_evolution.</span>
+        <span class="n">Wa_out</span> <span class="o">=</span> <span class="n">P</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agc_</span><span class="si">{</span><span class="n">nb_gc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span><span class="p">)</span> <span class="o">*</span> <span class="n">v_a</span><span class="p">[</span><span class="n">nb_gc</span><span class="p">]</span> <span class="o">*</span> <span class="n">Hagc</span> <span class="o">*</span> <span class="n">Wagc</span> <span class="o">*</span> <span class="n">nb_cell</span> <span class="o">*</span> <span class="n">nb_channel_in_gc</span>
+        <span class="n">Ware</span><span class="p">,</span> <span class="n">Wasm_to_agc</span><span class="p">,</span> <span class="n">Wagc_to_aem</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+    <span class="c1"># Anode flow entering/leaving the stack in mol.m-2.s-1</span>
+    <span class="k">if</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_anodic_recirculation&quot;</span> <span class="ow">or</span> \
+            <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>
+        <span class="k">pass</span>
+        <span class="c1"># Ja_in = 0</span>
+        <span class="c1"># Ja_out = 0</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># elif type_auxiliary == &quot;no_auxiliary&quot; (only 1 cell):</span>
+        <span class="n">Ja_in</span> <span class="o">=</span> <span class="n">Wa_in</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hagc</span> <span class="o">*</span> <span class="n">Wagc</span><span class="p">)</span> <span class="o">/</span> <span class="n">nb_cell</span> <span class="o">/</span> <span class="n">nb_channel_in_gc</span> <span class="c1"># This expression is also present in calculate_velocity_evolution.</span>
+        <span class="n">Ja_out</span> <span class="o">=</span> <span class="n">Wa_out</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hagc</span> <span class="o">*</span> <span class="n">Wagc</span><span class="p">)</span> <span class="o">/</span> <span class="n">nb_cell</span> <span class="o">/</span> <span class="n">nb_channel_in_gc</span>
 
-    <span class="c1"># At the cathode side</span>
+    <span class="c1"># Cathode flow through the auxiliaries in mol.s-1</span>
     <span class="k">if</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_anodic_recirculation&quot;</span> <span class="ow">or</span> \
        <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>
-        <span class="c1"># Cathode inlet         </span>
-        <span class="n">Wcsm_in</span> <span class="o">=</span> <span class="n">Wcp</span> <span class="o">+</span> <span class="n">Wc_inj</span>  <span class="c1"># kg.s-1</span>
-        <span class="n">Wcsm_out</span> <span class="o">=</span> <span class="n">Ksm_out</span> <span class="o">*</span> <span class="p">(</span><span class="n">Pcsm</span> <span class="o">-</span> <span class="n">Pcgc</span><span class="p">)</span>  <span class="c1"># kg.s-1</span>
-        <span class="n">Jc_in</span> <span class="o">=</span> <span class="n">Wcsm_out</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hcgc</span> <span class="o">*</span> <span class="n">Wcgc</span> <span class="o">*</span> <span class="n">Mcsm</span><span class="p">)</span>  <span class="c1"># mol.m-2.s-1</span>
-        <span class="c1"># Cathode outlet</span>
-        <span class="n">Wcem_in</span> <span class="o">=</span> <span class="n">Kem_in</span> <span class="o">*</span> <span class="p">(</span><span class="n">Pcgc</span> <span class="o">-</span> <span class="n">Pcem</span><span class="p">)</span>  <span class="c1"># kg.s-1</span>
-        <span class="n">Wcem_out</span> <span class="o">=</span> <span class="n">C_D</span> <span class="o">*</span> <span class="n">Abp_c</span> <span class="o">*</span> <span class="n">Pcem</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">Pr_cem</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">gamma</span><span class="p">)</span> <span class="o">*</span> \
-                   <span class="p">(</span><span class="n">Mcgc</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">gamma</span> <span class="o">/</span> <span class="p">(</span><span class="n">gamma</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Pr_cem</span> <span class="o">**</span> <span class="p">((</span><span class="n">gamma</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">gamma</span><span class="p">)))</span><span class="o">**</span><span class="mf">0.5</span>  <span class="c1"># kg.s-1</span>
-        <span class="n">Jc_out</span> <span class="o">=</span> <span class="n">Wcem_in</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hcgc</span> <span class="o">*</span> <span class="n">Wcgc</span> <span class="o">*</span> <span class="n">Mcgc</span><span class="p">)</span>  <span class="c1"># mol.m-2.s-1</span>
-
+        <span class="k">pass</span>
+        <span class="c1"># Wc_in = rho_csm_in_to_csm * v_c * A_T_c</span>
+        <span class="c1"># Wcsm_to_csm_out = rho_csm_to_csm_out * v_c * Hcgc * Wcgc</span>
+        <span class="c1"># Wcsm_out_to_cgc = rho_csm_out_to_cgc * v_c * Hcgc * Wcgc</span>
+        <span class="c1"># Wcgc_to_cem_in = rho_cgc_to_cem_in * v_c * Hcgc * Wcgc</span>
+        <span class="c1"># Wcem_in_to_cem = rho_cem_in_to_cem * v_c * Hcgc * Wcgc</span>
+        <span class="c1"># Wcem_to_cem_out = rho_cem_to_cem_out * v_c * Abp_c</span>
+        <span class="c1"># Wc_out = rho_cem_out_to_ext * v_c * Abp_c</span>
     <span class="k">else</span><span class="p">:</span>  <span class="c1"># elif type_auxiliary == &quot;no_auxiliary&quot; (only 1 cell):</span>
-        <span class="c1"># Cathode inlet   </span>
-        <span class="n">Wcsm_in</span><span class="p">,</span> <span class="n">Wcsm_out</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>  <span class="c1"># kg.s-1</span>
-        <span class="n">Jc_in</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">Phi_c_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Pcgc</span> <span class="o">-</span> <span class="n">Phi_c_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)))</span> <span class="o">*</span> \
-                <span class="mi">1</span> <span class="o">/</span> <span class="n">yO2_ext</span> <span class="o">*</span> <span class="n">Sc</span> <span class="o">*</span> <span class="p">(</span><span class="n">i_fc</span> <span class="o">+</span> <span class="n">i_n</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">F</span><span class="p">)</span> <span class="o">*</span> <span class="n">Aact</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hcgc</span> <span class="o">*</span> <span class="n">Wcgc</span><span class="p">)</span>  <span class="c1"># mol.m-2.s-1</span>
-        <span class="c1"># Cathode outlet</span>
-        <span class="n">Wcem_in</span><span class="p">,</span> <span class="n">Wcem_out</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>  <span class="c1"># kg.s-1</span>
-        <span class="n">Jc_out</span> <span class="o">=</span> <span class="n">Kem_in</span> <span class="o">*</span> <span class="p">(</span><span class="n">Pcgc</span> <span class="o">-</span> <span class="n">Pc_des</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hcgc</span> <span class="o">*</span> <span class="n">Wcgc</span> <span class="o">*</span> <span class="n">Mcgc</span><span class="p">)</span>  <span class="c1"># mol.m-2.s-1</span>
+        <span class="n">Wc_in</span> <span class="o">=</span> <span class="n">W_des</span><span class="p">[</span><span class="s1">&#39;dry_air&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">W_des</span><span class="p">[</span><span class="s1">&#39;H2O_inj_c&#39;</span><span class="p">]</span>  <span class="c1"># This expression is also present in calculate_velocity_evolution.</span>
+        <span class="n">Wc_out</span> <span class="o">=</span> <span class="n">P</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">nb_gc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span><span class="p">)</span> <span class="o">*</span> <span class="n">v_c</span><span class="p">[</span><span class="n">nb_gc</span><span class="p">]</span> <span class="o">*</span> <span class="n">Hcgc</span> <span class="o">*</span> <span class="n">Wcgc</span> <span class="o">*</span> <span class="n">nb_cell</span> <span class="o">*</span> <span class="n">nb_channel_in_gc</span>
+        <span class="n">Wcsm_to_cgc</span><span class="p">,</span> <span class="n">Wcgc_to_cem</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
+
+    <span class="c1"># Cathode flow entering/leaving the stack in mol.m-2.s-1</span>
+    <span class="n">Jc_in</span> <span class="o">=</span> <span class="n">Wc_in</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hcgc</span> <span class="o">*</span> <span class="n">Wcgc</span><span class="p">)</span> <span class="o">/</span> <span class="n">nb_cell</span> <span class="o">/</span> <span class="n">nb_channel_in_gc</span>  <span class="c1"># This expression is also present in calculate_velocity_evolution.</span>
+    <span class="n">Jc_out</span> <span class="o">=</span> <span class="n">Wc_out</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hcgc</span> <span class="o">*</span> <span class="n">Wcgc</span><span class="p">)</span> <span class="o">/</span> <span class="n">nb_cell</span> <span class="o">/</span> <span class="n">nb_channel_in_gc</span>
 
     <span class="c1"># ________________________________________Inlet and outlet specific flows___________________________________________</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Specific flows here refer to flows that integrate only a single chemical species within the ensemble of species</span>
@@ -791,57 +750,107 @@
 
     <span class="c1"># Vapor flows at the GC (mol.m-2.s-1)</span>
     <span class="k">if</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_anodic_recirculation&quot;</span> <span class="ow">or</span> \
-       <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>
-        <span class="n">Jv_a_in</span> <span class="o">=</span> <span class="n">Phi_asm</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pasm</span> <span class="o">*</span> <span class="n">Ja_in</span>
-        <span class="n">Jv_c_in</span> <span class="o">=</span> <span class="n">Phi_csm</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcsm</span> <span class="o">*</span> <span class="n">Jc_in</span>
+            <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>
+        <span class="k">pass</span>
+        <span class="c1"># Jv_agc_in = Phi_asm * Psat(T_des) / Pasm * Ja_in</span>
     <span class="k">else</span><span class="p">:</span>  <span class="c1"># elif type_auxiliary == &quot;no_auxiliary&quot;:</span>
-        <span class="n">Jv_a_in</span> <span class="o">=</span> <span class="n">Phi_a_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pagc</span> <span class="o">*</span> <span class="n">Ja_in</span>
-        <span class="n">Jv_c_in</span> <span class="o">=</span> <span class="n">Phi_c_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcgc</span> <span class="o">*</span> <span class="n">Jc_in</span>
-    <span class="n">Jv_a_out</span> <span class="o">=</span> <span class="n">Phi_agc</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pagc</span> <span class="o">*</span> <span class="n">Ja_out</span>
-    <span class="n">Jv_c_out</span> <span class="o">=</span> <span class="n">Phi_cgc</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcgc</span> <span class="o">*</span> <span class="n">Jc_out</span>
+        <span class="n">Jv_agc_in</span> <span class="o">=</span> <span class="n">Phi_a_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pa_in</span> <span class="o">*</span> <span class="n">Ja_in</span>
+    <span class="n">Jv_agc_agc</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">v_a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_gc</span><span class="p">)]</span>
+    <span class="n">Jv_agc_out</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_agc_</span><span class="si">{</span><span class="n">nb_gc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">P</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agc_</span><span class="si">{</span><span class="n">nb_gc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">Ja_out</span>
+    <span class="k">if</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_anodic_recirculation&quot;</span> <span class="ow">or</span> \
+            <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>
+        <span class="k">pass</span>
+        <span class="c1"># Jv_cgc_in = Phi_csm * Psat(T_des) / Pcsm * Jc_in</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># elif type_auxiliary == &quot;no_auxiliary&quot;:</span>
+        <span class="n">Jv_cgc_in</span> <span class="o">=</span> <span class="n">Phi_c_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pc_in</span> <span class="o">*</span> <span class="n">Jc_in</span>
+    <span class="n">Jv_cgc_cgc</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">v_c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_gc</span><span class="p">)]</span>
+    <span class="n">Jv_cgc_out</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_cgc_</span><span class="si">{</span><span class="n">nb_gc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">P</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">nb_gc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">Jc_out</span>
 
     <span class="c1"># H2 flows at the GC (mol.m-2.s-1)</span>
-    <span class="k">if</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_anodic_recirculation&quot;</span> <span class="ow">or</span> \
-       <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>
-        <span class="n">J_H2_in</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_asm</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pasm</span><span class="p">)</span> <span class="o">*</span> <span class="n">Ja_in</span>
-    <span class="k">else</span><span class="p">:</span>  <span class="c1"># elif type_auxiliary == &quot;no_auxiliary&quot;:</span>
-        <span class="n">J_H2_in</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_a_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pagc</span><span class="p">)</span> <span class="o">*</span> <span class="n">Ja_in</span>
-    <span class="n">J_H2_out</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_agc</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pagc</span><span class="p">)</span> <span class="o">*</span> <span class="n">Ja_out</span>
+    <span class="k">if</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>
+        <span class="k">pass</span>
+        <span class="c1"># J_H2_agc_in = y_H2[&#39;asm_out&#39;] * (1 - Phi_asm_out_to_agc * Psat(T_des) / Pasm_out_to_agc) * Ja_in</span>
+        <span class="c1"># J_H2_agc_agc = None</span>
+        <span class="c1"># J_H2_agc_out = y_H2_agc * (1 - Phi_agc_to_aem_in * Psat(T_des) / Pagc_to_aem_in) * Ja_out</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># elif type_auxiliary == &quot;forced-convective_cathode_with_anodic_recirculation&quot; or type_auxiliary == &quot;no_auxiliary&quot;:</span>
+        <span class="n">J_H2_agc_in</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_a_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pa_in</span><span class="p">)</span> <span class="o">*</span> <span class="n">Ja_in</span>
+        <span class="n">J_H2_agc_agc</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_H2_agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">v_a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_gc</span><span class="p">)]</span>
+        <span class="n">J_H2_agc_out</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_H2_agc_</span><span class="si">{</span><span class="n">nb_gc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">P</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agc_</span><span class="si">{</span><span class="n">nb_gc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">Ja_out</span>
 
     <span class="c1"># O2 flows at the GC (mol.m-2.s-1)</span>
     <span class="k">if</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_anodic_recirculation&quot;</span> <span class="ow">or</span> \
-       <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>
-        <span class="n">J_O2_in</span> <span class="o">=</span> <span class="n">yO2_ext</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_csm</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcsm</span><span class="p">)</span> <span class="o">*</span> <span class="n">Jc_in</span>
+            <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>
+        <span class="k">pass</span>
+        <span class="c1"># J_O2_cgc_in = y_O2_csm * (1 - Phi_csm * Psat(T_des) / Pcsm) * Jc_in</span>
     <span class="k">else</span><span class="p">:</span>  <span class="c1"># elif type_auxiliary == &quot;no_auxiliary&quot;:</span>
-        <span class="n">J_O2_in</span> <span class="o">=</span> <span class="n">yO2_ext</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_c_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcgc</span><span class="p">)</span> <span class="o">*</span> <span class="n">Jc_in</span>
-    <span class="n">J_O2_out</span> <span class="o">=</span> <span class="n">y_cgc</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_cgc</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcgc</span><span class="p">)</span> <span class="o">*</span> <span class="n">Jc_out</span>
+        <span class="n">J_O2_cgc_in</span> <span class="o">=</span> <span class="n">y_O2_ext</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_c_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pc_in</span><span class="p">)</span> <span class="o">*</span> <span class="n">Jc_in</span>
+    <span class="n">J_O2_cgc_cgc</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_O2_cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">v_c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_gc</span><span class="p">)]</span>
+    <span class="n">J_O2_cgc_out</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_O2_cgc_</span><span class="si">{</span><span class="n">nb_gc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">P</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">nb_gc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">Jc_out</span>
 
     <span class="c1"># N2 flows at the GC (mol.m-2.s-1)</span>
     <span class="k">if</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_anodic_recirculation&quot;</span> <span class="ow">or</span> \
-       <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>
-        <span class="n">J_N2_in</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">yO2_ext</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_csm</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcsm</span><span class="p">)</span> <span class="o">*</span> <span class="n">Jc_in</span>
+            <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>
+        <span class="k">pass</span>
+        <span class="c1"># J_N2_agc_in = (1 - y_H2[&#39;asm_out&#39;]) * (1 - Phi_asm_out_to_agc * Psat(T_des) / Pasm_out_to_agc) * Ja_in</span>
+        <span class="c1"># J_N2_agc_out = (1 - y_H2_agc) * (1 - Phi_agc_to_aem_in * Psat(T_des) / Pagc_to_aem_in) * Ja_out</span>
+        <span class="c1"># J_N2_cgc_in = (1 - y_O2_csm_out_to_cgc) * (1 - Phi_csm_out_to_cgc * Psat(T_des) / Pcsm_out_to_cgc) * Jc_in</span>
+        <span class="c1"># J_N2_cgc_out = (1 - y_O2_cgc_to_cem_in) * (1 - Phi_cgc_to_cem_in * Psat(T_des) / Pcgc_to_cem_in) * Jc_out</span>
     <span class="k">else</span><span class="p">:</span>  <span class="c1"># elif type_auxiliary == &quot;no_auxiliary&quot;:</span>
-        <span class="n">J_N2_in</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">yO2_ext</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_c_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcgc</span><span class="p">)</span> <span class="o">*</span> <span class="n">Jc_in</span>
-    <span class="n">J_N2_out</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y_cgc</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_cgc</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcgc</span><span class="p">)</span> <span class="o">*</span> <span class="n">Jc_out</span>
+        <span class="n">J_N2_agc_in</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">J_N2_agc_agc</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">nb_gc</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">J_N2_agc_out</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">J_N2_cgc_in</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y_O2_ext</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_c_des</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pc_in</span><span class="p">)</span> <span class="o">*</span> <span class="n">Jc_in</span>
+        <span class="n">J_N2_cgc_cgc</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_N2_cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">v_c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_gc</span><span class="p">)]</span>
+        <span class="n">J_N2_cgc_out</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_N2_cgc_</span><span class="si">{</span><span class="n">nb_gc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">P</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">nb_gc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">Jc_out</span>
 
     <span class="c1"># Vapor flows at the manifold (mol.s-1)</span>
-    <span class="k">if</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_anodic_recirculation&quot;</span><span class="p">:</span>
-        <span class="n">Wv_asm_in</span> <span class="o">=</span> <span class="n">Phi_aem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Paem</span> <span class="o">*</span> <span class="p">(</span><span class="n">Ware</span> <span class="o">/</span> <span class="n">Maem</span><span class="p">)</span>
-        <span class="n">Wv_aem_out</span> <span class="o">=</span> <span class="n">Phi_aem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Paem</span> <span class="o">*</span> <span class="p">(</span><span class="n">Waem_out</span> <span class="o">/</span> <span class="n">Maem</span><span class="p">)</span>
-        <span class="n">Wv_csm_in</span> <span class="o">=</span> <span class="n">Phi_ext</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pext</span> <span class="o">*</span> <span class="p">(</span><span class="n">Wcp</span> <span class="o">/</span> <span class="n">Mext</span><span class="p">)</span> <span class="o">+</span> <span class="n">Wc_inj</span> <span class="o">/</span> <span class="n">M_H2O</span>
-        <span class="n">Wv_cem_out</span> <span class="o">=</span> <span class="n">Phi_cem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcem</span> <span class="o">*</span> <span class="p">(</span><span class="n">Wcem_out</span> <span class="o">/</span> <span class="n">Mcem</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>
-        <span class="n">Wv_asm_in</span> <span class="o">=</span> <span class="n">Wa_inj</span> <span class="o">/</span> <span class="n">M_H2O</span>
-        <span class="n">Wv_aem_out</span> <span class="o">=</span> <span class="n">Phi_aem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Paem</span> <span class="o">*</span> <span class="p">(</span><span class="n">Waem_out</span> <span class="o">/</span> <span class="n">Maem</span><span class="p">)</span>
-        <span class="n">Wv_csm_in</span> <span class="o">=</span> <span class="n">Phi_ext</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pext</span> <span class="o">*</span> <span class="p">(</span><span class="n">Wcp</span> <span class="o">/</span> <span class="n">Mext</span><span class="p">)</span> <span class="o">+</span> <span class="n">Wc_inj</span> <span class="o">/</span> <span class="n">M_H2O</span>
-        <span class="n">Wv_cem_out</span> <span class="o">=</span> <span class="n">Phi_cem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcem</span> <span class="o">*</span> <span class="p">(</span><span class="n">Wcem_out</span> <span class="o">/</span> <span class="n">Mcem</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_anodic_recirculation&quot;</span> <span class="ow">or</span> \
+            <span class="n">type_auxiliary</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>
+        <span class="k">pass</span>
+        <span class="c1"># Wv_asm_in_to_asm = Phi_asm_in_to_asm * Psat(T_des) / Pasm_in_to_asm * Wa_in</span>
+        <span class="c1"># Wv_asm_to_asm_out = Phi_asm_to_asm_out * Psat(T_des) / Pasm_to_asm_out * Wasm_to_asm_out</span>
+        <span class="c1"># Wv_asm_out_to_agc = Phi_asm_out_to_agc * Psat(T_des) / Pasm_out_to_agc * Wasm_out_to_agc</span>
+        <span class="c1"># Wv_agc_to_aem_in = Phi_agc_to_aem_in * Psat(T_des) / Pagc_to_aem_in * Wagc_to_aem_in</span>
+        <span class="c1"># Wv_aem_in_to_aem = Phi_aem_in_to_aem * Psat(T_des) / Paem_in_to_aem * Waem_in_to_aem</span>
+        <span class="c1"># Wv_aem_to_aem_out = Phi_aem_to_aem_out * Psat(T_des) / Paem_to_aem_out * Waem_to_aem_out</span>
+        <span class="c1"># Wv_a_out = Phi_aem_out * Psat(T_des) / Paem_out * Wa_out</span>
+        <span class="c1"># if type_auxiliary == &quot;forced-convective_cathode_with_anodic_recirculation&quot;:</span>
+        <span class="c1">#     # At the anode side</span>
+        <span class="c1">#     Wv_asm_ext_to_in = 0</span>
+        <span class="c1">#     Wv_asm_in_re_to_asm = Phi_asm_in_re_to_asm * Psat(T_des) / Pasm_in_re_to_asm * Wasm_in_re_to_asm</span>
+        <span class="c1">#     Wv_aem_to_aem_out_re = Phi_aem_to_aem_out_re * Psat(T_des) / Paem_to_aem_out_re * Waem_to_aem_out_re</span>
+        <span class="c1">#     Wv_are = Phi_aem_out_re * Psat(T_des) / Paem_out_re * (Ware / M[&#39;aem_out_re&#39;]) # The pump exactly compensates the pressure drop.</span>
+        <span class="c1"># else: # type_auxiliary == &quot;forced-convective_cathode_with_flow-through_anode&quot;:</span>
+        <span class="c1">#     # At the anode side</span>
+        <span class="c1">#     Wv_asm_ext_to_in = Wa_inj / M_H2O</span>
+        <span class="c1">#     Wv_asm_in_re_to_asm = None</span>
+        <span class="c1">#     Wv_aem_to_aem_out_re = None</span>
+        <span class="c1">#     Wv_are = None</span>
+        <span class="c1"># # At the cathode side</span>
+        <span class="c1"># Wv_csm_ext_to_in = Phi_ext * Psat(Text) / Pext * (Wcp / M[&#39;ext&#39;]) + Wc_inj / M_H2O</span>
+        <span class="c1"># Wv_csm_in_to_csm = Phi_csm_in_to_csm * Psat(T_des) / Pcsm_in_to_csm * Wc_in</span>
+        <span class="c1"># Wv_csm_to_csm_out = Phi_csm_to_csm_out * Psat(T_des) / Pcsm_to_csm_out * Wcsm_to_csm_out</span>
+        <span class="c1"># Wv_csm_out_to_cgc = Phi_csm_out_to_cgc * Psat(T_des) / Pcsm_out_to_cgc * Wcsm_out_to_cgc</span>
+        <span class="c1"># Wv_cgc_to_cem_in = Phi_cgc_to_cem_in * Psat(T_des) / Pcgc_to_cem_in * Wcgc_to_cem_in</span>
+        <span class="c1"># Wv_cem_in_to_cem = Phi_cem_in_to_cem * Psat(T_des) / Pcem_in_to_cem * Wcem_in_to_cem</span>
+        <span class="c1"># Wv_cem_to_cem_out = Phi_cem_to_cem_out * Psat(T_des) / Pcem_to_cem_out * Wcem_to_cem_out</span>
+        <span class="c1"># Wv_c_out = Phi_cem_out * Psat(T_des) / Pcem_out * Wc_out</span>
     <span class="k">else</span><span class="p">:</span>  <span class="c1"># elif type_auxiliary == &quot;no_auxiliary&quot;:</span>
-        <span class="n">Wv_asm_in</span><span class="p">,</span> <span class="n">Wv_aem_out</span><span class="p">,</span> <span class="n">Wv_csm_in</span><span class="p">,</span> <span class="n">Wv_cem_out</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+        <span class="n">Wv_are</span><span class="p">,</span> <span class="n">Wv_a_in</span><span class="p">,</span> <span class="n">Wv_asm_to_agc</span><span class="p">,</span> <span class="n">Wv_agc_to_aem</span><span class="p">,</span> <span class="n">Wv_a_out</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">5</span>
+        <span class="n">Wv_c_in</span><span class="p">,</span> <span class="n">Wv_csm_to_cgc</span><span class="p">,</span> <span class="n">Wv_cgc_to_cem</span><span class="p">,</span> <span class="n">Wv_c_out</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
 
-    <span class="k">return</span> <span class="n">Jv_a_in</span><span class="p">,</span> <span class="n">Jv_a_out</span><span class="p">,</span> <span class="n">Jv_c_in</span><span class="p">,</span> <span class="n">Jv_c_out</span><span class="p">,</span> \
-        <span class="n">J_H2_in</span><span class="p">,</span> <span class="n">J_H2_out</span><span class="p">,</span> <span class="n">J_O2_in</span><span class="p">,</span> <span class="n">J_O2_out</span><span class="p">,</span> <span class="n">J_N2_in</span><span class="p">,</span> <span class="n">J_N2_out</span><span class="p">,</span> \
-        <span class="n">Wasm_in</span><span class="p">,</span> <span class="n">Wasm_out</span><span class="p">,</span> <span class="n">Waem_in</span><span class="p">,</span> <span class="n">Waem_out</span><span class="p">,</span> <span class="n">Wcsm_in</span><span class="p">,</span> <span class="n">Wcsm_out</span><span class="p">,</span> <span class="n">Wcem_in</span><span class="p">,</span> <span class="n">Wcem_out</span><span class="p">,</span> <span class="n">Ware</span><span class="p">,</span> \
-        <span class="n">Wv_asm_in</span><span class="p">,</span> <span class="n">Wv_aem_out</span><span class="p">,</span> <span class="n">Wv_csm_in</span><span class="p">,</span> <span class="n">Wv_cem_out</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;Jv&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;agc_in&#39;</span><span class="p">:</span> <span class="n">Jv_agc_in</span><span class="p">,</span> <span class="s1">&#39;agc_agc&#39;</span><span class="p">:</span> <span class="n">Jv_agc_agc</span><span class="p">,</span> <span class="s1">&#39;agc_out&#39;</span><span class="p">:</span> <span class="n">Jv_agc_out</span><span class="p">,</span>
+                   <span class="s1">&#39;cgc_in&#39;</span><span class="p">:</span> <span class="n">Jv_cgc_in</span><span class="p">,</span> <span class="s1">&#39;cgc_cgc&#39;</span><span class="p">:</span> <span class="n">Jv_cgc_cgc</span><span class="p">,</span> <span class="s1">&#39;cgc_out&#39;</span><span class="p">:</span> <span class="n">Jv_cgc_out</span><span class="p">},</span>
+            <span class="s1">&#39;J_H2&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;agc_in&#39;</span><span class="p">:</span> <span class="n">J_H2_agc_in</span><span class="p">,</span> <span class="s1">&#39;agc_agc&#39;</span><span class="p">:</span> <span class="n">J_H2_agc_agc</span><span class="p">,</span> <span class="s1">&#39;agc_out&#39;</span><span class="p">:</span> <span class="n">J_H2_agc_out</span><span class="p">},</span>
+            <span class="s1">&#39;J_O2&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;cgc_in&#39;</span><span class="p">:</span> <span class="n">J_O2_cgc_in</span><span class="p">,</span> <span class="s1">&#39;cgc_cgc&#39;</span><span class="p">:</span> <span class="n">J_O2_cgc_cgc</span><span class="p">,</span> <span class="s1">&#39;cgc_out&#39;</span><span class="p">:</span> <span class="n">J_O2_cgc_out</span><span class="p">},</span>
+            <span class="s1">&#39;J_N2&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;agc_in&#39;</span><span class="p">:</span> <span class="n">J_N2_agc_in</span><span class="p">,</span> <span class="s1">&#39;agc_agc&#39;</span><span class="p">:</span> <span class="n">J_N2_agc_agc</span><span class="p">,</span> <span class="s1">&#39;agc_out&#39;</span><span class="p">:</span> <span class="n">J_N2_agc_out</span><span class="p">,</span>
+                     <span class="s1">&#39;cgc_in&#39;</span><span class="p">:</span> <span class="n">J_N2_cgc_in</span><span class="p">,</span> <span class="s1">&#39;cgc_cgc&#39;</span><span class="p">:</span> <span class="n">J_N2_cgc_cgc</span><span class="p">,</span> <span class="s1">&#39;cgc_out&#39;</span><span class="p">:</span> <span class="n">J_N2_cgc_out</span><span class="p">},</span>
+            <span class="s1">&#39;W&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;are&#39;</span><span class="p">:</span> <span class="n">Ware</span><span class="p">,</span> <span class="s1">&#39;a_in&#39;</span><span class="p">:</span> <span class="n">Wa_in</span><span class="p">,</span> <span class="s1">&#39;asm_to_agc&#39;</span><span class="p">:</span> <span class="n">Wasm_to_agc</span><span class="p">,</span> <span class="s1">&#39;agc_to_aem&#39;</span><span class="p">:</span> <span class="n">Wagc_to_aem</span><span class="p">,</span> <span class="s1">&#39;a_out&#39;</span><span class="p">:</span> <span class="n">Wa_out</span><span class="p">,</span>
+                  <span class="s1">&#39;c_in&#39;</span><span class="p">:</span> <span class="n">Wc_in</span><span class="p">,</span> <span class="s1">&#39;csm_to_cgc&#39;</span><span class="p">:</span> <span class="n">Wcsm_to_cgc</span><span class="p">,</span> <span class="s1">&#39;cgc_to_cem&#39;</span><span class="p">:</span> <span class="n">Wcgc_to_cem</span><span class="p">,</span> <span class="s1">&#39;c_out&#39;</span><span class="p">:</span> <span class="n">Wc_out</span><span class="p">},</span>
+            <span class="s1">&#39;W_v&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;a_in&#39;</span><span class="p">:</span> <span class="n">Wv_a_in</span><span class="p">,</span> <span class="s1">&#39;are&#39;</span><span class="p">:</span> <span class="n">Wv_are</span><span class="p">,</span> <span class="s1">&#39;asm_to_agc&#39;</span><span class="p">:</span> <span class="n">Wv_asm_to_agc</span><span class="p">,</span> <span class="s1">&#39;agc_to_aem&#39;</span><span class="p">:</span> <span class="n">Wv_agc_to_aem</span><span class="p">,</span>
+                    <span class="s1">&#39;a_out&#39;</span><span class="p">:</span> <span class="n">Wv_a_out</span><span class="p">,</span> <span class="s1">&#39;c_in&#39;</span><span class="p">:</span> <span class="n">Wv_c_in</span><span class="p">,</span> <span class="s1">&#39;csm_to_cgc&#39;</span><span class="p">:</span> <span class="n">Wv_csm_to_cgc</span><span class="p">,</span> <span class="s1">&#39;cgc_to_cem&#39;</span><span class="p">:</span> <span class="n">Wv_cgc_to_cem</span><span class="p">,</span>
+                    <span class="s1">&#39;c_out&#39;</span><span class="p">:</span> <span class="n">Wv_c_out</span><span class="p">},</span>
+            <span class="s1">&#39;v_a_in&#39;</span><span class="p">:</span> <span class="n">v_a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;v_c_in&#39;</span><span class="p">:</span> <span class="n">v_c</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;Pa_in&#39;</span><span class="p">:</span> <span class="n">Pa_in</span><span class="p">,</span> <span class="s1">&#39;Pc_in&#39;</span><span class="p">:</span> <span class="n">Pc_in</span><span class="p">}</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

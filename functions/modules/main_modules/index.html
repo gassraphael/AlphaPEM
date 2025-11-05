@@ -376,7 +376,7 @@
         <span class="k">elif</span> <span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_display&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;synthetic&quot;</span><span class="p">:</span>
             <span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">13</span>  <span class="c1"># Font size for all text</span>
             <span class="n">fig1</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">14</span><span class="p">))</span>
-            <span class="n">fig2</span><span class="p">,</span> <span class="n">ax2</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>  <span class="c1"># Here, additional plots are unnecessary</span>
+            <span class="n">fig2</span><span class="p">,</span> <span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
             <span class="n">fig3</span><span class="p">,</span> <span class="n">ax3</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>  <span class="c1"># Here, additional plots are unnecessary</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="mf">0.04</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">0.96</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.07</span><span class="p">,</span> <span class="n">wspace</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)</span>
 
@@ -385,12 +385,12 @@
         <span class="k">if</span> <span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_display&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;multiple&quot;</span><span class="p">:</span>
             <span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">11</span>  <span class="c1"># Font size for all text</span>
             <span class="n">fig1</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mf">4.7</span><span class="p">))</span>
-            <span class="n">fig2</span><span class="p">,</span> <span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mf">4.7</span><span class="p">))</span>
+            <span class="n">fig2</span><span class="p">,</span> <span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">18.7</span><span class="p">,</span> <span class="mf">4.7</span><span class="p">))</span>
             <span class="n">fig3</span><span class="p">,</span> <span class="n">ax3</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>  <span class="c1"># Here, additional plots are unnecessary</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="mf">0.04</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">0.96</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.07</span><span class="p">,</span> <span class="n">wspace</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_display&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;synthetic&quot;</span><span class="p">:</span>
-            <span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">18</span>  <span class="c1"># Font size for all text</span>
-            <span class="n">fig1</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+            <span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">11</span>  <span class="c1"># Font size for all text</span>
+            <span class="n">fig1</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mf">4.7</span><span class="p">))</span>
             <span class="n">fig2</span><span class="p">,</span> <span class="n">ax2</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>  <span class="c1"># Here, additional plots are unnecessary</span>
             <span class="n">fig3</span><span class="p">,</span> <span class="n">ax3</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>  <span class="c1"># Here, additional plots are unnecessary</span>
 
@@ -500,13 +500,7 @@
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/main_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">459</span>
-<span class="normal">460</span>
-<span class="normal">461</span>
-<span class="normal">462</span>
-<span class="normal">463</span>
-<span class="normal">464</span>
-<span class="normal">465</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">465</span>
 <span class="normal">466</span>
 <span class="normal">467</span>
 <span class="normal">468</span>
@@ -591,7 +585,15 @@
 <span class="normal">547</span>
 <span class="normal">548</span>
 <span class="normal">549</span>
-<span class="normal">550</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">launch_AlphaPEM_for_EIS_current</span><span class="p">(</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="n">current_parameters</span><span class="p">,</span> <span class="n">accessible_physical_parameters</span><span class="p">,</span>
+<span class="normal">550</span>
+<span class="normal">551</span>
+<span class="normal">552</span>
+<span class="normal">553</span>
+<span class="normal">554</span>
+<span class="normal">555</span>
+<span class="normal">556</span>
+<span class="normal">557</span>
+<span class="normal">558</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">launch_AlphaPEM_for_EIS_current</span><span class="p">(</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="n">current_parameters</span><span class="p">,</span> <span class="n">accessible_physical_parameters</span><span class="p">,</span>
                                     <span class="n">undetermined_physical_parameters</span><span class="p">,</span> <span class="n">computing_parameters</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Launch the AlphaPEM simulator for an EIS current density and display the results.</span>
 
@@ -683,6 +685,8 @@
     <span class="c1"># Ending time</span>
     <span class="n">algo_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time of the algorithm in second :&#39;</span><span class="p">,</span> <span class="n">algo_time</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Simulator</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -760,9 +764,7 @@
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/main_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">211</span>
 <span class="normal">212</span>
 <span class="normal">213</span>
 <span class="normal">214</span>
@@ -890,7 +892,10 @@
 <span class="normal">336</span>
 <span class="normal">337</span>
 <span class="normal">338</span>
-<span class="normal">339</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">launch_AlphaPEM_for_polarization_current</span><span class="p">(</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="n">current_parameters</span><span class="p">,</span> <span class="n">accessible_physical_parameters</span><span class="p">,</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">launch_AlphaPEM_for_polarization_current</span><span class="p">(</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="n">current_parameters</span><span class="p">,</span> <span class="n">accessible_physical_parameters</span><span class="p">,</span>
                                              <span class="n">undetermined_physical_parameters</span><span class="p">,</span> <span class="n">computing_parameters</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Launch the AlphaPEM simulator for a polarization current density and display the results.</span>
 
@@ -917,25 +922,25 @@
     <span class="c1"># Condition to fill for the comparison with experimental values</span>
     <span class="k">if</span> <span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;manual_setup&quot;</span> <span class="ow">and</span> \
             <span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_auxiliary&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>  <span class="c1"># Experimental points are accessible</span>
-        <span class="n">i_exp_t_1</span><span class="p">,</span> <span class="n">U_exp_t_1</span> <span class="o">=</span> <span class="n">pola_exp_values</span><span class="p">(</span><span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">i_exp_t_1</span><span class="p">,</span> <span class="n">U_exp_t_1</span> <span class="o">=</span> <span class="n">pola_exp_values</span><span class="p">(</span><span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;voltage_zone&#39;</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">current_parameters</span><span class="p">[</span><span class="s1">&#39;pola_current_parameters&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;i_max_pola&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">i_exp_t_1</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The given maximum current density of the polarization curve i_max_pola_1 is lower than the &#39;</span>
                              <span class="s1">&#39;maximum current density of the experimental values. Please increase it.&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;manual_setup&quot;</span> <span class="ow">and</span> \
             <span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_auxiliary&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>  <span class="c1"># Experimental points are accessible</span>
-        <span class="n">i_exp_t_2</span><span class="p">,</span> <span class="n">U_exp_t_2</span> <span class="o">=</span> <span class="n">pola_exp_values</span><span class="p">(</span><span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">i_exp_t_2</span><span class="p">,</span> <span class="n">U_exp_t_2</span> <span class="o">=</span> <span class="n">pola_exp_values</span><span class="p">(</span><span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span> <span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;voltage_zone&#39;</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">current_parameters</span><span class="p">[</span><span class="s1">&#39;pola_current_parameters&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;i_max_pola&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">i_exp_t_2</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The given maximum current density of the polarization curve i_max_pola_2 is lower than the &#39;</span>
                              <span class="s1">&#39;maximum current density of the experimental values. Please increase it.&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;manual_setup&quot;</span> <span class="ow">and</span> \
             <span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_auxiliary&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>  <span class="c1"># Experimental points are accessible</span>
-        <span class="n">i_exp_t_3</span><span class="p">,</span> <span class="n">U_exp_t_3</span> <span class="o">=</span> <span class="n">pola_exp_values</span><span class="p">(</span><span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">][</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">i_exp_t_3</span><span class="p">,</span> <span class="n">U_exp_t_3</span> <span class="o">=</span> <span class="n">pola_exp_values</span><span class="p">(</span><span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span> <span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;voltage_zone&#39;</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">current_parameters</span><span class="p">[</span><span class="s1">&#39;pola_current_parameters&#39;</span><span class="p">][</span><span class="mi">3</span><span class="p">][</span><span class="s1">&#39;i_max_pola&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">i_exp_t_3</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The given maximum current density of the polarization curve i_max_pola_3 is lower than the &#39;</span>
                              <span class="s1">&#39;maximum current density of the experimental values. Please increase it.&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;manual_setup&quot;</span> <span class="ow">and</span> \
             <span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_auxiliary&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>  <span class="c1"># Experimental points are accessible</span>
-        <span class="n">i_exp_t_4</span><span class="p">,</span> <span class="n">U_exp_t_4</span> <span class="o">=</span> <span class="n">pola_exp_values</span><span class="p">(</span><span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">][</span><span class="mi">4</span><span class="p">])</span>
+        <span class="n">i_exp_t_4</span><span class="p">,</span> <span class="n">U_exp_t_4</span> <span class="o">=</span> <span class="n">pola_exp_values</span><span class="p">(</span><span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">][</span><span class="mi">4</span><span class="p">],</span> <span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;voltage_zone&#39;</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">current_parameters</span><span class="p">[</span><span class="s1">&#39;pola_current_parameters&#39;</span><span class="p">][</span><span class="mi">4</span><span class="p">][</span><span class="s1">&#39;i_max_pola&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">i_exp_t_4</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The given maximum current density of the polarization curve i_max_pola_4 is lower than the &#39;</span>
                              <span class="s1">&#39;maximum current density of the experimental values. Please increase it.&#39;</span><span class="p">)</span>
@@ -957,11 +962,10 @@
         <span class="n">delta_t_load_pola</span> <span class="o">=</span> <span class="n">current_parameters</span><span class="p">[</span><span class="s1">&#39;pola_current_parameters&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;delta_t_load_pola&#39;</span><span class="p">]</span>  <span class="c1"># (s).</span>
         <span class="n">delta_t_break_pola</span> <span class="o">=</span> <span class="n">current_parameters</span><span class="p">[</span><span class="s1">&#39;pola_current_parameters&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;delta_t_break_pola&#39;</span><span class="p">]</span>  <span class="c1"># (s).</span>
         <span class="n">delta_i_pola</span> <span class="o">=</span> <span class="n">current_parameters</span><span class="p">[</span><span class="s1">&#39;pola_current_parameters&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;delta_i_pola&#39;</span><span class="p">]</span>  <span class="c1"># (A.m-2).</span>
-        <span class="n">i_max_pola_1</span> <span class="o">=</span> <span class="n">current_parameters</span><span class="p">[</span><span class="s1">&#39;pola_current_parameters&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;i_max_pola_1&#39;</span><span class="p">]</span>  <span class="c1"># (A.m-2).</span>
+        <span class="n">i_max_pola</span> <span class="o">=</span> <span class="n">current_parameters</span><span class="p">[</span><span class="s1">&#39;pola_current_parameters&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;i_max_pola&#39;</span><span class="p">]</span>  <span class="c1"># (A.m-2).</span>
         <span class="c1">#           Calculation</span>
         <span class="n">delta_t_pola</span> <span class="o">=</span> <span class="n">delta_t_load_pola</span> <span class="o">+</span> <span class="n">delta_t_break_pola</span>  <span class="c1"># s. It is the time of one load.</span>
-        <span class="n">tf</span> <span class="o">=</span> <span class="n">delta_t_ini_pola</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span>
-            <span class="n">i_max_pola_1</span> <span class="o">/</span> <span class="n">delta_i_pola</span><span class="p">)</span> <span class="o">*</span> <span class="n">delta_t_pola</span>  <span class="c1"># s. It is the polarization current duration.</span>
+        <span class="n">tf</span> <span class="o">=</span> <span class="n">delta_t_ini_pola</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">i_max_pola</span> <span class="o">/</span> <span class="n">delta_i_pola</span><span class="p">)</span> <span class="o">*</span> <span class="n">delta_t_pola</span>  <span class="c1"># s. It is the polarization current duration.</span>
         <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tf</span> <span class="o">/</span> <span class="n">delta_t_pola</span><span class="p">)</span>  <span class="c1"># It is the plot update number.</span>
         <span class="n">time_interval</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">delta_t_ini_pola</span> <span class="o">+</span> <span class="n">delta_t_pola</span><span class="p">]</span>  <span class="c1"># It is the initial time interval.</span>
 
@@ -1021,6 +1025,8 @@
     <span class="c1"># Ending time</span>
     <span class="n">algo_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time of the algorithm in second :&#39;</span><span class="p">,</span> <span class="n">algo_time</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Simulator_1</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -1099,10 +1105,7 @@ parameters, and display the results.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>modules/main_modules.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span>
-<span class="normal">345</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">345</span>
 <span class="normal">346</span>
 <span class="normal">347</span>
 <span class="normal">348</span>
@@ -1213,7 +1216,13 @@ parameters, and display the results.</p>
 <span class="normal">453</span>
 <span class="normal">454</span>
 <span class="normal">455</span>
-<span class="normal">456</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">launch_AlphaPEM_for_polarization_current_for_calibration</span><span class="p">(</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="n">current_parameters</span><span class="p">,</span>
+<span class="normal">456</span>
+<span class="normal">457</span>
+<span class="normal">458</span>
+<span class="normal">459</span>
+<span class="normal">460</span>
+<span class="normal">461</span>
+<span class="normal">462</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">launch_AlphaPEM_for_polarization_current_for_calibration</span><span class="p">(</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="n">current_parameters</span><span class="p">,</span>
                                                              <span class="n">accessible_physical_parameters</span><span class="p">,</span>
                                                              <span class="n">undetermined_physical_parameters</span><span class="p">,</span> <span class="n">computing_parameters</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Launch the AlphaPEM simulator for a polarization current density made for the calibration of the undetermined</span>
@@ -1257,7 +1266,8 @@ parameters, and display the results.</p>
         <span class="n">delta_t_ini_pola_cali</span> <span class="o">=</span> <span class="n">current_parameters</span><span class="p">[</span><span class="s1">&#39;pola_current_parameters&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;delta_t_ini_pola_cali&#39;</span><span class="p">]</span>  <span class="c1"># (s).</span>
         <span class="n">delta_t_load_pola_cali</span> <span class="o">=</span> <span class="n">current_parameters</span><span class="p">[</span><span class="s1">&#39;pola_current_parameters&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;delta_t_load_pola_cali&#39;</span><span class="p">]</span>  <span class="c1"># (s).</span>
         <span class="n">delta_t_break_pola_cali</span> <span class="o">=</span> <span class="n">current_parameters</span><span class="p">[</span><span class="s1">&#39;pola_current_parameters&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;delta_t_break_pola_cali&#39;</span><span class="p">]</span>  <span class="c1"># (s).</span>
-        <span class="n">i_exp_cali_t</span><span class="p">,</span> <span class="n">U_exp_cali_t</span> <span class="o">=</span> <span class="n">pola_exp_values_calibration</span><span class="p">(</span><span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># (A.m-2, V).</span>
+        <span class="n">i_exp_cali_t</span><span class="p">,</span> <span class="n">U_exp_cali_t</span> <span class="o">=</span> <span class="n">pola_exp_values_calibration</span><span class="p">(</span><span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;type_fuel_cell&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                                                                 <span class="n">computing_parameters</span><span class="p">[</span><span class="s1">&#39;voltage_zone&#39;</span><span class="p">])</span>  <span class="c1"># (A.m-2, V).</span>
         <span class="c1">#           Calculation</span>
         <span class="n">delta_t_pola_cali</span> <span class="o">=</span> <span class="n">delta_t_load_pola_cali</span> <span class="o">+</span> <span class="n">delta_t_break_pola_cali</span>  <span class="c1"># s. It is the time of one load.</span>
         <span class="n">tf</span> <span class="o">=</span> <span class="n">delta_t_ini_pola_cali</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span>
@@ -1328,6 +1338,8 @@ parameters, and display the results.</p>
     <span class="c1"># Ending time</span>
     <span class="n">algo_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time of the algorithm in second :&#39;</span><span class="p">,</span> <span class="n">algo_time</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Simulator_1</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -1483,7 +1495,9 @@ parameters, and display the results.</p>
 <span class="normal">203</span>
 <span class="normal">204</span>
 <span class="normal">205</span>
-<span class="normal">206</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">launch_AlphaPEM_for_step_current</span><span class="p">(</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="n">current_parameters</span><span class="p">,</span> <span class="n">accessible_physical_parameters</span><span class="p">,</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">launch_AlphaPEM_for_step_current</span><span class="p">(</span><span class="n">operating_inputs</span><span class="p">,</span> <span class="n">current_parameters</span><span class="p">,</span> <span class="n">accessible_physical_parameters</span><span class="p">,</span>
                                      <span class="n">undetermined_physical_parameters</span><span class="p">,</span> <span class="n">computing_parameters</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Launch the AlphaPEM simulator for a step current density and display the results.</span>
 
@@ -1562,6 +1576,8 @@ parameters, and display the results.</p>
     <span class="c1"># Ending time</span>
     <span class="n">algo_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time of the algorithm in second :&#39;</span><span class="p">,</span> <span class="n">algo_time</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Simulator</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

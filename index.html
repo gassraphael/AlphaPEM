@@ -137,9 +137,10 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="alphapem">AlphaPEM</h1>
-<p>AlphaPEM is an open-source software package for simulating proton exchange membrane fuel cell (PEMFC) systems for embedded applications. It is based on a physics-based, one-dimensional (1D), dynamic, two-phase, and non-isothermal model. It quickly simulates the internal states and voltage dynamics of PEMFC systems for all current densities and operating conditions imposed on it. In particular, it is possible to apply a step current density or use current profiles to generate polarization curves or electrochemical impedance spectroscopy (EIS) curves. It can also automatically calibrate the undetermined parameters of the model to simulate a given real fuel cell system.</p>
+<p>AlphaPEM is an open-source software package for simulating proton exchange membrane fuel cell (PEMFC) systems for embedded applications. It is based on a physics-based, finite-volume, one-dimensional (1D), dynamic, two-phase, and non-isothermal model. It quickly simulates the internal states and voltage dynamics of PEMFC systems for all current densities and operating conditions imposed on it. In particular, it is possible to apply a step current density or use current profiles to generate polarization curves or electrochemical impedance spectroscopy (EIS) curves. It can also automatically calibrate the undetermined parameters of the model to simulate a given real fuel cell system.</p>
 <p>A detailed <a href="https://doi.org/10.48550/arXiv.2407.12373">presentation</a> of this program was published in the peer-reviewed journal SoftwareX. </p>
 <p>Improvements to <strong>AlphaPEM</strong>, such as the addition of heat transfer modelling and spatial extension to 1D+1D, will be available in the future.</p>
+<p>Important note: AlphaPEM is an ongoing research project and is not a commercial product. Therefore, the latest online version may contain bugs, and not all features may be available. Relatively stable versions are listed in the <a href="#major-updates">Major updates</a> section.</p>
 <h1 id="table-of-contents">Table of Contents</h1>
 <ul>
 <li><a href="#installation">Installation</a></li>
@@ -170,9 +171,19 @@
 </ol>
 <h1 id="major-updates">Major updates</h1>
 <ul>
-<li>V1.1 - 2025.07.16 - This version of AlphaPEM includes: <ul>
+<li>V1.2 - in progress - This version of AlphaPEM includes: <ul>
+<li>the addition of convective flow between the inlet, gas channels, and outlet of the cell, thereby removing the Pukrushpan equations (from Michigan University).<ul>
+<li>auxiliary considerations are temporarily removed, as they require reconstruction. </li>
+</ul>
+</li>
+<li>the addition of the MPL to the simulated cell, in both the anode and cathode. </li>
+<li>the addition of the open-source <a href="https://zenodo.org/records/14223364">ZSW GenStack</a> as a calibrated fuel cell case study. </li>
+</ul>
+</li>
+<li><a href="https://github.com/gassraphael/AlphaPEM/tree/11f07bd084a09cc6432f441b010d89d2a4229e4e">V1.1</a> - 2025.08.18 - This version of AlphaPEM includes: <ul>
 <li>the addition of heat transfer to the program, in cooperation with Pedro Affonso Nobrega (PERSEE, MINES PSL).</li>
-<li>an improvement of the initial variable values: the algorithm waits for a given time (approximately 2 virtual hours) to reach equilibrium, and then the experiment starts (step/pola/EIS).</li>
+<li>an improvement of the initial variable values: the algorithm waits for a given time to reach equilibrium, and then the experiment starts (step/pola/EIS).</li>
+<li>the limit liquid water saturation coefficient ($s_{lim}$) is temporarily removed for future refinement.</li>
 </ul>
 </li>
 <li><a href="https://github.com/gassraphael/AlphaPEM/tree/2b042c3d16d53fcd16779a5ffdc81eea75a9d012">V1.0</a> - 2024.09.05 - This version of AlphaPEM corresponds to the one developed during Raphaël Gass's PhD from 2021 to 2024. <ul>
@@ -273,5 +284,5 @@
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2025-08-26 07:33:48.540299+00:00
+Build Date UTC : 2025-11-05 14:37:01.141506+00:00
 -->

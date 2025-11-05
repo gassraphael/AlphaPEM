@@ -245,7 +245,18 @@
 </table>
             <details class="quote">
               <summary>Source code in <code>model/cell_voltage.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 63</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
 <span class="normal"> 64</span>
 <span class="normal"> 65</span>
 <span class="normal"> 66</span>
@@ -297,18 +308,7 @@
 <span class="normal">112</span>
 <span class="normal">113</span>
 <span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_cell_voltage</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+<span class="normal">115</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_cell_voltage</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the cell voltage at each time step.</span>
 
 <span class="sd">    Parameters</span>
@@ -332,7 +332,7 @@
     <span class="n">T_acl_t</span><span class="p">,</span> <span class="n">T_mem_t</span><span class="p">,</span> <span class="n">T_ccl_t</span> <span class="o">=</span> <span class="n">variables</span><span class="p">[</span><span class="s1">&#39;T_acl&#39;</span><span class="p">],</span> <span class="n">variables</span><span class="p">[</span><span class="s1">&#39;T_mem&#39;</span><span class="p">],</span> <span class="n">variables</span><span class="p">[</span><span class="s1">&#39;T_ccl&#39;</span><span class="p">]</span>
     <span class="c1"># Extraction of the operating inputs and the parameters</span>
     <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hmem&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hacl&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hccl&#39;</span><span class="p">]</span>
-    <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">kappa_co</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;epsilon_mc&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;kappa_co&#39;</span><span class="p">]</span>
+    <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">kappa_co</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;epsilon_mc&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Re&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;kappa_co&#39;</span><span class="p">]</span>
 
     <span class="c1"># Initialisation</span>
     <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
@@ -489,18 +489,7 @@ function f_drop at time t.</p>
 <span class="normal">46</span>
 <span class="normal">47</span>
 <span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_eta_c_intermediate_values</span><span class="p">(</span><span class="n">solver_variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+<span class="normal">49</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_eta_c_intermediate_values</span><span class="p">(</span><span class="n">solver_variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates the intermediate values needed for the calculation of the cathode overpotential dynamic</span>
 <span class="sd">    evolution.</span>
 
@@ -522,27 +511,16 @@ function f_drop at time t.</p>
 
     <span class="c1"># Extraction of the variables</span>
     <span class="n">s_ccl</span><span class="p">,</span> <span class="n">lambda_mem</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;s_ccl&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;lambda_mem&#39;</span><span class="p">]</span>
-    <span class="n">C_H2_acl</span><span class="p">,</span> <span class="n">C_O2_ccl</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_H2_acl&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_O2_ccl&#39;</span><span class="p">]</span>
-    <span class="n">T_acl</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">T_ccl</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;T_acl&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;T_mem&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;T_ccl&#39;</span><span class="p">]</span>
     <span class="c1"># Extraction of the operating inputs and the parameters</span>
     <span class="n">Pc_des</span> <span class="o">=</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Pc_des&#39;</span><span class="p">]</span>
-    <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hmem&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hacl&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hccl&#39;</span><span class="p">]</span>
-    <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;i0_c_ref&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;kappa_co&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;kappa_c&#39;</span><span class="p">]</span>
     <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;a_slim&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;b_slim&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;a_switch&#39;</span><span class="p">]</span>
-
-    <span class="c1"># The crossover current density i_n</span>
-    <span class="n">T_acl_mem_ccl</span> <span class="o">=</span> <span class="n">average</span><span class="p">([</span><span class="n">T_acl</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">],</span>
-                        <span class="n">weights</span><span class="o">=</span><span class="p">[</span><span class="n">Hacl</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hacl</span> <span class="o">+</span> <span class="n">Hmem</span> <span class="o">+</span> <span class="n">Hccl</span><span class="p">),</span> <span class="n">Hmem</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hacl</span> <span class="o">+</span> <span class="n">Hmem</span> <span class="o">+</span> <span class="n">Hccl</span><span class="p">),</span> <span class="n">Hccl</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hacl</span> <span class="o">+</span> <span class="n">Hmem</span> <span class="o">+</span> <span class="n">Hccl</span><span class="p">)])</span>
-    <span class="n">i_H2</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">F</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_acl_mem_ccl</span> <span class="o">/</span> <span class="n">Hmem</span> <span class="o">*</span> <span class="n">C_H2_acl</span> <span class="o">*</span> <span class="n">k_H2</span><span class="p">(</span><span class="n">lambda_mem</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">)</span>
-    <span class="n">i_O2</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">F</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_acl_mem_ccl</span> <span class="o">/</span> <span class="n">Hmem</span> <span class="o">*</span> <span class="n">C_O2_ccl</span> <span class="o">*</span> <span class="n">k_O2</span><span class="p">(</span><span class="n">lambda_mem</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">)</span>
-    <span class="n">i_n</span> <span class="o">=</span> <span class="n">i_H2</span> <span class="o">+</span> <span class="n">i_O2</span>
 
     <span class="c1"># The liquid water induced voltage drop function f_drop</span>
     <span class="n">slim</span> <span class="o">=</span> <span class="n">a_slim</span> <span class="o">*</span> <span class="p">(</span><span class="n">Pc_des</span> <span class="o">/</span> <span class="mf">1e5</span><span class="p">)</span> <span class="o">+</span> <span class="n">b_slim</span>
     <span class="n">s_switch</span> <span class="o">=</span> <span class="n">a_switch</span> <span class="o">*</span> <span class="n">slim</span>
     <span class="n">f_drop</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">tanh</span><span class="p">((</span><span class="mi">4</span> <span class="o">*</span> <span class="n">s_ccl</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">slim</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">s_switch</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">slim</span> <span class="o">-</span> <span class="n">s_switch</span><span class="p">)))</span>
 
-    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;i_n&#39;</span><span class="p">:</span> <span class="n">i_n</span><span class="p">,</span> <span class="s1">&#39;f_drop&#39;</span><span class="p">:</span> <span class="n">f_drop</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;f_drop&#39;</span><span class="p">:</span> <span class="n">f_drop</span><span class="p">}</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

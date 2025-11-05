@@ -170,8 +170,8 @@
 <div class="doc doc-object doc-function">
 
 
-<h2 id="configuration.settings.computing_parameters" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">computing_parameters</span><span class="p">(</span><span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">)</span></code>
+<h2 id="configuration.settings.calculate_computing_parameters" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">calculate_computing_parameters</span><span class="p">(</span><span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmpl</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">)</span></code>
 
 </h2>
 
@@ -208,6 +208,14 @@
               </div>
             </li>
             <li>
+              <b><code>Hmpl</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Thickness of the microporous layer in meters.</p>
+              </div>
+            </li>
+            <li>
               <b><code>Hacl</code></b>
                   (<code>float</code>)
               –
@@ -232,10 +240,24 @@
       <td class="field-body">
         <ul class="first simple">
             <li>
-<b><code>n_gdl</code></b>(                  <code>int</code>
+<b><code>nb_gdl</code></b>(                  <code>int</code>
 )              –
               <div class="doc-md-description">
                 <p>Number of model nodes placed inside each GDL.</p>
+              </div>
+            </li>
+            <li>
+<b><code>nb_mpl</code></b>(                  <code>int</code>
+)              –
+              <div class="doc-md-description">
+                <p>Number of model nodes placed inside each MPL.</p>
+              </div>
+            </li>
+            <li>
+<b><code>nb_tl</code></b>(                  <code>int</code>
+)              –
+              <div class="doc-md-description">
+                <p>Number of model nodes placed inside each transition layer.</p>
               </div>
             </li>
             <li>
@@ -246,6 +268,20 @@
 It is a tuple containing the purge time 'purge_time' in seconds, and the time between two purges
 'delta_purge' in seconds.
 delta_t_dyn_step : float</p>
+              </div>
+            </li>
+            <li>
+<b><code>rtol</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Relative tolerance for the system of ODEs solver.</p>
+              </div>
+            </li>
+            <li>
+<b><code>atol</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Absolute tolerance for the system of ODEs solver.</p>
               </div>
             </li>
             <li>
@@ -270,46 +306,70 @@ internal states,
 </table>
             <details class="quote">
               <summary>Source code in <code>configuration/settings.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span>
-<span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
-<span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span>
-<span class="normal">296</span>
-<span class="normal">297</span>
-<span class="normal">298</span>
-<span class="normal">299</span>
-<span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span>
-<span class="normal">306</span>
-<span class="normal">307</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">computing_parameters</span><span class="p">(</span><span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_computing_parameters</span><span class="p">(</span><span class="n">step_current_parameters</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">Hmpl</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function is used to set the computing parameters of the fuel cell system.</span>
 
 <span class="sd">    Parameters</span>
@@ -318,18 +378,28 @@ internal states,
 <span class="sd">        Parameters for the step current density function.</span>
 <span class="sd">    Hgdl : float</span>
 <span class="sd">        Thickness of the gas diffusion layer in meters.</span>
+<span class="sd">    Hmpl : float</span>
+<span class="sd">        Thickness of the microporous layer in meters.</span>
 <span class="sd">    Hacl : float</span>
 <span class="sd">        Thickness of the anode catalyst layer in meters.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    n_gdl : int</span>
+<span class="sd">    nb_gdl : int</span>
 <span class="sd">        Number of model nodes placed inside each GDL.</span>
+<span class="sd">    nb_mpl : int</span>
+<span class="sd">        Number of model nodes placed inside each MPL.</span>
+<span class="sd">    nb_tl : int</span>
+<span class="sd">        Number of model nodes placed inside each transition layer.</span>
 <span class="sd">    t_purge : tuple</span>
 <span class="sd">        Time parameters for purging the system.</span>
 <span class="sd">        It is a tuple containing the purge time &#39;purge_time&#39; in seconds, and the time between two purges</span>
 <span class="sd">        &#39;delta_purge&#39; in seconds.</span>
 <span class="sd">        delta_t_dyn_step : float</span>
+<span class="sd">    rtol : float</span>
+<span class="sd">        Relative tolerance for the system of ODEs solver.</span>
+<span class="sd">    atol : float</span>
+<span class="sd">        Absolute tolerance for the system of ODEs solver.</span>
 <span class="sd">    step_current_parameters : dict</span>
 <span class="sd">        Parameters for the step current density. It is a dictionary containing:</span>
 <span class="sd">        - &#39;delta_t_ini_step&#39;: the initial time (in seconds) at zero current density for the stabilisation of the</span>
@@ -342,13 +412,27 @@ internal states,
 <span class="sd">        - &#39;delta_t_dyn_step&#39;: the time (in seconds) for dynamic display of the step current density function.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">n_gdl</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">Hacl</span> <span class="o">/</span> <span class="mi">4</span><span class="p">))</span>  <span class="c1"># It is the number of model points placed inside each GDL.</span>
-    <span class="c1">#                                       A good compromise is int(Hgdl/Hacl/4).</span>
-    <span class="n">t_purge</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mi">15</span>  <span class="c1"># (s, s). It is the time parameters for purging the system.</span>
-    <span class="n">delta_t_dyn_step</span> <span class="o">=</span> <span class="mi">5</span><span class="o">*</span><span class="mi">60</span>  <span class="c1"># (s). Time for dynamic display of the step current density function.</span>
+    <span class="c1"># Calculation of the minimum thickness of the model node</span>
+    <span class="n">H_node_min</span> <span class="o">=</span> <span class="n">Hacl</span>  <span class="c1"># m. It is the minimum thickness of the model node.</span>
 
-    <span class="n">step_current_parameters</span><span class="p">[</span><span class="s1">&#39;delta_t_dyn_step&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta_t_dyn_step</span> <span class="c1"># Update the step current parameters.</span>
-    <span class="k">return</span> <span class="n">n_gdl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">step_current_parameters</span>
+    <span class="c1"># Setting the number of model points placed inside each layer:</span>
+    <span class="n">nb_gc</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># It is the number of model points placed inside each gas channel.</span>
+    <span class="n">nb_gdl</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">Hgdl</span> <span class="o">/</span> <span class="n">H_node_min</span> <span class="o">/</span> <span class="mi">4</span><span class="p">))</span>  <span class="c1"># It is the number of model points placed inside each GDL.</span>
+    <span class="n">nb_mpl</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">Hmpl</span> <span class="o">/</span> <span class="n">H_node_min</span> <span class="o">/</span> <span class="mi">3</span><span class="p">))</span>  <span class="c1"># It is the number of model points placed inside each MPL.</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;nb_gdl: &#39;</span><span class="p">,</span> <span class="n">nb_gdl</span><span class="p">,</span> <span class="s1">&#39; nb_mpl: &#39;</span><span class="p">,</span> <span class="n">nb_mpl</span><span class="p">)</span>
+
+    <span class="c1"># Setting the purging parameters of the system and the dynamic display of the step current density function:</span>
+    <span class="n">t_purge</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mi">15</span>  <span class="c1"># (s, s). It is the time parameters for purging the system.</span>
+    <span class="n">delta_t_dyn_step</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># (s). Time for dynamic display of the step current density function.</span>
+
+    <span class="c1"># Setting the tolerances for the system of ODEs solver:</span>
+    <span class="n">rtol</span> <span class="o">=</span> <span class="mf">1e-3</span>  <span class="c1"># Relative tolerance for the system of ODEs solver.</span>
+    <span class="n">atol</span> <span class="o">=</span> <span class="mf">1e-6</span>  <span class="c1"># Absolute tolerance for the system of ODEs solver.</span>
+
+    <span class="c1"># Update the step current parameters.</span>
+    <span class="n">step_current_parameters</span><span class="p">[</span><span class="s1">&#39;delta_t_dyn_step&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta_t_dyn_step</span>
+    <span class="k">return</span> <span class="n">nb_gc</span><span class="p">,</span> <span class="n">nb_gdl</span><span class="p">,</span> <span class="n">nb_mpl</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">rtol</span><span class="p">,</span> <span class="n">atol</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -358,8 +442,8 @@ internal states,
 <div class="doc doc-object doc-function">
 
 
-<h2 id="configuration.settings.current_density_parameters" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">current_density_parameters</span><span class="p">(</span><span class="n">type_current</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<h2 id="configuration.settings.calculate_current_density_parameters" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">calculate_current_density_parameters</span><span class="p">(</span><span class="n">type_current</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h2>
 
@@ -594,7 +678,8 @@ measuring the voltage response at each frequency 'delta_t_measurement_EIS' in se
 <span class="normal">110</span>
 <span class="normal">111</span>
 <span class="normal">112</span>
-<span class="normal">113</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">current_density_parameters</span><span class="p">(</span><span class="n">type_current</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">113</span>
+<span class="normal">114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_current_density_parameters</span><span class="p">(</span><span class="n">type_current</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function is used to set the parameters of the current density which is imposed to the fuel cell system.</span>
 
 <span class="sd">    Parameters</span>
@@ -653,20 +738,21 @@ measuring the voltage response at each frequency 'delta_t_measurement_EIS' in se
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Setting the parameters of the step current density function</span>
-    <span class="n">delta_t_ini_step</span> <span class="o">=</span> <span class="mi">120</span><span class="o">*</span><span class="mi">60</span> <span class="c1"># (s). Initial time at zero current density for the stabilisation of the internal states.</span>
+    <span class="n">delta_t_ini_step</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">*</span> <span class="mi">60</span> <span class="c1"># (s). Initial time at zero current density for the stabilisation of the internal states (standard value).</span>
     <span class="n">delta_t_load_step</span> <span class="o">=</span> <span class="mi">30</span> <span class="c1"># (s). Loading time for the step current density function, from 0 to i_step.</span>
     <span class="n">delta_t_break_step</span> <span class="o">=</span> <span class="mi">15</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># (s). Time at i_step current density for the stabilisation of the internal states.</span>
-    <span class="n">i_step</span> <span class="o">=</span> <span class="mf">1.5e4</span> <span class="c1"># (A.m-2). Current density for the step current density function.</span>
+    <span class="n">i_step</span> <span class="o">=</span> <span class="mf">2.0e4</span> <span class="c1"># (A.m-2). Current density for the step current density function.</span>
     <span class="n">step_current_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;delta_t_ini_step&#39;</span><span class="p">:</span> <span class="n">delta_t_ini_step</span><span class="p">,</span> <span class="s1">&#39;delta_t_load_step&#39;</span><span class="p">:</span> <span class="n">delta_t_load_step</span><span class="p">,</span>
                                <span class="s1">&#39;delta_t_break_step&#39;</span><span class="p">:</span> <span class="n">delta_t_break_step</span><span class="p">,</span><span class="s1">&#39;i_step&#39;</span><span class="p">:</span> <span class="n">i_step</span><span class="p">}</span>
 
     <span class="c1"># Setting the parameters of the polarization current density function</span>
+    <span class="n">delta_i_pola</span> <span class="o">=</span> <span class="mf">0.05e4</span>  <span class="c1"># (A.m-2). Current density step for the polarisation current density function.</span>
     <span class="n">delta_t_ini_pola</span> <span class="o">=</span> <span class="mi">120</span> <span class="o">*</span> <span class="mi">60</span> <span class="c1"># (s). Initial time at zero current density for the stabilisation of the internal states.</span>
-    <span class="n">delta_t_load_pola</span> <span class="o">=</span> <span class="mi">30</span> <span class="c1"># (s). Loading time for one step current of the polarisation current density function.</span>
+    <span class="n">v_load_pola</span> <span class="o">=</span> <span class="mf">0.01</span>  <span class="c1"># (A.m-2.s-1). Loading rate for one step current of the polarisation current density function.</span>
+    <span class="n">delta_t_load_pola</span> <span class="o">=</span> <span class="n">delta_i_pola</span> <span class="o">/</span> <span class="n">v_load_pola</span> <span class="c1"># (s). Loading time for one step current of the polarisation current density function.</span>
     <span class="n">delta_t_break_pola</span> <span class="o">=</span> <span class="mi">15</span> <span class="o">*</span> <span class="mi">60</span> <span class="c1"># (s). Breaking time for one step current, for the stabilisation of the internal states.</span>
-    <span class="n">delta_i_pola</span> <span class="o">=</span> <span class="mf">0.05e4</span> <span class="c1"># (A.m-2). Current density step for the polarisation current density function.</span>
-    <span class="n">pola_current_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;delta_t_ini_pola&#39;</span><span class="p">:</span> <span class="n">delta_t_ini_pola</span><span class="p">,</span> <span class="s1">&#39;delta_t_load_pola&#39;</span><span class="p">:</span> <span class="n">delta_t_load_pola</span><span class="p">,</span>
-                               <span class="s1">&#39;delta_t_break_pola&#39;</span><span class="p">:</span> <span class="n">delta_t_break_pola</span><span class="p">,</span> <span class="s1">&#39;delta_i_pola&#39;</span><span class="p">:</span> <span class="n">delta_i_pola</span><span class="p">}</span>
+    <span class="n">pola_current_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;delta_i_pola&#39;</span><span class="p">:</span> <span class="n">delta_i_pola</span><span class="p">,</span> <span class="s1">&#39;delta_t_ini_pola&#39;</span><span class="p">:</span> <span class="n">delta_t_ini_pola</span><span class="p">,</span>
+                               <span class="s1">&#39;delta_t_load_pola&#39;</span><span class="p">:</span> <span class="n">delta_t_load_pola</span><span class="p">,</span> <span class="s1">&#39;delta_t_break_pola&#39;</span><span class="p">:</span> <span class="n">delta_t_break_pola</span><span class="p">}</span>
 
     <span class="c1"># Setting the parameters of the polarization for calibration current density function</span>
     <span class="n">delta_t_ini_pola_cali</span> <span class="o">=</span> <span class="mi">120</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># (s). Initial time at zero current density for the stabilisation of the internal states.</span>
@@ -700,8 +786,8 @@ measuring the voltage response at each frequency 'delta_t_measurement_EIS' in se
 <div class="doc doc-object doc-function">
 
 
-<h2 id="configuration.settings.operating_inputs_function" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">operating_inputs_function</span><span class="p">(</span><span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">)</span></code>
+<h2 id="configuration.settings.calculate_operating_inputs" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">calculate_operating_inputs</span><span class="p">(</span><span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">voltage_zone</span><span class="p">)</span></code>
 
 </h2>
 
@@ -735,6 +821,14 @@ measuring the voltage response at each frequency 'delta_t_measurement_EIS' in se
               –
               <div class="doc-md-description">
                 <p>Type of fuel cell system.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>voltage_zone</code></b>
+                  (<code>str</code>)
+              –
+              <div class="doc-md-description">
+                <p>Zone of the polarization curve which is considered. It can be 'full' or 'before_voltage_drop'.</p>
               </div>
             </li>
         </ul>
@@ -824,8 +918,7 @@ internal states,
 </table>
             <details class="quote">
               <summary>Source code in <code>configuration/settings.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">116</span>
-<span class="normal">117</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">117</span>
 <span class="normal">118</span>
 <span class="normal">119</span>
 <span class="normal">120</span>
@@ -874,7 +967,11 @@ internal states,
 <span class="normal">163</span>
 <span class="normal">164</span>
 <span class="normal">165</span>
-<span class="normal">166</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">operating_inputs_function</span><span class="p">(</span><span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">):</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_operating_inputs</span><span class="p">(</span><span class="n">pola_current_parameters</span><span class="p">,</span> <span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">voltage_zone</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function is used to set the operating inputs of the fuel cell system.</span>
 
 <span class="sd">    Parameters</span>
@@ -883,6 +980,8 @@ internal states,
 <span class="sd">        Parameters for the polarization current density function.</span>
 <span class="sd">    type_fuel_cell : str</span>
 <span class="sd">        Type of fuel cell system.</span>
+<span class="sd">    voltage_zone : str</span>
+<span class="sd">        Zone of the polarization curve which is considered. It can be &#39;full&#39; or &#39;before_voltage_drop&#39;.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -917,14 +1016,15 @@ internal states,
         <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span> <span class="o">=</span> <span class="mf">2.0e5</span><span class="p">,</span> <span class="mf">2.0e5</span>  <span class="c1"># Pa. It is the desired pressure of the fuel gas (at the anode/cathode).</span>
         <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span> <span class="o">=</span> <span class="mf">1.2</span><span class="p">,</span> <span class="mf">2.0</span>  <span class="c1"># It is the stoichiometric ratio (of hydrogen and oxygen).</span>
         <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span> <span class="o">=</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.6</span>  <span class="c1"># It is the desired relative humidity.</span>
+        <span class="n">y_H2_in</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.</span>
         <span class="n">i_max_pola</span> <span class="o">=</span> <span class="mf">3.0e4</span>  <span class="c1"># A.m-2. It is the maximum current density for the polarization curve.</span>
     <span class="k">elif</span> <span class="n">type_fuel_cell</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">i_max_pola</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">y_H2_in</span><span class="p">,</span> <span class="n">i_max_pola</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span> <span class="c1"># Stored setup in &quot;stored_operating_inputs&quot;.</span>
-        <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">i_max_pola</span> <span class="o">=</span> <span class="n">stored_operating_inputs</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">)</span>
+        <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">y_H2_in</span><span class="p">,</span> <span class="n">i_max_pola</span> <span class="o">=</span> <span class="n">stored_operating_inputs</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">,</span> <span class="n">voltage_zone</span><span class="p">)</span>
 
     <span class="n">pola_current_parameters</span><span class="p">[</span><span class="s1">&#39;i_max_pola&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">i_max_pola</span>  <span class="c1"># Update the maximum current density for the polarization curve.</span>
-    <span class="k">return</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">pola_current_parameters</span>
+    <span class="k">return</span> <span class="n">T_des</span><span class="p">,</span> <span class="n">Pa_des</span><span class="p">,</span> <span class="n">Pc_des</span><span class="p">,</span> <span class="n">Sa</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Phi_a_des</span><span class="p">,</span> <span class="n">Phi_c_des</span><span class="p">,</span> <span class="n">y_H2_in</span><span class="p">,</span> <span class="n">pola_current_parameters</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -934,8 +1034,8 @@ internal states,
 <div class="doc doc-object doc-function">
 
 
-<h2 id="configuration.settings.physical_parameters" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">physical_parameters</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">)</span></code>
+<h2 id="configuration.settings.calculate_physical_parameters" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">calculate_physical_parameters</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">)</span></code>
 
 </h2>
 
@@ -960,8 +1060,7 @@ internal states,
                   (<code>str</code>)
               –
               <div class="doc-md-description">
-                <p>Type of fuel cell system. It can be "EH-31_1.5", "EH-31_2.0", "EH-31_2.25", "EH-31_2.5", "LF",
-or "manual_setup".</p>
+                <p>Type of fuel cell system.</p>
               </div>
             </li>
         </ul>
@@ -1086,6 +1185,83 @@ or "manual_setup".</p>
               </div>
             </li>
             <li>
+<b><code>nb_cell</code></b>(                  <code>int</code>
+)              –
+              <div class="doc-md-description">
+                <p>Number of cell in the stack.</p>
+              </div>
+            </li>
+            <li>
+<b><code>A_T_a</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Exhaust anode manifold throttle area in m².</p>
+              </div>
+            </li>
+            <li>
+<b><code>A_T_c</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Exhaust cathode manifold throttle area in m².</p>
+              </div>
+            </li>
+            <li>
+<b><code>Vasm</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Supply manifold volume at the anode in m³.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Vcsm</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Supply manifold volume at the cathode in m³.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Vaem</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Exhaust manifold volume at the anode in m³.</p>
+              </div>
+            </li>
+            <li>
+<b><code>Vcem</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Exhaust manifold volume at the cathode in m³.</p>
+              </div>
+            </li>
+            <li>
+<b><code>V_endplate_a</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Anode endplate volume in m³.</p>
+              </div>
+            </li>
+            <li>
+<b><code>V_endplate_c</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Cathode endplate volume in m³.</p>
+              </div>
+            </li>
+            <li>
+<b><code>V_man_agc</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Volume connecting the anode manifold to the gas channel in m³.</p>
+              </div>
+            </li>
+            <li>
+<b><code>V_man_cgc</code></b>(                  <code>float</code>
+)              –
+              <div class="doc-md-description">
+                <p>Volume connecting the cathode manifold to the gas channel in m³.</p>
+              </div>
+            </li>
+            <li>
 <b><code>e</code></b>(                  <code>float</code>
 )              –
               <div class="doc-md-description">
@@ -1148,11 +1324,7 @@ or "manual_setup".</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>configuration/settings.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">173</span>
 <span class="normal">174</span>
 <span class="normal">175</span>
 <span class="normal">176</span>
@@ -1244,14 +1416,55 @@ or "manual_setup".</p>
 <span class="normal">262</span>
 <span class="normal">263</span>
 <span class="normal">264</span>
-<span class="normal">265</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">physical_parameters</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">):</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_physical_parameters</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This function is used to set the physical parameters of the fuel cell system.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    type_fuel_cell : str</span>
-<span class="sd">        Type of fuel cell system. It can be &quot;EH-31_1.5&quot;, &quot;EH-31_2.0&quot;, &quot;EH-31_2.25&quot;, &quot;EH-31_2.5&quot;, &quot;LF&quot;,</span>
-<span class="sd">        or &quot;manual_setup&quot;.</span>
+<span class="sd">        Type of fuel cell system.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1285,6 +1498,28 @@ or "manual_setup".</p>
 <span class="sd">        Length of the gas channel in meters.</span>
 <span class="sd">    Aact : float</span>
 <span class="sd">        Active area of the catalyst layer in meters squared.</span>
+<span class="sd">    nb_cell : int</span>
+<span class="sd">        Number of cell in the stack.</span>
+<span class="sd">    A_T_a : float</span>
+<span class="sd">        Exhaust anode manifold throttle area in m².</span>
+<span class="sd">    A_T_c : float</span>
+<span class="sd">        Exhaust cathode manifold throttle area in m².</span>
+<span class="sd">    Vasm : float</span>
+<span class="sd">        Supply manifold volume at the anode in m³.</span>
+<span class="sd">    Vcsm : float</span>
+<span class="sd">        Supply manifold volume at the cathode in m³.</span>
+<span class="sd">    Vaem : float</span>
+<span class="sd">        Exhaust manifold volume at the anode in m³.</span>
+<span class="sd">    Vcem : float</span>
+<span class="sd">        Exhaust manifold volume at the cathode in m³.</span>
+<span class="sd">    V_endplate_a : float</span>
+<span class="sd">        Anode endplate volume in m³.</span>
+<span class="sd">    V_endplate_c : float</span>
+<span class="sd">        Cathode endplate volume in m³.</span>
+<span class="sd">    V_man_agc : float</span>
+<span class="sd">        Volume connecting the anode manifold to the gas channel in m³.</span>
+<span class="sd">    V_man_cgc : float</span>
+<span class="sd">        Volume connecting the cathode manifold to the gas channel in m³.</span>
 <span class="sd">    e : float</span>
 <span class="sd">        Capillary exponent.</span>
 <span class="sd">    i0_c_ref : float</span>
@@ -1305,8 +1540,10 @@ or "manual_setup".</p>
 
     <span class="k">if</span> <span class="n">type_fuel_cell</span> <span class="o">==</span> <span class="s2">&quot;manual_setup&quot;</span><span class="p">:</span> <span class="c1"># Setup which are not stored in &quot;stored_physical_parameters&quot;.</span>
         <span class="c1"># Fuel cell physical parameters: 𝜔 (which are not controllable by the system)</span>
+        <span class="c1"># Global</span>
+        <span class="n">Aact</span> <span class="o">=</span> <span class="mf">279.72e-4</span>  <span class="c1"># m². It is the MEA active area.</span>
+        <span class="n">nb_cell</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># . It is the number of cell in the stack.</span>
         <span class="c1">#   Catalyst layer</span>
-        <span class="n">Aact</span> <span class="o">=</span> <span class="mf">8.5e-3</span>  <span class="c1"># m². It is the active area of the catalyst layer.</span>
         <span class="n">Hacl</span> <span class="o">=</span> <span class="mf">8.089e-6</span>  <span class="c1"># m. It is the thickness of the anode catalyst layer.</span>
         <span class="n">Hccl</span> <span class="o">=</span> <span class="n">Hacl</span>  <span class="c1"># m. It is the thickness of the cathode catalyst layer.</span>
         <span class="n">epsilon_cl</span> <span class="o">=</span> <span class="mf">0.25</span>  <span class="c1"># It is the porosity of the catalyst layer, without units.</span>
@@ -1325,11 +1562,24 @@ or "manual_setup".</p>
         <span class="n">Hcgc</span> <span class="o">=</span> <span class="n">Hagc</span>  <span class="c1"># m. It is the thickness of the cathode gas channel.</span>
         <span class="n">Wagc</span> <span class="o">=</span> <span class="mf">4.5e-4</span>  <span class="c1"># m. It is the width of the anode gas channel.</span>
         <span class="n">Wcgc</span> <span class="o">=</span> <span class="n">Wagc</span>  <span class="c1"># m. It is the width of the cathode gas channel.</span>
-        <span class="n">Lgc</span> <span class="o">=</span> <span class="mf">9.67</span>  <span class="c1"># m. It is the length of the gas channel.</span>
+        <span class="n">Lgc</span> <span class="o">=</span> <span class="mf">144e-3</span>  <span class="c1"># m. It is the length of one channel in the bipolar plate.</span>
+        <span class="n">nb_channel_in_gc</span> <span class="o">=</span> <span class="mi">67</span>  <span class="c1"># . It is the number of channels in the bipolar plate.</span>
+        <span class="n">Ldist</span> <span class="o">=</span> <span class="mf">5e-2</span>  <span class="c1"># m. It is the estimated length of the distributor, which is the volume between the gas channel and the manifold.</span>
+        <span class="c1">#   Auxiliaries</span>
+        <span class="n">Lm</span> <span class="o">=</span> <span class="mf">25.8e-3</span>  <span class="c1"># m. It is the length of the manifold.</span>
+        <span class="n">L_endplate</span> <span class="o">=</span> <span class="mf">46.8e-3</span>  <span class="c1"># m. It is the length of the endplate.</span>
+        <span class="n">A_T_a</span> <span class="o">=</span> <span class="mf">11.8e-4</span>  <span class="c1"># m². It is the inlet/exhaust anode manifold throttle area</span>
+        <span class="n">A_T_c</span> <span class="o">=</span> <span class="n">A_T_a</span>  <span class="c1"># m². It is the inlet/exhaust cathode manifold throttle area</span>
+        <span class="n">Vasm</span><span class="p">,</span> <span class="n">Vcsm</span> <span class="o">=</span> <span class="mf">7000e-6</span><span class="p">,</span> <span class="mf">7000e-6</span>  <span class="c1"># m3. It is the supply manifold volume.</span>
+        <span class="n">Vaem</span><span class="p">,</span> <span class="n">Vcem</span> <span class="o">=</span> <span class="mf">2400e-6</span><span class="p">,</span> <span class="mf">2400e-6</span>  <span class="c1"># m-3. It is the exhaust manifold volume.</span>
+        <span class="n">V_endplate_a</span> <span class="o">=</span> <span class="mf">33.6e-6</span>  <span class="c1"># m3. It is the anode endplate volume.</span>
+        <span class="n">V_endplate_c</span> <span class="o">=</span> <span class="mf">86.6e-6</span>  <span class="c1"># m3. It is the cathode endplate volume.</span>
         <span class="c1">#   Interaction parameters between water and PEMFC structure</span>
         <span class="n">e</span> <span class="o">=</span> <span class="mf">5.0</span>  <span class="c1"># It is the capillary exponent</span>
         <span class="c1">#   Voltage polarization</span>
-        <span class="n">i0_c_ref</span> <span class="o">=</span> <span class="mf">2.787917581303015</span>  <span class="c1"># A.m-2. It is the reference exchange current density at the cathode.</span>
+        <span class="n">Re</span> <span class="o">=</span> <span class="mf">1e-06</span>  <span class="c1"># Ω.m². It is the electron conduction resistance of the circuit.</span>
+        <span class="n">i0_d_c_ref</span> <span class="o">=</span> <span class="mf">14.43</span>  <span class="c1"># A.m-2. It is the dry reference exchange current density at the cathode.</span>
+        <span class="n">i0_l_c_ref</span> <span class="o">=</span> <span class="mf">1.0e3</span>  <span class="c1"># A.m-2. It is the fully humidified reference exchange current density at the cathode.</span>
         <span class="n">kappa_co</span> <span class="o">=</span> <span class="mf">29.793535549174077</span>  <span class="c1"># mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.</span>
         <span class="n">kappa_c</span> <span class="o">=</span> <span class="mf">1.6136446641573106</span>  <span class="c1"># It is the overpotential correction exponent.</span>
         <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span> <span class="o">=</span> <span class="mf">0.0555312850726664</span><span class="p">,</span> <span class="mf">0.10514269908118055</span><span class="p">,</span> <span class="mf">0.6365424991141914</span>  <span class="c1"># It is the limit</span>
@@ -1337,10 +1587,12 @@ or "manual_setup".</p>
         <span class="n">C_scl</span> <span class="o">=</span> <span class="mf">2e7</span>  <span class="c1"># F.m-3. It is the volumetric space-charge layer capacitance.</span>
     <span class="k">else</span><span class="p">:</span> <span class="c1"># Stored setup in &quot;stored_physical_parameters&quot;.</span>
         <span class="p">(</span><span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_cl</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">Hmpl</span><span class="p">,</span> <span class="n">epsilon_mpl</span><span class="p">,</span> <span class="n">Hagc</span><span class="p">,</span> <span class="n">Hcgc</span><span class="p">,</span> <span class="n">Wagc</span><span class="p">,</span>
-         <span class="n">Wcgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">)</span> <span class="o">=</span> <span class="n">stored_physical_parameters</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">)</span>
+         <span class="n">Wcgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">nb_channel_in_gc</span><span class="p">,</span> <span class="n">Ldist</span><span class="p">,</span> <span class="n">Lm</span><span class="p">,</span> <span class="n">A_T_a</span><span class="p">,</span> <span class="n">A_T_c</span><span class="p">,</span> <span class="n">Vasm</span><span class="p">,</span> <span class="n">Vcsm</span><span class="p">,</span> <span class="n">Vaem</span><span class="p">,</span> <span class="n">Vcem</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">nb_cell</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_d_c_ref</span><span class="p">,</span>
+         <span class="n">i0_h_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">)</span> <span class="o">=</span> <span class="n">stored_physical_parameters</span><span class="p">(</span><span class="n">type_fuel_cell</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">epsilon_mc</span><span class="p">,</span> <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hgdl</span><span class="p">,</span> <span class="n">epsilon_gdl</span><span class="p">,</span> <span class="n">epsilon_cl</span><span class="p">,</span> <span class="n">epsilon_c</span><span class="p">,</span> <span class="n">Hmpl</span><span class="p">,</span> <span class="n">epsilon_mpl</span><span class="p">,</span> <span class="n">Hagc</span><span class="p">,</span> <span class="n">Hcgc</span><span class="p">,</span> <span class="n">Wagc</span><span class="p">,</span>
-            <span class="n">Wcgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">i0_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">)</span>
+            <span class="n">Wcgc</span><span class="p">,</span> <span class="n">Lgc</span><span class="p">,</span> <span class="n">nb_channel_in_gc</span><span class="p">,</span> <span class="n">Ldist</span><span class="p">,</span> <span class="n">Lm</span><span class="p">,</span> <span class="n">A_T_a</span><span class="p">,</span> <span class="n">A_T_c</span><span class="p">,</span> <span class="n">Vasm</span><span class="p">,</span> <span class="n">Vcsm</span><span class="p">,</span> <span class="n">Vaem</span><span class="p">,</span> <span class="n">Vcem</span><span class="p">,</span> <span class="n">Aact</span><span class="p">,</span> <span class="n">nb_cell</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">Re</span><span class="p">,</span> <span class="n">i0_d_c_ref</span><span class="p">,</span>
+            <span class="n">i0_h_c_ref</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">,</span> <span class="n">kappa_c</span><span class="p">,</span> <span class="n">a_slim</span><span class="p">,</span> <span class="n">b_slim</span><span class="p">,</span> <span class="n">a_switch</span><span class="p">,</span> <span class="n">C_scl</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

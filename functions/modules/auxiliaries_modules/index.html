@@ -170,8 +170,8 @@
 <div class="doc doc-object doc-function">
 
 
-<h2 id="modules.auxiliaries_modules.auxiliaries_int_values" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">auxiliaries_int_values</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">solver_variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span></code>
+<h2 id="modules.auxiliaries_modules.auxiliaries_int_values_which_are_commun_with_dif_eq" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">auxiliaries_int_values_which_are_commun_with_dif_eq</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">sv</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span></code>
 
 </h2>
 
@@ -200,11 +200,12 @@
               </div>
             </li>
             <li>
-              <b><code>solver_variables</code></b>
+              <b><code>sv</code></b>
                   (<code>dict</code>)
               –
               <div class="doc-md-description">
-                <p>Variables calculated by the solver. They correspond to the fuel cell internal states.</p>
+                <p>Variables calculated by the solver. They correspond to the fuel cell internal states.
+sv is a contraction of solver_variables for enhanced readability.</p>
               </div>
             </li>
             <li>
@@ -240,104 +241,6 @@
       <td class="field-body">
         <ul class="first simple">
             <li>
-<b><code>Mext</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Molar mass of the ambient air outside the stack (kg/mol).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Pagc</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Global pressure in the anode gas channel (Pa).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Pcgc</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Global pressure in the cathode gas channel (Pa).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Phi_agc</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Relative humidity in the anode gas channel.</p>
-              </div>
-            </li>
-            <li>
-<b><code>Phi_cgc</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Relative humidity in the cathode gas channel.</p>
-              </div>
-            </li>
-            <li>
-<b><code>y_cgc</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Oxygen ratio in dry air in the cathode gas channel.</p>
-              </div>
-            </li>
-            <li>
-<b><code>Magc</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Molar mass of all the gas species in the anode gas channel (kg/mol).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Mcgc</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Molar mass of all the gas species in the cathode gas channel (kg/mol).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Pr_aem</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Pressure ratio in the anode external manifold.</p>
-              </div>
-            </li>
-            <li>
-<b><code>Pr_cem</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Pressure ratio in the cathode external manifold.</p>
-              </div>
-            </li>
-            <li>
-<b><code>Maem</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Molar mass of all the gas species in the anode external manifold (kg/mol).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Masm</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Molar mass of all the gas species in the anode supply manifold (kg/mol).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Mcem</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Molar mass of all the gas species in the cathode external manifold (kg/mol).</p>
-              </div>
-            </li>
-            <li>
-<b><code>Mcsm</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Molar mass of all the gas species in the cathode supply manifold (kg/mol).</p>
-              </div>
-            </li>
-            <li>
 <b><code>k_purge</code></b>(                  <code>float</code>
 )              –
               <div class="doc-md-description">
@@ -356,13 +259,6 @@
 )              –
               <div class="doc-md-description">
                 <p>Area of the back pressure valve in the cathode external manifold (m²).</p>
-              </div>
-            </li>
-            <li>
-<b><code>i_n</code></b>(                  <code>float</code>
-)              –
-              <div class="doc-md-description">
-                <p>Internal current density (A/m²).</p>
               </div>
             </li>
         </ul>
@@ -514,15 +410,40 @@
 <span class="normal">157</span>
 <span class="normal">158</span>
 <span class="normal">159</span>
-<span class="normal">160</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">auxiliaries_int_values</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">solver_variables</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">auxiliaries_int_values_which_are_commun_with_dif_eq</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">sv</span><span class="p">,</span> <span class="n">operating_inputs</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This functions calculates intermediate values for the auxiliaries flows calculation.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    t : float</span>
 <span class="sd">        Time (s).</span>
-<span class="sd">    solver_variables : dict</span>
+<span class="sd">    sv : dict</span>
 <span class="sd">        Variables calculated by the solver. They correspond to the fuel cell internal states.</span>
+<span class="sd">        sv is a contraction of solver_variables for enhanced readability.</span>
 <span class="sd">    operating_inputs : dict</span>
 <span class="sd">        Operating inputs of the fuel cell model.</span>
 <span class="sd">    parameters : dict</span>
@@ -530,83 +451,89 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    Mext : float</span>
-<span class="sd">        Molar mass of the ambient air outside the stack (kg/mol).</span>
-<span class="sd">    Pagc : float</span>
-<span class="sd">        Global pressure in the anode gas channel (Pa).</span>
-<span class="sd">    Pcgc : float</span>
-<span class="sd">        Global pressure in the cathode gas channel (Pa).</span>
-<span class="sd">    Phi_agc : float</span>
-<span class="sd">        Relative humidity in the anode gas channel.</span>
-<span class="sd">    Phi_cgc : float</span>
-<span class="sd">        Relative humidity in the cathode gas channel.</span>
-<span class="sd">    y_cgc : float</span>
-<span class="sd">        Oxygen ratio in dry air in the cathode gas channel.</span>
-<span class="sd">    Magc : float</span>
-<span class="sd">        Molar mass of all the gas species in the anode gas channel (kg/mol).</span>
-<span class="sd">    Mcgc : float</span>
-<span class="sd">        Molar mass of all the gas species in the cathode gas channel (kg/mol).</span>
-<span class="sd">    Pr_aem : float</span>
-<span class="sd">        Pressure ratio in the anode external manifold.</span>
-<span class="sd">    Pr_cem : float</span>
-<span class="sd">        Pressure ratio in the cathode external manifold.</span>
-<span class="sd">    Maem : float</span>
-<span class="sd">        Molar mass of all the gas species in the anode external manifold (kg/mol).</span>
-<span class="sd">    Masm : float</span>
-<span class="sd">        Molar mass of all the gas species in the anode supply manifold (kg/mol).</span>
-<span class="sd">    Mcem : float</span>
-<span class="sd">        Molar mass of all the gas species in the cathode external manifold (kg/mol).</span>
-<span class="sd">    Mcsm : float</span>
-<span class="sd">        Molar mass of all the gas species in the cathode supply manifold (kg/mol).</span>
 <span class="sd">    k_purge : float</span>
 <span class="sd">        Purge coefficient. It is equal to 1 if the purge is active and 0 otherwise.</span>
 <span class="sd">    Abp_a : float</span>
 <span class="sd">        Area of the back pressure valve in the anode external manifold (m²).</span>
 <span class="sd">    Abp_c : float</span>
 <span class="sd">        Area of the back pressure valve in the cathode external manifold (m²).</span>
-<span class="sd">    i_n : float</span>
-<span class="sd">        Internal current density (A/m²).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Extraction of the variables</span>
-    <span class="n">C_v_agc</span><span class="p">,</span> <span class="n">C_v_cgc</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_v_agc&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_v_cgc&#39;</span><span class="p">]</span>
-    <span class="n">lambda_mem</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;lambda_mem&#39;</span><span class="p">]</span>
-    <span class="n">C_H2_agc</span><span class="p">,</span> <span class="n">C_H2_acl</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_H2_agc&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_H2_acl&#39;</span><span class="p">]</span>
-    <span class="n">C_N2</span><span class="p">,</span> <span class="n">C_O2_ccl</span><span class="p">,</span> <span class="n">C_O2_cgc</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_N2&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_O2_ccl&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;C_O2_cgc&#39;</span><span class="p">]</span>
-    <span class="n">T_acl</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">T_ccl</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;T_acl&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;T_mem&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;T_ccl&#39;</span><span class="p">]</span>
-    <span class="n">Pasm</span><span class="p">,</span> <span class="n">Paem</span><span class="p">,</span> <span class="n">Pcsm</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Pasm&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Paem&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Pcsm&#39;</span><span class="p">]</span>
-    <span class="n">Pcem</span><span class="p">,</span> <span class="n">Phi_asm</span><span class="p">,</span> <span class="n">Phi_aem</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Pcem&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Phi_asm&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Phi_aem&#39;</span><span class="p">]</span>
-    <span class="n">Phi_csm</span><span class="p">,</span> <span class="n">Phi_cem</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Phi_csm&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Phi_cem&#39;</span><span class="p">]</span>
-    <span class="n">Abp_a</span><span class="p">,</span> <span class="n">Abp_c</span> <span class="o">=</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Abp_a&#39;</span><span class="p">],</span> <span class="n">solver_variables</span><span class="p">[</span><span class="s1">&#39;Abp_c&#39;</span><span class="p">]</span>
+    <span class="n">lambda_mem</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;lambda_mem&#39;</span><span class="p">]</span>
+    <span class="n">C_H2_acl</span><span class="p">,</span> <span class="n">C_O2_ccl</span> <span class="o">=</span>  <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_H2_acl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;C_O2_ccl&#39;</span><span class="p">]</span>
+    <span class="n">T_acl</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">T_ccl</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_acl&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_mem&#39;</span><span class="p">],</span> <span class="n">sv</span><span class="p">[</span><span class="s1">&#39;T_ccl&#39;</span><span class="p">]</span>
+    <span class="n">Pasm</span><span class="p">,</span> <span class="n">Paem</span><span class="p">,</span> <span class="n">Pcsm</span><span class="p">,</span> <span class="n">Pcem</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Pasm&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Paem&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Pcsm&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Pcem&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">Phi_asm</span><span class="p">,</span> <span class="n">Phi_aem</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Phi_asm&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Phi_aem&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">Phi_csm</span><span class="p">,</span> <span class="n">Phi_cem</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Phi_csm&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Phi_cem&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">Abp_a</span><span class="p">,</span> <span class="n">Abp_c</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Abp_a&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">sv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Abp_c&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="c1"># Extraction of the operating inputs and the parameters</span>
-    <span class="n">T_des</span> <span class="o">=</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;T_des&#39;</span><span class="p">]</span>
-    <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span><span class="p">,</span> <span class="n">kappa_co</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hmem&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hacl&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hccl&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;kappa_co&#39;</span><span class="p">]</span>
-    <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_purge</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;t_purge&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_purge&#39;</span><span class="p">]</span>
+    <span class="n">T_des</span><span class="p">,</span> <span class="n">y_H2_in</span><span class="p">,</span> <span class="n">Pa_des</span> <span class="o">=</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;T_des&#39;</span><span class="p">],</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;y_H2_in&#39;</span><span class="p">],</span> <span class="n">operating_inputs</span><span class="p">[</span><span class="s1">&#39;Pa_des&#39;</span><span class="p">]</span>
+    <span class="n">Hmem</span><span class="p">,</span> <span class="n">Hacl</span><span class="p">,</span> <span class="n">Hccl</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hmem&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hacl&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Hccl&#39;</span><span class="p">]</span>
+    <span class="n">Lgc</span><span class="p">,</span> <span class="n">A_T_a</span><span class="p">,</span> <span class="n">A_T_c</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Lgc&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;A_T_a&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;A_T_c&#39;</span><span class="p">]</span>
+    <span class="n">kappa_co</span><span class="p">,</span> <span class="n">nb_gc</span><span class="p">,</span> <span class="n">t_purge</span><span class="p">,</span> <span class="n">type_purge</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;kappa_co&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;nb_gc&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;t_purge&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;type_purge&#39;</span><span class="p">]</span>
 
-    <span class="c1"># Molar mass of the ambient air</span>
-    <span class="n">Mext</span> <span class="o">=</span> <span class="n">Phi_ext</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pext</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
-           <span class="n">yO2_ext</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_ext</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pext</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_O2</span> <span class="o">+</span> \
-           <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">yO2_ext</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_ext</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pext</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_N2</span>
+    <span class="c1"># Physical quantities outside the stack</span>
+    <span class="c1">#       Molar masses</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">M</span><span class="p">[</span><span class="s1">&#39;ext&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Phi_ext</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pext</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
+               <span class="n">y_O2_ext</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_ext</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pext</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_O2</span> <span class="o">+</span> \
+               <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y_O2_ext</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_ext</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pext</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_N2</span>
+    <span class="n">M</span><span class="p">[</span><span class="s1">&#39;H2_N2_in&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_H2_in</span> <span class="o">*</span> <span class="n">M_H2</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y_H2_in</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_N2</span>
 
     <span class="c1"># Physical quantities inside the stack</span>
     <span class="c1">#       Pressures</span>
-    <span class="n">Pagc</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_v_agc</span> <span class="o">+</span> <span class="n">C_H2_agc</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span>
-    <span class="n">Pcgc</span> <span class="o">=</span> <span class="p">(</span><span class="n">C_v_cgc</span> <span class="o">+</span> <span class="n">C_O2_cgc</span> <span class="o">+</span> <span class="n">C_N2</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_gc</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">P</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_H2_agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_N2_agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
+        <span class="n">P</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_O2_cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_N2_cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
     <span class="c1">#       Humidities</span>
-    <span class="n">Phi_agc</span> <span class="o">=</span> <span class="n">C_v_agc</span> <span class="o">/</span> <span class="n">C_v_sat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span>
-    <span class="n">Phi_cgc</span> <span class="o">=</span> <span class="n">C_v_cgc</span> <span class="o">/</span> <span class="n">C_v_sat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span>
-    <span class="c1">#       Oxygen ratio in dry air</span>
-    <span class="n">y_cgc</span> <span class="o">=</span> <span class="n">C_O2_cgc</span> <span class="o">/</span> <span class="p">(</span><span class="n">C_O2_cgc</span> <span class="o">+</span> <span class="n">C_N2</span><span class="p">)</span>
+    <span class="n">Phi</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_gc</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">Phi</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">C_v_sat</span><span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span>
+        <span class="n">Phi</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">C_v_sat</span><span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span>
+    <span class="c1">#       H2/O2 ratio in the dry anode/cathode gas mixture (H2/N2 or O2/N2) at the GC</span>
+    <span class="n">y_O2</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">y_H2</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_gc</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">y_H2</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_H2_agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_H2_agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_N2_agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span>
+        <span class="n">y_O2</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_O2_cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_O2_cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_N2_cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span>
     <span class="c1">#       Molar masses</span>
-    <span class="n">Magc</span> <span class="o">=</span> <span class="n">C_v_agc</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">Pagc</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
-           <span class="n">C_H2_agc</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">Pagc</span> <span class="o">*</span> <span class="n">M_H2</span>
-    <span class="n">Mcgc</span> <span class="o">=</span> <span class="n">Phi_cgc</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcgc</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
-           <span class="n">y_cgc</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_cgc</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcgc</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_O2</span> <span class="o">+</span> \
-           <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y_cgc</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_cgc</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcgc</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_N2</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_gc</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">M</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">P</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
+                        <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_H2_agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">P</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">M_H2</span> <span class="o">+</span> \
+                        <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_N2_agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span> <span class="o">/</span> <span class="n">P</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">M_N2</span>
+        <span class="n">M</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Phi</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">P</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
+                        <span class="n">y_O2</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">P</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">M_O2</span> <span class="o">+</span> \
+                        <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y_O2</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">P</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">M_N2</span>
+    <span class="c1">#       Density of the gas mixture.</span>
+    <span class="n">rho</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_gc</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">rho</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">P</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">M</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
+        <span class="n">rho</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">P</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">M</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
 
-    <span class="c1"># Internal current density</span>
+    <span class="c1">#       Vapor ratio over the gas mixture.</span>
+    <span class="n">x_H2O_v</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_gc</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">x_H2O_v</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_H2_agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_N2_agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_gc</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">x_H2O_v</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_v_cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_O2_cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C_N2_cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span>
+
+    <span class="c1">#       Dynamic viscosity of the gas mixture.</span>
+    <span class="n">mu_gaz</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_gc</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">mu_gaz</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mu_mixture_gases</span><span class="p">([</span><span class="s1">&#39;H2O_v&#39;</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">],</span> <span class="p">[</span><span class="n">x_H2O_v</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">x_H2O_v</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]],</span>
+                                              <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_agc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_gc</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">mu_gaz</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mu_mixture_gases</span><span class="p">([</span><span class="s1">&#39;H2O_v&#39;</span><span class="p">,</span> <span class="s1">&#39;O2&#39;</span><span class="p">,</span> <span class="s1">&#39;N2&#39;</span><span class="p">],</span>
+                                              <span class="p">[</span><span class="n">x_H2O_v</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">y_O2</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x_H2O_v</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]),</span>
+                                               <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y_O2</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x_H2O_v</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])],</span>
+                                              <span class="n">sv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;T_cgc_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span>
+
+    <span class="c1">#       The crossover current density i_n</span>
     <span class="n">T_acl_mem_ccl</span> <span class="o">=</span> <span class="n">average</span><span class="p">([</span><span class="n">T_acl</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">T_ccl</span><span class="p">],</span>
-                        <span class="n">weights</span><span class="o">=</span><span class="p">[</span><span class="n">Hacl</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hacl</span> <span class="o">+</span> <span class="n">Hmem</span> <span class="o">+</span> <span class="n">Hccl</span><span class="p">),</span> <span class="n">Hmem</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hacl</span> <span class="o">+</span> <span class="n">Hmem</span> <span class="o">+</span> <span class="n">Hccl</span><span class="p">),</span> <span class="n">Hccl</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hacl</span> <span class="o">+</span> <span class="n">Hmem</span> <span class="o">+</span> <span class="n">Hccl</span><span class="p">)])</span>
+                            <span class="n">weights</span><span class="o">=</span><span class="p">[</span><span class="n">Hacl</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hacl</span> <span class="o">+</span> <span class="n">Hmem</span> <span class="o">+</span> <span class="n">Hccl</span><span class="p">),</span> <span class="n">Hmem</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hacl</span> <span class="o">+</span> <span class="n">Hmem</span> <span class="o">+</span> <span class="n">Hccl</span><span class="p">),</span>
+                                     <span class="n">Hccl</span> <span class="o">/</span> <span class="p">(</span><span class="n">Hacl</span> <span class="o">+</span> <span class="n">Hmem</span> <span class="o">+</span> <span class="n">Hccl</span><span class="p">)])</span>
     <span class="n">i_H2</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">F</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_acl_mem_ccl</span> <span class="o">/</span> <span class="n">Hmem</span> <span class="o">*</span> <span class="n">C_H2_acl</span> <span class="o">*</span> <span class="n">k_H2</span><span class="p">(</span><span class="n">lambda_mem</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">)</span>
     <span class="n">i_O2</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">F</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_acl_mem_ccl</span> <span class="o">/</span> <span class="n">Hmem</span> <span class="o">*</span> <span class="n">C_O2_ccl</span> <span class="o">*</span> <span class="n">k_O2</span><span class="p">(</span><span class="n">lambda_mem</span><span class="p">,</span> <span class="n">T_mem</span><span class="p">,</span> <span class="n">kappa_co</span><span class="p">)</span>
     <span class="n">i_n</span> <span class="o">=</span> <span class="n">i_H2</span> <span class="o">+</span> <span class="n">i_O2</span>
@@ -614,49 +541,66 @@
     <span class="c1"># Physical quantities in the auxiliary system</span>
     <span class="k">if</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;type_auxiliary&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_anodic_recirculation&quot;</span> <span class="ow">or</span> \
        <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;type_auxiliary&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;forced-convective_cathode_with_flow-through_anode&quot;</span><span class="p">:</span>
-        <span class="c1"># Pressure ratios</span>
-        <span class="n">Pr_aem</span> <span class="o">=</span> <span class="p">(</span><span class="n">Pext</span> <span class="o">/</span> <span class="n">Paem</span><span class="p">)</span>
-        <span class="n">Pr_cem</span> <span class="o">=</span> <span class="p">(</span><span class="n">Pext</span> <span class="o">/</span> <span class="n">Pcem</span><span class="p">)</span>
-        <span class="c1"># Oxygen ratio in dry air</span>
-        <span class="n">y_cem</span> <span class="o">=</span> <span class="p">(</span><span class="n">Pcem</span> <span class="o">-</span> <span class="n">Phi_cem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">-</span> <span class="n">C_N2</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Pcem</span> <span class="o">-</span> <span class="n">Phi_cem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">))</span>
-        <span class="c1"># Molar masses</span>
-        <span class="n">Maem</span> <span class="o">=</span> <span class="n">Phi_aem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Paem</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
-               <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_aem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Paem</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_H2</span>
-        <span class="n">Masm</span> <span class="o">=</span> <span class="n">Phi_asm</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pasm</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
-               <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_asm</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pasm</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_H2</span>
-        <span class="n">Mcem</span> <span class="o">=</span> <span class="n">Phi_cem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcem</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
-               <span class="n">y_cem</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_cem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcem</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_O2</span> <span class="o">+</span> \
-               <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y_cem</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_cem</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcem</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_N2</span>
-        <span class="n">Mcsm</span> <span class="o">=</span> <span class="n">Phi_csm</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcsm</span> <span class="o">*</span> <span class="n">M_H2O</span> <span class="o">+</span> \
-               <span class="n">yO2_ext</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_csm</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcsm</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_O2</span> <span class="o">+</span> \
-               <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">yO2_ext</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Phi_csm</span> <span class="o">*</span> <span class="n">Psat</span><span class="p">(</span><span class="n">T_des</span><span class="p">)</span> <span class="o">/</span> <span class="n">Pcsm</span><span class="p">)</span> <span class="o">*</span> <span class="n">M_N2</span>
-        <span class="c1"># Purge</span>
-        <span class="k">if</span> <span class="n">type_purge</span> <span class="o">==</span> <span class="s2">&quot;no_purge&quot;</span><span class="p">:</span>
-            <span class="n">k_purge</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">elif</span> <span class="n">type_purge</span> <span class="o">==</span> <span class="s2">&quot;constant_purge&quot;</span><span class="p">:</span>
-            <span class="n">k_purge</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="k">elif</span> <span class="n">type_purge</span> <span class="o">==</span> <span class="s2">&quot;periodic_purge&quot;</span><span class="p">:</span>
-            <span class="n">purge_time</span><span class="p">,</span> <span class="n">delta_purge</span> <span class="o">=</span> <span class="n">t_purge</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">t</span> <span class="o">/</span> <span class="p">(</span><span class="n">purge_time</span> <span class="o">+</span> <span class="n">delta_purge</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">purge_time</span> <span class="o">+</span> <span class="n">delta_purge</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="n">purge_time</span><span class="p">:</span>
-                <span class="n">k_purge</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">k_purge</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The type_purge variable should be correctly referenced.&quot;</span><span class="p">)</span>
-        <span class="c1"># Back pressure valve area</span>
-        <span class="k">if</span> <span class="n">Abp_a</span> <span class="o">&gt;</span> <span class="n">A_T</span><span class="p">:</span>
-            <span class="n">Abp_a</span> <span class="o">=</span> <span class="n">A_T</span>
-        <span class="k">elif</span> <span class="n">Abp_a</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">Abp_a</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="n">Abp_c</span> <span class="o">&gt;</span> <span class="n">A_T</span><span class="p">:</span>
-            <span class="n">Abp_c</span> <span class="o">=</span> <span class="n">A_T</span>
-        <span class="k">elif</span> <span class="n">Abp_c</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">Abp_c</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">else</span><span class="p">:</span>  <span class="c1"># parameters[&quot;type_auxiliary&quot;] == &quot;no_auxiliary&quot;</span>
-        <span class="n">Pr_aem</span><span class="p">,</span> <span class="n">Pr_cem</span><span class="p">,</span> <span class="n">Maem</span><span class="p">,</span> <span class="n">Masm</span><span class="p">,</span> <span class="n">Mcem</span><span class="p">,</span> <span class="n">Mcsm</span><span class="p">,</span> <span class="n">k_purge</span><span class="p">,</span> <span class="n">Abp_a</span><span class="p">,</span> <span class="n">Abp_c</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">9</span>
+        <span class="k">pass</span>
+        <span class="c1"># # H2/O2 ratio in the dry anode/cathode gas mixture (H2/N2 or O2/N2) at the EM</span>
+        <span class="c1"># y_H2_aem = (Paem - Phi_aem * Psat(T_des) - C_N2_a * R * T_des) / (Paem - Phi_aem * Psat(T_des))</span>
+        <span class="c1"># y_O2_cem = (Pcem - Phi_cem * Psat(T_cgc) - C_N2_c * R * T_cgc) / (Pcem - Phi_cem * Psat(T_cgc))</span>
+        <span class="c1">#</span>
+        <span class="c1"># # Molar masses</span>
+        <span class="c1"># if parameters[&quot;type_auxiliary&quot;] == &quot;forced-convective_cathode_with_anodic_recirculation&quot;:</span>
+        <span class="c1">#     Masm = Phi_asm * Psat(T_des) / Pasm * M_H2O + \</span>
+        <span class="c1">#            (1 - Phi_asm * Psat(T_des) / Pasm) * M_H2</span>
+        <span class="c1">#     Maem = Phi_aem * Psat(T_des) / Paem * M_H2O + \</span>
+        <span class="c1">#            (1 - Phi_aem * Psat(T_des) / Paem) * M_H2</span>
+        <span class="c1"># else:  # parameters[&quot;type_auxiliary&quot;] == &quot;forced-convective_cathode_with_flow-through_anode&quot;:</span>
+        <span class="c1">#     Masm = Phi_asm * Psat(T_des) / Pasm * M_H2O + \</span>
+        <span class="c1">#            y_H2_in * (1 - Phi_asm * Psat(T_des) / Pasm) * M_H2 + \</span>
+        <span class="c1">#            (1 - y_H2_in) * (1 - Phi_asm * Psat(T_des) / Pasm) * M_N2</span>
+        <span class="c1">#     Maem = Phi_aem * Psat(T_des) / Paem * M_H2O + \</span>
+        <span class="c1">#            y_H2_aem * (1 - Phi_aem * Psat(T_des) / Paem) * M_H2 + \</span>
+        <span class="c1">#            (1 - y_H2_aem) * (1 - Phi_aem * Psat(T_des) / Paem) * M_N2</span>
+        <span class="c1"># # Molar masses at the cathode side</span>
+        <span class="c1"># Mcsm = Phi_csm * Psat(T_des) / Pcsm * M_H2O + \</span>
+        <span class="c1">#        y_O2_ext * (1 - Phi_csm * Psat(T_des) / Pcsm) * M_O2 + \</span>
+        <span class="c1">#        (1 - y_O2_ext) * (1 - Phi_csm * Psat(T_des) / Pcsm) * M_N2</span>
+        <span class="c1"># Mcem = Phi_cem * Psat(T_des) / Pcem * M_H2O + \</span>
+        <span class="c1">#        y_O2_cem * (1 - Phi_cem * Psat(T_des) / Pcem) * M_O2 + \</span>
+        <span class="c1">#        (1 - y_O2_cem) * (1 - Phi_cem * Psat(T_des) / Pcem) * M_N2</span>
+        <span class="c1">#</span>
+        <span class="c1"># # Density of the gas mixture.</span>
+        <span class="c1"># rho_asm = Pasm / (R * T_des) * Masm</span>
+        <span class="c1"># rho_aem = Paem / (R * T_des) * Maem</span>
+        <span class="c1"># rho_csm = Pcsm / (R * T_des) * Mcsm</span>
+        <span class="c1"># rho_cgc = Pcgc / (R * T_cgc) * Mcgc</span>
+        <span class="c1"># rho_cem = Pcem / (R * T_cgc) * Mcem</span>
+        <span class="c1">#</span>
+        <span class="c1"># # Purge</span>
+        <span class="c1"># if type_purge == &quot;no_purge&quot;:</span>
+        <span class="c1">#     k_purge = 0</span>
+        <span class="c1"># elif type_purge == &quot;constant_purge&quot;:</span>
+        <span class="c1">#     k_purge = 1</span>
+        <span class="c1"># elif type_purge == &quot;periodic_purge&quot;:</span>
+        <span class="c1">#     purge_time, delta_purge = t_purge</span>
+        <span class="c1">#     if (t - int(t / (purge_time + delta_purge)) * (purge_time + delta_purge)) &lt;= purge_time:</span>
+        <span class="c1">#         k_purge = 1</span>
+        <span class="c1">#     else:</span>
+        <span class="c1">#         k_purge = 0</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     raise ValueError(&quot;The type_purge variable should be correctly referenced.&quot;)</span>
+        <span class="c1"># # Back pressure valve area</span>
+        <span class="c1"># if Abp_a &gt; A_T_a:</span>
+        <span class="c1">#     Abp_a = A_T_a</span>
+        <span class="c1"># elif Abp_a &lt; 0:</span>
+        <span class="c1">#     Abp_a = 0</span>
+        <span class="c1"># if Abp_c &gt; A_T_c:</span>
+        <span class="c1">#     Abp_c = A_T_c</span>
+        <span class="c1"># elif Abp_c &lt; 0:</span>
+        <span class="c1">#     Abp_c = 0</span>
 
-    <span class="k">return</span> <span class="p">(</span><span class="n">Mext</span><span class="p">,</span> <span class="n">Pagc</span><span class="p">,</span> <span class="n">Pcgc</span><span class="p">,</span> <span class="n">Phi_agc</span><span class="p">,</span> <span class="n">Phi_cgc</span><span class="p">,</span> <span class="n">y_cgc</span><span class="p">,</span> <span class="n">Magc</span><span class="p">,</span> <span class="n">Mcgc</span><span class="p">,</span> <span class="n">Pr_aem</span><span class="p">,</span> <span class="n">Pr_cem</span><span class="p">,</span> <span class="n">Maem</span><span class="p">,</span> <span class="n">Masm</span><span class="p">,</span> <span class="n">Mcem</span><span class="p">,</span> <span class="n">Mcsm</span><span class="p">,</span>
-            <span class="n">k_purge</span><span class="p">,</span> <span class="n">Abp_a</span><span class="p">,</span> <span class="n">Abp_c</span><span class="p">,</span> <span class="n">i_n</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># parameters[&quot;type_auxiliary&quot;] == &quot;no_auxiliary&quot;</span>
+        <span class="n">k_purge</span><span class="p">,</span> <span class="n">Abp_a</span><span class="p">,</span> <span class="n">Abp_c</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+
+    <span class="k">return</span> <span class="n">P</span><span class="p">,</span> <span class="n">Phi</span><span class="p">,</span> <span class="n">y_H2</span><span class="p">,</span> <span class="n">y_O2</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">k_purge</span><span class="p">,</span> <span class="n">Abp_a</span><span class="p">,</span> <span class="n">Abp_c</span><span class="p">,</span> <span class="n">mu_gaz</span><span class="p">,</span> <span class="n">i_n</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
