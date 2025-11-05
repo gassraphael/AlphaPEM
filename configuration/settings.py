@@ -81,12 +81,13 @@ def calculate_current_density_parameters(type_current=None):
                                'delta_t_break_step': delta_t_break_step,'i_step': i_step}
 
     # Setting the parameters of the polarization current density function
+    delta_i_pola = 0.05e4  # (A.m-2). Current density step for the polarisation current density function.
     delta_t_ini_pola = 120 * 60 # (s). Initial time at zero current density for the stabilisation of the internal states.
-    delta_t_load_pola = 30 # (s). Loading time for one step current of the polarisation current density function.
+    v_load_pola = 0.01  # (A.m-2.s-1). Loading rate for one step current of the polarisation current density function.
+    delta_t_load_pola = delta_i_pola / v_load_pola # (s). Loading time for one step current of the polarisation current density function.
     delta_t_break_pola = 15 * 60 # (s). Breaking time for one step current, for the stabilisation of the internal states.
-    delta_i_pola = 0.05e4 # (A.m-2). Current density step for the polarisation current density function.
-    pola_current_parameters = {'delta_t_ini_pola': delta_t_ini_pola, 'delta_t_load_pola': delta_t_load_pola,
-                               'delta_t_break_pola': delta_t_break_pola, 'delta_i_pola': delta_i_pola}
+    pola_current_parameters = {'delta_i_pola': delta_i_pola, 'delta_t_ini_pola': delta_t_ini_pola,
+                               'delta_t_load_pola': delta_t_load_pola, 'delta_t_break_pola': delta_t_break_pola}
 
     # Setting the parameters of the polarization for calibration current density function
     delta_t_ini_pola_cali = 120 * 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
