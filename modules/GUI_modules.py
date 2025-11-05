@@ -357,12 +357,10 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola = stored_operating_inputs(type_fuel_cell, voltage_zone)
 
     (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
-     Lgc, Lm, L_endplate, L_man_gc, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, V_endplate_a, V_endplate_c, V_man_agc,
-     V_man_cgc, Aact, n_cell, e, Re, i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) \
-        = stored_physical_parameters(type_fuel_cell)
+     Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
+     i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
 
-    n_gdl, n_mpl, n_tl, t_purge, rtol, atol = \
-        calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl)
+    nb_gc, nb_gdl, nb_mpl, nb_tl, t_purge, rtol, atol = calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl)
 
     # operating conditions recovery
     choice_operating_conditions['Temperature - Tfc (°C)']['value'].set(round(T_des - 273.15, 4))  # °C
@@ -375,25 +373,21 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_operating_conditions['Anode inlet H2 ratio - y_H2_in\n(flow-through anode only)']['value'].set(round(y_H2_in, 4))
     # accessible physical parameters recovery
     choice_accessible_parameters['Active area - Aact (cm²)']['value'].set(round(Aact * 1e4, 4))  # cm²
-    choice_accessible_parameters['Number of cells - n_cell']['value'].set(int(n_cell))
-    choice_accessible_parameters['AGC thickness - Hagc (µm)']['value'].set(round(Hagc * 1e6, 4))  # µm
-    choice_accessible_parameters['CGC thickness - Hcgc (µm)']['value'].set(round(Hcgc * 1e6, 4))  # µm
-    choice_accessible_parameters['AGC width - Wagc (µm)']['value'].set(round(Wagc * 1e6, 4))  # µm
-    choice_accessible_parameters['CGC width - Wcgc (µm)']['value'].set(round(Wcgc * 1e6, 4))  # µm
-    choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].set(round(Lgc, 4))  # µm
+    choice_accessible_parameters['Number of cells - nb_cell']['value'].set(int(nb_cell))
+    choice_accessible_parameters['Anode gas channel\nthickness - Hagc (µm)']['value'].set(round(Hagc * 1e6, 4))  # µm
+    choice_accessible_parameters['Cathode gas channel\nthickness - Hcgc (µm)']['value'].set(round(Hcgc * 1e6, 4))  # µm
+    choice_accessible_parameters['Anode gas channel\nwidth - Wagc (µm)']['value'].set(round(Wagc * 1e6, 4))  # µm
+    choice_accessible_parameters['Cathode gas channel\nwidth - Wcgc (µm)']['value'].set(round(Wcgc * 1e6, 4))  # µm
+    choice_accessible_parameters['Gas channel\nlength - Lgc (m)']['value'].set(round(Lgc * 1e3, 4))  # mm
+    choice_accessible_parameters['Number of channels inside the\ngas channel - nb_channel_in_gc']['value'].set(int(nb_channel_in_gc))
+    choice_accessible_parameters['Distributor length - L_dist (mm)']['value'].set(round(Ldist * 1e3, 4))  # mm
     choice_accessible_parameters['Manifold length - Lm (mm)']['value'].set(round(Lm * 1e3, 4))  # mm
-    choice_accessible_parameters['Endplate length - L_endplate (mm)']['value'].set(round(L_endplate * 1e3, 4))  # mm
-    choice_accessible_parameters['Manifold-GC connection length - L_man_gc (mm)']['value'].set(round(L_man_gc * 1e3, 4))  # mm
-    choice_accessible_parameters['Exhaust anode manifold throttle area - A_T_a (cm²)']['value'].set(round(A_T_a * 1e4, 4))  # cm²
-    choice_accessible_parameters['Exhaust cathode manifold throttle area - A_T_c (cm²)']['value'].set(round(A_T_c * 1e4, 4))  # cm²
-    choice_accessible_parameters['Supply anode manifold volume - Vasm (cm³)']['value'].set(round(Vasm * 1e6, 4))  # cm³
-    choice_accessible_parameters['Supply cathode manifold volume - Vcsm (cm³)']['value'].set(round(Vcsm * 1e6, 4))  # cm³
-    choice_accessible_parameters['Exhaust anode manifold volume - Vaem (cm³)']['value'].set(round(Vaem * 1e6, 4))  # cm³
-    choice_accessible_parameters['Exhaust cathode manifold volume - Vcem (cm³)']['value'].set(round(Vcem * 1e6, 4))  # cm³
-    choice_accessible_parameters['Anode endplate volume - V_endplate_a (cm³)']['value'].set(round(V_endplate_a * 1e6, 4))  # cm³
-    choice_accessible_parameters['Cathode endplate volume - V_endplate_c (cm³)']['value'].set(round(V_endplate_c * 1e6, 4))  # cm³
-    choice_accessible_parameters['Volume connecting the manifold and the AGC - V_man_agc (mm³)']['value'].set(round(V_man_agc * 1e9, 4))  # mm³
-    choice_accessible_parameters['Volume connecting the manifold and the CGC - V_man_cgc (mm³)']['value'].set(round(V_man_cgc * 1e9, 4)) # mm³
+    choice_accessible_parameters['Exhaust anode manifold throttle\narea - A_T_a (cm²)']['value'].set(round(A_T_a * 1e4, 4))  # cm²
+    choice_accessible_parameters['Exhaust cathode manifold throttle\narea - A_T_c (cm²)']['value'].set(round(A_T_c * 1e4, 4))  # cm²
+    choice_accessible_parameters['Supply anode manifold\nvolume - Vasm (cm³)']['value'].set(round(Vasm * 1e6, 4))  # cm³
+    choice_accessible_parameters['Supply cathode manifold\nvolume - Vcsm (cm³)']['value'].set(round(Vcsm * 1e6, 4))  # cm³
+    choice_accessible_parameters['Exhaust anode manifold\nvolume - Vaem (cm³)']['value'].set(round(Vaem * 1e6, 4))  # cm³
+    choice_accessible_parameters['Exhaust cathode manifold\nvolume - Vcem (cm³)']['value'].set(round(Vcem * 1e6, 4))  # cm³
     # undetermined physical parameters recovery
     choice_undetermined_parameters['GDL thickness - Hgdl (µm)\n(without the transition layer)']['value'].set(round(Hgdl * 1e6, 4))  # µm
     choice_undetermined_parameters['MPL thickness - Hmpl (µm)\n(without the transition layer)\n(without the transition layer)']['value'].set(round(Hmpl * 1e6, 4))  # µm
@@ -406,7 +400,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_undetermined_parameters['Ionomer volume fraction - ε_mc']['value'].set(round(epsilon_mc, 4))
     choice_undetermined_parameters['Compression ratio - ε_c']['value'].set(round(epsilon_c, 4))
     choice_undetermined_parameters['Capillary exponent - e']['value'].set(e)
-    choice_undetermined_parameters['Electron conduction resistance - Re (Ω.mm²)']['value'].set(round(Re * 1e6, 4))  # A.mm-2
+    choice_undetermined_parameters['Electron conduction\nresistance - Re (Ω.mm²)']['value'].set(round(Re * 1e6, 4))  # A.mm-2
     choice_undetermined_parameters['Dry reference exchange current\ndensity - i0_d_c_ref (A/m²)']['value'].set(round(i0_d_c_ref, 4))  # A.m-2
     choice_undetermined_parameters['Humid reference exchange current\ndensity - i0_h_c_ref (A/m²)']['value'].set(round(i0_h_c_ref, 4))  # A.m-2
     choice_undetermined_parameters['Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))']['value'].set(round(kappa_co, 4))  # mol.m-1.s-1.Pa-1
@@ -418,9 +412,10 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     # i_max_pola recovery
     choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].set(round(i_max_pola / 1e4, 4))  # A/cm²
     # computing parameters recovery
-    choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].set(n_gdl)
-    choice_computing_parameters['Number of MPL nodes - n_mpl']['value'].set(n_mpl)
-    choice_computing_parameters['Number of TL nodes - n_tl']['value'].set(n_tl)
+    choice_computing_parameters['Number of GC nodes - nb_gc']['value'].set(nb_gc)
+    choice_computing_parameters['Number of GDL nodes - nb_gdl']['value'].set(nb_gdl)
+    choice_computing_parameters['Number of MPL nodes - nb_mpl']['value'].set(nb_mpl)
+    choice_computing_parameters['Number of TL nodes - nb_tl']['value'].set(nb_tl)
     choice_computing_parameters['Solver relative tolerance - rtol']['value'].set(rtol)
     choice_computing_parameters['Solver absolute tolerance - atol']['value'].set(atol)
 
@@ -458,25 +453,23 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     y_H2_in = choice_operating_conditions['Anode inlet H2 ratio - y_H2_in\n(flow-through anode only)']['value'].get()
     # accessible physical parameters
     Aact = choice_accessible_parameters['Active area - Aact (cm²)']['value'].get() * 1e-4  # m²
-    n_cell = int(choice_accessible_parameters['Number of cells - n_cell']['value'].get())
-    Hagc = choice_accessible_parameters['AGC thickness - Hagc (µm)']['value'].get() * 1e-6  # m
-    Hcgc = choice_accessible_parameters['CGC thickness - Hcgc (µm)']['value'].get() * 1e-6  # m
-    Wagc = choice_accessible_parameters['AGC width - Wagc (µm)']['value'].get() * 1e-6  # m
-    Wcgc = choice_accessible_parameters['CGC width - Wcgc (µm)']['value'].get() * 1e-6  # m
-    Lgc = choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].get()  # m
+    nb_cell = int(choice_accessible_parameters['Number of cells - nb_cell']['value'].get())
+    Hagc = choice_accessible_parameters['Anode gas channel\nthickness - Hagc (µm)']['value'].get() * 1e-6  # m
+    Hcgc = choice_accessible_parameters['Cathode gas channel\nthickness - Hcgc (µm)']['value'].get() * 1e-6  # m
+    Wagc = choice_accessible_parameters['Anode gas channel\nwidth - Wagc (µm)']['value'].get() * 1e-6  # m
+    Wcgc = choice_accessible_parameters['Cathode gas channel\nwidth - Wcgc (µm)']['value'].get() * 1e-6  # m
+    Lgc = choice_accessible_parameters['Gas channel\nlength - Lgc (m)']['value'].get() * 1e-3  # m
     Lm = choice_accessible_parameters['Manifold length - Lm (mm)']['value'].get() * 1e-3  # m
-    L_endplate = choice_accessible_parameters['Endplate length - L_endplate (mm)']['value'].get() * 1e-3  # m
+    Ldist = choice_accessible_parameters['Distributor length - Ldist (mm)']['value'].get() * 1e-3  # m
     L_man_gc = choice_accessible_parameters['Manifold-GC connection length - L_man_gc (mm)']['value'].get() * 1e-3  # m
-    A_T_a = choice_accessible_parameters['Exhaust anode manifold throttle area - A_T_a (cm²)']['value'].get() * 1e-4  # m²
-    A_T_c = choice_accessible_parameters['Exhaust cathode manifold throttle area - A_T_c (cm²)']['value'].get() * 1e-4  # m²
-    Vasm = choice_accessible_parameters['Supply anode manifold volume - Vasm (cm³)']['value'].get() * 1e-6  # m³
-    Vcsm = choice_accessible_parameters['Supply cathode manifold volume - Vcsm (cm³)']['value'].get() * 1e-6  # m³
-    Vaem = choice_accessible_parameters['Exhaust anode manifold volume - Vaem (cm³)']['value'].get() * 1e-6 # m³
-    Vcem = choice_accessible_parameters['Exhaust cathode manifold volume - Vcem (cm³)']['value'].get() * 1e-6  # m³
+    A_T_a = choice_accessible_parameters['Exhaust anode manifold throttle\narea - A_T_a (cm²)']['value'].get() * 1e-4  # m²
+    A_T_c = choice_accessible_parameters['Exhaust cathode manifold throttle\narea - A_T_c (cm²)']['value'].get() * 1e-4  # m²
+    Vasm = choice_accessible_parameters['Supply anode manifold\nvolume - Vasm (cm³)']['value'].get() * 1e-6  # m³
+    Vcsm = choice_accessible_parameters['Supply cathode manifold\nvolume - Vcsm (cm³)']['value'].get() * 1e-6  # m³
+    Vaem = choice_accessible_parameters['Exhaust anode manifold\nvolume - Vaem (cm³)']['value'].get() * 1e-6 # m³
+    Vcem = choice_accessible_parameters['Exhaust cathode manifold\nvolume - Vcem (cm³)']['value'].get() * 1e-6  # m³
     V_endplate_a = choice_accessible_parameters['Anode endplate volume - V_endplate_c (cm³)']['value'].get() * 1e-6  # m³
     V_endplate_c = choice_accessible_parameters['Cathode endplate volume - V_endplate_c (cm³)']['value'].get() * 1e-6  # m³
-    V_man_agc = choice_accessible_parameters['Volume connecting the manifold and the AGC (mm³)']['value'].get() * 1e-9  # m³
-    V_man_cgc = choice_accessible_parameters['Volume connecting the manifold and the CGC (mm³)']['value'].get() * 1e-9  # m³
     # undetermined physical parameters
     Hgdl = choice_undetermined_parameters['GDL thickness - Hgdl (µm)\n(without the transition layer)']['value'].get() * 1e-6  # m
     Hmpl = choice_undetermined_parameters['MPL thickness - Hmpl (µm)\n(without the transition layer)']['value'].get() * 1e-6  # m
@@ -489,7 +482,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     epsilon_mc = choice_undetermined_parameters['Ionomer volume fraction - ε_mc']['value'].get()
     epsilon_c = choice_undetermined_parameters['Compression ratio - ε_c']['value'].get()
     e = choice_undetermined_parameters['Capillary exponent - e']['value'].get()
-    Re = choice_undetermined_parameters['Electron conduction resistance - Re (Ω.mm²)']['value'].get() * 1e-6  # Ω.m²
+    Re = choice_undetermined_parameters['Electron conduction\nresistance - Re (Ω.mm²)']['value'].get() * 1e-6  # Ω.m²
     i0_d_c_ref = choice_undetermined_parameters['Dry reference exchange current\ndensity - i0_d_c_ref (A/m²)']['value'].get()  # A.m-2
     i0_h_c_ref = choice_undetermined_parameters['Humid reference exchange current\ndensity - i0_h_c_ref (A/m²)']['value'].get()  # A.m-2
     kappa_co = choice_undetermined_parameters['Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))']['value'].get()  # mol.m-1.s-1.Pa-1
@@ -526,9 +519,10 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     # computing parameters
     t_purge = choice_computing_parameters['Purge time - t_purge (s)']['value'].get()  # s
     delta_t_purge = choice_computing_parameters['Time between two purges\n- Δt_purge (s)']['value'].get()  # s
-    n_gdl = choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].get()
-    n_mpl = choice_computing_parameters['Number of MPL nodes - n_mpl']['value'].get()
-    n_tl = choice_computing_parameters['Number of TL nodes - n_tl']['value'].get()
+    nb_gc = choice_computing_parameters['Number of GC nodes - nb_gc']['value'].get()
+    nb_gdl = choice_computing_parameters['Number of GDL nodes - nb_gdl']['value'].get()
+    nb_mpl = choice_computing_parameters['Number of MPL nodes - nb_mpl']['value'].get()
+    nb_tl = choice_computing_parameters['Number of TL nodes - nb_tl']['value'].get()
     rtol = choice_computing_parameters['Solver relative tolerance - rtol']['value'].get()
     atol = choice_computing_parameters['Solver absolute tolerance - atol']['value'].get()
 
@@ -579,12 +573,12 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     else:
         type_plot = "dynamic"
 
-    return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, n_cell, Hgdl, Hmpl, Hacl, Hccl, Hmem,
-            Hagc, Hcgc, Wagc, Wcgc, Lgc, Lm, L_endplate, L_man_gc, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, V_endplate_a,
-            V_endplate_c, V_man_agc, V_man_cgc, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, Re,
+    return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, nb_cell, Hgdl, Hmpl, Hacl, Hccl, Hmem,
+            Hagc, Hcgc, Wagc, Wcgc, Lgc, Ldist, Lm, L_man_gc, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, V_endplate_a,
+            V_endplate_c, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, Re,
             i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, step_current_parameters,
             pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge,
-            delta_t_purge, n_gdl, n_mpl, n_tl, rtol, atol, type_fuel_cell, voltage_zone, type_auxiliary, type_control,
+            delta_t_purge, nb_gdl, nb_mpl, nb_tl, rtol, atol, type_fuel_cell, voltage_zone, type_auxiliary, type_control,
             type_purge, type_display, type_plot)
 
 
@@ -648,38 +642,34 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
         messagebox.showerror(title='Active area', message='Negative active area is impossible.')
         choices.clear()
         return
-    if choice_accessible_parameters['Number of cells - n_cell']['value'].get() < 0:
+    if choice_accessible_parameters['Number of cells - nb_cell']['value'].get() < 0:
         messagebox.showerror(title='Number of cells', message='Negative number of cells is impossible.')
         choices.clear()
         return
-    if choice_accessible_parameters['Exhaust anode manifold throttle area - A_T_a (cm²)']['value'].get() < 0 or \
-            choice_accessible_parameters['Exhaust cathode manifold throttle area - A_T_c (cm²)']['value'].get() < 0 or \
-            choice_accessible_parameters['Supply anode manifold volume - Vasm (cm³)']['value'].get() < 0 or \
-            choice_accessible_parameters['Supply cathode manifold volume - Vcsm (cm³)']['value'].get() < 0 or \
-            choice_accessible_parameters['Exhaust anode manifold volume - Vaem (cm³)']['value'].get() < 0 or \
-            choice_accessible_parameters['Exhaust cathode manifold volume - Vcem (cm³)']['value'].get() < 0 or \
-            choice_accessible_parameters['Anode endplate volume - V_endplate_a (cm³)']['value'].get() < 0 or \
-            choice_accessible_parameters['Cathode endplate volume - V_endplate_c (cm³)']['value'].get() < 0 or \
-            choice_accessible_parameters['Volume connecting the manifold and the AGC (mm³)']['value'].get() < 0 or \
-            choice_accessible_parameters['Volume connecting the manifold and the CGC (mm³)']['value'].get() < 0:
+    if choice_accessible_parameters['Exhaust anode manifold throttle\narea - A_T_a (cm²)']['value'].get() < 0 or \
+            choice_accessible_parameters['Exhaust cathode manifold throttle\narea - A_T_c (cm²)']['value'].get() < 0 or \
+            choice_accessible_parameters['Supply anode manifold\nvolume - Vasm (cm³)']['value'].get() < 0 or \
+            choice_accessible_parameters['Supply cathode manifold\nvolume - Vcsm (cm³)']['value'].get() < 0 or \
+            choice_accessible_parameters['Exhaust anode manifold\nvolume - Vaem (cm³)']['value'].get() < 0 or \
+            choice_accessible_parameters['Exhaust cathode manifold\nvolume - Vcem (cm³)']['value'].get() < 0:
         messagebox.showerror(title='Manifold parameters', message='Negative volumes or area are impossible.')
         choices.clear()
         return
-    if choice_accessible_parameters['AGC thickness - Hagc (µm)']['value'].get() < 10 or \
-            choice_accessible_parameters['AGC thickness - Hagc (µm)']['value'].get() > 10000 or \
-            choice_accessible_parameters['CGC thickness - Hcgc (µm)']['value'].get() < 10 or \
-            choice_accessible_parameters['CGC thickness - Hcgc (µm)']['value'].get() > 10000 or \
-            choice_accessible_parameters['AGC width - Wagc (µm)']['value'].get() < 10 or \
-            choice_accessible_parameters['AGC width - Wagc (µm)']['value'].get() > 10000 or \
-            choice_accessible_parameters['CGC width - Wcgc (µm)']['value'].get() < 10 or \
-            choice_accessible_parameters['CGC width - Wcgc (µm)']['value'].get() > 10000 or \
-            choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].get() < 0 or \
-            choice_accessible_parameters['GC cumulated length - Lgc (m)']['value'].get() > 100 or \
+    if choice_accessible_parameters['Anode gas channel\nthickness - Hagc (µm)']['value'].get() < 10 or \
+            choice_accessible_parameters['Anode gas channel\nthickness - Hagc (µm)']['value'].get() > 10000 or \
+            choice_accessible_parameters['Cathode gas channel\nthickness - Hcgc (µm)']['value'].get() < 10 or \
+            choice_accessible_parameters['Cathode gas channel\nthickness - Hcgc (µm)']['value'].get() > 10000 or \
+            choice_accessible_parameters['Anode gas channel\nwidth - Wagc (µm)']['value'].get() < 10 or \
+            choice_accessible_parameters['Anode gas channel\nwidth - Wagc (µm)']['value'].get() > 10000 or \
+            choice_accessible_parameters['Cathode gas channel\nwidth - Wcgc (µm)']['value'].get() < 10 or \
+            choice_accessible_parameters['Cathode gas channel\nwidth - Wcgc (µm)']['value'].get() > 10000 or \
+            choice_accessible_parameters['Gas channel\nlength - Lgc (m)']['value'].get() < 0 or \
+            choice_accessible_parameters['Gas channel\nlength - Lgc (m)']['value'].get() > 1000 or \
+            choice_accessible_parameters['Distributor length - L_dist (mm)']['value'].get() < 0 or \
             choice_accessible_parameters['Manifold length - Lm (mm)']['value'].get() < 0 or \
-            choice_accessible_parameters['Endplate length - L_endplate (mm)']['value'].get() <0 or \
             choice_accessible_parameters['Manifold-GC connection length - L_man_gc (mm)']['value'].get() < 0:
         messagebox.showerror(title='GC distances', message='GC generally have a thickness and a width between 10µm and '
-                                                           '10mm. Also, GC length is generally between 0 and 100m')
+                                                           '10mm. Also, GC length is generally between 0 and 1000mm')
         choices.clear()
         return
     if (choice_undetermined_parameters['GDL thickness - Hgdl (µm)\n(without the transition layer)']['value'].get() < 1 or \
@@ -726,7 +716,7 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
                                                                  'being an integer.')
         choices.clear()
         return
-    if choice_undetermined_parameters['Electron conduction resistance - Re (Ω.mm²)']['value'].get() < 0 :
+    if choice_undetermined_parameters['Electron conduction\nresistance - Re (Ω.mm²)']['value'].get() < 0 :
         messagebox.showerror(title='Electron conduction resistance', message='Re should be positive.')
         choices.clear()
         return
@@ -820,22 +810,28 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
         choices.clear()
         return
 
-    if choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].get() < 1 or \
-            type(choice_computing_parameters['Number of GDL nodes - n_gdl']['value'].get()) != int:
-        messagebox.showerror(title='n_gdl', message='The n_gdl value should be an integer bigger or equal to 1.')
+    if choice_computing_parameters['Number of GC nodes - nb_gc']['value'].get() < 1 or \
+            type(choice_computing_parameters['Number of GC nodes - nb_gc']['value'].get()) != int:
+        messagebox.showerror(title='nb_gc', message='The nb_gc value should be an integer bigger or equal to 1.')
         choices.clear()
         return
 
-    if choice_computing_parameters['Number of MPL nodes - n_mpl']['value'].get() < 1 or \
-            type(choice_computing_parameters['Number of MPL nodes - n_mpl']['value'].get()) != int:
-        messagebox.showerror(title='n_mpl', message='The n_mpl value should be an integer bigger or equal to 1.')
+    if choice_computing_parameters['Number of GDL nodes - nb_gdl']['value'].get() < 1 or \
+            type(choice_computing_parameters['Number of GDL nodes - nb_gdl']['value'].get()) != int:
+        messagebox.showerror(title='nb_gdl', message='The nb_gdl value should be an integer bigger or equal to 1.')
         choices.clear()
         return
 
-    if choice_computing_parameters['Number of TL nodes - n_tl']['value'].get() < 2 or \
-            type(choice_computing_parameters['Number of TL nodes - n_tl']['value'].get()) != int or \
-            choice_computing_parameters['Number of TL nodes - n_tl']['value'].get() % 2 != 0:
-        messagebox.showerror(title='n_tl', message='The n_tl value should be an even integer bigger or equal to 2.')
+    if choice_computing_parameters['Number of MPL nodes - nb_mpl']['value'].get() < 1 or \
+            type(choice_computing_parameters['Number of MPL nodes - nb_mpl']['value'].get()) != int:
+        messagebox.showerror(title='nb_mpl', message='The nb_mpl value should be an integer bigger or equal to 1.')
+        choices.clear()
+        return
+
+    if choice_computing_parameters['Number of TL nodes - nb_tl']['value'].get() < 2 or \
+            type(choice_computing_parameters['Number of TL nodes - nb_tl']['value'].get()) != int or \
+            choice_computing_parameters['Number of TL nodes - nb_tl']['value'].get() % 2 != 0:
+        messagebox.showerror(title='nb_tl', message='The nb_tl value should be an even integer bigger or equal to 2.')
         choices.clear()
         return
 
@@ -962,7 +958,7 @@ def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, acces
         Dictionary containing the accessible physical parameters for the simulation. It contains:
             - Aact : float
                 Active area of the cell in m² (accessible physical parameter).
-            - n_cell : int
+            - nb_cell : int
                 Number of cells in the stack (accessible physical parameter).
             - Hagc : float
                 Thickness of the anode gas channel in m (accessible physical parameter).
@@ -1041,11 +1037,11 @@ def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, acces
         Dictionary containing the computing parameters for the simulation. It contains:
             - Htl : float
                 Thickness of the transition layers in meters (computing parameter).
-            - n_gdl : int
+            - nb_gdl : int
                 Number of points considered in the GDL (computing parameter).
-            - n_mpl : int
+            - nb_mpl : int
                 Number of points considered in the MPL (computing parameter).
-            - n_tl : int
+            - nb_tl : int
                 Number of points considered in the transitory layer (computing parameter).
             - t_purge : tuple
                 Time parameters for purging the system (computing parameter).
@@ -1207,7 +1203,7 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
         Dictionary containing the accessible physical parameters for the simulation. It contains:
             - Aact : float
                 Active area of the cell in m² (accessible physical parameter).
-            - n_cell : int
+            - nb_cell : int
                 Number of cells in the stack (accessible physical parameter).
             - Hagc : float
                 Thickness of the anode gas channel in m (accessible physical parameter).
@@ -1286,11 +1282,11 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
         Dictionary containing the computing parameters for the simulation. It contains:
             - Htl : float
                 Thickness of the transition layers in meters (computing parameter).
-            - n_gdl : int
+            - nb_gdl : int
                 Number of points considered in the GDL (computing parameter).
-            - n_mpl : int
+            - nb_mpl : int
                 Number of points considered in the MPL (computing parameter).
-            - n_tl : int
+            - nb_tl : int
                 Number of points considered in the transitory layer (computing parameter).
             - t_purge : tuple
                 Time parameters for purging the system (computing parameter).
@@ -1451,7 +1447,7 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
         Dictionary containing the accessible physical parameters for the simulation. It contains:
             - Aact : float
                 Active area of the cell in m² (accessible physical parameter).
-            - n_cell : int
+            - nb_cell : int
                 Number of cells in the stack (accessible physical parameter).
             - Hagc : float
                 Thickness of the anode gas channel in m (accessible physical parameter).
@@ -1528,11 +1524,11 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
         Dictionary containing the computing parameters for the simulation. It contains:
             - Htl : float
                 Thickness of the transition layers in meters (computing parameter).
-            - n_gdl : int
+            - nb_gdl : int
                 Number of points considered in the GDL (computing parameter).
-            - n_mpl : int
+            - nb_mpl : int
                 Number of points considered in the MPL (computing parameter).
-            - n_tl : int
+            - nb_tl : int
                 Number of points considered in the transitory layer (computing parameter).
             - t_purge : tuple
                 Time parameters for purging the system (computing parameter).

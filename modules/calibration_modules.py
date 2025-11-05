@@ -266,7 +266,7 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
     """
 
     # Algorithm parameters for polarization curve generation
-    type_auxiliary = "forced-convective_cathode_with_flow-through_anode"
+    type_auxiliary = "no_auxiliary"                                                                                     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! This should be changed in the future to "forced-convective_cathode_with_flow-through_anode".
     type_control = "no_control"
     type_purge = "no_purge"
     type_display = "no_display"
@@ -293,10 +293,10 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
                                         'delta_t_break_pola_cali': delta_t_break_pola_cali}
     i_EIS, ratio_EIS = np.nan, np.nan  # (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.
     f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
-    n_tl = 4  # It is the number of model points placed inside each transition layer.
+    nb_tl = 4  # It is the number of model points placed inside each transition layer.
     t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
-    rtol = 1e-6  # Relative tolerance for the system of ODEs solver.
-    atol = 1e-10  # Absolute tolerance for the system of ODEs solver.
+    rtol = 1e-3  # Relative tolerance for the system of ODEs solver.
+    atol = 1e-6  # Absolute tolerance for the system of ODEs solver.
 
     if type_fuel_cell == "ZSW-GenStack" or type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41" or \
             type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81" or type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2" or \
@@ -332,13 +332,15 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         pola_current_parameters.update({'i_max_pola': i_max_pola})
 
         #       Fuel cell physical parameters
-        Aact = 2.7972e-2  # m². It is the active area of the catalyst layer.
-        n_cell = 26  # . It is the number of cell in the stack.
+        Aact = 283.87e-4  # m². It is the active area of the catalyst layer.
+        nb_cell = 26  # . It is the number of cell in the stack.
         Hagc = 2.3e-4  # m. It is the thickness of the anode gas channel.
         Hcgc = 3e-4  # m. It is the thickness of the cathode gas channel.
         Wagc = 4.3e-4  # m. It is the width of the anode gas channel.
         Wcgc = 5.32e-4  # m. It is the width of the cathode gas channel.
-        Lgc = 23.31  # m. It is the length of the gas channel.
+        Lgc = 246.2e-3  # m. It is the length of the gas channel.
+        nb_channel_in_gc = 105  # . It is the number of channels in the bipolar plate.
+        Ldist = 7.11e-2  # m. It is the length of the distributor, which is the volume between the gas channel and the manifold.
         Lm = 25.8e-3  # m. It is the length of the manifold.
         L_endplate = 46.8e-3  # m. It is the length of the endplate.
         L_man_gc = 8.74e-3  # m. It is the length of the volume connecting the manifold to the gas channel.
@@ -378,12 +380,13 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
 
         # Computing parameters
-        k_node_min = math.ceil((n_tl / 2 + 1) * Hacl / Hmpl)  # It is a coefficient to determine the minimum thickness
+        k_node_min = math.ceil((nb_tl / 2 + 1) * Hacl / Hmpl)  # It is a coefficient to determine the minimum thickness
         # of a model node. It is calculated to ensure that there is at least one node inside the MPL, considering the
         # transition layer.
         H_node_min = Hacl / k_node_min  # m. It is the minimum thickness of the model node.
-        n_gdl = max(1, int(Hgdl / H_node_min / 4))  # It is the number of model points placed inside each GDL.
-        n_mpl = max(1, int(Hmpl / H_node_min))  # It is the number of model points placed inside each MPL.
+        nb_gc = 1  # It is the number of model points placed inside each gas channel.
+        nb_gdl = max(1, int(Hgdl / H_node_min / 4))  # It is the number of model points placed inside each GDL.
+        nb_mpl = max(1, int(Hmpl / H_node_min))  # It is the number of model points placed inside each MPL.
 
     elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
             type_fuel_cell == "EH-31_2.5":
@@ -411,15 +414,17 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         Aact = 85e-4  # m². It is the active area of the catalyst layer.
         Wagc = 450e-6  # m. It is the width of the anode gas channel.
         Wcgc = Wagc  # m. It is the width of the cathode gas channel.
-        Lgc = 9.67  # m. It is the length of the gas channel.
+        Lgc = 144e-3  # m. It is the length of one channel in the bipolar plate.
+        nb_channel_in_gc = 67  # . It is the number of channels in the bipolar plate.
 
         # Extrapolated physical parameters
-        n_cell = 1  # . It is the number of cell in the stack.
+        nb_cell = 1  # . It is the number of cell in the stack.
         Hgdl = 200e-6  # m. It is the thickness of the gas diffusion layer.
         Hmpl = 30e-6  # m. It is the thickness of the microporous layer.
         epsilon_mpl = 0.4  # It is the porosity of the microporous layer.
         Hagc = 500e-6  # m. It is the thickness of the anode gas channel.
         Hcgc = Hagc  # m. It is the thickness of the cathode gas channel.
+        Ldist = 5e-2  # m. It is the estimated length of the distributor, which is the volume between the gas channel and the manifold.
         Lm = 2.03e-3  # m. It is the length of the manifold.
         L_endplate = 46.8e-3  # m. It is the length of the endplate.
         L_man_gc = 8.74e-3  # m. It is the length of the volume connecting the manifold to the gas channel.
@@ -455,12 +460,12 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         C_scl = 20e6  # F.m-3. It is the volumetric space-charge layer capacitance.
 
         # Computing parameters
-        k_node_min = math.ceil((n_tl / 2 + 1) * Hacl / Hmpl)  # It is a coefficient to determine the minimum thickness
+        k_node_min = math.ceil((nb_tl / 2 + 1) * Hacl / Hmpl)  # It is a coefficient to determine the minimum thickness
         # of a model node. It is calculated to ensure that there is at least one node inside the MPL, considering the
         # transition layer.
         H_node_min = Hacl / k_node_min  # m. It is the minimum thickness of the model node.
-        n_gdl = max(1, int(Hgdl / H_node_min / 4))  # It is the number of model points placed inside each GDL.
-        n_mpl = max(1, int(Hmpl / H_node_min))  # It is the number of model points placed inside each MPL.
+        nb_gdl = max(1, int(Hgdl / H_node_min / 4))  # It is the number of model points placed inside each GDL.
+        nb_mpl = max(1, int(Hmpl / H_node_min))  # It is the number of model points placed inside each MPL.
 
     else:
         ValueError("A correct type_fuel_cell should be given.")
@@ -472,21 +477,21 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
                           'pola_current_parameters': pola_current_parameters,
                           'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
                           'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
-    accessible_physical_parameters = {'Aact': Aact, 'n_cell': n_cell, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc,
-                                      'Wcgc': Wcgc, 'Lgc': Lgc, 'Lm': Lm, 'L_endplate': L_endplate,
-                                      'L_man_gc': L_man_gc, 'A_T_a': A_T_a, 'A_T_c': A_T_c, 'Vasm': Vasm, 'Vcsm': Vcsm,
-                                      'Vaem': Vaem, 'Vcem': Vcem, 'V_endplate_a': V_endplate_a,
-                                      'V_endplate_c': V_endplate_c, 'V_man_agc': V_man_agc, 'V_man_cgc': V_man_cgc}
-    undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
-                                        'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl, 'epsilon_mpl': epsilon_mpl,
-                                        'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c, 'e': e, 'Re': Re,
-                                        'i0_d_c_ref': i0_d_c_ref, 'i0_h_c_ref': i0_h_c_ref, 'kappa_co': kappa_co,
-                                        'kappa_c': kappa_c, 'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch,
-                                        'C_scl': C_scl}
-    computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 'n_tl': n_tl, 't_purge': t_purge, 'rtol': rtol, 'atol': atol,
-                            'type_fuel_cell': type_fuel_cell, 'type_current': type_current, 'voltage_zone': voltage_zone,
-                            'type_auxiliary': type_auxiliary, 'type_control': type_control, 'type_purge': type_purge,
-                            'type_display': type_display, 'type_plot': type_plot}
+    accessible_physical_parameters = {'Aact': Aact, 'nb_cell': nb_cell, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc,
+                                      'Wcgc': Wcgc, 'Lgc': Lgc, 'nb_channel_in_gc': nb_channel_in_gc, 'Ldist': Ldist,
+                                      'Lm': Lm, 'A_T_a': A_T_a, 'A_T_c': A_T_c, 'Vasm': Vasm, 'Vcsm': Vcsm,
+                                      'Vaem': Vaem, 'Vcem': Vcem}
+    undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl,
+                                        'Hccl': Hccl, 'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl,
+                                        'epsilon_mpl': epsilon_mpl, 'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c,
+                                        'e': e, 'Re': Re, 'i0_d_c_ref': i0_d_c_ref, 'i0_h_c_ref': i0_h_c_ref,
+                                        'kappa_co': kappa_co, 'kappa_c': kappa_c, 'a_slim': a_slim, 'b_slim': b_slim,
+                                        'a_switch': a_switch, 'C_scl': C_scl}
+    computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 'nb_tl': nb_tl, 't_purge': t_purge,
+                            'rtol': rtol, 'atol': atol,'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
+                            'voltage_zone': voltage_zone, 'type_auxiliary': type_auxiliary,
+                            'type_control': type_control, 'type_purge': type_purge, 'type_display': type_display,
+                            'type_plot': type_plot}
 
     # Characteristic points of the experimental polarization curve
     i_exp, U_exp = pola_exp_values_calibration(type_fuel_cell, voltage_zone)

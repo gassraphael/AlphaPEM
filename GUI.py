@@ -118,23 +118,21 @@ def main_frame(root, canvas):
          'Anode inlet H2 ratio - y_H2_in\n(flow-through anode only)': {'value': tk.DoubleVar(operating_conditions_frame), 'label_row': 4, 'label_column': 5}}
 
     choice_accessible_parameters = \
-        {'AGC thickness - Hagc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 1},
-         'CGC thickness - Hcgc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 3},
-         'AGC width - Wagc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 5},
-         'CGC width - Wcgc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 1},
-         'GC cumulated length - Lgc (m)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 3},
-         'Active area - Aact (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 5},
-         'Number of cells - n_cell': {'value': tk.IntVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 1},
-         'Exhaust anode manifold throttle area - A_T_a (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 3},
-         'Exhaust cathode manifold throttle area - A_T_c (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 5},
-         'Supply anode manifold volume - Vasm (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 1},
-         'Supply cathode manifold volume - Vcsm (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 3},
-         'Exhaust anode manifold volume - Vaem (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 5},
-         'Exhaust cathode manifold volume - Vcem (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 5, 'label_column': 1},
-         'Anode endplate volume - V_endplate_a (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 5, 'label_column': 3},
-         'Cathode endplate volume - V_endplate_c (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 5, 'label_column': 5},
-         'Volume connecting the manifold and the AGC - V_man_agc (mm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 6, 'label_column': 1},
-         'Volume connecting the manifold and the CGC  - V_man_cgc (mm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 6, 'label_column': 3}}
+        {'Active area - Aact (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 1},
+         'Number of cells - nb_cell': {'value': tk.IntVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 3},
+         'Anode gas channel\nthickness - Hagc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 1},
+         'Cathode gas channel\nthickness - Hcgc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 3},
+         'Anode gas channel\nwidth - Wagc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 5},
+         'Cathode gas channel\nwidth - Wcgc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 5},
+         'Gas channel\nlength - Lgc (mm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 1},
+         'Number of channels inside the\ngas channel - nb_channel_in_gc' : {'value': tk.IntVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 3},
+         'Distributor length - Ldist (mm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 1},
+         'Exhaust anode manifold throttle\narea - A_T_a (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 3},
+         'Exhaust cathode manifold throttle\narea - A_T_c (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 5},
+         'Supply anode manifold\nvolume - Vasm (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 5, 'label_column': 1},
+         'Supply cathode manifold\nvolume - Vcsm (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 5, 'label_column': 3},
+         'Exhaust anode manifold\nvolume - Vaem (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 6, 'label_column': 1},
+         'Exhaust cathode manifold\nvolume - Vcem (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 6, 'label_column': 3}}
 
 
     choice_undetermined_parameters = \
@@ -149,7 +147,7 @@ def main_frame(root, canvas):
          'Ionomer volume fraction - ε_mc': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 2, 'label_column': 5},
          'Compression ratio - ε_c': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 3, 'label_column': 1},
          'Capillary exponent - e': {'value': tk.IntVar(undetermined_parameters_frame), 'label_row': 3, 'label_column': 3},
-         'Electron conduction resistance - Re (Ω.mm²)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 1},
+         'Electron conduction\nresistance - Re (Ω.mm²)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 1},
          'Dry reference exchange current\ndensity - i0_d_c_ref (A/m²)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 3},
          'Humid reference exchange current\ndensity - i0_h_c_ref (A/m²)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 5},
          'Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 5, 'label_column': 1},
@@ -200,16 +198,18 @@ def main_frame(root, canvas):
                                       'label_row': 0, 'label_column': 3},
          'Time between two purges\n- Δt_purge (s)': {'value': tk.DoubleVar(computing_parameters_frame, 15),
                                                      'label_row': 0, 'label_column': 5},
-         'Number of GDL nodes - n_gdl': {'value': tk.IntVar(computing_parameters_frame, 5),
-                                         'label_row': 1, 'label_column': 1},
-         'Number of MPL nodes - n_mpl': {'value': tk.IntVar(computing_parameters_frame, 5),
+         'Number of GC nodes - nb_gc': {'value': tk.IntVar(computing_parameters_frame, 5),
+                                            'label_row': 1, 'label_column': 1},
+         'Number of GDL nodes - nb_gdl': {'value': tk.IntVar(computing_parameters_frame, 5),
                                          'label_row': 1, 'label_column': 3},
-         'Number of TL nodes - n_tl': {'value': tk.IntVar(computing_parameters_frame, 4),
-                                         'label_row': 1, 'label_column': 5},
-         'Solver relative tolerance - rtol': {'value': tk.DoubleVar(computing_parameters_frame, 1e-5),
+         'Number of MPL nodes - nb_mpl': {'value': tk.IntVar(computing_parameters_frame, 5),
                                          'label_row': 2, 'label_column': 1},
+         'Number of TL nodes - nb_tl': {'value': tk.IntVar(computing_parameters_frame, 4),
+                                         'label_row': 2, 'label_column': 3},
+         'Solver relative tolerance - rtol': {'value': tk.DoubleVar(computing_parameters_frame, 1e-5),
+                                         'label_row': 3, 'label_column': 1},
          'Solver absolute tolerance - atol': {'value': tk.DoubleVar(computing_parameters_frame, 1e-8),
-                                         'label_row': 2, 'label_column': 3}
+                                         'label_row': 3, 'label_column': 3}
          }
 
     choice_buttons = \
@@ -378,11 +378,11 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
 
     # Retrieves parameter values for predefined stacks and keeps them in their standard unit, or converts user-selected
     # quantities into standard units.
-    (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, n_cell, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc,
+    (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, nb_cell, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc,
      Hcgc, Wagc, Wcgc, Lgc, Lm, L_endplate, L_man_gc, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, V_endplate_a, V_endplate_c,
      V_man_agc, V_man_cgc, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, Re, i0_d_c_ref, i0_h_c_ref,
      kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, step_current_parameters, pola_current_parameters,
-     pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, n_gdl, n_mpl, n_tl, rtol,
+     pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, nb_gdl, nb_mpl, nb_tl, rtol,
      atol, type_fuel_cell, voltage_zone, type_auxiliary, type_control, type_purge, type_display, type_plot) = \
         recover_for_use_operating_inputs_and_physical_parameters(choice_operating_conditions,
                                                                  choice_accessible_parameters,
@@ -396,10 +396,10 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
                           'pola_current_parameters': pola_current_parameters,
                           'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
                           'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
-    accessible_physical_parameters = {'Aact': Aact, 'n_cell': n_cell, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc,
-                                      'Wcgc': Wcgc, 'Lgc': Lgc, 'A_T_a': A_T_a, 'A_T_c': A_T_c, 'Vasm': Vasm,
-                                      'Vcsm': Vcsm, 'Vaem': Vaem, 'Vcem': Vcem, 'V_endplate_a': V_endplate_a,
-                                      'V_endplate_c': V_endplate_c, 'V_man_agc': V_man_agc, 'V_man_cgc': V_man_cgc}
+    accessible_physical_parameters = {'Aact': Aact, 'nb_cell': nb_cell, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc,
+                                      'Wcgc': Wcgc, 'Lgc': Lgc, 'nb_channel_in_gc': nb_channel_in_gc, 'Ldist': Ldist,
+                                      'Lm': Lm, 'A_T_a': A_T_a, 'A_T_c': A_T_c, 'Vasm': Vasm, 'Vcsm': Vcsm,
+                                      'Vaem': Vaem, 'Vcem': Vcem}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
                                         'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl,
                                         'epsilon_mpl': epsilon_mpl, 'epsilon_mc': epsilon_mc, 'epsilon_c': epsilon_c,
@@ -412,7 +412,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         current_density = step_current
         operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
                             'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des, 'y_H2_in': y_H2_in}
-        computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 'n_tl': n_tl, 't_purge': t_purge,
+        computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 'nb_tl': nb_tl, 't_purge': t_purge,
                                 'rtol': rtol, 'atol': atol, 'type_fuel_cell': type_fuel_cell,
                                 'type_current': type_current, 'voltage_zone': voltage_zone,
                                 'type_auxiliary': type_auxiliary, 'type_control': type_control,
@@ -425,7 +425,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         current_density = polarization_current
         operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
                             'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des, 'y_H2_in': y_H2_in}
-        computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 'n_tl': n_tl, 't_purge': t_purge,
+        computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 'nb_tl': nb_tl, 't_purge': t_purge,
                                 'rtol': rtol, 'atol': atol, 'type_fuel_cell': type_fuel_cell,
                                 'type_current': type_current, 'voltage_zone': voltage_zone,
                                 'type_auxiliary': type_auxiliary, 'type_control': type_control,
@@ -438,7 +438,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         current_density = EIS_current
         operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
                             'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des, 'y_H2_in': y_H2_in}
-        computing_parameters = {'n_gdl': n_gdl, 'n_mpl': n_mpl, 'n_tl': n_tl, 't_purge': t_purge,
+        computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 'nb_tl': nb_tl, 't_purge': t_purge,
                                 'rtol': rtol, 'atol': atol, 'type_fuel_cell': type_fuel_cell,
                                 'type_current': type_current, 'voltage_zone': voltage_zone,
                                 'type_auxiliary': type_auxiliary, 'type_control': type_control,
@@ -451,34 +451,37 @@ def about():
     """This function displays information about the program and its author in a dialog box when the "About" button is
     clicked.
     """
-    msg = "AlphaPEM is an open-source software package for simulating proton exchange membrane fuel cell (PEMFC) " \
-          "systems using physics-based models for embedded applications. \nIt is based on a physics-based, " \
-          "one-dimensional (1D), dynamic, two-phase, and non-isothermal model. It can quickly simulate the internal " \
-          "states and voltage dynamics of PEMFC systems, and produce polarization and EIS curves. It can also " \
-          "automatically calibrate the undetermined parameters of the model to simulate a given real fuel cell " \
-          "system." \
-          "\n\nAlphaPEM is firstly developed by Raphaël Gass during his PhD thesis in control engineering at the" \
-          "LIS Laboratory in Aix-Marseille University, and in co-supervision with FEMTO-ST Institute, within the FCLab," \ 
-          "in Franche-Comté University, from 2021 to 2024. This work has been supervised by Prof. Zhongliang Li (FEMTO-ST)," \ 
-          "Prof. Rachid Outbib (LIS), Prof. Samir Jemei (FEMTO-ST) and Prof. Daniel Hissel (FEMTO-ST)." \
-          "\nIt has been supported by French National Research Agency via project DEAL (Grant no. ANR-20-CE05-0016-01," \ 
-          "https://deal.lis-lab.fr/), the Region Provence-Alpes-Côte d’Azur, the EIPHI Graduate School" \
-          "(contract ANR-17-EURE-0002) and the Region Bourgogne Franche-Comté." \
-          "\n\nThe development of AlphaPEM was subsequently continued by Raphaël Gass during his postdoctoral research" \
-          "from 2025 to 2027 at ENERGY-Lab, University of Reunion island, in partnership with the ZSW Institute in Ulm, Germany." \ 
-          "This work was supervised by Prof. Michel Benne (ENERGY-Lab), Associate Prof. Cédric Damour (ENERGY-Lab)," \
-          "Associate Prof. Dominique Grondin (ENERGY-Lab), and Dr. Florian Wilhelm (ZSW)." \
-          "\nIt has been supported by European FEDER funds via project OPUS-H2" \
-          "(https://www.energylab.re/projets/projets-en-cours/opus-h2/) and the Region Reunion." \
-          "\n\nIt is related to the following articles:" \
-          "\n    - Gass et al 2024 J. Electrochem. Soc. https://doi.org/10.1149/1945-7111/ad305a," \
-          "\n    - Gass et al 2025 I.J. of Hydrogen Energy https://doi.org/10.1016/j.ijhydene.2024.11.374." \
-          "\n    - Gass et al 2025 SoftwareX https://doi.org/10.1016/j.softx.2024.102002." \
-          "\n\nMore information can be found in:" \
-          "\n    - AlphaPEM GitHub webpage: https://github.com/gassraphael/AlphaPEM" \
-          "\n    - AlphaPEM documentation webpage: https://gassraphael.github.io/AlphaPEM/" \
-          "\n    - Author webpage: https://gassraphael.github.io/" \
-          "\n\nIf you want to contact me, please send an email to: raphael.gass@univ-reunion.fr."
+    msg = """AlphaPEM is an open-source software package for simulating proton exchange membrane fuel cell (PEMFC) 
+     systems using physics-based models for embedded applications. It is based on a physics-based, finite-volume,
+     one-dimensional (1D), dynamic, two-phase, and non-isothermal model. It can quickly simulate the internal states and 
+     voltage dynamics of PEMFC systems, and produce polarization and EIS curves. It can also automatically calibrate 
+     the undetermined parameters of the model to simulate a given real fuel cell system.
+
+     AlphaPEM is firstly developed by Raphaël Gass during his PhD thesis in control engineering at the LIS Laboratory in 
+     Aix-Marseille University, and in co-supervision with FEMTO-ST Institute, within the FCLab, in Franche-Comté 
+     University, from 2021 to 2024. This work has been supervised by Prof. Zhongliang Li (FEMTO-ST), Prof. Rachid Outbib 
+     (LIS), Prof. Samir Jemei (FEMTO-ST) and Prof. Daniel Hissel (FEMTO-ST). It has been supported by French National 
+     Research Agency via project DEAL (Grant no. ANR-20-CE05-0016-01, https://deal.lis-lab.fr/), the Region 
+     Provence-Alpes-Côte d’Azur, the EIPHI Graduate School (contract ANR-17-EURE-0002) and the Region Bourgogne 
+     Franche-Comté.
+
+     The development of AlphaPEM was subsequently continued by Raphaël Gass during his postdoctoral research from 2025 
+     to 2027 at ENERGY-Lab, University of Reunion island, in partnership with the ZSW Institute in Ulm, Germany. 
+     This work was supervised by Prof. Michel Benne (ENERGY-Lab), Associate Prof. Cédric Damour (ENERGY-Lab), Associate
+     Prof. Dominique Grondin (ENERGY-Lab), and Dr. Florian Wilhelm (ZSW). It has been supported by European FEDER funds 
+     via project OPUS-H2 (https://www.energylab.re/projets/projets-en-cours/opus-h2/) and the Region Reunion.
+
+     It is related to the following articles:
+         - Gass et al 2024 J. Electrochem. Soc. https://doi.org/10.1149/1945-7111/ad305a,
+         - Gass et al 2025 I.J. of Hydrogen Energy https://doi.org/10.1016/j.ijhydene.2024.11.374.
+         - Gass et al 2025 SoftwareX https://doi.org/10.1016/j.softx.2024.102002.
+    
+     More information can be found in:
+         - AlphaPEM GitHub webpage: https://github.com/gassraphael/AlphaPEM
+         - AlphaPEM documentation webpage: https://gassraphael.github.io/AlphaPEM/
+         - Author webpage: https://gassraphael.github.io/
+    
+     If you want to contact me, please send an email to: raphael.gass@univ-reunion.fr."""
 
     # Create a new top-level window
     about_window = tk.Toplevel()
