@@ -350,7 +350,7 @@ def calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl):
     """
 
     # Setting the number of model points placed inside each transition layer.
-    nb_tl = 4
+    nb_tl = 2
     if nb_tl % 2 != 0:
         raise ValueError("nb_tl should be an even number.")
 

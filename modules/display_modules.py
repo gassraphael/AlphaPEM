@@ -83,8 +83,7 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax, show=Tr
             Ucell_discretized[i] = Ucell_t[idx]  # the last value at the end of each load
 
         # Plot the experimental polarization curve and calculate the simulation error compared with experimental data
-        if type_fuel_cell != "manual_setup" and \
-           type_auxiliary == "forced-convective_cathode_with_flow-through_anode":  # Experimental points are accessible
+        if type_fuel_cell != "manual_setup":  # Experimental points are accessible
             # Plot of the experimental polarization curve
             i_exp_t = i_exp_t / 1e4  # Conversion in A/cm²
             plot_experimental_polarisation_curve(type_fuel_cell, i_exp_t, U_exp_t, ax)
