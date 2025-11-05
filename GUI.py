@@ -124,20 +124,23 @@ def main_frame(root, canvas):
          'Cathode gas channel\nthickness - Hcgc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 3},
          'Anode gas channel\nwidth - Wagc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 2, 'label_column': 5},
          'Cathode gas channel\nwidth - Wcgc (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 5},
-         'Gas channel\nlength - Lgc (mm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 1},
+         'Gas channel length - Lgc (mm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 1},
          'Number of channels inside the\ngas channel - nb_channel_in_gc' : {'value': tk.IntVar(accessible_parameters_frame), 'label_row': 3, 'label_column': 3},
          'Distributor length - Ldist (mm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 1},
-         'Exhaust anode manifold throttle\narea - A_T_a (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 3},
-         'Exhaust cathode manifold throttle\narea - A_T_c (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 5},
-         'Supply anode manifold\nvolume - Vasm (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 5, 'label_column': 1},
-         'Supply cathode manifold\nvolume - Vcsm (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 5, 'label_column': 3},
-         'Exhaust anode manifold\nvolume - Vaem (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 6, 'label_column': 1},
-         'Exhaust cathode manifold\nvolume - Vcem (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 6, 'label_column': 3}}
+         'Manifold length - Lm (mm)' : {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 4, 'label_column': 3},
+         'Exhaust anode manifold throttle\narea - A_T_a (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 5, 'label_column': 1},
+         'Exhaust cathode manifold throttle\narea - A_T_c (cm²)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 5, 'label_column': 3},
+         'Supply anode manifold\nvolume - Vasm (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 5, 'label_column': 5},
+         'Supply cathode manifold\nvolume - Vcsm (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 6, 'label_column': 1},
+         'Exhaust anode manifold\nvolume - Vaem (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 6, 'label_column': 3},
+         'Exhaust cathode manifold\nvolume - Vcem (cm³)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 6, 'label_column': 5},
+         'Anode endplate volume - V_endplate_c (cm³)' : {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 7, 'label_column': 1},
+         'Cathode endplate volume - V_endplate_c (cm³)' : {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 7, 'label_column': 3}}
 
 
     choice_undetermined_parameters = \
-        {'GDL thickness - Hgdl (µm)\n(without the transition layer)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 1},
-         'MPL thickness - Hmpl (µm)\n(without the transition layer)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 3},
+        {'GDL thickness - Hgdl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 1},
+         'MPL thickness - Hmpl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 3},
          'ACL thickness - Hacl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 0, 'label_column': 5},
          'CCL thickness - Hccl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 1},
          'Membrane thickness - Hmem (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 3},
@@ -251,8 +254,11 @@ def main_frame(root, canvas):
     ttk.Label(operating_conditions_frame, text='Fuel cell:', font=('cmr10', 12, 'bold')). \
         grid(row=0, column=0, columnspan=2)
     ttk.OptionMenu(operating_conditions_frame, choice_buttons['type_fuel_cell']['value'],
-                   'Enter your specifications', 'Enter your specifications', 'EH-31 1.5 bar (2021)',
-                   'EH-31 2.0 bar (2021)', 'EH-31 2.25 bar (2021)', 'EH-31 2.5 bar (2021)',
+                   'Enter your specifications', 'Enter your specifications', 'ZSW-GenStack (2022)',
+                   'ZSW-GenStack: Pa=1.61 bar, Pc=1.41 bar (2022)', 'ZSW-GenStack: Pa=2.01 bar, Pc=1.81 bar (2022)',
+                   'ZSW-GenStack: Pa=2.4 bar, Pc=2.2 bar (2022)', 'ZSW-GenStack: Pa=2.8 bar, Pc=2.6 bar (2022)', 'ZSW-GenStack: T=62°C (2022)',
+                   'ZSW-GenStack: T=76°C (2022)', 'ZSW-GenStack: T=84°C (2022)', 'EH-31: P=1.5 bar (2021)',
+                   'EH-31: P=2.0 bar (2021)', 'EH-31: P=2.25 bar (2021)', 'EH-31: P=2.5 bar (2021)',
                    command=lambda value: changeValue(operating_conditions_frame, accessible_parameters_frame,
                                                      undetermined_parameters_frame, current_density_parameters_frame,
                                                      computing_parameters_frame, choice_operating_conditions,
@@ -377,11 +383,11 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
     # Retrieves parameter values for predefined stacks and keeps them in their standard unit, or converts user-selected
     # quantities into standard units.
     (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, nb_cell, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc,
-     Hcgc, Wagc, Wcgc, Lgc, Lm, L_endplate, L_man_gc, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, V_endplate_a, V_endplate_c,
-     V_man_agc, V_man_cgc, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, Re, i0_d_c_ref, i0_h_c_ref,
-     kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, step_current_parameters, pola_current_parameters,
-     pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, nb_gdl, nb_mpl, nb_tl, rtol,
-     atol, type_fuel_cell, voltage_zone, type_auxiliary, type_control, type_purge, type_display, type_plot) = \
+     Hcgc, Wagc, Wcgc, Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, V_endplate_a,
+     V_endplate_c, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, Re, i0_d_c_ref, i0_h_c_ref, kappa_co,
+     kappa_c, a_slim, b_slim, a_switch, C_scl, step_current_parameters, pola_current_parameters,
+     pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge, delta_t_purge, nb_gc, nb_gdl, nb_mpl,
+     rtol, atol, type_fuel_cell, voltage_zone, type_auxiliary, type_control, type_purge, type_display, type_plot) = \
         recover_for_use_operating_inputs_and_physical_parameters(choice_operating_conditions,
                                                                  choice_accessible_parameters,
                                                                  choice_undetermined_parameters,
@@ -410,7 +416,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         current_density = step_current
         operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
                             'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des, 'y_H2_in': y_H2_in}
-        computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 'nb_tl': nb_tl, 't_purge': t_purge,
+        computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
                                 'rtol': rtol, 'atol': atol, 'type_fuel_cell': type_fuel_cell,
                                 'type_current': type_current, 'voltage_zone': voltage_zone,
                                 'type_auxiliary': type_auxiliary, 'type_control': type_control,
@@ -423,7 +429,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         current_density = polarization_current
         operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
                             'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des, 'y_H2_in': y_H2_in}
-        computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 'nb_tl': nb_tl, 't_purge': t_purge,
+        computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
                                 'rtol': rtol, 'atol': atol, 'type_fuel_cell': type_fuel_cell,
                                 'type_current': type_current, 'voltage_zone': voltage_zone,
                                 'type_auxiliary': type_auxiliary, 'type_control': type_control,
@@ -436,7 +442,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         current_density = EIS_current
         operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
                             'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des, 'y_H2_in': y_H2_in}
-        computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 'nb_tl': nb_tl, 't_purge': t_purge,
+        computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
                                 'rtol': rtol, 'atol': atol, 'type_fuel_cell': type_fuel_cell,
                                 'type_current': type_current, 'voltage_zone': voltage_zone,
                                 'type_auxiliary': type_auxiliary, 'type_control': type_control,
