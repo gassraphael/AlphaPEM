@@ -464,6 +464,7 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         # of a model node. It is calculated to ensure that there is at least one node inside the MPL, considering the
         # transition layer.
         H_node_min = Hacl / k_node_min  # m. It is the minimum thickness of the model node.
+        nb_gc = 1  # It is the number of model points placed inside each gas channel.
         nb_gdl = max(1, int(Hgdl / H_node_min / 4))  # It is the number of model points placed inside each GDL.
         nb_mpl = max(1, int(Hmpl / H_node_min))  # It is the number of model points placed inside each MPL.
 
