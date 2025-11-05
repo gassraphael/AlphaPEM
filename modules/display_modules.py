@@ -90,7 +90,8 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax, show=Tr
             plot_experimental_polarisation_curve(type_fuel_cell, i_exp_t, U_exp_t, ax)
             # Calculate the simulation error compared with experimental data
             #       Experimental points are interpolated to correspond to the model points
-            Ucell_interpolated = interp1d(ifc_discretized, Ucell_discretized, kind='linear')(i_exp_t)
+            Ucell_interpolated = interp1d(ifc_discretized, Ucell_discretized, kind='linear',
+                                          fill_value='extrapolate')(i_exp_t)                                            # `fill_value='extrapolate'` allows the extrapolation beyond the input x-range (e.g. extend the first/last linear segment).
             sim_error = calculate_simulation_error(Ucell_interpolated, U_exp_t)
         else:
             sim_error = None
