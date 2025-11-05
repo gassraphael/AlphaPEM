@@ -360,7 +360,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
      Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
      i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
 
-    nb_gc, nb_gdl, nb_mpl, nb_tl, t_purge, rtol, atol = calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl)
+    nb_gc, nb_gdl, nb_mpl, t_purge, rtol, atol = calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl)
 
     # operating conditions recovery
     choice_operating_conditions['Temperature - Tfc (°C)']['value'].set(round(T_des - 273.15, 4))  # °C
@@ -415,7 +415,6 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_computing_parameters['Number of GC nodes - nb_gc']['value'].set(nb_gc)
     choice_computing_parameters['Number of GDL nodes - nb_gdl']['value'].set(nb_gdl)
     choice_computing_parameters['Number of MPL nodes - nb_mpl']['value'].set(nb_mpl)
-    choice_computing_parameters['Number of TL nodes - nb_tl']['value'].set(nb_tl)
     choice_computing_parameters['Solver relative tolerance - rtol']['value'].set(rtol)
     choice_computing_parameters['Solver absolute tolerance - atol']['value'].set(atol)
 
@@ -522,7 +521,6 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     nb_gc = choice_computing_parameters['Number of GC nodes - nb_gc']['value'].get()
     nb_gdl = choice_computing_parameters['Number of GDL nodes - nb_gdl']['value'].get()
     nb_mpl = choice_computing_parameters['Number of MPL nodes - nb_mpl']['value'].get()
-    nb_tl = choice_computing_parameters['Number of TL nodes - nb_tl']['value'].get()
     rtol = choice_computing_parameters['Solver relative tolerance - rtol']['value'].get()
     atol = choice_computing_parameters['Solver absolute tolerance - atol']['value'].get()
 
@@ -825,13 +823,6 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
     if choice_computing_parameters['Number of MPL nodes - nb_mpl']['value'].get() < 1 or \
             type(choice_computing_parameters['Number of MPL nodes - nb_mpl']['value'].get()) != int:
         messagebox.showerror(title='nb_mpl', message='The nb_mpl value should be an integer bigger or equal to 1.')
-        choices.clear()
-        return
-
-    if choice_computing_parameters['Number of TL nodes - nb_tl']['value'].get() < 2 or \
-            type(choice_computing_parameters['Number of TL nodes - nb_tl']['value'].get()) != int or \
-            choice_computing_parameters['Number of TL nodes - nb_tl']['value'].get() % 2 != 0:
-        messagebox.showerror(title='nb_tl', message='The nb_tl value should be an even integer bigger or equal to 2.')
         choices.clear()
         return
 

@@ -56,15 +56,13 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     epsilon_gdl, epsilon_cl = parameters['epsilon_gdl'], parameters['epsilon_cl']
     epsilon_mpl, epsilon_c = parameters['epsilon_mpl'], parameters['epsilon_c']
     e, kappa_co = parameters['e'], parameters['kappa_co']
-    epsilon_atl, epsilon_ctl = parameters['epsilon_atl'], parameters['epsilon_ctl']
-    nb_gc, nb_gdl, nb_tl, nb_mpl = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_tl'], parameters['nb_mpl']
+    nb_gc, nb_gdl, nb_mpl = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl']
 
     # Intermediate values
-    (H_gdl_node, H_tl_node, H_mpl_node, Pagc, Pcgc, J_EOD_acl_mem, J_EOD_mem_ccl, D_acl_mem, D_mem_ccl, D_cap_agdl_agdl,
-     D_cap_agdl_atl, D_cap_atl_atl, D_cap_atl_ampl, D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_ccl_cmpl, D_cap_cmpl_cmpl,
-     D_cap_cmpl_ctl, D_cap_ctl_ctl, D_cap_ctl_cgdl, D_cap_cgdl_cgdl, Da_eff_agdl_agdl, Da_eff_agdl_atl, Da_eff_atl_atl,
-     Da_eff_atl_ampl, Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl, Dc_eff_cmpl_ctl,
-     Dc_eff_ctl_ctl, Dc_eff_ctl_cgdl, Dc_eff_cgdl_cgdl, T_acl_mem_ccl) = \
+    (H_gdl_node, H_mpl_node, Pagc, Pcgc, J_EOD_acl_mem, J_EOD_mem_ccl, D_acl_mem, D_mem_ccl, D_cap_agdl_agdl,
+     D_cap_agdl_ampl, D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_ccl_cmpl, D_cap_cmpl_cmpl, D_cap_cmpl_cgdl,
+     D_cap_cgdl_cgdl, Da_eff_agdl_agdl, Da_eff_agdl_ampl, Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl,
+     Dc_eff_cmpl_cmpl, Dc_eff_cmpl_cgdl, Dc_eff_cgdl_cgdl, T_acl_mem_ccl) = \
         flows_int_values(sv, i_fc, operating_inputs, parameters)
     C_N2_a_mean = (sum(sv[f'C_N2_agc_{i}'] for i in range(1, nb_gc + 1)) / nb_gc)
     C_N2_c_mean = (sum(sv[f'C_N2_cgc_{i}'] for i in range(1, nb_gc + 1)) / nb_gc)
@@ -87,13 +85,8 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     Jl_agdl_agdl = [None] + [- D_cap_agdl_agdl[i] * d_dx(y_minus = sv[f's_agdl_{i}'], y_plus = sv[f's_agdl_{i + 1}'],
                                                          dx = H_gdl_node / 2)
                              for i in range(1, nb_gdl)]
-    Jl_agdl_atl = - D_cap_agdl_atl * d_dx(y_minus = sv[f's_agdl_{nb_gdl}'], y_plus = sv['s_atl_1'],
-                                          dx_minus = H_gdl_node / 2, dx_plus = H_tl_node / 2)
-    Jl_atl_atl = [None] + [- D_cap_atl_atl[i] * d_dx(y_minus = sv[f's_atl_{i}'], y_plus = sv[f's_atl_{i + 1}'],
-                                                     dx = H_tl_node / 2)
-                             for i in range(1, nb_tl)]
-    Jl_atl_ampl = - D_cap_atl_ampl * d_dx(y_minus = sv[f's_atl_{nb_tl}'], y_plus = sv['s_ampl_1'],
-                                          dx_minus = H_tl_node / 2 , dx_plus = H_mpl_node / 2)
+    Jl_agdl_ampl = - D_cap_agdl_ampl * d_dx(y_minus = sv[f's_agdl_{nb_gdl}'], y_plus = sv['s_ampl_1'],
+                                          dx_minus = H_gdl_node / 2, dx_plus = H_mpl_node / 2)
     Jl_ampl_ampl = [None] + [- D_cap_ampl_ampl[i] * d_dx(y_minus = sv[f's_ampl_{i}'], y_plus = sv[f's_ampl_{i + 1}'],
                                                          dx = H_mpl_node / 2)
                              for i in range(1, nb_mpl)]
@@ -107,13 +100,8 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     Jl_cmpl_cmpl = [None] + [- D_cap_cmpl_cmpl[i] * d_dx(y_minus = sv[f's_cmpl_{i}'], y_plus = sv[f's_cmpl_{i + 1}'],
                                                          dx = H_mpl_node / 2)
                             for i in range(1, nb_mpl)]
-    Jl_cmpl_ctl = - D_cap_cmpl_ctl * d_dx(y_minus = sv[f's_cmpl_{nb_mpl}'], y_plus = sv['s_ctl_1'],
-                                          dx_minus = H_mpl_node / 2, dx_plus = H_tl_node / 2)
-    Jl_ctl_ctl = [None] + [- D_cap_ctl_ctl[i] * d_dx(y_minus = sv[f's_ctl_{i}'], y_plus = sv[f's_ctl_{i + 1}'],
-                                                     dx = H_tl_node / 2)
-                             for i in range(1, nb_tl)]
-    Jl_ctl_cgdl = - D_cap_ctl_cgdl * d_dx(y_minus = sv[f's_ctl_{nb_tl}'], y_plus = sv['s_cgdl_1'],
-                                          dx_minus = H_tl_node / 2, dx_plus = H_gdl_node / 2)
+    Jl_cmpl_cgdl = - D_cap_cmpl_cgdl * d_dx(y_minus = sv[f's_cmpl_{nb_mpl}'], y_plus = sv['s_cgdl_1'],
+                                          dx_minus = H_mpl_node / 2, dx_plus = H_gdl_node / 2)
     Jl_cgdl_cgdl = [None] + [- D_cap_cgdl_cgdl[i] * d_dx(y_minus = sv[f's_cgdl_{i}'], y_plus = sv[f's_cgdl_{i + 1}'],
                                                          dx = H_gdl_node / 2)
                              for i in range(1, nb_gdl)]
@@ -135,13 +123,8 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     Jv_agdl_agdl = [None] + [- Da_eff_agdl_agdl[i] * d_dx(y_minus = sv[f'C_v_agdl_{i}'], y_plus = sv[f'C_v_agdl_{i + 1}'],
                                                           dx = H_gdl_node / 2)
                              for i in range(1, nb_gdl)]
-    Jv_agdl_atl = - Da_eff_agdl_atl * d_dx(y_minus = sv[f'C_v_agdl_{nb_gdl}'], y_plus = sv['C_v_atl_1'],
-                                           dx_minus = H_gdl_node / 2, dx_plus = H_tl_node / 2)
-    Jv_atl_atl = [None] + [- Da_eff_atl_atl[i] * d_dx(y_minus = sv[f'C_v_atl_{i}'], y_plus = sv[f'C_v_atl_{i + 1}'],
-                                                      dx = H_tl_node / 2)
-                             for i in range(1, nb_tl)]
-    Jv_atl_ampl = - Da_eff_atl_ampl * d_dx(y_minus = sv[f'C_v_atl_{nb_tl}'], y_plus = sv['C_v_ampl_1'],
-                                           dx_minus = H_tl_node / 2, dx_plus = H_mpl_node / 2)
+    Jv_agdl_ampl = - Da_eff_agdl_ampl * d_dx(y_minus = sv[f'C_v_agdl_{nb_gdl}'], y_plus = sv['C_v_ampl_1'],
+                                           dx_minus = H_gdl_node / 2, dx_plus = H_mpl_node / 2)
     Jv_ampl_ampl = [None] + [- Da_eff_ampl_ampl[i] * d_dx(y_minus = sv[f'C_v_ampl_{i}'], y_plus = sv[f'C_v_ampl_{i + 1}'],
                                                           dx = H_mpl_node / 2)
                              for i in range(1, nb_mpl)]
@@ -154,13 +137,8 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     Jv_cmpl_cmpl = [None] + [- Dc_eff_cmpl_cmpl[i] * d_dx(y_minus = sv[f'C_v_cmpl_{i}'], y_plus = sv[f'C_v_cmpl_{i + 1}'],
                                                           dx = H_mpl_node / 2)
                              for i in range(1, nb_mpl)]
-    Jv_cmpl_ctl = - Dc_eff_cmpl_ctl * d_dx(y_minus = sv[f'C_v_cmpl_{nb_mpl}'], y_plus = sv['C_v_ctl_1'],
-                                           dx_minus = H_mpl_node / 2, dx_plus = H_tl_node / 2)
-    Jv_ctl_ctl = [None] + [- Dc_eff_ctl_ctl[i] * d_dx(y_minus = sv[f'C_v_ctl_{i}'], y_plus = sv[f'C_v_ctl_{i + 1}'],
-                                                      dx = H_tl_node / 2)
-                             for i in range(1, nb_tl)]
-    Jv_ctl_cgdl = - Dc_eff_ctl_cgdl * d_dx(y_minus = sv[f'C_v_ctl_{nb_tl}'], y_plus = sv['C_v_cgdl_1'],
-                                           dx_minus = H_tl_node / 2, dx_plus = H_gdl_node / 2)
+    Jv_cmpl_cgdl = - Dc_eff_cmpl_cgdl * d_dx(y_minus = sv[f'C_v_cmpl_{nb_mpl}'], y_plus = sv['C_v_cgdl_1'],
+                                           dx_minus = H_mpl_node / 2, dx_plus = H_gdl_node / 2)
     Jv_cgdl_cgdl = [None] + [- Dc_eff_cgdl_cgdl[i] * d_dx(y_minus = sv[f'C_v_cgdl_{i}'], y_plus = sv[f'C_v_cgdl_{i + 1}'],
                                                           dx = H_gdl_node / 2)
                              for i in range(1, nb_gdl)]
@@ -190,13 +168,8 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     J_H2_agdl_agdl = [None] + [- Da_eff_agdl_agdl[i] * d_dx(y_minus = sv[f'C_H2_agdl_{i}'], y_plus = sv[f'C_H2_agdl_{i+1}'],
                                                             dx = H_gdl_node / 2)
                                for i in range(1, nb_gdl)]
-    J_H2_agdl_atl = - Da_eff_agdl_atl * d_dx(y_minus = sv[f'C_H2_agdl_{nb_gdl}'], y_plus = sv['C_H2_atl_1'],
-                                             dx_minus = H_gdl_node / 2, dx_plus = H_tl_node / 2)
-    J_H2_atl_atl = [None] + [- Da_eff_atl_atl[i] * d_dx(y_minus = sv[f'C_H2_atl_{i}'], y_plus = sv[f'C_H2_atl_{i + 1}'],
-                                                        dx = H_tl_node / 2)
-                               for i in range(1, nb_tl)]
-    J_H2_atl_ampl = - Da_eff_atl_ampl * d_dx(y_minus = sv[f'C_H2_atl_{nb_tl}'], y_plus = sv['C_H2_ampl_1'],
-                                             dx_minus = H_tl_node / 2, dx_plus = H_mpl_node / 2)
+    J_H2_agdl_ampl = - Da_eff_agdl_ampl * d_dx(y_minus = sv[f'C_H2_agdl_{nb_gdl}'], y_plus = sv['C_H2_ampl_1'],
+                                             dx_minus = H_gdl_node / 2, dx_plus = H_mpl_node / 2)
     J_H2_ampl_ampl = [None] + [- Da_eff_ampl_ampl[i] * d_dx(y_minus = sv[f'C_H2_ampl_{i}'], y_plus = sv[f'C_H2_ampl_{i + 1}'],
                                                             dx = H_mpl_node / 2)
                                for i in range(1, nb_mpl)]
@@ -209,13 +182,8 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     J_O2_cmpl_cmpl = [None] + [- Dc_eff_cmpl_cmpl[i] * d_dx(y_minus = sv[f'C_O2_cmpl_{i}'], y_plus = sv[f'C_O2_cmpl_{i + 1}'],
                                                             dx = H_mpl_node / 2)
                                for i in range(1, nb_mpl)]
-    J_O2_cmpl_ctl = - Dc_eff_cmpl_ctl * d_dx(y_minus = sv[f'C_O2_cmpl_{nb_mpl}'], y_plus = sv['C_O2_ctl_1'],
-                                             dx_minus = H_mpl_node / 2, dx_plus = H_tl_node / 2)
-    J_O2_ctl_ctl = [None] + [- Dc_eff_ctl_ctl[i] * d_dx(y_minus = sv[f'C_O2_ctl_{i}'], y_plus = sv[f'C_O2_ctl_{i + 1}'],
-                                                        dx = H_tl_node / 2)
-                               for i in range(1, nb_tl)]
-    J_O2_ctl_cgdl = - Dc_eff_ctl_cgdl * d_dx(y_minus = sv[f'C_O2_ctl_{nb_tl}'], y_plus = sv['C_O2_cgdl_1'],
-                                             dx_minus = H_tl_node / 2, dx_plus = H_gdl_node / 2)
+    J_O2_cmpl_cgdl = - Dc_eff_cmpl_cgdl * d_dx(y_minus = sv[f'C_O2_cmpl_{nb_mpl}'], y_plus = sv['C_O2_cgdl_1'],
+                                             dx_minus = H_mpl_node / 2, dx_plus = H_gdl_node / 2)
     J_O2_cgdl_cgdl = [None] + [- Dc_eff_cgdl_cgdl[i] * d_dx(y_minus = sv[f'C_O2_cgdl_{i}'], y_plus = sv[f'C_O2_cgdl_{i + 1}'],
                                                             dx = H_gdl_node / 2)
                                for i in range(1, nb_gdl)]
@@ -241,9 +209,6 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     Sl_agdl = [None] + [Svl(element='anode', s=sv[f's_agdl_{i}'], C_v=sv[f'C_v_agdl_{i}'],
                             Ctot=sv[f'C_v_agdl_{i}'] + sv[f'C_H2_agdl_{i}'] + C_N2_a_mean,
                             T=sv[f'T_agdl_{i}'], epsilon=epsilon_gdl) for i in range(1, nb_gdl + 1)]
-    Sl_atl = [None] + [Svl(element='anode', s=sv[f's_atl_{i}'], C_v=sv[f'C_v_atl_{i}'],
-                            Ctot=sv[f'C_v_atl_{i}'] + sv[f'C_H2_atl_{i}'] + C_N2_a_mean,
-                            T=sv[f'T_atl_{i}'], epsilon=epsilon_atl[i]) for i in range(1, nb_tl + 1)]
     Sl_ampl = [None] + [Svl(element='anode', s=sv[f's_ampl_{i}'], C_v=sv[f'C_v_ampl_{i}'],
                             Ctot=sv[f'C_v_ampl_{i}'] + sv[f'C_H2_ampl_{i}'] + C_N2_a_mean,
                             T=sv[f'T_ampl_{i}'], epsilon=epsilon_mpl) for i in range(1, nb_mpl + 1)]
@@ -253,9 +218,6 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     Sl_cmpl = [None] + [Svl(element='cathode', s=sv[f's_cmpl_{i}'], C_v=sv[f'C_v_cmpl_{i}'],
                             Ctot=sv[f'C_v_cmpl_{i}'] + sv[f'C_O2_cmpl_{i}'] + C_N2_c_mean,
                             T=sv[f'T_cmpl_{i}'], epsilon=epsilon_mpl) for i in range(1, nb_mpl + 1)]
-    Sl_ctl = [None] + [Svl(element='cathode', s=sv[f's_ctl_{i}'], C_v=sv[f'C_v_ctl_{i}'],
-                            Ctot=sv[f'C_v_ctl_{i}'] + sv[f'C_O2_ctl_{i}'] + C_N2_c_mean,
-                            T=sv[f'T_ctl_{i}'], epsilon=epsilon_ctl[i]) for i in range(1, nb_tl + 1)]
     Sl_cgdl = [None] + [Svl(element='cathode', s=sv[f's_cgdl_{i}'], C_v=sv[f'C_v_cgdl_{i}'],
                             Ctot=sv[f'C_v_cgdl_{i}'] + sv[f'C_O2_cgdl_{i}'] + C_N2_c_mean,
                             T=sv[f'T_cgdl_{i}'], epsilon=epsilon_gdl) for i in range(1, nb_gdl + 1)]
@@ -263,13 +225,11 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     # Vapor generated through liquid water evaporation or degenerated through condensation
     #   Anode side
     Sv_agdl = [None] + [-x for x in Sl_agdl[1:]]
-    Sv_atl = [None] + [-x for x in Sl_atl[1:]]
     Sv_ampl = [None] + [-x for x in Sl_ampl[1:]]
     Sv_acl = - Sl_acl
     #   Cathode side
     Sv_ccl = - Sl_ccl
     Sv_cmpl = [None] + [-x for x in Sl_cmpl[1:]]
-    Sv_ctl = [None] + [-x for x in Sl_ctl[1:]]
     Sv_cgdl = [None] + [-x for x in Sl_cgdl[1:]]
 
     # ____________________________________________Auxiliary flows (mol.s-1)_____________________________________________
@@ -281,27 +241,23 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
 
     return {**auxiliary_flows_dico,
             'Jv': {**auxiliary_flows_dico.get('Jv', {}),
-                   'agc_agdl': Jv_agc_agdl, 'agdl_agdl': Jv_agdl_agdl, 'agdl_atl': Jv_agdl_atl, 'atl_atl': Jv_atl_atl,
-                   'atl_ampl': Jv_atl_ampl, 'ampl_ampl': Jv_ampl_ampl, 'ampl_acl': Jv_ampl_acl,
-                   'ccl_cmpl': Jv_ccl_cmpl, 'cmpl_cmpl': Jv_cmpl_cmpl, 'cmpl_ctl': Jv_cmpl_ctl, 'ctl_ctl': Jv_ctl_ctl,
-                   'ctl_cgdl': Jv_ctl_cgdl, 'cgdl_cgdl': Jv_cgdl_cgdl, 'cgdl_cgc': Jv_cgdl_cgc},
-            'Jl': {'agc_agdl': Jl_agc_agdl, 'agdl_agdl': Jl_agdl_agdl, 'agdl_atl': Jl_agdl_atl, 'atl_atl': Jl_atl_atl,
-                   'atl_ampl': Jl_atl_ampl, 'ampl_ampl': Jl_ampl_ampl, 'ampl_acl': Jl_ampl_acl,
-                   'ccl_cmpl': Jl_ccl_cmpl, 'cmpl_cmpl': Jl_cmpl_cmpl, 'cmpl_ctl': Jl_cmpl_ctl, 'ctl_ctl': Jl_ctl_ctl,
-                   'ctl_cgdl': Jl_ctl_cgdl, 'cgdl_cgdl': Jl_cgdl_cgdl, 'cgdl_cgc': Jl_cgdl_cgc},
+                   'agc_agdl': Jv_agc_agdl, 'agdl_agdl': Jv_agdl_agdl, 'agdl_ampl': Jv_agdl_ampl,
+                   'ampl_ampl': Jv_ampl_ampl, 'ampl_acl': Jv_ampl_acl,
+                   'ccl_cmpl': Jv_ccl_cmpl, 'cmpl_cmpl': Jv_cmpl_cmpl, 'cmpl_cgdl': Jv_cmpl_cgdl,
+                   'cgdl_cgdl': Jv_cgdl_cgdl, 'cgdl_cgc': Jv_cgdl_cgc},
+            'Jl': {'agc_agdl': Jl_agc_agdl, 'agdl_agdl': Jl_agdl_agdl, 'agdl_ampl': Jl_agdl_ampl,
+                   'ampl_ampl': Jl_ampl_ampl, 'ampl_acl': Jl_ampl_acl,
+                   'ccl_cmpl': Jl_ccl_cmpl, 'cmpl_cmpl': Jl_cmpl_cmpl, 'cmpl_cgdl': Jl_cmpl_cgdl,
+                   'cgdl_cgdl': Jl_cgdl_cgdl, 'cgdl_cgc': Jl_cgdl_cgc},
             'J_lambda': {'acl_mem': J_lambda_acl_mem, 'mem_ccl': J_lambda_mem_ccl},
             'J_H2': {**auxiliary_flows_dico.get('J_H2', {}),
-                     'agc_agdl': J_H2_agc_agdl, 'agdl_agdl': J_H2_agdl_agdl, 'agdl_atl': J_H2_agdl_atl,
-                     'atl_atl': J_H2_atl_atl, 'atl_ampl': J_H2_atl_ampl, 'ampl_ampl': J_H2_ampl_ampl,
-                     'ampl_acl': J_H2_ampl_acl},
+                     'agc_agdl': J_H2_agc_agdl, 'agdl_agdl': J_H2_agdl_agdl, 'agdl_ampl': J_H2_agdl_ampl,
+                     'ampl_ampl': J_H2_ampl_ampl, 'ampl_acl': J_H2_ampl_acl},
             'J_O2': {**auxiliary_flows_dico.get('J_O2', {}),
-                     'ccl_cmpl': J_O2_ccl_cmpl, 'cmpl_cmpl': J_O2_cmpl_cmpl, 'cmpl_ctl': J_O2_cmpl_ctl,
-                     'ctl_ctl': J_O2_ctl_ctl, 'ctl_cgdl': J_O2_ctl_cgdl, 'cgdl_cgdl': J_O2_cgdl_cgdl,
-                     'cgdl_cgc': J_O2_cgdl_cgc},
+                     'ccl_cmpl': J_O2_ccl_cmpl, 'cmpl_cmpl': J_O2_cmpl_cmpl, 'cmpl_cgdl': J_O2_cmpl_cgdl,
+                     'cgdl_cgdl': J_O2_cgdl_cgdl, 'cgdl_cgc': J_O2_cgdl_cgc},
             'S_abs': {'acl': S_abs_acl, 'ccl': S_abs_ccl},
             'Sp' :{'acl': Sp_acl, 'ccl': Sp_ccl},
             'S_H2' :{'acl': S_H2_acl}, 'S_O2': {'ccl': S_O2_ccl},
-            'Sv' : {'agdl': Sv_agdl, 'atl': Sv_atl, 'ampl': Sv_ampl, 'acl': Sv_acl,
-                    'ccl': Sv_ccl, 'cmpl': Sv_cmpl, 'ctl': Sv_ctl, 'cgdl': Sv_cgdl},
-            'Sl': {'agdl': Sl_agdl, 'atl': Sl_atl, 'ampl': Sl_ampl, 'acl': Sl_acl,
-                   'ccl': Sl_ccl, 'cmpl': Sl_cmpl, 'ctl': Sl_ctl, 'cgdl': Sl_cgdl}}
+            'Sv' : {'agdl': Sv_agdl, 'ampl': Sv_ampl, 'acl': Sv_acl, 'ccl': Sv_ccl, 'cmpl': Sv_cmpl, 'cgdl': Sv_cgdl},
+            'Sl': {'agdl': Sl_agdl, 'ampl': Sl_ampl, 'acl': Sl_acl, 'ccl': Sl_ccl, 'cmpl': Sl_cmpl, 'cgdl': Sl_cgdl}}

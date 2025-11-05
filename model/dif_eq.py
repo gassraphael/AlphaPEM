@@ -62,8 +62,7 @@ def dydt(t, y, operating_inputs, parameters, solver_variable_names, control_vari
 
     # Intermediate values
     i_fc = operating_inputs['current_density'](t, parameters)
-    dif_eq_int_values = calculate_dif_eq_int_values(t, solver_variables, control_variables, i_fc, operating_inputs,
-                                                    parameters)
+    dif_eq_int_values = calculate_dif_eq_int_values(t, solver_variables, control_variables, operating_inputs, parameters)
     eta_c_intermediate_values = calculate_eta_c_intermediate_values(solver_variables, operating_inputs, parameters)
 
     # Calculation of the flows

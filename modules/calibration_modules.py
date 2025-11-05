@@ -293,7 +293,6 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
                                         'delta_t_break_pola_cali': delta_t_break_pola_cali}
     i_EIS, ratio_EIS = np.nan, np.nan  # (A/m², ). i_EIS is the current for which a ratio_EIS perturbation is added.
     f_EIS, t_EIS = np.nan, np.nan  # It is the EIS parameters.
-    nb_tl = 4  # It is the number of model points placed inside each transition layer.
     t_purge = 0.6, 15  # s It is the purge time and the distance between two purges.
     rtol = 1e-3  # Relative tolerance for the system of ODEs solver.
     atol = 1e-6  # Absolute tolerance for the system of ODEs solver.
@@ -380,13 +379,9 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
 
         # Computing parameters
-        k_node_min = math.ceil((nb_tl / 2 + 1) * Hacl / Hmpl)  # It is a coefficient to determine the minimum thickness
-        # of a model node. It is calculated to ensure that there is at least one node inside the MPL, considering the
-        # transition layer.
-        H_node_min = Hacl / k_node_min  # m. It is the minimum thickness of the model node.
         nb_gc = 1  # It is the number of model points placed inside each gas channel.
-        nb_gdl = max(1, int(Hgdl / H_node_min / 4))  # It is the number of model points placed inside each GDL.
-        nb_mpl = max(1, int(Hmpl / H_node_min))  # It is the number of model points placed inside each MPL.
+        nb_gdl = max(1, int(Hgdl / Hacl / 4))  # It is the number of model points placed inside each GDL.
+        nb_mpl = max(1, int(Hmpl / Hacl / 3))  # It is the number of model points placed inside each MPL.
 
     elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
             type_fuel_cell == "EH-31_2.5":
@@ -460,13 +455,9 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         C_scl = 20e6  # F.m-3. It is the volumetric space-charge layer capacitance.
 
         # Computing parameters
-        k_node_min = math.ceil((nb_tl / 2 + 1) * Hacl / Hmpl)  # It is a coefficient to determine the minimum thickness
-        # of a model node. It is calculated to ensure that there is at least one node inside the MPL, considering the
-        # transition layer.
-        H_node_min = Hacl / k_node_min  # m. It is the minimum thickness of the model node.
         nb_gc = 1  # It is the number of model points placed inside each gas channel.
-        nb_gdl = max(1, int(Hgdl / H_node_min / 4))  # It is the number of model points placed inside each GDL.
-        nb_mpl = max(1, int(Hmpl / H_node_min))  # It is the number of model points placed inside each MPL.
+        nb_gdl = max(1, int(Hgdl / Hacl / 4))  # It is the number of model points placed inside each GDL.
+        nb_mpl = max(1, int(Hmpl / Hacl / 3))  # It is the number of model points placed inside each MPL.
 
     else:
         ValueError("A correct type_fuel_cell should be given.")
@@ -488,7 +479,7 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
                                         'e': e, 'Re': Re, 'i0_d_c_ref': i0_d_c_ref, 'i0_h_c_ref': i0_h_c_ref,
                                         'kappa_co': kappa_co, 'kappa_c': kappa_c, 'a_slim': a_slim, 'b_slim': b_slim,
                                         'a_switch': a_switch, 'C_scl': C_scl}
-    computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 'nb_tl': nb_tl, 't_purge': t_purge,
+    computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
                             'rtol': rtol, 'atol': atol,'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
                             'voltage_zone': voltage_zone, 'type_auxiliary': type_auxiliary,
                             'type_control': type_control, 'type_purge': type_purge, 'type_display': type_display,

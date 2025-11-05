@@ -47,8 +47,7 @@ def calculate_dyn_dissoved_water_evolution_inside_MEA(dif_eq, Hmem, Hacl, Hccl, 
 
 
 def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, epsilon_gdl, epsilon_mpl,
-                                                    epsilon_cl, epsilon_atl, epsilon_ctl, Htl, nb_gdl, nb_tl, nb_mpl,
-                                                    Jl, Sl, **kwargs):
+                                                    epsilon_cl, nb_gdl, nb_mpl, Jl, Sl, **kwargs):
     """
     This function calculates the dynamic evolution of the liquid water in the gas diffusion and catalyst layers.
 
@@ -73,16 +72,8 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl
         Anode/cathode MPL porosity.
     epsilon_cl : float
         Anode/cathode CL porosity.
-    epsilon_atl : list
-        Anode transition layer porosities.
-    epsilon_ctl : list
-        Cathode transition layer porosities.
-    Htl : float
-        Thickness of the anode transition layer (m).
     nb_gdl : int
         Number of model nodes placed inside each GDL.
-    nb_tl : int
-        Number of model nodes placed inside the anode transition layer.
     nb_mpl : int
         Number of model nodes placed inside each MPL.
     Jl : dict
@@ -95,12 +86,12 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl
     #       Inside the AGDL
     if nb_gdl == 1:
         dif_eq['ds_agdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_agdl_1']) * epsilon_gdl) * \
-                                   ((Jl['agc_agdl'] - Jl['agdl_atl']) / Hgdl + M_H2O * Sl['agdl'][1])
+                                   ((Jl['agc_agdl'] - Jl['agdl_ampl']) / Hgdl + M_H2O * Sl['agdl'][1])
     elif nb_gdl == 2:
         dif_eq['ds_agdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_agdl_1']) * epsilon_gdl) * \
                                    ((Jl['agc_agdl'] - Jl['agdl_agdl'][1]) / (Hgdl / nb_gdl) + M_H2O * Sl['agdl'][1])
         dif_eq['ds_agdl_2 / dt'] = 1 / (rho_H2O_l(sv['T_agdl_2']) * epsilon_gdl) * \
-                                   ((Jl['agdl_agdl'][1] - Jl['agdl_atl']) / (Hgdl / nb_gdl) + M_H2O * Sl['agdl'][2])
+                                   ((Jl['agdl_agdl'][1] - Jl['agdl_ampl']) / (Hgdl / nb_gdl) + M_H2O * Sl['agdl'][2])
     else: # n_gdl > 2
         dif_eq['ds_agdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_agdl_1']) * epsilon_gdl) * \
                                      ((Jl['agc_agdl'] - Jl['agdl_agdl'][1]) / (Hgdl / nb_gdl) + M_H2O * Sl['agdl'][1])
@@ -109,34 +100,20 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl
                                           ((Jl['agdl_agdl'][i - 1] - Jl['agdl_agdl'][i]) / (Hgdl / nb_gdl) +
                                            M_H2O * Sl['agdl'][i])
         dif_eq[f'ds_agdl_{nb_gdl} / dt'] = 1 / (rho_H2O_l(sv[f'T_agdl_{nb_gdl}']) * epsilon_gdl) * \
-                                           ((Jl['agdl_agdl'][nb_gdl - 1] - Jl['agdl_atl']) / (Hgdl / nb_gdl) +
+                                           ((Jl['agdl_agdl'][nb_gdl - 1] - Jl['agdl_ampl']) / (Hgdl / nb_gdl) +
                                             M_H2O * Sl['agdl'][nb_gdl])
-    #      Inside the ATL
-    if nb_tl == 2:
-        dif_eq['ds_atl_1 / dt'] = 1 / (rho_H2O_l(sv['T_atl_1']) * epsilon_atl[1]) * \
-                                   ((Jl['agdl_atl'] - Jl['atl_atl'][1]) / (Htl / nb_tl) + M_H2O * Sl['atl'][1])
-        dif_eq['ds_atl_2 / dt'] = 1 / (rho_H2O_l(sv['T_atl_2']) * epsilon_atl[2]) * \
-                                   ((Jl['atl_atl'][1] - Jl['atl_ampl']) / (Htl / nb_tl) + M_H2O * Sl['atl'][2])
-    else: # n_tl > 2
-        dif_eq['ds_atl_1 / dt'] = 1 / (rho_H2O_l(sv['T_atl_1']) * epsilon_atl[1]) * \
-                                    ((Jl['agdl_atl'] - Jl['atl_atl'][1]) / (Htl / nb_tl) + M_H2O * Sl['atl'][1])
-        for i in range(2, nb_tl):
-            dif_eq[f'ds_atl_{i} / dt'] = 1 / (rho_H2O_l(sv[f'T_atl_{i}']) * epsilon_atl[i]) * \
-                                          ((Jl['atl_atl'][i - 1] - Jl['atl_atl'][i]) / (Htl / nb_tl) + M_H2O * Sl['atl'][i])
-        dif_eq[f'ds_atl_{nb_tl} / dt'] = 1 / (rho_H2O_l(sv[f'T_atl_{nb_tl}']) * epsilon_atl[nb_tl]) * \
-                                         ((Jl['atl_atl'][nb_tl - 1] - Jl['atl_ampl']) / (Htl / nb_tl) + M_H2O * Sl['atl'][nb_tl])
     #      Inside the AMPL
     if nb_mpl == 1:
         dif_eq['ds_ampl_1 / dt'] = 1 / (rho_H2O_l(sv['T_ampl_1']) * epsilon_mpl) * \
-                                   ((Jl['atl_ampl'] - Jl['ampl_acl']) / Hmpl + M_H2O * Sl['ampl'][1])
+                                   ((Jl['agdl_ampl'] - Jl['ampl_acl']) / Hmpl + M_H2O * Sl['ampl'][1])
     elif nb_mpl == 2:
         dif_eq['ds_ampl_1 / dt'] = 1 / (rho_H2O_l(sv['T_ampl_1']) * epsilon_mpl) * \
-                                   ((Jl['atl_ampl'] - Jl['ampl_ampl'][1]) / (Hmpl / nb_mpl) + M_H2O * Sl['ampl'][1])
+                                   ((Jl['agdl_ampl'] - Jl['ampl_ampl'][1]) / (Hmpl / nb_mpl) + M_H2O * Sl['ampl'][1])
         dif_eq['ds_ampl_2 / dt'] = 1 / (rho_H2O_l(sv['T_ampl_2']) * epsilon_mpl) * \
                                    ((Jl['ampl_ampl'][1] - Jl['ampl_acl']) / (Hmpl / nb_mpl) + M_H2O * Sl['ampl'][2])
     else: # n_mpl > 2
         dif_eq['ds_ampl_1 / dt'] = 1 / (rho_H2O_l(sv['T_ampl_1']) * epsilon_mpl) * \
-                                    ((Jl['atl_ampl'] - Jl['ampl_ampl'][1]) / (Hmpl / nb_mpl) + M_H2O * Sl['ampl'][1])
+                                    ((Jl['agdl_ampl'] - Jl['ampl_ampl'][1]) / (Hmpl / nb_mpl) + M_H2O * Sl['ampl'][1])
         for i in range(2, nb_mpl):
             dif_eq[f'ds_ampl_{i} / dt'] = 1 / (rho_H2O_l(sv[f'T_ampl_{i}']) * epsilon_mpl) * \
                                           ((Jl['ampl_ampl'][i - 1] - Jl['ampl_ampl'][i]) / (Hmpl / nb_mpl) +
@@ -153,12 +130,12 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl
     #       Inside the CMPL
     if nb_mpl == 1:
         dif_eq['ds_cmpl_1 / dt'] = 1 / (rho_H2O_l(sv['T_cmpl_1']) * epsilon_mpl) * \
-                                   ((Jl['ccl_cmpl'] - Jl['cmpl_ctl']) / Hmpl + M_H2O * Sl['cmpl'][1])
+                                   ((Jl['ccl_cmpl'] - Jl['cmpl_cgdl']) / Hmpl + M_H2O * Sl['cmpl'][1])
     elif nb_mpl == 2:
         dif_eq['ds_cmpl_1 / dt'] = 1 / (rho_H2O_l(sv['T_cmpl_1']) * epsilon_mpl) * \
                                    ((Jl['ccl_cmpl'] - Jl['cmpl_cmpl'][1]) / (Hmpl / nb_mpl) + M_H2O * Sl['cmpl'][1])
         dif_eq['ds_cmpl_2 / dt'] = 1 / (rho_H2O_l(sv['T_cmpl_2']) * epsilon_mpl) * \
-                                   ((Jl['cmpl_cmpl'][1] - Jl['cmpl_ctl']) / (Hmpl / nb_mpl) + M_H2O * Sl['cmpl'][2])
+                                   ((Jl['cmpl_cmpl'][1] - Jl['cmpl_cgdl']) / (Hmpl / nb_mpl) + M_H2O * Sl['cmpl'][2])
     else: # n_mpl > 2
         dif_eq['ds_cmpl_1 / dt'] = 1 / (rho_H2O_l(sv['T_cmpl_1']) * epsilon_mpl) * \
                                     ((Jl['ccl_cmpl'] - Jl['cmpl_cmpl'][1]) / (Hmpl / nb_mpl) + M_H2O * Sl['cmpl'][1])
@@ -167,34 +144,20 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl
                                           ((Jl['cmpl_cmpl'][i - 1] - Jl['cmpl_cmpl'][i]) / (Hmpl / nb_mpl) +
                                            M_H2O * Sl['cmpl'][i])
         dif_eq[f'ds_cmpl_{nb_mpl} / dt'] = 1 / (rho_H2O_l(sv[f'T_cmpl_{nb_mpl}']) * epsilon_mpl) * \
-                                           ((Jl['cmpl_cmpl'][nb_mpl - 1] - Jl['cmpl_ctl']) / (Hmpl / nb_mpl) +
+                                           ((Jl['cmpl_cmpl'][nb_mpl - 1] - Jl['cmpl_cgdl']) / (Hmpl / nb_mpl) +
                                             M_H2O * Sl['cmpl'][nb_mpl])
-    #       Inside the CTL
-    if nb_tl == 2:
-        dif_eq['ds_ctl_1 / dt'] = 1 / (rho_H2O_l(sv['T_ctl_1']) * epsilon_ctl[1]) * \
-                                   ((Jl['cmpl_ctl'] - Jl['ctl_ctl'][1]) / (Htl / nb_tl) + M_H2O * Sl['ctl'][1])
-        dif_eq['ds_ctl_2 / dt'] = 1 / (rho_H2O_l(sv['T_ctl_2']) * epsilon_ctl[2]) * \
-                                   ((Jl['ctl_ctl'][1] - Jl['ctl_cgdl']) / (Htl / nb_tl) + M_H2O * Sl['ctl'][2])
-    else: # n_tl > 2
-        dif_eq['ds_ctl_1 / dt'] = 1 / (rho_H2O_l(sv['T_ctl_1']) * epsilon_ctl[1]) * \
-                                    ((Jl['cmpl_ctl'] - Jl['ctl_ctl'][1]) / (Htl / nb_tl) + M_H2O * Sl['ctl'][1])
-        for i in range(2, nb_tl):
-            dif_eq[f'ds_ctl_{i} / dt'] = 1 / (rho_H2O_l(sv[f'T_ctl_{i}']) * epsilon_ctl[i]) * \
-                                          ((Jl['ctl_ctl'][i - 1] - Jl['ctl_ctl'][i]) / (Htl / nb_tl) + M_H2O * Sl['ctl'][i])
-        dif_eq[f'ds_ctl_{nb_tl} / dt'] = 1 / (rho_H2O_l(sv[f'T_ctl_{nb_tl}']) * epsilon_ctl[nb_tl]) * \
-                                         ((Jl['ctl_ctl'][nb_tl - 1] - Jl['ctl_cgdl']) / (Htl / nb_tl) + M_H2O * Sl['ctl'][nb_tl])
     #       Inside the CGDL
     if nb_gdl == 1:
         dif_eq['ds_cgdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_cgdl_1']) * epsilon_gdl) * \
-                                 ((Jl['ctl_cgdl'] - Jl['cgdl_cgc']) / Hgdl + M_H2O * Sl['cgdl'][1])
+                                 ((Jl['cmpl_cgdl'] - Jl['cgdl_cgc']) / Hgdl + M_H2O * Sl['cgdl'][1])
     elif nb_gdl == 2:
         dif_eq['ds_cgdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_cgdl_1']) * epsilon_gdl) * \
-                                   ((Jl['ctl_cgdl'] - Jl['cgdl_cgdl'][1]) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][1])
+                                   ((Jl['cmpl_cgdl'] - Jl['cgdl_cgdl'][1]) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][1])
         dif_eq['ds_cgdl_2 / dt'] = 1 / (rho_H2O_l(sv['T_cgdl_2']) * epsilon_gdl) * \
                                    ((Jl['cgdl_cgdl'][1] - Jl['cgdl_cgc']) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][2])
     else:
         dif_eq['ds_cgdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_cgdl_1']) * epsilon_gdl) * \
-                                   ((Jl['ctl_cgdl'] - Jl['cgdl_cgdl'][1]) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][1])
+                                   ((Jl['cmpl_cgdl'] - Jl['cgdl_cgdl'][1]) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][1])
         for i in range(2, nb_gdl):
             dif_eq[f'ds_cgdl_{i} / dt'] = 1 / (rho_H2O_l(sv[f'T_cgdl_{i}']) * epsilon_gdl) * \
                                           ((Jl['cgdl_cgdl'][i - 1] - Jl['cgdl_cgdl'][i]) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][i])
@@ -203,9 +166,8 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl
 
 
 def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, nb_channel_in_gc, Hgdl, Hmpl, Hacl,
-                                             Hccl, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_atl, epsilon_ctl, Htl,
-                                             nb_gc, nb_gdl, nb_tl, nb_mpl, Jv, Sv, S_abs,
-                                             **kwargs):
+                                             Hccl, epsilon_gdl, epsilon_cl, epsilon_mpl, nb_gc, nb_gdl, nb_mpl, Jv, Sv,
+                                             S_abs, **kwargs):
     """This function calculates the dynamic evolution of the vapor in the gas diffusion layers, the microporous layers,
     and the catalyst layers.
 
@@ -240,16 +202,8 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, 
         Anode/cathode CL porosity.
     epsilon_mpl : float
         Anode/cathode MPL porosity.
-    epsilon_atl : list
-        Anode transition layer porosities.
-    epsilon_ctl : list
-        Cathode transition layer porosities.
-    Htl : float
-        Thickness of the anode transition layer (m).
     nb_gdl : int
         Number of model nodes placed inside each GDL.
-    nb_tl : int
-        Number of model nodes placed inside the anode transition layer.
     nb_mpl : int
         Number of model nodes placed inside each MPL.
     Jv : dict
@@ -265,12 +219,12 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, 
     Jv_agc_agdl_avg = (sum(Jv['agc_agdl'][1:nb_gc+1]) / nb_gc) * (Wagc * Lgc) / (Aact / nb_channel_in_gc)               # Average vapor flow from the gas channel to the GDL. There is a surface reduction due to the presence of the ribs, which is taken into account here.
     if nb_gdl == 1:
         dif_eq['dC_v_agdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_agdl_1'])) * \
-                                   ((Jv_agc_agdl_avg - Jv['agdl_atl']) / Hgdl + Sv['agdl'][1])
+                                   ((Jv_agc_agdl_avg - Jv['agdl_ampl']) / Hgdl + Sv['agdl'][1])
     elif nb_gdl == 2:
         dif_eq['dC_v_agdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_agdl_1'])) * \
                                    ((Jv_agc_agdl_avg - Jv['agdl_agdl'][1]) / (Hgdl / nb_gdl) + Sv['agdl'][1])
         dif_eq['dC_v_agdl_2 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_agdl_2'])) * \
-                                   ((Jv['agdl_agdl'][1] - Jv['agdl_atl']) / (Hgdl / nb_gdl) + Sv['agdl'][2])
+                                   ((Jv['agdl_agdl'][1] - Jv['agdl_ampl']) / (Hgdl / nb_gdl) + Sv['agdl'][2])
     else: # n_gdl > 2
         dif_eq['dC_v_agdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_agdl_1'])) * \
                                      ((Jv_agc_agdl_avg - Jv['agdl_agdl'][1]) / (Hgdl / nb_gdl) + Sv['agdl'][1])
@@ -278,33 +232,19 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, 
             dif_eq[f'dC_v_agdl_{i} / dt'] = 1 / (epsilon_gdl * (1 - sv[f's_agdl_{i}'])) * \
                                             ((Jv['agdl_agdl'][i - 1] - Jv['agdl_agdl'][i]) / (Hgdl / nb_gdl) + Sv['agdl'][i])
         dif_eq[f'dC_v_agdl_{nb_gdl} / dt'] = 1 / (epsilon_gdl * (1 - sv[f's_agdl_{nb_gdl}'])) * \
-                                             ((Jv['agdl_agdl'][nb_gdl - 1] - Jv['agdl_atl']) / (Hgdl / nb_gdl) + Sv['agdl'][nb_gdl])
-    #       Inside the ATL
-    if nb_tl == 2:
-        dif_eq['dC_v_atl_1 / dt'] = 1 / (epsilon_atl[1] * (1 - sv['s_atl_1'])) * \
-                                     ((Jv['agdl_atl'] - Jv['atl_atl'][1]) / (Htl / nb_tl) + Sv['atl'][1])
-        dif_eq['dC_v_atl_2 / dt'] = 1 / (epsilon_atl[2] * (1 - sv['s_atl_2'])) * \
-                                     ((Jv['atl_atl'][1] - Jv['atl_ampl']) / (Htl / nb_tl) + Sv['atl'][2])
-    else: # n_tl > 2
-        dif_eq['dC_v_atl_1 / dt'] = 1 / (epsilon_atl[1] * (1 - sv['s_atl_1'])) * \
-                                        ((Jv['agdl_atl'] - Jv['atl_atl'][1]) / (Htl / nb_tl) + Sv['atl'][1])
-        for i in range(2, nb_tl):
-            dif_eq[f'dC_v_atl_{i} / dt'] = 1 / (epsilon_atl[i] * (1 - sv[f's_atl_{i}'])) * \
-                                            ((Jv['atl_atl'][i - 1] - Jv['atl_atl'][i]) / (Htl / nb_tl) + Sv['atl'][i])
-        dif_eq[f'dC_v_atl_{nb_tl} / dt'] = 1 / (epsilon_atl[nb_tl] * (1 - sv[f's_atl_{nb_tl}'])) * \
-                                           ((Jv['atl_atl'][nb_tl - 1] - Jv['atl_ampl']) / (Htl / nb_tl) + Sv['atl'][nb_tl])
+                                             ((Jv['agdl_agdl'][nb_gdl - 1] - Jv['agdl_ampl']) / (Hgdl / nb_gdl) + Sv['agdl'][nb_gdl])
     #       Inside the AMPL
     if nb_mpl == 1:
-        dif_eq['dC_v_ampl_1 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_ampl_1'])) * ((Jv['atl_ampl'] - Jv['ampl_acl']) / Hmpl +
+        dif_eq['dC_v_ampl_1 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_ampl_1'])) * ((Jv['agdl_ampl'] - Jv['ampl_acl']) / Hmpl +
                                                                                  Sv['ampl'][1])
     elif nb_mpl == 2:
         dif_eq['dC_v_ampl_1 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_ampl_1'])) * \
-                                   ((Jv['atl_ampl'] - Jv['ampl_ampl'][1]) / (Hmpl / nb_mpl) + Sv['ampl'][1])
+                                   ((Jv['agdl_ampl'] - Jv['ampl_ampl'][1]) / (Hmpl / nb_mpl) + Sv['ampl'][1])
         dif_eq['dC_v_ampl_2 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_ampl_2'])) * \
                                    ((Jv['ampl_ampl'][1] - Jv['ampl_acl']) / (Hmpl / nb_mpl) + Sv['ampl'][2])
     else: # n_mpl > 2
         dif_eq['dC_v_ampl_1 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_ampl_1'])) * \
-                                    ((Jv['atl_ampl'] - Jv['ampl_ampl'][1]) / (Hmpl / nb_mpl) + Sv['ampl'][1])
+                                    ((Jv['agdl_ampl'] - Jv['ampl_ampl'][1]) / (Hmpl / nb_mpl) + Sv['ampl'][1])
         for i in range(2, nb_mpl):
             dif_eq[f'dC_v_ampl_{i} / dt'] = 1 / (epsilon_mpl * (1 - sv[f's_ampl_{i}'])) * \
                                             ((Jv['ampl_ampl'][i - 1] - Jv['ampl_ampl'][i]) / (Hmpl / nb_mpl) + Sv['ampl'][i])
@@ -318,13 +258,13 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, 
     dif_eq['dC_v_ccl / dt'] = 1 / (epsilon_cl * (1 - sv['s_ccl'])) * (- Jv['ccl_cmpl'] / Hccl - S_abs['ccl'] + Sv['ccl'])
     #       Inside the CMPL
     if nb_mpl == 1:
-        dif_eq['dC_v_cmpl_1 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_cmpl_1'])) * ((Jv['ccl_cmpl'] - Jv['cmpl_ctl']) / Hmpl +
+        dif_eq['dC_v_cmpl_1 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_cmpl_1'])) * ((Jv['ccl_cmpl'] - Jv['cmpl_cgdl']) / Hmpl +
                                                                                  Sv['cmpl'][1])
     elif nb_mpl == 2:
         dif_eq['dC_v_cmpl_1 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_cmpl_1'])) * \
                                    ((Jv['ccl_cmpl'] - Jv['cmpl_cmpl'][1]) / (Hmpl / nb_mpl) + Sv['cmpl'][1])
         dif_eq['dC_v_cmpl_2 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_cmpl_2'])) * \
-                                   ((Jv['cmpl_cmpl'][1] - Jv['cmpl_ctl']) / (Hmpl / nb_mpl) + Sv['cmpl'][2])
+                                   ((Jv['cmpl_cmpl'][1] - Jv['cmpl_cgdl']) / (Hmpl / nb_mpl) + Sv['cmpl'][2])
     else: # n_mpl > 2
         dif_eq['dC_v_cmpl_1 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_cmpl_1'])) * \
                                     ((Jv['ccl_cmpl'] - Jv['cmpl_cmpl'][1]) / (Hmpl / nb_mpl) + Sv['cmpl'][1])
@@ -332,34 +272,20 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, 
             dif_eq[f'dC_v_cmpl_{i} / dt'] = 1 / (epsilon_mpl * (1 - sv[f's_cmpl_{i}'])) * \
                                             ((Jv['cmpl_cmpl'][i - 1] - Jv['cmpl_cmpl'][i]) / (Hmpl / nb_mpl) + Sv['cmpl'][i])
         dif_eq[f'dC_v_cmpl_{nb_mpl} / dt'] = 1 / (epsilon_mpl * (1 - sv[f's_cmpl_{nb_mpl}'])) * \
-                                             ((Jv['cmpl_cmpl'][nb_mpl - 1] - Jv['cmpl_ctl']) / (Hmpl / nb_mpl) + Sv['cmpl'][nb_mpl])
-    #       Inside the CTL
-    if nb_tl == 2:
-        dif_eq['dC_v_ctl_1 / dt'] = 1 / (epsilon_ctl[1] * (1 - sv['s_ctl_1'])) * \
-                                     ((Jv['cmpl_ctl'] - Jv['ctl_ctl'][1]) / (Htl / nb_tl) + Sv['ctl'][1])
-        dif_eq['dC_v_ctl_2 / dt'] = 1 / (epsilon_ctl[2] * (1 - sv['s_ctl_2'])) * \
-                                     ((Jv['ctl_ctl'][1] - Jv['ctl_cgdl']) / (Htl / nb_tl) + Sv['ctl'][2])
-    else: # n_tl > 2
-        dif_eq['dC_v_ctl_1 / dt'] = 1 / (epsilon_ctl[1] * (1 - sv['s_ctl_1'])) * \
-                                        ((Jv['cmpl_ctl'] - Jv['ctl_ctl'][1]) / (Htl / nb_tl) + Sv['ctl'][1])
-        for i in range(2, nb_tl):
-            dif_eq[f'dC_v_ctl_{i} / dt'] = 1 / (epsilon_ctl[i] * (1 - sv[f's_ctl_{i}'])) * \
-                                            ((Jv['ctl_ctl'][i - 1] - Jv['ctl_ctl'][i]) / (Htl / nb_tl) + Sv['ctl'][i])
-        dif_eq[f'dC_v_ctl_{nb_tl} / dt'] = 1 / (epsilon_ctl[nb_tl] * (1 - sv[f's_ctl_{nb_tl}'])) * \
-                                           ((Jv['ctl_ctl'][nb_tl - 1] - Jv['ctl_cgdl']) / (Htl / nb_tl) + Sv['ctl'][nb_tl])
+                                             ((Jv['cmpl_cmpl'][nb_mpl - 1] - Jv['cmpl_cgdl']) / (Hmpl / nb_mpl) + Sv['cmpl'][nb_mpl])
     #       Inside the CGDL
     Jv_cgdl_cgc_avg = (sum(Jv['cgdl_cgc'][1:nb_gc + 1]) / nb_gc) * (Wcgc * Lgc) / (Aact / nb_channel_in_gc)             # Average vapor flow from the GDL to the gas channel. There is a surface reduction due to the presence of the ribs, which is taken into account here.
     if nb_gdl == 1:
-        dif_eq['dC_v_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * ((Jv['ctl_cgdl'] - Jv_cgdl_cgc_avg) / Hgdl +
+        dif_eq['dC_v_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * ((Jv['cmpl_cgdl'] - Jv_cgdl_cgc_avg) / Hgdl +
                                                                                  Sv['cgdl'][1])
     elif nb_gdl == 2:
         dif_eq['dC_v_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * \
-                                   ((Jv['ctl_cgdl'] - Jv['cgdl_cgdl'][1]) / (Hgdl / nb_gdl) + Sv['cgdl'][1])
+                                   ((Jv['cmpl_cgdl'] - Jv['cgdl_cgdl'][1]) / (Hgdl / nb_gdl) + Sv['cgdl'][1])
         dif_eq['dC_v_cgdl_2 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_2'])) * \
                                    ((Jv['cgdl_cgdl'][1] - Jv_cgdl_cgc_avg) / (Hgdl / nb_gdl) + Sv['cgdl'][2])
     else: # n_gdl > 2
         dif_eq['dC_v_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * \
-                                     ((Jv['ctl_cgdl'] - Jv['cgdl_cgdl'][1]) / (Hgdl / nb_gdl) + Sv['cgdl'][1])
+                                     ((Jv['cmpl_cgdl'] - Jv['cgdl_cgdl'][1]) / (Hgdl / nb_gdl) + Sv['cgdl'][1])
         for i in range(2, nb_gdl):
             dif_eq[f'dC_v_cgdl_{i} / dt'] = 1 / (epsilon_gdl * (1 - sv[f's_cgdl_{i}'])) * \
                                             ((Jv['cgdl_cgdl'][i - 1] - Jv['cgdl_cgdl'][i]) / (Hgdl / nb_gdl) + Sv['cgdl'][i])
@@ -368,8 +294,8 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, 
 
 
 def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, nb_channel_in_gc, Hgdl, Hmpl, Hacl,
-                                                Hccl, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_atl, epsilon_ctl,
-                                                Htl, nb_gdl, nb_tl, nb_mpl, nb_gc, J_H2, J_O2, S_H2, S_O2, **kwargs):
+                                                Hccl, epsilon_gdl, epsilon_cl, epsilon_mpl, nb_gdl, nb_mpl, nb_gc, J_H2,
+                                                J_O2, S_H2, S_O2, **kwargs):
     """This function calculates the dynamic evolution of the hydrogen, oxygen and nitrogen in the gas diffusion layers,
     the microporous layers, and the catalyst layers.
 
@@ -404,16 +330,8 @@ def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lg
         Anode/cathode CL porosity.
     epsilon_mpl : float
         Anode/cathode MPL porosity.
-    epsilon_atl : list
-        Anode transition layer porosities.
-    epsilon_ctl : list
-        Cathode transition layer porosities.
-    Htl : float
-        Thickness of the anode transition layer (m).
     nb_gdl : int
         Number of model nodes placed inside each GDL.
-    nb_tl : int
-        Number of model nodes placed inside the anode transition layer.
     nb_mpl : int
         Number of model nodes placed inside each MPL.
     J_H2 : dict
@@ -431,12 +349,12 @@ def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lg
     J_H2_agc_agdl_avg = (sum(J_H2['agc_agdl'][1:nb_gc + 1]) / nb_gc) * (Wagc * Lgc) / (Aact / nb_channel_in_gc)         # Average hydrogen flow from the gas channel to the GDL. There is a surface reduction due to the presence of the ribs, which is taken into account here.
     if nb_gdl == 1:
         dif_eq['dC_H2_agdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_agdl_1'])) * \
-                                      (J_H2_agc_agdl_avg - J_H2['agdl_atl']) / Hgdl
+                                      (J_H2_agc_agdl_avg - J_H2['agdl_ampl']) / Hgdl
     elif nb_gdl == 2:
         dif_eq['dC_H2_agdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_agdl_1'])) * \
                                       (J_H2_agc_agdl_avg - J_H2['agdl_agdl'][1]) / (Hgdl / nb_gdl)
         dif_eq['dC_H2_agdl_2 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_agdl_2'])) * \
-                                      (J_H2['agdl_agdl'][1] - J_H2['agdl_atl']) / (Hgdl / nb_gdl)
+                                      (J_H2['agdl_agdl'][1] - J_H2['agdl_ampl']) / (Hgdl / nb_gdl)
     else: # n_gdl > 2
         dif_eq['dC_H2_agdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_agdl_1'])) * \
                                       (J_H2_agc_agdl_avg - J_H2['agdl_agdl'][1]) / (Hgdl / nb_gdl)
@@ -444,32 +362,18 @@ def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lg
             dif_eq[f'dC_H2_agdl_{i} / dt'] = 1 / (epsilon_gdl * (1 - sv[f's_agdl_{i}'])) * \
                                              (J_H2['agdl_agdl'][i - 1] - J_H2['agdl_agdl'][i]) / (Hgdl / nb_gdl)
         dif_eq[f'dC_H2_agdl_{nb_gdl} / dt'] = 1 / (epsilon_gdl * (1 - sv[f's_agdl_{nb_gdl}'])) * \
-                                              (J_H2['agdl_agdl'][nb_gdl - 1] - J_H2['agdl_atl']) / (Hgdl / nb_gdl)
-    #      Inside the ATL
-    if nb_tl == 2:
-        dif_eq['dC_H2_atl_1 / dt'] = 1 / (epsilon_atl[1] * (1 - sv['s_atl_1'])) * \
-                                      (J_H2['agdl_atl'] - J_H2['atl_atl'][1]) / (Htl / nb_tl)
-        dif_eq['dC_H2_atl_2 / dt'] = 1 / (epsilon_atl[2] * (1 - sv['s_atl_2'])) * \
-                                      (J_H2['atl_atl'][1] - J_H2['atl_ampl']) / (Htl / nb_tl)
-    else: # n_tl > 2
-        dif_eq['dC_H2_atl_1 / dt'] = 1 / (epsilon_atl[1] * (1 - sv['s_atl_1'])) * \
-                                        (J_H2['agdl_atl'] - J_H2['atl_atl'][1]) / (Htl / nb_tl)
-        for i in range(2, nb_tl):
-            dif_eq[f'dC_H2_atl_{i} / dt'] = 1 / (epsilon_atl[i] * (1 - sv[f's_atl_{i}'])) * \
-                                             (J_H2['atl_atl'][i - 1] - J_H2['atl_atl'][i]) / (Htl / nb_tl)
-        dif_eq[f'dC_H2_atl_{nb_tl} / dt'] = 1 / (epsilon_atl[nb_tl] * (1 - sv[f's_atl_{nb_tl}'])) * \
-                                            (J_H2['atl_atl'][nb_tl - 1] - J_H2['atl_ampl']) / (Htl / nb_tl)
+                                              (J_H2['agdl_agdl'][nb_gdl - 1] - J_H2['agdl_ampl']) / (Hgdl / nb_gdl)
     #      Inside the AMPL
     if nb_mpl == 1:
-        dif_eq['dC_H2_ampl_1 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_ampl_1'])) * (J_H2['atl_ampl'] - J_H2['ampl_acl']) / Hmpl
+        dif_eq['dC_H2_ampl_1 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_ampl_1'])) * (J_H2['agdl_ampl'] - J_H2['ampl_acl']) / Hmpl
     elif nb_mpl == 2:
         dif_eq['dC_H2_ampl_1 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_ampl_1'])) * \
-                                      (J_H2['atl_ampl'] - J_H2['ampl_ampl'][1]) / (Hmpl / nb_mpl)
+                                      (J_H2['agdl_ampl'] - J_H2['ampl_ampl'][1]) / (Hmpl / nb_mpl)
         dif_eq['dC_H2_ampl_2 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_ampl_2'])) * \
                                       (J_H2['ampl_ampl'][1] - J_H2['ampl_acl']) / (Hmpl / nb_mpl)
     else: # n_mpl > 2
         dif_eq['dC_H2_ampl_1 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_ampl_1'])) * \
-                                      (J_H2['atl_ampl'] - J_H2['ampl_ampl'][1]) / (Hmpl / nb_mpl)
+                                      (J_H2['agdl_ampl'] - J_H2['ampl_ampl'][1]) / (Hmpl / nb_mpl)
         for i in range(2, nb_mpl):
             dif_eq[f'dC_H2_ampl_{i} / dt'] = 1 / (epsilon_mpl * (1 - sv[f's_ampl_{i}'])) * \
                                              (J_H2['ampl_ampl'][i - 1] - J_H2['ampl_ampl'][i]) / (Hmpl / nb_mpl)
@@ -483,12 +387,12 @@ def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lg
     dif_eq['dC_O2_ccl / dt'] = 1 / (epsilon_cl * (1 - sv['s_ccl'])) * (-J_O2['ccl_cmpl'] / Hccl + S_O2['ccl'])
     #      Inside the CMPL
     if nb_mpl == 1:
-        dif_eq['dC_O2_cmpl_1 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_cmpl_1'])) * (J_O2['ccl_cmpl'] - J_O2['cmpl_ctl']) / Hmpl
+        dif_eq['dC_O2_cmpl_1 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_cmpl_1'])) * (J_O2['ccl_cmpl'] - J_O2['cmpl_cgdl']) / Hmpl
     elif nb_mpl == 2:
         dif_eq['dC_O2_cmpl_1 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_cmpl_1'])) * \
                                       (J_O2['ccl_cmpl'] - J_O2['cmpl_cmpl'][1]) / (Hmpl / nb_mpl)
         dif_eq['dC_O2_cmpl_2 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_cmpl_2'])) * \
-                                      (J_O2['cmpl_cmpl'][1] - J_O2['cmpl_ctl']) / (Hmpl / nb_mpl)
+                                      (J_O2['cmpl_cmpl'][1] - J_O2['cmpl_cgdl']) / (Hmpl / nb_mpl)
     else: # n_mpl > 2
         dif_eq['dC_O2_cmpl_1 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_cmpl_1'])) * \
                                         (J_O2['ccl_cmpl'] - J_O2['cmpl_cmpl'][1]) / (Hmpl / nb_mpl)
@@ -496,33 +400,19 @@ def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lg
             dif_eq[f'dC_O2_cmpl_{i} / dt'] = 1 / (epsilon_mpl * (1 - sv[f's_cmpl_{i}'])) * \
                                              (J_O2['cmpl_cmpl'][i - 1] - J_O2['cmpl_cmpl'][i]) / (Hmpl / nb_mpl)
         dif_eq[f'dC_O2_cmpl_{nb_mpl} / dt'] = 1 / (epsilon_mpl * (1 - sv[f's_cmpl_{nb_mpl}'])) * \
-                                              (J_O2['cmpl_cmpl'][nb_mpl - 1] - J_O2['cmpl_ctl']) / (Hmpl / nb_mpl)
-    #      Inside the CTL
-    if nb_tl == 2:
-        dif_eq['dC_O2_ctl_1 / dt'] = 1 / (epsilon_ctl[1] * (1 - sv['s_ctl_1'])) * \
-                                      (J_O2['cmpl_ctl'] - J_O2['ctl_ctl'][1]) / (Htl / nb_tl)
-        dif_eq['dC_O2_ctl_2 / dt'] = 1 / (epsilon_ctl[2] * (1 - sv['s_ctl_2'])) * \
-                                      (J_O2['ctl_ctl'][1] - J_O2['ctl_cgdl']) / (Htl / nb_tl)
-    else: # n_tl > 2
-        dif_eq['dC_O2_ctl_1 / dt'] = 1 / (epsilon_ctl[1] * (1 - sv['s_ctl_1'])) * \
-                                        (J_O2['cmpl_ctl'] - J_O2['ctl_ctl'][1]) / (Htl / nb_tl)
-        for i in range(2, nb_tl):
-            dif_eq[f'dC_O2_ctl_{i} / dt'] = 1 / (epsilon_ctl[i] * (1 - sv[f's_ctl_{i}'])) * \
-                                             (J_O2['ctl_ctl'][i - 1] - J_O2['ctl_ctl'][i]) / (Htl / nb_tl)
-        dif_eq[f'dC_O2_ctl_{nb_tl} / dt'] = 1 / (epsilon_ctl[nb_tl] * (1 - sv[f's_ctl_{nb_tl}'])) * \
-                                            (J_O2['ctl_ctl'][nb_tl - 1] - J_O2['ctl_cgdl']) / (Htl / nb_tl)
+                                              (J_O2['cmpl_cmpl'][nb_mpl - 1] - J_O2['cmpl_cgdl']) / (Hmpl / nb_mpl)
     #      Inside the CGDL
     J_O2_cgdl_cgc_avg = (sum(J_O2['cgdl_cgc'][1:nb_gc + 1]) / nb_gc) * (Wcgc * Lgc) / (Aact / nb_channel_in_gc)         # Average oxygen flow from the GDL to the gas channel. There is a surface reduction due to the presence of the ribs, which is taken into account here.
     if nb_gdl == 1:
-        dif_eq['dC_O2_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * (J_O2['ctl_cgdl'] - J_O2_cgdl_cgc_avg) / Hgdl
+        dif_eq['dC_O2_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * (J_O2['cmpl_cgdl'] - J_O2_cgdl_cgc_avg) / Hgdl
     elif nb_gdl == 2:
         dif_eq['dC_O2_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * \
-                                      (J_O2['ctl_cgdl'] - J_O2['cgdl_cgdl'][1]) / (Hgdl / nb_gdl)
+                                      (J_O2['cmpl_cgdl'] - J_O2['cgdl_cgdl'][1]) / (Hgdl / nb_gdl)
         dif_eq['dC_O2_cgdl_2 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_2'])) * \
                                       (J_O2['cgdl_cgdl'][1] - J_O2_cgdl_cgc_avg) / (Hgdl / nb_gdl)
     else:
         dif_eq['dC_O2_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * \
-                                      (J_O2['ctl_cgdl'] - J_O2['cgdl_cgdl'][1]) / (Hgdl / nb_gdl)
+                                      (J_O2['cmpl_cgdl'] - J_O2['cgdl_cgdl'][1]) / (Hgdl / nb_gdl)
         for i in range(2, nb_gdl):
             dif_eq[f'dC_O2_cgdl_{i} / dt'] = 1 / (epsilon_gdl * (1 - sv[f's_cgdl_{i}'])) * \
                                              (J_O2['cgdl_cgdl'][i - 1] - J_O2['cgdl_cgdl'][i]) / (Hgdl / nb_gdl)
@@ -530,8 +420,8 @@ def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lg
                                               (J_O2['cgdl_cgdl'][nb_gdl - 1] - J_O2_cgdl_cgc_avg) / (Hgdl / nb_gdl)
 
 
-def calculate_dyn_temperature_evolution_inside_MEA(dif_eq, Hgdl, Hmpl, Hacl, Hccl, Hmem, Htl, nb_gdl, nb_tl,
-                                                   nb_mpl, rho_Cp0, Jt, Q_r, Q_sorp, Q_liq, Q_p, Q_e, **kwargs):
+def calculate_dyn_temperature_evolution_inside_MEA(dif_eq, Hgdl, Hmpl, Hacl, Hccl, Hmem, nb_gdl, nb_mpl, rho_Cp0, Jt,
+                                                   Q_r, Q_sorp, Q_liq, Q_p, Q_e, **kwargs):
     """
     This function calculates the dynamic evolution of the temperature in the fuel cell.
 
@@ -551,12 +441,8 @@ def calculate_dyn_temperature_evolution_inside_MEA(dif_eq, Hgdl, Hmpl, Hacl, Hcc
         Thickness of the cathode catalyst layer, in m.
     Hmem : float
         Thickness of the membrane, in m.
-    Htl : float
-        Thickness of the transition layer, in m.
     nb_gdl : int
         Number of model nodes placed inside each GDL.
-    nb_tl : int
-        Number of model nodes placed inside the transition layer.
     nb_mpl : int
         Number of model nodes placed inside each MPL.
     Jt : dict
@@ -576,12 +462,12 @@ def calculate_dyn_temperature_evolution_inside_MEA(dif_eq, Hgdl, Hmpl, Hacl, Hcc
     # At the anode side
     #       Inside the AGDL
     if nb_gdl == 1:
-        dif_eq['dT_agdl_1 / dt'] = (1 / rho_Cp0['agdl_1']) * ( (Jt['agc_agdl'] - Jt['agdl_atl']) / Hgdl +
+        dif_eq['dT_agdl_1 / dt'] = (1 / rho_Cp0['agdl_1']) * ( (Jt['agc_agdl'] - Jt['agdl_ampl']) / Hgdl +
                                                                Q_liq['agdl_1'] + Q_e['agdl_1'] )
     elif nb_gdl == 2:
         dif_eq['dT_agdl_1 / dt'] = (1 / rho_Cp0['agdl_1']) * ((Jt['agc_agdl'] - Jt['agdl_agdl_1']) / (Hgdl / nb_gdl) +
                                                               Q_liq['agdl_1'] + Q_e['agdl_1'])
-        dif_eq['dT_agdl_2 / dt'] = (1 / rho_Cp0['agdl_2']) * ((Jt['agdl_agdl_1'] - Jt['agdl_atl']) / (Hgdl / nb_gdl) +
+        dif_eq['dT_agdl_2 / dt'] = (1 / rho_Cp0['agdl_2']) * ((Jt['agdl_agdl_1'] - Jt['agdl_ampl']) / (Hgdl / nb_gdl) +
                                                               Q_liq['agdl_2'] + Q_e['agdl_2'])
     else: # n_gdl > 2
         dif_eq['dT_agdl_1 / dt'] = (1 / rho_Cp0['agdl_1']) * ((Jt['agc_agdl'] - Jt['agdl_agdl_1']) / (Hgdl / nb_gdl) +
@@ -591,35 +477,19 @@ def calculate_dyn_temperature_evolution_inside_MEA(dif_eq, Hgdl, Hmpl, Hacl, Hcc
                                           ((Jt[f'agdl_agdl_{i - 1}'] - Jt[f'agdl_agdl_{i}']) / (Hgdl / nb_gdl) +
                                            Q_liq[f'agdl_{i}'] + Q_e[f'agdl_{i}'])
         dif_eq[f'dT_agdl_{nb_gdl} / dt'] = (1 / rho_Cp0[f'agdl_{nb_gdl}']) * \
-                                           ((Jt[f'agdl_agdl_{nb_gdl - 1}'] - Jt['agdl_atl']) / (Hgdl / nb_gdl) +
+                                           ((Jt[f'agdl_agdl_{nb_gdl - 1}'] - Jt['agdl_ampl']) / (Hgdl / nb_gdl) +
                                             Q_liq[f'agdl_{nb_gdl}'] + Q_e[f'agdl_{nb_gdl}'])
-    #       Inside the ATL
-    if nb_tl == 2:
-        dif_eq['dT_atl_1 / dt'] = (1 / rho_Cp0['atl_1']) * ((Jt['agdl_atl'] - Jt['atl_atl_1']) / (Htl / nb_tl) +
-                                                            Q_liq['atl_1'] + Q_e['atl_1'])
-        dif_eq['dT_atl_2 / dt'] = (1 / rho_Cp0['atl_2']) * ((Jt['atl_atl_1'] - Jt['atl_ampl']) / (Htl / nb_tl) +
-                                                            Q_liq['atl_2'] + Q_e['atl_2'])
-    else: # n_tl > 2
-        dif_eq['dT_atl_1 / dt'] = (1 / rho_Cp0['atl_1']) * ((Jt['agdl_atl'] - Jt['atl_atl_1']) / (Htl / nb_tl) +
-                                                            Q_liq['atl_1'] + Q_e['atl_1'])
-        for i in range(2, nb_tl):
-            dif_eq[f'dT_atl_{i} / dt'] = (1 / rho_Cp0[f'atl_{i}']) * \
-                                          ((Jt[f'atl_atl_{i - 1}'] - Jt[f'atl_atl_{i}']) / (Htl / nb_tl) +
-                                           Q_liq[f'atl_{i}'] + Q_e[f'atl_{i}'])
-        dif_eq[f'dT_atl_{nb_tl} / dt'] = (1 / rho_Cp0[f'atl_{nb_tl}']) * \
-                                         ((Jt[f'atl_atl_{nb_tl - 1}'] - Jt['atl_ampl']) / (Htl / nb_tl) +
-                                          Q_liq[f'atl_{nb_tl}'] + Q_e[f'atl_{nb_tl}'])
     #      Inside the AMPL
     if nb_mpl == 1:
-        dif_eq['dT_ampl_1 / dt'] = (1 / rho_Cp0['ampl_1']) * ( (Jt['atl_ampl'] - Jt['ampl_acl']) / Hmpl +
+        dif_eq['dT_ampl_1 / dt'] = (1 / rho_Cp0['ampl_1']) * ( (Jt['agdl_ampl'] - Jt['ampl_acl']) / Hmpl +
                                                              Q_liq['ampl_1'] + Q_e['ampl_1'] )
     elif nb_mpl == 2:
-        dif_eq['dT_ampl_1 / dt'] = (1 / rho_Cp0['ampl_1']) * ((Jt['atl_ampl'] - Jt['ampl_ampl_1']) / (Hmpl / nb_mpl) +
+        dif_eq['dT_ampl_1 / dt'] = (1 / rho_Cp0['ampl_1']) * ((Jt['agdl_ampl'] - Jt['ampl_ampl_1']) / (Hmpl / nb_mpl) +
                                                               Q_liq['ampl_1'] + Q_e['ampl_1'])
         dif_eq['dT_ampl_2 / dt'] = (1 / rho_Cp0['ampl_2']) * ((Jt['ampl_ampl_1'] - Jt['ampl_acl']) / (Hmpl / nb_mpl) +
                                                               Q_liq['ampl_2'] + Q_e['ampl_2'])
     else: # n_mpl > 2
-        dif_eq['dT_ampl_1 / dt'] = (1 / rho_Cp0['ampl_1']) * ((Jt['atl_ampl'] - Jt['ampl_ampl_1']) / (Hmpl / nb_mpl) +
+        dif_eq['dT_ampl_1 / dt'] = (1 / rho_Cp0['ampl_1']) * ((Jt['agdl_ampl'] - Jt['ampl_ampl_1']) / (Hmpl / nb_mpl) +
                                                               Q_liq['ampl_1'] + Q_e['ampl_1'])
         for i in range(2, nb_mpl):
             dif_eq[f'dT_ampl_{i} / dt'] = (1 / rho_Cp0[f'ampl_{i}']) * \
@@ -644,14 +514,14 @@ def calculate_dyn_temperature_evolution_inside_MEA(dif_eq, Hgdl, Hmpl, Hacl, Hcc
                               Q_r['ccl'] + Q_sorp['ccl'] + Q_liq['ccl'] + Q_p['ccl'] + Q_e['ccl'] )
     #      Inside the CMPL
     if nb_mpl == 1:
-        dif_eq['dT_cmpl_1 / dt'] = (1 / rho_Cp0['cmpl_1']) * ((Jt['ccl_cmpl'] - Jt['cmpl_ctl']) / Hmpl +
+        dif_eq['dT_cmpl_1 / dt'] = (1 / rho_Cp0['cmpl_1']) * ((Jt['ccl_cmpl'] - Jt['cmpl_cgdl']) / Hmpl +
                                                               Q_liq['cmpl_1'] + Q_e['cmpl_1'])
     elif nb_mpl == 2:
         dif_eq['dT_cmpl_1 / dt'] = (1 / rho_Cp0['cmpl_1']) * \
                                    ((Jt['ccl_cmpl'] - Jt['cmpl_cmpl_1']) / (Hmpl / nb_mpl) +
                                     Q_liq['cmpl_1'] + Q_e['cmpl_1'])
         dif_eq['dT_cmpl_2 / dt'] = (1 / rho_Cp0['cmpl_2']) * \
-                                   ((Jt['cmpl_cmpl_1'] - Jt['cmpl_ctl']) / (Hmpl / nb_mpl) +
+                                   ((Jt['cmpl_cmpl_1'] - Jt['cmpl_cgdl']) / (Hmpl / nb_mpl) +
                                     Q_liq['cmpl_2'] + Q_e['cmpl_2'])
     else: # n_mpl > 2
         dif_eq['dT_cmpl_1 / dt'] = (1 / rho_Cp0['cmpl_1']) * \
@@ -662,38 +532,22 @@ def calculate_dyn_temperature_evolution_inside_MEA(dif_eq, Hgdl, Hmpl, Hacl, Hcc
                                           ((Jt[f'cmpl_cmpl_{i - 1}'] - Jt[f'cmpl_cmpl_{i}']) / (Hmpl / nb_mpl) +
                                            Q_liq[f'cmpl_{i}'] + Q_e[f'cmpl_{i}'])
         dif_eq[f'dT_cmpl_{nb_mpl} / dt'] = (1 / rho_Cp0[f'cmpl_{nb_mpl}']) * \
-                                           ((Jt[f'cmpl_cmpl_{nb_mpl - 1}'] - Jt['cmpl_ctl']) / (Hmpl / nb_mpl) +
+                                           ((Jt[f'cmpl_cmpl_{nb_mpl - 1}'] - Jt['cmpl_cgdl']) / (Hmpl / nb_mpl) +
                                             Q_liq[f'cmpl_{nb_mpl}'] + Q_e[f'cmpl_{nb_mpl}'])
-    #       Inside the CTL
-    if nb_tl == 2:
-        dif_eq['dT_ctl_1 / dt'] = (1 / rho_Cp0['ctl_1']) * ((Jt['cmpl_ctl'] - Jt['ctl_ctl_1']) / (Htl / nb_tl) +
-                                                            Q_liq['ctl_1'] + Q_e['ctl_1'])
-        dif_eq['dT_ctl_2 / dt'] = (1 / rho_Cp0['ctl_2']) * ((Jt['ctl_ctl_1'] - Jt['ctl_cgdl']) / (Htl / nb_tl) +
-                                                            Q_liq['ctl_2'] + Q_e['ctl_2'])
-    else: # n_tl > 2
-        dif_eq['dT_ctl_1 / dt'] = (1 / rho_Cp0['ctl_1']) * ((Jt['cmpl_ctl'] - Jt['ctl_ctl_1']) / (Htl / nb_tl) +
-                                                            Q_liq['ctl_1'] + Q_e['ctl_1'])
-        for i in range(2, nb_tl):
-            dif_eq[f'dT_ctl_{i} / dt'] = (1 / rho_Cp0[f'ctl_{i}']) * \
-                                          ((Jt[f'ctl_ctl_{i - 1}'] - Jt[f'ctl_ctl_{i}']) / (Htl / nb_tl) +
-                                           Q_liq[f'ctl_{i}'] + Q_e[f'ctl_{i}'])
-        dif_eq[f'dT_ctl_{nb_tl} / dt'] = (1 / rho_Cp0[f'ctl_{nb_tl}']) * \
-                                         ((Jt[f'ctl_ctl_{nb_tl - 1}'] - Jt['ctl_cgdl']) / (Htl / nb_tl) +
-                                          Q_liq[f'ctl_{nb_tl}'] + Q_e[f'ctl_{nb_tl}'])
     #       Inside the CGDL
     if nb_gdl == 1:
-        dif_eq['dT_cgdl_1 / dt'] = (1 / rho_Cp0['cgdl_1']) * ( (Jt['ctl_cgdl'] - Jt['cgdl_cgc']) / Hgdl +
+        dif_eq['dT_cgdl_1 / dt'] = (1 / rho_Cp0['cgdl_1']) * ( (Jt['cmpl_cgdl'] - Jt['cgdl_cgc']) / Hgdl +
                                                                Q_liq['cgdl_1'] + Q_e['cgdl_1'] )
     elif nb_gdl == 2:
         dif_eq['dT_cgdl_1 / dt'] = (1 / rho_Cp0['cgdl_1']) * \
-                                   ((Jt['ctl_cgdl'] - Jt['cgdl_cgdl_1']) / (Hgdl / nb_gdl) +
+                                   ((Jt['cmpl_cgdl'] - Jt['cgdl_cgdl_1']) / (Hgdl / nb_gdl) +
                                     Q_liq['cgdl_1'] + Q_e['cgdl_1'])
         dif_eq['dT_cgdl_2 / dt'] = (1 / rho_Cp0['cgdl_2']) * \
                                    ((Jt['cgdl_cgdl_1'] - Jt['cgdl_cgc']) / (Hgdl / nb_gdl) +
                                     Q_liq['cgdl_2'] + Q_e['cgdl_2'])
     else: # n_gdl > 2
         dif_eq['dT_cgdl_1 / dt'] = (1 / rho_Cp0['cgdl_1']) * \
-                                   ((Jt['ctl_cgdl'] - Jt['cgdl_cgdl_1']) / (Hgdl / nb_gdl) +
+                                   ((Jt['cmpl_cgdl'] - Jt['cgdl_cgdl_1']) / (Hgdl / nb_gdl) +
                                     Q_liq['cgdl_1'] + Q_e['cgdl_1'])
         for i in range(2, nb_gdl):
             dif_eq[f'dT_cgdl_{i} / dt'] = (1 / rho_Cp0[f'cgdl_{i}']) * \

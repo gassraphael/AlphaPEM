@@ -13,7 +13,7 @@ from modules.transitory_functions import average, Psat, C_v_sat, mu_mixture_gase
 
 # ____________________________________________Differential equations modules____________________________________________
 
-def calculate_dif_eq_int_values(t, sv, control_variables, i_fc, operating_inputs, parameters):
+def calculate_dif_eq_int_values(t, sv, control_variables, operating_inputs, parameters):
     """This functions calculates intermediate values for the calculation of the differential equations
 
         Parameters
@@ -23,20 +23,12 @@ def calculate_dif_eq_int_values(t, sv, control_variables, i_fc, operating_inputs
         sv : dict
             Variables calculated by the solver. They correspond to the fuel cell internal states.
             sv is a contraction of solver_variables for enhanced readability.
+        control_variables : dict
+            Variables controlled by the user.
         operating_inputs : dict
             Operating inputs of the fuel cell.
         parameters : dict
             Parameters of the fuel cell model.
-        Wasm_ext_to_in : float
-            Mass flow entering inside the anode supply manifold (kg.s-1).
-        Wcsm_ext_to_in : float
-            Mass flow entering inside the cathode supply manifold (kg.s-1).
-        Ware : float
-            Mass flow inside the anode recirculation loop (kg.s-1).
-        Ja_in : float
-            Molar flow entering inside the anode gas channel (mol.m-2.s-1).
-        Jc_in : float
-            Molar flow entering inside the cathode gas channel (mol.m-2.s-1).
 
         Returns
         -------
@@ -74,8 +66,7 @@ def calculate_dif_eq_int_values(t, sv, control_variables, i_fc, operating_inputs
     Hmem, Hacl, Hccl = parameters['Hmem'], parameters['Hacl'], parameters['Hccl']
     epsilon_gdl, epsilon_cl = parameters['epsilon_gdl'], parameters['epsilon_cl']
     epsilon_mpl, kappa_co, epsilon_mc = parameters['epsilon_mpl'], parameters['kappa_co'], parameters['epsilon_mc']
-    epsilon_atl, epsilon_ctl = parameters['epsilon_atl'], parameters['epsilon_ctl']
-    Htl, nb_gc, nb_gdl, nb_mpl, nb_tl = parameters['Htl'], parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl'], parameters['nb_tl']
+    nb_gc, nb_gdl, nb_mpl = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl']
     t_purge, type_auxiliary, type_purge = parameters['t_purge'], parameters['type_auxiliary'], parameters['type_purge']
 
     # Calculation of intermediate values
@@ -151,10 +142,6 @@ def calculate_dif_eq_int_values(t, sv, control_variables, i_fc, operating_inputs
         **{f'agdl_{i}': calculate_rho_Cp0('agdl', sv[f'T_agdl_{i}'], C_v=sv[f'C_v_agdl_{i}'],
                                           s=sv[f's_agdl_{i}'], C_H2=sv[f'C_H2_agdl_{i}'], C_N2=C_N2_a_mean, epsilon=epsilon_gdl)
            for i in range(1, nb_gdl + 1)},
-        **{f'atl_{i}': calculate_rho_Cp0('atl', sv[f'T_atl_{i}'], C_v=sv[f'C_v_atl_{i}'], s=sv[f's_atl_{i}'],
-                                         C_H2=sv[f'C_H2_atl_{i}'], C_N2=C_N2_a_mean, epsilon=epsilon_atl[i], n_tl=nb_tl,
-                                         Htl=Htl, node=i)
-           for i in range(1, nb_tl + 1)},
         **{f'ampl_{i}': calculate_rho_Cp0('ampl', sv[f'T_ampl_{i}'], C_v=sv[f'C_v_ampl_{i}'],
                                           s=sv[f's_ampl_{i}'], C_H2=sv[f'C_H2_ampl_{i}'], C_N2=C_N2_a_mean, epsilon=epsilon_mpl)
            for i in range(1, nb_mpl + 1)},
@@ -166,10 +153,6 @@ def calculate_dif_eq_int_values(t, sv, control_variables, i_fc, operating_inputs
         **{f'cmpl_{i}': calculate_rho_Cp0('cmpl', sv[f'T_cmpl_{i}'], C_v=sv[f'C_v_cmpl_{i}'],
                                           s=sv[f's_cmpl_{i}'], C_O2=sv[f'C_O2_cmpl_{i}'], C_N2=C_N2_c_mean, epsilon=epsilon_mpl)
            for i in range(1, nb_mpl + 1)},
-        **{f'ctl_{i}': calculate_rho_Cp0('ctl', sv[f'T_ctl_{i}'], C_v=sv[f'C_v_ctl_{i}'], s=sv[f's_ctl_{i}'],
-                                         C_O2=sv[f'C_O2_ctl_{i}'], C_N2=C_N2_c_mean, epsilon=epsilon_ctl[i], n_tl=nb_tl,
-                                         Htl=Htl, node=i)
-           for i in range(1, nb_tl + 1)},
         **{f'cgdl_{i}': calculate_rho_Cp0('cgdl', sv[f'T_cgdl_{i}'], C_v=sv[f'C_v_cgdl_{i}'],
                                           s=sv[f's_cgdl_{i}'], C_O2=sv[f'C_O2_cgdl_{i}'], C_N2=C_N2_c_mean, epsilon=epsilon_gdl)
            for i in range(1, nb_gdl + 1)}

@@ -203,13 +203,11 @@ def main_frame(root, canvas):
          'Number of GDL nodes - nb_gdl': {'value': tk.IntVar(computing_parameters_frame, 5),
                                          'label_row': 1, 'label_column': 3},
          'Number of MPL nodes - nb_mpl': {'value': tk.IntVar(computing_parameters_frame, 5),
-                                         'label_row': 2, 'label_column': 1},
-         'Number of TL nodes - nb_tl': {'value': tk.IntVar(computing_parameters_frame, 4),
-                                         'label_row': 2, 'label_column': 3},
+                                         'label_row': 1, 'label_column': 5},
          'Solver relative tolerance - rtol': {'value': tk.DoubleVar(computing_parameters_frame, 1e-5),
-                                         'label_row': 3, 'label_column': 1},
+                                         'label_row': 2, 'label_column': 1},
          'Solver absolute tolerance - atol': {'value': tk.DoubleVar(computing_parameters_frame, 1e-8),
-                                         'label_row': 3, 'label_column': 3}
+                                         'label_row': 2, 'label_column': 3}
          }
 
     choice_buttons = \

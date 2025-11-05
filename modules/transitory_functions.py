@@ -130,8 +130,6 @@ def d_dx(y_minus, y_plus, dx = None, dx_minus = None, dx_plus = None):
     ----------
     y_minus : float
         Value at the left point (i-1).
-    y_0 : float
-        Value at the central point (i).
     y_plus : float
         Value at the right point (i+1).
     dx : float
@@ -339,7 +337,7 @@ def C_v_sat(T):
     return Psat(T) / (R * T)
 
 
-def Dcap(element, s, T, epsilon, e, epsilon_c=None, n_tl=None, Htl=None, node=None):
+def Dcap(element, s, T, epsilon, e, epsilon_c=None):
     """ This function calculates the capillary coefficient at the GDL or the CL and at the anode, in kg.m.s-1,
     considering GDL compression.
 
@@ -360,14 +358,9 @@ def Dcap(element, s, T, epsilon, e, epsilon_c=None, n_tl=None, Htl=None, node=No
         Compression ratio of the GDL.
     """
 
-    K0_value = K0(element, epsilon, epsilon_c, n_tl, Htl, node)
+    K0_value = K0(element, epsilon, epsilon_c)
     if element == 'gdl':
         theta_c_value = theta_c_gdl
-    elif element in ('atl', 'ctl'):
-        if element == 'atl':
-            theta_c_value = calculate_transition_layer_parameter(theta_c_gdl, theta_c_mpl, n_tl, Htl, node)
-        else: # element == 'ctl'
-            theta_c_value = calculate_transition_layer_parameter(theta_c_mpl, theta_c_gdl, n_tl, Htl, node)
     elif element == 'mpl':
         theta_c_value = theta_c_mpl
     elif element == 'cl':
@@ -415,7 +408,7 @@ def Dc(P, T):
     return 3.242e-5 * (T / 333) ** 2.334 * (101325 / P)
 
 
-def Da_eff(element, s, T, P, epsilon, epsilon_c=None, n_tl=None, Htl=None, node=None):
+def Da_eff(element, s, T, P, epsilon, epsilon_c=None):
     """This function calculates the effective diffusion coefficient at the GDL, TL, MPL or the CL and at the anode,
      in m².s-1, considering GDL compression.
 
@@ -434,12 +427,6 @@ def Da_eff(element, s, T, P, epsilon, epsilon_c=None, n_tl=None, Htl=None, node=
         Porosity.
     epsilon_c : float, optional
         Compression ratio of the GDL.
-    n_tl : float, optional
-        Number of elements in the transition layer.
-    Htl : float, optional
-        Thickness of the transition layer in m.
-    node : int, optional
-        Node number in the transition layer.
 
     Returns
     -------
@@ -456,17 +443,6 @@ def Da_eff(element, s, T, P, epsilon, epsilon_c=None, n_tl=None, Htl=None, node=
         tau_gdl = 1 / (((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p)
         return epsilon / tau_gdl * math.exp(beta2 * epsilon_c) * (1 - s) ** r_s_gdl * Da(P, T)
 
-    elif element == 'tl':
-        # According to the GDL porosity, the GDL compression effect is different.
-        if epsilon < 0.67:
-            beta2 = -1.59
-        else:
-            beta2 = -0.90
-        tau_gdl_eff = 1 / (((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p * math.exp(beta2 * epsilon_c))
-        tau_atl = calculate_transition_layer_parameter(tau_gdl_eff, tau_mpl, n_tl, Htl, node)
-        r_s_atl = calculate_transition_layer_parameter(r_s_gdl, r_s_mpl, n_tl, Htl, node)
-        return epsilon / tau_atl * (1 - s) ** r_s_atl * Da(P, T)
-
     elif element == 'mpl': # The effective diffusion coefficient at the MPL using Bruggeman model.
         return epsilon / tau_mpl * (1 - s) ** r_s_mpl * Da(P, T)
 
@@ -478,7 +454,7 @@ def Da_eff(element, s, T, P, epsilon, epsilon_c=None, n_tl=None, Htl=None, node=
 
 
 
-def Dc_eff(element, s, T, P, epsilon, epsilon_c=None, n_tl=None, Htl=None, node=None):
+def Dc_eff(element, s, T, P, epsilon, epsilon_c=None):
     """This function calculates the effective diffusion coefficient at the GDL, MPL, TL or the CL and at the cathode,
      in m².s-1, considering GDL compression.
 
@@ -497,12 +473,6 @@ def Dc_eff(element, s, T, P, epsilon, epsilon_c=None, n_tl=None, Htl=None, node=
         Porosity.
     epsilon_c : float, optional
         Compression ratio of the GDL.
-    n_tl : float, optional
-        Number of elements in the transition layer.
-    Htl : float, optional
-        Thickness of the transition layer in m.
-    node : int, optional
-        Node number in the transition layer.
 
     Returns
     -------
@@ -518,17 +488,6 @@ def Dc_eff(element, s, T, P, epsilon, epsilon_c=None, n_tl=None, Htl=None, node=
             beta2 = -0.90
         tau_gdl = 1 / (((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p)
         return epsilon / tau_gdl * math.exp(beta2 * epsilon_c) * (1 - s) ** r_s_gdl * Dc(P, T)
-
-    elif element == 'tl':
-        # According to the GDL porosity, the GDL compression effect is different.
-        if epsilon < 0.67:
-            beta2 = -1.59
-        else:
-            beta2 = -0.90
-        tau_gdl_eff = 1 / (((epsilon - epsilon_p) / (1 - epsilon_p)) ** alpha_p * math.exp(beta2 * epsilon_c))
-        tau_ctl = calculate_transition_layer_parameter(tau_mpl, tau_gdl_eff, n_tl, Htl, node)
-        r_s_ctl = calculate_transition_layer_parameter(r_s_mpl, r_s_gdl, n_tl, Htl, node)
-        return epsilon / tau_ctl * (1 - s) ** r_s_ctl * Dc(P, T)
 
     elif element == 'mpl': # The effective diffusion coefficient at the MPL using Bruggeman model.
         return epsilon / tau_mpl * (1 - s) ** r_s_mpl * Dc(P, T)
@@ -723,10 +682,6 @@ def Svl(element, s, C_v, Ctot, T, epsilon):
         Temperature in K.
     epsilon : float
         Porosity.
-    gamma_cond : float
-        Overall condensation rate constant for water in s-1.
-    gamma_evap : float
-        Overall evaporation rate constant for water in Pa-1.s-1.
 
     Returns
     -------
@@ -767,7 +722,7 @@ def sigma(T):
 
 
 @lru_cache(maxsize=None) # Cache the results to optimize performance
-def K0(element, epsilon, epsilon_c=None, n_tl=None, Htl=None, node=None):
+def K0(element, epsilon, epsilon_c=None):
     """This function calculates the intrinsic permeability, in m², considering GDL compression.
 
     Parameters
@@ -779,12 +734,6 @@ def K0(element, epsilon, epsilon_c=None, n_tl=None, Htl=None, node=None):
         Porosity.
     epsilon_c : float, optional
         Compression ratio of the GDL.
-    n_tl : float, optional
-        Number of elements in the transition layer.
-    Htl : float, optional
-        Thickness of the transition layer in m.
-    node : int, optional
-        Node number in the transition layer.
 
     Returns
     -------
@@ -808,12 +757,6 @@ def K0(element, epsilon, epsilon_c=None, n_tl=None, Htl=None, node=None):
         return epsilon / (8 * math.log(epsilon) ** 2) * (epsilon - epsilon_p) ** (alpha_p + 2) * \
             4.6e-6 ** 2 / ((1 - epsilon_p) ** alpha_p * ((alpha_p + 1) * epsilon - epsilon_p) ** 2) * math.exp(beta1 * epsilon_c)
 
-    elif element in ('atl', 'ctl'):
-        if element == 'atl':
-            return calculate_transition_layer_parameter(K0('gdl', epsilon, epsilon_c), K0('mpl', epsilon), n_tl, Htl, node)
-        else: # element == 'ctl'
-            return calculate_transition_layer_parameter(K0('mpl', epsilon), K0('gdl', epsilon, epsilon_c), n_tl, Htl, node)
-
     elif element == 'mpl':
         return (Dp_mpl**2 / 150) * (epsilon**3 / ((1-epsilon)**2)) # Using the Blake-Kozeny equation
 
@@ -821,7 +764,7 @@ def K0(element, epsilon, epsilon_c=None, n_tl=None, Htl=None, node=None):
         return (Dp_cl**2 / 150) * (epsilon**3 / ((1-epsilon)**2)) # Using the Blake-Kozeny equation
 
     else:
-        raise ValueError("The element should be either 'gdl', 'atl', 'ctl', 'mpl' or 'cl'.")
+        raise ValueError("The element should be either 'gdl', 'mpl' or 'cl'.")
 
 
 def k_H2(lambdaa, T, kappa_co):
@@ -921,7 +864,7 @@ def sigma_p_eff(element, lambdaa, T, epsilon_mc=None):
 
 
 @lru_cache(maxsize=None) # Cache the results to optimize performance
-def sigma_e_eff(element, epsilon, epsilon_c=None, epsilon_mc=None, n_tl=None, Htl=None, node=None):
+def sigma_e_eff(element, epsilon, epsilon_c=None, epsilon_mc=None):
     """This function calculates the effective electrical conductivity, in Ω-1.m-1, in either the GDL, the MPL or the CL,
     considering GDL compression.
 
@@ -936,12 +879,6 @@ def sigma_e_eff(element, epsilon, epsilon_c=None, epsilon_mc=None, n_tl=None, Ht
         Compression ratio of the GDL.
     epsilon_mc : float, optional
         Volume fraction of ionomer in the CL.
-    n_tl : float, optional
-        Number of elements in the transition layer.
-    Htl : float, optional
-        Thickness of the transition layer in m.
-    node : int, optional
-        Node number in the transition layer.
 
     Returns
     -------
@@ -955,20 +892,6 @@ def sigma_e_eff(element, epsilon, epsilon_c=None, epsilon_mc=None, n_tl=None, Ht
         else:
             beta3 = 4.40
         return (1 - epsilon) * sigma_e_gdl * math.exp(beta3 * epsilon_c) # Using the volume fraction of conductive material.
-
-    elif element in ('atl', 'ctl'):
-        # According to the GDL porosity, the GDL compression effect is different.
-        if epsilon < 0.67:
-            beta3 = 4.04
-        else:
-            beta3 = 4.40
-        sigma_e_gdl_eff = sigma_e_gdl * math.exp(beta3 * epsilon_c)
-        if element == 'atl':
-            sigma_e_tl = calculate_transition_layer_parameter(sigma_e_gdl_eff, sigma_e_mpl, n_tl, Htl, node)
-        else: # element == 'ctl'
-            sigma_e_tl = calculate_transition_layer_parameter(sigma_e_mpl, sigma_e_gdl_eff, n_tl, Htl, node)
-        return (1 - epsilon) * sigma_e_tl  # Using the volume fraction of conductive material.
-
 
     elif element == 'mpl': # The effective electrical conductivity at the MPL
         return (1 - epsilon) * sigma_e_mpl # Using the volume fraction of conductive material.
@@ -1075,7 +998,7 @@ def k_th_gaz_mixture(k_th_g, mu_g, x, M):
 
 
 def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C_N2=None, epsilon=None, epsilon_mc=None,
-             epsilon_c=None, n_tl=None, Htl=None, node=None):
+             epsilon_c=None):
     """This function calculates the effective thermal conductivity, in J.m-1.s-1.K-1, in either the GDL, the MPL, the CL
     or the membrane. A weighted harmonic average is used for characterizing the conductivity of each material in a layer,
     instead of a weighted arithmetic average. The physical meaning is that all the heat energy is forced to pass through
@@ -1108,12 +1031,6 @@ def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C
         Volume fraction of ionomer in the CL.
     epsilon_c : float
         Compression ratio of the GDL.
-    n_tl : float
-        Number of elements in the transition layer.
-    Htl : float
-        Thickness of the transition layer in m.
-    node : int
-        Node number in the transition layer.
 
     Returns
     -------
@@ -1142,30 +1059,6 @@ def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C
                                         [M_H2O, M_O2, M_N2])
         return hmean([k_th_gdl * math.exp(beta3 * epsilon_c), k_th('H2O_l', T), k_th_gaz],
                      weights=[1 - epsilon, epsilon * s, epsilon * (1 - s)])
-
-    elif element in ('atl', 'ctl'): # The effective thermal conductivity at the transition layer
-        if epsilon < 0.67:
-            beta3 = 4.04
-        else:
-            beta3 = 4.40
-        k_th_gdl_eff = k_th_gdl * math.exp(beta3 * epsilon_c)
-        if element == 'atl':
-            sum_C_v_C_H2_C_N2 = C_v + C_H2 + C_N2
-            x_v, x_h2, x_n2 = C_v / sum_C_v_C_H2_C_N2, C_H2 / sum_C_v_C_H2_C_N2, C_N2 / sum_C_v_C_H2_C_N2
-            k_th_gaz = k_th_gaz_mixture([k_th('H2O_v', T), k_th('H2', T), k_th('N2', T)],
-                                        [mu_gaz('H2O_v', T), mu_gaz('H2', T), mu_gaz('N2', T)],
-                                        [x_v, x_h2, x_n2],
-                                        [M_H2O, M_H2, M_N2])
-            k_th_tl = calculate_transition_layer_parameter(k_th_gdl_eff, k_th_mpl, n_tl, Htl, node)
-        else: # element == 'ctl'
-            sum_C_v_C_O2_C_N2 = C_v + C_O2 + C_N2
-            x_v, x_o2, x_n2 = C_v / sum_C_v_C_O2_C_N2, C_O2 / sum_C_v_C_O2_C_N2, C_N2 / sum_C_v_C_O2_C_N2
-            k_th_gaz = k_th_gaz_mixture([k_th('H2O_v', T), k_th('O2', T), k_th('N2', T)],
-                                        [mu_gaz('H2O_v', T), mu_gaz('O2', T), mu_gaz('N2', T)],
-                                        [x_v, x_o2, x_n2],
-                                        [M_H2O, M_O2, M_N2])
-            k_th_tl = calculate_transition_layer_parameter(k_th_mpl, k_th_gdl_eff, n_tl, Htl, node)
-        return hmean([k_th_tl, k_th('H2O_l', T), k_th_gaz], weights=[1 - epsilon, epsilon * s, epsilon * (1 - s)])
 
     elif element in ('ampl', 'cmpl'): # The effective thermal conductivity at the GDL
         if element == 'ampl': # The thermal conductivity of the gas mixture in the AGDL
@@ -1212,8 +1105,7 @@ def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C
                      weights=[1 - fv_val, fv_val])
 
     else:
-        raise ValueError("The element should be either 'agdl', 'cgdl', 'atl', 'ctl', 'ampl', 'cmpl', 'acl', 'ccl' or "
-                         "'mem'.")
+        raise ValueError("The element should be either 'agdl', 'cgdl', 'ampl', 'cmpl', 'acl', 'ccl' or 'mem'.")
 
 
 def Cp0(component, T):
@@ -1286,7 +1178,7 @@ def h0(component, T):
 
 
 def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C_N2=None, epsilon=None,
-                      epsilon_mc=None, n_tl=None, Htl=None, node=None):
+                      epsilon_mc=None):
     """This function calculates the volumetric heat capacity, in J.m-3.K-1, in either the GDL, the MPL, the CL or
     the membrane.
 
@@ -1314,20 +1206,14 @@ def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O
         Porosity.
     epsilon_mc : float
         Volume fraction of ionomer in the CL.
-    n_tl : int
-        Number of nodes in the transition layer.
-    Htl : float
-        Thickness of the transition layer in m.
-    node : int
-        Current node in the transition layer (from 1 to n_tl).
 
     Returns
     -------
     float
         Volumetric heat capacity in J.m-3.K-1."""
 
-    if element in ('agdl', 'cgdl', 'atl', 'ctl', 'ampl', 'cmpl'):  # The volumetric heat capacity at the GDL
-        if element in ('agdl', 'atl', 'ampl'):  # In the anode
+    if element in ('agdl', 'cgdl', 'ampl', 'cmpl'):  # The volumetric heat capacity at the GDL
+        if element in ('agdl', 'ampl'):  # In the anode
             sum_C_v_C_H2_C_N2 = C_v + C_H2 + C_N2
             rho_Cp0_gaz = average([M_H2O * C_v * Cp0('H2O_v', T), M_H2 * C_H2 * Cp0('H2', T),
                                      M_N2 * C_N2 * Cp0('N2', T)],
@@ -1340,15 +1226,6 @@ def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O
         if element in ('agdl', 'cgdl'): # In the GDLs
             return average([rho_gdl * Cp_gdl, rho_H2O_l(T) * Cp0('H2O_l', T), rho_Cp0_gaz],
                             weights=[1 - epsilon, epsilon * s, epsilon * (1 - s)])
-        elif element in ('atl', 'ctl'): # In the transition layers
-            if element == 'atl':
-                rho_tl = calculate_transition_layer_parameter(rho_gdl, rho_mpl, n_tl, Htl, node)
-                Cp_tl = calculate_transition_layer_parameter(Cp_gdl, Cp_mpl, n_tl, Htl, node)
-            else: # element == 'ctl'
-                rho_tl = calculate_transition_layer_parameter(rho_mpl, rho_gdl, n_tl, Htl, node)
-                Cp_tl = calculate_transition_layer_parameter(Cp_mpl, Cp_gdl, n_tl, Htl, node)
-            return average([rho_tl * Cp_tl, rho_H2O_l(T) * Cp0('H2O_l', T), rho_Cp0_gaz],
-                           weights=[1 - epsilon, epsilon * s, epsilon * (1 - s)])
         else: # In the MPLs
             return average([rho_mpl * Cp_mpl, rho_H2O_l(T) * Cp0('H2O_l', T), rho_Cp0_gaz],
                            weights=[1 - epsilon, epsilon * s, epsilon * (1 - s)])
@@ -1418,43 +1295,3 @@ def delta_h_abs(T):
     """
 
     return delta_h_liq(T)
-
-
-def calculate_transition_layer_parameter(parameter_left, parameter_right, n_tl, Htl, node = None):
-    """This function calculates a smoothed parameter value at a given position using a hyperbolic tangent
-    transition function. This is useful for modeling interfaces between different materials.
-
-    Parameters
-    ----------
-    parameter_left : float
-        Parameter value before the interface (left side).
-    parameter_right : float
-        Parameter value after the interface (right side).
-    n_tl : int
-        Number of transition layers.
-    Htl : float
-        Total thickness of the transition layers.
-    node : int, optional
-        Specific node position to calculate the parameter for (1 to n_tl). If None, returns values for all nodes.
-
-    Returns
-    -------
-    parameter : float or ndarray
-        Smoothed parameter value(s) at positions x.
-    """
-    x_interface = Htl / 2  # position of the interface
-    delta = Htl / 5  # controls the steepness of the transition
-
-    if node is not None:
-        if not isinstance(node, int) or not (1 <= node <= n_tl):
-            raise ValueError("node has to be an integer between 1 and n_tl.")
-        x = (node - 0.5) * (Htl / n_tl)
-        parameter_tl =  parameter_left + \
-                        0.5 * (parameter_right - parameter_left) * (1.0 + math.tanh((x - x_interface) / delta))
-    else:
-        parameter_tl = [None] * (n_tl + 1)
-        for i in range(1, n_tl + 1):
-            x = (i - 0.5) * (Htl / n_tl)  # position du centre du noeud
-            parameter_tl[i] = parameter_left + \
-                              0.5 * (parameter_right - parameter_left) * (1.0 + math.tanh((x - x_interface) / delta))
-    return parameter_tl

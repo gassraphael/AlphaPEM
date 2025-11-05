@@ -42,7 +42,7 @@ To install **AlphaPEM**, follow these steps in a shell:
 - V1.2 - in progress - This version of AlphaPEM includes: 
 	- the addition of convective flow between the inlet, gas channels, and outlet of the cell, thereby removing the Pukrushpan equations (from Michigan University).
 		- auxiliary considerations are temporarily removed, as they require reconstruction. 
-	- the addition of the MPL to the simulated cell, in both the anode and cathode. To ensure good numerical stability, a transition layer between each GDL and MPL is also included.
+	- the addition of the MPL to the simulated cell, in both the anode and cathode. 
 	- the addition of the open-source [ZSW GenStack](https://zenodo.org/records/14223364) as a calibrated fuel cell case study. 
 - [V1.1](https://github.com/gassraphael/AlphaPEM/tree/11f07bd084a09cc6432f441b010d89d2a4229e4e) - 2025.08.18 - This version of AlphaPEM includes: 
 	- the addition of heat transfer to the program, in cooperation with Pedro Affonso Nobrega (PERSEE, MINES PSL).

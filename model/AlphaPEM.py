@@ -25,7 +25,7 @@ from model.cell_voltage import calculate_cell_voltage
 from model.control import control_operating_conditions
 from configuration.settings import Pext, Phi_ext, y_O2_ext, C_O2ref, alpha_c, F, R
 from modules.dif_eq_modules import event_negative
-from modules.transitory_functions import lambda_eq, k_H2, k_O2, calculate_transition_layer_parameter
+from modules.transitory_functions import lambda_eq, k_H2, k_O2
 from modules.display_modules import (plot_ifc, plot_J, plot_C_v, plot_lambda, plot_s, plot_C_O2, plot_C_H2, plot_C_N2,
                                      plot_T, plot_Ucell, plot_P, plot_Phi_a, plot_Phi_c, plot_Phi_des, plot_v, plot_Re_nb,
                                      plot_polarisation_curve, plot_polarisation_curve_for_cali,
@@ -206,21 +206,18 @@ class AlphaPEM:
         self.accessible_physical_parameters = accessible_physical_parameters
         self.undetermined_physical_parameters = undetermined_physical_parameters
         self.computing_parameters = computing_parameters
-        self._create_transition_layer_parameters() # Transition layer is a virtual layer which allows to do a better
-        #                                            transition between the GDL and the MPL.
         self.parameters = {**self.current_parameters, **self.accessible_physical_parameters,
                            **self.undetermined_physical_parameters, **self.computing_parameters}
         if self.operating_inputs['Pa_des'] < Pext or self.operating_inputs['Pc_des'] < Pext:
             raise ValueError('The desired pressure is too low. It cannot be lower than the pressure outside the stack.')
 
         # Initialize the variables' dictionary.
-        self.solver_variable_names = ['C_v_agc', 'C_v_agdl', 'C_v_atl', 'C_v_ampl', 'C_v_acl', 'C_v_ccl', 'C_v_cmpl',
-                                      'C_v_ctl', 'C_v_cgdl', 'C_v_cgc', 's_agdl', 's_atl', 's_ampl', 's_acl', 's_ccl',
-                                      's_cmpl', 's_ctl', 's_cgdl', 'lambda_acl', 'lambda_mem', 'lambda_ccl', 'C_H2_agc',
-                                      'C_H2_agdl', 'C_H2_atl', 'C_H2_ampl', 'C_H2_acl', 'C_O2_ccl', 'C_O2_cmpl',
-                                      'C_O2_ctl', 'C_O2_cgdl', 'C_O2_cgc', 'C_N2_agc', 'C_N2_cgc', 'T_agc', 'T_agdl',
-                                      'T_atl', 'T_ampl', 'T_acl', 'T_mem', 'T_ccl', 'T_cmpl', 'T_ctl', 'T_cgdl',
-                                      'T_cgc', 'eta_c']
+        self.solver_variable_names = ['C_v_agc', 'C_v_agdl', 'C_v_ampl', 'C_v_acl', 'C_v_ccl', 'C_v_cmpl', 'C_v_cgdl',
+                                      'C_v_cgc', 's_agdl', 's_ampl', 's_acl', 's_ccl', 's_cmpl', 's_cgdl', 'lambda_acl',
+                                      'lambda_mem', 'lambda_ccl', 'C_H2_agc', 'C_H2_agdl', 'C_H2_ampl', 'C_H2_acl',
+                                      'C_O2_ccl', 'C_O2_cmpl', 'C_O2_cgdl', 'C_O2_cgc', 'C_N2_agc', 'C_N2_cgc', 'T_agc',
+                                      'T_agdl', 'T_ampl', 'T_acl', 'T_mem', 'T_ccl', 'T_cmpl', 'T_cgdl', 'T_cgc',
+                                      'eta_c']
         if self.parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
                 self.parameters['type_auxiliary'] == "forced-convective_cathode_with_anodic_recirculation":
             self.solver_variable_names.extend(['Pasm', 'Paem', 'Pcsm', 'Pcem', 'Phi_asm', 'Phi_aem', 'Phi_csm',
@@ -268,45 +265,15 @@ class AlphaPEM:
         #       Calculate the cell voltage after computing the internal states of the cell.
         self.variables["Ucell"].extend(calculate_cell_voltage(self.variables, self.operating_inputs, self.parameters))
 
-    def _create_transition_layer_parameters(self):
-        """Transition layer is a virtual layer which allows to do a better transition between the GDL and the MPL.
-        The parameters have to be adjusted accordingly."""
-
-        # Extraction of the parameters
-        Hgdl, Hmpl = self.undetermined_physical_parameters['Hgdl'], self.undetermined_physical_parameters['Hmpl']
-        Hacl, epsilon_gdl = self.undetermined_physical_parameters['Hacl'], self.undetermined_physical_parameters['epsilon_gdl']
-        epsilon_mpl = self.undetermined_physical_parameters['epsilon_mpl']
-        nb_tl = self.computing_parameters['nb_tl']
-
-        # Transitory parameters
-        k_node_min = math.ceil((nb_tl / 2 + 1) * Hacl / Hmpl)  # It is a coefficient to determine the minimum thickness
-        # of the model node. It is calculated to ensure that there is at least one node inside the MPL, considering the
-        # transition layer (also calculated in settings.py).
-        H_node_min = Hacl / k_node_min  # m. It is the minimum thickness of the model node.
-
-        # Calculation of the transition layer parameters
-        Htl = nb_tl * H_node_min  # m. It is the thickness of the transition layers.
-        Hgdl = Hgdl - Htl / 2  # m. It is the effective thickness of the GDL without the transition layers.
-        Hmpl = Hmpl - Htl / 2  # m. It is the effective thickness of the MPL without the transition layers.
-        epsilon_atl = calculate_transition_layer_parameter(epsilon_gdl, epsilon_mpl, nb_tl, Htl)  # It is the porosity of
-        #                                                            the transition layer between the AGDL and the AMPL.
-        epsilon_ctl = calculate_transition_layer_parameter(epsilon_mpl, epsilon_gdl, nb_tl, Htl)  # It is the porosity of
-        #                                                            the transition layer between the CMPL and the CGDL.
-
-        # Update of the parameters
-        self.undetermined_physical_parameters.update({'Hgdl': Hgdl, 'Hmpl': Hmpl})
-        self.computing_parameters.update({'Htl': Htl, 'epsilon_atl': epsilon_atl, 'epsilon_ctl': epsilon_ctl})
-
     def solver_variable_names_extension(self):
         """Several points are considered in each GDL and must be inserted into the solver_variable_names.
         """
 
-        new_points_location = ['C_v_agc', 'C_v_agdl', 'C_v_atl', 'C_v_ampl', 'C_v_cmpl', 'C_v_ctl', 'C_v_cgdl',
-                               'C_v_cgc', 's_agdl', 's_atl', 's_ampl', 's_cmpl', 's_ctl', 's_cgdl',
-                               'C_H2_agc', 'C_H2_agdl', 'C_H2_atl', 'C_H2_ampl',
-                               'C_O2_cmpl', 'C_O2_ctl', 'C_O2_cgdl', 'C_O2_cgc',
+        new_points_location = ['C_v_agc', 'C_v_agdl', 'C_v_ampl', 'C_v_cmpl', 'C_v_cgdl', 'C_v_cgc',
+                               's_agdl', 's_ampl', 's_cmpl', 's_cgdl',
+                               'C_H2_agc', 'C_H2_agdl', 'C_H2_ampl', 'C_O2_cmpl', 'C_O2_cgdl', 'C_O2_cgc',
                                'C_N2_agc', 'C_N2_cgc',
-                               'T_agc', 'T_agdl', 'T_atl', 'T_ampl', 'T_cmpl', 'T_ctl', 'T_cgdl', 'T_cgc']
+                               'T_agc', 'T_agdl', 'T_ampl', 'T_cmpl', 'T_cgdl', 'T_cgc']
         for variable in new_points_location:
             index = self.solver_variable_names.index(variable)
             # Delete the previous points
@@ -321,9 +288,6 @@ class AlphaPEM:
             elif variable.endswith('mpl'):
                 self.solver_variable_names[index:index] = [f'{variable}_{i}' for i in
                                                            range(1, self.parameters['nb_mpl'] + 1)]
-            elif variable.endswith('tl'):
-                self.solver_variable_names[index:index] = [f'{variable}_{i}' for i in
-                                                           range(1, self.parameters['nb_tl'] + 1)]
 
     def _create_time_interval(self):
         """Calculate the time intervals for numerical resolution, according to the current chosen,
@@ -394,7 +358,7 @@ class AlphaPEM:
         Hmem, kappa_co, kappa_c = self.parameters['Hmem'], self.parameters['kappa_co'], self.parameters['kappa_c']
         i0_d_c_ref, i0_h_c_ref = self.parameters['i0_d_c_ref'], self.parameters['i0_h_c_ref']
         a_slim, b_slim, a_switch = self.parameters['a_slim'], self.parameters['b_slim'], self.parameters['a_switch']
-        nb_gc, nb_gdl, nb_mpl, nb_tl = self.parameters['nb_gc'], self.parameters['nb_gdl'], self.parameters['nb_mpl'], self.parameters['nb_tl']
+        nb_gc, nb_gdl, nb_mpl = self.parameters['nb_gc'], self.parameters['nb_gdl'], self.parameters['nb_mpl']
         type_auxiliary = self.parameters['type_auxiliary']
 
         # Initial fuel cell states
@@ -448,18 +412,18 @@ class AlphaPEM:
         Abp_c_ini = 0  # It is the throttle area of the back pressure valve at the cathode.
 
         # Main variable initialization
-        C_v_agc, C_v_agdl, C_v_atl, C_v_ampl, C_v_acl = [C_v_a_ini] * 5
-        C_v_ccl, C_v_cmpl, C_v_ctl, C_v_cgdl, C_v_cgc = [C_v_c_ini] * 5
-        s_agdl, s_atl, s_ampl, s_acl, s_ccl, s_cmpl, s_ctl, s_cgdl = [s_ini] * 8
+        C_v_agc, C_v_agdl, C_v_ampl, C_v_acl = [C_v_a_ini] * 4
+        C_v_ccl, C_v_cmpl, C_v_cgdl, C_v_cgc = [C_v_c_ini] * 4
+        s_agdl, s_ampl, s_acl, s_ccl, s_cmpl, s_cgdl = [s_ini] * 6
         s_boundary = 0  # Dirichlet boundary condition
         lambda_acl, lambda_mem, lambda_ccl = [lambda_mem_ini] * 3
-        C_H2_agc, C_H2_agdl, C_H2_atl, C_H2_ampl, C_H2_acl = [C_H2_ini] * 5
-        C_O2_ccl, C_O2_cmpl, C_O2_ctl, C_O2_cgdl, C_O2_cgc = [C_O2_ini] * 5
+        C_H2_agc, C_H2_agdl, C_H2_ampl, C_H2_acl = [C_H2_ini] * 4
+        C_O2_ccl, C_O2_cmpl, C_O2_cgdl, C_O2_cgc = [C_O2_ini] * 4
         if type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
             C_N2_agc, C_N2_cgc = C_N2_agc_ini, C_N2_cgc_ini # Test bench: simulated H2 recirculation which leads to N2 in the anode.
         else:
             C_N2_agc, C_N2_cgc = 0, C_N2_cgc_ini
-        T_agc, T_agdl, T_atl, T_ampl, T_acl, T_mem, T_ccl, T_cmpl, T_ctl, T_cgdl, T_cgc = [T_ini] * 11
+        T_agc, T_agdl, T_ampl, T_acl, T_mem, T_ccl, T_cmpl, T_cgdl, T_cgc = [T_ini] * 9
         eta_c = eta_c_ini
         Pasm, Paem = [Pa_ini] * 2
         Pcsm, Pcem = [Pc_ini] * 2
@@ -468,17 +432,18 @@ class AlphaPEM:
         Wcp, Wa_inj, Wc_inj, Abp_a, Abp_c = Wcp_ini, Wa_inj_ini, Wc_inj_ini, Abp_a_ini, Abp_c_ini
 
         # Gathering of the variables initial value into one list
-        initial_variable_values = ([C_v_agc] * nb_gc + [C_v_agdl] * nb_gdl + [C_v_atl] * nb_tl + [C_v_ampl] * nb_mpl +
-                                   [C_v_acl, C_v_ccl] + [C_v_cmpl] * nb_mpl + [C_v_ctl] * nb_tl + [C_v_cgdl] * nb_gdl +
-                                   [C_v_cgc] * nb_gc + [s_boundary] + [s_agdl] * (nb_gdl - 1) + [s_atl] * nb_tl +
-                                   [s_ampl] * nb_mpl + [s_acl, s_ccl] + [s_cmpl] * nb_mpl + [s_ctl] * nb_tl +
-                                   [s_cgdl] * (nb_gdl - 1) +  [s_boundary] + [lambda_acl, lambda_mem, lambda_ccl] +
-                                   [C_H2_agc] * nb_gc + [C_H2_agdl] * nb_gdl + [C_H2_atl] * nb_tl + [C_H2_ampl] * nb_mpl +
-                                   [C_H2_acl, C_O2_ccl] + [C_O2_cmpl] * nb_mpl + [C_O2_ctl] * nb_tl +
-                                   [C_O2_cgdl] * nb_gdl + [C_O2_cgc] * nb_gc + [C_N2_agc] * nb_gc + [C_N2_cgc] * nb_gc +
-                                   [T_agc] * nb_gc + [T_agdl] * nb_gdl + [T_atl] * nb_tl + [T_ampl] * nb_mpl +
-                                   [T_acl, T_mem, T_ccl] + [T_cmpl] * nb_mpl + [T_ctl] * nb_tl + [T_cgdl] * nb_gdl +
-                                   [T_cgc] * nb_gc + [eta_c])
+        initial_variable_values = ([C_v_agc] * nb_gc + [C_v_agdl] * nb_gdl + [C_v_ampl] * nb_mpl + [C_v_acl, C_v_ccl] +
+                                   [C_v_cmpl] * nb_mpl + [C_v_cgdl] * nb_gdl + [C_v_cgc] * nb_gc +
+                                   [s_boundary] + [s_agdl] * (nb_gdl - 1) + [s_ampl] * nb_mpl + [s_acl, s_ccl] +
+                                   [s_cmpl] * nb_mpl + [s_cgdl] * (nb_gdl - 1) + [s_boundary] +
+                                   [lambda_acl, lambda_mem, lambda_ccl] +
+                                   [C_H2_agc] * nb_gc + [C_H2_agdl] * nb_gdl + [C_H2_ampl] * nb_mpl +
+                                   [C_H2_acl, C_O2_ccl] + [C_O2_cmpl] * nb_mpl + [C_O2_cgdl] * nb_gdl +
+                                   [C_O2_cgc] * nb_gc +
+                                   [C_N2_agc] * nb_gc + [C_N2_cgc] * nb_gc +
+                                   [T_agc] * nb_gc + [T_agdl] * nb_gdl + [T_ampl] * nb_mpl + [T_acl, T_mem, T_ccl] +
+                                   [T_cmpl] * nb_mpl + [T_cgdl] * nb_gdl + [T_cgc] * nb_gc +
+                                   [eta_c])
         if type_auxiliary == "forced-convective_cathode_with_flow-through_anode" or \
                 type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
                 initial_variable_values.extend([Pasm, Paem, Pcsm, Pcem] + [Phi_asm, Phi_aem] + [Phi_csm, Phi_cem] +

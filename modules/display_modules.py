@@ -449,8 +449,6 @@ def plot_ifc(variables, operating_inputs, parameters, ax):
         Operating inputs of the fuel cell.
     parameters : dict
         Parameters of the fuel cell model.
-    n : int
-        Number of points used to plot the current density.
     ax : matplotlib.axes.Axes
         Axes on which the current density will be plotted.
     """
