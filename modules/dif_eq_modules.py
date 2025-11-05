@@ -7,8 +7,8 @@ and to implement integration events.
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import Text, Pext, Phi_ext, M_H2, M_O2, M_N2, M_H2O, y_O2_ext, R
-from modules.transitory_functions import Psat, C_v_sat, mu_mixture_gases, calculate_rho_Cp0
+from configuration.settings import Text, Pext, Phi_ext, M_H2, M_O2, M_N2, M_H2O, y_O2_ext, R, F
+from modules.transitory_functions import average, Psat, C_v_sat, mu_mixture_gases, calculate_rho_Cp0, k_H2, k_O2
 
 
 # ____________________________________________Differential equations modules____________________________________________
@@ -71,7 +71,8 @@ def calculate_dif_eq_int_values(t, sv, control_variables, i_fc, operating_inputs
     # Extraction of the operating inputs and the parameters
     T_des, y_H2_in = operating_inputs['T_des'], operating_inputs['y_H2_in']
     Lgc, nb_channel_in_gc, Lm = parameters['Lgc'], parameters['nb_channel_in_gc'], parameters['Lm']
-    Hccl, epsilon_gdl, epsilon_cl = parameters['Hccl'], parameters['epsilon_gdl'], parameters['epsilon_cl']
+    Hmem, Hacl, Hccl = parameters['Hmem'], parameters['Hacl'], parameters['Hccl']
+    epsilon_gdl, epsilon_cl = parameters['epsilon_gdl'], parameters['epsilon_cl']
     epsilon_mpl, kappa_co, epsilon_mc = parameters['epsilon_mpl'], parameters['kappa_co'], parameters['epsilon_mc']
     epsilon_atl, epsilon_ctl = parameters['epsilon_atl'], parameters['epsilon_ctl']
     Htl, nb_gc, nb_gdl, nb_mpl, nb_tl = parameters['Htl'], parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl'], parameters['nb_tl']
@@ -145,7 +146,6 @@ def calculate_dif_eq_int_values(t, sv, control_variables, i_fc, operating_inputs
                                                (1 - y_O2[f'cgc_{i}']) * (1 - x_H2O_v[f'cgc_{i}'])],
                                               sv[f'T_cgc_{i}'])
 
-
     #       Volumetric heat capacity (J.m-3.K-1)
     rho_Cp0 = {
         **{f'agdl_{i}': calculate_rho_Cp0('agdl', sv[f'T_agdl_{i}'], C_v=sv[f'C_v_agdl_{i}'],
@@ -174,6 +174,14 @@ def calculate_dif_eq_int_values(t, sv, control_variables, i_fc, operating_inputs
                                           s=sv[f's_cgdl_{i}'], C_O2=sv[f'C_O2_cgdl_{i}'], C_N2=C_N2_c_mean, epsilon=epsilon_gdl)
            for i in range(1, nb_gdl + 1)}
         }
+
+    #       The crossover current density i_n
+    T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
+                            weights=[Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl),
+                                     Hccl / (Hacl + Hmem + Hccl)])
+    i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
+    i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
+    i_n = i_H2 + i_O2
 
 
 
@@ -297,7 +305,8 @@ def calculate_dif_eq_int_values(t, sv, control_variables, i_fc, operating_inputs
         # Set to None the variables not used when "no_auxiliary" system is considered
         v_re, Lman_to_endplate, Lman_to_man_gc, k_purge = [None] * 4
 
-    return {'rho_Cp0': rho_Cp0, 'v_re': v_re, 'k_purge': k_purge, 'rho': rho, 'C_tot': C_tot, 'mu_gaz': mu_gaz, 'P': P}
+    return {'rho_Cp0': rho_Cp0, 'v_re': v_re, 'k_purge': k_purge, 'rho': rho, 'C_tot': C_tot, 'mu_gaz': mu_gaz, 'P': P,
+            'i_n': i_n}
 
 
 # ______________________________________Function which gives the integration event______________________________________

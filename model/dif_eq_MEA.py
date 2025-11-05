@@ -737,7 +737,10 @@ def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hccl, 
     # dif_eq['deta_c / dt'] = 1 / (C_scl * Hccl) * ((i_fc + i_n) - i0_c_ref * (C_O2_ccl / C_O2ref) ** kappa_c *
     #                                              math.exp(f_drop * alpha_c * F / (R * T_ccl) * eta_c))
 
-    dif_eq['deta_c / dt'] = 1 / (C_scl * Hccl) * ((i_fc + i_n) - (i0_d_c_ref ** f_drop * i0_h_c_ref ** (1 - f_drop)) *
-                                                  (C_O2_ccl / C_O2ref) ** kappa_c * math.exp(alpha_c * F / (R * T_ccl) * eta_c))
+    # dif_eq['deta_c / dt'] = 1 / (C_scl * Hccl) * ((i_fc + i_n) - (i0_d_c_ref ** f_drop * i0_h_c_ref ** (1 - f_drop)) *
+    #                                               (C_O2_ccl / C_O2ref) ** kappa_c * math.exp(alpha_c * F / (R * T_ccl) * eta_c))
+
+    dif_eq['deta_c / dt'] = 1 / (C_scl * Hccl) * ((i_fc + i_n) - i0_d_c_ref * (C_O2_ccl / C_O2ref) ** kappa_c *
+                                                  math.exp(alpha_c * F / (R * T_ccl) * eta_c))
 
 

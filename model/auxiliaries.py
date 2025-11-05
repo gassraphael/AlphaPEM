@@ -83,11 +83,11 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
 
     # Intermediate values
         # Commun intermediate values with dif_eq_modules.py which allows to avoid redundant calculations
-    P, Phi, y_H2, y_O2, M, rho, k_purge, Abp_a, Abp_c, mu_gaz = \
+    P, Phi, y_H2, y_O2, M, rho, k_purge, Abp_a, Abp_c, mu_gaz, i_n = \
         auxiliaries_int_values_which_are_commun_with_dif_eq(t, sv, operating_inputs, parameters)
-    v_a, v_c, Pa_in, Pc_in = calculate_velocity_evolution(sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_agc_agdl,
-                                            J_O2_cgdl_cgc, operating_inputs, parameters, rho, mu_gaz)
-    W_des = desired_flows(sv, control_variables, i_fc, Pa_in, Pc_in, operating_inputs, parameters)
+    v_a, v_c, Pa_in, Pc_in = calculate_velocity_evolution(sv, control_variables, i_fc, i_n, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_agc_agdl,
+                                            J_O2_cgdl_cgc, operating_inputs, parameters, mu_gaz)
+    W_des = desired_flows(sv, control_variables, i_fc, i_n, Pa_in, Pc_in, operating_inputs, parameters)
 
     # _________________________________________Inlet and outlet global flows____________________________________________
     """Global flows here refer to flows that integrate all the chemical species circulating together.

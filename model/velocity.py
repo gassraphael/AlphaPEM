@@ -15,8 +15,8 @@ from modules.transitory_functions import Psat
 
 # ________________________________________________________Velocity______________________________________________________
 
-def calculate_velocity_evolution(sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_agc_agdl, J_O2_cgdl_cgc,
-                                 operating_inputs, parameters, rho, mu_gaz):
+def calculate_velocity_evolution(sv, control_variables, i_fc, i_n, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_agc_agdl, J_O2_cgdl_cgc,
+                                 operating_inputs, parameters, mu_gaz):
     """
         Calculate the gas velocities at the anode and cathode.
         This function finds the velocities v_a and v_c that make the pressures computed from the Hagen-Poiseuille
@@ -31,6 +31,8 @@ def calculate_velocity_evolution(sv, control_variables, i_fc, Jv_agc_agdl, Jv_cg
             Control inputs (passed to `desired_flows`).
         i_fc : int
             Fuel cell current density at time t.
+        i_n : float
+            Crossover current density at time t (A/m²).
         Jv_agc_agdl : list
             Vapor flow between the AGC and the AGDL at each GC node (mol.m-2.s-1).
         Jv_cgdl_cgc : list
@@ -43,8 +45,6 @@ def calculate_velocity_evolution(sv, control_variables, i_fc, Jv_agc_agdl, Jv_cg
             Operating conditions.
         parameters : dict
             Model parameters.
-        rho : dict
-            Gas densities at anode and cathode.
         mu_gaz : dict
             Gas dynamic viscosities at anode and cathode.
 
@@ -124,7 +124,7 @@ def calculate_velocity_evolution(sv, control_variables, i_fc, Jv_agc_agdl, Jv_cg
 
         # Desired molar flows at anode and cathode
         if type_auxiliary == "no_auxiliary":
-            W_des_calculated = desired_flows(sv, control_variables, i_fc, P_a[0], P_c[0], operating_inputs, parameters)
+            W_des_calculated = desired_flows(sv, control_variables, i_fc, i_n, P_a[0], P_c[0], operating_inputs, parameters)
             Wa_in_calculated = W_des_calculated['H2'] + W_des_calculated['H2O_inj_a']  # This expression is also present in auxiliaries.py.
             J_a_in_calculated = Wa_in_calculated / (Hagc * Wagc) / nb_cell / nb_channel_in_gc
             Wc_in_calculated = W_des_calculated['dry_air'] + W_des_calculated['H2O_inj_c']  # This expression is also present in calculate_velocity_evolution.
@@ -187,7 +187,7 @@ def calculate_velocity_evolution(sv, control_variables, i_fc, Jv_agc_agdl, Jv_cg
     return v_a, v_c, P_a[0], P_c[0]
 
 
-def desired_flows(solver_variables, control_variables, i_fc, Pa_in, Pc_in, operating_inputs, parameters):
+def desired_flows(solver_variables, control_variables, i_fc, i_n, Pa_in, Pc_in, operating_inputs, parameters):
     """
     This function calculates the desired flow for the air compressor and the humidifiers. These desired flow are
     different from the real ones as the corresponding machines takes time to reach the desired values.
@@ -200,6 +200,8 @@ def desired_flows(solver_variables, control_variables, i_fc, Pa_in, Pc_in, opera
         Variables controlled by the user.
     i_fc : float
         Fuel cell current density (A/m²).
+    i_n : float
+        Crossover current density (A/m²).
     operating_inputs : dict
         Operating inputs of the fuel cell.
     parameters : dict
@@ -248,11 +250,11 @@ def desired_flows(solver_variables, control_variables, i_fc, Pa_in, Pc_in, opera
 
     else:  # elif type_auxiliary == "no_auxiliary":
         # At the anode side
-        W_H2_des = Sa * i_fc / (2 * F) * (nb_cell * Aact)
+        W_H2_des = Sa * (i_fc + i_n) / (2 * F) * (nb_cell * Aact)
         W_H2O_inj_a_des = (Phi_a_des * Psat(T_des) / (Pa_in - Phi_a_des * Psat(T_des))) * W_H2_des
 
         # At the cathode side
-        W_dry_air_des = 1 / y_O2_ext * Sc * i_fc / (4 * F) * (nb_cell * Aact)
+        W_dry_air_des = 1 / y_O2_ext * Sc * (i_fc + i_n) / (4 * F) * (nb_cell * Aact)
         W_H2O_inj_c_des = (Phi_c_des * Psat(T_des) / (Pc_in - Phi_c_des * Psat(T_des))) * W_dry_air_des
 
     return {'H2': W_H2_des, 'dry_air': W_dry_air_des, 'H2O_inj_a': W_H2O_inj_a_des, 'H2O_inj_c': W_H2O_inj_c_des}

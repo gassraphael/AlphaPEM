@@ -35,7 +35,7 @@ def main():
     type_fuel_cell_3 = None
     type_fuel_cell_4 = None
     # Current density possibilities: "step", "polarization", "polarization_for_cali", "EIS".
-    type_current = "step"
+    type_current = "polarization"
     # Calibration zone : "before_voltage_drop", "full".
     # (only for "polarization" and "polarization_for_cali" currend densities
     voltage_zone = "before_voltage_drop"

@@ -10,7 +10,7 @@ import numpy as np
 
 # Importing constants' value and functions
 from configuration.settings import Text, Pext, Phi_ext, M_H2, M_O2, M_N2, M_H2O, y_O2_ext, R, F
-from modules.transitory_functions import Psat, C_v_sat, mu_mixture_gases
+from modules.transitory_functions import average, Psat, C_v_sat, mu_mixture_gases, k_H2, k_O2
 
 
 # _________________________________________________Auxiliaries modules__________________________________________________
@@ -43,12 +43,14 @@ def auxiliaries_int_values_which_are_commun_with_dif_eq(t, sv, operating_inputs,
     # Extraction of the variables
     lambda_mem = sv['lambda_mem']
     C_H2_acl, C_O2_ccl =  sv['C_H2_acl'], sv['C_O2_ccl']
+    T_acl, T_mem, T_ccl = sv['T_acl'], sv['T_mem'], sv['T_ccl']
     Pasm, Paem, Pcsm, Pcem = sv.get('Pasm', None), sv.get('Paem', None), sv.get('Pcsm', None), sv.get('Pcem', None)
     Phi_asm, Phi_aem = sv.get('Phi_asm', None), sv.get('Phi_aem', None)
     Phi_csm, Phi_cem = sv.get('Phi_csm', None), sv.get('Phi_cem', None)
     Abp_a, Abp_c = sv.get('Abp_a', None), sv.get('Abp_c', None)
     # Extraction of the operating inputs and the parameters
     T_des, y_H2_in, Pa_des = operating_inputs['T_des'], operating_inputs['y_H2_in'], operating_inputs['Pa_des']
+    Hmem, Hacl, Hccl = parameters['Hmem'], parameters['Hacl'], parameters['Hccl']
     Lgc, A_T_a, A_T_c = parameters['Lgc'], parameters['A_T_a'], parameters['A_T_c']
     kappa_co, nb_gc, t_purge, type_purge = parameters['kappa_co'], parameters['nb_gc'], parameters['t_purge'], parameters['type_purge']
 
@@ -108,6 +110,14 @@ def auxiliaries_int_values_which_are_commun_with_dif_eq(t, sv, operating_inputs,
                                               [x_H2O_v[f'cgc_{i}'], y_O2[f'cgc_{i}'] * (1 - x_H2O_v[f'cgc_{i}']),
                                                (1 - y_O2[f'cgc_{i}']) * (1 - x_H2O_v[f'cgc_{i}'])],
                                               sv[f'T_cgc_{i}'])
+
+    #       The crossover current density i_n
+    T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
+                            weights=[Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl),
+                                     Hccl / (Hacl + Hmem + Hccl)])
+    i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
+    i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
+    i_n = i_H2 + i_O2
 
     # Physical quantities in the auxiliary system
     if parameters["type_auxiliary"] == "forced-convective_cathode_with_anodic_recirculation" or \
@@ -171,4 +181,4 @@ def auxiliaries_int_values_which_are_commun_with_dif_eq(t, sv, operating_inputs,
     else:  # parameters["type_auxiliary"] == "no_auxiliary"
         k_purge, Abp_a, Abp_c = [None] * 3
 
-    return P, Phi, y_H2, y_O2, M, rho, k_purge, Abp_a, Abp_c, mu_gaz
+    return P, Phi, y_H2, y_O2, M, rho, k_purge, Abp_a, Abp_c, mu_gaz, i_n

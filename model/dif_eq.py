@@ -77,7 +77,7 @@ def dydt(t, y, operating_inputs, parameters, solver_variable_names, control_vari
     calculate_dyn_vapor_evolution_inside_MEA(dif_eq, solver_variables, **parameters, **matter_flows_dico)
     calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, solver_variables, **parameters, **matter_flows_dico)
     calculate_dyn_voltage_evolution(dif_eq, i_fc, **solver_variables, **operating_inputs, **parameters,
-                                    **eta_c_intermediate_values)
+                                    **dif_eq_int_values, **eta_c_intermediate_values)
     calculate_dyn_temperature_evolution_inside_MEA(dif_eq, **parameters, **dif_eq_int_values, **heat_flows_dico)
     #       Inside the gaz channels and the manifolds
     calculate_dyn_gas_evolution_inside_gas_channel(dif_eq, **parameters, **matter_flows_dico)
