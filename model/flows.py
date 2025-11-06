@@ -59,10 +59,10 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     nb_gc, nb_gdl, nb_mpl = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl']
 
     # Intermediate values
-    (H_gdl_node, H_mpl_node, Pagc, Pcgc, J_EOD_acl_mem, J_EOD_mem_ccl, D_acl_mem, D_mem_ccl, D_cap_agdl_agdl,
-     D_cap_agdl_ampl, D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_ccl_cmpl, D_cap_cmpl_cmpl, D_cap_cmpl_cgdl,
-     D_cap_cgdl_cgdl, Da_eff_agdl_agdl, Da_eff_agdl_ampl, Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl,
-     Dc_eff_cmpl_cmpl, Dc_eff_cmpl_cgdl, Dc_eff_cgdl_cgdl, T_acl_mem_ccl) = \
+    (H_gdl_node, H_mpl_node, Pagc, Pcgc, D_eff_EOD_acl_mem, D_eff_EOD_mem_ccl, D_lambda_eff_acl_mem,
+     D_lambda_eff_mem_ccl, D_cap_agdl_agdl, D_cap_agdl_ampl, D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_ccl_cmpl,
+     D_cap_cmpl_cmpl, D_cap_cmpl_cgdl, D_cap_cgdl_cgdl, Da_eff_agdl_agdl, Da_eff_agdl_ampl, Da_eff_ampl_ampl,
+     Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl, Dc_eff_cmpl_cgdl, Dc_eff_cgdl_cgdl, T_acl_mem_ccl) = \
         flows_int_values(sv, i_fc, operating_inputs, parameters)
     C_N2_a_mean = (sum(sv[f'C_N2_agc_{i}'] for i in range(1, nb_gc + 1)) / nb_gc)
     C_N2_c_mean = (sum(sv[f'C_N2_cgc_{i}'] for i in range(1, nb_gc + 1)) / nb_gc)
@@ -70,11 +70,13 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     # ________________________________________Dissolved water flows (mol.m-2.s-1)_______________________________________
 
     # Anode side
-    J_lambda_acl_mem = J_EOD_acl_mem - rho_mem / M_eq * D_acl_mem * d_dx(y_minus = lambda_acl, y_plus = lambda_mem,
-                                                                         dx_minus = Hacl / 2, dx_plus = Hmem / 2)
+    J_lambda_acl_mem = D_eff_EOD_acl_mem * interpolate([lambda_acl, lambda_mem], [Hacl, Hmem]) - \
+                       rho_mem / M_eq * D_lambda_eff_acl_mem * d_dx(y_minus = lambda_acl, y_plus = lambda_mem,
+                                                                    dx_minus = Hacl / 2, dx_plus = Hmem / 2)
     # Cathode side
-    J_lambda_mem_ccl = J_EOD_mem_ccl - rho_mem / M_eq * D_mem_ccl * d_dx(y_minus = lambda_mem, y_plus = lambda_ccl,
-                                                                         dx_minus = Hmem / 2, dx_plus = Hccl / 2)
+    J_lambda_mem_ccl = D_eff_EOD_mem_ccl * interpolate([lambda_mem, lambda_ccl], [Hmem, Hccl]) - \
+                       rho_mem / M_eq * D_lambda_eff_mem_ccl * d_dx(y_minus = lambda_mem, y_plus = lambda_ccl,
+                                                                    dx_minus = Hmem / 2, dx_plus = Hccl / 2)
 
     # _________________________________________Liquid water flows (kg.m-2.s-1)__________________________________________
 

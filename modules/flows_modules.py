@@ -7,7 +7,7 @@
 
 # Importing constants' value and functions
 from configuration.settings import R, F
-from modules.transitory_functions import hmean, average, interpolate, Dcap, Da_eff, Dc_eff, h_a, h_c, D
+from modules.transitory_functions import hmean, average, Dcap, Da_eff, Dc_eff, D_lambda, D_lambda_eff, D_EOD, D_EOD_eff
 
 
 # _____________________________________________________Flow modules_____________________________________________________
@@ -48,6 +48,7 @@ def flows_int_values(sv, i_fc, operating_inputs, parameters):
     e, Hacl, Hccl, Hmem = parameters['e'], parameters['Hacl'], parameters['Hccl'], parameters['Hmem']
     Hgdl, Hmpl, Wagc, Wcgc = parameters['Hgdl'], parameters['Hmpl'], parameters['Wagc'], parameters['Wcgc']
     nb_gc, nb_gdl, nb_mpl = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl']
+    epsilon_mc = parameters['epsilon_mc']
 
     # Transitory parameter
     H_gdl_node = Hgdl / nb_gdl
@@ -67,11 +68,15 @@ def flows_int_values(sv, i_fc, operating_inputs, parameters):
 
     # Weighted mean values ...
     #       ... of the EOD flow of water in the membrane
-    J_EOD_acl_mem = 2.5 / 22 * i_fc / F * interpolate([lambda_acl, lambda_mem], [Hacl, Hmem])
-    J_EOD_mem_ccl = 2.5 / 22 * i_fc / F * interpolate([lambda_mem, lambda_ccl], [Hmem, Hccl])
+    D_eff_EOD_acl_mem = hmean([D_EOD_eff(lambda_acl, epsilon_mc), D_EOD(lambda_mem)],
+                          weights = [Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem)])
+    D_eff_EOD_mem_ccl = hmean([D_EOD(lambda_mem), D_EOD_eff(lambda_ccl, epsilon_mc)],
+                          weights = [Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl)])
     #       ... of the diffusion coefficient of water in the membrane
-    D_acl_mem = hmean([D(lambda_acl), D(lambda_mem)], weights = [Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem)])
-    D_mem_ccl = hmean([D(lambda_mem), D(lambda_ccl)], weights = [Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl)])
+    D_lambda_eff_acl_mem = hmean([D_lambda_eff(lambda_acl, epsilon_mc), D_lambda(lambda_mem)],
+                          weights = [Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem)])
+    D_lambda_eff_mem_ccl = hmean([D_lambda(lambda_mem), D_lambda_eff(lambda_ccl, epsilon_mc)],
+                          weights = [Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl)])
     #       ... of the capillary coefficient
     D_cap_agdl_agdl = [None] + [hmean([Dcap('gdl', sv[f's_agdl_{i}'], sv[f'T_agdl_{i}'], epsilon_gdl, e,
                                             epsilon_c=epsilon_c),
@@ -138,7 +143,7 @@ def flows_int_values(sv, i_fc, operating_inputs, parameters):
     T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
                         weights=[Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl), Hccl / (Hacl + Hmem + Hccl)])
 
-    return (H_gdl_node, H_mpl_node, Pagc, Pcgc, J_EOD_acl_mem, J_EOD_mem_ccl, D_acl_mem, D_mem_ccl,
+    return (H_gdl_node, H_mpl_node, Pagc, Pcgc, D_eff_EOD_acl_mem, D_eff_EOD_mem_ccl, D_lambda_eff_acl_mem, D_lambda_eff_mem_ccl,
             D_cap_agdl_agdl, D_cap_agdl_ampl, D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_ccl_cmpl, D_cap_cmpl_cmpl,
             D_cap_cmpl_cgdl, D_cap_cgdl_cgdl, Da_eff_agdl_agdl, Da_eff_agdl_ampl, Da_eff_ampl_ampl, Da_eff_ampl_acl,
             Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl, Dc_eff_cmpl_cgdl, Dc_eff_cgdl_cgdl, T_acl_mem_ccl)

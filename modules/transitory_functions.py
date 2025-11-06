@@ -11,7 +11,7 @@ import math
 # Importing constants' value
 from functools import lru_cache
 from configuration.settings import (M_eq, rho_mem, Dp_mpl, Dp_cl, theta_c_gdl, theta_c_mpl, theta_c_cl, gamma_cond,
-                                    gamma_evap, M_H2, M_O2, M_N2, M_H2O, R, Kshape, K_transition, epsilon_p, alpha_p,
+                                    gamma_evap, M_H2, M_O2, M_N2, M_H2O, R, F, Kshape, K_transition, epsilon_p, alpha_p,
                                     tau_mpl, tau_cl, r_s_gdl, r_s_mpl, r_s_cl, k_th_gdl, k_th_mpl, k_th_cl, k_th_mem,
                                     Cp_gdl, Cp_mpl, Cp_cl, Cp_mem, rho_gdl, rho_mpl, rho_cl, sigma_e_gdl, sigma_e_mpl,
                                     sigma_e_cl)
@@ -160,37 +160,6 @@ def d_dx(y_minus, y_plus, dx = None, dx_minus = None, dx_plus = None):
     y_0 = interpolate([y_minus, y_plus], [dx_minus, dx_plus])
     return (y_plus * dx_minus**2 + y_0 * (dx_plus**2 - dx_minus**2) - y_minus * dx_plus**2)  / \
            (dx_minus * dx_plus * (dx_minus + dx_plus))
-
-
-def d2_dx2(y_minus, y_0, y_plus, dx_minus, dx_plus = None):
-    """
-    Computes the centered second derivative (second order) with different steps to the left and right.
-
-    Parameters
-    ----------
-    y_minus : float
-        Value at the left point (i-1).
-    y_0 : float
-        Value at the central point (i).
-    y_plus : float
-        Value at the right point (i+1).
-    dx_minus : float
-        Step between (i-1) and i.
-    dx_plus : float
-        Step between i and (i+1).
-
-    Returns
-    -------
-    float
-        Approximation of the second derivative at i.
-    """
-
-    if dx_plus is None:
-        dx = dx_minus
-        return (y_plus - 2 * y_0 + y_minus)  / dx**2
-    else:
-        return 2 * (y_plus * dx_minus - y_0 * (dx_minus + dx_plus) + y_minus * dx_plus)  / \
-                   (dx_minus * dx_plus * (dx_minus + dx_plus))
 
 
 def rho_H2O_l(T):
@@ -603,8 +572,8 @@ def lambda_eq(C_v, s, T):
                                                                              (1 + math.tanh(100 * (a_w - 1)))
 
 
-def D(lambdaa):
-    """This function calculates the diffusion coefficient of water in the membrane, in m².s-1.
+def D_lambda(lambdaa):
+    """This function calculates the diffusion coefficient of water in the bulk membrane, in m².s-1.
 
     Parameters
     ----------
@@ -617,6 +586,55 @@ def D(lambdaa):
         Diffusion coefficient of water in the membrane in m².s-1.
     """
     return 4.1e-10 * (lambdaa / 25.0) ** 0.15 * (1.0 + math.tanh((lambdaa - 2.5) / 1.4))
+
+
+def D_lambda_eff(lambdaa, epsilon_mc):
+    """This function calculates the effective diffusion coefficient of water in the catalyst layers, in m².s-1.
+
+    Parameters
+    ----------
+    lambdaa : float
+        Water content in the catalyst layer.
+
+    Returns
+    -------
+    float
+        Effective diffusion coefficient of water in the catalyst layer in m².s-1.
+    """
+    return epsilon_mc / tau_cl * D_lambda(lambdaa)
+
+
+def D_EOD(i_fc):
+    """This function calculates the electro-osmotic drag diffusion coefficient of water in the membrane, in mol.m-2.s-1.
+
+    Parameters
+    ----------
+    i_fc : float
+        Fuel cell current density in A.m-2.
+
+    Returns
+    -------
+    float
+        Electro-osmotic drag diffusion coefficient of water in the membrane in mol.m-2.s-1.
+    """
+    return 2.5 / 22 * i_fc / F
+
+
+def D_EOD_eff(i_fc, epsilon_mc):
+    """This function calculates the effective electro-osmotic drag diffusion coefficient of water in the catalyst layers,
+    in mol.m-2.s-1.
+
+    Parameters
+    ----------
+    i_fc : float
+        Fuel cell current density in A.m-2.
+
+    Returns
+    -------
+    float
+        Effective electro-osmotic drag diffusion coefficient of water in the catalyst layer in mol.m-2.s-1.
+    """
+    return epsilon_mc / tau_cl * D_EOD(i_fc)
 
 
 def fv(lambdaa, T):
