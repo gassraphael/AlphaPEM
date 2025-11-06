@@ -11,7 +11,7 @@ import math
 # Importing constants' value
 from functools import lru_cache
 from configuration.settings import (M_eq, rho_mem, Dp_mpl, Dp_cl, theta_c_gdl, theta_c_mpl, theta_c_cl, gamma_cond,
-                                    gamma_evap, M_H2, M_O2, M_N2, M_H2O, R, F, Kshape, K_transition, epsilon_p, alpha_p,
+                                    gamma_evap, M_H2, M_O2, M_N2, M_H2O, R, F, Kshape, epsilon_p, alpha_p,
                                     tau_mpl, tau_cl, r_s_gdl, r_s_mpl, r_s_cl, k_th_gdl, k_th_mpl, k_th_cl, k_th_mem,
                                     Cp_gdl, Cp_mpl, Cp_cl, Cp_mem, rho_gdl, rho_mpl, rho_cl, sigma_e_gdl, sigma_e_mpl,
                                     sigma_e_cl)
@@ -679,12 +679,17 @@ def gamma_sorp(C_v, s, lambdaa, T, Hcl):
     fv_value = fv(lambdaa, T)
     gamma_abs = (1.14e-5 * fv_value) / Hcl * math.exp(2416 * (1 / 303 - 1 / T))
     gamma_des = (4.59e-5 * fv_value) / Hcl * math.exp(2416 * (1 / 303 - 1 / T))
+
+    # Transition function between absorption and desorption
+    K_transition = 20  # It is a constant that defines the sharpness of the transition between two states. The higher it is, the sharper the transition is.
     w = 0.5 * (1 + math.tanh(K_transition * (lambda_eq(C_v, s, T) - lambdaa))) # transition function
+
     return w * gamma_abs + (1 - w) * gamma_des # interpolation between absorption and desorption
 
 
 def Svl(element, s, C_v, Ctot, T, epsilon):
     """This function calculates the phase transfer rate of water condensation or evaporation, in mol.m-3.s-1.
+    It is positive for condensation and negative for evaporation.
 
     Parameters
     ----------
@@ -719,7 +724,11 @@ def Svl(element, s, C_v, Ctot, T, epsilon):
 
     Svl_cond = gamma_cond * M_H2O / (R * T) * epsilon * (1 - s) * D_value * Ptot * math.log((Ptot - Psat(T)) / (Ptot - P_v))
     Svl_evap = gamma_evap * M_H2O / (R * T) * epsilon * s * D_value * Ptot * math.log((Ptot - Psat(T)) / (Ptot - P_v))
-    w = 0.5 * (1 + math.tanh(K_transition * (C_v_sat(T) - C_v))) # transition function
+
+    # Transition function between condensation and evaporation
+    K_transition = 1e-2 # This is a constant that defines the sharpness of the transition between two states.  The higher it is, the sharper the transition is.
+    w = 0.5 * (1 + math.tanh(K_transition * (Psat(T) - P_v))) # transition function
+
     return w * Svl_evap + (1 - w) * Svl_cond # interpolation between condensation and evaporation
 
 
@@ -811,7 +820,11 @@ def k_H2(lambdaa, T, kappa_co):
     # Calculation of the permeability coefficient of the membrane for hydrogen
     k_H2_d = kappa_co * (0.29 + 2.2 * fv(lambdaa, T)) * 1e-14 * math.exp(E_H2_v / R * (1 / Tref - 1 / T))
     k_H2_l = kappa_co * 1.8 * 1e-14 * math.exp(E_H2_l / R * (1 / Tref - 1 / T))
+
+    # Transition function between under-saturated and liquid-saturated states
+    K_transition = 20  # It is a constant that defines the sharpness of the transition between two states. The higher it is, the sharper the transition is.
     w = 0.5 * (1 + math.tanh(K_transition * (lambda_l_eq(T) - lambdaa)))  # transition function
+
     return w * k_H2_d + (1 - w) * k_H2_l  # interpolation between under-saturated and liquid-equilibrated H2 crossover
 
 
@@ -841,7 +854,11 @@ def k_O2(lambdaa, T, kappa_co):
     # Calculation of the permeability coefficient of the membrane for oxygen
     k_O2_v = kappa_co * (0.11 + 1.9 * fv(lambdaa, T)) * 1e-14 * math.exp(E_O2_v / R * (1 / Tref - 1 / T))
     k_O2_l = kappa_co * 1.2 * 1e-14 * math.exp(E_O2_l / R * (1 / Tref - 1 / T))
+
+    # Transition function between under-saturated and liquid-saturated states
+    K_transition = 20  # It is a constant that defines the sharpness of the transition between two states. The higher it is, the sharper the transition is.
     w = 0.5 * (1 + math.tanh(K_transition * (lambda_l_eq(T) - lambdaa)))  # transition function
+
     return w * k_O2_v + (1 - w) * k_O2_l  # interpolation between under-saturated and liquid-equilibrated O2 crossover
 
 
@@ -877,7 +894,10 @@ def sigma_p_eff(element, lambdaa, T, epsilon_mc=None):
     else:
         raise ValueError("The element should be either 'mem' or 'ccl'.")
 
+    # Transition function between low and high lambda
+    K_transition = 20  # It is a constant that defines the sharpness of the transition between two states. The higher it is, the sharper the transition is.
     w = 0.5 * (1 + math.tanh(K_transition * (lambda_transition - lambdaa)))  # transition function
+
     return w * sigma_p_eff_low + (1 - w) * sigma_p_eff_high  # interpolation between sigma_p_eff value at low and high lambda.
 
 

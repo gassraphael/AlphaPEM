@@ -408,8 +408,6 @@ gamma_evap = 1e8  # s-1. It is the overall evaporation rate constant for water [
 epsilon_p = 0.11 #. It is the percolation threshold porosity of the GDL.
 alpha_p = 0.785 #. It is a fitted value for the effective matter transfer in the GDL, for through plane direction.
 Kshape = 2  # . Mathematical factor governing lambda_eq smoothing.
-K_transition = 20  # It is a constant that defines the sharpness of the transition between two states.
-                   # The higher it is, the sharper the transition is.
 
 # Model parameters for the voltage calculation
 C_O2ref = 3.39  # mol.m-3. It is the reference concentration of oxygen.
