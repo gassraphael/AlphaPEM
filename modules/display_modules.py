@@ -62,8 +62,6 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax, show=Tr
     type_fuel_cell, type_current = parameters['type_fuel_cell'], parameters['type_current']
     voltage_zone, type_auxiliary = parameters['voltage_zone'], parameters['type_auxiliary']
     type_control, type_plot = parameters['type_control'], parameters['type_plot']
-    # Extraction of the experimental current density and voltage values.
-    i_exp_t, U_exp_t = pola_exp_values(type_fuel_cell, voltage_zone)  # (A.m-2, V).
 
     if type_plot == "fixed":
         # Creation of ifc_t
@@ -85,6 +83,8 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax, show=Tr
         # Plot the experimental polarization curve and calculate the simulation error compared with experimental data
         if type_fuel_cell != "manual_setup" and (type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
                                                  or type_auxiliary == "no_auxiliary"):  # Experimental points are accessible
+            # Extraction of the experimental current density and voltage values.
+            i_exp_t, U_exp_t = pola_exp_values(type_fuel_cell, voltage_zone)  # (A.m-2, V).
             # Plot of the experimental polarization curve
             i_exp_t = i_exp_t / 1e4  # Conversion in A/cm²
             plot_experimental_polarisation_curve(type_fuel_cell, i_exp_t, U_exp_t, ax)
