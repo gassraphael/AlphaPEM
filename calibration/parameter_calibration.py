@@ -103,38 +103,26 @@ def pola_points(ga_instance, solution, solution_idx): # Function to maximize.
     solution_of_undetermined_physical_parameters = update_undetermined_parameters(type_fuel_cell_1, solution, varbound,
                                                                       copy.deepcopy(undetermined_physical_parameters))
 
-    # Refuse invalid combinations of parameters
-    if solution_of_undetermined_physical_parameters['i0_h_c_ref'] >= solution_of_undetermined_physical_parameters['i0_d_c_ref']:
-        return 1e-12  # Very low fitness value to refuse this solution
-
-    # Calculation of the model polarization curve
-    try:
+    try: # Calculation of the model polarization curve
         Simulator_1 = AlphaPEM(operating_inputs_1, current_parameters, accessible_physical_parameters,
                                solution_of_undetermined_physical_parameters, computing_parameters_1)
-    except Exception as e:
-        print("\nAn error occurred during the evaluation of the solution.")
-        params = [f"{k}: {v}" for k, v in solution_of_undetermined_physical_parameters.items()]
-        print("Attempted parameters: " + " | ".join(params))
-        print("Exception :", e)
-        raise  # Erase this simulation without stopping the calibration.
-    try:
         Simulator_2 = AlphaPEM(operating_inputs_2, current_parameters, accessible_physical_parameters,
                                solution_of_undetermined_physical_parameters, computing_parameters_2)
-    except Exception as e:
+        # Calculation of the simulation error between the simulated and experimental polarization curves
+        sim_error = calculate_simulation_error(Simulator_1, U_exp_1, i_exp_1, Simulator_2, U_exp_2, i_exp_2)
+        if sim_error == 0:  # If the error is zero, it means the simulation is perfect.
+            sim_error = 1e-6
+
+        # Calculation of the fitness value to maximize
+        fitness = 1.0 / sim_error  # pygad maximise the fitness value, not the error value, so the inverse is taken.
+        return fitness
+
+    except Exception as e: # If an error occurs during the simulation, return a very low fitness value to refuse this solution
         print("\nAn error occurred during the evaluation of the solution.")
         params = [f"{k}: {v}" for k, v in solution_of_undetermined_physical_parameters.items()]
         print("Attempted parameters: " + " | ".join(params))
         print("Exception :", e)
-        raise  # Erase this simulation without stopping the calibration.
-
-    # Calculation of the simulation error between the simulated and experimental polarization curves
-    sim_error = calculate_simulation_error(Simulator_1, U_exp_1, i_exp_1, Simulator_2, U_exp_2, i_exp_2)
-    if sim_error == 0:  # If the error is zero, it means the simulation is perfect.
-        sim_error = 1e-6
-
-    # Calculation of the fitness value to maximize
-    fitness = 1.0 / sim_error # pygad maximise the fitness value, not the error value, so the inverse is taken.
-    return fitness
+        return 1e-12  # Very low fitness value to refuse this solution
 
 last_fitness = 0
 def callback_generation(ga_instance):
