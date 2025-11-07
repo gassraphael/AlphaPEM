@@ -34,7 +34,7 @@ different operating conditions, are imported from the calibration_module.py.
 #                          "ZSW-GenStack_T_76", "ZSW-GenStack_T_84", "EH-31_1.5"(2021), "EH-31_2.0"(2021),
 #                          "EH-31_2.25"(2021), "EH-31_2.5"(2021)
 type_fuel_cell_1 = "ZSW-GenStack_Pa_1.61_Pc_1.41"
-type_fuel_cell_2 = "ZSW-GenStack_Pa_2.8_Pc_2.6"
+type_fuel_cell_2 = "ZSW-GenStack_Pa_2.01_Pc_1.81"
 
 # Calibration zone: "before_voltage_drop", "full".
 voltage_zone = "before_voltage_drop"
@@ -122,6 +122,7 @@ def pola_points(ga_instance, solution, solution_idx): # Function to maximize.
         params = [f"{k}: {v}" for k, v in solution_of_undetermined_physical_parameters.items()]
         print("Attempted parameters: " + " | ".join(params))
         print("Exception :", e)
+        print("Refusing this solution and continuing the optimization.\n")
         return 1e-12  # Very low fitness value to refuse this solution
 
 last_fitness = 0
