@@ -422,7 +422,8 @@ def launch_AlphaPEM_for_polarization_current_for_calibration(operating_inputs, c
         # Certain conditions must be met.
         if (computing_parameters['type_current'] == "polarization_for_cali" and 
                 (computing_parameters['type_fuel_cell'][1] == "manual_setup" or \
-                 computing_parameters['type_auxiliary'] != "forced-convective_cathode_with_flow-through_anode")):
+                 (computing_parameters['type_auxiliary'] != "forced-convective_cathode_with_flow-through_anode" and
+                 computing_parameters['type_auxiliary'] != "no_auxiliary"))):
             raise ValueError('polarization current for calibration should be done with experimental data.')
 
         # Simulation
