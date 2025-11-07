@@ -54,10 +54,10 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
             type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6" or type_fuel_cell == "ZSW-GenStack_T_62" or \
             type_fuel_cell == "ZSW-GenStack_T_76" or type_fuel_cell == "ZSW-GenStack_T_84":
         #       Fuel cell physical parameters
-        Hacl_min, Hacl_max = 6e-6, 10e-6  # m. It is the thickness of the ACL.
-        Hccl_min, Hccl_max = 10e-6, 20e-6  # m. It is the thickness of the CCL.
-        Hmem_min, Hmem_max = 10e-6, 20e-6  # m. It is the thickness of the membrane.
-        epsilon_gdl_min, epsilon_gdl_max = 0.696, 0.880  # It is the anode/cathode GDL porosity, without units.
+        Hacl_min, Hacl_max = 5e-6, 20e-6  # m. It is the thickness of the ACL.
+        Hccl_min, Hccl_max = 5e-6, 20e-6  # m. It is the thickness of the CCL.
+        Hmem_min, Hmem_max = 5e-6, 30e-6  # m. It is the thickness of the membrane.
+        epsilon_gdl_min, epsilon_gdl_max = 0.6, 0.9  # It is the anode/cathode GDL porosity, without units.
         epsilon_mpl_min, epsilon_mpl_max = 0.32, 0.54  # It is the anode/cathode MPL porosity, without units.
         epsilon_cl_min, epsilon_cl_max = 0.40, 0.60  # It is the anode/cathode MPL porosity, without units.
         epsilon_mc_min, epsilon_mc_max = 0.15, 0.40  # It is the volume fraction of ionomer in the CL.
@@ -582,9 +582,12 @@ def calculate_simulation_error(Simulator_1, U_exp_1, i_exp_1, Simulator_2, U_exp
         ifc_discretized2[i] = ifc_t_2[idx2]  # the last value at the end of each load
         Ucell_discretized2[i] = Simulator_2.variables['Ucell'][idx2]  # the last value at the end of each load
 
-    # Distance between the simulated and the experimental polarization curves.
-    sim_error = (np.max(np.abs(Ucell_discretized1 - U_exp_1) / U_exp_1 * 100)
-                     + np.max(np.abs(Ucell_discretized2 - U_exp_2) / U_exp_2 * 100)) / 2  # in %.
+    # Distance between the simulated and the experimental polarization curves (RMSE: root-mean-square error).
+    res1 = (Ucell_discretized1 - U_exp_1) / U_exp_1 * 100 # in %.
+    res2 = (Ucell_discretized2 - U_exp_2) / U_exp_2 * 100 # in %.
+    rmse1 = np.sqrt(np.mean(res1 ** 2))
+    rmse2 = np.sqrt(np.mean(res2 ** 2))
+    sim_error = (rmse1 + rmse2) / 2  # in %.
 
     return sim_error
 
