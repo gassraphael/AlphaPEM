@@ -114,9 +114,6 @@ def pola_points(ga_instance, solution, solution_idx): # Function to maximize.
     except Exception as e:
         print("\nAn error occurred during the evaluation of the solution.")
         params = [f"{k}: {v}" for k, v in solution_of_undetermined_physical_parameters.items()]
-        slim = solution_of_undetermined_physical_parameters['a_slim'] * (operating_inputs_1['Pc_des'] / 1e5) + \
-               solution_of_undetermined_physical_parameters['b_slim']
-        params.append(f"slim: {slim}")
         print("Attempted parameters: " + " | ".join(params))
         print("Exception :", e)
         raise  # Erase this simulation without stopping the calibration.
@@ -126,9 +123,6 @@ def pola_points(ga_instance, solution, solution_idx): # Function to maximize.
     except Exception as e:
         print("\nAn error occurred during the evaluation of the solution.")
         params = [f"{k}: {v}" for k, v in solution_of_undetermined_physical_parameters.items()]
-        slim = solution_of_undetermined_physical_parameters['a_slim'] * (operating_inputs_1['Pc_des'] / 1e5) + \
-               solution_of_undetermined_physical_parameters['b_slim']
-        params.append(f"slim: {slim}")
         print("Attempted parameters: " + " | ".join(params))
         print("Exception :", e)
         raise  # Erase this simulation without stopping the calibration.
