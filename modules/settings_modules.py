@@ -255,7 +255,7 @@ def stored_physical_parameters(type_fuel_cell):
         Wcgc = 532e-6  # m. It is the width of the cathode gas channel.
         Lgc = 246.2e-3  # m. It is the length of one channel in the bipolar plate.
         nb_channel_in_gc = 105 # . It is the number of channels in the bipolar plate.
-        Ldist = 7.11e-2 # m. It is the length of the distributor, which is the volume between the gas channel and the manifold.
+        Ldist = 71.1e-3 # m. It is the length of the distributor, which is the volume between the gas channel and the manifold.
         #   Auxiliaries
         Lm = 25.8e-3  # m. It is the length of the manifold.
         A_T_a = 9.01e-4  # m². It is the inlet/exhaust anode manifold throttle area

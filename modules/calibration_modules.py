@@ -310,7 +310,7 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         elif type_fuel_cell == "ZSW-GenStack_T_84":
             T_des = 84 + 273.15  # K. It is the temperature of the fuel cell.
         else:
-            T_des = 68 + 273.15  # K. It is the temperature of the fuel cell.
+            T_des = 68 + 273.15  # K. It is the nominal temperature of the fuel cell.
         Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         if type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41":
@@ -333,27 +333,21 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         #       Fuel cell physical parameters
         Aact = 283.87e-4  # m². It is the active area of the catalyst layer.
         nb_cell = 26  # . It is the number of cell in the stack.
-        Hagc = 2.3e-4  # m. It is the thickness of the anode gas channel.
-        Hcgc = 3e-4  # m. It is the thickness of the cathode gas channel.
-        Wagc = 4.3e-4  # m. It is the width of the anode gas channel.
-        Wcgc = 5.32e-4  # m. It is the width of the cathode gas channel.
+        Hagc = 230e-6  # m. It is the thickness of the anode gas channel.
+        Hcgc = 300e-6  # m. It is the thickness of the cathode gas channel.
+        Wagc = 430e-6  # m. It is the width of the anode gas channel.
+        Wcgc = 532e-6  # m. It is the width of the cathode gas channel.
         Lgc = 246.2e-3  # m. It is the length of the gas channel.
         nb_channel_in_gc = 105  # . It is the number of channels in the bipolar plate.
-        Ldist = 7.11e-2  # m. It is the length of the distributor, which is the volume between the gas channel and the manifold.
+        Ldist = 71.1e-3  # m. It is the length of the distributor, which is the volume between the gas channel and the manifold.
         Lm = 25.8e-3  # m. It is the length of the manifold.
-        L_endplate = 46.8e-3  # m. It is the length of the endplate.
-        L_man_gc = 8.74e-3  # m. It is the length of the volume connecting the manifold to the gas channel.
         A_T_a = 9.01e-4  # m². It is the inlet/exhaust anode manifold throttle area
         A_T_c = 22.61e-4  # m². It is the inlet/exhaust cathode manifold throttle area
         Vasm, Vcsm = Lm * A_T_a, Lm * A_T_c  # m3. It is the supply manifold volume.
         Vaem, Vcem = Vasm, Vcsm  # m-3. It is the exhaust manifold volume.
-        V_endplate_a = L_man_gc * A_T_a  # m3. It is the anode endplate volume.
-        V_endplate_c = L_man_gc * A_T_c  # m3. It is the cathode endplate volume.
-        V_man_agc = L_man_gc * Hagc * Wagc  # m3. It is the volume of the volume connecting the anode manifold to the gas channel.
-        V_man_cgc = L_man_gc * Hcgc * Wcgc  # m3. It is the volume of the volume connecting the cathode manifold to the gas channel.
         #       Fuel cell undetermined physical parameters.
-        Hgdl = 1.27e-4  # m. It is the thickness of the gas diffusion layer.
-        Hmpl = 7e-5  # m. It is the thickness of the microporous layer.
+        Hgdl = 127e-6  # m. It is the thickness of the gas diffusion layer.
+        Hmpl = 70e-6  # m. It is the thickness of the microporous layer.
         epsilon_c = 0.2  # It is the compression ratio of the GDL.
 
         # Estimated undetermined parameters for the initialisation
@@ -364,17 +358,17 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         Hacl = 8e-6  # m. It is the thickness of the anode catalyst layer.
         Hccl = 17e-6  # m. It is the thickness of the cathode catalyst layer.
         epsilon_cl = 0.5  # It is the porosity of the microporous layer.
-        epsilon_mc = 0.5  # It is the volume fraction of ionomer in the CL.
+        epsilon_mc = 0.25  # It is the volume fraction of ionomer in the CL.
         #   Membrane
-        Hmem = 1.5e-5  # m. It is the thickness of the membrane.
+        Hmem = 15e-6  # m. It is the thickness of the membrane.
         #   Interaction parameters between water and PEMFC structure
-        e = 3.0  # It is the capillary exponent
+        e = 4.0  # It is the capillary exponent
         #   Voltage polarization
         Re = 1e-06  # ohm.m². It is the electron conduction resistance of the circuit.
-        i0_d_c_ref = 14.86  # A.m-2.It is the dry reference exchange current density at the cathode.
+        i0_d_c_ref = 14.43  # A.m-2.It is the dry reference exchange current density at the cathode.
         i0_h_c_ref = 1.0  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
-        kappa_co = 1  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
-        kappa_c = 0.6386  # It is the overpotential correction exponent.
+        kappa_co = 5  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
+        kappa_c = 1.026  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
 
@@ -421,16 +415,10 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         Hcgc = Hagc  # m. It is the thickness of the cathode gas channel.
         Ldist = 5e-2  # m. It is the estimated length of the distributor, which is the volume between the gas channel and the manifold.
         Lm = 2.03e-3  # m. It is the length of the manifold.
-        L_endplate = 46.8e-3  # m. It is the length of the endplate.
-        L_man_gc = 8.74e-3  # m. It is the length of the volume connecting the manifold to the gas channel.
         A_T_a = 11.8e-4  # m². It is the inlet/exhaust anode manifold throttle area
         A_T_c = 34.4e-4  # m². It is the inlet/exhaust cathode manifold throttle area
         Vasm, Vcsm = Lm * A_T_a, Lm * A_T_c  # m3. It is the supply manifold volume.
         Vaem, Vcem = Vasm, Vcsm  # m-3. It is the exhaust manifold volume.
-        V_endplate_a = L_man_gc * A_T_a  # m3. It is the anode endplate volume.
-        V_endplate_c = L_man_gc * A_T_c  # m3. It is the cathode endplate volume.
-        V_man_agc = L_man_gc * Hagc * Wagc  # m3. It is the volume of the volume connecting the anode manifold to the gas channel.
-        V_man_cgc = L_man_gc * Hcgc * Wcgc  # m3. It is the volume of the volume connecting the cathode manifold to the gas channel.
 
         # Estimated undetermined parameters for the initialisation
         #   Gas diffusion layer
