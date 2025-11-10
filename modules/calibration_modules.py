@@ -54,17 +54,17 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
             type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6" or type_fuel_cell == "ZSW-GenStack_T_62" or \
             type_fuel_cell == "ZSW-GenStack_T_76" or type_fuel_cell == "ZSW-GenStack_T_84":
         #       Fuel cell physical parameters
-        Hacl_min, Hacl_max = 5e-6, 20e-6  # m. It is the thickness of the ACL.
-        Hccl_min, Hccl_max = 5e-6, 20e-6  # m. It is the thickness of the CCL.
+        Hacl_min, Hacl_max = 4e-6, 16e-6  # m. It is the thickness of the ACL.
+        Hccl_min, Hccl_max = 9e-6, 25e-6  # m. It is the thickness of the CCL.
         Hmem_min, Hmem_max = 5e-6, 30e-6  # m. It is the thickness of the membrane.
+        Hgdl_min, Hgdl_max = 100e-6, 200e-6  # m. It is the thickness of the gas diffusion layer.
+        Hmpl_min, Hmpl_max = 40e-6, 100e-6  # m. It is the thickness of the microporous layer.
         epsilon_gdl_min, epsilon_gdl_max = 0.6, 0.9  # It is the anode/cathode GDL porosity, without units.
-        epsilon_mpl_min, epsilon_mpl_max = 0.32, 0.54  # It is the anode/cathode MPL porosity, without units.
-        epsilon_cl_min, epsilon_cl_max = 0.40, 0.60  # It is the anode/cathode MPL porosity, without units.
-        epsilon_mc_min, epsilon_mc_max = 0.15, 0.40  # It is the volume fraction of ionomer in the CL.
+        epsilon_mc_min, epsilon_mc_max = 0.15, 0.50  # It is the volume fraction of ionomer in the CL.
         #       Constants based on the interaction between water and the structure
         e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.
         #       Voltage polarization
-        Re_min, Re_max = 5e-7, 5e-6  # Ω.m². It is the electron conduction resistance of the circuit.
+        Re_min, Re_max = 5e-8, 5e-6  # Ω.m². It is the electron conduction resistance of the circuit.
         i0_d_c_ref_min, i0_d_c_ref_max = 1e-1, 100  # A.m-2.It is the dry reference exchange current density at the cathode.
         i0_h_c_ref_min, i0_h_c_ref_max = 1e-2, 10  # A.m-2.It is the humid reference exchange current density at the cathode.
         kappa_co_min, kappa_co_max = 0.01, 40  # A.m-2. It is the crossover correction coefficient.
@@ -80,6 +80,8 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
             varbound = [['Hacl', Hacl_min, Hacl_max, 'real'],
                         ['Hccl', Hccl_min, Hccl_max, 'real'],
                         ['Hmem', Hmem_min, Hmem_max, 'real'],
+                        ['Hgdl', Hgdl_min, Hgdl_max, 'real'],
+                        ['Hmpl', Hmpl_min, Hmpl_max, 'real'],
                         ['epsilon_gdl', epsilon_gdl_min, epsilon_gdl_max, 'real'],
                         ['epsilon_mc', epsilon_mc_min, epsilon_mc_max, 'real'],
                         ['e', e_min, e_max, 'int'],
@@ -106,8 +108,6 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
         Hacl_min, Hacl_max = 8e-6, 20e-6  # m. It is the thickness of the ACL.
         Hmem_min, Hmem_max = 15e-6, 50e-6  # m. It is the thickness of the membrane.
         epsilon_gdl_min, epsilon_gdl_max = 0.40, 0.95  # It is the anode/cathode GDL porosity, without units.
-        epsilon_mpl_min, epsilon_mpl_max = 0.30, 0.60  # It is the anode/cathode MPL porosity, without units.
-        epsilon_cl_min, epsilon_cl_max = 0.12, 0.50  # It is the anode/cathode MPL porosity, without units.
         epsilon_mc_min, epsilon_mc_max = 0.15, 0.40  # It is the volume fraction of ionomer in the CL.
         epsilon_c_min, epsilon_c_max = 0.15, 0.30  # It is the compression ratio of the GDL.
         #       Constants based on the interaction between water and the structure
@@ -607,13 +607,13 @@ def print_calibration_results(convergence, ga_instance, solution, varbound, sim_
     varbound : list
         List of parameter bounds and names.
     sim_error : float
-        Maximum simulation error in percentage.
+        Simulation error (RMSE) in percentage.
     """
     print("Convergence:\n", convergence)
     for idx, val in enumerate(solution):
         param_name = varbound[idx][0]
         print(f"Optimized parameter {param_name}: {val}")
-    print(Fore.RED + "\nMax simulation error: ", sim_error, "%")
+    print(Fore.RED + "\nSimulation error (RMSE): ", sim_error, "%")
     print(Style.RESET_ALL)
     if ga_instance.best_solution_generation != -1:
         print(f"Best fitness value reached after {ga_instance.best_solution_generation} generations.")
@@ -636,7 +636,7 @@ def save_calibration_results(convergence, ga_instance, solution, varbound, sim_e
     varbound : list
         List of parameter bounds and names.
     sim_error : float
-        Maximum simulation error in percentage.
+        Simulation error (RMSE) in percentage.
     type_fuel_cell : str
         Type of fuel cell configuration.
 
@@ -662,7 +662,7 @@ def save_calibration_results(convergence, ga_instance, solution, varbound, sim_e
         for idx, val in enumerate(solution):
             param_name = varbound[idx][0]
             file.write(f"\nOptimized parameter {param_name}: {val}")
-        file.write("\nMax simulation error: " + str(sim_error) + "%")
+        file.write("\nSimulation error (RMSE): " + str(sim_error) + "%")
         file.write("\nAlgorithm works with " + type_fuel_cell + ".")
         if ga_instance.best_solution_generation != -1:
             file.write(f"\nBest fitness value reached after {ga_instance.best_solution_generation} generations.")

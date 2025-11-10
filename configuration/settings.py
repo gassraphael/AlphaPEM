@@ -75,7 +75,7 @@ def calculate_current_density_parameters(type_current=None):
     # Setting the parameters of the step current density function
     delta_t_ini_step = 30 * 60 # (s). Initial time at zero current density for the stabilisation of the internal states (standard value).
     delta_t_load_step = 30 # (s). Loading time for the step current density function, from 0 to i_step.
-    delta_t_break_step = 5 * 60  # (s). Time at i_step current density for the stabilisation of the internal states.
+    delta_t_break_step = 10 * 60  # (s). Time at i_step current density for the stabilisation of the internal states.
     i_step = 2.0e4 # (A.m-2). Current density for the step current density function.
     step_current_parameters = {'delta_t_ini_step': delta_t_ini_step, 'delta_t_load_step': delta_t_load_step,
                                'delta_t_break_step': delta_t_break_step,'i_step': i_step}
@@ -307,19 +307,13 @@ def calculate_physical_parameters(type_fuel_cell):
             i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
 
 
-def calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl):
+def calculate_computing_parameters(step_current_parameters):
     """This function is used to set the computing parameters of the fuel cell system.
 
     Parameters
     ----------
     step_current_parameters : dict
         Parameters for the step current density function.
-    Hgdl : float
-        Thickness of the gas diffusion layer in meters.
-    Hmpl : float
-        Thickness of the microporous layer in meters.
-    Hacl : float
-        Thickness of the anode catalyst layer in meters.
 
     Returns
     -------
@@ -350,13 +344,10 @@ def calculate_computing_parameters(step_current_parameters, Hgdl, Hmpl, Hacl):
         - 'delta_t_dyn_step': the time (in seconds) for dynamic display of the step current density function.
     """
 
-    # Calculation of the minimum thickness of the model node
-    H_node_min = Hacl  # m. It is the minimum thickness of the model node.
-
     # Setting the number of model points placed inside each layer:
     nb_gc = 1  # It is the number of model points placed inside each gas channel.
-    nb_gdl = max(1, int(Hgdl / H_node_min / 4))  # It is the number of model points placed inside each GDL.
-    nb_mpl = max(1, int(Hmpl / H_node_min / 3))  # It is the number of model points placed inside each MPL.
+    nb_gdl = 3  # It is the number of model points placed inside each GDL.
+    nb_mpl = 2  # It is the number of model points placed inside each MPL.
 
     # Setting the purging parameters of the system and the dynamic display of the step current density function:
     t_purge = 0.6, 15  # (s, s). It is the time parameters for purging the system.
