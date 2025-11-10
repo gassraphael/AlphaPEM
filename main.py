@@ -31,9 +31,9 @@ def main():
     # - GenStack is a fuel cell developed in open source by ZSW (https://zenodo.org/records/14223364).
     # - EH-31 is a fuel cell developed by EH GROUP. 1.5, 2.0, 2.25 and 2.5 corresponds to the different pressure options.
     type_fuel_cell_1 = "ZSW-GenStack"
-    type_fuel_cell_2 = None
-    type_fuel_cell_3 = None
-    type_fuel_cell_4 = None
+    type_fuel_cell_2 = "ZSW-GenStack_Pa_1.61_Pc_1.41"
+    type_fuel_cell_3 = "ZSW-GenStack_Pa_2.01_Pc_1.81"
+    type_fuel_cell_4 = "ZSW-GenStack_Pa_2.4_Pc_2.2"
     # Current density possibilities: "step", "polarization", "polarization_for_cali", "EIS".
     type_current = "polarization"
     # Calibration zone : "before_voltage_drop", "full".
