@@ -871,6 +871,7 @@ def plot_C_N2(variables, parameters, ax):
     """
 
     # Extraction of the parameters
+    nb_gc = parameters['nb_gc']
     type_current, type_plot = parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
         delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
@@ -886,13 +887,13 @@ def plot_C_N2(variables, parameters, ax):
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
     t = np.array(variables['t'])[mask]
-    C_N2_a_t = np.array(variables['C_N2_a'])[mask]
-    C_N2_c_t = np.array(variables['C_N2_c'])[mask]
+    C_N2_agc_t = np.array(variables[f'C_N2_agc_{int(np.ceil(nb_gc / 2))}'])[mask]
+    C_N2_cgc_t = np.array(variables[f'C_N2_cgc_{int(np.ceil(nb_gc / 2))}'])[mask]
 
     # Plot C_N2
-    ax.plot(t, C_N2_a_t, color=colors(6))
-    ax.plot(t, C_N2_c_t, color=colors(6))
-    ax.legend([r'$\mathregular{C_{N_{2},a}}$', r'$\mathregular{C_{N_{2},c}}$'], loc='best')
+    ax.plot(t, C_N2_agc_t, color=colors(6))
+    ax.plot(t, C_N2_cgc_t, color=colors(6))
+    ax.legend([r'$\mathregular{C_{N_{2},agc}}$', r'$\mathregular{C_{N_{2},cgc}}$'], loc='best')
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r'$\mathbf{Nitrogen}$ $\mathbf{concentration}$ $\mathbf{C_{N_{2}}}$ $\mathbf{\left( mol.m^{-3} \right)}$',
                   labelpad=3)

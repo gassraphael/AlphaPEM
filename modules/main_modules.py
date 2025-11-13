@@ -149,13 +149,13 @@ def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, acces
     # Figures preparation
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(computing_parameters)
 
-    # Certain conditions must be met.
-    if computing_parameters['type_display'] == "multiple":
-        raise ValueError('step current is not thought to be used with step current and multiple display.' +
-                         'There would be too much plots to handle.')
-
     # Dynamic display requires a dedicated use of the AlphaPEM class.
     if computing_parameters['type_plot'] == "dynamic":
+
+        # Certain conditions must be met.
+        if computing_parameters['type_display'] == "multiple":
+            raise ValueError('step current is not thought to be used with step current, dynamic plot and multiple '
+                             'display. There would be too much plots to handle.')
 
         # Initialization
         #       Calculation of the plot update number (n) and the initial time interval (time_interval).
