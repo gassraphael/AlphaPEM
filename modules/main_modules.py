@@ -70,7 +70,8 @@ def figures_preparation(computing_parameters):
             fig3, ax3 = None, None  # Here, additional plots are unnecessary
             plt.subplots_adjust(left=0.04, right=0.98, top=0.96, bottom=0.07, wspace=0.2, hspace=0.15)
         elif computing_parameters['type_display'] == "synthetic":
-            mpl.rcParams['font.size'] = 11  # Font size for all text
+            mpl.rcParams['font.size'] = 18  # Font size for all text
+            mpl.rcParams['legend.fontsize'] = 15  # Legend font size only
             fig1, ax1 = plt.subplots(figsize=(8, 8))
             fig2, ax2 = None, None  # Here, additional plots are unnecessary
             fig3, ax3 = None, None  # Here, additional plots are unnecessary
