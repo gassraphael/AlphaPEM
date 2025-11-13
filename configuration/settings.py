@@ -75,7 +75,7 @@ def calculate_current_density_parameters(type_current=None):
     # Setting the parameters of the step current density function
     delta_t_ini_step = 30 * 60 # (s). Initial time at zero current density for the stabilisation of the internal states (standard value).
     delta_t_load_step = 30 # (s). Loading time for the step current density function, from 0 to i_step.
-    delta_t_break_step = 10 * 60  # (s). Time at i_step current density for the stabilisation of the internal states.
+    delta_t_break_step = 2 * 60  # (s). Time at i_step current density for the stabilisation of the internal states.
     i_step = 2.0e4 # (A.m-2). Current density for the step current density function.
     step_current_parameters = {'delta_t_ini_step': delta_t_ini_step, 'delta_t_load_step': delta_t_load_step,
                                'delta_t_break_step': delta_t_break_step,'i_step': i_step}

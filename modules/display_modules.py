@@ -1081,16 +1081,16 @@ def plot_P(variables, operating_inputs, parameters, ax):
         mask = np.array(variables['t']) >= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
-    t = np.array(variables['t'])
+    t = np.array(variables['t'])[mask]
     nb_gc_mid = int(np.ceil(nb_gc / 2))
-    C_v_agc = np.array(variables[f'C_v_agc_{nb_gc_mid}'])
-    C_H2_agc = np.array(variables[f'C_H2_agc_{nb_gc_mid}'])
-    C_N2_agc = np.array(variables[f'C_N2_agc_{nb_gc_mid}'])
-    T_agc = np.array(variables[f'T_agc_{nb_gc_mid}'])
-    C_v_cgc = np.array(variables[f'C_v_cgc_{nb_gc_mid}'])
-    C_O2_cgc = np.array(variables[f'C_O2_cgc_{nb_gc_mid}'])
-    C_N2_cgc = np.array(variables[f'C_N2_cgc_{nb_gc_mid}'])
-    T_cgc = np.array(variables[f'T_cgc_{nb_gc_mid}'])
+    C_v_agc = np.array(variables[f'C_v_agc_{nb_gc_mid}'])[mask]
+    C_H2_agc = np.array(variables[f'C_H2_agc_{nb_gc_mid}'])[mask]
+    C_N2_agc = np.array(variables[f'C_N2_agc_{nb_gc_mid}'])[mask]
+    T_agc = np.array(variables[f'T_agc_{nb_gc_mid}'])[mask]
+    C_v_cgc = np.array(variables[f'C_v_cgc_{nb_gc_mid}'])[mask]
+    C_O2_cgc = np.array(variables[f'C_O2_cgc_{nb_gc_mid}'])[mask]
+    C_N2_cgc = np.array(variables[f'C_N2_cgc_{nb_gc_mid}'])[mask]
+    T_cgc = np.array(variables[f'T_cgc_{nb_gc_mid}'])[mask]
     Pagc_t = (C_v_agc + C_H2_agc + C_N2_agc) * R * T_agc / 1e5  # Conversion in bar
     Pcgc_t = (C_v_cgc + C_O2_cgc + C_N2_cgc) * R * T_cgc / 1e5 # Conversion in bar
     if parameters['type_auxiliary'] != 'no_auxiliary':
@@ -1099,9 +1099,9 @@ def plot_P(variables, operating_inputs, parameters, ax):
         Pcsm_t = np.array(variables['Pcsm'])[mask] / 1e5 # Conversion in bar
         Pcem_t = np.array(variables['Pcem'])[mask] / 1e5 # Conversion in bar
     else: # parameters['type_auxiliary'] == 'no_auxiliary'
-        Pa_in_t = np.array(variables['Pa_in']) / 1e5 # Conversion in bar
+        Pa_in_t = np.array(variables['Pa_in'])[mask] / 1e5 # Conversion in bar
         Pa_out_t = np.array([Pa_des] * len(t)) / 1e5 # Conversion in bar
-        Pc_in_t = np.array(variables['Pc_in']) / 1e5 # Conversion in bar
+        Pc_in_t = np.array(variables['Pc_in'])[mask] / 1e5 # Conversion in bar
         Pc_out_t = np.array([Pc_des] * len(t)) / 1e5 # Conversion in bar
 
     # Plot the pressure at different spatial localisations: P
