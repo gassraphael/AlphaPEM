@@ -71,7 +71,7 @@ def figures_preparation(computing_parameters):
             plt.subplots_adjust(left=0.04, right=0.98, top=0.96, bottom=0.07, wspace=0.2, hspace=0.15)
         elif computing_parameters['type_display'] == "synthetic":
             mpl.rcParams['font.size'] = 11  # Font size for all text
-            fig1, ax1 = plt.subplots(1, 2, figsize=(14, 4.7))
+            fig1, ax1 = plt.subplots(figsize=(8, 8))
             fig2, ax2 = None, None  # Here, additional plots are unnecessary
             fig3, ax3 = None, None  # Here, additional plots are unnecessary
 
@@ -257,6 +257,12 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
         if current_parameters['pola_current_parameters'][4]['i_max_pola'] < i_exp_t_4[-1]:
             raise ValueError('The given maximum current density of the polarization curve i_max_pola_4 is lower than the '
                              'maximum current density of the experimental values. Please increase it.')
+    if computing_parameters['type_fuel_cell'][5] is not None and computing_parameters['type_fuel_cell'][5] != "manual_setup" and \
+            computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode":  # Experimental points are accessible
+        i_exp_t_5, U_exp_t_5 = pola_exp_values(computing_parameters['type_fuel_cell'][5], computing_parameters['voltage_zone'])
+        if current_parameters['pola_current_parameters'][5]['i_max_pola'] < i_exp_t_5[-1]:
+            raise ValueError('The given maximum current density of the polarization curve i_max_pola_5 is lower than the '
+                             'maximum current density of the experimental values. Please increase it.')
 
     # Dynamic display requires a dedicated use of the AlphaPEM class.
     if computing_parameters['type_plot'] == "dynamic":
@@ -264,7 +270,8 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
         # Certain conditions must be met.
         if (computing_parameters['type_fuel_cell'][2] is not None or 
                 computing_parameters['type_fuel_cell'][3] is not None or 
-                computing_parameters['type_fuel_cell'][4] is not None):
+                computing_parameters['type_fuel_cell'][4] is not None or
+                computing_parameters['type_fuel_cell'][5] is not None):
             raise ValueError('dynamic plot is not currently intended for use with different inputs.')
 
         # Initialization
@@ -321,6 +328,10 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
             Simulator_4 = AlphaPEM(select_nth_elements(operating_inputs, 4),
                                    select_nth_elements(current_parameters, 4), accessible_physical_parameters,
                                    undetermined_physical_parameters, select_nth_elements(computing_parameters, 4))
+        if computing_parameters['type_fuel_cell'][5] is not None:
+            Simulator_5 = AlphaPEM(select_nth_elements(operating_inputs, 5),
+                                   select_nth_elements(current_parameters, 5), accessible_physical_parameters,
+                                   undetermined_physical_parameters, select_nth_elements(computing_parameters, 5))
 
         # Display
         if computing_parameters['type_display'] != "no_display":
@@ -331,6 +342,8 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
                 Simulator_3.Display(ax1, ax2, ax3)
             if computing_parameters['type_fuel_cell'][4] is not None:
                 Simulator_4.Display(ax1, ax2, ax3)
+            if computing_parameters['type_fuel_cell'][5] is not None:
+                Simulator_5.Display(ax1, ax2, ax3)
 
     # Plot saving
     Simulator_1.Save_plot(fig1, fig2, fig3)
@@ -374,7 +387,8 @@ def launch_AlphaPEM_for_polarization_current_for_calibration(operating_inputs, c
         # Certain conditions must be met.
         if (computing_parameters['type_fuel_cell'][2] is not None or 
                 computing_parameters['type_fuel_cell'][3] is not None or 
-                computing_parameters['type_fuel_cell'][4] is not None):
+                computing_parameters['type_fuel_cell'][4] is not None or
+                computing_parameters['type_fuel_cell'][5] is not None):
             raise ValueError('dynamic plot is not currently intended for use with different inputs.')
         if computing_parameters['type_current'] == "polarization_for_cali":
             raise ValueError('calibration should not use dynamic plot, as it is not intended for real-time display.')
@@ -442,6 +456,10 @@ def launch_AlphaPEM_for_polarization_current_for_calibration(operating_inputs, c
             Simulator_4 = AlphaPEM(select_nth_elements(operating_inputs, 4),
                                    select_nth_elements(current_parameters, 4), accessible_physical_parameters,
                                    undetermined_physical_parameters, select_nth_elements(computing_parameters, 4))
+        if computing_parameters['type_fuel_cell'][5] is not None:
+            Simulator_5 = AlphaPEM(select_nth_elements(operating_inputs, 5),
+                                   select_nth_elements(current_parameters, 5), accessible_physical_parameters,
+                                   undetermined_physical_parameters, select_nth_elements(computing_parameters, 5))
 
         # Display
         if computing_parameters['type_display'] != "no_display":
@@ -452,6 +470,8 @@ def launch_AlphaPEM_for_polarization_current_for_calibration(operating_inputs, c
                 Simulator_3.Display(ax1, ax2, ax3)
             if computing_parameters['type_fuel_cell'][4] is not None:
                 Simulator_4.Display(ax1, ax2, ax3)
+            if computing_parameters['type_fuel_cell'][5] is not None:
+                Simulator_5.Display(ax1, ax2, ax3)
 
     # Plot saving
     Simulator_1.Save_plot(fig1, fig2, fig3)

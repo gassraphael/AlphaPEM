@@ -34,6 +34,7 @@ def main():
     type_fuel_cell_2 = "ZSW-GenStack_Pa_1.61_Pc_1.41"
     type_fuel_cell_3 = "ZSW-GenStack_Pa_2.01_Pc_1.81"
     type_fuel_cell_4 = "ZSW-GenStack_Pa_2.4_Pc_2.2"
+    type_fuel_cell_5 = "ZSW-GenStack_Pa_2.8_Pc_2.6"
     # Current density possibilities: "step", "polarization", "polarization_for_cali", "EIS".
     type_current = "polarization"
     # Calibration zone : "before_voltage_drop", "full".
@@ -47,6 +48,7 @@ def main():
     type_control_2 = "no_control"
     type_control_3 = "no_control"
     type_control_4 = "no_control"
+    type_control_5 = "no_control"
     # Purges possibilities: "constant_purge", "periodic_purge", "no_purge".
     type_purge = "no_purge"
     # Display possibilities: "multiple", "synthetic", "no_display".
@@ -74,6 +76,8 @@ def main():
         calculate_operating_inputs(copy.deepcopy(pola_current_parameters), type_fuel_cell_3, voltage_zone)
     T_des_4, Pa_des_4, Pc_des_4, Sa_4, Sc_4, Phi_a_des_4, Phi_c_des_4, y_H2_in_4, pola_current_parameters_4 = \
         calculate_operating_inputs(copy.deepcopy(pola_current_parameters), type_fuel_cell_4, voltage_zone)
+    T_des_5, Pa_des_5, Pc_des_5, Sa_5, Sc_5, Phi_a_des_5, Phi_c_des_5, y_H2_in_5, pola_current_parameters_5 = \
+        calculate_operating_inputs(copy.deepcopy(pola_current_parameters), type_fuel_cell_5, voltage_zone)
     #   Physical parameters
     (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
      Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
@@ -84,17 +88,18 @@ def main():
 
     # Initialize the operating inputs and parameters dictionaries.
     operating_inputs = {'current_density': current_density,
-                        'T_des': [None, T_des_1, T_des_2, T_des_3, T_des_4],
-                        'Pa_des': [None, Pa_des_1, Pa_des_2, Pa_des_3, Pa_des_4],
-                        'Pc_des': [None, Pc_des_1, Pc_des_2, Pc_des_3, Pc_des_4],
-                        'Sa': [None, Sa_1, Sa_2, Sa_3, Sa_4],
-                        'Sc': [None, Sc_1, Sc_2, Sc_3, Sc_4],
-                        'Phi_a_des': [None, Phi_a_des_1, Phi_a_des_2, Phi_a_des_3, Phi_a_des_4],
-                        'Phi_c_des': [None, Phi_c_des_1, Phi_c_des_2, Phi_c_des_3, Phi_c_des_4],
-                        'y_H2_in': [None, y_H2_in_1, y_H2_in_2, y_H2_in_3, y_H2_in_4]}
+                        'T_des': [None, T_des_1, T_des_2, T_des_3, T_des_4, T_des_5],
+                        'Pa_des': [None, Pa_des_1, Pa_des_2, Pa_des_3, Pa_des_4, Pa_des_5],
+                        'Pc_des': [None, Pc_des_1, Pc_des_2, Pc_des_3, Pc_des_4, Pc_des_5],
+                        'Sa': [None, Sa_1, Sa_2, Sa_3, Sa_4, Sa_5],
+                        'Sc': [None, Sc_1, Sc_2, Sc_3, Sc_4, Sc_5],
+                        'Phi_a_des': [None, Phi_a_des_1, Phi_a_des_2, Phi_a_des_3, Phi_a_des_4, Phi_a_des_5],
+                        'Phi_c_des': [None, Phi_c_des_1, Phi_c_des_2, Phi_c_des_3, Phi_c_des_4, Phi_c_des_5],
+                        'y_H2_in': [None, y_H2_in_1, y_H2_in_2, y_H2_in_3, y_H2_in_4, y_H2_in_5]}
     current_parameters = {'step_current_parameters': step_current_parameters,
                           'pola_current_parameters': [None, pola_current_parameters_1, pola_current_parameters_2,
-                                                      pola_current_parameters_3, pola_current_parameters_4],
+                                                      pola_current_parameters_3, pola_current_parameters_4,
+                                                      pola_current_parameters_5],
                           'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
                           'i_EIS': i_EIS, 'ratio_EIS': ratio_EIS, 't_EIS': t_EIS, 'f_EIS': f_EIS}
     accessible_physical_parameters = {'Aact': Aact, 'nb_cell': nb_cell, 'Hagc': Hagc, 'Hcgc': Hcgc, 'Wagc': Wagc,
@@ -110,10 +115,11 @@ def main():
     computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
                             'rtol': rtol, 'atol': atol,
                             'type_fuel_cell': [None, type_fuel_cell_1, type_fuel_cell_2, type_fuel_cell_3,
-                                               type_fuel_cell_4],
+                                               type_fuel_cell_4, type_fuel_cell_5],
                             'type_current': type_current, 'voltage_zone': voltage_zone,
                             'type_auxiliary': type_auxiliary,
-                            'type_control': [None, type_control_1, type_control_2, type_control_3, type_control_4],
+                            'type_control': [None, type_control_1, type_control_2, type_control_3, type_control_4,
+                                             type_control_5],
                             'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}
 
     # Check if the type_current is valid and launch the simulation

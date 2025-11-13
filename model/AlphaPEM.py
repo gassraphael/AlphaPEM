@@ -578,8 +578,7 @@ class AlphaPEM:
 
             elif type_display == "synthetic":
 
-                plot_polarisation_curve(self.variables, self.operating_inputs, self.parameters, ax1[0])
-                plot_s(self.variables, self.operating_inputs, self.parameters, ax1[1])
+                plot_polarisation_curve(self.variables, self.operating_inputs, self.parameters, ax1)
                 plt.pause(0.1)  # A break is necessary to plot the new points in dynamic mode
 
             elif type_display == "no_display":
