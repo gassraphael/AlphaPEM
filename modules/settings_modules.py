@@ -235,14 +235,14 @@ def stored_physical_parameters(type_fuel_cell):
         Aact = 283.87e-4  # m². It is the MEA active area.
         nb_cell = 26  # . It is the number of cell in the stack.
         # Catalyst layer
-        Hacl = 17.801448665657796e-6  # m. It is the thickness of the anode catalyst layer.
-        Hccl = 5.084209184222237e-6  # m. It is the thickness of the cathode catalyst layer.
-        epsilon_mc = 0.3977221223617322  # It is the volume fraction of ionomer in the CL.
+        Hacl = 7.440670672800841e-6  # m. It is the thickness of the anode catalyst layer.
+        Hccl = 5.123589240644842e-6  # m. It is the thickness of the cathode catalyst layer.
+        epsilon_mc = 0.39812758008346805  # It is the volume fraction of ionomer in the CL.
         # Membrane
-        Hmem = 13.26778357711510e-06  # m. It is the thickness of the membrane.
+        Hmem = 8.088414551242703e-06  # m. It is the thickness of the membrane.
         # Gas diffusion layer
         Hgdl = 127e-6  # m. It is the thickness of the gas diffusion layer.
-        epsilon_gdl = 0.72524597100995  # It is the anode/cathode GDL porosity.
+        epsilon_gdl = 0.6751340029820658  # It is the anode/cathode GDL porosity.
         epsilon_cl = 0.5  # It is the porosity of the catalyst layer, without units.
         epsilon_c = 0.2  # It is the compression ratio of the GDL.
         #   Microporous layer
@@ -265,11 +265,11 @@ def stored_physical_parameters(type_fuel_cell):
         # Interaction parameters between water and PEMFC structure
         e = 4.0  # It is the capillary exponent
         # Voltage polarization
-        Re = 5.086438702125131e-7  # ohm.m². It is the electron conduction resistance of the circuit.
-        i0_d_c_ref = 3.698611641610143  # A.m-2. It is the dry reference exchange current density at the cathode.
+        Re = 5.056928274815692e-7  # ohm.m². It is the electron conduction resistance of the circuit.
+        i0_d_c_ref = 3.4846418880603856  # A.m-2. It is the dry reference exchange current density at the cathode.
         i0_h_c_ref = 1.0  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
-        kappa_co = 5.429823145781237 # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
-        kappa_c = 0.279119923748518  # It is the overpotential correction exponent.
+        kappa_co = 3.0031657003133536 # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
+        kappa_c = 0.2659936257530351  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
 
