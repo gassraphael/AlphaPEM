@@ -54,10 +54,10 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
             type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6" or type_fuel_cell == "ZSW-GenStack_T_62" or \
             type_fuel_cell == "ZSW-GenStack_T_76" or type_fuel_cell == "ZSW-GenStack_T_84":
         #       Fuel cell physical parameters
-        Hacl_min, Hacl_max = 4e-6, 16e-6  # m. It is the thickness of the ACL.
-        Hccl_min, Hccl_max = 9e-6, 25e-6  # m. It is the thickness of the CCL.
+        Hacl_min, Hacl_max = 5e-6, 15e-6  # m. It is the thickness of the ACL.
+        Hccl_min, Hccl_max = 5e-6, 20e-6  # m. It is the thickness of the CCL.
         Hmem_min, Hmem_max = 5e-6, 30e-6  # m. It is the thickness of the membrane.
-        Hgdl_min, Hgdl_max = 100e-6, 200e-6  # m. It is the thickness of the gas diffusion layer.
+        Hgdl_min, Hgdl_max = 100e-6, 150e-6  # m. It is the thickness of the gas diffusion layer.
         Hmpl_min, Hmpl_max = 40e-6, 100e-6  # m. It is the thickness of the microporous layer.
         epsilon_gdl_min, epsilon_gdl_max = 0.6, 0.9  # It is the anode/cathode GDL porosity, without units.
         epsilon_mc_min, epsilon_mc_max = 0.15, 0.50  # It is the volume fraction of ionomer in the CL.
@@ -65,7 +65,7 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
         e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.
         #       Voltage polarization
         Re_min, Re_max = 5e-8, 5e-6  # Ω.m². It is the electron conduction resistance of the circuit.
-        i0_d_c_ref_min, i0_d_c_ref_max = 1e-1, 100  # A.m-2.It is the dry reference exchange current density at the cathode.
+        i0_d_c_ref_min, i0_d_c_ref_max = 1e-1, 80  # A.m-2.It is the dry reference exchange current density at the cathode.
         i0_h_c_ref_min, i0_h_c_ref_max = 1e-2, 10  # A.m-2.It is the humid reference exchange current density at the cathode.
         kappa_co_min, kappa_co_max = 0.01, 40  # A.m-2. It is the crossover correction coefficient.
         kappa_c_min, kappa_c_max = 0.25, 4  # It is the overpotential correction exponent.
