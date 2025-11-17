@@ -1005,7 +1005,7 @@ def plot_T(variables, operating_inputs, parameters, ax):
                r'$\mathregular{T_{acl}}$', r'$\mathregular{T_{mem}}$', r'$\mathregular{T_{ccl}}$',
                r'$\mathregular{T_{cmpl}}$', r'$\mathregular{T_{cgdl}}$', r'$\mathregular{T_{cgc}}$',
                r'$\mathregular{T_{des}}$'], loc='best')
-    ax.set_ylabel(r"$\mathbf{Temperature}$ $\mathbf{T}$ $\mathbf{\left( °C \right)}$", labelpad=3)
+    ax.set_ylabel(r"$\mathbf{Temperature}$ $\mathbf{T}$ $\mathbf{\left( $^\circ$C \right)}$", labelpad=3)
 
     # Plot instructions
     plot_general_instructions(ax)
@@ -1660,19 +1660,19 @@ def plot_specific_line(x, y, type_fuel_cell, type_current, type_auxiliary, type_
             ax.plot(x, y, color=colors(4), label='Sim. - P$_a$/P$_c$ = 2.8/2.6 bar')
 
         elif type_fuel_cell == "ZSW-GenStack_T_62" and (type_auxiliary == "forced-convective_cathode_with_flow-through_anode" or type_auxiliary == "no_auxiliary"):
-            ax.plot(x, y, '--', color=colors(5), label='Sim. - T = 62 °C' + r' - $ΔU_{RMSE}$ =' f' {sim_error} %')
+            ax.plot(x, y, '--', color=colors(5), label='Sim. - T = 62 $^\circ$C' + r' - $ΔU_{RMSE}$ =' f' {sim_error} %')
         elif type_fuel_cell == "ZSW-GenStack_T_62" and type_auxiliary != "forced-convective_cathode_with_flow-through_anode" and type_auxiliary != "no_auxiliary":
-            ax.plot(x, y, color=colors(5), label='Sim. - T = 62 °C')
+            ax.plot(x, y, color=colors(5), label='Sim. - T = 62 $^\circ$C')
 
         elif type_fuel_cell == "ZSW-GenStack_T_76" and (type_auxiliary == "forced-convective_cathode_with_flow-through_anode" or type_auxiliary == "no_auxiliary"):
-            ax.plot(x, y, color=colors(6), label='Sim. - T = 76 °C' + r' - $ΔU_{RMSE}$ =' f' {sim_error} %')
+            ax.plot(x, y, color=colors(6), label='Sim. - T = 76 $^\circ$C' + r' - $ΔU_{RMSE}$ =' f' {sim_error} %')
         elif type_fuel_cell == "ZSW-GenStack_T_76" and type_auxiliary != "forced-convective_cathode_with_flow-through_anode" and type_auxiliary != "no_auxiliary":
-            ax.plot(x, y, color=colors(6), label='Sim. - T = 76 °C')
+            ax.plot(x, y, color=colors(6), label='Sim. - T = 76 $^\circ$C')
 
         elif type_fuel_cell == "ZSW-GenStack_T_84" and (type_auxiliary == "forced-convective_cathode_with_flow-through_anode" or type_auxiliary == "no_auxiliary"):
-            ax.plot(x, y, color=colors(7), label='Sim. - T = 84 °C' + r' - $ΔU_{RMSE}$ =' f' {sim_error} %')
+            ax.plot(x, y, color=colors(7), label='Sim. - T = 84 $^\circ$C' + r' - $ΔU_{RMSE}$ =' f' {sim_error} %')
         elif type_fuel_cell == "ZSW-GenStack_T_84" and type_auxiliary != "forced-convective_cathode_with_flow-through_anode" and type_auxiliary != "no_auxiliary":
-            ax.plot(x, y, color=colors(7), label='Sim. - T = 84 °C')
+            ax.plot(x, y, color=colors(7), label='Sim. - T = 84 $^\circ$C')
 
         # EH-31 fuel cell
         elif type_fuel_cell == "EH-31_1.5" and (type_auxiliary == "forced-convective_cathode_with_flow-through_anode" or type_auxiliary == "no_auxiliary"):
@@ -1730,19 +1730,19 @@ def plot_specific_line(x, y, type_fuel_cell, type_current, type_auxiliary, type_
             ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(4), label='Sim. - P$_a$/P$_c$ = 2.8/2.6 bar')
 
         elif type_fuel_cell == "ZSW-GenStack_T_62" and (type_auxiliary == "forced-convective_cathode_with_flow-through_anode" or type_auxiliary == "no_auxiliary"):
-            ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(5), label='Sim. - T = 62 °C' + r' - $ΔU_{RMSE}$ =' f' {sim_error} %')
+            ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(5), label='Sim. - T = 62 $^\circ$C' + r' - $ΔU_{RMSE}$ =' f' {sim_error} %')
         elif type_fuel_cell == "ZSW-GenStack_T_62" and type_auxiliary != "forced-convective_cathode_with_flow-through_anode" and type_auxiliary != "no_auxiliary":
-            ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(5), label='Sim. - T = 62 °C')
+            ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(5), label='Sim. - T = 62 $^\circ$C')
 
         elif type_fuel_cell == "ZSW-GenStack_T_76" and (type_auxiliary == "forced-convective_cathode_with_flow-through_anode" or type_auxiliary == "no_auxiliary"):
-            ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(6), label='Sim. - T = 76 °C' + r' - $ΔU_{RMSE}$ =' f' {sim_error} %')
+            ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(6), label='Sim. - T = 76 $^\circ$C' + r' - $ΔU_{RMSE}$ =' f' {sim_error} %')
         elif type_fuel_cell == "ZSW-GenStack_T_76" and type_auxiliary != "forced-convective_cathode_with_flow-through_anode" and type_auxiliary != "no_auxiliary":
-            ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(6), label='Sim. - T = 76 °C')
+            ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(6), label='Sim. - T = 76 $^\circ$C')
 
         elif type_fuel_cell == "ZSW-GenStack_T_84" and (type_auxiliary == "forced-convective_cathode_with_flow-through_anode" or type_auxiliary == "no_auxiliary"):
-            ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(7), label='Sim. - T = 84 °C' + r' - $ΔU_{RMSE}$ =' f' {sim_error} %')
+            ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(7), label='Sim. - T = 84 $^\circ$C' + r' - $ΔU_{RMSE}$ =' f' {sim_error} %')
         elif type_fuel_cell == "ZSW-GenStack_T_84" and type_auxiliary != "forced-convective_cathode_with_flow-through_anode" and type_auxiliary != "no_auxiliary":
-            ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(7), label='Sim. - T = 84 °C')
+            ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(7), label='Sim. - T = 84 $^\circ$C')
 
         # EH-31 fuel cell
         elif type_fuel_cell == "EH-31_1.5" and (type_auxiliary == "forced-convective_cathode_with_flow-through_anode" or type_auxiliary == "no_auxiliary"):

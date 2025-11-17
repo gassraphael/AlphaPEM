@@ -707,11 +707,11 @@ def plot_experimental_polarisation_curve(type_fuel_cell, i_fc_t, U_exp_t, ax):
     elif type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6":
         ax.scatter(i_fc_t, U_exp_t, linewidths=1.5, marker="D", color="black", label="Exp. - P$_a$/P$_c$ = 2.8/2.6 bar")
     elif type_fuel_cell == "ZSW-GenStack_T_62":
-        ax.scatter(i_fc_t, U_exp_t, linewidths=1.5, marker="P", color="black", label="Exp. - T = 62 °C")
+        ax.scatter(i_fc_t, U_exp_t, linewidths=1.5, marker="P", color="black", label="Exp. - T = 62 $^\circ$C")
     elif type_fuel_cell == "ZSW-GenStack_T_76":
-        ax.scatter(i_fc_t, U_exp_t, linewidths=1.5, marker="X", color="black", label="Exp. - T = 76 °C")
+        ax.scatter(i_fc_t, U_exp_t, linewidths=1.5, marker="X", color="black", label="Exp. - T = 76 $^\circ$C")
     elif type_fuel_cell == "ZSW-GenStack_T_84":
-        ax.scatter(i_fc_t, U_exp_t, linewidths=1.5, marker="*", color="black", label="Exp. - T = 84 °C")
+        ax.scatter(i_fc_t, U_exp_t, linewidths=1.5, marker="*", color="black", label="Exp. - T = 84 $^\circ$C")
     # EH-31
     elif type_fuel_cell == "EH-31_1.5":  # at 1.5 bar
         ax.scatter(i_fc_t, U_exp_t, linewidths=1.5, marker="s", color="black", label="Exp. - P = 1.5 bar")
