@@ -59,7 +59,7 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
         Hmem_min, Hmem_max = 5e-6, 30e-6  # m. It is the thickness of the membrane.
         Hgdl_min, Hgdl_max = 100e-6, 150e-6  # m. It is the thickness of the gas diffusion layer.
         Hmpl_min, Hmpl_max = 40e-6, 100e-6  # m. It is the thickness of the microporous layer.
-        epsilon_gdl_min, epsilon_gdl_max = 0.6, 0.9  # It is the anode/cathode GDL porosity, without units.
+        epsilon_gdl_min, epsilon_gdl_max = 0.5, 0.9  # It is the anode/cathode GDL porosity, without units.
         epsilon_mc_min, epsilon_mc_max = 0.15, 0.50  # It is the volume fraction of ionomer in the CL.
         #       Constants based on the interaction between water and the structure
         e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.

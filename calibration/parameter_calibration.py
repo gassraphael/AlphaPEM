@@ -33,8 +33,8 @@ different operating conditions, are imported from the calibration_module.py.
 #                          "ZSW-GenStack_Pa_2.4_Pc_2.2", "ZSW-GenStack_Pa_2.8_Pc_2.6", "ZSW-GenStack_T_62",
 #                          "ZSW-GenStack_T_76", "ZSW-GenStack_T_84", "EH-31_1.5"(2021), "EH-31_2.0"(2021),
 #                          "EH-31_2.25"(2021), "EH-31_2.5"(2021)
-type_fuel_cell_1 = "ZSW-GenStack"
-type_fuel_cell_2 = "ZSW-GenStack_T_62"
+type_fuel_cell_1 = "ZSW-GenStack_T_62"
+type_fuel_cell_2 = "ZSW-GenStack_T_84"
 
 # Calibration zone: "before_voltage_drop", "full".
 voltage_zone = "before_voltage_drop"
