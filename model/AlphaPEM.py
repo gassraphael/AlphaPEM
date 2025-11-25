@@ -401,13 +401,11 @@ class AlphaPEM:
         f_drop_ini = 0.5 * (1.0 - math.tanh((4 * s_ini - 2 * slim - 2 * s_switch) / (slim - s_switch)))
         # eta_c_ini = R * T_ini / (alpha_c * F) * \
         #             math.log((i_fc_ini + i_n_ini) / (i0_d_c_ref ** (1 - f_drop_ini) * i0_h_c_ref ** f_drop_ini) *
-        #                      (C_O2ref / C_O2_ini) ** kappa_c)  # It is the initial
-        # #                                                                       cathode overpotential in the fuel cell.
+        #                      (C_O2ref / C_O2_ini) ** kappa_c)  # It is the initial cathode overpotential in the fuel cell.
         eta_c_ini = R * T_ini / (alpha_c * F) * \
                     math.log((i_fc_ini + i_n_ini) / (i0_d_c_ref) *
-                             1 / math.exp(-Eact_O2_red / (R * T_ini) * (1/T_ini - 1/Tref_O2_red))
-                             (C_O2ref_red / C_O2_ini) ** kappa_c)  # It is the initial
-        #                                                                       cathode overpotential in the fuel cell.
+                             1 / math.exp(-Eact_O2_red / (R * T_ini) * (1/T_ini - 1/Tref_O2_red)) *
+                             (C_O2ref_red / C_O2_ini) ** kappa_c)  # It is the initial cathode overpotential in the fuel cell.
 
         # Initial auxiliary system state
         Wcp_ini = 0  # kg.s-1. It is the flow rate of the air compressor.
