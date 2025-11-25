@@ -9,7 +9,7 @@
 import math
 
 # Importing constants' value and functions
-from configuration.settings import F, R, E0, Pref
+from configuration.settings import F, R, E0, Pref_eq
 from modules.transitory_functions import average, k_H2, k_O2, sigma_p_eff
 
 
@@ -92,8 +92,8 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
         i_fc = operating_inputs['current_density'](t[i], parameters)
 
         # The equilibrium potential
-        Ueq = E0 - 8.5e-4 * (T_ccl - 298.15) + R * T_ccl / (2 * F) * (math.log(R * T_acl * C_H2_acl / Pref) +
-                                                                  0.5 * math.log(R * T_ccl * C_O2_ccl / Pref))
+        Ueq = E0 - 8.5e-4 * (T_ccl - 298.15) + R * T_ccl / (2 * F) * (math.log(R * T_acl * C_H2_acl / Pref_eq) +
+                                                                      0.5 * math.log(R * T_ccl * C_O2_ccl / Pref_eq))
 
         # The crossover current density
         T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],

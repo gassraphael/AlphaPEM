@@ -23,7 +23,7 @@ from model.dif_eq import dydt
 from model.flows import calculate_flows
 from model.cell_voltage import calculate_cell_voltage
 from model.control import control_operating_conditions
-from configuration.settings import Pext, Phi_ext, y_O2_ext, C_O2ref, alpha_c, F, R
+from configuration.settings import Pext, Phi_ext, y_O2_ext, C_O2ref_red, alpha_c, Tref_O2_red, Eact_O2_red, F, R
 from modules.dif_eq_modules import event_negative
 from modules.transitory_functions import lambda_eq, k_H2, k_O2
 from modules.display_modules import (plot_ifc, plot_J, plot_C_v, plot_lambda, plot_s, plot_C_O2, plot_C_H2, plot_C_N2,
@@ -399,9 +399,14 @@ class AlphaPEM:
         i_n_ini = 2 * F * R * T_ini / Hmem * C_H2_ini * k_H2(lambda_mem_ini, T_ini, kappa_co) + \
                   4 * F * R * T_ini / Hmem * C_O2_ini * k_O2(lambda_mem_ini, T_ini, kappa_co)
         f_drop_ini = 0.5 * (1.0 - math.tanh((4 * s_ini - 2 * slim - 2 * s_switch) / (slim - s_switch)))
+        # eta_c_ini = R * T_ini / (alpha_c * F) * \
+        #             math.log((i_fc_ini + i_n_ini) / (i0_d_c_ref ** (1 - f_drop_ini) * i0_h_c_ref ** f_drop_ini) *
+        #                      (C_O2ref / C_O2_ini) ** kappa_c)  # It is the initial
+        # #                                                                       cathode overpotential in the fuel cell.
         eta_c_ini = R * T_ini / (alpha_c * F) * \
-                    math.log((i_fc_ini + i_n_ini) / (i0_d_c_ref ** (1 - f_drop_ini) * i0_h_c_ref ** f_drop_ini) *
-                             (C_O2ref / C_O2_ini) ** kappa_c)  # It is the initial
+                    math.log((i_fc_ini + i_n_ini) / (i0_d_c_ref) *
+                             1 / math.exp(-Eact_O2_red / (R * T_ini) * (1/T_ini - 1/Tref_O2_red))
+                             (C_O2ref_red / C_O2_ini) ** kappa_c)  # It is the initial
         #                                                                       cathode overpotential in the fuel cell.
 
         # Initial auxiliary system state

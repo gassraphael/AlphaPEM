@@ -9,7 +9,7 @@
 import math
 
 # Importing constants' value and functions
-from configuration.settings import C_O2ref, alpha_c, rho_mem, M_eq, F, R, M_H2O
+from configuration.settings import C_O2ref_red, alpha_c, Eact_O2_red, Tref_O2_red, rho_mem, M_eq, F, R, M_H2O
 from modules.transitory_functions import rho_H2O_l
 
 
@@ -594,7 +594,10 @@ def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hccl, 
     # dif_eq['deta_c / dt'] = 1 / (C_scl * Hccl) * ((i_fc + i_n) - (i0_d_c_ref ** f_drop * i0_h_c_ref ** (1 - f_drop)) *
     #                                               (C_O2_ccl / C_O2ref) ** kappa_c * math.exp(alpha_c * F / (R * T_ccl) * eta_c))
 
-    dif_eq['deta_c / dt'] = 1 / (C_scl * Hccl) * ((i_fc + i_n) - i0_d_c_ref * (C_O2_ccl / C_O2ref) ** kappa_c *
+
+
+    dif_eq['deta_c / dt'] = 1 / (C_scl * Hccl) * ((i_fc + i_n) - i0_d_c_ref * (C_O2_ccl / C_O2ref_red) ** kappa_c *
+                                                  math.exp(-Eact_O2_red / (R * T_ccl) * (1/T_ccl - 1/Tref_O2_red)) *
                                                   math.exp(alpha_c * F / (R * T_ccl) * eta_c))
 
 

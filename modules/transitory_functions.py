@@ -11,7 +11,8 @@ import math
 # Importing constants' value
 from functools import lru_cache
 from configuration.settings import (M_eq, rho_mem, Dp_mpl, Dp_cl, theta_c_gdl, theta_c_mpl, theta_c_cl, gamma_cond,
-                                    gamma_evap, M_H2, M_O2, M_N2, M_H2O, R, F, Kshape, epsilon_p, alpha_p,
+                                    gamma_evap, M_H2, M_O2, M_N2, M_H2O, R, F, Kshape, epsilon_p, alpha_p, Tref_cross,
+                                    Eact_H2_cros_v, Eact_H2_cros_l, Eact_O2_cros_v, Eact_O2_cros_l,
                                     tau_mpl, tau_cl, r_s_gdl, r_s_mpl, r_s_cl, k_th_gdl, k_th_mpl, k_th_cl, k_th_mem,
                                     Cp_gdl, Cp_mpl, Cp_cl, Cp_mem, rho_gdl, rho_mpl, rho_cl, sigma_e_gdl, sigma_e_mpl,
                                     sigma_e_cl)
@@ -812,14 +813,9 @@ def k_H2(lambdaa, T, kappa_co):
         Permeability coefficient of the membrane for hydrogen in mol.m−1.s−1.Pa−1.
     """
 
-    # Initialisation of the constants
-    E_H2_v = 2.1e4  # J.mol-1. It is the activation energy of H2 for crossover in the under saturated membrane.
-    E_H2_l = 1.8e4  # J.mol-1. It is the activation energy of H2 for crossover in the liquid-equilibrated membrane.
-    Tref = 303.15  # K.
-
     # Calculation of the permeability coefficient of the membrane for hydrogen
-    k_H2_d = kappa_co * (0.29 + 2.2 * fv(lambdaa, T)) * 1e-14 * math.exp(E_H2_v / R * (1 / Tref - 1 / T))
-    k_H2_l = kappa_co * 1.8 * 1e-14 * math.exp(E_H2_l / R * (1 / Tref - 1 / T))
+    k_H2_d = kappa_co * (0.29 + 2.2 * fv(lambdaa, T)) * 1e-14 * math.exp(Eact_H2_cros_v / R * (1 / Tref_cross - 1 / T))
+    k_H2_l = kappa_co * 1.8 * 1e-14 * math.exp(Eact_H2_cros_l / R * (1 / Tref_cross - 1 / T))
 
     # Transition function between under-saturated and liquid-saturated states
     K_transition = 10  # It is a constant that defines the sharpness of the transition between two states. The higher it is, the sharper the transition is.
@@ -846,14 +842,9 @@ def k_O2(lambdaa, T, kappa_co):
         Permeability coefficient of the membrane for oxygen in mol.m−1.s−1.Pa−1.
     """
 
-    # Initialisation of the constants
-    E_O2_v = 2.2e4  # J.mol-1. It is the activation energy of oxygen for crossover in the under saturated membrane.
-    E_O2_l = 2.0e4  # J.mol-1. It is the activation energy of oxygen for crossover in the liquid-equilibrated membrane.
-    Tref = 303.15  # K.
-
     # Calculation of the permeability coefficient of the membrane for oxygen
-    k_O2_v = kappa_co * (0.11 + 1.9 * fv(lambdaa, T)) * 1e-14 * math.exp(E_O2_v / R * (1 / Tref - 1 / T))
-    k_O2_l = kappa_co * 1.2 * 1e-14 * math.exp(E_O2_l / R * (1 / Tref - 1 / T))
+    k_O2_v = kappa_co * (0.11 + 1.9 * fv(lambdaa, T)) * 1e-14 * math.exp(Eact_O2_cros_v / R * (1 / Tref_cross - 1 / T))
+    k_O2_l = kappa_co * 1.2 * 1e-14 * math.exp(Eact_O2_cros_l / R * (1 / Tref_cross - 1 / T))
 
     # Transition function between under-saturated and liquid-saturated states
     K_transition = 10  # It is a constant that defines the sharpness of the transition between two states. The higher it is, the sharper the transition is.

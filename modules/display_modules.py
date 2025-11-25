@@ -14,7 +14,7 @@ from numpy.fft import fft, fftfreq
 from scipy.interpolate import interp1d
 
 # Importing constants' value and functions
-from configuration.settings import F, R, E0, Pref, M_H2, M_O2, M_H2O, M_N2
+from configuration.settings import F, R, E0, Pref_eq, M_H2, M_O2, M_H2O, M_N2
 from modules.transitory_functions import average, Psat, C_v_sat, k_H2, k_O2, mu_mixture_gases
 from calibration.experimental_values import (pola_exp_values, plot_experimental_polarisation_curve,
                                              pola_exp_values_calibration)
@@ -1508,8 +1508,8 @@ def plot_cell_efficiency(variables, operating_inputs, parameters, n, ax):
         ifc_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
         Pfc_t[i] = Ucell_t[i] * ifc_t[i]
         Ueq = E0 - 8.5e-4 * (T_ccl_t[i] - 298.15) + \
-              R * T_ccl_t[i] / (2 * F) * (np.log(R * T_acl_t[i] * C_H2_acl_t[i] / Pref) +
-                                          0.5 * np.log(R * T_ccl_t[i] * C_O2_ccl_t[i] / Pref))
+              R * T_ccl_t[i] / (2 * F) * (np.log(R * T_acl_t[i] * C_H2_acl_t[i] / Pref_eq) +
+                                          0.5 * np.log(R * T_ccl_t[i] * C_O2_ccl_t[i] / Pref_eq))
         T_acl_mem_ccl = average([T_acl_t[i], T_mem_t[i], T_ccl_t[i]],
                         weights=[Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl), Hccl / (Hacl + Hmem + Hccl)])
         i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl_t[i] * k_H2(lambda_mem_t[i], T_mem_t[i], kappa_co)

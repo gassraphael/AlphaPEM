@@ -398,14 +398,20 @@ gamma_cond = 1e8  # s-1. It is the overall condensation rate constant for water 
 gamma_evap = 1e8  # s-1. It is the overall evaporation rate constant for water [Ansys Fluent value from their User Guide].
 epsilon_p = 0.11 #. It is the percolation threshold porosity of the GDL.
 alpha_p = 0.785 #. It is a fitted value for the effective matter transfer in the GDL, for through plane direction.
+Tref_cross = 303.15  # K. It is the reference temperature for crossover.
+Eact_H2_cros_v = 2.1e4  # J.mol-1. It is the activation energy of H2 for crossover in the under saturated membrane.
+Eact_H2_cros_l = 1.8e4  # J.mol-1. It is the activation energy of H2 for crossover in the liquid-equilibrated membrane.
+Eact_O2_cros_v = 2.2e4  # J.mol-1. It is the activation energy of oxygen for crossover in the under saturated membrane.
+Eact_O2_cros_l = 2.0e4  # J.mol-1. It is the activation energy of oxygen for crossover in the liquid-equilibrated membrane.
 Kshape = 2  # . Mathematical factor governing lambda_eq smoothing.
 
 # Model parameters for the voltage calculation
-C_O2ref = 3.39  # mol.m-3. It is the reference concentration of oxygen.
+C_O2ref_red = 3.39  # mol.m-3. It is the reference concentration of oxygen for the reduction reaction.
 alpha_c = 0.5  # It is the transfer coefficient of the cathode.
 E0 = 1.229  # V. It is the standard-state reversible voltage.
-Pref = 1e5  # Pa. It is the reference pressure.
-Eact = 73.2e3  # J.mol-1. It is the activation energy.
+Pref_eq = 1e5  # Pa. It is the reference pressure for the equilibrium potential calculation.
+Eact_O2_red = 27.7e3  # J.mol-1. It is the activation energy of oxygen reduction [futterPhysicalModelingPolymerelectrolyte2018].
+Tref_O2_red = 323 # K. It is the reference temperature for the activation energy of oxygen reduction [futterPhysicalModelingPolymerelectrolyte2018].
 
 # Model parameters for the heat transfer calculation
 #   Thermal conductivities
