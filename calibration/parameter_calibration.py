@@ -33,8 +33,8 @@ different operating conditions, are imported from the calibration_module.py.
 #                          "ZSW-GenStack_Pa_2.4_Pc_2.2", "ZSW-GenStack_Pa_2.8_Pc_2.6", "ZSW-GenStack_T_62",
 #                          "ZSW-GenStack_T_76", "ZSW-GenStack_T_84", "EH-31_1.5"(2021), "EH-31_2.0"(2021),
 #                          "EH-31_2.25"(2021), "EH-31_2.5"(2021)
-type_fuel_cell_1 = "ZSW-GenStack_T_62"
-type_fuel_cell_2 = "ZSW-GenStack_T_84"
+type_fuel_cell_1 = "ZSW-GenStack"
+type_fuel_cell_2 = "ZSW-GenStack_Pa_1.61_Pc_1.41"
 
 # Calibration zone: "before_voltage_drop", "full".
 voltage_zone = "before_voltage_drop"
@@ -66,7 +66,7 @@ num_generations = 800 # 1000 generations are good, 2000 generations are better.
         # 1) random initial population.
 initial_population = None # It is the initial population, which can be loaded from a file.
         # 2) custom initial population.
-# initial_population = pygad.load(filename="results/EH-31/parameter_calibration_1").population # Remark: it seems that the
+# initial_population = pygad.load(filename="results/ZSW-GenStack/parameter_calibration_1").population # Remark: it seems that the
 #                                 file should be loaded from the same computer and in the same folder it is created ...?
 sol_per_pop = 128 # It is the population size. It should be between 100 and 200 for a good compromise between speed and
     #              precision. Select a multiple of the available number of CPU cores for optimal multiprocessing.
