@@ -235,18 +235,18 @@ def stored_physical_parameters(type_fuel_cell):
         Aact = 283.87e-4  # m². It is the MEA active area.
         nb_cell = 26  # . It is the number of cell in the stack.
         # Catalyst layer
-        Hacl = 12.001447701414023e-6  # m. It is the thickness of the anode catalyst layer.
-        Hccl = 7.079315061035209e-6  # m. It is the thickness of the cathode catalyst layer.
-        epsilon_mc = 0.39567010730845154  # It is the volume fraction of ionomer in the CL.
+        Hacl = 9.76346510970484e-6  # m. It is the thickness of the anode catalyst layer.
+        Hccl = 5.307345509355617e-6  # m. It is the thickness of the cathode catalyst layer.
+        epsilon_mc = 0.48352845256040067  # It is the volume fraction of ionomer in the CL.
         # Membrane
-        Hmem = 10.29890236462318e-06  # m. It is the thickness of the membrane.
+        Hmem = 10.684275696739961e-06  # m. It is the thickness of the membrane.
         # Gas diffusion layer
-        Hgdl = 101.73846851856691e-6  # m. It is the thickness of the gas diffusion layer.
-        epsilon_gdl = 0.6005731100220859  # It is the anode/cathode GDL porosity.
+        Hgdl = 103.92479846707957e-6  # m. It is the thickness of the gas diffusion layer.
+        epsilon_gdl = 0.8184931467542469  # It is the anode/cathode GDL porosity.
         epsilon_cl = 0.5  # It is the porosity of the catalyst layer, without units.
         epsilon_c = 0.2  # It is the compression ratio of the GDL.
         #   Microporous layer
-        Hmpl = 43.1730413284908e-6  # m. It is the thickness of the microporous layer.
+        Hmpl = 43.98306893354156e-6  # m. It is the thickness of the microporous layer.
         epsilon_mpl = 0.425  # It is the porosity of the microporous layer.
         # Gas channel
         Hagc = 230e-6  # m. It is the thickness of the anode gas channel.
@@ -265,11 +265,11 @@ def stored_physical_parameters(type_fuel_cell):
         # Interaction parameters between water and PEMFC structure
         e = 4.0  # It is the capillary exponent
         # Voltage polarization
-        Re = 1.3762260555440144e-7  # ohm.m². It is the electron conduction resistance of the circuit.
-        i0_d_c_ref = 3.299265048188871  # A.m-2. It is the dry reference exchange current density at the cathode.
+        Re = 6.635540741264315e-8  # ohm.m². It is the electron conduction resistance of the circuit.
+        i0_d_c_ref = 3.1021792383083717  # A.m-2. It is the dry reference exchange current density at the cathode.
         i0_h_c_ref = 1.0  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
-        kappa_co = 3.4649276668521143 # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
-        kappa_c = 0.28166575123409454  # It is the overpotential correction exponent.
+        kappa_co = 3.6088595047482706 # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
+        kappa_c = 0.6404199981185146  # It is the overpotential correction exponent.
         a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
 
