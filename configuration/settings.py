@@ -415,10 +415,10 @@ Tref_O2_red = 323 # K. It is the reference temperature for the activation energy
 
 # Model parameters for the heat transfer calculation
 #   Thermal conductivities
-k_th_gdl = 1.6 # J.m-1.s-1.K-1. It is the thermal conductivity of the GDLs (non-effective ?) [vetterFreeOpenReference2019].
-k_th_mpl = 0.27 # J.m-1.s-1.K-1. It is the thermal conductivity of the MPLs (non-effective ?) [kotakaImpactInterfacialWater2014].
-k_th_cl = 0.27 # J.m-1.s-1.K-1. It is the thermal conductivity of the CLs (non-effective ?) [vetterFreeOpenReference2019].
-k_th_mem = 0.3 # J.m-1.s-1.K-1. It is the thermal conductivity of the membrane (non-effective ?) [vetterFreeOpenReference2019].
+k_th_gdl = 0.3 # J.m-1.s-1.K-1. It is the thermal non-effective conductivity of the GDLs (non-effective ?) [ZSW].
+k_th_mpl = 0.27 # J.m-1.s-1.K-1. It is the thermal conductivity of the MPLs [kotakaImpactInterfacialWater2014].
+k_th_cl = 0.27 # J.m-1.s-1.K-1. It is the thermal conductivity of the CLs [vetterFreeOpenReference2019].
+k_th_mem = 0.3 # J.m-1.s-1.K-1. It is the thermal conductivity of the membrane [vetterFreeOpenReference2019].
 #   Specific heat capacities
 Cp_gdl = 568 # J.kg-1.K-1. It is the specific heat capacities of the GDLs [wangQuasi2DTransientModel2018].
 Cp_mpl = 568 # J.kg-1.K-1. It is the specific heat capacities of the MPLs [yangEffectsOperatingConditions2019].

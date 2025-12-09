@@ -1005,7 +1005,7 @@ def plot_T(variables, operating_inputs, parameters, ax):
                r'$\mathregular{T_{acl}}$', r'$\mathregular{T_{mem}}$', r'$\mathregular{T_{ccl}}$',
                r'$\mathregular{T_{cmpl}}$', r'$\mathregular{T_{cgdl}}$', r'$\mathregular{T_{cgc}}$',
                r'$\mathregular{T_{des}}$'], loc='best')
-    ax.set_ylabel(r"$\mathbf{Temperature}$ $\mathbf{T}$ $\mathbf{\left( $^\circ$C \right)}$", labelpad=3)
+    ax.set_ylabel(r"$\mathbf{Temperature}$ $\mathbf{T}$ $\mathbf{\left( ^\circ C \right)}$", labelpad=3)
 
     # Plot instructions
     plot_general_instructions(ax)
