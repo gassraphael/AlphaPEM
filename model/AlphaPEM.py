@@ -208,6 +208,25 @@ class AlphaPEM:
         self.computing_parameters = computing_parameters
         self.parameters = {**self.current_parameters, **self.accessible_physical_parameters,
                            **self.undetermined_physical_parameters, **self.computing_parameters}
+
+        # General warnings
+        if (self.parameters["type_fuel_cell"] == "EH-31_1.5" or self.parameters["type_fuel_cell"] == "EH-31_2.0" or
+                self.parameters["type_fuel_cell"] == "EH-31_2.25" or self.parameters["type_fuel_cell"] == "EH-31_2.5"):
+            print("Warning: EH-Group fuel cell examples are not directly used in current research. The calibration may "
+                  "therefore be outdated, and the results may not be as accurate as possible.\nUsing ZSW-GenStack is "
+                  "recommended.\n")
+
+        if (self.parameters["type_auxiliary"] == "forced-convective_cathode_with_anodic_recirculation" or
+                self.parameters["type_auxiliary"] == "forced-convective_cathode_with_flow-through_anode"):
+            self.parameters["type_auxiliary"] = "no_auxiliary"
+            print("Warning: auxiliaries were temporarily removed during the addition of convection inside the GC."
+                "\nThey will be back soon, meanwhile the \"no_auxiliary\" configuration is automatically given.\n")
+
+        if self.parameters["voltage_zone"] == "full":
+            self.parameters["voltage_zone"] = "before_voltage_drop"
+            print("Warning: a good physical modelling of the voltage drop at high current densities is under construction."
+                "\nFor now, only \"before_voltage_drop\" configuration is working.\n")
+
         if self.operating_inputs['Pa_des'] < Pext or self.operating_inputs['Pc_des'] < Pext:
             raise ValueError('The desired pressure is too low. It cannot be lower than the pressure outside the stack.')
 
@@ -233,11 +252,6 @@ class AlphaPEM:
         self.control_variables = {'t_control_Phi': 0,
                                   'Phi_a_des': self.operating_inputs['Phi_a_des'],
                                   'Phi_c_des': self.operating_inputs['Phi_c_des']}
-
-        # Temporary action: simulations with auxiliaries are in reconstruction.
-        if self.parameters['type_auxiliary'] != "no_auxiliary":
-            self.parameters['type_auxiliary'] == "no_auxiliary"
-            print("Auxiliary considerations are temporarily removed, as they require reconstruction.")
 
         # Create the dynamic evolution.
         #       Create time intervals
