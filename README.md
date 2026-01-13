@@ -48,7 +48,7 @@ To install **AlphaPEM**, follow these steps in a shell:
 
 # Major updates
 
-- V1.2 - in progress - This version of AlphaPEM includes: 
+- [V1.2](https://github.com/gassraphael/AlphaPEM/tree/b71f42878a186e17efeb7e97b5d7fb50d6e76827) - 2025.12.11 - This version of AlphaPEM includes: 
 	- the addition of convective flow between the inlet, gas channels, and outlet of the cell, thereby removing the Pukrushpan equations (from Michigan University).
 		- auxiliary considerations are temporarily removed, as they require reconstruction. 
 	- the addition of the MPL to the simulated cell, in both the anode and cathode. 
