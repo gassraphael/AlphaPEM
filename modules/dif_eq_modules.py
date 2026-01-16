@@ -65,7 +65,7 @@ def calculate_dif_eq_int_values(t, sv, control_variables, operating_inputs, para
     Lgc, nb_channel_in_gc, Lm = parameters['Lgc'], parameters['nb_channel_in_gc'], parameters['Lm']
     Hmem, Hacl, Hccl = parameters['Hmem'], parameters['Hacl'], parameters['Hccl']
     epsilon_gdl, epsilon_cl = parameters['epsilon_gdl'], parameters['epsilon_cl']
-    epsilon_mpl, kappa_co, epsilon_mc = parameters['epsilon_mpl'], parameters['kappa_co'], parameters['epsilon_mc']
+    epsilon_mpl, kappa_co, IC = parameters['epsilon_mpl'], parameters['kappa_co'], parameters['IC']
     nb_gc, nb_gdl, nb_mpl = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl']
     t_purge, type_auxiliary, type_purge = parameters['t_purge'], parameters['type_auxiliary'], parameters['type_purge']
 
@@ -146,10 +146,10 @@ def calculate_dif_eq_int_values(t, sv, control_variables, operating_inputs, para
                                           s=sv[f's_ampl_{i}'], C_H2=sv[f'C_H2_ampl_{i}'], C_N2=C_N2_a_mean, epsilon=epsilon_mpl)
            for i in range(1, nb_mpl + 1)},
         'acl': calculate_rho_Cp0('acl', T_acl, C_v=C_v_acl, s=s_acl, lambdaa=lambda_acl, C_N2=C_N2_a_mean, C_H2=C_H2_acl,
-                                 epsilon=epsilon_cl, epsilon_mc=epsilon_mc),
+                                 epsilon=epsilon_cl, IC=IC, Hcl = Hacl),
         'mem': calculate_rho_Cp0('mem', T_mem, lambdaa=lambda_mem),
         'ccl': calculate_rho_Cp0('ccl', T_ccl, C_v=C_v_ccl, s=s_ccl, lambdaa=lambda_ccl, C_O2=C_O2_ccl, C_N2=C_N2_c_mean,
-                                 epsilon=epsilon_cl, epsilon_mc=epsilon_mc),
+                                 epsilon=epsilon_cl, IC=IC, Hcl = Hccl),
         **{f'cmpl_{i}': calculate_rho_Cp0('cmpl', sv[f'T_cmpl_{i}'], C_v=sv[f'C_v_cmpl_{i}'],
                                           s=sv[f's_cmpl_{i}'], C_O2=sv[f'C_O2_cmpl_{i}'], C_N2=C_N2_c_mean, epsilon=epsilon_mpl)
            for i in range(1, nb_mpl + 1)},

@@ -9,14 +9,14 @@
 import math
 
 # Importing constants' value and functions
-from configuration.settings import C_O2ref_red, alpha_c, Eact_O2_red, Tref_O2_red, rho_mem, M_eq, F, R, M_H2O
-from modules.transitory_functions import rho_H2O_l
+from configuration.settings import C_O2ref_red, alpha_c, Eact_O2_red, Tref_O2_red, rho_mem, M_eq, F, R, M_H2O, ECSA_0
+from modules.transitory_functions import rho_H2O_l, epsilon_mc, delta_ion
 
 
 # ____________________________________________________Main functions____________________________________________________
 
 
-def calculate_dyn_dissoved_water_evolution_inside_MEA(dif_eq, Hmem, Hacl, Hccl, epsilon_mc, S_abs, J_lambda, Sp, 
+def calculate_dyn_dissoved_water_evolution_inside_MEA(dif_eq, sv, Hmem, Hacl, Hccl, IC, S_abs, J_lambda, Sp,
                                                       **kwargs):
     """
     This function calculates the dynamic evolution of the dissolved water in the membrane and the catalyst layers.
@@ -25,14 +25,17 @@ def calculate_dyn_dissoved_water_evolution_inside_MEA(dif_eq, Hmem, Hacl, Hccl, 
     ----------
     dif_eq : dict
         Dictionary used for saving the differential equations.
+    sv : dict
+        Variables calculated by the solver. They correspond to the fuel cell internal states.
+        sv is a contraction of solver_variables for enhanced readability.
     Hmem : float
         Thickness of the membrane (m).
     Hacl : float
         Thickness of the anode catalyst layer (m).
     Hccl : float
         Thickness of the cathode catalyst layer (m).
-    epsilon_mc : float
-        Volume fraction of ionomer in the catalyst layer.
+    IC : float
+        Ionomer to carbon ratio in the catalyst layer.
     S_abs : dict
         Source terms of absorbed water in the anode and cathode catalyst layers (mol.m-3.s-1).
     J_lambda : dict
@@ -41,9 +44,11 @@ def calculate_dyn_dissoved_water_evolution_inside_MEA(dif_eq, Hmem, Hacl, Hccl, 
         Source terms of produced water in the anode and cathode catalyst layers (mol.m-3.s-1).
     """
 
-    dif_eq['dlambda_acl / dt'] = M_eq / (rho_mem * epsilon_mc) * (-J_lambda['acl_mem'] / Hacl + S_abs['acl'] + Sp['acl'])
+    dif_eq['dlambda_acl / dt'] = M_eq / (rho_mem * epsilon_mc(sv['lambda_acl'], sv['T_acl'], Hacl, IC)) * \
+                                 (-J_lambda['acl_mem'] / Hacl + S_abs['acl'] + Sp['acl'])
     dif_eq['dlambda_mem / dt'] = M_eq / rho_mem * (J_lambda['acl_mem'] - J_lambda['mem_ccl']) / Hmem
-    dif_eq['dlambda_ccl / dt'] = M_eq / (rho_mem * epsilon_mc) * (J_lambda['mem_ccl'] / Hccl + S_abs['ccl'] + Sp['ccl'])
+    dif_eq['dlambda_ccl / dt'] = M_eq / (rho_mem * epsilon_mc(sv['lambda_ccl'], sv['T_ccl'], Hccl, IC)) * \
+                                 (J_lambda['mem_ccl'] / Hccl + S_abs['ccl'] + Sp['ccl'])
 
 
 def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, epsilon_gdl, epsilon_mpl,
@@ -294,7 +299,7 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, 
 
 
 def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, nb_channel_in_gc, Hgdl, Hmpl, Hacl,
-                                                Hccl, epsilon_gdl, epsilon_cl, epsilon_mpl, nb_gdl, nb_mpl, nb_gc, J_H2,
+                                                Hccl, epsilon_gdl, epsilon_cl, epsilon_mpl, IC, nb_gdl, nb_mpl, nb_gc, J_H2,
                                                 J_O2, S_H2, S_O2, **kwargs):
     """This function calculates the dynamic evolution of the hydrogen, oxygen and nitrogen in the gas diffusion layers,
     the microporous layers, and the catalyst layers.
@@ -330,6 +335,8 @@ def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lg
         Anode/cathode CL porosity.
     epsilon_mpl : float
         Anode/cathode MPL porosity.
+    IC : float
+        Ionomer to carbon ratio in the CL.
     nb_gdl : int
         Number of model nodes placed inside each GDL.
     nb_mpl : int
@@ -380,11 +387,11 @@ def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lg
         dif_eq[f'dC_H2_ampl_{nb_mpl} / dt'] = 1 / (epsilon_mpl * (1 - sv[f's_ampl_{nb_mpl}'])) * \
                                               (J_H2['ampl_ampl'][nb_mpl - 1] - J_H2['ampl_acl']) / (Hmpl / nb_mpl)
     #      Inside the ACL
-    dif_eq['dC_H2_acl / dt'] = 1 / (epsilon_cl * (1 - sv['s_acl'])) * (J_H2['ampl_acl'] / Hacl + S_H2['acl'])
+    dif_eq['dC_H2_acl / dt'] = 1 / (epsilon_cl * (1 - sv['s_acl'])) * (J_H2['ampl_acl'] / Hacl - S_H2['reac'] - S_H2['cros'])
 
     # At the cathode side
     #      Inside the CCL
-    dif_eq['dC_O2_ccl / dt'] = 1 / (epsilon_cl * (1 - sv['s_ccl'])) * (-J_O2['ccl_cmpl'] / Hccl + S_O2['ccl'])
+    dif_eq['dC_O2_ccl / dt'] = 1 / (epsilon_cl * (1 - sv['s_ccl'])) * (-J_O2['ccl_cmpl'] / Hccl - S_O2['reac'] - S_O2['cros'])
     #      Inside the CMPL
     if nb_mpl == 1:
         dif_eq['dC_O2_cmpl_1 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_cmpl_1'])) * (J_O2['ccl_cmpl'] - J_O2['cmpl_cgdl']) / Hmpl
@@ -559,7 +566,7 @@ def calculate_dyn_temperature_evolution_inside_MEA(dif_eq, Hgdl, Hmpl, Hacl, Hcc
 
 
 def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hccl, i0_d_c_ref, i0_h_c_ref, kappa_c, C_scl,
-                                    i_n, f_drop, **kwargs):
+                                    i_n, C_O2_Pt, f_drop, **kwargs):
     """This function calculates the dynamic evolution of the cell overpotential eta_c.
 
     Parameters
@@ -584,6 +591,8 @@ def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hccl, 
         Volumetric space-charge layer capacitance (F.m-3).
     i_n : float
         Crossover current density (A.m-2).
+    C_O2_Pt : float
+        Oxygen concentration at the platinum surface (mol.m-3).
     f_drop : float
         Liquid water induced voltage drop function.
     """
@@ -595,8 +604,14 @@ def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hccl, 
     #                                               (C_O2_ccl / C_O2ref) ** kappa_c * math.exp(alpha_c * F / (R * T_ccl) * eta_c))
 
 
+    # theta_Pt_0 = 0  # This is the initial platine-oxide coverage, assumed to be zero for simplification.
+    # omega = 3.0e3 # J.mol-1, It is the energy parameter for the Temkin isotherm [Hao 2015]
+    #
+    # dif_eq['deta_c / dt'] = 1 / (C_scl * Hccl) * ((i_fc + i_n) - i0_d_c_ref * ECSA_0 * (1 - theta_Pt_0) * (C_O2_Pt / C_O2ref_red) ** kappa_c *
+    #                                               math.exp(-Eact_O2_red / (R * T_ccl) * (1 / T_ccl - 1 / Tref_O2_red)) *
+    #                                               math.exp(alpha_c * F / (R * T_ccl) * eta_c + omega * theta_Pt_0 / (R * T_ccl)))  # signe à vérifier pour omega.
 
-    dif_eq['deta_c / dt'] = 1 / (C_scl * Hccl) * ((i_fc + i_n) - i0_d_c_ref * (C_O2_ccl / C_O2ref_red) ** kappa_c *
+    dif_eq['deta_c / dt'] = 1 / (C_scl * Hccl) * ((i_fc + i_n) - i0_d_c_ref * (C_O2_Pt / C_O2ref_red) ** kappa_c *
                                                   math.exp(-Eact_O2_red / (R * T_ccl) * (1/T_ccl - 1/Tref_O2_red)) *
                                                   math.exp(alpha_c * F / (R * T_ccl) * eta_c))
 

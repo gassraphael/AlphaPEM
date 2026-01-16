@@ -42,13 +42,12 @@ def flows_int_values(sv, i_fc, operating_inputs, parameters):
     C_H2_acl, C_O2_ccl = sv['C_H2_acl'], sv['C_O2_ccl']
     T_acl, T_mem, T_ccl = sv['T_acl'], sv['T_mem'], sv['T_ccl']
     # Extraction of the operating inputs and the parameters
-    T_des = operating_inputs['T_des']
     epsilon_gdl, epsilon_cl = parameters['epsilon_gdl'], parameters['epsilon_cl']
     epsilon_mpl, epsilon_c = parameters['epsilon_mpl'], parameters['epsilon_c']
     e, Hacl, Hccl, Hmem = parameters['e'], parameters['Hacl'], parameters['Hccl'], parameters['Hmem']
     Hgdl, Hmpl, Wagc, Wcgc = parameters['Hgdl'], parameters['Hmpl'], parameters['Wagc'], parameters['Wcgc']
     nb_gc, nb_gdl, nb_mpl = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl']
-    epsilon_mc = parameters['epsilon_mc']
+    IC = parameters['IC']
 
     # Transitory parameter
     H_gdl_node = Hgdl / nb_gdl
@@ -68,14 +67,14 @@ def flows_int_values(sv, i_fc, operating_inputs, parameters):
 
     # Weighted mean values ...
     #       ... of the EOD flow of water in the membrane
-    D_eff_EOD_acl_mem = hmean([D_EOD_eff(lambda_acl, epsilon_mc), D_EOD(lambda_mem)],
+    D_eff_EOD_acl_mem = hmean([D_EOD_eff(i_fc, lambda_acl, T_acl, Hacl, IC), D_EOD(lambda_mem)],
                           weights = [Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem)])
-    D_eff_EOD_mem_ccl = hmean([D_EOD(lambda_mem), D_EOD_eff(lambda_ccl, epsilon_mc)],
+    D_eff_EOD_mem_ccl = hmean([D_EOD(lambda_mem), D_EOD_eff(i_fc, lambda_ccl, T_ccl, Hccl, IC)],
                           weights = [Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl)])
     #       ... of the diffusion coefficient of water in the membrane
-    D_lambda_eff_acl_mem = hmean([D_lambda_eff(lambda_acl, epsilon_mc), D_lambda(lambda_mem)],
+    D_lambda_eff_acl_mem = hmean([D_lambda_eff(lambda_acl, T_acl, Hacl, IC), D_lambda(lambda_mem)],
                           weights = [Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem)])
-    D_lambda_eff_mem_ccl = hmean([D_lambda(lambda_mem), D_lambda_eff(lambda_ccl, epsilon_mc)],
+    D_lambda_eff_mem_ccl = hmean([D_lambda(lambda_mem), D_lambda_eff(lambda_ccl, T_ccl, Hccl, IC)],
                           weights = [Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl)])
     #       ... of the capillary coefficient
     D_cap_agdl_agdl = [None] + [hmean([Dcap('gdl', sv[f's_agdl_{i}'], sv[f'T_agdl_{i}'], epsilon_gdl, e,

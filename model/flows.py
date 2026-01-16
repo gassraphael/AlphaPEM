@@ -6,9 +6,10 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import rho_mem, M_eq, F, R
+from configuration.settings import rho_mem, M_eq, F, R, ECSA_0
 from model.auxiliaries import auxiliaries
-from modules.transitory_functions import interpolate, d_dx, Dcap, h_a, h_c, lambda_eq, gamma_sorp, Svl, k_H2, k_O2
+from modules.transitory_functions import (interpolate, d_dx, Dcap, h_a, h_c, lambda_eq, gamma_sorp, Svl, k_H2, k_O2,
+                                          gamma_O2_Pt)
 from modules.flows_modules import flows_int_values
 
 
@@ -52,9 +53,8 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     T_des = operating_inputs['T_des']
     Aact, Hmem, Hacl, Hccl = parameters['Aact'], parameters['Hmem'], parameters['Hacl'], parameters['Hccl']
     Wagc, Wcgc, Hagc, Hcgc = parameters['Wagc'], parameters['Wcgc'], parameters['Hagc'], parameters['Hcgc']
-    Lgc, nb_channel_in_gc = parameters['Lgc'], parameters['nb_channel_in_gc']
     epsilon_gdl, epsilon_cl = parameters['epsilon_gdl'], parameters['epsilon_cl']
-    epsilon_mpl, epsilon_c = parameters['epsilon_mpl'], parameters['epsilon_c']
+    epsilon_mpl, epsilon_c, IC = parameters['epsilon_mpl'], parameters['epsilon_c'], parameters['IC']
     e, kappa_co = parameters['e'], parameters['kappa_co']
     nb_gc, nb_gdl, nb_mpl = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl']
 
@@ -145,17 +145,17 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
                                                           dx = H_gdl_node / 2)
                              for i in range(1, nb_gdl)]
 
-    # __________________________________________H2 and O2 flows (mol.m-2.s-1)___________________________________________
+    # ______________________________H2 and O2 flows (mol.m-2.s-1 for J, mol.m-3.s-1 for S)______________________________
 
     # Hydrogen and oxygen consumption
     #   Anode side
-    S_H2_acl = - i_fc / (2 * F * Hacl) - \
-               R * T_acl_mem_ccl / (Hmem * Hacl) * (k_H2(lambda_mem, T_mem, kappa_co) * C_H2_acl +
-                                         2 * k_O2(lambda_mem, T_mem, kappa_co) * C_O2_ccl)
+    S_H2_reac = i_fc / (2 * F * Hacl)
+    S_H2_cros = R * T_acl_mem_ccl / (Hmem * Hacl) * (k_H2(lambda_mem, T_mem, kappa_co) * C_H2_acl +
+                                                    2 * k_O2(lambda_mem, T_mem, kappa_co) * C_O2_ccl)
     #   Cathode side
-    S_O2_ccl = - i_fc / (4 * F * Hccl) - \
-               R * T_acl_mem_ccl / (Hmem * Hccl) * (k_O2(lambda_mem, T_mem, kappa_co) * C_O2_ccl +
-                                         1 / 2 * k_H2(lambda_mem, T_mem, kappa_co) * C_H2_acl)
+    S_O2_reac = i_fc / (4 * F * Hccl)
+    S_O2_cros = R * T_acl_mem_ccl / (Hmem * Hccl) * (k_O2(lambda_mem, T_mem, kappa_co) * C_O2_ccl +
+                                                    1 / 2 * k_H2(lambda_mem, T_mem, kappa_co) * C_H2_acl)
 
     # Conductive-convective H2 and O2 flows
     #   Anode side
@@ -260,6 +260,6 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
                      'cgdl_cgdl': J_O2_cgdl_cgdl, 'cgdl_cgc': J_O2_cgdl_cgc},
             'S_abs': {'acl': S_abs_acl, 'ccl': S_abs_ccl},
             'Sp' :{'acl': Sp_acl, 'ccl': Sp_ccl},
-            'S_H2' :{'acl': S_H2_acl}, 'S_O2': {'ccl': S_O2_ccl},
+            'S_H2' :{'reac': S_H2_reac, 'cros': S_H2_cros}, 'S_O2': {'reac': S_O2_reac, 'cros': S_O2_cros},
             'Sv' : {'agdl': Sv_agdl, 'ampl': Sv_ampl, 'acl': Sv_acl, 'ccl': Sv_ccl, 'cmpl': Sv_cmpl, 'cgdl': Sv_cgdl},
             'Sl': {'agdl': Sl_agdl, 'ampl': Sl_ampl, 'acl': Sl_acl, 'ccl': Sl_ccl, 'cmpl': Sl_cmpl, 'cgdl': Sl_cgdl}}

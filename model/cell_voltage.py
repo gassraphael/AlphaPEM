@@ -10,17 +10,19 @@ import math
 
 # Importing constants' value and functions
 from configuration.settings import F, R, E0, Pref_eq
-from modules.transitory_functions import average, k_H2, k_O2, sigma_p_eff
+from modules.transitory_functions import average, k_H2, k_O2, sigma_p_eff, gamma_O2_Pt, a_c
 
 
 # _____________________________________________________Cell voltage_____________________________________________________
 
-def calculate_eta_c_intermediate_values(solver_variables, operating_inputs, parameters):
+def calculate_eta_c_intermediate_values(i_fc, solver_variables, operating_inputs, parameters):
     """This function calculates the intermediate values needed for the calculation of the cathode overpotential dynamic
     evolution.
 
     Parameters
     ----------
+    i_fc : float
+        The current density at time t.
     solver_variables : dict
         The dictionary containing the variables calculated by the solver.
     operating_inputs : dict
@@ -36,9 +38,11 @@ def calculate_eta_c_intermediate_values(solver_variables, operating_inputs, para
     """
 
     # Extraction of the variables
-    s_ccl, lambda_mem = solver_variables['s_ccl'], solver_variables['lambda_mem']
+    s_ccl, lambda_ccl, C_O2_ccl = solver_variables['s_ccl'], solver_variables['lambda_ccl'], solver_variables['C_O2_ccl']
+    T_ccl, lambda_mem = solver_variables['T_ccl'], solver_variables['lambda_mem']
     # Extraction of the operating inputs and the parameters
     Pc_des = operating_inputs['Pc_des']
+    Hccl, IC = parameters['Hccl'], parameters['IC']
     a_slim, b_slim, a_switch = parameters['a_slim'], parameters['b_slim'], parameters['a_switch']
 
     # The liquid water induced voltage drop function f_drop
@@ -46,7 +50,13 @@ def calculate_eta_c_intermediate_values(solver_variables, operating_inputs, para
     s_switch = a_switch * slim
     f_drop = 0.5 * (1.0 - math.tanh((4 * s_ccl - 2 * slim - 2 * s_switch) / (slim - s_switch)))
 
-    return {'f_drop': f_drop}
+    # The oxygen concentration at the platinum surface C_O2_Pt
+    C_O2_Pt = C_O2_ccl - i_fc / (4 * F * Hccl) / (gamma_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, IC) *
+                                                  a_c(lambda_ccl, T_ccl, Hccl, IC))
+
+    # print('i_fc = ', i_fc/1e4, 'eta_c = ', solver_variables['eta_c'], 'C_O2_ccl = ', C_O2_ccl, 'C_O2_Pt = ', C_O2_Pt)
+
+    return {'f_drop': f_drop, 'C_O2_Pt': C_O2_Pt}
 
 
 def calculate_cell_voltage(variables, operating_inputs, parameters):
@@ -68,12 +78,13 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
     """
 
     # Extraction of the variables
-    t, lambda_mem_t, lambda_ccl_t = variables['t'], variables['lambda_mem'], variables['lambda_ccl']
+    t = variables['t']
+    s_ccl_t, lambda_mem_t, lambda_ccl_t = variables['s_ccl'], variables['lambda_mem'], variables['lambda_ccl']
     C_H2_acl_t, C_O2_ccl_t, eta_c_t = variables['C_H2_acl'], variables['C_O2_ccl'], variables['eta_c']
     T_acl_t, T_mem_t, T_ccl_t = variables['T_acl'], variables['T_mem'], variables['T_ccl']
     # Extraction of the operating inputs and the parameters
     Hmem, Hacl, Hccl = parameters['Hmem'], parameters['Hacl'], parameters['Hccl']
-    epsilon_mc, Re, kappa_co = parameters['epsilon_mc'], parameters['Re'], parameters['kappa_co']
+    IC, Re, kappa_co = parameters['IC'], parameters['Re'], parameters['kappa_co']
 
     # Initialisation
     n = len(t)
@@ -83,7 +94,7 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
     for i in range(n):
 
         # Recovery of the already calculated variable values at each time step
-        lambda_mem, lambda_ccl = lambda_mem_t[i], lambda_ccl_t[i]
+        s_ccl, lambda_mem, lambda_ccl = s_ccl_t[i], lambda_mem_t[i], lambda_ccl_t[i]
         C_H2_acl, C_O2_ccl = C_H2_acl_t[i], C_O2_ccl_t[i]
         T_acl, T_mem, T_ccl = T_acl_t[i], T_mem_t[i], T_ccl_t[i]
         eta_c = eta_c_t[i]
@@ -91,9 +102,12 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
         # Current density value at this time step
         i_fc = operating_inputs['current_density'](t[i], parameters)
 
+        C_O2_Pt = C_O2_ccl - i_fc / (4 * F * Hccl) / (gamma_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, IC) *
+                                                      a_c(lambda_ccl, T_ccl, Hccl, IC))
+
         # The equilibrium potential
         Ueq = E0 - 8.5e-4 * (T_ccl - 298.15) + R * T_ccl / (2 * F) * (math.log(R * T_acl * C_H2_acl / Pref_eq) +
-                                                                      0.5 * math.log(R * T_ccl * C_O2_ccl / Pref_eq))
+                                                                      0.5 * math.log(R * T_ccl * C_O2_Pt / Pref_eq))
 
         # The crossover current density
         T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
@@ -106,10 +120,12 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
         #       The proton resistance at the membrane : Rmem
         Rmem = Hmem / sigma_p_eff('mem', lambda_mem, T_mem)
         #       The proton resistance at the cathode catalyst layer : Rccl
-        Rccl = Hccl / sigma_p_eff('ccl', lambda_ccl, T_ccl, epsilon_mc)
+        Rccl = Hccl / sigma_p_eff('ccl', lambda_ccl, T_ccl, Hcl=Hccl, IC=IC)
         #       The total proton resistance
         Rp = Rmem + Rccl  # its value is around [4-7]e-6 ohm.m².
 
         # The cell voltage
         Ucell_t[i] = Ueq - eta_c - (i_fc + i_n) * (Rp + Re)
+
+        # print('i_fc = ', i_fc, 'Ucell_t = ', Ucell_t[i], 'eta_c = ', eta_c, 'C_O2_ccl = ', C_O2_ccl, 'C_O2_Pt = ', C_O2_Pt)
     return Ucell_t

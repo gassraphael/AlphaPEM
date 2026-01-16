@@ -26,12 +26,11 @@ from model.control import control_operating_conditions
 from configuration.settings import Pext, Phi_ext, y_O2_ext, C_O2ref_red, alpha_c, Tref_O2_red, Eact_O2_red, F, R
 from modules.dif_eq_modules import event_negative
 from modules.transitory_functions import lambda_eq, k_H2, k_O2
-from modules.display_modules import (plot_ifc, plot_J, plot_C_v, plot_lambda, plot_s, plot_C_O2, plot_C_H2, plot_C_N2,
-                                     plot_T, plot_Ucell, plot_P, plot_Phi_a, plot_Phi_c, plot_Phi_des, plot_v, plot_Re_nb,
+from modules.display_modules import (plot_ifc, plot_C_v, plot_lambda, plot_s, plot_C_O2, plot_C_H2, plot_C_N2,
+                                     plot_T, plot_Ucell, plot_P, plot_Phi_des, plot_v, plot_Re_nb,
                                      plot_polarisation_curve, plot_polarisation_curve_for_cali,
                                      make_Fourier_transformation, plot_EIS_curve_Nyquist, plot_EIS_curve_Bode_amplitude,
-                                     plot_EIS_curve_Bode_angle, plot_EIS_curve_tests, plot_power_density_curve,
-                                     plot_cell_efficiency, plot_f_drop)
+                                     plot_EIS_curve_Bode_angle, plot_power_density_curve, plot_cell_efficiency)
 from calibration.experimental_values import pola_exp_values_calibration
 
 # _______________________________________________________AlphaPEM_______________________________________________________
@@ -136,8 +135,8 @@ class AlphaPEM:
                     Thickness of the cathode catalyst layer in m (undetermined physical parameter).
                 - epsilon_gdl : float
                     Anode/cathode GDL porosity (undetermined physical parameter).
-                - epsilon_mc : float
-                    Volume fraction of ionomer in the CL (undetermined physical parameter).
+                - IC : float
+                    Ionomer to carbon ratio in the CL (undetermined physical parameter).
                 - epsilon_c : float
                     Compression ratio of the GDL (undetermined physical parameter).
                 - e : float
@@ -223,7 +222,7 @@ class AlphaPEM:
                 "\nThey will be back soon, meanwhile the \"no_auxiliary\" configuration is automatically given.\n")
 
         if self.parameters["voltage_zone"] == "full":
-            self.parameters["voltage_zone"] = "before_voltage_drop"
+            # self.parameters["voltage_zone"] = "before_voltage_drop"
             print("Warning: a good physical modelling of the voltage drop at high current densities is under construction."
                 "\nFor now, only \"before_voltage_drop\" configuration is working.\n")
 
@@ -234,9 +233,9 @@ class AlphaPEM:
         self.solver_variable_names = ['C_v_agc', 'C_v_agdl', 'C_v_ampl', 'C_v_acl', 'C_v_ccl', 'C_v_cmpl', 'C_v_cgdl',
                                       'C_v_cgc', 's_agdl', 's_ampl', 's_acl', 's_ccl', 's_cmpl', 's_cgdl', 'lambda_acl',
                                       'lambda_mem', 'lambda_ccl', 'C_H2_agc', 'C_H2_agdl', 'C_H2_ampl', 'C_H2_acl',
-                                      'C_O2_ccl', 'C_O2_cmpl', 'C_O2_cgdl', 'C_O2_cgc', 'C_N2_agc', 'C_N2_cgc', 'T_agc',
-                                      'T_agdl', 'T_ampl', 'T_acl', 'T_mem', 'T_ccl', 'T_cmpl', 'T_cgdl', 'T_cgc',
-                                      'eta_c']
+                                      'C_O2_ccl', 'C_O2_cmpl', 'C_O2_cgdl', 'C_O2_cgc', 'C_N2_agc', 'C_N2_cgc',
+                                      'T_agc', 'T_agdl', 'T_ampl', 'T_acl', 'T_mem', 'T_ccl', 'T_cmpl',
+                                      'T_cgdl', 'T_cgc', 'eta_c']
         if self.parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
                 self.parameters['type_auxiliary'] == "forced-convective_cathode_with_anodic_recirculation":
             self.solver_variable_names.extend(['Pasm', 'Paem', 'Pcsm', 'Pcem', 'Phi_asm', 'Phi_aem', 'Phi_csm',

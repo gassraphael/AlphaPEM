@@ -372,7 +372,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
 
     T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola = stored_operating_inputs(type_fuel_cell, voltage_zone)
 
-    (Hacl, Hccl, epsilon_mc, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
+    (Hacl, Hccl, IC, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
      Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
      i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
 
@@ -413,7 +413,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].set(round(epsilon_gdl, 4))
     choice_undetermined_parameters['CL porosity - ε_cl']['value'].set(round(epsilon_cl, 4))
     choice_undetermined_parameters['MPL porosity - ε_mpl']['value'].set(round(epsilon_mpl, 4))
-    choice_undetermined_parameters['Ionomer volume fraction - ε_mc']['value'].set(round(epsilon_mc, 4))
+    choice_undetermined_parameters['Ionomer to carbon ratio - IC']['value'].set(round(IC, 4))
     choice_undetermined_parameters['Compression ratio - ε_c']['value'].set(round(epsilon_c, 4))
     choice_undetermined_parameters['Capillary exponent - e']['value'].set(e)
     choice_undetermined_parameters['Electron conduction\nresistance - Re (Ω.mm²)']['value'].set(round(Re * 1e6, 4))  # A.mm-2
@@ -494,7 +494,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     epsilon_gdl = choice_undetermined_parameters['GDL porosity - ε_gdl']['value'].get()
     epsilon_cl = choice_undetermined_parameters['CL porosity - ε_cl']['value'].get()
     epsilon_mpl = choice_undetermined_parameters['MPL porosity - ε_mpl']['value'].get()
-    epsilon_mc = choice_undetermined_parameters['Ionomer volume fraction - ε_mc']['value'].get()
+    IC = choice_undetermined_parameters['Ionomer to carbon ratio - IC']['value'].get()
     epsilon_c = choice_undetermined_parameters['Compression ratio - ε_c']['value'].get()
     e = choice_undetermined_parameters['Capillary exponent - e']['value'].get()
     Re = choice_undetermined_parameters['Electron conduction\nresistance - Re (Ω.mm²)']['value'].get() * 1e-6  # Ω.m²
@@ -605,7 +605,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
 
     return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, nb_cell, Hgdl, Hmpl, Hacl, Hccl, Hmem,
             Hagc, Hcgc, Wagc, Wcgc, Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem,
-            V_endplate_a, V_endplate_c, epsilon_gdl, epsilon_cl, epsilon_mpl, epsilon_mc, epsilon_c, e, Re,
+            V_endplate_a, V_endplate_c, epsilon_gdl, epsilon_cl, epsilon_mpl, IC, epsilon_c, e, Re,
             i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, step_current_parameters,
             pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge,
             delta_t_purge, nb_gc, nb_gdl, nb_mpl, rtol, atol, type_fuel_cell, voltage_zone, type_auxiliary,
@@ -737,9 +737,9 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
         messagebox.showerror(title='MPL porosity', message='MPL porosity should be between 0.30 and 0.70.')
         choices.clear()
         return
-    if choice_undetermined_parameters['Ionomer volume fraction - ε_mc']['value'].get() < 0 or \
-            choice_undetermined_parameters['Ionomer volume fraction - ε_mc']['value'].get() > 1:
-        messagebox.showerror(title='Ionomer volume fraction', message='Ionomer volume fraction should be between 0 and 1.')
+    if choice_undetermined_parameters['Ionomer to carbon ratio - IC']['value'].get() < 0 or \
+            choice_undetermined_parameters['Ionomer to carbon ratio - IC']['value'].get() > 2:
+        messagebox.showerror(title='Ionomer volume fraction', message='Ionomer to carbon ratio should be between 0 and 2.')
         choices.clear()
         return
     if choice_undetermined_parameters['Compression ratio - ε_c']['value'].get() < 0 or \
@@ -1035,8 +1035,8 @@ def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, acces
                 Anode/cathode GDL porosity (undetermined physical parameter).
             - epsilon_cl : float
                 Anode/cathode CL porosity (undetermined physical parameter).
-            - epsilon_mc : float
-                Volume fraction of ionomer in the CL (undetermined physical parameter).
+            - IC : float
+                Ionomer to carbon ratio in the CL (undetermined physical parameter).
             - epsilon_c : float
                 Compression ratio of the GDL (undetermined physical parameter).
             - e : float
@@ -1278,8 +1278,8 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
                 Anode/cathode GDL porosity (undetermined physical parameter).
             - epsilon_cl : float
                 Anode/cathode CL porosity (undetermined physical parameter).
-            - epsilon_mc : float
-                Volume fraction of ionomer in the CL (undetermined physical parameter).
+            - IC : float
+                Ionomer to carbon ratio in the CL (undetermined physical parameter).
             - epsilon_c : float
                 Compression ratio of the GDL (undetermined physical parameter).
             - e : float
@@ -1518,8 +1518,8 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
                 Thickness of the cathode catalyst layer in m (undetermined physical parameter).
             - epsilon_gdl : float
                 Anode/cathode GDL porosity (undetermined physical parameter).
-            - epsilon_mc : float
-                Volume fraction of ionomer in the CL (undetermined physical parameter).
+            - IC : float
+                Ionomer to carbon ratio in the CL (undetermined physical parameter).
             - epsilon_c : float
                 Compression ratio of the GDL (undetermined physical parameter).
             - e : float

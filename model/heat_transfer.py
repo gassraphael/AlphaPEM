@@ -46,7 +46,7 @@ def calculate_heat_transfers(sv, i_fc, operating_inputs, parameters, S_abs, Sl, 
 
     # Extraction of the operating inputs and parameters
     T_des = operating_inputs['T_des']
-    epsilon_mc, epsilon_gdl, epsilon_cl = parameters['epsilon_mc'], parameters['epsilon_gdl'], parameters['epsilon_cl']
+    IC, epsilon_gdl, epsilon_cl = parameters['IC'], parameters['epsilon_gdl'], parameters['epsilon_cl']
     epsilon_mpl, epsilon_c = parameters['epsilon_mpl'], parameters['epsilon_c']
     nb_gdl, nb_mpl = parameters['nb_gdl'], parameters['nb_mpl']
     Hmem, Hgdl, Hmpl = parameters['Hmem'], parameters['Hgdl'], parameters['Hmpl']
@@ -124,13 +124,13 @@ def calculate_heat_transfers(sv, i_fc, operating_inputs, parameters, S_abs, Sl, 
 
     # The heat dissipated by the ionic currents (Joule heating + Ohm's law), in J.m-3.s-1.
     Q_p = {'mem': i_fc ** 2 / sigma_p_eff('mem', lambda_mem, T_mem),
-           'ccl': i_fc ** 2 / (3 * sigma_p_eff('ccl', lambda_ccl, T_ccl, epsilon_mc))}
+           'ccl': i_fc ** 2 / (3 * sigma_p_eff('ccl', lambda_ccl, T_ccl, Hcl=Hccl, IC=IC))}
 
     # The heat dissipated by the electric currents (Joule heating + Ohm's law), in J.m-3.s-1.
     Q_e = {**{f'agdl_{i}': i_fc ** 2 / sigma_e_eff('gdl', epsilon_gdl, epsilon_c=epsilon_c) for i in range(1, nb_gdl + 1)},
            **{f'ampl_{i}': i_fc ** 2 / sigma_e_eff('mpl', epsilon_mpl) for i in range(1, nb_mpl + 1)},
-           'acl': i_fc ** 2 / sigma_e_eff('cl', epsilon_cl, epsilon_mc=epsilon_mc),
-           'ccl': i_fc ** 2 / (3 * sigma_e_eff('cl', epsilon_cl, epsilon_mc=epsilon_mc)),
+           'acl': i_fc ** 2 / sigma_e_eff('cl', epsilon_cl, lambda_cl=lambda_acl, T_cl=T_acl, Hcl=Hacl, IC=IC),
+           'ccl': i_fc ** 2 / (3 * sigma_e_eff('cl', epsilon_cl, lambda_cl=lambda_ccl, T_cl=T_ccl, Hcl=Hccl, IC=IC)),
            **{f'cmpl_{i}': i_fc ** 2 / sigma_e_eff('mpl', epsilon_mpl) for i in range(1, nb_mpl + 1)},
            **{f'cgdl_{i}': i_fc ** 2 / sigma_e_eff('gdl', epsilon_gdl, epsilon_c=epsilon_c) for i in range(1, nb_gdl + 1)}}
 

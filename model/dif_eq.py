@@ -63,7 +63,7 @@ def dydt(t, y, operating_inputs, parameters, solver_variable_names, control_vari
     # Intermediate values
     i_fc = operating_inputs['current_density'](t, parameters)
     dif_eq_int_values = calculate_dif_eq_int_values(t, solver_variables, control_variables, operating_inputs, parameters)
-    eta_c_intermediate_values = calculate_eta_c_intermediate_values(solver_variables, operating_inputs, parameters)
+    eta_c_intermediate_values = calculate_eta_c_intermediate_values(i_fc, solver_variables, operating_inputs, parameters)
 
     # Calculation of the flows
     matter_flows_dico = calculate_flows(t, solver_variables, control_variables, i_fc, operating_inputs, parameters)
@@ -71,7 +71,7 @@ def dydt(t, y, operating_inputs, parameters, solver_variable_names, control_vari
 
     # Calculation of the dynamic evolutions
     #       Inside the MEA
-    calculate_dyn_dissoved_water_evolution_inside_MEA(dif_eq, **parameters, **matter_flows_dico)
+    calculate_dyn_dissoved_water_evolution_inside_MEA(dif_eq, solver_variables, **parameters, **matter_flows_dico)
     calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, solver_variables, **parameters, **matter_flows_dico)
     calculate_dyn_vapor_evolution_inside_MEA(dif_eq, solver_variables, **parameters, **matter_flows_dico)
     calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, solver_variables, **parameters, **matter_flows_dico)
