@@ -850,7 +850,7 @@ def plot_C_O2(variables, operating_inputs, parameters, ax):
     n = len(t)
     ifc_t = np.zeros(n)
     for i in range(n):  # Creation of i_fc
-        ifc_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
+        ifc_t[i] = current_density(t[i], parameters)
     #    O2 concentrations
     C_O2_ccl_t = np.array(variables['C_O2_ccl'])[mask]
     C_O2_cmpl_t = np.array(variables[f'C_O2_cmpl_{int(np.ceil(nb_mpl / 2))}'])[mask]
@@ -865,7 +865,7 @@ def plot_C_O2(variables, operating_inputs, parameters, ax):
                        R_T_O2_Pt(s_ccl_t[i], lambda_ccl_t[i], T_ccl_t[i], Hccl, IC) / a_c(lambda_ccl_t[i], T_ccl_t[i], Hccl, IC)
 
     # Plot the oxygen concentration at different spatial localisations: C_O2
-    ax.plot(t, C_O2_Pt_t, color=colors(9))
+    ax.plot(t, C_O2_Pt_t, color=colors(10))
     ax.plot(t, C_O2_ccl_t, color=colors(5))
     ax.plot(t, C_O2_cmpl_t, color=colors(6))
     ax.plot(t, C_O2_cgdl_t, color=colors(7))
