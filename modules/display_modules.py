@@ -863,16 +863,15 @@ def plot_C_O2(variables, operating_inputs, parameters, ax):
     for i in range(n):
         C_O2_Pt_t[i] = C_O2_ccl_t[i] - ifc_t[i] / (4 * F * Hccl) * \
                        R_T_O2_Pt(s_ccl_t[i], lambda_ccl_t[i], T_ccl_t[i], Hccl, IC) / a_c(lambda_ccl_t[i], T_ccl_t[i], Hccl, IC)
-        print((C_O2_ccl_t[i] - C_O2_Pt_t[i])/C_O2_ccl_t[i])
 
     # Plot the oxygen concentration at different spatial localisations: C_O2
+    ax.plot(t, C_O2_Pt_t, color=colors(9))
     ax.plot(t, C_O2_ccl_t, color=colors(5))
     ax.plot(t, C_O2_cmpl_t, color=colors(6))
     ax.plot(t, C_O2_cgdl_t, color=colors(7))
     ax.plot(t, C_O2_cgc_t, color=colors(8))
-    ax.plot(t, C_O2_Pt_t, color=colors(9))
-    ax.legend([r'$\mathregular{C_{O_{2},ccl}}$', r'$\mathregular{C_{O_{2},cmpl}}$', r'$\mathregular{C_{O_{2},cgdl}}$',
-               r'$\mathregular{C_{O_{2},cgc}}$', r'$\mathregular{C_{O_{2},P_t}}$'], loc='best')
+    ax.legend([r'$\mathregular{C_{O_{2},P_t}}$', r'$\mathregular{C_{O_{2},ccl}}$', r'$\mathregular{C_{O_{2},cmpl}}$',
+               r'$\mathregular{C_{O_{2},cgdl}}$', r'$\mathregular{C_{O_{2},cgc}}$'], loc='best')
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r'$\mathbf{Oxygen}$ $\mathbf{concentration}$ $\mathbf{C_{O_{2}}}$ $\mathbf{\left( mol.m^{-3} \right)}$',
                   labelpad=3)

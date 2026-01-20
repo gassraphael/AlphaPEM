@@ -900,9 +900,9 @@ def R_T_O2_Pt(s, lambdaa, T, Hcl, IC):
     3. Alireza Goshtasbi - Article 2020 - A Mathematical Model toward Real-Time Monitoring of Automotive PEM Fuel Cells.
     """
 
-    return 1 / (R_O2_dis_l(s, lambdaa, T, Hcl, IC) + R_O2_dif_l(s, lambdaa, T, Hcl, IC) +
-                R_O2_dis_ion(lambdaa, T, Hcl, IC) + R_O2_dif_ion_eff(lambdaa, T, Hcl, IC) +
-                R_O2_ad_Pt_eff(lambdaa, T, Hcl, IC))
+    return R_O2_dis_l(s, lambdaa, T, Hcl, IC) + R_O2_dif_l(s, lambdaa, T, Hcl, IC) + \
+           R_O2_dis_ion(lambdaa, T, Hcl, IC) + R_O2_dif_ion_eff(lambdaa, T, Hcl, IC) + \
+           R_O2_ad_Pt_eff(lambdaa, T, Hcl, IC)
 
 
 def R_O2_dis_l(s, lambdaa, T, Hcl, IC):
