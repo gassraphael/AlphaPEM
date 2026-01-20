@@ -15,7 +15,7 @@ from scipy.interpolate import interp1d
 
 # Importing constants' value and functions
 from configuration.settings import F, R, E0, Pref_eq, M_H2, M_O2, M_H2O, M_N2
-from modules.transitory_functions import average, Psat, C_v_sat, k_H2, k_O2, mu_mixture_gases
+from modules.transitory_functions import average, Psat, C_v_sat, k_H2, k_O2, mu_mixture_gases, R_T_O2_Pt, a_c
 from calibration.experimental_values import (pola_exp_values, plot_experimental_polarisation_curve,
                                              pola_exp_values_calibration)
 
@@ -810,13 +810,15 @@ def plot_C_H2(variables, parameters, ax):
     plot_general_instructions(ax)
 
 
-def plot_C_O2(variables, parameters, ax):
+def plot_C_O2(variables, operating_inputs, parameters, ax):
     """This function plots the oxygen concentration at different spatial localisations, as a function of time.
 
     Parameters
     ----------
     variables : dict
         Variables calculated by the solver. They correspond to the fuel cell internal states.
+    operating_inputs : dict
+        Operating inputs of the fuel cell.
     parameters : dict
         Parameters of the fuel cell model.
     ax : matplotlib.axes.Axes
@@ -824,7 +826,10 @@ def plot_C_O2(variables, parameters, ax):
     """
 
     # Extraction of the parameters
-    nb_gc, nb_gdl, nb_mpl, type_current, type_plot = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl'], parameters['type_current'], parameters['type_plot']
+    current_density = operating_inputs['current_density']
+    Hccl, IC = parameters['Hccl'], parameters['IC']
+    nb_gc, nb_gdl, nb_mpl = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl']
+    type_current, type_plot = parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
         delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
     elif type_current == 'polarization':
@@ -834,23 +839,40 @@ def plot_C_O2(variables, parameters, ax):
     else:
         delta_t_ini = 0
     # Extraction of the variables
+    #   Mask
     if type_plot == "fixed":
         mask = np.array(variables['t']) >= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
+    #   Time
     t = np.array(variables['t'])[mask]
+    #   Current density
+    n = len(t)
+    ifc_t = np.zeros(n)
+    for i in range(n):  # Creation of i_fc
+        ifc_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
+    #    O2 concentrations
     C_O2_ccl_t = np.array(variables['C_O2_ccl'])[mask]
     C_O2_cmpl_t = np.array(variables[f'C_O2_cmpl_{int(np.ceil(nb_mpl / 2))}'])[mask]
     C_O2_cgdl_t = np.array(variables[f'C_O2_cgdl_{int(np.ceil(nb_gdl / 2))}'])[mask]
     C_O2_cgc_t = np.array(variables[f'C_O2_cgc_{int(np.ceil(nb_gc / 2))}'])[mask]
+    C_O2_Pt_t = np.zeros(n)
+    s_ccl_t = np.array(variables['s_ccl'])[mask]
+    lambda_ccl_t = np.array(variables['lambda_ccl'])[mask]
+    T_ccl_t = np.array(variables['T_ccl'])[mask]
+    for i in range(n):
+        C_O2_Pt_t[i] = C_O2_ccl_t[i] - ifc_t[i] / (4 * F * Hccl) * \
+                       R_T_O2_Pt(s_ccl_t[i], lambda_ccl_t[i], T_ccl_t[i], Hccl, IC) / a_c(lambda_ccl_t[i], T_ccl_t[i], Hccl, IC)
+        print((C_O2_ccl_t[i] - C_O2_Pt_t[i])/C_O2_ccl_t[i])
 
     # Plot the oxygen concentration at different spatial localisations: C_O2
     ax.plot(t, C_O2_ccl_t, color=colors(5))
     ax.plot(t, C_O2_cmpl_t, color=colors(6))
     ax.plot(t, C_O2_cgdl_t, color=colors(7))
     ax.plot(t, C_O2_cgc_t, color=colors(8))
+    ax.plot(t, C_O2_Pt_t, color=colors(9))
     ax.legend([r'$\mathregular{C_{O_{2},ccl}}$', r'$\mathregular{C_{O_{2},cmpl}}$', r'$\mathregular{C_{O_{2},cgdl}}$',
-               r'$\mathregular{C_{O_{2},cgc}}$'], loc='best')
+               r'$\mathregular{C_{O_{2},cgc}}$', r'$\mathregular{C_{O_{2},P_t}}$'], loc='best')
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r'$\mathbf{Oxygen}$ $\mathbf{concentration}$ $\mathbf{C_{O_{2}}}$ $\mathbf{\left( mol.m^{-3} \right)}$',
                   labelpad=3)

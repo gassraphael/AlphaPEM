@@ -538,7 +538,7 @@ class AlphaPEM:
                 plot_C_v(self.variables, self.parameters, axes[1])
                 plot_lambda(self.variables, self.operating_inputs, self.parameters, axes[2])
                 plot_s(self.variables, self.operating_inputs, self.parameters, axes[3])
-                plot_C_O2(self.variables, self.parameters, axes[4])
+                plot_C_O2(self.variables, self.operating_inputs, self.parameters, axes[4])
                 plot_C_H2(self.variables, self.parameters, axes[5])
                 plot_C_N2(self.variables, self.parameters, axes[6])
                 plot_T(self.variables, self.operating_inputs, self.parameters, axes[7])
@@ -570,7 +570,7 @@ class AlphaPEM:
                 plot_s(self.variables, self.operating_inputs, self.parameters, ax1[1, 1])
                 plot_lambda(self.variables, self.operating_inputs, self.parameters, ax1[1, 2])
                 plot_C_H2(self.variables, self.parameters, ax1[2, 0])
-                plot_C_O2(self.variables, self.parameters, ax1[2, 1])
+                plot_C_O2(self.variables, self.operating_inputs, self.parameters, ax1[2, 1])
                 plot_P(self.variables, self.operating_inputs, self.parameters, ax1[2, 2])
 
                 plot_v(self.variables, self.parameters, ax2[0])
