@@ -31,15 +31,15 @@ def main():
     # - GenStack is a fuel cell developed in open source by ZSW (https://zenodo.org/records/14223364).
     # - EH-31 is a fuel cell developed by EH GROUP. 1.5, 2.0, 2.25 and 2.5 corresponds to the different pressure options.
     type_fuel_cell_1 = "ZSW-GenStack"
-    type_fuel_cell_2 = "ZSW-GenStack_Pa_1.61_Pc_1.41"
-    type_fuel_cell_3 = "ZSW-GenStack_Pa_2.01_Pc_1.81"
-    type_fuel_cell_4 = "ZSW-GenStack_Pa_2.4_Pc_2.2"
-    type_fuel_cell_5 = "ZSW-GenStack_Pa_2.8_Pc_2.6"
+    type_fuel_cell_2 = None
+    type_fuel_cell_3 = None
+    type_fuel_cell_4 = None
+    type_fuel_cell_5 = None
     # Current density possibilities: "step", "polarization", "polarization_for_cali", "EIS".
     type_current = "polarization"
     # Calibration zone : "before_voltage_drop", "full".
     # (only for "polarization" and "polarization_for_cali" currend densities
-    voltage_zone = "before_voltage_drop"
+    voltage_zone = "full"
     # Auxiliary system possibilities: "forced-convective_cathode_with_anodic_recirculation",
     #                                 "forced-convective_cathode_with_flow-through_anode", "no_auxiliary".
     type_auxiliary = "no_auxiliary"
@@ -79,7 +79,7 @@ def main():
     T_des_5, Pa_des_5, Pc_des_5, Sa_5, Sc_5, Phi_a_des_5, Phi_c_des_5, y_H2_in_5, pola_current_parameters_5 = \
         calculate_operating_inputs(copy.deepcopy(pola_current_parameters), type_fuel_cell_5, voltage_zone)
     #   Physical parameters
-    (Hacl, Hccl, IC, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
+    (Hacl, Hccl, IC, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
      Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
      i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) \
         = calculate_physical_parameters(type_fuel_cell_1)
@@ -107,11 +107,10 @@ def main():
                                       'Lm': Lm, 'A_T_a': A_T_a, 'A_T_c': A_T_c, 'Vasm': Vasm, 'Vcsm': Vcsm,
                                       'Vaem': Vaem, 'Vcem': Vcem}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl,
-                                        'Hccl': Hccl, 'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl,
-                                        'epsilon_mpl': epsilon_mpl, 'IC': IC, 'epsilon_c': epsilon_c,
-                                        'e': e, 'Re': Re, 'i0_d_c_ref': i0_d_c_ref, 'i0_h_c_ref': i0_h_c_ref,
-                                        'kappa_co': kappa_co, 'kappa_c': kappa_c, 'a_slim': a_slim, 'b_slim': b_slim,
-                                        'a_switch': a_switch, 'C_scl': C_scl}
+                                        'Hccl': Hccl, 'epsilon_gdl': epsilon_gdl, 'epsilon_mpl': epsilon_mpl, 'IC': IC,
+                                        'epsilon_c': epsilon_c, 'e': e, 'Re': Re, 'i0_d_c_ref': i0_d_c_ref,
+                                        'i0_h_c_ref': i0_h_c_ref, 'kappa_co': kappa_co, 'kappa_c': kappa_c,
+                                        'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch, 'C_scl': C_scl}
     computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
                             'rtol': rtol, 'atol': atol,
                             'type_fuel_cell': [None, type_fuel_cell_1, type_fuel_cell_2, type_fuel_cell_3,

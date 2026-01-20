@@ -67,8 +67,7 @@ def heat_transfer_int_values(sv, parameters):
 
     # Extraction of the operating inputs and the parameters
     Hgdl, Hmpl, Hacl, Hccl = parameters['Hgdl'], parameters['Hmpl'], parameters['Hacl'], parameters['Hccl']
-    Hmem, IC, epsilon_gdl = parameters['Hmem'], parameters['IC'], parameters['epsilon_gdl']
-    epsilon_cl, epsilon_mpl = parameters['epsilon_cl'], parameters['epsilon_mpl']
+    Hmem, IC, epsilon_gdl, epsilon_mpl = parameters['Hmem'], parameters['IC'], parameters['epsilon_gdl'], parameters['epsilon_mpl']
     epsilon_c, nb_gc, nb_gdl, nb_mpl = parameters['epsilon_c'], parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl']
 
     # Calculation of intermediate values
@@ -109,21 +108,21 @@ def heat_transfer_int_values(sv, parameters):
                                                   s=sv[f's_ampl_{nb_mpl}'], C_H2=sv[f'C_H2_ampl_{nb_mpl}'],
                                                  C_N2=C_N2_a_mean, epsilon=epsilon_mpl),
                                  k_th_eff('acl', T_acl, C_v=C_v_acl, s=s_acl, lambdaa=lambda_acl,
-                                          C_H2=C_H2_acl, C_N2=C_N2_a_mean, epsilon=epsilon_cl, IC=IC, Hcl = Hacl)],
+                                          C_H2=C_H2_acl, C_N2=C_N2_a_mean, IC=IC, Hcl = Hacl)],
                                 weights=[Hmpl_node / 2, Hacl / 2])
 
     k_th_eff_acl_mem = hmean([k_th_eff('acl', T_acl, C_v=C_v_acl, s=s_acl, lambdaa=lambda_acl,
-                                       C_H2=C_H2_acl, C_N2=C_N2_a_mean, epsilon=epsilon_cl, IC=IC, Hcl = Hacl),
+                                       C_H2=C_H2_acl, C_N2=C_N2_a_mean, IC=IC, Hcl = Hacl),
                                       k_th_eff('mem', T_mem, lambdaa=lambda_mem)],
                                weights=[Hacl / 2, Hmem / 2])
 
     k_th_eff_mem_ccl = hmean([k_th_eff('mem', T_mem, lambdaa=lambda_mem),
                                       k_th_eff('ccl', T_ccl, C_v=C_v_ccl, s=s_ccl, lambdaa=lambda_ccl,
-                                                C_O2=C_O2_ccl, C_N2=C_N2_c_mean, epsilon=epsilon_cl, IC=IC, Hcl = Hccl)],
+                                                C_O2=C_O2_ccl, C_N2=C_N2_c_mean, IC=IC, Hcl = Hccl)],
                                weights=[Hmem / 2, Hccl / 2])
 
     k_th_eff_ccl_cmpl = hmean([k_th_eff('ccl', T_ccl, C_v=C_v_ccl, s=s_ccl, lambdaa=lambda_ccl, C_O2=C_O2_ccl,
-                                                C_N2=C_N2_c_mean, epsilon=epsilon_cl, IC=IC, Hcl = Hccl),
+                                                C_N2=C_N2_c_mean, IC=IC, Hcl = Hccl),
                                        k_th_eff('cmpl', sv[f'T_cmpl_{1}'], C_v=sv[f'C_v_cmpl_{1}'],
                                                  s=sv[f's_cmpl_{1}'], C_O2=sv[f'C_O2_cmpl_{1}'], C_N2=C_N2_c_mean,
                                                 epsilon=epsilon_mpl)],

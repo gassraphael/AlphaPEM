@@ -243,7 +243,6 @@ def stored_physical_parameters(type_fuel_cell):
         # Gas diffusion layer
         Hgdl = 103.92479846707957e-6  # m. It is the thickness of the gas diffusion layer.
         epsilon_gdl = 0.8184931467542469  # It is the anode/cathode GDL porosity.
-        epsilon_cl = 0.5  # It is the porosity of the catalyst layer, without units.
         epsilon_c = 0.2  # It is the compression ratio of the GDL.
         #   Microporous layer
         Hmpl = 43.98306893354156e-6  # m. It is the thickness of the microporous layer.
@@ -288,7 +287,6 @@ def stored_physical_parameters(type_fuel_cell):
         # Gas diffusion layer
         Hgdl = 200e-6  # m. It is the thickness of the gas diffusion layer.
         epsilon_gdl = 0.5002  # It is the anode/cathode GDL porosity.
-        epsilon_cl = 0.25  # It is the porosity of the catalyst layer, without units.
         epsilon_c = 0.2  # It is the compression ratio of the GDL.
         #   Microporous layer
         Hmpl = 30e-6  # m. It is the thickness of the microporous layer.
@@ -322,8 +320,8 @@ def stored_physical_parameters(type_fuel_cell):
     else:
         raise ValueError('the type_input given is not valid.')
 
-    return (Hacl, Hccl, IC, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
+    return (Hacl, Hccl, IC, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
+            nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
             i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
 
 

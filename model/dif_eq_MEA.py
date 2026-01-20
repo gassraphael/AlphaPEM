@@ -9,8 +9,8 @@
 import math
 
 # Importing constants' value and functions
-from configuration.settings import C_O2ref_red, alpha_c, Eact_O2_red, Tref_O2_red, rho_mem, M_eq, F, R, M_H2O, ECSA_0
-from modules.transitory_functions import rho_H2O_l, epsilon_mc, delta_ion
+from configuration.settings import C_O2ref_red, alpha_c, Eact_O2_red, Tref_O2_red, rho_mem, M_eq, F, R, M_H2O, IC, wt_Pt
+from modules.transitory_functions import rho_H2O_l, epsilon_mc, epsilon_cl
 
 
 # ____________________________________________________Main functions____________________________________________________
@@ -52,7 +52,7 @@ def calculate_dyn_dissoved_water_evolution_inside_MEA(dif_eq, sv, Hmem, Hacl, Hc
 
 
 def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, epsilon_gdl, epsilon_mpl,
-                                                    epsilon_cl, nb_gdl, nb_mpl, Jl, Sl, **kwargs):
+                                                    nb_gdl, nb_mpl, Jl, Sl, **kwargs):
     """
     This function calculates the dynamic evolution of the liquid water in the gas diffusion and catalyst layers.
 
@@ -75,8 +75,6 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl
         Anode/cathode GDL porosity.
     epsilon_mpl : float
         Anode/cathode MPL porosity.
-    epsilon_cl : float
-        Anode/cathode CL porosity.
     nb_gdl : int
         Number of model nodes placed inside each GDL.
     nb_mpl : int
@@ -127,11 +125,13 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl
                                            ((Jl['ampl_ampl'][nb_mpl - 1] - Jl['ampl_acl']) / (Hmpl / nb_mpl) +
                                             M_H2O * Sl['ampl'][nb_mpl])
     #      Inside the ACL
-    dif_eq['ds_acl / dt'] = 1 / (rho_H2O_l(sv['T_acl']) * epsilon_cl) * (Jl['ampl_acl'] / Hacl + M_H2O * Sl['acl'])
+    dif_eq['ds_acl / dt'] = 1 / (rho_H2O_l(sv['T_acl']) * epsilon_cl(sv['lambda_acl'], sv['T_acl'], Hacl, IC)) * \
+                            (Jl['ampl_acl'] / Hacl + M_H2O * Sl['acl'])
 
     # At the cathode side
     #       Inside the CCL
-    dif_eq['ds_ccl / dt'] = 1 / (rho_H2O_l(sv['T_ccl']) * epsilon_cl) * (- Jl['ccl_cmpl'] / Hccl + M_H2O * Sl['ccl'])
+    dif_eq['ds_ccl / dt'] = 1 / (rho_H2O_l(sv['T_ccl']) * epsilon_cl(sv['lambda_ccl'], sv['T_ccl'], Hccl, IC)) * \
+                            (- Jl['ccl_cmpl'] / Hccl + M_H2O * Sl['ccl'])
     #       Inside the CMPL
     if nb_mpl == 1:
         dif_eq['ds_cmpl_1 / dt'] = 1 / (rho_H2O_l(sv['T_cmpl_1']) * epsilon_mpl) * \
@@ -171,7 +171,7 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl
 
 
 def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, nb_channel_in_gc, Hgdl, Hmpl, Hacl,
-                                             Hccl, epsilon_gdl, epsilon_cl, epsilon_mpl, nb_gc, nb_gdl, nb_mpl, Jv, Sv,
+                                             Hccl, epsilon_gdl, epsilon_mpl, nb_gc, nb_gdl, nb_mpl, Jv, Sv,
                                              S_abs, **kwargs):
     """This function calculates the dynamic evolution of the vapor in the gas diffusion layers, the microporous layers,
     and the catalyst layers.
@@ -203,8 +203,6 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, 
         Thickness of the cathode catalyst layer (m).
     epsilon_gdl : float
         Anode/cathode GDL porosity.
-    epsilon_cl : float
-        Anode/cathode CL porosity.
     epsilon_mpl : float
         Anode/cathode MPL porosity.
     nb_gdl : int
@@ -256,11 +254,13 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, 
         dif_eq[f'dC_v_ampl_{nb_mpl} / dt'] = 1 / (epsilon_mpl * (1 - sv[f's_ampl_{nb_mpl}'])) * \
                                              ((Jv['ampl_ampl'][nb_mpl - 1] - Jv['ampl_acl']) / (Hmpl / nb_mpl) + Sv['ampl'][nb_mpl])
     #       Inside the ACL
-    dif_eq['dC_v_acl / dt'] = 1 / (epsilon_cl * (1 - sv['s_acl'])) * (Jv['ampl_acl'] / Hacl - S_abs['acl'] + Sv['acl'])
+    dif_eq['dC_v_acl / dt'] = 1 / (epsilon_cl(sv['lambda_acl'], sv['T_acl'], Hacl, IC) * (1 - sv['s_acl'])) * \
+                              (Jv['ampl_acl'] / Hacl - S_abs['acl'] + Sv['acl'])
 
     # At the cathode side
     #       Inside the CCL
-    dif_eq['dC_v_ccl / dt'] = 1 / (epsilon_cl * (1 - sv['s_ccl'])) * (- Jv['ccl_cmpl'] / Hccl - S_abs['ccl'] + Sv['ccl'])
+    dif_eq['dC_v_ccl / dt'] = 1 / (epsilon_cl(sv['lambda_ccl'], sv['T_ccl'], Hccl, IC) * (1 - sv['s_ccl'])) * \
+                              (- Jv['ccl_cmpl'] / Hccl - S_abs['ccl'] + Sv['ccl'])
     #       Inside the CMPL
     if nb_mpl == 1:
         dif_eq['dC_v_cmpl_1 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_cmpl_1'])) * ((Jv['ccl_cmpl'] - Jv['cmpl_cgdl']) / Hmpl +
@@ -299,7 +299,7 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, 
 
 
 def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, nb_channel_in_gc, Hgdl, Hmpl, Hacl,
-                                                Hccl, epsilon_gdl, epsilon_cl, epsilon_mpl, IC, nb_gdl, nb_mpl, nb_gc, J_H2,
+                                                Hccl, epsilon_gdl, epsilon_mpl, IC, nb_gdl, nb_mpl, nb_gc, J_H2,
                                                 J_O2, S_H2, S_O2, **kwargs):
     """This function calculates the dynamic evolution of the hydrogen, oxygen and nitrogen in the gas diffusion layers,
     the microporous layers, and the catalyst layers.
@@ -331,8 +331,6 @@ def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lg
         Thickness of the cathode catalyst layer (m).
     epsilon_gdl : float
         Anode/cathode GDL porosity.
-    epsilon_cl : float
-        Anode/cathode CL porosity.
     epsilon_mpl : float
         Anode/cathode MPL porosity.
     IC : float
@@ -387,11 +385,13 @@ def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lg
         dif_eq[f'dC_H2_ampl_{nb_mpl} / dt'] = 1 / (epsilon_mpl * (1 - sv[f's_ampl_{nb_mpl}'])) * \
                                               (J_H2['ampl_ampl'][nb_mpl - 1] - J_H2['ampl_acl']) / (Hmpl / nb_mpl)
     #      Inside the ACL
-    dif_eq['dC_H2_acl / dt'] = 1 / (epsilon_cl * (1 - sv['s_acl'])) * (J_H2['ampl_acl'] / Hacl - S_H2['reac'] - S_H2['cros'])
+    dif_eq['dC_H2_acl / dt'] = 1 / (epsilon_cl(sv['lambda_acl'], sv['T_acl'], Hacl, IC) * (1 - sv['s_acl'])) * \
+                               (J_H2['ampl_acl'] / Hacl - S_H2['reac'] - S_H2['cros'])
 
     # At the cathode side
     #      Inside the CCL
-    dif_eq['dC_O2_ccl / dt'] = 1 / (epsilon_cl * (1 - sv['s_ccl'])) * (-J_O2['ccl_cmpl'] / Hccl - S_O2['reac'] - S_O2['cros'])
+    dif_eq['dC_O2_ccl / dt'] = 1 / (epsilon_cl(sv['lambda_ccl'], sv['T_ccl'], Hccl, IC) * (1 - sv['s_ccl'])) * \
+                               (-J_O2['ccl_cmpl'] / Hccl - S_O2['reac'] - S_O2['cros'])
     #      Inside the CMPL
     if nb_mpl == 1:
         dif_eq['dC_O2_cmpl_1 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_cmpl_1'])) * (J_O2['ccl_cmpl'] - J_O2['cmpl_cgdl']) / Hmpl

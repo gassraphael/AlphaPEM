@@ -357,7 +357,6 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         #   Catalyst layer
         Hacl = 8e-6  # m. It is the thickness of the anode catalyst layer.
         Hccl = 17e-6  # m. It is the thickness of the cathode catalyst layer.
-        epsilon_cl = 0.5  # It is the porosity of the microporous layer.
         IC = 0.5  # It is the volume fraction of ionomer in the CL.
         #   Membrane
         Hmem = 15e-6  # m. It is the thickness of the membrane.
@@ -427,7 +426,6 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         #   Catalyst layer
         Hacl = 8.593e-6  # m. It is the thickness of the anode catalyst layer.
         Hccl = Hacl  # m. It is the thickness of the cathode catalyst layer.
-        epsilon_cl = 0.25  # It is the porosity of the catalyst layer, without units.
         IC = 0.8  # It is the volume fraction of ionomer in the CL.
         #   Membrane
         Hmem = 16.06e-6  # m. It is the thickness of the membrane.
@@ -462,11 +460,10 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
                                       'Lm': Lm, 'A_T_a': A_T_a, 'A_T_c': A_T_c, 'Vasm': Vasm, 'Vcsm': Vcsm,
                                       'Vaem': Vaem, 'Vcem': Vcem}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl,
-                                        'Hccl': Hccl, 'epsilon_gdl': epsilon_gdl, 'epsilon_cl': epsilon_cl,
-                                        'epsilon_mpl': epsilon_mpl, 'IC': IC, 'epsilon_c': epsilon_c,
-                                        'e': e, 'Re': Re, 'i0_d_c_ref': i0_d_c_ref, 'i0_h_c_ref': i0_h_c_ref,
-                                        'kappa_co': kappa_co, 'kappa_c': kappa_c, 'a_slim': a_slim, 'b_slim': b_slim,
-                                        'a_switch': a_switch, 'C_scl': C_scl}
+                                        'Hccl': Hccl, 'epsilon_gdl': epsilon_gdl, 'epsilon_mpl': epsilon_mpl, 'IC': IC,
+                                        'epsilon_c': epsilon_c, 'e': e, 'Re': Re, 'i0_d_c_ref': i0_d_c_ref,
+                                        'i0_h_c_ref': i0_h_c_ref, 'kappa_co': kappa_co, 'kappa_c': kappa_c,
+                                        'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch, 'C_scl': C_scl}
     computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
                             'rtol': rtol, 'atol': atol,'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
                             'voltage_zone': voltage_zone, 'type_auxiliary': type_auxiliary,

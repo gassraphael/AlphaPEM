@@ -10,7 +10,7 @@ import math
 
 # Importing constants' value and functions
 from configuration.settings import F, R, E0, Pref_eq
-from modules.transitory_functions import average, k_H2, k_O2, sigma_p_eff, gamma_O2_Pt, a_c
+from modules.transitory_functions import average, k_H2, k_O2, sigma_p_eff, R_T_O2_Pt, a_c
 
 
 # _____________________________________________________Cell voltage_____________________________________________________
@@ -51,10 +51,7 @@ def calculate_eta_c_intermediate_values(i_fc, solver_variables, operating_inputs
     f_drop = 0.5 * (1.0 - math.tanh((4 * s_ccl - 2 * slim - 2 * s_switch) / (slim - s_switch)))
 
     # The oxygen concentration at the platinum surface C_O2_Pt
-    C_O2_Pt = C_O2_ccl - i_fc / (4 * F * Hccl) / (gamma_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, IC) *
-                                                  a_c(lambda_ccl, T_ccl, Hccl, IC))
-
-    # print('i_fc = ', i_fc/1e4, 'eta_c = ', solver_variables['eta_c'], 'C_O2_ccl = ', C_O2_ccl, 'C_O2_Pt = ', C_O2_Pt)
+    C_O2_Pt = C_O2_ccl - i_fc / (4 * F * Hccl) * R_T_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, IC) / a_c(lambda_ccl, T_ccl, Hccl, IC)
 
     return {'f_drop': f_drop, 'C_O2_Pt': C_O2_Pt}
 
@@ -102,8 +99,7 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
         # Current density value at this time step
         i_fc = operating_inputs['current_density'](t[i], parameters)
 
-        C_O2_Pt = C_O2_ccl - i_fc / (4 * F * Hccl) / (gamma_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, IC) *
-                                                      a_c(lambda_ccl, T_ccl, Hccl, IC))
+        C_O2_Pt = C_O2_ccl - i_fc / (4 * F * Hccl) * R_T_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, IC) / a_c(lambda_ccl, T_ccl, Hccl, IC)
 
         # The equilibrium potential
         Ueq = E0 - 8.5e-4 * (T_ccl - 298.15) + R * T_ccl / (2 * F) * (math.log(R * T_acl * C_H2_acl / Pref_eq) +

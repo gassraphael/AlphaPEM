@@ -6,8 +6,9 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import R, F
-from modules.transitory_functions import hmean, average, Dcap, Da_eff, Dc_eff, D_lambda, D_lambda_eff, D_EOD, D_EOD_eff
+from configuration.settings import R
+from modules.transitory_functions import (hmean, average, Dcap, Da_eff, Dc_eff, D_lambda, D_lambda_eff, D_EOD,
+                                          D_EOD_eff, epsilon_cl)
 
 
 # _____________________________________________________Flow modules_____________________________________________________
@@ -42,8 +43,7 @@ def flows_int_values(sv, i_fc, operating_inputs, parameters):
     C_H2_acl, C_O2_ccl = sv['C_H2_acl'], sv['C_O2_ccl']
     T_acl, T_mem, T_ccl = sv['T_acl'], sv['T_mem'], sv['T_ccl']
     # Extraction of the operating inputs and the parameters
-    epsilon_gdl, epsilon_cl = parameters['epsilon_gdl'], parameters['epsilon_cl']
-    epsilon_mpl, epsilon_c = parameters['epsilon_mpl'], parameters['epsilon_c']
+    epsilon_gdl, epsilon_mpl, epsilon_c = parameters['epsilon_gdl'], parameters['epsilon_mpl'], parameters['epsilon_c']
     e, Hacl, Hccl, Hmem = parameters['e'], parameters['Hacl'], parameters['Hccl'], parameters['Hmem']
     Hgdl, Hmpl, Wagc, Wcgc = parameters['Hgdl'], parameters['Hmpl'], parameters['Wagc'], parameters['Wcgc']
     nb_gc, nb_gdl, nb_mpl = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl']
@@ -89,9 +89,9 @@ def flows_int_values(sv, i_fc, operating_inputs, parameters):
                                          Dcap('mpl', sv[f's_ampl_{i+1}'], sv[f'T_ampl_{i+1}'], epsilon_mpl, e)])
                                 for i in range(1, nb_mpl)]
     D_cap_ampl_acl = hmean([Dcap('mpl', sv[f's_ampl_{nb_mpl}'], sv[f'T_ampl_{nb_mpl}'], epsilon_mpl, e),
-                                    Dcap('cl', s_acl, T_acl, epsilon_cl, e)],
+                                    Dcap('cl', s_acl, T_acl, epsilon_cl(lambda_acl, T_acl, Hacl, IC), e)],
                              weights=[H_mpl_node / (H_mpl_node + Hacl), Hacl / (H_mpl_node + Hacl)])
-    D_cap_ccl_cmpl = hmean([Dcap('cl', s_ccl, T_ccl, epsilon_cl, e),
+    D_cap_ccl_cmpl = hmean([Dcap('cl', s_ccl, T_ccl, epsilon_cl(lambda_ccl, T_ccl, Hccl, IC), e),
                             Dcap('mpl', sv['s_cmpl_1'], sv['T_cmpl_1'], epsilon_mpl, e)],
                            weights=[Hccl / (Hccl + H_mpl_node), H_mpl_node / (Hccl + H_mpl_node)])
     D_cap_cmpl_cmpl = [None] + [hmean([Dcap('mpl', sv[f's_cmpl_{i}'], sv[f'T_cmpl_{i}'], epsilon_mpl, e),
@@ -120,9 +120,9 @@ def flows_int_values(sv, i_fc, operating_inputs, parameters):
                                               epsilon_mpl)]) for i in range(1, nb_mpl)]
     Da_eff_ampl_acl = hmean([Da_eff('mpl', sv[f's_ampl_{nb_mpl}'], sv[f'T_ampl_{nb_mpl}'], Pampl[nb_mpl],
                                             epsilon_mpl),
-                                     Da_eff('cl', s_acl, T_acl, Pacl, epsilon_cl)],
+                                     Da_eff('cl', s_acl, T_acl, Pacl, epsilon_cl(lambda_acl, T_acl, Hacl, IC))],
                               weights=[H_mpl_node / (H_mpl_node + Hacl), Hacl / (H_mpl_node + Hacl)])
-    Dc_eff_ccl_cmpl = hmean([Dc_eff('cl', s_ccl, T_ccl, Pccl, epsilon_cl),
+    Dc_eff_ccl_cmpl = hmean([Dc_eff('cl', s_ccl, T_ccl, Pccl, epsilon_cl(lambda_ccl, T_ccl, Hccl, IC)),
                                Dc_eff('mpl', sv['s_cmpl_1'], sv['T_cmpl_1'], Pcmpl[1], epsilon_mpl)],
                               weights=[Hccl / (H_mpl_node + Hccl), H_mpl_node / (H_mpl_node + Hccl)])
     Dc_eff_cmpl_cmpl = [None] + [hmean([Dc_eff('mpl', sv[f's_cmpl_{i}'], sv[f'T_cmpl_{i}'], Pcmpl[i],

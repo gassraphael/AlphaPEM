@@ -258,7 +258,6 @@ def calculate_physical_parameters(type_fuel_cell):
         #   Catalyst layer
         Hacl = 8.089e-6  # m. It is the thickness of the anode catalyst layer.
         Hccl = Hacl  # m. It is the thickness of the cathode catalyst layer.
-        epsilon_cl = 0.25  # It is the porosity of the catalyst layer, without units.
         IC = 0.5  # It is the ionomer to carbon ratio in the CL.
         #   Membrane
         Hmem = 2e-5  # m. It is the thickness of the membrane.
@@ -298,11 +297,11 @@ def calculate_physical_parameters(type_fuel_cell):
         #                                                               liquid saturation coefficients.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
     else: # Stored setup in "stored_physical_parameters".
-        (Hacl, Hccl, IC, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
+        (Hacl, Hccl, IC, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
          Wcgc, Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
          i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
 
-    return (Hacl, Hccl, IC, Hmem, Hgdl, epsilon_gdl, epsilon_cl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
+    return (Hacl, Hccl, IC, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
             Wcgc, Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
             i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
 
@@ -410,12 +409,13 @@ K_O2_dis_l = 5.4 # . It is the interfacial resistance coefficient of O2 dissolut
 K_O2_ad_Pt = 5.4 # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites
 IC = 0.5 # . It is the ionomer to carbon ratio in the catalyst layer.
 ECSA_0 = 150 # cm2_Pt.cm-2_active_area. It is the initial electrochemical surface area of the catalyst [ZSW].
+theta_Pt_0 = 0 # This is the initial platine-oxide coverage, assumed to be zero for simplification.
 rho_ion = 1900 # kg.m-3. It is the density of the ionomer [haoModelingExperimentalValidation2015].
 rho_carb = 1950 # kg.m-3. It is the density of the carbon [haoModelingExperimentalValidation2015].
 rho_Pt = 21450 # kg.m-3. It is the density of the platinum [haoModelingExperimentalValidation2015].
 r_carb = 25e-9 # m. It is the radius of the carbon particles [haoModelingExperimentalValidation2015].
-wt_Pt = 0.02 # It is the weight fraction of platinum over carbon covered by platinum (Pt/C) in the cathode catalyst layer [haoModelingExperimentalValidation2015].
-L_Pt = 0.3e-3 # kg.m-2. It is the platinum loading in the cathode catalyst layer.
+wt_Pt = 0.4 # It is the weight fraction of platinum over carbon covered by platinum (Pt/C) in the cathode catalyst layer [haoModelingExperimentalValidation2015].
+L_Pt = 0.3e-2 # kg.m-2. It is the platinum loading in the cathode catalyst layer.
 
 # Model parameters for the voltage calculation
 C_O2ref_red = 3.39  # mol.m-3. It is the reference concentration of oxygen for the reduction reaction.
