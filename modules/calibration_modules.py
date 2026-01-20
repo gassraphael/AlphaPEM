@@ -60,7 +60,6 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
         Hgdl_min, Hgdl_max = 100e-6, 150e-6  # m. It is the thickness of the gas diffusion layer.
         Hmpl_min, Hmpl_max = 40e-6, 100e-6  # m. It is the thickness of the microporous layer.
         epsilon_gdl_min, epsilon_gdl_max = 0.5, 0.9  # It is the anode/cathode GDL porosity, without units.
-        IC_min, IC_max = 0.1, 2.0  # It is the volume fraction of ionomer in the CL.
         #       Constants based on the interaction between water and the structure
         e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.
         #       Voltage polarization
@@ -78,7 +77,6 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
                         ['Hgdl', Hgdl_min, Hgdl_max, 'real'],
                         ['Hmpl', Hmpl_min, Hmpl_max, 'real'],
                         ['epsilon_gdl', epsilon_gdl_min, epsilon_gdl_max, 'real'],
-                        ['IC', IC_min, IC_max, 'real'],
                         ['e', e_min, e_max, 'int'],
                         ['Re', Re_min, Re_max, 'real'],
                         ['i0_d_c_ref', i0_c_ref_min, i0_c_ref_max, 'real'],
@@ -100,7 +98,6 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
         Hacl_min, Hacl_max = 8e-6, 20e-6  # m. It is the thickness of the ACL.
         Hmem_min, Hmem_max = 15e-6, 50e-6  # m. It is the thickness of the membrane.
         epsilon_gdl_min, epsilon_gdl_max = 0.40, 0.95  # It is the anode/cathode GDL porosity, without units.
-        IC_min, IC_max = 0.1, 2.0  # It is the volume fraction of ionomer in the CL.
         epsilon_c_min, epsilon_c_max = 0.15, 0.30  # It is the compression ratio of the GDL.
         #       Constants based on the interaction between water and the structure
         e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.
@@ -116,7 +113,6 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
             varbound = [['Hacl', Hacl_min, Hacl_max, 'real'],
                         ['Hmem', Hmem_min, Hmem_max, 'real'],
                         ['epsilon_gdl', epsilon_gdl_min, epsilon_gdl_max, 'real'],
-                        ['IC', IC_min, IC_max, 'real'],
                         ['e', e_min, e_max, 'int'],
                         ['Re', Re_min, Re_max, 'real'],
                         ['i0_d_c_ref', i0_c_ref_min, i0_c_ref_max, 'real'],
@@ -340,7 +336,6 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         #   Catalyst layer
         Hacl = 8e-6  # m. It is the thickness of the anode catalyst layer.
         Hccl = 17e-6  # m. It is the thickness of the cathode catalyst layer.
-        IC = 0.5  # It is the volume fraction of ionomer in the CL.
         #   Membrane
         Hmem = 15e-6  # m. It is the thickness of the membrane.
         #   Interaction parameters between water and PEMFC structure
@@ -407,7 +402,6 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         #   Catalyst layer
         Hacl = 8.593e-6  # m. It is the thickness of the anode catalyst layer.
         Hccl = Hacl  # m. It is the thickness of the cathode catalyst layer.
-        IC = 0.8  # It is the volume fraction of ionomer in the CL.
         #   Membrane
         Hmem = 16.06e-6  # m. It is the thickness of the membrane.
         #   Interaction parameters between water and PEMFC structure
@@ -439,7 +433,7 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
                                       'Lm': Lm, 'A_T_a': A_T_a, 'A_T_c': A_T_c, 'Vasm': Vasm, 'Vcsm': Vcsm,
                                       'Vaem': Vaem, 'Vcem': Vcem}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl,
-                                        'Hccl': Hccl, 'epsilon_gdl': epsilon_gdl, 'epsilon_mpl': epsilon_mpl, 'IC': IC,
+                                        'Hccl': Hccl, 'epsilon_gdl': epsilon_gdl, 'epsilon_mpl': epsilon_mpl,
                                         'epsilon_c': epsilon_c, 'e': e, 'Re': Re, 'i0_c_ref': i0_c_ref,
                                         'kappa_co': kappa_co, 'kappa_c': kappa_c, 'C_scl': C_scl}
     computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,

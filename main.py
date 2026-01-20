@@ -79,7 +79,7 @@ def main():
     T_des_5, Pa_des_5, Pc_des_5, Sa_5, Sc_5, Phi_a_des_5, Phi_c_des_5, y_H2_in_5, pola_current_parameters_5 = \
         calculate_operating_inputs(copy.deepcopy(pola_current_parameters), type_fuel_cell_5, voltage_zone)
     #   Physical parameters
-    (Hacl, Hccl, IC, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
+    (Hacl, Hccl, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
      Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_c_ref, kappa_co,
      kappa_c, C_scl) = calculate_physical_parameters(type_fuel_cell_1)
     #   Computing parameters
@@ -106,7 +106,7 @@ def main():
                                       'Lm': Lm, 'A_T_a': A_T_a, 'A_T_c': A_T_c, 'Vasm': Vasm, 'Vcsm': Vcsm,
                                       'Vaem': Vaem, 'Vcem': Vcem}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl,
-                                        'Hccl': Hccl, 'epsilon_gdl': epsilon_gdl, 'epsilon_mpl': epsilon_mpl, 'IC': IC,
+                                        'Hccl': Hccl, 'epsilon_gdl': epsilon_gdl, 'epsilon_mpl': epsilon_mpl,
                                         'epsilon_c': epsilon_c, 'e': e, 'Re': Re, 'i0_c_ref': i0_c_ref,
                                         'kappa_co': kappa_co, 'kappa_c': kappa_c, 'C_scl': C_scl}
     computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,

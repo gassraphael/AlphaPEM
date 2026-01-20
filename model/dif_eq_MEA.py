@@ -9,14 +9,14 @@
 import math
 
 # Importing constants' value and functions
-from configuration.settings import C_O2ref_red, alpha_c, Eact_O2_red, Tref_O2_red, rho_mem, M_eq, F, R, M_H2O, IC, wt_Pt
+from configuration.settings import C_O2ref_red, alpha_c, Eact_O2_red, Tref_O2_red, rho_mem, M_eq, F, R, M_H2O
 from modules.transitory_functions import rho_H2O_l, epsilon_mc, epsilon_cl
 
 
 # ____________________________________________________Main functions____________________________________________________
 
 
-def calculate_dyn_dissoved_water_evolution_inside_MEA(dif_eq, sv, Hmem, Hacl, Hccl, IC, S_abs, J_lambda, Sp,
+def calculate_dyn_dissoved_water_evolution_inside_MEA(dif_eq, sv, Hmem, Hacl, Hccl, S_abs, J_lambda, Sp,
                                                       **kwargs):
     """
     This function calculates the dynamic evolution of the dissolved water in the membrane and the catalyst layers.
@@ -34,8 +34,6 @@ def calculate_dyn_dissoved_water_evolution_inside_MEA(dif_eq, sv, Hmem, Hacl, Hc
         Thickness of the anode catalyst layer (m).
     Hccl : float
         Thickness of the cathode catalyst layer (m).
-    IC : float
-        Ionomer to carbon ratio in the catalyst layer.
     S_abs : dict
         Source terms of absorbed water in the anode and cathode catalyst layers (mol.m-3.s-1).
     J_lambda : dict
@@ -44,10 +42,10 @@ def calculate_dyn_dissoved_water_evolution_inside_MEA(dif_eq, sv, Hmem, Hacl, Hc
         Source terms of produced water in the anode and cathode catalyst layers (mol.m-3.s-1).
     """
 
-    dif_eq['dlambda_acl / dt'] = M_eq / (rho_mem * epsilon_mc(sv['lambda_acl'], sv['T_acl'], Hacl, IC)) * \
+    dif_eq['dlambda_acl / dt'] = M_eq / (rho_mem * epsilon_mc(sv['lambda_acl'], sv['T_acl'], Hacl)) * \
                                  (-J_lambda['acl_mem'] / Hacl + S_abs['acl'] + Sp['acl'])
     dif_eq['dlambda_mem / dt'] = M_eq / rho_mem * (J_lambda['acl_mem'] - J_lambda['mem_ccl']) / Hmem
-    dif_eq['dlambda_ccl / dt'] = M_eq / (rho_mem * epsilon_mc(sv['lambda_ccl'], sv['T_ccl'], Hccl, IC)) * \
+    dif_eq['dlambda_ccl / dt'] = M_eq / (rho_mem * epsilon_mc(sv['lambda_ccl'], sv['T_ccl'], Hccl)) * \
                                  (J_lambda['mem_ccl'] / Hccl + S_abs['ccl'] + Sp['ccl'])
 
 
@@ -125,12 +123,12 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl
                                            ((Jl['ampl_ampl'][nb_mpl - 1] - Jl['ampl_acl']) / (Hmpl / nb_mpl) +
                                             M_H2O * Sl['ampl'][nb_mpl])
     #      Inside the ACL
-    dif_eq['ds_acl / dt'] = 1 / (rho_H2O_l(sv['T_acl']) * epsilon_cl(sv['lambda_acl'], sv['T_acl'], Hacl, IC)) * \
+    dif_eq['ds_acl / dt'] = 1 / (rho_H2O_l(sv['T_acl']) * epsilon_cl(sv['lambda_acl'], sv['T_acl'], Hacl)) * \
                             (Jl['ampl_acl'] / Hacl + M_H2O * Sl['acl'])
 
     # At the cathode side
     #       Inside the CCL
-    dif_eq['ds_ccl / dt'] = 1 / (rho_H2O_l(sv['T_ccl']) * epsilon_cl(sv['lambda_ccl'], sv['T_ccl'], Hccl, IC)) * \
+    dif_eq['ds_ccl / dt'] = 1 / (rho_H2O_l(sv['T_ccl']) * epsilon_cl(sv['lambda_ccl'], sv['T_ccl'], Hccl)) * \
                             (- Jl['ccl_cmpl'] / Hccl + M_H2O * Sl['ccl'])
     #       Inside the CMPL
     if nb_mpl == 1:
@@ -254,12 +252,12 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, 
         dif_eq[f'dC_v_ampl_{nb_mpl} / dt'] = 1 / (epsilon_mpl * (1 - sv[f's_ampl_{nb_mpl}'])) * \
                                              ((Jv['ampl_ampl'][nb_mpl - 1] - Jv['ampl_acl']) / (Hmpl / nb_mpl) + Sv['ampl'][nb_mpl])
     #       Inside the ACL
-    dif_eq['dC_v_acl / dt'] = 1 / (epsilon_cl(sv['lambda_acl'], sv['T_acl'], Hacl, IC) * (1 - sv['s_acl'])) * \
+    dif_eq['dC_v_acl / dt'] = 1 / (epsilon_cl(sv['lambda_acl'], sv['T_acl'], Hacl) * (1 - sv['s_acl'])) * \
                               (Jv['ampl_acl'] / Hacl - S_abs['acl'] + Sv['acl'])
 
     # At the cathode side
     #       Inside the CCL
-    dif_eq['dC_v_ccl / dt'] = 1 / (epsilon_cl(sv['lambda_ccl'], sv['T_ccl'], Hccl, IC) * (1 - sv['s_ccl'])) * \
+    dif_eq['dC_v_ccl / dt'] = 1 / (epsilon_cl(sv['lambda_ccl'], sv['T_ccl'], Hccl) * (1 - sv['s_ccl'])) * \
                               (- Jv['ccl_cmpl'] / Hccl - S_abs['ccl'] + Sv['ccl'])
     #       Inside the CMPL
     if nb_mpl == 1:
@@ -299,7 +297,7 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, 
 
 
 def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, nb_channel_in_gc, Hgdl, Hmpl, Hacl,
-                                                Hccl, epsilon_gdl, epsilon_mpl, IC, nb_gdl, nb_mpl, nb_gc, J_H2,
+                                                Hccl, epsilon_gdl, epsilon_mpl, nb_gdl, nb_mpl, nb_gc, J_H2,
                                                 J_O2, S_H2, S_O2, **kwargs):
     """This function calculates the dynamic evolution of the hydrogen, oxygen and nitrogen in the gas diffusion layers,
     the microporous layers, and the catalyst layers.
@@ -333,8 +331,6 @@ def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lg
         Anode/cathode GDL porosity.
     epsilon_mpl : float
         Anode/cathode MPL porosity.
-    IC : float
-        Ionomer to carbon ratio in the CL.
     nb_gdl : int
         Number of model nodes placed inside each GDL.
     nb_mpl : int
@@ -385,12 +381,12 @@ def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lg
         dif_eq[f'dC_H2_ampl_{nb_mpl} / dt'] = 1 / (epsilon_mpl * (1 - sv[f's_ampl_{nb_mpl}'])) * \
                                               (J_H2['ampl_ampl'][nb_mpl - 1] - J_H2['ampl_acl']) / (Hmpl / nb_mpl)
     #      Inside the ACL
-    dif_eq['dC_H2_acl / dt'] = 1 / (epsilon_cl(sv['lambda_acl'], sv['T_acl'], Hacl, IC) * (1 - sv['s_acl'])) * \
+    dif_eq['dC_H2_acl / dt'] = 1 / (epsilon_cl(sv['lambda_acl'], sv['T_acl'], Hacl) * (1 - sv['s_acl'])) * \
                                (J_H2['ampl_acl'] / Hacl - S_H2['reac'] - S_H2['cros'])
 
     # At the cathode side
     #      Inside the CCL
-    dif_eq['dC_O2_ccl / dt'] = 1 / (epsilon_cl(sv['lambda_ccl'], sv['T_ccl'], Hccl, IC) * (1 - sv['s_ccl'])) * \
+    dif_eq['dC_O2_ccl / dt'] = 1 / (epsilon_cl(sv['lambda_ccl'], sv['T_ccl'], Hccl) * (1 - sv['s_ccl'])) * \
                                (-J_O2['ccl_cmpl'] / Hccl - S_O2['reac'] - S_O2['cros'])
     #      Inside the CMPL
     if nb_mpl == 1:

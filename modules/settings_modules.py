@@ -186,8 +186,6 @@ def stored_physical_parameters(type_fuel_cell):
         Thickness of the anode catalyst layer in m.
     Hccl : float
         Thickness of the cathode catalyst layer in m.
-    IC : float
-        Ionomer to carbon ratio in the CL.
     Hmem : float
             Thickness of the membrane in m.
     Hgdl : float
@@ -231,7 +229,6 @@ def stored_physical_parameters(type_fuel_cell):
         # Catalyst layer
         Hacl = 9.76346510970484e-6  # m. It is the thickness of the anode catalyst layer.
         Hccl = 5.307345509355617e-6  # m. It is the thickness of the cathode catalyst layer.
-        IC = 0.5  # It is the volume fraction of ionomer in the CL.
         # Membrane
         Hmem = 10.684275696739961e-06  # m. It is the thickness of the membrane.
         # Gas diffusion layer
@@ -273,7 +270,6 @@ def stored_physical_parameters(type_fuel_cell):
         # Catalyst layer
         Hacl = 8.593e-6  # m. It is the thickness of the anode catalyst layer.
         Hccl = Hacl  # m. It is the thickness of the cathode catalyst layer.
-        IC = 0.8  # It is the volume fraction of ionomer in the CL.
         # Membrane
         Hmem = 16.06e-6  # m. It is the thickness of the membrane.
         # Gas diffusion layer
@@ -310,7 +306,7 @@ def stored_physical_parameters(type_fuel_cell):
     else:
         raise ValueError('the type_input given is not valid.')
 
-    return (Hacl, Hccl, IC, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
+    return (Hacl, Hccl, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
             nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_c_ref, kappa_co,
             kappa_c, C_scl)
 

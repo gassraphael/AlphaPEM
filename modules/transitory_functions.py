@@ -12,7 +12,7 @@ import math
 from functools import lru_cache
 from configuration.settings import (M_eq, rho_mem, Dp_mpl, Dp_cl, theta_c_gdl, theta_c_mpl, theta_c_cl, gamma_cond,
                                     gamma_evap, M_H2, M_O2, M_N2, M_H2O, R, F, Kshape, K_O2_dis_ion, K_O2_dis_l,
-                                    K_O2_ad_Pt, rho_ion, rho_carb, r_carb, rho_Pt, ECSA_0, theta_Pt_0, wt_Pt, L_Pt,
+                                    K_O2_ad_Pt, rho_ion, rho_carb, r_carb, rho_Pt, IC, ECSA_0, theta_Pt_0, wt_Pt, L_Pt,
                                     epsilon_p, alpha_p, Tref_cross, Eact_H2_cros_v, Eact_H2_cros_l, Eact_O2_cros_v,
                                     Eact_O2_cros_l, tau_mpl, tau_cl, r_s_gdl, r_s_mpl, r_s_cl, k_th_gdl, k_th_mpl,
                                     k_th_cl, k_th_mem, Cp_gdl, Cp_mpl, Cp_cl, Cp_mem, rho_gdl, rho_mpl, rho_cl,
@@ -590,7 +590,7 @@ def D_lambda(lambdaa):
     return 4.1e-10 * (lambdaa / 25.0) ** 0.15 * (1.0 + math.tanh((lambdaa - 2.5) / 1.4))
 
 
-def D_lambda_eff(lambdaa, T, Hcl, IC):
+def D_lambda_eff(lambdaa, T, Hcl):
     """This function calculates the effective diffusion coefficient of water in the ionomer of the catalyst layers,
     in m².s-1.
 
@@ -602,15 +602,13 @@ def D_lambda_eff(lambdaa, T, Hcl, IC):
         Temperature in K.
     Hcl : float
         Thickness of the CL layer.
-    IC : float
-        Ionomer to carbon ratio in the catalyst layer.
 
     Returns
     -------
     float
         Effective diffusion coefficient of water in the catalyst layer in m².s-1.
     """
-    return epsilon_mc(lambdaa, T, Hcl, IC) / tau_cl * D_lambda(lambdaa)
+    return epsilon_mc(lambdaa, T, Hcl) / tau_cl * D_lambda(lambdaa)
 
 
 def D_EOD(i_fc):
@@ -629,7 +627,7 @@ def D_EOD(i_fc):
     return 2.5 / 22 * i_fc / F
 
 
-def D_EOD_eff(i_fc, lambdaa, T, Hcl, IC):
+def D_EOD_eff(i_fc, lambdaa, T, Hcl):
     """This function calculates the effective electro-osmotic drag diffusion coefficient of water in the ionomer of the
     catalyst layers, in mol.m-2.s-1.
 
@@ -643,15 +641,13 @@ def D_EOD_eff(i_fc, lambdaa, T, Hcl, IC):
         Temperature in K.
     Hcl : float
         Thickness of the CL layer.
-    IC : float
-        Ionomer to carbon ratio in the catalyst layer.
 
     Returns
     -------
     float
         Effective electro-osmotic drag diffusion coefficient of water in the catalyst layer in mol.m-2.s-1.
     """
-    return epsilon_mc(lambdaa, T, Hcl, IC) / tau_cl * D_EOD(i_fc)
+    return epsilon_mc(lambdaa, T, Hcl) / tau_cl * D_EOD(i_fc)
 
 
 def fv(lambdaa, T):
@@ -869,7 +865,7 @@ def k_O2(lambdaa, T, kappa_co):
     return w * k_O2_v + (1 - w) * k_O2_l  # interpolation between under-saturated and liquid-equilibrated O2 crossover
 
 
-def R_T_O2_Pt(s, lambdaa, T, Hcl, IC):
+def R_T_O2_Pt(s, lambdaa, T, Hcl):
     """This function calculates the total resistance of oxygen to the platinium particules inside the CCL, defined as the
      sum of the different dissolution, diffusion and adsorption resistances.
 
@@ -883,8 +879,6 @@ def R_T_O2_Pt(s, lambdaa, T, Hcl, IC):
         Temperature inside the CL in K.
     Hcl : float
         Thickness of the CL layer.
-    IC : float
-        Ionomer to carbon ratio in the CL.
 
     Returns
     -------
@@ -900,12 +894,12 @@ def R_T_O2_Pt(s, lambdaa, T, Hcl, IC):
     3. Alireza Goshtasbi - Article 2020 - A Mathematical Model toward Real-Time Monitoring of Automotive PEM Fuel Cells.
     """
 
-    return R_O2_dis_l(s, lambdaa, T, Hcl, IC) + R_O2_dif_l(s, lambdaa, T, Hcl, IC) + \
-           R_O2_dis_ion(lambdaa, T, Hcl, IC) + R_O2_dif_ion_eff(lambdaa, T, Hcl, IC) + \
-           R_O2_ad_Pt_eff(lambdaa, T, Hcl, IC)
+    return R_O2_dis_l(s, lambdaa, T, Hcl) + R_O2_dif_l(s, lambdaa, T, Hcl) + \
+           R_O2_dis_ion(lambdaa, T, Hcl) + R_O2_dif_ion_eff(lambdaa, T, Hcl) + \
+           R_O2_ad_Pt_eff(lambdaa, T, Hcl)
 
 
-def R_O2_dis_l(s, lambdaa, T, Hcl, IC):
+def R_O2_dis_l(s, lambdaa, T, Hcl):
     """This function calculates the dissolution resistance of oxygen in the CCL liquid water film, in s.m-1.
     The assumption to make R_02_dis_l proportional to R_O2_dif_l is strong.
 
@@ -919,8 +913,6 @@ def R_O2_dis_l(s, lambdaa, T, Hcl, IC):
         Temperature inside the CL in K.
     Hcl : float
         Thickness of the CL layer.
-    IC : float
-        Ionomer to carbon ratio in the CL.
 
     Returns
     -------
@@ -933,10 +925,10 @@ def R_O2_dis_l(s, lambdaa, T, Hcl, IC):
     in PEM Fuel Cells.
     """
 
-    return K_O2_dis_l * R_O2_dif_l(s, lambdaa, T, Hcl, IC)
+    return K_O2_dis_l * R_O2_dif_l(s, lambdaa, T, Hcl)
 
 
-def R_O2_dif_l(s, lambdaa, T, Hcl, IC):
+def R_O2_dif_l(s, lambdaa, T, Hcl):
     """This function calculates the diffusion resistance of oxygen inside the CCL liquid water film, in s.m-1.
 
     Parameters
@@ -949,8 +941,6 @@ def R_O2_dif_l(s, lambdaa, T, Hcl, IC):
         Temperature inside the CL in K.
     Hcl : float
         Thickness of the CL layer.
-    IC : float
-        Ionomer to carbon ratio in the CL.
 
     Returns
     -------
@@ -965,8 +955,8 @@ def R_O2_dif_l(s, lambdaa, T, Hcl, IC):
     3. Ping Han - Article 1996 - Temperature dependence of oxygen diffusion in H20 and D20
     """
 
-    delta_ion_val = delta_ion(lambdaa, T, Hcl, IC)
-    delta_H2O_l = (s * epsilon_cl(lambdaa, T, Hcl, IC) * r_carb**3 / epsilon_carb(Hcl) + (r_carb + delta_ion_val)**3)**(1/3) - \
+    delta_ion_val = delta_ion(lambdaa, T, Hcl)
+    delta_H2O_l = (s * epsilon_cl(lambdaa, T, Hcl) * r_carb**3 / epsilon_carb(Hcl) + (r_carb + delta_ion_val)**3)**(1/3) - \
                   (r_carb + delta_ion_val) # The liquid water film thickness in the CL, in m.
 
     D_O2_dif_l =  10 ** (-8.410 + 773.8 / T - (506.4 / T)**2) # The effective diffusion coefficient of O2 in the liquid water film, in m².s-1.
@@ -975,7 +965,7 @@ def R_O2_dif_l(s, lambdaa, T, Hcl, IC):
 
 
 
-def R_O2_dis_ion(lambdaa, T, Hcl, IC):
+def R_O2_dis_ion(lambdaa, T, Hcl):
     """This function calculates the dissolution resistance of oxygen in the CCL ionomer film, in s.m-1.
     The assumption to make R_02_dis_ion proportional to R_02_dif_ion is strong.
 
@@ -987,8 +977,6 @@ def R_O2_dis_ion(lambdaa, T, Hcl, IC):
         Temperature inside the CL in K.
     Hcl : float
         Thickness of the CL layer.
-    IC : float
-        Ionomer to carbon ratio in the CL.
 
     Returns
     -------
@@ -1001,10 +989,10 @@ def R_O2_dis_ion(lambdaa, T, Hcl, IC):
     in PEM Fuel Cells.
     """
 
-    return K_O2_dis_ion * R_O2_dif_ion(lambdaa, T, Hcl, IC)
+    return K_O2_dis_ion * R_O2_dif_ion(lambdaa, T, Hcl)
 
 
-def R_O2_dif_ion(lambdaa, T, Hcl, IC):
+def R_O2_dif_ion(lambdaa, T, Hcl):
     """This function calculates the diffusion resistance of oxygen inside the CCL ionomer film, in s.m-1.
 
     Parameters
@@ -1015,8 +1003,6 @@ def R_O2_dif_ion(lambdaa, T, Hcl, IC):
         Temperature inside the CL in K.
     Hcl : float
         Thickness of the CL layer.
-    IC : float
-        Ionomer to carbon ratio in the CL.
 
     Returns
     -------
@@ -1033,10 +1019,10 @@ def R_O2_dif_ion(lambdaa, T, Hcl, IC):
 
     D_O2_dif_ion = 17.45e-10 * math.exp(-1514 / T) # This is the effective diffusion coefficient of O2 in the ionomer film, in m².s-1.
 
-    return delta_ion(lambdaa, T, Hcl, IC) / D_O2_dif_ion
+    return delta_ion(lambdaa, T, Hcl) / D_O2_dif_ion
 
 
-def R_O2_dif_ion_eff(lambdaa, T, Hcl, IC):
+def R_O2_dif_ion_eff(lambdaa, T, Hcl):
     """This function calculates the effective diffusion resistance of oxygen inside the CCL ionomer film, in s.m-1.
 
     Parameters
@@ -1047,8 +1033,6 @@ def R_O2_dif_ion_eff(lambdaa, T, Hcl, IC):
         Temperature inside the CL in K.
     Hcl : float
         Thickness of the CL layer.
-    IC : float
-        Ionomer to carbon ratio in the CL.
 
     Returns
     -------
@@ -1061,12 +1045,12 @@ def R_O2_dif_ion_eff(lambdaa, T, Hcl, IC):
     in PEM Fuel Cells.
     """
 
-    return (r_carb + delta_ion(lambdaa, T, Hcl, IC))**2 / (r_Pt()**2 * (1 - theta_Pt_0)) * \
+    return (r_carb + delta_ion(lambdaa, T, Hcl))**2 / (r_Pt()**2 * (1 - theta_Pt_0)) * \
            rho_Pt / rho_carb * (r_Pt() / r_carb)**3 * (1 - wt_Pt) / wt_Pt * \
-           R_O2_dif_ion(lambdaa, T, Hcl, IC)
+           R_O2_dif_ion(lambdaa, T, Hcl)
 
 
-def R_O2_ad_Pt(lambdaa, T, Hcl, IC):
+def R_O2_ad_Pt(lambdaa, T, Hcl):
     """This function calculates the adsorption resistance of oxygen on the Pt particules inside the CCL, in s.m-1.
     The assumption to make R_O2_ad_Pt proportional to R_O2_dif_ion is strong.
 
@@ -1078,8 +1062,6 @@ def R_O2_ad_Pt(lambdaa, T, Hcl, IC):
         Temperature inside the CL in K.
     Hcl : float
         Thickness of the CL layer.
-    IC : float
-        Ionomer to carbon ratio in the CL.
 
     Returns
     -------
@@ -1092,10 +1074,10 @@ def R_O2_ad_Pt(lambdaa, T, Hcl, IC):
     in PEM Fuel Cells.
     """
 
-    return K_O2_ad_Pt * R_O2_dif_ion(lambdaa, T, Hcl, IC)
+    return K_O2_ad_Pt * R_O2_dif_ion(lambdaa, T, Hcl)
 
 
-def R_O2_ad_Pt_eff(lambdaa, T, Hcl, IC):
+def R_O2_ad_Pt_eff(lambdaa, T, Hcl):
     """This function calculates the effective adsorption resistance of oxygen on the Pt particules inside the CCL, in s.m-1.
     Parameters
     ----------
@@ -1105,8 +1087,6 @@ def R_O2_ad_Pt_eff(lambdaa, T, Hcl, IC):
         Temperature inside the CL in K.
     Hcl : float
         Thickness of the CL layer.
-    IC : float
-        Ionomer to carbon ratio in the CL.
 
     Returns
     -------
@@ -1119,9 +1099,9 @@ def R_O2_ad_Pt_eff(lambdaa, T, Hcl, IC):
     in PEM Fuel Cells.
     """
 
-    return (r_carb + delta_ion(lambdaa, T, Hcl, IC))**2 / (r_Pt()**2 * (1 - theta_Pt_0)) * \
+    return (r_carb + delta_ion(lambdaa, T, Hcl))**2 / (r_Pt()**2 * (1 - theta_Pt_0)) * \
            rho_Pt / rho_carb * (r_Pt() / r_carb)**3 * (1 - wt_Pt) / wt_Pt * \
-           R_O2_ad_Pt(lambdaa, T, Hcl, IC)
+           R_O2_ad_Pt(lambdaa, T, Hcl)
 
 
 @lru_cache(maxsize=None) # Cache the results to optimize performance
@@ -1142,7 +1122,7 @@ def r_Pt():
     return 3 / (rho_Pt * ECSA_0 / L_Pt) # This is the platine particle radius, in m.
 
 
-def delta_ion(lambdaa, T, Hcl, IC):
+def delta_ion(lambdaa, T, Hcl):
     """This function calculates the ionomer film thickness in the CL, in m. It should be in [7-9] nm.
 
     Parameters
@@ -1153,8 +1133,6 @@ def delta_ion(lambdaa, T, Hcl, IC):
         Temperature inside the CL in K.
     Hcl : float
         Thickness of the CL layer.
-    IC : float
-        Ionomer to carbon ratio in the CL.
 
     Returns
     -------
@@ -1169,7 +1147,7 @@ def delta_ion(lambdaa, T, Hcl, IC):
     water management and impedance spectra.
     """
 
-    return r_carb * ((epsilon_mc(lambdaa, T, Hcl, IC) / epsilon_carb(Hcl) + 1)**(1/3) - 1)
+    return r_carb * ((epsilon_mc(lambdaa, T, Hcl) / epsilon_carb(Hcl) + 1)**(1/3) - 1)
 
 
 @lru_cache(maxsize=None) # Cache the results to optimize performance
@@ -1230,7 +1208,7 @@ def epsilon_Pt(Hccl):
     return epsilon_Pt
 
 
-def a_c(lambdaa, T_cl, Hccl, IC):
+def a_c(lambdaa, T_cl, Hccl):
     """This function calculates the volumetric surface area of the ionomer in the CL, in m-1.
     Parameters
     ----------
@@ -1240,8 +1218,6 @@ def a_c(lambdaa, T_cl, Hccl, IC):
         Temperature inside the CL in K.
     Hccl : float
         Thickness of the CL layer.
-    IC : float
-        Ionomer to carbon ratio in the CL.
 
     Returns
     -------
@@ -1254,10 +1230,10 @@ def a_c(lambdaa, T_cl, Hccl, IC):
     in PEM Fuel Cells.
     """
 
-    return 3 * epsilon_carb(Hccl) / r_carb**3 * (r_carb + delta_ion(lambdaa, T_cl, Hccl, IC))**2
+    return 3 * epsilon_carb(Hccl) / r_carb**3 * (r_carb + delta_ion(lambdaa, T_cl, Hccl))**2
 
 
-def epsilon_mc(lambda_cl, T_cl, Hcl, IC):
+def epsilon_mc(lambda_cl, T_cl, Hcl):
     """This function calculates the ionomer volume fraction in the CL.
 
     Parameters
@@ -1268,8 +1244,6 @@ def epsilon_mc(lambda_cl, T_cl, Hcl, IC):
         Temperature inside the CL in K.
     Hcl : float
         Thickness of the CL layer.
-    IC : float
-        Ionomer to carbon ratio in the CL.
 
     Returns
     -------
@@ -1291,7 +1265,7 @@ def epsilon_mc(lambda_cl, T_cl, Hcl, IC):
     return epsilon_mc
 
 
-def epsilon_cl(lambda_cl, T_cl, Hcl, IC):
+def epsilon_cl(lambda_cl, T_cl, Hcl):
     """This function calculates the CL porosity.
 
     Parameters
@@ -1302,8 +1276,6 @@ def epsilon_cl(lambda_cl, T_cl, Hcl, IC):
         Temperature inside the CL in K.
     Hcl : float
         Thickness of the CL layer.
-    IC : float
-        Ionomer to carbon ratio in the CL.
 
     Returns
     -------
@@ -1315,16 +1287,16 @@ def epsilon_cl(lambda_cl, T_cl, Hcl, IC):
     1. Alireza Goshtasbi - Article 2020 - A Mathematical Model toward Real-Time Monitoring of Automotive PEM Fuel Cells.
     """
 
-    epsilon_cl = 1 - epsilon_carb(Hcl) - epsilon_Pt(Hcl) - epsilon_mc(lambda_cl, T_cl, Hcl, IC)
+    epsilon_cl = 1 - epsilon_carb(Hcl) - epsilon_Pt(Hcl) - epsilon_mc(lambda_cl, T_cl, Hcl)
 
     if epsilon_cl <= 0:
-        print("epsilon_cl: ", epsilon_cl, " Hcl: ", Hcl, " IC: ", IC, " wt_Pt: ", wt_Pt)
+        print("epsilon_cl: ", epsilon_cl, " Hcl: ", Hcl, " wt_Pt: ", wt_Pt)
         raise ValueError("The calculated porosity in the CCL is less than or equal to 0. "
-                         "Please check the inputs Hcl, IC and wt_Pt.")
+                         "Please check the inputs Hcl and wt_Pt.")
     return epsilon_cl
 
 
-def sigma_p_eff(element, lambdaa, T, Hcl=None, IC=None):
+def sigma_p_eff(element, lambdaa, T, Hcl=None):
     """This function calculates the effective proton conductivity, in Ω-1.m-1, in either the membrane or the CCL.
 
     Parameters
@@ -1338,8 +1310,6 @@ def sigma_p_eff(element, lambdaa, T, Hcl=None, IC=None):
         Temperature in K.
     Hcl : float, optional
         Thickness of the CL layer.
-    IC : float, optional
-        Ionomer to carbon ratio in the CCL.
 
     Returns
     -------
@@ -1353,8 +1323,8 @@ def sigma_p_eff(element, lambdaa, T, Hcl=None, IC=None):
         sigma_p_eff_low = 0.1879 * math.exp(1268 * (1 / 303.15 - 1 / T))
         sigma_p_eff_high = (0.5139 * lambdaa - 0.326) * math.exp(1268 * (1 / 303.15 - 1 / T))
     elif element == 'ccl': # The effective proton conductivity at the cathode catalyst layer
-        sigma_p_eff_low = epsilon_mc(lambdaa, T, Hcl, IC) * 0.1879 * math.exp(1268 * (1 / 303.15 - 1 / T))
-        sigma_p_eff_high = epsilon_mc(lambdaa, T, Hcl, IC) * (0.5139 * lambdaa - 0.326) * math.exp(1268 * (1 / 303.15 - 1 / T))
+        sigma_p_eff_low = epsilon_mc(lambdaa, T, Hcl) * 0.1879 * math.exp(1268 * (1 / 303.15 - 1 / T))
+        sigma_p_eff_high = epsilon_mc(lambdaa, T, Hcl) * (0.5139 * lambdaa - 0.326) * math.exp(1268 * (1 / 303.15 - 1 / T))
     else:
         raise ValueError("The element should be either 'mem' or 'ccl'.")
 
@@ -1366,7 +1336,7 @@ def sigma_p_eff(element, lambdaa, T, Hcl=None, IC=None):
 
 
 @lru_cache(maxsize=None) # Cache the results to optimize performance
-def sigma_e_eff(element, epsilon=None, epsilon_c=None, lambda_cl=None, T_cl=None, Hcl=None, IC=None):
+def sigma_e_eff(element, epsilon=None, epsilon_c=None, lambda_cl=None, T_cl=None, Hcl=None):
     """This function calculates the effective electrical conductivity, in Ω-1.m-1, in either the GDL, the MPL or the CL,
     considering GDL compression.
 
@@ -1385,8 +1355,6 @@ def sigma_e_eff(element, epsilon=None, epsilon_c=None, lambda_cl=None, T_cl=None
         Temperature inside the CL in K.
     Hcl : float, optional
         Thickness of the CL layer.
-    IC : float, optional
-        Ionomer to carbon ratio in the CL.
 
     Returns
     -------
@@ -1405,7 +1373,7 @@ def sigma_e_eff(element, epsilon=None, epsilon_c=None, lambda_cl=None, T_cl=None
         return (1 - epsilon) * sigma_e_mpl # Using the volume fraction of conductive material.
 
     elif element == 'cl': # The effective electrical conductivity at the CL
-        return (1 - epsilon_cl(lambda_cl, T_cl, Hcl, IC) - epsilon_mc(lambda_cl, T_cl, Hcl, IC)) * sigma_e_cl # Using the volume fraction of conductive material.
+        return (1 - epsilon_cl(lambda_cl, T_cl, Hcl) - epsilon_mc(lambda_cl, T_cl, Hcl)) * sigma_e_cl # Using the volume fraction of conductive material.
 
     else:
         raise ValueError("The element should be either 'gdl', 'mpl' or 'cl'.")
@@ -1505,8 +1473,8 @@ def k_th_gaz_mixture(k_th_g, mu_g, x, M):
     return k_th_gaz_mixture
 
 
-def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C_N2=None, epsilon=None, IC=None,
-             Hcl = None, epsilon_c=None):
+def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C_N2=None, epsilon=None, Hcl = None,
+             epsilon_c=None):
     """This function calculates the effective thermal conductivity, in J.m-1.s-1.K-1, in either the GDL, the MPL, the CL
     or the membrane. A weighted harmonic average is used for characterizing the conductivity of each material in a layer,
     instead of a weighted arithmetic average. The physical meaning is that all the heat energy is forced to pass through
@@ -1535,8 +1503,6 @@ def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C
         Concentration of nitrogen in the CGDL or CCL.
     epsilon : float
         Porosity.
-    IC : float
-        Ionomer to carbon ratio in the CL.
     Hcl : float
         Thickness of the CL layer.
     epsilon_c : float
@@ -1590,8 +1556,8 @@ def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C
 
     elif element in ('acl', 'ccl'): # The effective thermal conductivity at the CL
         fv_val = fv(lambdaa, T)
-        epsilon_mc_val = epsilon_mc(lambdaa, T, Hcl, IC)
-        epsilon_cl_val = epsilon_cl(lambdaa, T, Hcl, IC)
+        epsilon_mc_val = epsilon_mc(lambdaa, T, Hcl)
+        epsilon_cl_val = epsilon_cl(lambdaa, T, Hcl)
         k_th_eff_mem = hmean([k_th_mem, k_th('H2O_l', T)],
                              weights=[1 - fv_val, fv_val]) # The effective thermal conductivity at the membrane
         if element == 'acl':  # The thermal conductivity of the gas mixture in the ACL
@@ -1690,7 +1656,7 @@ def h0(component, T):
 
 
 def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C_N2=None, epsilon=None,
-                      IC=None, Hcl = None):
+                      Hcl = None):
     """This function calculates the volumetric heat capacity, in J.m-3.K-1, in either the GDL, the MPL, the CL or
     the membrane.
 
@@ -1716,8 +1682,6 @@ def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O
         Concentration of nitrogen in the CGDL or CCL.
     epsilon : float
         Porosity.
-    IC : float
-        Ionomer to carbon ratio in the CL.
     Hcl : float
         Thickness of the CL layer.
 
@@ -1745,8 +1709,8 @@ def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O
                            weights=[1 - epsilon, epsilon * s, epsilon * (1 - s)])
 
     elif element == 'acl' or element == 'ccl':  # The volumetric heat capacity at the CL
-        epsilon_mc_val = epsilon_mc(lambdaa, T, Hcl, IC)
-        epsilon_cl_val = epsilon_cl(lambdaa, T, Hcl, IC)
+        epsilon_mc_val = epsilon_mc(lambdaa, T, Hcl)
+        epsilon_cl_val = epsilon_cl(lambdaa, T, Hcl)
         if element == 'acl':  # The heat capacity of the gas mixture in the ACL
             sum_C_v_C_H2_C_N2 = C_v + C_H2 + C_N2
             rho_Cp0_gaz = average([M_H2O * C_v * Cp0('H2O_v', T), M_H2 * C_H2 * Cp0('H2', T),

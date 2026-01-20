@@ -15,7 +15,7 @@ from modules.transitory_functions import average, k_H2, k_O2, sigma_p_eff, R_T_O
 
 # _____________________________________________________Cell voltage_____________________________________________________
 
-def calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, Hccl, IC, **kwargs):
+def calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, Hccl, **kwargs):
     """This function calculates the oxygen concentration at the platinum surface in the cathode catalyst layer.
     Parameters
     ----------
@@ -31,8 +31,6 @@ def calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, Hccl, IC, **kwar
         The temperature in the cathode catalyst layer (K).
     Hccl : float
         The thickness of the cathode catalyst layer (m).
-    IC : float
-        The ionomer content in the cathode catalyst layer (-).
 
     Returns
     -------
@@ -45,7 +43,7 @@ def calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, Hccl, IC, **kwar
     in PEM Fuel Cells.
     """
 
-    return C_O2_ccl - i_fc / (4 * F * Hccl) * R_T_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, IC) / a_c(lambda_ccl, T_ccl, Hccl, IC)
+    return C_O2_ccl - i_fc / (4 * F * Hccl) * R_T_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl) / a_c(lambda_ccl, T_ccl, Hccl)
 
 
 def calculate_cell_voltage(variables, operating_inputs, parameters):
@@ -73,7 +71,7 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
     T_acl_t, T_mem_t, T_ccl_t = variables['T_acl'], variables['T_mem'], variables['T_ccl']
     # Extraction of the operating inputs and the parameters
     Hmem, Hacl, Hccl = parameters['Hmem'], parameters['Hacl'], parameters['Hccl']
-    IC, Re, kappa_co = parameters['IC'], parameters['Re'], parameters['kappa_co']
+    Re, kappa_co = parameters['Re'], parameters['kappa_co']
 
     # Initialisation
     n = len(t)
@@ -91,7 +89,7 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
         # Current density value at this time step
         i_fc = operating_inputs['current_density'](t[i], parameters)
 
-        C_O2_Pt = calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, Hccl, IC)
+        C_O2_Pt = calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, Hccl)
 
         # The equilibrium potential
         Ueq = E0 - 8.5e-4 * (T_ccl - 298.15) + R * T_ccl / (2 * F) * (math.log(R * T_acl * C_H2_acl / Pref_eq) +
@@ -108,7 +106,7 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
         #       The proton resistance at the membrane : Rmem
         Rmem = Hmem / sigma_p_eff('mem', lambda_mem, T_mem)
         #       The proton resistance at the cathode catalyst layer : Rccl
-        Rccl = Hccl / sigma_p_eff('ccl', lambda_ccl, T_ccl, Hcl=Hccl, IC=IC)
+        Rccl = Hccl / sigma_p_eff('ccl', lambda_ccl, T_ccl, Hcl=Hccl)
         #       The total proton resistance
         Rp = Rmem + Rccl  # its value is around [4-7]e-6 ohm.m².
 

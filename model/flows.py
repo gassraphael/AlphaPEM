@@ -54,7 +54,7 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     Aact, Hmem, Hacl, Hccl = parameters['Aact'], parameters['Hmem'], parameters['Hacl'], parameters['Hccl']
     Wagc, Wcgc, Hagc, Hcgc = parameters['Wagc'], parameters['Wcgc'], parameters['Hagc'], parameters['Hcgc']
     epsilon_gdl, epsilon_mpl, epsilon_c = parameters['epsilon_gdl'], parameters['epsilon_mpl'], parameters['epsilon_c']
-    IC, e, kappa_co = parameters['IC'], parameters['e'], parameters['kappa_co']
+    e, kappa_co = parameters['e'], parameters['kappa_co']
     nb_gc, nb_gdl, nb_mpl = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl']
 
     # Intermediate values
@@ -214,10 +214,10 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
                             Ctot=sv[f'C_v_ampl_{i}'] + sv[f'C_H2_ampl_{i}'] + C_N2_a_mean,
                             T=sv[f'T_ampl_{i}'], epsilon=epsilon_mpl) for i in range(1, nb_mpl + 1)]
     Sl_acl = Svl(element='anode', s=s_acl, C_v=C_v_acl, Ctot=C_v_acl + C_H2_acl + C_N2_a_mean, T=T_acl,
-                 epsilon=epsilon_cl(sv['lambda_acl'], sv['T_acl'], Hacl, IC))
+                 epsilon=epsilon_cl(sv['lambda_acl'], sv['T_acl'], Hacl))
     #   Cathode side
     Sl_ccl = Svl(element='cathode', s=s_ccl, C_v=C_v_ccl, Ctot=C_v_ccl + C_O2_ccl + C_N2_c_mean, T=T_ccl,
-                 epsilon=epsilon_cl(sv['lambda_ccl'], sv['T_ccl'], Hccl, IC))
+                 epsilon=epsilon_cl(sv['lambda_ccl'], sv['T_ccl'], Hccl))
     Sl_cmpl = [None] + [Svl(element='cathode', s=sv[f's_cmpl_{i}'], C_v=sv[f'C_v_cmpl_{i}'],
                             Ctot=sv[f'C_v_cmpl_{i}'] + sv[f'C_O2_cmpl_{i}'] + C_N2_c_mean,
                             T=sv[f'T_cmpl_{i}'], epsilon=epsilon_mpl) for i in range(1, nb_mpl + 1)]

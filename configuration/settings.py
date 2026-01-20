@@ -184,8 +184,6 @@ def calculate_physical_parameters(type_fuel_cell):
         Thickness of the anode catalyst layer in meters.
     Hacl : float
         Thickness of the cathode catalyst layer in meters.
-    IC : float
-        Ionomer to carbon ratio in the catalyst layer.
     Hmem : float
         Thickness of the membrane in meters.
     Hgdl : float
@@ -258,7 +256,6 @@ def calculate_physical_parameters(type_fuel_cell):
         #   Catalyst layer
         Hacl = 8.089e-6  # m. It is the thickness of the anode catalyst layer.
         Hccl = Hacl  # m. It is the thickness of the cathode catalyst layer.
-        IC = 0.5  # It is the ionomer to carbon ratio in the CL.
         #   Membrane
         Hmem = 2e-5  # m. It is the thickness of the membrane.
         #   Gas diffusion layer
@@ -294,11 +291,11 @@ def calculate_physical_parameters(type_fuel_cell):
         kappa_c = 1.6136446641573106  # It is the overpotential correction exponent.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
     else: # Stored setup in "stored_physical_parameters".
-        (Hacl, Hccl, IC, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
+        (Hacl, Hccl, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
          Wcgc, Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_c_ref,
          kappa_co, kappa_c, C_scl) = stored_physical_parameters(type_fuel_cell)
 
-    return (Hacl, Hccl, IC, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
+    return (Hacl, Hccl, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
             Wcgc, Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_c_ref,
             kappa_co, kappa_c, C_scl)
 
@@ -410,7 +407,7 @@ theta_Pt_0 = 0 # This is the initial platine-oxide coverage, assumed to be zero 
 rho_ion = 1900 # kg.m-3. It is the density of the ionomer [haoModelingExperimentalValidation2015].
 rho_carb = 1950 # kg.m-3. It is the density of the carbon [haoModelingExperimentalValidation2015].
 rho_Pt = 21450 # kg.m-3. It is the density of the platinum [haoModelingExperimentalValidation2015].
-r_carb = 50e-9 # m. It is the radius of the carbon particles.
+r_carb = 45e-9 # m. It is the radius of the carbon particles.
 wt_Pt = 0.36 # It is the weight fraction of platinum over carbon covered by platinum (Pt/C) in the cathode catalyst layer.
 L_Pt = 0.3e-2 # kg.m-2. It is the platinum loading in the cathode catalyst layer.
 

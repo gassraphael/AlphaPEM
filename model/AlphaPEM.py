@@ -135,8 +135,6 @@ class AlphaPEM:
                     Thickness of the cathode catalyst layer in m (undetermined physical parameter).
                 - epsilon_gdl : float
                     Anode/cathode GDL porosity (undetermined physical parameter).
-                - IC : float
-                    Ionomer to carbon ratio in the CL (undetermined physical parameter).
                 - epsilon_c : float
                     Compression ratio of the GDL (undetermined physical parameter).
                 - e : float

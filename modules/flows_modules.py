@@ -47,7 +47,6 @@ def flows_int_values(sv, i_fc, operating_inputs, parameters):
     e, Hacl, Hccl, Hmem = parameters['e'], parameters['Hacl'], parameters['Hccl'], parameters['Hmem']
     Hgdl, Hmpl, Wagc, Wcgc = parameters['Hgdl'], parameters['Hmpl'], parameters['Wagc'], parameters['Wcgc']
     nb_gc, nb_gdl, nb_mpl = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl']
-    IC = parameters['IC']
 
     # Transitory parameter
     H_gdl_node = Hgdl / nb_gdl
@@ -67,14 +66,14 @@ def flows_int_values(sv, i_fc, operating_inputs, parameters):
 
     # Weighted mean values ...
     #       ... of the EOD flow of water in the membrane
-    D_eff_EOD_acl_mem = hmean([D_EOD_eff(i_fc, lambda_acl, T_acl, Hacl, IC), D_EOD(lambda_mem)],
+    D_eff_EOD_acl_mem = hmean([D_EOD_eff(i_fc, lambda_acl, T_acl, Hacl), D_EOD(lambda_mem)],
                           weights = [Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem)])
-    D_eff_EOD_mem_ccl = hmean([D_EOD(lambda_mem), D_EOD_eff(i_fc, lambda_ccl, T_ccl, Hccl, IC)],
+    D_eff_EOD_mem_ccl = hmean([D_EOD(lambda_mem), D_EOD_eff(i_fc, lambda_ccl, T_ccl, Hccl)],
                           weights = [Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl)])
     #       ... of the diffusion coefficient of water in the membrane
-    D_lambda_eff_acl_mem = hmean([D_lambda_eff(lambda_acl, T_acl, Hacl, IC), D_lambda(lambda_mem)],
+    D_lambda_eff_acl_mem = hmean([D_lambda_eff(lambda_acl, T_acl, Hacl), D_lambda(lambda_mem)],
                           weights = [Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem)])
-    D_lambda_eff_mem_ccl = hmean([D_lambda(lambda_mem), D_lambda_eff(lambda_ccl, T_ccl, Hccl, IC)],
+    D_lambda_eff_mem_ccl = hmean([D_lambda(lambda_mem), D_lambda_eff(lambda_ccl, T_ccl, Hccl)],
                           weights = [Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl)])
     #       ... of the capillary coefficient
     D_cap_agdl_agdl = [None] + [hmean([Dcap('gdl', sv[f's_agdl_{i}'], sv[f'T_agdl_{i}'], epsilon_gdl, e,
@@ -89,9 +88,9 @@ def flows_int_values(sv, i_fc, operating_inputs, parameters):
                                          Dcap('mpl', sv[f's_ampl_{i+1}'], sv[f'T_ampl_{i+1}'], epsilon_mpl, e)])
                                 for i in range(1, nb_mpl)]
     D_cap_ampl_acl = hmean([Dcap('mpl', sv[f's_ampl_{nb_mpl}'], sv[f'T_ampl_{nb_mpl}'], epsilon_mpl, e),
-                                    Dcap('cl', s_acl, T_acl, epsilon_cl(lambda_acl, T_acl, Hacl, IC), e)],
+                                    Dcap('cl', s_acl, T_acl, epsilon_cl(lambda_acl, T_acl, Hacl), e)],
                              weights=[H_mpl_node / (H_mpl_node + Hacl), Hacl / (H_mpl_node + Hacl)])
-    D_cap_ccl_cmpl = hmean([Dcap('cl', s_ccl, T_ccl, epsilon_cl(lambda_ccl, T_ccl, Hccl, IC), e),
+    D_cap_ccl_cmpl = hmean([Dcap('cl', s_ccl, T_ccl, epsilon_cl(lambda_ccl, T_ccl, Hccl), e),
                             Dcap('mpl', sv['s_cmpl_1'], sv['T_cmpl_1'], epsilon_mpl, e)],
                            weights=[Hccl / (Hccl + H_mpl_node), H_mpl_node / (Hccl + H_mpl_node)])
     D_cap_cmpl_cmpl = [None] + [hmean([Dcap('mpl', sv[f's_cmpl_{i}'], sv[f'T_cmpl_{i}'], epsilon_mpl, e),
@@ -120,9 +119,9 @@ def flows_int_values(sv, i_fc, operating_inputs, parameters):
                                               epsilon_mpl)]) for i in range(1, nb_mpl)]
     Da_eff_ampl_acl = hmean([Da_eff('mpl', sv[f's_ampl_{nb_mpl}'], sv[f'T_ampl_{nb_mpl}'], Pampl[nb_mpl],
                                             epsilon_mpl),
-                                     Da_eff('cl', s_acl, T_acl, Pacl, epsilon_cl(lambda_acl, T_acl, Hacl, IC))],
+                                     Da_eff('cl', s_acl, T_acl, Pacl, epsilon_cl(lambda_acl, T_acl, Hacl))],
                               weights=[H_mpl_node / (H_mpl_node + Hacl), Hacl / (H_mpl_node + Hacl)])
-    Dc_eff_ccl_cmpl = hmean([Dc_eff('cl', s_ccl, T_ccl, Pccl, epsilon_cl(lambda_ccl, T_ccl, Hccl, IC)),
+    Dc_eff_ccl_cmpl = hmean([Dc_eff('cl', s_ccl, T_ccl, Pccl, epsilon_cl(lambda_ccl, T_ccl, Hccl)),
                                Dc_eff('mpl', sv['s_cmpl_1'], sv['T_cmpl_1'], Pcmpl[1], epsilon_mpl)],
                               weights=[Hccl / (H_mpl_node + Hccl), H_mpl_node / (H_mpl_node + Hccl)])
     Dc_eff_cmpl_cmpl = [None] + [hmean([Dc_eff('mpl', sv[f's_cmpl_{i}'], sv[f'T_cmpl_{i}'], Pcmpl[i],
