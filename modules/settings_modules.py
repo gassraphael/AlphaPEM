@@ -216,12 +216,6 @@ def stored_physical_parameters(type_fuel_cell):
         Crossover correction coefficient in mol.m-1.s-1.Pa-1.
     kappa_c : float
         Overpotential correction exponent.
-    a_slim : float
-        One of the limit liquid saturation coefficients: the slop of slim function.
-    b_slim : float
-        One of the limit liquid saturation coefficients: the intercept of slim function.
-    a_switch : float
-        One of the limit liquid saturation coefficients: the slop of s_switch function.
     C_dl : float
         Volumetric double layer capacitance in F.m-3.
     """
@@ -265,11 +259,9 @@ def stored_physical_parameters(type_fuel_cell):
         e = 4.0  # It is the capillary exponent
         # Voltage polarization
         Re = 6.635540741264315e-8  # ohm.m². It is the electron conduction resistance of the circuit.
-        i0_d_c_ref = 3.1021792383083717  # A.m-2. It is the dry reference exchange current density at the cathode.
-        i0_h_c_ref = 1.0  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
+        i0_c_ref = 3.1021792383083717  # A.m-2. It is the dry reference exchange current density at the cathode.
         kappa_co = 3.6088595047482706 # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 0.6404199981185146  # It is the overpotential correction exponent.
-        a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
 
     # For EH-31 fuel cell
@@ -309,11 +301,9 @@ def stored_physical_parameters(type_fuel_cell):
         e = 4.0  # It is the capillary exponent
         # Voltage polarization
         Re = 1e-06  # ohm.m². It is the electron conduction resistance of the circuit.
-        i0_d_c_ref = 14.43  # A.m-2. It is the dry reference exchange current density at the cathode.
-        i0_h_c_ref = 1.0  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
+        i0_c_ref = 14.43  # A.m-2. It is the dry reference exchange current density at the cathode.
         kappa_co = 30.42  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 0.4152  # It is the overpotential correction exponent.
-        a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.82  # It is the limit liquid saturation coefficients.
         C_scl = 20e6  # F.m-3. It is the volumetric space-charge layer capacitance.
 
     # For other fuel cells
@@ -321,8 +311,8 @@ def stored_physical_parameters(type_fuel_cell):
         raise ValueError('the type_input given is not valid.')
 
     return (Hacl, Hccl, IC, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
-            nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
-            i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
+            nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_c_ref, kappa_co,
+            kappa_c, C_scl)
 
 
 def EIS_parameters(f_EIS):

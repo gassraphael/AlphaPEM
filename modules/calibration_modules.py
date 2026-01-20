@@ -65,14 +65,9 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
         e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.
         #       Voltage polarization
         Re_min, Re_max = 5e-8, 5e-6  # Ω.m². It is the electron conduction resistance of the circuit.
-        i0_d_c_ref_min, i0_d_c_ref_max = 1e-1, 80  # A.m-2.It is the dry reference exchange current density at the cathode.
-        i0_h_c_ref_min, i0_h_c_ref_max = 1e-2, 10  # A.m-2.It is the humid reference exchange current density at the cathode.
+        i0_c_ref_min, i0_c_ref_max = 1e-1, 80  # A.m-2.It is the dry reference exchange current density at the cathode.
         kappa_co_min, kappa_co_max = 0.01, 40  # A.m-2. It is the crossover correction coefficient.
         kappa_c_min, kappa_c_max = 0.25, 4  # It is the overpotential correction exponent.
-        #       The bounds on liquid saturation coefficients are constrained to facilitate calibration.
-        a_slim_min, a_slim_max = 0.0, 0.25 / min(Pc_des_1/1e5, Pc_des_2/1e5)  # It is one of the limit liquid saturation coefficients.
-        b_slim_min, b_slim_max = 0.05, 0.3  # It is one of the limit liquid saturation coefficients.
-        a_switch_min, a_switch_max = 0.5, 0.95  # It is one of the limit liquid saturation coefficients.
         #       Undetermined parameter which is not considered yet (require the use of EIS curves to be calibrated)
         C_scl_min, C_sl_max = 2e7, 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
         #       Bounds gathering and type
@@ -86,14 +81,11 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
                         ['IC', IC_min, IC_max, 'real'],
                         ['e', e_min, e_max, 'int'],
                         ['Re', Re_min, Re_max, 'real'],
-                        ['i0_d_c_ref', i0_d_c_ref_min, i0_d_c_ref_max, 'real'],
+                        ['i0_d_c_ref', i0_c_ref_min, i0_c_ref_max, 'real'],
                         ['kappa_co', kappa_co_min, kappa_co_max, 'real'],
                         ['kappa_c', kappa_c_min, kappa_c_max, 'real']]
         else: # voltage_zone == "full"
-            varbound = [['i0_h_c_ref', i0_h_c_ref_min, i0_h_c_ref_max, 'real'],
-                        ['a_slim', a_slim_min, a_slim_max, 'real'],
-                        ['b_slim', b_slim_min, b_slim_max, 'real'],
-                        ['a_switch', a_switch_min, a_switch_max, 'real']]
+            varbound = []
         gene_space = []  # List used to define the bounds of the undetermined parameters for pygad.
         for i in range(len(varbound)):
             name, min_val, max_val, type_val = varbound[i]
@@ -114,14 +106,9 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
         e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.
         #       Voltage polarization
         Re_min, Re_max = 5e-7, 5e-6 # Ω.m². It is the electron conduction resistance of the circuit.
-        i0_d_c_ref_min, i0_d_c_ref_max = 1e-1, 100  # A.m-2.It is the dry reference exchange current density at the cathode.
-        i0_h_c_ref_min, i0_h_c_ref_max = 1e-2, 10  # A.m-2.It is the humid reference exchange current density at the cathode.
+        i0_c_ref_min, i0_c_ref_max = 1e-1, 100  # A.m-2.It is the dry reference exchange current density at the cathode.
         kappa_co_min, kappa_co_max = 0.01, 40  # A.m-2. It is the crossover correction coefficient.
         kappa_c_min, kappa_c_max = 0.25, 4  # It is the overpotential correction exponent.
-        #       The bounds on liquid saturation coefficients are constrained to facilitate calibration.
-        a_slim_min, a_slim_max = 0.0, 0.25 / min(Pc_des_1/1e5, Pc_des_2/1e5)  # It is one of the limit liquid saturation coefficients.
-        b_slim_min, b_slim_max = 0.05, 0.3  # It is one of the limit liquid saturation coefficients.
-        a_switch_min, a_switch_max = 0.5, 0.95  # It is one of the limit liquid saturation coefficients.
         #       Undetermined parameter which is not considered yet (require the use of EIS curves to be calibrated)
         C_scl_min, C_sl_max = 2e7, 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
         #       Bounds gathering and type
@@ -132,15 +119,11 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
                         ['IC', IC_min, IC_max, 'real'],
                         ['e', e_min, e_max, 'int'],
                         ['Re', Re_min, Re_max, 'real'],
-                        ['i0_d_c_ref', i0_d_c_ref_min, i0_d_c_ref_max, 'real'],
+                        ['i0_d_c_ref', i0_c_ref_min, i0_c_ref_max, 'real'],
                         ['kappa_co', kappa_co_min, kappa_co_max, 'real'],
                         ['kappa_c', kappa_c_min, kappa_c_max, 'real']]
         else: # voltage_zone == "full"
-            varbound = [['epsilon_c', epsilon_c_min, epsilon_c_max, 'real'],
-                        ['i0_h_c_ref', i0_h_c_ref_min, i0_h_c_ref_max, 'real'],
-                        ['a_slim', a_slim_min, a_slim_max, 'real'],
-                        ['b_slim', b_slim_min, b_slim_max, 'real'],
-                        ['a_switch', a_switch_min, a_switch_max, 'real']]
+            varbound = []
         gene_space = []  # List used to define the bounds of the undetermined parameters for pygad.
         for i in range(len(varbound)):
             name, min_val, max_val, type_val = varbound[i]
@@ -364,11 +347,9 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         e = 4.0  # It is the capillary exponent
         #   Voltage polarization
         Re = 1e-06  # ohm.m². It is the electron conduction resistance of the circuit.
-        i0_d_c_ref = 14.43  # A.m-2.It is the dry reference exchange current density at the cathode.
-        i0_h_c_ref = 1.0  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
+        i0_c_ref = 14.43  # A.m-2.It is the dry reference exchange current density at the cathode.
         kappa_co = 5  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 1.026  # It is the overpotential correction exponent.
-        a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
 
         # Computing parameters
@@ -433,11 +414,9 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         e = 4.0  # It is the capillary exponent
         #   Voltage polarization
         Re = 1e-06  # ohm.m². It is the electron conduction resistance of the circuit.
-        i0_d_c_ref = 14.43  # A.m-2.It is the reference exchange current density at the cathode.
-        i0_h_c_ref = 1.0  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
+        i0_c_ref = 14.43  # A.m-2.It is the reference exchange current density at the cathode.
         kappa_co = 30.42  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 0.4152  # It is the overpotential correction exponent.
-        a_slim, b_slim, a_switch = 0.05553, 0.10514, 0.63654  # It is the limit liquid saturation coefficients.
         C_scl = 20e6  # F.m-3. It is the volumetric space-charge layer capacitance.
 
         # Computing parameters
@@ -461,9 +440,8 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
                                       'Vaem': Vaem, 'Vcem': Vcem}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl,
                                         'Hccl': Hccl, 'epsilon_gdl': epsilon_gdl, 'epsilon_mpl': epsilon_mpl, 'IC': IC,
-                                        'epsilon_c': epsilon_c, 'e': e, 'Re': Re, 'i0_d_c_ref': i0_d_c_ref,
-                                        'i0_h_c_ref': i0_h_c_ref, 'kappa_co': kappa_co, 'kappa_c': kappa_c,
-                                        'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch, 'C_scl': C_scl}
+                                        'epsilon_c': epsilon_c, 'e': e, 'Re': Re, 'i0_c_ref': i0_c_ref,
+                                        'kappa_co': kappa_co, 'kappa_c': kappa_c, 'C_scl': C_scl}
     computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
                             'rtol': rtol, 'atol': atol,'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
                             'voltage_zone': voltage_zone, 'type_auxiliary': type_auxiliary,

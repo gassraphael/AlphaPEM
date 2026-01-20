@@ -36,7 +36,7 @@ def main():
     type_fuel_cell_4 = None
     type_fuel_cell_5 = None
     # Current density possibilities: "step", "polarization", "polarization_for_cali", "EIS".
-    type_current = "step"
+    type_current = "polarization"
     # Calibration zone : "before_voltage_drop", "full".
     # (only for "polarization" and "polarization_for_cali" currend densities
     voltage_zone = "full"
@@ -80,9 +80,8 @@ def main():
         calculate_operating_inputs(copy.deepcopy(pola_current_parameters), type_fuel_cell_5, voltage_zone)
     #   Physical parameters
     (Hacl, Hccl, IC, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc,
-     Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
-     i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) \
-        = calculate_physical_parameters(type_fuel_cell_1)
+     Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_c_ref, kappa_co,
+     kappa_c, C_scl) = calculate_physical_parameters(type_fuel_cell_1)
     #   Computing parameters
     nb_gc, nb_gdl, nb_mpl, t_purge, rtol, atol = calculate_computing_parameters(step_current_parameters)
 
@@ -108,9 +107,8 @@ def main():
                                       'Vaem': Vaem, 'Vcem': Vcem}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl,
                                         'Hccl': Hccl, 'epsilon_gdl': epsilon_gdl, 'epsilon_mpl': epsilon_mpl, 'IC': IC,
-                                        'epsilon_c': epsilon_c, 'e': e, 'Re': Re, 'i0_d_c_ref': i0_d_c_ref,
-                                        'i0_h_c_ref': i0_h_c_ref, 'kappa_co': kappa_co, 'kappa_c': kappa_c,
-                                        'a_slim': a_slim, 'b_slim': b_slim, 'a_switch': a_switch, 'C_scl': C_scl}
+                                        'epsilon_c': epsilon_c, 'e': e, 'Re': Re, 'i0_c_ref': i0_c_ref,
+                                        'kappa_co': kappa_co, 'kappa_c': kappa_c, 'C_scl': C_scl}
     computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
                             'rtol': rtol, 'atol': atol,
                             'type_fuel_cell': [None, type_fuel_cell_1, type_fuel_cell_2, type_fuel_cell_3,

@@ -15,45 +15,37 @@ from modules.transitory_functions import average, k_H2, k_O2, sigma_p_eff, R_T_O
 
 # _____________________________________________________Cell voltage_____________________________________________________
 
-def calculate_eta_c_intermediate_values(i_fc, solver_variables, operating_inputs, parameters):
-    """This function calculates the intermediate values needed for the calculation of the cathode overpotential dynamic
-    evolution.
-
+def calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, Hccl, IC, **kwargs):
+    """This function calculates the oxygen concentration at the platinum surface in the cathode catalyst layer.
     Parameters
     ----------
     i_fc : float
-        The current density at time t.
-    solver_variables : dict
-        The dictionary containing the variables calculated by the solver.
-    operating_inputs : dict
-        The dictionary containing the operating inputs.
-    parameters : dict
-        The dictionary containing the parameters.
+        The current density (A/m²).
+    s_ccl : float
+        The saturation in the cathode catalyst layer (-).
+    lambda_ccl : float
+        The membrane water content in the cathode catalyst layer (-).
+    C_O2_ccl : float
+        The oxygen concentration in the cathode catalyst layer (mol/m³).
+    T_ccl : float
+        The temperature in the cathode catalyst layer (K).
+    Hccl : float
+        The thickness of the cathode catalyst layer (m).
+    IC : float
+        The ionomer content in the cathode catalyst layer (-).
 
     Returns
     -------
-    dict
-        The dictionary containing the crossover current density i_n at time t, and the liquid water induced voltage drop
-        function f_drop at time t.
+    C_O2_Pt : float
+        The oxygen concentration at the platinum surface in the cathode catalyst layer (mol/m³).
+
+    Sources
+    -------
+    1. Liang Hao - Article 2015 - Modeling and Experimental Validation of Pt Loading and Electrode Composition Effects
+    in PEM Fuel Cells.
     """
 
-    # Extraction of the variables
-    s_ccl, lambda_ccl, C_O2_ccl = solver_variables['s_ccl'], solver_variables['lambda_ccl'], solver_variables['C_O2_ccl']
-    T_ccl, lambda_mem = solver_variables['T_ccl'], solver_variables['lambda_mem']
-    # Extraction of the operating inputs and the parameters
-    Pc_des = operating_inputs['Pc_des']
-    Hccl, IC = parameters['Hccl'], parameters['IC']
-    a_slim, b_slim, a_switch = parameters['a_slim'], parameters['b_slim'], parameters['a_switch']
-
-    # The liquid water induced voltage drop function f_drop
-    slim = a_slim * (Pc_des / 1e5) + b_slim
-    s_switch = a_switch * slim
-    f_drop = 0.5 * (1.0 - math.tanh((4 * s_ccl - 2 * slim - 2 * s_switch) / (slim - s_switch)))
-
-    # The oxygen concentration at the platinum surface C_O2_Pt
-    C_O2_Pt = C_O2_ccl - i_fc / (4 * F * Hccl) * R_T_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, IC) / a_c(lambda_ccl, T_ccl, Hccl, IC)
-
-    return {'f_drop': f_drop, 'C_O2_Pt': C_O2_Pt}
+    return C_O2_ccl - i_fc / (4 * F * Hccl) * R_T_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, IC) / a_c(lambda_ccl, T_ccl, Hccl, IC)
 
 
 def calculate_cell_voltage(variables, operating_inputs, parameters):
@@ -99,7 +91,7 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
         # Current density value at this time step
         i_fc = operating_inputs['current_density'](t[i], parameters)
 
-        C_O2_Pt = C_O2_ccl - i_fc / (4 * F * Hccl) * R_T_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, IC) / a_c(lambda_ccl, T_ccl, Hccl, IC)
+        C_O2_Pt = calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, Hccl, IC)
 
         # The equilibrium potential
         Ueq = E0 - 8.5e-4 * (T_ccl - 298.15) + R * T_ccl / (2 * F) * (math.log(R * T_acl * C_H2_acl / Pref_eq) +

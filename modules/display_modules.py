@@ -15,7 +15,8 @@ from scipy.interpolate import interp1d
 
 # Importing constants' value and functions
 from configuration.settings import F, R, E0, Pref_eq, M_H2, M_O2, M_H2O, M_N2
-from modules.transitory_functions import average, Psat, C_v_sat, k_H2, k_O2, mu_mixture_gases, R_T_O2_Pt, a_c
+from modules.transitory_functions import average, Psat, C_v_sat, k_H2, k_O2, mu_mixture_gases
+from model.cell_voltage import calculate_C_O2_Pt
 from calibration.experimental_values import (pola_exp_values, plot_experimental_polarisation_curve,
                                              pola_exp_values_calibration)
 
@@ -861,8 +862,7 @@ def plot_C_O2(variables, operating_inputs, parameters, ax):
     lambda_ccl_t = np.array(variables['lambda_ccl'])[mask]
     T_ccl_t = np.array(variables['T_ccl'])[mask]
     for i in range(n):
-        C_O2_Pt_t[i] = C_O2_ccl_t[i] - ifc_t[i] / (4 * F * Hccl) * \
-                       R_T_O2_Pt(s_ccl_t[i], lambda_ccl_t[i], T_ccl_t[i], Hccl, IC) / a_c(lambda_ccl_t[i], T_ccl_t[i], Hccl, IC)
+        C_O2_Pt_t[i] = calculate_C_O2_Pt(ifc_t[i], s_ccl_t[i], lambda_ccl_t[i], C_O2_ccl_t[i], T_ccl_t[i], Hccl, IC)
 
     # Plot the oxygen concentration at different spatial localisations: C_O2
     ax.plot(t, C_O2_Pt_t, color=colors(10))
@@ -1544,62 +1544,6 @@ def plot_cell_efficiency(variables, operating_inputs, parameters, n, ax):
                   labelpad=0)
     ax.set_ylabel(r'$\mathbf{Fuel}$ $\mathbf{cell}$ $\mathbf{efficiency}$ $\mathbf{\eta_{fc}}$', labelpad=0)
     ax.legend(loc='best')
-
-    # Plot instructions
-    plot_general_instructions(ax)
-
-
-def plot_f_drop(variables, operating_inputs, parameters, ax):
-    # Extraction of the operating inputs and the parameters
-    current_density = operating_inputs['current_density']
-    a_switch, pola_current_parameters = parameters['a_switch'], parameters['pola_current_parameters']
-    type_current, type_plot = parameters['type_current'], parameters['type_plot']
-    if type_current == 'step':
-        delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
-    elif type_current == 'polarization':
-        delta_t_ini = parameters['pola_current_parameters']['delta_t_ini_pola']
-    elif type_current == 'polarization_for_cali':
-        delta_t_ini = parameters['pola_current_for_cali_parameters']['delta_t_ini_pola_cali']
-    else:
-        delta_t_ini = 0
-    # Extraction of the variables
-    if type_plot == "fixed":
-        mask = np.array(variables['t']) >= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
-    else: # type_plot == "dynamic"
-        mask = np.ones_like(variables['t'], dtype=bool)
-    t = np.array(variables['t'])[mask]
-    s_ccl_t = np.array(variables['s_ccl'])[mask]
-
-    # slim = a_slim * (Pc_des / 1e5) + b_slim
-    slim = 0.085
-    s_switch = a_switch * slim
-    f_drop_t = 0.5 * (1.0 - np.tanh((4 * s_ccl_t - 2 * slim - 2 * s_switch) / (slim - s_switch)))
-
-    # Plot the liquid water saturation at different spatial localisations: s
-    if type_current == "polarization":
-        n = len(t)
-        ifc_t = np.zeros(n)
-        for i in range(n):  # Creation of i_fc
-            ifc_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
-        # Recovery of the internal states from the model after each stack stabilisation
-        delta_t_ini_pola = pola_current_parameters['delta_t_ini_pola']
-        delta_t_load_pola = pola_current_parameters['delta_t_load_pola']
-        delta_t_break_pola = pola_current_parameters['delta_t_break_pola']
-        nb_loads = int(pola_current_parameters['i_max_pola'] / pola_current_parameters['delta_i_pola']) # Number of loads
-        ifc_discretized_t = np.zeros(nb_loads)
-        f_drop_discretized_t = np.zeros(nb_loads)
-        for i in range(nb_loads):
-            t_load = delta_t_ini_pola + (i + 1) * (delta_t_load_pola + delta_t_break_pola)  # time for measurement
-            idx = (np.abs(t - t_load)).argmin()  # the corresponding index
-            ifc_discretized_t[i] = ifc_t[idx]  # the last value at the end of each load
-            f_drop_discretized_t[i] = 0.5 * (1.0 - np.tanh((4 * s_ccl_t[idx] - 2 * slim - 2 * s_switch) / (slim - s_switch)))  # the last value at the end of each load
-        ax.scatter(ifc_discretized_t, f_drop_discretized_t, marker='o', color=colors(5))
-        ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
-                      labelpad=3)
-    else:
-        ax.plot(t, f_drop_t, color=colors(5))
-        ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
-    ax.set_ylabel(r'$f_{drop}$', labelpad=3)
 
     # Plot instructions
     plot_general_instructions(ax)

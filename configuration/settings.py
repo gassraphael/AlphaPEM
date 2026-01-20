@@ -289,21 +289,18 @@ def calculate_physical_parameters(type_fuel_cell):
         e = 5.0  # It is the capillary exponent
         #   Voltage polarization
         Re = 1e-06  # Ω.m². It is the electron conduction resistance of the circuit.
-        i0_d_c_ref = 14.43  # A.m-2. It is the dry reference exchange current density at the cathode.
-        i0_l_c_ref = 1.0e3  # A.m-2. It is the fully humidified reference exchange current density at the cathode.
+        i0_c_ref = 14.43  # A.m-2. It is the dry reference exchange current density at the cathode.
         kappa_co = 29.793535549174077  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
         kappa_c = 1.6136446641573106  # It is the overpotential correction exponent.
-        a_slim, b_slim, a_switch = 0.0555312850726664, 0.10514269908118055, 0.6365424991141914  # It is the limit
-        #                                                               liquid saturation coefficients.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
     else: # Stored setup in "stored_physical_parameters".
         (Hacl, Hccl, IC, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-         Wcgc, Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
-         i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
+         Wcgc, Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_c_ref,
+         kappa_co, kappa_c, C_scl) = stored_physical_parameters(type_fuel_cell)
 
     return (Hacl, Hccl, IC, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref,
-            i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl)
+            Wcgc, Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_c_ref,
+            kappa_co, kappa_c, C_scl)
 
 
 def calculate_computing_parameters(step_current_parameters):
@@ -413,8 +410,8 @@ theta_Pt_0 = 0 # This is the initial platine-oxide coverage, assumed to be zero 
 rho_ion = 1900 # kg.m-3. It is the density of the ionomer [haoModelingExperimentalValidation2015].
 rho_carb = 1950 # kg.m-3. It is the density of the carbon [haoModelingExperimentalValidation2015].
 rho_Pt = 21450 # kg.m-3. It is the density of the platinum [haoModelingExperimentalValidation2015].
-r_carb = 25e-9 # m. It is the radius of the carbon particles [haoModelingExperimentalValidation2015].
-wt_Pt = 0.4 # It is the weight fraction of platinum over carbon covered by platinum (Pt/C) in the cathode catalyst layer [haoModelingExperimentalValidation2015].
+r_carb = 50e-9 # m. It is the radius of the carbon particles.
+wt_Pt = 0.36 # It is the weight fraction of platinum over carbon covered by platinum (Pt/C) in the cathode catalyst layer.
 L_Pt = 0.3e-2 # kg.m-2. It is the platinum loading in the cathode catalyst layer.
 
 # Model parameters for the voltage calculation

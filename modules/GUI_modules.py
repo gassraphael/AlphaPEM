@@ -373,8 +373,8 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola = stored_operating_inputs(type_fuel_cell, voltage_zone)
 
     (Hacl, Hccl, IC, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
-     nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_d_c_ref, i0_h_c_ref,
-     kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl) = stored_physical_parameters(type_fuel_cell)
+     nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_c_ref,
+     kappa_co, kappa_c, C_scl) = stored_physical_parameters(type_fuel_cell)
 
     nb_gc, nb_gdl, nb_mpl, t_purge, rtol, atol = calculate_computing_parameters(step_current_parameters)
 
@@ -416,13 +416,9 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_undetermined_parameters['Compression ratio - ε_c']['value'].set(round(epsilon_c, 4))
     choice_undetermined_parameters['Capillary exponent - e']['value'].set(e)
     choice_undetermined_parameters['Electron conduction\nresistance - Re (Ω.mm²)']['value'].set(round(Re * 1e6, 4))  # A.mm-2
-    choice_undetermined_parameters['Dry reference exchange current\ndensity - i0_d_c_ref (A/m²)']['value'].set(round(i0_d_c_ref, 4))  # A.m-2
-    choice_undetermined_parameters['Humid reference exchange current\ndensity - i0_h_c_ref (A/m²)']['value'].set(round(i0_h_c_ref, 4))  # A.m-2
+    choice_undetermined_parameters['Reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].set(round(i0_c_ref, 4))  # A.m-2
     choice_undetermined_parameters['Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))']['value'].set(round(kappa_co, 4))  # mol.m-1.s-1.Pa-1
     choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].set(round(kappa_c, 4))
-    choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_slim']['value'].set(round(a_slim, 7))
-    choice_undetermined_parameters['Limit liquid saturation\ncoefficient - b_slim']['value'].set(round(b_slim, 7))
-    choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_switch']['value'].set(round(a_switch, 7))
     choice_undetermined_parameters['Volumetric space-charge layer\ncapacitance - C_scl (F/cm³)']['value'].set(round(C_scl * 1e-6, 4))  # F.cm-3
     # i_max_pola recovery
     choice_current_density_parameters['Maximum current density\n- i_max_pola (A/cm²)']['value'].set(round(i_max_pola / 1e4, 4))  # A/cm²
@@ -496,13 +492,9 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     epsilon_c = choice_undetermined_parameters['Compression ratio - ε_c']['value'].get()
     e = choice_undetermined_parameters['Capillary exponent - e']['value'].get()
     Re = choice_undetermined_parameters['Electron conduction\nresistance - Re (Ω.mm²)']['value'].get() * 1e-6  # Ω.m²
-    i0_d_c_ref = choice_undetermined_parameters['Dry reference exchange current\ndensity - i0_d_c_ref (A/m²)']['value'].get()  # A.m-2
-    i0_h_c_ref = choice_undetermined_parameters['Humid reference exchange current\ndensity - i0_h_c_ref (A/m²)']['value'].get()  # A.m-2
+    i0_c_ref = choice_undetermined_parameters['Dry reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].get()  # A.m-2
     kappa_co = choice_undetermined_parameters['Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))']['value'].get()  # mol.m-1.s-1.Pa-1
     kappa_c = choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].get()
-    a_slim = choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_slim']['value'].get()
-    b_slim = choice_undetermined_parameters['Limit liquid saturation\ncoefficient - b_slim']['value'].get()
-    a_switch = choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_switch']['value'].get()
     C_scl = choice_undetermined_parameters['Volumetric space-charge layer\ncapacitance - C_scl (F/cm³)']['value'].get() * 1e6  # F.m-3
     # current density parameters
     delta_t_ini_step = choice_current_density_parameters['Stabilisation time\n- Δt_ini_step (min)']['value'].get() * 60 #s
@@ -603,11 +595,10 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
 
     return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, nb_cell, Hgdl, Hmpl, Hacl, Hccl, Hmem,
             Hagc, Hcgc, Wagc, Wcgc, Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem,
-            V_endplate_a, V_endplate_c, epsilon_gdl, epsilon_mpl, IC, epsilon_c, e, Re,
-            i0_d_c_ref, i0_h_c_ref, kappa_co, kappa_c, a_slim, b_slim, a_switch, C_scl, step_current_parameters,
-            pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS, t_purge,
-            delta_t_purge, nb_gc, nb_gdl, nb_mpl, rtol, atol, type_fuel_cell, voltage_zone, type_auxiliary,
-            type_control, type_purge, type_display, type_plot)
+            V_endplate_a, V_endplate_c, epsilon_gdl, epsilon_mpl, IC, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c,
+            C_scl, step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS,
+            f_EIS, t_EIS, t_purge, delta_t_purge, nb_gc, nb_gdl, nb_mpl, rtol, atol, type_fuel_cell, voltage_zone,
+            type_auxiliary, type_control, type_purge, type_display, type_plot)
 
 
 def value_control(choice_operating_conditions, choice_accessible_parameters, choice_undetermined_parameters,
@@ -749,12 +740,10 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
         messagebox.showerror(title='Electron conduction resistance', message='Re should be positive.')
         choices.clear()
         return
-    if choice_undetermined_parameters['Dry reference exchange current\ndensity - i0_d_c_ref (A/m²)']['value'].get() < 0.001 or \
-            choice_undetermined_parameters['Dry reference exchange current\ndensity - i0_d_c_ref (A/m²)']['value'].get() > 100 or \
-            choice_undetermined_parameters['Humid reference exchange current\ndensity - i0_h_c_ref (A/m²)']['value'].get() < 0.001 or \
-            choice_undetermined_parameters['Humid reference exchange current\ndensity - i0_h_c_ref (A/m²)']['value'].get() > 100:
+    if choice_undetermined_parameters['Reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].get() < 0.001 or \
+            choice_undetermined_parameters['Reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].get() > 100:
         messagebox.showerror(title='Referenced exchange current densities', message='The referenced exchange current '
-                                                                                  'densities are generally between 0.001 '
+                                                                                  'density is generally between 0.001 '
                                                                                   'and 100 A.m-2.')
         choices.clear()
         return
@@ -769,24 +758,6 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
             choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].get() > 100:
         messagebox.showerror(title='Overpotential correction exponent', message='The overpotential correction exponent '
                                                                                 'is generally between 0 and 100.')
-        choices.clear()
-        return
-    if choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_slim']['value'].get() < 0 or \
-            choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_slim']['value'].get() > 1:
-        messagebox.showerror(title='Slop of slim function', message='The slop of slim function is generally between 0 '
-                                                                    'and 1.')
-        choices.clear()
-        return
-    if choice_undetermined_parameters['Limit liquid saturation\ncoefficient - b_slim']['value'].get() < 0 or \
-            choice_undetermined_parameters['Limit liquid saturation\ncoefficient - b_slim']['value'].get() > 1:
-        messagebox.showerror(title='Intercept of slim function', message='The intercept of slim function is generally '
-                                                                         'between 0 and 1.')
-        choices.clear()
-        return
-    if choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_switch']['value'].get() < 0 or \
-            choice_undetermined_parameters['Limit liquid saturation\ncoefficient - a_switch']['value'].get() > 1:
-        messagebox.showerror(title='Slop of switch function', message='The slop of switch function is generally between'
-                                                                      ' 0 and 1.')
         choices.clear()
         return
     if choice_undetermined_parameters['Volumetric space-charge layer\ncapacitance - C_scl (F/cm³)']['value'].get() < 5 or \
@@ -1034,23 +1005,12 @@ def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, acces
                 Capillary exponent (undetermined physical parameter).
             - Re : float
                 Electron conduction resistance in Ω.m2 (undetermined physical parameter).
-            - i0_d_c_ref : float
-                Dry reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
-            - i0_h_c_ref : float
-                Humid reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
+            - i0_c_ref : float
+                Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
             - kappa_co : float
                 Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
             - kappa_c : float
                 Overpotential correction exponent (undetermined physical parameter).
-            - a_slim : float
-                One of the limit liquid saturation coefficients: the slop of slim function
-                (undetermined physical parameter).
-            - b_slim : float
-                One of the limit liquid saturation coefficients: the intercept of slim function
-                (undetermined physical parameter).
-            - a_switch : float
-                One of the limit liquid saturation coefficients: the slop of s_switch function
-                (undetermined physical parameter).
             - C_scl : float
                 Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
     computing_parameters : dict
@@ -1275,23 +1235,12 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
                 Capillary exponent (undetermined physical parameter).
             - Re : float
                 Electron conduction resistance in Ω.m2 (undetermined physical parameter).
-            - i0_d_c_ref : float
-                Dry reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
-            - i0_h_c_ref : float
-                Humid reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
+            - i0_c_ref : float
+                Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
             - kappa_co : float
                 Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
             - kappa_c : float
                 Overpotential correction exponent (undetermined physical parameter).
-            - a_slim : float
-                One of the limit liquid saturation coefficients: the slop of slim function
-                (undetermined physical parameter).
-            - b_slim : float
-                One of the limit liquid saturation coefficients: the intercept of slim function
-                (undetermined physical parameter).
-            - a_switch : float
-                One of the limit liquid saturation coefficients: the slop of s_switch function
-                (undetermined physical parameter).
             - C_scl : float
                 Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
     computing_parameters : dict
@@ -1515,23 +1464,12 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
                 Capillary exponent (undetermined physical parameter).
             - Re : float
                 Electron conduction resistance in Ω.m2 (undetermined physical parameter).
-            - i0_d_c_ref : float
-                Dry reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
-            - i0_h_c_ref : float
-                Humid reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
+            - i0_c_ref : float
+                Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
             - kappa_co : float
                 Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
             - kappa_c : float
                 Overpotential correction exponent (undetermined physical parameter).
-            - a_slim : float
-                One of the limit liquid saturation coefficients: the slop of slim function
-                (undetermined physical parameter).
-            - b_slim : float
-                One of the limit liquid saturation coefficients: the intercept of slim function
-                (undetermined physical parameter).
-            - a_switch : float
-                One of the limit liquid saturation coefficients: the slop of s_switch function
-                (undetermined physical parameter).
             - C_scl : float
                 Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
     computing_parameters : dict

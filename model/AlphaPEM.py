@@ -143,21 +143,12 @@ class AlphaPEM:
                     Capillary exponent (undetermined physical parameter).
                 - Re : float
                     Electron conduction resistance in Ω.m2 (undetermined physical parameter).
-                - i0_d_c_ref : float
-                    Dry reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
+                - i0_c_ref : float
+                    Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
                 - kappa_co : float
                     Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
                 - kappa_c : float
                     Overpotential correction exponent (undetermined physical parameter).
-                - a_slim : float
-                    One of the limit liquid saturation coefficients: the slop of slim function
-                    (undetermined physical parameter).
-                - b_slim : float
-                    One of the limit liquid saturation coefficients: the intercept of slim function
-                    (undetermined physical parameter).
-                - a_switch : float
-                    One of the limit liquid saturation coefficients: the slop of s_switch function
-                    (undetermined physical parameter).
                 - C_scl : float
                     Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
         computing_parameters : dict
@@ -220,11 +211,6 @@ class AlphaPEM:
             self.parameters["type_auxiliary"] = "no_auxiliary"
             print("Warning: auxiliaries were temporarily removed during the addition of convection inside the GC."
                 "\nThey will be back soon, meanwhile the \"no_auxiliary\" configuration is automatically given.\n")
-
-        if self.parameters["voltage_zone"] == "full":
-            # self.parameters["voltage_zone"] = "before_voltage_drop"
-            print("Warning: a good physical modelling of the voltage drop at high current densities is under construction."
-                "\nFor now, only \"before_voltage_drop\" configuration is working.\n")
 
         if self.operating_inputs['Pa_des'] < Pext or self.operating_inputs['Pc_des'] < Pext:
             raise ValueError('The desired pressure is too low. It cannot be lower than the pressure outside the stack.')
@@ -369,8 +355,7 @@ class AlphaPEM:
         Phi_a_des, Phi_c_des = self.operating_inputs['Phi_a_des'], self.operating_inputs['Phi_c_des']
         y_H2_in = self.operating_inputs['y_H2_in']
         Hmem, kappa_co, kappa_c = self.parameters['Hmem'], self.parameters['kappa_co'], self.parameters['kappa_c']
-        i0_d_c_ref, i0_h_c_ref = self.parameters['i0_d_c_ref'], self.parameters['i0_h_c_ref']
-        a_slim, b_slim, a_switch = self.parameters['a_slim'], self.parameters['b_slim'], self.parameters['a_switch']
+        i0_c_ref = self.parameters['i0_c_ref']
         nb_gc, nb_gdl, nb_mpl = self.parameters['nb_gc'], self.parameters['nb_gdl'], self.parameters['nb_mpl']
         type_auxiliary = self.parameters['type_auxiliary']
 
@@ -387,8 +372,6 @@ class AlphaPEM:
             Phi_a_ini, Phi_c_ini = Phi_a_des, Phi_c_des # Choosing other values would create an imbalance in the initial state.
         Psat_ini = 101325 * 10 ** (-2.1794 + 0.02953 * (T_ini - 273.15) - 9.1837e-5 * (T_ini - 273.15) ** 2 +
                                    1.4454e-7 * (T_ini - 273.15) ** 3)
-        slim = a_slim * (Pc_ini / 1e5) + b_slim
-        s_switch = a_switch * slim
         #   Initial fuel cell states
         C_v_a_ini = Phi_a_ini * Psat_ini / (R * T_ini)  # mol.m-3. It is the initial vapor concentration.
         C_v_c_ini = Phi_c_ini * Psat_ini / (R * T_ini)  # mol.m-3. It is the initial vapor concentration.
@@ -411,12 +394,8 @@ class AlphaPEM:
         i_fc_ini = current_density(self.time_interval[0], self.parameters)
         i_n_ini = 2 * F * R * T_ini / Hmem * C_H2_ini * k_H2(lambda_mem_ini, T_ini, kappa_co) + \
                   4 * F * R * T_ini / Hmem * C_O2_ini * k_O2(lambda_mem_ini, T_ini, kappa_co)
-        f_drop_ini = 0.5 * (1.0 - math.tanh((4 * s_ini - 2 * slim - 2 * s_switch) / (slim - s_switch)))
-        # eta_c_ini = R * T_ini / (alpha_c * F) * \
-        #             math.log((i_fc_ini + i_n_ini) / (i0_d_c_ref ** (1 - f_drop_ini) * i0_h_c_ref ** f_drop_ini) *
-        #                      (C_O2ref / C_O2_ini) ** kappa_c)  # It is the initial cathode overpotential in the fuel cell.
         eta_c_ini = R * T_ini / (alpha_c * F) * \
-                    math.log((i_fc_ini + i_n_ini) / (i0_d_c_ref) *
+                    math.log((i_fc_ini + i_n_ini) / (i0_c_ref) *
                              1 / math.exp(-Eact_O2_red / (R * T_ini) * (1/T_ini - 1/Tref_O2_red)) *
                              (C_O2ref_red / C_O2_ini) ** kappa_c)  # It is the initial cathode overpotential in the fuel cell.
 

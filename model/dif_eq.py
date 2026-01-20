@@ -10,7 +10,7 @@ import numpy as np
 
 # Importing constants' value and functions
 from model.flows import calculate_flows
-from model.cell_voltage import calculate_eta_c_intermediate_values
+from model.cell_voltage import calculate_C_O2_Pt
 from model.heat_transfer import calculate_heat_transfers
 from model.control import control_operating_conditions
 from modules.dif_eq_modules import calculate_dif_eq_int_values
@@ -63,7 +63,7 @@ def dydt(t, y, operating_inputs, parameters, solver_variable_names, control_vari
     # Intermediate values
     i_fc = operating_inputs['current_density'](t, parameters)
     dif_eq_int_values = calculate_dif_eq_int_values(t, solver_variables, control_variables, operating_inputs, parameters)
-    eta_c_intermediate_values = calculate_eta_c_intermediate_values(i_fc, solver_variables, operating_inputs, parameters)
+    C_O2_Pt = calculate_C_O2_Pt(i_fc, **solver_variables, **parameters)
 
     # Calculation of the flows
     matter_flows_dico = calculate_flows(t, solver_variables, control_variables, i_fc, operating_inputs, parameters)
@@ -75,8 +75,8 @@ def dydt(t, y, operating_inputs, parameters, solver_variable_names, control_vari
     calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, solver_variables, **parameters, **matter_flows_dico)
     calculate_dyn_vapor_evolution_inside_MEA(dif_eq, solver_variables, **parameters, **matter_flows_dico)
     calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, solver_variables, **parameters, **matter_flows_dico)
-    calculate_dyn_voltage_evolution(dif_eq, i_fc, **solver_variables, **operating_inputs, **parameters,
-                                    **dif_eq_int_values, **eta_c_intermediate_values)
+    calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_Pt, **solver_variables, **operating_inputs, **parameters,
+                                    **dif_eq_int_values)
     calculate_dyn_temperature_evolution_inside_MEA(dif_eq, **parameters, **dif_eq_int_values, **heat_flows_dico)
     #       Inside the gaz channels and the manifolds
     calculate_dyn_gas_evolution_inside_gas_channel(dif_eq, **parameters, **matter_flows_dico)

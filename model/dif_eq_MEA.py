@@ -565,8 +565,7 @@ def calculate_dyn_temperature_evolution_inside_MEA(dif_eq, Hgdl, Hmpl, Hacl, Hcc
                                             Q_liq[f'cgdl_{nb_gdl}'] + Q_e[f'cgdl_{nb_gdl}'])
 
 
-def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hccl, i0_d_c_ref, i0_h_c_ref, kappa_c, C_scl,
-                                    i_n, C_O2_Pt, f_drop, **kwargs):
+def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_Pt, T_ccl, eta_c, Hccl, i0_c_ref, kappa_c, C_scl, i_n, **kwargs):
     """This function calculates the dynamic evolution of the cell overpotential eta_c.
 
     Parameters
@@ -575,8 +574,8 @@ def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hccl, 
         Dictionary used for saving the differential equations.
     i_fc : float
         Fuel cell current density (A.m-2).
-    C_O2_ccl : float
-        Oxygen concentration in the cathode catalyst layer (mol.m-3).
+    C_O2_Pt : float
+        Oxygen concentration at the platinum surface (mol.m-3).
     T_ccl : float
         Fuel cell temperature in the cathode catalyst layer (K).
     eta_c : float
@@ -591,19 +590,13 @@ def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hccl, 
         Volumetric space-charge layer capacitance (F.m-3).
     i_n : float
         Crossover current density (A.m-2).
-    C_O2_Pt : float
-        Oxygen concentration at the platinum surface (mol.m-3).
-    f_drop : float
-        Liquid water induced voltage drop function.
     """
 
-    # dif_eq['deta_c / dt'] = 1 / (C_scl * Hccl) * ((i_fc + i_n) - i0_c_ref * (C_O2_ccl / C_O2ref) ** kappa_c *
-    #                                              math.exp(f_drop * alpha_c * F / (R * T_ccl) * eta_c))
+    dif_eq['deta_c / dt'] = 1 / (C_scl * Hccl) * ((i_fc + i_n) - i0_c_ref * (C_O2_Pt / C_O2ref_red) ** kappa_c *
+                                                  math.exp(-Eact_O2_red / (R * T_ccl) * (1/T_ccl - 1/Tref_O2_red)) *
+                                                  math.exp(alpha_c * F / (R * T_ccl) * eta_c))
 
-    # dif_eq['deta_c / dt'] = 1 / (C_scl * Hccl) * ((i_fc + i_n) - (i0_d_c_ref ** f_drop * i0_h_c_ref ** (1 - f_drop)) *
-    #                                               (C_O2_ccl / C_O2ref) ** kappa_c * math.exp(alpha_c * F / (R * T_ccl) * eta_c))
-
-
+    # Expression used when theta_Pt is considered as a dynamic variable
     # theta_Pt_0 = 0  # This is the initial platine-oxide coverage, assumed to be zero for simplification.
     # omega = 3.0e3 # J.mol-1, It is the energy parameter for the Temkin isotherm [Hao 2015]
     #
@@ -611,8 +604,5 @@ def calculate_dyn_voltage_evolution(dif_eq, i_fc, C_O2_ccl, T_ccl, eta_c, Hccl, 
     #                                               math.exp(-Eact_O2_red / (R * T_ccl) * (1 / T_ccl - 1 / Tref_O2_red)) *
     #                                               math.exp(alpha_c * F / (R * T_ccl) * eta_c + omega * theta_Pt_0 / (R * T_ccl)))  # signe à vérifier pour omega.
 
-    dif_eq['deta_c / dt'] = 1 / (C_scl * Hccl) * ((i_fc + i_n) - i0_d_c_ref * (C_O2_Pt / C_O2ref_red) ** kappa_c *
-                                                  math.exp(-Eact_O2_red / (R * T_ccl) * (1/T_ccl - 1/Tref_O2_red)) *
-                                                  math.exp(alpha_c * F / (R * T_ccl) * eta_c))
 
 
