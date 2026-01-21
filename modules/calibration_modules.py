@@ -60,8 +60,9 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
         Hgdl_min, Hgdl_max = 100e-6, 150e-6  # m. It is the thickness of the gas diffusion layer.
         Hmpl_min, Hmpl_max = 40e-6, 100e-6  # m. It is the thickness of the microporous layer.
         epsilon_gdl_min, epsilon_gdl_max = 0.5, 0.9  # It is the anode/cathode GDL porosity, without units.
-        #       Constants based on the interaction between water and the structure
+        #       Constants based on the interaction between fluids and the structure
         e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.
+        K_O2_ad_Pt_min, K_O2_ad_Pt_max = 1, 10  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
         #       Voltage polarization
         Re_min, Re_max = 5e-8, 5e-6  # Ω.m². It is the electron conduction resistance of the circuit.
         i0_c_ref_min, i0_c_ref_max = 1e-1, 80  # A.m-2.It is the dry reference exchange current density at the cathode.
@@ -70,20 +71,19 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
         #       Undetermined parameter which is not considered yet (require the use of EIS curves to be calibrated)
         C_scl_min, C_sl_max = 2e7, 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
         #       Bounds gathering and type
-        if voltage_zone == "before_voltage_drop":
-            varbound = [['Hacl', Hacl_min, Hacl_max, 'real'],
-                        ['Hccl', Hccl_min, Hccl_max, 'real'],
-                        ['Hmem', Hmem_min, Hmem_max, 'real'],
-                        ['Hgdl', Hgdl_min, Hgdl_max, 'real'],
-                        ['Hmpl', Hmpl_min, Hmpl_max, 'real'],
-                        ['epsilon_gdl', epsilon_gdl_min, epsilon_gdl_max, 'real'],
-                        ['e', e_min, e_max, 'int'],
-                        ['Re', Re_min, Re_max, 'real'],
-                        ['i0_d_c_ref', i0_c_ref_min, i0_c_ref_max, 'real'],
-                        ['kappa_co', kappa_co_min, kappa_co_max, 'real'],
-                        ['kappa_c', kappa_c_min, kappa_c_max, 'real']]
-        else: # voltage_zone == "full"
-            varbound = []
+        varbound = [['Hacl', Hacl_min, Hacl_max, 'real'],
+                    ['Hccl', Hccl_min, Hccl_max, 'real'],
+                    ['Hmem', Hmem_min, Hmem_max, 'real'],
+                    ['Hgdl', Hgdl_min, Hgdl_max, 'real'],
+                    ['Hmpl', Hmpl_min, Hmpl_max, 'real'],
+                    ['epsilon_gdl', epsilon_gdl_min, epsilon_gdl_max, 'real'],
+                    ['e', e_min, e_max, 'int'],
+                    ['Re', Re_min, Re_max, 'real'],
+                    ['i0_d_c_ref', i0_c_ref_min, i0_c_ref_max, 'real'],
+                    ['kappa_co', kappa_co_min, kappa_co_max, 'real'],
+                    ['kappa_c', kappa_c_min, kappa_c_max, 'real']]
+        if voltage_zone == "full":
+            varbound += [['K_O2_ad_Pt', K_O2_ad_Pt_min, K_O2_ad_Pt_max, 'real']]
         gene_space = []  # List used to define the bounds of the undetermined parameters for pygad.
         for i in range(len(varbound)):
             name, min_val, max_val, type_val = varbound[i]
@@ -99,8 +99,9 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
         Hmem_min, Hmem_max = 15e-6, 50e-6  # m. It is the thickness of the membrane.
         epsilon_gdl_min, epsilon_gdl_max = 0.40, 0.95  # It is the anode/cathode GDL porosity, without units.
         epsilon_c_min, epsilon_c_max = 0.15, 0.30  # It is the compression ratio of the GDL.
-        #       Constants based on the interaction between water and the structure
+        #       Constants based on the interaction between fluids and the structure
         e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.
+        K_O2_ad_Pt_min, K_O2_ad_Pt_max = 1, 10  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
         #       Voltage polarization
         Re_min, Re_max = 5e-7, 5e-6 # Ω.m². It is the electron conduction resistance of the circuit.
         i0_c_ref_min, i0_c_ref_max = 1e-1, 100  # A.m-2.It is the dry reference exchange current density at the cathode.
@@ -109,17 +110,16 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
         #       Undetermined parameter which is not considered yet (require the use of EIS curves to be calibrated)
         C_scl_min, C_sl_max = 2e7, 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
         #       Bounds gathering and type
-        if voltage_zone == "before_voltage_drop":
-            varbound = [['Hacl', Hacl_min, Hacl_max, 'real'],
-                        ['Hmem', Hmem_min, Hmem_max, 'real'],
-                        ['epsilon_gdl', epsilon_gdl_min, epsilon_gdl_max, 'real'],
-                        ['e', e_min, e_max, 'int'],
-                        ['Re', Re_min, Re_max, 'real'],
-                        ['i0_d_c_ref', i0_c_ref_min, i0_c_ref_max, 'real'],
-                        ['kappa_co', kappa_co_min, kappa_co_max, 'real'],
-                        ['kappa_c', kappa_c_min, kappa_c_max, 'real']]
-        else: # voltage_zone == "full"
-            varbound = []
+        varbound = [['Hacl', Hacl_min, Hacl_max, 'real'],
+                    ['Hmem', Hmem_min, Hmem_max, 'real'],
+                    ['epsilon_gdl', epsilon_gdl_min, epsilon_gdl_max, 'real'],
+                    ['e', e_min, e_max, 'int'],
+                    ['Re', Re_min, Re_max, 'real'],
+                    ['i0_d_c_ref', i0_c_ref_min, i0_c_ref_max, 'real'],
+                    ['kappa_co', kappa_co_min, kappa_co_max, 'real'],
+                    ['kappa_c', kappa_c_min, kappa_c_max, 'real']]
+        if voltage_zone == "full":
+            varbound += [['K_O2_ad_Pt', K_O2_ad_Pt_min, K_O2_ad_Pt_max, 'real']]
         gene_space = []  # List used to define the bounds of the undetermined parameters for pygad.
         for i in range(len(varbound)):
             name, min_val, max_val, type_val = varbound[i]
@@ -336,6 +336,7 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         #   Catalyst layer
         Hacl = 8e-6  # m. It is the thickness of the anode catalyst layer.
         Hccl = 17e-6  # m. It is the thickness of the cathode catalyst layer.
+        K_O2_ad_Pt = 5.4  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
         #   Membrane
         Hmem = 15e-6  # m. It is the thickness of the membrane.
         #   Interaction parameters between water and PEMFC structure
@@ -402,6 +403,7 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         #   Catalyst layer
         Hacl = 8.593e-6  # m. It is the thickness of the anode catalyst layer.
         Hccl = Hacl  # m. It is the thickness of the cathode catalyst layer.
+        K_O2_ad_Pt = 5.4  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
         #   Membrane
         Hmem = 16.06e-6  # m. It is the thickness of the membrane.
         #   Interaction parameters between water and PEMFC structure
@@ -434,8 +436,8 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
                                       'Vaem': Vaem, 'Vcem': Vcem}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl,
                                         'Hccl': Hccl, 'epsilon_gdl': epsilon_gdl, 'epsilon_mpl': epsilon_mpl,
-                                        'epsilon_c': epsilon_c, 'e': e, 'Re': Re, 'i0_c_ref': i0_c_ref,
-                                        'kappa_co': kappa_co, 'kappa_c': kappa_c, 'C_scl': C_scl}
+                                        'epsilon_c': epsilon_c, 'e': e, 'K_O2_ad_Pt': K_O2_ad_Pt, 'Re': Re,
+                                        'i0_c_ref': i0_c_ref, 'kappa_co': kappa_co, 'kappa_c': kappa_c, 'C_scl': C_scl}
     computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
                             'rtol': rtol, 'atol': atol,'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
                             'voltage_zone': voltage_zone, 'type_auxiliary': type_auxiliary,

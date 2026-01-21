@@ -145,14 +145,15 @@ def main_frame(root, canvas):
          'CCL thickness - Hccl (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 1},
          'Membrane thickness - Hmem (µm)': {'value': tk.DoubleVar(accessible_parameters_frame), 'label_row': 1, 'label_column': 3},
          'GDL porosity - ε_gdl': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 1, 'label_column': 5},
-         'MPL porosity - ε_mpl': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 2, 'label_column': 3},
-         'Compression ratio - ε_c': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 3, 'label_column': 1},
-         'Capillary exponent - e': {'value': tk.IntVar(undetermined_parameters_frame), 'label_row': 3, 'label_column': 3},
-         'Electron conduction\nresistance - Re (Ω.mm²)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 1},
-         'Reference exchange current\ndensity - i0_c_ref (A/m²)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 3},
-         'Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 5},
-         'Overpotential correction\nexponent - κ_c': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 5, 'label_column': 1},
-         'Volumetric space-charge layer\ncapacitance - C_scl (F/cm³)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 5, 'label_column': 3}}
+         'MPL porosity - ε_mpl': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 2, 'label_column': 1},
+         'Compression ratio - ε_c': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 2, 'label_column': 3},
+         'Capillary exponent - e': {'value': tk.IntVar(undetermined_parameters_frame), 'label_row': 2, 'label_column': 5},
+         'Interfacial res. coef. of\nO2 ads. on Pt - K_O2_ad_Pt': {'value': tk.IntVar(undetermined_parameters_frame), 'label_row': 3, 'label_column': 1},
+         'Electron conduction\nresistance - Re (Ω.mm²)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 3, 'label_column': 3},
+         'Reference exchange current\ndensity - i0_c_ref (A/m²)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 3, 'label_column': 5},
+         'Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 1},
+         'Overpotential correction\nexponent - κ_c': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 3},
+         'Volumetric space-charge layer\ncapacitance - C_scl (F/cm³)': {'value': tk.DoubleVar(undetermined_parameters_frame), 'label_row': 4, 'label_column': 5}}
 
     choice_current_density_parameters = \
         {'Stabilisation time\n- Δt_ini_step (min)': {'value': tk.DoubleVar(current_density_parameters_frame, step_current_parameters['delta_t_ini_step']/60),
@@ -378,7 +379,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
     # quantities into standard units.
     (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, nb_cell, Hgdl, Hmpl, Hacl, Hccl, Hmem, Hagc,
      Hcgc, Wagc, Wcgc, Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, V_endplate_a,
-     V_endplate_c, epsilon_gdl, epsilon_mpl, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c, C_scl,
+     V_endplate_c, epsilon_gdl, epsilon_mpl, epsilon_c, e, K_O2_ad_Pt, Re, i0_c_ref, kappa_co, kappa_c, C_scl,
      step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
      t_purge, delta_t_purge, nb_gc, nb_gdl, nb_mpl, rtol, atol, type_fuel_cell, voltage_zone, type_auxiliary,
      type_control, type_purge, type_display, type_plot) = \
@@ -400,8 +401,8 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
                                       'Vaem': Vaem, 'Vcem': Vcem}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl, 'Hccl': Hccl,
                                         'epsilon_gdl': epsilon_gdl, 'epsilon_mpl': epsilon_mpl, 'epsilon_c': epsilon_c,
-                                        'e': e, 'Re': Re, 'i0_c_ref': i0_c_ref, 'kappa_co': kappa_co,
-                                        'kappa_c': kappa_c, 'C_scl': C_scl}
+                                        'e': e, 'K_O2_ad_Pt': K_O2_ad_Pt, 'Re': Re, 'i0_c_ref': i0_c_ref,
+                                        'kappa_co': kappa_co, 'kappa_c': kappa_c, 'C_scl': C_scl}
 
     if current_button == 0:
         type_current = "step"

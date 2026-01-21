@@ -828,6 +828,7 @@ def plot_C_O2(variables, operating_inputs, parameters, ax):
 
     # Extraction of the parameters
     current_density = operating_inputs['current_density']
+    K_O2_ad_Pt = parameters['K_O2_ad_Pt']
     Hccl, nb_gc, nb_gdl, nb_mpl = parameters['Hccl'], parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl']
     type_current, type_plot = parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
@@ -861,7 +862,7 @@ def plot_C_O2(variables, operating_inputs, parameters, ax):
     lambda_ccl_t = np.array(variables['lambda_ccl'])[mask]
     T_ccl_t = np.array(variables['T_ccl'])[mask]
     for i in range(n):
-        C_O2_Pt_t[i] = calculate_C_O2_Pt(ifc_t[i], s_ccl_t[i], lambda_ccl_t[i], C_O2_ccl_t[i], T_ccl_t[i], Hccl)
+        C_O2_Pt_t[i] = calculate_C_O2_Pt(ifc_t[i], s_ccl_t[i], lambda_ccl_t[i], C_O2_ccl_t[i], T_ccl_t[i], Hccl, K_O2_ad_Pt)
 
     # Plot the oxygen concentration at different spatial localisations: C_O2
     ax.plot(t, C_O2_Pt_t, color=colors(10))

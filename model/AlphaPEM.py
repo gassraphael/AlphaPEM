@@ -139,6 +139,8 @@ class AlphaPEM:
                     Compression ratio of the GDL (undetermined physical parameter).
                 - e : float
                     Capillary exponent (undetermined physical parameter).
+                - K_O2_ad_Pt : float
+                    Interfacial resistance coefficient of O2 adsorption on the Pt sites (undetermined physical parameter).
                 - Re : float
                     Electron conduction resistance in Ω.m2 (undetermined physical parameter).
                 - i0_c_ref : float

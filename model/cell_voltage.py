@@ -15,7 +15,7 @@ from modules.transitory_functions import average, k_H2, k_O2, sigma_p_eff, R_T_O
 
 # _____________________________________________________Cell voltage_____________________________________________________
 
-def calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, Hccl, **kwargs):
+def calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, Hccl, K_O2_ad_Pt, **kwargs):
     """This function calculates the oxygen concentration at the platinum surface in the cathode catalyst layer.
     Parameters
     ----------
@@ -31,6 +31,8 @@ def calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, Hccl, **kwargs):
         The temperature in the cathode catalyst layer (K).
     Hccl : float
         The thickness of the cathode catalyst layer (m).
+    K_O2_ad_Pt: float
+        Interfacial resistance coefficient of O2 adsorption on the Pt sites, without units.
 
     Returns
     -------
@@ -43,7 +45,7 @@ def calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, Hccl, **kwargs):
     in PEM Fuel Cells.
     """
 
-    return C_O2_ccl - i_fc / (4 * F * Hccl) * R_T_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl) / a_c(lambda_ccl, T_ccl, Hccl)
+    return C_O2_ccl - i_fc / (4 * F * Hccl) * R_T_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, K_O2_ad_Pt) / a_c(lambda_ccl, T_ccl, Hccl)
 
 
 def calculate_cell_voltage(variables, operating_inputs, parameters):
@@ -71,6 +73,7 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
     T_acl_t, T_mem_t, T_ccl_t = variables['T_acl'], variables['T_mem'], variables['T_ccl']
     # Extraction of the operating inputs and the parameters
     Hmem, Hacl, Hccl = parameters['Hmem'], parameters['Hacl'], parameters['Hccl']
+    K_O2_ad_Pt = parameters['K_O2_ad_Pt']
     Re, kappa_co = parameters['Re'], parameters['kappa_co']
 
     # Initialisation
@@ -89,7 +92,7 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
         # Current density value at this time step
         i_fc = operating_inputs['current_density'](t[i], parameters)
 
-        C_O2_Pt = calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, Hccl)
+        C_O2_Pt = calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, Hccl, K_O2_ad_Pt)
 
         # The equilibrium potential
         Ueq = E0 - 8.5e-4 * (T_ccl - 298.15) + R * T_ccl / (2 * F) * (math.log(R * T_acl * C_H2_acl / Pref_eq) +

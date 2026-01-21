@@ -49,7 +49,7 @@ def stored_operating_inputs(type_fuel_cell, voltage_zone):
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
         if voltage_zone == "full":
-            i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+            i_max_pola = 2.700e4  # A.m-2. It is the maximum current density for the polarization curve.
         elif voltage_zone == "before_voltage_drop":
             i_max_pola = 1.700e4 # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41":
@@ -252,8 +252,9 @@ def stored_physical_parameters(type_fuel_cell):
         A_T_c = 22.61e-4  # m². It is the inlet/exhaust cathode manifold throttle area
         Vasm, Vcsm = Lm * A_T_a, Lm * A_T_c  # m3. It is the supply manifold volume.
         Vaem, Vcem = Vasm, Vcsm  # m-3. It is the exhaust manifold volume.
-        # Interaction parameters between water and PEMFC structure
+        # Interaction parameters between fluids and PEMFC structure
         e = 4.0  # It is the capillary exponent
+        K_O2_ad_Pt = 5.4  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
         # Voltage polarization
         Re = 6.635540741264315e-8  # ohm.m². It is the electron conduction resistance of the circuit.
         i0_c_ref = 3.1021792383083717  # A.m-2. It is the dry reference exchange current density at the cathode.
@@ -293,8 +294,9 @@ def stored_physical_parameters(type_fuel_cell):
         A_T_c = 34.4e-4  # m². It is the inlet/exhaust cathode manifold throttle area
         Vasm, Vcsm = Lm * A_T_a, Lm * A_T_c  # m3. It is the supply manifold volume.
         Vaem, Vcem = Vasm, Vcsm  # m-3. It is the exhaust manifold volume.
-        # Interaction parameters between water and PEMFC structure
+        # Interaction parameters between fluids and PEMFC structure
         e = 4.0  # It is the capillary exponent
+        K_O2_ad_Pt = 5.4  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
         # Voltage polarization
         Re = 1e-06  # ohm.m². It is the electron conduction resistance of the circuit.
         i0_c_ref = 14.43  # A.m-2. It is the dry reference exchange current density at the cathode.
@@ -307,8 +309,8 @@ def stored_physical_parameters(type_fuel_cell):
         raise ValueError('the type_input given is not valid.')
 
     return (Hacl, Hccl, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
-            nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_c_ref, kappa_co,
-            kappa_c, C_scl)
+            nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, K_O2_ad_Pt, Re,
+            i0_c_ref, kappa_co, kappa_c, C_scl)
 
 
 def EIS_parameters(f_EIS):

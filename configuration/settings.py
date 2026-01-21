@@ -282,8 +282,9 @@ def calculate_physical_parameters(type_fuel_cell):
         Vaem, Vcem = 2400e-6, 2400e-6  # m-3. It is the exhaust manifold volume.
         V_endplate_a = 33.6e-6  # m3. It is the anode endplate volume.
         V_endplate_c = 86.6e-6  # m3. It is the cathode endplate volume.
-        #   Interaction parameters between water and PEMFC structure
+        #   Interaction parameters between fluids and PEMFC structure
         e = 5.0  # It is the capillary exponent
+        K_O2_ad_Pt = 5.4  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
         #   Voltage polarization
         Re = 1e-06  # Ω.m². It is the electron conduction resistance of the circuit.
         i0_c_ref = 14.43  # A.m-2. It is the dry reference exchange current density at the cathode.
@@ -291,13 +292,13 @@ def calculate_physical_parameters(type_fuel_cell):
         kappa_c = 1.6136446641573106  # It is the overpotential correction exponent.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
     else: # Stored setup in "stored_physical_parameters".
-        (Hacl, Hccl, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-         Wcgc, Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_c_ref,
+        (Hacl, Hccl, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
+         nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, K_O2_ad_Pt, Re, i0_c_ref,
          kappa_co, kappa_c, C_scl) = stored_physical_parameters(type_fuel_cell)
 
-    return (Hacl, Hccl, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc,
-            Wcgc, Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_c_ref,
-            kappa_co, kappa_c, C_scl)
+    return (Hacl, Hccl, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
+            nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, K_O2_ad_Pt, Re,
+            i0_c_ref, kappa_co, kappa_c, C_scl)
 
 
 def calculate_computing_parameters(step_current_parameters):
@@ -398,17 +399,16 @@ Eact_O2_cros_v = 2.2e4  # J.mol-1. It is the activation energy of oxygen for cro
 Eact_O2_cros_l = 2.0e4  # J.mol-1. It is the activation energy of oxygen for crossover in the liquid-equilibrated membrane.
 Kshape = 2  # . Mathematical factor governing lambda_eq smoothing.
 #   Volumic flow of O2 inside the CCL to the Pt sites
-K_O2_dis_ion = 8.5 # . It is the interfacial resistance coefficient of O2 dissolution inside the ionomer [haoModelingExperimentalValidation2015]
-K_O2_dis_l = 5.4 # . It is the interfacial resistance coefficient of O2 dissolution inside the CL liquid water [haoModelingExperimentalValidation2015]
-K_O2_ad_Pt = 5.4 # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites
+K_O2_dis_ion = 8.5 # . It is the interfacial resistance coefficient of O2 dissolution inside the ionomer [haoModelingExperimentalValidation2015].
+K_O2_dis_l = 1.0 # . It is the interfacial resistance coefficient of O2 dissolution inside the CL liquid water.
 IC = 0.5 # . It is the ionomer to carbon ratio in the catalyst layer.
-ECSA_0 = 150 # cm2_Pt.cm-2_active_area. It is the initial electrochemical surface area of the catalyst [ZSW].
-theta_Pt_0 = 0 # This is the initial platine-oxide coverage, assumed to be zero for simplification.
 rho_ion = 1900 # kg.m-3. It is the density of the ionomer [haoModelingExperimentalValidation2015].
 rho_carb = 1950 # kg.m-3. It is the density of the carbon [haoModelingExperimentalValidation2015].
 rho_Pt = 21450 # kg.m-3. It is the density of the platinum [haoModelingExperimentalValidation2015].
-r_carb = 45e-9 # m. It is the radius of the carbon particles.
-wt_Pt = 0.36 # It is the weight fraction of platinum over carbon covered by platinum (Pt/C) in the cathode catalyst layer.
+r_carb = 40e-9 # m. It is the radius of the carbon particles.
+theta_Pt_0 = 0 # This is the initial platine-oxide coverage, assumed to be zero for simplification.
+ECSA_0 = 150 # cm2_Pt.cm-2_active_area. It is the initial electrochemical surface area of the catalyst.
+wt_Pt = 0.5 # It is the weight fraction of platinum over carbon covered by platinum (Pt/C) in the cathode catalyst layer [haoModelingExperimentalValidation2015].
 L_Pt = 0.3e-2 # kg.m-2. It is the platinum loading in the cathode catalyst layer.
 
 # Model parameters for the voltage calculation

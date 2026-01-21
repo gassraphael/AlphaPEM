@@ -373,8 +373,8 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola = stored_operating_inputs(type_fuel_cell, voltage_zone)
 
     (Hacl, Hccl, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc, nb_channel_in_gc,
-     Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, Re, i0_c_ref, kappa_co, kappa_c, C_scl) = \
-        stored_physical_parameters(type_fuel_cell)
+     Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, K_O2_ad_Pt, Re, i0_c_ref, kappa_co, kappa_c,
+     C_scl) = stored_physical_parameters(type_fuel_cell)
 
     nb_gc, nb_gdl, nb_mpl, t_purge, rtol, atol = calculate_computing_parameters(step_current_parameters)
 
@@ -414,6 +414,7 @@ def recover_for_display_operating_inputs_and_physical_parameters(choice_operatin
     choice_undetermined_parameters['MPL porosity - ε_mpl']['value'].set(round(epsilon_mpl, 4))
     choice_undetermined_parameters['Compression ratio - ε_c']['value'].set(round(epsilon_c, 4))
     choice_undetermined_parameters['Capillary exponent - e']['value'].set(e)
+    choice_undetermined_parameters['Interfacial res. coef. of\nO2 ads. on Pt - K_O2_ad_Pt']['value'].set(round(K_O2_ad_Pt, 4))
     choice_undetermined_parameters['Electron conduction\nresistance - Re (Ω.mm²)']['value'].set(round(Re * 1e6, 4))  # A.mm-2
     choice_undetermined_parameters['Reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].set(round(i0_c_ref, 4))  # A.m-2
     choice_undetermined_parameters['Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))']['value'].set(round(kappa_co, 4))  # mol.m-1.s-1.Pa-1
@@ -489,6 +490,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     epsilon_mpl = choice_undetermined_parameters['MPL porosity - ε_mpl']['value'].get()
     epsilon_c = choice_undetermined_parameters['Compression ratio - ε_c']['value'].get()
     e = choice_undetermined_parameters['Capillary exponent - e']['value'].get()
+    K_O2_ad_Pt = choice_undetermined_parameters['Interfacial res. coef. of\nO2 ads. on Pt - K_O2_ad_Pt']['value'].get()
     Re = choice_undetermined_parameters['Electron conduction\nresistance - Re (Ω.mm²)']['value'].get() * 1e-6  # Ω.m²
     i0_c_ref = choice_undetermined_parameters['Dry reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].get()  # A.m-2
     kappa_co = choice_undetermined_parameters['Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))']['value'].get()  # mol.m-1.s-1.Pa-1
@@ -593,7 +595,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
 
     return (T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, Aact, nb_cell, Hgdl, Hmpl, Hacl, Hccl, Hmem,
             Hagc, Hcgc, Wagc, Wcgc, Lgc, nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem,
-            V_endplate_a, V_endplate_c, epsilon_gdl, epsilon_mpl, epsilon_c, e, Re, i0_c_ref, kappa_co, kappa_c,
+            V_endplate_a, V_endplate_c, epsilon_gdl, epsilon_mpl, epsilon_c, e, K_O2_ad_Pt, Re, i0_c_ref, kappa_co, kappa_c,
             C_scl, step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS,
             f_EIS, t_EIS, t_purge, delta_t_purge, nb_gc, nb_gdl, nb_mpl, rtol, atol, type_fuel_cell, voltage_zone,
             type_auxiliary, type_control, type_purge, type_display, type_plot)
@@ -727,6 +729,12 @@ def value_control(choice_operating_conditions, choice_accessible_parameters, cho
     if choice_undetermined_parameters['Capillary exponent - e']['value'].get() < 3 or choice_undetermined_parameters['Capillary exponent - e']['value'].get() > 5:
         messagebox.showerror(title='Capillary exponent', message='The capillary exponent should be between 3 and 5 and '
                                                                  'being an integer.')
+        choices.clear()
+        return
+    if choice_undetermined_parameters['Interfacial res. coef. of\nO2 ads. on Pt - K_O2_ad_Pt']['value'].get() < 1 or \
+            choice_undetermined_parameters['Interfacial res. coef. of\nO2 ads. on Pt - K_O2_ad_Pt']['value'].get() > 10:
+        messagebox.showerror(title='Interfacial res. coef. of O2 ads. on Pt', message='The interfacial res. coef. of O2 '
+                                                                             'ads. on Pt should be between 10 and 10')
         choices.clear()
         return
     if choice_undetermined_parameters['Electron conduction\nresistance - Re (Ω.mm²)']['value'].get() < 0 :
@@ -994,6 +1002,8 @@ def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, acces
                 Compression ratio of the GDL (undetermined physical parameter).
             - e : float
                 Capillary exponent (undetermined physical parameter).
+            - K_O2_ad_Pt : float
+                Interfacial resistance coefficient of O2 adsorption on the Pt sites (undetermined physical parameter).
             - Re : float
                 Electron conduction resistance in Ω.m2 (undetermined physical parameter).
             - i0_c_ref : float
@@ -1222,6 +1232,8 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
                 Compression ratio of the GDL (undetermined physical parameter).
             - e : float
                 Capillary exponent (undetermined physical parameter).
+            - K_O2_ad_Pt : float
+                Interfacial resistance coefficient of O2 adsorption on the Pt sites (undetermined physical parameter).
             - Re : float
                 Electron conduction resistance in Ω.m2 (undetermined physical parameter).
             - i0_c_ref : float
@@ -1449,6 +1461,8 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
                 Compression ratio of the GDL (undetermined physical parameter).
             - e : float
                 Capillary exponent (undetermined physical parameter).
+            - K_O2_ad_Pt : float
+                Interfacial resistance coefficient of O2 adsorption on the Pt sites (undetermined physical parameter).
             - Re : float
                 Electron conduction resistance in Ω.m2 (undetermined physical parameter).
             - i0_c_ref : float

@@ -12,7 +12,7 @@ import math
 from functools import lru_cache
 from configuration.settings import (M_eq, rho_mem, Dp_mpl, Dp_cl, theta_c_gdl, theta_c_mpl, theta_c_cl, gamma_cond,
                                     gamma_evap, M_H2, M_O2, M_N2, M_H2O, R, F, Kshape, K_O2_dis_ion, K_O2_dis_l,
-                                    K_O2_ad_Pt, rho_ion, rho_carb, r_carb, rho_Pt, IC, ECSA_0, theta_Pt_0, wt_Pt, L_Pt,
+                                    rho_ion, rho_carb, r_carb, rho_Pt, IC, ECSA_0, theta_Pt_0, wt_Pt, L_Pt,
                                     epsilon_p, alpha_p, Tref_cross, Eact_H2_cros_v, Eact_H2_cros_l, Eact_O2_cros_v,
                                     Eact_O2_cros_l, tau_mpl, tau_cl, r_s_gdl, r_s_mpl, r_s_cl, k_th_gdl, k_th_mpl,
                                     k_th_cl, k_th_mem, Cp_gdl, Cp_mpl, Cp_cl, Cp_mem, rho_gdl, rho_mpl, rho_cl,
@@ -865,7 +865,7 @@ def k_O2(lambdaa, T, kappa_co):
     return w * k_O2_v + (1 - w) * k_O2_l  # interpolation between under-saturated and liquid-equilibrated O2 crossover
 
 
-def R_T_O2_Pt(s, lambdaa, T, Hcl):
+def R_T_O2_Pt(s, lambdaa, T, Hcl, K_O2_ad_Pt):
     """This function calculates the total resistance of oxygen to the platinium particules inside the CCL, defined as the
      sum of the different dissolution, diffusion and adsorption resistances.
 
@@ -879,6 +879,8 @@ def R_T_O2_Pt(s, lambdaa, T, Hcl):
         Temperature inside the CL in K.
     Hcl : float
         Thickness of the CL layer.
+    K_O2_ad_Pt : float
+        Interfacial resistance coefficient of O2 adsorption on the Pt sites, without units.
 
     Returns
     -------
@@ -896,7 +898,7 @@ def R_T_O2_Pt(s, lambdaa, T, Hcl):
 
     return R_O2_dis_l(s, lambdaa, T, Hcl) + R_O2_dif_l(s, lambdaa, T, Hcl) + \
            R_O2_dis_ion(lambdaa, T, Hcl) + R_O2_dif_ion_eff(lambdaa, T, Hcl) + \
-           R_O2_ad_Pt_eff(lambdaa, T, Hcl)
+           R_O2_ad_Pt_eff(lambdaa, T, Hcl, K_O2_ad_Pt)
 
 
 def R_O2_dis_l(s, lambdaa, T, Hcl):
@@ -1050,7 +1052,7 @@ def R_O2_dif_ion_eff(lambdaa, T, Hcl):
            R_O2_dif_ion(lambdaa, T, Hcl)
 
 
-def R_O2_ad_Pt(lambdaa, T, Hcl):
+def R_O2_ad_Pt(lambdaa, T, Hcl, K_O2_ad_Pt):
     """This function calculates the adsorption resistance of oxygen on the Pt particules inside the CCL, in s.m-1.
     The assumption to make R_O2_ad_Pt proportional to R_O2_dif_ion is strong.
 
@@ -1062,6 +1064,8 @@ def R_O2_ad_Pt(lambdaa, T, Hcl):
         Temperature inside the CL in K.
     Hcl : float
         Thickness of the CL layer.
+    K_O2_ad_Pt : float
+        Interfacial resistance coefficient of O2 adsorption on the Pt sites, without units.
 
     Returns
     -------
@@ -1077,7 +1081,7 @@ def R_O2_ad_Pt(lambdaa, T, Hcl):
     return K_O2_ad_Pt * R_O2_dif_ion(lambdaa, T, Hcl)
 
 
-def R_O2_ad_Pt_eff(lambdaa, T, Hcl):
+def R_O2_ad_Pt_eff(lambdaa, T, Hcl, K_O2_ad_Pt):
     """This function calculates the effective adsorption resistance of oxygen on the Pt particules inside the CCL, in s.m-1.
     Parameters
     ----------
@@ -1087,6 +1091,8 @@ def R_O2_ad_Pt_eff(lambdaa, T, Hcl):
         Temperature inside the CL in K.
     Hcl : float
         Thickness of the CL layer.
+    K_O2_ad_Pt : float
+        Interfacial resistance coefficient of O2 adsorption on the Pt sites, without units.
 
     Returns
     -------
@@ -1101,7 +1107,7 @@ def R_O2_ad_Pt_eff(lambdaa, T, Hcl):
 
     return (r_carb + delta_ion(lambdaa, T, Hcl))**2 / (r_Pt()**2 * (1 - theta_Pt_0)) * \
            rho_Pt / rho_carb * (r_Pt() / r_carb)**3 * (1 - wt_Pt) / wt_Pt * \
-           R_O2_ad_Pt(lambdaa, T, Hcl)
+           R_O2_ad_Pt(lambdaa, T, Hcl, K_O2_ad_Pt)
 
 
 @lru_cache(maxsize=None) # Cache the results to optimize performance
