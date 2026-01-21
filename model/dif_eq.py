@@ -8,6 +8,7 @@
 # Importing the necessary libraries
 import numpy as np
 
+from configuration.settings import E0
 # Importing constants' value and functions
 from model.flows import calculate_flows
 from model.cell_voltage import calculate_C_O2_Pt
@@ -55,6 +56,11 @@ def dydt(t, y, operating_inputs, parameters, solver_variable_names, control_vari
     solver_variables = {}
     for index, key in enumerate(solver_variable_names):
         solver_variables[key] = y[index]
+
+    # Conditions to pursue the calculations
+    if solver_variables['eta_c'] > E0:
+        raise ValueError("The cathode overpotential is higher than the open circuit voltage at time t = " + str(t) +
+                         " s. It means that the voltage is negative, which is not possible.")
 
     # Modifications of the operating conditions in real time, if required.
     if parameters["type_control"] != "no_control":

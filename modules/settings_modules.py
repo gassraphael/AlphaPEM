@@ -49,7 +49,7 @@ def stored_operating_inputs(type_fuel_cell, voltage_zone):
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
         if voltage_zone == "full":
-            i_max_pola = 2.700e4  # A.m-2. It is the maximum current density for the polarization curve.
+            i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
         elif voltage_zone == "before_voltage_drop":
             i_max_pola = 1.700e4 # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41":
