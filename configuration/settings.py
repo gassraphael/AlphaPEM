@@ -388,6 +388,7 @@ Dp_cl = 0.15e-6  # m. It is the pore diameter of the CL [Ali Malekian 2019 Inter
 theta_c_gdl = 120 * math.pi / 180  # radian. It is the contact angle of GDL for liquid water.
 theta_c_mpl = 135 * math.pi / 180  # radian. It is the contact angle of MPL for liquid water.
 theta_c_cl = 95 * math.pi / 180  # radian. It is the contact angle of CL for liquid water.
+K_l_ads = 0 # . It is an estimation of the ratio between the liquid and vapor sorption rates of water in the membrane. It should be in [10-1000] [shaoNewInsightsSteadystate2023].
 gamma_cond = 1e8  # s-1. It is the overall condensation rate constant for water [Ansys Fluent value from their User Guide].
 gamma_evap = 1e8  # s-1. It is the overall evaporation rate constant for water [Ansys Fluent value from their User Guide].
 epsilon_p = 0.11 #. It is the percolation threshold porosity of the GDL.

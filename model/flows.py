@@ -6,7 +6,7 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import rho_mem, M_eq, F, R, ECSA_0
+from configuration.settings import rho_mem, M_eq, F, R, ECSA_0, K_l_ads
 from model.auxiliaries import auxiliaries
 from modules.transitory_functions import (interpolate, d_dx, Dcap, h_a, h_c, lambda_eq, gamma_sorp, Svl, k_H2, k_O2,
                                           epsilon_cl)
@@ -199,11 +199,21 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
 
     # Water absorption in the CL:
     #   Anode side
-    S_abs_acl = gamma_sorp(C_v_acl, s_acl, lambda_acl, T_acl, Hacl) * rho_mem / M_eq * \
+    Sv_abs_acl = (1 - s_acl) * gamma_sorp(C_v_acl, s_acl, lambda_acl, T_acl, Hacl) * rho_mem / M_eq * \
                  (lambda_eq(C_v_acl, s_acl, T_acl) - lambda_acl)
+    if s_acl > 0:
+        Sl_abs_acl = s_acl * K_l_ads * gamma_sorp(C_v_acl, s_acl, lambda_acl, T_acl, Hacl) * rho_mem / M_eq * \
+                     (lambda_eq(C_v_acl, s_acl, T_acl) - lambda_acl)
+    else:
+        Sl_abs_acl = 0
     #   Cathode side
-    S_abs_ccl = gamma_sorp(C_v_ccl, s_ccl, lambda_ccl, T_ccl, Hccl) * rho_mem / M_eq * \
+    Sv_abs_ccl = (1 - s_ccl) * gamma_sorp(C_v_ccl, s_ccl, lambda_ccl, T_ccl, Hccl) * rho_mem / M_eq * \
                  (lambda_eq(C_v_ccl, s_ccl, T_ccl) - lambda_ccl)
+    if s_ccl > 0:
+        Sl_abs_ccl = s_ccl * K_l_ads * gamma_sorp(C_v_ccl, s_ccl, lambda_ccl, T_ccl, Hccl) * rho_mem / M_eq * \
+                     (lambda_eq(C_v_ccl, s_ccl, T_ccl) - lambda_ccl)
+    else:
+        Sl_abs_ccl = 0
 
     # Liquid water generated through vapor condensation or degenerated through evaporation
     #   Anode side
@@ -259,7 +269,7 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
             'J_O2': {**auxiliary_flows_dico.get('J_O2', {}),
                      'ccl_cmpl': J_O2_ccl_cmpl, 'cmpl_cmpl': J_O2_cmpl_cmpl, 'cmpl_cgdl': J_O2_cmpl_cgdl,
                      'cgdl_cgdl': J_O2_cgdl_cgdl, 'cgdl_cgc': J_O2_cgdl_cgc},
-            'S_abs': {'acl': S_abs_acl, 'ccl': S_abs_ccl},
+            'S_abs': {'v_acl': Sv_abs_acl, 'l_acl': Sl_abs_acl, 'v_ccl': Sv_abs_ccl, 'l_ccl': Sl_abs_ccl},
             'Sp' :{'acl': Sp_acl, 'ccl': Sp_ccl},
             'S_H2' :{'reac': S_H2_reac, 'cros': S_H2_cros}, 'S_O2': {'reac': S_O2_reac, 'cros': S_O2_cros},
             'Sv' : {'agdl': Sv_agdl, 'ampl': Sv_ampl, 'acl': Sv_acl, 'ccl': Sv_ccl, 'cmpl': Sv_cmpl, 'cgdl': Sv_cgdl},

@@ -43,14 +43,14 @@ def calculate_dyn_dissoved_water_evolution_inside_MEA(dif_eq, sv, Hmem, Hacl, Hc
     """
 
     dif_eq['dlambda_acl / dt'] = M_eq / (rho_mem * epsilon_mc(sv['lambda_acl'], sv['T_acl'], Hacl)) * \
-                                 (-J_lambda['acl_mem'] / Hacl + S_abs['acl'] + Sp['acl'])
+                                 (-J_lambda['acl_mem'] / Hacl + S_abs['v_acl'] + S_abs['l_acl'] + Sp['acl'])
     dif_eq['dlambda_mem / dt'] = M_eq / rho_mem * (J_lambda['acl_mem'] - J_lambda['mem_ccl']) / Hmem
     dif_eq['dlambda_ccl / dt'] = M_eq / (rho_mem * epsilon_mc(sv['lambda_ccl'], sv['T_ccl'], Hccl)) * \
-                                 (J_lambda['mem_ccl'] / Hccl + S_abs['ccl'] + Sp['ccl'])
+                                 (J_lambda['mem_ccl'] / Hccl + S_abs['v_ccl'] + S_abs['l_ccl'] + Sp['ccl'])
 
 
 def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, epsilon_gdl, epsilon_mpl,
-                                                    nb_gdl, nb_mpl, Jl, Sl, **kwargs):
+                                                    nb_gdl, nb_mpl, Jl, S_abs, Sl, **kwargs):
     """
     This function calculates the dynamic evolution of the liquid water in the gas diffusion and catalyst layers.
 
@@ -79,6 +79,8 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl
         Number of model nodes placed inside each MPL.
     Jl : dict
         Liquid water flow between the different layers (mol.m-2.s-1).
+    S_abs : dict
+        Water absorption in the CLs (mol.m-3.s-1).
     Sl : dict
         Liquid water source terms inside the different layers (mol.m-3.s-1).
     """
@@ -124,12 +126,12 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl
                                             M_H2O * Sl['ampl'][nb_mpl])
     #      Inside the ACL
     dif_eq['ds_acl / dt'] = 1 / (rho_H2O_l(sv['T_acl']) * epsilon_cl(sv['lambda_acl'], sv['T_acl'], Hacl)) * \
-                            (Jl['ampl_acl'] / Hacl + M_H2O * Sl['acl'])
+                            (Jl['ampl_acl'] / Hacl - M_H2O * S_abs['l_acl'] + M_H2O * Sl['acl'])
 
     # At the cathode side
     #       Inside the CCL
     dif_eq['ds_ccl / dt'] = 1 / (rho_H2O_l(sv['T_ccl']) * epsilon_cl(sv['lambda_ccl'], sv['T_ccl'], Hccl)) * \
-                            (- Jl['ccl_cmpl'] / Hccl + M_H2O * Sl['ccl'])
+                            (- Jl['ccl_cmpl'] / Hccl - M_H2O * S_abs['l_ccl'] + M_H2O * Sl['ccl'])
     #       Inside the CMPL
     if nb_mpl == 1:
         dif_eq['ds_cmpl_1 / dt'] = 1 / (rho_H2O_l(sv['T_cmpl_1']) * epsilon_mpl) * \
@@ -253,12 +255,12 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, 
                                              ((Jv['ampl_ampl'][nb_mpl - 1] - Jv['ampl_acl']) / (Hmpl / nb_mpl) + Sv['ampl'][nb_mpl])
     #       Inside the ACL
     dif_eq['dC_v_acl / dt'] = 1 / (epsilon_cl(sv['lambda_acl'], sv['T_acl'], Hacl) * (1 - sv['s_acl'])) * \
-                              (Jv['ampl_acl'] / Hacl - S_abs['acl'] + Sv['acl'])
+                              (Jv['ampl_acl'] / Hacl - S_abs['v_acl'] + Sv['acl'])
 
     # At the cathode side
     #       Inside the CCL
     dif_eq['dC_v_ccl / dt'] = 1 / (epsilon_cl(sv['lambda_ccl'], sv['T_ccl'], Hccl) * (1 - sv['s_ccl'])) * \
-                              (- Jv['ccl_cmpl'] / Hccl - S_abs['ccl'] + Sv['ccl'])
+                              (- Jv['ccl_cmpl'] / Hccl - S_abs['v_ccl'] + Sv['ccl'])
     #       Inside the CMPL
     if nb_mpl == 1:
         dif_eq['dC_v_cmpl_1 / dt'] = 1 / (epsilon_mpl * (1 - sv['s_cmpl_1'])) * ((Jv['ccl_cmpl'] - Jv['cmpl_cgdl']) / Hmpl +
@@ -504,7 +506,7 @@ def calculate_dyn_temperature_evolution_inside_MEA(dif_eq, Hgdl, Hmpl, Hacl, Hcc
     #      Inside the ACL
     dif_eq['dT_acl / dt'] = (1 / rho_Cp0['acl']) * \
                             ( (Jt['ampl_acl'] - Jt['acl_mem']) / Hacl +
-                             Q_r['acl'] + Q_sorp['acl'] + Q_liq['acl'] + Q_e['acl'] )
+                             Q_r['acl'] + Q_sorp['v_acl'] + Q_sorp['l_acl'] + Q_liq['acl'] + Q_e['acl'] )
 
     # Inside the membrane
     dif_eq['dT_mem / dt'] = (1 / rho_Cp0['mem']) * \
@@ -514,7 +516,7 @@ def calculate_dyn_temperature_evolution_inside_MEA(dif_eq, Hgdl, Hmpl, Hacl, Hcc
     #       Inside the CCL
     dif_eq['dT_ccl / dt'] = (1 / rho_Cp0['ccl']) * \
                             ( (Jt['mem_ccl'] - Jt['ccl_cmpl']) / Hccl +
-                              Q_r['ccl'] + Q_sorp['ccl'] + Q_liq['ccl'] + Q_p['ccl'] + Q_e['ccl'] )
+                              Q_r['ccl'] + Q_sorp['v_ccl'] + Q_sorp['l_ccl'] + Q_liq['ccl'] + Q_p['ccl'] + Q_e['ccl'] )
     #      Inside the CMPL
     if nb_mpl == 1:
         dif_eq['dT_cmpl_1 / dt'] = (1 / rho_Cp0['cmpl_1']) * ((Jt['ccl_cmpl'] - Jt['cmpl_cgdl']) / Hmpl +

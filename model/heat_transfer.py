@@ -110,8 +110,10 @@ def calculate_heat_transfers(sv, i_fc, operating_inputs, parameters, S_abs, Sl, 
            'ccl': S_r_ccl * T_ccl * (-delta_s_ORR) + i_fc * eta_c / Hccl}
 
     # The heat dissipated by the absorption of water from the CL to the membrane, in J.m-3.s-1.
-    Q_sorp = {'acl': S_abs['acl'] * (-delta_h_abs(T_acl)),
-              'ccl': S_abs['ccl'] * (-delta_h_abs(T_ccl))}
+    Q_sorp = {'v_acl': S_abs['v_acl'] * (-delta_h_abs(T_acl)),
+              'l_acl': S_abs['l_acl'] * (-delta_h_abs(T_acl)),
+              'v_ccl': S_abs['v_ccl'] * (-delta_h_abs(T_ccl)),
+              'l_ccl': S_abs['l_ccl'] * (-delta_h_abs(T_ccl))}
 
     # The heat dissipated by the liquefaction of vapor water, in J.m-3.s-1.
     Q_liq = {**{f'agdl_{i}': Sl['agdl'][i] * (- delta_h_liq(sv[f'T_agdl_{i}'])) for i in range(1, nb_gdl + 1)},
