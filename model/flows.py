@@ -197,7 +197,7 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     #   Cathode side
     Sp_ccl = i_fc / (2 * F * Hccl) + k_H2(lambda_mem, T_mem, kappa_co) * R * T_acl_mem_ccl / (Hmem * Hccl) * C_H2_acl
 
-    # Water absorption in the CL:
+    # Water absorption in the CL due to the contact between the ionomer and vapor or liquid water:
     #   Anode side
     Sv_abs_acl = (1 - s_acl) * gamma_sorp(C_v_acl, s_acl, lambda_acl, T_acl, Hacl) * rho_mem / M_eq * \
                  (lambda_eq(C_v_acl, s_acl, T_acl) - lambda_acl)
