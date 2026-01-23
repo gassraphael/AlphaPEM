@@ -50,6 +50,7 @@ To install **AlphaPEM**, follow these steps in a shell:
 
 - V1.3 - in progress - This version of AlphaPEM includes: 
 	- the addition of O2 flow to Pt particules which improves the modeling of overvoltage due to flooding at high curent densities.
+	- the addition of liquid water flow inside the GC (with the sorption flow at the GDL/GC interface).
 - [V1.2](https://github.com/gassraphael/AlphaPEM/tree/b71f42878a186e17efeb7e97b5d7fb50d6e76827) - 2025.12.11 - This version of AlphaPEM includes: 
 	- the addition of convective flow between the inlet, gas channels, and outlet of the cell, thereby removing the Pukrushpan equations (from Michigan University).
 		- auxiliary considerations are temporarily removed, as they require reconstruction. 
