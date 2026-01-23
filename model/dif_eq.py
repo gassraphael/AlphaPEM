@@ -10,6 +10,7 @@ import numpy as np
 
 from configuration.settings import E0
 # Importing constants' value and functions
+from model.velocity import calculate_velocity_evolution
 from model.flows import calculate_flows
 from model.cell_voltage import calculate_C_O2_Pt
 from model.heat_transfer import calculate_heat_transfers
@@ -20,7 +21,8 @@ from model.dif_eq_MEA import (calculate_dyn_dissoved_water_evolution_inside_MEA,
                               calculate_dyn_voltage_evolution, calculate_dyn_temperature_evolution_inside_MEA)
 from model.dif_eq_GC_manifold import (calculate_dyn_gas_evolution_inside_gas_channel,
                                       calculate_dyn_temperature_evolution_inside_gas_channel,
-                                      calculate_dyn_manifold_pressure_and_humidity_evolution)
+                                      calculate_dyn_manifold_pressure_and_humidity_evolution,
+                                      calculate_dyn_liq_evolution_inside_gas_channel)
 from model.dif_eq_auxiliaries import (calculate_dyn_air_compressor_evolution, calculate_dyn_humidifier_evolution,
                                       calculate_dyn_throttle_area_controler)
 
@@ -71,8 +73,13 @@ def dydt(t, y, operating_inputs, parameters, solver_variable_names, control_vari
     dif_eq_int_values = calculate_dif_eq_int_values(t, solver_variables, control_variables, operating_inputs, parameters)
     C_O2_Pt = calculate_C_O2_Pt(i_fc, **solver_variables, **parameters)
 
+    # Calculation of the velocities inside the GC and the manifolds
+    v_a, v_c, Pa_in, Pc_in = calculate_velocity_evolution(solver_variables, control_variables, i_fc, operating_inputs,
+                                                          parameters)
+
     # Calculation of the flows
-    matter_flows_dico = calculate_flows(t, solver_variables, control_variables, i_fc, operating_inputs, parameters)
+    matter_flows_dico = calculate_flows(t, solver_variables, control_variables, i_fc, v_a, v_c, Pa_in, Pc_in,
+                                        operating_inputs, parameters)
     heat_flows_dico = calculate_heat_transfers(solver_variables, i_fc, operating_inputs, parameters, **matter_flows_dico)
 
     # Calculation of the dynamic evolutions
@@ -86,6 +93,7 @@ def dydt(t, y, operating_inputs, parameters, solver_variable_names, control_vari
     calculate_dyn_temperature_evolution_inside_MEA(dif_eq, **parameters, **dif_eq_int_values, **heat_flows_dico)
     #       Inside the gaz channels and the manifolds
     calculate_dyn_gas_evolution_inside_gas_channel(dif_eq, **parameters, **matter_flows_dico)
+    calculate_dyn_liq_evolution_inside_gas_channel(dif_eq, **operating_inputs, **parameters, **matter_flows_dico)
     calculate_dyn_temperature_evolution_inside_gas_channel(dif_eq, **parameters)
     if parameters['type_auxiliary'] != "no_auxiliary":
         calculate_dyn_manifold_pressure_and_humidity_evolution(dif_eq, **operating_inputs, **parameters, **matter_flows_dico)

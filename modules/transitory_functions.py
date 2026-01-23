@@ -135,7 +135,7 @@ def d_dx(y_minus, y_plus, dx = None, dx_minus = None, dx_plus = None):
     y_plus : float
         Value at the right point (i+1).
     dx : float
-        Step between (i-1) and (i+1) when dx_minus = dx_plus.
+        Half step between (i-1) and (i+1) when dx_minus = dx_plus.
     dx_minus : float
         Step between (i-1) and i.
     dx_plus : float
@@ -309,8 +309,8 @@ def C_v_sat(T):
 
 
 def Dcap(element, s, T, epsilon, e, epsilon_c=None):
-    """ This function calculates the capillary coefficient at the GDL or the CL and at the anode, in kg.m.s-1,
-    considering GDL compression.
+    """ This function calculates the capillary coefficient at the GDL, the MPL or the CL, in kg.m.s-1, considering
+     GDL compression.
 
     Parameters
     ----------
@@ -327,6 +327,11 @@ def Dcap(element, s, T, epsilon, e, epsilon_c=None):
         Capillary exponent.
     epsilon_c : float, optional
         Compression ratio of the GDL.
+
+    Returns
+    -------
+    float
+        Capillary coefficient at the GDL, MPL or CL in kg.m.s-1.
     """
 
     K0_value = K0(element, epsilon, epsilon_c)
@@ -341,6 +346,45 @@ def Dcap(element, s, T, epsilon, e, epsilon_c=None):
 
     return sigma(T) * K0_value / nu_l(T) * abs(math.cos(theta_c_value)) * \
            (epsilon / K0_value) ** 0.5 * (s ** e + 1e-7) * (1.417 - 4.24 * s + 3.789 * s ** 2)
+
+
+def Pcap(element, s, T, epsilon, epsilon_c=None):
+    """ This function calculates the capillary pressure at the GDL, the MPL or the CL, in kg.m.s-1.
+
+    Parameters
+    ----------
+    element : str
+        Specifies the element for which the capillary coefficient is calculated.
+        Must be either 'gdl' (gas diffusion layer) or 'cl' (catalyst layer).
+    s : float
+        Liquid water saturation variable.
+    T : float
+        Temperature in K.
+    epsilon : float
+        Porosity.
+    epsilon_c : float, optional
+        Compression ratio of the GDL.
+
+    Returns
+    -------
+    float
+        Capillary pressure at the selected element in kg.m.s-1.
+    """
+
+    K0_value = K0(element, epsilon, epsilon_c)
+    if element == 'gdl':
+        theta_c_value = theta_c_gdl
+    elif element == 'mpl':
+        theta_c_value = theta_c_mpl
+    elif element == 'cl':
+        theta_c_value = theta_c_cl
+    else:
+        raise ValueError("The element should be either 'gdl', 'mpl' or 'cl'.")
+
+    s_num = s + 1e-7 # To avoid numerical issues when s = 0.
+
+    return sigma(T) * abs(math.cos(theta_c_value)) * (epsilon / K0_value) ** 0.5 * \
+           (1.417 * s_num - 2.12 * s_num ** 2 + 1.263 * s_num ** 3)
 
 
 def Da(P, T):

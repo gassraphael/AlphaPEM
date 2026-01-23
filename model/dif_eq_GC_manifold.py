@@ -9,7 +9,7 @@ import math
 
 # Importing constants' value and functions
 from configuration.settings import R
-from modules.transitory_functions import Psat
+from modules.transitory_functions import Psat, rho_H2O_l
 
 
 # ____________________________________________________Main functions____________________________________________________
@@ -113,6 +113,50 @@ def calculate_dyn_gas_evolution_inside_gas_channel(dif_eq, Hagc, Hcgc, Lgc, nb_g
         for i in range(2, nb_gc):
             dif_eq[f'dC_N2_cgc_{i} / dt'] = (J_N2['cgc_cgc'][i - 1] - J_N2['cgc_cgc'][i]) / (Lgc / nb_gc)
         dif_eq[f'dC_N2_cgc_{nb_gc} / dt'] = (J_N2['cgc_cgc'][nb_gc - 1] - J_N2['cgc_out']) / (Lgc / nb_gc)
+
+
+def calculate_dyn_liq_evolution_inside_gas_channel(dif_eq, T_des, Hagc, Hcgc, Lgc, nb_gc, Jl, **kwargs):
+    """This function calculates the dynamic evolution of the liquid water in the gas channels.
+
+    Parameters
+    ----------
+    dif_eq : dict
+        Dictionary used for saving the differential equations.
+    T_des : float
+        Desired fuel cell temperature (K).
+    Hagc : float
+        Thickness of the anode gas channel (m).
+    Hcgc : float
+        Thickness of the cathode gas channel (m).
+    Lgc : float
+        Length of the gas channel (m).
+    Jl : dict
+        Liquid water flow between the different layers (mol.m-2.s-1).
+    """
+
+    # At the anode side, inside the AGC
+    if nb_gc == 1:
+        dif_eq['ds_agc_1 / dt'] = 1 / rho_H2O_l(T_des) * (- Jl['agc_out'] / Lgc - Jl['agc_agdl'][1] / Hagc)
+    elif nb_gc == 2:
+        dif_eq['ds_agc_1 / dt'] = 1 / rho_H2O_l(T_des) * (- Jl['agc_agc'][1] / (Lgc / nb_gc) - Jl['agc_agdl'][1] / Hagc)
+        dif_eq['ds_agc_2 / dt'] = 1 / rho_H2O_l(T_des) * ((Jl['agc_agc'][1] - Jl['agc_out']) / (Lgc / nb_gc) - Jl['agc_agdl'][2] / Hagc)
+    else: # n_gc > 2:
+        dif_eq['ds_agc_1 / dt'] = 1 / rho_H2O_l(T_des) * (- Jl['agc_agc'][1] / (Lgc / nb_gc) - Jl['agc_agdl'][1] / Hagc)
+        for i in range(2, nb_gc):
+            dif_eq[f'ds_agc_{i} / dt'] = 1 / rho_H2O_l(T_des) * ((Jl['agc_agc'][i - 1] - Jl['agc_agc'][i]) / (Lgc / nb_gc) - Jl['agc_agdl'][i] / Hagc)
+        dif_eq[f'ds_agc_{nb_gc} / dt'] = 1 / rho_H2O_l(T_des) * ((Jl['agc_agc'][nb_gc - 1] - Jl['agc_out']) / (Lgc / nb_gc) - Jl['agc_agdl'][nb_gc] / Hagc)
+
+    # At the cathode side, inside the CGC
+    if nb_gc == 1:
+        dif_eq['ds_cgc_1 / dt'] = 1 / rho_H2O_l(T_des) * (- Jl['cgc_out'] / Lgc + Jl['cgdl_cgc'][1] / Hcgc)
+    elif nb_gc == 2:
+        dif_eq['ds_cgc_1 / dt'] = 1 / rho_H2O_l(T_des) * (- Jl['cgc_cgc'][1] / (Lgc / nb_gc) + Jl['cgdl_cgc'][1] / Hcgc)
+        dif_eq['ds_cgc_2 / dt'] = 1 / rho_H2O_l(T_des) * ((Jl['cgc_cgc'][1] - Jl['cgc_out']) / (Lgc / nb_gc) + Jl['cgdl_cgc'][2] / Hcgc)
+    else: # n_gc > 2:
+        dif_eq['ds_cgc_1 / dt'] = 1 / rho_H2O_l(T_des) * (- Jl['cgc_cgc'][1] / (Lgc / nb_gc) + Jl['cgdl_cgc'][1] / Hcgc)
+        for i in range(2, nb_gc):
+            dif_eq[f'ds_cgc_{i} / dt'] = 1 / rho_H2O_l(T_des) * ((Jl['cgc_cgc'][i - 1] - Jl['cgc_cgc'][i]) / (Lgc / nb_gc) + Jl['cgdl_cgc'][i] / Hcgc)
+        dif_eq[f'ds_cgc_{nb_gc} / dt'] = 1 / rho_H2O_l(T_des) * ((Jl['cgc_cgc'][nb_gc - 1] - Jl['cgc_out']) / (Lgc / nb_gc) + Jl['cgdl_cgc'][nb_gc] / Hcgc)
 
 
 def calculate_dyn_temperature_evolution_inside_gas_channel(dif_eq, nb_gc, **kwarks):

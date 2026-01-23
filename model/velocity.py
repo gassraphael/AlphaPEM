@@ -9,14 +9,13 @@ import math
 from scipy.optimize import least_squares
 
 # Importing constants' value and functions
-from configuration.settings import R, F, Text, Pext, Phi_ext, y_O2_ext
-from modules.transitory_functions import Psat
+from configuration.settings import R, F, Text, Pext, Phi_ext, y_O2_ext, M_H2O
+from modules.transitory_functions import average, Psat, h_a, h_c, mu_mixture_gases, k_H2, k_O2
 
 
 # ________________________________________________________Velocity______________________________________________________
 
-def calculate_velocity_evolution(sv, control_variables, i_fc, i_n, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_agc_agdl, J_O2_cgdl_cgc,
-                                 operating_inputs, parameters, mu_gaz):
+def calculate_velocity_evolution(sv, control_variables, i_fc, operating_inputs, parameters):
     """
         Calculate the gas velocities at the anode and cathode.
         This function finds the velocities v_a and v_c that make the pressures computed from the Hagen-Poiseuille
@@ -31,22 +30,10 @@ def calculate_velocity_evolution(sv, control_variables, i_fc, i_n, Jv_agc_agdl, 
             Control inputs (passed to `desired_flows`).
         i_fc : int
             Fuel cell current density at time t.
-        i_n : float
-            Crossover current density at time t (A/m²).
-        Jv_agc_agdl : list
-            Vapor flow between the AGC and the AGDL at each GC node (mol.m-2.s-1).
-        Jv_cgdl_cgc : list
-            Vapor flow between the CGDL and the CGC at each GC node (mol.m-2.s-1).
-        J_H2_agc_agdl : list
-            H2 flow between the AGC and the AGDL at each GC node (mol.m-2.s-1).
-        J_O2_cgdl_cgc : list
-            O2 flow between the CGDL and the CGC at each GC node (mol.m-2.s-1).
         operating_inputs : dict
             Operating conditions.
         parameters : dict
             Model parameters.
-        mu_gaz : dict
-            Gas dynamic viscosities at anode and cathode.
 
         Returns
         -------
@@ -61,14 +48,22 @@ def calculate_velocity_evolution(sv, control_variables, i_fc, i_n, Jv_agc_agdl, 
             If the least squares solver does not converge.
         """
 
+    # Extraction of the variables
+    lambda_mem = sv['lambda_mem']
+    C_H2_acl, C_O2_ccl = sv['C_H2_acl'], sv['C_O2_ccl']
+    T_acl, T_mem, T_ccl = sv['T_acl'], sv['T_mem'], sv['T_ccl']
+    # Extraction of the operating inputs and the parameters
     T_des, Pa_des, Pc_des = operating_inputs['T_des'], operating_inputs['Pa_des'], operating_inputs['Pc_des']
     Hagc, Hcgc, Wagc, Wcgc = parameters['Hagc'], parameters['Hcgc'], parameters['Wagc'], parameters['Wcgc']
     Lgc, Ldist = parameters['Lgc'], parameters['Ldist']
+    Hmem, Hacl, Hccl, kappa_co = parameters['Hmem'], parameters['Hacl'], parameters['Hccl'], parameters['kappa_co']
     nb_channel_in_gc, nb_cell, type_auxiliary = parameters['nb_channel_in_gc'], parameters['nb_cell'], parameters['type_auxiliary']
     nb_gc, nb_gdl = parameters['nb_gc'], parameters['nb_gdl']
 
     # Intermediate calculation
-    L_node_gc = Lgc / nb_gc                                                                                             # Length of one gas channel node (m).
+    #       Length of one gas channel node (m).
+    L_node_gc = Lgc / nb_gc
+    #       Pressures (Pa).
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
             type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         Pa_ext = Pext
@@ -76,8 +71,41 @@ def calculate_velocity_evolution(sv, control_variables, i_fc, i_n, Jv_agc_agdl, 
     else:  # elif type_auxiliary == "no_auxiliary":
         Pa_ext = Pa_des
         Pc_ext = Pc_des
+    Pagc = [None] + [(sv[f'C_v_agc_{i}'] + sv[f'C_H2_agc_{i}'] + sv[f'C_N2_agc_{i}']) * R * sv[f'T_agc_{i}']
+                     for i in range(1, nb_gc + 1)]
+    Pcgc = [None] + [(sv[f'C_v_cgc_{i}'] + sv[f'C_O2_cgc_{i}'] + sv[f'C_N2_cgc_{i}']) * R * sv[f'T_cgc_{i}']
+                     for i in range(1, nb_gc + 1)]
     C_N2_a_mean = (sum(sv[f'C_N2_agc_{i}'] for i in range(1, nb_gc + 1)) / nb_gc)
     C_N2_c_mean = (sum(sv[f'C_N2_cgc_{i}'] for i in range(1, nb_gc + 1)) / nb_gc)
+    #       H2/O2 ratio in the dry anode/cathode gas mixture (H2/N2 or O2/N2) at the GC
+    y_O2 = {}
+    y_H2 = {}
+    for i in range(1, nb_gc + 1):
+        y_H2[f'agc_{i}'] = sv[f'C_H2_agc_{i}'] / (sv[f'C_H2_agc_{i}'] + sv[f'C_N2_agc_{i}'])
+        y_O2[f'cgc_{i}'] = sv[f'C_O2_cgc_{i}'] / (sv[f'C_O2_cgc_{i}'] + sv[f'C_N2_cgc_{i}'])
+    #       Vapor ratio over the gas mixture.
+    x_H2O_v = {}
+    for i in range(1, nb_gc + 1):
+        x_H2O_v[f'agc_{i}'] = sv[f'C_v_agc_{i}'] / (sv[f'C_v_agc_{i}'] + sv[f'C_H2_agc_{i}'] + sv[f'C_N2_agc_{i}'])
+    for i in range(1, nb_gc + 1):
+        x_H2O_v[f'cgc_{i}'] = sv[f'C_v_cgc_{i}'] / (sv[f'C_v_cgc_{i}'] + sv[f'C_O2_cgc_{i}'] + sv[f'C_N2_cgc_{i}'])
+    #       Dynamic viscosity of the gas mixture.
+    mu_gaz = {}
+    for i in range(1, nb_gc + 1):
+        mu_gaz[f'agc_{i}'] = mu_mixture_gases(['H2O_v', 'H2'], [x_H2O_v[f'agc_{i}'], 1 - x_H2O_v[f'agc_{i}']],
+                                              sv[f'T_agc_{i}'])
+    for i in range(1, nb_gc + 1):
+        mu_gaz[f'cgc_{i}'] = mu_mixture_gases(['H2O_v', 'O2', 'N2'],
+                                              [x_H2O_v[f'cgc_{i}'], y_O2[f'cgc_{i}'] * (1 - x_H2O_v[f'cgc_{i}']),
+                                               (1 - y_O2[f'cgc_{i}']) * (1 - x_H2O_v[f'cgc_{i}'])],
+                                              sv[f'T_cgc_{i}'])
+    #       The crossover current density i_n
+    T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
+                            weights=[Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl),
+                                     Hccl / (Hacl + Hmem + Hccl)])
+    i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
+    i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
+    i_n = i_H2 + i_O2
 
     # Calculation of the boundary conditions at the GC/GDL interface
     C_tot_agdl = sv['C_v_agdl_1'] + sv['C_H2_agdl_1'] + C_N2_a_mean
@@ -85,8 +113,14 @@ def calculate_velocity_evolution(sv, control_variables, i_fc, i_n, Jv_agc_agdl, 
     J_tot_agc_agdl = [None] + [0.0] * nb_gc
     J_tot_cgdl_cgc = [None] + [0.0] * nb_gc
     for i in range(1, nb_gc + 1):
-        J_tot_agc_agdl[i] = Jv_agc_agdl[i] + J_H2_agc_agdl[i]                                                           # Total molar flow from the AGC to the AGDL (mol.m-2.s-1).
-        J_tot_cgdl_cgc[i] = Jv_cgdl_cgc[i] + J_O2_cgdl_cgc[i]                                                           # Total molar flow from the CGDL to the CGC (mol.m-2.s-1).
+        Jv_agc_agdl = h_a(Pagc[i], T_des, Wagc, Hagc) * (sv[f'C_v_agc_{i}'] - sv['C_v_agdl_1'])                         # This equation is also calcultaed in flows.py.
+        J_H2_agc_agdl = h_a(Pagc[i], T_des, Wagc, Hagc) * (sv[f'C_H2_agc_{i}'] - sv['C_H2_agdl_1'])                     # This equation is also calcultaed in flows.py.
+        Jv_cgdl_cgc = h_c(Pcgc[i], T_des, Wcgc, Hcgc) * (sv[f'C_v_cgdl_{nb_gdl}'] - sv[f'C_v_cgc_{i}'])                 # This equation is also calcultaed in flows.py.
+        J_O2_cgdl_cgc = h_c(Pcgc[i], T_des, Wcgc, Hcgc) * (sv[f'C_O2_cgdl_{nb_gdl}'] - sv[f'C_O2_cgc_{i}'])             # This equation is also calcultaed in flows.py.
+        Jl_agc_agdl = 0.0 / M_H2O                                                                                       # Should be added later, knowing that it requires the knowledge of v_agc...
+        Jl_cgdl_cgc = 0.0 / M_H2O                                                                                       # Should be added later, knowing that it requires the knowledge of v_cgc...
+        J_tot_agc_agdl[i] = Jv_agc_agdl + J_H2_agc_agdl                                                                 # Total molar flow from the AGC to the AGDL (mol.m-2.s-1).
+        J_tot_cgdl_cgc[i] = Jv_cgdl_cgc + J_O2_cgdl_cgc                                                                 # Total molar flow from the CGDL to the CGC (mol.m-2.s-1).
 
     # Residual function for least_squares solver applied on the inlet molar flows
     def residuals(J_in_guessed):

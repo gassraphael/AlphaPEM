@@ -20,6 +20,7 @@ from scipy.integrate import solve_ivp
 
 # Importing constants' value and functions
 from model.dif_eq import dydt
+from model.velocity import calculate_velocity_evolution
 from model.flows import calculate_flows
 from model.cell_voltage import calculate_cell_voltage
 from model.control import control_operating_conditions
@@ -217,11 +218,11 @@ class AlphaPEM:
 
         # Initialize the variables' dictionary.
         self.solver_variable_names = ['C_v_agc', 'C_v_agdl', 'C_v_ampl', 'C_v_acl', 'C_v_ccl', 'C_v_cmpl', 'C_v_cgdl',
-                                      'C_v_cgc', 's_agdl', 's_ampl', 's_acl', 's_ccl', 's_cmpl', 's_cgdl', 'lambda_acl',
-                                      'lambda_mem', 'lambda_ccl', 'C_H2_agc', 'C_H2_agdl', 'C_H2_ampl', 'C_H2_acl',
-                                      'C_O2_ccl', 'C_O2_cmpl', 'C_O2_cgdl', 'C_O2_cgc', 'C_N2_agc', 'C_N2_cgc',
-                                      'T_agc', 'T_agdl', 'T_ampl', 'T_acl', 'T_mem', 'T_ccl', 'T_cmpl',
-                                      'T_cgdl', 'T_cgc', 'eta_c']
+                                      'C_v_cgc', 's_agc', 's_agdl', 's_ampl', 's_acl', 's_ccl', 's_cmpl', 's_cgdl',
+                                      's_cgc', 'lambda_acl', 'lambda_mem', 'lambda_ccl', 'C_H2_agc', 'C_H2_agdl',
+                                      'C_H2_ampl', 'C_H2_acl', 'C_O2_ccl', 'C_O2_cmpl', 'C_O2_cgdl', 'C_O2_cgc',
+                                      'C_N2_agc', 'C_N2_cgc', 'T_agc', 'T_agdl', 'T_ampl', 'T_acl', 'T_mem', 'T_ccl',
+                                      'T_cmpl', 'T_cgdl', 'T_cgc', 'eta_c']
         if self.parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
                 self.parameters['type_auxiliary'] == "forced-convective_cathode_with_anodic_recirculation":
             self.solver_variable_names.extend(['Pasm', 'Paem', 'Pcsm', 'Pcem', 'Phi_asm', 'Phi_aem', 'Phi_csm',
@@ -269,7 +270,7 @@ class AlphaPEM:
         """
 
         new_points_location = ['C_v_agc', 'C_v_agdl', 'C_v_ampl', 'C_v_cmpl', 'C_v_cgdl', 'C_v_cgc',
-                               's_agdl', 's_ampl', 's_cmpl', 's_cgdl',
+                               's_agc', 's_agdl', 's_ampl', 's_cmpl', 's_cgdl', 's_cgc',
                                'C_H2_agc', 'C_H2_agdl', 'C_H2_ampl', 'C_O2_cmpl', 'C_O2_cgdl', 'C_O2_cgc',
                                'C_N2_agc', 'C_N2_cgc',
                                'T_agc', 'T_agdl', 'T_ampl', 'T_cmpl', 'T_cgdl', 'T_cgc']
@@ -409,8 +410,7 @@ class AlphaPEM:
         # Main variable initialization
         C_v_agc, C_v_agdl, C_v_ampl, C_v_acl = [C_v_a_ini] * 4
         C_v_ccl, C_v_cmpl, C_v_cgdl, C_v_cgc = [C_v_c_ini] * 4
-        s_agdl, s_ampl, s_acl, s_ccl, s_cmpl, s_cgdl = [s_ini] * 6
-        s_boundary = 0  # Dirichlet boundary condition
+        s_agc, s_agdl, s_ampl, s_acl, s_ccl, s_cmpl, s_cgdl, s_cgc = [s_ini] * 8
         lambda_acl, lambda_mem, lambda_ccl = [lambda_mem_ini] * 3
         C_H2_agc, C_H2_agdl, C_H2_ampl, C_H2_acl = [C_H2_ini] * 4
         C_O2_ccl, C_O2_cmpl, C_O2_cgdl, C_O2_cgc = [C_O2_ini] * 4
@@ -429,8 +429,8 @@ class AlphaPEM:
         # Gathering of the variables initial value into one list
         initial_variable_values = ([C_v_agc] * nb_gc + [C_v_agdl] * nb_gdl + [C_v_ampl] * nb_mpl + [C_v_acl, C_v_ccl] +
                                    [C_v_cmpl] * nb_mpl + [C_v_cgdl] * nb_gdl + [C_v_cgc] * nb_gc +
-                                   [s_boundary] + [s_agdl] * (nb_gdl - 1) + [s_ampl] * nb_mpl + [s_acl, s_ccl] +
-                                   [s_cmpl] * nb_mpl + [s_cgdl] * (nb_gdl - 1) + [s_boundary] +
+                                   [s_agc] * nb_gc  + [s_agdl] * nb_gdl + [s_ampl] * nb_mpl + [s_acl, s_ccl] +
+                                   [s_cmpl] * nb_mpl + [s_cgdl] * nb_gdl + [s_cgc] * nb_gc  +
                                    [lambda_acl, lambda_mem, lambda_ccl] +
                                    [C_H2_agc] * nb_gc + [C_H2_agdl] * nb_gdl + [C_H2_ampl] * nb_mpl +
                                    [C_H2_acl, C_O2_ccl] + [C_O2_cmpl] * nb_mpl + [C_O2_cgdl] * nb_gdl +
@@ -474,8 +474,10 @@ class AlphaPEM:
                 i_fc = self.operating_inputs["current_density"](self.variables['t'][j], self.parameters)
                 # ... recovery of S_abs_acl, S_abs_ccl, Jmem_acl, Jmem_ccl.
                 last_solver_variables = {key: self.variables[key][j] for key in self.solver_variable_names}
+                v_a, v_c, Pa_in, Pc_in = calculate_velocity_evolution(last_solver_variables, self.control_variables,
+                                                                      i_fc, self.operating_inputs, self.parameters)
                 flows_recovery = calculate_flows(self.variables['t'][j], last_solver_variables, self.control_variables,
-                                                 i_fc, self.operating_inputs, self.parameters)
+                                                 i_fc, v_a, v_c, Pa_in, Pc_in, self.operating_inputs, self.parameters)
                 for key in ['v_a_in', 'v_c_in', 'Pa_in', 'Pc_in']:
                     self.variables[key].append(flows_recovery[key])
                 # ... recovery of Phi_a_des and Phi_c_des.

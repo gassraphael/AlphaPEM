@@ -6,16 +6,16 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import rho_mem, M_eq, F, R, ECSA_0, K_l_ads
+from configuration.settings import rho_mem, M_eq, F, R, ECSA_0, K_l_ads, theta_l_rem
 from model.auxiliaries import auxiliaries
 from modules.transitory_functions import (interpolate, d_dx, Dcap, h_a, h_c, lambda_eq, gamma_sorp, Svl, k_H2, k_O2,
-                                          epsilon_cl)
+                                          epsilon_cl, Pcap)
 from modules.flows_modules import flows_int_values
 
 
 # ________________________________________________________Flows_________________________________________________________
 
-def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters):
+def calculate_flows(t, sv, control_variables, i_fc, v_a, v_c, Pa_in, Pc_in, operating_inputs, parameters):
     """This function calculates the flows inside the fuel cell system.
 
     Parameters
@@ -29,6 +29,14 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
         Variables controlled by the user.
     i_fc : float
         Fuel cell current density at time t (A.m-2).
+    v_a : list
+        Anode gas velocity at time t (m.s-1).
+    v_c : list
+        Cathode gas velocity at time t (m.s-1).
+    Pa_in : float
+        Anode inlet pressure at time t (Pa).
+    Pc_in : float
+        Cathode inlet pressure at time t (Pa).
     operating_inputs : dict
         Operating inputs of the fuel cell.
     parameters : dict
@@ -58,11 +66,11 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     nb_gc, nb_gdl, nb_mpl = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl']
 
     # Intermediate values
-    (H_gdl_node, H_mpl_node, Pagc, Pcgc, D_eff_EOD_acl_mem, D_eff_EOD_mem_ccl, D_lambda_eff_acl_mem,
-     D_lambda_eff_mem_ccl, D_cap_agdl_agdl, D_cap_agdl_ampl, D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_ccl_cmpl,
-     D_cap_cmpl_cmpl, D_cap_cmpl_cgdl, D_cap_cgdl_cgdl, Da_eff_agdl_agdl, Da_eff_agdl_ampl, Da_eff_ampl_ampl,
-     Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl, Dc_eff_cmpl_cgdl, Dc_eff_cgdl_cgdl, T_acl_mem_ccl) = \
-        flows_int_values(sv, i_fc, operating_inputs, parameters)
+    (H_gdl_node, H_mpl_node, Pagc, Pcgc, Pcap_agdl, Pcap_cgdl, rho_agc, rho_cgc, D_eff_EOD_acl_mem, D_eff_EOD_mem_ccl,
+     D_lambda_eff_acl_mem, D_lambda_eff_mem_ccl, D_cap_agdl_agdl, D_cap_agdl_ampl, D_cap_ampl_ampl, D_cap_ampl_acl,
+     D_cap_ccl_cmpl, D_cap_cmpl_cmpl, D_cap_cmpl_cgdl, D_cap_cgdl_cgdl, Da_eff_agdl_agdl, Da_eff_agdl_ampl,
+     Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl, Dc_eff_cmpl_cgdl, Dc_eff_cgdl_cgdl,
+     T_acl_mem_ccl) = flows_int_values(sv, i_fc, operating_inputs, parameters)
     C_N2_a_mean = (sum(sv[f'C_N2_agc_{i}'] for i in range(1, nb_gc + 1)) / nb_gc)
     C_N2_c_mean = (sum(sv[f'C_N2_cgc_{i}'] for i in range(1, nb_gc + 1)) / nb_gc)
 
@@ -80,9 +88,8 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     # _________________________________________Liquid water flows (kg.m-2.s-1)__________________________________________
 
     # Anode side
-    s_agc = 0  # Dirichlet boundary condition (taken at the agc/agdl border).
-    Jl_agc_agdl = - Dcap('gdl', sv['s_agdl_1'], sv['T_agdl_1'], epsilon_gdl, e, epsilon_c=epsilon_c) * \
-                    d_dx(y_minus = s_agc, y_plus = sv['s_agdl_1'], dx = H_gdl_node / 2)
+    Jl_agc_agdl = [None] + [- theta_l_rem * epsilon_gdl * sv['s_agdl_1'] * max((Pcap_agdl + rho_agc[i] * v_a[i]**2 / 2), 0)
+                            for i in range(1, nb_gc + 1)]
     Jl_agdl_agdl = [None] + [- D_cap_agdl_agdl[i] * d_dx(y_minus = sv[f's_agdl_{i}'], y_plus = sv[f's_agdl_{i + 1}'],
                                                          dx = H_gdl_node / 2)
                              for i in range(1, nb_gdl)]
@@ -95,7 +102,6 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
                                           dx_minus = H_mpl_node / 2, dx_plus = Hacl / 2)
 
     # Cathode side
-    s_cgc = 0  # Dirichlet boundary condition (taken at the cgc/cgdl border).
     Jl_ccl_cmpl = - D_cap_ccl_cmpl * d_dx(y_minus = s_ccl, y_plus = sv['s_cmpl_1'],
                                           dx_minus = Hccl / 2, dx_plus = H_mpl_node / 2)
     Jl_cmpl_cmpl = [None] + [- D_cap_cmpl_cmpl[i] * d_dx(y_minus = sv[f's_cmpl_{i}'], y_plus = sv[f's_cmpl_{i + 1}'],
@@ -106,18 +112,18 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     Jl_cgdl_cgdl = [None] + [- D_cap_cgdl_cgdl[i] * d_dx(y_minus = sv[f's_cgdl_{i}'], y_plus = sv[f's_cgdl_{i + 1}'],
                                                          dx = H_gdl_node / 2)
                              for i in range(1, nb_gdl)]
-    Jl_cgdl_cgc = - Dcap('gdl', sv[f's_cgdl_{nb_gdl}'], sv[f'T_cgdl_{nb_gdl}'], epsilon_gdl, e, epsilon_c=epsilon_c) * \
-                  d_dx(y_minus = sv[f's_cgdl_{nb_gdl}'], y_plus = s_cgc, dx = H_gdl_node / 2)
+    Jl_cgdl_cgc = [None] + [theta_l_rem * epsilon_gdl * sv[f's_cgdl_{nb_gdl}'] * max((Pcap_cgdl + rho_cgc[i] * v_c[i]**2 / 2), 0)
+                            for i in range(1, nb_gc + 1)]
 
     # _____________________________________________Vapor flows (mol.m-2.s-1)____________________________________________
 
     # Convective vapor flows
     #   Anode side
     Jv_agc_agdl = [None] + [h_a(Pagc[i], T_des, Wagc, Hagc) * (sv[f'C_v_agc_{i}'] - sv['C_v_agdl_1'])
-                            for i in range(1, nb_gc + 1)]
+                            for i in range(1, nb_gc + 1)]                                                               # This equation is also calcultaed in velocity.py.
     #   Cathode side
     Jv_cgdl_cgc = [None] + [h_c(Pcgc[i], T_des, Wcgc, Hcgc) * (sv[f'C_v_cgdl_{nb_gdl}'] - sv[f'C_v_cgc_{i}'])
-                            for i in range(1, nb_gc + 1)]
+                            for i in range(1, nb_gc + 1)]                                                               # This equation is also calcultaed in velocity.py.
 
     # Conductive vapor flows
     #   Anode side
@@ -159,10 +165,10 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
     # Conductive-convective H2 and O2 flows
     #   Anode side
     J_H2_agc_agdl = [None] + [h_a(Pagc[i], T_des, Wagc, Hagc) * (sv[f'C_H2_agc_{i}'] - sv['C_H2_agdl_1'])
-                              for i in range(1, nb_gc + 1)]
+                              for i in range(1, nb_gc + 1)]                                                             # This equation is also calcultaed in velocity.py.
     #   Cathode side
     J_O2_cgdl_cgc = [None] + [h_c(Pcgc[i], T_des, Wcgc, Hcgc) * (sv[f'C_O2_cgdl_{nb_gdl}'] - sv[f'C_O2_cgc_{i}'])
-                              for i in range(1, nb_gc + 1)]
+                              for i in range(1, nb_gc + 1)]                                                             # This equation is also calcultaed in velocity.py.
 
     # Conductive H2 and O2 flows
     #   Anode side
@@ -247,8 +253,7 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
 
     # ____________________________________________Auxiliary flows (mol.s-1)_____________________________________________
 
-    auxiliary_flows_dico = auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_agc_agdl,
-                                       J_O2_cgdl_cgc, operating_inputs, parameters)
+    auxiliary_flows_dico = auxiliaries(t, sv, control_variables, i_fc, v_a, v_c, Pa_in, Pc_in, operating_inputs, parameters)
 
     # _____________________________________Assemble and return the flow dictionary______________________________________
 
@@ -258,7 +263,8 @@ def calculate_flows(t, sv, control_variables, i_fc, operating_inputs, parameters
                    'ampl_ampl': Jv_ampl_ampl, 'ampl_acl': Jv_ampl_acl,
                    'ccl_cmpl': Jv_ccl_cmpl, 'cmpl_cmpl': Jv_cmpl_cmpl, 'cmpl_cgdl': Jv_cmpl_cgdl,
                    'cgdl_cgdl': Jv_cgdl_cgdl, 'cgdl_cgc': Jv_cgdl_cgc},
-            'Jl': {'agc_agdl': Jl_agc_agdl, 'agdl_agdl': Jl_agdl_agdl, 'agdl_ampl': Jl_agdl_ampl,
+            'Jl': {**auxiliary_flows_dico.get('Jl', {}),
+                   'agc_agdl': Jl_agc_agdl, 'agdl_agdl': Jl_agdl_agdl, 'agdl_ampl': Jl_agdl_ampl,
                    'ampl_ampl': Jl_ampl_ampl, 'ampl_acl': Jl_ampl_acl,
                    'ccl_cmpl': Jl_ccl_cmpl, 'cmpl_cmpl': Jl_cmpl_cmpl, 'cmpl_cgdl': Jl_cmpl_cgdl,
                    'cgdl_cgdl': Jl_cgdl_cgdl, 'cgdl_cgc': Jl_cgdl_cgc},

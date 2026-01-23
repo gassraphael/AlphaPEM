@@ -49,8 +49,9 @@ def calculate_dyn_dissoved_water_evolution_inside_MEA(dif_eq, sv, Hmem, Hacl, Hc
                                  (J_lambda['mem_ccl'] / Hccl + S_abs['v_ccl'] + S_abs['l_ccl'] + Sp['ccl'])
 
 
-def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl, Hccl, epsilon_gdl, epsilon_mpl,
-                                                    nb_gdl, nb_mpl, Jl, S_abs, Sl, **kwargs):
+def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, nb_channel_in_gc, Hgdl, Hmpl, Hacl,
+                                                    Hccl, epsilon_gdl, epsilon_mpl, nb_gc, nb_gdl, nb_mpl, Jl, S_abs,
+                                                    Sl, **kwargs):
     """
     This function calculates the dynamic evolution of the liquid water in the gas diffusion and catalyst layers.
 
@@ -61,6 +62,16 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl
     sv : dict
         Variables calculated by the solver. They correspond to the fuel cell internal states.
         sv is a contraction of solver_variables for enhanced readability.
+    Aact : float
+        Active area of one cell (m²).
+    Wagc : float
+        Width of the anode gas channel (m).
+    Wcgc : float
+        Width of the cathode gas channel (m).
+    Lgc : float
+        Length of one channel of the gas channel (m).
+    nb_channel_in_gc : int
+        Number of channels in the gas channel.
     Hgdl : float
         Thickness of the gas diffusion layer (m).
     Hmpl : float
@@ -73,6 +84,8 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl
         Anode/cathode GDL porosity.
     epsilon_mpl : float
         Anode/cathode MPL porosity.
+    nb_gc : int
+        Number of model nodes placed inside each GC.
     nb_gdl : int
         Number of model nodes placed inside each GDL.
     nb_mpl : int
@@ -87,17 +100,18 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl
 
     # At the anode side
     #       Inside the AGDL
+    Jl_agc_agdl_avg = (sum(Jl['agc_agdl'][1:nb_gc + 1]) / nb_gc) * (Wagc * Lgc) / (Aact / nb_channel_in_gc)             # Average liquid water flow from the gas channel to the GDL. There is a surface reduction due to the presence of the ribs, which is taken into account here.
     if nb_gdl == 1:
         dif_eq['ds_agdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_agdl_1']) * epsilon_gdl) * \
-                                   ((Jl['agc_agdl'] - Jl['agdl_ampl']) / Hgdl + M_H2O * Sl['agdl'][1])
+                                   ((Jl_agc_agdl_avg - Jl['agdl_ampl']) / Hgdl + M_H2O * Sl['agdl'][1])
     elif nb_gdl == 2:
         dif_eq['ds_agdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_agdl_1']) * epsilon_gdl) * \
-                                   ((Jl['agc_agdl'] - Jl['agdl_agdl'][1]) / (Hgdl / nb_gdl) + M_H2O * Sl['agdl'][1])
+                                   ((Jl_agc_agdl_avg - Jl['agdl_agdl'][1]) / (Hgdl / nb_gdl) + M_H2O * Sl['agdl'][1])
         dif_eq['ds_agdl_2 / dt'] = 1 / (rho_H2O_l(sv['T_agdl_2']) * epsilon_gdl) * \
                                    ((Jl['agdl_agdl'][1] - Jl['agdl_ampl']) / (Hgdl / nb_gdl) + M_H2O * Sl['agdl'][2])
     else: # n_gdl > 2
         dif_eq['ds_agdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_agdl_1']) * epsilon_gdl) * \
-                                     ((Jl['agc_agdl'] - Jl['agdl_agdl'][1]) / (Hgdl / nb_gdl) + M_H2O * Sl['agdl'][1])
+                                     ((Jl_agc_agdl_avg - Jl['agdl_agdl'][1]) / (Hgdl / nb_gdl) + M_H2O * Sl['agdl'][1])
         for i in range(2, nb_gdl):
             dif_eq[f'ds_agdl_{i} / dt'] = 1 / (rho_H2O_l(sv[f'T_agdl_{i}']) * epsilon_gdl) * \
                                           ((Jl['agdl_agdl'][i - 1] - Jl['agdl_agdl'][i]) / (Hgdl / nb_gdl) +
@@ -152,14 +166,15 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl
                                            ((Jl['cmpl_cmpl'][nb_mpl - 1] - Jl['cmpl_cgdl']) / (Hmpl / nb_mpl) +
                                             M_H2O * Sl['cmpl'][nb_mpl])
     #       Inside the CGDL
+    Jl_cgdl_cgc_avg = (sum(Jl['cgdl_cgc'][1:nb_gc + 1]) / nb_gc) * (Wcgc * Lgc) / (Aact / nb_channel_in_gc)             # Average liquid water flow from the gas channel to the GDL. There is a surface reduction due to the presence of the ribs, which is taken into account here.
     if nb_gdl == 1:
         dif_eq['ds_cgdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_cgdl_1']) * epsilon_gdl) * \
-                                 ((Jl['cmpl_cgdl'] - Jl['cgdl_cgc']) / Hgdl + M_H2O * Sl['cgdl'][1])
+                                 ((Jl['cmpl_cgdl'] - Jl_cgdl_cgc_avg) / Hgdl + M_H2O * Sl['cgdl'][1])
     elif nb_gdl == 2:
         dif_eq['ds_cgdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_cgdl_1']) * epsilon_gdl) * \
                                    ((Jl['cmpl_cgdl'] - Jl['cgdl_cgdl'][1]) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][1])
         dif_eq['ds_cgdl_2 / dt'] = 1 / (rho_H2O_l(sv['T_cgdl_2']) * epsilon_gdl) * \
-                                   ((Jl['cgdl_cgdl'][1] - Jl['cgdl_cgc']) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][2])
+                                   ((Jl['cgdl_cgdl'][1] - Jl_cgdl_cgc_avg) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][2])
     else:
         dif_eq['ds_cgdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_cgdl_1']) * epsilon_gdl) * \
                                    ((Jl['cmpl_cgdl'] - Jl['cgdl_cgdl'][1]) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][1])
@@ -167,7 +182,7 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Hgdl, Hmpl, Hacl
             dif_eq[f'ds_cgdl_{i} / dt'] = 1 / (rho_H2O_l(sv[f'T_cgdl_{i}']) * epsilon_gdl) * \
                                           ((Jl['cgdl_cgdl'][i - 1] - Jl['cgdl_cgdl'][i]) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][i])
         dif_eq[f'ds_cgdl_{nb_gdl} / dt'] = 1 / (rho_H2O_l(sv[f'T_cgdl_{nb_gdl}']) * epsilon_gdl) * \
-                                           ((Jl['cgdl_cgdl'][nb_gdl - 1] - Jl['cgdl_cgc']) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][nb_gdl])
+                                           ((Jl['cgdl_cgdl'][nb_gdl - 1] - Jl_cgdl_cgc_avg) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][nb_gdl])
 
 
 def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, nb_channel_in_gc, Hgdl, Hmpl, Hacl,
@@ -205,6 +220,8 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, 
         Anode/cathode GDL porosity.
     epsilon_mpl : float
         Anode/cathode MPL porosity.
+    nb_gc : int
+        Number of model nodes placed inside each GC.
     nb_gdl : int
         Number of model nodes placed inside each GDL.
     nb_mpl : int

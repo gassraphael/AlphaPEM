@@ -6,16 +6,15 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import F, R, Text, Pext, Phi_ext, y_O2_ext, M_H2O
-from modules.transitory_functions import Psat
+from configuration.settings import F, R, Text, Pext, Phi_ext, y_O2_ext, M_H2O, K_v_liq_gas, D_liq_dif
+from modules.transitory_functions import Psat, rho_H2O_l, d_dx
 from modules.auxiliaries_modules import auxiliaries_int_values_which_are_commun_with_dif_eq
 from model.velocity import calculate_velocity_evolution, desired_flows
 
 
 # ______________________________________________________Auxiliaries_____________________________________________________
 
-def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_agc_agdl, J_O2_cgdl_cgc,
-                operating_inputs, parameters):
+def auxiliaries(t, sv, control_variables, i_fc, v_a, v_c, Pa_in, Pc_in, operating_inputs, parameters):
     """This function calculates the flows passing through the auxiliaries.
 
     Parameters
@@ -28,14 +27,14 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
         Variables controlled by the user.
     i_fc : float
         Fuel cell current density at time t (A.m-2).
-    Jv_agc_agdl : list
-        Vapor flow between the AGC and the AGDL at each GC node (mol.m-2.s-1).
-    Jv_cgdl_cgc : list
-        Vapor flow between the CGDL and the CGC at each GC node (mol.m-2.s-1).
-    J_H2_agc_agdl : list
-        H2 flow between the AGC and the AGDL at each GC node (mol.m-2.s-1).
-    J_O2_cgdl_cgc : list
-        O2 flow between the CGDL and the CGC at each GC node (mol.m-2.s-1).
+    v_a : list
+        Velocity evolution at the anode side (m.s-1).
+    v_c : list
+        Velocity evolution at the cathode side (m.s-1).
+    Pa_in : float
+        Inlet pressure at the anode side (Pa).
+    Pc_in : float
+        Inlet pressure at the cathode side (Pa).
     operating_inputs : dict
         Operating inputs of the fuel cell.
     parameters : dict
@@ -77,7 +76,7 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
     T_des, Phi_a_des, Phi_c_des = operating_inputs['T_des'], operating_inputs['Phi_a_des'], operating_inputs['Phi_c_des']
     Sa, Sc, y_H2_in = operating_inputs['Sa'], operating_inputs['Sc'], operating_inputs['y_H2_in']
     Aact, nb_cell, Hagc, Hcgc = parameters['Aact'], parameters['nb_cell'], parameters['Hagc'], parameters['Hcgc']
-    Wagc, Wcgc, nb_channel_in_gc = parameters['Wagc'], parameters['Wcgc'], parameters['nb_channel_in_gc']
+    Wagc, Wcgc, Lgc, nb_channel_in_gc = parameters['Wagc'], parameters['Wcgc'], parameters['Lgc'], parameters['nb_channel_in_gc']
     A_T_a, A_T_c = parameters['A_T_a'], parameters['A_T_c']
     nb_gc, type_auxiliary = parameters['nb_gc'], parameters['type_auxiliary']
 
@@ -85,8 +84,6 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
         # Commun intermediate values with dif_eq_modules.py which allows to avoid redundant calculations
     P, Phi, y_H2, y_O2, M, rho, k_purge, Abp_a, Abp_c, mu_gaz, i_n = \
         auxiliaries_int_values_which_are_commun_with_dif_eq(t, sv, operating_inputs, parameters)
-    v_a, v_c, Pa_in, Pc_in = calculate_velocity_evolution(sv, control_variables, i_fc, i_n, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_agc_agdl,
-                                            J_O2_cgdl_cgc, operating_inputs, parameters, mu_gaz)
     W_des = desired_flows(sv, control_variables, i_fc, i_n, Pa_in, Pc_in, operating_inputs, parameters)
 
     # _________________________________________Inlet and outlet global flows____________________________________________
@@ -173,6 +170,22 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
     Jv_cgc_cgc = [None] + [sv[f'C_v_cgc_{i}'] * v_c[i] for i in range(1, nb_gc)]
     Jv_cgc_out = sv[f'C_v_cgc_{nb_gc}'] * R * T_des / P[f'cgc_{nb_gc}'] * Jc_out
 
+    # Liquid water flows at the GC (kg.m-2.s-1)
+    #   At the anode side
+    sv[f's_agc_{nb_gc + 1}'] = 0 # Boundary condition at the outlet of the anode GC: no liquid water at the outlet.
+    Jl_agc_agc_conv = [None] + [rho_H2O_l(T_des) * K_v_liq_gas * v_a[i] * sv[f's_agc_{i}'] for i in range(1, nb_gc + 1)]
+    Jl_agc_agc_dif = [None] + [- D_liq_dif * d_dx(y_minus=sv[f's_agc_{i}'], y_plus=sv[f's_agc_{i + 1}'], dx=(Lgc / nb_gc) / 2)
+                               for i in range(1, nb_gc + 1)]
+    Jl_agc_agc = [Jl_agc_agc_conv[i] + Jl_agc_agc_dif[i] for i in range(1, nb_gc + 1)]
+    Jl_agc_out = Jl_agc_agc_conv[-1] + Jl_agc_agc_dif[-1]
+    #   At the cathode side
+    sv[f's_cgc_{nb_gc + 1}'] = 0 # Boundary condition at the outlet of the cathode GC: no liquid water at the outlet.
+    Jl_cgc_cgc_conv = [None] + [rho_H2O_l(T_des) * K_v_liq_gas * v_c[i] * sv[f's_cgc_{i}'] for i in range(1, nb_gc + 1)]
+    Jl_cgc_cgc_dif = [None] + [- D_liq_dif * d_dx(y_minus=sv[f's_cgc_{i}'], y_plus=sv[f's_cgc_{i + 1}'], dx=(Lgc / nb_gc) / 2)
+                               for i in range(1, nb_gc + 1)]
+    Jl_cgc_cgc = [Jl_cgc_cgc_conv[i] + Jl_cgc_cgc_dif[i] for i in range(1, nb_gc + 1)]
+    Jl_cgc_out = Jl_cgc_cgc_conv[-1] + Jl_cgc_cgc_dif[-1]
+
     # H2 flows at the GC (mol.m-2.s-1)
     if type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         pass
@@ -248,6 +261,7 @@ def auxiliaries(t, sv, control_variables, i_fc, Jv_agc_agdl, Jv_cgdl_cgc, J_H2_a
 
     return {'Jv': {'agc_in': Jv_agc_in, 'agc_agc': Jv_agc_agc, 'agc_out': Jv_agc_out,
                    'cgc_in': Jv_cgc_in, 'cgc_cgc': Jv_cgc_cgc, 'cgc_out': Jv_cgc_out},
+            'Jl': {'agc_agc': Jl_agc_agc, 'agc_out': Jl_agc_out, 'cgc_cgc': Jl_cgc_cgc, 'cgc_out': Jl_cgc_out},
             'J_H2': {'agc_in': J_H2_agc_in, 'agc_agc': J_H2_agc_agc, 'agc_out': J_H2_agc_out},
             'J_O2': {'cgc_in': J_O2_cgc_in, 'cgc_cgc': J_O2_cgc_cgc, 'cgc_out': J_O2_cgc_out},
             'J_N2': {'agc_in': J_N2_agc_in, 'agc_agc': J_N2_agc_agc, 'agc_out': J_N2_agc_out,

@@ -691,7 +691,8 @@ def plot_s(variables, operating_inputs, parameters, ax):
 
     # Extraction of the operating inputs and the parameters
     current_density = operating_inputs['current_density']
-    nb_gdl, nb_mpl, pola_current_parameters = parameters['nb_gdl'], parameters['nb_mpl'], parameters['pola_current_parameters']
+    nb_gc, nb_gdl, nb_mpl = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl']
+    pola_current_parameters = parameters['pola_current_parameters']
     type_current, type_plot = parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
         delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
@@ -707,12 +708,14 @@ def plot_s(variables, operating_inputs, parameters, ax):
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
     t = np.array(variables['t'])[mask]
+    s_agc_t = np.array(variables[f's_agc_{int(np.ceil(nb_gc / 2))}'])[mask]
     s_agdl_t = np.array(variables[f's_agdl_{int(np.ceil(nb_gdl / 2))}'])[mask]
     s_ampl_t = np.array(variables[f's_ampl_{int(np.ceil(nb_mpl / 2))}'])[mask]
     s_acl_t = np.array(variables['s_acl'])[mask]
     s_ccl_t = np.array(variables['s_ccl'])[mask]
     s_cmpl_t = np.array(variables[f's_cmpl_{int(np.ceil(nb_mpl / 2))}'])[mask]
     s_cgdl_t = np.array(variables[f's_cgdl_{int(np.ceil(nb_gdl / 2))}'])[mask]
+    s_cgc_t = np.array(variables[f's_cgc_{int(np.ceil(nb_gc / 2))}'])[mask]
 
     # Plot the liquid water saturation at different spatial localisations: s
     if type_current == "polarization":
@@ -726,37 +729,44 @@ def plot_s(variables, operating_inputs, parameters, ax):
         delta_t_break_pola = pola_current_parameters['delta_t_break_pola']
         nb_loads = int(pola_current_parameters['i_max_pola'] / pola_current_parameters['delta_i_pola']) # Number of loads
         ifc_discretized_t = np.zeros(nb_loads)
-        s_agdl_discretized_t, s_ampl_discretized_t, s_acl_discretized_t = [np.zeros(nb_loads)] * 3
-        s_ccl_discretized_t, s_cmpl_discretized_t, s_cgdl_discretized_t = [np.zeros(nb_loads)] * 3
+        s_agc_discretized_t, s_agdl_discretized_t, s_ampl_discretized_t, s_acl_discretized_t = [np.zeros(nb_loads)] * 4
+        s_ccl_discretized_t, s_cmpl_discretized_t, s_cgdl_discretized_t, s_cgc_discretized_t = [np.zeros(nb_loads)] * 4
         for i in range(nb_loads):
             t_load = delta_t_ini_pola + (i + 1) * (delta_t_load_pola + delta_t_break_pola)  # time for measurement
             idx = (np.abs(t - t_load)).argmin()  # the corresponding index
             ifc_discretized_t[i] = ifc_t[idx]  # the last value at the end of each load
+            s_agc_discretized_t[i] = s_agc_t[idx]  # the last value at the end of each load
             s_agdl_discretized_t[i] = s_agdl_t[idx]  # the last value at the end of each load
             s_ampl_discretized_t[i] = s_ampl_t[idx]  # the last value at the end of each load
             s_acl_discretized_t[i] = s_acl_t[idx]  # the last value at the end of each load
             s_ccl_discretized_t[i] = s_ccl_t[idx]  # the last value at the end of each load
             s_cmpl_discretized_t[i] = s_cmpl_t[idx]  # the last value at the end of each load
             s_cgdl_discretized_t[i] = s_cgdl_t[idx]  # the last value at the end of each load
+            s_cgc_discretized_t[i] = s_cgc_t[idx]  # the last value at the end of each load
+        ax.scatter(ifc_discretized_t, s_agc_discretized_t, marker='o', color=colors(0))
         ax.scatter(ifc_discretized_t, s_agdl_discretized_t, marker='o', color=colors(1))
         ax.scatter(ifc_discretized_t, s_ampl_discretized_t, marker='o', color=colors(2))
         ax.scatter(ifc_discretized_t, s_acl_discretized_t, marker='o', color=colors(3))
         ax.scatter(ifc_discretized_t, s_ccl_discretized_t, marker='o', color=colors(5))
         ax.scatter(ifc_discretized_t, s_cmpl_discretized_t, marker='o', color=colors(6))
         ax.scatter(ifc_discretized_t, s_cgdl_discretized_t, marker='o', color=colors(7))
+        ax.scatter(ifc_discretized_t, s_cgc_discretized_t, marker='o', color=colors(8))
         ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
                       labelpad=3)
     else:
+        ax.plot(t, s_agc_t, color=colors(0))
         ax.plot(t, s_agdl_t, color=colors(1))
         ax.plot(t, s_ampl_t, color=colors(2))
         ax.plot(t, s_acl_t, color=colors(3))
         ax.plot(t, s_ccl_t, color=colors(5))
         ax.plot(t, s_cmpl_t, color=colors(6))
         ax.plot(t, s_cgdl_t, color=colors(7))
+        ax.plot(t, s_cgc_t, color=colors(8))
         ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r'$\mathbf{Liquid}$ $\mathbf{water}$ $\mathbf{saturation}$ $\mathbf{s}$', labelpad=3)
-    ax.legend([r'$\mathregular{s_{agdl}}$', r'$\mathregular{s_{ampl}}$', r'$\mathregular{s_{acl}}$',
-               r'$\mathregular{s_{ccl}}$', r'$\mathregular{s_{cmpl}}$', r'$\mathregular{s_{cgdl}}$'], loc='best')
+    ax.legend([r'$\mathregular{s_{agc}}$', r'$\mathregular{s_{agdl}}$', r'$\mathregular{s_{ampl}}$',
+               r'$\mathregular{s_{acl}}$', r'$\mathregular{s_{ccl}}$', r'$\mathregular{s_{cmpl}}$',
+               r'$\mathregular{s_{cgdl}}$', r'$\mathregular{s_{cgc}}$'], loc='best')
 
     # Plot instructions
     plot_general_instructions(ax)

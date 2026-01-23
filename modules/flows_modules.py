@@ -6,9 +6,9 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import R
+from configuration.settings import R, M_H2, M_O2, M_N2, M_H2O
 from modules.transitory_functions import (hmean, average, Dcap, Da_eff, Dc_eff, D_lambda, D_lambda_eff, D_EOD,
-                                          D_EOD_eff, epsilon_cl)
+                                          D_EOD_eff, epsilon_cl, Pcap)
 
 
 # _____________________________________________________Flow modules_____________________________________________________
@@ -63,6 +63,16 @@ def flows_int_values(sv, i_fc, operating_inputs, parameters):
     Pcmpl = [None] + [(sv[f'C_v_cmpl_{i}'] + sv[f'C_O2_cmpl_{i}'] + C_N2_c_mean) * R * sv[f'T_cmpl_{i}'] for i in range(1, nb_mpl + 1)]
     Pcgdl = [None] + [(sv[f'C_v_cgdl_{i}'] + sv[f'C_O2_cgdl_{i}'] + C_N2_c_mean) * R * sv[f'T_cgdl_{i}'] for i in range(1, nb_gdl + 1)]
     Pcgc = [None] + [(sv[f'C_v_cgc_{i}'] + sv[f'C_O2_cgc_{i}'] + sv[f'C_N2_cgc_{i}']) * R * sv[f'T_cgc_{i}'] for i in range(1, nb_gc + 1)]
+
+    # Capillary pressures in the stack
+    Pcap_agdl = Pcap('gdl', sv['s_agdl_1'], sv['T_agdl_1'], epsilon_gdl, epsilon_c=epsilon_c)
+    Pcap_cgdl = Pcap('gdl', sv[f's_cgdl_{nb_gdl}'], sv[f'T_cgdl_{nb_gdl}'], epsilon_gdl, epsilon_c=epsilon_c)
+
+    # Densities in the GC
+    rho_agc = [None] + [sv[f'C_H2_agc_{i}'] * M_H2 + sv[f'C_v_agc_{i}'] * M_H2O + \
+                        sv[f'C_N2_agc_{i}'] * M_N2 for i in range(1, nb_gc + 1)]
+    rho_cgc = [None] + [sv[f'C_O2_cgc_{i}'] * M_O2 + sv[f'C_v_cgc_{i}'] * M_H2O + \
+                        sv[f'C_N2_cgc_{i}'] * M_N2 for i in range(1, nb_gc + 1)]
 
     # Weighted mean values ...
     #       ... of the EOD flow of water in the membrane
@@ -141,7 +151,8 @@ def flows_int_values(sv, i_fc, operating_inputs, parameters):
     T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
                         weights=[Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl), Hccl / (Hacl + Hmem + Hccl)])
 
-    return (H_gdl_node, H_mpl_node, Pagc, Pcgc, D_eff_EOD_acl_mem, D_eff_EOD_mem_ccl, D_lambda_eff_acl_mem, D_lambda_eff_mem_ccl,
-            D_cap_agdl_agdl, D_cap_agdl_ampl, D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_ccl_cmpl, D_cap_cmpl_cmpl,
-            D_cap_cmpl_cgdl, D_cap_cgdl_cgdl, Da_eff_agdl_agdl, Da_eff_agdl_ampl, Da_eff_ampl_ampl, Da_eff_ampl_acl,
-            Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl, Dc_eff_cmpl_cgdl, Dc_eff_cgdl_cgdl, T_acl_mem_ccl)
+    return (H_gdl_node, H_mpl_node, Pagc, Pcgc, Pcap_agdl, Pcap_cgdl, rho_agc, rho_cgc, D_eff_EOD_acl_mem,
+            D_eff_EOD_mem_ccl, D_lambda_eff_acl_mem, D_lambda_eff_mem_ccl, D_cap_agdl_agdl, D_cap_agdl_ampl,
+            D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_ccl_cmpl, D_cap_cmpl_cmpl, D_cap_cmpl_cgdl, D_cap_cgdl_cgdl,
+            Da_eff_agdl_agdl, Da_eff_agdl_ampl, Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl,
+            Dc_eff_cmpl_cgdl, Dc_eff_cgdl_cgdl, T_acl_mem_ccl)
