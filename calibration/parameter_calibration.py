@@ -59,7 +59,7 @@ varbound, gene_space = parameter_bounds_for_calibration(type_fuel_cell_1, voltag
 
 # PyGAD parameters for the genetic algorithm:
     # Number of generations:
-num_generations = 800 # 1000 generations are good, 2000 generations are better.
+num_generations = 700 # 1000 generations are good, 2000 generations are better.
     #                   10 generation of 128 elements takes approximatively ??min on my computer (16 CPU cores).
     #                   100 generations of 128 elements take approximatively 10h on UR cluster (1 node of 32 CPU cores).
     # Initial population (one solution means a member of the population):
@@ -162,7 +162,7 @@ if __name__ == '__main__':
     start_time = time.time()
 
     # pYGAD execution
-    ga_instance = pygad.GA( # 1 iteration takes 720s = 12min = 0.2h inside LIS cluster with 80 nodes.
+    ga_instance = pygad.GA( # 1 iteration takes 720s = 12min = 0.2h inside UR cluster with 32 nodes.
     #                         800 iterations takes 160h = 6.67j.
         num_generations=num_generations, # Number of generations.
         num_parents_mating=num_parents_mating, # Number of solutions to be selected as parents in the mating pool.
