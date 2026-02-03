@@ -179,8 +179,6 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         Length of the gas channel in m.
     type_auxiliary : str
         Type of auxiliary system.
-    type_control : str
-        Type of control system.
     type_purge : str
         Type of purge system.
     type_display : str
@@ -246,7 +244,6 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
 
     # Algorithm parameters for polarization curve generation
     type_auxiliary = "no_auxiliary"                                                                                     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! This should be changed in the future to "forced-convective_cathode_with_flow-through_anode".
-    type_control = "no_control"
     type_purge = "no_purge"
     type_display = "no_display"
     type_plot = "fixed"
@@ -440,9 +437,8 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
                                         'i0_c_ref': i0_c_ref, 'kappa_co': kappa_co, 'kappa_c': kappa_c, 'C_scl': C_scl}
     computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
                             'rtol': rtol, 'atol': atol,'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
-                            'voltage_zone': voltage_zone, 'type_auxiliary': type_auxiliary,
-                            'type_control': type_control, 'type_purge': type_purge, 'type_display': type_display,
-                            'type_plot': type_plot}
+                            'voltage_zone': voltage_zone, 'type_auxiliary': type_auxiliary, 'type_purge': type_purge,
+                            'type_display': type_display, 'type_plot': type_plot}
 
     # Characteristic points of the experimental polarization curve
     i_exp, U_exp = pola_exp_values_calibration(type_fuel_cell, voltage_zone)

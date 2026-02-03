@@ -447,6 +447,7 @@ delta_s_HOR = 0.104  # J.mol-1.K-1. It is the HOR molar reaction entropy [vetter
 delta_s_ORR = -163.3  # J.mol-1.K-1. It is the ORR molar reaction entropy [vetterFreeOpenReference2019].
 
 # Model parameters for the balance of plant
+i_min_inlet_flows = 0.3e4  # A.m-2. Minimum current density at which inlet mass flows are regulated to supply reactant flow.
 tau_cp = 1  # s. It is the air compressor time constant.
 tau_hum = 5  # s. It is the humidifier time constant.
 Kp_T = 5e-8  # m².s-1.Pa-1. It is the proportional constant of the PD controller at the back pressure valve.

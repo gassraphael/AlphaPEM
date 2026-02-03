@@ -6,25 +6,21 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import F, R, Text, Pext, Phi_ext, y_O2_ext, M_H2O, K_v_liq_gas, D_liq_dif
+from configuration.settings import R, y_O2_ext, K_v_liq_gas, D_liq_dif
 from modules.transitory_functions import Psat, rho_H2O_l, d_dx
-from modules.auxiliaries_modules import auxiliaries_int_values_which_are_commun_with_dif_eq
-from model.velocity import calculate_velocity_evolution, desired_flows
+from modules.flow_1D_GC_manifold_modules import flow_1D_GC_manifold_int_values
+from model.velocity import desired_flows
 
 
 # ______________________________________________________Auxiliaries_____________________________________________________
 
-def auxiliaries(t, sv, control_variables, i_fc, v_a, v_c, Pa_in, Pc_in, operating_inputs, parameters):
+def calculate_flows_1D_GC_manifold(sv, i_fc, v_a, v_c, Pa_in, Pc_in, operating_inputs, parameters):
     """This function calculates the flows passing through the auxiliaries.
 
     Parameters
     ----------
-    t : float
-        Time (s).
     sv : dict
         Variables calculated by the solver. They correspond to the fuel cell internal states.
-    control_variables : dict
-        Variables controlled by the user.
     i_fc : float
         Fuel cell current density at time t (A.m-2).
     v_a : list
@@ -81,10 +77,9 @@ def auxiliaries(t, sv, control_variables, i_fc, v_a, v_c, Pa_in, Pc_in, operatin
     nb_gc, type_auxiliary = parameters['nb_gc'], parameters['type_auxiliary']
 
     # Intermediate values
-        # Commun intermediate values with dif_eq_modules.py which allows to avoid redundant calculations
-    P, Phi, y_H2, y_O2, M, rho, k_purge, Abp_a, Abp_c, mu_gaz, i_n = \
-        auxiliaries_int_values_which_are_commun_with_dif_eq(t, sv, operating_inputs, parameters)
-    W_des = desired_flows(sv, control_variables, i_fc, i_n, Pa_in, Pc_in, operating_inputs, parameters)
+    P, Phi, y_H2, y_O2, M, rho, k_purge, Abp_a, Abp_c, mu_gaz = flow_1D_GC_manifold_int_values(sv, operating_inputs,
+                                                                                               parameters)
+    W_des = desired_flows(sv, i_fc, Pa_in, Pc_in, operating_inputs, parameters)
 
     # _________________________________________Inlet and outlet global flows____________________________________________
     """Global flows here refer to flows that integrate all the chemical species circulating together.
@@ -270,5 +265,4 @@ def auxiliaries(t, sv, control_variables, i_fc, v_a, v_c, Pa_in, Pc_in, operatin
                   'c_in': Wc_in, 'csm_to_cgc': Wcsm_to_cgc, 'cgc_to_cem': Wcgc_to_cem, 'c_out': Wc_out},
             'W_v': {'a_in': Wv_a_in, 'are': Wv_are, 'asm_to_agc': Wv_asm_to_agc, 'agc_to_aem': Wv_agc_to_aem,
                     'a_out': Wv_a_out, 'c_in': Wv_c_in, 'csm_to_cgc': Wv_csm_to_cgc, 'cgc_to_cem': Wv_cgc_to_cem,
-                    'c_out': Wv_c_out},
-            'v_a_in': v_a[0], 'v_c_in': v_c[0], 'Pa_in': Pa_in, 'Pc_in': Pc_in}
+                    'c_out': Wv_c_out}}

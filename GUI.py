@@ -213,10 +213,9 @@ def main_frame(root, canvas):
                             'label_row': 0},
          'type_auxiliary': {'value': tk.IntVar(model_possibilities_frame, 2), 'label_row': 1},
          'voltage_zone': {'value': tk.IntVar(model_possibilities_frame, 0), 'label_row': 2},
-         'type_control': {'value': tk.IntVar(model_possibilities_frame, 0), 'label_row': 3},
-         'type_purge': {'value': tk.IntVar(model_possibilities_frame, 0), 'label_row': 4},
-         'type_display': {'value': tk.IntVar(model_possibilities_frame, 1), 'label_row': 5},
-         'type_plot': {'value': tk.IntVar(model_possibilities_frame, 0), 'label_row': 6}}
+         'type_purge': {'value': tk.IntVar(model_possibilities_frame, 0), 'label_row': 3},
+         'type_display': {'value': tk.IntVar(model_possibilities_frame, 1), 'label_row': 4},
+         'type_plot': {'value': tk.IntVar(model_possibilities_frame, 0), 'label_row': 5}}
 
     # Displays operating conditions and physical parameters on the screen (without their values)
     #   Display the dropdown menu buttons
@@ -382,7 +381,7 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
      V_endplate_c, epsilon_gdl, epsilon_mpl, epsilon_c, e, K_O2_ad_Pt, Re, i0_c_ref, kappa_co, kappa_c, C_scl,
      step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
      t_purge, delta_t_purge, nb_gc, nb_gdl, nb_mpl, rtol, atol, type_fuel_cell, voltage_zone, type_auxiliary,
-     type_control, type_purge, type_display, type_plot) = \
+     type_purge, type_display, type_plot) = \
         recover_for_use_operating_inputs_and_physical_parameters(choice_operating_conditions,
                                                                  choice_accessible_parameters,
                                                                  choice_undetermined_parameters,
@@ -412,8 +411,8 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
                                 'rtol': rtol, 'atol': atol, 'type_fuel_cell': type_fuel_cell,
                                 'type_current': type_current, 'voltage_zone': voltage_zone,
-                                'type_auxiliary': type_auxiliary, 'type_control': type_control,
-                                'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}
+                                'type_auxiliary': type_auxiliary, 'type_purge': type_purge,
+                                'type_display': type_display, 'type_plot': type_plot}
         launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, accessible_physical_parameters,
                                          undetermined_physical_parameters, computing_parameters)
 
@@ -425,8 +424,8 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
                                 'rtol': rtol, 'atol': atol, 'type_fuel_cell': type_fuel_cell,
                                 'type_current': type_current, 'voltage_zone': voltage_zone,
-                                'type_auxiliary': type_auxiliary, 'type_control': type_control,
-                                'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}
+                                'type_auxiliary': type_auxiliary, 'type_purge': type_purge,
+                                'type_display': type_display, 'type_plot': type_plot}
         launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameters, accessible_physical_parameters,
                                                  undetermined_physical_parameters, computing_parameters)
 
@@ -438,8 +437,8 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
         computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
                                 'rtol': rtol, 'atol': atol, 'type_fuel_cell': type_fuel_cell,
                                 'type_current': type_current, 'voltage_zone': voltage_zone,
-                                'type_auxiliary': type_auxiliary, 'type_control': type_control,
-                                'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}
+                                'type_auxiliary': type_auxiliary, 'type_purge': type_purge,
+                                'type_display': type_display, 'type_plot': type_plot}
         launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, accessible_physical_parameters,
                                         undetermined_physical_parameters, computing_parameters)
 

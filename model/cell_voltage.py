@@ -7,6 +7,7 @@
 
 # Importing the necessary libraries
 import math
+import numpy as np
 
 # Importing constants' value and functions
 from configuration.settings import F, R, E0, Pref_eq
@@ -66,15 +67,21 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
         The cell voltage at each time step.
     """
 
-    # Extraction of the variables
-    t = variables['t']
-    s_ccl_t, lambda_mem_t, lambda_ccl_t = variables['s_ccl'], variables['lambda_mem'], variables['lambda_ccl']
-    C_H2_acl_t, C_O2_ccl_t, eta_c_t = variables['C_H2_acl'], variables['C_O2_ccl'], variables['eta_c']
-    T_acl_t, T_mem_t, T_ccl_t = variables['T_acl'], variables['T_mem'], variables['T_ccl']
     # Extraction of the operating inputs and the parameters
     Hmem, Hacl, Hccl = parameters['Hmem'], parameters['Hacl'], parameters['Hccl']
-    K_O2_ad_Pt = parameters['K_O2_ad_Pt']
+    nb_gc, K_O2_ad_Pt = parameters['nb_gc'], parameters['K_O2_ad_Pt']
     Re, kappa_co = parameters['Re'], parameters['kappa_co']
+    # Extraction of the variables
+    t = variables['t']
+    s_ccl_t = variables['s_ccl'][int(np.ceil(nb_gc / 2))]
+    lambda_mem_t = variables['lambda_mem'][int(np.ceil(nb_gc / 2))]
+    lambda_ccl_t = variables['lambda_ccl'][int(np.ceil(nb_gc / 2))]
+    C_H2_acl_t = variables['C_H2_acl'][int(np.ceil(nb_gc / 2))]
+    C_O2_ccl_t = variables['C_O2_ccl'][int(np.ceil(nb_gc / 2))]
+    eta_c_t = variables['eta_c'][int(np.ceil(nb_gc / 2))]
+    T_acl_t = variables['T_acl'][int(np.ceil(nb_gc / 2))]
+    T_mem_t = variables['T_mem'][int(np.ceil(nb_gc / 2))]
+    T_ccl_t = variables['T_ccl'][int(np.ceil(nb_gc / 2))]
 
     # Initialisation
     n = len(t)
@@ -82,7 +89,6 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
 
     # Loop for having Ucell_t at each time step
     for i in range(n):
-
         # Recovery of the already calculated variable values at each time step
         s_ccl, lambda_mem, lambda_ccl = s_ccl_t[i], lambda_mem_t[i], lambda_ccl_t[i]
         C_H2_acl, C_O2_ccl = C_H2_acl_t[i], C_O2_ccl_t[i]
@@ -116,5 +122,4 @@ def calculate_cell_voltage(variables, operating_inputs, parameters):
         # The cell voltage
         Ucell_t[i] = Ueq - eta_c - (i_fc + i_n) * (Rp + Re)
 
-        # print('i_fc = ', i_fc, 'Ucell_t = ', Ucell_t[i], 'eta_c = ', eta_c, 'C_O2_ccl = ', C_O2_ccl, 'C_O2_Pt = ', C_O2_Pt)
     return Ucell_t

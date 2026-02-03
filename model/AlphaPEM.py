@@ -16,21 +16,20 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 import os
 import math
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy.integrate import solve_ivp
 
 # Importing constants' value and functions
 from model.dif_eq import dydt
 from model.velocity import calculate_velocity_evolution
-from model.flows import calculate_flows
 from model.cell_voltage import calculate_cell_voltage
-from model.control import control_operating_conditions
 from configuration.settings import Pext, Phi_ext, y_O2_ext, C_O2ref_red, alpha_c, Tref_O2_red, Eact_O2_red, F, R
 from modules.dif_eq_modules import event_negative
 from modules.transitory_functions import lambda_eq, k_H2, k_O2
 from modules.display_modules import (plot_ifc, plot_C_v, plot_lambda, plot_s, plot_C_O2, plot_C_H2, plot_C_N2,
-                                     plot_T, plot_Ucell, plot_P, plot_Phi_des, plot_v, plot_Re_nb,
-                                     plot_polarisation_curve, plot_polarisation_curve_for_cali,
-                                     make_Fourier_transformation, plot_EIS_curve_Nyquist, plot_EIS_curve_Bode_amplitude,
+                                     plot_T, plot_Ucell, plot_P, plot_v, plot_Re_nb, plot_polarisation_curve,
+                                     plot_polarisation_curve_for_cali, make_Fourier_transformation,
+                                     plot_EIS_curve_Nyquist, plot_EIS_curve_Bode_amplitude,
                                      plot_EIS_curve_Bode_angle, plot_power_density_curve, plot_cell_efficiency)
 from calibration.experimental_values import pola_exp_values_calibration
 
@@ -175,8 +174,6 @@ class AlphaPEM:
                     Type of current density function (computing parameter).
                 - type_auxiliary : str
                     Type of auxiliary system (computing parameter).
-                - type_control : str
-                    Type of control system (computing parameter).
                 - type_purge : str
                     Type of purge system (computing parameter).
                 - type_display : str
@@ -217,27 +214,22 @@ class AlphaPEM:
             raise ValueError('The desired pressure is too low. It cannot be lower than the pressure outside the stack.')
 
         # Initialize the variables' dictionary.
-        self.solver_variable_names = ['C_v_agc', 'C_v_agdl', 'C_v_ampl', 'C_v_acl', 'C_v_ccl', 'C_v_cmpl', 'C_v_cgdl',
+        self.solver_variable_names = [['C_v_agc', 'C_v_agdl', 'C_v_ampl', 'C_v_acl', 'C_v_ccl', 'C_v_cmpl', 'C_v_cgdl',
                                       'C_v_cgc', 's_agc', 's_agdl', 's_ampl', 's_acl', 's_ccl', 's_cmpl', 's_cgdl',
                                       's_cgc', 'lambda_acl', 'lambda_mem', 'lambda_ccl', 'C_H2_agc', 'C_H2_agdl',
                                       'C_H2_ampl', 'C_H2_acl', 'C_O2_ccl', 'C_O2_cmpl', 'C_O2_cgdl', 'C_O2_cgc',
                                       'C_N2_agc', 'C_N2_cgc', 'T_agc', 'T_agdl', 'T_ampl', 'T_acl', 'T_mem', 'T_ccl',
-                                      'T_cmpl', 'T_cgdl', 'T_cgc', 'eta_c']
+                                      'T_cmpl', 'T_cgdl', 'T_cgc', 'eta_c']]
         if self.parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
                 self.parameters['type_auxiliary'] == "forced-convective_cathode_with_anodic_recirculation":
-            self.solver_variable_names.extend(['Pasm', 'Paem', 'Pcsm', 'Pcem', 'Phi_asm', 'Phi_aem', 'Phi_csm',
-                                               'Phi_cem', 'Wcp', 'Wa_inj', 'Wc_inj', 'Abp_a', 'Abp_c'])
+            self.solver_variable_names.extend([['Pasm', 'Paem', 'Pcsm', 'Pcem', 'Phi_asm', 'Phi_aem', 'Phi_csm',
+                                               'Phi_cem'], ['Wcp', 'Wa_inj', 'Wc_inj', 'Abp_a', 'Abp_c']])
 
         self.solver_variable_names_extension()  # Several points are considered in each GC, GDL and MPL. This must be
         #                                        inserted into the solver_variable_names.
-        self.all_variable_names = self.solver_variable_names + ['t', 'Ucell', 'v_a_in', 'v_c_in', 'Pa_in', 'Pc_in'] + \
-                                                               ['Phi_a_des', 'Phi_c_des']
+        self.all_variable_names = [item for sub in self.solver_variable_names for item in sub] + \
+                                  ['t', 'Ucell', 'v_a_in', 'v_c_in', 'Pa_in', 'Pc_in'] + ['Phi_a_des', 'Phi_c_des']
         self.variables = {key: [] for key in self.all_variable_names}
-
-        # Initialize the control_variables dictionary.
-        self.control_variables = {'t_control_Phi': 0,
-                                  'Phi_a_des': self.operating_inputs['Phi_a_des'],
-                                  'Phi_c_des': self.operating_inputs['Phi_c_des']}
 
         # Create the dynamic evolution.
         #       Create time intervals
@@ -256,8 +248,7 @@ class AlphaPEM:
         event_negative.terminal = True  # Integration is stopped if one of the crucial variables becomes negative.
         self.sol = solve_ivp(dydt, self.time_interval, self.initial_variable_values, method='BDF',
                              rtol = self.parameters['rtol'], atol = self.parameters['atol'], events=event_negative,
-                             args=(self.operating_inputs, self.parameters, self.solver_variable_names,
-                                   self.control_variables))
+                             args=(self.operating_inputs, self.parameters, self.solver_variable_names))
 
         #       Recover the variable values calculated by the solver into the dictionary.
         self._recovery()
@@ -266,27 +257,24 @@ class AlphaPEM:
         self.variables["Ucell"].extend(calculate_cell_voltage(self.variables, self.operating_inputs, self.parameters))
 
     def solver_variable_names_extension(self):
-        """Several points are considered in each GDL and must be inserted into the solver_variable_names.
+        """Several points are considered in each GDL, MPL and GC. They must be inserted into the solver_variable_names.
         """
 
-        new_points_location = ['C_v_agc', 'C_v_agdl', 'C_v_ampl', 'C_v_cmpl', 'C_v_cgdl', 'C_v_cgc',
-                               's_agc', 's_agdl', 's_ampl', 's_cmpl', 's_cgdl', 's_cgc',
-                               'C_H2_agc', 'C_H2_agdl', 'C_H2_ampl', 'C_O2_cmpl', 'C_O2_cgdl', 'C_O2_cgc',
-                               'C_N2_agc', 'C_N2_cgc',
-                               'T_agc', 'T_agdl', 'T_ampl', 'T_cmpl', 'T_cgdl', 'T_cgc']
+        new_points_location = ['C_v_agdl', 'C_v_ampl', 'C_v_cmpl', 'C_v_cgdl',
+                               's_agdl', 's_ampl', 's_cmpl', 's_cgdl',
+                               'C_H2_agdl', 'C_H2_ampl', 'C_O2_cmpl', 'C_O2_cgdl',
+                               'T_agdl', 'T_ampl', 'T_cmpl', 'T_cgdl']
+
         for variable in new_points_location:
-            index = self.solver_variable_names.index(variable)
+            index = self.solver_variable_names[0].index(variable)
             # Delete the previous points
-            self.solver_variable_names.pop(index)
+            self.solver_variable_names[0].pop(index)
             # Increase the number of points
-            if variable.endswith('gc'):
-                self.solver_variable_names[index:index] = [f'{variable}_{i}' for i in
-                                                           range(1, self.parameters['nb_gc'] + 1)]
             if variable.endswith('gdl'):
-                self.solver_variable_names[index:index] = [f'{variable}_{i}' for i in
+                self.solver_variable_names[0][index:index] = [f'{variable}_{i}' for i in
                                                            range(1, self.parameters['nb_gdl'] + 1)]
             elif variable.endswith('mpl'):
-                self.solver_variable_names[index:index] = [f'{variable}_{i}' for i in
+                self.solver_variable_names[0][index:index] = [f'{variable}_{i}' for i in
                                                            range(1, self.parameters['nb_mpl'] + 1)]
 
     def _create_time_interval(self):
@@ -333,9 +321,6 @@ class AlphaPEM:
             tf_interval = delta_t_ini_pola_cali + len(i_exp_cali_t) * delta_t_cali # s.
         else:  # EIS time_interval is calculated in the main.py file.
             raise ValueError("Please enter a recognized type_current option for calculating the time interval.")
-
-        # To be reviewed
-        self.control_variables['t_control_Phi'] = t0_interval
 
         return [t0_interval, tf_interval]
 
@@ -426,19 +411,21 @@ class AlphaPEM:
         Phi_csm, Phi_cem = [Phi_c_ini] * 2
         Wcp, Wa_inj, Wc_inj, Abp_a, Abp_c = Wcp_ini, Wa_inj_ini, Wc_inj_ini, Abp_a_ini, Abp_c_ini
 
-        # Gathering of the variables initial value into one list
-        initial_variable_values = ([C_v_agc] * nb_gc + [C_v_agdl] * nb_gdl + [C_v_ampl] * nb_mpl + [C_v_acl, C_v_ccl] +
-                                   [C_v_cmpl] * nb_mpl + [C_v_cgdl] * nb_gdl + [C_v_cgc] * nb_gc +
-                                   [s_agc] * nb_gc  + [s_agdl] * nb_gdl + [s_ampl] * nb_mpl + [s_acl, s_ccl] +
-                                   [s_cmpl] * nb_mpl + [s_cgdl] * nb_gdl + [s_cgc] * nb_gc  +
-                                   [lambda_acl, lambda_mem, lambda_ccl] +
-                                   [C_H2_agc] * nb_gc + [C_H2_agdl] * nb_gdl + [C_H2_ampl] * nb_mpl +
-                                   [C_H2_acl, C_O2_ccl] + [C_O2_cmpl] * nb_mpl + [C_O2_cgdl] * nb_gdl +
-                                   [C_O2_cgc] * nb_gc +
-                                   [C_N2_agc] * nb_gc + [C_N2_cgc] * nb_gc +
-                                   [T_agc] * nb_gc + [T_agdl] * nb_gdl + [T_ampl] * nb_mpl + [T_acl, T_mem, T_ccl] +
-                                   [T_cmpl] * nb_mpl + [T_cgdl] * nb_gdl + [T_cgc] * nb_gc +
-                                   [eta_c])
+        # Gathering of the variables initial value into one list, only for one gas channel node
+        initial_variable_values_1D = ([C_v_agc] + [C_v_agdl] * nb_gdl + [C_v_ampl] * nb_mpl + [C_v_acl, C_v_ccl] +
+                                      [C_v_cmpl] * nb_mpl + [C_v_cgdl] * nb_gdl + [C_v_cgc] +
+                                      [s_agc] + [s_agdl] * nb_gdl + [s_ampl] * nb_mpl + [s_acl, s_ccl] +
+                                      [s_cmpl] * nb_mpl + [s_cgdl] * nb_gdl + [s_cgc] +
+                                      [lambda_acl, lambda_mem, lambda_ccl] +
+                                      [C_H2_agc] + [C_H2_agdl] * nb_gdl + [C_H2_ampl] * nb_mpl + [C_H2_acl, C_O2_ccl] +
+                                      [C_O2_cmpl] * nb_mpl + [C_O2_cgdl] * nb_gdl + [C_O2_cgc] + [C_N2_agc] + [C_N2_cgc] +
+                                      [T_agc] + [T_agdl] * nb_gdl + [T_ampl] * nb_mpl + [T_acl] + [T_mem] + [T_ccl] +
+                                      [T_cmpl] * nb_mpl + [T_cgdl] * nb_gdl + [T_cgc] +
+                                      [eta_c])
+        #  Replication for each gas channel node
+        initial_variable_values = initial_variable_values_1D * nb_gc
+
+        # Addition of the auxiliary system initial states
         if type_auxiliary == "forced-convective_cathode_with_flow-through_anode" or \
                 type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":
                 initial_variable_values.extend([Pasm, Paem, Pcsm, Pcem] + [Phi_asm, Phi_aem] + [Phi_csm, Phi_cem] +
@@ -456,36 +443,40 @@ class AlphaPEM:
         self.variables['t'].extend(list(self.sol.t))
 
         # Recovery of the main variables dynamic evolution
-        for index, key in enumerate(self.solver_variable_names):
-            self.variables[key].extend(list(self.sol.y[index]))
+        nb_gc = self.parameters['nb_gc']
+        for index, key in enumerate(self.solver_variable_names[0]): # recovery of the MEA and GC variables
+            self.variables[key] = [None]
+            for i in range(nb_gc):  # For each gas channel node...
+                self.variables[key].append(self.sol.y[index + i * len(self.solver_variable_names[0])])
+        if self.parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
+                self.parameters['type_auxiliary'] == "forced-convective_cathode_with_anodic_recirculation":
+            for index, key in enumerate(self.solver_variable_names[1]): # recovery of the manifold variables
+                self.variables[key] = self.sol.y[index + nb_gc * len(self.solver_variable_names[0])]
+            for index, key in enumerate(self.solver_variable_names[2]):  # recovery of the auxiliary variables
+                self.variables[key] = self.sol.y[index + nb_gc * len(self.solver_variable_names[0]) +
+                                                 len(self.solver_variable_names[1])]
 
         # Recovery of more variables
         if self.parameters['type_display'] != "no_display":
-            #   The control variables should be reinitialized. To be reviewed.
-            if self.parameters['type_current'] == "step":
-                self.control_variables['t_control_Phi'] = 0
-            else:
-                self.control_variables['t_control_Phi'] = 0
-            self.control_variables['Phi_a_des'] = self.operating_inputs['Phi_a_des']
-            self.control_variables['Phi_c_des'] = self.operating_inputs['Phi_c_des']
-
+            self.variables['v_a'], self.variables['v_c'] = [[] for _ in range(nb_gc + 2)], [[] for _ in range(nb_gc + 2)] # Includes v_a_in and v_a_out
+            self.variables['Pa_in'], self.variables['Pc_in'] = [], []
             for j in range(len(self.sol.t)):  # For each time...
                 # ... recovery of i_fc.
                 i_fc = self.operating_inputs["current_density"](self.variables['t'][j], self.parameters)
-                # ... recovery of S_abs_acl, S_abs_ccl, Jmem_acl, Jmem_ccl.
-                last_solver_variables = {key: self.variables[key][j] for key in self.solver_variable_names}
-                v_a, v_c, Pa_in, Pc_in = calculate_velocity_evolution(last_solver_variables, self.control_variables,
-                                                                      i_fc, self.operating_inputs, self.parameters)
-                flows_recovery = calculate_flows(self.variables['t'][j], last_solver_variables, self.control_variables,
-                                                 i_fc, v_a, v_c, Pa_in, Pc_in, self.operating_inputs, self.parameters)
-                for key in ['v_a_in', 'v_c_in', 'Pa_in', 'Pc_in']:
-                    self.variables[key].append(flows_recovery[key])
-                # ... recovery of Phi_a_des and Phi_c_des.
-                if self.parameters["type_control"] == "Phi_des":
-                    sv = {'lambda_mem': self.variables['lambda_mem'][j], 's_ccl': self.variables['s_ccl'][j]}
-                    control_operating_conditions(self.variables['t'][j], sv, self.operating_inputs,
-                                                 self.parameters, self.control_variables)
-                    for key in ['Phi_a_des', 'Phi_c_des']: self.variables[key].append(self.control_variables[key])
+                # ... recovery of v_a, v_c, Pa_in, Pc_in.
+                solver_variables_1D_MEA = [None] # Dictionary corresponding to the variable inside the MEA 1D line
+                for k in range(nb_gc):
+                    solver_variables_1D_MEA.append({})
+                    for index, variable in enumerate(self.solver_variable_names[0]):
+                        solver_variables_1D_MEA[k + 1][variable] = \
+                        self.sol.y[index + k * len(self.solver_variable_names[0])][j]
+                v_a, v_c, Pa_in, Pc_in = calculate_velocity_evolution(solver_variables_1D_MEA, i_fc,
+                                                                      self.operating_inputs, self.parameters)
+                for k in range(nb_gc + 2):
+                    self.variables['v_a'][k] += [v_a[k]]
+                    self.variables['v_c'][k] += [v_c[k]]
+                self.variables['Pa_in'] += [Pa_in]
+                self.variables['Pc_in'] += [Pc_in]
 
     def Display(self, ax1=None, ax2=None, ax3=None):
         """Display the plots of the program.
@@ -566,7 +557,6 @@ class AlphaPEM:
                 plot_power_density_curve(self.variables, self.operating_inputs, self.parameters, n, ax1[1])
                 plot_cell_efficiency(self.variables, self.operating_inputs, self.parameters, n, ax1[2])
 
-                plot_Phi_des(self.variables, self.operating_inputs, self.parameters, ax2[0])
                 plot_lambda(self.variables, self.operating_inputs, self.parameters, ax2[1])
                 plot_s(self.variables, self.operating_inputs, self.parameters, ax2[2])
                 plot_T(self.variables, self.operating_inputs, self.parameters, ax2[3])

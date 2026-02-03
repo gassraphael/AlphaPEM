@@ -266,16 +266,6 @@ def display_radiobuttons(model_possibilities_frame, choices_buttons):
         grid(row=choices_buttons['voltage_zone']['label_row'], column=3, sticky="w")
 
     # Ask the user to choose an option and save it
-    ttk.Label(model_possibilities_frame, text='Control: ', font=('cmr10', 12)). \
-        grid(row=choices_buttons['type_control']['label_row'], column=0, columnspan=2, sticky="w")
-    ttk.Radiobutton(model_possibilities_frame, text='No control', value=0,
-                    variable=choices_buttons['type_control']['value']). \
-        grid(row=choices_buttons['type_control']['label_row'], column=2, sticky="w")
-    ttk.Radiobutton(model_possibilities_frame, text='Humidity', value=1,
-                    variable=choices_buttons['type_control']['value']). \
-        grid(row=choices_buttons['type_control']['label_row'], column=3, sticky="w")
-
-    # Ask the user to choose an option and save it
     ttk.Label(model_possibilities_frame, text='Purge: ', font=('cmr10', 12)). \
         grid(row=choices_buttons['type_purge']['label_row'], column=0, columnspan=2, sticky="w")
     ttk.Radiobutton(model_possibilities_frame, text='No purge', value=0,
@@ -569,11 +559,6 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     else:
         voltage_zone = "before_voltage_drop"
 
-    if choice_buttons['type_control']['value'].get() == 0:
-        type_control = "no_control"
-    else:
-        type_control = "Phi_des"
-
     if choice_buttons['type_purge']['value'].get() == 0:
         type_purge = "no_purge"
     elif choice_buttons['type_purge']['value'].get() == 1:
@@ -598,7 +583,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
             V_endplate_a, V_endplate_c, epsilon_gdl, epsilon_mpl, epsilon_c, e, K_O2_ad_Pt, Re, i0_c_ref, kappa_co, kappa_c,
             C_scl, step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS,
             f_EIS, t_EIS, t_purge, delta_t_purge, nb_gc, nb_gdl, nb_mpl, rtol, atol, type_fuel_cell, voltage_zone,
-            type_auxiliary, type_control, type_purge, type_display, type_plot)
+            type_auxiliary, type_purge, type_display, type_plot)
 
 
 def value_control(choice_operating_conditions, choice_accessible_parameters, choice_undetermined_parameters,
@@ -1037,8 +1022,6 @@ def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, acces
                 Zone of interest for the polarization curve (computing parameter).
             - type_auxiliary : str
                 Type of auxiliary system (computing parameter).
-            - type_control : str
-                Type of control system (computing parameter).
             - type_purge : str
                 Type of purge system (computing parameter).
             - type_display : str
@@ -1267,8 +1250,6 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
                 Zone of interest for the polarization curve (computing parameter).
             - type_auxiliary : str
                 Type of auxiliary system (computing parameter).
-            - type_control : str
-                Type of control system (computing parameter).
             - type_purge : str
                 Type of purge system (computing parameter).
             - type_display : str
@@ -1496,8 +1477,6 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
                 Zone of interest for the polarization curve (computing parameter).
             - type_auxiliary : str
                 Type of auxiliary system (computing parameter).
-            - type_control : str
-                Type of control system (computing parameter).
             - type_purge : str
                 Type of purge system (computing parameter).
             - type_display : str

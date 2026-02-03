@@ -62,7 +62,7 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax, show=Tr
     delta_i_pola, i_max_pola = pola_current_parameters['delta_i_pola'], pola_current_parameters['i_max_pola']
     type_fuel_cell, type_current = parameters['type_fuel_cell'], parameters['type_current']
     voltage_zone, type_auxiliary = parameters['voltage_zone'], parameters['type_auxiliary']
-    type_control, type_plot = parameters['type_control'], parameters['type_plot']
+    type_plot = parameters['type_plot']
 
     if type_plot == "fixed":
         # Creation of ifc_t
@@ -98,8 +98,8 @@ def plot_polarisation_curve(variables, operating_inputs, parameters, ax, show=Tr
             sim_error = None
 
         # Plot the model polarisation curve
-        plot_specific_line(ifc_discretized, Ucell_discretized, type_fuel_cell, type_current, type_auxiliary,
-                           type_control, sim_error, ax)
+        plot_specific_line(ifc_discretized, Ucell_discretized, type_fuel_cell, type_current, type_auxiliary, sim_error,
+                           ax)
         plot_pola_instructions(type_fuel_cell, ax, show)
 
     else:  # type_plot == "dynamic"
@@ -150,7 +150,7 @@ def plot_polarisation_curve_for_cali(variables, operating_inputs, parameters, ax
     delta_t_break_pola_cali = pola_current_for_cali_parameters['delta_t_break_pola_cali']
     type_fuel_cell, type_current = parameters['type_fuel_cell'], parameters['type_current']
     voltage_zone, type_auxiliary = parameters['voltage_zone'], parameters['type_auxiliary']
-    type_control, type_plot = parameters['type_control'], parameters['type_plot']
+    type_plot = parameters['type_plot']
     # Extraction of the experimental current density and voltage values for the calibration.
     i_exp_cali_t, U_exp_cali_t = pola_exp_values_calibration(type_fuel_cell, voltage_zone)  # (A.m-2, V).
 
@@ -177,8 +177,7 @@ def plot_polarisation_curve_for_cali(variables, operating_inputs, parameters, ax
 
     # Plot the model polarisation curve
     sim_error = calculate_simulation_error(Ucell_discretized, U_exp_cali_t) # Calculate the simulation error
-    plot_specific_line(ifc_discretized, Ucell_discretized, type_fuel_cell, type_current, type_auxiliary,
-                       type_control, sim_error, ax)
+    plot_specific_line(ifc_discretized, Ucell_discretized, type_fuel_cell, type_current, type_auxiliary, sim_error, ax)
     plot_pola_instructions(type_fuel_cell, ax)
 
     # Add the common instructions for the plot
@@ -488,56 +487,6 @@ def plot_ifc(variables, operating_inputs, parameters, ax):
     plot_general_instructions(ax)
 
 
-def plot_J(variables, parameters, ax):
-    """This function plots the sorption and dissolved water flows as a function of time.
-
-    Parameters
-    ----------
-    variables : dict
-        Variables calculated by the solver. They correspond to the fuel cell internal states.
-    parameters : dict
-        Parameters of the fuel cell model.
-    ax : matplotlib.axes.Axes
-        Axes on which the flows will be plotted.
-    """
-    # Extraction of the operating inputs and the parameters
-    Hacl, Hccl = parameters['Hacl'], parameters['Hccl']
-    type_current, type_plot = parameters['type_current'], parameters['type_plot']
-    if type_current == 'step':
-        delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
-    elif type_current == 'polarization':
-        delta_t_ini = parameters['pola_current_parameters']['delta_t_ini_pola']
-    elif type_current == 'polarization_for_cali':
-        delta_t_ini = parameters['pola_current_for_cali_parameters']['delta_t_ini_pola_cali']
-    else:
-        delta_t_ini = 0
-    # Extraction of the variables
-    if type_plot == "fixed":
-        mask = np.array(variables['t']) >= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
-    else: # type_plot == "dynamic"
-        mask = np.ones_like(variables['t'], dtype=bool)
-    t = np.array(variables['t'])[mask]
-    S_abs_acl_t = np.array(variables['S_abs_acl'])[mask]
-    S_abs_ccl_t = np.array(variables['S_abs_ccl'])[mask]
-    J_lambda_acl_mem_t = np.array(variables['J_lambda_acl_mem'])[mask]
-    J_lambda_mem_ccl_t = np.array(variables['J_lambda_mem_ccl'])[mask]
-
-    # Plot the sorption and dissolved water flows: J
-    J_abs_acl, J_abs_ccl = S_abs_acl_t * Hacl, S_abs_ccl_t * Hccl  # Conversion in mol.m⁻².s⁻¹ for comparison
-    ax.plot(t, J_abs_acl, color=colors(2))
-    ax.plot(t, J_lambda_acl_mem_t, color=colors(3))
-    ax.plot(t, J_abs_ccl, color=colors(4))
-    ax.plot(t, J_lambda_mem_ccl_t, color=colors(7))
-    ax.legend([r'$\mathregular{J_{abs,acl}}$', r'$\mathregular{J_{\lambda,mem,acl}}$', r'$\mathregular{J_{abs,ccl}}$',
-               r'$\mathregular{J_{\lambda,mem,ccl}}$'], loc='best')
-    ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
-    ax.set_ylabel(r'$\mathbf{Flows}$ $\mathbf{J}$ $\mathbf{\left( mol.m^{-2}.s^{-1} \right)}$', labelpad=3)
-    ax.ticklabel_format(style='scientific', axis='y', scilimits=(0, 0))
-
-    # Plot instructions
-    plot_general_instructions(ax)
-
-
 def plot_C_v(variables, parameters, ax):
     """This function plots the vapor concentrations at different spatial localisations, as a function of time.
 
@@ -552,7 +501,8 @@ def plot_C_v(variables, parameters, ax):
     """
 
     # Extraction of the parameter
-    nb_gc, nb_gdl, nb_mpl, type_current, type_plot = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl'], parameters['type_current'], parameters['type_plot']
+    nb_gc, nb_gdl, nb_mpl = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl']
+    type_current, type_plot = parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
         delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
     elif type_current == 'polarization':
@@ -566,16 +516,17 @@ def plot_C_v(variables, parameters, ax):
         mask = np.array(variables['t']) >= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
+    nb_gc_mid = int(np.ceil(nb_gc / 2)) # Middle of the gas channel
     t = np.array(variables['t'])[mask]
-    C_v_agc_t = np.array(variables[f'C_v_agc_{int(np.ceil(nb_gc / 2))}'])[mask]
-    C_v_agdl_t = np.array(variables[f'C_v_agdl_{int(np.ceil(nb_gdl / 2))}'])[mask]
-    C_v_ampl_t = np.array(variables[f'C_v_ampl_{int(np.ceil(nb_mpl / 2))}'])[mask]
-    C_v_acl_t = np.array(variables['C_v_acl'])[mask]
-    C_v_ccl_t = np.array(variables['C_v_ccl'])[mask]
-    C_v_cmpl_t = np.array(variables[f'C_v_cmpl_{int(np.ceil(nb_mpl / 2))}'])[mask]
-    C_v_cgdl_t = np.array(variables[f'C_v_cgdl_{int(np.ceil(nb_gdl / 2))}'])[mask]
-    C_v_cgc_t = np.array(variables[f'C_v_cgc_{int(np.ceil(nb_gc / 2))}'])[mask]
-    T_ccl = np.array(variables['T_ccl'])[mask]
+    C_v_agc_t = np.array(variables['C_v_agc'][nb_gc_mid])[mask]
+    C_v_agdl_t = np.array(variables[f'C_v_agdl_{int(np.ceil(nb_gdl / 2))}'][nb_gc_mid])[mask]
+    C_v_ampl_t = np.array(variables[f'C_v_ampl_{int(np.ceil(nb_mpl / 2))}'][nb_gc_mid])[mask]
+    C_v_acl_t = np.array(variables['C_v_acl'][nb_gc_mid])[mask]
+    C_v_ccl_t = np.array(variables['C_v_ccl'][nb_gc_mid])[mask]
+    C_v_cmpl_t = np.array(variables[f'C_v_cmpl_{int(np.ceil(nb_mpl / 2))}'][nb_gc_mid])[mask]
+    C_v_cgdl_t = np.array(variables[f'C_v_cgdl_{int(np.ceil(nb_gdl / 2))}'][nb_gc_mid])[mask]
+    C_v_cgc_t = np.array(variables['C_v_cgc'][nb_gc_mid])[mask]
+    T_ccl = np.array(variables['T_ccl'][nb_gc_mid])[mask]
 
     # Plot the vapor concentrations at different spatial localisations Cv
     C_v_sat_ccl_t = np.array([C_v_sat(T) for T in T_ccl])
@@ -616,6 +567,7 @@ def plot_lambda(variables, operating_inputs, parameters, ax):
 
     # Extraction of the operating inputs and the parameters
     current_density = operating_inputs['current_density']
+    nb_gc = parameters['nb_gc']
     pola_current_parameters, type_current = parameters['pola_current_parameters'], parameters['type_current']
     type_plot = parameters['type_plot']
     if type_current == 'step':
@@ -631,10 +583,11 @@ def plot_lambda(variables, operating_inputs, parameters, ax):
         mask = np.array(variables['t']) >= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
+    nb_gc_mid = int(np.ceil(nb_gc / 2))  # Middle of the gas channel
     t = np.array(variables['t'])[mask]
-    lambda_acl_t = np.array(variables['lambda_acl'])[mask]
-    lambda_mem_t = np.array(variables['lambda_mem'])[mask]
-    lambda_ccl_t = np.array(variables['lambda_ccl'])[mask]
+    lambda_acl_t = np.array(variables['lambda_acl'][nb_gc_mid])[mask]
+    lambda_mem_t = np.array(variables['lambda_mem'][nb_gc_mid])[mask]
+    lambda_ccl_t = np.array(variables['lambda_ccl'][nb_gc_mid])[mask]
 
     # Plot the water content at different spatial localisations: lambda
     if type_current == "polarization":
@@ -707,15 +660,16 @@ def plot_s(variables, operating_inputs, parameters, ax):
         mask = np.array(variables['t']) >= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
+    nb_gc_mid = int(np.ceil(nb_gc / 2))  # Middle of the gas channel
     t = np.array(variables['t'])[mask]
-    s_agc_t = np.array(variables[f's_agc_{int(np.ceil(nb_gc / 2))}'])[mask]
-    s_agdl_t = np.array(variables[f's_agdl_{int(np.ceil(nb_gdl / 2))}'])[mask]
-    s_ampl_t = np.array(variables[f's_ampl_{int(np.ceil(nb_mpl / 2))}'])[mask]
-    s_acl_t = np.array(variables['s_acl'])[mask]
-    s_ccl_t = np.array(variables['s_ccl'])[mask]
-    s_cmpl_t = np.array(variables[f's_cmpl_{int(np.ceil(nb_mpl / 2))}'])[mask]
-    s_cgdl_t = np.array(variables[f's_cgdl_{int(np.ceil(nb_gdl / 2))}'])[mask]
-    s_cgc_t = np.array(variables[f's_cgc_{int(np.ceil(nb_gc / 2))}'])[mask]
+    s_agc_t = np.array(variables['s_agc'][nb_gc_mid])[mask]
+    s_agdl_t = np.array(variables[f's_agdl_{int(np.ceil(nb_gdl / 2))}'][nb_gc_mid])[mask]
+    s_ampl_t = np.array(variables[f's_ampl_{int(np.ceil(nb_mpl / 2))}'][nb_gc_mid])[mask]
+    s_acl_t = np.array(variables['s_acl'][nb_gc_mid])[mask]
+    s_ccl_t = np.array(variables['s_ccl'][nb_gc_mid])[mask]
+    s_cmpl_t = np.array(variables[f's_cmpl_{int(np.ceil(nb_mpl / 2))}'][nb_gc_mid])[mask]
+    s_cgdl_t = np.array(variables[f's_cgdl_{int(np.ceil(nb_gdl / 2))}'][nb_gc_mid])[mask]
+    s_cgc_t = np.array(variables['s_cgc'][nb_gc_mid])[mask]
 
     # Plot the liquid water saturation at different spatial localisations: s
     if type_current == "polarization":
@@ -800,11 +754,12 @@ def plot_C_H2(variables, parameters, ax):
         mask = np.array(variables['t']) >= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
+    nb_gc_mid = int(np.ceil(nb_gc / 2))  # Middle of the gas channel
     t = np.array(variables['t'])[mask]
-    C_H2_agc_t = np.array(variables[f'C_H2_agc_{int(np.ceil(nb_gc / 2))}'])[mask]
-    C_H2_agdl_t = np.array(variables[f'C_H2_agdl_{int(np.ceil(nb_gdl / 2))}'])[mask]
-    C_H2_ampl_t = np.array(variables[f'C_H2_ampl_{int(np.ceil(nb_mpl / 2))}'])[mask]
-    C_H2_acl_t = np.array(variables['C_H2_acl'])[mask]
+    C_H2_agc_t = np.array(variables['C_H2_agc'][nb_gc_mid])[mask]
+    C_H2_agdl_t = np.array(variables[f'C_H2_agdl_{int(np.ceil(nb_gdl / 2))}'][nb_gc_mid])[mask]
+    C_H2_ampl_t = np.array(variables[f'C_H2_ampl_{int(np.ceil(nb_mpl / 2))}'][nb_gc_mid])[mask]
+    C_H2_acl_t = np.array(variables['C_H2_acl'][nb_gc_mid])[mask]
 
     # Plot the hydrogen concentration at different spatial localisations: C_H2
     ax.plot(t, C_H2_agc_t, color=colors(0))
@@ -855,6 +810,7 @@ def plot_C_O2(variables, operating_inputs, parameters, ax):
         mask = np.array(variables['t']) >= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
+    nb_gc_mid = int(np.ceil(nb_gc / 2))  # Middle of the gas channel
     #   Time
     t = np.array(variables['t'])[mask]
     #   Current density
@@ -863,14 +819,14 @@ def plot_C_O2(variables, operating_inputs, parameters, ax):
     for i in range(n):  # Creation of i_fc
         ifc_t[i] = current_density(t[i], parameters)
     #    O2 concentrations
-    C_O2_ccl_t = np.array(variables['C_O2_ccl'])[mask]
-    C_O2_cmpl_t = np.array(variables[f'C_O2_cmpl_{int(np.ceil(nb_mpl / 2))}'])[mask]
-    C_O2_cgdl_t = np.array(variables[f'C_O2_cgdl_{int(np.ceil(nb_gdl / 2))}'])[mask]
-    C_O2_cgc_t = np.array(variables[f'C_O2_cgc_{int(np.ceil(nb_gc / 2))}'])[mask]
+    C_O2_ccl_t = np.array(variables['C_O2_ccl'][nb_gc_mid])[mask]
+    C_O2_cmpl_t = np.array(variables[f'C_O2_cmpl_{int(np.ceil(nb_mpl / 2))}'][nb_gc_mid])[mask]
+    C_O2_cgdl_t = np.array(variables[f'C_O2_cgdl_{int(np.ceil(nb_gdl / 2))}'][nb_gc_mid])[mask]
+    C_O2_cgc_t = np.array(variables['C_O2_cgc'][nb_gc_mid])[mask]
     C_O2_Pt_t = np.zeros(n)
-    s_ccl_t = np.array(variables['s_ccl'])[mask]
-    lambda_ccl_t = np.array(variables['lambda_ccl'])[mask]
-    T_ccl_t = np.array(variables['T_ccl'])[mask]
+    s_ccl_t = np.array(variables['s_ccl'][nb_gc_mid])[mask]
+    lambda_ccl_t = np.array(variables['lambda_ccl'][nb_gc_mid])[mask]
+    T_ccl_t = np.array(variables['T_ccl'][nb_gc_mid])[mask]
     for i in range(n):
         C_O2_Pt_t[i] = calculate_C_O2_Pt(ifc_t[i], s_ccl_t[i], lambda_ccl_t[i], C_O2_ccl_t[i], T_ccl_t[i], Hccl, K_O2_ad_Pt)
 
@@ -917,9 +873,10 @@ def plot_C_N2(variables, parameters, ax):
         mask = np.array(variables['t']) >= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
+    nb_gc_mid = int(np.ceil(nb_gc / 2))  # Middle of the gas channel
     t = np.array(variables['t'])[mask]
-    C_N2_agc_t = np.array(variables[f'C_N2_agc_{int(np.ceil(nb_gc / 2))}'])[mask]
-    C_N2_cgc_t = np.array(variables[f'C_N2_cgc_{int(np.ceil(nb_gc / 2))}'])[mask]
+    C_N2_agc_t = np.array(variables['C_N2_agc'][nb_gc_mid])[mask]
+    C_N2_cgc_t = np.array(variables['C_N2_cgc'][nb_gc_mid])[mask]
 
     # Plot C_N2
     ax.plot(t, C_N2_agc_t, color=colors(6))
@@ -967,16 +924,17 @@ def plot_T(variables, operating_inputs, parameters, ax):
         mask = np.array(variables['t']) >= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
+    nb_gc_mid = int(np.ceil(nb_gc / 2))  # Middle of the gas channel
     t = np.array(variables['t'])[mask]
-    T_agc_t = np.array(variables[f'T_agc_{int(np.ceil(nb_gc / 2))}'])[mask] - 273.15 # Conversion in °C.
-    T_agdl_t = np.array(variables[f'T_agdl_{int(np.ceil(nb_gdl / 2))}'])[mask] - 273.15 # Conversion in °C.
-    T_ampl_t = np.array(variables[f'T_ampl_{int(np.ceil(nb_mpl / 2))}'])[mask] - 273.15 # Conversion in °C.
-    T_acl_t = np.array(variables['T_acl'])[mask] - 273.15  # Conversion in °C.
-    T_mem_t = np.array(variables['T_mem'])[mask] - 273.15 # Conversion in °C.
-    T_ccl_t = np.array(variables['T_ccl'])[mask] - 273.15 # Conversion in °C.
-    T_cmpl_t = np.array(variables[f'T_cmpl_{int(np.ceil(nb_mpl / 2))}'])[mask] - 273.15  # Conversion in °C.
-    T_cgdl_t = np.array(variables[f'T_cgdl_{int(np.ceil(nb_gdl / 2))}'])[mask] - 273.15 # Conversion in °C.
-    T_cgc_t = np.array(variables[f'T_cgc_{int(np.ceil(nb_gc / 2))}'])[mask] - 273.15 # Conversion in °C.
+    T_agc_t = np.array(variables['T_agc'][nb_gc_mid])[mask] - 273.15           # Conversion in °C.
+    T_agdl_t = np.array(variables[f'T_agdl_{int(np.ceil(nb_gdl / 2))}'][nb_gc_mid])[mask] - 273.15        # Conversion in °C.
+    T_ampl_t = np.array(variables[f'T_ampl_{int(np.ceil(nb_mpl / 2))}'][nb_gc_mid])[mask] - 273.15        # Conversion in °C.
+    T_acl_t = np.array(variables['T_acl'][nb_gc_mid])[mask] - 273.15                                      # Conversion in °C.
+    T_mem_t = np.array(variables['T_mem'][nb_gc_mid])[mask] - 273.15                                      # Conversion in °C.
+    T_ccl_t = np.array(variables['T_ccl'][nb_gc_mid])[mask] - 273.15                                      # Conversion in °C.
+    T_cmpl_t = np.array(variables[f'T_cmpl_{int(np.ceil(nb_mpl / 2))}'][nb_gc_mid])[mask] - 273.15        # Conversion in °C.
+    T_cgdl_t = np.array(variables[f'T_cgdl_{int(np.ceil(nb_gdl / 2))}'][nb_gc_mid])[mask] - 273.15        # Conversion in °C.
+    T_cgc_t = np.array(variables['T_cgc'][nb_gc_mid])[mask] - 273.15           # Conversion in °C.
 
     # Plot the temperature at different spatial localisations
     if type_current == "polarization":
@@ -1114,14 +1072,14 @@ def plot_P(variables, operating_inputs, parameters, ax):
         mask = np.ones_like(variables['t'], dtype=bool)
     t = np.array(variables['t'])[mask]
     nb_gc_mid = int(np.ceil(nb_gc / 2))
-    C_v_agc = np.array(variables[f'C_v_agc_{nb_gc_mid}'])[mask]
-    C_H2_agc = np.array(variables[f'C_H2_agc_{nb_gc_mid}'])[mask]
-    C_N2_agc = np.array(variables[f'C_N2_agc_{nb_gc_mid}'])[mask]
-    T_agc = np.array(variables[f'T_agc_{nb_gc_mid}'])[mask]
-    C_v_cgc = np.array(variables[f'C_v_cgc_{nb_gc_mid}'])[mask]
-    C_O2_cgc = np.array(variables[f'C_O2_cgc_{nb_gc_mid}'])[mask]
-    C_N2_cgc = np.array(variables[f'C_N2_cgc_{nb_gc_mid}'])[mask]
-    T_cgc = np.array(variables[f'T_cgc_{nb_gc_mid}'])[mask]
+    C_v_agc = np.array(variables['C_v_agc'][nb_gc_mid])[mask]
+    C_H2_agc = np.array(variables['C_H2_agc'][nb_gc_mid])[mask]
+    C_N2_agc = np.array(variables['C_N2_agc'][nb_gc_mid])[mask]
+    T_agc = np.array(variables['T_agc'][nb_gc_mid])[mask]
+    C_v_cgc = np.array(variables['C_v_cgc'][nb_gc_mid])[mask]
+    C_O2_cgc = np.array(variables['C_O2_cgc'][nb_gc_mid])[mask]
+    C_N2_cgc = np.array(variables['C_N2_cgc'][nb_gc_mid])[mask]
+    T_cgc = np.array(variables['T_cgc'][nb_gc_mid])[mask]
     Pagc_t = (C_v_agc + C_H2_agc + C_N2_agc) * R * T_agc / 1e5  # Conversion in bar
     Pcgc_t = (C_v_cgc + C_O2_cgc + C_N2_cgc) * R * T_cgc / 1e5 # Conversion in bar
     if parameters['type_auxiliary'] != 'no_auxiliary':
@@ -1177,6 +1135,7 @@ def plot_Phi_a(variables, operating_inputs, parameters, ax):
 
     # Extraction of the operating inputs and parameters
     Phi_a_des = operating_inputs['Phi_a_des']
+    nb_gc = parameters['nb_gc']
     type_current, type_plot = parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
         delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
@@ -1191,9 +1150,10 @@ def plot_Phi_a(variables, operating_inputs, parameters, ax):
         mask = np.array(variables['t']) >= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
+    nb_gc_mid = int(np.ceil(nb_gc / 2))  # Middle of the gas channel
     t = np.array(variables['t'])[mask]
-    C_v_agc_t = np.array(variables['C_v_agc'])[mask]
-    T_agc_t = np.array(variables['T_agc'])[mask]
+    C_v_agc_t = np.array(variables['C_v_agc'][nb_gc_mid])[mask]
+    T_agc_t = np.array(variables['T_agc'][nb_gc_mid])[mask]
     Phi_asm_t = np.array(variables['Phi_asm'])[mask]
     Phi_aem_t = np.array(variables['Phi_aem'])[mask]
 
@@ -1229,6 +1189,7 @@ def plot_Phi_c(variables, operating_inputs, parameters, ax):
 
     # Extraction of the operating inputs and parameters
     Phi_c_des = operating_inputs['Phi_c_des']
+    nb_gc = parameters['nb_gc']
     type_current, type_plot = parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
         delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
@@ -1243,9 +1204,10 @@ def plot_Phi_c(variables, operating_inputs, parameters, ax):
         mask = np.array(variables['t']) >= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
+    nb_gc_mid = int(np.ceil(nb_gc / 2))  # Middle of the gas channel
     t = np.array(variables['t'])[mask]
-    C_v_cgc_t = np.array(variables['C_v_cgc'])[mask]
-    T_cgc_t = np.array(variables['T_cgc'])[mask]
+    C_v_cgc_t = np.array(variables['C_v_cgc'][nb_gc_mid])[mask]
+    T_cgc_t = np.array(variables['T_cgc'][nb_gc_mid])[mask]
     Phi_csm_t = np.array(variables['Phi_csm'])[mask]
     Phi_cem_t = np.array(variables['Phi_cem'])[mask]
 
@@ -1265,82 +1227,6 @@ def plot_Phi_c(variables, operating_inputs, parameters, ax):
     # Plot instructions
     plot_general_instructions(ax)
 
-
-def plot_Phi_des(variables, operating_inputs, parameters, ax):
-    """This function plots the controlled or uncontrolled desired humidity at the anode and cathode as a function of the
-    current density.
-
-    Parameters
-    ax.plot(t, np.array([Phi_c_des]*len(t)), color='black', label=r'$\mathregular{\Phi_{c,des}}$')
-    variables : dict
-        Variables calculated by the solver. They correspond to the fuel cell internal states.
-    operating_inputs : dict
-        Operating inputs of the fuel cell.
-    parameters : dict
-        Parameters of the fuel cell model.
-    ax : matplotlib.axes.Axes
-        Axes on which the humidity will be plotted.
-    """
-
-    # Extraction of the operating inputs and the parameters
-    current_density = operating_inputs['current_density']
-    pola_current_parameters = parameters['pola_current_parameters']
-    type_current, type_plot = parameters['type_current'], parameters['type_plot']
-    if type_current == 'step':
-        delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
-    elif type_current == 'polarization':
-        delta_t_ini = parameters['pola_current_parameters']['delta_t_ini_pola']
-    elif type_current == 'polarization_for_cali':
-        delta_t_ini = parameters['pola_current_for_cali_parameters']['delta_t_ini_pola_cali']
-    else:
-        delta_t_ini = 0
-    # Extraction of the variables
-    if type_plot == "fixed":
-        mask = np.array(variables['t']) >= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
-    else: # type_plot == "dynamic"
-        mask = np.ones_like(variables['t'], dtype=bool)
-    t = np.array(variables['t'])[mask]
-    if parameters['type_control'] == "Phi_des":
-        Phi_a_des_t = variables['Phi_a_des'][mask]
-        Phi_c_des_t = variables['Phi_c_des'][mask]
-        ax.set_ylabel(r'$\mathbf{Controlled}$ $\mathbf{inlet}$ $\mathbf{humidity}$  $\mathbf{\Phi_{des}}$', labelpad=3)
-    else:
-        Phi_a_des_t = np.array([operating_inputs['Phi_a_des']] * len(t))
-        Phi_c_des_t = np.array([operating_inputs['Phi_c_des']] * len(t))
-        ax.set_ylabel(r'$\mathbf{Uncontrolled}$ $\mathbf{inlet}$ $\mathbf{humidity}$ $\mathbf{\Phi_{des}}$', labelpad=3)
-
-    # Plot Phi_des
-    n = len(t)
-    ifc_t = np.zeros(n)
-    for i in range(n):  # Creation of ifc_t
-        ifc_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
-
-    # Recovery of the internal states from the model after each stack stabilisation
-    delta_t_ini_pola = pola_current_parameters['delta_t_ini_pola']
-    delta_t_load_pola = pola_current_parameters['delta_t_load_pola']
-    delta_t_break_pola = pola_current_parameters['delta_t_break_pola']
-    nb_loads = int(pola_current_parameters['i_max_pola'] / pola_current_parameters['delta_i_pola'])  # Number of loads
-    ifc_discretized_t = np.zeros(nb_loads)
-    Phi_a_des_discretized_t, Phi_c_des_discretized_t = np.zeros(nb_loads), np.zeros(nb_loads)
-    for i in range(nb_loads):
-        t_load = delta_t_ini_pola + (i + 1) * (delta_t_load_pola + delta_t_break_pola)  # time for measurement
-        idx = (np.abs(t - t_load)).argmin()  # the corresponding index
-        ifc_discretized_t[i] = ifc_t[idx]  # the last value at the end of each load
-        Phi_a_des_discretized_t[i] = Phi_a_des_t[idx]  # the last value at the end of each load
-        Phi_c_des_discretized_t[i] = Phi_c_des_t[idx]  # the last value at the end of each load
-
-    ax.scatter(ifc_discretized_t, Phi_c_des_discretized_t, color=colors(6), label=r'$\mathregular{\Phi_{c,des}}$')
-    ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
-                  labelpad=3)
-    if parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
-       parameters['type_auxiliary'] == "no_auxiliary":
-        ax.scatter(ifc_discretized_t, Phi_a_des_discretized_t, color=colors(0), label=r'$\mathregular{\Phi_{a,des}}$')
-        ax.legend([r'$\mathregular{\Phi_{a,des}}$', r'$\mathregular{\Phi_{c,des}}$'], loc='best')
-    else:
-        ax.legend([r'$\mathregular{\Phi_{c,des}}$'], loc='best')
-
-    # Plot instructions
-    plot_general_instructions(ax)
 
 def plot_v(variables, parameters, ax):
     """This function plots the velocity at the anode and the cathode as a function of time.
@@ -1370,16 +1256,17 @@ def plot_v(variables, parameters, ax):
         mask = np.array(variables['t']) >= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
-    t = np.array(variables['t'])
-    v_a_in_t = np.array(variables['v_a_in'])
-    v_c_in_t = np.array(variables['v_c_in'])
+    nb_gc_mid = int(np.ceil(nb_gc / 2))  # Middle of the gas channel
+    t = np.array(variables['t'])[mask]
+    v_a_t = np.array(variables['v_a'][nb_gc_mid])[mask]
+    v_c_t = np.array(variables['v_c'][nb_gc_mid])[mask]
 
     # Plot the pressure at different spatial localisations: P
-    ax.plot(t, v_a_in_t, color=colors(0))
-    ax.plot(t, v_c_in_t, color=colors(6))
-    ax.legend([r'$\mathregular{v_{a,in}}$', r'$\mathregular{v_{c,in}}$'], loc='best')
+    ax.plot(t, v_a_t, color=colors(0))
+    ax.plot(t, v_c_t, color=colors(6))
+    ax.legend([r'$\mathregular{v_{a}}$', r'$\mathregular{v_{c}}$'], loc='best')
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
-    ax.set_ylabel(r'$\mathbf{Inlet velocities}$ $\mathbf{v}$ $\mathbf{\left( m.s^{-1} \right)}$', labelpad=3)
+    ax.set_ylabel(r'$\mathbf{Velocities at the middle of the GC}$ $\mathbf{v}$ $\mathbf{\left( m.s^{-1} \right)}$', labelpad=3)
     ax.ticklabel_format(style='scientific', axis='y', scilimits=(0, 0))
 
     # Plot instructions
@@ -1413,17 +1300,18 @@ def plot_Re_nb(variables, parameters, ax):
         mask = np.array(variables['t']) >= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
+    nb_gc_mid = int(np.ceil(nb_gc / 2))  # Middle of the gas channel
     t = np.array(variables['t'])
-    v_a_in_t = np.array(variables['v_a_in'])
-    v_c_in_t = np.array(variables['v_c_in'])
-    C_v_agc_t = np.array(variables['C_v_agc_1'])
-    C_v_cgc_t = np.array(variables['C_v_cgc_1'])
-    C_H2_agc_t = np.array(variables['C_H2_agc_1'])
-    C_O2_cgc_t = np.array(variables['C_O2_cgc_1'])
-    C_N2_agc_t = np.array(variables['C_N2_agc_1'])
-    C_N2_cgc_t = np.array(variables['C_N2_cgc_1'])
-    T_agc_t = np.array(variables['T_agc_1'])
-    T_cgc_t = np.array(variables['T_cgc_1'])
+    v_a_t = np.array(variables['v_a'][nb_gc_mid])
+    v_c_t = np.array(variables['v_c'][nb_gc_mid])
+    C_v_agc_t = np.array(variables['C_v_agc'][nb_gc_mid])
+    C_v_cgc_t = np.array(variables['C_v_cgc'][nb_gc_mid])
+    C_H2_agc_t = np.array(variables['C_H2_agc'][nb_gc_mid])
+    C_O2_cgc_t = np.array(variables['C_O2_cgc'][nb_gc_mid])
+    C_N2_agc_t = np.array(variables['C_N2_agc'][nb_gc_mid])
+    C_N2_cgc_t = np.array(variables['C_N2_cgc'][nb_gc_mid])
+    T_agc_t = np.array(variables['T_agc'][nb_gc_mid])
+    T_cgc_t = np.array(variables['T_cgc'][nb_gc_mid])
 
     # Calculation of the Reynold Number
     d_pipe = np.sqrt(4 * Hcgc * Wcgc / np.pi)
@@ -1447,8 +1335,8 @@ def plot_Re_nb(variables, parameters, ax):
     mu_cgc = mu_mixture_gases(['H2O_v', 'O2', 'N2'],
                               [x_H2O_v_cgc, y_O2_cgc * (1 - x_H2O_v_cgc), (1 - y_O2_cgc) * (1 - x_H2O_v_cgc)],
                               T_cgc_t)
-    Re_nb_a_t = (rho_agc * v_a_in_t * d_pipe) / mu_agc  # Reynolds number at the anode side
-    Re_nb_c_t = (rho_cgc * v_c_in_t * d_pipe) / mu_cgc  # Reynolds number at the anode side
+    Re_nb_a_t = (rho_agc * v_a_t * d_pipe) / mu_agc  # Reynolds number at the anode side
+    Re_nb_c_t = (rho_cgc * v_c_t * d_pipe) / mu_cgc  # Reynolds number at the anode side
 
     # Plot the pressure at different spatial localisations: P
     ax.plot(t, Re_nb_a_t, color=colors(0))
@@ -1486,7 +1374,7 @@ def plot_power_density_curve(variables, operating_inputs, parameters, n, ax):
     # Extraction of the operating inputs and the parameters
     current_density = operating_inputs['current_density']
     type_fuel_cell, type_current = parameters['type_fuel_cell'], parameters['type_current']
-    type_auxiliary, type_control = parameters['type_auxiliary'], parameters['type_control']
+    type_auxiliary = parameters['type_auxiliary']
 
     # Creation of the power density function: Pfc
     ifc_t, Pfc_t = np.zeros(n), np.zeros(n)
@@ -1495,7 +1383,7 @@ def plot_power_density_curve(variables, operating_inputs, parameters, n, ax):
         Pfc_t[i] = Ucell_t[i] * ifc_t[i]
 
     # Plot of the power density function: Pfc
-    plot_specific_line(ifc_t, Pfc_t, type_fuel_cell, type_current, type_auxiliary, type_control, None, ax)
+    plot_specific_line(ifc_t, Pfc_t, type_fuel_cell, type_current, type_auxiliary, None, ax)
     ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
                   labelpad=0)
     ax.set_ylabel(r'$\mathbf{Fuel}$ $\mathbf{cell}$ $\mathbf{power}$ $\mathbf{density}$ $\mathbf{P_{fc}}$ $\mathbf{\left( W.cm^{-2} \right)}$',
@@ -1523,15 +1411,17 @@ def plot_cell_efficiency(variables, operating_inputs, parameters, n, ax):
         Axes on which the fuel cell efficiency will be plotted.
     """
 
-    # Extraction of the variables
-    t, Ucell_t, lambda_mem_t = variables['t'], variables['Ucell'], variables['lambda_mem']
-    C_H2_acl_t, C_O2_ccl_t = variables['C_H2_acl'], variables['C_O2_ccl']
-    T_acl_t, T_mem_t, T_ccl_t = variables['T_acl'], variables['T_mem'], variables['T_ccl']
     # Extraction of the operating inputs and the parameters
     current_density = operating_inputs['current_density']
     Hmem, Hacl, Hccl, kappa_co = parameters['Hmem'], parameters['Hacl'], parameters['Hccl'], parameters['kappa_co']
-    type_fuel_cell, type_current = parameters['type_fuel_cell'], parameters['type_current']
-    type_auxiliary, type_control = parameters['type_auxiliary'], parameters['type_control']
+    nb_gc, type_fuel_cell, type_current = parameters['nb_gc'], parameters['type_fuel_cell'], parameters['type_current']
+    type_auxiliary = parameters['type_auxiliary']
+    # Extraction of the variables
+    nb_gc_mid = int(np.ceil(nb_gc / 2))  # Middle of the gas channel
+    t, Ucell_t, lambda_mem_t = variables['t'], variables['Ucell'], variables['lambda_mem'][nb_gc_mid]
+    C_H2_acl_t, C_O2_ccl_t = variables['C_H2_acl'][nb_gc_mid], variables['C_O2_ccl'][nb_gc_mid]
+    T_acl_t, T_mem_t = variables['T_acl'][nb_gc_mid], variables['T_mem'][nb_gc_mid]
+    T_ccl_t = variables['T_ccl'][nb_gc_mid]
 
     # Creation of the fuel cell efficiency: eta_fc
     ifc_t, Pfc_t, eta_fc_t = np.zeros(n), np.zeros(n), np.zeros(n)
@@ -1549,7 +1439,7 @@ def plot_cell_efficiency(variables, operating_inputs, parameters, n, ax):
         eta_fc_t[i] = Pfc_t[i] / (Ueq * (ifc_t[i] + i_n))
 
     # Plot of the fuel cell efficiency: eta_fc
-    plot_specific_line(ifc_t, eta_fc_t, type_fuel_cell, type_current, type_auxiliary, type_control, None, ax)
+    plot_specific_line(ifc_t, eta_fc_t, type_fuel_cell, type_current, type_auxiliary, None, ax)
     ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
                   labelpad=0)
     ax.set_ylabel(r'$\mathbf{Fuel}$ $\mathbf{cell}$ $\mathbf{efficiency}$ $\mathbf{\eta_{fc}}$', labelpad=0)
@@ -1583,7 +1473,7 @@ def calculate_simulation_error(Ucell, U_exp_t):
     return np.round(np.sqrt(np.mean(res1 ** 2)), 2)
 
 
-def plot_specific_line(x, y, type_fuel_cell, type_current, type_auxiliary, type_control, sim_error, ax):
+def plot_specific_line(x, y, type_fuel_cell, type_current, type_auxiliary, sim_error, ax):
     """ This function adds the appropriate plot configuration according to the type_input to the ax object.
 
     Parameters
@@ -1598,8 +1488,6 @@ def plot_specific_line(x, y, type_fuel_cell, type_current, type_auxiliary, type_
         Type of current density.
     type_auxiliary : str
         Type of auxiliary system.
-    type_control : str
-        Type of control system.
     sim_error : float
         Simulation error between the simulated cell voltage and the experimental cell voltage (in %).
     ax : matplotlib.axes.Axes
@@ -1658,10 +1546,7 @@ def plot_specific_line(x, y, type_fuel_cell, type_current, type_auxiliary, type_
         elif type_fuel_cell == "EH-31_2.0" and (type_auxiliary == "forced-convective_cathode_with_flow-through_anode" or type_auxiliary == "no_auxiliary"):
             ax.plot(x, y, '--', color=colors(1), label='Sim. - P = 2.0 bar' + r' - $ΔU_{RMSE}$ =' f' {sim_error} %')
         elif type_fuel_cell == "EH-31_2.0" and type_auxiliary != "forced-convective_cathode_with_flow-through_anode" and type_auxiliary != "no_auxiliary":
-            if type_control == "Phi_des":
-                ax.plot(x, y, color=colors(5), label=r'Sim. - P = 2.0 bar - controlled $\mathregular{\Phi_{des}}$')
-            else:
-                ax.plot(x, y, color=colors(1), label=r'Sim. - P = 2.0 bar - uncontrolled $\mathregular{\Phi_{des}}$')
+             ax.plot(x, y, color=colors(1), label=r'Sim. - P = 2.0 bar')
 
         elif type_fuel_cell == "EH-31_2.25" and (type_auxiliary == "forced-convective_cathode_with_flow-through_anode" or type_auxiliary == "no_auxiliary"):
             ax.plot(x, y, '--', color=colors(2), label='Sim. - P = 2.25 bar' + r' - $ΔU_{RMSE}$ =' f' {sim_error} %')
@@ -1728,10 +1613,7 @@ def plot_specific_line(x, y, type_fuel_cell, type_current, type_auxiliary, type_
         elif type_fuel_cell == "EH-31_2.0" and (type_auxiliary == "forced-convective_cathode_with_flow-through_anode" or type_auxiliary == "no_auxiliary"):
             ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(1), label='Sim. - P = 2.0 bar' + r' - $ΔU_{RMSE}$ =' f' {sim_error} %')
         elif type_fuel_cell == "EH-31_2.0" and type_auxiliary != "forced-convective_cathode_with_flow-through_anode" and type_auxiliary != "no_auxiliary":
-            if type_control == "Phi_des":
-                ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(5), label=r'Sim. - P = 2.0 bar - controlled $\mathregular{\Phi_{des}}$')
-            else:
-                ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(1), label=r'Sim. - P = 2.0 bar - uncontrolled $\mathregular{\Phi_{des}}$')
+            ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(1), label=r'Sim. - P = 2.0 bar')
 
         elif type_fuel_cell == "EH-31_2.25" and (type_auxiliary == "forced-convective_cathode_with_flow-through_anode" or type_auxiliary == "no_auxiliary"):
             ax.scatter(x, y, marker='o', linewidths=1.5, color=colors(2), label='Sim. - P = 2.25 bar' + r' - $ΔU_{RMSE}$ =' f' {sim_error} %')

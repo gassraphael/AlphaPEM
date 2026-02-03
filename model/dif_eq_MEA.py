@@ -100,18 +100,18 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc
 
     # At the anode side
     #       Inside the AGDL
-    Jl_agc_agdl_avg = (sum(Jl['agc_agdl'][1:nb_gc + 1]) / nb_gc) * (Wagc * Lgc) / (Aact / nb_channel_in_gc)             # Average liquid water flow from the gas channel to the GDL. There is a surface reduction due to the presence of the ribs, which is taken into account here.
+    Jl_agc_agdl_red = Jl['agc_agdl'] * (Wagc * Lgc) / (Aact / nb_channel_in_gc)                                         # There is a surface reduction due to the presence of the ribs, which is taken into account here.
     if nb_gdl == 1:
         dif_eq['ds_agdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_agdl_1']) * epsilon_gdl) * \
-                                   ((Jl_agc_agdl_avg - Jl['agdl_ampl']) / Hgdl + M_H2O * Sl['agdl'][1])
+                                   ((Jl_agc_agdl_red - Jl['agdl_ampl']) / Hgdl + M_H2O * Sl['agdl'][1])
     elif nb_gdl == 2:
         dif_eq['ds_agdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_agdl_1']) * epsilon_gdl) * \
-                                   ((Jl_agc_agdl_avg - Jl['agdl_agdl'][1]) / (Hgdl / nb_gdl) + M_H2O * Sl['agdl'][1])
+                                   ((Jl_agc_agdl_red - Jl['agdl_agdl'][1]) / (Hgdl / nb_gdl) + M_H2O * Sl['agdl'][1])
         dif_eq['ds_agdl_2 / dt'] = 1 / (rho_H2O_l(sv['T_agdl_2']) * epsilon_gdl) * \
                                    ((Jl['agdl_agdl'][1] - Jl['agdl_ampl']) / (Hgdl / nb_gdl) + M_H2O * Sl['agdl'][2])
     else: # n_gdl > 2
         dif_eq['ds_agdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_agdl_1']) * epsilon_gdl) * \
-                                     ((Jl_agc_agdl_avg - Jl['agdl_agdl'][1]) / (Hgdl / nb_gdl) + M_H2O * Sl['agdl'][1])
+                                     ((Jl_agc_agdl_red - Jl['agdl_agdl'][1]) / (Hgdl / nb_gdl) + M_H2O * Sl['agdl'][1])
         for i in range(2, nb_gdl):
             dif_eq[f'ds_agdl_{i} / dt'] = 1 / (rho_H2O_l(sv[f'T_agdl_{i}']) * epsilon_gdl) * \
                                           ((Jl['agdl_agdl'][i - 1] - Jl['agdl_agdl'][i]) / (Hgdl / nb_gdl) +
@@ -166,15 +166,15 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc
                                            ((Jl['cmpl_cmpl'][nb_mpl - 1] - Jl['cmpl_cgdl']) / (Hmpl / nb_mpl) +
                                             M_H2O * Sl['cmpl'][nb_mpl])
     #       Inside the CGDL
-    Jl_cgdl_cgc_avg = (sum(Jl['cgdl_cgc'][1:nb_gc + 1]) / nb_gc) * (Wcgc * Lgc) / (Aact / nb_channel_in_gc)             # Average liquid water flow from the gas channel to the GDL. There is a surface reduction due to the presence of the ribs, which is taken into account here.
+    Jl_cgdl_cgc_red = Jl['cgdl_cgc'] * (Wcgc * Lgc) / (Aact / nb_channel_in_gc)                                         # There is a surface reduction due to the presence of the ribs, which is taken into account here.
     if nb_gdl == 1:
         dif_eq['ds_cgdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_cgdl_1']) * epsilon_gdl) * \
-                                 ((Jl['cmpl_cgdl'] - Jl_cgdl_cgc_avg) / Hgdl + M_H2O * Sl['cgdl'][1])
+                                 ((Jl['cmpl_cgdl'] - Jl_cgdl_cgc_red) / Hgdl + M_H2O * Sl['cgdl'][1])
     elif nb_gdl == 2:
         dif_eq['ds_cgdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_cgdl_1']) * epsilon_gdl) * \
                                    ((Jl['cmpl_cgdl'] - Jl['cgdl_cgdl'][1]) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][1])
         dif_eq['ds_cgdl_2 / dt'] = 1 / (rho_H2O_l(sv['T_cgdl_2']) * epsilon_gdl) * \
-                                   ((Jl['cgdl_cgdl'][1] - Jl_cgdl_cgc_avg) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][2])
+                                   ((Jl['cgdl_cgdl'][1] - Jl_cgdl_cgc_red) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][2])
     else:
         dif_eq['ds_cgdl_1 / dt'] = 1 / (rho_H2O_l(sv['T_cgdl_1']) * epsilon_gdl) * \
                                    ((Jl['cmpl_cgdl'] - Jl['cgdl_cgdl'][1]) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][1])
@@ -182,7 +182,7 @@ def calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc
             dif_eq[f'ds_cgdl_{i} / dt'] = 1 / (rho_H2O_l(sv[f'T_cgdl_{i}']) * epsilon_gdl) * \
                                           ((Jl['cgdl_cgdl'][i - 1] - Jl['cgdl_cgdl'][i]) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][i])
         dif_eq[f'ds_cgdl_{nb_gdl} / dt'] = 1 / (rho_H2O_l(sv[f'T_cgdl_{nb_gdl}']) * epsilon_gdl) * \
-                                           ((Jl['cgdl_cgdl'][nb_gdl - 1] - Jl_cgdl_cgc_avg) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][nb_gdl])
+                                           ((Jl['cgdl_cgdl'][nb_gdl - 1] - Jl_cgdl_cgc_red) / (Hgdl / nb_gdl) + M_H2O * Sl['cgdl'][nb_gdl])
 
 
 def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, nb_channel_in_gc, Hgdl, Hmpl, Hacl,
@@ -236,18 +236,18 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, 
 
     # At the anode side
     #       Inside the AGDL
-    Jv_agc_agdl_avg = (sum(Jv['agc_agdl'][1:nb_gc+1]) / nb_gc) * (Wagc * Lgc) / (Aact / nb_channel_in_gc)               # Average vapor flow from the gas channel to the GDL. There is a surface reduction due to the presence of the ribs, which is taken into account here.
+    Jv_agc_agdl_red = Jv['agc_agdl'] * (Wagc * Lgc) / (Aact / nb_channel_in_gc)                                         # There is a surface reduction due to the presence of the ribs, which is taken into account here.
     if nb_gdl == 1:
         dif_eq['dC_v_agdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_agdl_1'])) * \
-                                   ((Jv_agc_agdl_avg - Jv['agdl_ampl']) / Hgdl + Sv['agdl'][1])
+                                   ((Jv_agc_agdl_red - Jv['agdl_ampl']) / Hgdl + Sv['agdl'][1])
     elif nb_gdl == 2:
         dif_eq['dC_v_agdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_agdl_1'])) * \
-                                   ((Jv_agc_agdl_avg - Jv['agdl_agdl'][1]) / (Hgdl / nb_gdl) + Sv['agdl'][1])
+                                   ((Jv_agc_agdl_red - Jv['agdl_agdl'][1]) / (Hgdl / nb_gdl) + Sv['agdl'][1])
         dif_eq['dC_v_agdl_2 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_agdl_2'])) * \
                                    ((Jv['agdl_agdl'][1] - Jv['agdl_ampl']) / (Hgdl / nb_gdl) + Sv['agdl'][2])
     else: # n_gdl > 2
         dif_eq['dC_v_agdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_agdl_1'])) * \
-                                     ((Jv_agc_agdl_avg - Jv['agdl_agdl'][1]) / (Hgdl / nb_gdl) + Sv['agdl'][1])
+                                     ((Jv_agc_agdl_red - Jv['agdl_agdl'][1]) / (Hgdl / nb_gdl) + Sv['agdl'][1])
         for i in range(2, nb_gdl):
             dif_eq[f'dC_v_agdl_{i} / dt'] = 1 / (epsilon_gdl * (1 - sv[f's_agdl_{i}'])) * \
                                             ((Jv['agdl_agdl'][i - 1] - Jv['agdl_agdl'][i]) / (Hgdl / nb_gdl) + Sv['agdl'][i])
@@ -296,15 +296,15 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, 
         dif_eq[f'dC_v_cmpl_{nb_mpl} / dt'] = 1 / (epsilon_mpl * (1 - sv[f's_cmpl_{nb_mpl}'])) * \
                                              ((Jv['cmpl_cmpl'][nb_mpl - 1] - Jv['cmpl_cgdl']) / (Hmpl / nb_mpl) + Sv['cmpl'][nb_mpl])
     #       Inside the CGDL
-    Jv_cgdl_cgc_avg = (sum(Jv['cgdl_cgc'][1:nb_gc + 1]) / nb_gc) * (Wcgc * Lgc) / (Aact / nb_channel_in_gc)             # Average vapor flow from the GDL to the gas channel. There is a surface reduction due to the presence of the ribs, which is taken into account here.
+    Jv_cgdl_cgc_red = Jv['cgdl_cgc'] * (Wcgc * Lgc) / (Aact / nb_channel_in_gc)                                         # There is a surface reduction due to the presence of the ribs, which is taken into account here.
     if nb_gdl == 1:
-        dif_eq['dC_v_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * ((Jv['cmpl_cgdl'] - Jv_cgdl_cgc_avg) / Hgdl +
+        dif_eq['dC_v_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * ((Jv['cmpl_cgdl'] - Jv_cgdl_cgc_red) / Hgdl +
                                                                                  Sv['cgdl'][1])
     elif nb_gdl == 2:
         dif_eq['dC_v_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * \
                                    ((Jv['cmpl_cgdl'] - Jv['cgdl_cgdl'][1]) / (Hgdl / nb_gdl) + Sv['cgdl'][1])
         dif_eq['dC_v_cgdl_2 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_2'])) * \
-                                   ((Jv['cgdl_cgdl'][1] - Jv_cgdl_cgc_avg) / (Hgdl / nb_gdl) + Sv['cgdl'][2])
+                                   ((Jv['cgdl_cgdl'][1] - Jv_cgdl_cgc_red) / (Hgdl / nb_gdl) + Sv['cgdl'][2])
     else: # n_gdl > 2
         dif_eq['dC_v_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * \
                                      ((Jv['cmpl_cgdl'] - Jv['cgdl_cgdl'][1]) / (Hgdl / nb_gdl) + Sv['cgdl'][1])
@@ -312,7 +312,7 @@ def calculate_dyn_vapor_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, 
             dif_eq[f'dC_v_cgdl_{i} / dt'] = 1 / (epsilon_gdl * (1 - sv[f's_cgdl_{i}'])) * \
                                             ((Jv['cgdl_cgdl'][i - 1] - Jv['cgdl_cgdl'][i]) / (Hgdl / nb_gdl) + Sv['cgdl'][i])
         dif_eq[f'dC_v_cgdl_{nb_gdl} / dt'] = 1 / (epsilon_gdl * (1 - sv[f's_cgdl_{nb_gdl}'])) * \
-                                             ((Jv['cgdl_cgdl'][nb_gdl - 1] - Jv_cgdl_cgc_avg) / (Hgdl / nb_gdl) + Sv['cgdl'][nb_gdl])
+                                             ((Jv['cgdl_cgdl'][nb_gdl - 1] - Jv_cgdl_cgc_red) / (Hgdl / nb_gdl) + Sv['cgdl'][nb_gdl])
 
 
 def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lgc, nb_channel_in_gc, Hgdl, Hmpl, Hacl,
@@ -366,18 +366,18 @@ def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lg
 
     # At the anode side
     #      Inside the AGDL
-    J_H2_agc_agdl_avg = (sum(J_H2['agc_agdl'][1:nb_gc + 1]) / nb_gc) * (Wagc * Lgc) / (Aact / nb_channel_in_gc)         # Average hydrogen flow from the gas channel to the GDL. There is a surface reduction due to the presence of the ribs, which is taken into account here.
+    J_H2_agc_agdl_red = J_H2['agc_agdl'] * (Wagc * Lgc) / (Aact / nb_channel_in_gc)         # There is a surface reduction due to the presence of the ribs, which is taken into account here.
     if nb_gdl == 1:
         dif_eq['dC_H2_agdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_agdl_1'])) * \
-                                      (J_H2_agc_agdl_avg - J_H2['agdl_ampl']) / Hgdl
+                                      (J_H2_agc_agdl_red - J_H2['agdl_ampl']) / Hgdl
     elif nb_gdl == 2:
         dif_eq['dC_H2_agdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_agdl_1'])) * \
-                                      (J_H2_agc_agdl_avg - J_H2['agdl_agdl'][1]) / (Hgdl / nb_gdl)
+                                      (J_H2_agc_agdl_red - J_H2['agdl_agdl'][1]) / (Hgdl / nb_gdl)
         dif_eq['dC_H2_agdl_2 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_agdl_2'])) * \
                                       (J_H2['agdl_agdl'][1] - J_H2['agdl_ampl']) / (Hgdl / nb_gdl)
     else: # n_gdl > 2
         dif_eq['dC_H2_agdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_agdl_1'])) * \
-                                      (J_H2_agc_agdl_avg - J_H2['agdl_agdl'][1]) / (Hgdl / nb_gdl)
+                                      (J_H2_agc_agdl_red - J_H2['agdl_agdl'][1]) / (Hgdl / nb_gdl)
         for i in range(2, nb_gdl):
             dif_eq[f'dC_H2_agdl_{i} / dt'] = 1 / (epsilon_gdl * (1 - sv[f's_agdl_{i}'])) * \
                                              (J_H2['agdl_agdl'][i - 1] - J_H2['agdl_agdl'][i]) / (Hgdl / nb_gdl)
@@ -424,14 +424,14 @@ def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lg
         dif_eq[f'dC_O2_cmpl_{nb_mpl} / dt'] = 1 / (epsilon_mpl * (1 - sv[f's_cmpl_{nb_mpl}'])) * \
                                               (J_O2['cmpl_cmpl'][nb_mpl - 1] - J_O2['cmpl_cgdl']) / (Hmpl / nb_mpl)
     #      Inside the CGDL
-    J_O2_cgdl_cgc_avg = (sum(J_O2['cgdl_cgc'][1:nb_gc + 1]) / nb_gc) * (Wcgc * Lgc) / (Aact / nb_channel_in_gc)         # Average oxygen flow from the GDL to the gas channel. There is a surface reduction due to the presence of the ribs, which is taken into account here.
+    J_O2_cgdl_cgc_red = J_O2['cgdl_cgc'] * (Wcgc * Lgc) / (Aact / nb_channel_in_gc)                                     # There is a surface reduction due to the presence of the ribs, which is taken into account here.
     if nb_gdl == 1:
-        dif_eq['dC_O2_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * (J_O2['cmpl_cgdl'] - J_O2_cgdl_cgc_avg) / Hgdl
+        dif_eq['dC_O2_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * (J_O2['cmpl_cgdl'] - J_O2_cgdl_cgc_red) / Hgdl
     elif nb_gdl == 2:
         dif_eq['dC_O2_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * \
                                       (J_O2['cmpl_cgdl'] - J_O2['cgdl_cgdl'][1]) / (Hgdl / nb_gdl)
         dif_eq['dC_O2_cgdl_2 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_2'])) * \
-                                      (J_O2['cgdl_cgdl'][1] - J_O2_cgdl_cgc_avg) / (Hgdl / nb_gdl)
+                                      (J_O2['cgdl_cgdl'][1] - J_O2_cgdl_cgc_red) / (Hgdl / nb_gdl)
     else:
         dif_eq['dC_O2_cgdl_1 / dt'] = 1 / (epsilon_gdl * (1 - sv['s_cgdl_1'])) * \
                                       (J_O2['cmpl_cgdl'] - J_O2['cgdl_cgdl'][1]) / (Hgdl / nb_gdl)
@@ -439,7 +439,7 @@ def calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq, sv, Aact, Wagc, Wcgc, Lg
             dif_eq[f'dC_O2_cgdl_{i} / dt'] = 1 / (epsilon_gdl * (1 - sv[f's_cgdl_{i}'])) * \
                                              (J_O2['cgdl_cgdl'][i - 1] - J_O2['cgdl_cgdl'][i]) / (Hgdl / nb_gdl)
         dif_eq[f'dC_O2_cgdl_{nb_gdl} / dt'] = 1 / (epsilon_gdl * (1 - sv[f's_cgdl_{nb_gdl}'])) * \
-                                              (J_O2['cgdl_cgdl'][nb_gdl - 1] - J_O2_cgdl_cgc_avg) / (Hgdl / nb_gdl)
+                                              (J_O2['cgdl_cgdl'][nb_gdl - 1] - J_O2_cgdl_cgc_red) / (Hgdl / nb_gdl)
 
 
 def calculate_dyn_temperature_evolution_inside_MEA(dif_eq, Hgdl, Hmpl, Hacl, Hccl, Hmem, nb_gdl, nb_mpl, rho_Cp0, Jt,

@@ -43,12 +43,6 @@ def main():
     # Auxiliary system possibilities: "forced-convective_cathode_with_anodic_recirculation",
     #                                 "forced-convective_cathode_with_flow-through_anode", "no_auxiliary".
     type_auxiliary = "no_auxiliary"
-    # Control strategy for the operating inputs: "Phi_des", "no_control".
-    type_control_1 = "no_control"
-    type_control_2 = "no_control"
-    type_control_3 = "no_control"
-    type_control_4 = "no_control"
-    type_control_5 = "no_control"
     # Purges possibilities: "constant_purge", "periodic_purge", "no_purge".
     type_purge = "no_purge"
     # Display possibilities: "multiple", "synthetic", "no_display".
@@ -115,8 +109,6 @@ def main():
                                                type_fuel_cell_4, type_fuel_cell_5],
                             'type_current': type_current, 'voltage_zone': voltage_zone,
                             'type_auxiliary': type_auxiliary,
-                            'type_control': [None, type_control_1, type_control_2, type_control_3, type_control_4,
-                                             type_control_5],
                             'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}
 
     # Check if the type_current is valid and launch the simulation
