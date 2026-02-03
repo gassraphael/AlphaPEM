@@ -54,18 +54,18 @@ def calculate_velocity_evolution(sv, i_fc, operating_inputs, parameters):
     nb_channel_in_gc, nb_cell, type_auxiliary = parameters['nb_channel_in_gc'], parameters['nb_cell'], parameters['type_auxiliary']
     nb_gc, nb_gdl = parameters['nb_gc'], parameters['nb_gdl']
     # Extraction of the variables
-    C_v_agc = [None] + [sv[i][f'C_v_agc'] for i in range(1, nb_gc + 1)]
-    C_v_agdl_1 = [None] + [sv[i][f'C_v_agdl_1'] for i in range(1, nb_gc + 1)]
+    C_v_agc = [None] + [sv[i]['C_v_agc'] for i in range(1, nb_gc + 1)]
+    C_v_agdl_1 = [None] + [sv[i]['C_v_agdl_1'] for i in range(1, nb_gc + 1)]
     C_v_cgdl_nb_gdl = [None] + [sv[i][f'C_v_cgdl_{nb_gdl}'] for i in range(1, nb_gc + 1)]
-    C_v_cgc = [None] + [sv[i][f'C_v_cgc'] for i in range(1, nb_gc + 1)]
-    C_H2_agc = [None] + [sv[i][f'C_H2_agc'] for i in range(1, nb_gc + 1)]
-    C_H2_agdl_1 = [None] + [sv[i][f'C_H2_agdl_1'] for i in range(1, nb_gc + 1)]
+    C_v_cgc = [None] + [sv[i]['C_v_cgc'] for i in range(1, nb_gc + 1)]
+    C_H2_agc = [None] + [sv[i]['C_H2_agc'] for i in range(1, nb_gc + 1)]
+    C_H2_agdl_1 = [None] + [sv[i]['C_H2_agdl_1'] for i in range(1, nb_gc + 1)]
     C_O2_cgdl_nb_gdl = [None] + [sv[i][f'C_O2_cgdl_{nb_gdl}'] for i in range(1, nb_gc + 1)]
-    C_O2_cgc = [None] + [sv[i][f'C_O2_cgc'] for i in range(1, nb_gc + 1)]
-    C_N2_agc = [None] + [sv[i][f'C_N2_agc'] for i in range(1, nb_gc + 1)]
-    C_N2_cgc = [None] + [sv[i][f'C_N2_cgc'] for i in range(1, nb_gc + 1)]
-    T_agc = [None] + [sv[i][f'T_agc'] for i in range(1, nb_gc + 1)]
-    T_cgc = [None] + [sv[i][f'T_cgc'] for i in range(1, nb_gc + 1)]
+    C_O2_cgc = [None] + [sv[i]['C_O2_cgc'] for i in range(1, nb_gc + 1)]
+    C_N2_agc = [None] + [sv[i]['C_N2_agc'] for i in range(1, nb_gc + 1)]
+    C_N2_cgc = [None] + [sv[i]['C_N2_cgc'] for i in range(1, nb_gc + 1)]
+    T_agc = [None] + [sv[i]['T_agc'] for i in range(1, nb_gc + 1)]
+    T_cgc = [None] + [sv[i]['T_cgc'] for i in range(1, nb_gc + 1)]
 
     # Intermediate calculation
     #       Length of one gas channel node (m).
@@ -244,13 +244,32 @@ def desired_flows(solver_variables, i_fc, Pa_in, Pc_in, operating_inputs, parame
         Desired humidifier flow rate at the cathode side (kg/s).
     """
 
-    # Extraction of the variables
-    # Pasm, Pcsm, Wcp = solver_variables.get('Pasm', None), solver_variables.get('Pcsm', None), solver_variables.get('Wcp', None)
     # Extraction of the operating inputs and the parameters
     T_des, Sa, Sc = operating_inputs['T_des'], operating_inputs['Sa'], operating_inputs['Sc']
     Phi_a_des, Phi_c_des = operating_inputs['Phi_a_des'], operating_inputs['Phi_c_des']
     y_H2_in = operating_inputs['y_H2_in']
-    Aact, nb_cell, type_auxiliary = parameters['Aact'], parameters['nb_cell'], parameters['type_auxiliary']
+    kappa_co = parameters['kappa_co']
+    Hacl, Hmem, Hccl, Aact = parameters['Hacl'], parameters['Hmem'], parameters['Hccl'], parameters['Aact']
+    nb_gc, nb_cell, type_auxiliary = parameters['nb_gc'], parameters['nb_cell'], parameters['type_auxiliary']
+    # Extraction of the variables
+    # Pasm, Pcsm, Wcp = solver_variables.get('Pasm', None), solver_variables.get('Pcsm', None), solver_variables.get('Wcp', None)
+    C_H2_acl = [None] + [solver_variables[i]['C_H2_acl'] for i in range(1, nb_gc + 1)]
+    C_O2_ccl = [None] + [solver_variables[i]['C_O2_ccl'] for i in range(1, nb_gc + 1)]
+    lambda_mem = [None] + [solver_variables[i]['lambda_mem'] for i in range(1, nb_gc + 1)]
+    T_acl = [None] + [solver_variables[i]['T_acl'] for i in range(1, nb_gc + 1)]
+    T_mem = [None] + [solver_variables[i]['T_mem'] for i in range(1, nb_gc + 1)]
+    T_ccl = [None] + [solver_variables[i]['T_ccl'] for i in range(1, nb_gc + 1)]
+
+    # Physical quantities inside the stack
+    #       The crossover current density i_n
+    i_n = []
+    for i in range(1, nb_gc + 1):
+        T_acl_mem_ccl = average([T_acl[i], T_mem[i], T_ccl[i]],
+                                weights=[Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl),
+                                         Hccl / (Hacl + Hmem + Hccl)])
+        i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl[i] * k_H2(lambda_mem[i], T_mem[i], kappa_co)
+        i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl[i] * k_O2(lambda_mem[i], T_mem[i], kappa_co)
+        i_n += [i_H2 + i_O2]
 
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
        type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
@@ -277,11 +296,11 @@ def desired_flows(solver_variables, i_fc, Pa_in, Pc_in, operating_inputs, parame
 
     else:  # elif type_auxiliary == "no_auxiliary":
         # At the anode side
-        W_H2_des = Sa * max(i_fc, i_min_inlet_flows) / (2 * F) * (nb_cell * Aact)
+        W_H2_des = Sa * (i_fc + max(i_n)) / (2 * F) * (nb_cell * Aact)
         W_H2O_inj_a_des = (Phi_a_des * Psat(T_des) / (Pa_in - Phi_a_des * Psat(T_des))) * W_H2_des
 
         # At the cathode side
-        W_dry_air_des = 1 / y_O2_ext * Sc * max(i_fc, i_min_inlet_flows) / (4 * F) * (nb_cell * Aact)
+        W_dry_air_des = 1 / y_O2_ext * Sc * (i_fc + max(i_n)) / (4 * F) * (nb_cell * Aact)
         W_H2O_inj_c_des = (Phi_c_des * Psat(T_des) / (Pc_in - Phi_c_des * Psat(T_des))) * W_dry_air_des
 
     return {'H2': W_H2_des, 'dry_air': W_dry_air_des, 'H2O_inj_a': W_H2O_inj_a_des, 'H2O_inj_c': W_H2O_inj_c_des}
