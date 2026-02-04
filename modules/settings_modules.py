@@ -59,7 +59,7 @@ def stored_operating_inputs(type_fuel_cell, voltage_zone):
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         y_H2_in = 0.7 # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
         if voltage_zone == "full":
-            i_max_pola = 2.200e4  # A.m-2. It is the maximum current density for the polarization curve.
+            i_max_pola = 2.150e4  # A.m-2. It is the maximum current density for the polarization curve.
         elif voltage_zone == "before_voltage_drop":
             i_max_pola = 0.700e4 # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81":
@@ -69,7 +69,7 @@ def stored_operating_inputs(type_fuel_cell, voltage_zone):
         Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
         y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
         if voltage_zone == "full":
-            i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+            i_max_pola = 2.450e4  # A.m-2. It is the maximum current density for the polarization curve.
         elif voltage_zone == "before_voltage_drop":
             i_max_pola = 1.300e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2":
@@ -131,7 +131,7 @@ def stored_operating_inputs(type_fuel_cell, voltage_zone):
         Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
         y_H2_in = 1 # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
         if voltage_zone == "full":
-            i_max_pola = 2.300e4  # A.m-2. It is the maximum current density for the polarization curve.
+            i_max_pola = 2.250e4  # A.m-2. It is the maximum current density for the polarization curve.
         elif voltage_zone == "before_voltage_drop":
             i_max_pola = 1.700e4  # A.m-2. It is the maximum current density for the polarization curve.
     elif type_fuel_cell == "EH-31_2.0":
@@ -227,13 +227,13 @@ def stored_physical_parameters(type_fuel_cell):
         Aact = 283.87e-4  # m². It is the MEA active area.
         nb_cell = 26  # . It is the number of cell in the stack.
         # Catalyst layer
-        Hacl = 9.76346510970484e-6  # m. It is the thickness of the anode catalyst layer.
-        Hccl = 5.307345509355617e-6  # m. It is the thickness of the cathode catalyst layer.
+        Hacl = 8.112569325675836e-6  # m. It is the thickness of the anode catalyst layer.
+        Hccl = 7.605652607044295e-6  # m. It is the thickness of the cathode catalyst layer.
         # Membrane
-        Hmem = 10.684275696739961e-06  # m. It is the thickness of the membrane.
+        Hmem = 13.646579963107156e-06  # m. It is the thickness of the membrane.
         # Gas diffusion layer
-        Hgdl = 103.92479846707957e-6  # m. It is the thickness of the gas diffusion layer.
-        epsilon_gdl = 0.8184931467542469  # It is the anode/cathode GDL porosity.
+        Hgdl = 121.28496643671034e-6  # m. It is the thickness of the gas diffusion layer.
+        epsilon_gdl = 0.8436478459989776  # It is the anode/cathode GDL porosity.
         epsilon_c = 0.2  # It is the compression ratio of the GDL.
         #   Microporous layer
         Hmpl = 43.98306893354156e-6  # m. It is the thickness of the microporous layer.
@@ -253,13 +253,13 @@ def stored_physical_parameters(type_fuel_cell):
         Vasm, Vcsm = Lm * A_T_a, Lm * A_T_c  # m3. It is the supply manifold volume.
         Vaem, Vcem = Vasm, Vcsm  # m-3. It is the exhaust manifold volume.
         # Interaction parameters between fluids and PEMFC structure
-        e = 4.0  # It is the capillary exponent
-        K_O2_ad_Pt = 5.4  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
+        e = 3.0  # It is the capillary exponent
+        K_O2_ad_Pt = 7.346634385810734  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
         # Voltage polarization
-        Re = 6.635540741264315e-8  # ohm.m². It is the electron conduction resistance of the circuit.
-        i0_c_ref = 3.1021792383083717  # A.m-2. It is the dry reference exchange current density at the cathode.
-        kappa_co = 3.6088595047482706 # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
-        kappa_c = 0.6404199981185146  # It is the overpotential correction exponent.
+        Re = 1.545654084145453e-7  # ohm.m². It is the electron conduction resistance of the circuit.
+        i0_c_ref = 15  # A.m-2. It is the dry reference exchange current density at the cathode.
+        kappa_co = 21.423681082096856 # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
+        kappa_c = 0.253020870903792  # It is the overpotential correction exponent.
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
 
     # For EH-31 fuel cell

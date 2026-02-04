@@ -184,8 +184,15 @@ def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, acces
 
             # Recovery of the internal states from the end of the preceding simulation.
             initial_variable_values = []
-            for x in Simulator.solver_variable_names:
-                initial_variable_values.append(Simulator.variables[x][-1])
+            for i in range(1, computing_parameters['nb_gc'] + 1):
+                for key in Simulator.solver_variable_names[0]:
+                    initial_variable_values.append(Simulator.variables[key][i][-1])
+            if computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
+                    computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_anodic_recirculation":
+                for key in Simulator.solver_variable_names[1]:
+                    initial_variable_values.append(Simulator.variables[key][-1])
+                for key in Simulator.solver_variable_names[2]:
+                    initial_variable_values.append(Simulator.variables[key][-1])
 
             # Display
             if computing_parameters['type_display'] != "no_display":
@@ -305,8 +312,15 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
 
             # Recovery of the internal states from the end of the preceding simulation.
             initial_variable_values = []
-            for x in Simulator_1.solver_variable_names:
-                initial_variable_values.append(Simulator_1.variables[x][-1])
+            for i in range(1, computing_parameters['nb_gc'] + 1):
+                for key in Simulator_1.solver_variable_names[0]:
+                    initial_variable_values.append(Simulator_1.variables[key][i][-1])
+            if computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
+                    computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_anodic_recirculation":
+                for key in Simulator_1.solver_variable_names[1]:
+                    initial_variable_values.append(Simulator_1.variables[key][-1])
+                for key in Simulator_1.solver_variable_names[2]:
+                    initial_variable_values.append(Simulator_1.variables[key][-1])
 
             # Display
             if computing_parameters['type_display'] != "no_display":
@@ -425,8 +439,15 @@ def launch_AlphaPEM_for_polarization_current_for_calibration(operating_inputs, c
 
             # Recovery of the internal states from the end of the preceding simulation.
             initial_variable_values = []
-            for x in Simulator_1.solver_variable_names:
-                initial_variable_values.append(Simulator_1.variables[x][-1])
+            for i in range(1, computing_parameters['nb_gc'] + 1):
+                for key in Simulator_1.solver_variable_names[0]:
+                    initial_variable_values.append(Simulator_1.variables[key][i][-1])
+            if computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
+                    computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_anodic_recirculation":
+                for key in Simulator_1.solver_variable_names[1]:
+                    initial_variable_values.append(Simulator_1.variables[key][-1])
+                for key in Simulator_1.solver_variable_names[2]:
+                    initial_variable_values.append(Simulator_1.variables[key][-1])
 
             # Display
             if computing_parameters['type_display'] != "no_display":
@@ -538,8 +559,15 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
 
     # Recovery of the internal states from the end of the preceding simulation.
     initial_variable_values = []
-    for x in Simulator.solver_variable_names:
-        initial_variable_values.append(Simulator.variables[x][-1])
+    for i in range(1, computing_parameters['nb_gc'] + 1):
+        for key in Simulator.solver_variable_names[0]:
+            initial_variable_values.append(Simulator.variables[key][i][-1])
+    if computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
+            computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_anodic_recirculation":
+        for key in Simulator.solver_variable_names[1]:
+            initial_variable_values.append(Simulator.variables[key][-1])
+        for key in Simulator.solver_variable_names[2]:
+            initial_variable_values.append(Simulator.variables[key][-1])
 
     if computing_parameters['type_display'] == "multiple":
         print("A display bug prevents the dynamic updating of the graphs, as it appears that too much data is "
@@ -563,8 +591,15 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
 
         # Recovery of the internal states from the end of the preceding simulation.
         initial_variable_values = []
-        for x in Simulator.solver_variable_names:
-            initial_variable_values.append(Simulator.variables[x][-1])
+        for i in range(1, computing_parameters['nb_gc'] + 1):
+            for key in Simulator.solver_variable_names[0]:
+                initial_variable_values.append(Simulator.variables[key][i][-1])
+        if computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
+                computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_anodic_recirculation":
+            for key in Simulator.solver_variable_names[1]:
+                initial_variable_values.append(Simulator.variables[key][-1])
+            for key in Simulator.solver_variable_names[2]:
+                initial_variable_values.append(Simulator.variables[key][-1])
 
         # Display
         if computing_parameters['type_display'] != "no_display":

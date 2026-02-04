@@ -65,7 +65,7 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
         K_O2_ad_Pt_min, K_O2_ad_Pt_max = 1, 10  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
         #       Voltage polarization
         Re_min, Re_max = 5e-8, 5e-6  # Ω.m². It is the electron conduction resistance of the circuit.
-        i0_c_ref_min, i0_c_ref_max = 1e-1, 80  # A.m-2.It is the dry reference exchange current density at the cathode.
+        i0_c_ref_min, i0_c_ref_max = 1e-1, 100  # A.m-2.It is the dry reference exchange current density at the cathode.
         kappa_co_min, kappa_co_max = 0.01, 40  # A.m-2. It is the crossover correction coefficient.
         kappa_c_min, kappa_c_max = 0.25, 4  # It is the overpotential correction exponent.
         #       Undetermined parameter which is not considered yet (require the use of EIS curves to be calibrated)
@@ -347,8 +347,8 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
 
         # Computing parameters
         nb_gc = 1  # It is the number of model points placed inside each gas channel.
-        nb_gdl = max(1, int(Hgdl / Hacl / 4))  # It is the number of model points placed inside each GDL.
-        nb_mpl = max(1, int(Hmpl / Hacl / 3))  # It is the number of model points placed inside each MPL.
+        nb_gdl = 3  # It is the number of model points placed inside each GDL.
+        nb_mpl = 2  # It is the number of model points placed inside each MPL.
 
     elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
             type_fuel_cell == "EH-31_2.5":
@@ -414,8 +414,8 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
 
         # Computing parameters
         nb_gc = 1  # It is the number of model points placed inside each gas channel.
-        nb_gdl = max(1, int(Hgdl / Hacl / 4))  # It is the number of model points placed inside each GDL.
-        nb_mpl = max(1, int(Hmpl / Hacl / 3))  # It is the number of model points placed inside each MPL.
+        nb_gdl = 3  # It is the number of model points placed inside each GDL.
+        nb_mpl = 2  # It is the number of model points placed inside each MPL.
 
     else:
         ValueError("A correct type_fuel_cell should be given.")

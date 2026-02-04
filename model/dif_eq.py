@@ -17,13 +17,13 @@ from model.flows_1D_MEA import calculate_flows_1D_MEA
 from model.cell_voltage import calculate_C_O2_Pt
 from model.heat_transfer import calculate_heat_transfers
 from modules.dif_eq_modules import calculate_dif_eq_int_values
-from model.dif_eq_MEA import (calculate_dyn_dissoved_water_evolution_inside_MEA, calculate_dyn_liquid_water_evolution_inside_MEA,
-                              calculate_dyn_vapor_evolution_inside_MEA, calculate_dyn_H2_O2_N2_evolution_inside_MEA,
-                              calculate_dyn_voltage_evolution, calculate_dyn_temperature_evolution_inside_MEA)
-from model.dif_eq_GC_manifold import (calculate_dyn_gas_evolution_inside_gas_channel,
-                                      calculate_dyn_temperature_evolution_inside_gas_channel,
-                                      calculate_dyn_manifold_pressure_and_humidity_evolution,
-                                      calculate_dyn_liq_evolution_inside_gas_channel)
+from model.dif_eq_1D_MEA import (calculate_dyn_dissoved_water_evolution_inside_MEA, calculate_dyn_liquid_water_evolution_inside_MEA,
+                                 calculate_dyn_vapor_evolution_inside_MEA, calculate_dyn_H2_O2_N2_evolution_inside_MEA,
+                                 calculate_dyn_voltage_evolution, calculate_dyn_temperature_evolution_inside_MEA)
+from model.dif_eq_1D_GC_manifold import (calculate_dyn_gas_evolution_inside_gas_channel,
+                                         calculate_dyn_temperature_evolution_inside_gas_channel,
+                                         calculate_dyn_manifold_pressure_and_humidity_evolution,
+                                         calculate_dyn_liq_evolution_inside_gas_channel)
 from model.dif_eq_auxiliaries import (calculate_dyn_air_compressor_evolution, calculate_dyn_humidifier_evolution,
                                       calculate_dyn_throttle_area_controler)
 

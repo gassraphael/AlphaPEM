@@ -46,7 +46,12 @@ def calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, Hccl, K_O2_ad_Pt
     in PEM Fuel Cells.
     """
 
-    return C_O2_ccl - i_fc / (4 * F * Hccl) * R_T_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, K_O2_ad_Pt) / a_c(lambda_ccl, T_ccl, Hccl)
+    C_O2_Pt = C_O2_ccl - i_fc / (4 * F * Hccl) * R_T_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, K_O2_ad_Pt) / a_c(lambda_ccl, T_ccl, Hccl)
+
+    if C_O2_Pt <= 0:
+        raise ValueError("Calculated C_O2_Pt is non-physical (negative or zero). Check input parameters and variables.")
+
+    return C_O2_Pt
 
 
 def calculate_cell_voltage(variables, operating_inputs, parameters):
