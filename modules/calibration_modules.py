@@ -62,6 +62,7 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
         epsilon_gdl_min, epsilon_gdl_max = 0.5, 0.9  # It is the anode/cathode GDL porosity, without units.
         #       Constants based on the interaction between fluids and the structure
         e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.
+        K_l_ads_min, K_l_ads_max = 1, 100  # . It is the ratio between the liquid and vapor sorption rates of water in the membrane.
         K_O2_ad_Pt_min, K_O2_ad_Pt_max = 1, 10  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
         #       Voltage polarization
         Re_min, Re_max = 5e-8, 5e-6  # Ω.m². It is the electron conduction resistance of the circuit.
@@ -83,7 +84,8 @@ def parameter_bounds_for_calibration(type_fuel_cell, voltage_zone, operating_inp
                     ['kappa_co', kappa_co_min, kappa_co_max, 'real'],
                     ['kappa_c', kappa_c_min, kappa_c_max, 'real']]
         if voltage_zone == "full":
-            varbound += [['K_O2_ad_Pt', K_O2_ad_Pt_min, K_O2_ad_Pt_max, 'real']]
+            varbound += [['K_l_ads', K_l_ads_min, K_l_ads_max, 'real'],
+                         ['K_O2_ad_Pt', K_O2_ad_Pt_min, K_O2_ad_Pt_max, 'real']]
         gene_space = []  # List used to define the bounds of the undetermined parameters for pygad.
         for i in range(len(varbound)):
             name, min_val, max_val, type_val = varbound[i]

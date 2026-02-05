@@ -254,7 +254,7 @@ def stored_physical_parameters(type_fuel_cell):
         Vaem, Vcem = Vasm, Vcsm  # m-3. It is the exhaust manifold volume.
         # Interaction parameters between fluids and PEMFC structure
         e = 3.0  # It is the capillary exponent
-        K_l_ads = 1  # . It is an estimation of the ratio between the liquid and vapor sorption rates of water in the membrane. It should be in [10-1000] [shaoNewInsightsSteadystate2023].
+        K_l_ads = 80  # . It is an estimation of the ratio between the liquid and vapor sorption rates of water in the membrane. It should be in [10-1000] [shaoNewInsightsSteadystate2023].
         K_O2_ad_Pt = 7.346634385810734  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
         # Voltage polarization
         Re = 1.545654084145453e-7  # ohm.m². It is the electron conduction resistance of the circuit.

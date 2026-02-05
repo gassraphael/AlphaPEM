@@ -284,7 +284,7 @@ def calculate_physical_parameters(type_fuel_cell):
         V_endplate_c = 86.6e-6  # m3. It is the cathode endplate volume.
         #   Interaction parameters between fluids and PEMFC structure
         e = 5.0  # It is the capillary exponent
-        K_l_ads = 1  # . It is an estimation of the ratio between the liquid and vapor sorption rates of water in the membrane. It should be in [10-1000] [shaoNewInsightsSteadystate2023].
+        K_l_ads = 1  # . It is the ratio between the liquid and vapor sorption rates of water in the membrane. It should be in [10-1000] [shaoNewInsightsSteadystate2023].
         K_O2_ad_Pt = 5.4  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
         #   Voltage polarization
         Re = 1e-06  # Ω.m². It is the electron conduction resistance of the circuit.

@@ -531,6 +531,10 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
         raise ValueError('EIS has to be plot with a dynamic type_plot setting, '
                          'because max_step has to be adjusted at each frequency.')
 
+    # Warnings
+    print('Warning: EIS simulation is currently not maintained. It should work, but some unexpected bugs or incorrect '
+          'results may happen. This will be fixed later.')
+
     # Figures preparation
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(computing_parameters)
 
