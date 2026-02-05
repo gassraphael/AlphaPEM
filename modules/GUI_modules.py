@@ -484,7 +484,7 @@ def recover_for_use_operating_inputs_and_physical_parameters(choice_operating_co
     K_l_ads = choice_undetermined_parameters['Ratio of liq. and vap. water sorption\nrates in the mem. - K_l_ads']['value'].get()
     K_O2_ad_Pt = choice_undetermined_parameters['Interfacial res. coef. of\nO2 ads. on Pt - K_O2_ad_Pt']['value'].get()
     Re = choice_undetermined_parameters['Electron conduction\nresistance - Re (Ω.mm²)']['value'].get() * 1e-6  # Ω.m²
-    i0_c_ref = choice_undetermined_parameters['Dry reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].get()  # A.m-2
+    i0_c_ref = choice_undetermined_parameters['Reference exchange current\ndensity - i0_c_ref (A/m²)']['value'].get()  # A.m-2
     kappa_co = choice_undetermined_parameters['Crossover correction coefficient\n- κ_co (mol/(m.s.Pa))']['value'].get()  # mol.m-1.s-1.Pa-1
     kappa_c = choice_undetermined_parameters['Overpotential correction\nexponent - κ_c']['value'].get()
     C_scl = choice_undetermined_parameters['Volumetric space-charge layer\ncapacitance - C_scl (F/cm³)']['value'].get() * 1e6  # F.m-3
