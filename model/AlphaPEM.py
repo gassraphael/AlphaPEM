@@ -139,6 +139,8 @@ class AlphaPEM:
                     Compression ratio of the GDL (undetermined physical parameter).
                 - e : float
                     Capillary exponent (undetermined physical parameter).
+                - K_l_ads : float
+                    Ratio of liquid and vapor water sorption rates in the membrane (undetermined physical parameter).
                 - K_O2_ad_Pt : float
                     Interfacial resistance coefficient of O2 adsorption on the Pt sites (undetermined physical parameter).
                 - Re : float

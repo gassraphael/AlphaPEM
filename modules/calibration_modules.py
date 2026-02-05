@@ -333,11 +333,12 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         #   Catalyst layer
         Hacl = 8e-6  # m. It is the thickness of the anode catalyst layer.
         Hccl = 17e-6  # m. It is the thickness of the cathode catalyst layer.
-        K_O2_ad_Pt = 5.4  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
         #   Membrane
         Hmem = 15e-6  # m. It is the thickness of the membrane.
         #   Interaction parameters between water and PEMFC structure
         e = 4.0  # It is the capillary exponent
+        K_l_ads = 1  # . It is an estimation of the ratio between the liquid and vapor sorption rates of water in the membrane. It should be in [10-1000] [shaoNewInsightsSteadystate2023].
+        K_O2_ad_Pt = 5.4  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
         #   Voltage polarization
         Re = 1e-06  # ohm.m². It is the electron conduction resistance of the circuit.
         i0_c_ref = 14.43  # A.m-2.It is the dry reference exchange current density at the cathode.
@@ -400,11 +401,12 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
         #   Catalyst layer
         Hacl = 8.593e-6  # m. It is the thickness of the anode catalyst layer.
         Hccl = Hacl  # m. It is the thickness of the cathode catalyst layer.
-        K_O2_ad_Pt = 5.4  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
         #   Membrane
         Hmem = 16.06e-6  # m. It is the thickness of the membrane.
         #   Interaction parameters between water and PEMFC structure
         e = 4.0  # It is the capillary exponent
+        K_l_ads = 1  # . It is an estimation of the ratio between the liquid and vapor sorption rates of water in the membrane. It should be in [10-1000] [shaoNewInsightsSteadystate2023].
+        K_O2_ad_Pt = 5.4  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
         #   Voltage polarization
         Re = 1e-06  # ohm.m². It is the electron conduction resistance of the circuit.
         i0_c_ref = 14.43  # A.m-2.It is the reference exchange current density at the cathode.
@@ -433,8 +435,9 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
                                       'Vaem': Vaem, 'Vcem': Vcem}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl,
                                         'Hccl': Hccl, 'epsilon_gdl': epsilon_gdl, 'epsilon_mpl': epsilon_mpl,
-                                        'epsilon_c': epsilon_c, 'e': e, 'K_O2_ad_Pt': K_O2_ad_Pt, 'Re': Re,
-                                        'i0_c_ref': i0_c_ref, 'kappa_co': kappa_co, 'kappa_c': kappa_c, 'C_scl': C_scl}
+                                        'epsilon_c': epsilon_c, 'e': e, 'K_l_ads': K_l_ads, 'K_O2_ad_Pt': K_O2_ad_Pt,
+                                        'Re': Re, 'i0_c_ref': i0_c_ref, 'kappa_co': kappa_co, 'kappa_c': kappa_c,
+                                        'C_scl': C_scl}
     computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
                             'rtol': rtol, 'atol': atol,'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
                             'voltage_zone': voltage_zone, 'type_auxiliary': type_auxiliary, 'type_purge': type_purge,

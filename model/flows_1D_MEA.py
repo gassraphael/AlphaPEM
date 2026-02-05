@@ -6,7 +6,7 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing constants' value and functions
-from configuration.settings import rho_mem, M_eq, F, R, K_l_ads, theta_l_rem
+from configuration.settings import rho_mem, M_eq, F, R, theta_l_rem
 from modules.transitory_functions import interpolate, d_dx, h_a, h_c, lambda_eq, gamma_sorp, Svl, k_H2, k_O2, epsilon_cl
 from modules.flows_1D_MEA_modules import flows_1D_MEA_int_values
 
@@ -53,7 +53,7 @@ def calculate_flows_1D_MEA(sv, i_fc, v_a, v_c, operating_inputs, parameters):
     Aact, Hmem, Hacl, Hccl = parameters['Aact'], parameters['Hmem'], parameters['Hacl'], parameters['Hccl']
     Wagc, Wcgc, Hagc, Hcgc = parameters['Wagc'], parameters['Wcgc'], parameters['Hagc'], parameters['Hcgc']
     epsilon_gdl, epsilon_mpl, epsilon_c = parameters['epsilon_gdl'], parameters['epsilon_mpl'], parameters['epsilon_c']
-    e, kappa_co = parameters['e'], parameters['kappa_co']
+    e, K_l_ads, kappa_co = parameters['e'], parameters['K_l_ads'], parameters['kappa_co']
     nb_gdl, nb_mpl = parameters['nb_gdl'], parameters['nb_mpl']
 
     # Intermediate values

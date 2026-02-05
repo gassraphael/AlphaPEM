@@ -254,6 +254,7 @@ def stored_physical_parameters(type_fuel_cell):
         Vaem, Vcem = Vasm, Vcsm  # m-3. It is the exhaust manifold volume.
         # Interaction parameters between fluids and PEMFC structure
         e = 3.0  # It is the capillary exponent
+        K_l_ads = 1  # . It is an estimation of the ratio between the liquid and vapor sorption rates of water in the membrane. It should be in [10-1000] [shaoNewInsightsSteadystate2023].
         K_O2_ad_Pt = 7.346634385810734  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
         # Voltage polarization
         Re = 1.545654084145453e-7  # ohm.m². It is the electron conduction resistance of the circuit.
@@ -296,6 +297,7 @@ def stored_physical_parameters(type_fuel_cell):
         Vaem, Vcem = Vasm, Vcsm  # m-3. It is the exhaust manifold volume.
         # Interaction parameters between fluids and PEMFC structure
         e = 4.0  # It is the capillary exponent
+        K_l_ads = 1  # . It is an estimation of the ratio between the liquid and vapor sorption rates of water in the membrane. It should be in [10-1000] [shaoNewInsightsSteadystate2023].
         K_O2_ad_Pt = 5.4  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
         # Voltage polarization
         Re = 1e-06  # ohm.m². It is the electron conduction resistance of the circuit.
@@ -309,8 +311,8 @@ def stored_physical_parameters(type_fuel_cell):
         raise ValueError('the type_input given is not valid.')
 
     return (Hacl, Hccl, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
-            nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, K_O2_ad_Pt, Re,
-            i0_c_ref, kappa_co, kappa_c, C_scl)
+            nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, K_l_ads, K_O2_ad_Pt,
+            Re, i0_c_ref, kappa_co, kappa_c, C_scl)
 
 
 def EIS_parameters(f_EIS):

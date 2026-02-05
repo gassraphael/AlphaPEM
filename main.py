@@ -31,10 +31,10 @@ def main():
     # - GenStack is a fuel cell developed in open source by ZSW (https://zenodo.org/records/14223364).
     # - EH-31 is a fuel cell developed by EH GROUP. 1.5, 2.0, 2.25 and 2.5 corresponds to the different pressure options.
     type_fuel_cell_1 = "ZSW-GenStack"
-    type_fuel_cell_2 = "ZSW-GenStack_Pa_1.61_Pc_1.41"
-    type_fuel_cell_3 = "ZSW-GenStack_Pa_2.01_Pc_1.81"
-    type_fuel_cell_4 = "ZSW-GenStack_Pa_2.4_Pc_2.2"
-    type_fuel_cell_5 = "ZSW-GenStack_Pa_2.8_Pc_2.6"
+    type_fuel_cell_2 = None
+    type_fuel_cell_3 = None
+    type_fuel_cell_4 = None
+    type_fuel_cell_5 = None
     # Current density possibilities: "step", "polarization", "polarization_for_cali", "EIS".
     type_current = "polarization"
     # Calibration zone : "before_voltage_drop", "full".
@@ -74,7 +74,7 @@ def main():
         calculate_operating_inputs(copy.deepcopy(pola_current_parameters), type_fuel_cell_5, voltage_zone)
     #   Physical parameters
     (Hacl, Hccl, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc, nb_channel_in_gc,
-     Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, K_O2_ad_Pt, Re, i0_c_ref, kappa_co,
+     Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, K_l_ads, K_O2_ad_Pt, Re, i0_c_ref, kappa_co,
      kappa_c, C_scl) = calculate_physical_parameters(type_fuel_cell_1)
     #   Computing parameters
     nb_gc, nb_gdl, nb_mpl, t_purge, rtol, atol = calculate_computing_parameters(step_current_parameters)
@@ -101,8 +101,9 @@ def main():
                                       'Vaem': Vaem, 'Vcem': Vcem}
     undetermined_physical_parameters = {'Hgdl': Hgdl, 'Hmpl': Hmpl, 'Hmem': Hmem, 'Hacl': Hacl,
                                         'Hccl': Hccl, 'epsilon_gdl': epsilon_gdl, 'epsilon_mpl': epsilon_mpl,
-                                        'epsilon_c': epsilon_c, 'e': e, 'K_O2_ad_Pt': K_O2_ad_Pt, 'Re': Re,
-                                        'i0_c_ref': i0_c_ref, 'kappa_co': kappa_co, 'kappa_c': kappa_c, 'C_scl': C_scl}
+                                        'epsilon_c': epsilon_c, 'e': e, 'K_l_ads': K_l_ads, 'K_O2_ad_Pt': K_O2_ad_Pt,
+                                        'Re': Re, 'i0_c_ref': i0_c_ref, 'kappa_co': kappa_co, 'kappa_c': kappa_c,
+                                        'C_scl': C_scl}
     computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
                             'rtol': rtol, 'atol': atol,
                             'type_fuel_cell': [None, type_fuel_cell_1, type_fuel_cell_2, type_fuel_cell_3,

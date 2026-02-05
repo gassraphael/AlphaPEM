@@ -284,6 +284,7 @@ def calculate_physical_parameters(type_fuel_cell):
         V_endplate_c = 86.6e-6  # m3. It is the cathode endplate volume.
         #   Interaction parameters between fluids and PEMFC structure
         e = 5.0  # It is the capillary exponent
+        K_l_ads = 1  # . It is an estimation of the ratio between the liquid and vapor sorption rates of water in the membrane. It should be in [10-1000] [shaoNewInsightsSteadystate2023].
         K_O2_ad_Pt = 5.4  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
         #   Voltage polarization
         Re = 1e-06  # Ω.m². It is the electron conduction resistance of the circuit.
@@ -293,12 +294,12 @@ def calculate_physical_parameters(type_fuel_cell):
         C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
     else: # Stored setup in "stored_physical_parameters".
         (Hacl, Hccl, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
-         nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, K_O2_ad_Pt, Re, i0_c_ref,
-         kappa_co, kappa_c, C_scl) = stored_physical_parameters(type_fuel_cell)
+         nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, K_l_ads, K_O2_ad_Pt, Re,
+         i0_c_ref, kappa_co, kappa_c, C_scl) = stored_physical_parameters(type_fuel_cell)
 
     return (Hacl, Hccl, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
-            nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, K_O2_ad_Pt, Re,
-            i0_c_ref, kappa_co, kappa_c, C_scl)
+            nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, K_l_ads, K_O2_ad_Pt,
+            Re, i0_c_ref, kappa_co, kappa_c, C_scl)
 
 
 def calculate_computing_parameters(step_current_parameters):
@@ -388,7 +389,6 @@ Dp_cl = 0.15e-6  # m. It is the pore diameter of the CL [Ali Malekian 2019 Inter
 theta_c_gdl = 120 * math.pi / 180  # radian. It is the contact angle of GDL for liquid water.
 theta_c_mpl = 135 * math.pi / 180  # radian. It is the contact angle of MPL for liquid water.
 theta_c_cl = 95 * math.pi / 180  # radian. It is the contact angle of CL for liquid water.
-K_l_ads = 0 # . It is an estimation of the ratio between the liquid and vapor sorption rates of water in the membrane. It should be in [10-1000] [shaoNewInsightsSteadystate2023].
 theta_l_rem = 5e-5 # s/m. It is the coefficient of liquid water removal from the GDL to the GC [Ansys Fluent value from their User Guide].
 K_v_liq_gas = 0.02 # . It is the liquid to gas velocity ratio in the GC [Ansys Fluent value from their User Guide].
 D_liq_dif = 1e-5  # kg.m-1.s-1. It is the diffusion coefficient of liquid water in the GC [Ansys Fluent value from their User Guide].
