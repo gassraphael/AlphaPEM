@@ -122,8 +122,8 @@ def calculate_velocity_evolution(sv, i_fc, operating_inputs, parameters):
     # Residual function for least_squares solver applied on the inlet molar flows
     def residuals(J_in_guessed):
         # Intermediate values
-        J_a_in_guesses, J_c_in_guessed = float(J_in_guessed[0]), float(J_in_guessed[1])                                 # Inlet molar flows at anode and cathode (mol/s).
-        J_a, J_c = [J_a_in_guesses] + [0] * (nb_gc + 1), [J_c_in_guessed] + [0] * (nb_gc + 1)                           # J[0] is the cell inlet molar flow, J[i] is the outlet molar flow at node i (upwind numerical scheme), and J[-1] is the cell outlet molar flow.
+        J_a_in_guessed, J_c_in_guessed = float(J_in_guessed[0]), float(J_in_guessed[1])                                 # Inlet molar flows at anode and cathode (mol/s).
+        J_a, J_c = [J_a_in_guessed] + [0] * (nb_gc + 1), [J_c_in_guessed] + [0] * (nb_gc + 1)                           # J[0] is the cell inlet molar flow, J[i] is the outlet molar flow at node i (upwind numerical scheme), and J[-1] is the cell outlet molar flow.
         P_a, P_c = [0] * (nb_gc + 1) + [Pa_ext], [0] * (nb_gc + 1) + [Pc_ext]                                           # P[0] is the inlet pressure, P[i] is the pressure at the outlet of node i, and P[-1] is the outlet pressure.
         v_a, v_c = [0] * (nb_gc + 2), [0] * (nb_gc + 2)                                                                 # v[0] is the inlet velocity, v[i] is the velocity at the outlet of node i, and v[-1] is the outlet velocity.
 
@@ -162,7 +162,7 @@ def calculate_velocity_evolution(sv, i_fc, operating_inputs, parameters):
             J_c_in_calculated = Wc_in_calculated / (Hcgc * Wcgc) / nb_cell / nb_channel_in_gc
 
         # Residuals: difference between
-        res_a = J_a_in_calculated - J_a_in_guesses
+        res_a = J_a_in_calculated - J_a_in_guessed
         res_c = J_c_in_calculated - J_c_in_guessed
         return [res_a, res_c]
 
