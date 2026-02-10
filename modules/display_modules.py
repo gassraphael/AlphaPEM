@@ -16,7 +16,6 @@ from scipy.interpolate import interp1d
 # Importing constants' value and functions
 from configuration.settings import F, R, E0, Pref_eq, M_H2, M_O2, M_H2O, M_N2
 from modules.transitory_functions import average, Psat, C_v_sat, k_H2, k_O2, mu_mixture_gases
-from model.cell_voltage import calculate_C_O2_Pt
 from calibration.experimental_values import (pola_exp_values, plot_experimental_polarisation_curve,
                                              pola_exp_values_calibration)
 
@@ -456,7 +455,8 @@ def plot_ifc(variables, operating_inputs, parameters, ax):
 
     # Extraction of the operating inputs and the parameters
     current_density = operating_inputs['current_density']
-    type_current, type_plot = parameters['type_current'], parameters['type_plot']
+    nb_gc, type_current, type_plot = parameters['nb_gc'], parameters['type_current'], parameters['type_plot']
+
     if type_current == 'step':
         delta_t_ini = parameters['step_current_parameters']['delta_t_ini_step']
     elif type_current == 'polarization':
@@ -471,17 +471,23 @@ def plot_ifc(variables, operating_inputs, parameters, ax):
     else: # type_plot == "dynamic"
         mask = np.ones_like(variables['t'], dtype=bool)
     t = np.array(variables['t'])[mask]
+    i_fc_t = [None] + [[] for _ in range(1, nb_gc + 1)]
+    for i in range(1, nb_gc + 1):
+        i_fc_t[i] = np.array(variables['i_fc'][i])[mask]
 
     # Plot the current density: ifc
     n = len(t)
-    ifc_t = np.zeros(n)
-    for i in range(n):  # Creation of ifc_t
-        ifc_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
-    ax.plot(t, ifc_t, color=colors(0), label=r'$\mathregular{i_{fc}}$')
+    i_fc_cell_t = np.zeros(n)
+    for i in range(n):  # Creation of i_fc_cell_t
+        i_fc_cell_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
+    ax.plot(t, i_fc_cell_t, color=colors(0), label=r'$\mathregular{i_{fc}}$')
+    for i in range(1, nb_gc + 1):
+        ax.plot(t, i_fc_t[i], color=colors(i), label=r'$\mathregular{i_{fc}}$' + f' at gc {i}')
+
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
                   labelpad=3)
-    ax.legend([r'$\mathregular{i_{fc}}$'], loc='best')
+    ax.legend(loc='best')
 
     # Plot instructions
     plot_general_instructions(ax)
@@ -793,7 +799,6 @@ def plot_C_O2(variables, operating_inputs, parameters, ax):
 
     # Extraction of the parameters
     current_density = operating_inputs['current_density']
-    K_O2_ad_Pt = parameters['K_O2_ad_Pt']
     Hccl, nb_gc, nb_gdl, nb_mpl = parameters['Hccl'], parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl']
     type_current, type_plot = parameters['type_current'], parameters['type_plot']
     if type_current == 'step':
@@ -813,22 +818,12 @@ def plot_C_O2(variables, operating_inputs, parameters, ax):
     nb_gc_mid = int(np.ceil(nb_gc / 2))  # Middle of the gas channel
     #   Time
     t = np.array(variables['t'])[mask]
-    #   Current density
-    n = len(t)
-    ifc_t = np.zeros(n)
-    for i in range(n):  # Creation of i_fc
-        ifc_t[i] = current_density(t[i], parameters)
     #    O2 concentrations
     C_O2_ccl_t = np.array(variables['C_O2_ccl'][nb_gc_mid])[mask]
     C_O2_cmpl_t = np.array(variables[f'C_O2_cmpl_{int(np.ceil(nb_mpl / 2))}'][nb_gc_mid])[mask]
     C_O2_cgdl_t = np.array(variables[f'C_O2_cgdl_{int(np.ceil(nb_gdl / 2))}'][nb_gc_mid])[mask]
     C_O2_cgc_t = np.array(variables['C_O2_cgc'][nb_gc_mid])[mask]
-    C_O2_Pt_t = np.zeros(n)
-    s_ccl_t = np.array(variables['s_ccl'][nb_gc_mid])[mask]
-    lambda_ccl_t = np.array(variables['lambda_ccl'][nb_gc_mid])[mask]
-    T_ccl_t = np.array(variables['T_ccl'][nb_gc_mid])[mask]
-    for i in range(n):
-        C_O2_Pt_t[i] = calculate_C_O2_Pt(ifc_t[i], s_ccl_t[i], lambda_ccl_t[i], C_O2_ccl_t[i], T_ccl_t[i], Hccl, K_O2_ad_Pt)
+    C_O2_Pt_t = np.array(variables['C_O2_Pt_t'][nb_gc_mid])[mask]
 
     # Plot the oxygen concentration at different spatial localisations: C_O2
     ax.plot(t, C_O2_Pt_t, color=colors(10))

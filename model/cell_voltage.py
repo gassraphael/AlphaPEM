@@ -8,6 +8,7 @@
 # Importing the necessary libraries
 import math
 import numpy as np
+from scipy.optimize import least_squares
 
 # Importing constants' value and functions
 from configuration.settings import F, R, E0, Pref_eq
@@ -16,24 +17,76 @@ from modules.transitory_functions import average, k_H2, k_O2, sigma_p_eff, R_T_O
 
 # _____________________________________________________Cell voltage_____________________________________________________
 
-def calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, Hccl, K_O2_ad_Pt, **kwargs):
+def calculate_1D_GC_current_density(i_fc_cell, sv, parameters):
+    """This function calculates the local current density distribution in the 1D direction of the GC.
+
+    Parameters
+    ----------
+    i_fc_cell : float
+        Fuel cell current density at time t (A.m-2).
+    sv : dict
+        Variables calculated by the solver. They correspond to the cell internal states.
+        sv is a contraction of solver_variables for enhanced readability.
+    parameters : dict
+        Parameters of the fuel cell model.
+
+    Returns
+    -------
+    i_fc : list
+        Local current density distribution in the 1D direction of the GC (A.m-2).
+
+    """
+
+    # Extraction of the operating inputs and the parameters
+    nb_gc = parameters['nb_gc']
+    # Extraction of the variables
+    C_O2_ccl = [None] + [sv[i]['C_O2_ccl'] for i in range(1, nb_gc + 1)]
+
+    # Residual function for least_squares solver applied on the local current density
+    def residuals(variable_guessed):
+
+        # Recovery of the guessed variable values
+        U_cell_guessed = variable_guessed[0]
+        i_fc_guessed = [None] + [variable_guessed[i] for i in range(1, nb_gc + 1)]
+        C_O2_Pt_guessed = [None] + [variable_guessed[i] for i in range(nb_gc + 1, 2 * nb_gc + 1)]
+
+        # Residuals: difference between
+        res_U_cell = [calculate_cell_voltage(i_fc_guessed[i], C_O2_Pt_guessed[i], sv[i], parameters) - U_cell_guessed
+                      for i in range(1, nb_gc + 1)]
+        res_i_fc = i_fc_cell - average(i_fc_guessed[1:])
+        res_C_O2_Pt = [calculate_C_O2_Pt(i_fc_guessed[i], sv[i], parameters)  - C_O2_Pt_guessed[i]
+                       for i in range(1, nb_gc + 1)]
+
+        return res_U_cell + [res_i_fc] + res_C_O2_Pt
+
+    # Calculation of the 1D GC current density by solving the system of equations defined by the residuals function using least squares solver
+    #       Initial guesses, bounds
+    U_cell_medium = 0.7  # Initial guess for the cell voltage (V).
+    C_O2_medium = calculate_C_O2_Pt(i_fc_cell, sv[1], parameters)
+    x0 = [U_cell_medium] + [i_fc_cell] * nb_gc + [C_O2_medium] * nb_gc  # Initial guesses for the least square solver.
+    lb = [1e-8] * (2 * nb_gc + 1) # Lower bounds for the least square solver.
+    ub = [E0] + [i_fc_cell * nb_gc] * nb_gc + [C_O2_ccl[i] for i in range(1, nb_gc + 1)] # Upper bounds for the least square solver
+    #       Solver call
+    sol = least_squares(residuals, x0, bounds=(lb, ub), method='trf')
+    #       Check for convergence
+    if not sol.success:
+        raise RuntimeError(f"Convergence failed in calculate_1D_GC_current_density: {sol.message}")
+    #      Extract the results
+    i_fc = [None] + [float(sol.x[i]) for i in range(1, nb_gc + 1)]
+
+    return i_fc
+
+
+def calculate_C_O2_Pt(i_fc, sv_1D, parameters):
     """This function calculates the oxygen concentration at the platinum surface in the cathode catalyst layer.
     Parameters
     ----------
     i_fc : float
         The current density (A/m²).
-    s_ccl : float
-        The saturation in the cathode catalyst layer (-).
-    lambda_ccl : float
-        The membrane water content in the cathode catalyst layer (-).
-    C_O2_ccl : float
-        The oxygen concentration in the cathode catalyst layer (mol/m³).
-    T_ccl : float
-        The temperature in the cathode catalyst layer (K).
-    Hccl : float
-        The thickness of the cathode catalyst layer (m).
-    K_O2_ad_Pt: float
-        Interfacial resistance coefficient of O2 adsorption on the Pt sites, without units.
+    sv_1D : dict
+        The dictionary containing the variables calculated by the solver.
+    parameters : dict
+        The dictionary containing the parameters.
 
     Returns
     -------
@@ -46,6 +99,13 @@ def calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, Hccl, K_O2_ad_Pt
     in PEM Fuel Cells.
     """
 
+    # Extraction of the variables
+    s_ccl, lambda_ccl = sv_1D['s_ccl'], sv_1D['lambda_ccl']
+    C_O2_ccl = sv_1D['C_O2_ccl']
+    T_ccl = sv_1D['T_ccl']
+    # Extraction of the operating inputs and the parameters
+    Hccl, K_O2_ad_Pt = parameters['Hccl'], parameters['K_O2_ad_Pt']
+
     C_O2_Pt = C_O2_ccl - i_fc / (4 * F * Hccl) * R_T_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, K_O2_ad_Pt) / a_c(lambda_ccl, T_ccl, Hccl)
 
     if C_O2_Pt <= 0:
@@ -54,77 +114,55 @@ def calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, Hccl, K_O2_ad_Pt
     return C_O2_Pt
 
 
-def calculate_cell_voltage(variables, operating_inputs, parameters):
-    """This function calculates the cell voltage at each time step.
+def calculate_cell_voltage(i_fc, C_O2_Pt, sv, parameters):
+    """This function calculates the cell voltage in volt.
 
     Parameters
     ----------
-    variables : dict
+    i_fc : float
+        The current density (A/m²).
+    C_O2_Pt : float
+        The oxygen concentration at the platinum surface in the cathode catalyst layer (mol/m³).
+    sv : dict
         The dictionary containing the variables calculated by the solver.
-    operating_inputs : dict
-        The dictionary containing the operating inputs.
     parameters : dict
         The dictionary containing the parameters.
 
     Returns
     -------
     Ucell_t : list
-        The cell voltage at each time step.
+        The cell voltage in volt.
     """
 
+    # Extraction of the variables
+    s_ccl, lambda_mem, lambda_ccl = sv['s_ccl'], sv['lambda_mem'], sv['lambda_ccl']
+    C_H2_acl, C_O2_ccl = sv['C_H2_acl'], sv['C_O2_ccl']
+    eta_c = sv['eta_c']
+    T_acl, T_mem, T_ccl = sv['T_acl'], sv['T_mem'], sv['T_ccl']
     # Extraction of the operating inputs and the parameters
     Hmem, Hacl, Hccl = parameters['Hmem'], parameters['Hacl'], parameters['Hccl']
-    nb_gc, K_O2_ad_Pt = parameters['nb_gc'], parameters['K_O2_ad_Pt']
     Re, kappa_co = parameters['Re'], parameters['kappa_co']
-    # Extraction of the variables
-    t = variables['t']
-    s_ccl_t = variables['s_ccl'][int(np.ceil(nb_gc / 2))]
-    lambda_mem_t = variables['lambda_mem'][int(np.ceil(nb_gc / 2))]
-    lambda_ccl_t = variables['lambda_ccl'][int(np.ceil(nb_gc / 2))]
-    C_H2_acl_t = variables['C_H2_acl'][int(np.ceil(nb_gc / 2))]
-    C_O2_ccl_t = variables['C_O2_ccl'][int(np.ceil(nb_gc / 2))]
-    eta_c_t = variables['eta_c'][int(np.ceil(nb_gc / 2))]
-    T_acl_t = variables['T_acl'][int(np.ceil(nb_gc / 2))]
-    T_mem_t = variables['T_mem'][int(np.ceil(nb_gc / 2))]
-    T_ccl_t = variables['T_ccl'][int(np.ceil(nb_gc / 2))]
 
-    # Initialisation
-    n = len(t)
-    Ucell_t = [0] * n
+    # The equilibrium potential
+    Ueq = E0 - 8.5e-4 * (T_ccl - 298.15) + R * T_ccl / (2 * F) * (math.log(R * T_acl * C_H2_acl / Pref_eq) +
+                                                                  0.5 * math.log(R * T_ccl * C_O2_Pt / Pref_eq))
 
-    # Loop for having Ucell_t at each time step
-    for i in range(n):
-        # Recovery of the already calculated variable values at each time step
-        s_ccl, lambda_mem, lambda_ccl = s_ccl_t[i], lambda_mem_t[i], lambda_ccl_t[i]
-        C_H2_acl, C_O2_ccl = C_H2_acl_t[i], C_O2_ccl_t[i]
-        T_acl, T_mem, T_ccl = T_acl_t[i], T_mem_t[i], T_ccl_t[i]
-        eta_c = eta_c_t[i]
+    # The crossover current density
+    T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
+                          weights=[Hacl/(Hacl + Hmem + Hccl), Hmem/(Hacl + Hmem + Hccl), Hccl/(Hacl + Hmem + Hccl)])
+    i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
+    i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
+    i_n = i_H2 + i_O2
 
-        # Current density value at this time step
-        i_fc = operating_inputs['current_density'](t[i], parameters)
+    # The proton resistance
+    #       The proton resistance at the membrane : Rmem
+    Rmem = Hmem / sigma_p_eff('mem', lambda_mem, T_mem)
+    #       The proton resistance at the cathode catalyst layer : Rccl
+    Rccl = Hccl / sigma_p_eff('ccl', lambda_ccl, T_ccl, Hcl=Hccl)
+    #       The total proton resistance
+    Rp = Rmem + Rccl  # its value is around [4-7]e-6 ohm.m².
 
-        C_O2_Pt = calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, Hccl, K_O2_ad_Pt)
+    # The cell voltage
+    Ucell = Ueq - eta_c - (i_fc + i_n) * (Rp + Re)
 
-        # The equilibrium potential
-        Ueq = E0 - 8.5e-4 * (T_ccl - 298.15) + R * T_ccl / (2 * F) * (math.log(R * T_acl * C_H2_acl / Pref_eq) +
-                                                                      0.5 * math.log(R * T_ccl * C_O2_Pt / Pref_eq))
-
-        # The crossover current density
-        T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
-                              weights=[Hacl/(Hacl + Hmem + Hccl), Hmem/(Hacl + Hmem + Hccl), Hccl/(Hacl + Hmem + Hccl)])
-        i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
-        i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
-        i_n = i_H2 + i_O2
-
-        # The proton resistance
-        #       The proton resistance at the membrane : Rmem
-        Rmem = Hmem / sigma_p_eff('mem', lambda_mem, T_mem)
-        #       The proton resistance at the cathode catalyst layer : Rccl
-        Rccl = Hccl / sigma_p_eff('ccl', lambda_ccl, T_ccl, Hcl=Hccl)
-        #       The total proton resistance
-        Rp = Rmem + Rccl  # its value is around [4-7]e-6 ohm.m².
-
-        # The cell voltage
-        Ucell_t[i] = Ueq - eta_c - (i_fc + i_n) * (Rp + Re)
-
-    return Ucell_t
+    return Ucell

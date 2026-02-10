@@ -15,7 +15,7 @@ from modules.transitory_functions import average, Psat, h_a, h_c, mu_mixture_gas
 
 # ________________________________________________________Velocity______________________________________________________
 
-def calculate_velocity_evolution(sv, i_fc, operating_inputs, parameters):
+def calculate_velocity_evolution(sv, i_fc_cell, operating_inputs, parameters):
     """
         Calculate the gas velocities at the anode and cathode.
         This function finds the velocities v_a and v_c that make the pressures computed from the Hagen-Poiseuille
@@ -26,7 +26,7 @@ def calculate_velocity_evolution(sv, i_fc, operating_inputs, parameters):
         ----------
         sv : dict
             Solver state variables (passed to `desired_flows`).
-        i_fc : int
+        i_fc_cell : int
             Fuel cell current density at time t.
         operating_inputs : dict
             Operating conditions.
@@ -155,7 +155,7 @@ def calculate_velocity_evolution(sv, i_fc, operating_inputs, parameters):
 
         # Desired molar flows at anode and cathode
         if type_auxiliary == "no_auxiliary":
-            W_des_calculated = desired_flows(sv, i_fc, P_a[0], P_c[0], operating_inputs, parameters)
+            W_des_calculated = desired_flows(sv, i_fc_cell, P_a[0], P_c[0], operating_inputs, parameters)
             Wa_in_calculated = W_des_calculated['H2'] + W_des_calculated['H2O_inj_a']                                   # This expression is also present in auxiliaries.py.
             J_a_in_calculated = Wa_in_calculated / (Hagc * Wagc) / nb_cell / nb_channel_in_gc
             Wc_in_calculated = W_des_calculated['dry_air'] + W_des_calculated['H2O_inj_c']                              # This expression is also present in calculate_velocity_evolution.
@@ -218,7 +218,7 @@ def calculate_velocity_evolution(sv, i_fc, operating_inputs, parameters):
     return v_a, v_c, P_a[0], P_c[0]
 
 
-def desired_flows(solver_variables, i_fc, Pa_in, Pc_in, operating_inputs, parameters):
+def desired_flows(solver_variables, i_fc_cell, Pa_in, Pc_in, operating_inputs, parameters):
     """
     This function calculates the desired flow for the air compressor and the humidifiers. These desired flow are
     different from the real ones as the corresponding machines takes time to reach the desired values.
@@ -227,7 +227,7 @@ def desired_flows(solver_variables, i_fc, Pa_in, Pc_in, operating_inputs, parame
     ----------
     solver_variables : dict
         Variables calculated by the solver. They correspond to the fuel cell internal states.
-    i_fc : float
+    i_fc_cell : float
         Fuel cell current density (A/m²).
     operating_inputs : dict
         Operating inputs of the fuel cell.
@@ -274,15 +274,15 @@ def desired_flows(solver_variables, i_fc, Pa_in, Pc_in, operating_inputs, parame
     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or \
        type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
         # The desired air compressor volume flow rate (mol.s-1)                                                         # Warning: considérer le débit minimal du compresseur !
-        W_H2_des = 1 / y_H2_in * Sa * i_fc / (2 * F) * (nb_cell * Aact)
-        Wacp_des_adjusted = adjust_compressor_flow_with_minimum(i_fc, W_H2_des)                                         # Adjust the desired compressor flow to ensure a minimum flow is maintained.
-        W_air_ext_des = Pext / (Pext - Phi_ext * Psat(Text)) * 1 / y_O2_ext * Sc * i_fc / (4 * F) * (nb_cell * Aact)
-        Wccp_des_adjusted = adjust_compressor_flow_with_minimum(i_fc, W_air_ext_des)                                         # Adjust the desired compressor flow to ensure a minimum flow is maintained.
+        W_H2_des = 1 / y_H2_in * Sa * i_fc_cell / (2 * F) * (nb_cell * Aact)
+        Wacp_des_adjusted = adjust_compressor_flow_with_minimum(i_fc_cell, W_H2_des)                                         # Adjust the desired compressor flow to ensure a minimum flow is maintained.
+        W_air_ext_des = Pext / (Pext - Phi_ext * Psat(Text)) * 1 / y_O2_ext * Sc * i_fc_cell / (4 * F) * (nb_cell * Aact)
+        Wccp_des_adjusted = adjust_compressor_flow_with_minimum(i_fc_cell, W_air_ext_des)                                         # Adjust the desired compressor flow to ensure a minimum flow is maintained.
 
         # The desired humidifier volume flow rate at the anode side Wa_v_inj_des (mol.s-1)                              # Warning: considérer le débit minimal du compresseur !
         if type_auxiliary == "forced-convective_cathode_with_flow-through_anode":
             Prd = Pasm
-            W_H2_des = 1 / y_H2_in * Sa * i_fc / (2 * F) * (nb_cell * Aact)
+            W_H2_des = 1 / y_H2_in * Sa * i_fc_cell / (2 * F) * (nb_cell * Aact)
             W_H2O_inj_a_des = (Phi_a_des * Psat(T_des) / (Prd + Phi_a_des * Psat(T_des)) /
                           (1 - Phi_a_des * Psat(T_des) / (Prd + Phi_a_des * Psat(T_des))) * W_H2_des)
         else:  # type_auxiliary == "forced-convective_cathode_with_anodic_recirculation"
@@ -296,24 +296,24 @@ def desired_flows(solver_variables, i_fc, Pa_in, Pc_in, operating_inputs, parame
 
     else:  # elif type_auxiliary == "no_auxiliary":
         # At the anode side
-        W_H2_des = Sa * (i_fc + max(i_n)) / (2 * F) * (nb_cell * Aact)
+        W_H2_des = Sa * (i_fc_cell + max(i_n)) / (2 * F) * (nb_cell * Aact)
         W_H2O_inj_a_des = (Phi_a_des * Psat(T_des) / (Pa_in - Phi_a_des * Psat(T_des))) * W_H2_des
 
         # At the cathode side
-        W_dry_air_des = 1 / y_O2_ext * Sc * (i_fc + max(i_n)) / (4 * F) * (nb_cell * Aact)
+        W_dry_air_des = 1 / y_O2_ext * Sc * (i_fc_cell + max(i_n)) / (4 * F) * (nb_cell * Aact)
         W_H2O_inj_c_des = (Phi_c_des * Psat(T_des) / (Pc_in - Phi_c_des * Psat(T_des))) * W_dry_air_des
 
     return {'H2': W_H2_des, 'dry_air': W_dry_air_des, 'H2O_inj_a': W_H2O_inj_a_des, 'H2O_inj_c': W_H2O_inj_c_des}
 
 
-def adjust_compressor_flow_with_minimum(i_fc, Wcp_des):
+def adjust_compressor_flow_with_minimum(i_fc_cell, Wcp_des):
     """
     Adjusts the desired compressor flow rate to ensure a minimum flow is maintained, based on the current density and
      model parameters.
 
     Parameters
     ----------
-    i_fc : float
+    i_fc_cell : float
         Actual fuel cell current density (A/m²).
     parameters : dict
         Model parameters, must include 'pola_current_parameters' with 'delta_i_pola'.
@@ -330,10 +330,10 @@ def adjust_compressor_flow_with_minimum(i_fc, Wcp_des):
     i_cp_min = 0.3e4  # (A/m²) Minimum current density for compressor flow.
     delta_i_load_step = 0.01e4  # (A/m²) Minimum current density step for reaching the minimum compressor flow.
 
-    if i_fc <= i_cp_min + 3 * delta_i_load_step:
+    if i_fc_cell <= i_cp_min + 3 * delta_i_load_step:
         Wcp_des_adjusted = (
-            Wcp_des * i_cp_min / i_fc * (1.0 + math.tanh(4 * (i_fc - (delta_i_load_step / 2)) / (delta_i_load_step / 2))) / 2
-            + Wcp_des * (1 - i_cp_min / i_fc) * (1.0 + math.tanh(4 * (i_fc - i_cp_min - (delta_i_load_step / 2)) / (delta_i_load_step / 2))) / 2
+            Wcp_des * i_cp_min / i_fc_cell * (1.0 + math.tanh(4 * (i_fc_cell - (delta_i_load_step / 2)) / (delta_i_load_step / 2))) / 2
+            + Wcp_des * (1 - i_cp_min / i_fc_cell) * (1.0 + math.tanh(4 * (i_fc_cell - i_cp_min - (delta_i_load_step / 2)) / (delta_i_load_step / 2))) / 2
         )
         return Wcp_des_adjusted
     else: # For higher current densities, the compressor flow is not adjusted, and so it is faster to return the original value.

@@ -14,12 +14,12 @@ from modules.heat_modules import heat_transfer_int_values
 
 # ____________________________________________________Heat transfers____________________________________________________
 
-def calculate_heat_transfers(sv, i_fc, operating_inputs, parameters, S_abs, Sl, **kwargs):
+def calculate_heat_transfers(sv_1D, i_fc, operating_inputs, parameters, S_abs, Sl, **kwargs):
     """This function calculates the heat transfers occurring inside the fuel cell system.
 
     Parameters
     ----------
-    sv : dict
+    sv_1D : dict
         Variables calculated by the solver. They correspond to the fuel cell internal states.
         sv is a contraction of solver_variables for enhanced readability.
     i_fc : float
@@ -40,9 +40,9 @@ def calculate_heat_transfers(sv, i_fc, operating_inputs, parameters, S_abs, Sl, 
     # ___________________________________________________Preliminaries__________________________________________________
 
     # Extraction of the variables
-    T_acl, T_mem, T_ccl = sv['T_acl'], sv['T_mem'], sv['T_ccl']
-    lambda_acl, lambda_mem, lambda_ccl = sv['lambda_acl'], sv['lambda_mem'], sv['lambda_ccl']
-    s_acl, s_ccl, eta_c = sv['s_acl'], sv['s_ccl'], sv['eta_c']
+    T_acl, T_mem, T_ccl = sv_1D['T_acl'], sv_1D['T_mem'], sv_1D['T_ccl']
+    lambda_acl, lambda_mem, lambda_ccl = sv_1D['lambda_acl'], sv_1D['lambda_mem'], sv_1D['lambda_ccl']
+    s_acl, s_ccl, eta_c = sv_1D['s_acl'], sv_1D['s_ccl'], sv_1D['eta_c']
 
     # Extraction of the operating inputs and parameters
     T_des = operating_inputs['T_des']
@@ -54,25 +54,25 @@ def calculate_heat_transfers(sv, i_fc, operating_inputs, parameters, S_abs, Sl, 
     # Intermediate values
     (Hgdl_node, Hmpl_node, k_th_eff_agc_agdl, k_th_eff_agdl_agdl, k_th_eff_agdl_ampl, k_th_eff_ampl_ampl,
      k_th_eff_ampl_acl, k_th_eff_acl_mem, k_th_eff_mem_ccl, k_th_eff_ccl_cmpl, k_th_eff_cmpl_cmpl, k_th_eff_cmpl_cgdl,
-     k_th_eff_cgdl_cgdl, k_th_eff_cgdl_cgc) = heat_transfer_int_values(sv, parameters)
+     k_th_eff_cgdl_cgdl, k_th_eff_cgdl_cgc) = heat_transfer_int_values(sv_1D, parameters)
 
     # ______________________________________________Heat flows (J.m-2.s-1)______________________________________________
 
     # Anode side
     T_agc_mean = T_des
     T_cgc_mean = T_des
-    Jt_agc_agdl = - k_th_eff_agc_agdl * d_dx(y_minus = T_agc_mean, y_plus = sv['T_agdl_1'],
+    Jt_agc_agdl = - k_th_eff_agc_agdl * d_dx(y_minus = T_agc_mean, y_plus = sv_1D['T_agdl_1'],
                                              dx = Hgdl_node / 2)
-    Jt_agdl_agdl = {f'agdl_agdl_{i}': -k_th_eff_agdl_agdl[i] * d_dx(y_minus = sv[f'T_agdl_{i}'], y_plus = sv[f'T_agdl_{i+1}'],
+    Jt_agdl_agdl = {f'agdl_agdl_{i}': -k_th_eff_agdl_agdl[i] * d_dx(y_minus = sv_1D[f'T_agdl_{i}'], y_plus = sv_1D[f'T_agdl_{i + 1}'],
                                                                     dx = Hgdl_node / 2)
                     for i in range(1, nb_gdl)}
 
-    Jt_agdl_ampl = - k_th_eff_agdl_ampl * d_dx(y_minus = sv[f'T_agdl_{nb_gdl}'], y_plus = sv['T_ampl_1'],
-                                             dx_minus = Hgdl_node / 2, dx_plus = Hmpl_node / 2)
-    Jt_ampl_ampl = {f'ampl_ampl_{i}': -k_th_eff_ampl_ampl[i] * d_dx(y_minus = sv[f'T_ampl_{i}'], y_plus = sv[f'T_ampl_{i+1}'],
+    Jt_agdl_ampl = - k_th_eff_agdl_ampl * d_dx(y_minus = sv_1D[f'T_agdl_{nb_gdl}'], y_plus = sv_1D['T_ampl_1'],
+                                               dx_minus = Hgdl_node / 2, dx_plus = Hmpl_node / 2)
+    Jt_ampl_ampl = {f'ampl_ampl_{i}': -k_th_eff_ampl_ampl[i] * d_dx(y_minus = sv_1D[f'T_ampl_{i}'], y_plus = sv_1D[f'T_ampl_{i + 1}'],
                                                                     dx = Hmpl_node / 2)
                     for i in range(1, nb_mpl)}
-    Jt_ampl_acl = - k_th_eff_ampl_acl * d_dx(y_minus = sv[f'T_ampl_{nb_mpl}'], y_plus = T_acl,
+    Jt_ampl_acl = - k_th_eff_ampl_acl * d_dx(y_minus = sv_1D[f'T_ampl_{nb_mpl}'], y_plus = T_acl,
                                              dx_minus = Hmpl_node / 2, dx_plus = Hacl / 2)
 
     # Membrane side
@@ -82,18 +82,18 @@ def calculate_heat_transfers(sv, i_fc, operating_inputs, parameters, S_abs, Sl, 
                                            dx_minus = Hmem / 2, dx_plus = Hccl / 2)
 
     # Cathode side
-    Jt_ccl_cmpl = - k_th_eff_ccl_cmpl * d_dx(y_minus = T_ccl, y_plus = sv['T_cmpl_1'],
+    Jt_ccl_cmpl = - k_th_eff_ccl_cmpl * d_dx(y_minus = T_ccl, y_plus = sv_1D['T_cmpl_1'],
                                              dx_minus = Hccl / 2, dx_plus = Hmpl_node / 2)
-    Jt_cmpl_cmpl = {f'cmpl_cmpl_{i}': -k_th_eff_cmpl_cmpl[i] * d_dx(y_minus = sv[f'T_cmpl_{i}'], y_plus = sv[f'T_cmpl_{i+1}'],
+    Jt_cmpl_cmpl = {f'cmpl_cmpl_{i}': -k_th_eff_cmpl_cmpl[i] * d_dx(y_minus = sv_1D[f'T_cmpl_{i}'], y_plus = sv_1D[f'T_cmpl_{i + 1}'],
                                                                     dx = Hmpl_node / 2)
                     for i in range(1, nb_mpl)}
-    Jt_cmpl_cgdl = - k_th_eff_cmpl_cgdl * d_dx(y_minus = sv[f'T_cmpl_{nb_mpl}'], y_plus = sv['T_cgdl_1'],
-                                             dx_minus = Hmpl_node, dx_plus = Hgdl_node)
-    Jt_cgdl_cgdl = {f'cgdl_cgdl_{i}': -k_th_eff_cgdl_cgdl[i] * d_dx(y_minus = sv[f'T_cgdl_{i}'], y_plus = sv[f'T_cgdl_{i+1}'],
+    Jt_cmpl_cgdl = - k_th_eff_cmpl_cgdl * d_dx(y_minus = sv_1D[f'T_cmpl_{nb_mpl}'], y_plus = sv_1D['T_cgdl_1'],
+                                               dx_minus = Hmpl_node, dx_plus = Hgdl_node)
+    Jt_cgdl_cgdl = {f'cgdl_cgdl_{i}': -k_th_eff_cgdl_cgdl[i] * d_dx(y_minus = sv_1D[f'T_cgdl_{i}'], y_plus = sv_1D[f'T_cgdl_{i + 1}'],
                                                                     dx = Hgdl_node / 2)
                     for i in range(1, nb_gdl)}
 
-    Jt_cgdl_cgc = - k_th_eff_cgdl_cgc * d_dx(y_minus = sv[f'T_cgdl_{nb_gdl}'], y_plus = T_cgc_mean,
+    Jt_cgdl_cgc = - k_th_eff_cgdl_cgc * d_dx(y_minus = sv_1D[f'T_cgdl_{nb_gdl}'], y_plus = T_cgc_mean,
                                              dx = Hgdl_node / 2)
 
     Jt = {'agc_agdl': Jt_agc_agdl, **Jt_agdl_agdl, 'agdl_ampl': Jt_agdl_ampl, **Jt_ampl_ampl, 'ampl_acl': Jt_ampl_acl,
@@ -116,10 +116,10 @@ def calculate_heat_transfers(sv, i_fc, operating_inputs, parameters, S_abs, Sl, 
               'l_ccl': S_abs['l_ccl'] * (-delta_h_abs(T_ccl))}
 
     # The heat dissipated by the liquefaction of vapor water, in J.m-3.s-1.
-    Q_liq = {**{f'agdl_{i}': Sl['agdl'][i] * (- delta_h_liq(sv[f'T_agdl_{i}'])) for i in range(1, nb_gdl + 1)},
-             **{f'cgdl_{i}': Sl['cgdl'][i] * (- delta_h_liq(sv[f'T_cgdl_{i}'])) for i in range(1, nb_gdl + 1)},
-             **{f'ampl_{i}': Sl['ampl'][i] * (- delta_h_liq(sv[f'T_ampl_{i}'])) for i in range(1, nb_mpl + 1)},
-             **{f'cmpl_{i}': Sl['cmpl'][i] * (- delta_h_liq(sv[f'T_cmpl_{i}'])) for i in range(1, nb_mpl + 1)},
+    Q_liq = {**{f'agdl_{i}': Sl['agdl'][i] * (- delta_h_liq(sv_1D[f'T_agdl_{i}'])) for i in range(1, nb_gdl + 1)},
+             **{f'cgdl_{i}': Sl['cgdl'][i] * (- delta_h_liq(sv_1D[f'T_cgdl_{i}'])) for i in range(1, nb_gdl + 1)},
+             **{f'ampl_{i}': Sl['ampl'][i] * (- delta_h_liq(sv_1D[f'T_ampl_{i}'])) for i in range(1, nb_mpl + 1)},
+             **{f'cmpl_{i}': Sl['cmpl'][i] * (- delta_h_liq(sv_1D[f'T_cmpl_{i}'])) for i in range(1, nb_mpl + 1)},
              'acl': Sl['acl'] * (-delta_h_liq(T_acl)),
              'ccl': Sl['ccl'] * (-delta_h_liq(T_ccl))             }
 

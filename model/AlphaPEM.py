@@ -22,7 +22,7 @@ from scipy.integrate import solve_ivp
 # Importing constants' value and functions
 from model.dif_eq import dydt
 from model.velocity import calculate_velocity_evolution
-from model.cell_voltage import calculate_cell_voltage
+from model.cell_voltage import calculate_cell_voltage, calculate_C_O2_Pt, calculate_1D_GC_current_density
 from configuration.settings import Pext, Phi_ext, y_O2_ext, C_O2ref_red, alpha_c, Tref_O2_red, Eact_O2_red, F, R
 from modules.dif_eq_modules import event_negative
 from modules.transitory_functions import lambda_eq, k_H2, k_O2
@@ -230,7 +230,7 @@ class AlphaPEM:
         self.solver_variable_names_extension()  # Several points are considered in each GC, GDL and MPL. This must be
         #                                        inserted into the solver_variable_names.
         self.all_variable_names = [item for sub in self.solver_variable_names for item in sub] + \
-                                  ['t', 'Ucell', 'v_a_in', 'v_c_in', 'Pa_in', 'Pc_in'] + ['Phi_a_des', 'Phi_c_des']
+                                  ['t', 'i_fc', 'C_O2_Pt', 'Ucell', 'v_a_in', 'v_c_in', 'Pa_in', 'Pc_in'] + ['Phi_a_des', 'Phi_c_des']
         self.variables = {key: [] for key in self.all_variable_names}
 
         # Create the dynamic evolution.
@@ -254,9 +254,6 @@ class AlphaPEM:
 
         #       Recover the variable values calculated by the solver into the dictionary.
         self._recovery()
-
-        #       Calculate the cell voltage after computing the internal states of the cell.
-        self.variables["Ucell"].extend(calculate_cell_voltage(self.variables, self.operating_inputs, self.parameters))
 
     def solver_variable_names_extension(self):
         """Several points are considered in each GDL, MPL and GC. They must be inserted into the solver_variable_names.
@@ -461,18 +458,30 @@ class AlphaPEM:
         # Recovery of more variables
         if self.parameters['type_display'] != "no_display":
             self.variables['v_a'], self.variables['v_c'] = [[] for _ in range(nb_gc + 2)], [[] for _ in range(nb_gc + 2)] # Includes v_a_in and v_a_out
-            self.variables['Pa_in'], self.variables['Pc_in'] = [], []
+            self.variables['C_O2_Pt'] = [None] + [[] for _ in range(1, nb_gc + 1)]
+            self.variables['i_fc'] = [None] + [[] for _ in range(1, nb_gc + 1)]
             for j in range(len(self.sol.t)):  # For each time...
-                # ... recovery of i_fc.
-                i_fc = self.operating_inputs["current_density"](self.variables['t'][j], self.parameters)
-                # ... recovery of v_a, v_c, Pa_in, Pc_in.
-                solver_variables_1D_MEA = [None] # Dictionary corresponding to the variable inside the MEA 1D line
+                # ... recovery of the variables inside the MEA 1D line.
+                solver_variables_1D_MEA = [None]  # Dictionary corresponding to the variable inside the MEA 1D line
                 for k in range(nb_gc):
                     solver_variables_1D_MEA.append({})
                     for index, variable in enumerate(self.solver_variable_names[0]):
                         solver_variables_1D_MEA[k + 1][variable] = \
-                        self.sol.y[index + k * len(self.solver_variable_names[0])][j]
-                v_a, v_c, Pa_in, Pc_in = calculate_velocity_evolution(solver_variables_1D_MEA, i_fc,
+                            self.sol.y[index + k * len(self.solver_variable_names[0])][j]
+                # ... recovery of i_fc.
+                i_fc_cell = self.operating_inputs["current_density"](self.variables['t'][j], self.parameters)
+                i_fc = calculate_1D_GC_current_density(i_fc_cell, solver_variables_1D_MEA, self.parameters)
+                for k in range (1, nb_gc + 1):
+                    self.variables['i_fc'][k] += [i_fc[k]]
+                # ... recovery of C_O2_Pt.
+                for k in range (1, nb_gc + 1):
+                    self.variables['C_O2_Pt'][k] += [calculate_C_O2_Pt(i_fc[k], solver_variables_1D_MEA[k],
+                                                                       self.parameters)]
+                # ... recovery of Ucell.
+                self.variables['Ucell'] += [calculate_cell_voltage(i_fc[1], self.variables['C_O2_Pt'][1][-1],
+                                                                   solver_variables_1D_MEA[1], self.parameters)]
+                # ... recovery of v_a, v_c, Pa_in, Pc_in.
+                v_a, v_c, Pa_in, Pc_in = calculate_velocity_evolution(solver_variables_1D_MEA, i_fc_cell,
                                                                       self.operating_inputs, self.parameters)
                 for k in range(nb_gc + 2):
                     self.variables['v_a'][k] += [v_a[k]]

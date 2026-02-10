@@ -14,7 +14,7 @@ from model.velocity import desired_flows
 
 # ______________________________________________________Auxiliaries_____________________________________________________
 
-def calculate_flows_1D_GC_manifold(sv_1D_cell, sv_1D_manifold, sv_auxiliary, i_fc, v_a, v_c, Pa_in,
+def calculate_flows_1D_GC_manifold(sv_1D_cell, sv_1D_manifold, sv_auxiliary, i_fc_cell, v_a, v_c, Pa_in,
                                    Pc_in, operating_inputs, parameters):
     """This function calculates the flows passing through the auxiliaries.
 
@@ -29,7 +29,7 @@ def calculate_flows_1D_GC_manifold(sv_1D_cell, sv_1D_manifold, sv_auxiliary, i_f
     sv_auxiliary : dict
         Variables calculated by the solver. They correspond to the auxiliary internal states.
         sv is a contraction of solver_variables for enhanced readability.
-    i_fc : float
+    i_fc_cell : float
         Fuel cell current density at time t (A.m-2).
     v_a : list
         Velocity evolution at the anode side (m.s-1).
@@ -98,7 +98,7 @@ def calculate_flows_1D_GC_manifold(sv_1D_cell, sv_1D_manifold, sv_auxiliary, i_f
     (P_agc, P_cgc, Phi_agc, Phi_cgc, y_H2_agc, y_O2_cgc, M_agc, M_cgc, M_ext, M_H2_N2_in, rho_agc, rho_cgc, k_purge,
      Abp_a, Abp_c, mu_gaz_agc, mu_gaz_cgc) = flow_1D_GC_manifold_int_values(sv_1D_cell, sv_auxiliary, operating_inputs,
                                                                             parameters)                                 # Some of them will remain useless ?!
-    W_des = desired_flows(sv_1D_cell, i_fc, Pa_in, Pc_in, operating_inputs, parameters)
+    W_des = desired_flows(sv_1D_cell, i_fc_cell, Pa_in, Pc_in, operating_inputs, parameters)
 
     # _________________________________________Inlet and outlet global flows____________________________________________
     """Global flows here refer to flows that integrate all the chemical species circulating together.
@@ -116,7 +116,7 @@ def calculate_flows_1D_GC_manifold(sv_1D_cell, sv_1D_manifold, sv_auxiliary, i_f
         # Waem_in_to_aem = rho_aem_in_to_aem * v_a * Hagc * Wagc
         # if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation":                                     # Attention: prévoir un débit minimal pour la pompe, comme les débits entrants.
         #     Ware = Maem_out_re * (Paem_out_re / (Paem_out_re - Phi_aem_out_re * Psat(T_des))) * \
-        #            (Sa - 1) * i_fc / (2 * F) * (nb_cell * Aact)                                                  # The pump exactly compensates the pressure drop.
+        #            (Sa - 1) * i_fc_cell / (2 * F) * (nb_cell * Aact)                                                  # The pump exactly compensates the pressure drop.
         #     Wasm_in_re_to_asm = rho_asm_in_re_to_asm * v_a * A_T_a
         #     Waem_to_aem_out_re = rho_aem_to_aem_out_re * v_a * A_T_a
         #     Waem_to_aem_out = k_purge * rho_aem_to_aem_out * v_a * A_T_a

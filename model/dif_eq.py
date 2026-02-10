@@ -14,7 +14,7 @@ from model.flows_1D_GC_manifold import calculate_flows_1D_GC_manifold
 # Importing constants' value and functions
 from model.velocity import calculate_velocity_evolution
 from model.flows_1D_MEA import calculate_flows_1D_MEA
-from model.cell_voltage import calculate_C_O2_Pt
+from model.cell_voltage import calculate_1D_GC_current_density, calculate_C_O2_Pt
 from model.heat_transfer import calculate_heat_transfers
 from modules.dif_eq_modules import calculate_dif_eq_int_values
 from model.dif_eq_1D_MEA import (calculate_dyn_dissoved_water_evolution_inside_MEA, calculate_dyn_liquid_water_evolution_inside_MEA,
@@ -81,30 +81,35 @@ def dydt(t, y, operating_inputs, parameters, solver_variable_names):
                          " s. It means that the voltage is negative, which is not possible.")
 
     # Intermediate values
-    i_fc = operating_inputs['current_density'](t, parameters)
+
     dif_eq_int_values = [None] + [calculate_dif_eq_int_values(t, solver_variables_1D_cell[i], operating_inputs,
                                                               parameters) for i in range(1, nb_gc + 1)]
 
+    # Calculate the local current density at each node of the GC.
+    i_fc_cell = operating_inputs['current_density'](t, parameters)
+    i_fc = calculate_1D_GC_current_density(i_fc_cell, solver_variables_1D_cell, parameters)
+
     # Calculation of the oxygen concentration at the platinum surface in the cathode catalyst layer
-    C_O2_Pt = calculate_C_O2_Pt(i_fc, **solver_variables_1D_cell[1], **parameters)                                       # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    C_O2_Pt = [None] + [calculate_C_O2_Pt(i_fc[i], solver_variables_1D_cell[i], parameters)
+                        for i in range(1, nb_gc + 1)]
 
     # Calculation of the velocities inside the GC and the manifolds
-    v_a, v_c, Pa_in, Pc_in = calculate_velocity_evolution(solver_variables_1D_cell, i_fc, operating_inputs, parameters)
+    v_a, v_c, Pa_in, Pc_in = calculate_velocity_evolution(solver_variables_1D_cell, i_fc_cell, operating_inputs, parameters)
 
     # Calculation of the flows. These elements are lists of dictionaries. Each index corresponds to one GC node.
     # Each element of the dictionary corresponds to one flow inside this GC node.
-    flows_1D_MEA = [None] + [calculate_flows_1D_MEA(solver_variables_1D_cell[i], i_fc, v_a[i], v_c[i],
+    flows_1D_MEA = [None] + [calculate_flows_1D_MEA(solver_variables_1D_cell[i], i_fc[i], v_a[i], v_c[i],
                                                     operating_inputs, parameters)
                              for i in range(1, nb_gc + 1)]
     flows_1D_GC_manifold = calculate_flows_1D_GC_manifold(solver_variables_1D_cell, solver_variable_1D_manifold,
-                                                          solver_variable_auxiliary, i_fc, v_a, v_c, Pa_in, Pc_in,
+                                                          solver_variable_auxiliary, i_fc_cell, v_a, v_c, Pa_in, Pc_in,
                                                           operating_inputs, parameters)
     for dif_eq, flow_names in {'agc_agdl': ('Jl', 'Jv', 'J_H2'), 'cgdl_cgc': ('Jl', 'Jv', 'J_O2')}.items():
         for flow_name in flow_names:
             flows_1D_GC_manifold[flow_name][dif_eq] = [None]
             for i in range(1, nb_gc + 1):
                 flows_1D_GC_manifold[flow_name][dif_eq].append(flows_1D_MEA[i][flow_name][dif_eq])
-    heat_flows_global = [None] + [calculate_heat_transfers(solver_variables_1D_cell[i], i_fc, operating_inputs,
+    heat_flows_global = [None] + [calculate_heat_transfers(solver_variables_1D_cell[i], i_fc[i], operating_inputs,
                                                            parameters, **flows_1D_MEA[i])
                                   for i in range(1, nb_gc + 1)]
 
@@ -119,7 +124,7 @@ def dydt(t, y, operating_inputs, parameters, solver_variable_names):
                                                  **flows_1D_MEA[i])
         calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq_1D_cell[i], solver_variables_1D_cell[i], **parameters,
                                                     **flows_1D_MEA[i])
-        calculate_dyn_voltage_evolution(dif_eq_1D_cell[i], i_fc, C_O2_Pt, **solver_variables_1D_cell[i],
+        calculate_dyn_voltage_evolution(dif_eq_1D_cell[i], i_fc[i], C_O2_Pt[i], **solver_variables_1D_cell[i],
                                         **operating_inputs, **parameters, **dif_eq_int_values[i])                       # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         calculate_dyn_temperature_evolution_inside_MEA(dif_eq_1D_cell[i], **parameters, **dif_eq_int_values[i],
                                                        **heat_flows_global[i])
