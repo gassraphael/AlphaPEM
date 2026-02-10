@@ -473,16 +473,16 @@ def plot_ifc(variables, operating_inputs, parameters, ax):
     t = np.array(variables['t'])[mask]
     i_fc_t = [None] + [[] for _ in range(1, nb_gc + 1)]
     for i in range(1, nb_gc + 1):
-        i_fc_t[i] = np.array(variables['i_fc'][i])[mask]
+        i_fc_t[i] = np.array(variables['i_fc'][i])[mask] / 1e4  # Conversion in A/cm²
 
     # Plot the current density: ifc
     n = len(t)
     i_fc_cell_t = np.zeros(n)
     for i in range(n):  # Creation of i_fc_cell_t
         i_fc_cell_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
-    ax.plot(t, i_fc_cell_t, color=colors(0), label=r'$\mathregular{i_{fc}}$')
+    ax.plot(t, i_fc_cell_t, color=colors(0), label=r'$\mathregular{i_{fc,cell}}$')
     for i in range(1, nb_gc + 1):
-        ax.plot(t, i_fc_t[i], color=colors(i), label=r'$\mathregular{i_{fc}}$' + f' at gc {i}')
+        ax.plot(t, i_fc_t[i], color=colors(i), label=rf'$\mathregular{{i_{{fc,{i}}}}}$')
 
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
@@ -823,7 +823,7 @@ def plot_C_O2(variables, operating_inputs, parameters, ax):
     C_O2_cmpl_t = np.array(variables[f'C_O2_cmpl_{int(np.ceil(nb_mpl / 2))}'][nb_gc_mid])[mask]
     C_O2_cgdl_t = np.array(variables[f'C_O2_cgdl_{int(np.ceil(nb_gdl / 2))}'][nb_gc_mid])[mask]
     C_O2_cgc_t = np.array(variables['C_O2_cgc'][nb_gc_mid])[mask]
-    C_O2_Pt_t = np.array(variables['C_O2_Pt_t'][nb_gc_mid])[mask]
+    C_O2_Pt_t = np.array(variables['C_O2_Pt'][nb_gc_mid])[mask]
 
     # Plot the oxygen concentration at different spatial localisations: C_O2
     ax.plot(t, C_O2_Pt_t, color=colors(10))
