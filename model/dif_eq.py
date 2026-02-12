@@ -76,12 +76,12 @@ def dydt(t, y, operating_inputs, parameters, solver_variable_names):
             dif_eq_auxiliary['d' + f'{variable}' + ' / dt'] = None
 
     # Conditions to pursue the calculations
-    if solver_variables_1D_cell[1]['eta_c'] > E0:                                                                        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        raise ValueError("The cathode overpotential is higher than the open circuit voltage at time t = " + str(t) +
-                         " s. It means that the voltage is negative, which is not possible.")
+    for i in range(1, nb_gc + 1):
+        if solver_variables_1D_cell[i]['eta_c'] > E0:
+            raise ValueError("The cathode overpotential is higher than the open circuit voltage at time t = " + str(t) +
+                             " s. It means that the voltage is negative, which is not possible.")
 
     # Intermediate values
-
     dif_eq_int_values = [None] + [calculate_dif_eq_int_values(t, solver_variables_1D_cell[i], operating_inputs,
                                                               parameters) for i in range(1, nb_gc + 1)]
 

@@ -340,13 +340,13 @@ def calculate_computing_parameters(step_current_parameters):
     """
 
     # Setting the number of model points placed inside each layer:
-    nb_gc = 1  # It is the number of model points placed inside each gas channel.
+    nb_gc = 2  # It is the number of model points placed inside each gas channel.
     nb_gdl = 3  # It is the number of model points placed inside each GDL.
     nb_mpl = 2  # It is the number of model points placed inside each MPL.
 
     # Setting the purging parameters of the system and the dynamic display of the step current density function:
     t_purge = 0.6, 15  # (s, s). It is the time parameters for purging the system.
-    delta_t_dyn_step = 2 * 60  # (s). Time for dynamic display of the step current density function.
+    delta_t_dyn_step = 0.1  # (s). Time for dynamic display of the step current density function.
 
     # Setting the tolerances for the system of ODEs solver:
     rtol = 1e-5  # Relative tolerance for the system of ODEs solver.

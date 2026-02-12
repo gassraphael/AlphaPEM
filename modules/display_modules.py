@@ -475,19 +475,26 @@ def plot_ifc(variables, operating_inputs, parameters, ax):
     for i in range(1, nb_gc + 1):
         i_fc_t[i] = np.array(variables['i_fc'][i])[mask] / 1e4  # Conversion in A/cm²
 
+    # Collect handles and labels then built manually the legend
+    handles = []
+    labels = []
+
     # Plot the current density: ifc
     n = len(t)
     i_fc_cell_t = np.zeros(n)
     for i in range(n):  # Creation of i_fc_cell_t
         i_fc_cell_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
-    ax.plot(t, i_fc_cell_t, color=colors(0), label=r'$\mathregular{i_{fc,cell}}$')
+    h = ax.plot(t, i_fc_cell_t, color=colors(0))[0]
+    handles.append(h)
+    labels.append(r'$\mathregular{i_{fc,cell}}$')
     for i in range(1, nb_gc + 1):
-        ax.plot(t, i_fc_t[i], color=colors(i), label=rf'$\mathregular{{i_{{fc,{i}}}}}$')
-
+        h = ax.plot(t, i_fc_t[i], color=colors(i))[0]
+        handles.append(h)
+        labels.append(rf'$\mathregular{{i_{{fc,{i}}}}}$')
     ax.set_xlabel(r'$\mathbf{Time}$ $\mathbf{t}$ $\mathbf{\left( s \right)}$', labelpad=3)
     ax.set_ylabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
                   labelpad=3)
-    ax.legend(loc='best')
+    ax.legend(handles=handles, labels=labels, loc='best')
 
     # Plot instructions
     plot_general_instructions(ax)

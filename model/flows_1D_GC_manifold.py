@@ -190,14 +190,14 @@ def calculate_flows_1D_GC_manifold(sv_1D_cell, sv_1D_manifold, sv_auxiliary, i_f
     Jl_agc_agc_conv = [None] + [rho_H2O_l(T_des) * K_v_liq_gas * v_a[i] * s_agc[i] for i in range(1, nb_gc + 1)]
     Jl_agc_agc_dif = [None] + [- D_liq_dif * d_dx(y_minus = s_agc[i], y_plus = s_agc[i + 1], dx = (Lgc / nb_gc) / 2)
                                for i in range(1, nb_gc + 1)]
-    Jl_agc_agc = [Jl_agc_agc_conv[i] + Jl_agc_agc_dif[i] for i in range(1, nb_gc + 1)]
+    Jl_agc_agc = [None] + [Jl_agc_agc_conv[i] + Jl_agc_agc_dif[i] for i in range(1, nb_gc + 1)]
     Jl_agc_out = Jl_agc_agc_conv[-1] + Jl_agc_agc_dif[-1]
     #   At the cathode side
     s_cgc[nb_gc + 1] = 0 # Boundary condition at the outlet of the cathode GC: no liquid water at the outlet.
     Jl_cgc_cgc_conv = [None] + [rho_H2O_l(T_des) * K_v_liq_gas * v_c[i] * s_cgc[i] for i in range(1, nb_gc + 1)]
     Jl_cgc_cgc_dif = [None] + [- D_liq_dif * d_dx(y_minus = s_cgc[i], y_plus = s_cgc[i + 1], dx = (Lgc / nb_gc) / 2)
                                for i in range(1, nb_gc + 1)]
-    Jl_cgc_cgc = [Jl_cgc_cgc_conv[i] + Jl_cgc_cgc_dif[i] for i in range(1, nb_gc + 1)]
+    Jl_cgc_cgc = [None] + [Jl_cgc_cgc_conv[i] + Jl_cgc_cgc_dif[i] for i in range(1, nb_gc + 1)]
     Jl_cgc_out = Jl_cgc_cgc_conv[-1] + Jl_cgc_cgc_dif[-1]
 
     # H2 flows at the GC (mol.m-2.s-1)

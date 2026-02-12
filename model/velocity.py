@@ -169,13 +169,9 @@ def calculate_velocity_evolution(sv, i_fc_cell, operating_inputs, parameters):
     # Calculation of the initial molar flow using least squares and pressure drop relation
     #       Initial guesses, bounds
     v_medium = 10 # Initial guess for the velocity (m/s).
-    v_max = 100  # Maximum velocity (m/s)
-    P_max = 4e5  # Maximum pressure (Pa)
     x0 = [v_medium * Pa_des / (R * T_des), v_medium * Pc_des / (R * T_des)]
-    lb = [1e-8, 1e-8]
-    ub = [v_max * P_max / (R * T_des), v_max * P_max / (R * T_des)]
     #       Solver call
-    sol = least_squares(residuals, x0, bounds=(lb, ub), method='trf')
+    sol = least_squares(residuals, x0, method='lm')
     #       Check for convergence
     if not sol.success:
         raise RuntimeError(f"Convergence failed in calculate_velocity_evolution: {sol.message}")
