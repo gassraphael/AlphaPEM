@@ -340,7 +340,7 @@ def calculate_computing_parameters(step_current_parameters):
     """
 
     # Setting the number of model points placed inside each layer:
-    nb_gc = 2  # It is the number of model points placed inside each gas channel.
+    nb_gc = 1  # It is the number of model points placed inside each gas channel.
     nb_gdl = 3  # It is the number of model points placed inside each GDL.
     nb_mpl = 2  # It is the number of model points placed inside each MPL.
 

@@ -64,10 +64,8 @@ def calculate_1D_GC_current_density(i_fc_cell, sv, parameters):
     x0 = [calculate_cell_voltage(i_fc_cell, C_O2_ccl[1], sv[1], parameters)] + \
          [i_fc_cell] * nb_gc + \
          [C_O2_ccl[i] for i in range(1, nb_gc + 1)]  # Initial guesses for the least square solver.
-    lb = [1e-8] * (2 * nb_gc + 1) # Lower bounds for the least square solver.
-    ub = [E0] + [i_fc_cell * nb_gc] * nb_gc + [C_O2_ccl[i] for i in range(1, nb_gc + 1)] # Upper bounds for the least square solver
     #       Solver call
-    sol = least_squares(residuals, x0, bounds=(lb, ub), method='dogbox')
+    sol = least_squares(residuals, x0, method='lm')
 
     #       Check for convergence
     if not sol.success:
