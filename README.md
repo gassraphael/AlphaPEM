@@ -53,57 +53,55 @@ To install **AlphaPEM**, follow these steps in a shell:
     python3 -m pip install git+https://github.com/RedFantom/ttkthemes
     ```
     
-    
+
 # Start
 
 You have two main ways to run AlphaPEM:
 
-A. Using the Graphical User Interface (GUI)
+## Using the Graphical User Interface (GUI)
 
-	The GUI provides a quick way to configure and run simulations without modifying the source code. However, it does not yet grant access to all the functionalities of the code.
+The GUI provides a quick way to configure and run simulations without modifying the source code. However, it does not yet grant access to all the functionalities of the code.
 
-	1. Execute the GUI file:
+1. Execute the GUI file:
 
-	   ```sh
-	   python3 GUI.py
-	   ```
+   ```sh
+   python3 GUI.py
+   ```
 
-	2. In the GUI (as shown in [AlphaPEM graphical user interface]):
+2. In the GUI (as shown in [AlphaPEM graphical user interface]):
 
-	   - Select a predefined fuel cell specification from the 'Fuel cell' dropdown menu. Operating conditions and parameters can also be adjusted by selecting 'Enter your specifications' in this menu.
+   - Select a predefined fuel cell specification from the 'Fuel cell' dropdown menu. Operating conditions and parameters can also be adjusted by selecting 'Enter your specifications' in this menu.
 
-	   - Choose the configuration you prefer for the auxiliaries, voltage zone, purge, display and plot under 'Model configuration'.
+   - Choose the configuration you prefer for the auxiliaries, voltage zone, purge, display and plot under 'Model configuration'.
 
-	   - Select your desired simulation type at the bottom of the GUI (e.g., current density step, polarization curve, or EIS curve).
+   - Select your desired simulation type at the bottom of the GUI (e.g., current density step, polarization curve, or EIS curve).
 
-	3. Run the simulation to generate results (internal states and voltage dynamics) in the /results directory.
+3. Run the simulation to generate results (internal states and voltage dynamics) in the /results directory.
 
-B. Using the Command Line (Programmers)
+## Using the Command Line (Programmers)
 
-	The main.py file is used for standard operation and provides full control for programmers. This allows for using any physically acceptable current density function, beyond the predefined configurations of the GUI.
+The main.py file is used for standard operation and provides full control for programmers. This allows for using any physically acceptable current density function, beyond the predefined configurations of the GUI.
 
-	1. Modify parameters and input current densities directly in the appropriate configuration files (e.g., /configuration/settings.py or /configuration/current_densities.py).
+1. Modify parameters and input current densities directly in the appropriate configuration files (e.g., /configuration/settings.py or /configuration/current_densities.py).
 
-	2. Execute the main file:
+2. Execute the main file:
 
-	```sh
-	python3 main.py
-	```
+```sh
+python3 main.py
+```
 
-	3. Automated Parameter Calibration (Advanced)
+3. Automated Parameter Calibration (Advanced)
 
-		To adapt AlphaPEM to a new, specific fuel cell, you must calibrate the undetermined physical parameters (like GDL porosity) using experimental data. This functionality is not yet available from the GUI. The calibration uses a genetic algorithm (PyGAD) to match simulated results to experimental data.
+   To adapt AlphaPEM to a new, specific fuel cell, you must calibrate the undetermined physical parameters (like GDL porosity) using experimental data. This functionality is not yet available from the GUI. The calibration uses a genetic algorithm (PyGAD) to match simulated results to experimental data.
 
-		1. Input Experimental Data: place experimental polarization curves (at least three) into the file: 
-		./calibration/experimental_values.
+   1. Input Experimental Data: place experimental polarization curves (at least three) into the file: ./calibration/experimental_values.
 
-		2. Configure Parameters: input the operating conditions and accessible physical parameters of your fuel cell system in: 
-		./modules/calibration_modules.
+   2. Configure Parameters: input the operating conditions and accessible physical parameters of your fuel cell system in: ./modules/calibration_modules.
 
-		3. Run Calibration: execute the calibration program (preferably on a computing cluster due to computational cost):
-		```sh
-		python3 ./calibration/parameter_calibration.py
-		```
+   3. Run Calibration: execute the calibration program (preferably on a computing cluster due to computational cost):
+   ```sh
+   python3 ./calibration/parameter_calibration.py
+   ```
 
 # Major updates
 
