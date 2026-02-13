@@ -52,7 +52,9 @@ To install **AlphaPEM**, follow these steps in a shell:
     pip install numpy scipy matplotlib colorama pygad
     python3 -m pip install git+https://github.com/RedFantom/ttkthemes
     ```
-   
+
+Test
+
 # Start
 
 You have two main ways to run AlphaPEM:
@@ -67,7 +69,7 @@ The GUI provides a quick way to configure and run simulations without modifying 
    python3 GUI.py
    ```
 
-2. In the GUI (as shown in [AlphaPEM graphical user interface][gui]):
+2. In the GUI (as shown in [AlphaPEM section](#alphapem)):
 
    - Select a predefined fuel cell specification from the 'Fuel cell' dropdown menu. Operating conditions and parameters can also be adjusted by selecting 'Enter your specifications' in this menu.
 
@@ -76,8 +78,6 @@ The GUI provides a quick way to configure and run simulations without modifying 
    - Select your desired simulation type at the bottom of the GUI (e.g., current density step, polarization curve, or EIS curve).
 
 3. Run the simulation to generate results (internal states and voltage dynamics) in the /results directory.
-
-[gui]: docs/images/demo.png "AlphaPEM graphical user interface (GUI)"
 
 ## Using the Command Line (Programmers)
 
