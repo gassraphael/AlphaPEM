@@ -549,15 +549,14 @@ class AlphaPEM:
                 plot_ifc(self.variables, self.operating_inputs, self.parameters, ax1[0, 0])
                 plot_Ucell(self.variables, self.parameters, ax1[0, 1])
                 plot_T(self.variables, self.operating_inputs, self.parameters, ax1[0, 2])
+
                 plot_C_v(self.variables, self.parameters, ax1[1, 0])
                 plot_s(self.variables, self.operating_inputs, self.parameters, ax1[1, 1])
                 plot_lambda(self.variables, self.operating_inputs, self.parameters, ax1[1, 2])
+
                 plot_C_H2(self.variables, self.parameters, ax1[2, 0])
                 plot_C_O2(self.variables, self.operating_inputs, self.parameters, ax1[2, 1])
                 plot_P(self.variables, self.operating_inputs, self.parameters, ax1[2, 2])
-
-                plot_v(self.variables, self.parameters, ax2[0])
-                plot_Re_nb(self.variables, self.parameters, ax2[1])
 
                 plt.pause(1)  # A break is necessary to plot the new points in dynamic mode
 

@@ -67,7 +67,7 @@ The GUI provides a quick way to configure and run simulations without modifying 
    python3 GUI.py
    ```
 
-2. In the GUI (as shown in [AlphaPEM section](#alphapem)):
+2. In the GUI (as shown in the figure of [AlphaPEM section](#alphapem)):
 
    - Select a predefined fuel cell specification from the 'Fuel cell' dropdown menu. Operating conditions and parameters can also be adjusted by selecting 'Enter your specifications' in this menu.
 
