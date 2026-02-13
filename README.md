@@ -108,7 +108,7 @@ python3 main.py
 	- the addition of O2 flow to Pt particules which improves the modeling of overvoltage due to flooding at high curent densities.
 		- the limiting liquid water saturation coefficient ($s_{lim}$) has been definitively removed, as this model replaces it.
 	- the addition of liquid water flow inside the GC (with the sorption flow at the GDL/GC interface).
-	- the spatial extension to 1D+1D.
+	- the spatial extension to 1D+1D (except thermal evolution which remains 1D for now).
 - [V1.2](https://github.com/gassraphael/AlphaPEM/tree/b71f42878a186e17efeb7e97b5d7fb50d6e76827) - 2025.12.11 - This version of AlphaPEM includes: 
 	- the addition of convective flow between the inlet, gas channels, and outlet of the cell, thereby removing the Pukrushpan equations (from Michigan University).
 		- auxiliaries are temporarily removed, as they require reconstruction. 
@@ -131,7 +131,11 @@ python3 main.py
 
 # Roadmap
 
-
+- Spatial extension to 1D+1D for modeling the thermal evolution.
+- Spatial extension to 1D+1D+1D: a 1D channel will be added to each manifold, enabling full-stack modeling.
+- Integration of more accurate physical models for the auxiliaries.
+- Inclusion of ECSA degradation in the simulation framework.
+- Enhancement of the GUI to allow seamless addition of new fuel cell configurations without modifying the source code.
 
 # Related publications
 
