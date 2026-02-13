@@ -53,13 +53,11 @@ To install **AlphaPEM**, follow these steps in a shell:
     python3 -m pip install git+https://github.com/RedFantom/ttkthemes
     ```
 
-Test
-
-# Start
+# Start
 
 You have two main ways to run AlphaPEM:
 
-## Using the Graphical User Interface (GUI)
+## Using the graphical user interface (GUI)
 
 The GUI provides a quick way to configure and run simulations without modifying the source code. However, it does not yet grant access to all the functionalities of the code.
 
@@ -79,19 +77,19 @@ The GUI provides a quick way to configure and run simulations without modifying 
 
 3. Run the simulation to generate results (internal states and voltage dynamics) in the /results directory.
 
-## Using the Command Line (Programmers)
+## Using the command line (programmers)
 
 The main.py file is used for standard operation and provides full control for programmers. This allows for using any physically acceptable current density function, beyond the predefined configurations of the GUI.
 
 1. Modify parameters and input current densities directly in the appropriate configuration files (e.g., /configuration/settings.py or /configuration/current_densities.py).
 
-2. Execute the main file:
+2. Execute the main file to generate results (internal states and voltage dynamics) in the /results directory:
 
 ```sh
 python3 main.py
 ```
 
-3. Automated Parameter Calibration (Advanced)
+3. Automated parameter calibration (advanced)
 
    To adapt AlphaPEM to a new, specific fuel cell, you must calibrate the undetermined physical parameters (like GDL porosity) using experimental data. This functionality is not yet available from the GUI. The calibration uses a genetic algorithm (PyGAD) to match simulated results to experimental data.
 
