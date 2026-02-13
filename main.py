@@ -5,6 +5,9 @@
 
 # _____________________________________________________Preliminaries____________________________________________________
 
+# Importing the necessary libraries
+import matplotlib.pyplot as plt
+
 # Importing constants' value and functions
 import cProfile
 import copy
@@ -134,6 +137,9 @@ def main():
                                                     select_nth_elements(computing_parameters, 1))
     else:
         raise ValueError('You have to specify a type_current which is accepted.')
+
+    plt.ioff()  # Disable interactive mode for non-blocking display
+    plt.show(block=True)  # To ensure that the figures remain displayed after the program execution.
 
     return Simulator
 

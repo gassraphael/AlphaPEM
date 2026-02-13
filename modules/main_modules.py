@@ -42,6 +42,9 @@ def figures_preparation(computing_parameters):
     mpl.rcParams['lines.linewidth'] = 2.0
     mpl.rcParams['lines.markersize'] = 5.0
 
+    # Enable interactive mode for non-blocking display
+    plt.ion()
+
     if computing_parameters['type_display'] == "no_display":
         fig1, ax1 = None, None
         fig2, ax2 = None, None

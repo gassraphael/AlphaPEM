@@ -10,6 +10,7 @@ Most of the functionalities are available, but some are not implemented.
 import tkinter as tk
 from ttkthemes import ThemedTk
 from tkinter import ttk
+import matplotlib.pyplot as plt
 
 # Importing constants' value and functions
 from modules.GUI_modules import display_parameter_labels, \
@@ -442,6 +443,9 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
                                 'type_display': type_display, 'type_plot': type_plot}
         launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, accessible_physical_parameters,
                                         undetermined_physical_parameters, computing_parameters)
+
+    plt.ioff()  # Disable interactive mode for non-blocking display
+    plt.show(block=True)  # To ensure that the figures remain displayed after the program execution.
 
 
 def about():
