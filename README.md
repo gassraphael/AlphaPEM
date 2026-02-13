@@ -81,15 +81,17 @@ The GUI provides a quick way to configure and run simulations without modifying 
 
 The main.py file is used for standard operation and provides full control for programmers. This allows for using any physically acceptable current density function, beyond the predefined configurations of the GUI.
 
-1. Modify parameters and input current densities directly in the appropriate configuration files (e.g., /configuration/settings.py or /configuration/current_densities.py).
+1. Modify parameters and input current densities directly in the appropriate configuration files (e.g., /configuration/settings.py or /configuration/current_densities.py) if needed.
 
-2. Execute the main file to generate results (internal states and voltage dynamics) in the /results directory:
+2. Select a predefined fuel cell specification, a given configuration and the desired simulation directly at the beguining of the /main.py file.
+
+3. Execute the main file to generate results (internal states and voltage dynamics) in the /results directory:
 
 ```sh
 python3 main.py
 ```
 
-3. Automated parameter calibration (advanced)
+4. Automated parameter calibration (advanced)
 
    To adapt AlphaPEM to a new, specific fuel cell, you must calibrate the undetermined physical parameters (like GDL porosity) using experimental data. This functionality is not yet available from the GUI. The calibration uses a genetic algorithm (PyGAD) to match simulated results to experimental data.
 
