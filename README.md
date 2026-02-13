@@ -1,20 +1,22 @@
 # AlphaPEM
 
-AlphaPEM is an open-source software package for simulating proton exchange membrane fuel cell (PEMFC) systems for embedded applications. It is based on a physics-based, finite-volume, one-dimensional (1D), dynamic, two-phase, and non-isothermal model. It quickly simulates the internal states and voltage dynamics of PEMFC systems for all current densities and operating conditions imposed on it. In particular, it is possible to apply a step current density or use current profiles to generate polarization curves or electrochemical impedance spectroscopy (EIS) curves. It can also automatically calibrate the undetermined parameters of the model to simulate a given real fuel cell system.
+AlphaPEM is an open-source software package for simulating proton exchange membrane fuel cell (PEMFC) systems for embedded applications. It is based on a physics-based, finite-volume, pseudo-two-dimensional (1D+1D), dynamic, two-phase, and non-isothermal model. It quickly simulates the internal states and voltage dynamics of PEMFC systems for all current densities and operating conditions imposed on it. In particular, it is possible to apply a step current density or use current profiles to generate polarization curves or electrochemical impedance spectroscopy (EIS) curves. It can also automatically calibrate the undetermined parameters of the model to simulate a given real fuel cell system.
 
-A detailed [presentation](https://doi.org/10.48550/arXiv.2407.12373) of this program is published in the peer-reviewed journal SoftwareX. Furthermore, comprehensive [documentation](https://gassraphael.github.io/AlphaPEM/) in Numpy style for the software functions is available.
+A detailed [presentation](https://doi.org/10.48550/arXiv.2407.12373) of this program has been published in the peer-reviewed journal SoftwareX (limited to [version V1.0](#major-updates)). Furthermore, comprehensive [documentation](https://gassraphael.github.io/AlphaPEM/) in Numpy style for the software functions is available.
 
-Improvements to **AlphaPEM**, such as the addition of auxiliary cooling system modeling and spatial extension to 1D+1D, will be available in the future.
+Improvements to AlphaPEM are discussed in the [roadmap section](#roadmap).
 
-Important note: AlphaPEM is an ongoing research project and is not a commercial product. Therefore, the latest online version may contain bugs, and not all features may be available. Relatively stable versions are listed in the [Major updates](#major-updates) section.
+**Important note:** AlphaPEM is an ongoing research project and is not a commercial product. Therefore, the latest online version may contain bugs, and not all features may be available. The current work is detailled in the [work in progress](#work-in-progress) section. Relatively stable versions are listed in the [Major updates](#major-updates) section.
 
 ![AlphaPEM graphical user interface](docs/images/demo.png "AlphaPEM graphical user interface (GUI)")
 
 # Table of Contents
 
 - [Installation](#installation)
+- [Start](#start)
 - [Major updates](#major-updates)
 - [Work in progress](#work-in-progress)
+- [Roadmap](#roadmap)
 - [Related publications](#related-publications) 
 - [Contributions](#contributions)
 - [Contact](#contact)
@@ -38,6 +40,12 @@ To install **AlphaPEM**, follow these steps in a shell:
     ```sh
     pip install --upgrade pip
     ```
+    
+4. Create a new environment, referred to here as *env*, and activate it:
+    ```sh
+    python3 -m venv env
+    source env/bin/activate
+    ```
 
 4. Install the required dependencies (eventually in a specific environment):
     ```sh
@@ -45,29 +53,87 @@ To install **AlphaPEM**, follow these steps in a shell:
     python3 -m pip install git+https://github.com/RedFantom/ttkthemes
     ```
     
+    
+# Start
+
+You have two main ways to run AlphaPEM:
+
+A. Using the Graphical User Interface (GUI)
+
+	The GUI provides a quick way to configure and run simulations without modifying the source code. However, it does not yet grant access to all the functionalities of the code.
+
+	1. Execute the GUI file:
+
+	   ```sh
+	   python3 GUI.py
+	   ```
+
+	2. In the GUI (as shown in [AlphaPEM graphical user interface]):
+
+	   - Select a predefined fuel cell specification from the 'Fuel cell' dropdown menu. Operating conditions and parameters can also be adjusted by selecting 'Enter your specifications' in this menu.
+
+	   - Choose the configuration you prefer for the auxiliaries, voltage zone, purge, display and plot under 'Model configuration'.
+
+	   - Select your desired simulation type at the bottom of the GUI (e.g., current density step, polarization curve, or EIS curve).
+
+	3. Run the simulation to generate results (internal states and voltage dynamics) in the /results directory.
+
+B. Using the Command Line (Programmers)
+
+	The main.py file is used for standard operation and provides full control for programmers. This allows for using any physically acceptable current density function, beyond the predefined configurations of the GUI.
+
+	1. Modify parameters and input current densities directly in the appropriate configuration files (e.g., /configuration/settings.py or /configuration/current_densities.py).
+
+	2. Execute the main file:
+
+	```sh
+	python3 main.py
+	```
+
+	3. Automated Parameter Calibration (Advanced)
+
+		To adapt AlphaPEM to a new, specific fuel cell, you must calibrate the undetermined physical parameters (like GDL porosity) using experimental data. This functionality is not yet available from the GUI. The calibration uses a genetic algorithm (PyGAD) to match simulated results to experimental data.
+
+		1. Input Experimental Data: place experimental polarization curves (at least three) into the file: 
+		./calibration/experimental_values.
+
+		2. Configure Parameters: input the operating conditions and accessible physical parameters of your fuel cell system in: 
+		./modules/calibration_modules.
+
+		3. Run Calibration: execute the calibration program (preferably on a computing cluster due to computational cost):
+		```sh
+		python3 ./calibration/parameter_calibration.py
+		```
 
 # Major updates
 
 - V1.3 - in progress - This version of AlphaPEM includes: 
 	- the addition of O2 flow to Pt particules which improves the modeling of overvoltage due to flooding at high curent densities.
+		- the limiting liquid water saturation coefficient ($s_{lim}$) has been definitively removed, as this model replaces it.
 	- the addition of liquid water flow inside the GC (with the sorption flow at the GDL/GC interface).
+	- the spatial extension to 1D+1D.
 - [V1.2](https://github.com/gassraphael/AlphaPEM/tree/b71f42878a186e17efeb7e97b5d7fb50d6e76827) - 2025.12.11 - This version of AlphaPEM includes: 
 	- the addition of convective flow between the inlet, gas channels, and outlet of the cell, thereby removing the Pukrushpan equations (from Michigan University).
-		- auxiliary considerations are temporarily removed, as they require reconstruction. 
+		- auxiliaries are temporarily removed, as they require reconstruction. 
 	- the addition of the MPL to the simulated cell, in both the anode and cathode. 
 	- effective diffusive flows for the dissolved water insided the CLs are introduced.
 	- the addition of the open-source [ZSW GenStack](https://zenodo.org/records/14223364) as a calibrated fuel cell case study. 
 - [V1.1](https://github.com/gassraphael/AlphaPEM/tree/11f07bd084a09cc6432f441b010d89d2a4229e4e) - 2025.08.18 - This version of AlphaPEM includes: 
 	- the addition of heat transfer to the program, in cooperation with Pedro Affonso Nobrega (PERSEE, MINES PSL).
 	- an improvement of the initial variable values: the algorithm waits for a given time to reach equilibrium, and then the experiment starts (step/pola/EIS).
-	- the limit liquid water saturation coefficient ($s_{lim}$) is temporarily removed for future refinement.
+	- the limiting liquid water saturation coefficient ($s_{lim}$) is temporarily removed for future refinement.
 - [V1.0](https://github.com/gassraphael/AlphaPEM/tree/2b042c3d16d53fcd16779a5ffdc81eea75a9d012) - 2024.09.05 - This version of AlphaPEM corresponds to the one developed during Raphaël Gass's PhD from 2021 to 2024. 
 	- It is based on a physics-based, one-dimensional (1D), dynamic, two-phase, and isothermal model.
 
 
 # Work in progress
 
-- The addition of the MPL to the model is currently in progress.
+- Calibration of the model using pre-selected data from ZSW-GenStack or EH-31 is currently underway.
+- Auxiliaries are temporarily removed, as they require reconstruction. 
+
+
+# Roadmap
+
 
 
 # Related publications

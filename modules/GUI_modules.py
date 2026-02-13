@@ -239,7 +239,7 @@ def display_radiobuttons(model_possibilities_frame, choices_buttons):
         A dictionary containing the button information.
     """
 
-    ttk.Label(model_possibilities_frame, text='Model possibilities', font=('cmr10', 12, 'bold')) \
+    ttk.Label(model_possibilities_frame, text='Model configuration', font=('cmr10', 12, 'bold')) \
         .grid(row=0, column=0, columnspan=6, ipady=15)
 
     # Ask the user to choose an option and save it
