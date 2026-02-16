@@ -654,6 +654,7 @@ class AlphaPEM:
                 pass  # saving instruction is directly implemented within AlphaPEM.Display for this situation.
             if type_display == "synthetic":
                 self.Saving_instructions("results", subfolder_name, "step_current_syn_1.pdf", fig1)
+                self.Saving_instructions("results", subfolder_name, "final_temperature_dist_1.pdf", fig2)
 
         # For the polarization curve
         elif type_current == "polarization":
