@@ -26,11 +26,15 @@ from model.cell_voltage import calculate_cell_voltage, calculate_C_O2_Pt, calcul
 from configuration.settings import Pext, Phi_ext, y_O2_ext, C_O2ref_red, alpha_c, Tref_O2_red, Eact_O2_red, F, R
 from modules.dif_eq_modules import event_negative
 from modules.transitory_functions import lambda_eq, k_H2, k_O2
-from modules.display_modules import (plot_ifc, plot_C_v, plot_lambda, plot_s, plot_C_O2, plot_C_H2, plot_C_N2,
-                                     plot_T, plot_Ucell, plot_P, plot_v, plot_Re_nb, plot_polarisation_curve,
+from modules.display_modules import (plot_ifc_1D_temporal, plot_C_v_1D_temporal, plot_lambda_1D_temporal,
+                                     plot_s_1D_temporal, plot_C_O2_1D_temporal, plot_C_H2_1D_temporal,
+                                     plot_C_N2_1D_temporal,
+                                     plot_T_1D_temporal, plot_Ucell, plot_P_1D_temporal, plot_v_1D_temporal,
+                                     plot_Re_nb_1D_temporal, plot_polarisation_curve,
                                      plot_polarisation_curve_for_cali, make_Fourier_transformation,
                                      plot_EIS_curve_Nyquist, plot_EIS_curve_Bode_amplitude,
-                                     plot_EIS_curve_Bode_angle, plot_power_density_curve, plot_cell_efficiency)
+                                     plot_EIS_curve_Bode_angle, plot_power_density_curve, plot_cell_efficiency,
+                                     plot_T_pseudo_2D_final)
 from calibration.experimental_values import pola_exp_values_calibration
 
 # _______________________________________________________AlphaPEM_______________________________________________________
@@ -517,17 +521,17 @@ class AlphaPEM:
 
                 figs, axes = zip(*[plt.subplots(figsize=(8, 8)) for _ in range(11)])
 
-                plot_ifc(self.variables, self.operating_inputs, self.parameters, axes[0])
-                plot_C_v(self.variables, self.parameters, axes[1])
-                plot_lambda(self.variables, self.operating_inputs, self.parameters, axes[2])
-                plot_s(self.variables, self.operating_inputs, self.parameters, axes[3])
-                plot_C_O2(self.variables, self.operating_inputs, self.parameters, axes[4])
-                plot_C_H2(self.variables, self.parameters, axes[5])
-                plot_C_N2(self.variables, self.parameters, axes[6])
-                plot_T(self.variables, self.operating_inputs, self.parameters, axes[7])
+                plot_ifc_1D_temporal(self.variables, self.operating_inputs, self.parameters, axes[0])
+                plot_C_v_1D_temporal(self.variables, self.parameters, axes[1])
+                plot_lambda_1D_temporal(self.variables, self.operating_inputs, self.parameters, axes[2])
+                plot_s_1D_temporal(self.variables, self.operating_inputs, self.parameters, axes[3])
+                plot_C_O2_1D_temporal(self.variables, self.operating_inputs, self.parameters, axes[4])
+                plot_C_H2_1D_temporal(self.variables, self.parameters, axes[5])
+                plot_C_N2_1D_temporal(self.variables, self.parameters, axes[6])
+                plot_T_1D_temporal(self.variables, self.operating_inputs, self.parameters, axes[7])
                 plot_Ucell(self.variables, self.parameters, axes[8])
-                plot_P(self.variables, self.operating_inputs, self.parameters, axes[9])
-                plot_v(self.variables, self.parameters, axes[10])
+                plot_P_1D_temporal(self.variables, self.operating_inputs, self.parameters, axes[9])
+                plot_v_1D_temporal(self.variables, self.parameters, axes[10])
 
                 # Considering the number of plots, the saving instructions are made here and not in the main.py file.
                 self.Saving_instructions("results", subfolder_name, "step_current_ifc_1.pdf", figs[0])
@@ -546,17 +550,19 @@ class AlphaPEM:
 
             elif type_display == "synthetic":
 
-                plot_ifc(self.variables, self.operating_inputs, self.parameters, ax1[0, 0])
+                plot_ifc_1D_temporal(self.variables, self.operating_inputs, self.parameters, ax1[0, 0])
                 plot_Ucell(self.variables, self.parameters, ax1[0, 1])
-                plot_T(self.variables, self.operating_inputs, self.parameters, ax1[0, 2])
+                plot_T_1D_temporal(self.variables, self.operating_inputs, self.parameters, ax1[0, 2])
 
-                plot_C_v(self.variables, self.parameters, ax1[1, 0])
-                plot_s(self.variables, self.operating_inputs, self.parameters, ax1[1, 1])
-                plot_lambda(self.variables, self.operating_inputs, self.parameters, ax1[1, 2])
+                plot_C_v_1D_temporal(self.variables, self.parameters, ax1[1, 0])
+                plot_s_1D_temporal(self.variables, self.operating_inputs, self.parameters, ax1[1, 1])
+                plot_lambda_1D_temporal(self.variables, self.operating_inputs, self.parameters, ax1[1, 2])
 
-                plot_C_H2(self.variables, self.parameters, ax1[2, 0])
-                plot_C_O2(self.variables, self.operating_inputs, self.parameters, ax1[2, 1])
-                plot_P(self.variables, self.operating_inputs, self.parameters, ax1[2, 2])
+                plot_C_H2_1D_temporal(self.variables, self.parameters, ax1[2, 0])
+                plot_C_O2_1D_temporal(self.variables, self.operating_inputs, self.parameters, ax1[2, 1])
+                plot_P_1D_temporal(self.variables, self.operating_inputs, self.parameters, ax1[2, 2])
+
+                plot_T_pseudo_2D_final(self.variables, self.operating_inputs, self.parameters, ax2)
 
                 plt.pause(1)  # A break is necessary to plot the new points in dynamic mode
 
@@ -567,9 +573,9 @@ class AlphaPEM:
                 plot_power_density_curve(self.variables, self.operating_inputs, self.parameters, n, ax1[1])
                 plot_cell_efficiency(self.variables, self.operating_inputs, self.parameters, n, ax1[2])
 
-                plot_lambda(self.variables, self.operating_inputs, self.parameters, ax2[1])
-                plot_s(self.variables, self.operating_inputs, self.parameters, ax2[2])
-                plot_T(self.variables, self.operating_inputs, self.parameters, ax2[3])
+                plot_lambda_1D_temporal(self.variables, self.operating_inputs, self.parameters, ax2[1])
+                plot_s_1D_temporal(self.variables, self.operating_inputs, self.parameters, ax2[2])
+                plot_T_1D_temporal(self.variables, self.operating_inputs, self.parameters, ax2[3])
 
                 plt.pause(0.1)  # A break is necessary to plot the new points in dynamic mode
 
@@ -586,8 +592,8 @@ class AlphaPEM:
             if type_display == "multiple":
 
                 plot_polarisation_curve_for_cali(self.variables, self.operating_inputs, self.parameters, ax1[0])
-                plot_lambda(self.variables, self.operating_inputs, self.parameters, ax1[1])
-                plot_s(self.variables, self.operating_inputs, self.parameters, ax1[2])
+                plot_lambda_1D_temporal(self.variables, self.operating_inputs, self.parameters, ax1[1])
+                plot_s_1D_temporal(self.variables, self.operating_inputs, self.parameters, ax1[2])
 
                 plt.pause(0.1)  # A break is necessary to plot the new points in dynamic mode
 

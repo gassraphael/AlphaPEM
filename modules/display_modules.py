@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.ticker import LogLocator, LogFormatter, FormatStrFormatter
+from matplotlib.colors import TwoSlopeNorm
 from numpy.fft import fft, fftfreq
 from scipy.interpolate import interp1d
 
@@ -436,10 +437,11 @@ def plot_EIS_curve_tests(variables, operating_inputs, parameters, Fourier_result
     plt.ylabel('Cell voltage (V)')
     plt.title('The cell voltage\nbehaviour over time')
 
-# ___________________________________________________Internal variables_________________________________________________
+# ____________________________________________Internal variables - 1D temporal__________________________________________
 
-def plot_ifc(variables, operating_inputs, parameters, ax):
-    """This function plots the current density as a function of time.
+def plot_ifc_1D_temporal(variables, operating_inputs, parameters, ax):
+    """This function plots the current density as a function of time. The different current density values at different
+    spatial localisation through the gas channel are plotted on the same graph, to compare their behaviour over time.
 
     Parameters
     ----------
@@ -500,8 +502,9 @@ def plot_ifc(variables, operating_inputs, parameters, ax):
     plot_general_instructions(ax)
 
 
-def plot_C_v(variables, parameters, ax):
-    """This function plots the vapor concentrations at different spatial localisations, as a function of time.
+def plot_C_v_1D_temporal(variables, parameters, ax):
+    """This function plots the vapor concentrations at different spatial localisations through the thickness of the
+     cell, as a function of time.
 
     Parameters
     ----------
@@ -563,8 +566,9 @@ def plot_C_v(variables, parameters, ax):
     plot_general_instructions(ax)
 
 
-def plot_lambda(variables, operating_inputs, parameters, ax):
-    """This function plots the water content at different spatial localisations, as a function of time.
+def plot_lambda_1D_temporal(variables, operating_inputs, parameters, ax):
+    """This function plots the water content at different spatial localisations through the thickness of the cell,
+     as a function of time.
 
     Parameters
     ----------
@@ -640,8 +644,9 @@ def plot_lambda(variables, operating_inputs, parameters, ax):
     plot_general_instructions(ax)
 
 
-def plot_s(variables, operating_inputs, parameters, ax):
-    """This function plots the liquid water saturation at different spatial localisations, as a function of time.
+def plot_s_1D_temporal(variables, operating_inputs, parameters, ax):
+    """This function plots the liquid water saturation at different spatial localisations through the thickness of the
+     cell, as a function of time.
 
     Parameters
     ----------
@@ -739,8 +744,9 @@ def plot_s(variables, operating_inputs, parameters, ax):
     plot_general_instructions(ax)
 
 
-def plot_C_H2(variables, parameters, ax):
-    """This function plots the hydrogen concentration at different spatial localisations, as a function of time.
+def plot_C_H2_1D_temporal(variables, parameters, ax):
+    """This function plots the hydrogen concentration at different spatial localisations through the thickness of the
+     cell, as a function of time.
 
     Parameters
     ----------
@@ -789,8 +795,9 @@ def plot_C_H2(variables, parameters, ax):
     plot_general_instructions(ax)
 
 
-def plot_C_O2(variables, operating_inputs, parameters, ax):
-    """This function plots the oxygen concentration at different spatial localisations, as a function of time.
+def plot_C_O2_1D_temporal(variables, operating_inputs, parameters, ax):
+    """This function plots the oxygen concentration at different spatial localisations through the thickness of the
+    cell, as a function of time.
 
     Parameters
     ----------
@@ -848,7 +855,7 @@ def plot_C_O2(variables, operating_inputs, parameters, ax):
     plot_general_instructions(ax)
 
 
-def plot_C_N2(variables, parameters, ax):
+def plot_C_N2_1D_temporal(variables, parameters, ax):
     """This function plots the nitrogen concentration as a function of time.
 
     Parameters
@@ -892,8 +899,9 @@ def plot_C_N2(variables, parameters, ax):
     plot_general_instructions(ax)
 
 
-def plot_T(variables, operating_inputs, parameters, ax):
-    """This function plots the vapor concentrations at different spatial localisations, as a function of time.
+def plot_T_1D_temporal(variables, operating_inputs, parameters, ax):
+    """This function plots the vapor concentrations at different spatial localisations through the thickness of the
+    cell, as a function of time.
 
     Parameters
     ----------
@@ -1041,7 +1049,7 @@ def plot_Ucell(variables, parameters, ax):
     plot_general_instructions(ax)
 
 
-def plot_P(variables, operating_inputs, parameters, ax):
+def plot_P_1D_temporal(variables, operating_inputs, parameters, ax):
     """This function plots the pressure at different spatial localisations as a function of time.
 
     Parameters
@@ -1122,7 +1130,7 @@ def plot_P(variables, operating_inputs, parameters, ax):
     plot_general_instructions(ax)
 
 
-def plot_Phi_a(variables, operating_inputs, parameters, ax):
+def plot_Phi_a_1D_temporal(variables, operating_inputs, parameters, ax):
     """This function plots the humidity at the anode side, at different spatial localisations, as a function of time.
 
     Parameters
@@ -1176,7 +1184,7 @@ def plot_Phi_a(variables, operating_inputs, parameters, ax):
     plot_general_instructions(ax)
 
 
-def plot_Phi_c(variables, operating_inputs, parameters, ax):
+def plot_Phi_c_1D_temporal(variables, operating_inputs, parameters, ax):
     """This function plots the humidity, at the cathode side, at different spatial localisations as a function of time.
 
     Parameters
@@ -1230,7 +1238,7 @@ def plot_Phi_c(variables, operating_inputs, parameters, ax):
     plot_general_instructions(ax)
 
 
-def plot_v(variables, parameters, ax):
+def plot_v_1D_temporal(variables, parameters, ax):
     """This function plots the velocity at the anode and the cathode as a function of time.
 
     Parameters
@@ -1275,7 +1283,7 @@ def plot_v(variables, parameters, ax):
     plot_general_instructions(ax)
 
 
-def plot_Re_nb(variables, parameters, ax):
+def plot_Re_nb_1D_temporal(variables, parameters, ax):
     """This function plots the Reynold number at the center of the AGC and the CGC as a function of time.
 
     Parameters
@@ -1350,6 +1358,115 @@ def plot_Re_nb(variables, parameters, ax):
 
     # Plot instructions
     plot_general_instructions(ax)
+
+
+# ____________________________________________Internal variables - 1D+1D final__________________________________________
+
+def plot_T_pseudo_2D_final(variables, operating_inputs, parameters, ax):
+    """ This function plots the temperature at different spatial localisation inside the fuel cell in pseudo 2D,
+    for the last time step of the simulation.
+    The temperature is represented by a color scale, with a single‑hue red colormap (shades from light to dark).
+    The x‑axis represents the different spatial localisations (agc, agdl, ampl, acl, mem, ccl, cmpl, cgdl, cgc),
+    and the y‑axis represents the gas channel number (from 1 to nb_gc).
+    The first gas channel is called “inlet” and the last gas channel is called “outlet”.
+
+    Parameters
+    ----------
+    variables : dict
+        Variables calculated by the solver. They correspond to the fuel cell internal states.
+    operating_inputs : dict
+        Operating inputs of the fuel cell.
+    parameters : dict
+        Parameters of the fuel cell model.
+    ax : matplotlib.axes.Axes
+        Axes on which the temperature will be plotted.
+    """
+
+
+    # Extraction of the operating inputs and parameters
+    T_des = operating_inputs['T_des'] - 273.15                                                                          # Conversion in °C.
+    nb_gc, nb_gdl, nb_mpl = parameters['nb_gc'], parameters['nb_gdl'], parameters['nb_mpl']
+
+    # Construction of the temperature matrix for the pseudo‑2D plot
+    #       Define the order of variables as they will appear in the columns
+    var_order = (['agc'] +
+                 [f'agdl{j}' for j in range(1, nb_gdl + 1)] +
+                 [f'ampl{j}' for j in range(1, nb_mpl + 1)] +
+                 ['acl', 'mem', 'ccl'] +
+                 [f'cmpl{j}' for j in range(1, nb_mpl + 1)] +
+                 [f'cgdl{j}' for j in range(1, nb_gdl + 1)] +
+                 ['cgc'])
+    n_cols = len(var_order)  # total number of columns
+    #       Matrix to hold the last temperature values for each variable and each gas channel (nb_gc rows, n_cols columns)
+    temp_matrix = np.full((nb_gc, n_cols), np.nan, dtype=float)
+
+    #       Helper to fetch the last element of a variable and convert to °C
+    def last_celsius(arr):
+        return np.array(arr[-1]) - 273.15
+
+    #       Extraction of the last temperature values and insertion into the matrix
+    col = 0
+    for name in var_order:
+        if name == 'agc':
+            # T_agc is a list indexed by channel
+            temp_matrix[:, col] = [last_celsius(variables['T_agc'][i]) for i in range(1, nb_gc + 1)]
+        elif name.startswith('agdl'):
+            j = int(name.replace('agdl', ''))
+            temp_matrix[:, col] = [last_celsius(variables[f'T_agdl_{j}'][i]) for i in range(1, nb_gc + 1)]
+        elif name.startswith('ampl'):
+            j = int(name.replace('ampl', ''))
+            temp_matrix[:, col] = [last_celsius(variables[f'T_ampl_{j}'][i]) for i in range(1, nb_gc + 1)]
+        elif name in ('acl', 'mem', 'ccl', 'cgc'):
+            temp_matrix[:, col] = [last_celsius(variables[f'T_{name}'][i]) for i in range(1, nb_gc + 1)]
+        elif name.startswith('cmpl'):
+            j = int(name.replace('cmpl', ''))
+            temp_matrix[:, col] = [last_celsius(variables[f'T_cmpl_{j}'][i]) for i in range(1, nb_gc + 1)]
+        elif name.startswith('cgdl'):
+            j = int(name.replace('cgdl', ''))
+            temp_matrix[:, col] = [last_celsius(variables[f'T_cgdl_{j}'][i]) for i in range(1, nb_gc + 1)]
+        col += 1
+
+    # Plot the figure
+    #       Determine the min and max temperatures to set the color scale
+    vmin = np.nanmin(temp_matrix)  # minimum observed temperature
+    vmax = np.nanmax(temp_matrix)  # maximum observed temperature
+    #       Use a single‑hue red colormap (shades from light to dark)
+    cmap = plt.get_cmap('Reds')
+    #       Linear normalization from vmin to vmax
+    norm = plt.Normalize(vmin=vmin, vmax=vmax)
+    #      Create the heatmap using imshow
+    im = ax.imshow(temp_matrix, aspect='auto', origin='lower', cmap=cmap, norm=norm)
+    #       X-axis labels
+    x_labels = ['agc']
+    x_labels += [r'$\mathregular{agdl_{%d}}$' % j for j in range(1, nb_gdl + 1)]
+    x_labels += [r'$\mathregular{ampl_{%d}}$' % j for j in range(1, nb_mpl + 1)]
+    x_labels += ['acl', 'mem', 'ccl']
+    x_labels += [r'$\mathregular{cmpl_{%d}}$' % j for j in range(1, nb_mpl + 1)]
+    x_labels += [r'$\mathregular{cgdl_{%d}}$' % j for j in range(1, nb_gdl + 1)]
+    x_labels += ['cgc']
+    ax.set_xticks(np.arange(n_cols))
+    ax.set_xticklabels(x_labels, rotation=45, ha='right', fontsize=9)
+    #      Y-axis labels
+    y_labels = [str(i) for i in range(1, nb_gc + 1)]
+    if nb_gc > 1:
+        y_labels[0] = "inlet - 1"  # first ordinate becomes “inlet”
+        y_labels[-1] = f"outlet - {nb_gc}"  # last ordinate becomes “outlet”
+    ax.set_yticks(np.arange(nb_gc))
+    ax.set_yticklabels(y_labels, fontsize=9)
+    ax.invert_yaxis() # To have the first gas channel at the top
+    #      Set labels and title
+    ax.set_xlabel('Through the thickness of the cell', fontsize=11)
+    ax.set_ylabel('Through the gas channel', fontsize=11)
+    ax.set_title(r'$\mathbf{Final\ temperature\ distribution\ \left(^\circ\!C\right)}$',
+                 fontsize=13, pad=15)
+    #      Add a colorbar with label
+    cbar = plt.colorbar(im, ax=ax, orientation='vertical')
+    cbar.set_label(r"$\mathbf{Temperature\ \left(^\circ\!C\right)}$", rotation=270, labelpad=15)
+    #      Show T_des value
+    ax.text(0.95, 0.05,  # relative position (right‑bottom of the axes)
+            rf"$T_{{des}} = {T_des:.1f}\,^\circ C$", transform=ax.transAxes, ha='right', va='bottom',
+            fontsize=10, bbox=dict(boxstyle='round,pad=0.3', fc='white', ec='gray', lw=0.5))
+    plt.tight_layout()
 
 
 # ___________________________________________________Global indicators__________________________________________________
