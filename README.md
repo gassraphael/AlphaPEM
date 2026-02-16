@@ -106,7 +106,7 @@ python3 main.py
 
 # Major updates
 
-- V1.3 - 2026.02.16 - This version of AlphaPEM includes: 
+- [V1.3](https://github.com/gassraphael/AlphaPEM/tree/65dd73ed306a054c80018447f7943b9d9f973ffb) - 2026.02.16 - This version of AlphaPEM includes: 
 	- the addition of O2 flow to Pt particules which improves the modeling of overvoltage due to flooding at high curent densities.
 		- the limiting liquid water saturation coefficient ($s_{lim}$) has been definitively removed, as this model replaces it.
 	- the addition of liquid water flow inside the GC (with the sorption flow at the GDL/GC interface).
