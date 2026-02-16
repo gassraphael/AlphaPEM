@@ -41,7 +41,7 @@ def main():
     # Current density possibilities: "step", "polarization", "polarization_for_cali", "EIS".
     type_current = "step"
     # Calibration zone : "before_voltage_drop", "full".
-    # (only for "polarization" and "polarization_for_cali" currend densities
+    # (only for "polarization" and "polarization_for_cali" current densities
     voltage_zone = "full"
     # Auxiliary system possibilities: "forced-convective_cathode_with_anodic_recirculation",
     #                                 "forced-convective_cathode_with_flow-through_anode", "no_auxiliary".
