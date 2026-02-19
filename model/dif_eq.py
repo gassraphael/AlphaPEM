@@ -7,7 +7,6 @@ the 1D+1D+1D model to several 1D models in order to ease the coding.
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing the necessary libraries
-import numpy as np
 
 from configuration.settings import E0
 from model.flows_1D_GC_manifold import calculate_flows_1D_GC_manifold

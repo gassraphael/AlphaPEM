@@ -123,7 +123,6 @@ def interpolate(terms, distances):
     return (d2 * y1 + d1 * y2) / (d1 + d2)
 
 
-
 def d_dx(y_minus, y_plus, dx = None, dx_minus = None, dx_plus = None):
     """
     Computes the centered first derivative (second order) with different steps to the left and right.
@@ -164,6 +163,7 @@ def d_dx(y_minus, y_plus, dx = None, dx_minus = None, dx_plus = None):
            (dx_minus * dx_plus * (dx_minus + dx_plus))
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def rho_H2O_l(T):
     """This function calculates the water density, in kg.m-3, as a function of the temperature.
 
@@ -182,6 +182,7 @@ def rho_H2O_l(T):
              + 105.56302e-9 * T_Celsius ** 4 - 280.54253e-12 * T_Celsius ** 5) / (1 + 16.879850e-3 * T_Celsius))
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def nu_l(T):
     """This function calculates the liquid water kinematic viscosity, in m².s-1, as a function of the temperature.
 
@@ -198,6 +199,8 @@ def nu_l(T):
     mu_l = 2.414 * 10 ** (-5 + 247.8 / (T - 140.0))  # Pa.s. It is the liquid water dynamic viscosity.
     return mu_l / rho_H2O_l(T)
 
+
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def mu_gaz(component, T):
     """This function calculates the dynamic viscosity of different gases, in Pa.s, as a function of the temperature.
 
@@ -273,7 +276,7 @@ def mu_mixture_gases(components, x, T):
     return 1 / inv_mu_mix
 
 
-
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def Psat(T):
     """This function calculates the saturated partial pressure of vapor, in Pa, as a function of the temperature.
 
@@ -291,6 +294,7 @@ def Psat(T):
     return 101325 * 10 ** (-2.1794 + 0.02953 * Tcelsius - 9.1837e-5 * Tcelsius ** 2 + 1.4454e-7 * Tcelsius ** 3)
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def C_v_sat(T):
     """This function calculates the saturated vapor concentration for a perfect gas, in mol.m-3, as a function of the
     temperature.
@@ -387,6 +391,7 @@ def Pcap(element, s, T, epsilon, epsilon_c=None):
            (1.417 * s_num - 2.12 * s_num ** 2 + 1.263 * s_num ** 3)
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def Da(P, T):
     """This function calculates the diffusion coefficient at the anode, in m².s-1.
 
@@ -405,6 +410,7 @@ def Da(P, T):
     return 1.644e-4 * (T / 333) ** 2.334 * (101325 / P)
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def Dc(P, T):
     """This function calculates the diffusion coefficient at the cathode, in m².s-1.
 
@@ -466,7 +472,6 @@ def Da_eff(element, s, T, P, epsilon, epsilon_c=None):
 
     else:
         raise ValueError("The element should be either 'gdl', 'tl', 'mpl' or 'cl'.")
-
 
 
 def Dc_eff(element, s, T, P, epsilon, epsilon_c=None):
@@ -655,6 +660,7 @@ def D_lambda_eff(lambdaa, T, Hcl):
     return epsilon_mc(lambdaa, T, Hcl) / tau_cl * D_lambda(lambdaa)
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def D_EOD(i_fc):
     """This function calculates the electro-osmotic drag diffusion coefficient of water in the membrane, in mol.m-2.s-1.
 
@@ -694,6 +700,7 @@ def D_EOD_eff(i_fc, lambdaa, T, Hcl):
     return epsilon_mc(lambdaa, T, Hcl) / tau_cl * D_EOD(i_fc)
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def fv(lambdaa, T):
     """This function calculates the water volume fraction of the membrane.
 
@@ -744,6 +751,7 @@ def gamma_sorp(C_v, s, lambdaa, T, Hcl):
     return w * gamma_abs + (1 - w) * gamma_des # interpolation between absorption and desorption
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def Svl(element, s, C_v, Ctot, T, epsilon):
     """This function calculates the phase transfer rate of water condensation or evaporation, in mol.m-3.s-1.
     It is positive for condensation and negative for evaporation.
@@ -909,6 +917,7 @@ def k_O2(lambdaa, T, kappa_co):
     return w * k_O2_v + (1 - w) * k_O2_l  # interpolation between under-saturated and liquid-equilibrated O2 crossover
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def R_T_O2_Pt(s, lambdaa, T, Hcl, K_O2_ad_Pt):
     """This function calculates the total resistance of oxygen to the platinium particules inside the CCL, defined as the
      sum of the different dissolution, diffusion and adsorption resistances.
@@ -945,6 +954,7 @@ def R_T_O2_Pt(s, lambdaa, T, Hcl, K_O2_ad_Pt):
            R_O2_ad_Pt_eff(lambdaa, T, Hcl, K_O2_ad_Pt)
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def R_O2_dis_l(s, lambdaa, T, Hcl):
     """This function calculates the dissolution resistance of oxygen in the CCL liquid water film, in s.m-1.
     The assumption to make R_02_dis_l proportional to R_O2_dif_l is strong.
@@ -974,6 +984,7 @@ def R_O2_dis_l(s, lambdaa, T, Hcl):
     return K_O2_dis_l * R_O2_dif_l(s, lambdaa, T, Hcl)
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def R_O2_dif_l(s, lambdaa, T, Hcl):
     """This function calculates the diffusion resistance of oxygen inside the CCL liquid water film, in s.m-1.
 
@@ -1010,7 +1021,6 @@ def R_O2_dif_l(s, lambdaa, T, Hcl):
     return delta_H2O_l / D_O2_dif_l
 
 
-
 def R_O2_dis_ion(lambdaa, T, Hcl):
     """This function calculates the dissolution resistance of oxygen in the CCL ionomer film, in s.m-1.
     The assumption to make R_02_dis_ion proportional to R_02_dif_ion is strong.
@@ -1038,6 +1048,7 @@ def R_O2_dis_ion(lambdaa, T, Hcl):
     return K_O2_dis_ion * R_O2_dif_ion(lambdaa, T, Hcl)
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def R_O2_dif_ion(lambdaa, T, Hcl):
     """This function calculates the diffusion resistance of oxygen inside the CCL ionomer film, in s.m-1.
 
@@ -1068,6 +1079,7 @@ def R_O2_dif_ion(lambdaa, T, Hcl):
     return delta_ion(lambdaa, T, Hcl) / D_O2_dif_ion
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def R_O2_dif_ion_eff(lambdaa, T, Hcl):
     """This function calculates the effective diffusion resistance of oxygen inside the CCL ionomer film, in s.m-1.
 
@@ -1258,6 +1270,7 @@ def epsilon_Pt(Hccl):
     return epsilon_Pt
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def a_c(lambdaa, T_cl, Hccl):
     """This function calculates the volumetric surface area of the ionomer in the CL, in m-1.
     Parameters
@@ -1346,6 +1359,7 @@ def epsilon_cl(lambda_cl, T_cl, Hcl):
     return epsilon_cl
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def sigma_p_eff(element, lambdaa, T, Hcl=None):
     """This function calculates the effective proton conductivity, in Ω-1.m-1, in either the membrane or the CCL.
 
@@ -1523,6 +1537,7 @@ def k_th_gaz_mixture(k_th_g, mu_g, x, M):
     return k_th_gaz_mixture
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C_N2=None, epsilon=None, Hcl = None,
              epsilon_c=None):
     """This function calculates the effective thermal conductivity, in J.m-1.s-1.K-1, in either the GDL, the MPL, the CL
@@ -1636,6 +1651,7 @@ def k_th_eff(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C
         raise ValueError("The element should be either 'agdl', 'cgdl', 'ampl', 'cmpl', 'acl', 'ccl' or 'mem'.")
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def Cp0(component, T):
     """This function calculates the specific heat capacity of fluids, in J.kg-1.K-1, as a function of the
     temperature.
@@ -1675,6 +1691,7 @@ def Cp0(component, T):
         raise ValueError("The element should be either 'H2O_l', 'H2O_v', 'H2', 'O2' or 'N2'.")
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def h0(component, T):
     """This function calculates the standard enthalpy of fluids, in J.mol-1, as a function of the temperature.
     The variation of the enthalpy of reaction with temperature is given by Kirchhoff's Law of Thermochemistry.
@@ -1705,6 +1722,7 @@ def h0(component, T):
         raise ValueError("The element should be either 'H2O_l' or 'H2O_v'")
 
 
+@lru_cache(maxsize=None) # Cache the results to optimize performance
 def calculate_rho_Cp0(element, T, C_v=None, s=None, lambdaa=None, C_H2=None, C_O2=None, C_N2=None, epsilon=None,
                       Hcl = None):
     """This function calculates the volumetric heat capacity, in J.m-3.K-1, in either the GDL, the MPL, the CL or
