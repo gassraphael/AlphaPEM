@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "AlphaPEM"
+version = "1.3.0"
+description = "1D+1D dynamic simulator of PEM fuel cells for embedded applications."
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [ { name = "Raphaël Gass", email = "gassraphael@proton.me" } ]
+requires-python = ">=3.10"
+keywords = ["fuel-cell", "PEMFC", "simulation", "finite-volume"]
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Scientific/Engineering",
+    "Intended Audience :: Science/Research",
+]
+
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "matplotlib==3.10.7",
+    "colorama==0.4.6",
+    "pygad==3.5.0",
+    "ttkthemes==3.3.0",
+]
+
+[project.urls]
+Homepage = "https://gassraphael.github.io/AlphaPEM/"
+Repository = "https://github.com/gassraphael/AlphaPEM"
+
+[project.scripts]
+AlphaPEM = "main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["env*", "docs*", "site*", "__pycache__", "results*", "calibration/results*"]
