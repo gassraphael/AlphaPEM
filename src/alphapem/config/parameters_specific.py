@@ -1,0 +1,316 @@
+# -*- coding: utf-8 -*-
+
+"""This modul contains some of the required functions for the settings.
+"""
+
+# _____________________________________________________Preliminaries____________________________________________________
+
+# Importing the necessary libraries
+
+
+# ___________________________________________________Settings modules___________________________________________________
+
+def stored_operating_inputs(type_fuel_cell, voltage_zone):
+    """This function gives the operating inputs which correspond to the given type_fuel_cell.
+
+    Parameters
+    ----------
+    type_fuel_cell : str
+        Type of fuel cell configuration.
+    voltage_zone : str
+        Zone of the polarization curve which is considered.
+
+    Returns
+    -------
+    T_des : float
+        Desired fuel cell temperature in Kelvin.
+    Pa_des : float
+        Desired anode pressure in Pascal.
+    Pc_des : float
+        Desired cathode pressure in Pascal.
+    Sa : float
+        Stoichiometric ratio of hydrogen.
+    Sc : float
+        Stoichiometric ratio of oxygen.
+    Phi_a_des : float
+        Desired anode relative humidity.
+    Phi_c_des : float
+        Desired cathode relative humidity.
+    i_max_pola : float
+        Maximum current density for the polarization curve.
+    """
+
+    # For the ZSW Generic Stack fuel cell
+    if type_fuel_cell == "ZSW-GenStack":
+        T_des = 68 + 273.15  # K. It is the desired fuel cell temperature.
+        Pa_des, Pc_des = 2.2e5, 2.0e5  # Pa. It is the desired pressures of the fuel gas.
+        Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
+        Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
+        y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        if voltage_zone == "full":
+            i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 1.700e4 # A.m-2. It is the maximum current density for the polarization curve.
+    elif type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41":
+        T_des = 68 + 273.15  # K. It is the desired fuel cell temperature.
+        Pa_des, Pc_des = 1.61e5, 1.41e5  # Pa. It is the desired pressures of the fuel gas.
+        Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
+        Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
+        y_H2_in = 0.7 # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        if voltage_zone == "full":
+            i_max_pola = 2.150e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 0.700e4 # A.m-2. It is the maximum current density for the polarization curve.
+    elif type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81":
+        T_des = 68 + 273.15  # K. It is the desired fuel cell temperature.
+        Pa_des, Pc_des = 2.01e5, 1.81e5  # Pa. It is the desired pressures of the fuel gas.
+        Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
+        Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
+        y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        if voltage_zone == "full":
+            i_max_pola = 2.450e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 1.300e4  # A.m-2. It is the maximum current density for the polarization curve.
+    elif type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2":
+        T_des = 68 + 273.15  # K. It is the desired fuel cell temperature.
+        Pa_des, Pc_des = 2.4e5, 2.2e5  # Pa. It is the desired pressures of the fuel gas.
+        Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
+        Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
+        y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        if voltage_zone == "full":
+            i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 1.900e4  # A.m-2. It is the maximum current density for the polarization curve.
+    elif type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6":
+        T_des = 68 + 273.15  # K. It is the desired fuel cell temperature.
+        Pa_des, Pc_des = 2.8e5, 2.6e5  # Pa. It is the desired pressures of the fuel gas.
+        Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
+        Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
+        y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        if voltage_zone == "full":
+            i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 1.900e4  # A.m-2. It is the maximum current density for the polarization curve.
+    elif type_fuel_cell == "ZSW-GenStack_T_62":
+        T_des = 62 + 273.15  # K. It is the desired fuel cell temperature.
+        Pa_des, Pc_des = 2.2e5, 2.0e5  # Pa. It is the desired pressures of the fuel gas.
+        Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
+        Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
+        y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        if voltage_zone == "full":
+            i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 1.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+    elif type_fuel_cell == "ZSW-GenStack_T_76":
+        T_des = 76 + 273.15  # K. It is the desired fuel cell temperature.
+        Pa_des, Pc_des = 2.2e5, 2.0e5  # Pa. It is the desired pressures of the fuel gas.
+        Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
+        Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
+        y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        if voltage_zone == "full":
+            i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 1.100e4  # A.m-2. It is the maximum current density for the polarization curve.
+    elif type_fuel_cell == "ZSW-GenStack_T_84":
+        T_des = 84 + 273.15  # K. It is the desired fuel cell temperature.
+        Pa_des, Pc_des = 2.2e5, 2.0e5  # Pa. It is the desired pressures of the fuel gas.
+        Sa, Sc = 1.6, 1.6  # It is the stoichiometric ratio (of hydrogen and oxygen).
+        Phi_a_des, Phi_c_des = 0.398, 0.50  # It is the desired relative humidity.
+        y_H2_in = 0.7  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        if voltage_zone == "full":
+            i_max_pola = 2.000e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 0.700e4  # A.m-2. It is the maximum current density for the polarization curve.
+
+    # For EH-31 fuel cell
+    elif type_fuel_cell == "EH-31_1.5":
+        T_des = 74 + 273.15  # K. It is the desired fuel cell temperature.
+        Pa_des, Pc_des = 1.5e5, 1.5e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
+        Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
+        Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
+        y_H2_in = 1 # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        if voltage_zone == "full":
+            i_max_pola = 2.250e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 1.700e4  # A.m-2. It is the maximum current density for the polarization curve.
+    elif type_fuel_cell == "EH-31_2.0":
+        T_des = 74 + 273.15  # K. It is the desired fuel cell temperature.
+        Pa_des, Pc_des = 2.0e5, 2.0e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
+        Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
+        Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
+        y_H2_in = 1  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        if voltage_zone == "full":
+            i_max_pola = 2.500e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 1.300e4  # A.m-2. It is the maximum current density for the polarization curve.
+    elif type_fuel_cell == "EH-31_2.25":
+        T_des = 74 + 273.15  # K. It is the desired fuel cell temperature.
+        Pa_des, Pc_des = 2.25e5, 2.25e5  # Pa. It is the desired pressure of the fuel gas (at the anode/cathode).
+        Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
+        Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
+        y_H2_in = 1  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        if voltage_zone == "full":
+            i_max_pola = 2.800e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 1.700e4  # A.m-2. It is the maximum current density for the polarization curve.
+    elif type_fuel_cell == "EH-31_2.5":
+        T_des = 74 + 273.15  # K. It is the desired fuel cell temperature.
+        Pa_des, Pc_des = 2.5e5, 2.5e5  # Pa. It is the desired pressures of the fuel gas.
+        Sa, Sc = 1.2, 2.0  # It is the stoichiometric ratio (of hydrogen and oxygen).
+        Phi_a_des, Phi_c_des = 0.4, 0.6  # It is the desired relative humidity.
+        y_H2_in = 1  # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        if voltage_zone == "full":
+            i_max_pola = 3.000e4  # A.m-2. It is the maximum current density for the polarization curve.
+        elif voltage_zone == "before_voltage_drop":
+            i_max_pola = 1.600e4  # A.m-2. It is the maximum current density for the polarization curve.
+
+    # For other fuel cells
+    else:
+        raise ValueError('the type_fuel_cell given is not valid.')
+
+    return T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_max_pola
+
+
+def stored_physical_parameters(type_fuel_cell):
+    """This function gives the physical parameters which correspond to the given type_fuel_cell.
+
+    Parameters
+    ----------
+    type_fuel_cell : str
+        Type of fuel cell configuration.
+
+    Returns
+    -------
+    Hacl : float
+        Thickness of the anode catalyst layer in m.
+    Hccl : float
+        Thickness of the cathode catalyst layer in m.
+    Hmem : float
+            Thickness of the membrane in m.
+    Hgdl : float
+            Thickness of the gas diffusion layer in m.
+    epsilon_gdl : float
+        Anode/cathode GDL porosity.
+    epsilon_c : float
+        Compression ratio of the GDL.
+    Hagc : float
+        Thickness of the anode gas channel in m.
+    Hcgc : float
+        Thickness of the cathode gas channel in m.
+    Wagc : float
+        Width of the anode gas channel in m.
+    Wcgc : float
+        Width of the cathode gas channel in m.
+    Lgc : float
+        Length of the gas channel in m.
+    Aact : float
+            Active area of the cell in m².
+    e : float
+        Capillary exponent.
+    i0_c_ref : float
+        Reference exchange current density at the cathode in A.m-2.
+    kappa_co : float
+        Crossover correction coefficient in mol.m-1.s-1.Pa-1.
+    kappa_c : float
+        Overpotential correction exponent.
+    C_dl : float
+        Volumetric double layer capacitance in F.m-3.
+    """
+
+    # For the ZSW Generic Stack fuel cell
+    if type_fuel_cell == "ZSW-GenStack" or type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41" or \
+            type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81" or type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2" or \
+            type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6" or type_fuel_cell == "ZSW-GenStack_T_62" or \
+            type_fuel_cell == "ZSW-GenStack_T_76" or type_fuel_cell == "ZSW-GenStack_T_84":
+        # Global
+        Aact = 283.87e-4  # m². It is the MEA active area.
+        nb_cell = 26  # . It is the number of cell in the stack.
+        # Catalyst layer
+        Hacl = 8.112569325675836e-6  # m. It is the thickness of the anode catalyst layer.
+        Hccl = 7.605652607044295e-6  # m. It is the thickness of the cathode catalyst layer.
+        # Membrane
+        Hmem = 13.646579963107156e-06  # m. It is the thickness of the membrane.
+        # Gas diffusion layer
+        Hgdl = 121.28496643671034e-6  # m. It is the thickness of the gas diffusion layer.
+        epsilon_gdl = 0.8436478459989776  # It is the anode/cathode GDL porosity.
+        epsilon_c = 0.2  # It is the compression ratio of the GDL.
+        #   Microporous layer
+        Hmpl = 43.98306893354156e-6  # m. It is the thickness of the microporous layer.
+        epsilon_mpl = 0.425  # It is the porosity of the microporous layer.
+        # Gas channel
+        Hagc = 230e-6  # m. It is the thickness of the anode gas channel.
+        Hcgc = 300e-6  # m. It is the thickness of the cathode gas channel.
+        Wagc = 430e-6  # m. It is the width of the anode gas channel.
+        Wcgc = 532e-6  # m. It is the width of the cathode gas channel.
+        Lgc = 246.2e-3  # m. It is the length of one channel in the bipolar plate.
+        nb_channel_in_gc = 105 # . It is the number of channels in the bipolar plate.
+        Ldist = 71.1e-3 # m. It is the length of the distributor, which is the volume between the gas channel and the manifold.
+        #   Auxiliaries
+        Lm = 25.8e-3  # m. It is the length of the manifold.
+        A_T_a = 9.01e-4  # m². It is the inlet/exhaust anode manifold throttle area
+        A_T_c = 22.61e-4  # m². It is the inlet/exhaust cathode manifold throttle area
+        Vasm, Vcsm = Lm * A_T_a, Lm * A_T_c  # m3. It is the supply manifold volume.
+        Vaem, Vcem = Vasm, Vcsm  # m-3. It is the exhaust manifold volume.
+        # Interaction parameters between fluids and PEMFC structure
+        e = 3.0  # It is the capillary exponent
+        K_l_ads = 1  # . It is an estimation of the ratio between the liquid and vapor sorption rates of water in the membrane. It should be in [10-1000] [shaoNewInsightsSteadystate2023].
+        K_O2_ad_Pt = 7.346634385810734  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
+        # Voltage polarization
+        Re = 1.545654084145453e-7  # ohm.m². It is the electron conduction resistance of the circuit.
+        i0_c_ref = 15  # A.m-2. It is the dry reference exchange current density at the cathode.
+        kappa_co = 21.423681082096856 # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
+        kappa_c = 0.253020870903792  # It is the overpotential correction exponent.
+        C_scl = 2e7  # F.m-3. It is the volumetric space-charge layer capacitance.
+
+    # For EH-31 fuel cell
+    elif type_fuel_cell == "EH-31_1.5" or type_fuel_cell == "EH-31_2.0" or type_fuel_cell == "EH-31_2.25" or \
+            type_fuel_cell == "EH-31_2.5":
+        # Global
+        Aact = 85e-4  # m². It is the active area of the catalyst layer.
+        nb_cell = 1  # . It is the number of cell in the stack.
+        # Catalyst layer
+        Hacl = 8.593e-6  # m. It is the thickness of the anode catalyst layer.
+        Hccl = Hacl  # m. It is the thickness of the cathode catalyst layer.
+        # Membrane
+        Hmem = 16.06e-6  # m. It is the thickness of the membrane.
+        # Gas diffusion layer
+        Hgdl = 200e-6  # m. It is the thickness of the gas diffusion layer.
+        epsilon_gdl = 0.5002  # It is the anode/cathode GDL porosity.
+        epsilon_c = 0.2  # It is the compression ratio of the GDL.
+        #   Microporous layer
+        Hmpl = 30e-6  # m. It is the thickness of the microporous layer.
+        epsilon_mpl = 0.4  # It is the porosity of the microporous layer.
+        # Gas channel
+        Hagc = 500e-6  # m. It is the thickness of the anode gas channel.
+        Hcgc = Hagc  # m. It is the thickness of the cathode gas channel.
+        Wagc = 450e-6  # m. It is the width of the anode gas channel.
+        Wcgc = Wagc  # m. It is the width of the cathode gas channel.
+        Lgc = 144e-3  # m. It is the length of one channel in the bipolar plate.
+        nb_channel_in_gc = 67  # . It is the number of channels in the bipolar plate.
+        Ldist = 5e-2  # m. It is the estimated length of the distributor, which is the volume between the gas channel and the manifold.
+        #   Auxiliaries
+        Lm = 2.03  # m. It is the length of the manifold.
+        A_T_a = 11.8e-4  # m². It is the inlet/exhaust anode manifold throttle area
+        A_T_c = 34.4e-4  # m². It is the inlet/exhaust cathode manifold throttle area
+        Vasm, Vcsm = Lm * A_T_a, Lm * A_T_c  # m3. It is the supply manifold volume.
+        Vaem, Vcem = Vasm, Vcsm  # m-3. It is the exhaust manifold volume.
+        # Interaction parameters between fluids and PEMFC structure
+        e = 4.0  # It is the capillary exponent
+        K_l_ads = 1  # . It is an estimation of the ratio between the liquid and vapor sorption rates of water in the membrane. It should be in [10-1000] [shaoNewInsightsSteadystate2023].
+        K_O2_ad_Pt = 5.4  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
+        # Voltage polarization
+        Re = 1e-06  # ohm.m². It is the electron conduction resistance of the circuit.
+        i0_c_ref = 14.43  # A.m-2. It is the dry reference exchange current density at the cathode.
+        kappa_co = 30.42  # mol.m-1.s-1.Pa-1. It is the crossover correction coefficient.
+        kappa_c = 0.4152  # It is the overpotential correction exponent.
+        C_scl = 20e6  # F.m-3. It is the volumetric space-charge layer capacitance.
+
+    # For other fuel cells
+    else:
+        raise ValueError('the type_input given is not valid.')
+
+    return (Hacl, Hccl, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
+            nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, K_l_ads, K_O2_ad_Pt,
+            Re, i0_c_ref, kappa_co, kappa_c, C_scl)
+
+

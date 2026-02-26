@@ -47,10 +47,9 @@ To install **AlphaPEM**, follow these steps in a shell:
     source env/bin/activate
     ```
 
-4. Install the required dependencies (eventually in a specific environment):
+4. Install the required dependencies:
     ```sh
-    pip install numpy scipy matplotlib colorama pygad
-    python3 -m pip install git+https://github.com/RedFantom/ttkthemes
+    python3 -m pip install -r requirements.txt
     ```
 
 # Start
@@ -64,7 +63,7 @@ The GUI provides a quick way to configure and run simulations without modifying 
 1. Execute the GUI file:
 
    ```sh
-   python3 GUI.py
+   python3 src/aphapem/interfaces/GUI.py
    ```
 
 2. In the GUI (as shown in the figure of [AlphaPEM section](#alphapem)):
@@ -81,31 +80,33 @@ The GUI provides a quick way to configure and run simulations without modifying 
 
 The main.py file is used for standard operation and provides full control for programmers. This allows for using any physically acceptable current density function, beyond the predefined configurations of the GUI.
 
-1. Modify parameters and input current densities directly in the appropriate configuration files (e.g., /configuration/settings.py or /configuration/current_densities.py) if needed.
+1. Modify parameters and input current densities directly in the appropriate configuration files (e.g., src/alphapem/config/parameters.py or src/alphapem/config/current_densities.py) if needed.
 
-2. Select a predefined fuel cell specification, a given configuration and the desired simulation directly at the beguining of the /main.py file.
+2. Select a predefined fuel cell specification, a given configuration and the desired simulation directly at the beginning of the src/alphapem/application/run_simulation.py file.
 
 3. Execute the main file to generate results (internal states and voltage dynamics) in the /results directory:
 
 ```sh
-python3 main.py
+python3 src/aphapem/application/run_simulation.py
 ```
 
 4. Automated parameter calibration (advanced)
 
    To adapt AlphaPEM to a new, specific fuel cell, you must calibrate the undetermined physical parameters (like GDL porosity) using experimental data. This functionality is not yet available from the GUI. The calibration uses a genetic algorithm (PyGAD) to match simulated results to experimental data.
 
-   1. Input Experimental Data: place experimental polarization curves (at least three) into the file: ./calibration/experimental_values.
+   1. Input Experimental Data: place experimental polarization curves (at least three) into the file: src/aphapem/config/pola_exp_values.
 
-   2. Configure Parameters: input the operating conditions and accessible physical parameters of your fuel cell system in: ./modules/calibration_modules.
+   2. Configure Parameters: input the operating conditions and accessible physical parameters of your fuel cell system in: src/aphapem/parametrisation/calibration_modules.
 
    3. Run Calibration: execute the calibration program (preferably on a computing cluster due to computational cost):
    ```sh
-   python3 ./calibration/parameter_calibration.py
+   python3 src/aphapem/parametrisation/calibration.py
    ```
 
 # Major updates
 
+- V1.4 - under construction - This version of AlphaPEM includes: 
+    - the redesign of the AlphaPEM architecture so that the code is closer to industry standards.
 - [V1.3](https://github.com/gassraphael/AlphaPEM/tree/65dd73ed306a054c80018447f7943b9d9f973ffb) - 2026.02.16 - This version of AlphaPEM includes: 
 	- the addition of O2 flow to Pt particules which improves the modeling of overvoltage due to flooding at high curent densities.
 		- the limiting liquid water saturation coefficient ($s_{lim}$) has been definitively removed, as this model replaces it.
@@ -183,7 +184,7 @@ This work has been supported:
 
 **AlphaPEM** is licensed under the GNU GPL 3.0. See the [LICENSE](LICENSE) file for more details. 
 
-It also includes components licensed under the [BSD-3-Clause license](calibration/LICENSE-BSD-3-CLAUSE):
+It also includes components licensed under the [BSD-3-Clause license](src/alphapem/parametrisation/LICENSE-BSD-3-CLAUSE):
 
 - calibration/parameter_calibration.py from [PyGAD](https://github.com/ahmedfgad/GeneticAlgorithmPython). 
 

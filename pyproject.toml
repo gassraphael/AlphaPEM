@@ -14,19 +14,17 @@ keywords = ["fuel-cell", "PEMFC", "simulation", "finite-volume"]
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.10",
     "Topic :: Scientific/Engineering",
     "Intended Audience :: Science/Research",
 ]
 
 dependencies = [
-    "numpy>=1.24",
-    "scipy>=1.10",
-    "matplotlib==3.10.7",
-    "colorama==0.4.6",
-    "pygad==3.5.0",
-    "ttkthemes==3.3.0",
+    "colorama~=0.4.6",
+    "matplotlib~=3.10.7",
+    "numpy~=2.3.5",
+    "pygad~=3.5.0",
+    "scipy~=1.16.3",
+    "ttkthemes~=3.3.0",
 ]
 
 [project.urls]
@@ -34,8 +32,11 @@ Homepage = "https://gassraphael.github.io/AlphaPEM/"
 Repository = "https://github.com/gassraphael/AlphaPEM"
 
 [project.scripts]
-AlphaPEM = "main:main"
+AlphaPEM = "alphapem.application.run_simulation:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
-where = ["."]
-exclude = ["env*", "docs*", "site*", "__pycache__", "results*", "calibration/results*"]
+where = ["src"]
+exclude = ["env*", "docs*", "site*", "__pycache__", "results*", "calibration/results*", "*.tests", "tests*"]
