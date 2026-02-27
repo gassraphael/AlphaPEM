@@ -63,7 +63,7 @@ The GUI provides a quick way to configure and run simulations without modifying 
 1. Execute the GUI file:
 
    ```sh
-   python3 src/aphapem/interfaces/GUI.py
+   python3 src/alphapem/interfaces/GUI.py
    ```
 
 2. In the GUI (as shown in the figure of [AlphaPEM section](#alphapem)):
@@ -87,20 +87,20 @@ The main.py file is used for standard operation and provides full control for pr
 3. Execute the main file to generate results (internal states and voltage dynamics) in the /results directory:
 
 ```sh
-python3 src/aphapem/application/run_simulation.py
+python3 src/alphapem/application/run_simulation.py
 ```
 
 4. Automated parameter calibration (advanced)
 
    To adapt AlphaPEM to a new, specific fuel cell, you must calibrate the undetermined physical parameters (like GDL porosity) using experimental data. This functionality is not yet available from the GUI. The calibration uses a genetic algorithm (PyGAD) to match simulated results to experimental data.
 
-   1. Input Experimental Data: place experimental polarization curves (at least three) into the file: src/aphapem/config/pola_exp_values.
+   1. Input Experimental Data: place experimental polarization curves (at least three) into the file: src/alphapem/config/pola_exp_values.
 
-   2. Configure Parameters: input the operating conditions and accessible physical parameters of your fuel cell system in: src/aphapem/parametrisation/calibration_modules.
+   2. Configure Parameters: input the operating conditions and accessible physical parameters of your fuel cell system in: src/alphapem/parametrisation/calibration_modules.
 
    3. Run Calibration: execute the calibration program (preferably on a computing cluster due to computational cost):
    ```sh
-   python3 src/aphapem/parametrisation/calibration.py
+   python3 src/alphapem/parametrisation/calibration.py
    ```
 
 # Major updates

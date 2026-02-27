@@ -16,7 +16,7 @@ from scipy.interpolate import interp1d
 # Importing constants' value and functions
 from alphapem.utils.physics_constants import F, R, E0, Pref_eq, M_H2, M_O2, M_H2O, M_N2
 from alphapem.utils.maths_functions import average
-from alphapem.domain.modules.flows_1D_MEA_modules import k_H2, k_O2
+from alphapem.core.modules.flows_1D_MEA_modules import k_H2, k_O2
 from alphapem.utils.physics_functions import Psat, C_v_sat, mu_mixture_gases
 from alphapem.config.pola_exp_values import (pola_exp_values, plot_experimental_polarisation_curve,
                                              pola_exp_values_calibration)

@@ -17,7 +17,7 @@ import numpy as np
 
 # Importing constants' value and functions
 sys.path.append(os.path.abspath('../../..'))  # Add parent (root) folder path to list of module search paths
-from alphapem.domain.models import AlphaPEM
+from alphapem.core.models import AlphaPEM
 from alphapem.config.current_densities import polarization_current
 from alphapem.parametrisation.calibration_modules import (parameter_bounds_for_calibration, parameters_for_calibration,
                                                           update_undetermined_parameters, calculate_simulation_error,

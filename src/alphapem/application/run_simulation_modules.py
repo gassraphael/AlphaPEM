@@ -12,7 +12,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 # Importing constants' value and functions
-from alphapem.domain.models import AlphaPEM
+from alphapem.core.models import AlphaPEM
 from alphapem.config.pola_exp_values import pola_exp_values, pola_exp_values_calibration
 
 # _____________________________________________________Main modules_____________________________________________________

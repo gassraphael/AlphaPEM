@@ -19,24 +19,24 @@ from scipy.integrate import solve_ivp
 from pathlib import Path
 
 # Importing constants' value and functions
-from alphapem.domain.models.dif_eq import dydt
-from alphapem.domain.models.velocity import calculate_velocity_evolution
-from alphapem.domain.models.cell_voltage import calculate_cell_voltage
-from alphapem.domain.modules.cell_voltage_modules import calculate_C_O2_Pt
-from alphapem.domain.models.current_distribution_1D_GC import calculate_1D_GC_current_density
+from alphapem.core.models.dif_eq import dydt
+from alphapem.core.models.velocity import calculate_velocity_evolution
+from alphapem.core.models.cell_voltage import calculate_cell_voltage
+from alphapem.core.modules.cell_voltage_modules import calculate_C_O2_Pt
+from alphapem.core.models.current_distribution_1D_GC import calculate_1D_GC_current_density
 from alphapem.utils.physics_constants import (Pext, Phi_ext, y_O2_ext, C_O2ref_red, alpha_c, Tref_O2_red, Eact_O2_red, F,
                                               R)
-from alphapem.domain.modules.dif_eq_modules import event_negative
-from alphapem.domain.modules.flows_1D_MEA_modules import lambda_eq, k_H2, k_O2
-from alphapem.domain.modules.display_modules import (plot_ifc_1D_temporal, plot_C_v_1D_temporal, plot_lambda_1D_temporal,
-                                                     plot_s_1D_temporal, plot_C_O2_1D_temporal, plot_C_H2_1D_temporal,
-                                                     plot_C_N2_1D_temporal,
-                                                     plot_T_1D_temporal, plot_Ucell, plot_P_1D_temporal, plot_v_1D_temporal,
-                                                     plot_polarisation_curve,
-                                                     plot_polarisation_curve_for_cali, make_Fourier_transformation,
-                                                     plot_EIS_curve_Nyquist, plot_EIS_curve_Bode_amplitude,
-                                                     plot_EIS_curve_Bode_angle, plot_power_density_curve, plot_cell_efficiency,
-                                                     plot_T_pseudo_2D_final)
+from alphapem.core.modules.dif_eq_modules import event_negative
+from alphapem.core.modules.flows_1D_MEA_modules import lambda_eq, k_H2, k_O2
+from alphapem.core.modules.display_modules import (plot_ifc_1D_temporal, plot_C_v_1D_temporal, plot_lambda_1D_temporal,
+                                                   plot_s_1D_temporal, plot_C_O2_1D_temporal, plot_C_H2_1D_temporal,
+                                                   plot_C_N2_1D_temporal,
+                                                   plot_T_1D_temporal, plot_Ucell, plot_P_1D_temporal, plot_v_1D_temporal,
+                                                   plot_polarisation_curve,
+                                                   plot_polarisation_curve_for_cali, make_Fourier_transformation,
+                                                   plot_EIS_curve_Nyquist, plot_EIS_curve_Bode_amplitude,
+                                                   plot_EIS_curve_Bode_angle, plot_power_density_curve, plot_cell_efficiency,
+                                                   plot_T_pseudo_2D_final)
 from alphapem.config.pola_exp_values import pola_exp_values_calibration
 
 # _______________________________________________________AlphaPEM_______________________________________________________

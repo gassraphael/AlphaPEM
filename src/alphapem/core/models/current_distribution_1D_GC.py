@@ -8,8 +8,8 @@ It is a component of the fuel cell model.
 
 # Importing the necessary libraries
 from scipy.optimize import least_squares
-from alphapem.domain.models.cell_voltage import calculate_cell_voltage
-from alphapem.domain.modules.cell_voltage_modules import calculate_C_O2_Pt
+from alphapem.core.models.cell_voltage import calculate_cell_voltage
+from alphapem.core.modules.cell_voltage_modules import calculate_C_O2_Pt
 
 # Importing constants' value and functions
 from alphapem.utils.maths_functions import average

@@ -10,7 +10,7 @@ import math
 
 # Importing constants' value and functions
 from alphapem.utils.physics_constants import C_O2ref_red, alpha_c, Eact_O2_red, Tref_O2_red, rho_mem, M_eq, F, R, M_H2O
-from alphapem.domain.modules.cell_voltage_modules import epsilon_mc, epsilon_cl
+from alphapem.core.modules.cell_voltage_modules import epsilon_mc, epsilon_cl
 from alphapem.utils.physics_functions import rho_H2O_l
 
 

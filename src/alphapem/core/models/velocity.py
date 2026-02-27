@@ -11,7 +11,7 @@ from scipy.optimize import least_squares
 # Importing constants' value and functions
 from alphapem.utils.physics_constants import R, F, Text, Pext, Phi_ext, y_O2_ext, M_H2O
 from alphapem.utils.maths_functions import average
-from alphapem.domain.modules.flows_1D_MEA_modules import h_a, h_c, k_H2, k_O2
+from alphapem.core.modules.flows_1D_MEA_modules import h_a, h_c, k_H2, k_O2
 from alphapem.utils.physics_functions import Psat, mu_mixture_gases
 
 

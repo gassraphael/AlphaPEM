@@ -9,8 +9,8 @@ and to implement integration events.
 # Importing constants' value and functions
 from alphapem.utils.physics_constants import Text, Pext, Phi_ext, M_H2, M_O2, M_N2, M_H2O, y_O2_ext, R, F
 from alphapem.utils.maths_functions import average
-from alphapem.domain.modules.heat_modules import calculate_rho_Cp0
-from alphapem.domain.modules.flows_1D_MEA_modules import k_H2, k_O2
+from alphapem.core.modules.heat_modules import calculate_rho_Cp0
+from alphapem.core.modules.flows_1D_MEA_modules import k_H2, k_O2
 from alphapem.utils.physics_functions import Psat, C_v_sat, mu_mixture_gases
 
 

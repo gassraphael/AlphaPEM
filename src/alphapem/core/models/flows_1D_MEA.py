@@ -8,8 +8,8 @@
 # Importing constants' value and functions
 from alphapem.utils.physics_constants import rho_mem, M_eq, F, R, theta_l_rem
 from alphapem.utils.maths_functions import interpolate, d_dx
-from alphapem.domain.modules.cell_voltage_modules import epsilon_cl
-from alphapem.domain.modules.flows_1D_MEA_modules import flows_1D_MEA_int_values, h_a, h_c, lambda_eq, gamma_sorp, Svl, \
+from alphapem.core.modules.cell_voltage_modules import epsilon_cl
+from alphapem.core.modules.flows_1D_MEA_modules import flows_1D_MEA_int_values, h_a, h_c, lambda_eq, gamma_sorp, Svl, \
     k_H2, k_O2
 
 

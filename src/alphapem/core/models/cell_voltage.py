@@ -11,8 +11,8 @@ import math
 # Importing constants' value and functions
 from alphapem.utils.physics_constants import F, R, E0, Pref_eq
 from alphapem.utils.maths_functions import average
-from alphapem.domain.modules.heat_modules import sigma_p_eff
-from alphapem.domain.modules.flows_1D_MEA_modules import k_H2, k_O2
+from alphapem.core.modules.heat_modules import sigma_p_eff
+from alphapem.core.modules.flows_1D_MEA_modules import k_H2, k_O2
 
 
 # _____________________________________________________Cell voltage_____________________________________________________

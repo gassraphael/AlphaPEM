@@ -29,7 +29,7 @@ __author__ = "Raphaël Gass"
 __email__ = "gassraphael@proton.me"
 __license__ = "GPLv3"
 
-from alphapem.domain.models import AlphaPEM
+from alphapem.core.models import AlphaPEM
 
 __all__ = [
     "AlphaPEM",

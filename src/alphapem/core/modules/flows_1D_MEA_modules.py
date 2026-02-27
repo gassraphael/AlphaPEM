@@ -13,7 +13,7 @@ from alphapem.utils.physics_constants import (R, M_H2, M_O2, M_N2, M_H2O, theta_
                                               M_eq, rho_mem, gamma_cond, gamma_evap, Dp_mpl, Dp_cl, Eact_H2_cros_v,
                                               Tref_cross, Eact_H2_cros_l, Eact_O2_cros_v, Eact_O2_cros_l)
 from alphapem.utils.maths_functions import (hmean, average)
-from alphapem.domain.modules.cell_voltage_modules import epsilon_mc, epsilon_cl
+from alphapem.core.modules.cell_voltage_modules import epsilon_mc, epsilon_cl
 from alphapem.utils.physics_functions import nu_l, C_v_sat, rho_H2O_l, Psat
 
 

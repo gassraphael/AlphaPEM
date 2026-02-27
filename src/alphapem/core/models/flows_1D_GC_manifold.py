@@ -9,8 +9,8 @@
 from alphapem.utils.physics_constants import R, y_O2_ext, K_v_liq_gas, D_liq_dif
 from alphapem.utils.maths_functions import d_dx
 from alphapem.utils.physics_functions import rho_H2O_l, Psat
-from alphapem.domain.modules.flows_1D_GC_manifold_modules import flow_1D_GC_manifold_int_values
-from alphapem.domain.models.velocity import desired_flows
+from alphapem.core.modules.flows_1D_GC_manifold_modules import flow_1D_GC_manifold_int_values
+from alphapem.core.models.velocity import desired_flows
 
 
 # ______________________________________________________Auxiliaries_____________________________________________________

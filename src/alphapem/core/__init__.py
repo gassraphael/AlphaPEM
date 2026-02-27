@@ -11,7 +11,7 @@ Submodules:
     - parameters: Configuration and parameter definitions
 """
 
-from alphapem.domain.models import AlphaPEM
+from alphapem.core.models import AlphaPEM
 
 __all__ = [
     "AlphaPEM",

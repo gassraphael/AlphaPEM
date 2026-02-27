@@ -9,23 +9,23 @@ the 1D+1D+1D model to several 1D models in order to ease the coding.
 # Importing the necessary libraries
 
 from alphapem.utils.physics_constants import E0
-from alphapem.domain.models.flows_1D_GC_manifold import calculate_flows_1D_GC_manifold
+from alphapem.core.models.flows_1D_GC_manifold import calculate_flows_1D_GC_manifold
 # Importing constants' value and functions
-from alphapem.domain.models.velocity import calculate_velocity_evolution
-from alphapem.domain.models.flows_1D_MEA import calculate_flows_1D_MEA
-from alphapem.domain.modules.cell_voltage_modules import calculate_C_O2_Pt
-from alphapem.domain.models.current_distribution_1D_GC import calculate_1D_GC_current_density
-from alphapem.domain.models.heat_transfer import calculate_heat_transfers
-from alphapem.domain.modules.dif_eq_modules import calculate_dif_eq_int_values
-from alphapem.domain.models.dif_eq_1D_MEA import (calculate_dyn_dissoved_water_evolution_inside_MEA, calculate_dyn_liquid_water_evolution_inside_MEA,
-                                                  calculate_dyn_vapor_evolution_inside_MEA, calculate_dyn_H2_O2_N2_evolution_inside_MEA,
-                                                  calculate_dyn_voltage_evolution, calculate_dyn_temperature_evolution_inside_MEA)
-from alphapem.domain.models.dif_eq_1D_GC_manifold import (calculate_dyn_gas_evolution_inside_gas_channel,
-                                                          calculate_dyn_temperature_evolution_inside_gas_channel,
-                                                          calculate_dyn_manifold_pressure_and_humidity_evolution,
-                                                          calculate_dyn_liq_evolution_inside_gas_channel)
-from alphapem.domain.models.dif_eq_auxiliaries import (calculate_dyn_air_compressor_evolution, calculate_dyn_humidifier_evolution,
-                                                       calculate_dyn_throttle_area_controler)
+from alphapem.core.models.velocity import calculate_velocity_evolution
+from alphapem.core.models.flows_1D_MEA import calculate_flows_1D_MEA
+from alphapem.core.modules.cell_voltage_modules import calculate_C_O2_Pt
+from alphapem.core.models.current_distribution_1D_GC import calculate_1D_GC_current_density
+from alphapem.core.models.heat_transfer import calculate_heat_transfers
+from alphapem.core.modules.dif_eq_modules import calculate_dif_eq_int_values
+from alphapem.core.models.dif_eq_1D_MEA import (calculate_dyn_dissoved_water_evolution_inside_MEA, calculate_dyn_liquid_water_evolution_inside_MEA,
+                                                calculate_dyn_vapor_evolution_inside_MEA, calculate_dyn_H2_O2_N2_evolution_inside_MEA,
+                                                calculate_dyn_voltage_evolution, calculate_dyn_temperature_evolution_inside_MEA)
+from alphapem.core.models.dif_eq_1D_GC_manifold import (calculate_dyn_gas_evolution_inside_gas_channel,
+                                                        calculate_dyn_temperature_evolution_inside_gas_channel,
+                                                        calculate_dyn_manifold_pressure_and_humidity_evolution,
+                                                        calculate_dyn_liq_evolution_inside_gas_channel)
+from alphapem.core.models.dif_eq_auxiliaries import (calculate_dyn_air_compressor_evolution, calculate_dyn_humidifier_evolution,
+                                                     calculate_dyn_throttle_area_controler)
 
 
 # ______________________Objective function to solve. It gives the system of differential equations______________________

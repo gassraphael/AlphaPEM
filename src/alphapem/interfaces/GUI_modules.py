@@ -14,7 +14,7 @@ from tkinter import ttk
 # Importing constants' value and functions
 from alphapem.config.parameters import (calculate_current_density_parameters, calculate_computing_parameters)
 from alphapem.config.current_densities import EIS_parameters
-from alphapem.domain.models import AlphaPEM
+from alphapem.core.models import AlphaPEM
 from alphapem.config.parameters_specific import stored_operating_inputs, stored_physical_parameters
 from alphapem.application.run_simulation_modules import figures_preparation
 

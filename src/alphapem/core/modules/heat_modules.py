@@ -5,8 +5,8 @@
 import math
 from functools import lru_cache
 
-from alphapem.domain.modules.cell_voltage_modules import epsilon_mc, epsilon_cl
-from alphapem.domain.modules.flows_1D_MEA_modules import fv
+from alphapem.core.modules.cell_voltage_modules import epsilon_mc, epsilon_cl
+from alphapem.core.modules.flows_1D_MEA_modules import fv
 from alphapem.utils.physics_constants import (sigma_e_gdl, sigma_e_mpl, sigma_e_cl, M_H2O, M_H2, M_N2, M_O2, k_th_gdl,
                                               k_th_mpl, k_th_mem, k_th_cl, rho_gdl, Cp_gdl, rho_mpl, Cp_mpl, rho_cl,
                                               Cp_cl, rho_mem, Cp_mem)

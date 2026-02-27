@@ -9,7 +9,7 @@ It is a component of the fuel cell model.
 # Importing constants' value and functions
 from alphapem.utils.physics_constants import F, delta_s_HOR, delta_s_ORR
 from alphapem.utils.maths_functions import d_dx
-from alphapem.domain.modules.heat_modules import heat_transfer_int_values, sigma_p_eff, sigma_e_eff, delta_h_liq, \
+from alphapem.core.modules.heat_modules import heat_transfer_int_values, sigma_p_eff, sigma_e_eff, delta_h_liq, \
     delta_h_abs
 
 

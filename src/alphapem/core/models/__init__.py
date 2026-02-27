@@ -9,7 +9,7 @@ Classes:
     AlphaPEM: Main fuel cell simulator class implementing physics-based modeling
 """
 
-from alphapem.domain.models.AlphaPEM import AlphaPEM
+from alphapem.core.models.AlphaPEM import AlphaPEM
 
 __all__ = [
     "AlphaPEM",
