@@ -21,9 +21,9 @@ classifiers = [
 dependencies = [
     "colorama~=0.4",
     "matplotlib~=3.10",
-    "numpy~=2.3",
+    "numpy~=2.2",
     "pygad~=3.5",
-    "scipy~=1.16",
+    "scipy~=1.15",
     "ttkthemes~=3.3",
 ]
 
