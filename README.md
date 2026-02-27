@@ -24,6 +24,8 @@ Improvements to AlphaPEM are discussed in the [roadmap section](#roadmap).
 
 # Installation
 
+## Installation from source (to develop AlphaPEM locally)
+
 To install **AlphaPEM**, follow these steps in a shell:
 
 1. Clone the repository:
@@ -51,6 +53,22 @@ To install **AlphaPEM**, follow these steps in a shell:
     ```sh
     python3 -m pip install -r requirements.txt
     ```
+
+## Installation via pip (to use AlphaPEM in other projects)
+
+To use **AlphaPEM** as a library in other projects, you can install it directly from GitHub using pip:
+
+```sh
+pip install alphapem @ git+https://github.com/gassraphael/AlphaPEM.git
+```
+
+Then, import the AlphaPEM class in your Python code:
+
+```python
+from alphapem import AlphaPEM
+```
+
+This allows you to export and integrate the AlphaPEM package into your own applications without cloning the entire repository.
 
 # Start
 
