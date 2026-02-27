@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "AlphaPEM"
-version = "1.3.0"
+version = "1.4.0"
 description = "1D+1D dynamic simulator of PEM fuel cells for embedded applications."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -19,12 +19,12 @@ classifiers = [
 ]
 
 dependencies = [
-    "colorama~=0.4.6",
-    "matplotlib~=3.10.7",
-    "numpy~=2.3.5",
-    "pygad~=3.5.0",
-    "scipy~=1.16.3",
-    "ttkthemes~=3.3.0",
+    "colorama~=0.4",
+    "matplotlib~=3.10",
+    "numpy~=2.3",
+    "pygad~=3.5",
+    "scipy~=1.16",
+    "ttkthemes~=3.3",
 ]
 
 [project.urls]
