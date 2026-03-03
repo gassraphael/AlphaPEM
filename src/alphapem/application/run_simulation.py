@@ -141,22 +141,6 @@ def run_simulation():
     plt.show(block=True)  # To ensure that the figures remain displayed after the program execution.
 
     return Simulator
-    return run_simulation_api(
-        type_fuel_cell=[
-            type_fuel_cell_1,
-            type_fuel_cell_2,
-            type_fuel_cell_3,
-            type_fuel_cell_4,
-            type_fuel_cell_5,
-        ],
-        type_current=type_current,
-        voltage_zone=voltage_zone,
-        type_auxiliary=type_auxiliary,
-        type_purge=type_purge,
-        type_display=type_display,
-        type_plot=type_plot,
-        show_plots=True,
-    )
 
 if __name__ == '__main__':
     run_simulation()

@@ -18,6 +18,13 @@ from alphapem.config.current_densities import (
     EIS_current
 )
 
+from alphapem.config.parameters import (
+    calculate_current_density_parameters,
+    calculate_operating_inputs,
+    calculate_physical_parameters,
+    calculate_computing_parameters
+)
+
 from alphapem.config.parameters_specific import (
     stored_operating_inputs,
     stored_physical_parameters
@@ -34,6 +41,10 @@ __all__ = [
     "polarization_current",
     "polarization_current_for_calibration",
     "EIS_current",
+    "calculate_current_density_parameters",
+    "calculate_operating_inputs",
+    "calculate_physical_parameters",
+    "calculate_computing_parameters",
     "stored_operating_inputs",
     "stored_physical_parameters",
     "pola_exp_values",

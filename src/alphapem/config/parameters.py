@@ -302,7 +302,7 @@ def calculate_physical_parameters(type_fuel_cell):
             Re, i0_c_ref, kappa_co, kappa_c, C_scl)
 
 
-def calculate_computing_parameters(step_current_parameters):
+def calculate_computing_parameters(step_current_parameters=None):
     """This function is used to set the computing parameters of the fuel cell system.
 
     Parameters
@@ -353,5 +353,6 @@ def calculate_computing_parameters(step_current_parameters):
     atol = 1e-8  # Absolute tolerance for the system of ODEs solver.
 
     # Update the step current parameters.
-    step_current_parameters['delta_t_dyn_step'] = delta_t_dyn_step
+    if step_current_parameters is not None:
+        step_current_parameters['delta_t_dyn_step'] = delta_t_dyn_step
     return nb_gc, nb_gdl, nb_mpl, t_purge, rtol, atol
