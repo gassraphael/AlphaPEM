@@ -278,7 +278,6 @@ if __name__ == "__main__":
     ax[0].set_ylabel(r'Current density $\mathregular{i_{fc}}$ $\mathregular{\left( A.cm^{-2} \right)}$', labelpad=3)
     ax[0].set_title('The step current density behaviour over time')
     ax[0].legend(loc='best')
-    plt.show()
 
 
     # Tests for polarization curves:
@@ -304,7 +303,6 @@ if __name__ == "__main__":
     ax[1].set_ylabel(r'Current density $\mathregular{i_{fc}}$ $\mathregular{\left( A.cm^{-2} \right)}$', labelpad=3)
     ax[1].set_title('The current density behaviour over time\nfor a polarization curve')
     ax[1].legend(loc='best')
-    plt.show()
 
 
     # Tests for calibration curves:
@@ -331,7 +329,6 @@ if __name__ == "__main__":
     ax[2].set_ylabel(r'Current density $\mathregular{i_{fc}}$ $\mathregular{\left( A.cm^{-2} \right)}$', labelpad=3)
     ax[2].set_title('The current density behaviour over time\nfor a polarization curve (calibration)')
     ax[2].legend(loc='best')
-    plt.show()
 
 
     # Tests for EIS curve:

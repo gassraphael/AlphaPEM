@@ -42,11 +42,97 @@ from alphapem.config.pola_exp_values import pola_exp_values_calibration
 # _______________________________________________________AlphaPEM_______________________________________________________
 
 class AlphaPEM:
-    def __init__(self, operating_inputs, current_parameters, accessible_physical_parameters,
-                 undetermined_physical_parameters, computing_parameters, initial_variable_values=None,
-                 time_interval=None):
+    def __init__(self, accessible_physical_parameters, undetermined_physical_parameters, model_parameters):
         """Initialise all parameters defining a fuel cell stack operation: nominal operating conditions,
         applied electrical load, dimensions, and undetermined variables.
+
+        Parameters
+        ----------
+        accessible_physical_parameters : dict
+            Dictionary containing the accessible physical parameters for the simulation. It contains:
+                - Aact : float
+                    Active area of the cell in m² (accessible physical parameter).
+                - n_cell : int
+                    Number of cells in the stack (accessible physical parameter).
+                - Hagc : float
+                    Thickness of the anode gas channel in m (accessible physical parameter).
+                Hcgc : float
+                    Thickness of the cathode gas channel in m (accessible physical parameter).
+                Wagc : float
+                    Width of the anode gas channel in m (accessible physical parameter).
+                Wcgc : float
+                    Width of the cathode gas channel in m (accessible physical parameter).
+                Lgc : float
+                    Length of the gas channel in m (accessible physical parameter).
+        undetermined_physical_parameters : dict
+            Dictionary containing the undetermined physical parameters for the simulation. It contains:
+                - Hgdl : float
+                    Thickness of the gas diffusion layer in m (undetermined physical parameter).
+                - Hmem : float
+                    Thickness of the membrane in m (undetermined physical parameter).
+                - Hacl : float
+                    Thickness of the anode catalyst layer in m (undetermined physical parameter).
+                - Hccl : float
+                    Thickness of the cathode catalyst layer in m (undetermined physical parameter).
+                - epsilon_gdl : float
+                    Anode/cathode GDL porosity (undetermined physical parameter).
+                - epsilon_c : float
+                    Compression ratio of the GDL (undetermined physical parameter).
+                - e : float
+                    Capillary exponent (undetermined physical parameter).
+                - K_l_ads : float
+                    Ratio of liquid and vapor water sorption rates in the membrane (undetermined physical parameter).
+                - K_O2_ad_Pt : float
+                    Interfacial resistance coefficient of O2 adsorption on the Pt sites (undetermined physical parameter).
+                - Re : float
+                    Electron conduction resistance in Ω.m2 (undetermined physical parameter).
+                - i0_c_ref : float
+                    Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
+                - kappa_co : float
+                    Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
+                - kappa_c : float
+                    Overpotential correction exponent (undetermined physical parameter).
+                - C_scl : float
+                    Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
+        model_parameters : dict
+            Dictionary containing the computing parameters for the simulation. It contains:
+                - n_gdl : int
+                    Number of points considered in the GDL (computing parameter).
+                - n_mpl : int
+                    Number of points considered in the MPL (computing parameter).
+                - n_tl : int
+                    Number of points considered in the transitory layer (computing parameter).
+                - t_purge : tuple
+                    Time parameters for purging the system (computing parameter).
+                    It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
+                - rtol : float
+                    Relative tolerance for the solver (computing parameter).
+                - atol : float
+                    Absolute tolerance for the solver (computing parameter).
+        """
+
+        # Initialize the operating inputs and parameters dictionaries.
+        self.accessible_physical_parameters = accessible_physical_parameters
+        self.undetermined_physical_parameters = undetermined_physical_parameters
+        self.model_parameters = model_parameters
+        self.parameters = {**self.accessible_physical_parameters, **self.undetermined_physical_parameters,
+                           **self.model_parameters}
+
+        # Initialize the variables' dictionary.
+        self.solver_variable_names = [['C_v_agc', 'C_v_agdl', 'C_v_ampl', 'C_v_acl', 'C_v_ccl', 'C_v_cmpl', 'C_v_cgdl',
+                                      'C_v_cgc', 's_agc', 's_agdl', 's_ampl', 's_acl', 's_ccl', 's_cmpl', 's_cgdl',
+                                      's_cgc', 'lambda_acl', 'lambda_mem', 'lambda_ccl', 'C_H2_agc', 'C_H2_agdl',
+                                      'C_H2_ampl', 'C_H2_acl', 'C_O2_ccl', 'C_O2_cmpl', 'C_O2_cgdl', 'C_O2_cgc',
+                                      'C_N2_agc', 'C_N2_cgc', 'T_agc', 'T_agdl', 'T_ampl', 'T_acl', 'T_mem', 'T_ccl',
+                                      'T_cmpl', 'T_cgdl', 'T_cgc', 'eta_c']]
+
+        self.solver_variable_names_extension()  # Several points are considered in each GC, GDL and MPL. This must be
+        #                                        inserted into the solver_variable_names.
+
+
+    def simulate_model(self, operating_inputs, current_parameters, computing_parameters, initial_variable_values=None,
+                       time_interval=None):
+        """Simulate the model with the given operating inputs.
 
         Parameters
         ----------
@@ -113,69 +199,8 @@ class AlphaPEM:
                     'f_power_min_EIS': f_min_EIS = 10**f_power_min_EIS, the power of the final frequency 'f_power_max_EIS', the
                     number of frequencies tested 'nb_f_EIS' and the number of points calculated per specific period
                     'nb_points_EIS'.
-        accessible_physical_parameters : dict
-            Dictionary containing the accessible physical parameters for the simulation. It contains:
-                - Aact : float
-                    Active area of the cell in m² (accessible physical parameter).
-                - n_cell : int
-                    Number of cells in the stack (accessible physical parameter).
-                - Hagc : float
-                    Thickness of the anode gas channel in m (accessible physical parameter).
-                Hcgc : float
-                    Thickness of the cathode gas channel in m (accessible physical parameter).
-                Wagc : float
-                    Width of the anode gas channel in m (accessible physical parameter).
-                Wcgc : float
-                    Width of the cathode gas channel in m (accessible physical parameter).
-                Lgc : float
-                    Length of the gas channel in m (accessible physical parameter).
-        undetermined_physical_parameters : dict
-            Dictionary containing the undetermined physical parameters for the simulation. It contains:
-                - Hgdl : float
-                    Thickness of the gas diffusion layer in m (undetermined physical parameter).
-                - Hmem : float
-                    Thickness of the membrane in m (undetermined physical parameter).
-                - Hacl : float
-                    Thickness of the anode catalyst layer in m (undetermined physical parameter).
-                - Hccl : float
-                    Thickness of the cathode catalyst layer in m (undetermined physical parameter).
-                - epsilon_gdl : float
-                    Anode/cathode GDL porosity (undetermined physical parameter).
-                - epsilon_c : float
-                    Compression ratio of the GDL (undetermined physical parameter).
-                - e : float
-                    Capillary exponent (undetermined physical parameter).
-                - K_l_ads : float
-                    Ratio of liquid and vapor water sorption rates in the membrane (undetermined physical parameter).
-                - K_O2_ad_Pt : float
-                    Interfacial resistance coefficient of O2 adsorption on the Pt sites (undetermined physical parameter).
-                - Re : float
-                    Electron conduction resistance in Ω.m2 (undetermined physical parameter).
-                - i0_c_ref : float
-                    Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
-                - kappa_co : float
-                    Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
-                - kappa_c : float
-                    Overpotential correction exponent (undetermined physical parameter).
-                - C_scl : float
-                    Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
         computing_parameters : dict
             Dictionary containing the computing parameters for the simulation. It contains:
-                - Htl : float
-                    Thickness of the transition layers in meters (computing parameter).
-                - n_gdl : int
-                    Number of points considered in the GDL (computing parameter).
-                - n_mpl : int
-                    Number of points considered in the MPL (computing parameter).
-                - n_tl : int
-                    Number of points considered in the transitory layer (computing parameter).
-                - t_purge : tuple
-                    Time parameters for purging the system (computing parameter).
-                    It is the purge time interval 'purge_time' and the time between two purges 'delta_purge'.
-                - rtol : float
-                    Relative tolerance for the solver (computing parameter).
-                - atol : float
-                    Absolute tolerance for the solver (computing parameter).
                 - type_fuel_cell : str
                     Type of fuel cell configuration (computing parameter).
                 - type_current : str
@@ -194,16 +219,12 @@ class AlphaPEM:
         time_interval : list, optional
             Time intervals for numerical resolution. The default is None, which implies that it is automatically
             generated according to the data given in the current density parameters.
-        """
+    """
 
-        # Initialize the operating inputs and parameters dictionaries.
         self.operating_inputs = operating_inputs
         self.current_parameters = current_parameters
-        self.accessible_physical_parameters = accessible_physical_parameters
-        self.undetermined_physical_parameters = undetermined_physical_parameters
         self.computing_parameters = computing_parameters
-        self.parameters = {**self.current_parameters, **self.accessible_physical_parameters,
-                           **self.undetermined_physical_parameters, **self.computing_parameters}
+        self.parameters.update(**self.current_parameters, **self.computing_parameters)
 
         # General warnings
         if (self.parameters["type_fuel_cell"] == "EH-31_1.5" or self.parameters["type_fuel_cell"] == "EH-31_2.0" or
@@ -216,27 +237,19 @@ class AlphaPEM:
                 self.parameters["type_auxiliary"] == "forced-convective_cathode_with_flow-through_anode"):
             self.parameters["type_auxiliary"] = "no_auxiliary"
             print("Warning: auxiliaries were temporarily removed during the addition of convection inside the GC."
-                "\nThey will be back soon, meanwhile the \"no_auxiliary\" configuration is automatically given.\n")
+                  "\nThey will be back soon, meanwhile the \"no_auxiliary\" configuration is automatically given.\n")
 
         if self.operating_inputs['Pa_des'] < Pext or self.operating_inputs['Pc_des'] < Pext:
             raise ValueError('The desired pressure is too low. It cannot be lower than the pressure outside the stack.')
 
-        # Initialize the variables' dictionary.
-        self.solver_variable_names = [['C_v_agc', 'C_v_agdl', 'C_v_ampl', 'C_v_acl', 'C_v_ccl', 'C_v_cmpl', 'C_v_cgdl',
-                                      'C_v_cgc', 's_agc', 's_agdl', 's_ampl', 's_acl', 's_ccl', 's_cmpl', 's_cgdl',
-                                      's_cgc', 'lambda_acl', 'lambda_mem', 'lambda_ccl', 'C_H2_agc', 'C_H2_agdl',
-                                      'C_H2_ampl', 'C_H2_acl', 'C_O2_ccl', 'C_O2_cmpl', 'C_O2_cgdl', 'C_O2_cgc',
-                                      'C_N2_agc', 'C_N2_cgc', 'T_agc', 'T_agdl', 'T_ampl', 'T_acl', 'T_mem', 'T_ccl',
-                                      'T_cmpl', 'T_cgdl', 'T_cgc', 'eta_c']]
+        # Initialize the variables' dictionaries.
         if self.parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
                 self.parameters['type_auxiliary'] == "forced-convective_cathode_with_anodic_recirculation":
             self.solver_variable_names.extend([['Pasm', 'Paem', 'Pcsm', 'Pcem', 'Phi_asm', 'Phi_aem', 'Phi_csm',
-                                               'Phi_cem'], ['Wcp', 'Wa_inj', 'Wc_inj', 'Abp_a', 'Abp_c']])
-
-        self.solver_variable_names_extension()  # Several points are considered in each GC, GDL and MPL. This must be
-        #                                        inserted into the solver_variable_names.
-        self.all_variable_names = [item for sub in self.solver_variable_names for item in sub] + \
-                                  ['t', 'i_fc', 'C_O2_Pt', 'Ucell', 'v_a_in', 'v_c_in', 'Pa_in', 'Pc_in'] + ['Phi_a_des', 'Phi_c_des']
+                                                'Phi_cem'], ['Wcp', 'Wa_inj', 'Wc_inj', 'Abp_a', 'Abp_c']])
+        self.all_variable_names = ([item for sub in self.solver_variable_names for item in sub] +
+                                   ['t', 'i_fc', 'C_O2_Pt', 'Ucell', 'v_a_in', 'v_c_in', 'Pa_in', 'Pc_in'] +
+                                   ['Phi_a_des', 'Phi_c_des'])
         self.variables = {key: [] for key in self.all_variable_names}
 
         # Create the dynamic evolution.
@@ -255,11 +268,12 @@ class AlphaPEM:
         #       Resolution of the system of differential equations.
         event_negative.terminal = True  # Integration is stopped if one of the crucial variables becomes negative.
         self.sol = solve_ivp(dydt, self.time_interval, self.initial_variable_values, method='BDF',
-                             rtol = self.parameters['rtol'], atol = self.parameters['atol'], events=event_negative,
+                             rtol=self.parameters['rtol'], atol=self.parameters['atol'], events=event_negative,
                              args=(self.operating_inputs, self.parameters, self.solver_variable_names))
 
         #       Recover the variable values calculated by the solver into the dictionary.
         self._recovery()
+
 
     def solver_variable_names_extension(self):
         """Several points are considered in each GDL, MPL and GC. They must be inserted into the solver_variable_names.
@@ -321,9 +335,9 @@ class AlphaPEM:
             delta_t_break_pola_cali = pola_current_for_cali_parameters['delta_t_break_pola_cali']  # (s).
             i_exp_cali_t, U_exp_cali_t = pola_exp_values_calibration(type_fuel_cell, voltage_zone)  # (A.m-2, V).
             # Calculation
-            delta_t_cali = delta_t_load_pola_cali + delta_t_break_pola_cali  # s. It is the time of one load.
+            delta_t_pola_cali = delta_t_load_pola_cali + delta_t_break_pola_cali  # s. It is the time of one load.
             t0_interval = 0
-            tf_interval = delta_t_ini_pola_cali + len(i_exp_cali_t) * delta_t_cali # s.
+            tf_interval = delta_t_ini_pola_cali + len(i_exp_cali_t) * delta_t_pola_cali # s.
         else:  # EIS time_interval is calculated in the main.py file.
             raise ValueError("Please enter a recognized type_current option for calculating the time interval.")
 
@@ -511,6 +525,7 @@ class AlphaPEM:
         # Extraction of the operating inputs and parameters
         nb_gdl, type_fuel_cell = self.parameters['nb_gdl'], self.parameters['type_fuel_cell']
         type_current, type_display = self.parameters['type_current'], self.parameters['type_display']
+        type_plot = self.parameters['type_plot']
 
         # Parameters' preparation
         n = len(self.variables['t'])
@@ -564,7 +579,8 @@ class AlphaPEM:
                 plot_C_O2_1D_temporal(self.variables, self.operating_inputs, self.parameters, ax1[2, 1])
                 plot_P_1D_temporal(self.variables, self.operating_inputs, self.parameters, ax1[2, 2])
 
-                plot_T_pseudo_2D_final(self.variables, self.operating_inputs, self.parameters, ax2)
+                if type_plot == "fixed":
+                    plot_T_pseudo_2D_final(self.variables, self.operating_inputs, self.parameters, ax2)
 
                 plt.pause(1)  # A break is necessary to plot the new points in dynamic mode
 
@@ -602,7 +618,7 @@ class AlphaPEM:
             elif type_display == "synthetic":
 
                 plot_polarisation_curve_for_cali(self.variables, self.operating_inputs, self.parameters, ax1)
-                plt.pause(0.01)  # A break is necessary to plot the new points in dynamic mode
+                plt.pause(0.1)  # A break is necessary to plot the new points in dynamic mode
 
         elif type_current == "EIS":
             if type_display == "multiple":
@@ -645,7 +661,7 @@ class AlphaPEM:
 
         # Extraction of the operating inputs and parameters
         type_fuel_cell, type_current = self.parameters['type_fuel_cell'], self.parameters['type_current']
-        type_display = self.parameters['type_display']
+        type_display, type_plot = self.parameters['type_display'], self.parameters['type_plot']
 
         # Folder name
         subfolder_name = type_fuel_cell.split('_')[0]
@@ -656,7 +672,8 @@ class AlphaPEM:
                 pass  # saving instruction is directly implemented within AlphaPEM.Display for this situation.
             if type_display == "synthetic":
                 self.Saving_instructions("results", subfolder_name, "step_current_syn_1.pdf", fig1)
-                self.Saving_instructions("results", subfolder_name, "final_temperature_dist_1.pdf", fig2)
+                if type_plot == "fixed":
+                    self.Saving_instructions("results", subfolder_name, "final_temperature_dist_1.pdf", fig2)
 
         # For the polarization curve
         elif type_current == "polarization":

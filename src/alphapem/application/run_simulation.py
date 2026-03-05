@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 
 # Importing constants' value and functions
 import copy
+from alphapem.core.models import AlphaPEM
 from alphapem.config.parameters import calculate_current_density_parameters, calculate_operating_inputs, calculate_physical_parameters, \
                                    calculate_computing_parameters
 from alphapem.application.run_simulation_modules import (select_nth_elements, launch_AlphaPEM_for_step_current,
@@ -33,12 +34,12 @@ def run_simulation():
     # - GenStack is a fuel cell developed in open source by ZSW (https://zenodo.org/records/14223364).
     # - EH-31 is a fuel cell developed by EH GROUP. 1.5, 2.0, 2.25 and 2.5 corresponds to the different pressure options.
     type_fuel_cell_1 = "ZSW-GenStack"
-    type_fuel_cell_2 = None
+    type_fuel_cell_2 = "ZSW-GenStack_Pa_1.61_Pc_1.41"
     type_fuel_cell_3 = None
     type_fuel_cell_4 = None
     type_fuel_cell_5 = None
     # Current density possibilities: "step", "polarization", "polarization_for_cali", "EIS".
-    type_current = "step"
+    type_current = "polarization"
     # Calibration zone : "before_voltage_drop", "full".
     # (only for "polarization" and "polarization_for_cali" current densities
     voltage_zone = "full"
@@ -106,33 +107,36 @@ def run_simulation():
                                         'epsilon_c': epsilon_c, 'e': e, 'K_l_ads': K_l_ads, 'K_O2_ad_Pt': K_O2_ad_Pt,
                                         'Re': Re, 'i0_c_ref': i0_c_ref, 'kappa_co': kappa_co, 'kappa_c': kappa_c,
                                         'C_scl': C_scl}
-    computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
-                            'rtol': rtol, 'atol': atol,
-                            'type_fuel_cell': [None, type_fuel_cell_1, type_fuel_cell_2, type_fuel_cell_3,
+    model_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge, 'rtol': rtol,
+                        'atol': atol}
+
+    computing_parameters = {'type_fuel_cell': [None, type_fuel_cell_1, type_fuel_cell_2, type_fuel_cell_3,
                                                type_fuel_cell_4, type_fuel_cell_5],
                             'type_current': type_current, 'voltage_zone': voltage_zone,
                             'type_auxiliary': type_auxiliary,
                             'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}
 
+    # Create the simulator based on the corresponding parameters.
+    simulators = [None]
+    for i in range(1, 6):
+        if i == 1 or computing_parameters['type_fuel_cell'][i] is not None:
+            simulators.append(AlphaPEM(accessible_physical_parameters, undetermined_physical_parameters, model_parameters))
+
     # Check if the type_current is valid and launch the simulation
     if type_current == "step":
-        Simulator = launch_AlphaPEM_for_step_current(select_nth_elements(operating_inputs, 1),
+        Simulator = launch_AlphaPEM_for_step_current(simulators[1], select_nth_elements(operating_inputs, 1),
                                                      select_nth_elements(current_parameters, 1),
-                                                     accessible_physical_parameters, undetermined_physical_parameters,
                                                      select_nth_elements(computing_parameters, 1))
     elif type_current == "polarization":
-        Simulator = launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameters,
-                                                             accessible_physical_parameters,
-                                                             undetermined_physical_parameters, computing_parameters)
+        Simulator = launch_AlphaPEM_for_polarization_current(simulators, operating_inputs, current_parameters,
+                                                             computing_parameters)
     elif type_current == "polarization_for_cali":
-        Simulator = launch_AlphaPEM_for_polarization_current_for_calibration(operating_inputs, current_parameters,
-                                                                             accessible_physical_parameters,
-                                                                             undetermined_physical_parameters,
+        Simulator = launch_AlphaPEM_for_polarization_current_for_calibration(simulators, operating_inputs,
+                                                                             current_parameters,
                                                                              computing_parameters)
     elif type_current == "EIS":
-        Simulator = launch_AlphaPEM_for_EIS_current(select_nth_elements(operating_inputs, 1),
+        Simulator = launch_AlphaPEM_for_EIS_current(simulators[1], select_nth_elements(operating_inputs, 1),
                                                     select_nth_elements(current_parameters, 1),
-                                                    accessible_physical_parameters, undetermined_physical_parameters,
                                                     select_nth_elements(computing_parameters, 1))
     else:
         raise ValueError('You have to specify a type_current which is accepted.')

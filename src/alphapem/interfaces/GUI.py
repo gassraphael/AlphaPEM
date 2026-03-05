@@ -17,6 +17,7 @@ from GUI_modules import (display_parameter_labels,  display_parameters_value,
                          recover_for_use_operating_inputs_and_physical_parameters, display_radiobuttons, changeValue,
                          value_control, set_equal_width, launch_AlphaPEM_for_step_current,
                          launch_AlphaPEM_for_polarization_current, launch_AlphaPEM_for_EIS_current)
+from alphapem.core.models import AlphaPEM
 from alphapem.config.current_densities import step_current, polarization_current, EIS_current
 from alphapem.config.parameters import calculate_current_density_parameters
 
@@ -404,45 +405,41 @@ def show_current_button(choice_operating_conditions, choice_accessible_parameter
                                         'epsilon_gdl': epsilon_gdl, 'epsilon_mpl': epsilon_mpl, 'epsilon_c': epsilon_c,
                                         'e': e, 'K_l_ads': K_l_ads, 'K_O2_ad_Pt': K_O2_ad_Pt, 'Re': Re,
                                         'i0_c_ref': i0_c_ref, 'kappa_co': kappa_co, 'kappa_c': kappa_c, 'C_scl': C_scl}
+    model_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge, 'rtol': rtol,
+                        'atol': atol}
+
+    # Create the simulator based on the corresponding parameters
+    simulator = AlphaPEM(accessible_physical_parameters, undetermined_physical_parameters, model_parameters)
 
     if current_button == 0:
         type_current = "step"
         current_density = step_current
         operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
                             'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des, 'y_H2_in': y_H2_in}
-        computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
-                                'rtol': rtol, 'atol': atol, 'type_fuel_cell': type_fuel_cell,
-                                'type_current': type_current, 'voltage_zone': voltage_zone,
-                                'type_auxiliary': type_auxiliary, 'type_purge': type_purge,
-                                'type_display': type_display, 'type_plot': type_plot}
-        launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, accessible_physical_parameters,
-                                         undetermined_physical_parameters, computing_parameters)
+        computing_parameters = {'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
+                                'voltage_zone': voltage_zone, 'type_auxiliary': type_auxiliary,
+                                'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}
+        launch_AlphaPEM_for_step_current(simulator, operating_inputs, current_parameters, computing_parameters)
 
     if current_button == 1:
         type_current = "polarization"
         current_density = polarization_current
         operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
                             'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des, 'y_H2_in': y_H2_in}
-        computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
-                                'rtol': rtol, 'atol': atol, 'type_fuel_cell': type_fuel_cell,
-                                'type_current': type_current, 'voltage_zone': voltage_zone,
-                                'type_auxiliary': type_auxiliary, 'type_purge': type_purge,
-                                'type_display': type_display, 'type_plot': type_plot}
-        launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameters, accessible_physical_parameters,
-                                                 undetermined_physical_parameters, computing_parameters)
+        computing_parameters = {'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
+                                'voltage_zone': voltage_zone, 'type_auxiliary': type_auxiliary,
+                                'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}
+        launch_AlphaPEM_for_polarization_current(simulator, operating_inputs, current_parameters, computing_parameters)
 
     if current_button == 2:
         type_current = "EIS"
         current_density = EIS_current
         operating_inputs = {'current_density': current_density, 'T_des': T_des, 'Pa_des': Pa_des, 'Pc_des': Pc_des,
                             'Sa': Sa, 'Sc': Sc, 'Phi_a_des': Phi_a_des, 'Phi_c_des': Phi_c_des, 'y_H2_in': y_H2_in}
-        computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
-                                'rtol': rtol, 'atol': atol, 'type_fuel_cell': type_fuel_cell,
-                                'type_current': type_current, 'voltage_zone': voltage_zone,
-                                'type_auxiliary': type_auxiliary, 'type_purge': type_purge,
-                                'type_display': type_display, 'type_plot': type_plot}
-        launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, accessible_physical_parameters,
-                                        undetermined_physical_parameters, computing_parameters)
+        computing_parameters = {'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
+                                'voltage_zone': voltage_zone, 'type_auxiliary': type_auxiliary,
+                                'type_purge': type_purge, 'type_display': type_display, 'type_plot': type_plot}
+        launch_AlphaPEM_for_EIS_current(simulator, operating_inputs, current_parameters, computing_parameters)
 
     plt.ioff()  # Disable interactive mode for non-blocking display
     plt.show(block=True)  # To ensure that the figures remain displayed after the program execution.

@@ -349,8 +349,8 @@ def calculate_computing_parameters(step_current_parameters=None):
     delta_t_dyn_step = 0.1  # (s). Time for dynamic display of the step current density function.
 
     # Setting the tolerances for the system of ODEs solver:
-    rtol = 1e-5  # Relative tolerance for the system of ODEs solver.
-    atol = 1e-8  # Absolute tolerance for the system of ODEs solver.
+    rtol = 1e-6  # Relative tolerance for the system of ODEs solver.
+    atol = 1e-9  # Absolute tolerance for the system of ODEs solver.
 
     # Update the step current parameters.
     if step_current_parameters is not None:

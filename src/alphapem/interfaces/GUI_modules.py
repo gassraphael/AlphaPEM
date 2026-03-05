@@ -14,7 +14,6 @@ from tkinter import ttk
 # Importing constants' value and functions
 from alphapem.config.parameters import (calculate_current_density_parameters, calculate_computing_parameters)
 from alphapem.config.current_densities import EIS_parameters
-from alphapem.core.models import AlphaPEM
 from alphapem.config.parameters_specific import stored_operating_inputs, stored_physical_parameters
 from alphapem.application.run_simulation_modules import figures_preparation
 
@@ -871,12 +870,13 @@ def set_equal_width(frame1, frame2, frame3, frame4, frame5, frame6):
             frame.grid_columnconfigure(i, minsize=max(widths) / 5.5)  # Set minimum width of all column to max_width / 5
 
 
-def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, accessible_physical_parameters,
-                                     undetermined_physical_parameters, computing_parameters):
+def launch_AlphaPEM_for_step_current(simulator, operating_inputs, current_parameters, computing_parameters):
     """Launch the AlphaPEM simulator for a step current density and display the results.
 
     Parameters
     ----------
+    simulator : AlphaPEM
+        An instance of the AlphaPEM class.
     operating_inputs : dict
         Dictionary containing the operating inputs for the simulation. It contains:
             - current_density : function
@@ -940,74 +940,6 @@ def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, acces
                 'f_power_min_EIS': f_min_EIS = 10**f_power_min_EIS, the power of the final frequency 'f_power_max_EIS', the
                 number of frequencies tested 'nb_f_EIS' and the number of points calculated per specific period
                 'nb_points_EIS'.
-    accessible_physical_parameters : dict
-        Dictionary containing the accessible physical parameters for the simulation. It contains:
-            - Aact : float
-                Active area of the cell in m² (accessible physical parameter).
-            - nb_cell : int
-                Number of cells in the stack (accessible physical parameter).
-            - Hagc : float
-                Thickness of the anode gas channel in m (accessible physical parameter).
-            - Hcgc : float
-                Thickness of the cathode gas channel in m (accessible physical parameter).
-            - Wagc : float
-                Width of the anode gas channel in m (accessible physical parameter).
-            - Wcgc : float
-                Width of the cathode gas channel in m (accessible physical parameter).
-            - Lgc : float
-                Length of the gas channel in m (accessible physical parameter).
-            - Lm : float
-                Length of the manifold in m (accessible physical parameter).
-            - L_endplate : float
-                Length of the endplate in m (accessible physical parameter).
-            - L_man_gc : float
-                Length connecting the manifold and the gas channel in m (accessible physical parameter).
-            - A_T_a : float
-                Exhaust anode manifold throttle area in m² (accessible physical parameter).
-            - A_T_c : float
-                Exhaust cathode manifold throttle area in m² (accessible physical parameter).
-            - Vasm : float
-                Supply anode manifold volume in m³ (accessible physical parameter).
-            - Vcsm : float
-                Supply cathode manifold volume in m³ (accessible physical parameter).
-            - Vaem : float
-                Exhaust anode manifold volume in m³ (accessible physical parameter).
-            - Vcem : float
-                Exhaust cathode manifold volume in m³ (accessible physical parameter).
-            - V_endplate_a : float
-                Anode endplate volume in m³ (accessible physical parameter).
-            - V_endplate_c : float
-                Cathode endplate volume in m³ (accessible physical parameter).
-    undetermined_physical_parameters : dict
-        Dictionary containing the undetermined physical parameters for the simulation. It contains:
-            - Hgdl : float
-                Thickness of the gas diffusion layer in m (undetermined physical parameter).
-            - Hmem : float
-                Thickness of the membrane in m (undetermined physical parameter).
-            - Hacl : float
-                Thickness of the anode catalyst layer in m (undetermined physical parameter).
-            - Hccl : float
-                Thickness of the cathode catalyst layer in m (undetermined physical parameter).
-            - epsilon_gdl : float
-                Anode/cathode GDL porosity (undetermined physical parameter).
-            - epsilon_c : float
-                Compression ratio of the GDL (undetermined physical parameter).
-            - e : float
-                Capillary exponent (undetermined physical parameter).
-            - K_l_ads : float
-                Ratio of liquid and vapor water sorption rates in the membrane (undetermined physical parameter).
-            - K_O2_ad_Pt : float
-                Interfacial resistance coefficient of O2 adsorption on the Pt sites (undetermined physical parameter).
-            - Re : float
-                Electron conduction resistance in Ω.m2 (undetermined physical parameter).
-            - i0_c_ref : float
-                Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
-            - kappa_co : float
-                Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
-            - kappa_c : float
-                Overpotential correction exponent (undetermined physical parameter).
-            - C_scl : float
-                Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
     computing_parameters : dict
         Dictionary containing the computing parameters for the simulation. It contains:
             - Htl : float
@@ -1066,47 +998,53 @@ def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, acces
 
         # Dynamic simulation
         for i in range(n):
-            Simulator = AlphaPEM(operating_inputs, current_parameters, accessible_physical_parameters,
-                                 undetermined_physical_parameters, computing_parameters, initial_variable_values,
-                                 time_interval)
+            simulator.simulate_model(operating_inputs, current_parameters, computing_parameters,
+                                     initial_variable_values, time_interval)
 
             # time_interval actualization
             if i < (n - 1):  # The final simulation does not require actualization.
-                t0_interval = Simulator.variables['t'][-1]
+                t0_interval = simulator.variables['t'][-1]
                 tf_interval = (i + 2) * delta_t_dyn_step
                 time_interval = [t0_interval, tf_interval]  # Reset of the time interval
 
             # Recovery of the internal states from the end of the preceding simulation.
             initial_variable_values = []
-            for x in Simulator.solver_variable_names:
-                initial_variable_values.append(Simulator.variables[x][-1])
+            for i in range(1, simulator.parameters['nb_gc'] + 1):
+                for key in simulator.solver_variable_names[0]:
+                    initial_variable_values.append(simulator.variables[key][i][-1])
+            if computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
+                    computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_anodic_recirculation":
+                for key in simulator.solver_variable_names[1]:
+                    initial_variable_values.append(simulator.variables[key][-1])
+                for key in simulator.solver_variable_names[2]:
+                    initial_variable_values.append(simulator.variables[key][-1])
 
             # Display
             if computing_parameters['type_display'] != "no_display":
-                Simulator.Display(ax1, ax2, ax3)
+                simulator.Display(ax1, ax2, ax3)
 
     else:  # elif computing_parameters['type_plot'] == "fixed":
         # Simulation
-        Simulator = AlphaPEM(operating_inputs, current_parameters, accessible_physical_parameters,
-                             undetermined_physical_parameters, computing_parameters)
+        simulator.simulate_model(operating_inputs, current_parameters, computing_parameters)
         # Display
         if computing_parameters['type_display'] != "no_display":
-            Simulator.Display(ax1, ax2, ax3)
+            simulator.Display(ax1, ax2, ax3)
 
     # Plot saving
-    Simulator.Save_plot(fig1, fig2, fig3)
+    simulator.Save_plot(fig1, fig2, fig3)
 
     # Ending time
     algo_time = time.time() - start_time
     print('Time of the algorithm in second :', algo_time)
 
 
-def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameters, accessible_physical_parameters,
-                                             undetermined_physical_parameters, computing_parameters):
+def launch_AlphaPEM_for_polarization_current(simulator, operating_inputs, current_parameters, computing_parameters):
     """Launch the AlphaPEM simulator for a polarization current density and display the results.
 
     Parameters
     ----------
+    simulator : AlphaPEM
+        An instance of the AlphaPEM class.
     operating_inputs : dict
         Dictionary containing the operating inputs for the simulation. It contains:
             - current_density : function
@@ -1170,74 +1108,6 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
                 'f_power_min_EIS': f_min_EIS = 10**f_power_min_EIS, the power of the final frequency 'f_power_max_EIS', the
                 number of frequencies tested 'nb_f_EIS' and the number of points calculated per specific period
                 'nb_points_EIS'.
-    accessible_physical_parameters : dict
-        Dictionary containing the accessible physical parameters for the simulation. It contains:
-            - Aact : float
-                Active area of the cell in m² (accessible physical parameter).
-            - nb_cell : int
-                Number of cells in the stack (accessible physical parameter).
-            - Hagc : float
-                Thickness of the anode gas channel in m (accessible physical parameter).
-            - Hcgc : float
-                Thickness of the cathode gas channel in m (accessible physical parameter).
-            - Wagc : float
-                Width of the anode gas channel in m (accessible physical parameter).
-            - Wcgc : float
-                Width of the cathode gas channel in m (accessible physical parameter).
-            - Lgc : float
-                Length of the gas channel in m (accessible physical parameter).
-            - Lm : float
-                Length of the manifold in m (accessible physical parameter).
-            - L_endplate : float
-                Length of the endplate in m (accessible physical parameter).
-            - L_man_gc : float
-                Length connecting the manifold and the gas channel in m (accessible physical parameter).
-            - A_T_a : float
-                Exhaust anode manifold throttle area in m² (accessible physical parameter).
-            - A_T_c : float
-                Exhaust cathode manifold throttle area in m² (accessible physical parameter).
-            - Vasm : float
-                Supply anode manifold volume in m³ (accessible physical parameter).
-            - Vcsm : float
-                Supply cathode manifold volume in m³ (accessible physical parameter).
-            - Vaem : float
-                Exhaust anode manifold volume in m³ (accessible physical parameter).
-            - Vcem : float
-                Exhaust cathode manifold volume in m³ (accessible physical parameter).
-            - V_endplate_a : float
-                Anode endplate volume in m³ (accessible physical parameter).
-            - V_endplate_c : float
-                Cathode endplate volume in m³ (accessible physical parameter).
-    undetermined_physical_parameters : dict
-        Dictionary containing the undetermined physical parameters for the simulation. It contains:
-            - Hgdl : float
-                Thickness of the gas diffusion layer in m (undetermined physical parameter).
-            - Hmem : float
-                Thickness of the membrane in m (undetermined physical parameter).
-            - Hacl : float
-                Thickness of the anode catalyst layer in m (undetermined physical parameter).
-            - Hccl : float
-                Thickness of the cathode catalyst layer in m (undetermined physical parameter).
-            - epsilon_gdl : float
-                Anode/cathode GDL porosity (undetermined physical parameter).
-            - epsilon_c : float
-                Compression ratio of the GDL (undetermined physical parameter).
-            - e : float
-                Capillary exponent (undetermined physical parameter).
-            - K_l_ads : float
-                Ratio of liquid and vapor water sorption rates in the membrane (undetermined physical parameter).
-            - K_O2_ad_Pt : float
-                Interfacial resistance coefficient of O2 adsorption on the Pt sites (undetermined physical parameter).
-            - Re : float
-                Electron conduction resistance in Ω.m2 (undetermined physical parameter).
-            - i0_c_ref : float
-                Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
-            - kappa_co : float
-                Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
-            - kappa_c : float
-                Overpotential correction exponent (undetermined physical parameter).
-            - C_scl : float
-                Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
     computing_parameters : dict
         Dictionary containing the computing parameters for the simulation. It contains:
             - Htl : float
@@ -1295,47 +1165,53 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
 
         # Dynamic simulation
         for i in range(n):
-            Simulator = AlphaPEM(operating_inputs, current_parameters, accessible_physical_parameters,
-                                 undetermined_physical_parameters, computing_parameters, initial_variable_values,
-                                 time_interval)
+            simulator.simulate_model(operating_inputs, current_parameters, computing_parameters,
+                                     initial_variable_values, time_interval)
 
             # time_interval actualization
             if i < (n - 1):  # The final simulation does not require actualization.
-                t0_interval = Simulator.variables['t'][-1]
+                t0_interval = simulator.variables['t'][-1]
                 tf_interval = delta_t_ini_pola + (i + 2) * delta_t_pola
                 time_interval = [t0_interval, tf_interval]  # Reset of the time interval
 
             # Recovery of the internal states from the end of the preceding simulation.
             initial_variable_values = []
-            for x in Simulator.solver_variable_names:
-                initial_variable_values.append(Simulator.variables[x][-1])
+            for i in range(1, simulator.parameters['nb_gc'] + 1):
+                for key in simulator.solver_variable_names[0]:
+                    initial_variable_values.append(simulator.variables[key][i][-1])
+            if computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
+                    computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_anodic_recirculation":
+                for key in simulator.solver_variable_names[1]:
+                    initial_variable_values.append(simulator.variables[key][-1])
+                for key in simulator.solver_variable_names[2]:
+                    initial_variable_values.append(simulator.variables[key][-1])
 
             # Display
             if computing_parameters['type_display'] != "no_display":
-                Simulator.Display(ax1, ax2, ax3)
+                simulator.Display(ax1, ax2, ax3)
 
     else:  # elif computing_parameters['type_plot'] == "fixed":
         # Simulation
-        Simulator = AlphaPEM(operating_inputs, current_parameters, accessible_physical_parameters,
-                             undetermined_physical_parameters, computing_parameters)
+        simulator.simulate_model(operating_inputs, current_parameters, computing_parameters)
         # Display
         if computing_parameters['type_display'] != "no_display":
-            Simulator.Display(ax1, ax2, ax3)
+            simulator.Display(ax1, ax2, ax3)
 
     # Plot saving
-    Simulator.Save_plot(fig1, fig2, fig3)
+    simulator.Save_plot(fig1, fig2, fig3)
 
     # Ending time
     algo_time = time.time() - start_time
     print('Time of the algorithm in second :', algo_time)
 
 
-def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, accessible_physical_parameters,
-                                    undetermined_physical_parameters, computing_parameters):
+def launch_AlphaPEM_for_EIS_current(simulator, operating_inputs, current_parameters, computing_parameters):
     """Launch the AlphaPEM simulator for an EIS current density and display the results.
 
     Parameters
     ----------
+    simulator : AlphaPEM
+        An instance of the AlphaPEM class.
     operating_inputs : dict
         Dictionary containing the operating inputs for the simulation. It contains:
             - current_density : function
@@ -1399,74 +1275,6 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
                 'f_power_min_EIS': f_min_EIS = 10**f_power_min_EIS, the power of the final frequency 'f_power_max_EIS', the
                 number of frequencies tested 'nb_f_EIS' and the number of points calculated per specific period
                 'nb_points_EIS'.
-    accessible_physical_parameters : dict
-        Dictionary containing the accessible physical parameters for the simulation. It contains:
-            - Aact : float
-                Active area of the cell in m² (accessible physical parameter).
-            - nb_cell : int
-                Number of cells in the stack (accessible physical parameter).
-            - Hagc : float
-                Thickness of the anode gas channel in m (accessible physical parameter).
-            - Hcgc : float
-                Thickness of the cathode gas channel in m (accessible physical parameter).
-            - Wagc : float
-                Width of the anode gas channel in m (accessible physical parameter).
-            - Wcgc : float
-                Width of the cathode gas channel in m (accessible physical parameter).
-            - Lgc : float
-                Length of the gas channel in m (accessible physical parameter).
-            - Lm : float
-                Length of the manifold in m (accessible physical parameter).
-            - L_endplate : float
-                Length of the endplate in m (accessible physical parameter).
-            - L_man_gc : float
-                Length connecting the manifold and the gas channel in m (accessible physical parameter).
-            - A_T_a : float
-                Exhaust anode manifold throttle area in m² (accessible physical parameter).
-            - A_T_c : float
-                Exhaust cathode manifold throttle area in m² (accessible physical parameter).
-            - Vasm : float
-                Supply anode manifold volume in m³ (accessible physical parameter).
-            - Vcsm : float
-                Supply cathode manifold volume in m³ (accessible physical parameter).
-            - Vaem : float
-                Exhaust anode manifold volume in m³ (accessible physical parameter).
-            - Vcem : float
-                Exhaust cathode manifold volume in m³ (accessible physical parameter).
-            - V_endplate_a : float
-                Anode endplate volume in m³ (accessible physical parameter).
-            - V_endplate_c : float
-                Cathode endplate volume in m³ (accessible physical parameter).
-    undetermined_physical_parameters : dict
-        Dictionary containing the undetermined physical parameters for the simulation. It contains:
-            - Hgdl : float
-                Thickness of the gas diffusion layer in m (undetermined physical parameter).
-            - Hmem : float
-                Thickness of the membrane in m (undetermined physical parameter).
-            - Hacl : float
-                Thickness of the anode catalyst layer in m (undetermined physical parameter).
-            - Hccl : float
-                Thickness of the cathode catalyst layer in m (undetermined physical parameter).
-            - epsilon_gdl : float
-                Anode/cathode GDL porosity (undetermined physical parameter).
-            - epsilon_c : float
-                Compression ratio of the GDL (undetermined physical parameter).
-            - e : float
-                Capillary exponent (undetermined physical parameter).
-            - K_l_ads : float
-                Ratio of liquid and vapor water sorption rates in the membrane (undetermined physical parameter).
-            - K_O2_ad_Pt : float
-                Interfacial resistance coefficient of O2 adsorption on the Pt sites (undetermined physical parameter).
-            - Re : float
-                Electron conduction resistance in Ω.m2 (undetermined physical parameter).
-            - i0_c_ref : float
-                Reference exchange current density at the cathode in A.m-2 (undetermined physical parameter).
-            - kappa_co : float
-                Crossover correction coefficient in mol.m-1.s-1.Pa-1 (undetermined physical parameter).
-            - kappa_c : float
-                Overpotential correction exponent (undetermined physical parameter).
-            - C_scl : float
-                Volumetric space-charge layer capacitance in F.m-3 (undetermined physical parameter).
     computing_parameters : dict
         Dictionary containing the computing parameters for the simulation. It contains:
             - Htl : float
@@ -1516,8 +1324,8 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
 
     #       A preliminary simulation run is necessary to equilibrate the internal variables of the cell at i_EIS
     #       prior to initiating the EIS.
-    Simulator = AlphaPEM(operating_inputs, current_parameters, accessible_physical_parameters,
-                         undetermined_physical_parameters, computing_parameters, initial_variable_values, time_interval)
+    simulator.simulate_model(operating_inputs, current_parameters, computing_parameters,
+                             initial_variable_values, time_interval)
 
     # time_interval actualization
     t0_EIS_temp = t0_EIS  # It is the initial time for 1 EIS point.
@@ -1529,8 +1337,8 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
 
     # Recovery of the internal states from the end of the preceding simulation.
     initial_variable_values = []
-    for x in Simulator.solver_variable_names:
-        initial_variable_values.append(Simulator.variables[x][-1])
+    for x in simulator.solver_variable_names:
+        initial_variable_values.append(simulator.variables[x][-1])
 
     if computing_parameters['type_display'] == "multiple":
         print("A display bug prevents the dynamic updating of the graphs, as it appears that too much data is "
@@ -1539,13 +1347,12 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
 
     # Dynamic simulation
     for i in range(n):
-        Simulator = AlphaPEM(operating_inputs, current_parameters, accessible_physical_parameters,
-                             undetermined_physical_parameters, computing_parameters, initial_variable_values,
-                             time_interval)
+        simulator.simulate_model(operating_inputs, current_parameters, computing_parameters,
+                                 initial_variable_values, time_interval)
 
         # time_interval actualization
         if i < (n - 1):  # The final simulation does not require actualization.
-            t0_EIS_temp = Simulator.variables['t'][-1]  # It is the initial time for 1 EIS point.
+            t0_EIS_temp = simulator.variables['t'][-1]  # It is the initial time for 1 EIS point.
             tf_EIS_temp = t_new_start[i + 1] + delta_t_break_EIS[i + 1] + delta_t_measurement_EIS[i + 1]  # It
             #                                                                 is the final time for 1 EIS point.
             n_inf = np.where(t_new_start <= t0_EIS_temp)[0][-1]  # It is the number of frequency changes which
@@ -1554,15 +1361,22 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
 
         # Recovery of the internal states from the end of the preceding simulation.
         initial_variable_values = []
-        for x in Simulator.solver_variable_names:
-            initial_variable_values.append(Simulator.variables[x][-1])
+        for i in range(1, simulator.parameters['nb_gc'] + 1):
+            for key in simulator.solver_variable_names[0]:
+                initial_variable_values.append(simulator.variables[key][i][-1])
+        if computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
+                computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_anodic_recirculation":
+            for key in simulator.solver_variable_names[1]:
+                initial_variable_values.append(simulator.variables[key][-1])
+            for key in simulator.solver_variable_names[2]:
+                initial_variable_values.append(simulator.variables[key][-1])
 
         # Display
         if computing_parameters['type_display'] != "no_display":
-            Simulator.Display(ax1, ax2, ax3)
+            simulator.Display(ax1, ax2, ax3)
 
     # Plot saving
-    Simulator.Save_plot(fig1, fig2, fig3)
+    simulator.Save_plot(fig1, fig2, fig3)
 
     # Ending time
     algo_time = time.time() - start_time

@@ -12,7 +12,6 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 # Importing constants' value and functions
-from alphapem.core.models import AlphaPEM
 from alphapem.config.pola_exp_values import pola_exp_values, pola_exp_values_calibration
 
 # _____________________________________________________Main modules_____________________________________________________
@@ -60,7 +59,10 @@ def figures_preparation(computing_parameters):
         elif computing_parameters['type_display'] == "synthetic":
             mpl.rcParams['font.size'] = 13  # Font size for all text
             fig1, ax1 = plt.subplots(3, 3, figsize=(14, 14))
-            fig2, ax2 = plt.subplots(figsize=(8, 8))
+            if computing_parameters['type_plot'] == "fixed":
+                fig2, ax2 = plt.subplots(figsize=(8, 8))
+            else:
+                fig2, ax2 = None, None  # Here, additional plots are unnecessary
             fig3, ax3 = None, None  # Here, additional plots are unnecessary
             plt.subplots_adjust(left=0.04, right=0.98, top=0.96, bottom=0.07, wspace=0.2, hspace=0.15)
 
@@ -129,20 +131,17 @@ def select_nth_elements(d, n):
     return {k: (v[n] if isinstance(v, list) and len(v) > n else v) for k, v in d.items()}
 
 
-def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, accessible_physical_parameters,
-                                     undetermined_physical_parameters, computing_parameters):
+def launch_AlphaPEM_for_step_current(simulator, operating_inputs, current_parameters, computing_parameters):
     """Launch the AlphaPEM simulator for a step current density and display the results.
 
     Parameters
     ----------
+    simulator : AlphaPEM
+        An instance of the AlphaPEM class to be used for the simulation.
     operating_inputs : dict
         Dictionary containing the operating inputs for the simulation.
     current_parameters : dict
         Dictionary containing the current parameters for the simulation.
-    accessible_physical_parameters : dict
-        Dictionary containing the accessible physical parameters for the simulation.
-    undetermined_physical_parameters : dict
-        Dictionary containing the undetermined physical parameters for the simulation.
     computing_parameters : dict
         Dictionary containing the computing parameters for the simulation.
     """
@@ -175,64 +174,59 @@ def launch_AlphaPEM_for_step_current(operating_inputs, current_parameters, acces
 
         # Dynamic simulation
         for i in range(n):
-            Simulator = AlphaPEM(operating_inputs, current_parameters, accessible_physical_parameters,
-                                 undetermined_physical_parameters, computing_parameters, initial_variable_values,
-                                 time_interval)
+            simulator.simulate_model(operating_inputs, current_parameters, computing_parameters,
+                                     initial_variable_values, time_interval)
 
             # time_interval actualization
             if i < (n - 1):  # The final simulation does not require actualization.
-                t0_interval = Simulator.variables['t'][-1]
+                t0_interval = simulator.variables['t'][-1]
                 tf_interval = (i + 2) * delta_t_dyn_step
                 time_interval = [t0_interval, tf_interval]  # Reset of the time interval
 
             # Recovery of the internal states from the end of the preceding simulation.
             initial_variable_values = []
-            for i in range(1, computing_parameters['nb_gc'] + 1):
-                for key in Simulator.solver_variable_names[0]:
-                    initial_variable_values.append(Simulator.variables[key][i][-1])
+            for i in range(1, simulator.parameters['nb_gc'] + 1):
+                for key in simulator.solver_variable_names[0]:
+                    initial_variable_values.append(simulator.variables[key][i][-1])
             if computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
                     computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_anodic_recirculation":
-                for key in Simulator.solver_variable_names[1]:
-                    initial_variable_values.append(Simulator.variables[key][-1])
-                for key in Simulator.solver_variable_names[2]:
-                    initial_variable_values.append(Simulator.variables[key][-1])
+                for key in simulator.solver_variable_names[1]:
+                    initial_variable_values.append(simulator.variables[key][-1])
+                for key in simulator.solver_variable_names[2]:
+                    initial_variable_values.append(simulator.variables[key][-1])
 
             # Display
             if computing_parameters['type_display'] != "no_display":
-                Simulator.Display(ax1, ax2, ax3)
+                simulator.Display(ax1, ax2, ax3)
 
     else:  # elif computing_parameters['type_plot'] == "fixed":
         # Simulation
-        Simulator = AlphaPEM(operating_inputs, current_parameters, accessible_physical_parameters,
-                               undetermined_physical_parameters, computing_parameters)
+        simulator.simulate_model(operating_inputs, current_parameters, computing_parameters)
         # Display
         if computing_parameters['type_display'] != "no_display":
-            Simulator.Display(ax1, ax2, ax3)
+            simulator.Display(ax1, ax2, ax3)
 
     # Plot saving
-    Simulator.Save_plot(fig1, fig2, fig3)
+    simulator.Save_plot(fig1, fig2, fig3)
 
     # Ending time
     algo_time = time.time() - start_time
     print('Time of the algorithm in second :', algo_time)
 
-    return Simulator
+    return simulator
 
 
-def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameters, accessible_physical_parameters,
-                                             undetermined_physical_parameters, computing_parameters):
+def launch_AlphaPEM_for_polarization_current(simulators, operating_inputs, current_parameters, computing_parameters):
     """Launch the AlphaPEM simulator for a polarization current density and display the results.
 
     Parameters
     ----------
+    simulators : list of AlphaPEM
+        A list of instances of the AlphaPEM class to be used for the simulations.
     operating_inputs : dict
         Dictionary containing the operating inputs for the simulation.
     current_parameters : dict
         Dictionary containing the current parameters for the simulation.
-    accessible_physical_parameters : dict
-        Dictionary containing the accessible physical parameters for the simulation.
-    undetermined_physical_parameters : dict
-        Dictionary containing the undetermined physical parameters for the simulation.
     computing_parameters : dict
         Dictionary containing the computing parameters for the simulation.
     """
@@ -302,93 +296,68 @@ def launch_AlphaPEM_for_polarization_current(operating_inputs, current_parameter
 
         # Dynamic simulation
         for i in range(n):
-            Simulator_1 = AlphaPEM(select_nth_elements(operating_inputs, 1),
-                                   select_nth_elements(current_parameters, 1), accessible_physical_parameters,
-                                   undetermined_physical_parameters, select_nth_elements(computing_parameters, 1),
-                                   initial_variable_values, time_interval)
+            simulators[1].simulate_model(select_nth_elements(operating_inputs, 1),
+                                         select_nth_elements(current_parameters, 1),
+                                         select_nth_elements(computing_parameters, 1),
+                                         initial_variable_values, time_interval)
 
             # time_interval actualization
             if i < (n - 1):  # The final simulation does not require actualization.
-                t0_interval = Simulator_1.variables['t'][-1]
+                t0_interval = simulators[1].variables['t'][-1]
                 tf_interval = delta_t_ini_pola + (i + 2) * delta_t_pola
                 time_interval = [t0_interval, tf_interval]  # Reset of the time interval
 
             # Recovery of the internal states from the end of the preceding simulation.
             initial_variable_values = []
-            for i in range(1, computing_parameters['nb_gc'] + 1):
-                for key in Simulator_1.solver_variable_names[0]:
-                    initial_variable_values.append(Simulator_1.variables[key][i][-1])
+            for i in range(1, simulators[1].parameters['nb_gc'] + 1):
+                for key in simulators[1].solver_variable_names[0]:
+                    initial_variable_values.append(simulators[1].variables[key][i][-1])
             if computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
                     computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_anodic_recirculation":
-                for key in Simulator_1.solver_variable_names[1]:
-                    initial_variable_values.append(Simulator_1.variables[key][-1])
-                for key in Simulator_1.solver_variable_names[2]:
-                    initial_variable_values.append(Simulator_1.variables[key][-1])
+                for key in simulators[1].solver_variable_names[1]:
+                    initial_variable_values.append(simulators[1].variables[key][-1])
+                for key in simulators[1].solver_variable_names[2]:
+                    initial_variable_values.append(simulators[1].variables[key][-1])
 
             # Display
             if computing_parameters['type_display'] != "no_display":
-                Simulator_1.Display(ax1, ax2, ax3)
+                simulators[1].Display(ax1, ax2, ax3)
 
     else:  # elif computing_parameters['type_plot'] == "fixed":
-        # Simulation
-        Simulator_1 = AlphaPEM(select_nth_elements(operating_inputs, 1),
-                               select_nth_elements(current_parameters, 1), accessible_physical_parameters,
-                               undetermined_physical_parameters, select_nth_elements(computing_parameters, 1))
-        if computing_parameters['type_fuel_cell'][2] is not None:
-            Simulator_2 = AlphaPEM(select_nth_elements(operating_inputs, 2),
-                                   select_nth_elements(current_parameters, 2), accessible_physical_parameters,
-                                   undetermined_physical_parameters, select_nth_elements(computing_parameters, 2))
-        if computing_parameters['type_fuel_cell'][3] is not None:
-            Simulator_3 = AlphaPEM(select_nth_elements(operating_inputs, 3),
-                                   select_nth_elements(current_parameters, 3), accessible_physical_parameters,
-                                   undetermined_physical_parameters, select_nth_elements(computing_parameters, 3))
-        if computing_parameters['type_fuel_cell'][4] is not None:
-            Simulator_4 = AlphaPEM(select_nth_elements(operating_inputs, 4),
-                                   select_nth_elements(current_parameters, 4), accessible_physical_parameters,
-                                   undetermined_physical_parameters, select_nth_elements(computing_parameters, 4))
-        if computing_parameters['type_fuel_cell'][5] is not None:
-            Simulator_5 = AlphaPEM(select_nth_elements(operating_inputs, 5),
-                                   select_nth_elements(current_parameters, 5), accessible_physical_parameters,
-                                   undetermined_physical_parameters, select_nth_elements(computing_parameters, 5))
-
-        # Display
-        if computing_parameters['type_display'] != "no_display":
-            Simulator_1.Display(ax1, ax2, ax3)
-            if computing_parameters['type_fuel_cell'][2] is not None:
-                Simulator_2.Display(ax1, ax2, ax3)
-            if computing_parameters['type_fuel_cell'][3] is not None:
-                Simulator_3.Display(ax1, ax2, ax3)
-            if computing_parameters['type_fuel_cell'][4] is not None:
-                Simulator_4.Display(ax1, ax2, ax3)
-            if computing_parameters['type_fuel_cell'][5] is not None:
-                Simulator_5.Display(ax1, ax2, ax3)
+        for i in range(1, len(simulators)):
+            # Simulation
+            if computing_parameters['type_fuel_cell'][i] is not None:
+                simulators[i].simulate_model(select_nth_elements(operating_inputs, i),
+                                             select_nth_elements(current_parameters, i),
+                                             select_nth_elements(computing_parameters, i))
+            # Display
+            if computing_parameters['type_display'] != "no_display":
+                if computing_parameters['type_fuel_cell'][i] is not None:
+                    simulators[i].Display(ax1, ax2, ax3)
 
     # Plot saving
-    Simulator_1.Save_plot(fig1, fig2, fig3)
+    simulators[1].Save_plot(fig1, fig2, fig3)
 
     # Ending time
     algo_time = time.time() - start_time
     print('Time of the algorithm in second :', algo_time)
 
-    return Simulator_1
+    return simulators[1]
 
 
-def launch_AlphaPEM_for_polarization_current_for_calibration(operating_inputs, current_parameters,
-                                                             accessible_physical_parameters,
-                                                             undetermined_physical_parameters, computing_parameters):
+def launch_AlphaPEM_for_polarization_current_for_calibration(simulators, operating_inputs, current_parameters,
+                                                             computing_parameters):
     """Launch the AlphaPEM simulator for a polarization current density made for the calibration of the undetermined
     parameters, and display the results.
 
     Parameters
     ----------
+    simulators : list of AlphaPEM
+        A list of instances of the AlphaPEM class to be used for the simulations.
     operating_inputs : dict
         Dictionary containing the operating inputs for the simulation.
     current_parameters : dict
         Dictionary containing the current parameters for the simulation.
-    accessible_physical_parameters : dict
-        Dictionary containing the accessible physical parameters for the simulation.
-    undetermined_physical_parameters : dict
-        Dictionary containing the undetermined physical parameters for the simulation.
     computing_parameters : dict
         Dictionary containing the computing parameters for the simulation.
     """
@@ -401,60 +370,49 @@ def launch_AlphaPEM_for_polarization_current_for_calibration(operating_inputs, c
 
     # Dynamic display requires a dedicated use of the AlphaPEM class.
     if computing_parameters['type_plot'] == "dynamic":
-
-        # Certain conditions must be met.
-        if (computing_parameters['type_fuel_cell'][2] is not None or 
-                computing_parameters['type_fuel_cell'][3] is not None or 
-                computing_parameters['type_fuel_cell'][4] is not None or
-                computing_parameters['type_fuel_cell'][5] is not None):
-            raise ValueError('dynamic plot is not currently intended for use with different inputs.')
-        if computing_parameters['type_current'] == "polarization_for_cali":
-            raise ValueError('calibration should not use dynamic plot, as it is not intended for real-time display.')
-
         # Initialization
         #       Calculation of the plot update number (n) and the initial time interval (time_interval).
         initial_variable_values = None
         #           Extraction of the parameters
-        delta_t_ini_pola_cali = current_parameters['pola_current_parameters'][1]['delta_t_ini_pola_cali']  # (s).
-        delta_t_load_pola_cali = current_parameters['pola_current_parameters'][1]['delta_t_load_pola_cali']  # (s).
-        delta_t_break_pola_cali = current_parameters['pola_current_parameters'][1]['delta_t_break_pola_cali']  # (s).
+        delta_t_ini_pola_cali = current_parameters['pola_current_for_cali_parameters']['delta_t_ini_pola_cali']  # (s).
+        delta_t_load_pola_cali = current_parameters['pola_current_for_cali_parameters']['delta_t_load_pola_cali']  # (s).
+        delta_t_break_pola_cali = current_parameters['pola_current_for_cali_parameters']['delta_t_break_pola_cali']  # (s).
         i_exp_cali_t, U_exp_cali_t = pola_exp_values_calibration(computing_parameters['type_fuel_cell'][1],
                                                                  computing_parameters['voltage_zone'])  # (A.m-2, V).
         #           Calculation
         delta_t_pola_cali = delta_t_load_pola_cali + delta_t_break_pola_cali  # s. It is the time of one load.
-        tf = delta_t_ini_pola_cali + len(
-            i_exp_cali_t) * delta_t_pola_cali  # s. It is the polarization current duration.
+        tf = delta_t_ini_pola_cali + len(i_exp_cali_t) * delta_t_pola_cali  # s. It is the polarization current duration.
         n = int(tf / delta_t_pola_cali)  # It is the plot update number.
         time_interval = [0, delta_t_ini_pola_cali + delta_t_pola_cali]  # It is the initial time interval.
 
         # Dynamic simulation
         for i in range(n):
-            Simulator_1 = AlphaPEM(select_nth_elements(operating_inputs, 1),
-                                   select_nth_elements(current_parameters, 1), accessible_physical_parameters,
-                                   undetermined_physical_parameters, select_nth_elements(computing_parameters, 1),
-                                   initial_variable_values, time_interval)
+            simulators[1].simulate_model(select_nth_elements(operating_inputs, 1),
+                                         select_nth_elements(current_parameters, 1),
+                                         select_nth_elements(computing_parameters, 1),
+                                         initial_variable_values, time_interval)
 
             # time_interval actualization
             if i < (n - 1):  # The final simulation does not require actualization.
-                t0_interval = Simulator_1.variables['t'][-1]
+                t0_interval = simulators[1].variables['t'][-1]
                 tf_interval = delta_t_ini_pola_cali + (i + 2) * delta_t_pola_cali
                 time_interval = [t0_interval, tf_interval]  # Reset of the time interval
 
             # Recovery of the internal states from the end of the preceding simulation.
             initial_variable_values = []
-            for i in range(1, computing_parameters['nb_gc'] + 1):
-                for key in Simulator_1.solver_variable_names[0]:
-                    initial_variable_values.append(Simulator_1.variables[key][i][-1])
+            for i in range(1, simulators[1].parameters['nb_gc'] + 1):
+                for key in simulators[1].solver_variable_names[0]:
+                    initial_variable_values.append(simulators[1].variables[key][i][-1])
             if computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
                     computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_anodic_recirculation":
-                for key in Simulator_1.solver_variable_names[1]:
-                    initial_variable_values.append(Simulator_1.variables[key][-1])
-                for key in Simulator_1.solver_variable_names[2]:
-                    initial_variable_values.append(Simulator_1.variables[key][-1])
+                for key in simulators[1].solver_variable_names[1]:
+                    initial_variable_values.append(simulators[1].variables[key][-1])
+                for key in simulators[1].solver_variable_names[2]:
+                    initial_variable_values.append(simulators[1].variables[key][-1])
 
             # Display
             if computing_parameters['type_display'] != "no_display":
-                Simulator_1.Display(ax1, ax2, ax3)
+                simulators[1].Display(ax1, ax2, ax3)
 
     else:  # elif computing_parameters['type_plot'] == "fixed":
 
@@ -465,63 +423,38 @@ def launch_AlphaPEM_for_polarization_current_for_calibration(operating_inputs, c
                  computing_parameters['type_auxiliary'] != "no_auxiliary"))):
             raise ValueError('polarization current for calibration should be done with experimental data.')
 
-        # Simulation
-        Simulator_1 = AlphaPEM(select_nth_elements(operating_inputs, 1),
-                               select_nth_elements(current_parameters, 1), accessible_physical_parameters,
-                               undetermined_physical_parameters, select_nth_elements(computing_parameters, 1))
-        if computing_parameters['type_fuel_cell'][2] is not None:
-            Simulator_2 = AlphaPEM(select_nth_elements(operating_inputs, 2),
-                                   select_nth_elements(current_parameters, 2), accessible_physical_parameters,
-                                   undetermined_physical_parameters, select_nth_elements(computing_parameters, 2))
-        if computing_parameters['type_fuel_cell'][3] is not None:
-            Simulator_3 = AlphaPEM(select_nth_elements(operating_inputs, 3),
-                                   select_nth_elements(current_parameters, 3), accessible_physical_parameters,
-                                   undetermined_physical_parameters, select_nth_elements(computing_parameters, 3))
-        if computing_parameters['type_fuel_cell'][4] is not None:
-            Simulator_4 = AlphaPEM(select_nth_elements(operating_inputs, 4),
-                                   select_nth_elements(current_parameters, 4), accessible_physical_parameters,
-                                   undetermined_physical_parameters, select_nth_elements(computing_parameters, 4))
-        if computing_parameters['type_fuel_cell'][5] is not None:
-            Simulator_5 = AlphaPEM(select_nth_elements(operating_inputs, 5),
-                                   select_nth_elements(current_parameters, 5), accessible_physical_parameters,
-                                   undetermined_physical_parameters, select_nth_elements(computing_parameters, 5))
-
-        # Display
-        if computing_parameters['type_display'] != "no_display":
-            Simulator_1.Display(ax1, ax2, ax3)
-            if computing_parameters['type_fuel_cell'][2] is not None:
-                Simulator_2.Display(ax1, ax2, ax3)
-            if computing_parameters['type_fuel_cell'][3] is not None:
-                Simulator_3.Display(ax1, ax2, ax3)
-            if computing_parameters['type_fuel_cell'][4] is not None:
-                Simulator_4.Display(ax1, ax2, ax3)
-            if computing_parameters['type_fuel_cell'][5] is not None:
-                Simulator_5.Display(ax1, ax2, ax3)
+        for i in range(1, len(simulators)):
+            # Simulation
+            if computing_parameters['type_fuel_cell'][i] is not None:
+                simulators[i].simulate_model(select_nth_elements(operating_inputs, i),
+                                             select_nth_elements(current_parameters, i),
+                                             select_nth_elements(computing_parameters, i))
+            # Display
+            if computing_parameters['type_display'] != "no_display":
+                if computing_parameters['type_fuel_cell'][i] is not None:
+                    simulators[i].Display(ax1, ax2, ax3)
 
     # Plot saving
-    Simulator_1.Save_plot(fig1, fig2, fig3)
+    simulators[1].Save_plot(fig1, fig2, fig3)
 
     # Ending time
     algo_time = time.time() - start_time
     print('Time of the algorithm in second :', algo_time)
 
-    return Simulator_1
+    return simulators[1]
 
 
-def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, accessible_physical_parameters,
-                                    undetermined_physical_parameters, computing_parameters):
+def launch_AlphaPEM_for_EIS_current(simulator, operating_inputs, current_parameters, computing_parameters):
     """Launch the AlphaPEM simulator for an EIS current density and display the results.
 
     Parameters
     ----------
+    simulators : list of AlphaPEM
+        A list of instances of the AlphaPEM class to be used for the simulations.
     operating_inputs : dict
         Dictionary containing the operating inputs for the simulation.
     current_parameters : dict
         Dictionary containing the current parameters for the simulation.
-    accessible_physical_parameters : dict
-        Dictionary containing the accessible physical parameters for the simulation.
-    undetermined_physical_parameters : dict
-        Dictionary containing the undetermined physical parameters for the simulation.
     computing_parameters : dict
         Dictionary containing the computing parameters for the simulation.
     """
@@ -553,8 +486,9 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
 
     #       A preliminary simulation run is necessary to equilibrate the internal variables of the cell at i_EIS
     #       prior to initiating the EIS.
-    Simulator = AlphaPEM(operating_inputs, current_parameters, accessible_physical_parameters,
-                         undetermined_physical_parameters, computing_parameters, initial_variable_values, time_interval)
+    simulator.simulate_model(operating_inputs, current_parameters, computing_parameters, initial_variable_values,
+                             time_interval)
+
 
     # time_interval actualization
     t0_EIS_temp = t0_EIS  # It is the initial time for 1 EIS point.
@@ -566,15 +500,15 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
 
     # Recovery of the internal states from the end of the preceding simulation.
     initial_variable_values = []
-    for i in range(1, computing_parameters['nb_gc'] + 1):
-        for key in Simulator.solver_variable_names[0]:
-            initial_variable_values.append(Simulator.variables[key][i][-1])
+    for i in range(1, simulator.parameters['nb_gc'] + 1):
+        for key in simulator.solver_variable_names[0]:
+            initial_variable_values.append(simulator.variables[key][i][-1])
     if computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
             computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_anodic_recirculation":
-        for key in Simulator.solver_variable_names[1]:
-            initial_variable_values.append(Simulator.variables[key][-1])
-        for key in Simulator.solver_variable_names[2]:
-            initial_variable_values.append(Simulator.variables[key][-1])
+        for key in simulator.solver_variable_names[1]:
+            initial_variable_values.append(simulator.variables[key][-1])
+        for key in simulator.solver_variable_names[2]:
+            initial_variable_values.append(simulator.variables[key][-1])
 
     if computing_parameters['type_display'] == "multiple":
         print("A display bug prevents the dynamic updating of the graphs, as it appears that too much data is "
@@ -583,13 +517,12 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
 
     # Dynamic simulation
     for i in range(n):
-        Simulator = AlphaPEM(operating_inputs, current_parameters, accessible_physical_parameters,
-                             undetermined_physical_parameters, computing_parameters, initial_variable_values,
-                             time_interval)
+        simulator.simulate_model(operating_inputs, current_parameters, computing_parameters,
+                                 initial_variable_values, time_interval)
 
         # time_interval actualization
         if i < (n - 1):  # The final simulation does not require actualization.
-            t0_EIS_temp = Simulator.variables['t'][-1]  # It is the initial time for 1 EIS point.
+            t0_EIS_temp = simulator.variables['t'][-1]  # It is the initial time for 1 EIS point.
             tf_EIS_temp = t_new_start[i + 1] + delta_t_break_EIS[i + 1] + delta_t_measurement_EIS[i + 1]  # It
             #                                                               is the final time for 1 EIS point.
             n_inf = np.where(t_new_start <= t0_EIS_temp)[0][-1]  # It is the number of frequency changes which
@@ -598,25 +531,25 @@ def launch_AlphaPEM_for_EIS_current(operating_inputs, current_parameters, access
 
         # Recovery of the internal states from the end of the preceding simulation.
         initial_variable_values = []
-        for i in range(1, computing_parameters['nb_gc'] + 1):
-            for key in Simulator.solver_variable_names[0]:
-                initial_variable_values.append(Simulator.variables[key][i][-1])
+        for i in range(1, simulator.parameters['nb_gc'] + 1):
+            for key in simulator.solver_variable_names[0]:
+                initial_variable_values.append(simulator.variables[key][i][-1])
         if computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_flow-through_anode" or \
                 computing_parameters['type_auxiliary'] == "forced-convective_cathode_with_anodic_recirculation":
-            for key in Simulator.solver_variable_names[1]:
-                initial_variable_values.append(Simulator.variables[key][-1])
-            for key in Simulator.solver_variable_names[2]:
-                initial_variable_values.append(Simulator.variables[key][-1])
+            for key in simulator.solver_variable_names[1]:
+                initial_variable_values.append(simulator.variables[key][-1])
+            for key in simulator.solver_variable_names[2]:
+                initial_variable_values.append(simulator.variables[key][-1])
 
         # Display
         if computing_parameters['type_display'] != "no_display":
-            Simulator.Display(ax1, ax2, ax3)
+            simulator.Display(ax1, ax2, ax3)
 
     # Plot saving
-    Simulator.Save_plot(fig1, fig2, fig3)
+    simulator.Save_plot(fig1, fig2, fig3)
 
     # Ending time
     algo_time = time.time() - start_time
     print('Time of the algorithm in second :', algo_time)
 
-    return Simulator
+    return simulator

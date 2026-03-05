@@ -155,31 +155,39 @@ def plot_polarisation_curve_for_cali(variables, operating_inputs, parameters, ax
     # Extraction of the experimental current density and voltage values for the calibration.
     i_exp_cali_t, U_exp_cali_t = pola_exp_values_calibration(type_fuel_cell, voltage_zone)  # (A.m-2, V).
 
-    # Creation of ifc_t
-    n = len(t)
-    ifc_t = np.zeros(n)
-    for i in range(n):
-        ifc_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
+    if type_plot == "fixed":
+        # Creation of ifc_t
+        n = len(t)
+        ifc_t = np.zeros(n)
+        for i in range(n):
+            ifc_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
 
-    # Recovery of ifc and Ucell from the model after each stack stabilisation
-    nb_loads = len(i_exp_cali_t)  # Number of loads which are made
-    delta_t_cali = delta_t_load_pola_cali + delta_t_break_pola_cali  # s. It is the time of one load.
-    ifc_discretized = np.zeros(nb_loads)
-    Ucell_discretized = np.zeros(nb_loads)
-    for i in range(nb_loads):
-        t_load = delta_t_ini_pola_cali + (i + 1) * delta_t_cali # time for measurement
-        idx = (np.abs(t - t_load)).argmin()  # the corresponding index
-        ifc_discretized[i] = ifc_t[idx]  # the last value at the end of each load
-        Ucell_discretized[i] = Ucell_t[idx]  # the last value at the end of each load
+        # Recovery of ifc and Ucell from the model after each stack stabilisation
+        nb_loads = len(i_exp_cali_t)  # Number of loads which are made
+        delta_t_cali = delta_t_load_pola_cali + delta_t_break_pola_cali  # s. It is the time of one load.
+        ifc_discretized = np.zeros(nb_loads)
+        Ucell_discretized = np.zeros(nb_loads)
+        for i in range(nb_loads):
+            t_load = delta_t_ini_pola_cali + (i + 1) * delta_t_cali # time for measurement
+            idx = (np.abs(t - t_load)).argmin()  # the corresponding index
+            ifc_discretized[i] = ifc_t[idx]  # the last value at the end of each load
+            Ucell_discretized[i] = Ucell_t[idx]  # the last value at the end of each load
 
-    # Plot the experimental polarization curve
-    i_exp_cali_t = i_exp_cali_t / 1e4  # Conversion in A/cm²
-    plot_experimental_polarisation_curve(type_fuel_cell, i_exp_cali_t, U_exp_cali_t, ax)
+        # Plot the experimental polarization curve
+        i_exp_cali_t = i_exp_cali_t / 1e4  # Conversion in A/cm²
+        plot_experimental_polarisation_curve(type_fuel_cell, i_exp_cali_t, U_exp_cali_t, ax)
 
-    # Plot the model polarisation curve
-    sim_error = calculate_simulation_error(Ucell_discretized, U_exp_cali_t) # Calculate the simulation error
-    plot_specific_line(ifc_discretized, Ucell_discretized, type_fuel_cell, type_current, type_auxiliary, sim_error, ax)
-    plot_pola_instructions(type_fuel_cell, ax)
+        # Plot the model polarisation curve
+        sim_error = calculate_simulation_error(Ucell_discretized, U_exp_cali_t) # Calculate the simulation error
+        plot_specific_line(ifc_discretized, Ucell_discretized, type_fuel_cell, type_current, type_auxiliary, sim_error, ax)
+        plot_pola_instructions(type_fuel_cell, ax)
+
+    else:  # type_plot == "dynamic"
+        # Plot of the polarisation curve produced by the model
+        idx = (np.abs(t - t[-1])).argmin()  # index for polarisation measurement
+        ifc = np.array(current_density(t[idx], parameters) / 1e4)  # time for polarisation measurement
+        Ucell = np.array(Ucell_t[idx])  # voltage measurement
+        ax.plot(ifc, Ucell, 'og', markersize=2)
 
     # Add the common instructions for the plot
     ax.set_xlabel(r'$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$',
@@ -1467,7 +1475,8 @@ def plot_T_pseudo_2D_final(variables, operating_inputs, parameters, ax):
     ax.text(0.95, 0.05,  # relative position (right‑bottom of the axes)
             rf"$T_{{des}} = {T_des:.1f}\,^\circ C$", transform=ax.transAxes, ha='right', va='bottom',
             fontsize=10, bbox=dict(boxstyle='round,pad=0.3', fc='white', ec='gray', lw=0.5))
-    plt.tight_layout()
+    plt.subplots_adjust(left=0.1, right=0.95, top=0.95, bottom=0.1)
+
 
 
 # ___________________________________________________Global indicators__________________________________________________
@@ -1778,7 +1787,8 @@ def plot_general_instructions(ax, set_y = True):
     # Configure the appearance of major and minor ticks
     ax.tick_params(axis='both', which='major', size=10, width=1.5, direction='out')
     ax.tick_params(axis='both', which='minor', size=5, width=1.5, direction='out')
-    plt.tight_layout() # Adjust layout to prevent overlap between labels and the figure
+    plt.subplots_adjust(left=0.1, right=0.95, top=0.95, bottom=0.1)
+ # Adjust layout to prevent overlap between labels and the figure
     plt.show() # Show the figure
 
 def round_nice(x):
@@ -1848,7 +1858,8 @@ def plot_pola_instructions(type_fuel_cell, ax, show = True):
     # Configure the appearance of major and minor ticks
     ax.tick_params(axis='both', which='major', size=10, width=1.5, direction='out')
     ax.tick_params(axis='both', which='minor', size=5, width=1.5, direction='out')
-    plt.tight_layout()  # Adjust layout to prevent overlap between labels and the figure
+    plt.subplots_adjust(left=0.1, right=0.95, top=0.95, bottom=0.1)
+  # Adjust layout to prevent overlap between labels and the figure
     if show:
         plt.show()  # Show the figure
 
@@ -1874,7 +1885,8 @@ def plot_EIS_Nyquist_instructions(type_fuel_cell, f_Fourier, x, y, ax):
     # Configure the appearance of major and minor ticks
     ax.tick_params(axis='both', which='major', size=10, width=1.5, direction='out')
     ax.tick_params(axis='both', which='minor', size=5, width=1.5, direction='out')
-    plt.tight_layout()  # Adjust layout to prevent overlap between labels and the figure
+    plt.subplots_adjust(left=0.1, right=0.95, top=0.95, bottom=0.1)
+  # Adjust layout to prevent overlap between labels and the figure
     plt.show()  # Show the figure
 
     # For EH-31 fuel cell
@@ -1936,7 +1948,8 @@ def plot_Bode_amplitude_instructions(f_EIS, type_fuel_cell, ax):
     # Configure the appearance of major and minor ticks
     ax.tick_params(axis='both', which='major', size=10, width=1.5, direction='out')
     ax.tick_params(axis='both', which='minor', size=5, width=1.5, direction='out')
-    plt.tight_layout()  # Adjust layout to prevent overlap between labels and the figure
+    plt.subplots_adjust(left=0.1, right=0.95, top=0.95, bottom=0.1)
+  # Adjust layout to prevent overlap between labels and the figure
     plt.show()  # Show the figure
 
     # For EH-31 fuel cell
@@ -1970,7 +1983,8 @@ def plot_Bode_phase_instructions(f_EIS, type_fuel_cell, ax):
     # Configure the appearance of major and minor ticks
     ax.tick_params(axis='both', which='major', size=10, width=1.5, direction='out')
     ax.tick_params(axis='both', which='minor', size=5, width=1.5, direction='out')
-    plt.tight_layout()  # Adjust layout to prevent overlap between labels and the figure
+    plt.subplots_adjust(left=0.1, right=0.95, top=0.95, bottom=0.1)
+  # Adjust layout to prevent overlap between labels and the figure
     plt.show()  # Show the figure
 
     # For EH-31 fuel cell
