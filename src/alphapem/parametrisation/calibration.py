@@ -59,7 +59,7 @@ varbound, gene_space = parameter_bounds_for_calibration(type_fuel_cell_1, voltag
 
 # PyGAD parameters for the genetic algorithm:
     # Number of generations:
-num_generations = 1 # 1000 generations are good, 2000 generations are better.
+num_generations = 500 # 1000 generations are good, 2000 generations are better.
     #                   10 generation of 128 elements takes approximatively ??min on my computer (16 CPU cores).
     #                   100 generations of 128 elements take approximatively 10h on UR cluster (1 node of 32 CPU cores).
     # Initial population (one solution means a member of the population):
@@ -68,7 +68,7 @@ initial_population = None # It is the initial population, which can be loaded fr
         # 2) custom initial population.
 # initial_population = pygad.load(filename="results/ZSW-GenStack/parameter_calibration_1").population # Remark: it seems that the
 #                                 file should be loaded from the same computer and in the same folder it is created ...?
-sol_per_pop = 10 # It is the population size. It should be between 100 and 200 for a good compromise between speed and
+sol_per_pop = 128 # It is the population size. It should be between 100 and 200 for a good compromise between speed and
     #              precision. Select a multiple of the available number of CPU cores for optimal multiprocessing.
 num_genes = len(varbound) # Number of genes in the solution. It is the number of undetermined parameters.
     # Number of solutions to be selected as parents in the mating pool.
