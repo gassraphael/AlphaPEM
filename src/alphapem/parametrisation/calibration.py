@@ -109,7 +109,7 @@ def pola_points(ga_instance, solution, solution_idx): # Function to maximize.
         simulator_2 = AlphaPEM(accessible_physical_parameters, solution_of_undetermined_physical_parameters, model_parameters)
         # Simulate the model with the current parameters and the operating conditions of the experimental points
         simulator_1.simulate_model(operating_inputs_1, current_parameters, computing_parameters_1)
-        simulator_1.simulate_model(operating_inputs_2, current_parameters, computing_parameters_2)
+        simulator_2.simulate_model(operating_inputs_2, current_parameters, computing_parameters_2)
         # Calculation of the simulation error between the simulated and experimental polarization curves
         sim_error = calculate_simulation_error(simulator_1, U_exp_1, i_exp_1, simulator_2, U_exp_2, i_exp_2)
         if sim_error == 0:  # If the error is zero, it means the simulation is perfect.
@@ -206,10 +206,10 @@ if __name__ == '__main__':
     operating_inputs_final_1['current_density'], computing_parameters_final_1['type_current'] = polarization_current, 'polarization'
     operating_inputs_final_2, computing_parameters_final_2 = operating_inputs_2, computing_parameters_2
     operating_inputs_final_2['current_density'], computing_parameters_final_2['type_current'] = polarization_current, 'polarization'
-    simulator_final_1 = AlphaPEM(accessible_physical_parameters, undetermined_physical_parameters, computing_parameters_final_1)
-    simulator_final_2 = AlphaPEM(accessible_physical_parameters, undetermined_physical_parameters, computing_parameters_final_2)
-    simulator_final_1.simulate_model(operating_inputs_1, current_parameters, computing_parameters_1)
-    simulator_final_2.simulate_model(operating_inputs_2, current_parameters, computing_parameters_2)
+    simulator_final_1 = AlphaPEM(accessible_physical_parameters, undetermined_physical_parameters, model_parameters)
+    simulator_final_2 = AlphaPEM(accessible_physical_parameters, undetermined_physical_parameters, model_parameters)
+    simulator_final_1.simulate_model(operating_inputs_1, current_parameters, computing_parameters_final_1)
+    simulator_final_2.simulate_model(operating_inputs_2, current_parameters, computing_parameters_final_2)
     #       Display the calibrated and experimental polarization curve
     fig, ax = plt.subplots(figsize=(8, 8))
     simulator_final_1.Display(ax)

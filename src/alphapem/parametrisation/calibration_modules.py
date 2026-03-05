@@ -478,20 +478,20 @@ def update_undetermined_parameters(type_fuel_cell, solution, varbound, undetermi
             undetermined_physical_parameters['Hccl'] = undetermined_physical_parameters['Hacl']
     return undetermined_physical_parameters
 
-def calculate_simulation_error(Simulator_1, U_exp_1, i_exp_1, Simulator_2, U_exp_2, i_exp_2):
+def calculate_simulation_error(simulator_1, U_exp_1, i_exp_1, simulator_2, U_exp_2, i_exp_2):
     """This function is used to calculate the simulation maximal error between the experimental and the simulated
     polarization curves. Two simulations on different operating conditions and on the same stack, and so two set of
     experimental data, are considered as it is the minimum amount of data which is required for the calibration.
 
     Parameters
     ----------
-    Simulator_1 : AlphaPEM object
+    simulator_1 : AlphaPEM object
         PEM simulator which contains the simulation results for the first simulation.
     U_exp_1 : numpy.ndarray
         Experimental values of the voltage for the first simulation.
     i_exp_1 : numpy.ndarray
         Experimental values of the current density for the first simulation.
-    Simulator_2 : AlphaPEM object
+    simulator_2 : AlphaPEM object
         PEM simulator which contains the simulation results for the second simulation.
     U_exp_2 : numpy.ndarray
         Experimental values of the voltage for the second simulation.
@@ -505,26 +505,26 @@ def calculate_simulation_error(Simulator_1, U_exp_1, i_exp_1, Simulator_2, U_exp
     """
 
     # Recovery of ifc_1
-    t1 = np.array(Simulator_1.variables['t'])
+    t1 = np.array(simulator_1.variables['t'])
     n1 = len(t1)
     ifc_t_1 = np.zeros(n1)
     for i in range(n1):  # Creation of ifc_t
-        ifc_t_1[i] = Simulator_1.operating_inputs['current_density'](t1[i], Simulator_1.parameters)
+        ifc_t_1[i] = simulator_1.operating_inputs['current_density'](t1[i], simulator_1.parameters)
     # Recovery of ifc_2
-    t2 = np.array(Simulator_2.variables['t'])
+    t2 = np.array(simulator_2.variables['t'])
     n2 = len(t2)
     ifc_t_2 = np.zeros(n2)
     for i in range(n2):  # Creation of ifc_t
-        ifc_t_2[i] = Simulator_2.operating_inputs['current_density'](t2[i], Simulator_2.parameters)
+        ifc_t_2[i] = simulator_2.operating_inputs['current_density'](t2[i], simulator_2.parameters)
 
     # Polarisation curve point recovery after stack stabilisation for Simulator1
     #   Extraction of the parameters
     #       The initial time at zero current density for the stabilisation of the internal states.
-    delta_t_ini_pola_cali_1 = Simulator_1.parameters['pola_current_for_cali_parameters']['delta_t_ini_pola_cali']  # (s).
+    delta_t_ini_pola_cali_1 = simulator_1.parameters['pola_current_for_cali_parameters']['delta_t_ini_pola_cali']  # (s).
     #       The loading time for one step current of the polarisation current density function.
-    delta_t_load_pola_cali_1 = Simulator_1.parameters['pola_current_for_cali_parameters']['delta_t_load_pola_cali']  # (s).
+    delta_t_load_pola_cali_1 = simulator_1.parameters['pola_current_for_cali_parameters']['delta_t_load_pola_cali']  # (s).
     #       The breaking time for one step current, for the stabilisation of the internal states.
-    delta_t_break_pola_cali_1 = Simulator_1.parameters['pola_current_for_cali_parameters']['delta_t_break_pola_cali']  # (s).
+    delta_t_break_pola_cali_1 = simulator_1.parameters['pola_current_for_cali_parameters']['delta_t_break_pola_cali']  # (s).
     #   Calculation
     nb_loads1 = len(i_exp_1)  # Number of load which are made
     delta_t_cali_1 = delta_t_load_pola_cali_1 + delta_t_break_pola_cali_1  # s. It is the time of one load.
@@ -534,15 +534,15 @@ def calculate_simulation_error(Simulator_1, U_exp_1, i_exp_1, Simulator_2, U_exp
         t_load_1 = delta_t_ini_pola_cali_1 + (i + 1) * delta_t_cali_1 # time for measurement
         idx1 = (np.abs(t1 - t_load_1)).argmin()  # the corresponding index
         ifc_discretized1[i] = ifc_t_1[idx1]  # the last value at the end of each load
-        Ucell_discretized1[i] = Simulator_1.variables['Ucell'][idx1]  # the last value at the end of each load
+        Ucell_discretized1[i] = simulator_1.variables['Ucell'][idx1]  # the last value at the end of each load
     # Polarisation curve point recovery after stack stabilisation for Simulator2
     #   Extraction of the parameters
     #       The initial time at zero current density for the stabilisation of the internal states.
-    delta_t_ini_pola_cali_2 = Simulator_2.parameters['pola_current_for_cali_parameters']['delta_t_ini_pola_cali']  # (s).
+    delta_t_ini_pola_cali_2 = simulator_2.parameters['pola_current_for_cali_parameters']['delta_t_ini_pola_cali']  # (s).
     #       The loading time for one step current of the polarisation current density function.
-    delta_t_load_pola_cali_2 = Simulator_2.parameters['pola_current_for_cali_parameters']['delta_t_load_pola_cali']  # (s).
+    delta_t_load_pola_cali_2 = simulator_2.parameters['pola_current_for_cali_parameters']['delta_t_load_pola_cali']  # (s).
     #       The breaking time for one step current, for the stabilisation of the internal states.
-    delta_t_break_pola_cali_2 = Simulator_2.parameters['pola_current_for_cali_parameters']['delta_t_break_pola_cali']  # (s).
+    delta_t_break_pola_cali_2 = simulator_2.parameters['pola_current_for_cali_parameters']['delta_t_break_pola_cali']  # (s).
     #   Calculation
     nb_loads2 = len(i_exp_2)  # Number of load which are made
     delta_t_cali_2 = delta_t_load_pola_cali_2 + delta_t_break_pola_cali_2  # s. It is the time of one load.
@@ -552,7 +552,7 @@ def calculate_simulation_error(Simulator_1, U_exp_1, i_exp_1, Simulator_2, U_exp
         t_load_2 = delta_t_ini_pola_cali_2 + (i + 1) * delta_t_cali_2 # time for measurement
         idx2 = (np.abs(t2 - t_load_2)).argmin()  # the corresponding index
         ifc_discretized2[i] = ifc_t_2[idx2]  # the last value at the end of each load
-        Ucell_discretized2[i] = Simulator_2.variables['Ucell'][idx2]  # the last value at the end of each load
+        Ucell_discretized2[i] = simulator_2.variables['Ucell'][idx2]  # the last value at the end of each load
 
     # Distance between the simulated and the experimental polarization curves (RMSE: root-mean-square error).
     res1 = (Ucell_discretized1 - U_exp_1) / U_exp_1 * 100 # in %.
