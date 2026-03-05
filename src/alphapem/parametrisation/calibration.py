@@ -40,11 +40,11 @@ type_fuel_cell_2 = "ZSW-GenStack_Pa_2.8_Pc_2.6"
 voltage_zone = "full"
 
 (operating_inputs_1, current_parameters, accessible_physical_parameters, undetermined_physical_parameters,
- computing_parameters_1, i_exp_1, U_exp_1) \
+ model_parameters, computing_parameters_1, i_exp_1, U_exp_1) \
     = parameters_for_calibration(type_fuel_cell_1, voltage_zone)
 
 (operating_inputs_2, current_parameters, accessible_physical_parameters, undetermined_physical_parameters,
- computing_parameters_2, i_exp_2, U_exp_2) \
+ model_parameters, computing_parameters_2, i_exp_2, U_exp_2) \
     = parameters_for_calibration(type_fuel_cell_2, voltage_zone)
 
 # _________________________________________________Calibration settings_________________________________________________
@@ -59,7 +59,7 @@ varbound, gene_space = parameter_bounds_for_calibration(type_fuel_cell_1, voltag
 
 # PyGAD parameters for the genetic algorithm:
     # Number of generations:
-num_generations = 500 # 1000 generations are good, 2000 generations are better.
+num_generations = 1 # 1000 generations are good, 2000 generations are better.
     #                   10 generation of 128 elements takes approximatively ??min on my computer (16 CPU cores).
     #                   100 generations of 128 elements take approximatively 10h on UR cluster (1 node of 32 CPU cores).
     # Initial population (one solution means a member of the population):
@@ -68,7 +68,7 @@ initial_population = None # It is the initial population, which can be loaded fr
         # 2) custom initial population.
 # initial_population = pygad.load(filename="results/ZSW-GenStack/parameter_calibration_1").population # Remark: it seems that the
 #                                 file should be loaded from the same computer and in the same folder it is created ...?
-sol_per_pop = 128 # It is the population size. It should be between 100 and 200 for a good compromise between speed and
+sol_per_pop = 10 # It is the population size. It should be between 100 and 200 for a good compromise between speed and
     #              precision. Select a multiple of the available number of CPU cores for optimal multiprocessing.
 num_genes = len(varbound) # Number of genes in the solution. It is the number of undetermined parameters.
     # Number of solutions to be selected as parents in the mating pool.
@@ -104,12 +104,14 @@ def pola_points(ga_instance, solution, solution_idx): # Function to maximize.
                                                                       copy.deepcopy(undetermined_physical_parameters))
 
     try: # Calculation of the model polarization curve
-        Simulator_1 = AlphaPEM(operating_inputs_1, current_parameters, accessible_physical_parameters,
-                               solution_of_undetermined_physical_parameters, computing_parameters_1)
-        Simulator_2 = AlphaPEM(operating_inputs_2, current_parameters, accessible_physical_parameters,
-                               solution_of_undetermined_physical_parameters, computing_parameters_2)
+        # Create the simulators
+        simulator_1 = AlphaPEM(accessible_physical_parameters, solution_of_undetermined_physical_parameters, model_parameters)
+        simulator_2 = AlphaPEM(accessible_physical_parameters, solution_of_undetermined_physical_parameters, model_parameters)
+        # Simulate the model with the current parameters and the operating conditions of the experimental points
+        simulator_1.simulate_model(operating_inputs_1, current_parameters, computing_parameters_1)
+        simulator_1.simulate_model(operating_inputs_2, current_parameters, computing_parameters_2)
         # Calculation of the simulation error between the simulated and experimental polarization curves
-        sim_error = calculate_simulation_error(Simulator_1, U_exp_1, i_exp_1, Simulator_2, U_exp_2, i_exp_2)
+        sim_error = calculate_simulation_error(simulator_1, U_exp_1, i_exp_1, simulator_2, U_exp_2, i_exp_2)
         if sim_error == 0:  # If the error is zero, it means the simulation is perfect.
             sim_error = 1e-6
 
@@ -204,18 +206,18 @@ if __name__ == '__main__':
     operating_inputs_final_1['current_density'], computing_parameters_final_1['type_current'] = polarization_current, 'polarization'
     operating_inputs_final_2, computing_parameters_final_2 = operating_inputs_2, computing_parameters_2
     operating_inputs_final_2['current_density'], computing_parameters_final_2['type_current'] = polarization_current, 'polarization'
-    Simulator_final_1 = AlphaPEM(operating_inputs_final_1, current_parameters, accessible_physical_parameters,
-                                 undetermined_physical_parameters, computing_parameters_final_1)
-    Simulator_final_2 = AlphaPEM(operating_inputs_final_2, current_parameters, accessible_physical_parameters,
-                                 undetermined_physical_parameters, computing_parameters_final_2)
+    simulator_final_1 = AlphaPEM(accessible_physical_parameters, undetermined_physical_parameters, computing_parameters_final_1)
+    simulator_final_2 = AlphaPEM(accessible_physical_parameters, undetermined_physical_parameters, computing_parameters_final_2)
+    simulator_final_1.simulate_model(operating_inputs_1, current_parameters, computing_parameters_1)
+    simulator_final_2.simulate_model(operating_inputs_2, current_parameters, computing_parameters_2)
     #       Display the calibrated and experimental polarization curve
     fig, ax = plt.subplots(figsize=(8, 8))
-    Simulator_final_1.Display(ax)
-    Simulator_final_2.Display(ax)
+    simulator_final_1.Display(ax)
+    simulator_final_2.Display(ax)
     #       Save the calibrated and experimental polarization curve
     subfolder_name = type_fuel_cell_1[:type_fuel_cell_1.rfind('_')] if type_fuel_cell_1.rfind('_') != -1 \
         else type_fuel_cell_1
-    Simulator_final_1.Saving_instructions("results", subfolder_name, "final_calibration_1.pdf", fig)
+    simulator_final_1.Saving_instructions("results", subfolder_name, "final_calibration_1.pdf", fig)
 
     # Algorithm time
     algo_time = time.time() - start_time

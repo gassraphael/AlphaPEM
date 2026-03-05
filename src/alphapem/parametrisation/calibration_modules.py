@@ -439,8 +439,9 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
                                         'epsilon_c': epsilon_c, 'e': e, 'K_l_ads': K_l_ads, 'K_O2_ad_Pt': K_O2_ad_Pt,
                                         'Re': Re, 'i0_c_ref': i0_c_ref, 'kappa_co': kappa_co, 'kappa_c': kappa_c,
                                         'C_scl': C_scl}
-    computing_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge,
-                            'rtol': rtol, 'atol': atol,'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
+    model_parameters = {'nb_gc': nb_gc, 'nb_gdl': nb_gdl, 'nb_mpl': nb_mpl, 't_purge': t_purge, 'rtol': rtol,
+                        'atol': atol}
+    computing_parameters = {'type_fuel_cell': type_fuel_cell, 'type_current': type_current,
                             'voltage_zone': voltage_zone, 'type_auxiliary': type_auxiliary, 'type_purge': type_purge,
                             'type_display': type_display, 'type_plot': type_plot}
 
@@ -448,7 +449,7 @@ def parameters_for_calibration(type_fuel_cell, voltage_zone):
     i_exp, U_exp = pola_exp_values_calibration(type_fuel_cell, voltage_zone)
 
     return (operating_inputs, current_parameters, accessible_physical_parameters, undetermined_physical_parameters,
-            computing_parameters, i_exp, U_exp)
+            model_parameters, computing_parameters, i_exp, U_exp)
 
 def update_undetermined_parameters(type_fuel_cell, solution, varbound, undetermined_physical_parameters):
     """
