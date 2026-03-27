@@ -1,0 +1,131 @@
+# -*- coding: utf-8 -*-
+
+"""This module contains purely computational functions used for display purposes: Fourier
+transformations, simulation error calculation, and axis-tick rounding helpers.
+"""
+
+# _____________________________________________________Preliminaries____________________________________________________
+
+# Importing the necessary libraries
+using FFTW
+using Statistics
+
+
+# ___________________________________________Computational display functions____________________________________________
+
+"""
+    make_Fourier_transformation(variables, operating_inputs, parameters)
+
+This function calculates the Fourier transformation of both cell voltage and current density. It will be used to
+display the Nyquist and Bode diagrams.
+To generate it at each frequency change, the cell voltage and the current density are recorded. The time for which
+these points are captured is determined using the following approach: at the beginning of each frequency change, a
+delta_t_break_EIS time is observed to ensure the dynamic stability of the stack's variables. Subsequently, a
+delta_t_measurement_EIS time is needed to record the cell voltage and the current density.
+
+# Arguments
+- `variables::Dict{String, Any}`: Variables calculated by the solver. They correspond to the fuel cell internal states.
+- `operating_inputs::Dict{String, Any}`: Operating inputs of the fuel cell.
+- `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
+
+# Returns
+- `Dict{String, Any}`: Dictionary containing the Fourier transformation (FT) of the cell voltage and the current
+  density, all amplitude values of the cell voltage calculated by the FT, the amplitude of the cell voltage at the
+  frequency of the perturbation, all frequency values used by the FT, the frequency of the perturbation, and the
+  number of points used in the FT.
+"""
+function make_Fourier_transformation(variables::Dict{String, Any},
+                                     operating_inputs::Dict{String, Any},
+                                     parameters::Dict{String, Any})::Dict{String, Any}
+
+    # Extraction of the variables
+    t, Ucell_t = variables["t"], variables["Ucell"]
+    # Extraction of the operating inputs and the parameters
+    current_density = operating_inputs["current_density"]
+    t_EIS           = parameters["t_EIS"]
+
+    # Creation of ifc
+    n     = length(t)
+    ifc_t = zeros(n)
+    for i in 1:n
+        ifc_t[i] = current_density(t[i], parameters)
+    end
+
+    # Identify the areas where Ucell and ifc can be measured for the EIS: after equilibrium and at each frequency change
+    t0_EIS, t_new_start_EIS, tf_EIS, delta_t_break_EIS, delta_t_measurement_EIS = t_EIS
+    n_inf = findlast(t_new_start_EIS .<= t[1])  # The number of frequency changes which has been made so far.
+    mask_EIS = (t .> (t[1] + delta_t_break_EIS[n_inf])) .&
+               (t .< (t[1] + delta_t_break_EIS[n_inf] + delta_t_measurement_EIS[n_inf]))
+    Ucell_EIS_measured = Ucell_t[mask_EIS]
+    ifc_EIS_measured   = ifc_t[mask_EIS]
+
+    # Determination of the Fourier transformation
+    N             = length(Ucell_EIS_measured)              # Number of points used for the Fourier transformation
+    Ucell_Fourier = fft(Ucell_EIS_measured)                  # Ucell Fourier transformation
+    ifc_Fourier   = fft(ifc_EIS_measured)                    # ifc Fourier transformation
+    A_period_t    = vcat([abs(Ucell_Fourier[1]) / N],        # Recovery of all amplitude values calculated by fft
+                          abs.(Ucell_Fourier[2:N÷2]) .* 2 ./ N)
+    A      = maximum(A_period_t[2:end])                      # Amplitude at the frequency of the perturbation
+    freq_t = fftfreq(N)[1:N÷2]                              # Recovery of all frequency values used by fft
+    f      = freq_t[findfirst(A_period_t .== A)]             # Recovery of the studied frequency
+
+    return Dict{String, Any}(
+        "Ucell_Fourier" => Ucell_Fourier,
+        "ifc_Fourier"   => ifc_Fourier,
+        "A_period_t"    => A_period_t,
+        "A"             => A,
+        "freq_t"        => freq_t,
+        "f"             => f,
+        "N"             => N
+    )
+end
+
+
+"""
+    calculate_simulation_error(Ucell, U_exp_t)
+
+This function calculates the simulation error between the simulated cell voltage and the experimental cell
+voltage. It is calculated as the RMSE (root-mean-square error) of the relative differences (in %).
+
+# Arguments
+- `Ucell::Vector`: Simulated cell voltage, interpolated at the experimental measurement points.
+- `U_exp_t::Vector`: Experimental cell voltage.
+
+# Returns
+- RMSE between the simulated cell voltage and the experimental cell voltage (in %).
+"""
+function calculate_simulation_error(Ucell::Vector,
+                                    U_exp_t::Vector)
+
+    # Distance between the simulated and the experimental polarization curves (RMSE: root-mean-square error).
+    res1 = (Ucell .- U_exp_t) ./ U_exp_t .* 100  # in %.
+    return round(sqrt(mean(res1 .^ 2)), digits=2)
+end
+
+
+"""
+    round_nice(x)
+
+Round the main step to a "nice" number.
+
+# Arguments
+- `x`: The value to be rounded.
+
+# Returns
+- The value rounded to a "nice" number.
+"""
+function round_nice(x)
+    exp  = floor(log10(x))
+    f    = x / 10^exp
+    nice = if f < 1.5
+        1
+    elseif f < 3
+        2
+    elseif f < 7
+        5
+    else
+        10
+    end
+    return nice * 10^exp
+end
+

@@ -1,0 +1,304 @@
+# -*- coding: utf-8 -*-
+
+"""This file represents all the flows passing through the auxiliaries. It is a component of the fuel cell model.
+"""
+
+# _____________________________________________________Preliminaries____________________________________________________
+
+# Importing constants' value and functions
+include(joinpath(@__DIR__, "../../utils/physics_constants.jl"))
+include(joinpath(@__DIR__, "../../utils/maths_functions.jl"))
+include(joinpath(@__DIR__, "../../utils/physics_functions.jl"))
+include(joinpath(@__DIR__, "../modules/flows_1D_GC_manifold_modules.jl"))
+include(joinpath(@__DIR__, "velocity.jl"))
+
+
+# ______________________________________________________Auxiliaries_____________________________________________________
+
+"""This function calculates the flows passing through the auxiliaries.
+
+Parameters
+----------
+sv_1D_cell : Vector{Dict}
+    Variables calculated by the solver. They correspond to the cell internal states.
+    `sv` is a contraction of solver_variables for enhanced readability.
+sv_1D_manifold : Dict
+    Variables calculated by the solver. They correspond to the manifold internal states.
+    `sv` is a contraction of solver_variables for enhanced readability.
+sv_auxiliary : Dict
+    Variables calculated by the solver. They correspond to the auxiliary internal states.
+    `sv` is a contraction of solver_variables for enhanced readability.
+i_fc_cell : Float64
+    Fuel cell current density at time t (A.m-2).
+v_a : Vector
+    Velocity evolution at the anode side (m.s-1).
+v_c : Vector
+    Velocity evolution at the cathode side (m.s-1).
+Pa_in : Float64
+    Inlet pressure at the anode side (Pa).
+Pc_in : Float64
+    Inlet pressure at the cathode side (Pa).
+operating_inputs : Dict
+    Operating inputs of the fuel cell.
+parameters : Dict
+    Parameters of the fuel cell model.
+
+Returns
+-------
+Dict{String, Dict}
+    Global and species-specific flows in the gas channels and auxiliaries.
+    Julia vectors are naturally 1-based, so no dummy element is stored at index 0.
+"""
+function calculate_flows_1D_GC_manifold(sv_1D_cell::Vector{Dict},
+                                        sv_1D_manifold::Dict,
+                                        sv_auxiliary::Dict,
+                                        i_fc_cell,
+                                        v_a::Vector,
+                                        v_c::Vector,
+                                        Pa_in,
+                                        Pc_in,
+                                        operating_inputs::Dict,
+                                        parameters::Dict)::Dict{String, Dict}
+
+    # __________________________________________________Preliminaries___________________________________________________
+
+    # Extraction of the operating inputs and the parameters
+    T_des = operating_inputs["T_des"]
+    Phi_a_des, Phi_c_des = operating_inputs["Phi_a_des"], operating_inputs["Phi_c_des"]
+    Sa, Sc, y_H2_in = operating_inputs["Sa"], operating_inputs["Sc"], operating_inputs["y_H2_in"]
+
+    Aact, nb_cell, Hagc, Hcgc = parameters["Aact"], parameters["nb_cell"], parameters["Hagc"], parameters["Hcgc"]
+    Wagc, Wcgc, Lgc, nb_channel_in_gc = parameters["Wagc"], parameters["Wcgc"], parameters["Lgc"], parameters["nb_channel_in_gc"]
+    A_T_a, A_T_c = parameters["A_T_a"], parameters["A_T_c"]
+    nb_gc, type_auxiliary = Int(parameters["nb_gc"]), parameters["type_auxiliary"]
+
+    # Extraction of the variables
+    C_v_agc = [sv_1D_cell[i]["C_v_agc"] for i in 1:nb_gc]
+    C_v_cgc = [sv_1D_cell[i]["C_v_cgc"] for i in 1:nb_gc]
+    s_agc = [sv_1D_cell[i]["s_agc"] for i in 1:nb_gc]
+    s_cgc = [sv_1D_cell[i]["s_cgc"] for i in 1:nb_gc]
+    C_H2_agc = [sv_1D_cell[i]["C_H2_agc"] for i in 1:nb_gc]
+    C_O2_cgc = [sv_1D_cell[i]["C_O2_cgc"] for i in 1:nb_gc]
+    C_N2_cgc = [sv_1D_cell[i]["C_N2_cgc"] for i in 1:nb_gc]
+
+    # Intermediate values
+    (P_agc, P_cgc, Phi_agc, Phi_cgc, y_H2_agc, y_O2_cgc, M_agc, M_cgc, M_ext, M_H2_N2_in, rho_agc, rho_cgc, k_purge,
+     Abp_a, Abp_c, mu_gaz_agc, mu_gaz_cgc) = flow_1D_GC_manifold_int_values(sv_1D_cell, sv_auxiliary, operating_inputs,
+                                                                            parameters)                                 # Some of them will remain useless ?!
+    W_des = desired_flows(sv_1D_cell, i_fc_cell, Pa_in, Pc_in, operating_inputs, parameters)
+
+    # _________________________________________Inlet and outlet global flows____________________________________________
+    """Global flows here refer to flows that integrate all the chemical species circulating together.
+    Slight differences are to be noted in the expression of these flows depending on the type of auxiliary selected.
+    """
+
+    # Anode flow through the auxiliaries in mol.s-1
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" ||
+       type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+        # pass
+        # Wa_in = rho_asm_in_to_asm * v_a * A_T_a
+        # Wasm_to_asm_out = rho_asm_to_asm_out * v_a * Hagc * Wagc
+        # Wasm_out_to_agc = rho_asm_out_to_agc * v_a * Hagc * Wagc
+        # Wagc_to_aem_in = rho_agc_to_aem_in * v_a * Hagc * Wagc
+        # Waem_in_to_aem = rho_aem_in_to_aem * v_a * Hagc * Wagc
+        # if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" # Attention: include a minimal flow for the pump, as for incoming flows.
+        #     Ware = Maem_out_re * (Paem_out_re / (Paem_out_re - Phi_aem_out_re * Psat(T_des))) *
+        #            (Sa - 1) * i_fc_cell / (2 * F) * (nb_cell * Aact)  # The pump exactly compensates the pressure drop.
+        #     Wasm_in_re_to_asm = rho_asm_in_re_to_asm * v_a * A_T_a
+        #     Waem_to_aem_out_re = rho_aem_to_aem_out_re * v_a * A_T_a
+        #     Waem_to_aem_out = k_purge * rho_aem_to_aem_out * v_a * A_T_a
+        #     Wa_out = k_purge * rho_aem_out_to_ext * v_a * A_T_a
+        # else # type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+        #     Waem_to_aem_out = rho_aem_to_aem_out * v_a * Abp_a
+        #     Wa_out = rho_aem_out_to_ext * v_a * Abp_a
+    else  # type_auxiliary == "no_auxiliary" (only 1 cell)
+        Wa_in = W_des["H2"] + W_des["H2O_inj_a"]  # This expression is also present in calculate_velocity_evolution.
+        Wa_out = P_agc[nb_gc] / (R * T_des) * v_a[nb_gc] * Hagc * Wagc * nb_cell * nb_channel_in_gc
+    end
+
+    # Anode flow entering/leaving the stack in mol.m-2.s-1
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" ||
+       type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+        # pass
+        # Ja_in = 0
+        # Ja_out = 0
+    else  # type_auxiliary == "no_auxiliary" (only 1 cell)
+        Ja_in = Wa_in / (Hagc * Wagc) / nb_cell / nb_channel_in_gc  # This expression is also present in calculate_velocity_evolution.
+        Ja_out = Wa_out / (Hagc * Wagc) / nb_cell / nb_channel_in_gc
+    end
+
+    # Cathode flow through the auxiliaries in mol.s-1
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" ||
+       type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+        # pass
+        # Wc_in = rho_csm_in_to_csm * v_c * A_T_c
+        # Wcsm_to_csm_out = rho_csm_to_csm_out * v_c * Hcgc * Wcgc
+        # Wcsm_out_to_cgc = rho_csm_out_to_cgc * v_c * Hcgc * Wcgc
+        # Wcgc_to_cem_in = rho_cgc_to_cem_in * v_c * Hcgc * Wcgc
+        # Wcem_in_to_cem = rho_cem_in_to_cem * v_c * Hcgc * Wcgc
+        # Wcem_to_cem_out = rho_cem_to_cem_out * v_c * Abp_c
+        # Wc_out = rho_cem_out_to_ext * v_c * Abp_c
+    else  # type_auxiliary == "no_auxiliary" (only 1 cell)
+        Wc_in = W_des["dry_air"] + W_des["H2O_inj_c"]  # This expression is also present in calculate_velocity_evolution.
+        Wc_out = P_cgc[nb_gc] / (R * T_des) * v_c[nb_gc] * Hcgc * Wcgc * nb_cell * nb_channel_in_gc
+    end
+
+    # Cathode flow entering/leaving the stack in mol.m-2.s-1
+    Jc_in = Wc_in / (Hcgc * Wcgc) / nb_cell / nb_channel_in_gc  # This expression is also present in calculate_velocity_evolution.
+    Jc_out = Wc_out / (Hcgc * Wcgc) / nb_cell / nb_channel_in_gc
+
+    # ________________________________________Inlet and outlet specific flows___________________________________________
+    """Specific flows here refer to flows that integrate only a single chemical species within the ensemble of species
+    circulating together. For example, only the water vapor flow within the ensemble of hydrogen and water vapor.
+    """
+
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" ||
+       type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+        # Jv_agc_in = Phi_asm * Psat(T_des) / Pasm * Ja_in
+    else  # type_auxiliary == "no_auxiliary"
+        Jv_agc_in = Phi_a_des * Psat(T_des) / Pa_in * Ja_in
+    end
+    Jv_agc_agc = [C_v_agc[i] * v_a[i] for i in 1:(nb_gc - 1)]
+    Jv_agc_out = C_v_agc[nb_gc] * R * T_des / P_agc[nb_gc] * Ja_out
+
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" ||
+       type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+        # Jv_cgc_in = Phi_csm * Psat(T_des) / Pcsm * Jc_in
+    else  # type_auxiliary == "no_auxiliary"
+        Jv_cgc_in = Phi_c_des * Psat(T_des) / Pc_in * Jc_in
+    end
+    Jv_cgc_cgc = [C_v_cgc[i] * v_c[i] for i in 1:(nb_gc - 1)]
+    Jv_cgc_out = C_v_cgc[nb_gc] * R * T_des / P_cgc[nb_gc] * Jc_out
+
+    # Liquid water flows at the GC (kg.m-2.s-1)
+    #   At the anode side
+    s_agc_outlet = 0.0  # Boundary condition at the outlet of the anode GC: no liquid water at the outlet.
+    Jl_agc_agc_conv = [rho_H2O_l(T_des) * K_v_liq_gas * v_a[i] * s_agc[i] for i in 1:nb_gc]
+    Jl_agc_agc_dif = [-D_liq_dif * d_dx(s_agc[i], i == nb_gc ? s_agc_outlet : s_agc[i + 1], (Lgc / nb_gc) / 2)
+                      for i in 1:nb_gc]
+    Jl_agc_agc = [Jl_agc_agc_conv[i] + Jl_agc_agc_dif[i] for i in 1:nb_gc]
+    Jl_agc_out = Jl_agc_agc_conv[end] + Jl_agc_agc_dif[end]
+
+    #   At the cathode side
+    s_cgc_outlet = 0.0  # Boundary condition at the outlet of the cathode GC: no liquid water at the outlet.
+    Jl_cgc_cgc_conv = [rho_H2O_l(T_des) * K_v_liq_gas * v_c[i] * s_cgc[i] for i in 1:nb_gc]
+    Jl_cgc_cgc_dif = [-D_liq_dif * d_dx(s_cgc[i], i == nb_gc ? s_cgc_outlet : s_cgc[i + 1], (Lgc / nb_gc) / 2)
+                      for i in 1:nb_gc]
+    Jl_cgc_cgc = [Jl_cgc_cgc_conv[i] + Jl_cgc_cgc_dif[i] for i in 1:nb_gc]
+    Jl_cgc_out = Jl_cgc_cgc_conv[end] + Jl_cgc_cgc_dif[end]
+
+    # H2 flows at the GC (mol.m-2.s-1)
+    if type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+        # pass
+        # J_H2_agc_in = y_H2["asm_out"] * (1 - Phi_asm_out_to_agc * Psat(T_des) / Pasm_out_to_agc) * Ja_in
+        # J_H2_agc_out = y_H2_agc * (1 - Phi_agc_to_aem_in * Psat(T_des) / Pagc_to_aem_in) * Ja_out
+    else  # type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or type_auxiliary == "no_auxiliary"
+        J_H2_agc_in = (1 - Phi_a_des * Psat(T_des) / Pa_in) * Ja_in
+        J_H2_agc_agc = [C_H2_agc[i] * v_a[i] for i in 1:(nb_gc - 1)]
+        J_H2_agc_out = C_H2_agc[nb_gc] * R * T_des / P_agc[nb_gc] * Ja_out
+    end
+
+    # O2 flows at the GC (mol.m-2.s-1)
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" ||
+       type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+        # pass
+        # J_O2_cgc_in = y_O2_csm * (1 - Phi_csm * Psat(T_des) / Pcsm) * Jc_in
+    else  # type_auxiliary == "no_auxiliary"
+        J_O2_cgc_in = y_O2_ext * (1 - Phi_c_des * Psat(T_des) / Pc_in) * Jc_in
+    end
+    J_O2_cgc_cgc = [C_O2_cgc[i] * v_c[i] for i in 1:(nb_gc - 1)]
+    J_O2_cgc_out = C_O2_cgc[nb_gc] * R * T_des / P_cgc[nb_gc] * Jc_out
+
+    # N2 flows at the GC (mol.m-2.s-1)
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" ||
+       type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+        # pass
+        # J_N2_agc_in = (1 - y_H2["asm_out"]) * (1 - Phi_asm_out_to_agc * Psat(T_des) / Pasm_out_to_agc) * Ja_in
+        # J_N2_agc_out = (1 - y_H2_agc) * (1 - Phi_agc_to_aem_in * Psat(T_des) / Pagc_to_aem_in) * Ja_out
+        # J_N2_cgc_in = (1 - y_O2_csm_out_to_cgc) * (1 - Phi_csm_out_to_cgc * Psat(T_des) / Pcsm_out_to_cgc) * Jc_in
+        # J_N2_cgc_out = (1 - y_O2_cgc_to_cem_in) * (1 - Phi_cgc_to_cem_in * Psat(T_des) / Pcgc_to_cem_in) * Jc_out
+    else  # type_auxiliary == "no_auxiliary"
+        J_N2_agc_in = 0.0
+        J_N2_agc_agc = fill(0.0, max(nb_gc - 1, 0))
+        J_N2_agc_out = 0.0
+        J_N2_cgc_in = (1 - y_O2_ext) * (1 - Phi_c_des * Psat(T_des) / Pc_in) * Jc_in
+        J_N2_cgc_cgc = [C_N2_cgc[i] * v_c[i] for i in 1:(nb_gc - 1)]
+        J_N2_cgc_out = C_N2_cgc[nb_gc] * R * T_des / P_cgc[nb_gc] * Jc_out
+    end
+
+    # Vapor flows at the manifold (mol.s-1)
+    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" ||
+       type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+        # pass
+        # Wv_asm_in_to_asm = Phi_asm_in_to_asm * Psat(T_des) / Pasm_in_to_asm * Wa_in
+        # Wv_asm_to_asm_out = Phi_asm_to_asm_out * Psat(T_des) / Pasm_to_asm_out * Wasm_to_asm_out
+        # Wv_asm_out_to_agc = Phi_asm_out_to_agc * Psat(T_des) / Pasm_out_to_agc * Wasm_out_to_agc
+        # Wv_agc_to_aem_in = Phi_agc_to_aem_in * Psat(T_des) / Pagc_to_aem_in * Wagc_to_aem_in
+        # Wv_aem_in_to_aem = Phi_aem_in_to_aem * Psat(T_des) / Paem_in_to_aem * Waem_in_to_aem
+        # Wv_aem_to_aem_out = Phi_aem_to_aem_out * Psat(T_des) / Paem_to_aem_out * Waem_to_aem_out
+        # Wv_a_out = Phi_aem_out * Psat(T_des) / Paem_out * Wa_out
+        # if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation"
+        #     # At the anode side
+        #     Wv_asm_ext_to_in = 0
+        #     Wv_asm_in_re_to_asm = Phi_asm_in_re_to_asm * Psat(T_des) / Pasm_in_re_to_asm * Wasm_in_re_to_asm
+        #     Wv_aem_to_aem_out_re = Phi_aem_to_aem_out_re * Psat(T_des) / Paem_to_aem_out_re * Waem_to_aem_out_re
+        #     Wv_are = Phi_aem_out_re * Psat(T_des) / Paem_out_re * (Ware / M["aem_out_re"])  # The pump exactly compensates the pressure drop.
+        # else # type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+        #     # At the anode side
+        #     Wv_asm_ext_to_in = Wa_inj / M_H2O
+        # # At the cathode side
+        # Wv_csm_ext_to_in = Phi_ext * Psat(Text) / Pext * (Wcp / M["ext"]) + Wc_inj / M_H2O
+        # Wv_csm_in_to_csm = Phi_csm_in_to_csm * Psat(T_des) / Pcsm_in_to_csm * Wc_in
+        # Wv_csm_to_csm_out = Phi_csm_to_csm_out * Psat(T_des) / Pcsm_to_csm_out * Wcsm_to_csm_out
+        # Wv_csm_out_to_cgc = Phi_csm_out_to_cgc * Psat(T_des) / Pcsm_out_to_cgc * Wcsm_out_to_cgc
+        # Wv_cgc_to_cem_in = Phi_cgc_to_cem_in * Psat(T_des) / Pcgc_to_cem_in * Wcgc_to_cem_in
+        # Wv_cem_in_to_cem = Phi_cem_in_to_cem * Psat(T_des) / Pcem_in_to_cem * Wcem_in_to_cem
+        # Wv_cem_to_cem_out = Phi_cem_to_cem_out * Psat(T_des) / Pcem_to_cem_out * Wcem_to_cem_out
+        # Wv_c_out = Phi_cem_out * Psat(T_des) / Pcem_out * Wc_out
+    end
+
+    if type_auxiliary == "no_auxiliary"
+        return Dict{String, Dict}(
+            "Jv" => Dict(
+                "agc_in" => Jv_agc_in,
+                "agc_agc" => Jv_agc_agc,
+                "agc_out" => Jv_agc_out,
+                "cgc_in" => Jv_cgc_in,
+                "cgc_cgc" => Jv_cgc_cgc,
+                "cgc_out" => Jv_cgc_out
+            ),
+            "Jl" => Dict(
+                "agc_agc" => Jl_agc_agc,
+                "agc_out" => Jl_agc_out,
+                "cgc_cgc" => Jl_cgc_cgc,
+                "cgc_out" => Jl_cgc_out
+            ),
+            "J_H2" => Dict(
+                "agc_in" => J_H2_agc_in,
+                "agc_agc" => J_H2_agc_agc,
+                "agc_out" => J_H2_agc_out
+            ),
+            "J_O2" => Dict(
+                "cgc_in" => J_O2_cgc_in,
+                "cgc_cgc" => J_O2_cgc_cgc,
+                "cgc_out" => J_O2_cgc_out
+            ),
+            "J_N2" => Dict(
+                "agc_in" => J_N2_agc_in,
+                "agc_agc" => J_N2_agc_agc,
+                "agc_out" => J_N2_agc_out,
+                "cgc_in" => J_N2_cgc_in,
+                "cgc_cgc" => J_N2_cgc_cgc,
+                "cgc_out" => J_N2_cgc_out
+            ),
+            "W" => Dict(
+                "a_in" => Wa_in,
+                "a_out" => Wa_out,
+                "c_in" => Wc_in,
+                "c_out" => Wc_out
+            )
+        )
+    else
+        return nothing  # To be completed with the expressions of the flows for the other types of auxiliary.
+    end
+end

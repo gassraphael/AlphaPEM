@@ -38,20 +38,35 @@ To install **AlphaPEM**, follow these steps in a shell:
     cd AlphaPEM
     ```
     
-3. Update the Python package manager, pip, to the latest available version:
+3. Install Julia (using [VS Code](https://marketplace.visualstudio.com/items?itemName=julialang.language-julia) is suggested):
+    - for Linux or macOS:
     ```sh
-    pip install --upgrade pip
+    curl -fsSL https://install.julialang.org | sh
     ```
-    
-4. Create a new environment, referred to here as *env*, and activate it:
+    - for Windows:
     ```sh
-    python3 -m venv env
-    source env/bin/activate
+    winget install --name Julia --id 9NJNWW8PVKMN -e -s msstore
     ```
 
-4. Install the required dependencies:
-    ```sh
-    python3 -m pip install -r requirements.txt
+4. Update the package manager, Pkg, to the latest available version:
+     ```sh
+    julia -e 'using Pkg; Pkg.update()'
+     ```
+
+5. Activate the project environment defined by the existing Project.toml file:
+     ```sh
+     export JULIA_PROJECT=@.
+     ```
+ 
+6. Install the required Julia dependencies:
+     ```sh
+    julia --project=. -e 'using Pkg; Pkg.instantiate()'
+    ```
+
+7. Install the required Python dependencies:
+     ```sh
+    PYTHON_FOR_PYCALL=$(julia --project=. -e 'using PyCall; print(PyCall.python)')
+    "$PYTHON_FOR_PYCALL" -m pip install numpy matplotlib pygad ttkthemes
     ```
 
 ## Installation via pip (to use AlphaPEM in other projects)
