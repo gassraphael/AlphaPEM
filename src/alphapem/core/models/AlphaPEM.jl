@@ -140,6 +140,10 @@ function simulate_model!(simu::AlphaPEM,
         println("Warning: EH-Group fuel cell examples may be outdated. Using ZSW-GenStack is recommended.\n")
     end
 
+    if simu.parameters["voltage_zone"] == "EIS"
+        throw(ArgumentError("The EIS generation is currently undergoing maintenance."))
+    end
+
     if simu.parameters["type_auxiliary"] in ("forced-convective_cathode_with_anodic_recirculation",
                                                "forced-convective_cathode_with_flow-through_anode")
         simu.parameters["type_auxiliary"] = "no_auxiliary"

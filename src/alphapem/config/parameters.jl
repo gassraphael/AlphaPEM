@@ -7,121 +7,10 @@
 # Importing the necessary libraries
 
 # Importing functions
-include(joinpath(@__DIR__, "current_densities.jl"))
 include(joinpath(@__DIR__, "parameters_specific.jl"))
 
 
 # _______________________________________________________Settings_______________________________________________________
-
-"""
-    calculate_current_density_parameters(type_current::Union{Nothing, String}=nothing)
-
-This function is used to set the parameters of the current density which is imposed to the fuel cell system.
-
-# Arguments
-- `type_current::String`: Type of current density which is imposed to the fuel cell system.
-  It can be `"step"`, `"polarization"`, `"polarization_for_cali"` or `"EIS"`.
-
-# Returns
-- `step_current_parameters::Dict`: Parameters for the step current density. It is a dictionary
-  containing:
-  - `"delta_t_ini_step"`: the initial time (in seconds) at zero current density for the stabilisation of the
-    internal states,
-  - `"delta_t_load_step"`: the loading time (in seconds) for the step current density function, from 0 to
-    `i_step`,
-  - `"delta_t_break_step"`: the time (in seconds) at `i_step` current density for the stabilisation of the
-    internal states,
-  - `"i_step"`: the current density (in A.m-2) for the step current density function,
-  - `"delta_t_dyn_step"`: the time (in seconds) for dynamic display of the step current density function.
-- `pola_current_parameters::Dict{String, Float64}`: Parameters for the polarization current density. It is a
-  dictionary containing:
-  - `"delta_t_ini_pola"`: the initial time (in seconds) at zero current density for the stabilisation of the
-    internal states,
-  - `"delta_t_load_pola"`: the loading time (in seconds) for one step current of the polarisation current density
-    function,
-  - `"delta_t_break_pola"`: the breaking time (in seconds) for one step current, for the stabilisation of the
-    internal states,
-  - `"delta_i_pola"`: the current density step (in A.m-2) for the polarisation current density function,
-  - `"i_max_pola"`: the maximum current density (in A.m-2) for the polarization curve.
-- `pola_current_for_cali_parameters::Dict{String, Float64}`: Parameters for the polarization current density for
-  calibration. It is a dictionary containing:
-  - `"delta_t_ini_pola_cali"`: the initial time (in seconds) at zero current density for the stabilisation of the
-    internal states,
-  - `"delta_t_load_pola_cali"`: the loading time (in seconds) for one step current of the polarisation current
-    density function,
-  - `"delta_t_break_pola_cali"`: the breaking time (in seconds) for one step current, for the stabilisation of the
-    internal states.
-- `i_EIS::Float64`: Parameter for the EIS curve. It is the current for which a perturbation is added.
-- `ratio_EIS::Float64`: Parameter for the EIS curve. It is the ratio of the current for which a perturbation is
-  added.
-- `f_EIS::NTuple{4, Int64}`: Frequency parameters for the `EIS_current` density function. It is a tuple containing
-  the power of the initial frequency `f_power_min_EIS` (`f_min_EIS = 10^f_power_min_EIS`), the power of the final
-  frequency `f_power_max_EIS`, the number of frequencies tested `nb_f_EIS`, and the number of points calculated per
-  specific period `nb_points_EIS`.
-- `t_EIS::Tuple{Float64, Vector{Float64}, Float64, Vector{Float64}, Vector{Float64}}`: Time parameters for the
-  `EIS_current` density function. It is a tuple containing the initial EIS time after stack equilibrium `t0_EIS` in
-  seconds, a list of time parameters which gives the beginning of each frequency change `t_new_start_EIS` in seconds,
-  the final time `tf_EIS` in seconds, a list of time parameters which gives the estimated time for reaching
-  equilibrium at each frequency `delta_t_break_EIS` in seconds, and a list of time parameters which gives the
-  estimated time for measuring the voltage response at each frequency `delta_t_measurement_EIS` in seconds.
-- `current_density::Union{Function, Nothing}`: Current density function.
-"""
-function calculate_current_density_parameters(type_current::String)
-
-    # Setting the parameters of the step current density function
-    delta_t_ini_step::Float64 = 30.0 * 60.0 # (s). Initial time at zero current density for the stabilisation of the internal states (standard value).
-    delta_t_load_step::Float64 = 30.0 # (s). Loading time for the step current density function, from 0 to i_step.
-    delta_t_break_step::Float64 = 2.0 * 60.0  # (s). Time at i_step current density for the stabilisation of the internal states.
-    i_step::Float64 = 2.0e4 # (A.m-2). Current density for the step current density function.
-    step_current_parameters = Dict("delta_t_ini_step" => delta_t_ini_step, "delta_t_load_step" => delta_t_load_step,
-                                   "delta_t_break_step" => delta_t_break_step, "i_step" => i_step)
-
-    # Setting the parameters of the polarization current density function
-    delta_i_pola::Float64 = 0.05e4  # (A.m-2). Current density step for the polarisation current density function.
-    delta_t_ini_pola::Float64 = 120.0 * 60.0 # (s). Initial time at zero current density for the stabilisation of the internal states.
-    v_load_pola::Float64 = 0.01  # (A.m-2.s-1). Loading rate for one step current of the polarisation current density function.
-    delta_t_load_pola::Float64 = delta_i_pola / v_load_pola # (s). Loading time for one step current of the polarisation current density function.
-    delta_t_break_pola::Float64 = 15.0 * 60.0 # (s). Breaking time for one step current, for the stabilisation of the internal states.
-    pola_current_parameters = Dict("delta_i_pola" => delta_i_pola, "delta_t_ini_pola" => delta_t_ini_pola,
-                                   "delta_t_load_pola" => delta_t_load_pola, "delta_t_break_pola" => delta_t_break_pola)
-
-    # Setting the parameters of the polarization for calibration current density function
-    delta_t_ini_pola_cali::Float64 = 120.0 * 60.0  # (s). Initial time at zero current density for the stabilisation of the internal states.
-    delta_t_load_pola_cali::Float64 = 30.0  # (s). Loading time for one step current of the polarisation current density function.
-    delta_t_break_pola_cali::Float64 = 10.0 * 60.0  # (s). Breaking time for one step current, for the stabilisation of the internal states.
-    pola_current_for_cali_parameters = Dict("delta_t_ini_pola_cali" => delta_t_ini_pola_cali,
-                                            "delta_t_load_pola_cali" => delta_t_load_pola_cali,
-                                            "delta_t_break_pola_cali" => delta_t_break_pola_cali)
-
-    # Setting the parameters of the EIS current density function
-    i_EIS::Float64 = 1.0e4  # (A/m²). Parameters for the EIS curve.
-    ratio_EIS::Float64 = 5.0 / 100.0  # (.). Parameters for the EIS curve.
-    f_power_min_EIS::Float64 = -3.0  # (.). Power of the minimum frequency for the EIS current density function.
-    f_power_max_EIS::Float64 = 5.0 # (.). Power of the maximum frequency for the EIS current density function.
-    nb_f_EIS::Float64 = 90 # (.). Number of frequencies tested for the EIS current density function.
-    nb_points_EIS::Float64 = 50 # (.). Number of points calculated per specific period for the EIS current density function.
-    t_EIS = EIS_parameters(f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS)  # Time parameters for the EIS_current density function.
-    EIS_current_parameters = Dict("i_EIS" => i_EIS, "ratio_EIS" => ratio_EIS, "f_power_min_EIS" => f_power_min_EIS,
-                                  "f_power_max_EIS" => f_power_max_EIS, "nb_f_EIS" => nb_f_EIS,
-                                  "nb_points_EIS" => nb_points_EIS, "t_EIS" => t_EIS)
-
-    # Setting the current density function:
-    if type_current == "step"
-        current_density = step_current
-    elseif type_current == "polarization"
-        current_density = polarization_current
-    elseif type_current == "polarization_for_cali"
-        current_density = polarization_current_for_calibration
-    elseif type_current == "EIS"
-        current_density = EIS_current
-    else
-        error("You have to specify a type_current which is on the list.")
-    end
-
-    return merge(step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters,
-                 EIS_current_parameters, current_density)
-end
-
 
 """
     calculate_operating_inputs(pola_current_parameters::Dict{<:String, <:Real},
@@ -323,4 +212,5 @@ function calculate_computing_parameters(step_current_parameters::Union{Nothing, 
     end
     return nb_gc, nb_gdl, nb_mpl, purge_time, delta_purge, rtol, atol
 end
+
 
