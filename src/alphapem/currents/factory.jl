@@ -24,7 +24,7 @@ function create_current(type_current::String, fuelcell::AbstractFuelCell=nothing
     elseif type_current == "polarization"
         params = PolarizationParams()
         # If a FuelCell object is provided and contains experimental current data,
-        # use the maximum value as i_max for the polarization profile.
+        # use the maximum value as i_max for the polarization profile.                                                  # A faire plus bas
         if fuelcell !== nothing && hasproperty(fuelcell, :pola_exp_data) &&
            hasproperty(fuelcell.pola_exp_data, :i_exp) && !isempty(fuelcell.pola_exp_data.i_exp)
             i_max_val = maximum(fuelcell.pola_exp_data.i_exp)
