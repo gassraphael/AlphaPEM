@@ -23,10 +23,10 @@ function operating_conditions(fc::AbstractFuelCell, type_fuel_cell::String)::Ope
 end
 
 """
-    experimental_values(fc::AbstractFuelCell, type_fuel_cell::String, voltage_zone::String)::ExperimentalValues
-Return the experimental values of the fuel cell.
+    pola_exp_data(fc::AbstractFuelCell, type_fuel_cell::String, voltage_zone::String)::PolaExperimentalData
+Return the polarization experimental data of the fuel cell.
 """
-function experimental_values(fc::AbstractFuelCell, type_fuel_cell::String, voltage_zone::String)::ExperimentalValues
+function pola_exp_data(fc::AbstractFuelCell, type_fuel_cell::String, voltage_zone::String)::PolaExperimentalData
     throw(MethodError(experimental_values, (fc, type_fuel_cell, voltage_zone)))
 end
 

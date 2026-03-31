@@ -89,18 +89,18 @@ end
 
 
 # ============================================================
-# EXPERIMENTAL VALUES
+# EXPERIMENTAL DATA
 # ============================================================
 
 """
-    ExperimentalValues
+    PolaExperimentalData
 
-Structure to store experimental current density and voltage values for a fuel cell.
-- `i_exp::Vector{Float64}`: Experimental current density values (A/m²).
-- `U_exp::Vector{Float64}`: Experimental cell voltage values (V).
-By default, both vectors are initialized as empty.
+Structure for storing experimental polarization data of a fuel cell.
+- `i_exp::Vector{Float64}`: Experimental current density values during polarization (A/m²).
+- `U_exp::Vector{Float64}`: Experimental cell voltage values during polarization (V).
+Both vectors are initialized as empty by default.
 """
-Base.@kwdef struct ExperimentalValues <: AbstractFuelCellParams
+Base.@kwdef struct PolaExperimentalData <: AbstractFuelCellParams
     i_exp::Vector{Float64} = Float64[] # Experimental current density values (A/m²)
     U_exp::Vector{Float64} = Float64[] # Experimental cell voltage values (V)
 end

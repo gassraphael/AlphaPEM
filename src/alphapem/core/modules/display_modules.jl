@@ -1974,6 +1974,62 @@ end
 
 
 
+
+
+
+"""
+    plot_experimental_polarisation_curve(type_fuel_cell, i_fc_t, U_exp_t, ax)
+
+This function plots the experimental polarisation curve on the same graph as the model results.
+
+# Arguments
+- `type_fuel_cell::String`: Type of fuel cell used in the model. This parameter includes the fuel cell used
+  in the model and the corresponding operating conditions.
+- `i_fc_t::Vector{<:Real}`: Current density values.
+- `U_exp_t::Vector{<:Real}`: Experimental values of the voltage.
+- `ax`: Axes-like object exposing `scatter` and `legend` methods.
+"""
+function plot_experimental_polarisation_curve(type_fuel_cell::String,
+                                              i_fc_t::Vector{<:Real},
+                                              U_exp_t::Vector{<:Real},
+                                              ax)
+    # ZSW-GenStack
+    if type_fuel_cell == "ZSW-GenStack"
+        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="s", color="black", label="Exp. - nominal")
+    elseif type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41"
+        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="v", color="black", label="Exp. - P\$_a\$/P\$_c\$ = 1.61/1.41 bar")
+    elseif type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81"
+        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="^", color="black", label="Exp. - P\$_a\$/P\$_c\$ = 2.01/1.81 bar")
+    elseif type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2"
+        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="p", color="black", label="Exp. - P\$_a\$/P\$_c\$ = 2.4/2.2 bar")
+    elseif type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6"
+        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="D", color="black", label="Exp. - P\$_a\$/P\$_c\$ = 2.8/2.6 bar")
+    elseif type_fuel_cell == "ZSW-GenStack_T_62"
+        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="P", color="black", label="Exp. - T = 62 \$^\\circ\$C")
+    elseif type_fuel_cell == "ZSW-GenStack_T_76"
+        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="X", color="black", label="Exp. - T = 76 \$^\\circ\$C")
+    elseif type_fuel_cell == "ZSW-GenStack_T_84"
+        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="*", color="black", label="Exp. - T = 84 \$^\\circ\$C")
+
+    # EH-31
+    elseif type_fuel_cell == "EH-31_1.5"  # at 1.5 bar
+        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="s", color="black", label="Exp. - P = 1.5 bar")
+    elseif type_fuel_cell == "EH-31_2.0"  # at 2.0 bar
+        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="v", color="black", label="Exp. - P = 2.0 bar")
+    elseif type_fuel_cell == "EH-31_2.25"  # at 2.25 bar
+        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="^", color="black", label="Exp. - P = 2.25 bar")
+    elseif type_fuel_cell == "EH-31_2.5"  # at 2.5 bar
+        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="p", color="black", label="Exp. - P = 2.5 bar")
+    else
+        throw(ArgumentError("Unknown type_fuel_cell: $type_fuel_cell"))
+    end
+
+    ax.legend(loc="best", markerscale=0.5)
+    return nothing
+end
+
+
+
 """
     plot_EIS_Nyquist_instructions(type_fuel_cell, f_Fourier, x, y, ax)
 
