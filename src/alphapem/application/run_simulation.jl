@@ -13,8 +13,9 @@ const mpl = pyimport("matplotlib")
 const plt = pyimport("matplotlib.pyplot")
 
 # Importing constants' value and functions
+include(joinpath(@__DIR__, "../fuelcell/Fuelcell.jl"))
+include(joinpath(@__DIR__, "../currents/Currents.jl"))
 include(joinpath(@__DIR__, "../core/models/AlphaPEM.jl"))
-include(joinpath(@__DIR__, "../config/parameters.jl"))
 include(joinpath(@__DIR__, "run_simulation_modules.jl"))
 
 # __________________________________________________AlphaPEM settings___________________________________________________
@@ -56,95 +57,19 @@ function run_simulation()::AlphaPEM
     This should remain unaltered for regular program usage.
     """
 
-    # Retrieving parameters from settings.
-    #   Imposed inputs
-    (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS, t_EIS,
-     current_density) = calculate_current_density_parameters(type_current)
-
+    # Warning for potential issues with the selected configurations.
     if isempty(type_fuel_cells)
         throw(ArgumentError("type_fuel_cells must contain at least one fuel cell configuration."))
     end
 
-    #   Operating conditions (one set per selected fuel cell configuration)
-    operating_conditions = [
-        calculate_operating_inputs(deepcopy(pola_current_parameters), type_fuel_cell, voltage_zone)
-        for type_fuel_cell in type_fuel_cells
-    ]
-    T_des = [oc[1] for oc in operating_conditions]
-    Pa_des = [oc[2] for oc in operating_conditions]
-    Pc_des = [oc[3] for oc in operating_conditions]
-    Sa = [oc[4] for oc in operating_conditions]
-    Sc = [oc[5] for oc in operating_conditions]
-    Phi_a_des = [oc[6] for oc in operating_conditions]
-    Phi_c_des = [oc[7] for oc in operating_conditions]
-    y_H2_in = [oc[8] for oc in operating_conditions]
-    pola_current_parameters_list = [oc[9] for oc in operating_conditions]
+    # Build Fuelcell objects for each configuration using the factory
+    simulators = [create_fuelcell(type_fuel_cells[i], voltage_zone) for i in 1:length(type_fuel_cells)]
 
-    #   Physical parameters
-    (Hacl, Hccl, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc, nb_channel_in_gc,
-     Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, K_l_ads, K_O2_ad_Pt, Re, i0_c_ref, kappa_co,
-    kappa_c, C_scl) = calculate_physical_parameters(type_fuel_cells[1])
+    # Build Current objects for each configuration using the factory
+    current_densities = [create_current(type_current, simulators[i]) for i in 1:length(simulators)]
 
-    #   Computing parameters
-    nb_gc, nb_gdl, nb_mpl, purge_time, delta_purge, rtol, atol = calculate_computing_parameters(step_current_parameters)
-
-    # Initialize the operating inputs and parameters dictionaries.
-    # In Julia, vectors are naturally 1-based, so no [None] placeholder is needed.
-    operating_inputs = Dict(
-        "current_density" => current_density,
-        "T_des" => T_des,
-        "Pa_des" => Pa_des,
-        "Pc_des" => Pc_des,
-        "Sa" => Sa,
-        "Sc" => Sc,
-        "Phi_a_des" => Phi_a_des,
-        "Phi_c_des" => Phi_c_des,
-        "y_H2_in" => y_H2_in,
-    )
-
-    current_parameters = Dict(
-        "step_current_parameters" => step_current_parameters,
-        "pola_current_parameters" => pola_current_parameters_list,
-        "pola_current_for_cali_parameters" => pola_current_for_cali_parameters,
-        "i_EIS" => i_EIS,
-        "ratio_EIS" => ratio_EIS,
-        "t_EIS" => t_EIS,
-        "f_EIS" => f_EIS,
-    )
-
-    accessible_physical_parameters = Dict(
-        "Aact" => Aact, "nb_cell" => nb_cell, "Hagc" => Hagc, "Hcgc" => Hcgc, "Wagc" => Wagc,
-        "Wcgc" => Wcgc, "Lgc" => Lgc, "nb_channel_in_gc" => nb_channel_in_gc, "Ldist" => Ldist,
-        "Lm" => Lm, "A_T_a" => A_T_a, "A_T_c" => A_T_c, "Vasm" => Vasm, "Vcsm" => Vcsm,
-        "Vaem" => Vaem, "Vcem" => Vcem,
-    )
-
-    undetermined_physical_parameters = Dict(
-        "Hgdl" => Hgdl, "Hmpl" => Hmpl, "Hmem" => Hmem, "Hacl" => Hacl,
-        "Hccl" => Hccl, "epsilon_gdl" => epsilon_gdl, "epsilon_mpl" => epsilon_mpl,
-        "epsilon_c" => epsilon_c, "e" => e, "K_l_ads" => K_l_ads, "K_O2_ad_Pt" => K_O2_ad_Pt,
-        "Re" => Re, "i0_c_ref" => i0_c_ref, "kappa_co" => kappa_co, "kappa_c" => kappa_c,
-        "C_scl" => C_scl,
-    )
-
-    model_parameters = Dict(
-        "nb_gc" => nb_gc, "nb_gdl" => nb_gdl, "nb_mpl" => nb_mpl, "purge_time" => purge_time,
-        "delta_purge" => delta_purge, "rtol" => rtol, "atol" => atol,
-    )
-
-    computing_parameters = Dict(
-        "type_fuel_cell" => type_fuel_cells,
-        "type_current" => type_current,
-        "voltage_zone" => voltage_zone,
-        "type_auxiliary" => type_auxiliary,
-        "type_purge" => type_purge,
-        "type_display" => type_display,
-        "type_plot" => type_plot,
-    )
-
-    # Create one simulator per selected fuel cell configuration.
-    simulators = [AlphaPEM(accessible_physical_parameters, undetermined_physical_parameters, model_parameters)
-                  for _ in 1:length(computing_parameters["type_fuel_cell"])]
+    # Create one simulator per selected fuel cell and current density configuration.
+    simulators = [AlphaPEM(simulators[i], current_densities[i]) for i in 1:length(simulators)]
 
     # Check if type_current is valid and launch the simulation.
     Simulator::AlphaPEM = begin

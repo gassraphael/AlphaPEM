@@ -16,8 +16,10 @@ module Fuelcell
 include("abstract.jl")
 include("eh31.jl")
 include("zsw.jl")
+include("factory.jl")
+include("default.jl")
 
-export AbstractFuelCell, EH31, ZSW
+export create_fuelcell, DefaultFuelCell, AbstractFuelCell, EH31FuelCell, ZSWFuelCell
 
 end  # module Fuelcell
 

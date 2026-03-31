@@ -9,7 +9,7 @@ Contains:
 - physical, operating, numerical parameters (inherited from FuelCell)
 - experimental polarization data (i_exp, U_exp)
 """
-struct EH31 <: AbstractFuelCell
+struct EH31FuelCell <: AbstractFuelCell
     physical_parameters::PhysicalParams
     operating_conditions::OperatingConditions
     pola_exp_data::PolaExperimentalData
@@ -17,7 +17,25 @@ struct EH31 <: AbstractFuelCell
     numerical_parameters::NumericalParams
 end
 
-function physical_params(fc::EH31)
+# Simple constructor for EH31
+function EH31FuelCell(type_fuel_cell::String, voltage_zone::String)
+    # Create a temporary object with uninitialized fields
+    fc = EH31FuelCell(
+         PhysicalParams(),
+         OperatingConditions(),
+         PolaExperimentalData(),
+         PolaExperimentalData(),
+         NumericalParams()
+    )
+    fc.physical_parameters = physical_params(fc)
+    fc.operating_conditions = operating_conditions(fc, type_fuel_cell)
+    fc.pola_exp_data = pola_exp_data(fc, type_fuel_cell, voltage_zone)
+    fc.pola_exp_data_cali = pola_exp_data_calibration(fc, type_fuel_cell, voltage_zone)
+    fc.numerical_parameters = numerical_params(fc)
+    return fc
+end
+
+function physical_params(fc::EH31FuelCell)
     fc.physical_parameters = PhysicalParams(
         # Global
         Aact = 85e-4,                        # Active area of the catalyst layer in m²
@@ -65,7 +83,7 @@ function physical_params(fc::EH31)
 end
 
 
-function operating_conditions(fc::EH31, type_fuel_cell::String)
+function operating_conditions(fc::EH31FuelCell, type_fuel_cell::String)
     if type_fuel_cell == "EH-31_1.5"
         T_des::Float64          = 74.0 + 273.15  # K.  It is the desired fuel cell temperature.
         Pa_des::Float64         = 1.5e5          # Pa. It is the desired pressures of the fuel gas at the anode.
@@ -106,12 +124,11 @@ function operating_conditions(fc::EH31, type_fuel_cell::String)
         error("Unknown type_fuel_cell: $type_fuel_cell")
     end
 
-    fc.operating_conditions = OperatingConditions(T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in)
-    return fc.operating_conditions
+    return fc.OperatingConditions(T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in)
 end
 
 
-function pola_exp_data(fc::EH31, type_fuel_cell::String, voltage_zone::String)
+function pola_exp_data(fc::EH31FuelCell, type_fuel_cell::String, voltage_zone::String)
     if type_fuel_cell == "EH-31_1.5"  # at 1.5 bar
         if voltage_zone == "full"
             i_exp_pola = [0.050, 0.068, 0.089, 0.110, 0.147, 0.185, 0.233, 0.293, 0.352, 0.395,
@@ -209,8 +226,8 @@ function pola_exp_data(fc::EH31, type_fuel_cell::String, voltage_zone::String)
     else
         error("Unknown type_fuel_cell: $type_fuel_cell")
     end
-    fc.pola_exp_data = PolaExperimentalData(i_exp = i_exp_pola .* 1e4, U_exp = U_exp_pola)
-    return fc.pola_exp_data
+
+    return PolaExperimentalData(i_exp = i_exp_pola .* 1e4, U_exp = U_exp_pola)
 end
 
 
@@ -270,12 +287,11 @@ function pola_exp_data_calibration(fc::ZSW, type_fuel_cell::String, voltage_zone
         throw(ArgumentError("Unknown type_fuel_cell: $type_fuel_cell"))
     end
 
-    fc.pola_exp_data_cali = PolaExperimentalData(i_exp = i_exp_cali .* 1e4, U_exp = U_exp_cali)
-    return fc.pola_exp_data_cali
+    return PolaExperimentalData(i_exp = i_exp_cali .* 1e4, U_exp = U_exp_cali)
 end
 
 
-function numerical_params(fc::EH31)
+function numerical_params(fc::EH31FuelCell)
     fc.numerical_parameters = NumericalParams(
         # Setting the number of model points placed inside each layer:
         nb_gc = 1,                             # Number of model nodes placed inside each gas channel
@@ -290,3 +306,4 @@ function numerical_params(fc::EH31)
     )
     return fc.numerical_parameters
 end
+

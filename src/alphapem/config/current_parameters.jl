@@ -29,8 +29,6 @@ Base.@kwdef struct PolarizationParams <: AbstractCurrentParams
     v_load::Float64 = 0.01e4  # (A.m-2.s-1). Loading rate for one step current of the polarisation current density function.
     delta_t_break::Float64 = 15.0 * 60.0 # (s). Breaking time for one step current, for the stabilisation of the internal states.
     i_max::Float64 = 3.0e4 # Maximum current (default value, can be overridden by experimental current values if provided).
-    type_fuel_cell::Union{Nothing, String} = nothing  # Optional
-    voltage_zone::Union{Nothing, String} = nothing   # Optional
 end
 
 
@@ -41,8 +39,7 @@ Base.@kwdef struct PolarizationCalibrationParams <: AbstractCurrentParams
     delta_t_ini::Float64 = 120.0 * 60.0 # (s). Initial time at zero current density for the stabilisation of the internal states.
     v_load::Float64 = 0.01e4  # (A.m-2.s-1). Loading rate for one step current of the polarisation current density function.
     delta_t_break::Float64 = 10.0 * 60.0  # (s). Breaking time for one step current, for the stabilisation of the internal states.
-    type_fuel_cell::String
-    voltage_zone::String
+    i_exp::Vector{Float64} = Float64[]  # Experimental current density values (A/m²) for calibration
 end
 
 

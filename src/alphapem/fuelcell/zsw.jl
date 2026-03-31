@@ -9,7 +9,7 @@ Contains:
 - physical, operating, numerical parameters (inherited from FuelCell)
 - experimental polarization data (i_exp, U_exp)
 """
-struct ZSW <: AbstractFuelCell
+struct ZSWFuelCell <: AbstractFuelCell
     physical_parameters::PhysicalParams
     operating_conditions::OperatingConditions
     pola_exp_data::PolaExperimentalData
@@ -17,7 +17,25 @@ struct ZSW <: AbstractFuelCell
     numerical_parameters::NumericalParams
 end
 
-function physical_params(fc::ZSW)::PhysicalParams
+# Simple constructor for ZSW
+function ZSWFuelCell(type_fuel_cell::String, voltage_zone::String)
+    # Create a temporary object with uninitialized fields
+    fc = ZSWFuelCell(
+        PhysicalParams(),
+        OperatingConditions(),
+        PolaExperimentalData(),
+        PolaExperimentalData(),
+        NumericalParams()
+    )
+    fc.physical_parameters = physical_params(fc)
+    fc.operating_conditions = operating_conditions(fc, type_fuel_cell)
+    fc.pola_exp_data = pola_exp_data(fc, type_fuel_cell, voltage_zone)
+    fc.pola_exp_data_cali = pola_exp_data_calibration(fc, type_fuel_cell, voltage_zone)
+    fc.numerical_parameters = numerical_params(fc)
+    return fc
+end
+
+function physical_params(fc::ZSWFuelCell)::PhysicalParams
     fc.physical_parameters = PhysicalParams(
         # Global
         Aact = 283.87e-4,                    # Active area of the catalyst layer in m²
@@ -65,7 +83,7 @@ function physical_params(fc::ZSW)::PhysicalParams
 end
 
 
-function operating_conditions(fc::ZSW, type_fuel_cell::String)::OperatingConditions
+function operating_conditions(fc::ZSWFuelCell, type_fuel_cell::String)::OperatingConditions
     if type_fuel_cell == "ZSW-GenStack"
         T_des::Float64          = 68.0 + 273.15  # K.  It is the desired fuel cell temperature.
         Pa_des::Float64         = 2.2e5          # Pa. It is the desired pressures of the fuel gas at the anode.
@@ -142,12 +160,11 @@ function operating_conditions(fc::ZSW, type_fuel_cell::String)::OperatingConditi
         error("Unknown type_fuel_cell: $type_fuel_cell")
     end
 
-    fc.operating_conditions = OperatingConditions(T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in)
-    return fc.operating_conditions
+    return OperatingConditions(T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in)
 end
 
 
-function pola_exp_data(fc::ZSW, type_fuel_cell::String, voltage_zone::String)::PolaExperimentalData
+function pola_exp_data(fc::ZSWFuelCell, type_fuel_cell::String, voltage_zone::String)::PolaExperimentalData
     if type_fuel_cell == "ZSW-GenStack"
         if voltage_zone == "full"
             i_exp_pola = [0.001, 0.050, 0.099, 0.150, 0.200, 0.299, 0.400, 0.498, 0.700, 0.901,
@@ -259,8 +276,8 @@ function pola_exp_data(fc::ZSW, type_fuel_cell::String, voltage_zone::String)::P
     else
         error("Unknown type_fuel_cell: $type_fuel_cell")
     end
-    fc.pola_exp_data = PolaExperimentalData(i_exp = i_exp_pola .* 1e4, U_exp = U_exp_pola)
-    return fc.pola_exp_data
+
+    return PolaExperimentalData(i_exp = i_exp_pola .* 1e4, U_exp = U_exp_pola)
 end
 
 """
@@ -271,7 +288,7 @@ operating conditions. The experimental values are used for calibrating the model
 number of points compare to the pola_exp_values function. These points are specifically chosen to be as few as
 possible while still providing a good representation of the polarisation curve.
 """
-function pola_exp_data_calibration(fc::ZSW, type_fuel_cell::String, voltage_zone::String)::PolaExperimentalData
+function pola_exp_data_calibration(fc::ZSWFuelCell, type_fuel_cell::String, voltage_zone::String)::PolaExperimentalData
     if type_fuel_cell == "ZSW-GenStack"
         if voltage_zone == "full"
             i_exp_cali = [0.001, 0.050, 0.498, 1.099, 1.700, 2.000, 2.500]
@@ -363,11 +380,10 @@ function pola_exp_data_calibration(fc::ZSW, type_fuel_cell::String, voltage_zone
         throw(ArgumentError("Unknown type_fuel_cell: $type_fuel_cell"))
     end
 
-    fc.pola_exp_data_cali = PolaExperimentalData(i_exp = i_exp_cali .* 1e4, U_exp = U_exp_cali)
-    return fc.pola_exp_data_cali
+    return fc.PolaExperimentalData(i_exp = i_exp_cali .* 1e4, U_exp = U_exp_cali)
 end
 
-function numerical_params(fc::ZSW)
+function numerical_params(fc::ZSWFuelCell)
     fc.numerical_parameters = NumericalParams(
         # Setting the number of model points placed inside each layer:
         nb_gc = 1,                             # Number of model nodes placed inside each gas channel
