@@ -33,25 +33,19 @@ struct PolarizationCurrent <: AbstractCurrent
     delta_i::Float64
     i_max::Float64
 
-    function PolarizationCurrent(
-        delta_t_ini::Real,
-        v_load::Real,
-        delta_t_break::Real,
-        delta_i::Real,
-        i_max::Real
-    )
-        delta_t_ini ≥ 0 || throw(ArgumentError("delta_t_ini must be ≥ 0"))
-        v_load > 0 || throw(ArgumentError("v_load must be > 0"))
-        delta_t_break ≥ 0 || throw(ArgumentError("delta_t_break must be ≥ 0"))
-        delta_i > 0 || throw(ArgumentError("delta_i must be > 0"))
-        i_max ≥ 0 || throw(ArgumentError("i_max must be ≥ 0"))
+    function PolarizationCurrent(p::PolarizationParams)
+        p.delta_t_ini ≥ 0 || throw(ArgumentError("delta_t_ini must be ≥ 0"))
+        p.v_load > 0 || throw(ArgumentError("v_load must be > 0"))
+        p.delta_t_break ≥ 0 || throw(ArgumentError("delta_t_break must be ≥ 0"))
+        p.delta_i > 0 || throw(ArgumentError("delta_i must be > 0"))
+        p.i_max ≥ 0 || throw(ArgumentError("i_max must be ≥ 0"))
 
         return new(
-            Float64(delta_t_ini),
-            Float64(v_load),
-            Float64(delta_t_break),
-            Float64(delta_i),
-            Float64(i_max)
+            Float64(p.delta_t_ini),
+            Float64(p.v_load),
+            Float64(p.delta_t_break),
+            Float64(p.delta_i),
+            Float64(p.i_max)
         )
     end
 end

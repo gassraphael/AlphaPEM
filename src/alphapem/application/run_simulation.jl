@@ -37,10 +37,7 @@ function run_simulation(cfg::SimulationConfig)::AlphaPEM
     # Check if type_current is valid and launch the simulation.
     Simulator::AlphaPEM = begin
         if type_current == "step"
-            launch_AlphaPEM_for_step_current(simulators[1],
-                                             select_nth_elements(operating_inputs, 1),
-                                             select_nth_elements(current_parameters, 1),
-                                             select_nth_elements(computing_parameters, 1))
+            launch_AlphaPEM_for_step_current(simulators[1], cfg)
         elseif type_current == "polarization"
             launch_AlphaPEM_for_polarization_current(simulators, operating_inputs, current_parameters,
                                                      computing_parameters)

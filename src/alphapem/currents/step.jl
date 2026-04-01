@@ -27,23 +27,17 @@ struct StepCurrent <: AbstractCurrent
     i_ini::Float64
     i_step::Float64
 
-    function StepCurrent(
-        delta_t_ini::Real,
-        delta_t_load::Real,
-        delta_t_break::Real,
-        i_ini::Real,
-        i_step::Real
-    )
-        delta_t_ini ≥ 0 || throw(ArgumentError("delta_t_ini must be ≥ 0"))
-        delta_t_load > 0 || throw(ArgumentError("delta_t_load must be > 0"))
-        delta_t_break ≥ 0 || throw(ArgumentError("delta_t_break must be ≥ 0"))
+    function StepCurrent(p::StepParams)
+        p.delta_t_ini ≥ 0 || throw(ArgumentError("delta_t_ini must be ≥ 0"))
+        p.delta_t_load > 0 || throw(ArgumentError("delta_t_load must be > 0"))
+        p.delta_t_break ≥ 0 || throw(ArgumentError("delta_t_break must be ≥ 0"))
 
         return new(
-            Float64(delta_t_ini),
-            Float64(delta_t_load),
-            Float64(delta_t_break),
-            Float64(i_ini),
-            Float64(i_step)
+            Float64(p.delta_t_ini),
+            Float64(p.delta_t_load),
+            Float64(p.delta_t_break),
+            Float64(p.i_ini),
+            Float64(p.i_step)
         )
     end
 end

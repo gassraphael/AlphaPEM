@@ -30,22 +30,17 @@ struct PolarizationCalibrationCurrent <: AbstractCurrent
     delta_t_break::Float64
     i_exp::Vector{Float64}
 
-    function PolarizationCalibrationCurrent(
-        delta_t_ini::Real,
-        v_load::Real,
-        delta_t_break::Real,
-        i_exp::AbstractVector{<:Real}
-    )
-        delta_t_ini ≥ 0 || throw(ArgumentError("delta_t_ini must be ≥ 0"))
-        v_load > 0 || throw(ArgumentError("v_load must be > 0"))
-        delta_t_break ≥ 0 || throw(ArgumentError("delta_t_break must be ≥ 0"))
-        length(i_exp) > 0 || throw(ArgumentError("i_exp must not be empty"))
+    function PolarizationCalibrationCurrent(p::PolarizationCalibrationParams)
+        p.delta_t_ini ≥ 0 || throw(ArgumentError("delta_t_ini must be ≥ 0"))
+        p.v_load > 0 || throw(ArgumentError("v_load must be > 0"))
+        p.delta_t_break ≥ 0 || throw(ArgumentError("delta_t_break must be ≥ 0"))
+        length(p.i_exp) > 0 || throw(ArgumentError("i_exp must not be empty"))
 
         return new(
-            Float64(delta_t_ini),
-            Float64(v_load),
-            Float64(delta_t_break),
-            Float64.(i_exp)
+            Float64(p.delta_t_ini),
+            Float64(p.v_load),
+            Float64(p.delta_t_break),
+            Float64.(p.i_exp)
         )
     end
 end

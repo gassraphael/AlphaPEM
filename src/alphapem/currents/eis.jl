@@ -44,21 +44,14 @@ end
 # This constructor computes all the time intervals and frequency steps for the EIS protocol.
 # It generates logarithmically spaced frequencies, and for each frequency, it computes the break and measurement durations.
 # The start time for each frequency segment is also precomputed for efficient lookup during simulation.
-function EISCurrent(
-    i_EIS::Real,
-    ratio::Real,
-    f_power_min::Real,
-    f_power_max::Real,
-    nb_f::Integer,
-    nb_points::Integer
-)
+function EISCurrent(p::EISParams)
     # Check input validity
-    nb_f > 0 || throw(ArgumentError("nb_f must be > 0"))
-    nb_points > 0 || throw(ArgumentError("nb_points must be > 0"))
-    ratio ≥ 0 || throw(ArgumentError("ratio must be ≥ 0"))
+    p.nb_f > 0 || throw(ArgumentError("nb_f must be > 0"))
+    p.nb_points > 0 || throw(ArgumentError("nb_points must be > 0"))
+    p.ratio ≥ 0 || throw(ArgumentError("ratio must be ≥ 0"))
 
     # Generate logarithmically spaced frequencies
-    f = 10.0 .^ range(f_power_min, f_power_max; length=nb_f)
+    f = 10.0 .^ range(p.f_power_min, p.f_power_max; length=p.nb_f)
 
     nb_period_break = 50  # Number of periods for stabilization at each frequency
     nb_period_measurement = 50  # Number of periods for measurement at each frequency
@@ -71,13 +64,13 @@ function EISCurrent(
     tf = t0  # Final simulation time (will be updated in the loop below)
 
     # For each frequency, compute the durations and update the start times
-    for i in 1:nb_f
+    for i in 1:p.nb_f
         T = 1 / f[i]  # Period for current frequency
 
         push!(delta_t_break, nb_period_break * T)
         push!(delta_t_measurement, nb_period_measurement * T)
 
-        if i < nb_f
+        if i < p.nb_f
             # Compute the start time for the next frequency segment
             next_start = t_new_start[i] + delta_t_break[i] + delta_t_measurement[i]
             push!(t_new_start, next_start)
@@ -88,8 +81,8 @@ function EISCurrent(
     end
 
     return EISCurrent(
-        Float64(i_EIS),
-        Float64(ratio),
+        Float64(p.i_EIS),
+        Float64(p.ratio),
         f,
         t0,
         t_new_start,
