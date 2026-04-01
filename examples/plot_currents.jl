@@ -22,7 +22,7 @@ step_p = StepParams(
 )
 step_c = StepCurrent(step_p)
 
-t0_step, tf_step = time_interval(step_c)
+t0_step, tf_step = step_c.time_interval
 t_step = range(t0_step, tf_step, length=n_points)
 i_step = [current(step_c, t) for t in t_step]
 
@@ -36,7 +36,7 @@ pola_p = PolarizationParams(
 )
 pola_c = PolarizationCurrent(pola_p)
 
-t0_pola, tf_pola = time_interval(pola_c)
+t0_pola, tf_pola = pola_c.time_interval
 t_pola = range(t0_pola, tf_pola, length=n_points)
 i_pola = [current(pola_c, t) for t in t_pola]
 
@@ -49,7 +49,7 @@ pola_cali_p = PolarizationCalibrationParams(
 )
 pola_cali = PolarizationCalibrationCurrent(pola_cali_p)
 
-t0_pola_cali, tf_pola_cali = time_interval(pola_cali)
+t0_pola_cali, tf_pola_cali = pola_cali.time_interval
 t_pola_cali = range(t0_pola_cali, tf_pola_cali, length=n_points)
 i_pola_cali = [current(pola_cali, t) for t in t_pola_cali]
 
@@ -64,7 +64,7 @@ eis_p = EISParams(
 )
 eis_c = EISCurrent(eis_p)
 
-t0_eis, tf_eis = time_interval(eis_c)
+t0_eis, tf_eis = eis_c.time_interval
 t_eis = range(t0_eis, tf_eis, length=n_points)
 i_eis = [current(eis_c, t) for t in t_eis]
 

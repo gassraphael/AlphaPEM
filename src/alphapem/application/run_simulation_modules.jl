@@ -16,21 +16,18 @@ if !isdefined(@__MODULE__, :plt)
     const plt = pyimport("matplotlib.pyplot")
 end
 
-# Importing constants' value and functions
-include(joinpath(@__DIR__, "../config/pola_exp_values.jl"))
-
 # _____________________________________________________Main modules_____________________________________________________
 
-"""Create the required figures and axes according to `type_current` and `type_display`.
+"""Create required figures and axes according to a `SimulationConfig` object.
 
 # Arguments
-- `computing_parameters::Dict`: Dictionary containing
-  the computing parameters for the simulation.
+- `cfg::SimulationConfig`: Simulation configuration object.
+  The function uses `cfg.type_current`, `cfg.type_display`, and `cfg.type_plot`.
 
 # Returns
 - `(fig1, ax1, fig2, ax2, fig3, ax3)`: Figure/axes tuple.
 """
-function figures_preparation(computing_parameters::Dict)
+function figures_preparation(cfg::SimulationConfig)
 
     mpl.rcParams["font.family"] = "cmr10"  # "cmr10" for English characters and "DejaVu Serif" for French ones
     mpl.rcParams["axes.formatter.use_mathtext"] = true  # For scientific notation
@@ -44,23 +41,21 @@ function figures_preparation(computing_parameters::Dict)
     fig2, ax2 = nothing, nothing
     fig3, ax3 = nothing, nothing
 
-    if computing_parameters["type_display"] == "no_display"
-        fig1, ax1 = nothing, nothing
-        fig2, ax2 = nothing, nothing
-        fig3, ax3 = nothing, nothing
+    if cfg.type_display == :no_display
+        return fig1, ax1, fig2, ax2, fig3, ax3
     end
 
     # For the step current
-    if computing_parameters["type_current"] == "step"
-        if computing_parameters["type_display"] == "multiple"  # saving instruction is directly implemented within AlphaPEM.Display here.
+    if cfg.type_current == :step
+        if cfg.type_display == :multiple  # saving instruction is directly implemented within AlphaPEM.Display here.
             mpl.rcParams["font.size"] = 18  # Font size for all text
             fig1, ax1 = nothing, nothing  # Here, additional plots are unnecessary
             fig2, ax2 = nothing, nothing  # Here, additional plots are unnecessary
             fig3, ax3 = nothing, nothing  # Here, additional plots are unnecessary
-        elseif computing_parameters["type_display"] == "synthetic"
+        elseif cfg.type_display == :synthetic
             mpl.rcParams["font.size"] = 13  # Font size for all text
             fig1, ax1 = plt.subplots(3, 3; figsize=(14, 14))
-            if computing_parameters["type_plot"] == "fixed"
+            if cfg.type_plot == :fixed
                 fig2, ax2 = plt.subplots(; figsize=(8, 8))
             else
                 fig2, ax2 = nothing, nothing  # Here, additional plots are unnecessary
@@ -70,14 +65,14 @@ function figures_preparation(computing_parameters::Dict)
         end
 
     # For the polarization curve
-    elseif computing_parameters["type_current"] == "polarization"
-        if computing_parameters["type_display"] == "multiple"
+    elseif cfg.type_current == :polarization
+        if cfg.type_display == :multiple
             mpl.rcParams["font.size"] = 11  # Font size for all text
             fig1, ax1 = plt.subplots(1, 3; figsize=(14, 4.7))
             fig2, ax2 = plt.subplots(1, 4; figsize=(18.7, 4.7))
             fig3, ax3 = nothing, nothing  # Here, additional plots are unnecessary
             plt.subplots_adjust(; left=0.04, right=0.98, top=0.96, bottom=0.07, wspace=0.2, hspace=0.15)
-        elseif computing_parameters["type_display"] == "synthetic"
+        elseif cfg.type_display == :synthetic
             mpl.rcParams["font.size"] = 18  # Font size for all text
             mpl.rcParams["legend.fontsize"] = 15  # Legend font size only
             fig1, ax1 = plt.subplots(; figsize=(8, 8))
@@ -86,14 +81,14 @@ function figures_preparation(computing_parameters::Dict)
         end
 
     # For the polarization curve used for calibration
-    elseif computing_parameters["type_current"] == "polarization_for_cali"
-        if computing_parameters["type_display"] == "multiple"
+    elseif cfg.type_current == :polarization_for_cali
+        if cfg.type_display == :multiple
             mpl.rcParams["font.size"] = 11  # Font size for all text
             fig1, ax1 = plt.subplots(1, 3; figsize=(14, 4.7))
             fig2, ax2 = nothing, nothing  # Here, additional plots are unnecessary
             fig3, ax3 = nothing, nothing  # Here, additional plots are unnecessary
             plt.subplots_adjust(; left=0.04, right=0.98, top=0.96, bottom=0.07, wspace=0.2, hspace=0.15)
-        elseif computing_parameters["type_display"] == "synthetic"
+        elseif cfg.type_display == :synthetic
             mpl.rcParams["font.size"] = 18  # Font size for all text
             fig1, ax1 = plt.subplots(; figsize=(8, 8))
             fig2, ax2 = nothing, nothing  # Here, additional plots are unnecessary
@@ -101,13 +96,13 @@ function figures_preparation(computing_parameters::Dict)
         end
 
     # For the EIS curve
-    elseif computing_parameters["type_current"] == "EIS"
-        if computing_parameters["type_display"] == "multiple"
+    elseif cfg.type_current == :EIS
+        if cfg.type_display == :multiple
             mpl.rcParams["font.size"] = 18  # Font size for all text
             fig1, ax1 = plt.subplots(; figsize=(8, 8))
             fig2, ax2 = plt.subplots(; figsize=(8, 8))
             fig3, ax3 = plt.subplots(; figsize=(8, 8))
-        elseif computing_parameters["type_display"] == "synthetic"
+        elseif cfg.type_display == :synthetic
             mpl.rcParams["font.size"] = 13  # Font size for all text
             fig1, ax1 = plt.subplots(1, 3; figsize=(14, 4.7))
             fig2, ax2 = nothing, nothing  # Here, additional plots are unnecessary

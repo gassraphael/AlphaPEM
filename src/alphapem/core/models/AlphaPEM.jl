@@ -28,16 +28,12 @@ include(joinpath(@__DIR__, "../modules/display_modules.jl"))
 
 
 mutable struct AlphaPEM
-    accessible_physical_parameters::Dict
-    undetermined_physical_parameters::Dict
-    model_parameters::Dict
-    parameters::Dict
+    fuel_cell::AbstractFuelCell
+    current_density::AbstractCurrent
+    cfg::SimulationConfig
     solver_variable_names::Vector{Vector{String}}
     all_variable_names::Vector{String}
     variables::Dict
-    operating_inputs::Dict
-    current_parameters::Dict
-    computing_parameters::Dict
     time_interval::Tuple{Float64, Float64}
     initial_variable_values::Vector
     sol
@@ -48,21 +44,14 @@ end
 
 Parameters
 ----------
-accessible_physical_parameters : Dict
-    Dictionary containing the accessible physical parameters for the simulation.
-undetermined_physical_parameters : Dict
-    Dictionary containing the undetermined physical parameters for the simulation.
-model_parameters : Dict
-    Dictionary containing the model/computing parameters for the simulation.
+
 
 Returns
 -------
 AlphaPEM
     Initialised simulator instance.
 """
-function AlphaPEM(accessible_physical_parameters::Dict,
-                  undetermined_physical_parameters::Dict,
-                  model_parameters::Dict)::AlphaPEM
+function AlphaPEM(fuel_cell::AbstractFuelCell, current_density::AbstractCurrent, cfg::SimulationConfig)::AlphaPEM
 
     # Initialize the variables' dictionary.
     solver_variable_names = [[
@@ -77,16 +66,12 @@ function AlphaPEM(accessible_physical_parameters::Dict,
     ]]
 
     simu = AlphaPEM(
-        accessible_physical_parameters, # accessible_physical_parameters::Dict
-        undetermined_physical_parameters, # undetermined_physical_parameters::Dict
-        model_parameters, # model_parameters::Dict
-        merge(accessible_physical_parameters, undetermined_physical_parameters, model_parameters), # parameters::Dict
+        fuel_cell, #
+        current_density, #
+        cfg, #
         solver_variable_names, # solver_variable_names::Vector{Vector{String}}
         String[], # all_variable_names::Vector{String}
         Dict{String, Vector{Number}}(), # variables::Dict{String, Vector{Number}}
-        Dict(), # operating_inputs::Dict
-        Dict(), # current_parameters::Dict
-        Dict(), # computing_parameters::Dict
         (0.0, 0.0), # time_interval::Tuple{Float64, Float64}
         [], # initial_variable_values::Vector{Number}
         nothing, # sol
@@ -94,107 +79,6 @@ function AlphaPEM(accessible_physical_parameters::Dict,
     # Several points are considered in each GC, GDL and MPL. This must be inserted into the solver_variable_names.
     solver_variable_names_extension!(simu)
     return simu
-end
-
-
-"""Simulate the model with the given operating inputs.
-
-Parameters
-----------
-simu : AlphaPEM
-    Fuel cell simulator instance.
-operating_inputs : Dict
-    Dictionary containing the operating inputs for the simulation.
-current_parameters : Dict
-    Dictionary containing the current-density profile parameters.
-computing_parameters : Dict
-    Dictionary containing the computing/display parameters.
-initial_variable_values : Union{Nothing, Vector}, optional
-    Initial values of the solver variables. If `nothing`, values are generated
-    from a no-current equilibrium.
-time_interval : Union{Nothing, Tuple{Float64, Float64}}, optional
-    Time interval for numerical resolution. If `nothing`, it is generated
-    according to the chosen current profile.
-
-Returns
--------
-Nothing
-    The function updates `simu` in place.
-"""
-function simulate_model!(simu::AlphaPEM,
-                         operating_inputs::Dict,
-                         current_parameters::Dict,
-                         computing_parameters::Dict,
-                         initial_variable_values:: Union{Nothing, Vector}=nothing,
-                         time_interval:: Union{Nothing, Tuple{Float64, Float64}}=nothing)
-
-    # Initialize the operating inputs and parameters dictionaries.
-    simu.operating_inputs = operating_inputs
-    simu.current_parameters = current_parameters
-    simu.computing_parameters = computing_parameters
-    merge!(simu.parameters, simu.current_parameters)
-    merge!(simu.parameters, simu.computing_parameters)
-
-    # General warnings.
-    if simu.parameters["type_fuel_cell"] in ("EH-31_1.5", "EH-31_2.0", "EH-31_2.25", "EH-31_2.5")
-        println("Warning: EH-Group fuel cell examples may be outdated. Using ZSW-GenStack is recommended.\n")
-    end
-
-    if simu.parameters["voltage_zone"] == "EIS"
-        throw(ArgumentError("The EIS generation is currently undergoing maintenance."))
-    end
-
-    if simu.parameters["type_auxiliary"] in ("forced-convective_cathode_with_anodic_recirculation",
-                                               "forced-convective_cathode_with_flow-through_anode")
-        simu.parameters["type_auxiliary"] = "no_auxiliary"
-        println("Warning: auxiliaries were temporarily removed; \"no_auxiliary\" is automatically used.\n")
-    end
-
-    if simu.operating_inputs["Pa_des"] < Pext || simu.operating_inputs["Pc_des"] < Pext
-        throw(ArgumentError("The desired pressure is too low. It cannot be lower than the pressure outside the stack."))
-    end
-
-    # Initialize the variables' dictionaries.
-    if simu.parameters["type_auxiliary"] in ("forced-convective_cathode_with_flow-through_anode",
-                                               "forced-convective_cathode_with_anodic_recirculation")
-        push!(simu.solver_variable_names,
-              ["Pasm", "Paem", "Pcsm", "Pcem", "Phi_asm", "Phi_aem", "Phi_csm", "Phi_cem"])
-        push!(simu.solver_variable_names, ["Wcp", "Wa_inj", "Wc_inj", "Abp_a", "Abp_c"])
-    end
-    simu.all_variable_names = vcat(
-        reduce(vcat, simu.solver_variable_names),
-        ["t", "i_fc", "C_O2_Pt", "Ucell", "v_a", "v_c", "Pa_in", "Pc_in"],
-        ["Phi_a_des", "Phi_c_des"],
-    )
-    simu.variables = Dict{String, Vector{Number}}(k => Number[] for k in simu.all_variable_names)
-
-    # Create the dynamic evolution.
-    #       Create time intervals
-    simu.time_interval = time_interval === nothing ? create_time_interval(simu) :
-                          (time_interval[1], time_interval[2])
-    #       Create the initial variable values
-    simu.initial_variable_values = initial_variable_values === nothing ?
-                                    create_initial_variable_values(simu) : initial_variable_values
-
-    #       Solve the differential equation system.
-    #           Pack external data passed to the ODE right\-hand side.
-    packed = (operating_inputs=simu.operating_inputs, parameters=simu.parameters,
-              solver_variable_names=simu.solver_variable_names)
-    #           Define RHS in SciML signature: f(y, p, t) -> dy/dt.
-    rhs = (y, p, t) -> dydt(t, y, p.operating_inputs, p.parameters, p.solver_variable_names)
-    #           Stop integration as soon as a critical variable becomes negative.
-    #           The callback monitors the event condition continuously in time.
-    condition = (y, t, integ) -> event_negative(t, y, integ.p.operating_inputs, integ.p.parameters,
-                                                integ.p.solver_variable_names)
-    cb_negative = ContinuousCallback(condition, integ -> terminate!(integ))
-    #           Build and solve the ODE problem with FBDF for stiff dynamics.
-    prob = ODEProblem(rhs, simu.initial_variable_values, simu.time_interval, packed)
-    simu.sol = solve(prob, FBDF(); reltol=simu.parameters["rtol"], abstol=simu.parameters["atol"],
-                     callback=cb_negative)
-
-    #       Recover the variable values calculated by the solver into the dictionary.
-    recovery!(simu)
-    return nothing
 end
 
 
@@ -225,12 +109,96 @@ function solver_variable_names_extension!(simu::AlphaPEM)
         # Increase the number of points.
         if endswith(variable, "gdl")
             splice!(simu.solver_variable_names[1], index:index-1,
-                ["$(variable)_$(i)" for i in 1:simu.parameters["nb_gdl"]])
+                ["$(variable)_$(i)" for i in 1:simu.fuel_cell.physical_parameters.nb_gdl])
         elseif endswith(variable, "mpl")
             splice!(simu.solver_variable_names[1], index:index-1,
-                ["$(variable)_$(i)" for i in 1:simu.parameters["nb_mpl"]])
+                ["$(variable)_$(i)" for i in 1:simu.fuel_cell.physical_parameters.nb_mpl])
         end
     end
+    return nothing
+end
+
+
+"""Simulate the model with the given operating inputs.
+
+Parameters
+----------
+simu : AlphaPEM
+    Fuel cell simulator instance.
+
+initial_variable_values : Union{Nothing, Vector}, optional
+    Initial values of the solver variables. If `nothing`, values are generated
+    from a no-current equilibrium.
+time_interval : Union{Nothing, Tuple{Float64, Float64}}, optional
+    Time interval for numerical resolution. If `nothing`, it is generated
+    according to the chosen current profile.
+
+Returns
+-------
+Nothing
+    The function updates `simu` in place.
+"""
+function simulate_model!(simu::AlphaPEM,
+                         cfg::SimulationConfig,
+                         initial_variable_values:: Union{Nothing, Vector}=nothing,
+                         time_interval:: Union{Nothing, Tuple{Float64, Float64}}=nothing)
+
+    # General warnings.
+    if cfg.type_fuel_cell in (:EH_31_1_5, :EH_31_2_0, :E_H31_2_25, :EH_31_2_5)
+        println("Warning: EH-Group fuel cell examples may be outdated. Using ZSW-GenStack is recommended.\n")
+    end
+
+    if cfg.voltage_zone == :EIS
+        throw(ArgumentError("The EIS generation is currently undergoing maintenance."))
+    end
+
+    if cfg.type_auxiliary in (:forced_convective_cathode_with_anodic_recirculation,
+                              :forced_convective_cathode_with_flow_through_anode)
+        cfg.type_auxiliary = :no_auxiliary
+        println("Warning: auxiliaries were temporarily removed; \"no_auxiliary\" is automatically used.\n")
+    end
+
+    if simu.fuel_cell.operating_conditions.Pa_des < Pext || simu.fuel_cell.operating_conditions.Pc_des < Pext
+        throw(ArgumentError("The desired pressure is too low. It cannot be lower than the pressure outside the stack."))
+    end
+
+    # Initialize the variables' dictionaries.
+    if cfg.type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
+                              :forced_convective_cathode_with_anodic_recirculation)
+        push!(simu.solver_variable_names,
+              ["Pasm", "Paem", "Pcsm", "Pcem", "Phi_asm", "Phi_aem", "Phi_csm", "Phi_cem"])
+        push!(simu.solver_variable_names, ["Wcp", "Wa_inj", "Wc_inj", "Abp_a", "Abp_c"])
+    end
+    simu.all_variable_names = vcat(
+        reduce(vcat, simu.solver_variable_names),
+        ["t", "i_fc", "C_O2_Pt", "Ucell", "v_a", "v_c", "Pa_in", "Pc_in"],
+        ["Phi_a_des", "Phi_c_des"],
+    )
+    simu.variables = Dict{String, Vector{Number}}(k => Number[] for k in simu.all_variable_names)
+
+    # Create the dynamic evolution.
+    #       Create time intervals
+    simu.time_interval = time_interval === nothing ? simu.current_density.time_interval : time_interval
+    #       Create the initial variable values
+    simu.initial_variable_values = initial_variable_values === nothing ?
+                                    create_initial_variable_values(simu) : initial_variable_values
+
+    #       Solve the differential equation system.
+    #           Pack external data passed to the ODE right\-hand side.
+    packed = (fuel_cell=simu.fuel_cell, solver_variable_names=simu.solver_variable_names)
+    #           Define RHS in SciML signature: f(y, p, t) -> dy/dt.
+    rhs = (y, p, t) -> dydt(t, y, p.fuel_cell, p.solver_variable_names)
+    #           Stop integration as soon as a critical variable becomes negative.
+    #           The callback monitors the event condition continuously in time.
+    condition = (y, t, integ) -> event_negative(t, y, integ.p.fuel_cell, integ.p.solver_variable_names)
+    cb_negative = ContinuousCallback(condition, integ -> terminate!(integ))
+    #           Build and solve the ODE problem with FBDF for stiff dynamics.
+    prob = ODEProblem(rhs, simu.initial_variable_values, simu.time_interval, packed)
+    simu.sol = solve(prob, FBDF(); reltol=simu.parameters["rtol"], abstol=simu.parameters["atol"],
+                     callback=cb_negative)
+
+    #       Recover the variable values calculated by the solver into the dictionary.
+    recovery!(simu)
     return nothing
 end
 
@@ -240,21 +208,14 @@ if it is not provided.
 
 Parameters
 ----------
-simu : AlphaPEM
-    Fuel cell simulator instance.
+
 
 Returns
 -------
 Tuple{Float64, Float64}
     Time interval for numerical resolution. It is used when `time_interval == nothing`.
 """
-function create_time_interval(simu::AlphaPEM)::Tuple{Float64, Float64}
-    # Extraction of the parameters.
-    step_current_parameters = simu.parameters["step_current_parameters"]
-    pola_current_parameters = simu.parameters["pola_current_parameters"]
-    pola_current_for_cali_parameters = simu.parameters["pola_current_for_cali_parameters"]
-    type_fuel_cell, type_current = simu.parameters["type_fuel_cell"], simu.parameters["type_current"]
-    voltage_zone = simu.parameters["voltage_zone"]
+function create_time_interval(current_density::AbstractCurrent)::Tuple{Float64, Float64}
 
     # Recovery of the good time interval.
     if type_current == "step"
@@ -277,7 +238,7 @@ function create_time_interval(simu::AlphaPEM)::Tuple{Float64, Float64}
         delta_t_ini_pola_cali = pola_current_for_cali_parameters["delta_t_ini_pola_cali"]
         delta_t_load_pola_cali = pola_current_for_cali_parameters["delta_t_load_pola_cali"]
         delta_t_break_pola_cali = pola_current_for_cali_parameters["delta_t_break_pola_cali"]
-        i_exp_cali_t, _ = pola_exp_values_calibration(type_fuel_cell, voltage_zone)
+        i_exp_cali_t, _ = simu.fuel_cell.pola_exp_data_cali
         # Calculation.
         delta_t_pola_cali = delta_t_load_pola_cali + delta_t_break_pola_cali
         t0_interval = 0.0
@@ -307,22 +268,21 @@ Vector
 function create_initial_variable_values(simu::AlphaPEM)::Vector
     # Extraction of the operating inputs and parameters.
     current_density, T_des = simu.operating_inputs["current_density"], simu.operating_inputs["T_des"]
-    Pa_des, Pc_des = simu.operating_inputs["Pa_des"], simu.operating_inputs["Pc_des"]
+    Pa_des, Pc_des = simu.fuel_cell.operating_conditions.Pa_des, simu.fuel_cell.operating_conditions.Pc_des
     Phi_a_des, Phi_c_des = simu.operating_inputs["Phi_a_des"], simu.operating_inputs["Phi_c_des"]
     y_H2_in = simu.operating_inputs["y_H2_in"]
     Hmem, kappa_co, kappa_c = simu.parameters["Hmem"], simu.parameters["kappa_co"], simu.parameters["kappa_c"]
     i0_c_ref = simu.parameters["i0_c_ref"]
     nb_gc, nb_gdl, nb_mpl = simu.parameters["nb_gc"], simu.parameters["nb_gdl"], simu.parameters["nb_mpl"]
-    type_auxiliary = simu.parameters["type_auxiliary"]
 
     # Initial fuel cell states.
     #   Intermediate values.
     T_ini = T_des
-    if type_auxiliary in ("forced-convective_cathode_with_anodic_recirculation",
-                          "forced-convective_cathode_with_flow-through_anode")
+    if cfg.type_auxiliary in (:forced_convective_cathode_with_anodic_recirculation,
+                              :forced_convective_cathode_with_flow_through_anode)
         Pa_ini, Pc_ini = Pext, Pext
         Phi_a_ini, Phi_c_ini = Phi_ext, Phi_ext
-    else # type_auxiliary == "no_auxiliaries".
+    else # cfg.type_auxiliary == "no_auxiliaries".
         Pa_ini, Pc_ini = Pa_des, Pc_des
         Phi_a_ini, Phi_c_ini = Phi_a_des, Phi_c_des
     end
@@ -335,7 +295,7 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector
     C_O2_ini = y_O2_ext * (Pc_ini - Phi_c_ini * Psat_ini) / (R * T_ini)
     C_N2_cgc_ini = (1 - y_O2_ext) * (Pc_ini - Phi_c_ini * Psat_ini) / (R * T_ini)
 
-    if type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+    if cfg.type_auxiliary == :forced_convective_cathode_with_flow_through_anode
         C_H2_ini = y_H2_in * (Pa_ini - Phi_a_ini * Psat_ini) / (R * T_ini)
         C_N2_agc_ini = (1 - y_H2_in) * (Pa_ini - Phi_a_ini * Psat_ini) / (R * T_ini)
     else
@@ -366,7 +326,7 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector
     lambda_acl, lambda_mem, lambda_ccl = (lambda_mem_ini, lambda_mem_ini, lambda_mem_ini)
     C_H2_agc, C_H2_agdl, C_H2_ampl, C_H2_acl = (C_H2_ini, C_H2_ini, C_H2_ini, C_H2_ini)
     C_O2_ccl, C_O2_cmpl, C_O2_cgdl, C_O2_cgc = (C_O2_ini, C_O2_ini, C_O2_ini, C_O2_ini)
-    if type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+    if cfg.type_auxiliary == :forced_convective_cathode_with_flow_through_anode
         C_N2_agc, C_N2_cgc = C_N2_agc_ini, C_N2_cgc_ini
     else
         C_N2_agc, C_N2_cgc = 0.0, C_N2_cgc_ini
@@ -395,8 +355,8 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector
     initial_variable_values = repeat(initial_variable_values_1D, nb_gc)
 
     # Addition of the auxiliary system initial states.
-    if type_auxiliary in ("forced-convective_cathode_with_flow-through_anode",
-                          "forced-convective_cathode_with_anodic_recirculation")
+    if cfg.type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
+                              :forced_convective_cathode_with_anodic_recirculation)
         append!(initial_variable_values, [Pasm, Paem, Pcsm, Pcem, Phi_asm, Phi_aem, Phi_csm, Phi_cem,
                                           Wcp, Wa_inj, Wc_inj, Abp_a, Abp_c])
     end
@@ -428,8 +388,8 @@ function recovery!(simu::AlphaPEM)
         simu.variables[key] = [[simu.sol.u[j][index + (i - 1) * length(simu.solver_variable_names[1])] for j in eachindex(simu.sol.u)]
                                 for i in 1:nb_gc]
     end
-    if simu.parameters["type_auxiliary"] in ("forced-convective_cathode_with_flow-through_anode",
-                                              "forced-convective_cathode_with_anodic_recirculation")
+    if cfg.type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
+                              :forced_convective_cathode_with_anodic_recirculation)
         for (index, key) in enumerate(simu.solver_variable_names[2]) # recovery of the manifold variables
             simu.variables[key] = [simu.sol.u[j][index + nb_gc * length(simu.solver_variable_names[1])]
                                     for j in eachindex(simu.sol.u)]
@@ -498,10 +458,8 @@ Returns
 Nothing
 """
 function Display(simu::AlphaPEM, ax1=nothing, ax2=nothing, ax3=nothing)
-    # Extraction of the operating inputs and parameters.
-    type_current, type_display = simu.parameters["type_current"], simu.parameters["type_display"]
-    type_fuel_cell = simu.parameters["type_fuel_cell"]
-    subfolder_name = split(type_fuel_cell, '_')[1]
+    # Folder name.
+    subfolder_name = split(cfg.type_fuel_cell, '_')[1]
 
     # Display.
     if type_current == "step"
@@ -625,11 +583,8 @@ Returns
 Nothing
 """
 function Save_plot(simu::AlphaPEM, fig1=nothing, fig2=nothing, fig3=nothing)
-    # Extraction of the operating inputs and parameters.
-    type_fuel_cell, type_current = simu.parameters["type_fuel_cell"], simu.parameters["type_current"]
-    type_display, type_plot = simu.parameters["type_display"], simu.parameters["type_plot"]
     # Folder name.
-    subfolder_name = split(type_fuel_cell, '_')[1]
+    subfolder_name = split(cfg.type_fuel_cell, '_')[1]
 
     # For the step current.
     if type_current == "step"

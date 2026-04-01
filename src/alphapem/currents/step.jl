@@ -26,6 +26,7 @@ struct StepCurrent <: AbstractCurrent
     delta_t_break::Float64
     i_ini::Float64
     i_step::Float64
+    time_interval::Tuple{Float64, Float64}
 
     function StepCurrent(p::StepParams)
         p.delta_t_ini ≥ 0 || throw(ArgumentError("delta_t_ini must be ≥ 0"))
@@ -37,7 +38,8 @@ struct StepCurrent <: AbstractCurrent
             Float64(p.delta_t_load),
             Float64(p.delta_t_break),
             Float64(p.i_ini),
-            Float64(p.i_step)
+            Float64(p.i_step),
+            time_interval(p)
         )
     end
 end
@@ -62,16 +64,11 @@ end
 
 
 """
-    time_interval(c::StepCurrent)
+    time_interval(p::StepParams)
 
-Return the default simulation time interval `(t0, tf)`.
-
-# Returns
-- `(0.0, tf)` where:
-    tf = delta_t_ini + delta_t_load + delta_t_break
+Compute the simulation time interval from the raw parameters, before the struct is built.
+Used internally by the `StepCurrent` constructor.
 """
-function time_interval(c::StepCurrent)
-    t0 = 0.0
-    tf = c.delta_t_ini + c.delta_t_load + c.delta_t_break
-    return (t0, tf)
+function time_interval(p::StepParams)
+    return (0.0, p.delta_t_ini + p.delta_t_load + p.delta_t_break)
 end

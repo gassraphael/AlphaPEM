@@ -29,6 +29,7 @@ struct PolarizationCalibrationCurrent <: AbstractCurrent
     v_load::Float64
     delta_t_break::Float64
     i_exp::Vector{Float64}
+    time_interval::Tuple{Float64, Float64}
 
     function PolarizationCalibrationCurrent(p::PolarizationCalibrationParams)
         p.delta_t_ini ≥ 0 || throw(ArgumentError("delta_t_ini must be ≥ 0"))
@@ -40,7 +41,8 @@ struct PolarizationCalibrationCurrent <: AbstractCurrent
             Float64(p.delta_t_ini),
             Float64(p.v_load),
             Float64(p.delta_t_break),
-            Float64.(p.i_exp)
+            Float64.(p.i_exp),
+            time_interval(p)
         )
     end
 end
@@ -48,18 +50,10 @@ end
 # --- Internal utilities ----------------------------------------------------
 
 """
-    n_steps(c::PolarizationCalibrationCurrent)
-
-Number of current transitions (number of experimental steps).
-"""
-n_steps(c::PolarizationCalibrationCurrent) = length(c.i_exp)
-
-"""
-    delta_t_load(c::PolarizationCalibrationCurrent)
-
 Returns a vector containing the loading duration for each current transition, calculated as abs(Δi) / v_load.
 Δi = difference between two successive values of i_exp.
 """
+
 function delta_t_load(c::PolarizationCalibrationCurrent)
     n = length(c.i_exp)
     dt_load = Vector{Float64}(undef, n)
@@ -69,15 +63,27 @@ function delta_t_load(c::PolarizationCalibrationCurrent)
     end
     return dt_load
 end
+function delta_t_load(p::PolarizationCalibrationParams)
+    n = length(p.i_exp)
+    dt_load = Vector{Float64}(undef, n)
+    dt_load[1] = abs(p.i_exp[1]) / p.v_load
+    for k in 2:n
+        dt_load[k] = abs(p.i_exp[k] - p.i_exp[k-1]) / p.v_load
+    end
+    return dt_load
+end
 
 """
-    step_duration(c::PolarizationCalibrationCurrent)
-
 Returns a vector containing the total duration of each step (loading + stabilization).
 """
+
 function step_duration(c::PolarizationCalibrationCurrent)
     dt_load = delta_t_load(c)
     return dt_load .+ c.delta_t_break
+end
+function step_duration(p::PolarizationCalibrationParams)
+    dt_load = delta_t_load(p)
+    return dt_load .+ p.delta_t_break
 end
 
 # --- Interface implementation ---------------------------------------------
@@ -108,7 +114,7 @@ function current(c::PolarizationCalibrationCurrent, t::Real)
 end
 
 """
-    time_interval(c::PolarizationCalibrationCurrent)
+    time_interval(c::PolarizationCalibrationParams)
 
 Return the default simulation time interval `(t0, tf)`.
 
@@ -116,8 +122,6 @@ Return the default simulation time interval `(t0, tf)`.
 - `(0.0, tf)` where:
     tf = delta_t_ini + sum of the durations of each step (loading + stabilization)
 """
-function time_interval(c::PolarizationCalibrationCurrent)
-    t0 = 0.0
-    tf = c.delta_t_ini + sum(step_duration(c))
-    return (t0, tf)
+function time_interval(p::PolarizationCalibrationParams)
+    return (0.0, p.delta_t_ini + sum(step_duration(p)))
 end

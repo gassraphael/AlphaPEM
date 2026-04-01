@@ -32,6 +32,7 @@ struct PolarizationCurrent <: AbstractCurrent
     delta_t_break::Float64
     delta_i::Float64
     i_max::Float64
+    time_interval::Tuple{Float64, Float64}
 
     function PolarizationCurrent(p::PolarizationParams)
         p.delta_t_ini ≥ 0 || throw(ArgumentError("delta_t_ini must be ≥ 0"))
@@ -45,7 +46,8 @@ struct PolarizationCurrent <: AbstractCurrent
             Float64(p.v_load),
             Float64(p.delta_t_break),
             Float64(p.delta_i),
-            Float64(p.i_max)
+            Float64(p.i_max),
+            time_interval(p)
         )
     end
 end
@@ -55,25 +57,22 @@ end
 # --- Internal utilities ----------------------------------------------------
 
 """
-    n_steps(c::PolarizationCurrent)
-
 Number of current increments required to reach `i_max`.
 """
+n_steps(p::PolarizationParams) = Int(floor(p.i_max / p.delta_i))
 n_steps(c::PolarizationCurrent) = Int(floor(c.i_max / c.delta_i))
 
 """
-delta_t_load(c::PolarizationCurrent)
-
 Loading time for one step current.
 """
+delta_t_load(p::PolarizationParams) = p.delta_i / p.v_load
 delta_t_load(c::PolarizationCurrent) = c.delta_i / c.v_load
 
 
 """
-step_duration(c::PolarizationCurrent)
-
 Total duration of one increment cycle (load + break).
 """
+step_duration(p::PolarizationParams) = delta_t_load(p) + p.delta_t_break
 step_duration(c::PolarizationCurrent) = delta_t_load(c) + c.delta_t_break
 
 
@@ -101,7 +100,7 @@ end
 
 
 """
-    time_interval(c::PolarizationCurrent)
+    time_interval(c::PolarizationParams)
 
 Return the default simulation time interval `(t0, tf)`.
 
@@ -109,8 +108,6 @@ Return the default simulation time interval `(t0, tf)`.
 - `(0.0, tf)` where:
     tf = delta_t_ini + n_steps * (delta_t_load + delta_t_break)
 """
-function time_interval(c::PolarizationCurrent)
-    t0 = 0.0
-    tf = c.delta_t_ini + n_steps(c) * step_duration(c)
-    return (t0, tf)
+function time_interval(p::PolarizationParams)
+    return (0.0, p.delta_t_ini + n_steps(p) * step_duration(p))
 end

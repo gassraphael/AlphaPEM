@@ -43,19 +43,3 @@ end
 Vectorized evaluation of the current density.
 """
 current(c::AbstractCurrent, t::AbstractArray) = current.(Ref(c), t)
-
-
-"""
-    time_interval(c::AbstractCurrent)
-
-Return the default simulation time interval `(t0, tf)`.
-
-# Returns
-- `Tuple{Float64, Float64}`: Start and end times (s)
-
-# Notes
-This method should be implemented by each concrete current type.
-"""
-function time_interval(c::AbstractCurrent)
-    throw(MethodError(time_interval, (c,)))
-end

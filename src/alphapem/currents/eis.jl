@@ -37,6 +37,7 @@ struct EISCurrent <: AbstractCurrent
     tf::Float64
     delta_t_break::Vector{Float64}
     delta_t_measurement::Vector{Float64}
+    time_interval::Tuple{Float64, Float64}
 end
 
 # --- Constructor with precomputation --------------------------------------
@@ -88,7 +89,8 @@ function EISCurrent(p::EISParams)
         t_new_start,
         tf,
         delta_t_break,
-        delta_t_measurement
+        delta_t_measurement,
+        (0.0, tf)
     )
 end
 
@@ -117,15 +119,4 @@ function current(c::EISCurrent, t::Real)
     i_disruption = (c.ratio * c.i_EIS) * cos(2 * π * c.f[n_inf] * t)
 
     return c.i_EIS + i_disruption
-end
-
-"""
-    time_interval(c::EISCurrent)
-
-Return the default simulation time interval `(t0, tf)`.
-- t0 is always 0.0 (simulation start)
-- tf is the end of the last frequency segment
-"""
-function time_interval(c::EISCurrent)
-    return (0.0, c.tf)
 end
