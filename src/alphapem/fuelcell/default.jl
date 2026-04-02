@@ -6,8 +6,6 @@
 A generic fallback FuelCell using default parameters, for unknown or manual types.
 """
 
-include("abstract.jl")
-include("../config/fuel_cell_parameters.jl")
 
 struct DefaultFuelCell <: AbstractFuelCell
     physical_parameters::PhysicalParams

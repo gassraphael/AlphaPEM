@@ -19,7 +19,6 @@ include(joinpath(@__DIR__, "../../utils/physics_constants.jl"))
 include(joinpath(@__DIR__, "../../utils/maths_functions.jl"))
 include(joinpath(@__DIR__, "flows_1D_MEA_modules.jl"))
 include(joinpath(@__DIR__, "../../utils/physics_functions.jl"))
-include(joinpath(@__DIR__, "../../config/pola_exp_values.jl"))
 include(joinpath(@__DIR__, "display_calc_modules.jl"))
 
 # General edition

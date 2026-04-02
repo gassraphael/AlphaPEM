@@ -4,9 +4,6 @@
 
 # _____________________________________________________Preliminaries____________________________________________________
 
-# Importing functions
-include(joinpath(@__DIR__, "abstract.jl"))
-
 
 # _____________________________________Polarization current density for calibration_____________________________________
 

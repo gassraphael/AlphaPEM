@@ -7,10 +7,6 @@ This module provides a factory function to instantiate the correct FuelCell type
 (ZSWFuelCell, EH31FuelCell, or DefaultFuelCell) based on the type_fuel_cell string.
 """
 
-include("abstract.jl")
-include("zsw.jl")
-include("eh31.jl")
-include("default.jl")
 
 const FUELCELL_TYPE_MAP = Dict(
     :ZSW_GenStack => ZSWFuelCell,

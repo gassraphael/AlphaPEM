@@ -16,6 +16,8 @@ Modules:
 """
 module Currents
 
+include("../config/current_parameters.jl")   # AbstractCurrentParams, StepParams, etc.
+
 include("abstract.jl")
 include("step.jl")
 include("polarization.jl")
@@ -23,7 +25,8 @@ include("polarization_for_cali.jl")
 include("eis.jl")
 include("factory.jl")
 
-export AbstractCurrentProfile, StepCurrent, PolarizationCurrent, PolarizationCalibrationCurrent, EISCurrent, create_current_profile
+export AbstractCurrent, StepCurrent, PolarizationCurrent, PolarizationCalibrationCurrent, EISCurrent, create_current
+export AbstractCurrentParams, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
 
 end  # module Currents
 

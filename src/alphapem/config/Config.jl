@@ -21,6 +21,7 @@ module Config
 include("current_parameters.jl")
 include("fuel_cell_parameters.jl")
 include("simulation_config.jl")
+using .SimulationConfigModule: SimulationConfig, validate_config
 
 export AbstractCurrentParams, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
 export AbstractFuelCellParams, PhysicalParams, OperatingConditions, PolaExperimentalData, NumericalParams

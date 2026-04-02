@@ -171,11 +171,10 @@ end
 # Returns
 - `AlphaPEM`: Updated simulator instance.
 """
-function launch_AlphaPEM_for_step_current(simulator::AlphaPEM)::AlphaPEM
-
+function launch_AlphaPEM_for_step_current(simu::AlphaPEM)::AlphaPEM
 
     # Figures preparation
-    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(computing_parameters)
+    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(simulator.cfg)
 
     # Dynamic display requires a dedicated use of the AlphaPEM class.
     if simu.cfg.type_plot == :dynamic
@@ -245,7 +244,7 @@ end
 function launch_AlphaPEM_for_polarization_current(simu::AlphaPEM)::AlphaPEM
 
     # Figures preparation
-    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(computing_parameters)
+    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(simu.cfg)
 
     # Dynamic display requires a dedicated use of the AlphaPEM class.
     if simu.cfg.type_plot == :dynamic

@@ -396,8 +396,8 @@ function Display(simu::AlphaPEM, ax1=nothing, ax2=nothing, ax3=nothing)
     subfolder_name = split(simu.cfg.type_fuel_cell, '_')[1]
 
     # Display.
-    if type_current == "step"
-        if type_display == "multiple"
+    if simu.cfg.type_current == :step
+        if simu.cfg.type_display == :multiple
             figs_axes = [plt.subplots(figsize=(8, 8)) for _ in 1:11]
             figs = [fa[1] for fa in figs_axes]
             axes = [fa[2] for fa in figs_axes]
@@ -428,7 +428,7 @@ function Display(simu::AlphaPEM, ax1=nothing, ax2=nothing, ax3=nothing)
 
             # A break is necessary to plot the new points in dynamic mode.
             plt.pause(0.1)
-        elseif type_display == "synthetic"
+        elseif simu.cfg.type_display == :synthetic
             plot_ifc_1D_temporal(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, ax1[1, 1])
             plot_Ucell(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, ax1[1, 2])
             plot_T_1D_temporal(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, ax1[1, 3])
@@ -441,15 +441,15 @@ function Display(simu::AlphaPEM, ax1=nothing, ax2=nothing, ax3=nothing)
             plot_C_O2_1D_temporal(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, ax1[3, 2])
             plot_P_1D_temporal(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, ax1[3, 3])
 
-            if simu.fuel_cell["type_plot"] == "fixed"
+            if simu.cfg.type_plot == :fixed
                 plot_T_pseudo_2D_final(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, ax2)
             end
 
             # A break is necessary to plot the new points in dynamic mode.
             plt.pause(1.0)
         end
-    elseif type_current == "polarization"
-        if type_display == "multiple"
+    elseif simu.cfg.type_current == :polarization
+        if simu.cfg.type_display == :multiple
             plot_polarisation_curve(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, ax1[1])
             plot_power_density_curve(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, length(simu.variables["t"]), ax1[2])
             plot_cell_efficiency(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, length(simu.variables["t"]), ax1[3])
@@ -459,34 +459,34 @@ function Display(simu::AlphaPEM, ax1=nothing, ax2=nothing, ax3=nothing)
             plot_T_1D_temporal(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, ax2[4])
             # A break is necessary to plot the new points in dynamic mode.
             plt.pause(0.1)
-        elseif type_display == "synthetic"
+        elseif simu.cfg.type_display == :synthetic
             plot_polarisation_curve(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, ax1)
             # A break is necessary to plot the new points in dynamic mode.
             plt.pause(0.1)
-        elseif type_display == "no_display"
+        elseif simu.cfg.type_display == :no_display
             plot_polarisation_curve(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, ax1, false)
         end
-    elseif type_current == "polarization_for_cali"
-        if type_display == "multiple"
+    elseif simu.cfg.type_current == :polarization_for_cali
+        if simu.cfg.type_display == :multiple
             plot_polarisation_curve_for_cali(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, ax1[1])
             plot_lambda_1D_temporal(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, ax1[2])
             plot_s_1D_temporal(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, ax1[3])
             # A break is necessary to plot the new points in dynamic mode.
             plt.pause(0.1)
-        elseif type_display == "synthetic"
+        elseif simu.cfg.type_display == :synthetic
             plot_polarisation_curve_for_cali(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, ax1)
             # A break is necessary to plot the new points in dynamic mode.
             plt.pause(0.1)
         end
-    elseif type_current == "EIS"
+    elseif simu.cfg.type_current == :EIS
         Fourier_results = make_Fourier_transformation(simu.variables, simu.current_density, simu.cfg)
-        if type_display == "multiple"
+        if simu.cfg.type_display == :multiple
             plot_EIS_curve_Nyquist(simu.fuel_cell, simu.current_density, simu.cfg, Fourier_results, ax1)
             plot_EIS_curve_Bode_amplitude(simu.fuel_cell, simu.current_density, simu.cfg, Fourier_results, ax2)
             plot_EIS_curve_Bode_angle(simu.fuel_cell, simu.current_density, simu.cfg, Fourier_results, ax3)
             # A break is necessary to plot the new points in dynamic mode.
             plt.pause(0.1)
-        elseif type_display == "synthetic"
+        elseif simu.cfg.type_display == :synthetic
             plot_EIS_curve_Nyquist(simu.fuel_cell, simu.current_density, simu.cfg, Fourier_results, ax1[1])
             plot_EIS_curve_Bode_amplitude(simu.fuel_cell, simu.current_density, simu.cfg, Fourier_results, ax1[2])
             plot_EIS_curve_Bode_angle(simu.fuel_cell, simu.current_density, simu.cfg, Fourier_results, ax1[3])
@@ -516,33 +516,33 @@ function Save_plot(simu::AlphaPEM, fig1=nothing, fig2=nothing, fig3=nothing)
     subfolder_name = split(simu.cfg.type_fuel_cell, '_')[1]
 
     # For the step current.
-    if type_current == "step"
-        if type_display == "synthetic"
+    if simu.cfg.type_current == :step
+        if simu.cfg.type_display == :synthetic
             Saving_instructions(simu, "results", subfolder_name, "step_current_syn_1.pdf", fig1)
-            type_plot == "fixed" && Saving_instructions(simu, "results", subfolder_name, "final_temperature_dist_1.pdf", fig2)
+            simu.cfg.type_plot == :fixed && Saving_instructions(simu, "results", subfolder_name, "final_temperature_dist_1.pdf", fig2)
         end
     # For the polarization curve.
-    elseif type_current == "polarization"
-        if type_display == "multiple"
+    elseif simu.cfg.type_current == :polarization
+        if simu.cfg.type_display == :multiple
             Saving_instructions(simu, "results", subfolder_name, "global_indicators_1.pdf", fig1)
             Saving_instructions(simu, "results", subfolder_name, "pola_curve_syn_1.pdf", fig2)
-        elseif type_display == "synthetic"
+        elseif simu.cfg.type_display == :synthetic
             Saving_instructions(simu, "results", subfolder_name, "pola_curve_1.pdf", fig1)
         end
     # For the EIS curve.
-    elseif type_current == "EIS"
-        if type_display == "multiple"
+    elseif simu.cfg.type_current == :EIS
+        if simu.cfg.type_display == :multiple
             Saving_instructions(simu, "results", subfolder_name, "Nyquist_plot_1.pdf", fig1)
             Saving_instructions(simu, "results", subfolder_name, "Bode_amplitude_curve_1.pdf", fig2)
             Saving_instructions(simu, "results", subfolder_name, "Bode_angle_curve_1.pdf", fig3)
-        elseif type_display == "synthetic"
+        elseif simu.cfg.type_display == :synthetic
             Saving_instructions(simu, "results", subfolder_name, "Nyquist_plot_syn_1.pdf", fig1)
         end
     # For the polarization curve for calibration.
-    elseif type_current == "polarization_for_cali"
-        if type_display == "multiple"
+    elseif simu.cfg.type_current == :polarization_for_cali
+        if simu.cfg.type_display == :multiple
             Saving_instructions(simu, "results", subfolder_name, "impact_cali_on_internal_state_1.pdf", fig1)
-        elseif type_display == "synthetic"
+        elseif simu.cfg.type_display == :synthetic
             Saving_instructions(simu, "results", subfolder_name, "pola_curve_cali_1.pdf", fig1)
         end
     end

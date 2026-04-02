@@ -5,7 +5,7 @@
 # _______________________________________________Current density factory_____________________________________________
 
 """
-    create_current(p::AbstractCurrentParams; fuel_cell::AbstractFuelCell=nothing)::AbstractCurrent
+    create_current(p::AbstractCurrentParams; fuel_cell=nothing)::AbstractCurrent
 
 Create a current profile object according to the type of p.
 If a `fuel_cell` object is provided, experimental values will be extracted from it for polarization and calibration profiles.
@@ -17,7 +17,7 @@ function create_current(p::StepParams)::AbstractCurrent
 end
 
 
-function create_current(p::PolarizationParams, fuel_cell::AbstractFuelCell=nothing)::AbstractCurrent
+function create_current(p::PolarizationParams, fuel_cell=nothing)::AbstractCurrent
     # If a FuelCell object is provided and contains experimental current data,
     # use the maximum value as i_max for the polarization profile.
     if fuel_cell !== nothing && hasproperty(fuel_cell, :pola_exp_data) &&
@@ -29,7 +29,7 @@ function create_current(p::PolarizationParams, fuel_cell::AbstractFuelCell=nothi
 end
 
 
-function create_current(p::PolarizationCalibrationParams, fuel_cell::AbstractFuelCell=nothing)::AbstractCurrent
+function create_current(p::PolarizationCalibrationParams, fuel_cell=nothing)::AbstractCurrent
     # If a FuelCell object is provided and contains calibration experimental data,
     # pass i_exp as a field in the parameter struct (requires constructor support).
     if fuel_cell !== nothing && hasproperty(fuel_cell, :pola_exp_data_cali) &&

@@ -13,9 +13,11 @@ Modules:
 """
 module Fuelcell
 
+include("../config/fuel_cell_parameters.jl")   # PhysicalParams, OperatingConditions, etc.
+
 include("abstract.jl")
-include("eh31.jl")
 include("zsw.jl")
+include("eh31.jl")
 include("factory.jl")
 include("default.jl")
 

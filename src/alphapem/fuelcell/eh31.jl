@@ -9,7 +9,7 @@ Contains:
 - physical, operating, numerical parameters (inherited from FuelCell)
 - experimental polarization data (i_exp, U_exp)
 """
-struct EH31FuelCell <: AbstractFuelCell
+mutable struct EH31FuelCell <: AbstractFuelCell
     physical_parameters::PhysicalParams
     operating_conditions::OperatingConditions
     pola_exp_data::PolaExperimentalData
@@ -27,16 +27,16 @@ function EH31FuelCell(type_fuel_cell::Symbol, voltage_zone::Symbol)
          PolaExperimentalData(),
          NumericalParams()
     )
-    fc.physical_parameters = physical_params(fc)
-    fc.operating_conditions = operating_conditions(fc, type_fuel_cell)
-    fc.pola_exp_data = pola_exp_data(fc, type_fuel_cell, voltage_zone)
-    fc.pola_exp_data_cali = pola_exp_data_calibration(fc, type_fuel_cell, voltage_zone)
-    fc.numerical_parameters = numerical_params(fc)
+    fc.physical_parameters = physical_params()
+    fc.operating_conditions = operating_conditions(type_fuel_cell)
+    fc.pola_exp_data = pola_exp_data(type_fuel_cell, voltage_zone)
+    fc.pola_exp_data_cali = pola_exp_data_calibration(type_fuel_cell, voltage_zone)
+    fc.numerical_parameters = numerical_params()
     return fc
 end
 
-function physical_params(fc::EH31FuelCell)
-    fc.physical_parameters = PhysicalParams(
+function physical_params()::PhysicalParams
+    return PhysicalParams(
         # Global
         Aact = 85e-4,                        # Active area of the catalyst layer in m²
         nb_cell = 1,                         # Number of cells in the stack
@@ -79,58 +79,57 @@ function physical_params(fc::EH31FuelCell)
         kappa_c = 0.4152,                    # Overpotential correction exponent
         C_scl = 2e7                          # Volumetric space-charge layer capacitance in F·m⁻³
     )
-    return fc.physical_parameters
 end
 
 
-function operating_conditions(fc::EH31FuelCell, type_fuel_cell::Symbol)
+function operating_conditions(type_fuel_cell::Symbol)::OperatingConditions
     if type_fuel_cell == :EH_31_1_5
-        T_des::Float64          = 74.0 + 273.15  # K.  It is the desired fuel cell temperature.
-        Pa_des::Float64         = 1.5e5          # Pa. It is the desired pressures of the fuel gas at the anode.
-        Pc_des::Float64         = 1.5e5          # Pa. It is the desired pressures of the fuel gas at the cathode.
-        Sa::Float64             = 1.2            # It is the stoichiometric ratio of hydrogen at the anode.
-        Sc::Float64             = 2.0            # It is the stoichiometric ratio of oxygen at the cathode.
-        Phi_a_des::Float64      = 0.4            # It is the desired relative humidity at the anode.
-        Phi_c_des::Float64      = 0.6            # It is the desired relative humidity at the cathode.
-        y_H2_in::Float64        = 1.0            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        T_des                   = 74.0 + 273.15  # K.  It is the desired fuel cell temperature.
+        Pa_des                  = 1.5e5          # Pa. It is the desired pressures of the fuel gas at the anode.
+        Pc_des                  = 1.5e5          # Pa. It is the desired pressures of the fuel gas at the cathode.
+        Sa                      = 1.2            # It is the stoichiometric ratio of hydrogen at the anode.
+        Sc                      = 2.0            # It is the stoichiometric ratio of oxygen at the cathode.
+        Phi_a_des               = 0.4            # It is the desired relative humidity at the anode.
+        Phi_c_des               = 0.6            # It is the desired relative humidity at the cathode.
+        y_H2_in                 = 1.0            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
     elseif type_fuel_cell == :EH_31_2_0
-        T_des::Float64          = 74.0 + 273.15  # K.  It is the desired fuel cell temperature.
-        Pa_des::Float64         = 2.0e5          # Pa. It is the desired pressures of the fuel gas at the anode.
-        Pc_des::Float64         = 2.0e5          # Pa. It is the desired pressures of the fuel gas at the cathode.
-        Sa::Float64             = 1.2            # It is the stoichiometric ratio of hydrogen at the anode.
-        Sc::Float64             = 2.0            # It is the stoichiometric ratio of oxygen at the cathode.
-        Phi_a_des::Float64      = 0.4            # It is the desired relative humidity at the anode.
-        Phi_c_des::Float64      = 0.6            # It is the desired relative humidity at the cathode.
-        y_H2_in::Float64        = 1.0            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        T_des                   = 74.0 + 273.15  # K.  It is the desired fuel cell temperature.
+        Pa_des                  = 2.0e5          # Pa. It is the desired pressures of the fuel gas at the anode.
+        Pc_des                  = 2.0e5          # Pa. It is the desired pressures of the fuel gas at the cathode.
+        Sa                      = 1.2            # It is the stoichiometric ratio of hydrogen at the anode.
+        Sc                      = 2.0            # It is the stoichiometric ratio of oxygen at the cathode.
+        Phi_a_des               = 0.4            # It is the desired relative humidity at the anode.
+        Phi_c_des               = 0.6            # It is the desired relative humidity at the cathode.
+        y_H2_in                 = 1.0            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
     elseif type_fuel_cell == :EH_31_2_25
-        T_des::Float64          = 74.0 + 273.15  # K.  It is the desired fuel cell temperature.
-        Pa_des::Float64         = 2.25e5          # Pa. It is the desired pressures of the fuel gas at the anode.
-        Pc_des::Float64         = 2.25e5          # Pa. It is the desired pressures of the fuel gas at the cathode.
-        Sa::Float64             = 1.2            # It is the stoichiometric ratio of hydrogen at the anode.
-        Sc::Float64             = 2.0            # It is the stoichiometric ratio of oxygen at the cathode.
-        Phi_a_des::Float64      = 0.4            # It is the desired relative humidity at the anode.
-        Phi_c_des::Float64      = 0.6            # It is the desired relative humidity at the cathode.
-        y_H2_in::Float64        = 1.0            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        T_des                   = 74.0 + 273.15  # K.  It is the desired fuel cell temperature.
+        Pa_des                  = 2.25e5          # Pa. It is the desired pressures of the fuel gas at the anode.
+        Pc_des                  = 2.25e5          # Pa. It is the desired pressures of the fuel gas at the cathode.
+        Sa                      = 1.2            # It is the stoichiometric ratio of hydrogen at the anode.
+        Sc                      = 2.0            # It is the stoichiometric ratio of oxygen at the cathode.
+        Phi_a_des               = 0.4            # It is the desired relative humidity at the anode.
+        Phi_c_des               = 0.6            # It is the desired relative humidity at the cathode.
+        y_H2_in                 = 1.0            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
     elseif type_fuel_cell == :EH_31_2_5
-        T_des::Float64          = 74.0 + 273.15  # K.  It is the desired fuel cell temperature.
-        Pa_des::Float64         = 2.5e5          # Pa. It is the desired pressures of the fuel gas at the anode.
-        Pc_des::Float64         = 2.5e5          # Pa. It is the desired pressures of the fuel gas at the cathode.
-        Sa::Float64             = 1.2            # It is the stoichiometric ratio of hydrogen at the anode.
-        Sc::Float64             = 2.0            # It is the stoichiometric ratio of oxygen at the cathode.
-        Phi_a_des::Float64      = 0.4            # It is the desired relative humidity at the anode.
-        Phi_c_des::Float64      = 0.6            # It is the desired relative humidity at the cathode.
-        y_H2_in::Float64        = 1.0            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        T_des                   = 74.0 + 273.15  # K.  It is the desired fuel cell temperature.
+        Pa_des                  = 2.5e5          # Pa. It is the desired pressures of the fuel gas at the anode.
+        Pc_des                  = 2.5e5          # Pa. It is the desired pressures of the fuel gas at the cathode.
+        Sa                      = 1.2            # It is the stoichiometric ratio of hydrogen at the anode.
+        Sc                      = 2.0            # It is the stoichiometric ratio of oxygen at the cathode.
+        Phi_a_des               = 0.4            # It is the desired relative humidity at the anode.
+        Phi_c_des               = 0.6            # It is the desired relative humidity at the cathode.
+        y_H2_in                 = 1.0            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
     else
         error("Unknown type_fuel_cell: $type_fuel_cell")
     end
 
-    return fc.OperatingConditions(T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in)
+    return OperatingConditions(T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in)
 end
 
 
-function pola_exp_data(fc::EH31FuelCell, type_fuel_cell::Symbol, voltage_zone::Symbol)
-    if voltage_zone == :full
-        if type_fuel_cell == :EH_31_1_5  # at 1.5 bar
+function pola_exp_data(type_fuel_cell::Symbol, voltage_zone::Symbol)
+    if type_fuel_cell == :EH_31_1_5  # at 1.5 bar
+        if voltage_zone == :full
             i_exp_pola = [0.050, 0.068, 0.089, 0.110, 0.147, 0.185, 0.233, 0.293, 0.352, 0.395,
                           0.455, 0.510, 0.556, 0.620, 0.672, 0.738, 0.799, 0.850, 0.892, 0.942,
                           1.039, 1.139, 1.212, 1.269, 1.360, 1.432, 1.525, 1.604, 1.683, 1.765,
@@ -239,7 +238,7 @@ operating conditions. The experimental values are used for calibrating the model
 number of points compare to the pola_exp_values function. These points are specifically chosen to be as few as
 possible while still providing a good representation of the polarisation curve.
 """
-function pola_exp_data_calibration(fc::ZSW, type_fuel_cell::Symbol, voltage_zone::Symbol)
+function pola_exp_data_calibration(type_fuel_cell::Symbol, voltage_zone::Symbol)
     if type_fuel_cell == :EH_31_1_5  # at 1.5 bar
         if voltage_zone == :full
             i_exp_cali = [0.050, 0.110, 0.293, 1.039, 1.683, 1.966, 2.246]
@@ -291,8 +290,8 @@ function pola_exp_data_calibration(fc::ZSW, type_fuel_cell::Symbol, voltage_zone
 end
 
 
-function numerical_params(fc::EH31FuelCell)
-    fc.numerical_parameters = NumericalParams(
+function numerical_params()
+    return NumericalParams(
         # Setting the number of model points placed inside each layer:
         nb_gc = 1,                             # Number of model nodes placed inside each gas channel
         nb_gdl = 3,                            # Number of model nodes placed inside each GDL
@@ -304,5 +303,4 @@ function numerical_params(fc::EH31FuelCell)
         rtol = 1e-6,                           # Relative tolerance for the system of ODEs solver
         atol = 1e-9                            # Absolute tolerance for the system of ODEs solver
     )
-    return fc.numerical_parameters
 end

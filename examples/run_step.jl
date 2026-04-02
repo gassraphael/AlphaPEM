@@ -7,10 +7,9 @@ You can modify any SimulationConfig parameter below.
 
 include("../src/alphapem/config/simulation_config.jl")
 include("../src/alphapem/application/run_simulation.jl")
-include("../src/alphapem/config/current_parameters.jl")
 
-using .SimulationConfigModule
-using .Config: StepParams
+using .SimulationConfigModule: SimulationConfig
+using .Currents: StepParams
 
 current_params = StepParams(
     delta_t_ini = 30.0 * 60.0,   # (s). Initial time at zero current density for the stabilisation of the internal states (standard value).

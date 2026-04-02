@@ -26,9 +26,9 @@ module SimulationConfigModule
 
 export SimulationConfig, validate_config
 
-Base.@kwdef struct SimulationConfig
+Base.@kwdef mutable struct SimulationConfig
     type_fuel_cell::Symbol = :ZSW_GenStack
-    type_current::Symbol = :polarization
+    type_current::AbstractCurrentParams = PolarizationParams()
     voltage_zone::Symbol = :full
     type_auxiliary::Symbol = :no_auxiliary
     type_purge::Symbol = :no_purge
