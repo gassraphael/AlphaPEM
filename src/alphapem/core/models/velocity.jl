@@ -21,7 +21,7 @@ include(joinpath(@__DIR__, "../modules/flows_1D_MEA_modules.jl"))
 
 
 """
-    calculate_velocity_evolution(sv, i_fc_cell, operating_inputs, parameters)
+    calculate_velocity_evolution(sv, i_fc_cell, fc, cfg)
 
 Calculate the gas velocities at the anode and cathode.
 This function finds the velocities `v_a` and `v_c` that make the pressures computed from the Hagen-Poiseuille
@@ -31,13 +31,13 @@ A nonlinear root solver from `NonlinearSolve.jl` is used.
 Parameters
 ----------
 sv : Vector{Dict}
-    Solver state variables. `sv[i]` provides the state dictionary of gas-channel node `i`. T<:Real
+    Solver state variables. `sv[i]` provides the state dictionary of gas-channel node `i`.
 i_fc_cell
     Fuel cell current density at time t (A.m-2).
-operating_inputs : Dict
-    Operating conditions.
-parameters : Dict
-    Model parameters.
+fc : AbstractFuelCell
+    Fuel cell instance providing model parameters.
+cfg : SimulationConfig
+    Simulation configuration (provides `type_auxiliary`).
 
 Returns
 -------
@@ -49,17 +49,16 @@ Raises
 ErrorException
     If the nonlinear solver does not converge.
 """
-function calculate_velocity_evolution(sv::Vector{Dict}, i_fc_cell, operating_inputs::Dict, parameters::Dict)::Tuple
+function calculate_velocity_evolution(sv::Vector{Dict}, i_fc_cell, fc::AbstractFuelCell, cfg::SimulationConfig)::Tuple
 
-    # Extraction of the operating inputs and the parameters
-    T_des = operating_inputs["T_des"]
-    Pa_des, Pc_des = operating_inputs["Pa_des"], operating_inputs["Pc_des"]
-    Hagc, Hcgc = parameters["Hagc"], parameters["Hcgc"]
-    Wagc, Wcgc = parameters["Wagc"], parameters["Wcgc"]
-    Lgc, Ldist = parameters["Lgc"], parameters["Ldist"]
-    nb_channel_in_gc = parameters["nb_channel_in_gc"]
-    nb_cell, type_auxiliary = parameters["nb_cell"], parameters["type_auxiliary"]
-    nb_gc, nb_gdl = parameters["nb_gc"], parameters["nb_gdl"]
+    # Extraction of the parameters
+    oc = fc.operating_conditions
+    pp = fc.physical_parameters
+    np = fc.numerical_parameters
+    T_des, Pa_des, Pc_des = oc.T_des, oc.Pa_des, oc.Pc_des
+    Hagc, Hcgc, Wagc, Wcgc = pp.Hagc, pp.Hcgc, pp.Wagc, pp.Wcgc
+    Lgc, Ldist, nb_channel_in_gc, nb_cell = pp.Lgc, pp.Ldist, pp.nb_channel_in_gc, pp.nb_cell
+    nb_gc, nb_gdl = np.nb_gc, np.nb_gdl
 
     # Extraction of the variables
     C_v_agc = [sv[i]["C_v_agc"] for i in 1:nb_gc]
@@ -80,11 +79,11 @@ function calculate_velocity_evolution(sv::Vector{Dict}, i_fc_cell, operating_inp
     L_node_gc = Lgc / nb_gc
 
     #       Pressures (Pa).
-    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" ||
-        type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+    if cfg.type_auxiliary == :forced_convective_cathode_with_anodic_recirculation ||
+        cfg.type_auxiliary == :forced_convective_cathode_with_flow_through_anode
         Pa_ext = Pext
         Pc_ext = Pext
-    else  # type_auxiliary == "no_auxiliary"
+    else  # cfg.type_auxiliary == :no_auxiliary
         Pa_ext = Pa_des
         Pc_ext = Pc_des
     end
@@ -173,8 +172,8 @@ function calculate_velocity_evolution(sv::Vector{Dict}, i_fc_cell, operating_inp
                  (v_c[1] - J_tot_cgdl_cgc[1] / C_tot_cgdl[1])
 
         # Desired molar flows at anode and cathode
-        if type_auxiliary == "no_auxiliary"
-            W_des_calculated = desired_flows(sv, i_fc_cell, P_a_in, P_c_in, operating_inputs, parameters)
+        if cfg.type_auxiliary == :no_auxiliary
+            W_des_calculated = desired_flows(sv, i_fc_cell, P_a_in, P_c_in, fc, cfg)
             Wa_in_calculated = W_des_calculated["H2"] + W_des_calculated["H2O_inj_a"]  # Expression also present in flow calculations
             J_a_in_calculated = Wa_in_calculated / (Hagc * Wagc) / nb_cell / nb_channel_in_gc
             Wc_in_calculated = W_des_calculated["dry_air"] + W_des_calculated["H2O_inj_c"]  # This expression is also present in calculate_velocity_evolution.
@@ -254,10 +253,9 @@ end
 
 
 """
-    desired_flows(solver_variables, i_fc_cell, Pa_in, Pc_in, operating_inputs, parameters)
+    desired_flows(solver_variables, i_fc_cell, Pa_in, Pc_in, fc, cfg)
 
-This function calculates the desired flow for the air compressor and the humidifiers. These desired flows are
-different from the real ones because the corresponding machines take time to reach the desired values.
+Calculate the desired flow for the air compressor and the humidifiers.
 
 Parameters
 ----------
@@ -269,10 +267,10 @@ Pa_in :
     Inlet pressure at the anode side (Pa).
 Pc_in :
     Inlet pressure at the cathode side (Pa).
-operating_inputs : Dict
-    Operating inputs of the fuel cell.
-parameters : Dict
-    Parameters of the fuel cell model.
+fc : AbstractFuelCell
+    Fuel cell instance providing model parameters.
+cfg : SimulationConfig
+    Simulation configuration (provides `type_auxiliary`).
 
 Returns
 -------
@@ -283,18 +281,17 @@ Dict
                        i_fc_cell,
                        Pa_in,
                        Pc_in,
-                       operating_inputs::Dict,
-                       parameters::Dict)::Dict
+                       fc::AbstractFuelCell,
+                       cfg::SimulationConfig)::Dict
 
-    # Extraction of the operating inputs and the parameters
-    T_des, Sa, Sc = operating_inputs["T_des"], operating_inputs["Sa"], operating_inputs["Sc"]
-    Phi_a_des, Phi_c_des = operating_inputs["Phi_a_des"], operating_inputs["Phi_c_des"]
-    y_H2_in = operating_inputs["y_H2_in"]
-    kappa_co = parameters["kappa_co"]
-    Hacl, Hmem, Hccl = parameters["Hacl"], parameters["Hmem"], parameters["Hccl"]
-    Aact = parameters["Aact"]
-    nb_gc, nb_cell = parameters["nb_gc"], parameters["nb_cell"]
-    type_auxiliary = parameters["type_auxiliary"]
+    # Extraction of the parameters
+    oc = fc.operating_conditions
+    pp = fc.physical_parameters
+    np = fc.numerical_parameters
+    T_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in = oc.T_des, oc.Sa, oc.Sc, oc.Phi_a_des, oc.Phi_c_des, oc.y_H2_in
+    Hacl, Hmem, Hccl, Aact = pp.Hacl, pp.Hmem, pp.Hccl, pp.Aact
+    kappa_co = pp.kappa_co
+    nb_gc, nb_cell = np.nb_gc, pp.nb_cell
 
     # Extraction of the variables
     # Pasm, Pcsm, Wcp = get(solver_variables, "Pasm", nothing), get(solver_variables, "Pcsm", nothing), get(solver_variables, "Wcp", nothing)
@@ -316,8 +313,8 @@ Dict
         i_n[i] = i_H2 + i_O2
     end
 
-    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" ||
-       type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+    if cfg.type_auxiliary == :forced_convective_cathode_with_anodic_recirculation ||
+       cfg.type_auxiliary == :forced_convective_cathode_with_flow_through_anode
         # The desired air compressor volume flow rate (mol.s-1). Warning: consider the minimum compressor flow!
         W_H2_des = 1 / y_H2_in * Sa * i_fc_cell / (2 * F) * (nb_cell * Aact)
         Wacp_des_adjusted = adjust_compressor_flow_with_minimum(i_fc_cell, W_H2_des)  # Adjust the desired compressor flow to ensure a minimum flow is maintained.
@@ -325,7 +322,7 @@ Dict
         Wccp_des_adjusted = adjust_compressor_flow_with_minimum(i_fc_cell, W_air_ext_des)  # Adjust the desired compressor flow to ensure a minimum flow is maintained.
 
         # The desired humidifier volume flow rate at the anode side Wa_v_inj_des (mol.s-1). Warning: consider the minimum compressor flow!
-        if type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+        if cfg.type_auxiliary == :forced_convective_cathode_with_flow_through_anode
             # Prd = Pasm
             # W_H2_des = 1 / y_H2_in * Sa * i_fc_cell / (2 * F) * (nb_cell * Aact)
             # W_H2O_inj_a_des = Phi_a_des * Psat(T_des) / (Prd + Phi_a_des * Psat(T_des)) /
@@ -341,7 +338,7 @@ Dict
         # W_H2O_inj_c_des = W_H20_c_des - Wv_hum_in  # Desired humidifier flow rate.
 
         throw(ErrorException("desired_flows is not yet implemented in Julia for the forced-convective auxiliary branches because the translated Python source still depends on unavailable variables such as Pasm, Pcsm, and Wcp."))
-    else  # type_auxiliary == "no_auxiliary"
+    else  # cfg.type_auxiliary == :no_auxiliary
         # At the anode side
         W_H2_des = Sa * (i_fc_cell + maximum(i_n)) / (2 * F) * (nb_cell * Aact)
         W_H2O_inj_a_des = (Phi_a_des * Psat(T_des) / (Pa_in - Phi_a_des * Psat(T_des))) * W_H2_des

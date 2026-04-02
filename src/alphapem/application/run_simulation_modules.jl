@@ -140,23 +140,22 @@ end
 # Returns
 - `initial_variable_values`: Internal state vector.
 """
-function _extract_last_internal_state(simulator::AlphaPEM,
-                                      type_auxiliary::String)
+function _extract_last_internal_state(simu::AlphaPEM, cfg::SimulationConfig)
     initial_variable_values = []
 
-    for k in 1:simulator.parameters["nb_gc"]
-        for key in simulator.solver_variable_names[1]
-            push!(initial_variable_values, simulator.variables[key][k][end])
+    for k in 1:simu.fuel_cell.numerical_parameters.nb_gc
+        for key in simu.solver_variable_names[1]
+            push!(initial_variable_values, simu.variables[key][k][end])
         end
     end
 
-    if type_auxiliary in ("forced-convective_cathode_with_flow-through_anode",
-                          "forced-convective_cathode_with_anodic_recirculation")
-        for key in simulator.solver_variable_names[2]
-            push!(initial_variable_values, simulator.variables[key][end])
+    if cfg.type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
+                              :forced_convective_cathode_with_anodic_recirculation)
+        for key in simu.solver_variable_names[2]
+            push!(initial_variable_values, simu.variables[key][end])
         end
-        for key in simulator.solver_variable_names[3]
-            push!(initial_variable_values, simulator.variables[key][end])
+        for key in simu.solver_variable_names[3]
+            push!(initial_variable_values, simu.variables[key][end])
         end
     end
 
@@ -168,27 +167,21 @@ end
 
 # Arguments
 - `simulator::AlphaPEM`: Simulator instance.
-- `operating_inputs::Dict`: Operating inputs.
-- `current_parameters::Dict`: Current parameters.
-- `computing_parameters::Dict`: Computing parameters.
 
 # Returns
 - `AlphaPEM`: Updated simulator instance.
 """
-function launch_AlphaPEM_for_step_current(simulator::AlphaPEM, operating_inputs::Dict,
-                                          current_parameters::Dict, computing_parameters::Dict)::AlphaPEM
+function launch_AlphaPEM_for_step_current(simulator::AlphaPEM)::AlphaPEM
 
-    # Starting time
-    start_time = time()
 
     # Figures preparation
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(computing_parameters)
 
     # Dynamic display requires a dedicated use of the AlphaPEM class.
-    if computing_parameters["type_plot"] == "dynamic"
+    if simu.cfg.type_plot == :dynamic
 
         # Certain conditions must be met.
-        if computing_parameters["type_display"] == "multiple"
+        if simu.cfg.type_display == :multiple
             throw(ArgumentError("step current is not thought to be used with step current, dynamic plot and multiple display. There would be too much plots to handle."))
         end
 
@@ -220,26 +213,22 @@ function launch_AlphaPEM_for_step_current(simulator::AlphaPEM, operating_inputs:
             initial_variable_values = _extract_last_internal_state(simulator, computing_parameters["type_auxiliary"])
 
             # Display
-            if computing_parameters["type_display"] != "no_display"
+            if simu.cfg.type_display != :no_display
                 Display(simulator, ax1, ax2, ax3)
             end
         end
 
-    else  # elseif computing_parameters["type_plot"] == "fixed":
+    else  # elseif simu.cfg.type_plot == :fixed
         # Simulation
-        simulate_model!(simulator, operating_inputs, current_parameters, computing_parameters)
+        simulate_model!(simulator)
         # Display
-        if computing_parameters["type_display"] != "no_display"
+        if simu.cfg.type_display != :no_display
             Display(simulator, ax1, ax2, ax3)
         end
     end
 
     # Plot saving
     Save_plot(simulator, fig1, fig2, fig3)
-
-    # Ending time
-    algo_time = time() - start_time
-    println("Time of the algorithm in second : ", algo_time)
 
     return simulator
 end
@@ -248,21 +237,65 @@ end
 """Launch the AlphaPEM simulator for a polarization current density and display results.
 
 # Arguments
-- `simulators::Vector{<:AlphaPEM}`: Vector of simulator instances (1-based, no placeholder element).
-- `operating_inputs::Dict`: Operating inputs.
-- `current_parameters::Dict`: Current parameters.
-- `computing_parameters::Dict`: Computing parameters.
+
 
 # Returns
-- `AlphaPEM`: Main simulator (`simulators[1]`) after execution.
+
 """
+function launch_AlphaPEM_for_polarization_current(simu::AlphaPEM)::AlphaPEM
+
+    # Figures preparation
+    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(computing_parameters)
+
+    # Dynamic display requires a dedicated use of the AlphaPEM class.
+    if simu.cfg.type_plot == :dynamic
+        # Initialization
+        #       Calculation of the plot update number (n) and the initial time interval (time_interval).
+        initial_variable_values = nothing
+        delta_t_ini_pola = simu.current_density.delta_t_ini  # (s). It is the initial time at zero current density for the stabilisation of the internal states.
+        delta_t_pola = step_duration(simu.current_density)  # s. It is the time of one load.
+        _, tf = simu.current_density.time_interval  # s. It is the polarization current duration.
+        n = Int(floor(tf / delta_t_pola))  # It is the plot update number.
+        time_interval = [0.0, delta_t_ini_pola + delta_t_pola]  # It is the initial time interval.
+
+        # Dynamic simulation
+        for i in 1:n
+            simulate_model!(simu, initial_variable_values, time_interval)
+
+            # time_interval actualization
+            if i < n  # The final simulation does not require actualization.
+                t0_interval = simu.variables["t"][end]
+                tf_interval = delta_t_ini_pola + (i + 1) * delta_t_pola
+                time_interval = [t0_interval, tf_interval]  # Reset of the time interval
+            end
+
+            # Recovery of the internal states from the end of the preceding simulation.
+            initial_variable_values = _extract_last_internal_state(simu, cfg)
+
+            # Display
+            if simu.cfg.type_display != :no_display
+                Display(simu, ax1, ax2, ax3)
+            end
+        end
+
+    else  # elseif simu.cfg.type_plot == :fixed
+        # Simulation
+        simulate_model!(simu)
+        # Display
+        if simu.cfg.type_display != :no_display
+            Display(simu, ax1, ax2, ax3)
+        end
+    end
+
+    # Plot saving
+    Save_plot(simu, fig1, fig2, fig3)
+
+    return simu
+end
 function launch_AlphaPEM_for_polarization_current(simulators::Vector{AlphaPEM},
                                                   operating_inputs::Dict,
                                                   current_parameters::Dict,
                                                   computing_parameters::Dict)::AlphaPEM
-
-    # Starting time
-    start_time = time()
 
     # Figures preparation
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(computing_parameters)
@@ -288,83 +321,24 @@ function launch_AlphaPEM_for_polarization_current(simulators::Vector{AlphaPEM},
             end
         end
     end
-
-    # Dynamic display requires a dedicated use of the AlphaPEM class.
-    if computing_parameters["type_plot"] == "dynamic"
-
-        # Certain conditions must be met.
-        if length(type_fuel_cells) > 1
-            throw(ArgumentError("dynamic plot is not currently intended for use with different inputs."))
-        end
-
-        # Initialization
-        #       Calculation of the plot update number (n) and the initial time interval (time_interval).
-        initial_variable_values = nothing
-        #           Extraction of the parameters (first simulator configuration)
-        delta_t_ini_pola = pola_params_list[1]["delta_t_ini_pola"]  # (s).
-        delta_t_load_pola = pola_params_list[1]["delta_t_load_pola"]  # (s).
-        delta_t_break_pola = pola_params_list[1]["delta_t_break_pola"]  # (s).
-        delta_i_pola = pola_params_list[1]["delta_i_pola"]  # (A.m-2).
-        i_max_pola = pola_params_list[1]["i_max_pola"]  # (A.m-2).
-        #           Calculation
-        delta_t_pola = delta_t_load_pola + delta_t_break_pola  # s. It is the time of one load.
-        tf = delta_t_ini_pola + Int(floor(i_max_pola / delta_i_pola)) * delta_t_pola  # s. It is the polarization current duration.
-        n = Int(floor(tf / delta_t_pola))  # It is the plot update number.
-        time_interval = [0.0, delta_t_ini_pola + delta_t_pola]  # It is the initial time interval.
-
-        # Dynamic simulation
-        for i in 1:n
-            simulate_model!(simulators[1],
-                            select_nth_elements(operating_inputs, 1),
-                            select_nth_elements(current_parameters, 1),
-                            select_nth_elements(computing_parameters, 1),
-                            initial_variable_values,
-                            time_interval)
-
-            # time_interval actualization
-            if i < n  # The final simulation does not require actualization.
-                t0_interval = simulators[1].variables["t"][end]
-                tf_interval = delta_t_ini_pola + (i + 1) * delta_t_pola
-                time_interval = [t0_interval, tf_interval]  # Reset of the time interval
-            end
-
-            # Recovery of the internal states from the end of the preceding simulation.
-            initial_variable_values = _extract_last_internal_state(simulators[1], computing_parameters["type_auxiliary"])
-
-            # Display
-            if computing_parameters["type_display"] != "no_display"
-                Display(simulators[1], ax1, ax2, ax3)
-            end
-        end
-
-    else  # elseif computing_parameters["type_plot"] == "fixed":
-        for i in eachindex(simulators)
-            # Simulation
-            if type_fuel_cells[i] !== nothing
-                simulate_model!(simulators[i],
-                                select_nth_elements(operating_inputs, i),
-                                select_nth_elements(current_parameters, i),
-                                select_nth_elements(computing_parameters, i))
-            end
-            # Display
-            if computing_parameters["type_display"] != "no_display"
-                if type_fuel_cells[i] !== nothing
-                    Display(simulators[i], ax1, ax2, ax3)
-                end
-            end
+    
+    for i in eachindex(simulators)
+        # Simulation
+        simulate_model!(simulators[i],
+                        select_nth_elements(operating_inputs, i),
+                        select_nth_elements(current_parameters, i),
+                        select_nth_elements(computing_parameters, i))
+        # Display
+        if simu.cfg.type_display != :no_display
+            Display(simulators[i], ax1, ax2, ax3)
         end
     end
 
     # Plot saving
     Save_plot(simulators[1], fig1, fig2, fig3)
 
-    # Ending time
-    algo_time = time() - start_time
-    println("Time of the algorithm in second : ", algo_time)
-
     return simulators[1]
 end
-
 
 """Launch the AlphaPEM simulator for calibration polarization current and display results.
 
@@ -384,9 +358,6 @@ function launch_AlphaPEM_for_polarization_current_for_calibration(
     computing_parameters::Dict,
 )::AlphaPEM
 
-    # Starting time
-    start_time = time()
-
     # Figures preparation
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(computing_parameters)
 
@@ -396,7 +367,7 @@ function launch_AlphaPEM_for_polarization_current_for_calibration(
     end
 
     # Dynamic display requires a dedicated use of the AlphaPEM class.
-    if computing_parameters["type_plot"] == "dynamic"
+    if simu.cfg.type_plot == :dynamic
         # Initialization
         #       Calculation of the plot update number (n) and the initial time interval (time_interval).
         initial_variable_values = nothing
@@ -431,12 +402,12 @@ function launch_AlphaPEM_for_polarization_current_for_calibration(
             initial_variable_values = _extract_last_internal_state(simulators[1], computing_parameters["type_auxiliary"])
 
             # Display
-            if computing_parameters["type_display"] != "no_display"
+            if simu.cfg.type_display != :no_display
                 Display(simulators[1], ax1, ax2, ax3)
             end
         end
 
-    else  # elseif computing_parameters["type_plot"] == "fixed":
+    else  # elseif simu.cfg.type_plot == :fixed
 
         # Certain conditions must be met.
         if computing_parameters["type_current"] == "polarization_for_cali" &&
@@ -448,27 +419,19 @@ function launch_AlphaPEM_for_polarization_current_for_calibration(
 
         for i in eachindex(simulators)
             # Simulation
-            if type_fuel_cells[i] !== nothing
-                simulate_model!(simulators[i],
-                                select_nth_elements(operating_inputs, i),
-                                select_nth_elements(current_parameters, i),
-                                select_nth_elements(computing_parameters, i))
-            end
+            simulate_model!(simulators[i],
+                            select_nth_elements(operating_inputs, i),
+                            select_nth_elements(current_parameters, i),
+                            select_nth_elements(computing_parameters, i))
             # Display
-            if computing_parameters["type_display"] != "no_display"
-                if type_fuel_cells[i] !== nothing
-                    Display(simulators[i], ax1, ax2, ax3)
-                end
+            if simu.cfg.type_display != :no_display
+                Display(simulators[i], ax1, ax2, ax3)
             end
         end
     end
 
     # Plot saving
     Save_plot(simulators[1], fig1, fig2, fig3)
-
-    # Ending time
-    algo_time = time() - start_time
-    println("Time of the algorithm in second : ", algo_time)
 
     return simulators[1]
 end
@@ -490,11 +453,8 @@ function launch_AlphaPEM_for_EIS_current(simulator::AlphaPEM,
                                          current_parameters::Dict,
                                          computing_parameters::Dict)::AlphaPEM
 
-    # Starting time
-    start_time = time()
-
     # Check if the computing_parameters["type_current"] is valid
-    if computing_parameters["type_plot"] != "dynamic"
+    if simu.cfg.type_plot != :dynamic
         throw(ArgumentError("EIS has to be plot with a dynamic type_plot setting, because max_step has to be adjusted at each frequency."))
     end
 
@@ -526,7 +486,7 @@ function launch_AlphaPEM_for_EIS_current(simulator::AlphaPEM,
     # Recovery of the internal states from the end of the preceding simulation.
     initial_variable_values = _extract_last_internal_state(simulator, computing_parameters["type_auxiliary"])
 
-    if computing_parameters["type_display"] == "multiple"
+    if simu.cfg.type_display == :multiple
         println("A display bug prevents the dynamic updating of the graphs, as it appears that too much data is involved. However, the data is correctly calculated, and the appropriate plots are saved in the 'results' folder. This display bug does not occur when using a 'synthetic' type_display.")
     end
 
@@ -547,17 +507,13 @@ function launch_AlphaPEM_for_EIS_current(simulator::AlphaPEM,
         initial_variable_values = _extract_last_internal_state(simulator, computing_parameters["type_auxiliary"])
 
         # Display
-        if computing_parameters["type_display"] != "no_display"
+        if simu.cfg.type_display != :no_display
             Display(simulator, ax1, ax2, ax3)
         end
     end
 
     # Plot saving
     Save_plot(simulator, fig1, fig2, fig3)
-
-    # Ending time
-    algo_time = time() - start_time
-    println("Time of the algorithm in second : ", algo_time)
 
     # Keep these variables explicit for readability and parity with Python's current structure.
     _ = tf_EIS

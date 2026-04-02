@@ -20,14 +20,40 @@ current_params = PolarizationParams(
     i_max = 3.0e4                # Maximum current (default value, can be overridden by experimental current values if provided).
 )
 
-cfg = SimulationConfig(
-    type_fuel_cells = [:ZSW_GenStack],
-    type_current = current_params,
-    voltage_zone = :full,
-    type_auxiliary = :no_auxiliary,
-    type_purge = :no_purge,
-    type_display = :synthetic,
-    type_plot = :fixed
-)
+# List of fuel cell types to simulate. You can add more fuel cell types to the list,
+# but make sure they are implemented in the create_fuelcell factory function.
+type_fuel_cell_list = [:ZSW_GenStack]
 
-run_simulation(cfg)
+# If only one fuel cell type is selected, run a single simulation. Otherwise, run multiple simulations in parallel.
+if length(type_fuel_cell_list) == 1
+    cfg = SimulationConfig(
+        type_fuel_cell = type_fuel_cell_list[1],
+        type_current = current_params,
+        voltage_zone = :full,
+        type_auxiliary = :no_auxiliary,
+        type_purge = :no_purge,
+        type_display = :synthetic,
+        type_plot = :fixed
+    )
+    start_time = time() # Starting time
+    run_simulation(cfg)
+    algo_time = time() - start_time # Ending time
+    println("Time of the algorithm in second : ", algo_time)
+else
+    cfgs = Vector{SimulationConfig}(undef, length(type_fuel_cell_list))
+    for i in 1:length(type_fuel_cell_list)
+        cfgs[i] = SimulationConfig(
+            type_fuel_cell = type_fuel_cell_list[i],
+            type_current = current_params,
+            voltage_zone = :full,
+            type_auxiliary = :no_auxiliary,
+            type_purge = :no_purge,
+            type_display = :synthetic,
+            type_plot = :fixed
+        )
+    end
+    start_time = time() # Starting time
+    run_simulation(cfgs)
+    algo_time = time() - start_time # Ending time
+    println("Time of the algorithm in second : ", algo_time)
+end

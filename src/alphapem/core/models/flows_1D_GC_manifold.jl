@@ -15,19 +15,16 @@ include(joinpath(@__DIR__, "velocity.jl"))
 
 # ______________________________________________________Auxiliaries_____________________________________________________
 
-"""This function calculates the flows passing through the auxiliaries.
+"""Calculate the flows passing through the auxiliaries.
 
 Parameters
 ----------
 sv_1D_cell : Vector{Dict}
-    Variables calculated by the solver. They correspond to the cell internal states.
-    `sv` is a contraction of solver_variables for enhanced readability.
+    Variables calculated by the solver (cell internal states).
 sv_1D_manifold : Dict
-    Variables calculated by the solver. They correspond to the manifold internal states.
-    `sv` is a contraction of solver_variables for enhanced readability.
+    Variables calculated by the solver (manifold internal states).
 sv_auxiliary : Dict
-    Variables calculated by the solver. They correspond to the auxiliary internal states.
-    `sv` is a contraction of solver_variables for enhanced readability.
+    Variables calculated by the solver (auxiliary internal states).
 i_fc_cell : Float64
     Fuel cell current density at time t (A.m-2).
 v_a : Vector
@@ -38,10 +35,10 @@ Pa_in : Float64
     Inlet pressure at the anode side (Pa).
 Pc_in : Float64
     Inlet pressure at the cathode side (Pa).
-operating_inputs : Dict
-    Operating inputs of the fuel cell.
-parameters : Dict
-    Parameters of the fuel cell model.
+fc : AbstractFuelCell
+    Fuel cell instance providing model parameters.
+cfg : SimulationConfig
+    Simulation configuration (provides `type_auxiliary`).
 
 Returns
 -------
@@ -57,20 +54,20 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::Vector{Dict},
                                         v_c::Vector,
                                         Pa_in,
                                         Pc_in,
-                                        operating_inputs::Dict,
-                                        parameters::Dict)::Dict{String, Dict}
+                                        fc::AbstractFuelCell,
+                                        cfg::SimulationConfig)::Dict{String, Dict}
 
     # __________________________________________________Preliminaries___________________________________________________
 
-    # Extraction of the operating inputs and the parameters
-    T_des = operating_inputs["T_des"]
-    Phi_a_des, Phi_c_des = operating_inputs["Phi_a_des"], operating_inputs["Phi_c_des"]
-    Sa, Sc, y_H2_in = operating_inputs["Sa"], operating_inputs["Sc"], operating_inputs["y_H2_in"]
-
-    Aact, nb_cell, Hagc, Hcgc = parameters["Aact"], parameters["nb_cell"], parameters["Hagc"], parameters["Hcgc"]
-    Wagc, Wcgc, Lgc, nb_channel_in_gc = parameters["Wagc"], parameters["Wcgc"], parameters["Lgc"], parameters["nb_channel_in_gc"]
-    A_T_a, A_T_c = parameters["A_T_a"], parameters["A_T_c"]
-    nb_gc, type_auxiliary = Int(parameters["nb_gc"]), parameters["type_auxiliary"]
+    # Extraction of the parameters
+    oc = fc.operating_conditions
+    pp = fc.physical_parameters
+    np = fc.numerical_parameters
+    T_des, Phi_a_des, Phi_c_des, Sa, Sc, y_H2_in = oc.T_des, oc.Phi_a_des, oc.Phi_c_des, oc.Sa, oc.Sc, oc.y_H2_in
+    Aact, nb_cell, Hagc, Hcgc = pp.Aact, pp.nb_cell, pp.Hagc, pp.Hcgc
+    Wagc, Wcgc, Lgc, nb_channel_in_gc, A_T_a, A_T_c = pp.Wagc, pp.Wcgc, pp.Lgc, pp.nb_channel_in_gc, pp.A_T_a, pp.A_T_c
+    nb_gc = np.nb_gc
+    type_auxiliary = cfg.type_auxiliary
 
     # Extraction of the variables
     C_v_agc = [sv_1D_cell[i]["C_v_agc"] for i in 1:nb_gc]
@@ -83,9 +80,8 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::Vector{Dict},
 
     # Intermediate values
     (P_agc, P_cgc, Phi_agc, Phi_cgc, y_H2_agc, y_O2_cgc, M_agc, M_cgc, M_ext, M_H2_N2_in, rho_agc, rho_cgc, k_purge,
-     Abp_a, Abp_c, mu_gaz_agc, mu_gaz_cgc) = flow_1D_GC_manifold_int_values(sv_1D_cell, sv_auxiliary, operating_inputs,
-                                                                            parameters)                                 # Some of them will remain useless ?!
-    W_des = desired_flows(sv_1D_cell, i_fc_cell, Pa_in, Pc_in, operating_inputs, parameters)
+     Abp_a, Abp_c, mu_gaz_agc, mu_gaz_cgc) = flow_1D_GC_manifold_int_values(sv_1D_cell, sv_auxiliary, fc, cfg)
+    W_des = desired_flows(sv_1D_cell, i_fc_cell, Pa_in, Pc_in, fc, cfg)
 
     # _________________________________________Inlet and outlet global flows____________________________________________
     """Global flows here refer to flows that integrate all the chemical species circulating together.
@@ -93,43 +89,43 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::Vector{Dict},
     """
 
     # Anode flow through the auxiliaries in mol.s-1
-    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" ||
-       type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+    if type_auxiliary == :forced_convective_cathode_with_anodic_recirculation ||
+       type_auxiliary == :forced_convective_cathode_with_flow_through_anode
         # pass
         # Wa_in = rho_asm_in_to_asm * v_a * A_T_a
         # Wasm_to_asm_out = rho_asm_to_asm_out * v_a * Hagc * Wagc
         # Wasm_out_to_agc = rho_asm_out_to_agc * v_a * Hagc * Wagc
         # Wagc_to_aem_in = rho_agc_to_aem_in * v_a * Hagc * Wagc
         # Waem_in_to_aem = rho_aem_in_to_aem * v_a * Hagc * Wagc
-        # if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" # Attention: include a minimal flow for the pump, as for incoming flows.
+        # if type_auxiliary == :forced_convective_cathode_with_anodic_recirculation # Attention: include a minimal flow for the pump, as for incoming flows.
         #     Ware = Maem_out_re * (Paem_out_re / (Paem_out_re - Phi_aem_out_re * Psat(T_des))) *
         #            (Sa - 1) * i_fc_cell / (2 * F) * (nb_cell * Aact)  # The pump exactly compensates the pressure drop.
         #     Wasm_in_re_to_asm = rho_asm_in_re_to_asm * v_a * A_T_a
         #     Waem_to_aem_out_re = rho_aem_to_aem_out_re * v_a * A_T_a
         #     Waem_to_aem_out = k_purge * rho_aem_to_aem_out * v_a * A_T_a
         #     Wa_out = k_purge * rho_aem_out_to_ext * v_a * A_T_a
-        # else # type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+        # else # type_auxiliary == :forced_convective_cathode_with_flow_through_anode
         #     Waem_to_aem_out = rho_aem_to_aem_out * v_a * Abp_a
         #     Wa_out = rho_aem_out_to_ext * v_a * Abp_a
-    else  # type_auxiliary == "no_auxiliary" (only 1 cell)
+    else  # type_auxiliary == :no_auxiliary (only 1 cell)
         Wa_in = W_des["H2"] + W_des["H2O_inj_a"]  # This expression is also present in calculate_velocity_evolution.
         Wa_out = P_agc[nb_gc] / (R * T_des) * v_a[nb_gc] * Hagc * Wagc * nb_cell * nb_channel_in_gc
     end
 
     # Anode flow entering/leaving the stack in mol.m-2.s-1
-    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" ||
-       type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+    if type_auxiliary == :forced_convective_cathode_with_anodic_recirculation ||
+       type_auxiliary == :forced_convective_cathode_with_flow_through_anode
         # pass
         # Ja_in = 0
         # Ja_out = 0
-    else  # type_auxiliary == "no_auxiliary" (only 1 cell)
+    else  # type_auxiliary == :no_auxiliary (only 1 cell)
         Ja_in = Wa_in / (Hagc * Wagc) / nb_cell / nb_channel_in_gc  # This expression is also present in calculate_velocity_evolution.
         Ja_out = Wa_out / (Hagc * Wagc) / nb_cell / nb_channel_in_gc
     end
 
     # Cathode flow through the auxiliaries in mol.s-1
-    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" ||
-       type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+    if type_auxiliary == :forced_convective_cathode_with_anodic_recirculation ||
+       type_auxiliary == :forced_convective_cathode_with_flow_through_anode
         # pass
         # Wc_in = rho_csm_in_to_csm * v_c * A_T_c
         # Wcsm_to_csm_out = rho_csm_to_csm_out * v_c * Hcgc * Wcgc
@@ -138,7 +134,7 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::Vector{Dict},
         # Wcem_in_to_cem = rho_cem_in_to_cem * v_c * Hcgc * Wcgc
         # Wcem_to_cem_out = rho_cem_to_cem_out * v_c * Abp_c
         # Wc_out = rho_cem_out_to_ext * v_c * Abp_c
-    else  # type_auxiliary == "no_auxiliary" (only 1 cell)
+    else  # type_auxiliary == :no_auxiliary (only 1 cell)
         Wc_in = W_des["dry_air"] + W_des["H2O_inj_c"]  # This expression is also present in calculate_velocity_evolution.
         Wc_out = P_cgc[nb_gc] / (R * T_des) * v_c[nb_gc] * Hcgc * Wcgc * nb_cell * nb_channel_in_gc
     end
@@ -152,19 +148,19 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::Vector{Dict},
     circulating together. For example, only the water vapor flow within the ensemble of hydrogen and water vapor.
     """
 
-    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" ||
-       type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+    if type_auxiliary == :forced_convective_cathode_with_anodic_recirculation ||
+       type_auxiliary == :forced_convective_cathode_with_flow_through_anode
         # Jv_agc_in = Phi_asm * Psat(T_des) / Pasm * Ja_in
-    else  # type_auxiliary == "no_auxiliary"
+    else  # type_auxiliary == :no_auxiliary
         Jv_agc_in = Phi_a_des * Psat(T_des) / Pa_in * Ja_in
     end
     Jv_agc_agc = [C_v_agc[i] * v_a[i] for i in 1:(nb_gc - 1)]
     Jv_agc_out = C_v_agc[nb_gc] * R * T_des / P_agc[nb_gc] * Ja_out
 
-    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" ||
-       type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+    if type_auxiliary == :forced_convective_cathode_with_anodic_recirculation ||
+       type_auxiliary == :forced_convective_cathode_with_flow_through_anode
         # Jv_cgc_in = Phi_csm * Psat(T_des) / Pcsm * Jc_in
-    else  # type_auxiliary == "no_auxiliary"
+    else  # type_auxiliary == :no_auxiliary
         Jv_cgc_in = Phi_c_des * Psat(T_des) / Pc_in * Jc_in
     end
     Jv_cgc_cgc = [C_v_cgc[i] * v_c[i] for i in 1:(nb_gc - 1)]
@@ -188,36 +184,36 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::Vector{Dict},
     Jl_cgc_out = Jl_cgc_cgc_conv[end] + Jl_cgc_cgc_dif[end]
 
     # H2 flows at the GC (mol.m-2.s-1)
-    if type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+    if type_auxiliary == :forced_convective_cathode_with_flow_through_anode
         # pass
         # J_H2_agc_in = y_H2["asm_out"] * (1 - Phi_asm_out_to_agc * Psat(T_des) / Pasm_out_to_agc) * Ja_in
         # J_H2_agc_out = y_H2_agc * (1 - Phi_agc_to_aem_in * Psat(T_des) / Pagc_to_aem_in) * Ja_out
-    else  # type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" or type_auxiliary == "no_auxiliary"
+    else  # type_auxiliary == :forced_convective_cathode_with_anodic_recirculation or type_auxiliary == :no_auxiliary
         J_H2_agc_in = (1 - Phi_a_des * Psat(T_des) / Pa_in) * Ja_in
         J_H2_agc_agc = [C_H2_agc[i] * v_a[i] for i in 1:(nb_gc - 1)]
         J_H2_agc_out = C_H2_agc[nb_gc] * R * T_des / P_agc[nb_gc] * Ja_out
     end
 
     # O2 flows at the GC (mol.m-2.s-1)
-    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" ||
-       type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+    if type_auxiliary == :forced_convective_cathode_with_anodic_recirculation ||
+       type_auxiliary == :forced_convective_cathode_with_flow_through_anode
         # pass
         # J_O2_cgc_in = y_O2_csm * (1 - Phi_csm * Psat(T_des) / Pcsm) * Jc_in
-    else  # type_auxiliary == "no_auxiliary"
+    else  # type_auxiliary == :no_auxiliary
         J_O2_cgc_in = y_O2_ext * (1 - Phi_c_des * Psat(T_des) / Pc_in) * Jc_in
     end
     J_O2_cgc_cgc = [C_O2_cgc[i] * v_c[i] for i in 1:(nb_gc - 1)]
     J_O2_cgc_out = C_O2_cgc[nb_gc] * R * T_des / P_cgc[nb_gc] * Jc_out
 
     # N2 flows at the GC (mol.m-2.s-1)
-    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" ||
-       type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+    if type_auxiliary == :forced_convective_cathode_with_anodic_recirculation ||
+       type_auxiliary == :forced_convective_cathode_with_flow_through_anode
         # pass
         # J_N2_agc_in = (1 - y_H2["asm_out"]) * (1 - Phi_asm_out_to_agc * Psat(T_des) / Pasm_out_to_agc) * Ja_in
         # J_N2_agc_out = (1 - y_H2_agc) * (1 - Phi_agc_to_aem_in * Psat(T_des) / Pagc_to_aem_in) * Ja_out
         # J_N2_cgc_in = (1 - y_O2_csm_out_to_cgc) * (1 - Phi_csm_out_to_cgc * Psat(T_des) / Pcsm_out_to_cgc) * Jc_in
         # J_N2_cgc_out = (1 - y_O2_cgc_to_cem_in) * (1 - Phi_cgc_to_cem_in * Psat(T_des) / Pcgc_to_cem_in) * Jc_out
-    else  # type_auxiliary == "no_auxiliary"
+    else  # type_auxiliary == :no_auxiliary
         J_N2_agc_in = 0.0
         J_N2_agc_agc = fill(0.0, max(nb_gc - 1, 0))
         J_N2_agc_out = 0.0
@@ -227,8 +223,8 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::Vector{Dict},
     end
 
     # Vapor flows at the manifold (mol.s-1)
-    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" ||
-       type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+    if type_auxiliary == :forced_convective_cathode_with_anodic_recirculation ||
+       type_auxiliary == :forced_convective_cathode_with_flow_through_anode
         # pass
         # Wv_asm_in_to_asm = Phi_asm_in_to_asm * Psat(T_des) / Pasm_in_to_asm * Wa_in
         # Wv_asm_to_asm_out = Phi_asm_to_asm_out * Psat(T_des) / Pasm_to_asm_out * Wasm_to_asm_out
@@ -237,13 +233,13 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::Vector{Dict},
         # Wv_aem_in_to_aem = Phi_aem_in_to_aem * Psat(T_des) / Paem_in_to_aem * Waem_in_to_aem
         # Wv_aem_to_aem_out = Phi_aem_to_aem_out * Psat(T_des) / Paem_to_aem_out * Waem_to_aem_out
         # Wv_a_out = Phi_aem_out * Psat(T_des) / Paem_out * Wa_out
-        # if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation"
+        # if type_auxiliary == :forced_convective_cathode_with_anodic_recirculation
         #     # At the anode side
         #     Wv_asm_ext_to_in = 0
         #     Wv_asm_in_re_to_asm = Phi_asm_in_re_to_asm * Psat(T_des) / Pasm_in_re_to_asm * Wasm_in_re_to_asm
         #     Wv_aem_to_aem_out_re = Phi_aem_to_aem_out_re * Psat(T_des) / Paem_to_aem_out_re * Waem_to_aem_out_re
         #     Wv_are = Phi_aem_out_re * Psat(T_des) / Paem_out_re * (Ware / M["aem_out_re"])  # The pump exactly compensates the pressure drop.
-        # else # type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+        # else # type_auxiliary == :forced_convective_cathode_with_flow_through_anode
         #     # At the anode side
         #     Wv_asm_ext_to_in = Wa_inj / M_H2O
         # # At the cathode side
@@ -257,7 +253,7 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::Vector{Dict},
         # Wv_c_out = Phi_cem_out * Psat(T_des) / Pcem_out * Wc_out
     end
 
-    if type_auxiliary == "no_auxiliary"
+    if type_auxiliary == :no_auxiliary
         return Dict{String, Dict}(
             "Jv" => Dict(
                 "agc_in" => Jv_agc_in,

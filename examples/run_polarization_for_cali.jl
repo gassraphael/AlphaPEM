@@ -20,7 +20,7 @@ current_params = PolarizationCalibrationParams(
 )
 
 cfg = SimulationConfig(
-    type_fuel_cells = [:ZSW_GenStack],
+    type_fuel_cell = :ZSW_GenStack,
     type_current = current_params,
     voltage_zone = :full,
     type_auxiliary = :no_auxiliary,
@@ -29,4 +29,7 @@ cfg = SimulationConfig(
     type_plot = :fixed
 )
 
+start_time = time() # Starting time
 run_simulation(cfg)
+algo_time = time() - start_time # Ending time
+println("Time of the algorithm in second : ", algo_time)

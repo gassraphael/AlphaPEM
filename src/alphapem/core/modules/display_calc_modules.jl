@@ -14,7 +14,7 @@ using Statistics
 # ___________________________________________Computational display functions____________________________________________
 
 """
-    make_Fourier_transformation(variables, operating_inputs, parameters)
+    make_Fourier_transformation(variables, cd, cfg)
 
 This function calculates the Fourier transformation of both cell voltage and current density. It will be used to
 display the Nyquist and Bode diagrams.
@@ -24,38 +24,34 @@ delta_t_break_EIS time is observed to ensure the dynamic stability of the stack'
 delta_t_measurement_EIS time is needed to record the cell voltage and the current density.
 
 # Arguments
-- `variables::Dict{String, Any}`: Variables calculated by the solver. They correspond to the fuel cell internal states.
-- `operating_inputs::Dict{String, Any}`: Operating inputs of the fuel cell.
-- `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
+- `variables::Dict`: Variables calculated by the solver. They correspond to the fuel cell internal states.
+- `cd::AbstractCurrent`: Current profile used by the simulation.
+- `cfg::SimulationConfig`: Simulation configuration.
 
 # Returns
-- `Dict{String, Any}`: Dictionary containing the Fourier transformation (FT) of the cell voltage and the current
+- `Dict`: Dictionary containing the Fourier transformation (FT) of the cell voltage and the current
   density, all amplitude values of the cell voltage calculated by the FT, the amplitude of the cell voltage at the
   frequency of the perturbation, all frequency values used by the FT, the frequency of the perturbation, and the
   number of points used in the FT.
 """
-function make_Fourier_transformation(variables::Dict{String, Any},
-                                     operating_inputs::Dict{String, Any},
-                                     parameters::Dict{String, Any})::Dict{String, Any}
+function make_Fourier_transformation(variables::Dict,
+                                     cd::AbstractCurrent,
+                                     cfg::SimulationConfig)::Dict
 
     # Extraction of the variables
     t, Ucell_t = variables["t"], variables["Ucell"]
-    # Extraction of the operating inputs and the parameters
-    current_density = operating_inputs["current_density"]
-    t_EIS           = parameters["t_EIS"]
+    # EIS timing is only available for EIS current profiles.
+    cfg.type_current == :EIS || throw(ArgumentError("make_Fourier_transformation requires type_current = :EIS."))
 
-    # Creation of ifc
-    n     = length(t)
-    ifc_t = zeros(n)
-    for i in 1:n
-        ifc_t[i] = current_density(t[i], parameters)
-    end
+    # Creation of the current density vector at the same time points as the cell voltage.
+    ifc_t = current(cd, t)
 
     # Identify the areas where Ucell and ifc can be measured for the EIS: after equilibrium and at each frequency change
-    t0_EIS, t_new_start_EIS, tf_EIS, delta_t_break_EIS, delta_t_measurement_EIS = t_EIS
-    n_inf = findlast(t_new_start_EIS .<= t[1])  # The number of frequency changes which has been made so far.
-    mask_EIS = (t .> (t[1] + delta_t_break_EIS[n_inf])) .&
-               (t .< (t[1] + delta_t_break_EIS[n_inf] + delta_t_measurement_EIS[n_inf]))
+    t_new_start_EIS = cd.t_new_start
+    delta_t_break_EIS = cd.delta_t_break
+    delta_t_measurement_EIS = cd.delta_t_measurement
+    n_inf = findlast(t_new_start_EIS .<= t[1])  # Number of frequency changes already applied.
+    mask_EIS = (t .> (t[1] + delta_t_break_EIS[n_inf])) .& (t .< (t[1] + delta_t_break_EIS[n_inf] + delta_t_measurement_EIS[n_inf]))
     Ucell_EIS_measured = Ucell_t[mask_EIS]
     ifc_EIS_measured   = ifc_t[mask_EIS]
 

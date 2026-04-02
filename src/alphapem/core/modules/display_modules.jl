@@ -48,39 +48,26 @@ each polarisation point is recorded at the end of each delta_t_break_pola time.
 - `ax`: Axes on which the polarisation curve will be plotted.
 - `show::Bool=true`: If true, the polarisation curve will be displayed. If false, it will not be displayed.
 """
-function plot_polarisation_curve(variables::Dict{String, Any},
-                                 operating_inputs::Dict{String, Any},
-                                 parameters::Dict{String, Any},
-                                 ax,
-                                 show::Bool=true)
+function plot_polarisation_curve(variables::Dict{String, Any},  fc::AbstractFuelCell, cd::AbstractCurrent,
+                                 cfg::SimulationConfig, ax, show::Bool=true)
 
     # Extraction of the variables
-    t       = collect(variables["t"])
-    Ucell_t = collect(variables["Ucell"])
-    # Extraction of the operating inputs and the parameters
-    current_density = operating_inputs["current_density"]
-    pola_current_parameters = parameters["pola_current_parameters"]
-    delta_t_ini_pola = pola_current_parameters["delta_t_ini_pola"]
-    delta_t_load_pola = pola_current_parameters["delta_t_load_pola"]
-    delta_t_break_pola = pola_current_parameters["delta_t_break_pola"]
-    delta_i_pola = pola_current_parameters["delta_i_pola"]
-    i_max_pola = pola_current_parameters["i_max_pola"]
-    type_fuel_cell = parameters["type_fuel_cell"]
-    type_current = parameters["type_current"]
-    voltage_zone = parameters["voltage_zone"]
-    type_auxiliary = parameters["type_auxiliary"]
-    type_plot = parameters["type_plot"]
+    t, Ucell_t = collect(variables["t"]), collect(variables["Ucell"])
 
-    if type_plot == "fixed"
+    delta_t_ini_pola, delta_t_load_pola, delta_t_break_pola = cd.delta_t_ini, delta_t_load(cd), cd.delta_t_break
+    delta_i_pola, i_max_pola = cd.delta_i, cd.i_max
+    voltage_zone = cfg.voltage_zone
+
+    if cfg.type_plot == :fixed
         # Creation of ifc_t
         n = length(t)
         ifc_t = zeros(n)
         for i in 1:n
-            ifc_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
+            ifc_t[i] = current(cd, t[i]) / 1e4  # Conversion in A/cm²
         end
 
         # Recovery of ifc and Ucell from the model after each stack stabilisation
-            nb_loads = floor(Int, i_max_pola / delta_i_pola)  # Number of loads which are made
+        nb_loads = floor(Int, i_max_pola / delta_i_pola)  # Number of loads which are made
         ifc_discretized = zeros(nb_loads + 1)      # One point is taken at ifc = 0, before the first load.
         Ucell_discretized = zeros(nb_loads + 1)    # One point is taken at ifc = 0, before the first load.
         for i in 0:nb_loads
@@ -91,13 +78,13 @@ function plot_polarisation_curve(variables::Dict{String, Any},
         end
 
         # Plot the experimental polarization curve and calculate the simulation error compared with experimental data
-        if type_fuel_cell != "manual_setup" &&
-           (type_auxiliary == "forced-convective_cathode_with_flow-through_anode" || type_auxiliary == "no_auxiliary")
+        if cfg.type_fuel_cell != :manual_setup &&
+           (type_auxiliary == :forced_convective_cathode_with_flow_through_anode || type_auxiliary == :no_auxiliary)
             # Extraction of the experimental current density and voltage values.
-            i_exp_t, U_exp_t = pola_exp_values(type_fuel_cell, voltage_zone)  # (A.m-2, V).
+            i_exp_t, U_exp_t = fc.pola_exp_data  # (A.m-2, V).
             # Plot of the experimental polarization curve
             i_exp_t = i_exp_t ./ 1e4  # Conversion in A/cm²
-            plot_experimental_polarisation_curve(type_fuel_cell, i_exp_t, U_exp_t, ax)
+            plot_experimental_polarisation_curve(cfg.type_fuel_cell, i_exp_t, U_exp_t, ax)
             # Calculate the simulation error compared with experimental data
             # Experimental points are interpolated to correspond to the model points
             itp = linear_interpolation(ifc_discretized, Ucell_discretized; extrapolation_bc=Line())
@@ -108,14 +95,14 @@ function plot_polarisation_curve(variables::Dict{String, Any},
         end
 
         # Plot the model polarisation curve
-        plot_specific_line(ifc_discretized, Ucell_discretized, type_fuel_cell, type_current, type_auxiliary,
+        plot_specific_line(ifc_discretized, Ucell_discretized, cfg.type_fuel_cell, cfg.type_current, cfg.type_auxiliary,
                            sim_error, ax)
-        plot_pola_instructions(type_fuel_cell, ax, show)
+        plot_pola_instructions(cfg.type_fuel_cell, ax, show)
 
-    else  # type_plot == "dynamic"
+    else  # cfg.type_plot == :dynamic
         # Plot of the polarisation curve produced by the model
         idx = argmin(abs.(t .- t[end]))  # index for polarisation measurement
-        ifc = current_density(t[idx], parameters) / 1e4  # time for polarisation measurement
+        ifc = current(cd, t[idx]) / 1e4  # time for polarisation measurement
         Ucell = Ucell_t[idx]  # voltage measurement
         ax.plot([ifc], [Ucell], "og"; markersize=2)
     end
@@ -125,7 +112,7 @@ function plot_polarisation_curve(variables::Dict{String, Any},
                   labelpad=3)
     ax.set_ylabel(raw"$\mathbf{Cell}$ $\mathbf{voltage}$ $\mathbf{U_{cell}}$ $\mathbf{\left( V \right)}$";
                   labelpad=3)
-    if type_plot == "fixed"
+    if cfg.type_plot == :fixed
         ax.legend(loc="best")
     end
 
@@ -153,33 +140,28 @@ each polarisation point is recorded at the end of each delta_t_break_pola time.
 - `ax`: Axes on which the polarisation curve will be plotted.
 """
 function plot_polarisation_curve_for_cali(variables::Dict{String, Any},
-                                          operating_inputs::Dict{String, Any},
-                                          parameters::Dict{String, Any},
+                                          fc::AbstractFuelCell,
+                                          cd::AbstractCurrent,
+                                          cfg::SimulationConfig,
                                           ax)
 
     # Extraction of the variables
-    t       = collect(variables["t"])
-    Ucell_t = collect(variables["Ucell"])
+    t, Ucell_t = collect(variables["t"]), collect(variables["Ucell"])
     # Extraction of the operating inputs and the parameters
-    current_density = operating_inputs["current_density"]
-    pola_current_for_cali_parameters = parameters["pola_current_for_cali_parameters"]
-    delta_t_ini_pola_cali = pola_current_for_cali_parameters["delta_t_ini_pola_cali"]
-    delta_t_load_pola_cali = pola_current_for_cali_parameters["delta_t_load_pola_cali"]
-    delta_t_break_pola_cali = pola_current_for_cali_parameters["delta_t_break_pola_cali"]
-    type_fuel_cell = parameters["type_fuel_cell"]
-    type_current = parameters["type_current"]
-    voltage_zone = parameters["voltage_zone"]
-    type_auxiliary = parameters["type_auxiliary"]
-    type_plot = parameters["type_plot"]
-    # Extraction of the experimental current density and voltage values for the calibration.
-    i_exp_cali_t, U_exp_cali_t = pola_exp_values_calibration(type_fuel_cell, voltage_zone)  # (A.m-2, V).
 
-    if type_plot == "fixed"
+    delta_t_ini_pola_cali = cd.delta_t_ini
+    delta_t_load_pola_cali = abs(cd.i_exp[1]) / cd.v_load
+    delta_t_break_pola_cali = cd.delta_t_break
+    voltage_zone = cfg.voltage_zone
+    # Extraction of the experimental current density and voltage values for the calibration.
+    i_exp_cali_t, U_exp_cali_t = fc.pola_exp_data_cali  # (A.m-2, V).
+
+    if cfg.type_plot == :fixed
         # Creation of ifc_t
         n = length(t)
         ifc_t = zeros(n)
         for i in 1:n
-            ifc_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
+            ifc_t[i] = current(cd, t[i]) / 1e4  # Conversion in A/cm²
         end
 
         # Recovery of ifc and Ucell from the model after each stack stabilisation
@@ -196,18 +178,18 @@ function plot_polarisation_curve_for_cali(variables::Dict{String, Any},
 
         # Plot the experimental polarization curve
         i_exp_cali_t = i_exp_cali_t ./ 1e4  # Conversion in A/cm²
-        plot_experimental_polarisation_curve(type_fuel_cell, i_exp_cali_t, U_exp_cali_t, ax)
+        plot_experimental_polarisation_curve(cfg.type_fuel_cell, i_exp_cali_t, U_exp_cali_t, ax)
 
         # Plot the model polarisation curve
         sim_error = calculate_simulation_error(Ucell_discretized, U_exp_cali_t)  # Calculate the simulation error
-        plot_specific_line(ifc_discretized, Ucell_discretized, type_fuel_cell, type_current, type_auxiliary,
+        plot_specific_line(ifc_discretized, Ucell_discretized, cfg.type_fuel_cell, cfg.type_current, cfg.type_auxiliary,
                            sim_error, ax)
-        plot_pola_instructions(type_fuel_cell, ax)
+        plot_pola_instructions(cfg.type_fuel_cell, ax)
 
-    else  # type_plot == "dynamic"
+    else  # cfg.type_plot == :dynamic
         # Plot of the polarisation curve produced by the model
         idx = argmin(abs.(t .- t[end]))  # index for polarisation measurement
-        ifc = current_density(t[idx], parameters) / 1e4  # time for polarisation measurement
+        ifc = current(cd, t[idx]) / 1e4  # time for polarisation measurement
         Ucell = Ucell_t[idx]  # voltage measurement
         ax.plot([ifc], [Ucell], "og"; markersize=2)
     end
@@ -217,7 +199,7 @@ function plot_polarisation_curve_for_cali(variables::Dict{String, Any},
                   labelpad=3)
     ax.set_ylabel(raw"$\mathbf{Cell}$ $\mathbf{voltage}$ $\mathbf{U_{cell}}$ $\mathbf{\left( V \right)}$";
                   labelpad=3)
-    if type_plot == "fixed"
+    if cfg.type_plot == :fixed
         ax.legend(loc="best")
     end
 
@@ -238,12 +220,14 @@ This function is used to plot the Nyquist diagram of the EIS curves.
   post-processing outputs.
 - `ax`: Axes on which the Nyquist diagram will be plotted.
 """
-function plot_EIS_curve_Nyquist(parameters::Dict{String, Any},
+function plot_EIS_curve_Nyquist(fc::AbstractFuelCell,
+                                cd::AbstractCurrent,
+                                cfg::SimulationConfig,
                                 Fourier_results::Dict{String, Any},
                                 ax)
 
     # Extraction of the parameters
-    i_EIS, ratio_EIS, type_fuel_cell = parameters["i_EIS"], parameters["ratio_EIS"], parameters["type_fuel_cell"]
+    i_EIS, ratio_EIS = cd.i_EIS, cd.ratio
     # Extraction of the Fourier results
     Ucell_Fourier, ifc_Fourier = Fourier_results["Ucell_Fourier"], Fourier_results["ifc_Fourier"]
     f_Fourier = Fourier_results["f"]
@@ -265,7 +249,7 @@ function plot_EIS_curve_Nyquist(parameters::Dict{String, Any},
     ax.set_xlabel(raw"$\mathbf{Z_{real}}$ $\mathbf{(m\Omega.cm^{2})}$"; labelpad=3)
     ax.set_ylabel(raw"$\mathbf{-Z_{imag}}$ $\mathbf{(m\Omega.cm^{2})}$"; labelpad=3)
     # Plot instructions
-    plot_EIS_Nyquist_instructions(type_fuel_cell, f_Fourier, Z_real, -Z_imag, ax)
+    plot_EIS_Nyquist_instructions(cfg.type_fuel_cell, f_Fourier, Z_real, -Z_imag, ax)
 
     return nothing
 end
@@ -281,15 +265,16 @@ This function is used to plot the amplitude Bode diagram of the EIS curves.
 - `Fourier_results::Dict{String, Any}`: Dictionary containing Fourier post-processing outputs.
 - `ax`: Axes on which the amplitude Bode diagram will be plotted.
 """
-function plot_EIS_curve_Bode_amplitude(parameters::Dict{String, Any},
+function plot_EIS_curve_Bode_amplitude(fc::AbstractFuelCell,
+                                       cd::AbstractCurrent,
+                                       cfg::SimulationConfig,
                                        Fourier_results::Dict{String, Any},
                                        ax)
 
     # Extraction of the parameters
-    i_EIS = parameters["i_EIS"]
-    ratio_EIS = parameters["ratio_EIS"]
-    f_EIS = parameters["f_EIS"]
-    type_fuel_cell = parameters["type_fuel_cell"]
+    i_EIS = cd.i_EIS
+    ratio_EIS = cd.ratio
+    f_EIS = (minimum(log10.(cd.f)), maximum(log10.(cd.f)), length(cd.f), 0)
     # Extraction of the Fourier results
     A = Fourier_results["A"]
     f = Fourier_results["f"]
@@ -302,7 +287,7 @@ function plot_EIS_curve_Bode_amplitude(parameters::Dict{String, Any},
     ax.set_xlabel(raw"$\mathbf{Frequency}$ $\mathbf{(Hz,}$ $\mathbf{logarithmic}$ $\mathbf{scale)}$"; labelpad=3)
     ax.set_ylabel(raw"$\mathbf{Impedance}$ $\mathbf{amplitude}$ $\mathbf{(m\Omega.cm^{2})}$"; labelpad=3)
     # Plot instructions
-    plot_Bode_amplitude_instructions(f_EIS, type_fuel_cell, ax)
+    plot_Bode_amplitude_instructions(f_EIS, cfg.type_fuel_cell, ax)
 
     return nothing
 end
@@ -319,13 +304,14 @@ This function is used to plot the angle Bode diagram. It only works with an entr
 - `Fourier_results::Dict{String, Any}`: Dictionary containing Fourier post-processing outputs.
 - `ax`: Axes on which the angle Bode diagram will be plotted.
 """
-function plot_EIS_curve_Bode_angle(parameters::Dict{String, Any},
+function plot_EIS_curve_Bode_angle(fc::AbstractFuelCell,
+                                   cd::AbstractCurrent,
+                                   cfg::SimulationConfig,
                                    Fourier_results::Dict{String, Any},
                                    ax)
 
     # Extraction of the parameters
-    f_EIS = parameters["f_EIS"]
-    type_fuel_cell = parameters["type_fuel_cell"]
+    f_EIS = (minimum(log10.(cd.f)), maximum(log10.(cd.f)), length(cd.f), 0)
     # Extraction of the Fourier results
     Ucell_Fourier = Fourier_results["Ucell_Fourier"]
     ifc_Fourier = Fourier_results["ifc_Fourier"]
@@ -351,7 +337,7 @@ function plot_EIS_curve_Bode_angle(parameters::Dict{String, Any},
     ax.set_xlabel(raw"$\mathbf{Frequency}$ $\mathbf{(Hz,}$ $\mathbf{logarithmic}$ $\mathbf{scale)}$"; labelpad=3)
     ax.set_ylabel(raw"$\mathbf{Phase}$ $\mathbf{(^\circ)}$"; labelpad=3)
     # Plot instructions
-    plot_Bode_phase_instructions(f_EIS, type_fuel_cell, ax)
+    plot_Bode_phase_instructions(f_EIS, cfg.type_fuel_cell, ax)
 
     return nothing
 end
@@ -372,19 +358,20 @@ reconstructed Ucell_Fourier(t).
 - `Fourier_results::Dict{String, Any}`: Dictionary containing Fourier post-processing outputs.
 """
 function plot_EIS_curve_tests(variables::Dict{String, Any},
-                              operating_inputs::Dict{String, Any},
-                              parameters::Dict{String, Any},
+                              fc::AbstractFuelCell,
+                              cd::AbstractCurrent,
+                              cfg::SimulationConfig,
                               Fourier_results::Dict{String, Any})
 
     # Extraction of the variables
     t = collect(variables["t"])
     Ucell_t = variables["Ucell"]
     # Extraction of the operating inputs and the parameters
-    current_density = operating_inputs["current_density"]
-    i_EIS = parameters["i_EIS"]
-    ratio_EIS = parameters["ratio_EIS"]
-    t_EIS = parameters["t_EIS"]
-    f_EIS = parameters["f_EIS"]
+
+    i_EIS = cd.i_EIS
+    ratio_EIS = cd.ratio
+    t_EIS = (cd.t0, cd.t_new_start, cd.tf, cd.delta_t_break, cd.delta_t_measurement)
+    f_EIS = (minimum(log10.(cd.f)), maximum(log10.(cd.f)), length(cd.f), 0)
     # Extraction of the Fourier results
     Ucell_Fourier = Fourier_results["Ucell_Fourier"]
     ifc_Fourier = Fourier_results["ifc_Fourier"]
@@ -416,7 +403,7 @@ function plot_EIS_curve_tests(variables::Dict{String, Any},
     n = length(t)
     ifc_t = zeros(n)
     for i in 1:n  # Conversion in A/cm²
-        ifc_t[i] = current_density(t[i], parameters) / 1e4
+        ifc_t[i] = current(cd, t[i]) / 1e4
     end
     # Plot of ifc_t
     plt.plot(t, ifc_t; color="blue", label="ifc")
@@ -452,29 +439,18 @@ spatial localisation through the gas channel are plotted on the same graph, to c
 - `ax`: Axes on which the current density will be plotted.
 """
 function plot_ifc_1D_temporal(variables::Dict{String, Any},
-                              operating_inputs::Dict{String, Any},
-                              parameters::Dict{String, Any},
+                              fc::AbstractFuelCell,
+                              cd::AbstractCurrent,
+                              cfg::SimulationConfig,
                               ax)
 
     # Extraction of the operating inputs and the parameters
-    current_density = operating_inputs["current_density"]
-    nb_gc = parameters["nb_gc"]
-    type_current = parameters["type_current"]
-    type_plot = parameters["type_plot"]
-
-    if type_current == "step"
-        delta_t_ini = parameters["step_current_parameters"]["delta_t_ini_step"]
-    elseif type_current == "polarization"
-        delta_t_ini = parameters["pola_current_parameters"]["delta_t_ini_pola"]
-    elseif type_current == "polarization_for_cali"
-        delta_t_ini = parameters["pola_current_for_cali_parameters"]["delta_t_ini_pola_cali"]
-    else
-        delta_t_ini = 0
-    end
+    nb_gc = fc.numerical_parameters.nb_gc
+    delta_t_ini = cd.delta_t_ini
 
     # Extraction of the variables
     t_full = collect(variables["t"])
-    mask = if type_plot == "fixed"
+    mask = if cfg.type_plot == :fixed
         t_full .>= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
     else
         trues(length(t_full))
@@ -491,7 +467,7 @@ function plot_ifc_1D_temporal(variables::Dict{String, Any},
     n = length(t)
     i_fc_cell_t = zeros(n)
     for i in 1:n  # Creation of i_fc_cell_t
-        i_fc_cell_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
+        i_fc_cell_t[i] = current(cd, t[i]) / 1e4  # Conversion in A/cm²
     end
     h = ax.plot(t, i_fc_cell_t; color=colors(0))[1]
     push!(handles, h)
@@ -524,25 +500,27 @@ cell, as a function of time.
 - `ax`: Axes on which the vapor concentration will be plotted.
 """
 function plot_C_v_1D_temporal(variables::Dict{String, Any},
-                              parameters::Dict{String, Any},
+                              fc::AbstractFuelCell,
+                              cd::AbstractCurrent,
+                              cfg::SimulationConfig,
                               ax)
 
     # Extraction of the parameter
-    nb_gc, nb_gdl, nb_mpl = parameters["nb_gc"], parameters["nb_gdl"], parameters["nb_mpl"]
-    type_current, type_plot = parameters["type_current"], parameters["type_plot"]
-    if type_current == "step"
-        delta_t_ini = parameters["step_current_parameters"]["delta_t_ini_step"]
-    elseif type_current == "polarization"
-        delta_t_ini = parameters["pola_current_parameters"]["delta_t_ini_pola"]
-    elseif type_current == "polarization_for_cali"
-        delta_t_ini = parameters["pola_current_for_cali_parameters"]["delta_t_ini_pola_cali"]
+    nb_gc, nb_gdl, nb_mpl = fc.numerical_parameters.nb_gc, fc.numerical_parameters.nb_gdl, fc.numerical_parameters.nb_mpl
+    type_current, type_plot = cfg.type_current, cfg.type_plot
+    if cfg.type_current == :step
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization_for_cali
+        delta_t_ini = cd.delta_t_ini
     else
         delta_t_ini = 0
     end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
-    mask = if type_plot == "fixed"
+    mask = if cfg.type_plot == :fixed
         t_full .>= 0.9 * delta_t_ini
     else
         trues(length(t_full))
@@ -597,29 +575,27 @@ as a function of time.
 - `ax`: Axes on which the water content will be plotted.
 """
 function plot_lambda_1D_temporal(variables::Dict{String, Any},
-                                 operating_inputs::Dict{String, Any},
-                                 parameters::Dict{String, Any},
+                                 fc::AbstractFuelCell,
+                                 cd::AbstractCurrent,
+                                 cfg::SimulationConfig,
                                  ax)
 
     # Extraction of the operating inputs and the parameters
-    current_density = operating_inputs["current_density"]
-    nb_gc = parameters["nb_gc"]
-    pola_current_parameters = parameters["pola_current_parameters"]
-    type_current = parameters["type_current"]
-    type_plot = parameters["type_plot"]
-    if type_current == "step"
-        delta_t_ini = parameters["step_current_parameters"]["delta_t_ini_step"]
-    elseif type_current == "polarization"
-        delta_t_ini = parameters["pola_current_parameters"]["delta_t_ini_pola"]
-    elseif type_current == "polarization_for_cali"
-        delta_t_ini = parameters["pola_current_for_cali_parameters"]["delta_t_ini_pola_cali"]
+
+    nb_gc = fc.numerical_parameters.nb_gc
+    if cfg.type_current == :step
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization_for_cali
+        delta_t_ini = cd.delta_t_ini
     else
         delta_t_ini = 0
     end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
-    mask = if type_plot == "fixed"
+    mask = if cfg.type_plot == :fixed
         t_full .>= 0.9 * delta_t_ini
     else
         trues(length(t_full))
@@ -631,18 +607,18 @@ function plot_lambda_1D_temporal(variables::Dict{String, Any},
     lambda_ccl_t = collect(variables["lambda_ccl"][nb_gc_mid])[mask]
 
     # Plot the water content at different spatial localisations: lambda
-    if type_current == "polarization"
+    if cfg.type_current == :polarization
         n = length(t)
         ifc_t = zeros(n)
         for i in 1:n
-            ifc_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
+            ifc_t[i] = current(cd, t[i]) / 1e4  # Conversion in A/cm²
         end
 
         # Recovery of the internal states from the model after each stack stabilisation
-        delta_t_ini_pola = pola_current_parameters["delta_t_ini_pola"]
-        delta_t_load_pola = pola_current_parameters["delta_t_load_pola"]
-        delta_t_break_pola = pola_current_parameters["delta_t_break_pola"]
-            nb_loads = floor(Int, pola_current_parameters["i_max_pola"] / pola_current_parameters["delta_i_pola"])
+        delta_t_ini_pola = cd.delta_t_ini
+        delta_t_load_pola = cd.delta_i / cd.v_load
+        delta_t_break_pola = cd.delta_t_break
+            nb_loads = floor(Int, cd.i_max / cd.delta_i)
         ifc_discretized_t = zeros(nb_loads)
         lambda_acl_discretized_t = zeros(nb_loads)
         lambda_mem_discretized_t = zeros(nb_loads)
@@ -689,31 +665,29 @@ cell, as a function of time.
 - `ax`: Axes on which the liquid water saturation will be plotted.
 """
 function plot_s_1D_temporal(variables::Dict{String, Any},
-                            operating_inputs::Dict{String, Any},
-                            parameters::Dict{String, Any},
+                            fc::AbstractFuelCell,
+                            cd::AbstractCurrent,
+                            cfg::SimulationConfig,
                             ax)
 
     # Extraction of the operating inputs and the parameters
-    current_density = operating_inputs["current_density"]
-    nb_gc = parameters["nb_gc"]
-    nb_gdl = parameters["nb_gdl"]
-    nb_mpl = parameters["nb_mpl"]
-    pola_current_parameters = parameters["pola_current_parameters"]
-    type_current = parameters["type_current"]
-    type_plot = parameters["type_plot"]
-    if type_current == "step"
-        delta_t_ini = parameters["step_current_parameters"]["delta_t_ini_step"]
-    elseif type_current == "polarization"
-        delta_t_ini = parameters["pola_current_parameters"]["delta_t_ini_pola"]
-    elseif type_current == "polarization_for_cali"
-        delta_t_ini = parameters["pola_current_for_cali_parameters"]["delta_t_ini_pola_cali"]
+
+    nb_gc = fc.numerical_parameters.nb_gc
+    nb_gdl = fc.numerical_parameters.nb_gdl
+    nb_mpl = fc.numerical_parameters.nb_mpl
+    if cfg.type_current == :step
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization_for_cali
+        delta_t_ini = cd.delta_t_ini
     else
         delta_t_ini = 0
     end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
-    mask = if type_plot == "fixed"
+    mask = if cfg.type_plot == :fixed
         t_full .>= 0.9 * delta_t_ini
     else
         trues(length(t_full))
@@ -730,17 +704,17 @@ function plot_s_1D_temporal(variables::Dict{String, Any},
     s_cgc_t = collect(variables["s_cgc"][nb_gc_mid])[mask]
 
     # Plot the liquid water saturation at different spatial localisations: s
-    if type_current == "polarization"
+    if cfg.type_current == :polarization
         n = length(t)
         ifc_t = zeros(n)
         for i in 1:n
-            ifc_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
+            ifc_t[i] = current(cd, t[i]) / 1e4  # Conversion in A/cm²
         end
         # Recovery of the internal states from the model after each stack stabilisation
-        delta_t_ini_pola = pola_current_parameters["delta_t_ini_pola"]
-        delta_t_load_pola = pola_current_parameters["delta_t_load_pola"]
-        delta_t_break_pola = pola_current_parameters["delta_t_break_pola"]
-            nb_loads = floor(Int, pola_current_parameters["i_max_pola"] / pola_current_parameters["delta_i_pola"])
+        delta_t_ini_pola = cd.delta_t_ini
+        delta_t_load_pola = cd.delta_i / cd.v_load
+        delta_t_break_pola = cd.delta_t_break
+            nb_loads = floor(Int, cd.i_max / cd.delta_i)
         ifc_discretized_t = zeros(nb_loads)
         s_agc_discretized_t = zeros(nb_loads)
         s_agdl_discretized_t = zeros(nb_loads)
@@ -808,28 +782,28 @@ cell, as a function of time.
 - `ax`: Axes on which the hydrogen concentration will be plotted.
 """
 function plot_C_H2_1D_temporal(variables::Dict{String, Any},
-                               parameters::Dict{String, Any},
+                               fc::AbstractFuelCell,
+                               cd::AbstractCurrent,
+                               cfg::SimulationConfig,
                                ax)
 
     # Extraction of the parameters
-    nb_gc = parameters["nb_gc"]
-    nb_gdl = parameters["nb_gdl"]
-    nb_mpl = parameters["nb_mpl"]
-    type_current = parameters["type_current"]
-    type_plot = parameters["type_plot"]
-    if type_current == "step"
-        delta_t_ini = parameters["step_current_parameters"]["delta_t_ini_step"]
-    elseif type_current == "polarization"
-        delta_t_ini = parameters["pola_current_parameters"]["delta_t_ini_pola"]
-    elseif type_current == "polarization_for_cali"
-        delta_t_ini = parameters["pola_current_for_cali_parameters"]["delta_t_ini_pola_cali"]
+    nb_gc = fc.numerical_parameters.nb_gc
+    nb_gdl = fc.numerical_parameters.nb_gdl
+    nb_mpl = fc.numerical_parameters.nb_mpl
+    if cfg.type_current == :step
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization_for_cali
+        delta_t_ini = cd.delta_t_ini
     else
         delta_t_ini = 0
     end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
-    mask = if type_plot == "fixed"
+    mask = if cfg.type_plot == :fixed
         t_full .>= 0.9 * delta_t_ini
     else
         trues(length(t_full))
@@ -872,31 +846,30 @@ cell, as a function of time.
 - `ax`: Axes on which the oxygen concentration will be plotted.
 """
 function plot_C_O2_1D_temporal(variables::Dict{String, Any},
-                               operating_inputs::Dict{String, Any},
-                               parameters::Dict{String, Any},
+                               fc::AbstractFuelCell,
+                               cd::AbstractCurrent,
+                               cfg::SimulationConfig,
                                ax)
 
     # Extraction of the parameters
-    current_density = operating_inputs["current_density"]
-    Hccl = parameters["Hccl"]
-    nb_gc = parameters["nb_gc"]
-    nb_gdl = parameters["nb_gdl"]
-    nb_mpl = parameters["nb_mpl"]
-    type_current = parameters["type_current"]
-    type_plot = parameters["type_plot"]
-    if type_current == "step"
-        delta_t_ini = parameters["step_current_parameters"]["delta_t_ini_step"]
-    elseif type_current == "polarization"
-        delta_t_ini = parameters["pola_current_parameters"]["delta_t_ini_pola"]
-    elseif type_current == "polarization_for_cali"
-        delta_t_ini = parameters["pola_current_for_cali_parameters"]["delta_t_ini_pola_cali"]
+
+    Hccl = fc.physical_parameters.Hccl
+    nb_gc = fc.numerical_parameters.nb_gc
+    nb_gdl = fc.numerical_parameters.nb_gdl
+    nb_mpl = fc.numerical_parameters.nb_mpl
+    if cfg.type_current == :step
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization_for_cali
+        delta_t_ini = cd.delta_t_ini
     else
         delta_t_ini = 0
     end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
-    mask = if type_plot == "fixed"
+    mask = if cfg.type_plot == :fixed
         t_full .>= 0.9 * delta_t_ini
     else
         trues(length(t_full))
@@ -939,26 +912,26 @@ This function plots the nitrogen concentration as a function of time.
 - `ax`: Axes on which the nitrogen concentration will be plotted.
 """
 function plot_C_N2_1D_temporal(variables::Dict{String, Any},
-                               parameters::Dict{String, Any},
+                               fc::AbstractFuelCell,
+                               cd::AbstractCurrent,
+                               cfg::SimulationConfig,
                                ax)
 
     # Extraction of the parameters
-    nb_gc = parameters["nb_gc"]
-    type_current = parameters["type_current"]
-    type_plot = parameters["type_plot"]
-    if type_current == "step"
-        delta_t_ini = parameters["step_current_parameters"]["delta_t_ini_step"]
-    elseif type_current == "polarization"
-        delta_t_ini = parameters["pola_current_parameters"]["delta_t_ini_pola"]
-    elseif type_current == "polarization_for_cali"
-        delta_t_ini = parameters["pola_current_for_cali_parameters"]["delta_t_ini_pola_cali"]
+    nb_gc = fc.numerical_parameters.nb_gc
+    if cfg.type_current == :step
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization_for_cali
+        delta_t_ini = cd.delta_t_ini
     else
         delta_t_ini = 0
     end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
-    mask = if type_plot == "fixed"
+    mask = if cfg.type_plot == :fixed
         t_full .>= 0.9 * delta_t_ini
     else
         trues(length(t_full))
@@ -995,29 +968,28 @@ This function plots the pressure at different spatial localisations as a functio
 - `ax`: Axes on which the pressure will be plotted.
 """
 function plot_P_1D_temporal(variables::Dict{String, Any},
-                            operating_inputs::Dict{String, Any},
-                            parameters::Dict{String, Any},
+                            fc::AbstractFuelCell,
+                            cd::AbstractCurrent,
+                            cfg::SimulationConfig,
                             ax)
 
     # Extraction of the parameters
-    Pa_des = operating_inputs["Pa_des"]
-    Pc_des = operating_inputs["Pc_des"]
-    nb_gc = parameters["nb_gc"]
-    type_current = parameters["type_current"]
-    type_plot = parameters["type_plot"]
-    if type_current == "step"
-        delta_t_ini = parameters["step_current_parameters"]["delta_t_ini_step"]
-    elseif type_current == "polarization"
-        delta_t_ini = parameters["pola_current_parameters"]["delta_t_ini_pola"]
-    elseif type_current == "polarization_for_cali"
-        delta_t_ini = parameters["pola_current_for_cali_parameters"]["delta_t_ini_pola_cali"]
+    Pa_des = fc.operating_conditions.Pa_des
+    Pc_des = fc.operating_conditions.Pc_des
+    nb_gc = fc.numerical_parameters.nb_gc
+    if cfg.type_current == :step
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization_for_cali
+        delta_t_ini = cd.delta_t_ini
     else
         delta_t_ini = 0
     end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
-    mask = if type_plot == "fixed"
+    mask = if cfg.type_plot == :fixed
         t_full .>= 0.9 * delta_t_ini
     else
         trues(length(t_full))
@@ -1034,7 +1006,7 @@ function plot_P_1D_temporal(variables::Dict{String, Any},
     T_cgc = collect(variables["T_cgc"][nb_gc_mid])[mask]
     Pagc_t = (C_v_agc .+ C_H2_agc .+ C_N2_agc) .* R .* T_agc ./ 1e5  # Conversion in bar
     Pcgc_t = (C_v_cgc .+ C_O2_cgc .+ C_N2_cgc) .* R .* T_cgc ./ 1e5  # Conversion in bar
-    if parameters["type_auxiliary"] != "no_auxiliary"
+    if cfg.type_auxiliary != :no_auxiliary
         Pasm_t = collect(variables["Pasm"])[mask] ./ 1e5
         Paem_t = collect(variables["Paem"])[mask] ./ 1e5
         Pcsm_t = collect(variables["Pcsm"])[mask] ./ 1e5
@@ -1049,7 +1021,7 @@ function plot_P_1D_temporal(variables::Dict{String, Any},
     # Plot the pressure at different spatial localisations: P
     ax.plot(t, Pagc_t; color=colors(0))
     ax.plot(t, Pcgc_t; color=colors(6))
-    if parameters["type_auxiliary"] != "no_auxiliary"
+    if cfg.type_auxiliary != :no_auxiliary
         ax.plot(t, Pasm_t; color=colors(7))
         ax.plot(t, Paem_t; color=colors(8))
         ax.plot(t, Pcsm_t; color=colors(9))
@@ -1060,7 +1032,7 @@ function plot_P_1D_temporal(variables::Dict{String, Any},
         ax.plot(t, Pc_in_t; color=colors(9))
         ax.plot(t, Pc_out_t; color=colors(10))
     end
-    if parameters["type_auxiliary"] != "no_auxiliary"
+    if cfg.type_auxiliary != :no_auxiliary
         ax.legend([raw"$\mathregular{P_{agc}}$", raw"$\mathregular{P_{cgc}}$", raw"$\mathregular{P_{asm}}$",
                    raw"$\mathregular{P_{aem}}$", raw"$\mathregular{P_{csm}}$", raw"$\mathregular{P_{cem}}$"];
                   loc="best")
@@ -1092,32 +1064,30 @@ cell, as a function of time.
 - `ax`: Axes on which the temperature will be plotted.
 """
 function plot_T_1D_temporal(variables::Dict{String, Any},
-                            operating_inputs::Dict{String, Any},
-                            parameters::Dict{String, Any},
+                            fc::AbstractFuelCell,
+                            cd::AbstractCurrent,
+                            cfg::SimulationConfig,
                             ax)
 
     # Extraction of the operating inputs and parameters
-    current_density = operating_inputs["current_density"]
-    T_des = operating_inputs["T_des"]
-    nb_gc = parameters["nb_gc"]
-    nb_gdl = parameters["nb_gdl"]
-    nb_mpl = parameters["nb_mpl"]
-    pola_current_parameters = parameters["pola_current_parameters"]
-    type_current = parameters["type_current"]
-    type_plot = parameters["type_plot"]
-    if type_current == "step"
-        delta_t_ini = parameters["step_current_parameters"]["delta_t_ini_step"]
-    elseif type_current == "polarization"
-        delta_t_ini = parameters["pola_current_parameters"]["delta_t_ini_pola"]
-    elseif type_current == "polarization_for_cali"
-        delta_t_ini = parameters["pola_current_for_cali_parameters"]["delta_t_ini_pola_cali"]
+
+    T_des = fc.operating_conditions.T_des
+    nb_gc = fc.numerical_parameters.nb_gc
+    nb_gdl = fc.numerical_parameters.nb_gdl
+    nb_mpl = fc.numerical_parameters.nb_mpl
+    if cfg.type_current == :step
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization_for_cali
+        delta_t_ini = cd.delta_t_ini
     else
         delta_t_ini = 0
     end
 
     # Extraction of the variables and the operating inputs
     t_full = collect(variables["t"])
-    mask = if type_plot == "fixed"
+    mask = if cfg.type_plot == :fixed
         t_full .>= 0.9 * delta_t_ini
     else
         trues(length(t_full))
@@ -1135,17 +1105,17 @@ function plot_T_1D_temporal(variables::Dict{String, Any},
     T_cgc_t = collect(variables["T_cgc"][nb_gc_mid])[mask] .- 273.15
 
     # Plot the temperature at different spatial localisations
-    if type_current == "polarization"
+    if cfg.type_current == :polarization
         n = length(t)
         ifc_t = zeros(n)
         for i in 1:n
-            ifc_t[i] = current_density(t[i], parameters) / 1e4  # Conversion in A/cm²
+            ifc_t[i] = current(cd, t[i]) / 1e4  # Conversion in A/cm²
         end
         # Recovery of the internal states from the model after each stack stabilisation
-        delta_t_ini_pola = pola_current_parameters["delta_t_ini_pola"]
-        delta_t_load_pola = pola_current_parameters["delta_t_load_pola"]
-        delta_t_break_pola = pola_current_parameters["delta_t_break_pola"]
-            nb_loads = floor(Int, pola_current_parameters["i_max_pola"] / pola_current_parameters["delta_i_pola"])
+        delta_t_ini_pola = cd.delta_t_ini
+        delta_t_load_pola = cd.delta_i / cd.v_load
+        delta_t_break_pola = cd.delta_t_break
+            nb_loads = floor(Int, cd.i_max / cd.delta_i)
         ifc_discretized_t = zeros(nb_loads)
         T_agc_discretized_t = zeros(nb_loads)
         T_agdl_discretized_t = zeros(nb_loads)
@@ -1220,25 +1190,25 @@ This function plots the cell voltage as a function of time.
 - `ax`: Axes on which the cell voltage will be plotted.
 """
 function plot_Ucell(variables::Dict{String, Any},
-                    parameters::Dict{String, Any},
+                    fc::AbstractFuelCell,
+                    cd::AbstractCurrent,
+                    cfg::SimulationConfig,
                     ax)
 
     # Extraction of the parameters
-    type_current = parameters["type_current"]
-    type_plot = parameters["type_plot"]
-    if type_current == "step"
-        delta_t_ini = parameters["step_current_parameters"]["delta_t_ini_step"]
-    elseif type_current == "polarization"
-        delta_t_ini = parameters["pola_current_parameters"]["delta_t_ini_pola"]
-    elseif type_current == "polarization_for_cali"
-        delta_t_ini = parameters["pola_current_for_cali_parameters"]["delta_t_ini_pola_cali"]
+    if cfg.type_current == :step
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization_for_cali
+        delta_t_ini = cd.delta_t_ini
     else
         delta_t_ini = 0
     end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
-    mask = if type_plot == "fixed"
+    mask = if cfg.type_plot == :fixed
         t_full .>= 0.9 * delta_t_ini
     else
         trues(length(t_full))
@@ -1270,27 +1240,26 @@ This function plots the humidity at the anode side, at different spatial localis
 - `ax`: Axes on which the humidity will be plotted.
 """
 function plot_Phi_a_1D_temporal(variables::Dict{String, Any},
-                                operating_inputs::Dict{String, Any},
-                                parameters::Dict{String, Any},
+                                fc::AbstractFuelCell,
+                                cd::AbstractCurrent,
+                                cfg::SimulationConfig,
                                 ax)
     # Extraction of the operating inputs and parameters
-    Phi_a_des = operating_inputs["Phi_a_des"]
-    nb_gc = parameters["nb_gc"]
-    type_current = parameters["type_current"]
-    type_plot = parameters["type_plot"]
-    if type_current == "step"
-        delta_t_ini = parameters["step_current_parameters"]["delta_t_ini_step"]
-    elseif type_current == "polarization"
-        delta_t_ini = parameters["pola_current_parameters"]["delta_t_ini_pola"]
-    elseif type_current == "polarization_for_cali"
-        delta_t_ini = parameters["pola_current_for_cali_parameters"]["delta_t_ini_pola_cali"]
+    Phi_a_des = fc.operating_conditions.Phi_a_des
+    nb_gc = fc.numerical_parameters.nb_gc
+    if cfg.type_current == :step
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization_for_cali
+        delta_t_ini = cd.delta_t_ini
     else
         delta_t_ini = 0
     end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
-    mask = if type_plot == "fixed"
+    mask = if cfg.type_plot == :fixed
         t_full .>= 0.9 * delta_t_ini
     else
         trues(length(t_full))
@@ -1333,27 +1302,26 @@ This function plots the humidity at the cathode side, at different spatial local
 - `ax`: Axes on which the humidity will be plotted.
 """
 function plot_Phi_c_1D_temporal(variables::Dict{String, Any},
-                                operating_inputs::Dict{String, Any},
-                                parameters::Dict{String, Any},
+                                fc::AbstractFuelCell,
+                                cd::AbstractCurrent,
+                                cfg::SimulationConfig,
                                 ax)
     # Extraction of the operating inputs and parameters
-    Phi_c_des = operating_inputs["Phi_c_des"]
-    nb_gc = parameters["nb_gc"]
-    type_current = parameters["type_current"]
-    type_plot = parameters["type_plot"]
-    if type_current == "step"
-        delta_t_ini = parameters["step_current_parameters"]["delta_t_ini_step"]
-    elseif type_current == "polarization"
-        delta_t_ini = parameters["pola_current_parameters"]["delta_t_ini_pola"]
-    elseif type_current == "polarization_for_cali"
-        delta_t_ini = parameters["pola_current_for_cali_parameters"]["delta_t_ini_pola_cali"]
+    Phi_c_des = fc.operating_conditions.Phi_c_des
+    nb_gc = fc.numerical_parameters.nb_gc
+    if cfg.type_current == :step
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization_for_cali
+        delta_t_ini = cd.delta_t_ini
     else
         delta_t_ini = 0
     end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
-    mask = if type_plot == "fixed"
+    mask = if cfg.type_plot == :fixed
         t_full .>= 0.9 * delta_t_ini
     else
         trues(length(t_full))
@@ -1395,26 +1363,26 @@ This function plots the velocity at the anode and the cathode as a function of t
 - `ax`: Axes on which the pressure will be plotted.
 """
 function plot_v_1D_temporal(variables::Dict{String, Any},
-                            parameters::Dict{String, Any},
+                            fc::AbstractFuelCell,
+                            cd::AbstractCurrent,
+                            cfg::SimulationConfig,
                             ax)
 
     # Extraction of the parameters
-    nb_gc = parameters["nb_gc"]
-    type_current = parameters["type_current"]
-    type_plot = parameters["type_plot"]
-    if type_current == "step"
-        delta_t_ini = parameters["step_current_parameters"]["delta_t_ini_step"]
-    elseif type_current == "polarization"
-        delta_t_ini = parameters["pola_current_parameters"]["delta_t_ini_pola"]
-    elseif type_current == "polarization_for_cali"
-        delta_t_ini = parameters["pola_current_for_cali_parameters"]["delta_t_ini_pola_cali"]
+    nb_gc = fc.numerical_parameters.nb_gc
+    if cfg.type_current == :step
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization_for_cali
+        delta_t_ini = cd.delta_t_ini
     else
         delta_t_ini = 0
     end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
-    mask = if type_plot == "fixed"
+    mask = if cfg.type_plot == :fixed
         t_full .>= 0.9 * delta_t_ini
     else
         trues(length(t_full))
@@ -1450,28 +1418,28 @@ This function plots the Reynolds number at the center of the AGC and the CGC as 
 - `ax`: Axes on which the pressure will be plotted.
 """
 function plot_Re_nb_1D_temporal(variables::Dict{String, Any},
-                                parameters::Dict{String, Any},
+                                fc::AbstractFuelCell,
+                                cd::AbstractCurrent,
+                                cfg::SimulationConfig,
                                 ax)
 
     # Extraction of the parameters
-    Hcgc = parameters["Hcgc"]
-    Wcgc = parameters["Wcgc"]
-    nb_gc = parameters["nb_gc"]
-    type_current = parameters["type_current"]
-    type_plot = parameters["type_plot"]
-    if type_current == "step"
-        delta_t_ini = parameters["step_current_parameters"]["delta_t_ini_step"]
-    elseif type_current == "polarization"
-        delta_t_ini = parameters["pola_current_parameters"]["delta_t_ini_pola"]
-    elseif type_current == "polarization_for_cali"
-        delta_t_ini = parameters["pola_current_for_cali_parameters"]["delta_t_ini_pola_cali"]
+    Hcgc = fc.physical_parameters.Hcgc
+    Wcgc = fc.physical_parameters.Wcgc
+    nb_gc = fc.numerical_parameters.nb_gc
+    if cfg.type_current == :step
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization
+        delta_t_ini = cd.delta_t_ini
+    elseif cfg.type_current == :polarization_for_cali
+        delta_t_ini = cd.delta_t_ini
     else
         delta_t_ini = 0
     end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
-    mask = if type_plot == "fixed"
+    mask = if cfg.type_plot == :fixed
         t_full .>= 0.9 * delta_t_ini
     else
         trues(length(t_full))
@@ -1538,15 +1506,16 @@ This function plots the temperature at different spatial localisations inside th
 for the last time step of the simulation.
 """
 function plot_T_pseudo_2D_final(variables::Dict{String, Any},
-                                operating_inputs::Dict{String, Any},
-                                parameters::Dict{String, Any},
+                                fc::AbstractFuelCell,
+                                cd::AbstractCurrent,
+                                cfg::SimulationConfig,
                                 ax)
 
     # Extraction of the operating inputs and parameters
-    T_des = operating_inputs["T_des"] - 273.15  # Conversion in °C.
-    nb_gc = parameters["nb_gc"]
-    nb_gdl = parameters["nb_gdl"]
-    nb_mpl = parameters["nb_mpl"]
+    T_des = fc.operating_conditions.T_des - 273.15  # Conversion in °C.
+    nb_gc = fc.numerical_parameters.nb_gc
+    nb_gdl = fc.numerical_parameters.nb_gdl
+    nb_mpl = fc.numerical_parameters.nb_mpl
 
     # Construction of the temperature matrix for the pseudo-2D plot
     var_order = vcat(["agc"],
@@ -1637,30 +1606,26 @@ end
 This function plots the power density curve Pfc, produced by a cell, as a function of the current density.
 """
 function plot_power_density_curve(variables::Dict{String, Any},
-                                  operating_inputs::Dict{String, Any},
-                                  parameters::Dict{String, Any},
+                                  fc::AbstractFuelCell,
+                                  cd::AbstractCurrent,
+                                  cfg::SimulationConfig,
                                   n::Integer,
                                   ax)
 
     # Extraction of the variables
     t = variables["t"]
     Ucell_t = variables["Ucell"]
-    # Extraction of the operating inputs and the parameters
-    current_density = operating_inputs["current_density"]
-    type_fuel_cell = parameters["type_fuel_cell"]
-    type_current = parameters["type_current"]
-    type_auxiliary = parameters["type_auxiliary"]
 
     # Creation of the power density function: Pfc
     ifc_t = zeros(n)
     Pfc_t = zeros(n)
     for i in 1:n
-        ifc_t[i] = current_density(t[i], parameters) / 1e4
+        ifc_t[i] = current(cd, t[i]) / 1e4
         Pfc_t[i] = Ucell_t[i] * ifc_t[i]
     end
 
     # Plot of the power density function: Pfc
-    plot_specific_line(ifc_t, Pfc_t, type_fuel_cell, type_current, type_auxiliary, nothing, ax)
+    plot_specific_line(ifc_t, Pfc_t, cfg.type_fuel_cell, cfg.type_current, cfg.type_auxiliary, nothing, ax)
     ax.set_xlabel(raw"$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$"; labelpad=0)
     ax.set_ylabel(raw"$\mathbf{Fuel}$ $\mathbf{cell}$ $\mathbf{power}$ $\mathbf{density}$ $\mathbf{P_{fc}}$ $\mathbf{\left( W.cm^{-2} \right)}$";
                   labelpad=0)
@@ -1678,21 +1643,19 @@ end
 This function plots the fuel cell efficiency eta_fc as a function of the current density.
 """
 function plot_cell_efficiency(variables::Dict{String, Any},
-                              operating_inputs::Dict{String, Any},
-                              parameters::Dict{String, Any},
+                              fc::AbstractFuelCell,
+                              cd::AbstractCurrent,
+                              cfg::SimulationConfig,
                               n::Integer,
                               ax)
 
     # Extraction of the operating inputs and the parameters
-    current_density = operating_inputs["current_density"]
-    Hmem = parameters["Hmem"]
-    Hacl = parameters["Hacl"]
-    Hccl = parameters["Hccl"]
-    kappa_co = parameters["kappa_co"]
-    nb_gc = parameters["nb_gc"]
-    type_fuel_cell = parameters["type_fuel_cell"]
-    type_current = parameters["type_current"]
-    type_auxiliary = parameters["type_auxiliary"]
+    
+    Hmem = fc.physical_parameters.Hmem
+    Hacl = fc.physical_parameters.Hacl
+    Hccl = fc.physical_parameters.Hccl
+    kappa_co = fc.physical_parameters.kappa_co
+    nb_gc = fc.numerical_parameters.nb_gc
 
     # Extraction of the variables
     nb_gc_mid = Int(ceil(nb_gc / 2))
@@ -1710,7 +1673,7 @@ function plot_cell_efficiency(variables::Dict{String, Any},
     Pfc_t = zeros(n)
     eta_fc_t = zeros(n)
     for i in 1:n
-        ifc_t[i] = current_density(t[i], parameters) / 1e4
+        ifc_t[i] = current(cd, t[i]) / 1e4
         Pfc_t[i] = Ucell_t[i] * ifc_t[i]
         Ueq = E0 - 8.5e-4 * (T_ccl_t[i] - 298.15) +
               R * T_ccl_t[i] / (2 * F) * (log(R * T_acl_t[i] * C_H2_acl_t[i] / Pref_eq) +
@@ -1724,7 +1687,7 @@ function plot_cell_efficiency(variables::Dict{String, Any},
     end
 
     # Plot of the fuel cell efficiency: eta_fc
-    plot_specific_line(ifc_t, eta_fc_t, type_fuel_cell, type_current, type_auxiliary, nothing, ax)
+    plot_specific_line(ifc_t, eta_fc_t, cfg.type_fuel_cell, cfg.type_current, cfg.type_auxiliary, nothing, ax)
     ax.set_xlabel(raw"$\mathbf{Current}$ $\mathbf{density}$ $\mathbf{i_{fc}}$ $\mathbf{\left( A.cm^{-2} \right)}$"; labelpad=0)
     ax.set_ylabel(raw"$\mathbf{Fuel}$ $\mathbf{cell}$ $\mathbf{efficiency}$ $\mathbf{\eta_{fc}}$"; labelpad=0)
     ax.legend(loc="best")
@@ -1783,7 +1746,7 @@ This function adds the specific instructions for polarisation plots according to
 - `ax`: Axes on which the instructions will be added.
 - `show::Bool=true`: If true, the figure will be displayed.
 """
-function plot_pola_instructions(type_fuel_cell::String, ax, show::Bool=true)
+function plot_pola_instructions(type_fuel_cell, ax, show::Bool=true)
 
     # For ZSW-GenStack fuel cell
     if type_fuel_cell == "ZSW-GenStack" || type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41" ||
@@ -1824,21 +1787,21 @@ end
 
 
 """
-    plot_specific_line(x, y, type_fuel_cell, type_current, type_auxiliary, sim_error, ax)
+    plot_specific_line(x, y, type_fuel_cell, cfg.type_current, cfg.type_auxiliary, sim_error, ax)
 
 This function adds the appropriate plot configuration according to the type_input to the ax object.
 """
 function plot_specific_line(x,
                             y,
-                            type_fuel_cell::String,
-                            type_current::String,
-                            type_auxiliary::String,
+                            type_fuel_cell,
+                            type_current,
+                            type_auxiliary,
                             sim_error,
                             ax)
 
-    aux_ok = (type_auxiliary == "forced-convective_cathode_with_flow-through_anode" || type_auxiliary == "no_auxiliary")
+    aux_ok = (type_auxiliary == :forced_convective_cathode_with_flow_through_anode || type_auxiliary == :no_auxiliary)
 
-    if type_current == "polarization"
+    if cfg.type_current == :polarization
         if type_fuel_cell == "ZSW-GenStack" && aux_ok
             ax.plot(x, y, "--"; color=colors(0), label="Sim. - nominal - \$ΔU_{RMSE}\$ = $(sim_error) %")
         elseif type_fuel_cell == "ZSW-GenStack"
@@ -1902,7 +1865,7 @@ function plot_specific_line(x,
             ax.plot(x, y; color=colors(0), label="Simulation")
         end
 
-    elseif type_current == "polarization_for_cali"
+    elseif cfg.type_current == :polarization_for_cali
         if type_fuel_cell == "ZSW-GenStack" && aux_ok
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(0), label="Sim. - nominal operating conditions - \$ΔU_{RMSE}\$ = $(sim_error) %")
         elseif type_fuel_cell == "ZSW-GenStack"
@@ -1989,7 +1952,7 @@ This function plots the experimental polarisation curve on the same graph as the
 - `U_exp_t::Vector{<:Real}`: Experimental values of the voltage.
 - `ax`: Axes-like object exposing `scatter` and `legend` methods.
 """
-function plot_experimental_polarisation_curve(type_fuel_cell::String,
+function plot_experimental_polarisation_curve(type_fuel_cell,
                                               i_fc_t::Vector{<:Real},
                                               U_exp_t::Vector{<:Real},
                                               ax)
@@ -2042,7 +2005,7 @@ This function adds the instructions for EIS plots according to the type_input to
 - `y::Number`: y-axis value for plotting the annotation.
 - `ax`: Axes on which the instructions will be added.
 """
-function plot_EIS_Nyquist_instructions(type_fuel_cell::String,
+function plot_EIS_Nyquist_instructions(type_fuel_cell,
                                        f_Fourier::Number,
                                        x::Number,
                                        y::Number,
@@ -2121,7 +2084,7 @@ This function adds the instructions for amplitude Bode plots according to the ty
 - `type_fuel_cell::String`: Type of fuel cell configuration.
 - `ax`: Axes on which the instructions will be added.
 """
-function plot_Bode_amplitude_instructions(f_EIS, type_fuel_cell::String, ax)
+function plot_Bode_amplitude_instructions(f_EIS, type_fuel_cell, ax)
 
     # Common instructions
     f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = f_EIS
@@ -2159,7 +2122,7 @@ This function adds the instructions for phase Bode plots according to the type_i
 - `type_fuel_cell::String`: Type of fuel cell configuration.
 - `ax`: Axes on which the instructions will be added.
 """
-function plot_Bode_phase_instructions(f_EIS, type_fuel_cell::String, ax)
+function plot_Bode_phase_instructions(f_EIS, type_fuel_cell, ax)
 
     # Common instructions
     f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = f_EIS
@@ -2188,3 +2151,4 @@ function plot_Bode_phase_instructions(f_EIS, type_fuel_cell::String, ax)
 
     return nothing
 end
+

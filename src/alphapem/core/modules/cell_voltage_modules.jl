@@ -12,15 +12,16 @@ include(joinpath(@__DIR__, "../../utils/physics_functions.jl"))
 
 # _________________________________________________Cell voltage modules_________________________________________________
 
-"""This function calculates the oxygen concentration at the platinum surface in the cathode catalyst layer.
+"""Calculate the oxygen concentration at the platinum surface in the cathode catalyst layer.
+
 Parameters
 ----------
 i_fc :
     The current density (A/m²).
-sv_1D : Dict{String, Any}
+sv_1D : Dict
     The dictionary containing the variables calculated by the solver.
-parameters : Dict{String, Any}
-    The dictionary containing the parameters.
+fc : AbstractFuelCell
+    The fuel cell instance providing model parameters.
 
 Returns
 -------
@@ -33,17 +34,16 @@ Sources
 in PEM Fuel Cells.
 """
 function calculate_C_O2_Pt(i_fc,
-                           sv_1D::Dict{String, Any},
-                           parameters::Dict{String, Any})
+                           sv_1D::Dict,
+                           fc::AbstractFuelCell)
 
     # Extraction of the variables
     s_ccl = sv_1D["s_ccl"]
     lambda_ccl = sv_1D["lambda_ccl"]
     C_O2_ccl = sv_1D["C_O2_ccl"]
     T_ccl = sv_1D["T_ccl"]
-    # Extraction of the operating inputs and the parameters
-    Hccl = parameters["Hccl"]
-    K_O2_ad_Pt = parameters["K_O2_ad_Pt"]
+    # Extraction of the parameters
+    Hccl, K_O2_ad_Pt = fc.physical_parameters.Hccl, fc.physical_parameters.K_O2_ad_Pt
 
     C_O2_Pt = C_O2_ccl - i_fc / (4 * F * Hccl) *
               R_T_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, K_O2_ad_Pt) /

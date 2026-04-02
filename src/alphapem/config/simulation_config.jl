@@ -27,7 +27,7 @@ module SimulationConfigModule
 export SimulationConfig, validate_config
 
 Base.@kwdef struct SimulationConfig
-    type_fuel_cells::Vector{Symbol} = [:ZSW_GenStack]
+    type_fuel_cell::Symbol = :ZSW_GenStack
     type_current::Symbol = :polarization
     voltage_zone::Symbol = :full
     type_auxiliary::Symbol = :no_auxiliary
@@ -76,8 +76,6 @@ const ALLOWED_PLOT = (
 # --- Validation ---
 
 function validate_config(cfg::SimulationConfig)
-    isa(cfg.type_fuel_cells, Vector{Symbol}) && !isempty(cfg.type_fuel_cells) ||
-        error("type_fuel_cells must be a non-empty Vector{Symbol}")
 
     cfg.type_current in ALLOWED_CURRENT ||
         error("Invalid type_current: $(cfg.type_current)")

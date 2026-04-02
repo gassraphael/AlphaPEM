@@ -35,16 +35,9 @@ J_lambda : Dict
 Sp : Dict
     Source terms of produced water in the anode and cathode catalyst layers (mol.m-3.s-1).
 """
-function calculate_dyn_dissoved_water_evolution_inside_MEA(
-    dif_eq_1D::Dict,
-    sv_1D::Dict,
-    Hmem::Float64,
-    Hacl::Float64,
-    Hccl::Float64,
-    S_abs::Dict,
-    J_lambda::Dict,
-    Sp::Dict
-)
+function calculate_dyn_dissoved_water_evolution_inside_MEA(dif_eq_1D::Dict, sv_1D::Dict, Hmem::Float64,
+                                                           Hacl::Float64, Hccl::Float64, S_abs::Dict,
+                                                           J_lambda::Dict, Sp::Dict)
     dif_eq_1D["dlambda_acl / dt"] = M_eq / (rho_mem * epsilon_mc(sv_1D["lambda_acl"], sv_1D["T_acl"], Hacl)) *
                                      (-J_lambda["acl_mem"] / Hacl + S_abs["v_acl"] + S_abs["l_acl"] + Sp["acl"])
     dif_eq_1D["dlambda_mem / dt"] = M_eq / rho_mem * (J_lambda["acl_mem"] - J_lambda["mem_ccl"]) / Hmem
@@ -99,21 +92,10 @@ S_abs : Dict
 Sl : Dict
     Liquid water source terms inside the different layers (mol.m-3.s-1).
 """
-function calculate_dyn_liquid_water_evolution_inside_MEA(
-    dif_eq_1D::Dict,
-    sv_1D::Dict,
-    Aact::Float64,
-    Wagc::Float64,
-    Wcgc::Float64,
-    Lgc::Float64,
-    nb_channel_in_gc::Int64,
-    Hgdl::Float64,
-    Hmpl::Float64,
-    Hacl::Float64,
-    Hccl::Float64,
-    epsilon_gdl::Float64,
-    epsilon_mpl::Float64,
-    nb_gc::Int64,
+function calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq_1D::Dict, sv_1D::Dict, Aact::Float64, Wagc::Float64,
+                                                         Wcgc::Float64, Lgc::Float64, nb_channel_in_gc::Int64,
+                                                         Hgdl::Float64, Hmpl::Float64, Hacl::Float64, Hccl::Float64,
+                                                         epsilon_gdl::Float64, epsilon_mpl::Float64, nb_gc::Int64,
     nb_gdl::Int64,
     nb_mpl::Int64,
     Jl::Dict,

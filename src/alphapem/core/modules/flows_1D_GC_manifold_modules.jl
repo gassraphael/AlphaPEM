@@ -11,37 +11,33 @@ include(joinpath(@__DIR__, "../../utils/physics_constants.jl"))
 include(joinpath(@__DIR__, "../../utils/physics_functions.jl"))
 
 """
-    flow_1D_GC_manifold_int_values(sv_1D_cell::Vector{<:Dict}, sv_auxiliary::Dict, operating_inputs::Dict, parameters::Dict)
+    flow_1D_GC_manifold_int_values(sv_1D_cell, sv_auxiliary, fc, cfg)
 
-This function calculates intermediate values used for auxiliary flow computations.
+Calculate intermediate values used for auxiliary flow computations.
 
 # Arguments
-- `sv_1D_cell::Vector{Dict{String, Any}}`: Variables computed by the solver (internal stack states).
-- `sv_auxiliary::Dict{String, Any}`: Variables computed by the auxiliary system (internal auxiliary states).
-- `operating_inputs::Dict{String, Any}`: Operating inputs for the stack model.
-- `parameters::Dict{String, Any}`: Stack model parameters.
+- `sv_1D_cell::Vector{Dict}`: Variables computed by the solver (internal stack states).
+- `sv_auxiliary::Dict`: Variables computed by the auxiliary system (internal auxiliary states).
+- `fc::AbstractFuelCell`: Fuel cell instance providing model parameters.
+- `cfg::SimulationConfig`: Simulation configuration (provides `type_auxiliary`, `type_purge`).
 
 # Returns
 - `k_purge`: Purge coefficient (1 if purge is active, 0 otherwise).
-- `Abp_a`: Back-pressure valve area in the external anode manifold (m^2).
-- `Abp_c`: Back-pressure valve area in the external cathode manifold (m^2).
+- `Abp_a`: Back-pressure valve area in the external anode manifold (m²).
+- `Abp_c`: Back-pressure valve area in the external cathode manifold (m²).
 """
-function flow_1D_GC_manifold_int_values(sv_1D_cell::Vector{Dict{String, Any}},
-                                        sv_auxiliary::Dict{String, Any},
-                                        operating_inputs::Dict{String, Any},
-                                        parameters::Dict{String, Any})
-    # Extract operating inputs and parameters
-    T_des = operating_inputs["T_des"]
-    y_H2_in = operating_inputs["y_H2_in"]
-    Pa_des = operating_inputs["Pa_des"]
-    Hmem = parameters["Hmem"]
-    Hacl = parameters["Hacl"]
-    Hccl = parameters["Hccl"]
-    kappa_co = parameters["kappa_co"]
-    nb_gc = parameters["nb_gc"]
-    purge_time = parameters["purge_time"]
-    delta_purge = parameters["delta_purge"]
-    type_purge = parameters["type_purge"]
+function flow_1D_GC_manifold_int_values(sv_1D_cell::Vector{<:Dict},
+                                        sv_auxiliary::Dict,
+                                        fc::AbstractFuelCell,
+                                        cfg::SimulationConfig)
+    # Extract parameters
+    oc = fc.operating_conditions
+    pp = fc.physical_parameters
+    np = fc.numerical_parameters
+    T_des, y_H2_in = oc.T_des, oc.y_H2_in
+    Hmem, Hacl, Hccl, kappa_co = pp.Hmem, pp.Hacl, pp.Hccl, pp.kappa_co
+    nb_gc, purge_time, delta_purge = np.nb_gc, np.purge_time, np.delta_purge
+    type_purge = cfg.type_purge
 
     # Initialise variables
     k_purge = nothing
@@ -120,8 +116,8 @@ function flow_1D_GC_manifold_int_values(sv_1D_cell::Vector{Dict{String, Any}},
     end
 
     # Physical quantities in the auxiliary system
-    if parameters["type_auxiliary"] == "forced-convective_cathode_with_anodic_recirculation" ||
-       parameters["type_auxiliary"] == "forced-convective_cathode_with_flow-through_anode"
+    if cfg.type_auxiliary == :forced_convective_cathode_with_anodic_recirculation ||
+       cfg.type_auxiliary == :forced_convective_cathode_with_flow_through_anode
         # Commented section translated to Julia
         # # H2/O2 ratio in the dry anode/cathode gas mixture (H2/N2 or O2/N2) at EM
         # y_H2_aem = (Paem - Phi_aem * Psat(T_des) - C_N2_a * R * T_des) / (Paem - Phi_aem * Psat(T_des))
@@ -180,7 +176,7 @@ function flow_1D_GC_manifold_int_values(sv_1D_cell::Vector{Dict{String, Any}},
         # elseif Abp_c < 0
         #     Abp_c = 0
         # end
-    else  # parameters["type_auxiliary"] == "no_auxiliary"
+    else  # cfg.type_auxiliary == :no_auxiliary
         k_purge = nothing
         Abp_a = nothing
         Abp_c = nothing

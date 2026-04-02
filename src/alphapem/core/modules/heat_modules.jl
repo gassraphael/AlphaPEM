@@ -15,28 +15,30 @@ include(joinpath(@__DIR__, "../../utils/physics_functions.jl"))
 
 # _________________________________________________Heat transfer modules________________________________________________
 
-"""This function calculates intermediate values for the heat calculation.
+"""Calculate intermediate values for the heat transfer calculation.
 
 Parameters
 ----------
-sv : Dict{Float64, Any}
+sv : Dict
     Variables calculated by the solver. They correspond to the fuel cell internal states.
     `sv` is a contraction of solver_variables for enhanced readability.
-parameters : Dict{Float64, Any}
-    Parameters of the fuel cell model.
+fc : AbstractFuelCell
+    The fuel cell instance providing model parameters.
 
 Returns
 -------
 Tuple
     Tuple containing the intermediate values used by the heat calculation.
 """
-function heat_transfer_int_values(sv::Dict{Float64, Any},
-                                  parameters::Dict{Float64, Any})::Tuple
+function heat_transfer_int_values(sv::Dict,
+                                  fc::AbstractFuelCell)::Tuple
 
-    # Extraction of the operating inputs and the parameters
-    Hgdl, Hmpl, Hacl, Hccl = parameters["Hgdl"], parameters["Hmpl"], parameters["Hacl"], parameters["Hccl"]
-    Hmem, epsilon_gdl, epsilon_mpl = parameters["Hmem"], parameters["epsilon_gdl"], parameters["epsilon_mpl"]
-    epsilon_c, nb_gdl, nb_mpl = parameters["epsilon_c"], parameters["nb_gdl"], parameters["nb_mpl"]
+    # Extraction of the parameters
+    pp = fc.physical_parameters
+    np = fc.numerical_parameters
+    Hgdl, Hmpl, Hacl, Hccl = pp.Hgdl, pp.Hmpl, pp.Hacl, pp.Hccl
+    Hmem, epsilon_gdl, epsilon_mpl, epsilon_c = pp.Hmem, pp.epsilon_gdl, pp.epsilon_mpl, pp.epsilon_c
+    nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl
 
     # Extraction of the variables
     C_v_acl, C_v_ccl = sv["C_v_acl"], sv["C_v_ccl"]

@@ -18,19 +18,12 @@ include(joinpath(@__DIR__, "..", "..", "utils", "physics_constants.jl"))
 - `Pasm_out`: Pressure at the anode supply manifold outlet (Pa).
 - `Pccp_des`: Desired pressure at the cathode compressor outlet (Pa).
 - `Pcsm_out`: Pressure at the cathode supply manifold outlet (Pa).
-- `type_auxiliary::String`: Type of auxiliary components used in the fuel cell model.
+- `type_auxiliary::Symbol`: Type of auxiliary components used in the fuel cell model.
 
 # Returns
 - `Nothing`: `dif_eq` is modified in place.
 """
-function calculate_dyn_air_compressor_evolution(
-    dif_eq::Dict,
-    Pacp_des,
-    Pasm_out,
-    Pccp_des,
-    Pcsm_out,
-    type_auxiliary::String
-)
+function calculate_dyn_air_compressor_evolution()
     # This section is intentionally left unchanged for now.
     # dif_eq["dPasm_out / dt"] = (Pacp_des - Pasm_out) / tau_cp # Estimation at the first order.
     return nothing
@@ -43,26 +36,20 @@ end
 - `dif_eq::Dict`: Dictionary used for saving the differential equations.
 - `Wa_inj`: Injected water mass flow at the anode side (kg.s-1).
 - `Wc_inj`: Injected water mass flow at the cathode side (kg.s-1).
-- `type_auxiliary::String`: Type of auxiliary components used in the fuel cell model.
+- `type_auxiliary::Symbol`: Type of auxiliary components used in the fuel cell model.
 - `Wa_inj_des`: Desired injected water mass flow at the anode side (kg.s-1).
 - `Wc_inj_des`: Desired injected water mass flow at the cathode side (kg.s-1).
 
 # Returns
 - `Nothing`: `dif_eq` is modified in place.
 """
-function calculate_dyn_humidifier_evolution(
-    dif_eq::Dict,
-    Wa_inj,
-    Wc_inj,
-    type_auxiliary::String,
-    Wa_inj_des,
-    Wc_inj_des
-)::Nothing
+function calculate_dyn_humidifier_evolution(dif_eq::Dict, Wa_inj, Wc_inj, type_auxiliary::Symbol,
+                                            Wa_inj_des, Wc_inj_des)::Nothing
     # Anode and cathode humidifiers evolution
-    if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation"
+    if type_auxiliary == :forced_convective_cathode_with_anodic_recirculation
         dif_eq["dWa_inj / dt"] = 0.0
         dif_eq["dWc_inj / dt"] = (Wc_inj_des - Wc_inj) / tau_hum  # Estimation at the first order.
-    elseif type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+    elseif type_auxiliary == :forced_convective_cathode_with_flow_through_anode
         dif_eq["dWa_inj / dt"] = (Wa_inj_des - Wa_inj) / tau_hum  # Estimation at the first order.
         dif_eq["dWc_inj / dt"] = (Wc_inj_des - Wc_inj) / tau_hum  # Estimation at the first order.
     end
@@ -81,24 +68,15 @@ This function has to be executed after `calculate_dyn_vapor_evolution` and `calc
 - `Pc_des`: Desired pressure inside the cathode gas channel (Pa).
 - `A_T_a`: Maximum throttle area at the anode side (m²).
 - `A_T_c`: Maximum throttle area at the cathode side (m²).
-- `type_auxiliary::String`: Type of auxiliary components used in the fuel cell model.
+- `type_auxiliary::Symbol`: Type of auxiliary components used in the fuel cell model.
 - `Pagc:`: Pressure inside the anode gas channel (Pa).
 - `Pcgc`: Pressure inside the cathode gas channel (Pa).
 
 # Returns
 - `Nothing`: `dif_eq` is modified in place.
 """
-function calculate_dyn_throttle_area_controler(
-    dif_eq::Dict,
-    sv::Dict,
-    Pa_des,
-    Pc_des,
-    A_T_a,
-    A_T_c,
-    type_auxiliary::String,
-    Pagc,
-    Pcgc
-)::Nothing
+function calculate_dyn_throttle_area_controler(dif_eq::Dict, sv::Dict, Pa_des, Pc_des, A_T_a, A_T_c,
+                                               type_auxiliary::Symbol, Pagc, Pcgc)::Nothing
 
     # Extraction of the variables
     T_agc, T_cgc = sv["T_agc"], sv["T_cgc"]
@@ -109,7 +87,7 @@ function calculate_dyn_throttle_area_controler(
     dPcgcdt = (dif_eq["dC_v_cgc / dt"] + dif_eq["dC_O2_cgc / dt"] + dif_eq["dC_N2_cgc / dt"]) * R * T_cgc
 
     # Throttle area evolution inside the anode auxiliaries
-    if type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+    if type_auxiliary == :forced_convective_cathode_with_flow_through_anode
         dif_eq["dAbp_a / dt"] = -Kp_T * (Pa_des - Pagc) + Kd_T * dPagcdt  # PD controller
         if Abp_a > A_T_a && dif_eq["dAbp_a / dt"] > 0.0  # The throttle area cannot be higher than the maximum value
             dif_eq["dAbp_a / dt"] = 0.0

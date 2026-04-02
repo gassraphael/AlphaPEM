@@ -14,7 +14,7 @@ include(joinpath(@__DIR__, "../modules/flows_1D_MEA_modules.jl"))
 
 # ________________________________________________________Flows_________________________________________________________
 
-"""This function calculates the flows inside the fuel cell system.
+"""Calculate the flows inside the fuel cell system.
 
 Parameters
 ----------
@@ -27,10 +27,8 @@ v_a :
     Anode gas velocity at time t (m.s-1).
 v_c :
     Cathode gas velocity at time t (m.s-1).
-operating_inputs : Dict
-    Operating inputs of the fuel cell.
-parameters : Dict
-    Parameters of the fuel cell model.
+fc : AbstractFuelCell
+    Fuel cell instance providing model parameters.
 
 Returns
 -------
@@ -44,18 +42,19 @@ function calculate_flows_1D_MEA(sv_1D::Dict,
                                 i_fc,
                                 v_a,
                                 v_c,
-                                operating_inputs::Dict,
-                                parameters::Dict)::Dict{String, Dict}
+                                fc::AbstractFuelCell)::Dict{String, Dict}
 
     # ___________________________________________________Preliminaries__________________________________________________
 
-    # Extraction of the operating inputs and parameters
-    T_des = operating_inputs["T_des"]
-    Hmem, Hacl, Hccl = parameters["Hmem"], parameters["Hacl"], parameters["Hccl"]
-    Wagc, Wcgc, Hagc, Hcgc = parameters["Wagc"], parameters["Wcgc"], parameters["Hagc"], parameters["Hcgc"]
-    epsilon_gdl, epsilon_mpl = parameters["epsilon_gdl"], parameters["epsilon_mpl"]
-    K_l_ads, kappa_co = parameters["K_l_ads"], parameters["kappa_co"]
-    nb_gdl, nb_mpl = parameters["nb_gdl"], parameters["nb_mpl"]
+    # Extraction of parameters
+    pp = fc.physical_parameters
+    np = fc.numerical_parameters
+    T_des = fc.operating_conditions.T_des
+    Hmem, Hacl, Hccl = pp.Hmem, pp.Hacl, pp.Hccl
+    Wagc, Wcgc, Hagc, Hcgc = pp.Wagc, pp.Wcgc, pp.Hagc, pp.Hcgc
+    epsilon_gdl, epsilon_mpl = pp.epsilon_gdl, pp.epsilon_mpl
+    K_l_ads, kappa_co = pp.K_l_ads, pp.kappa_co
+    nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl
 
     # Extraction of the variables
     C_v_agc, C_v_acl, C_v_ccl, C_v_cgc = sv_1D["C_v_agc"], sv_1D["C_v_acl"], sv_1D["C_v_ccl"], sv_1D["C_v_cgc"]
@@ -78,7 +77,7 @@ function calculate_flows_1D_MEA(sv_1D::Dict,
      D_eff_EOD_mem_ccl, D_lambda_eff_acl_mem, D_lambda_eff_mem_ccl, D_cap_agdl_agdl, D_cap_agdl_ampl,
      D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_ccl_cmpl, D_cap_cmpl_cmpl, D_cap_cmpl_cgdl, D_cap_cgdl_cgdl,
      Da_eff_agdl_agdl, Da_eff_agdl_ampl, Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl,
-     Dc_eff_cmpl_cgdl, Dc_eff_cgdl_cgdl, T_acl_mem_ccl) = flows_1D_MEA_int_values(sv_1D, i_fc, parameters)
+     Dc_eff_cmpl_cgdl, Dc_eff_cgdl_cgdl, T_acl_mem_ccl) = flows_1D_MEA_int_values(sv_1D, i_fc, fc)
 
     # ________________________________________Dissolved water flows (mol.m-2.s-1)_______________________________________
 

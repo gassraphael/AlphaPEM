@@ -14,19 +14,17 @@ include(joinpath(@__DIR__, "../modules/heat_modules.jl"))
 
 # ____________________________________________________Heat transfers____________________________________________________
 
-"""This function calculates the heat transfers occurring inside the fuel cell system.
+"""Calculate the heat transfers occurring inside the fuel cell system.
 
 Parameters
 ----------
 sv_1D : Dict
-    Variables calculated by the solver (états internes de la pile).
+    Variables calculated by the solver (fuel cell internal states).
     `sv` is a contraction of solver_variables for enhanced readability.
 i_fc :
     Fuel cell current density at time t (A.m-2).
-operating_inputs : Dict
-    Operating inputs of the fuel cell model.
-parameters : Dict
-    Parameters of the fuel cell model.
+fc : AbstractFuelCell
+    Fuel cell instance providing model parameters.
 S_abs : Dict
     Water absorption rates from the CL to the membrane (mol.m-3.s-1).
 Sl : Dict
@@ -37,8 +35,7 @@ Returns
 Dict{String, Dict} where
     Heat transfers occurring inside the fuel cell system.
 """
-function calculate_heat_transfers(sv_1D::Dict, i_fc, operating_inputs::Dict, parameters::Dict,
-                                  S_abs::Dict, Sl::Dict)::Dict{String, Dict}
+function calculate_heat_transfers(sv_1D::Dict, i_fc, fc::AbstractFuelCell, S_abs::Dict, Sl::Dict)::Dict{String, Dict}
 
     # ___________________________________________________Preliminaries__________________________________________________
 
@@ -47,17 +44,18 @@ function calculate_heat_transfers(sv_1D::Dict, i_fc, operating_inputs::Dict, par
     lambda_acl, lambda_mem, lambda_ccl = sv_1D["lambda_acl"], sv_1D["lambda_mem"], sv_1D["lambda_ccl"]
     s_acl, s_ccl, eta_c = sv_1D["s_acl"], sv_1D["s_ccl"], sv_1D["eta_c"]
 
-    # Extraction of the operating inputs and parameters
-    T_des = operating_inputs["T_des"]
-    epsilon_gdl, epsilon_mpl, epsilon_c = parameters["epsilon_gdl"], parameters["epsilon_mpl"], parameters["epsilon_c"]
-    nb_gdl, nb_mpl = parameters["nb_gdl"], parameters["nb_mpl"]
-    Hmem, Hgdl, Hmpl = parameters["Hmem"], parameters["Hgdl"], parameters["Hmpl"]
-    Hacl, Hccl = parameters["Hacl"], parameters["Hccl"]
+    # Extraction of the parameters
+    pp = fc.physical_parameters
+    np = fc.numerical_parameters
+    T_des = fc.operating_conditions.T_des
+    Hmem, Hgdl, Hmpl, Hacl, Hccl = pp.Hmem, pp.Hgdl, pp.Hmpl, pp.Hacl, pp.Hccl
+    epsilon_gdl, epsilon_mpl, epsilon_c = pp.epsilon_gdl, pp.epsilon_mpl, pp.epsilon_c
+    nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl
 
     # Intermediate values
     (Hgdl_node, Hmpl_node, k_th_eff_agc_agdl, k_th_eff_agdl_agdl, k_th_eff_agdl_ampl, k_th_eff_ampl_ampl,
      k_th_eff_ampl_acl, k_th_eff_acl_mem, k_th_eff_mem_ccl, k_th_eff_ccl_cmpl, k_th_eff_cmpl_cmpl,
-     k_th_eff_cmpl_cgdl, k_th_eff_cgdl_cgdl, k_th_eff_cgdl_cgc) = heat_transfer_int_values(sv_1D, parameters)
+     k_th_eff_cmpl_cgdl, k_th_eff_cgdl_cgdl, k_th_eff_cgdl_cgc) = heat_transfer_int_values(sv_1D, fc)
 
     # ______________________________________________Heat flows (J.m-2.s-1)______________________________________________
 
@@ -65,13 +63,13 @@ function calculate_heat_transfers(sv_1D::Dict, i_fc, operating_inputs::Dict, par
     T_agc_mean = T_des
     T_cgc_mean = T_des
     Jt_agc_agdl = -k_th_eff_agc_agdl * d_dx(T_agc_mean, sv_1D["T_agdl_1"], Hgdl_node / 2)
-    Jt_agdl_agdl = Dict{String, T}(
+    Jt_agdl_agdl = Dict(
         "agdl_agdl_$i" => -k_th_eff_agdl_agdl[i] * d_dx(sv_1D["T_agdl_$i"], sv_1D["T_agdl_$(i + 1)"], Hgdl_node / 2)
         for i in 1:(nb_gdl - 1)
     )
 
     Jt_agdl_ampl = -k_th_eff_agdl_ampl * d_dx(sv_1D["T_agdl_$nb_gdl"], sv_1D["T_ampl_1"], Hgdl_node / 2, Hmpl_node / 2)
-    Jt_ampl_ampl = Dict{String, T}(
+    Jt_ampl_ampl = Dict(
         "ampl_ampl_$i" => -k_th_eff_ampl_ampl[i] * d_dx(sv_1D["T_ampl_$i"], sv_1D["T_ampl_$(i + 1)"], Hmpl_node / 2)
         for i in 1:(nb_mpl - 1)
     )

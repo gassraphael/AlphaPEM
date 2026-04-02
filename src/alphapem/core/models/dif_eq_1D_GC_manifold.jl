@@ -41,7 +41,7 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
     Hcgc::Float64,
     Lgc::Float64,
     nb_gc::Int64,
-    type_auxiliary::String,
+    type_auxiliary::Symbol,
     Jv::Dict,
     J_H2::Dict,
     J_O2::Dict,
@@ -87,7 +87,7 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
                                           (J_H2["agc_agc"][nb_gc - 1] - J_H2["agc_out"]) / (Lgc / nb_gc) - J_H2["agc_agdl"][nb_gc] / Hagc
     end
 
-    if type_auxiliary == "forced-convective_cathode_with_flow-through_anode"  # Test bench: simulated H2 recirculation which leads to N2 in the anode.
+    if type_auxiliary == :forced_convective_cathode_with_flow_through_anode  # Test bench: simulated H2 recirculation which leads to N2 in the anode.
         if nb_gc == 1
             dif_eq[1]["dC_N2_agc / dt"] = 1 / (1 - sv[1]["s_agc"]) *
                                           (J_N2["agc_in"] - J_N2["agc_out"]) / Lgc
@@ -293,19 +293,19 @@ function calculate_dyn_manifold_pressure_and_humidity_evolution(
     Vcsm::Float64,
     Vaem::Float64,
     Vcem::Float64,
-    type_auxiliary::String,
+    type_auxiliary::Symbol,
     W::Dict,
     Wv::Dict
 )
 
     # # Pressure evolution inside the manifolds
-    # if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" ||
-    #    type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+    # if type_auxiliary == :forced_convective_cathode_with_anodic_recirculation ||
+    #    type_auxiliary == :forced_convective_cathode_with_flow_through_anode
     #     # At the anode side
-    #     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation"
+    #     if type_auxiliary == :forced_convective_cathode_with_anodic_recirculation
     #         dif_eq["dPasm / dt"] = (W["a_in"] + W["asm_in_re_to_asm"] - nb_cell * Wasm_to_asm_out) / Vasm * R * T_des
     #         dif_eq["dPaem / dt"] = (nb_cell * Waem_in_to_aem - Waem_to_aem_out - Waem_to_aem_out_re) / Vaem * R * T_des
-    #     else  # type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+    #     else  # type_auxiliary == :forced_convective_cathode_with_flow_through_anode
     #         dif_eq["dPasm / dt"] = (W["a_in"] - nb_cell * Wasm_to_asm_out) / Vasm * R * T_des
     #         dif_eq["dPaem / dt"] = (nb_cell * Waem_in_to_aem - Waem_to_aem_out) / Vaem * R * T_des
     #     end
@@ -315,13 +315,13 @@ function calculate_dyn_manifold_pressure_and_humidity_evolution(
     # end
     #
     # # Humidity evolution inside the manifolds
-    # if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation" ||
-    #    type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+    # if type_auxiliary == :forced_convective_cathode_with_anodic_recirculation ||
+    #    type_auxiliary == :forced_convective_cathode_with_flow_through_anode
     #     # At the anode side
-    #     if type_auxiliary == "forced-convective_cathode_with_anodic_recirculation"
+    #     if type_auxiliary == :forced_convective_cathode_with_anodic_recirculation
     #         dif_eq["dPhi_asm / dt"] = (Wv_asm_in_to_asm + Wv_asm_in_re_to_asm - nb_cell * Wv_asm_to_asm_out) / Vasm * R * T_des / Psat(T_des)
     #         dif_eq["dPhi_aem / dt"] = (nb_cell * Wv_aem_in_to_aem - Wv_aem_to_aem_out_re - Wv_aem_to_aem_out) / Vaem * R * T_des / Psat(T_des)
-    #     else  # type_auxiliary == "forced-convective_cathode_with_flow-through_anode"
+    #     else  # type_auxiliary == :forced_convective_cathode_with_flow_through_anode
     #         dif_eq["dPhi_asm / dt"] = (Wv_asm_in_to_asm - nb_cell * Wv_asm_to_asm_out) / Vasm * R * T_des / Psat(T_des)
     #         dif_eq["dPhi_aem / dt"] = (nb_cell * Wv_aem_in_to_aem - Wv_aem_to_aem_out) / Vaem * R * T_des / Psat(T_des)
     #     end

@@ -14,32 +14,34 @@ include(joinpath(@__DIR__, "../../utils/physics_functions.jl"))
 
 # _____________________________________________________Flow modules_____________________________________________________
 
-"""This function calculates intermediate values for the flows calculation.
+"""Calculate intermediate values for the flows calculation.
 
 Parameters
 ----------
-sv : Dict{String, Any}
+sv : Dict
     Variables calculated by the solver. They correspond to the fuel cell internal states.
     `sv` is a contraction of solver_variables for enhanced readability.
 i_fc :
     Current density of the fuel cell (A/m²).
-parameters : Dict{String, Any}
-    Parameters of the fuel cell model.
+fc : AbstractFuelCell
+    The fuel cell instance providing model parameters.
 
 Returns
 -------
 Tuple
     Tuple containing all intermediate values used by the flows calculation.
 """
-function flows_1D_MEA_int_values(sv::Dict{String, Any},
+function flows_1D_MEA_int_values(sv::Dict,
                                  i_fc,
-                                 parameters::Dict{String, Any})
+                                 fc::AbstractFuelCell)
 
-    # Extraction of the operating inputs and the parameters
-    epsilon_gdl, epsilon_mpl, epsilon_c = parameters["epsilon_gdl"], parameters["epsilon_mpl"], parameters["epsilon_c"]
-    e, Hacl, Hccl, Hmem = parameters["e"], parameters["Hacl"], parameters["Hccl"], parameters["Hmem"]
-    Hgdl, Hmpl, Wagc, Wcgc = parameters["Hgdl"], parameters["Hmpl"], parameters["Wagc"], parameters["Wcgc"]
-    nb_gdl, nb_mpl = parameters["nb_gdl"], parameters["nb_mpl"]
+    # Extraction of the parameters
+    pp = fc.physical_parameters
+    np = fc.numerical_parameters
+    Hacl, Hccl, Hmem, Hgdl, Hmpl = pp.Hacl, pp.Hccl, pp.Hmem, pp.Hgdl, pp.Hmpl
+    Wagc, Wcgc = pp.Wagc, pp.Wcgc
+    epsilon_gdl, epsilon_mpl, epsilon_c, e = pp.epsilon_gdl, pp.epsilon_mpl, pp.epsilon_c, pp.e
+    nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl
 
     # Extraction of the variables
     C_v_agc, C_v_acl, C_v_ccl, C_v_cgc = sv["C_v_agc"], sv["C_v_acl"], sv["C_v_ccl"], sv["C_v_cgc"]

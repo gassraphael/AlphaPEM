@@ -18,7 +18,7 @@ include(joinpath(@__DIR__, "../modules/cell_voltage_modules.jl"))
 
 # _________________________________________________Current distribution_________________________________________________
 
-"""This function calculates the local current density distribution in the 1D direction of the GC.
+"""Calculate the local current density distribution in the 1D direction of the GC.
 
 Parameters
 ----------
@@ -27,9 +27,9 @@ i_fc_cell :
 sv : Vector{Dict}
     Variables calculated by the solver. They correspond to the cell internal states.
     sv is a contraction of solver_variables for enhanced readability.
-    sv[i] is a Dict{String, Number} of internal state variables for gas channel i.
-parameters : Dict
-    Parameters of the fuel cell model.
+    sv[i] is a Dict of internal state variables for gas channel i.
+fc : AbstractFuelCell
+    Fuel cell instance providing model parameters.
 
 Returns
 -------
@@ -38,10 +38,10 @@ i_fc : Vector
     Julia vectors are naturally 1-based, so no dummy element is stored at index 0.
     i_fc[i] corresponds to gas channel i, for i in 1:nb_gc.
 """
-function calculate_1D_GC_current_density(i_fc_cell, sv::Vector{Dict}, parameters::Dict)::Vector
+function calculate_1D_GC_current_density(i_fc_cell, sv::Vector{Dict}, fc::AbstractFuelCell)::Vector
 
-    # Extraction of the operating inputs and the parameters
-    nb_gc = parameters["nb_gc"]
+    # Extraction of the parameters
+    nb_gc = fc.numerical_parameters.nb_gc
     # Extraction of the variables
     C_O2_ccl = [sv[i]["C_O2_ccl"] for i in 1:nb_gc]
 
@@ -56,13 +56,13 @@ function calculate_1D_GC_current_density(i_fc_cell, sv::Vector{Dict}, parameters
         # Residuals: difference between guessed and calculated values
         #   Equation set 1 – cell voltage consistency across all GC positions (nb_gc equations)
         @inbounds for i in 1:nb_gc
-            res[i] = calculate_cell_voltage(i_fc_guessed[i], C_O2_Pt_guessed[i], sv[i], parameters) - U_cell_guessed
+            res[i] = calculate_cell_voltage(i_fc_guessed[i], C_O2_Pt_guessed[i], sv[i], fc) - U_cell_guessed
         end
         #   Equation set 2 – average current density conservation (1 equation)
         res[nb_gc+1] = i_fc_cell - average(i_fc_guessed)
         #   Equation set 3 – oxygen concentration at the Pt surface (nb_gc equations)
         @inbounds for i in 1:nb_gc
-            res[nb_gc+1+i] = calculate_C_O2_Pt(i_fc_guessed[i], sv[i], parameters) - C_O2_Pt_guessed[i]
+            res[nb_gc+1+i] = calculate_C_O2_Pt(i_fc_guessed[i], sv[i], fc) - C_O2_Pt_guessed[i]
         end
     end
 
@@ -70,7 +70,7 @@ function calculate_1D_GC_current_density(i_fc_cell, sv::Vector{Dict}, parameters
     # using NonlinearSolve with Levenberg-Marquardt
     #       Initial guesses
     x0 = Vector{Number}(undef, 2 * nb_gc + 1)
-    x0[1]            = calculate_cell_voltage(i_fc_cell, C_O2_ccl[1], sv[1], parameters)
+    x0[1]            = calculate_cell_voltage(i_fc_cell, C_O2_ccl[1], sv[1], fc)
     x0[2:nb_gc+1]   .= i_fc_cell
     x0[nb_gc+2:2*nb_gc+1] = C_O2_ccl
     #       Solver call
