@@ -5,12 +5,11 @@ Example: Run AlphaPEM with type_current = :EIS
 You can modify any SimulationConfig parameter below.
 """
 
-include("../src/alphapem/config/simulation_config.jl")
-include("../src/alphapem/application/run_simulation.jl")
-include("../src/alphapem/config/current_parameters.jl")
+import Pkg
+Pkg.activate(joinpath(@__DIR__, ".."))
 
-using .SimulationConfigModule
-using .Config: EISParams
+using AlphaPEM.Config: SimulationConfig, EISParams
+using AlphaPEM.Application: run_simulation
 
 current_params = EISParams(
     i_EIS = 1.0e4,        # (A/m²). Parameters for the EIS curve.

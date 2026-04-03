@@ -3,15 +3,6 @@
 """This module is used to calculate intermediate values for the flows calculation.
 """
 
-# _____________________________________________________Preliminaries____________________________________________________
-
-# Importing constants' value and functions
-include(joinpath(@__DIR__, "../../utils/physics_constants.jl"))
-include(joinpath(@__DIR__, "../../utils/maths_functions.jl"))
-include(joinpath(@__DIR__, "cell_voltage_modules.jl"))
-include(joinpath(@__DIR__, "../../utils/physics_functions.jl"))
-
-
 # _____________________________________________________Flow modules_____________________________________________________
 
 """Calculate intermediate values for the flows calculation.

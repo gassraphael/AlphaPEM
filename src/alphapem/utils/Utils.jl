@@ -17,7 +17,7 @@ include("maths_functions.jl")
 include("physics_functions.jl")
 
 # Re-export all symbols defined by the included utility files.
-for _name in names(@__MODULE__; all=false, imported=false)
+for _name in names(@__MODULE__; all=true, imported=false)
     if _name in (:Utils, :eval, :include) || startswith(String(_name), "#")
         continue
     end

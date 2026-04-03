@@ -12,7 +12,7 @@ If a `fuel_cell` object is provided, experimental values will be extracted from 
 Otherwise, default parameter values are used.
 """
 
-function create_current(p::StepParams)::AbstractCurrent
+function create_current(p::StepParams, fuel_cell=nothing)::AbstractCurrent
     return StepCurrent(p)
 end
 
@@ -23,7 +23,13 @@ function create_current(p::PolarizationParams, fuel_cell=nothing)::AbstractCurre
     if fuel_cell !== nothing && hasproperty(fuel_cell, :pola_exp_data) &&
            hasproperty(fuel_cell.pola_exp_data, :i_exp) && !isempty(fuel_cell.pola_exp_data.i_exp)
             i_max_val = maximum(fuel_cell.pola_exp_data.i_exp)
-            p = PolarizationParams(; NamedTuple(p)..., i_max=i_max_val)
+            p = PolarizationParams(
+                delta_t_ini = p.delta_t_ini,
+                delta_i = p.delta_i,
+                v_load = p.v_load,
+                delta_t_break = p.delta_t_break,
+                i_max = i_max_val,
+            )
     end
     return PolarizationCurrent(p)
 end
@@ -34,12 +40,19 @@ function create_current(p::PolarizationCalibrationParams, fuel_cell=nothing)::Ab
     # pass i_exp as a field in the parameter struct (requires constructor support).
     if fuel_cell !== nothing && hasproperty(fuel_cell, :pola_exp_data_cali) &&
        hasproperty(fuel_cell.pola_exp_data_cali, :i_exp) && !isempty(fuel_cell.pola_exp_data_cali.i_exp)
-        p = PolarizationCalibrationParams(; NamedTuple(p)..., i_exp=fuel_cell.pola_exp_data_cali.i_exp)
+        p = PolarizationCalibrationParams(
+            delta_t_ini = p.delta_t_ini,
+            v_load = p.v_load,
+            delta_t_break = p.delta_t_break,
+            i_exp = Float64.(fuel_cell.pola_exp_data_cali.i_exp),
+        )
     end
     return PolarizationCalibrationCurrent(p)
 end
 
 
-function create_current(p::EISParams)::AbstractCurrent
+
+function create_current(p::EISParams, fuel_cell=nothing)::AbstractCurrent
     return EISCurrent(p)
 end
+

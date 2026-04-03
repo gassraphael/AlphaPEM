@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-__precompile__(false)
-
 """
 	AlphaPEM
 
@@ -19,9 +17,10 @@ const LICENSE = "GPLv3"
 
 include("alphapem/utils/Utils.jl")
 include("alphapem/config/Config.jl")
+include("alphapem/fuelcell/Fuelcell.jl")
+include("alphapem/currents/Currents.jl")
 include("alphapem/core/Core.jl")
 include("alphapem/application/Application.jl")
-include("alphapem/parametrisation/Parametrisation.jl")
 include("alphapem/interfaces/Interfaces.jl")
 
 export VERSION,
@@ -30,9 +29,10 @@ export VERSION,
 	   LICENSE,
 	   Utils,
 	   Config,
+	   Fuelcell,
+	   Currents,
 	   Core,
 	   Application,
-	   Parametrisation,
 	   Interfaces
 
 end  # module AlphaPEM

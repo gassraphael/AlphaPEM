@@ -5,11 +5,12 @@ Example: Run AlphaPEM with type_current = :step
 You can modify any SimulationConfig parameter below.
 """
 
-include("../src/alphapem/config/simulation_config.jl")
-include("../src/alphapem/application/run_simulation.jl")
+import Pkg
+Pkg.activate(joinpath(@__DIR__, ".."))
 
-using .SimulationConfigModule: SimulationConfig
-using .Currents: StepParams
+# --- Load AlphaPEM from the project environment ---
+using AlphaPEM.Config: SimulationConfig, StepParams
+using AlphaPEM.Application: run_simulation
 
 current_params = StepParams(
     delta_t_ini = 30.0 * 60.0,   # (s). Initial time at zero current density for the stabilisation of the internal states (standard value).

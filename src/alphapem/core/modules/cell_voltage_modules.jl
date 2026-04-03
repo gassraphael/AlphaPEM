@@ -3,13 +3,6 @@
 """This module is used to calculate intermediate values for the voltage calculation.
 """
 
-# _____________________________________________________Preliminaries____________________________________________________
-
-# Importing constants' value and functions
-include(joinpath(@__DIR__, "../../utils/physics_constants.jl"))
-include(joinpath(@__DIR__, "../../utils/physics_functions.jl"))
-
-
 # _________________________________________________Cell voltage modules_________________________________________________
 
 """Calculate the oxygen concentration at the platinum surface in the cathode catalyst layer.

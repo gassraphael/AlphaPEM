@@ -6,23 +6,8 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing the necessary libraries
-using PyCall
 using Interpolations
 
-const np = pyimport("numpy")
-const mpl = pyimport("matplotlib")
-const plt = pyimport("matplotlib.pyplot")
-const LogLocator = pyimport("matplotlib.ticker").LogLocator
-
-# Importing constants' value and functions
-include(joinpath(@__DIR__, "../../utils/physics_constants.jl"))
-include(joinpath(@__DIR__, "../../utils/maths_functions.jl"))
-include(joinpath(@__DIR__, "flows_1D_MEA_modules.jl"))
-include(joinpath(@__DIR__, "../../utils/physics_functions.jl"))
-include(joinpath(@__DIR__, "display_calc_modules.jl"))
-
-# General edition
-const colors = pyimport("matplotlib.pyplot").get_cmap("tab20")
 
 
 # __________________________________________________Polarisation curve__________________________________________________
@@ -55,7 +40,6 @@ function plot_polarisation_curve(variables::Dict{String, Any},  fc::AbstractFuel
 
     delta_t_ini_pola, delta_t_load_pola, delta_t_break_pola = cd.delta_t_ini, delta_t_load(cd), cd.delta_t_break
     delta_i_pola, i_max_pola = cd.delta_i, cd.i_max
-    voltage_zone = cfg.voltage_zone
 
     if cfg.type_plot == :fixed
         # Creation of ifc_t
@@ -78,9 +62,9 @@ function plot_polarisation_curve(variables::Dict{String, Any},  fc::AbstractFuel
 
         # Plot the experimental polarization curve and calculate the simulation error compared with experimental data
         if cfg.type_fuel_cell != :manual_setup &&
-           (type_auxiliary == :forced_convective_cathode_with_flow_through_anode || type_auxiliary == :no_auxiliary)
+           (cfg.type_auxiliary == :forced_convective_cathode_with_flow_through_anode || cfg.type_auxiliary == :no_auxiliary)
             # Extraction of the experimental current density and voltage values.
-            i_exp_t, U_exp_t = fc.pola_exp_data  # (A.m-2, V).
+            i_exp_t, U_exp_t = fc.pola_exp_data.i_exp, fc.pola_exp_data.U_exp  # (A.m-2, V).
             # Plot of the experimental polarization curve
             i_exp_t = i_exp_t ./ 1e4  # Conversion in A/cm²
             plot_experimental_polarisation_curve(cfg.type_fuel_cell, i_exp_t, U_exp_t, ax)
@@ -143,7 +127,6 @@ function plot_polarisation_curve_for_cali(variables::Dict{String, Any},
                                           cd::AbstractCurrent,
                                           cfg::SimulationConfig,
                                           ax)
-
     # Extraction of the variables
     t, Ucell_t = collect(variables["t"]), collect(variables["Ucell"])
     # Extraction of the operating inputs and the parameters
@@ -153,7 +136,7 @@ function plot_polarisation_curve_for_cali(variables::Dict{String, Any},
     delta_t_break_pola_cali = cd.delta_t_break
     voltage_zone = cfg.voltage_zone
     # Extraction of the experimental current density and voltage values for the calibration.
-    i_exp_cali_t, U_exp_cali_t = fc.pola_exp_data_cali  # (A.m-2, V).
+    i_exp_cali_t, U_exp_cali_t = fc.pola_exp_data_cali.i_exp, fc.pola_exp_data_cali.U_exp  # (A.m-2, V).
 
     if cfg.type_plot == :fixed
         # Creation of ifc_t
@@ -445,12 +428,11 @@ function plot_ifc_1D_temporal(variables::Dict{String, Any},
 
     # Extraction of the operating inputs and the parameters
     nb_gc = fc.numerical_parameters.nb_gc
-    delta_t_ini = cd.delta_t_ini
 
     # Extraction of the variables
     t_full = collect(variables["t"])
     mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * delta_t_ini  # select the time after 0.9*delta_t_ini
+        t_full .>= 0.9 * cd.delta_t_ini  # select the time after 0.9*delta_t_ini
     else
         trues(length(t_full))
     end
@@ -507,20 +489,11 @@ function plot_C_v_1D_temporal(variables::Dict{String, Any},
     # Extraction of the parameter
     nb_gc, nb_gdl, nb_mpl = fc.numerical_parameters.nb_gc, fc.numerical_parameters.nb_gdl, fc.numerical_parameters.nb_mpl
     type_current, type_plot = cfg.type_current, cfg.type_plot
-    if cfg.type_current == :step
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization_for_cali
-        delta_t_ini = cd.delta_t_ini
-    else
-        delta_t_ini = 0
-    end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
     mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * delta_t_ini
+        t_full .>= 0.9 * cd.delta_t_ini
     else
         trues(length(t_full))
     end
@@ -580,22 +553,12 @@ function plot_lambda_1D_temporal(variables::Dict{String, Any},
                                  ax)
 
     # Extraction of the operating inputs and the parameters
-
     nb_gc = fc.numerical_parameters.nb_gc
-    if cfg.type_current == :step
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization_for_cali
-        delta_t_ini = cd.delta_t_ini
-    else
-        delta_t_ini = 0
-    end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
     mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * delta_t_ini
+        t_full .>= 0.9 * cd.delta_t_ini
     else
         trues(length(t_full))
     end
@@ -606,7 +569,7 @@ function plot_lambda_1D_temporal(variables::Dict{String, Any},
     lambda_ccl_t = collect(variables["lambda_ccl"][nb_gc_mid])[mask]
 
     # Plot the water content at different spatial localisations: lambda
-    if cfg.type_current == :polarization
+    if cfg.type_current isa PolarizationParams
         n = length(t)
         ifc_t = zeros(n)
         for i in 1:n
@@ -671,23 +634,12 @@ function plot_s_1D_temporal(variables::Dict{String, Any},
 
     # Extraction of the operating inputs and the parameters
 
-    nb_gc = fc.numerical_parameters.nb_gc
-    nb_gdl = fc.numerical_parameters.nb_gdl
-    nb_mpl = fc.numerical_parameters.nb_mpl
-    if cfg.type_current == :step
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization_for_cali
-        delta_t_ini = cd.delta_t_ini
-    else
-        delta_t_ini = 0
-    end
+    nb_gc, nb_gdl, nb_mpl = fc.numerical_parameters.nb_gc, fc.numerical_parameters.nb_gdl, fc.numerical_parameters.nb_mpl
 
     # Extraction of the variables
     t_full = collect(variables["t"])
     mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * delta_t_ini
+        t_full .>= 0.9 * cd.delta_t_ini
     else
         trues(length(t_full))
     end
@@ -703,7 +655,7 @@ function plot_s_1D_temporal(variables::Dict{String, Any},
     s_cgc_t = collect(variables["s_cgc"][nb_gc_mid])[mask]
 
     # Plot the liquid water saturation at different spatial localisations: s
-    if cfg.type_current == :polarization
+    if cfg.type_current isa PolarizationParams
         n = length(t)
         ifc_t = zeros(n)
         for i in 1:n
@@ -790,20 +742,11 @@ function plot_C_H2_1D_temporal(variables::Dict{String, Any},
     nb_gc = fc.numerical_parameters.nb_gc
     nb_gdl = fc.numerical_parameters.nb_gdl
     nb_mpl = fc.numerical_parameters.nb_mpl
-    if cfg.type_current == :step
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization_for_cali
-        delta_t_ini = cd.delta_t_ini
-    else
-        delta_t_ini = 0
-    end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
     mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * delta_t_ini
+        t_full .>= 0.9 * cd.delta_t_ini
     else
         trues(length(t_full))
     end
@@ -856,20 +799,11 @@ function plot_C_O2_1D_temporal(variables::Dict{String, Any},
     nb_gc = fc.numerical_parameters.nb_gc
     nb_gdl = fc.numerical_parameters.nb_gdl
     nb_mpl = fc.numerical_parameters.nb_mpl
-    if cfg.type_current == :step
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization_for_cali
-        delta_t_ini = cd.delta_t_ini
-    else
-        delta_t_ini = 0
-    end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
     mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * delta_t_ini
+        t_full .>= 0.9 * cd.delta_t_ini
     else
         trues(length(t_full))
     end
@@ -918,20 +852,11 @@ function plot_C_N2_1D_temporal(variables::Dict{String, Any},
 
     # Extraction of the parameters
     nb_gc = fc.numerical_parameters.nb_gc
-    if cfg.type_current == :step
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization_for_cali
-        delta_t_ini = cd.delta_t_ini
-    else
-        delta_t_ini = 0
-    end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
     mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * delta_t_ini
+        t_full .>= 0.9 * cd.delta_t_ini
     else
         trues(length(t_full))
     end
@@ -976,20 +901,11 @@ function plot_P_1D_temporal(variables::Dict{String, Any},
     Pa_des = fc.operating_conditions.Pa_des
     Pc_des = fc.operating_conditions.Pc_des
     nb_gc = fc.numerical_parameters.nb_gc
-    if cfg.type_current == :step
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization_for_cali
-        delta_t_ini = cd.delta_t_ini
-    else
-        delta_t_ini = 0
-    end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
     mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * delta_t_ini
+        t_full .>= 0.9 * cd.delta_t_ini
     else
         trues(length(t_full))
     end
@@ -1074,20 +990,11 @@ function plot_T_1D_temporal(variables::Dict{String, Any},
     nb_gc = fc.numerical_parameters.nb_gc
     nb_gdl = fc.numerical_parameters.nb_gdl
     nb_mpl = fc.numerical_parameters.nb_mpl
-    if cfg.type_current == :step
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization_for_cali
-        delta_t_ini = cd.delta_t_ini
-    else
-        delta_t_ini = 0
-    end
 
     # Extraction of the variables and the operating inputs
     t_full = collect(variables["t"])
     mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * delta_t_ini
+        t_full .>= 0.9 * cd.delta_t_ini
     else
         trues(length(t_full))
     end
@@ -1104,7 +1011,7 @@ function plot_T_1D_temporal(variables::Dict{String, Any},
     T_cgc_t = collect(variables["T_cgc"][nb_gc_mid])[mask] .- 273.15
 
     # Plot the temperature at different spatial localisations
-    if cfg.type_current == :polarization
+    if cfg.type_current isa PolarizationParams
         n = length(t)
         ifc_t = zeros(n)
         for i in 1:n
@@ -1194,21 +1101,10 @@ function plot_Ucell(variables::Dict{String, Any},
                     cfg::SimulationConfig,
                     ax)
 
-    # Extraction of the parameters
-    if cfg.type_current == :step
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization_for_cali
-        delta_t_ini = cd.delta_t_ini
-    else
-        delta_t_ini = 0
-    end
-
     # Extraction of the variables
     t_full = collect(variables["t"])
     mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * delta_t_ini
+        t_full .>= 0.9 * cd.delta_t_ini
     else
         trues(length(t_full))
     end
@@ -1246,20 +1142,11 @@ function plot_Phi_a_1D_temporal(variables::Dict{String, Any},
     # Extraction of the operating inputs and parameters
     Phi_a_des = fc.operating_conditions.Phi_a_des
     nb_gc = fc.numerical_parameters.nb_gc
-    if cfg.type_current == :step
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization_for_cali
-        delta_t_ini = cd.delta_t_ini
-    else
-        delta_t_ini = 0
-    end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
     mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * delta_t_ini
+        t_full .>= 0.9 * cd.delta_t_ini
     else
         trues(length(t_full))
     end
@@ -1308,20 +1195,11 @@ function plot_Phi_c_1D_temporal(variables::Dict{String, Any},
     # Extraction of the operating inputs and parameters
     Phi_c_des = fc.operating_conditions.Phi_c_des
     nb_gc = fc.numerical_parameters.nb_gc
-    if cfg.type_current == :step
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization_for_cali
-        delta_t_ini = cd.delta_t_ini
-    else
-        delta_t_ini = 0
-    end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
     mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * delta_t_ini
+        t_full .>= 0.9 * cd.delta_t_ini
     else
         trues(length(t_full))
     end
@@ -1369,20 +1247,11 @@ function plot_v_1D_temporal(variables::Dict{String, Any},
 
     # Extraction of the parameters
     nb_gc = fc.numerical_parameters.nb_gc
-    if cfg.type_current == :step
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization_for_cali
-        delta_t_ini = cd.delta_t_ini
-    else
-        delta_t_ini = 0
-    end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
     mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * delta_t_ini
+        t_full .>= 0.9 * cd.delta_t_ini
     else
         trues(length(t_full))
     end
@@ -1426,20 +1295,11 @@ function plot_Re_nb_1D_temporal(variables::Dict{String, Any},
     Hcgc = fc.physical_parameters.Hcgc
     Wcgc = fc.physical_parameters.Wcgc
     nb_gc = fc.numerical_parameters.nb_gc
-    if cfg.type_current == :step
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization
-        delta_t_ini = cd.delta_t_ini
-    elseif cfg.type_current == :polarization_for_cali
-        delta_t_ini = cd.delta_t_ini
-    else
-        delta_t_ini = 0
-    end
 
     # Extraction of the variables
     t_full = collect(variables["t"])
     mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * delta_t_ini
+        t_full .>= 0.9 * cd.delta_t_ini
     else
         trues(length(t_full))
     end
@@ -1741,17 +1601,17 @@ end
 This function adds the specific instructions for polarisation plots according to the type_input to the ax object.
 
 # Arguments
-- `type_fuel_cell::String`: Type of fuel cell configuration.
+- `type_fuel_cell::Symbol`: Type of fuel cell configuration.
 - `ax`: Axes on which the instructions will be added.
 - `show::Bool=true`: If true, the figure will be displayed.
 """
-function plot_pola_instructions(type_fuel_cell, ax, show::Bool=true)
+function plot_pola_instructions(type_fuel_cell::Symbol, ax, show::Bool=true)
 
     # For ZSW-GenStack fuel cell
-    if type_fuel_cell == "ZSW-GenStack" || type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41" ||
-       type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81" || type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2" ||
-       type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6" || type_fuel_cell == "ZSW-GenStack_T_62" ||
-       type_fuel_cell == "ZSW-GenStack_T_76" || type_fuel_cell == "ZSW-GenStack_T_84"
+    if type_fuel_cell in (:ZSW_GenStack, :ZSW_GenStack_Pa_1_61_Pc_1_41,
+                          :ZSW_GenStack_Pa_2_01_Pc_1_81, :ZSW_GenStack_Pa_2_4_Pc_2_2,
+                          :ZSW_GenStack_Pa_2_8_Pc_2_6, :ZSW_GenStack_T_62,
+                          :ZSW_GenStack_T_76, :ZSW_GenStack_T_84)
         ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(0.5))
         ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.5 / 5))
         ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.1))
@@ -1760,8 +1620,7 @@ function plot_pola_instructions(type_fuel_cell, ax, show::Bool=true)
         ax.set_ylim(0.4, 1.24)
 
     # For EH-31 fuel cell
-    elseif type_fuel_cell == "EH-31_1.5" || type_fuel_cell == "EH-31_2.0" ||
-           type_fuel_cell == "EH-31_2.25" || type_fuel_cell == "EH-31_2.5"
+    elseif type_fuel_cell in (:EH_31_1_5, :EH_31_2_0, :EH_31_2_25, :EH_31_2_5)
         ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(0.5))
         ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.5 / 5))
         ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.1))
@@ -1800,135 +1659,135 @@ function plot_specific_line(x,
 
     aux_ok = (type_auxiliary == :forced_convective_cathode_with_flow_through_anode || type_auxiliary == :no_auxiliary)
 
-    if cfg.type_current == :polarization
-        if type_fuel_cell == "ZSW-GenStack" && aux_ok
+    if type_current isa PolarizationParams
+        if type_fuel_cell == :ZSW_GenStack && aux_ok
             ax.plot(x, y, "--"; color=colors(0), label="Sim. - nominal - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "ZSW-GenStack"
+        elseif type_fuel_cell == :ZSW_GenStack
             ax.plot(x, y; color=colors(0), label="Sim. - nominal")
 
-        elseif type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41" && aux_ok
+        elseif type_fuel_cell == :ZSW_GenStack_Pa_1_61_Pc_1_41 && aux_ok
             ax.plot(x, y, "--"; color=colors(1), label="Sim. - P\$_a\$/P\$_c\$ = 1.61/1.41 bar - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41"
+        elseif type_fuel_cell == :ZSW_GenStack_Pa_1_61_Pc_1_41
             ax.plot(x, y; color=colors(1), label="Sim. - P\$_a\$/P\$_c\$ = 1.61/1.41 bar")
 
-        elseif type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81" && aux_ok
+        elseif type_fuel_cell == :ZSW_GenStack_Pa_2_01_Pc_1_81 && aux_ok
             ax.plot(x, y; color=colors(2), label="Sim. - P\$_a\$/P\$_c\$ = 2.01/1.81 bar - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81"
+        elseif type_fuel_cell == :ZSW_GenStack_Pa_2_01_Pc_1_81
             ax.plot(x, y; color=colors(2), label="Sim. - P\$_a\$/P\$_c\$ = 2.01/1.81 bar")
 
-        elseif type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2" && aux_ok
+        elseif type_fuel_cell == :ZSW_GenStack_Pa_2_4_Pc_2_2 && aux_ok
             ax.plot(x, y; color=colors(3), label="Sim. - P\$_a\$/P\$_c\$ = 2.4/2.2 bar - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2"
+        elseif type_fuel_cell == :ZSW_GenStack_Pa_2_4_Pc_2_2
             ax.plot(x, y; color=colors(3), label="Sim. - P\$_a\$/P\$_c\$ = 2.4/2.2 bar")
 
-        elseif type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6" && aux_ok
+        elseif type_fuel_cell == :ZSW_GenStack_Pa_2_8_Pc_2_6 && aux_ok
             ax.plot(x, y; color=colors(4), label="Sim. - P\$_a\$/P\$_c\$ = 2.8/2.6 bar - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6"
+        elseif type_fuel_cell == :ZSW_GenStack_Pa_2_8_Pc_2_6
             ax.plot(x, y; color=colors(4), label="Sim. - P\$_a\$/P\$_c\$ = 2.8/2.6 bar")
 
-        elseif type_fuel_cell == "ZSW-GenStack_T_62" && aux_ok
+        elseif type_fuel_cell == :ZSW_GenStack_T_62 && aux_ok
             ax.plot(x, y, "--"; color=colors(5), label="Sim. - T = 62 \$^\\circ\$C - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "ZSW-GenStack_T_62"
+        elseif type_fuel_cell == :ZSW_GenStack_T_62
             ax.plot(x, y; color=colors(5), label="Sim. - T = 62 \$^\\circ\$C")
 
-        elseif type_fuel_cell == "ZSW-GenStack_T_76" && aux_ok
+        elseif type_fuel_cell == :ZSW_GenStack_T_76 && aux_ok
             ax.plot(x, y; color=colors(6), label="Sim. - T = 76 \$^\\circ\$C - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "ZSW-GenStack_T_76"
+        elseif type_fuel_cell == :ZSW_GenStack_T_76
             ax.plot(x, y; color=colors(6), label="Sim. - T = 76 \$^\\circ\$C")
 
-        elseif type_fuel_cell == "ZSW-GenStack_T_84" && aux_ok
+        elseif type_fuel_cell == :ZSW_GenStack_T_84 && aux_ok
             ax.plot(x, y; color=colors(7), label="Sim. - T = 84 \$^\\circ\$C - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "ZSW-GenStack_T_84"
+        elseif type_fuel_cell == :ZSW_GenStack_T_84
             ax.plot(x, y; color=colors(7), label="Sim. - T = 84 \$^\\circ\$C")
 
-        elseif type_fuel_cell == "EH-31_1.5" && aux_ok
+        elseif type_fuel_cell == :EH_31_1_5 && aux_ok
             ax.plot(x, y; color=colors(0), label="Sim. - P = 1.5 bar - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "EH-31_1.5"
+        elseif type_fuel_cell == :EH_31_1_5
             ax.plot(x, y; color=colors(0), label="Sim. - P = 1.5 bar")
 
-        elseif type_fuel_cell == "EH-31_2.0" && aux_ok
+        elseif type_fuel_cell == :EH_31_2_0 && aux_ok
             ax.plot(x, y, "--"; color=colors(1), label="Sim. - P = 2.0 bar - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "EH-31_2.0"
+        elseif type_fuel_cell == :EH_31_2_0
             ax.plot(x, y; color=colors(1), label="Sim. - P = 2.0 bar")
 
-        elseif type_fuel_cell == "EH-31_2.25" && aux_ok
+        elseif type_fuel_cell == :EH_31_2_25 && aux_ok
             ax.plot(x, y, "--"; color=colors(2), label="Sim. - P = 2.25 bar - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "EH-31_2.25"
+        elseif type_fuel_cell == :EH_31_2_25
             ax.plot(x, y; color=colors(2), label="Sim. - P = 2.25 bar")
 
-        elseif type_fuel_cell == "EH-31_2.5" && aux_ok
+        elseif type_fuel_cell == :EH_31_2_5 && aux_ok
             ax.plot(x, y; color=colors(3), label="Sim - P = 2.5 bar - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "EH-31_2.5"
+        elseif type_fuel_cell == :EH_31_2_5
             ax.plot(x, y; color=colors(3), label="Sim - P = 2.5 bar")
         else
             ax.plot(x, y; color=colors(0), label="Simulation")
         end
 
-    elseif cfg.type_current == :polarization_for_cali
-        if type_fuel_cell == "ZSW-GenStack" && aux_ok
+    elseif type_current isa PolarizationCalibrationParams
+        if type_fuel_cell == :ZSW_GenStack && aux_ok
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(0), label="Sim. - nominal operating conditions - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "ZSW-GenStack"
+        elseif type_fuel_cell == :ZSW_GenStack
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(0), label="Sim. - nominal operating conditions")
 
-        elseif type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41" && aux_ok
+        elseif type_fuel_cell == :ZSW_GenStack_Pa_1_61_Pc_1_41 && aux_ok
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(1), label="Sim. - P\$_a\$/P\$_c\$ = 1.61/1.41 bar - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41"
+        elseif type_fuel_cell == :ZSW_GenStack_Pa_1_61_Pc_1_41
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(1), label="Sim. - P\$_a\$/P\$_c\$ = 1.61/1.41 bar")
 
-        elseif type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81" && aux_ok
+        elseif type_fuel_cell == :ZSW_GenStack_Pa_2_01_Pc_1_81 && aux_ok
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(2), label="Sim. - P\$_a\$/P\$_c\$ = 2.01/1.81 bar - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81"
+        elseif type_fuel_cell == :ZSW_GenStack_Pa_2_01_Pc_1_81
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(2), label="Sim. - P\$_a\$/P\$_c\$ = 2.01/1.81 bar")
 
-        elseif type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2" && aux_ok
+        elseif type_fuel_cell == :ZSW_GenStack_Pa_2_4_Pc_2_2 && aux_ok
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(3), label="Sim. - P\$_a\$/P\$_c\$ = 2.4/2.2 bar - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2"
+        elseif type_fuel_cell == :ZSW_GenStack_Pa_2_4_Pc_2_2
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(3), label="Sim. - P\$_a\$/P\$_c\$ = 2.4/2.2 bar")
 
-        elseif type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6" && aux_ok
+        elseif type_fuel_cell == :ZSW_GenStack_Pa_2_8_Pc_2_6 && aux_ok
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(4), label="Sim. - P\$_a\$/P\$_c\$ = 2.8/2.6 bar - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6"
+        elseif type_fuel_cell == :ZSW_GenStack_Pa_2_8_Pc_2_6
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(4), label="Sim. - P\$_a\$/P\$_c\$ = 2.8/2.6 bar")
 
-        elseif type_fuel_cell == "ZSW-GenStack_T_62" && aux_ok
+        elseif type_fuel_cell == :ZSW_GenStack_T_62 && aux_ok
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(5), label="Sim. - T = 62 \$^\\circ\$C - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "ZSW-GenStack_T_62"
+        elseif type_fuel_cell == :ZSW_GenStack_T_62
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(5), label="Sim. - T = 62 \$^\\circ\$C")
 
-        elseif type_fuel_cell == "ZSW-GenStack_T_76" && aux_ok
+        elseif type_fuel_cell == :ZSW_GenStack_T_76 && aux_ok
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(6), label="Sim. - T = 76 \$^\\circ\$C - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "ZSW-GenStack_T_76"
+        elseif type_fuel_cell == :ZSW_GenStack_T_76
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(6), label="Sim. - T = 76 \$^\\circ\$C")
 
-        elseif type_fuel_cell == "ZSW-GenStack_T_84" && aux_ok
+        elseif type_fuel_cell == :ZSW_GenStack_T_84 && aux_ok
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(7), label="Sim. - T = 84 \$^\\circ\$C - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "ZSW-GenStack_T_84"
+        elseif type_fuel_cell == :ZSW_GenStack_T_84
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(7), label="Sim. - T = 84 \$^\\circ\$C")
 
-        elseif type_fuel_cell == "EH-31_1.5" && aux_ok
+        elseif type_fuel_cell == :EH_31_1_5 && aux_ok
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(0), label="Sim. - P = 1.5 bar - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "EH-31_1.5"
+        elseif type_fuel_cell == :EH_31_1_5
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(0), label="Sim. - P = 1.5 bar")
 
-        elseif type_fuel_cell == "EH-31_2.0" && aux_ok
+        elseif type_fuel_cell == :EH_31_2_0 && aux_ok
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(1), label="Sim. - P = 2.0 bar - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "EH-31_2.0"
+        elseif type_fuel_cell == :EH_31_2_0
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(1), label="Sim. - P = 2.0 bar")
 
-        elseif type_fuel_cell == "EH-31_2.25" && aux_ok
+        elseif type_fuel_cell == :EH_31_2_25 && aux_ok
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(2), label="Sim. - P = 2.25 bar - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "EH-31_2.25"
+        elseif type_fuel_cell == :EH_31_2_25
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(2), label="Sim. - P = 2.25 bar")
 
-        elseif type_fuel_cell == "EH-31_2.5" && aux_ok
+        elseif type_fuel_cell == :EH_31_2_5 && aux_ok
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(3), label="Sim - P = 2.5 bar - \$ΔU_{RMSE}\$ = $(sim_error) %")
-        elseif type_fuel_cell == "EH-31_2.5"
+        elseif type_fuel_cell == :EH_31_2_5
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(3), label="Sim - P = 2.5 bar")
         else
             ax.scatter(x, y; marker="o", linewidths=1.5, color=colors(0), label="Simulation")
         end
     else
-        throw(ArgumentError("Only 'polarization' and 'polarization_for_cali' are considered here."))
+        throw(ArgumentError("Only PolarizationParams and PolarizationCalibrationParams are considered here."))
     end
 
     return nothing
@@ -1945,42 +1804,42 @@ end
 This function plots the experimental polarisation curve on the same graph as the model results.
 
 # Arguments
-- `type_fuel_cell::String`: Type of fuel cell used in the model. This parameter includes the fuel cell used
+- `type_fuel_cell::Symbol`: Type of fuel cell used in the model. This parameter includes the fuel cell used
   in the model and the corresponding operating conditions.
 - `i_fc_t::Vector{<:Real}`: Current density values.
 - `U_exp_t::Vector{<:Real}`: Experimental values of the voltage.
 - `ax`: Axes-like object exposing `scatter` and `legend` methods.
 """
-function plot_experimental_polarisation_curve(type_fuel_cell,
+function plot_experimental_polarisation_curve(type_fuel_cell::Symbol,
                                               i_fc_t::Vector{<:Real},
                                               U_exp_t::Vector{<:Real},
                                               ax)
     # ZSW-GenStack
-    if type_fuel_cell == "ZSW-GenStack"
+    if type_fuel_cell == :ZSW_GenStack
         ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="s", color="black", label="Exp. - nominal")
-    elseif type_fuel_cell == "ZSW-GenStack_Pa_1.61_Pc_1.41"
+    elseif type_fuel_cell == :ZSW_GenStack_Pa_1_61_Pc_1_41
         ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="v", color="black", label="Exp. - P\$_a\$/P\$_c\$ = 1.61/1.41 bar")
-    elseif type_fuel_cell == "ZSW-GenStack_Pa_2.01_Pc_1.81"
+    elseif type_fuel_cell == :ZSW_GenStack_Pa_2_01_Pc_1_81
         ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="^", color="black", label="Exp. - P\$_a\$/P\$_c\$ = 2.01/1.81 bar")
-    elseif type_fuel_cell == "ZSW-GenStack_Pa_2.4_Pc_2.2"
+    elseif type_fuel_cell == :ZSW_GenStack_Pa_2_4_Pc_2_2
         ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="p", color="black", label="Exp. - P\$_a\$/P\$_c\$ = 2.4/2.2 bar")
-    elseif type_fuel_cell == "ZSW-GenStack_Pa_2.8_Pc_2.6"
+    elseif type_fuel_cell == :ZSW_GenStack_Pa_2_8_Pc_2_6
         ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="D", color="black", label="Exp. - P\$_a\$/P\$_c\$ = 2.8/2.6 bar")
-    elseif type_fuel_cell == "ZSW-GenStack_T_62"
+    elseif type_fuel_cell == :ZSW_GenStack_T_62
         ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="P", color="black", label="Exp. - T = 62 \$^\\circ\$C")
-    elseif type_fuel_cell == "ZSW-GenStack_T_76"
+    elseif type_fuel_cell == :ZSW_GenStack_T_76
         ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="X", color="black", label="Exp. - T = 76 \$^\\circ\$C")
-    elseif type_fuel_cell == "ZSW-GenStack_T_84"
+    elseif type_fuel_cell == :ZSW_GenStack_T_84
         ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="*", color="black", label="Exp. - T = 84 \$^\\circ\$C")
 
     # EH-31
-    elseif type_fuel_cell == "EH-31_1.5"  # at 1.5 bar
+    elseif type_fuel_cell == :EH_31_1_5  # at 1.5 bar
         ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="s", color="black", label="Exp. - P = 1.5 bar")
-    elseif type_fuel_cell == "EH-31_2.0"  # at 2.0 bar
+    elseif type_fuel_cell == :EH_31_2_0  # at 2.0 bar
         ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="v", color="black", label="Exp. - P = 2.0 bar")
-    elseif type_fuel_cell == "EH-31_2.25"  # at 2.25 bar
+    elseif type_fuel_cell == :EH_31_2_25  # at 2.25 bar
         ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="^", color="black", label="Exp. - P = 2.25 bar")
-    elseif type_fuel_cell == "EH-31_2.5"  # at 2.5 bar
+    elseif type_fuel_cell == :EH_31_2_5  # at 2.5 bar
         ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="p", color="black", label="Exp. - P = 2.5 bar")
     else
         throw(ArgumentError("Unknown type_fuel_cell: $type_fuel_cell"))
@@ -1998,13 +1857,13 @@ end
 This function adds the instructions for EIS plots according to the type_input to the ax object.
 
 # Arguments
-- `type_fuel_cell::String`: Type of fuel cell configuration.
+- `type_fuel_cell::Symbol`: Type of fuel cell configuration.
 - `f_Fourier::Number`: Frequency at which the EIS is simulated.
 - `x::Number`: x-axis value for plotting the annotation.
 - `y::Number`: y-axis value for plotting the annotation.
 - `ax`: Axes on which the instructions will be added.
 """
-function plot_EIS_Nyquist_instructions(type_fuel_cell,
+function plot_EIS_Nyquist_instructions(type_fuel_cell::Symbol,
                                        f_Fourier::Number,
                                        x::Number,
                                        y::Number,
@@ -2020,8 +1879,7 @@ function plot_EIS_Nyquist_instructions(type_fuel_cell,
     plt.show()  # Show the figure
 
     # For EH-31 fuel cell
-    if type_fuel_cell == "EH-31_1.5" || type_fuel_cell == "EH-31_2.0" ||
-       type_fuel_cell == "EH-31_2.25" || type_fuel_cell == "EH-31_2.5"
+    if type_fuel_cell in (:EH_31_1_5, :EH_31_2_0, :EH_31_2_25, :EH_31_2_5)
 
         # Double charge transfer
         if f_Fourier >= 70 && f_Fourier <= 80
@@ -2080,10 +1938,10 @@ This function adds the instructions for amplitude Bode plots according to the ty
 
 # Arguments
 - `f_EIS`: Frequency parameters for EIS simulation.
-- `type_fuel_cell::String`: Type of fuel cell configuration.
+- `type_fuel_cell::Symbol`: Type of fuel cell configuration.
 - `ax`: Axes on which the instructions will be added.
 """
-function plot_Bode_amplitude_instructions(f_EIS, type_fuel_cell, ax)
+function plot_Bode_amplitude_instructions(f_EIS, type_fuel_cell::Symbol, ax)
 
     # Common instructions
     f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = f_EIS
@@ -2096,8 +1954,7 @@ function plot_Bode_amplitude_instructions(f_EIS, type_fuel_cell, ax)
     plt.show()  # Show the figure
 
     # For EH-31 fuel cell
-    if type_fuel_cell == "EH-31_1.5" || type_fuel_cell == "EH-31_2.0" ||
-       type_fuel_cell == "EH-31_2.25" || type_fuel_cell == "EH-31_2.5"
+    if type_fuel_cell in (:EH_31_1_5, :EH_31_2_0, :EH_31_2_25, :EH_31_2_5)
         ax.xaxis.set_major_locator(LogLocator(base=10.0, numticks=f_power_max_EIS - f_power_min_EIS + 1))
         ax.xaxis.set_minor_locator(LogLocator(base=10.0, subs=np.arange(2, 10) .* 0.1,
                                               numticks=(f_power_max_EIS - f_power_min_EIS + 1) * length(np.arange(2, 10))))
@@ -2118,10 +1975,10 @@ This function adds the instructions for phase Bode plots according to the type_i
 
 # Arguments
 - `f_EIS`: Frequency parameters for EIS simulation.
-- `type_fuel_cell::String`: Type of fuel cell configuration.
+- `type_fuel_cell::Symbol`: Type of fuel cell configuration.
 - `ax`: Axes on which the instructions will be added.
 """
-function plot_Bode_phase_instructions(f_EIS, type_fuel_cell, ax)
+function plot_Bode_phase_instructions(f_EIS, type_fuel_cell::Symbol, ax)
 
     # Common instructions
     f_power_min_EIS, f_power_max_EIS, nb_f_EIS, nb_points_EIS = f_EIS
@@ -2137,8 +1994,7 @@ function plot_Bode_phase_instructions(f_EIS, type_fuel_cell, ax)
     plt.show()  # Show the figure
 
     # For EH-31 fuel cell
-    if type_fuel_cell == "EH-31_1.5" || type_fuel_cell == "EH-31_2.0" ||
-       type_fuel_cell == "EH-31_2.25" || type_fuel_cell == "EH-31_2.5"
+    if type_fuel_cell in (:EH_31_1_5, :EH_31_2_0, :EH_31_2_25, :EH_31_2_5)
         ax.xaxis.set_major_locator(LogLocator(base=10.0, numticks=f_power_max_EIS - f_power_min_EIS + 1))
         ax.xaxis.set_minor_locator(LogLocator(base=10.0, subs=np.arange(2, 10) .* 0.1,
                                               numticks=(f_power_max_EIS - f_power_min_EIS + 1) * length(np.arange(2, 10))))

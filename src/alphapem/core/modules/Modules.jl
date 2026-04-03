@@ -7,6 +7,9 @@ ODE right-hand-side helpers, and display/post-processing utilities.
 module Modules
 using ...Utils   # AlphaPEM.Utils: constants + maths/physics functions
 using ...Config  # AlphaPEM.Config: experimental data (pola_exp_values, ...)
+using ...Config: SimulationConfig, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
+using ...Fuelcell: AbstractFuelCell
+using ...Currents: AbstractCurrent, current
 using PyCall
 using Interpolations
 using FFTW

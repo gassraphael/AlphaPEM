@@ -3,15 +3,6 @@
 """This file represents the equations for calculating the cell voltage. It is a component of the fuel cell model.
 """
 
-# _____________________________________________________Preliminaries____________________________________________________
-
-# Importing constants' value and functions
-include(joinpath(@__DIR__, "../../utils/physics_constants.jl"))
-include(joinpath(@__DIR__, "../../utils/maths_functions.jl"))
-include(joinpath(@__DIR__, "../modules/heat_modules.jl"))
-include(joinpath(@__DIR__, "../modules/flows_1D_MEA_modules.jl"))
-
-
 # _____________________________________________________Cell voltage_____________________________________________________
 
 """Calculate the cell voltage in volt.

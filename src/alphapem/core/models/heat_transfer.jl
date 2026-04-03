@@ -4,14 +4,6 @@
 It is a component of the fuel cell model.
 """
 
-# _____________________________________________________Preliminaries____________________________________________________
-
-# Importing constants' value and functions
-include(joinpath(@__DIR__, "../../utils/physics_constants.jl"))
-include(joinpath(@__DIR__, "../../utils/maths_functions.jl"))
-include(joinpath(@__DIR__, "../modules/heat_modules.jl"))
-
-
 # ____________________________________________________Heat transfers____________________________________________________
 
 """Calculate the heat transfers occurring inside the fuel cell system.

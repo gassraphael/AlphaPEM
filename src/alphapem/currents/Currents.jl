@@ -16,7 +16,7 @@ Modules:
 """
 module Currents
 
-include("../config/current_parameters.jl")   # AbstractCurrentParams, StepParams, etc.
+using ..Config: AbstractCurrentParams, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
 
 include("abstract.jl")
 include("step.jl")

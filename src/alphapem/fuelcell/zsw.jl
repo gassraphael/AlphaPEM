@@ -27,15 +27,15 @@ function ZSWFuelCell(type_fuel_cell::Symbol, voltage_zone::Symbol)
         PolaExperimentalData(),
         NumericalParams()
     )
-    fc.physical_parameters = physical_params()
-    fc.operating_conditions = operating_conditions(type_fuel_cell)
-    fc.pola_exp_data = pola_exp_data(type_fuel_cell, voltage_zone)
-    fc.pola_exp_data_cali = pola_exp_data_calibration(type_fuel_cell, voltage_zone)
-    fc.numerical_parameters = numerical_params()
+    fc.physical_parameters = zsw_physical_params()
+    fc.operating_conditions = zsw_operating_conditions(type_fuel_cell)
+    fc.pola_exp_data = zsw_pola_exp_data(type_fuel_cell, voltage_zone)
+    fc.pola_exp_data_cali = zsw_pola_exp_data_calibration(type_fuel_cell, voltage_zone)
+    fc.numerical_parameters = zsw_numerical_params()
     return fc
 end
 
-function physical_params()::PhysicalParams
+function zsw_physical_params()::PhysicalParams
     return PhysicalParams(
         # Global
         Aact = 283.87e-4,                    # Active area of the catalyst layer in m²
@@ -82,7 +82,7 @@ function physical_params()::PhysicalParams
 end
 
 
-function operating_conditions(type_fuel_cell::Symbol)::OperatingConditions
+function zsw_operating_conditions(type_fuel_cell::Symbol)::OperatingConditions
     if type_fuel_cell == :ZSW_GenStack
         T_des                   = 68.0 + 273.15  # K.  It is the desired fuel cell temperature.
         Pa_des                  = 2.2e5          # Pa. It is the desired pressures of the fuel gas at the anode.
@@ -163,7 +163,7 @@ function operating_conditions(type_fuel_cell::Symbol)::OperatingConditions
 end
 
 
-function pola_exp_data(type_fuel_cell::Symbol, voltage_zone::Symbol)::PolaExperimentalData
+function zsw_pola_exp_data(type_fuel_cell::Symbol, voltage_zone::Symbol)::PolaExperimentalData
     if type_fuel_cell == :ZSW_GenStack
         if voltage_zone == :full
             i_exp_pola = [0.001, 0.050, 0.099, 0.150, 0.200, 0.299, 0.400, 0.498, 0.700, 0.901,
@@ -280,14 +280,14 @@ function pola_exp_data(type_fuel_cell::Symbol, voltage_zone::Symbol)::PolaExperi
 end
 
 """
-    pola_exp_values_calibration(type_fuel_cell, voltage_zone)::PolaExperimentalData
+    zsw_pola_exp_data_calibration(type_fuel_cell, voltage_zone)::PolaExperimentalData
 
 This function returns the experimental values of polarisation curves made on different fuel cells at different
 operating conditions. The experimental values are used for calibrating the model and so are composed of a reduced
-number of points compare to the pola_exp_values function. These points are specifically chosen to be as few as
+number of points compared to the polarization data function. These points are specifically chosen to be as few as
 possible while still providing a good representation of the polarisation curve.
 """
-function pola_exp_data_calibration(type_fuel_cell::Symbol, voltage_zone::Symbol)::PolaExperimentalData
+function zsw_pola_exp_data_calibration(type_fuel_cell::Symbol, voltage_zone::Symbol)::PolaExperimentalData
     if type_fuel_cell == :ZSW_GenStack
         if voltage_zone == :full
             i_exp_cali = [0.001, 0.050, 0.498, 1.099, 1.700, 2.000, 2.500]
@@ -382,7 +382,7 @@ function pola_exp_data_calibration(type_fuel_cell::Symbol, voltage_zone::Symbol)
     return PolaExperimentalData(i_exp = i_exp_cali .* 1e4, U_exp = U_exp_cali)
 end
 
-function numerical_params()
+function zsw_numerical_params()
     return NumericalParams(
         # Setting the number of model points placed inside each layer:
         nb_gc = 1,                             # Number of model nodes placed inside each gas channel

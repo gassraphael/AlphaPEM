@@ -6,10 +6,6 @@ This module is used to calculate intermediate values for auxiliary flow calculat
 
 # _____________________________________________________Preliminaries____________________________________________________
 
-# Importing constants' value and functions
-include(joinpath(@__DIR__, "../../utils/physics_constants.jl"))
-include(joinpath(@__DIR__, "../../utils/physics_functions.jl"))
-
 """
     flow_1D_GC_manifold_int_values(sv_1D_cell, sv_auxiliary, fc, cfg)
 

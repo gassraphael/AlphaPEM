@@ -4,22 +4,6 @@
 the 1D+1D+1D model to several 1D models in order to ease the coding.
 """
 
-# _____________________________________________________Preliminaries____________________________________________________
-
-# Importing constants' value and functions
-include(joinpath(@__DIR__, "../../utils/physics_constants.jl"))
-include(joinpath(@__DIR__, "velocity.jl"))
-include(joinpath(@__DIR__, "flows_1D_MEA.jl"))
-include(joinpath(@__DIR__, "flows_1D_GC_manifold.jl"))
-include(joinpath(@__DIR__, "current_distribution_1D_GC.jl"))
-include(joinpath(@__DIR__, "heat_transfer.jl"))
-include(joinpath(@__DIR__, "dif_eq_1D_MEA.jl"))
-include(joinpath(@__DIR__, "dif_eq_1D_GC_manifold.jl"))
-include(joinpath(@__DIR__, "dif_eq_auxiliaries.jl"))
-include(joinpath(@__DIR__, "../modules/cell_voltage_modules.jl"))
-include(joinpath(@__DIR__, "../modules/dif_eq_modules.jl"))
-
-
 # ______________________Objective function to solve. It gives the system of differential equations______________________
 
 """This function gives the system of differential equations to solve.
@@ -188,6 +172,6 @@ function dydt(t, y::Vector, fc::AbstractFuelCell, cd::AbstractCurrent, cfg::Simu
         append!(dif_eq_global,
                 [dif_eq_auxiliary["d" * key * " / dt"] for key in solver_variable_names[3]])
     end
-    return dif_eq_global
+    return Float64.(dif_eq_global)
 end
 

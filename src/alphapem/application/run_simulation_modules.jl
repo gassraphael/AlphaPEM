@@ -3,19 +3,6 @@
 """This module contains some of the required functions for the run_simulation.jl file.
 """
 
-# _____________________________________________________Preliminaries____________________________________________________
-
-# Importing the necessary libraries
-using PyCall
-
-# Keep matplotlib usage via Python interop, as in the Python implementation.
-if !isdefined(@__MODULE__, :mpl)
-    const mpl = pyimport("matplotlib")
-end
-if !isdefined(@__MODULE__, :plt)
-    const plt = pyimport("matplotlib.pyplot")
-end
-
 # _____________________________________________________Main modules_____________________________________________________
 
 """Create required figures and axes according to a `SimulationConfig` object.
@@ -46,7 +33,7 @@ function figures_preparation(cfg::SimulationConfig)
     end
 
     # For the step current
-    if cfg.type_current == :step
+    if cfg.type_current isa StepParams
         if cfg.type_display == :multiple  # saving instruction is directly implemented within AlphaPEM.Display here.
             mpl.rcParams["font.size"] = 18  # Font size for all text
             fig1, ax1 = nothing, nothing  # Here, additional plots are unnecessary
@@ -65,7 +52,7 @@ function figures_preparation(cfg::SimulationConfig)
         end
 
     # For the polarization curve
-    elseif cfg.type_current == :polarization
+    elseif cfg.type_current isa PolarizationParams
         if cfg.type_display == :multiple
             mpl.rcParams["font.size"] = 11  # Font size for all text
             fig1, ax1 = plt.subplots(1, 3; figsize=(14, 4.7))
@@ -81,7 +68,7 @@ function figures_preparation(cfg::SimulationConfig)
         end
 
     # For the polarization curve used for calibration
-    elseif cfg.type_current == :polarization_for_cali
+    elseif cfg.type_current isa PolarizationCalibrationParams
         if cfg.type_display == :multiple
             mpl.rcParams["font.size"] = 11  # Font size for all text
             fig1, ax1 = plt.subplots(1, 3; figsize=(14, 4.7))
@@ -96,7 +83,7 @@ function figures_preparation(cfg::SimulationConfig)
         end
 
     # For the EIS curve
-    elseif cfg.type_current == :EIS
+    elseif cfg.type_current isa EISParams
         if cfg.type_display == :multiple
             mpl.rcParams["font.size"] = 18  # Font size for all text
             fig1, ax1 = plt.subplots(; figsize=(8, 8))
@@ -174,7 +161,7 @@ end
 function launch_AlphaPEM_for_step_current(simu::AlphaPEM)::AlphaPEM
 
     # Figures preparation
-    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(simulator.cfg)
+    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(simu.cfg)
 
     # Dynamic display requires a dedicated use of the AlphaPEM class.
     if simu.cfg.type_plot == :dynamic
@@ -198,38 +185,38 @@ function launch_AlphaPEM_for_step_current(simu::AlphaPEM)::AlphaPEM
 
         # Dynamic simulation
         for i in 1:n
-            simulate_model!(simulator, operating_inputs, current_parameters, computing_parameters,
+            simulate_model!(simu, operating_inputs, current_parameters, computing_parameters,
                             initial_variable_values, time_interval)
 
             # time_interval actualization
             if i < n  # The final simulation does not require actualization.
-                t0_interval = simulator.variables["t"][end]
+                t0_interval = simu.variables["t"][end]
                 tf_interval = (i + 1) * delta_t_dyn_step
                 time_interval = [t0_interval, tf_interval]  # Reset of the time interval
             end
 
             # Recovery of the internal states from the end of the preceding simulation.
-            initial_variable_values = _extract_last_internal_state(simulator, computing_parameters["type_auxiliary"])
+            initial_variable_values = _extract_last_internal_state(simu, computing_parameters["type_auxiliary"])
 
             # Display
             if simu.cfg.type_display != :no_display
-                Display(simulator, ax1, ax2, ax3)
+                Display(simu, ax1, ax2, ax3)
             end
         end
 
     else  # elseif simu.cfg.type_plot == :fixed
         # Simulation
-        simulate_model!(simulator)
+        simulate_model!(simu)
         # Display
         if simu.cfg.type_display != :no_display
-            Display(simulator, ax1, ax2, ax3)
+            Display(simu, ax1, ax2, ax3)
         end
     end
 
     # Plot saving
-    Save_plot(simulator, fig1, fig2, fig3)
+    Save_plot(simu, fig1, fig2, fig3)
 
-    return simulator
+    return simu
 end
 
 

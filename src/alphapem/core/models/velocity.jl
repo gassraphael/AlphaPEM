@@ -10,12 +10,6 @@ using NonlinearSolve
 using LineSearches
 using SciMLBase
 
-# Importing constants' value and functions
-include(joinpath(@__DIR__, "../../utils/physics_constants.jl"))
-include(joinpath(@__DIR__, "../../utils/maths_functions.jl"))
-include(joinpath(@__DIR__, "../../utils/physics_functions.jl"))
-include(joinpath(@__DIR__, "../modules/flows_1D_MEA_modules.jl"))
-
 
 # ________________________________________________________Velocity______________________________________________________
 
@@ -49,7 +43,7 @@ Raises
 ErrorException
     If the nonlinear solver does not converge.
 """
-function calculate_velocity_evolution(sv::Vector{Dict}, i_fc_cell, fc::AbstractFuelCell, cfg::SimulationConfig)::Tuple
+function calculate_velocity_evolution(sv::AbstractVector{<:AbstractDict}, i_fc_cell, fc::AbstractFuelCell, cfg::SimulationConfig)::Tuple
 
     # Extraction of the parameters
     oc = fc.operating_conditions
@@ -277,7 +271,7 @@ Returns
 Dict
     Desired hydrogen flow rate, dry-air flow rate, anode humidifier flow rate, and cathode humidifier flow rate.
 """
-@inline function desired_flows(solver_variables::Vector{Dict},
+@inline function desired_flows(solver_variables::AbstractVector{<:AbstractDict},
                        i_fc_cell,
                        Pa_in,
                        Pc_in,

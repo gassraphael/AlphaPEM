@@ -16,14 +16,6 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 # Importing the necessary libraries.
 using DifferentialEquations
 
-# Importing constants' value and functions.
-include(joinpath(@__DIR__, "dif_eq.jl"))
-include(joinpath(@__DIR__, "../modules/cell_voltage_modules.jl"))
-include(joinpath(@__DIR__, "../modules/dif_eq_modules.jl"))
-include(joinpath(@__DIR__, "../modules/flows_1D_MEA_modules.jl"))
-include(joinpath(@__DIR__, "../modules/display_modules.jl"))
-
-
 # _______________________________________________________AlphaPEM_______________________________________________________
 
 
@@ -70,7 +62,7 @@ function AlphaPEM(fuel_cell::AbstractFuelCell, current_density::AbstractCurrent,
         cfg, #
         solver_variable_names, # solver_variable_names::Vector{Vector{String}}
         String[], # all_variable_names::Vector{String}
-        Dict{String, Vector{Number}}(), # variables::Dict{String, Vector{Number}}
+        Dict{String, Any}(), # variables::Dict
         (0.0, 0.0), # time_interval::Tuple{Float64, Float64}
         [], # initial_variable_values::Vector{Number}
         nothing, # sol
@@ -167,7 +159,7 @@ function simulate_model!(simu::AlphaPEM,
         ["t", "i_fc", "C_O2_Pt", "Ucell", "v_a", "v_c", "Pa_in", "Pc_in"],
         ["Phi_a_des", "Phi_c_des"],
     )
-    simu.variables = Dict{String, Vector{Number}}(k => Number[] for k in simu.all_variable_names)
+    simu.variables = Dict{String, Any}(k => Number[] for k in simu.all_variable_names)
 
     # Create the dynamic evolution.
     #       Create time intervals
@@ -188,7 +180,7 @@ function simulate_model!(simu::AlphaPEM,
     cb_negative = ContinuousCallback(condition, integ -> terminate!(integ))
     #           Build and solve the ODE problem with FBDF for stiff dynamics.
     prob = ODEProblem(rhs, simu.initial_variable_values, simu.time_interval, packed)
-    simu.sol = solve(prob, FBDF(); reltol=simu.fuel_cell.numerical_parameters.rtol,
+    simu.sol = solve(prob, FBDF(autodiff=false); reltol=simu.fuel_cell.numerical_parameters.rtol,
                      abstol=simu.fuel_cell.numerical_parameters.atol,
                      callback=cb_negative)
 
@@ -393,10 +385,10 @@ end
 """
 function Display(simu::AlphaPEM, ax1=nothing, ax2=nothing, ax3=nothing)
     # Folder name.
-    subfolder_name = split(simu.cfg.type_fuel_cell, '_')[1]
+    subfolder_name = String(split(String(simu.cfg.type_fuel_cell), '_')[1])
 
     # Display.
-    if simu.cfg.type_current == :step
+    if simu.cfg.type_current isa StepParams
         if simu.cfg.type_display == :multiple
             figs_axes = [plt.subplots(figsize=(8, 8)) for _ in 1:11]
             figs = [fa[1] for fa in figs_axes]
@@ -448,7 +440,7 @@ function Display(simu::AlphaPEM, ax1=nothing, ax2=nothing, ax3=nothing)
             # A break is necessary to plot the new points in dynamic mode.
             plt.pause(1.0)
         end
-    elseif simu.cfg.type_current == :polarization
+    elseif simu.cfg.type_current isa PolarizationParams
         if simu.cfg.type_display == :multiple
             plot_polarisation_curve(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, ax1[1])
             plot_power_density_curve(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, length(simu.variables["t"]), ax1[2])
@@ -466,7 +458,7 @@ function Display(simu::AlphaPEM, ax1=nothing, ax2=nothing, ax3=nothing)
         elseif simu.cfg.type_display == :no_display
             plot_polarisation_curve(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, ax1, false)
         end
-    elseif simu.cfg.type_current == :polarization_for_cali
+    elseif simu.cfg.type_current isa PolarizationCalibrationParams
         if simu.cfg.type_display == :multiple
             plot_polarisation_curve_for_cali(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, ax1[1])
             plot_lambda_1D_temporal(simu.variables, simu.fuel_cell, simu.current_density, simu.cfg, ax1[2])
@@ -478,7 +470,7 @@ function Display(simu::AlphaPEM, ax1=nothing, ax2=nothing, ax3=nothing)
             # A break is necessary to plot the new points in dynamic mode.
             plt.pause(0.1)
         end
-    elseif simu.cfg.type_current == :EIS
+    elseif simu.cfg.type_current isa EISParams
         Fourier_results = make_Fourier_transformation(simu.variables, simu.current_density, simu.cfg)
         if simu.cfg.type_display == :multiple
             plot_EIS_curve_Nyquist(simu.fuel_cell, simu.current_density, simu.cfg, Fourier_results, ax1)
@@ -513,16 +505,16 @@ The output filenames depend on the current profile and on the selected display m
 """
 function Save_plot(simu::AlphaPEM, fig1=nothing, fig2=nothing, fig3=nothing)
     # Folder name.
-    subfolder_name = split(simu.cfg.type_fuel_cell, '_')[1]
+    subfolder_name = String(split(String(simu.cfg.type_fuel_cell), '_')[1])
 
     # For the step current.
-    if simu.cfg.type_current == :step
+    if simu.cfg.type_current isa StepParams
         if simu.cfg.type_display == :synthetic
             Saving_instructions(simu, "results", subfolder_name, "step_current_syn_1.pdf", fig1)
             simu.cfg.type_plot == :fixed && Saving_instructions(simu, "results", subfolder_name, "final_temperature_dist_1.pdf", fig2)
         end
     # For the polarization curve.
-    elseif simu.cfg.type_current == :polarization
+    elseif simu.cfg.type_current isa PolarizationParams
         if simu.cfg.type_display == :multiple
             Saving_instructions(simu, "results", subfolder_name, "global_indicators_1.pdf", fig1)
             Saving_instructions(simu, "results", subfolder_name, "pola_curve_syn_1.pdf", fig2)
@@ -530,7 +522,7 @@ function Save_plot(simu::AlphaPEM, fig1=nothing, fig2=nothing, fig3=nothing)
             Saving_instructions(simu, "results", subfolder_name, "pola_curve_1.pdf", fig1)
         end
     # For the EIS curve.
-    elseif simu.cfg.type_current == :EIS
+    elseif simu.cfg.type_current isa EISParams
         if simu.cfg.type_display == :multiple
             Saving_instructions(simu, "results", subfolder_name, "Nyquist_plot_1.pdf", fig1)
             Saving_instructions(simu, "results", subfolder_name, "Bode_amplitude_curve_1.pdf", fig2)
@@ -539,7 +531,7 @@ function Save_plot(simu::AlphaPEM, fig1=nothing, fig2=nothing, fig3=nothing)
             Saving_instructions(simu, "results", subfolder_name, "Nyquist_plot_syn_1.pdf", fig1)
         end
     # For the polarization curve for calibration.
-    elseif simu.cfg.type_current == :polarization_for_cali
+    elseif simu.cfg.type_current isa PolarizationCalibrationParams
         if simu.cfg.type_display == :multiple
             Saving_instructions(simu, "results", subfolder_name, "impact_cali_on_internal_state_1.pdf", fig1)
         elseif simu.cfg.type_display == :synthetic

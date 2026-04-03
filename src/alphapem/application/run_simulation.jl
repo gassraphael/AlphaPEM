@@ -5,31 +5,13 @@
 
 # _____________________________________________________Preliminaries____________________________________________________
 
-# Importing the necessary libraries
-using PyCall
+# Shared package modules
+using ..Config: SimulationConfig, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
+using ..Fuelcell: create_fuelcell
+using ..Currents: create_current, step_duration
+using ..Core.Models: AlphaPEM, simulate_model!, Display, Save_plot
 
-# SimulationConfig is created by simulation_config.jl, included before this file
-using .SimulationConfigModule: SimulationConfig
 
-# Keep matplotlib usage via Python interop
-if !isdefined(@__MODULE__, :mpl)
-    const mpl = pyimport("matplotlib")
-end
-if !isdefined(@__MODULE__, :plt)
-    const plt = pyimport("matplotlib.pyplot")
-end
-
-# Importing constants' value and functions
-include(joinpath(@__DIR__, "../fuelcell/Fuelcell.jl"))
-using .Fuelcell: AbstractFuelCell, create_fuelcell, DefaultFuelCell, EH31FuelCell, ZSWFuelCell
-
-include(joinpath(@__DIR__, "../currents/Currents.jl"))
-using .Currents: AbstractCurrent, StepCurrent, PolarizationCurrent, PolarizationCalibrationCurrent,
-                 EISCurrent, create_current,
-                 AbstractCurrentParams, StepParams, PolarizationParams,
-                 PolarizationCalibrationParams, EISParams
-
-include(joinpath(@__DIR__, "../core/models/AlphaPEM.jl"))
 include(joinpath(@__DIR__, "run_simulation_modules.jl"))
 
 # __________________________________________________Run simulation___________________________________________________
@@ -45,13 +27,13 @@ function run_simulation(cfg::SimulationConfig)::AlphaPEM
     AlphaPEM_simulator = AlphaPEM(fuel_cells, current_density, cfg)
 
     # Launch the simulation.
-    if cfg.type_current == :step
+    if cfg.type_current isa StepParams
         launch_AlphaPEM_for_step_current(AlphaPEM_simulator)
-    elseif cfg.type_current == :polarization
+    elseif cfg.type_current isa PolarizationParams
         launch_AlphaPEM_for_polarization_current(AlphaPEM_simulator)
-    elseif cfg.type_current == :polarization_for_cali
+    elseif cfg.type_current isa PolarizationCalibrationParams
         launch_AlphaPEM_for_polarization_current_for_calibration(AlphaPEM_simulator)
-    elseif cfg.type_current == :EIS
+    elseif cfg.type_current isa EISParams
         launch_AlphaPEM_for_EIS_current(AlphaPEM_simulator)
     else
         throw(ArgumentError("You have to specify a type_current which is accepted."))
@@ -80,12 +62,12 @@ function run_simulation(cfgs::Vector{SimulationConfig})::Vector{AlphaPEM}
     AlphaPEM_simulators = [AlphaPEM(fuel_cells[i], current_densities[i], cfgs[i]) for i in 1:nb_fuel_cells]
 
     # Launch the simulation.
-    if  cfg.type_current == :polarization
+    if all(cfg -> cfg.type_current isa PolarizationParams, cfgs)
         launch_AlphaPEM_for_polarization_current(AlphaPEM_simulators)
-    elseif cfg.type_current == :polarization_for_cali
+    elseif all(cfg -> cfg.type_current isa PolarizationCalibrationParams, cfgs)
         launch_AlphaPEM_for_polarization_current_for_calibration(AlphaPEM_simulators)
     else
-        throw(ArgumentError("You have to specify a type_current which is accepted for multi-simulator runs."))
+        throw(ArgumentError("You have to specify homogeneous type_current parameters accepted for multi-simulator runs."))
     end
 
     # Disable interactive mode for non-blocking display.

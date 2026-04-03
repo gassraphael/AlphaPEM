@@ -1,13 +1,12 @@
 # examples/plot_currents.jl
 
 using Plots
+import Pkg
+Pkg.activate(joinpath(@__DIR__, ".."))
 
-# --- Include your current models ---
-include("../src/alphapem/config/current_parameters.jl")
-include("../src/alphapem/currents/step.jl")
-include("../src/alphapem/currents/polarization.jl")
-include("../src/alphapem/currents/eis.jl")
-include("../src/alphapem/currents/polarization_for_cali.jl")
+# --- Load AlphaPEM from the project environment ---
+using AlphaPEM.Config: StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
+using AlphaPEM.Currents: StepCurrent, PolarizationCurrent, PolarizationCalibrationCurrent, EISCurrent, current
 
 # --- Time resolution ---
 n_points = 1000  # points for plotting

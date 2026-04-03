@@ -3,15 +3,6 @@
 """This file represents all the matter flows inside the fuel cell system. It is a component of the fuel cell model.
 """
 
-# _____________________________________________________Preliminaries____________________________________________________
-
-# Importing constants' value and functions
-include(joinpath(@__DIR__, "../../utils/physics_constants.jl"))
-include(joinpath(@__DIR__, "../../utils/maths_functions.jl"))
-include(joinpath(@__DIR__, "../modules/cell_voltage_modules.jl"))
-include(joinpath(@__DIR__, "../modules/flows_1D_MEA_modules.jl"))
-
-
 # ________________________________________________________Flows_________________________________________________________
 
 """Calculate the flows inside the fuel cell system.

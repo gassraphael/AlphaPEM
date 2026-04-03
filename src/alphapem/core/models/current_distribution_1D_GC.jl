@@ -10,11 +10,6 @@ It is a component of the fuel cell model.
 using NonlinearSolve
 using SciMLBase: successful_retcode
 
-# Importing constants' value and functions
-include(joinpath(@__DIR__, "../../utils/maths_functions.jl"))
-include(joinpath(@__DIR__, "cell_voltage.jl"))
-include(joinpath(@__DIR__, "../modules/cell_voltage_modules.jl"))
-
 
 # _________________________________________________Current distribution_________________________________________________
 
@@ -38,10 +33,12 @@ i_fc : Vector
     Julia vectors are naturally 1-based, so no dummy element is stored at index 0.
     i_fc[i] corresponds to gas channel i, for i in 1:nb_gc.
 """
-function calculate_1D_GC_current_density(i_fc_cell, sv::Vector{Dict}, fc::AbstractFuelCell)::Vector
+function calculate_1D_GC_current_density(i_fc_cell, sv::AbstractVector{<:AbstractDict}, fc::AbstractFuelCell)::Vector
 
     # Extraction of the parameters
     nb_gc = fc.numerical_parameters.nb_gc
+        # Fast path: if there is only one gas channel, the local current density equals the cell current density.
+    nb_gc == 1 && return [Float64(i_fc_cell)]
     # Extraction of the variables
     C_O2_ccl = [sv[i]["C_O2_ccl"] for i in 1:nb_gc]
 
@@ -69,7 +66,7 @@ function calculate_1D_GC_current_density(i_fc_cell, sv::Vector{Dict}, fc::Abstra
     # Calculation of the 1D GC current density by solving the system of equations defined by the residuals function
     # using NonlinearSolve with Levenberg-Marquardt
     #       Initial guesses
-    x0 = Vector{Number}(undef, 2 * nb_gc + 1)
+    x0 = Vector(undef, 2 * nb_gc + 1)
     x0[1]            = calculate_cell_voltage(i_fc_cell, C_O2_ccl[1], sv[1], fc)
     x0[2:nb_gc+1]   .= i_fc_cell
     x0[nb_gc+2:2*nb_gc+1] = C_O2_ccl
@@ -82,7 +79,7 @@ function calculate_1D_GC_current_density(i_fc_cell, sv::Vector{Dict}, fc::Abstra
         error("Convergence failed in calculate_1D_GC_current_density: retcode = $(sol.retcode)")
     end
     #       Extract the results (indices 2 to nb_gc+1 of the solution vector correspond to i_fc[1:nb_gc])
-    i_fc = Vector{Number}(sol.u[2:nb_gc+1])
+    i_fc = Vector(sol.u[2:nb_gc+1])
 
     return i_fc
 end

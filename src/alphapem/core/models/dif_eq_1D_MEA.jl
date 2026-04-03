@@ -3,14 +3,6 @@
 """This file represents all the differential equations used for the fuel cell model.
 """
 
-# _____________________________________________________Preliminaries____________________________________________________
-
-# Importing constants' value and functions
-include(joinpath(@__DIR__, "../../utils/physics_constants.jl"))
-include(joinpath(@__DIR__, "../modules/cell_voltage_modules.jl"))
-include(joinpath(@__DIR__, "../../utils/physics_functions.jl"))
-
-
 # ____________________________________________________Main functions____________________________________________________
 
 """This function calculates the dynamic evolution of the dissolved water in the membrane and the catalyst layers.

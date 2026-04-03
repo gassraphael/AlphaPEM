@@ -4,16 +4,6 @@
 and to implement integration events.
 """
 
-# _____________________________________________________Preliminaries____________________________________________________
-
-# Importing constants' value and functions
-include(joinpath(@__DIR__, "../../utils/physics_constants.jl"))
-include(joinpath(@__DIR__, "../../utils/maths_functions.jl"))
-include(joinpath(@__DIR__, "heat_modules.jl"))
-include(joinpath(@__DIR__, "flows_1D_MEA_modules.jl"))
-include(joinpath(@__DIR__, "../../utils/physics_functions.jl"))
-
-
 # ____________________________________________Differential equations modules____________________________________________
 
 """This function calculates intermediate values for the calculation of the differential equations.

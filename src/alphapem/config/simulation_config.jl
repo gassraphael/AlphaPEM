@@ -12,7 +12,7 @@ Functions:
 - validate_config(cfg::SimulationConfig): Validates the configuration parameter values.
 
 Constants:
-- ALLOWED_CURRENT: Allowed current types.
+- ALLOWED_CURRENT_TYPES: Allowed current parameter types.
 - ALLOWED_VOLTAGE_ZONE: Allowed voltage zones.
 - ALLOWED_DISPLAY: Allowed display types.
 - ALLOWED_PLOT: Allowed plot types.
@@ -23,6 +23,9 @@ Constants:
 # _______________________________________________Simulation configuration_______________________________________________
 
 module SimulationConfigModule
+
+using ..Config: AbstractCurrentParams, StepParams, PolarizationParams,
+                 PolarizationCalibrationParams, EISParams
 
 export SimulationConfig, validate_config
 
@@ -38,11 +41,11 @@ end
 
 # --- Allowed values (tu peux enrichir plus tard) ---
 
-const ALLOWED_CURRENT = (
-    :step,
-    :polarization,
-    :polarization_for_cali,
-    :EIS
+const ALLOWED_CURRENT_TYPES = (
+    StepParams,
+    PolarizationParams,
+    PolarizationCalibrationParams,
+    EISParams
 )
 
 const ALLOWED_VOLTAGE_ZONE = (
@@ -77,8 +80,8 @@ const ALLOWED_PLOT = (
 
 function validate_config(cfg::SimulationConfig)
 
-    cfg.type_current in ALLOWED_CURRENT ||
-        error("Invalid type_current: $(cfg.type_current)")
+    any(T -> cfg.type_current isa T, ALLOWED_CURRENT_TYPES) ||
+        error("Invalid type_current: $(typeof(cfg.type_current))")
 
     cfg.voltage_zone in ALLOWED_VOLTAGE_ZONE ||
         error("Invalid voltage_zone: $(cfg.voltage_zone)")

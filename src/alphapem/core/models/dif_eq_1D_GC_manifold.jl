@@ -1,10 +1,5 @@
 # This file represents all the differential equations used for the fuel cell model.
 
-# _____________________________________________________Preliminaries____________________________________________________
-# Importing constants' value and functions
-include(joinpath(@__DIR__, "../../utils/physics_functions.jl"))
-
-
 # ____________________________________________________Main functions____________________________________________________
 
 """Calculate dynamic gas evolution in the gas channels.
@@ -35,8 +30,8 @@ J_N2 : Dict
     Nitrogen flow between the different layers (mol.m-2.s-1).
 """
 function calculate_dyn_gas_evolution_inside_gas_channel(
-    dif_eq::AbstractVector{Dict},
-    sv::AbstractVector{Dict},
+    dif_eq::AbstractVector{<:AbstractDict},
+    sv::AbstractVector{<:AbstractDict},
     Hagc::Float64,
     Hcgc::Float64,
     Lgc::Float64,
@@ -193,7 +188,7 @@ Jl : Dict
     Liquid water flow between the different layers (mol.m-2.s-1).
 """
 function calculate_dyn_liq_evolution_inside_gas_channel(
-    dif_eq::AbstractVector{Dict},
+    dif_eq::AbstractVector{<:AbstractDict},
     T_des::Float64,
     Hagc::Float64,
     Hcgc::Float64,
@@ -243,7 +238,7 @@ nb_gc : Int64
     Number of gas channels.
 """
 function calculate_dyn_temperature_evolution_inside_gas_channel(
-    dif_eq::AbstractVector{Dict},
+    dif_eq::AbstractVector{<:AbstractDict},
     nb_gc::Int64
 )
 

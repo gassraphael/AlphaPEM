@@ -211,7 +211,7 @@ The detailed model description and simulation results can be found in the follow
 This work has been supported:
 
 - from 2021 to 2024 by French National Research Agency via project [DEAL](https://deal.lis-lab.fr/) (Grant no. ANR-20-CE05-0016-01), the Region Provence-Alpes-Côte d’Azur, the EIPHI Graduate School (contract ANR-17-EURE-0002) and the Region Bourgogne Franche-Comté.
-- from 2025 to 2027 by European FEDER funds via project [OPUS-H2](https://www.energylab.re/projets/projets-en-cours/opus-h2/) and the Region Reunion.
+- from 2025 to 2027 by European FEDER funds via project [OPUS-H2](https://www.energylab.re/projets/opus-h2/) and the Region Reunion.
 
 ## Licenses
 

@@ -5,12 +5,11 @@ Example: Run AlphaPEM with type_current = :polarization
 You can modify any SimulationConfig parameter below.
 """
 
-include("../src/alphapem/config/simulation_config.jl")
-include("../src/alphapem/application/run_simulation.jl")
-include("../src/alphapem/config/current_parameters.jl")
+import Pkg
+Pkg.activate(joinpath(@__DIR__, ".."))
 
-using .SimulationConfigModule
-using .Config: PolarizationParams
+using AlphaPEM.Config: SimulationConfig, PolarizationParams
+using AlphaPEM.Application: run_simulation
 
 current_params = PolarizationParams(
     delta_t_ini = 120.0 * 60.0,  # (s). Initial time at zero current density for the stabilisation of the internal states.
@@ -29,10 +28,10 @@ if length(type_fuel_cell_list) == 1
     cfg = SimulationConfig(
         type_fuel_cell = type_fuel_cell_list[1],
         type_current = current_params,
-        voltage_zone = :full,
+        voltage_zone = :before_voltage_drop,
         type_auxiliary = :no_auxiliary,
         type_purge = :no_purge,
-        type_display = :synthetic,
+        type_display = :no_display,
         type_plot = :fixed
     )
     start_time = time() # Starting time

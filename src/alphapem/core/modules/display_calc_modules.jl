@@ -41,7 +41,8 @@ function make_Fourier_transformation(variables::Dict,
     # Extraction of the variables
     t, Ucell_t = variables["t"], variables["Ucell"]
     # EIS timing is only available for EIS current profiles.
-    cfg.type_current == :EIS || throw(ArgumentError("make_Fourier_transformation requires type_current = :EIS."))
+    cfg.type_current isa EISParams ||
+        throw(ArgumentError("make_Fourier_transformation requires type_current isa EISParams."))
 
     # Creation of the current density vector at the same time points as the cell voltage.
     ifc_t = current(cd, t)

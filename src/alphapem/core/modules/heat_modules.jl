@@ -3,16 +3,6 @@
 """This module is used to calculate intermediate values for the heat transfer calculation.
 """
 
-# _____________________________________________________Preliminaries____________________________________________________
-
-# Importing constants' value and functions
-include(joinpath(@__DIR__, "../../utils/physics_constants.jl"))
-include(joinpath(@__DIR__, "cell_voltage_modules.jl"))
-include(joinpath(@__DIR__, "flows_1D_MEA_modules.jl"))
-include(joinpath(@__DIR__, "../../utils/maths_functions.jl"))
-include(joinpath(@__DIR__, "../../utils/physics_functions.jl"))
-
-
 # _________________________________________________Heat transfer modules________________________________________________
 
 """Calculate intermediate values for the heat transfer calculation.

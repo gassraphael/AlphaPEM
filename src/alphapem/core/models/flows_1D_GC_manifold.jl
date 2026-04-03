@@ -3,16 +3,6 @@
 """This file represents all the flows passing through the auxiliaries. It is a component of the fuel cell model.
 """
 
-# _____________________________________________________Preliminaries____________________________________________________
-
-# Importing constants' value and functions
-include(joinpath(@__DIR__, "../../utils/physics_constants.jl"))
-include(joinpath(@__DIR__, "../../utils/maths_functions.jl"))
-include(joinpath(@__DIR__, "../../utils/physics_functions.jl"))
-include(joinpath(@__DIR__, "../modules/flows_1D_GC_manifold_modules.jl"))
-include(joinpath(@__DIR__, "velocity.jl"))
-
-
 # ______________________________________________________Auxiliaries_____________________________________________________
 
 """Calculate the flows passing through the auxiliaries.
@@ -46,7 +36,7 @@ Dict{String, Dict}
     Global and species-specific flows in the gas channels and auxiliaries.
     Julia vectors are naturally 1-based, so no dummy element is stored at index 0.
 """
-function calculate_flows_1D_GC_manifold(sv_1D_cell::Vector{Dict},
+function calculate_flows_1D_GC_manifold(sv_1D_cell::AbstractVector{<:AbstractDict},
                                         sv_1D_manifold::Dict,
                                         sv_auxiliary::Dict,
                                         i_fc_cell,

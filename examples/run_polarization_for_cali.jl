@@ -5,12 +5,11 @@ Example: Run AlphaPEM with type_current = :polarization_for_cali
 You can modify any SimulationConfig parameter below.
 """
 
-include("../src/alphapem/config/simulation_config.jl")
-include("../src/alphapem/application/run_simulation.jl")
-include("../src/alphapem/config/current_parameters.jl")
+import Pkg
+Pkg.activate(joinpath(@__DIR__, ".."))
 
-using .SimulationConfigModule
-using .Config: PolarizationCalibrationParams
+using AlphaPEM.Config: SimulationConfig, PolarizationCalibrationParams
+using AlphaPEM.Application: run_simulation
 
 current_params = PolarizationCalibrationParams(
     delta_t_ini= 120.0 * 60.0,    # (s). Initial time at zero current density for the stabilisation of the internal states.
