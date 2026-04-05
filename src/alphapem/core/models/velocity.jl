@@ -26,7 +26,7 @@ Parameters
 ----------
 sv : Vector{Dict}
     Solver state variables. `sv[i]` provides the state dictionary of gas-channel node `i`.
-i_fc_cell
+i_fc_cell : Float64
     Fuel cell current density at time t (A.m-2).
 fc : AbstractFuelCell
     Fuel cell instance providing model parameters.
@@ -35,15 +35,19 @@ cfg : SimulationConfig
 
 Returns
 -------
-Tuple
-    Anode gas velocity profile, cathode gas velocity profile, anode inlet pressure, and cathode inlet pressure.
+Tuple(Vector{Float64}, Vector{Float64}, Float64, Float64)
+    Tuple of (v_a, v_c, Pa_in, Pc_in):
+    - Anode gas velocity profile (m.s-1)
+    - Cathode gas velocity profile (m.s-1)
+    - Anode inlet pressure (Pa)
+    - Cathode inlet pressure (Pa)
 
 Raises
 ------
 ErrorException
     If the nonlinear solver does not converge.
 """
-function calculate_velocity_evolution(sv::AbstractVector{<:AbstractDict}, i_fc_cell, fc::AbstractFuelCell, cfg::SimulationConfig)::Tuple
+function calculate_velocity_evolution(sv::AbstractVector{<:AbstractDict}, i_fc_cell::Float64, fc::AbstractFuelCell, cfg::SimulationConfig)::Tuple{Vector{Float64}, Vector{Float64}, Float64, Float64}
 
     # Extraction of the parameters
     oc = fc.operating_conditions
@@ -255,11 +259,11 @@ Parameters
 ----------
 solver_variables : Vector{Dict}
     Variables calculated by the solver at each gas-channel node.
-i_fc_cell :
+i_fc_cell : Real
     Fuel cell current density (A.m-2).
-Pa_in :
+Pa_in : Real
     Inlet pressure at the anode side (Pa).
-Pc_in :
+Pc_in : Real
     Inlet pressure at the cathode side (Pa).
 fc : AbstractFuelCell
     Fuel cell instance providing model parameters.
@@ -272,9 +276,9 @@ Dict
     Desired hydrogen flow rate, dry-air flow rate, anode humidifier flow rate, and cathode humidifier flow rate.
 """
 @inline function desired_flows(solver_variables::AbstractVector{<:AbstractDict},
-                       i_fc_cell,
-                       Pa_in,
-                       Pc_in,
+                       i_fc_cell::Real,
+                       Pa_in::Real,
+                       Pc_in::Real,
                        fc::AbstractFuelCell,
                        cfg::SimulationConfig)::Dict
 
@@ -356,17 +360,17 @@ Adjust the desired compressor flow rate to ensure a minimum flow is maintained, 
 
 Parameters
 ----------
-i_fc_cell :
+i_fc_cell : Real
     Actual fuel cell current density (A.m-2).
-Wcp_des :
+Wcp_des : Real
     Desired compressor flow rate (mol.s-1).
 
 Returns
 -------
-Wcp_des_adjusted
+Real
     Adjusted compressor flow rate (mol.s-1) ensuring the minimum flow.
 """
-@inline function adjust_compressor_flow_with_minimum(i_fc_cell, Wcp_des)
+@inline function adjust_compressor_flow_with_minimum(i_fc_cell::Real, Wcp_des::Real)::Real
 
     # Parameters for minimum current density adjustment
     i_cp_min = 0.3e4  # (A/m²) Minimum current density for compressor flow.

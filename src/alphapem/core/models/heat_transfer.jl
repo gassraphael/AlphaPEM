@@ -13,7 +13,7 @@ Parameters
 sv_1D : Dict
     Variables calculated by the solver (fuel cell internal states).
     `sv` is a contraction of solver_variables for enhanced readability.
-i_fc :
+i_fc : Float64
     Fuel cell current density at time t (A.m-2).
 fc : AbstractFuelCell
     Fuel cell instance providing model parameters.
@@ -24,10 +24,10 @@ Sl : Dict
 
 Returns
 -------
-Dict{String, Dict} where
+Dict{String, Dict}
     Heat transfers occurring inside the fuel cell system.
 """
-function calculate_heat_transfers(sv_1D::Dict, i_fc, fc::AbstractFuelCell, S_abs::Dict, Sl::Dict)::Dict{String, Dict}
+function calculate_heat_transfers(sv_1D::Dict, i_fc::Float64, fc::AbstractFuelCell, S_abs::Dict, Sl::Dict)::Dict{String, Dict}
 
     # ___________________________________________________Preliminaries__________________________________________________
 

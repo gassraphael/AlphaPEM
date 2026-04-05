@@ -10,18 +10,22 @@ and to implement integration events.
 
 Parameters
 ----------
-t :
+t : Float64
     Time (s).
 sv : Dict
     Variables calculated by the solver. They correspond to the fuel cell internal states.
     `sv` is a contraction of solver_variables for enhanced readability.
+fc : AbstractFuelCell
+    Fuel cell instance providing model parameters.
+cfg : SimulationConfig
+    Simulation configuration.
 
 Returns
 -------
 Dict
     Dictionary containing all intermediate values used by the differential equations.
 """
-function calculate_dif_eq_int_values(t, sv::Dict, fc::AbstractFuelCell, cfg::SimulationConfig)::Dict
+function calculate_dif_eq_int_values(t::Float64, sv::Dict, fc::AbstractFuelCell, cfg::SimulationConfig)::Dict
 
     # Extraction of the variables
     C_v_agc, C_v_acl, C_v_ccl, C_v_cgc = sv["C_v_agc"], sv["C_v_acl"], sv["C_v_ccl"], sv["C_v_cgc"]

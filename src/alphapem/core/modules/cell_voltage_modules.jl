@@ -9,7 +9,7 @@
 
 Parameters
 ----------
-i_fc :
+i_fc : Float64
     The current density (A/m²).
 sv_1D : Dict
     The dictionary containing the variables calculated by the solver.
@@ -18,7 +18,7 @@ fc : AbstractFuelCell
 
 Returns
 -------
-C_O2_Pt :
+Float64
     The oxygen concentration at the platinum surface in the cathode catalyst layer (mol/m³).
 
 Sources
@@ -26,9 +26,9 @@ Sources
 1. Liang Hao - Article 2015 - Modeling and Experimental Validation of Pt Loading and Electrode Composition Effects
 in PEM Fuel Cells.
 """
-function calculate_C_O2_Pt(i_fc,
+function calculate_C_O2_Pt(i_fc::Float64,
                            sv_1D::Dict,
-                           fc::AbstractFuelCell)
+                           fc::AbstractFuelCell)::Float64
 
     # Extraction of the variables
     s_ccl = sv_1D["s_ccl"]

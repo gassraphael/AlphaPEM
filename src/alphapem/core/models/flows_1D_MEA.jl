@@ -12,11 +12,11 @@ Parameters
 sv_1D : Dict
     Variables calculated by the solver. They correspond to the fuel cell internal states.
     `sv` is a contraction of solver_variables for enhanced readability.
-i_fc :
+i_fc : Float64
     Fuel cell current density at time t (A.m-2).
-v_a :
+v_a : Float64
     Anode gas velocity at time t (m.s-1).
-v_c :
+v_c : Float64
     Cathode gas velocity at time t (m.s-1).
 fc : AbstractFuelCell
     Fuel cell instance providing model parameters.
@@ -30,9 +30,9 @@ Dict{String, Dict}
     `nb_gdl` or `nb_mpl`.
 """
 function calculate_flows_1D_MEA(sv_1D::Dict,
-                                i_fc,
-                                v_a,
-                                v_c,
+                                i_fc::Float64,
+                                v_a::Float64,
+                                v_c::Float64,
                                 fc::AbstractFuelCell)::Dict{String, Dict}
 
     # ___________________________________________________Preliminaries__________________________________________________

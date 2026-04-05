@@ -9,9 +9,9 @@
 
 Parameters
 ----------
-i_fc :
+i_fc : Float64
     The current density (A/m²).
-C_O2_Pt :
+C_O2_Pt : Float64
     The oxygen concentration at the platinum surface in the cathode catalyst layer (mol/m³).
 sv : Dict
     The dictionary containing the variables calculated by the solver.
@@ -20,10 +20,10 @@ fc : AbstractFuelCell
 
 Returns
 -------
-Ucell :
+Float64
     The cell voltage in volt.
 """
-function calculate_cell_voltage(i_fc, C_O2_Pt, sv::Dict, fc::AbstractFuelCell)
+function calculate_cell_voltage(i_fc::Float64, C_O2_Pt::Float64, sv::Dict, fc::AbstractFuelCell)::Float64
 
     # Extraction of the variables
     s_ccl, lambda_mem, lambda_ccl = sv["s_ccl"], sv["lambda_mem"], sv["lambda_ccl"]

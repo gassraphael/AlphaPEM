@@ -17,9 +17,9 @@ sv_auxiliary : Dict
     Variables calculated by the solver (auxiliary internal states).
 i_fc_cell : Float64
     Fuel cell current density at time t (A.m-2).
-v_a : Vector
+v_a : Vector{Float64}
     Velocity evolution at the anode side (m.s-1).
-v_c : Vector
+v_c : Vector{Float64}
     Velocity evolution at the cathode side (m.s-1).
 Pa_in : Float64
     Inlet pressure at the anode side (Pa).
@@ -39,11 +39,11 @@ Dict{String, Dict}
 function calculate_flows_1D_GC_manifold(sv_1D_cell::AbstractVector{<:AbstractDict},
                                         sv_1D_manifold::Dict,
                                         sv_auxiliary::Dict,
-                                        i_fc_cell,
-                                        v_a::Vector,
-                                        v_c::Vector,
-                                        Pa_in,
-                                        Pc_in,
+                                        i_fc_cell::Float64,
+                                        v_a::Vector{Float64},
+                                        v_c::Vector{Float64},
+                                        Pa_in::Float64,
+                                        Pc_in::Float64,
                                         fc::AbstractFuelCell,
                                         cfg::SimulationConfig)::Dict{String, Dict}
 

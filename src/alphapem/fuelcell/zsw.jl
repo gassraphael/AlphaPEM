@@ -392,7 +392,7 @@ function zsw_numerical_params()
         purge_time = 0.6,                      # The time for purging the system in seconds
         delta_purge = 15.0,                    # The time between two purges in seconds
         # Setting the tolerances for the system of ODEs solver:
-        rtol = 1e-6,                           # Relative tolerance for the system of ODEs solver
-        atol = 1e-9                            # Absolute tolerance for the system of ODEs solver
+        rtol = 1e-3,                           # Relative tolerance for the system of ODEs solver
+        atol = 1e-6                            # Absolute tolerance for the system of ODEs solver
     )
 end

@@ -10,11 +10,16 @@ the 1D+1D+1D model to several 1D models in order to ease the coding.
 
 Parameters
 ----------
-t :
+t : Float64
     Time (s).
-y : Vector
+y : Vector{Float64}
     Vector of the solver variables.
-
+fc : AbstractFuelCell
+    Fuel cell instance.
+cd : AbstractCurrent
+    Current profile instance.
+cfg : SimulationConfig
+    Simulation configuration.
 solver_variable_names : Vector{Vector{String}}
     Names of the solver variables. The first element contains the MEA and GC variable names,
     the second element contains the manifold variable names, and the third element contains
@@ -22,11 +27,11 @@ solver_variable_names : Vector{Vector{String}}
 
 Returns
 -------
-Vector
+Vector{Float64}
     Vector containing the derivative of the solver variables.
 """
-function dydt(t, y::Vector, fc::AbstractFuelCell, cd::AbstractCurrent, cfg::SimulationConfig,
-              solver_variable_names::Vector{Vector{String}})::Vector
+function dydt(t::Float64, y::Vector{Float64}, fc::AbstractFuelCell, cd::AbstractCurrent, cfg::SimulationConfig,
+              solver_variable_names::Vector{Vector{String}})::Vector{Float64}
 
     # Extraction of frequently used parameters
     oc = fc.operating_conditions

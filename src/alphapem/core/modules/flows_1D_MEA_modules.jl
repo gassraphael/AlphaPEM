@@ -12,19 +12,23 @@ Parameters
 sv : Dict
     Variables calculated by the solver. They correspond to the fuel cell internal states.
     `sv` is a contraction of solver_variables for enhanced readability.
-i_fc :
+i_fc : Float64
     Current density of the fuel cell (A/m²).
 fc : AbstractFuelCell
     The fuel cell instance providing model parameters.
 
 Returns
 -------
-Tuple
+Tuple(29 elements)
     Tuple containing all intermediate values used by the flows calculation.
+    Elements: (H_gdl_node, H_mpl_node, Pagc, Pcgc, Pcap_agdl, Pcap_cgdl, rho_agc, rho_cgc,
+    D_eff_EOD_acl_mem, D_eff_EOD_mem_ccl, D_lambda_eff_acl_mem, D_lambda_eff_mem_ccl,
+    D_cap_agdl_agdl, D_cap_agdl_ampl, D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_ccl_cmpl,
+    D_cap_cmpl_cmpl, D_cap_cmpl_cgdl, D_cap_cgdl_cgdl, Da_eff_agdl_agdl, Da_eff_agdl_ampl,
+    Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl, Dc_eff_cmpl_cgdl,
+    Dc_eff_cgdl_cgdl, T_acl_mem_ccl)
 """
-function flows_1D_MEA_int_values(sv::Dict,
-                                 i_fc,
-                                 fc::AbstractFuelCell)
+function flows_1D_MEA_int_values(sv::Dict, i_fc::Float64, fc::AbstractFuelCell)::Tuple
 
     # Extraction of the parameters
     pp = fc.physical_parameters

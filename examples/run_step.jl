@@ -26,7 +26,7 @@ cfg = SimulationConfig(
     voltage_zone = :full,
     type_auxiliary = :no_auxiliary,
     type_purge = :no_purge,
-    type_display = :synthetic,
+    type_display = :no_display,
     type_plot = :fixed
 )
 

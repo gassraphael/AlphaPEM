@@ -17,7 +17,7 @@ using SciMLBase: successful_retcode
 
 Parameters
 ----------
-i_fc_cell :
+i_fc_cell : Float64
     Fuel cell current density at time t (A.m-2).
 sv : Vector{Dict}
     Variables calculated by the solver. They correspond to the cell internal states.
@@ -28,12 +28,12 @@ fc : AbstractFuelCell
 
 Returns
 -------
-i_fc : Vector
+Vector{Float64}
     Local current density distribution in the 1D direction of the GC (A.m-2).
     Julia vectors are naturally 1-based, so no dummy element is stored at index 0.
     i_fc[i] corresponds to gas channel i, for i in 1:nb_gc.
 """
-function calculate_1D_GC_current_density(i_fc_cell, sv::AbstractVector{<:AbstractDict}, fc::AbstractFuelCell)::Vector
+function calculate_1D_GC_current_density(i_fc_cell::Float64, sv::AbstractVector{<:AbstractDict}, fc::AbstractFuelCell)::Vector{Float64}
 
     # Extraction of the parameters
     nb_gc = fc.numerical_parameters.nb_gc
