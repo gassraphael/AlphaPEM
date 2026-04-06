@@ -296,6 +296,7 @@ function eh31_numerical_params()
         nb_gc = 1,                             # Number of model nodes placed inside each gas channel
         nb_gdl = 3,                            # Number of model nodes placed inside each GDL
         nb_mpl = 2,                            # Number of model nodes placed inside each MPL
+        nb_man = 1,                            # Number of model nodes placed inside each manifold line
         # Setting the purging parameters of the system and the dynamic display of the step current density function:
         purge_time = 0.6,                      # The time for purging the system in seconds
         delta_purge = 15.0,                    # The time between two purges in seconds

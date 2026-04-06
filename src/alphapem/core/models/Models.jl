@@ -29,16 +29,20 @@ const Phi_ext = Utils.Phi_ext
 const y_O2_ext = Utils.y_O2_ext
 const interpolate = Utils.interpolate
 
-# ── Include shared helpers exactly once (avoid docstring redefinitions) ─────
+# ── Include shared helpers exactly once ─────
 include("../modules/cell_voltage_modules.jl")
 include("../modules/flows_1D_MEA_modules.jl")
 include("../modules/heat_modules.jl")
 include("../modules/flows_1D_GC_manifold_modules.jl")
-include("../modules/dif_eq_modules.jl")
 include("../modules/display_calc_modules.jl")
 include("../modules/display_modules.jl")
 
 # ── Include model files in dependency order ─────────────────────────────────
+include("cell_node.jl")
+include("cell_balance.jl")
+include("cell_equations.jl")
+include("auxiliary.jl")
+include("../modules/dif_eq_modules.jl")
 include("velocity.jl")
 include("cell_voltage.jl")
 include("current_distribution_1D_GC.jl")

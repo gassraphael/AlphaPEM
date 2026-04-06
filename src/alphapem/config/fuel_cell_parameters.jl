@@ -119,6 +119,7 @@ Base.@kwdef struct NumericalParams <: AbstractFuelCellParams
     nb_gc::Int = 1                  # Number of model nodes placed inside each gas channel
     nb_gdl::Int = 3                 # Number of model nodes placed inside each GDL
     nb_mpl::Int = 2                 # Number of model nodes placed inside each MPL
+    nb_man::Int = 1                 # Number of model nodes placed inside each manifold line
     purge_time::Float64 = 0.6       # The time for purging the system in seconds
     delta_purge::Float64 = 15.0     # The time between two purges in seconds
     delta_t_dyn_step::Float64 = 0.1 # Time for dynamic display of the step current density function in seconds

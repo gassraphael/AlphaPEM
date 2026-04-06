@@ -278,6 +278,307 @@ function calculate_dif_eq_int_values(t::Float64, sv::Dict, fc::AbstractFuelCell,
 end
 
 
+# Typed solver-vector helpers depend on model structs (`MEAState1D`, manifold and
+# auxiliary containers). They are loaded only in the `Models` include context.
+if @isdefined(MEAState1D)
+
+"""Count the number of MEA/GC variables per gas-channel node in the solver vector.
+
+The ordering matches `create_initial_variable_values` in `AlphaPEM.jl`.
+"""
+function _nb_solver_vars_per_gc(nb_gdl::Int, nb_mpl::Int)::Int
+    return fieldcount(AnodeGCNode) +
+           nb_gdl * fieldcount(AnodeGDLNode) +
+           nb_mpl * fieldcount(AnodeMPLNode) +
+           fieldcount(AnodeCLNode) +
+           fieldcount(MembraneNode) +
+           fieldcount(CathodeCLNode) +
+           nb_mpl * fieldcount(CathodeMPLNode) +
+           nb_gdl * fieldcount(CathodeGDLNode) +
+           fieldcount(CathodeGCNode)
+end
+
+
+"""Unpack one GC-node segment of the solver vector into a typed 1D MEA state."""
+function _unpack_mea_state_1D(values::AbstractVector{<:Real}, nb_gdl::Int, nb_mpl::Int)
+    idx = 1
+
+    # C_v block
+    C_v_agc = Float64(values[idx]); idx += 1
+    C_v_agdl = [Float64(values[idx + i - 1]) for i in 1:nb_gdl]; idx += nb_gdl
+    C_v_ampl = [Float64(values[idx + i - 1]) for i in 1:nb_mpl]; idx += nb_mpl
+    C_v_acl = Float64(values[idx]); idx += 1
+    C_v_ccl = Float64(values[idx]); idx += 1
+    C_v_cmpl = [Float64(values[idx + i - 1]) for i in 1:nb_mpl]; idx += nb_mpl
+    C_v_cgdl = [Float64(values[idx + i - 1]) for i in 1:nb_gdl]; idx += nb_gdl
+    C_v_cgc = Float64(values[idx]); idx += 1
+
+    # s block
+    s_agc = Float64(values[idx]); idx += 1
+    s_agdl = [Float64(values[idx + i - 1]) for i in 1:nb_gdl]; idx += nb_gdl
+    s_ampl = [Float64(values[idx + i - 1]) for i in 1:nb_mpl]; idx += nb_mpl
+    s_acl = Float64(values[idx]); idx += 1
+    s_ccl = Float64(values[idx]); idx += 1
+    s_cmpl = [Float64(values[idx + i - 1]) for i in 1:nb_mpl]; idx += nb_mpl
+    s_cgdl = [Float64(values[idx + i - 1]) for i in 1:nb_gdl]; idx += nb_gdl
+    s_cgc = Float64(values[idx]); idx += 1
+
+    # lambda block
+    lambda_acl = Float64(values[idx]); idx += 1
+    lambda_mem = Float64(values[idx]); idx += 1
+    lambda_ccl = Float64(values[idx]); idx += 1
+
+    # H2/O2/N2 block
+    C_H2_agc = Float64(values[idx]); idx += 1
+    C_H2_agdl = [Float64(values[idx + i - 1]) for i in 1:nb_gdl]; idx += nb_gdl
+    C_H2_ampl = [Float64(values[idx + i - 1]) for i in 1:nb_mpl]; idx += nb_mpl
+    C_H2_acl = Float64(values[idx]); idx += 1
+    C_O2_ccl = Float64(values[idx]); idx += 1
+    C_O2_cmpl = [Float64(values[idx + i - 1]) for i in 1:nb_mpl]; idx += nb_mpl
+    C_O2_cgdl = [Float64(values[idx + i - 1]) for i in 1:nb_gdl]; idx += nb_gdl
+    C_O2_cgc = Float64(values[idx]); idx += 1
+    C_N2_agc = Float64(values[idx]); idx += 1
+    C_N2_cgc = Float64(values[idx]); idx += 1
+
+    # T block + eta_c
+    T_agc = Float64(values[idx]); idx += 1
+    T_agdl = [Float64(values[idx + i - 1]) for i in 1:nb_gdl]; idx += nb_gdl
+    T_ampl = [Float64(values[idx + i - 1]) for i in 1:nb_mpl]; idx += nb_mpl
+    T_acl = Float64(values[idx]); idx += 1
+    T_mem = Float64(values[idx]); idx += 1
+    T_ccl = Float64(values[idx]); idx += 1
+    T_cmpl = [Float64(values[idx + i - 1]) for i in 1:nb_mpl]; idx += nb_mpl
+    T_cgdl = [Float64(values[idx + i - 1]) for i in 1:nb_gdl]; idx += nb_gdl
+    T_cgc = Float64(values[idx]); idx += 1
+    eta_c = Float64(values[idx]); idx += 1
+
+    # Defensive check: ensure the full segment was consumed exactly once.
+    idx == length(values) + 1 ||
+        throw(ArgumentError("Invalid 1D state segment length while unpacking solver vector."))
+
+    agc = AnodeGCNode(T_agc, C_v_agc, s_agc, C_H2_agc, C_N2_agc)
+    agdl = ntuple(i -> AnodeGDLNode(T_agdl[i], C_v_agdl[i], s_agdl[i], C_H2_agdl[i]), nb_gdl)
+    ampl = ntuple(i -> AnodeMPLNode(T_ampl[i], C_v_ampl[i], s_ampl[i], C_H2_ampl[i]), nb_mpl)
+    acl = AnodeCLNode(T_acl, C_v_acl, s_acl, lambda_acl, C_H2_acl)
+    mem = MembraneNode(T_mem, lambda_mem)
+    ccl = CathodeCLNode(T_ccl, C_v_ccl, s_ccl, lambda_ccl, C_O2_ccl, eta_c)
+    cmpl = ntuple(i -> CathodeMPLNode(T_cmpl[i], C_v_cmpl[i], s_cmpl[i], C_O2_cmpl[i]), nb_mpl)
+    cgdl = ntuple(i -> CathodeGDLNode(T_cgdl[i], C_v_cgdl[i], s_cgdl[i], C_O2_cgdl[i]), nb_gdl)
+    cgc = CathodeGCNode(T_cgc, C_v_cgc, s_cgc, C_O2_cgc, C_N2_cgc)
+
+    return MEAState1D{nb_gdl, nb_mpl}(agc, agdl, ampl, acl, mem, ccl, cmpl, cgdl, cgc)
+end
+
+
+"""Create a derivative container initialized with NaN values.
+
+NaN sentinels make missing derivative assignments fail fast.
+"""
+function _nan_mea_derivative_1D(nb_gdl::Int, nb_mpl::Int)
+    z = NaN
+    agc = AnodeGCDerivative(z, z, z, z, z)
+    agdl = ntuple(_ -> AnodeGDLDerivative(z, z, z, z), nb_gdl)
+    ampl = ntuple(_ -> AnodeMPLDerivative(z, z, z, z), nb_mpl)
+    acl = AnodeCLDerivative(z, z, z, z, z)
+    mem = MembraneDerivative(z, z)
+    ccl = CathodeCLDerivative(z, z, z, z, z, z)
+    cmpl = ntuple(_ -> CathodeMPLDerivative(z, z, z, z), nb_mpl)
+    cgdl = ntuple(_ -> CathodeGDLDerivative(z, z, z, z), nb_gdl)
+    cgc = CathodeGCDerivative(z, z, z, z, z)
+    return MEADerivative1D{nb_gdl, nb_mpl}(agc, agdl, ampl, acl, mem, ccl, cmpl, cgdl, cgc)
+end
+
+
+"""Ensure all derivatives were assigned before returning to the solver."""
+function _assert_derivative_complete(d::MEADerivative1D{nb_gdl, nb_mpl}) where {nb_gdl, nb_mpl}
+    any(isnan, _pack_mea_derivative_1D(d)) &&
+        throw(ArgumentError("At least one derivative entry is missing (NaN sentinel detected)."))
+    return nothing
+end
+
+
+"""Repack one typed 1D derivative container into the solver ordering."""
+function _pack_mea_derivative_1D(d::MEADerivative1D{nb_gdl, nb_mpl}) where {nb_gdl, nb_mpl}
+    out = Float64[]
+    sizehint!(out, _nb_solver_vars_per_gc(nb_gdl, nb_mpl))
+
+    # C_v block
+    push!(out, d.agc.C_v)
+    append!(out, [d.agdl[i].C_v for i in 1:nb_gdl])
+    append!(out, [d.ampl[i].C_v for i in 1:nb_mpl])
+    push!(out, d.acl.C_v)
+    push!(out, d.ccl.C_v)
+    append!(out, [d.cmpl[i].C_v for i in 1:nb_mpl])
+    append!(out, [d.cgdl[i].C_v for i in 1:nb_gdl])
+    push!(out, d.cgc.C_v)
+
+    # s block
+    push!(out, d.agc.s)
+    append!(out, [d.agdl[i].s for i in 1:nb_gdl])
+    append!(out, [d.ampl[i].s for i in 1:nb_mpl])
+    push!(out, d.acl.s)
+    push!(out, d.ccl.s)
+    append!(out, [d.cmpl[i].s for i in 1:nb_mpl])
+    append!(out, [d.cgdl[i].s for i in 1:nb_gdl])
+    push!(out, d.cgc.s)
+
+    # lambda block
+    push!(out, d.acl.lambda)
+    push!(out, d.mem.lambda)
+    push!(out, d.ccl.lambda)
+
+    # H2/O2/N2 block
+    push!(out, d.agc.C_H2)
+    append!(out, [d.agdl[i].C_H2 for i in 1:nb_gdl])
+    append!(out, [d.ampl[i].C_H2 for i in 1:nb_mpl])
+    push!(out, d.acl.C_H2)
+    push!(out, d.ccl.C_O2)
+    append!(out, [d.cmpl[i].C_O2 for i in 1:nb_mpl])
+    append!(out, [d.cgdl[i].C_O2 for i in 1:nb_gdl])
+    push!(out, d.cgc.C_O2)
+    push!(out, d.agc.C_N2)
+    push!(out, d.cgc.C_N2)
+
+    # T block + eta_c
+    push!(out, d.agc.T)
+    append!(out, [d.agdl[i].T for i in 1:nb_gdl])
+    append!(out, [d.ampl[i].T for i in 1:nb_mpl])
+    push!(out, d.acl.T)
+    push!(out, d.mem.T)
+    push!(out, d.ccl.T)
+    append!(out, [d.cmpl[i].T for i in 1:nb_mpl])
+    append!(out, [d.cgdl[i].T for i in 1:nb_gdl])
+    push!(out, d.cgc.T)
+    push!(out, d.ccl.eta_c)
+
+    return out
+end
+
+
+"""Count manifold state variables in the solver vector."""
+function _nb_solver_vars_manifolds(nb_man::Int)::Int
+    manifold_lines = (:asm, :aem, :csm, :cem)
+    return length(manifold_lines) * nb_man * fieldcount(ManifoldNode)
+end
+
+
+"""Count auxiliary state variables currently present in the solver vector."""
+function _nb_solver_vars_auxiliary(type_auxiliary::Symbol)::Int
+    if type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
+                          :forced_convective_cathode_with_anodic_recirculation)
+        return length(_packed_auxiliary_fields())
+    end
+    return 0
+end
+
+
+"""Fields currently packed in the solver vector for auxiliaries."""
+function _packed_auxiliary_fields()
+    return fieldnames(Auxiliary0DState)
+end
+
+
+"""Unpack manifold state from a solver-vector segment.
+
+Ordering is:
+P(asm, aem, csm, cem) then Phi(asm, aem, csm, cem), each by local manifold node index.
+"""
+function _unpack_manifold_state(values::AbstractVector{<:Real}, nb_manifold::Int)
+    idx = 1
+
+    P_asm = ntuple(i -> Float64(values[idx + i - 1]), nb_manifold); idx += nb_manifold
+    P_aem = ntuple(i -> Float64(values[idx + i - 1]), nb_manifold); idx += nb_manifold
+    P_csm = ntuple(i -> Float64(values[idx + i - 1]), nb_manifold); idx += nb_manifold
+    P_cem = ntuple(i -> Float64(values[idx + i - 1]), nb_manifold); idx += nb_manifold
+
+    Phi_asm = ntuple(i -> Float64(values[idx + i - 1]), nb_manifold); idx += nb_manifold
+    Phi_aem = ntuple(i -> Float64(values[idx + i - 1]), nb_manifold); idx += nb_manifold
+    Phi_csm = ntuple(i -> Float64(values[idx + i - 1]), nb_manifold); idx += nb_manifold
+    Phi_cem = ntuple(i -> Float64(values[idx + i - 1]), nb_manifold); idx += nb_manifold
+
+    # Defensive check: ensure manifold segment length is exactly as expected.
+    idx == length(values) + 1 ||
+        throw(ArgumentError("Invalid manifold segment length while unpacking solver vector."))
+
+    asm = ManifoldLine{nb_manifold}(ntuple(i -> ManifoldNode(P_asm[i], Phi_asm[i]), nb_manifold))
+    aem = ManifoldLine{nb_manifold}(ntuple(i -> ManifoldNode(P_aem[i], Phi_aem[i]), nb_manifold))
+    csm = ManifoldLine{nb_manifold}(ntuple(i -> ManifoldNode(P_csm[i], Phi_csm[i]), nb_manifold))
+    cem = ManifoldLine{nb_manifold}(ntuple(i -> ManifoldNode(P_cem[i], Phi_cem[i]), nb_manifold))
+
+    return _ManifoldStateBundle{nb_manifold}(asm, aem, csm, cem)
+end
+
+
+"""Create manifold derivative container initialised with NaN sentinels."""
+function _nan_manifold_derivative_state(nb_manifold::Int)
+    z = NaN
+    mkline(n) = ManifoldLineDerivative{n}(ntuple(_ -> ManifoldDerivative(z, z), n))
+    return _ManifoldDerivativeBundle{nb_manifold}(mkline(nb_manifold), mkline(nb_manifold),
+                                                  mkline(nb_manifold), mkline(nb_manifold))
+end
+
+
+"""Pack manifold derivatives into solver-vector ordering."""
+function _pack_manifold_derivative_state(md)
+    out = Float64[]
+
+    append!(out, [md.asm.nodes[i].P for i in eachindex(md.asm.nodes)])
+    append!(out, [md.aem.nodes[i].P for i in eachindex(md.aem.nodes)])
+    append!(out, [md.csm.nodes[i].P for i in eachindex(md.csm.nodes)])
+    append!(out, [md.cem.nodes[i].P for i in eachindex(md.cem.nodes)])
+
+    append!(out, [md.asm.nodes[i].Phi for i in eachindex(md.asm.nodes)])
+    append!(out, [md.aem.nodes[i].Phi for i in eachindex(md.aem.nodes)])
+    append!(out, [md.csm.nodes[i].Phi for i in eachindex(md.csm.nodes)])
+    append!(out, [md.cem.nodes[i].Phi for i in eachindex(md.cem.nodes)])
+
+    return out
+end
+
+
+"""Ensure manifold derivatives are fully assigned."""
+function _assert_manifold_derivative_complete(md)
+    any(isnan, _pack_manifold_derivative_state(md)) &&
+        throw(ArgumentError("At least one manifold derivative entry is missing (NaN sentinel detected)."))
+    return nothing
+end
+
+
+"""Unpack auxiliary state from solver-vector segment."""
+function _unpack_auxiliary_state(values::AbstractVector{<:Real})::Auxiliary0DState
+    packed_fields = _packed_auxiliary_fields()
+    # Keep strict consistency with the field-based packing schema.
+    length(values) == length(packed_fields) ||
+        throw(ArgumentError("Invalid auxiliary segment length while unpacking solver vector."))
+
+    packed_values = NamedTuple{packed_fields}(Tuple(Float64(values[i]) for i in eachindex(values)))
+    return Auxiliary0DState((getfield(packed_values, f) for f in packed_fields)...)
+end
+
+
+"""Create auxiliary derivative container initialised with NaN sentinels."""
+function _nan_auxiliary_derivative()::Auxiliary0DDerivative
+    z = NaN
+    return Auxiliary0DDerivative(ntuple(_ -> z, fieldcount(Auxiliary0DDerivative))...)
+end
+
+
+"""Pack auxiliary derivatives into current solver-vector ordering."""
+function _pack_auxiliary_derivative(d::Auxiliary0DDerivative)
+    return Float64[getfield(d, f) for f in _packed_auxiliary_fields()]
+end
+
+
+"""Ensure auxiliary derivatives are fully assigned for active ordered fields."""
+function _assert_auxiliary_derivative_complete(d::Auxiliary0DDerivative)
+    any(isnan, _pack_auxiliary_derivative(d)) &&
+        throw(ArgumentError("At least one auxiliary derivative entry is missing (NaN sentinel detected)."))
+    return nothing
+end
+
+end
+
+
 # ______________________________________Function which gives the integration event______________________________________
 
 """Create an integration event that stops the solver when a crucial variable (C_v, lambda, C_O2, C_H2)
