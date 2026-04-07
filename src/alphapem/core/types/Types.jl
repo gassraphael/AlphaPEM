@@ -11,6 +11,7 @@ Structs are grouped by physical role:
   - cell_intermediates: scratch values computed during the ODE RHS evaluation
   - cell_balance      : local conservation-law terms (fluxes + sources)
   - auxiliary         : balance-of-plant 0-D auxiliary systems
+  - cell_flows        : inter-layer fluxes and source terms (ODE RHS outputs)
 """
 module Types
 
@@ -20,6 +21,7 @@ include("cell_derivative.jl")
 include("cell_intermediates.jl")
 include("cell_balance.jl")
 include("auxiliary.jl")
+include("cell_flows.jl")
 
 # ── Public API ────────────────────────────────────────────────────────────────
 
@@ -62,6 +64,18 @@ export FuelCellBalanceP2D
 
 # --- auxiliary.jl ---
 export Auxiliary0DState, Auxiliary0DDerivative
+
+# --- cell_flows.jl ---
+# scalar flow / source types
+export MEASorptionSources, MEADissolvedWaterFlux, MEAWaterProductionSources
+export MEAGasReactionSources
+export MEAReactionHeat, MEASorptionHeat, MEAProtonHeat
+# dimension-dependent flux types
+export MEALiquidFluxes, MEAVaporFluxes, MEAHydrogenFluxes, MEAOxygenFluxes
+export MEALiquidSources, MEAVaporSources
+export MEAThermalFluxes, MEALiquidHeat, MEAElectricHeat
+# top-level containers
+export MEAFlows1D, MEAHeatFlows1D
 
 end  # module Types
 

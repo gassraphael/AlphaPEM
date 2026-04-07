@@ -29,11 +29,11 @@ Dict{String, Dict}
     have length `nb_gdl - 1` or `nb_mpl - 1`, while node-based source vectors have length
     `nb_gdl` or `nb_mpl`.
 """
-function calculate_flows_1D_MEA(sv_1D::Dict,
+function calculate_flows_1D_MEA(sv_1D::MEAState1D,
                                 i_fc::Float64,
                                 v_a::Float64,
                                 v_c::Float64,
-                                fc::AbstractFuelCell)::Dict{String, Dict}
+                                fc::AbstractFuelCell)
 
     # ___________________________________________________Preliminaries__________________________________________________
 
@@ -48,20 +48,28 @@ function calculate_flows_1D_MEA(sv_1D::Dict,
     nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl
 
     # Extraction of the variables
-    C_v_agc, C_v_acl, C_v_ccl, C_v_cgc = sv_1D["C_v_agc"], sv_1D["C_v_acl"], sv_1D["C_v_ccl"], sv_1D["C_v_cgc"]
-    C_v_agdl, C_v_ampl = [sv_1D["C_v_agdl_$i"] for i in 1:nb_gdl], [sv_1D["C_v_ampl_$i"] for i in 1:nb_mpl]
-    C_v_cmpl, C_v_cgdl = [sv_1D["C_v_cmpl_$i"] for i in 1:nb_mpl], [sv_1D["C_v_cgdl_$i"] for i in 1:nb_gdl]
-    s_acl, s_ccl = sv_1D["s_acl"], sv_1D["s_ccl"]
-    s_agdl, s_ampl = [sv_1D["s_agdl_$i"] for i in 1:nb_gdl], [sv_1D["s_ampl_$i"] for i in 1:nb_mpl]
-    s_cmpl, s_cgdl = [sv_1D["s_cmpl_$i"] for i in 1:nb_mpl], [sv_1D["s_cgdl_$i"] for i in 1:nb_gdl]
-    lambda_acl, lambda_mem, lambda_ccl = sv_1D["lambda_acl"], sv_1D["lambda_mem"], sv_1D["lambda_ccl"]
-    C_H2_agc, C_H2_acl, C_O2_ccl, C_O2_cgc = sv_1D["C_H2_agc"], sv_1D["C_H2_acl"], sv_1D["C_O2_ccl"], sv_1D["C_O2_cgc"]
-    C_H2_agdl, C_H2_ampl = [sv_1D["C_H2_agdl_$i"] for i in 1:nb_gdl], [sv_1D["C_H2_ampl_$i"] for i in 1:nb_mpl]
-    C_O2_cmpl, C_O2_cgdl = [sv_1D["C_O2_cmpl_$i"] for i in 1:nb_mpl], [sv_1D["C_O2_cgdl_$i"] for i in 1:nb_gdl]
-    C_N2_agc, C_N2_cgc = sv_1D["C_N2_agc"], sv_1D["C_N2_cgc"]
-    T_acl, T_mem, T_ccl = sv_1D["T_acl"], sv_1D["T_mem"], sv_1D["T_ccl"]
-    T_agdl, T_ampl = [sv_1D["T_agdl_$i"] for i in 1:nb_gdl], [sv_1D["T_ampl_$i"] for i in 1:nb_mpl]
-    T_cmpl, T_cgdl = [sv_1D["T_cmpl_$i"] for i in 1:nb_mpl], [sv_1D["T_cgdl_$i"] for i in 1:nb_gdl]
+    C_v_agc, C_v_acl, C_v_ccl, C_v_cgc = sv_1D.agc.C_v, sv_1D.acl.C_v, sv_1D.ccl.C_v, sv_1D.cgc.C_v
+    C_v_agdl = [sv_1D.agdl[i].C_v for i in 1:nb_gdl]
+    C_v_ampl = [sv_1D.ampl[i].C_v for i in 1:nb_mpl]
+    C_v_cmpl = [sv_1D.cmpl[i].C_v for i in 1:nb_mpl]
+    C_v_cgdl = [sv_1D.cgdl[i].C_v for i in 1:nb_gdl]
+    s_acl, s_ccl = sv_1D.acl.s, sv_1D.ccl.s
+    s_agdl = [sv_1D.agdl[i].s for i in 1:nb_gdl]
+    s_ampl = [sv_1D.ampl[i].s for i in 1:nb_mpl]
+    s_cmpl = [sv_1D.cmpl[i].s for i in 1:nb_mpl]
+    s_cgdl = [sv_1D.cgdl[i].s for i in 1:nb_gdl]
+    lambda_acl, lambda_mem, lambda_ccl = sv_1D.acl.lambda, sv_1D.mem.lambda, sv_1D.ccl.lambda
+    C_H2_agc, C_H2_acl, C_O2_ccl, C_O2_cgc = sv_1D.agc.C_H2, sv_1D.acl.C_H2, sv_1D.ccl.C_O2, sv_1D.cgc.C_O2
+    C_H2_agdl = [sv_1D.agdl[i].C_H2 for i in 1:nb_gdl]
+    C_H2_ampl = [sv_1D.ampl[i].C_H2 for i in 1:nb_mpl]
+    C_O2_cmpl = [sv_1D.cmpl[i].C_O2 for i in 1:nb_mpl]
+    C_O2_cgdl = [sv_1D.cgdl[i].C_O2 for i in 1:nb_gdl]
+    C_N2_agc, C_N2_cgc = sv_1D.agc.C_N2, sv_1D.cgc.C_N2
+    T_acl, T_mem, T_ccl = sv_1D.acl.T, sv_1D.mem.T, sv_1D.ccl.T
+    T_agdl = [sv_1D.agdl[i].T for i in 1:nb_gdl]
+    T_ampl = [sv_1D.ampl[i].T for i in 1:nb_mpl]
+    T_cmpl = [sv_1D.cmpl[i].T for i in 1:nb_mpl]
+    T_cgdl = [sv_1D.cgdl[i].T for i in 1:nb_gdl]
 
     # Intermediate values
     (H_gdl_node, H_mpl_node, Pagc, Pcgc, Pcap_agdl, Pcap_cgdl, rho_agc, rho_cgc, D_eff_EOD_acl_mem,
@@ -216,85 +224,27 @@ function calculate_flows_1D_MEA(sv_1D::Dict,
     Sv_cmpl = [-x for x in Sl_cmpl]
     Sv_cgdl = [-x for x in Sl_cgdl]
 
-    # _____________________________________Assemble and return the flow dictionary______________________________________
+    # ____________________________________Assemble and return typed flow container____________________________________
+    Jv = MEAVaporFluxes{nb_gdl, nb_mpl}(Jv_agc_agdl, Jv_agdl_agdl, Jv_agdl_ampl,
+                                        Jv_ampl_ampl, Jv_ampl_acl,
+                                        Jv_ccl_cmpl, Jv_cmpl_cmpl, Jv_cmpl_cgdl,
+                                        Jv_cgdl_cgdl, Jv_cgdl_cgc)
+    Jl = MEALiquidFluxes{nb_gdl, nb_mpl}(Jl_agc_agdl, Jl_agdl_agdl, Jl_agdl_ampl,
+                                         Jl_ampl_ampl, Jl_ampl_acl,
+                                         Jl_ccl_cmpl, Jl_cmpl_cmpl, Jl_cmpl_cgdl,
+                                         Jl_cgdl_cgdl, Jl_cgdl_cgc)
+    J_lambda = MEADissolvedWaterFlux(J_lambda_acl_mem, J_lambda_mem_ccl)
+    J_H2 = MEAHydrogenFluxes{nb_gdl, nb_mpl}(J_H2_agc_agdl, J_H2_agdl_agdl, J_H2_agdl_ampl,
+                                             J_H2_ampl_ampl, J_H2_ampl_acl)
+    J_O2 = MEAOxygenFluxes{nb_gdl, nb_mpl}(J_O2_ccl_cmpl, J_O2_cmpl_cmpl, J_O2_cmpl_cgdl,
+                                           J_O2_cgdl_cgdl, J_O2_cgdl_cgc)
+    S_abs = MEASorptionSources(Sv_abs_acl, Sl_abs_acl, Sv_abs_ccl, Sl_abs_ccl)
+    Sp = MEAWaterProductionSources(Sp_acl, Sp_ccl)
+    S_H2 = MEAGasReactionSources(S_H2_reac, S_H2_cros)
+    S_O2 = MEAGasReactionSources(S_O2_reac, S_O2_cros)
+    Sv = MEAVaporSources{nb_gdl, nb_mpl}(Sv_agdl, Sv_ampl, Sv_acl, Sv_ccl, Sv_cmpl, Sv_cgdl)
+    Sl = MEALiquidSources{nb_gdl, nb_mpl}(Sl_agdl, Sl_ampl, Sl_acl, Sl_ccl, Sl_cmpl, Sl_cgdl)
 
-    return Dict{String, Dict}(
-        "Jv" => Dict(
-            "agc_agdl" => Jv_agc_agdl,
-            "agdl_agdl" => Jv_agdl_agdl,
-            "agdl_ampl" => Jv_agdl_ampl,
-            "ampl_ampl" => Jv_ampl_ampl,
-            "ampl_acl" => Jv_ampl_acl,
-            "ccl_cmpl" => Jv_ccl_cmpl,
-            "cmpl_cmpl" => Jv_cmpl_cmpl,
-            "cmpl_cgdl" => Jv_cmpl_cgdl,
-            "cgdl_cgdl" => Jv_cgdl_cgdl,
-            "cgdl_cgc" => Jv_cgdl_cgc
-        ),
-        "Jl" => Dict(
-            "agc_agdl" => Jl_agc_agdl,
-            "agdl_agdl" => Jl_agdl_agdl,
-            "agdl_ampl" => Jl_agdl_ampl,
-            "ampl_ampl" => Jl_ampl_ampl,
-            "ampl_acl" => Jl_ampl_acl,
-            "ccl_cmpl" => Jl_ccl_cmpl,
-            "cmpl_cmpl" => Jl_cmpl_cmpl,
-            "cmpl_cgdl" => Jl_cmpl_cgdl,
-            "cgdl_cgdl" => Jl_cgdl_cgdl,
-            "cgdl_cgc" => Jl_cgdl_cgc
-        ),
-        "J_lambda" => Dict(
-            "acl_mem" => J_lambda_acl_mem,
-            "mem_ccl" => J_lambda_mem_ccl
-        ),
-        "J_H2" => Dict(
-            "agc_agdl" => J_H2_agc_agdl,
-            "agdl_agdl" => J_H2_agdl_agdl,
-            "agdl_ampl" => J_H2_agdl_ampl,
-            "ampl_ampl" => J_H2_ampl_ampl,
-            "ampl_acl" => J_H2_ampl_acl
-        ),
-        "J_O2" => Dict(
-            "ccl_cmpl" => J_O2_ccl_cmpl,
-            "cmpl_cmpl" => J_O2_cmpl_cmpl,
-            "cmpl_cgdl" => J_O2_cmpl_cgdl,
-            "cgdl_cgdl" => J_O2_cgdl_cgdl,
-            "cgdl_cgc" => J_O2_cgdl_cgc
-        ),
-        "S_abs" => Dict(
-            "v_acl" => Sv_abs_acl,
-            "l_acl" => Sl_abs_acl,
-            "v_ccl" => Sv_abs_ccl,
-            "l_ccl" => Sl_abs_ccl
-        ),
-        "Sp" => Dict(
-            "acl" => Sp_acl,
-            "ccl" => Sp_ccl
-        ),
-        "S_H2" => Dict(
-            "reac" => S_H2_reac,
-            "cros" => S_H2_cros
-        ),
-        "S_O2" => Dict(
-            "reac" => S_O2_reac,
-            "cros" => S_O2_cros
-        ),
-        "Sv" => Dict(
-            "agdl" => Sv_agdl,
-            "ampl" => Sv_ampl,
-            "acl" => Sv_acl,
-            "ccl" => Sv_ccl,
-            "cmpl" => Sv_cmpl,
-            "cgdl" => Sv_cgdl
-        ),
-        "Sl" => Dict(
-            "agdl" => Sl_agdl,
-            "ampl" => Sl_ampl,
-            "acl" => Sl_acl,
-            "ccl" => Sl_ccl,
-            "cmpl" => Sl_cmpl,
-            "cgdl" => Sl_cgdl
-        )
-    )
+    return MEAFlows1D{nb_gdl, nb_mpl}(Jv, Jl, J_lambda, J_H2, J_O2, S_abs, Sp, S_H2, S_O2, Sv, Sl)
 end
 

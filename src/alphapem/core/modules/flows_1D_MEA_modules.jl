@@ -28,7 +28,7 @@ Tuple(29 elements)
     Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl, Dc_eff_cmpl_cgdl,
     Dc_eff_cgdl_cgdl, T_acl_mem_ccl)
 """
-function flows_1D_MEA_int_values(sv::Dict, i_fc::Float64, fc::AbstractFuelCell)::Tuple
+function flows_1D_MEA_int_values(sv::MEAState1D, i_fc::Float64, fc::AbstractFuelCell)::Tuple
 
     # Extraction of the parameters
     pp = fc.physical_parameters
@@ -39,20 +39,28 @@ function flows_1D_MEA_int_values(sv::Dict, i_fc::Float64, fc::AbstractFuelCell):
     nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl
 
     # Extraction of the variables
-    C_v_agc, C_v_acl, C_v_ccl, C_v_cgc = sv["C_v_agc"], sv["C_v_acl"], sv["C_v_ccl"], sv["C_v_cgc"]
-    C_v_agdl, C_v_ampl = [sv["C_v_agdl_$i"] for i in 1:nb_gdl], [sv["C_v_ampl_$i"] for i in 1:nb_mpl]
-    C_v_cmpl, C_v_cgdl = [sv["C_v_cmpl_$i"] for i in 1:nb_mpl], [sv["C_v_cgdl_$i"] for i in 1:nb_gdl]
-    s_acl, s_ccl = sv["s_acl"], sv["s_ccl"]
-    s_agdl, s_ampl = [sv["s_agdl_$i"] for i in 1:nb_gdl], [sv["s_ampl_$i"] for i in 1:nb_mpl]
-    s_cmpl, s_cgdl = [sv["s_cmpl_$i"] for i in 1:nb_mpl], [sv["s_cgdl_$i"] for i in 1:nb_gdl]
-    lambda_acl, lambda_mem, lambda_ccl = sv["lambda_acl"], sv["lambda_mem"], sv["lambda_ccl"]
-    C_H2_agc, C_H2_acl, C_O2_ccl, C_O2_cgc = sv["C_H2_agc"], sv["C_H2_acl"], sv["C_O2_ccl"], sv["C_O2_cgc"]
-    C_H2_agdl, C_H2_ampl = [sv["C_H2_agdl_$i"] for i in 1:nb_gdl], [sv["C_H2_ampl_$i"] for i in 1:nb_mpl]
-    C_O2_cmpl, C_O2_cgdl = [sv["C_O2_cmpl_$i"] for i in 1:nb_mpl], [sv["C_O2_cgdl_$i"] for i in 1:nb_gdl]
-    C_N2_agc, C_N2_cgc = sv["C_N2_agc"], sv["C_N2_cgc"]
-    T_agc, T_acl, T_mem, T_ccl, T_cgc = sv["T_agc"], sv["T_acl"], sv["T_mem"], sv["T_ccl"], sv["T_cgc"]
-    T_agdl, T_ampl = [sv["T_agdl_$i"] for i in 1:nb_gdl], [sv["T_ampl_$i"] for i in 1:nb_mpl]
-    T_cmpl, T_cgdl = [sv["T_cmpl_$i"] for i in 1:nb_mpl], [sv["T_cgdl_$i"] for i in 1:nb_gdl]
+    C_v_agc, C_v_acl, C_v_ccl, C_v_cgc = sv.agc.C_v, sv.acl.C_v, sv.ccl.C_v, sv.cgc.C_v
+    C_v_agdl = [sv.agdl[i].C_v for i in 1:nb_gdl]
+    C_v_ampl = [sv.ampl[i].C_v for i in 1:nb_mpl]
+    C_v_cmpl = [sv.cmpl[i].C_v for i in 1:nb_mpl]
+    C_v_cgdl = [sv.cgdl[i].C_v for i in 1:nb_gdl]
+    s_acl, s_ccl = sv.acl.s, sv.ccl.s
+    s_agdl = [sv.agdl[i].s for i in 1:nb_gdl]
+    s_ampl = [sv.ampl[i].s for i in 1:nb_mpl]
+    s_cmpl = [sv.cmpl[i].s for i in 1:nb_mpl]
+    s_cgdl = [sv.cgdl[i].s for i in 1:nb_gdl]
+    lambda_acl, lambda_mem, lambda_ccl = sv.acl.lambda, sv.mem.lambda, sv.ccl.lambda
+    C_H2_agc, C_H2_acl, C_O2_ccl, C_O2_cgc = sv.agc.C_H2, sv.acl.C_H2, sv.ccl.C_O2, sv.cgc.C_O2
+    C_H2_agdl = [sv.agdl[i].C_H2 for i in 1:nb_gdl]
+    C_H2_ampl = [sv.ampl[i].C_H2 for i in 1:nb_mpl]
+    C_O2_cmpl = [sv.cmpl[i].C_O2 for i in 1:nb_mpl]
+    C_O2_cgdl = [sv.cgdl[i].C_O2 for i in 1:nb_gdl]
+    C_N2_agc, C_N2_cgc = sv.agc.C_N2, sv.cgc.C_N2
+    T_agc, T_acl, T_mem, T_ccl, T_cgc = sv.agc.T, sv.acl.T, sv.mem.T, sv.ccl.T, sv.cgc.T
+    T_agdl = [sv.agdl[i].T for i in 1:nb_gdl]
+    T_ampl = [sv.ampl[i].T for i in 1:nb_mpl]
+    T_cmpl = [sv.cmpl[i].T for i in 1:nb_mpl]
+    T_cgdl = [sv.cgdl[i].T for i in 1:nb_gdl]
 
     # Transitory parameter
     H_gdl_node = Hgdl / nb_gdl
