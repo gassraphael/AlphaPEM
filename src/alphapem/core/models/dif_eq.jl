@@ -37,10 +37,7 @@ function dydt(t::Float64, y::Vector{Float64}, fc::AbstractFuelCell, cd::Abstract
     pp = fc.physical_parameters
     np = fc.numerical_parameters
     T_des = oc.T_des
-    Hacl, Hccl, Hmem, Hgdl, Hmpl = pp.Hacl, pp.Hccl, pp.Hmem, pp.Hgdl, pp.Hmpl
-    Aact, Wagc, Wcgc, Lgc, Hagc, Hcgc = pp.Aact, pp.Wagc, pp.Wcgc, pp.Lgc, pp.Hagc, pp.Hcgc
-    nb_channel_in_gc = pp.nb_channel_in_gc
-    epsilon_gdl, epsilon_mpl, i0_c_ref, kappa_c, C_scl = pp.epsilon_gdl, pp.epsilon_mpl, pp.i0_c_ref, pp.kappa_c, pp.C_scl
+    Lgc, Hagc, Hcgc = pp.Lgc, pp.Hagc, pp.Hcgc
     nb_gc, nb_gdl, nb_mpl, nb_man = np.nb_gc, np.nb_gdl, np.nb_mpl, np.nb_man
 
     # Global model composition
@@ -60,7 +57,7 @@ function dydt(t::Float64, y::Vector{Float64}, fc::AbstractFuelCell, cd::Abstract
     sv_1D_cell = [_unpack_mea_state_1D(@view(y[(i - 1) * n_vars_per_gc + 1:i * n_vars_per_gc]),
                                        nb_gdl, nb_mpl)
                   for i in 1:nb_gc]
-    dif_eq_1D_cell = [_nan_mea_derivative_1D(nb_gdl, nb_mpl) for _ in 1:nb_gc]
+    dif_eq_1D_cell = Vector{typeof(_nan_mea_derivative_1D(nb_gdl, nb_mpl))}(undef, nb_gc)
 
     if has_auxiliary
         manifold_offset = n_vars_mea
@@ -110,45 +107,34 @@ function dydt(t::Float64, y::Vector{Float64}, fc::AbstractFuelCell, cd::Abstract
     # Calculation of the dynamic evolutions
     for i in 1:nb_gc
         sv_i = sv_1D_cell[i]
-        dif_eq_i = dif_eq_1D_cell[i]
         flows_i = flows_1D_MEA[i]
         heat_i = heat_flows_global[i]
         dif_eq_int_values_i = dif_eq_int_values[i]
 
-    #       Inside the MEA
-        dif_eq_i = calculate_dyn_dissoved_water_evolution_inside_MEA(dif_eq_i, sv_i, Hmem, Hacl, Hccl,
-                                                                      flows_i.S_abs, flows_i.J_lambda, flows_i.Sp)
-        dif_eq_i = calculate_dyn_liquid_water_evolution_inside_MEA(dif_eq_i, sv_i,
-                                                                    Aact, Wagc, Wcgc, Lgc, nb_channel_in_gc,
-                                                                    Hgdl, Hmpl, Hacl, Hccl,
-                                                                    epsilon_gdl, epsilon_mpl,
-                                                                    nb_gc, nb_gdl, nb_mpl,
-                                                                    flows_i.Jl, flows_i.S_abs, flows_i.Sl)
-        dif_eq_i = calculate_dyn_vapor_evolution_inside_MEA(dif_eq_i, sv_i,
-                                                             Aact, Wagc, Wcgc, Lgc, nb_channel_in_gc,
-                                                             Hgdl, Hmpl, Hacl, Hccl,
-                                                             epsilon_gdl, epsilon_mpl,
-                                                             nb_gc, nb_gdl, nb_mpl,
-                                                             flows_i.Jv, flows_i.Sv, flows_i.S_abs)
-        dif_eq_i = calculate_dyn_H2_O2_N2_evolution_inside_MEA(dif_eq_i, sv_i,
-                                                                Aact, Wagc, Wcgc, Lgc, nb_channel_in_gc,
-                                                                Hgdl, Hmpl, Hacl, Hccl,
-                                                                epsilon_gdl, epsilon_mpl,
-                                                                nb_gdl, nb_mpl, nb_gc,
-                                                                flows_i.J_H2, flows_i.J_O2,
-                                                                flows_i.S_H2, flows_i.S_O2)
-        dif_eq_i = calculate_dyn_voltage_evolution(dif_eq_i, i_fc[i], C_O2_Pt[i],
-                                                   sv_i.ccl.T, sv_i.ccl.eta_c,
-                                                   Hccl, i0_c_ref, kappa_c, C_scl,
-                                                   dif_eq_int_values_i.i_n)
-        dif_eq_i = calculate_dyn_temperature_evolution_inside_MEA(dif_eq_i,
-                                                                   Hgdl, Hmpl, Hacl, Hccl, Hmem,
-                                                                   nb_gdl, nb_mpl,
-                                                                   dif_eq_int_values_i.rho_Cp0,
-                                                                   heat_i.Jt, heat_i.Q_r,
-                                                                   heat_i.Q_sorp, heat_i.Q_liq,
-                                                                   heat_i.Q_p, heat_i.Q_e)
-        dif_eq_1D_cell[i] = dif_eq_i
+        # Inside the MEA: compute independent derivative contributions, then assemble once.
+        dw_derivative = calculate_dyn_dissoved_water_evolution_inside_MEA(sv_i, pp,
+                                                                           flows_i.S_abs, flows_i.J_lambda, flows_i.Sp)
+        lw_derivative = calculate_dyn_liquid_water_evolution_inside_MEA(sv_i,
+                                                                         pp,
+                                                                         flows_i.Jl, flows_i.S_abs, flows_i.Sl)
+        vw_derivative = calculate_dyn_vapor_evolution_inside_MEA(sv_i,
+                                                                  pp,
+                                                                  flows_i.Jv, flows_i.Sv, flows_i.S_abs)
+        s_derivative = calculate_dyn_H2_O2_N2_evolution_inside_MEA(sv_i,
+                                                                     pp,
+                                                                     flows_i.J_H2, flows_i.J_O2,
+                                                                     flows_i.S_H2, flows_i.S_O2)
+        v_derivative = calculate_dyn_voltage_evolution(i_fc[i], C_O2_Pt[i],
+                                                        sv_i.ccl.T, sv_i.ccl.eta_c,
+                                                        pp,
+                                                        dif_eq_int_values_i.i_n)
+        t_derivative = calculate_dyn_temperature_evolution_inside_MEA(dif_eq_int_values_i.rho_Cp0,
+                                                                        pp,
+                                                                        heat_i.Jt, heat_i.Q_r,
+                                                                        heat_i.Q_sorp, heat_i.Q_liq,
+                                                                        heat_i.Q_p, heat_i.Q_e)
+        dif_eq_1D_cell[i] = assemble_mea_derivative_1D(dw_derivative, lw_derivative, vw_derivative,
+                                                       s_derivative, v_derivative, t_derivative)
     end
     #       Inside the gas channels
     calculate_dyn_gas_evolution_inside_gas_channel(dif_eq_1D_cell, sv_1D_cell,

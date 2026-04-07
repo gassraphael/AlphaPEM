@@ -20,7 +20,7 @@ Returns
 Tuple
     Tuple containing the intermediate values used by the heat calculation.
 """
-function heat_transfer_int_values(sv::Dict,
+function heat_transfer_int_values(sv::MEAState1D,
                                   fc::AbstractFuelCell)::Tuple
 
     # Extraction of the parameters
@@ -30,21 +30,21 @@ function heat_transfer_int_values(sv::Dict,
     Hmem, epsilon_gdl, epsilon_mpl, epsilon_c = pp.Hmem, pp.epsilon_gdl, pp.epsilon_mpl, pp.epsilon_c
     nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl
 
-    # Extraction of the variables
-    C_v_acl, C_v_ccl = sv["C_v_acl"], sv["C_v_ccl"]
-    C_v_agdl, C_v_ampl = [sv["C_v_agdl_$i"] for i in 1:nb_gdl], [sv["C_v_ampl_$i"] for i in 1:nb_mpl]
-    C_v_cmpl, C_v_cgdl = [sv["C_v_cmpl_$i"] for i in 1:nb_mpl], [sv["C_v_cgdl_$i"] for i in 1:nb_gdl]
-    s_acl, s_ccl = sv["s_acl"], sv["s_ccl"]
-    s_agdl, s_ampl = [sv["s_agdl_$i"] for i in 1:nb_gdl], [sv["s_ampl_$i"] for i in 1:nb_mpl]
-    s_cmpl, s_cgdl = [sv["s_cmpl_$i"] for i in 1:nb_mpl], [sv["s_cgdl_$i"] for i in 1:nb_gdl]
-    lambda_acl, lambda_mem, lambda_ccl = sv["lambda_acl"], sv["lambda_mem"], sv["lambda_ccl"]
-    C_H2_acl, C_O2_ccl = sv["C_H2_acl"], sv["C_O2_ccl"]
-    C_H2_agdl, C_H2_ampl = [sv["C_H2_agdl_$i"] for i in 1:nb_gdl], [sv["C_H2_ampl_$i"] for i in 1:nb_mpl]
-    C_O2_cmpl, C_O2_cgdl = [sv["C_O2_cmpl_$i"] for i in 1:nb_mpl], [sv["C_O2_cgdl_$i"] for i in 1:nb_gdl]
-    C_N2_agc, C_N2_cgc = sv["C_N2_agc"], sv["C_N2_cgc"]
-    T_acl, T_mem, T_ccl = sv["T_acl"], sv["T_mem"], sv["T_ccl"]
-    T_agdl, T_ampl = [sv["T_agdl_$i"] for i in 1:nb_gdl], [sv["T_ampl_$i"] for i in 1:nb_mpl]
-    T_cmpl, T_cgdl = [sv["T_cmpl_$i"] for i in 1:nb_mpl], [sv["T_cgdl_$i"] for i in 1:nb_gdl]
+    # Extraction of the variables (typed access via MEAState1D struct fields)
+    C_v_acl, C_v_ccl = sv.acl.C_v, sv.ccl.C_v
+    C_v_agdl, C_v_ampl = [sv.agdl[i].C_v for i in 1:nb_gdl], [sv.ampl[i].C_v for i in 1:nb_mpl]
+    C_v_cmpl, C_v_cgdl = [sv.cmpl[i].C_v for i in 1:nb_mpl], [sv.cgdl[i].C_v for i in 1:nb_gdl]
+    s_acl, s_ccl = sv.acl.s, sv.ccl.s
+    s_agdl, s_ampl = [sv.agdl[i].s for i in 1:nb_gdl], [sv.ampl[i].s for i in 1:nb_mpl]
+    s_cmpl, s_cgdl = [sv.cmpl[i].s for i in 1:nb_mpl], [sv.cgdl[i].s for i in 1:nb_gdl]
+    lambda_acl, lambda_mem, lambda_ccl = sv.acl.lambda, sv.mem.lambda, sv.ccl.lambda
+    C_H2_acl, C_O2_ccl = sv.acl.C_H2, sv.ccl.C_O2
+    C_H2_agdl, C_H2_ampl = [sv.agdl[i].C_H2 for i in 1:nb_gdl], [sv.ampl[i].C_H2 for i in 1:nb_mpl]
+    C_O2_cmpl, C_O2_cgdl = [sv.cmpl[i].C_O2 for i in 1:nb_mpl], [sv.cgdl[i].C_O2 for i in 1:nb_gdl]
+    C_N2_agc, C_N2_cgc = sv.agc.C_N2, sv.cgc.C_N2
+    T_acl, T_mem, T_ccl = sv.acl.T, sv.mem.T, sv.ccl.T
+    T_agdl, T_ampl = [sv.agdl[i].T for i in 1:nb_gdl], [sv.ampl[i].T for i in 1:nb_mpl]
+    T_cmpl, T_cgdl = [sv.cmpl[i].T for i in 1:nb_mpl], [sv.cgdl[i].T for i in 1:nb_gdl]
 
     # Calculation of intermediate values
     Hgdl_node = Hgdl / nb_gdl

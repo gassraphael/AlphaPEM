@@ -102,6 +102,63 @@ struct MEACellDerivative1D{nb_gdl, nb_mpl}
 end
 
 # ────────────────────────────────────────────────────────────────────────────────
+# 1D MEA derivative contributions (per-physics, before final assembly)
+# ────────────────────────────────────────────────────────────────────────────────
+
+"""Dissolved-water contribution (lambda only) for ACL, membrane and CCL."""
+struct MEADissolvedWaterDerivative
+    acl_lambda::Float64
+    mem_lambda::Float64
+    ccl_lambda::Float64
+end
+
+"""Liquid-water contribution (saturation derivatives) across porous layers."""
+struct MEALiquidWaterDerivative{nb_gdl, nb_mpl}
+    agdl_s::NTuple{nb_gdl, Float64}
+    ampl_s::NTuple{nb_mpl, Float64}
+    acl_s::Float64
+    ccl_s::Float64
+    cmpl_s::NTuple{nb_mpl, Float64}
+    cgdl_s::NTuple{nb_gdl, Float64}
+end
+
+"""Water-vapour contribution (C_v derivatives) across porous layers and CLs."""
+struct MEAVaporDerivative{nb_gdl, nb_mpl}
+    agdl_C_v::NTuple{nb_gdl, Float64}
+    ampl_C_v::NTuple{nb_mpl, Float64}
+    acl_C_v::Float64
+    ccl_C_v::Float64
+    cmpl_C_v::NTuple{nb_mpl, Float64}
+    cgdl_C_v::NTuple{nb_gdl, Float64}
+end
+
+"""H2/O2 species derivative contribution for porous layers and CLs."""
+struct MEAH2O2SpeciesDerivative{nb_gdl, nb_mpl}
+    agdl_C_H2::NTuple{nb_gdl, Float64}
+    ampl_C_H2::NTuple{nb_mpl, Float64}
+    acl_C_H2::Float64
+    ccl_C_O2::Float64
+    cmpl_C_O2::NTuple{nb_mpl, Float64}
+    cgdl_C_O2::NTuple{nb_gdl, Float64}
+end
+
+"""Voltage contribution (eta_c derivative in the CCL)."""
+struct MEAVoltageDerivative
+    ccl_eta_c::Float64
+end
+
+"""Temperature contribution across porous layers, CLs and membrane."""
+struct MEATemperatureDerivative{nb_gdl, nb_mpl}
+    agdl_T::NTuple{nb_gdl, Float64}
+    ampl_T::NTuple{nb_mpl, Float64}
+    acl_T::Float64
+    mem_T::Float64
+    ccl_T::Float64
+    cmpl_T::NTuple{nb_mpl, Float64}
+    cgdl_T::NTuple{nb_gdl, Float64}
+end
+
+# ────────────────────────────────────────────────────────────────────────────────
 # Manifold line derivatives
 # ────────────────────────────────────────────────────────────────────────────────
 

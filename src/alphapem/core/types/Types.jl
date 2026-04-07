@@ -43,6 +43,8 @@ export CathodeCLDerivative, CathodeMPLDerivative, CathodeGDLDerivative, CathodeG
 export ManifoldDerivative
 export MEACellDerivative1D, ManifoldLineDerivative
 export FuelCellDerivativeP2D
+export MEADissolvedWaterDerivative, MEALiquidWaterDerivative, MEAVaporDerivative
+export MEAH2O2SpeciesDerivative, MEAVoltageDerivative, MEATemperatureDerivative
 
 # --- cell_intermediates.jl ---
 export AbstractCellIntermediate
