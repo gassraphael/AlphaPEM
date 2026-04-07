@@ -1,12 +1,12 @@
-# cell_equations.jl
+# cell_derivative.jl
 #
 # Typed representation of time derivatives used in the ODE right-hand side.
-# These structures mirror the state topology from cell_node.jl.
+# These structures mirror the state topology from cell_state.jl.
 
-abstract type AbstractLayerDerivative end
+abstract type AbstractCellDerivative end
 
 # Anode side
-struct AnodeGCDerivative <: AbstractLayerDerivative
+struct AnodeGCDerivative <: AbstractCellDerivative
     C_v::Float64
     s::Float64
     C_H2::Float64
@@ -14,21 +14,21 @@ struct AnodeGCDerivative <: AbstractLayerDerivative
     T::Float64
 end
 
-struct AnodeGDLDerivative <: AbstractLayerDerivative
+struct AnodeGDLDerivative <: AbstractCellDerivative
     C_v::Float64
     s::Float64
     C_H2::Float64
     T::Float64
 end
 
-struct AnodeMPLDerivative <: AbstractLayerDerivative
+struct AnodeMPLDerivative <: AbstractCellDerivative
     C_v::Float64
     s::Float64
     C_H2::Float64
     T::Float64
 end
 
-struct AnodeCLDerivative <: AbstractLayerDerivative
+struct AnodeCLDerivative <: AbstractCellDerivative
     C_v::Float64
     s::Float64
     C_H2::Float64
@@ -37,13 +37,13 @@ struct AnodeCLDerivative <: AbstractLayerDerivative
 end
 
 # Electrolyte
-struct MembraneDerivative <: AbstractLayerDerivative
+struct MembraneDerivative <: AbstractCellDerivative
     lambda::Float64
     T::Float64
 end
 
 # Cathode side
-struct CathodeCLDerivative <: AbstractLayerDerivative
+struct CathodeCLDerivative <: AbstractCellDerivative
     C_v::Float64
     s::Float64
     C_O2::Float64
@@ -52,21 +52,21 @@ struct CathodeCLDerivative <: AbstractLayerDerivative
     eta_c::Float64
 end
 
-struct CathodeMPLDerivative <: AbstractLayerDerivative
+struct CathodeMPLDerivative <: AbstractCellDerivative
     C_v::Float64
     s::Float64
     C_O2::Float64
     T::Float64
 end
 
-struct CathodeGDLDerivative <: AbstractLayerDerivative
+struct CathodeGDLDerivative <: AbstractCellDerivative
     C_v::Float64
     s::Float64
     C_O2::Float64
     T::Float64
 end
 
-struct CathodeGCDerivative <: AbstractLayerDerivative
+struct CathodeGCDerivative <: AbstractCellDerivative
     C_v::Float64
     s::Float64
     C_O2::Float64
@@ -79,7 +79,7 @@ end
 # ────────────────────────────────────────────────────────────────────────────────
 
 """Time derivatives for pressure and relative humidity at a manifold node."""
-struct ManifoldDerivative <: AbstractLayerDerivative
+struct ManifoldDerivative <: AbstractCellDerivative
     P::Float64      # dP/dt
     Phi::Float64    # dPhi/dt
 end
@@ -89,7 +89,7 @@ end
 # ────────────────────────────────────────────────────────────────────────────────
 
 """Complete 1D derivative container for one gas-channel column."""
-struct MEADerivative1D{nb_gdl, nb_mpl}
+struct MEACellDerivative1D{nb_gdl, nb_mpl}
     agc::AnodeGCDerivative
     agdl::NTuple{nb_gdl, AnodeGDLDerivative}
     ampl::NTuple{nb_mpl, AnodeMPLDerivative}
@@ -117,6 +117,7 @@ end
 """Complete P2D derivative container for the MEA stack.
 """
 struct FuelCellDerivativeP2D{nb_gdl, nb_mpl, nb_gc}
-    nodes::NTuple{nb_gc, MEADerivative1D{nb_gdl, nb_mpl}}
+    nodes::NTuple{nb_gc, MEACellDerivative1D{nb_gdl, nb_mpl}}
 end
+
 

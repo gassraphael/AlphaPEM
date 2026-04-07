@@ -10,6 +10,7 @@ using ...Config  # AlphaPEM.Config: experimental data (pola_exp_values, ...)
 using ...Config: SimulationConfig, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
 using ...Fuelcell: AbstractFuelCell
 using ...Currents: AbstractCurrent, current
+using ..Types    # AlphaPEM.Core.Types: all domain structs (MEAThermalIntermediates, …)
 using PyCall
 using Interpolations
 using FFTW

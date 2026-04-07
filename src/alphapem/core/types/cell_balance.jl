@@ -1,7 +1,7 @@
 # cell_balance.jl
 #
 # Typed representation of local conservation balances used in the ODE right-hand side.
-# These structures are separate from state structures (see cell_node.jl):
+# These structures are separate from state structures (see cell_state.jl):
 # - state structs describe what the solver integrates;
 # - balance structs describe temporary terms used to build d(state)/dt.
 

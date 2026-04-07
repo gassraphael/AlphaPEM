@@ -15,6 +15,7 @@ using ...Config  # AlphaPEM.Config: experimental data (pola_exp_values, ...)
 using ...Config: SimulationConfig, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
 using ...Fuelcell: AbstractFuelCell
 using ...Currents: AbstractCurrent, current, delta_t_load
+using ..Types    # AlphaPEM.Core.Types: all domain structs (cell_state, cell_derivative, …)
 
 const np = PyNULL()
 const mpl = PyNULL()
@@ -38,10 +39,6 @@ include("../modules/display_calc_modules.jl")
 include("../modules/display_modules.jl")
 
 # ── Include model files in dependency order ─────────────────────────────────
-include("cell_node.jl")
-include("cell_balance.jl")
-include("cell_equations.jl")
-include("auxiliary.jl")
 include("../modules/dif_eq_modules.jl")
 include("velocity.jl")
 include("cell_voltage.jl")

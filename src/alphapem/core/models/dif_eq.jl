@@ -85,7 +85,8 @@ function dydt(t::Float64, y::Vector{Float64}, fc::AbstractFuelCell, cd::Abstract
     end
 
     # Intermediate values (one container per GC node)
-    dif_eq_int_values = [calculate_dif_eq_int_values(t, sv_1D_cell[i], fc, cfg) for i in 1:nb_gc]
+    dif_eq_int_values = [calculate_dif_eq_int_values(t, sv_1D_cell[i], fc, cfg, sv_1D_manifold, sv_auxiliary)
+                         for i in 1:nb_gc]
 
     # Calculate the local current density at each node of the GC.
     i_fc_cell = current(cd, t)

@@ -7,17 +7,19 @@ This module contains the core domain models and computational modules that defin
 PEMFC physics and simulation behavior.
 
 Modules:
-    - Models: Core domain models (main `AlphaPEM` fuel cell model)
+    - Types:   Pure data types (structs) — loaded first, no dependencies
+    - Models:  Core domain models (main `AlphaPEM` fuel cell model)
     - Modules: Physics kernels (flows, heat transfer, voltage, ODE helpers, display)
 """
 module Core
 
-include("models/Models.jl")
+include("types/Types.jl")    # ① types first — no deps
+include("models/Models.jl")  # ② models depend on Types
 include("modules/Modules.jl")
 
 using .Models: AlphaPEM
 
-export Models, Modules, AlphaPEM
+export Types, Models, Modules, AlphaPEM
 
 end  # module Core
 

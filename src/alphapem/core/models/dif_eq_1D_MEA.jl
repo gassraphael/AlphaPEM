@@ -567,7 +567,7 @@ function calculate_dyn_temperature_evolution_inside_MEA(
     Hmem::Float64,
     nb_gdl::Int64,
     nb_mpl::Int64,
-    rho_Cp0::Dict,
+    rho_Cp0::MEAThermalIntermediates,
     Jt::Dict,
     Q_r::Dict,
     Q_sorp::Dict,
@@ -579,108 +579,108 @@ function calculate_dyn_temperature_evolution_inside_MEA(
     # At the anode side
     #       Inside the AGDL
     if nb_gdl == 1
-        dif_eq_1D["dT_agdl_1 / dt"] = (1 / rho_Cp0["agdl_1"]) * ((Jt["agc_agdl"] - Jt["agdl_ampl"]) / Hgdl +
+        dif_eq_1D["dT_agdl_1 / dt"] = (1 / rho_Cp0.agdl[1]) * ((Jt["agc_agdl"] - Jt["agdl_ampl"]) / Hgdl +
                                                                   Q_liq["agdl_1"] + Q_e["agdl_1"])
     elseif nb_gdl == 2
-        dif_eq_1D["dT_agdl_1 / dt"] = (1 / rho_Cp0["agdl_1"]) * ((Jt["agc_agdl"] - Jt["agdl_agdl_1"]) / (Hgdl / nb_gdl) +
+        dif_eq_1D["dT_agdl_1 / dt"] = (1 / rho_Cp0.agdl[1]) * ((Jt["agc_agdl"] - Jt["agdl_agdl_1"]) / (Hgdl / nb_gdl) +
                                                                   Q_liq["agdl_1"] + Q_e["agdl_1"])
-        dif_eq_1D["dT_agdl_2 / dt"] = (1 / rho_Cp0["agdl_2"]) * ((Jt["agdl_agdl_1"] - Jt["agdl_ampl"]) / (Hgdl / nb_gdl) +
+        dif_eq_1D["dT_agdl_2 / dt"] = (1 / rho_Cp0.agdl[2]) * ((Jt["agdl_agdl_1"] - Jt["agdl_ampl"]) / (Hgdl / nb_gdl) +
                                                                   Q_liq["agdl_2"] + Q_e["agdl_2"])
     else  # n_gdl > 2
-        dif_eq_1D["dT_agdl_1 / dt"] = (1 / rho_Cp0["agdl_1"]) * ((Jt["agc_agdl"] - Jt["agdl_agdl_1"]) / (Hgdl / nb_gdl) +
+        dif_eq_1D["dT_agdl_1 / dt"] = (1 / rho_Cp0.agdl[1]) * ((Jt["agc_agdl"] - Jt["agdl_agdl_1"]) / (Hgdl / nb_gdl) +
                                                                   Q_liq["agdl_1"] + Q_e["agdl_1"])
         for i in 2:(nb_gdl - 1)
-            dif_eq_1D["dT_agdl_$(i) / dt"] = (1 / rho_Cp0["agdl_$(i)"]) *
+            dif_eq_1D["dT_agdl_$(i) / dt"] = (1 / rho_Cp0.agdl[i]) *
                                               ((Jt["agdl_agdl_$(i - 1)"] - Jt["agdl_agdl_$(i)"]) / (Hgdl / nb_gdl) +
                                                Q_liq["agdl_$(i)"] + Q_e["agdl_$(i)"])
         end
-        dif_eq_1D["dT_agdl_$(nb_gdl) / dt"] = (1 / rho_Cp0["agdl_$(nb_gdl)"]) *
+        dif_eq_1D["dT_agdl_$(nb_gdl) / dt"] = (1 / rho_Cp0.agdl[nb_gdl]) *
                                                ((Jt["agdl_agdl_$(nb_gdl - 1)"] - Jt["agdl_ampl"]) / (Hgdl / nb_gdl) +
                                                 Q_liq["agdl_$(nb_gdl)"] + Q_e["agdl_$(nb_gdl)"])
     end
 
     #      Inside the AMPL
     if nb_mpl == 1
-        dif_eq_1D["dT_ampl_1 / dt"] = (1 / rho_Cp0["ampl_1"]) * ((Jt["agdl_ampl"] - Jt["ampl_acl"]) / Hmpl +
+        dif_eq_1D["dT_ampl_1 / dt"] = (1 / rho_Cp0.ampl[1]) * ((Jt["agdl_ampl"] - Jt["ampl_acl"]) / Hmpl +
                                                                   Q_liq["ampl_1"] + Q_e["ampl_1"])
     elseif nb_mpl == 2
-        dif_eq_1D["dT_ampl_1 / dt"] = (1 / rho_Cp0["ampl_1"]) * ((Jt["agdl_ampl"] - Jt["ampl_ampl_1"]) / (Hmpl / nb_mpl) +
+        dif_eq_1D["dT_ampl_1 / dt"] = (1 / rho_Cp0.ampl[1]) * ((Jt["agdl_ampl"] - Jt["ampl_ampl_1"]) / (Hmpl / nb_mpl) +
                                                                   Q_liq["ampl_1"] + Q_e["ampl_1"])
-        dif_eq_1D["dT_ampl_2 / dt"] = (1 / rho_Cp0["ampl_2"]) * ((Jt["ampl_ampl_1"] - Jt["ampl_acl"]) / (Hmpl / nb_mpl) +
+        dif_eq_1D["dT_ampl_2 / dt"] = (1 / rho_Cp0.ampl[2]) * ((Jt["ampl_ampl_1"] - Jt["ampl_acl"]) / (Hmpl / nb_mpl) +
                                                                   Q_liq["ampl_2"] + Q_e["ampl_2"])
     else  # n_mpl > 2
-        dif_eq_1D["dT_ampl_1 / dt"] = (1 / rho_Cp0["ampl_1"]) * ((Jt["agdl_ampl"] - Jt["ampl_ampl_1"]) / (Hmpl / nb_mpl) +
+        dif_eq_1D["dT_ampl_1 / dt"] = (1 / rho_Cp0.ampl[1]) * ((Jt["agdl_ampl"] - Jt["ampl_ampl_1"]) / (Hmpl / nb_mpl) +
                                                                   Q_liq["ampl_1"] + Q_e["ampl_1"])
         for i in 2:(nb_mpl - 1)
-            dif_eq_1D["dT_ampl_$(i) / dt"] = (1 / rho_Cp0["ampl_$(i)"]) *
+            dif_eq_1D["dT_ampl_$(i) / dt"] = (1 / rho_Cp0.ampl[i]) *
                                               ((Jt["ampl_ampl_$(i - 1)"] - Jt["ampl_ampl_$(i)"]) / (Hmpl / nb_mpl) +
                                                Q_liq["ampl_$(i)"] + Q_e["ampl_$(i)"])
         end
-        dif_eq_1D["dT_ampl_$(nb_mpl) / dt"] = (1 / rho_Cp0["ampl_$(nb_mpl)"]) *
+        dif_eq_1D["dT_ampl_$(nb_mpl) / dt"] = (1 / rho_Cp0.ampl[nb_mpl]) *
                                                ((Jt["ampl_ampl_$(nb_mpl - 1)"] - Jt["ampl_acl"]) / (Hmpl / nb_mpl) +
                                                 Q_liq["ampl_$(nb_mpl)"] + Q_e["ampl_$(nb_mpl)"])
     end
 
     #      Inside the ACL
-    dif_eq_1D["dT_acl / dt"] = (1 / rho_Cp0["acl"]) *
+    dif_eq_1D["dT_acl / dt"] = (1 / rho_Cp0.acl) *
                                 ((Jt["ampl_acl"] - Jt["acl_mem"]) / Hacl +
                                  Q_r["acl"] + Q_sorp["v_acl"] + Q_sorp["l_acl"] + Q_liq["acl"] + Q_e["acl"])
 
     # Inside the membrane
-    dif_eq_1D["dT_mem / dt"] = (1 / rho_Cp0["mem"]) * ((Jt["acl_mem"] - Jt["mem_ccl"]) / Hmem + Q_p["mem"])
+    dif_eq_1D["dT_mem / dt"] = (1 / rho_Cp0.mem) * ((Jt["acl_mem"] - Jt["mem_ccl"]) / Hmem + Q_p["mem"])
 
     # At the cathode side
     #       Inside the CCL
-    dif_eq_1D["dT_ccl / dt"] = (1 / rho_Cp0["ccl"]) *
+    dif_eq_1D["dT_ccl / dt"] = (1 / rho_Cp0.ccl) *
                                 ((Jt["mem_ccl"] - Jt["ccl_cmpl"]) / Hccl +
                                  Q_r["ccl"] + Q_sorp["v_ccl"] + Q_sorp["l_ccl"] + Q_liq["ccl"] + Q_p["ccl"] + Q_e["ccl"])
 
     #      Inside the CMPL
     if nb_mpl == 1
-        dif_eq_1D["dT_cmpl_1 / dt"] = (1 / rho_Cp0["cmpl_1"]) * ((Jt["ccl_cmpl"] - Jt["cmpl_cgdl"]) / Hmpl +
+        dif_eq_1D["dT_cmpl_1 / dt"] = (1 / rho_Cp0.cmpl[1]) * ((Jt["ccl_cmpl"] - Jt["cmpl_cgdl"]) / Hmpl +
                                                                   Q_liq["cmpl_1"] + Q_e["cmpl_1"])
     elseif nb_mpl == 2
-        dif_eq_1D["dT_cmpl_1 / dt"] = (1 / rho_Cp0["cmpl_1"]) *
+        dif_eq_1D["dT_cmpl_1 / dt"] = (1 / rho_Cp0.cmpl[1]) *
                                        ((Jt["ccl_cmpl"] - Jt["cmpl_cmpl_1"]) / (Hmpl / nb_mpl) +
                                         Q_liq["cmpl_1"] + Q_e["cmpl_1"])
-        dif_eq_1D["dT_cmpl_2 / dt"] = (1 / rho_Cp0["cmpl_2"]) *
+        dif_eq_1D["dT_cmpl_2 / dt"] = (1 / rho_Cp0.cmpl[2]) *
                                        ((Jt["cmpl_cmpl_1"] - Jt["cmpl_cgdl"]) / (Hmpl / nb_mpl) +
                                         Q_liq["cmpl_2"] + Q_e["cmpl_2"])
     else  # n_mpl > 2
-        dif_eq_1D["dT_cmpl_1 / dt"] = (1 / rho_Cp0["cmpl_1"]) *
+        dif_eq_1D["dT_cmpl_1 / dt"] = (1 / rho_Cp0.cmpl[1]) *
                                        ((Jt["ccl_cmpl"] - Jt["cmpl_cmpl_1"]) / (Hmpl / nb_mpl) +
                                         Q_liq["cmpl_1"] + Q_e["cmpl_1"])
         for i in 2:(nb_mpl - 1)
-            dif_eq_1D["dT_cmpl_$(i) / dt"] = (1 / rho_Cp0["cmpl_$(i)"]) *
+            dif_eq_1D["dT_cmpl_$(i) / dt"] = (1 / rho_Cp0.cmpl[i]) *
                                               ((Jt["cmpl_cmpl_$(i - 1)"] - Jt["cmpl_cmpl_$(i)"]) / (Hmpl / nb_mpl) +
                                                Q_liq["cmpl_$(i)"] + Q_e["cmpl_$(i)"])
         end
-        dif_eq_1D["dT_cmpl_$(nb_mpl) / dt"] = (1 / rho_Cp0["cmpl_$(nb_mpl)"]) *
+        dif_eq_1D["dT_cmpl_$(nb_mpl) / dt"] = (1 / rho_Cp0.cmpl[nb_mpl]) *
                                                ((Jt["cmpl_cmpl_$(nb_mpl - 1)"] - Jt["cmpl_cgdl"]) / (Hmpl / nb_mpl) +
                                                 Q_liq["cmpl_$(nb_mpl)"] + Q_e["cmpl_$(nb_mpl)"])
     end
 
     #       Inside the CGDL
     if nb_gdl == 1
-        dif_eq_1D["dT_cgdl_1 / dt"] = (1 / rho_Cp0["cgdl_1"]) * ((Jt["cmpl_cgdl"] - Jt["cgdl_cgc"]) / Hgdl +
+        dif_eq_1D["dT_cgdl_1 / dt"] = (1 / rho_Cp0.cgdl[1]) * ((Jt["cmpl_cgdl"] - Jt["cgdl_cgc"]) / Hgdl +
                                                                   Q_liq["cgdl_1"] + Q_e["cgdl_1"])
     elseif nb_gdl == 2
-        dif_eq_1D["dT_cgdl_1 / dt"] = (1 / rho_Cp0["cgdl_1"]) *
+        dif_eq_1D["dT_cgdl_1 / dt"] = (1 / rho_Cp0.cgdl[1]) *
                                        ((Jt["cmpl_cgdl"] - Jt["cgdl_cgdl_1"]) / (Hgdl / nb_gdl) +
                                         Q_liq["cgdl_1"] + Q_e["cgdl_1"])
-        dif_eq_1D["dT_cgdl_2 / dt"] = (1 / rho_Cp0["cgdl_2"]) *
+        dif_eq_1D["dT_cgdl_2 / dt"] = (1 / rho_Cp0.cgdl[2]) *
                                        ((Jt["cgdl_cgdl_1"] - Jt["cgdl_cgc"]) / (Hgdl / nb_gdl) +
                                         Q_liq["cgdl_2"] + Q_e["cgdl_2"])
     else  # n_gdl > 2
-        dif_eq_1D["dT_cgdl_1 / dt"] = (1 / rho_Cp0["cgdl_1"]) *
+        dif_eq_1D["dT_cgdl_1 / dt"] = (1 / rho_Cp0.cgdl[1]) *
                                        ((Jt["cmpl_cgdl"] - Jt["cgdl_cgdl_1"]) / (Hgdl / nb_gdl) +
                                         Q_liq["cgdl_1"] + Q_e["cgdl_1"])
         for i in 2:(nb_gdl - 1)
-            dif_eq_1D["dT_cgdl_$(i) / dt"] = (1 / rho_Cp0["cgdl_$(i)"]) *
+            dif_eq_1D["dT_cgdl_$(i) / dt"] = (1 / rho_Cp0.cgdl[i]) *
                                               ((Jt["cgdl_cgdl_$(i - 1)"] - Jt["cgdl_cgdl_$(i)"]) / (Hgdl / nb_gdl) +
                                                Q_liq["cgdl_$(i)"] + Q_e["cgdl_$(i)"])
         end
-        dif_eq_1D["dT_cgdl_$(nb_gdl) / dt"] = (1 / rho_Cp0["cgdl_$(nb_gdl)"]) *
+        dif_eq_1D["dT_cgdl_$(nb_gdl) / dt"] = (1 / rho_Cp0.cgdl[nb_gdl]) *
                                                ((Jt["cgdl_cgdl_$(nb_gdl - 1)"] - Jt["cgdl_cgc"]) / (Hgdl / nb_gdl) +
                                                 Q_liq["cgdl_$(nb_gdl)"] + Q_e["cgdl_$(nb_gdl)"])
     end
