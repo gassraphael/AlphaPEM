@@ -16,6 +16,11 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 # Importing the necessary libraries.
 using DifferentialEquations
 
+# Creating the variable names
+const MANIFOLD_SOLVER_VARIABLE_NAMES  = ["Pasm", "Paem", "Pcsm", "Pcem", "Phi_asm", "Phi_aem", "Phi_csm", "Phi_cem"]
+const AUXILIARY_SOLVER_VARIABLE_NAMES = ["Wcp", "Wa_inj", "Wc_inj", "Abp_a", "Abp_c"]
+const DERIVED_VARIABLE_NAMES          = ["t", "i_fc", "C_O2_Pt", "Ucell", "v_a", "v_c", "Pa_in", "Pc_in"]
+
 # _______________________________________________________AlphaPEM_______________________________________________________
 
 
@@ -23,8 +28,6 @@ mutable struct AlphaPEM
     fuel_cell::AbstractFuelCell
     current_density::AbstractCurrent
     cfg::SimulationConfig
-    solver_variable_names::Vector{Vector{String}}
-    all_variable_names::Vector{String}
     variables::Dict
     time_interval::Tuple{Float64, Float64}
     initial_variable_values::Vector
@@ -44,65 +47,16 @@ end
 """
 function AlphaPEM(fuel_cell::AbstractFuelCell, current_density::AbstractCurrent, cfg::SimulationConfig)::AlphaPEM
 
-    # Initialize the variables' dictionary.
-    solver_variable_names = [[
-        "C_v_agc", "C_v_agdl", "C_v_ampl", "C_v_acl", "C_v_ccl", "C_v_cmpl", "C_v_cgdl", "C_v_cgc",
-        "s_agc", "s_agdl", "s_ampl", "s_acl", "s_ccl", "s_cmpl", "s_cgdl", "s_cgc",
-        "lambda_acl", "lambda_mem", "lambda_ccl",
-        "C_H2_agc", "C_H2_agdl", "C_H2_ampl", "C_H2_acl",
-        "C_O2_ccl", "C_O2_cmpl", "C_O2_cgdl", "C_O2_cgc",
-        "C_N2_agc", "C_N2_cgc",
-        "T_agc", "T_agdl", "T_ampl", "T_acl", "T_mem", "T_ccl", "T_cmpl", "T_cgdl", "T_cgc",
-        "eta_c"
-    ]]
-
     simu = AlphaPEM(
         fuel_cell, #
         current_density, #
         cfg, #
-        solver_variable_names, # solver_variable_names::Vector{Vector{String}}
-        String[], # all_variable_names::Vector{String}
         Dict{String, Any}(), # variables::Dict
         (0.0, 0.0), # time_interval::Tuple{Float64, Float64}
         [], # initial_variable_values::Vector{Number}
         nothing, # sol
     )
-    # Several points are considered in each GC, GDL and MPL. This must be inserted into the solver_variable_names.
-    solver_variable_names_extension!(simu)
     return simu
-end
-
-
-"""Expand `solver_variable_names` according to the GDL and MPL spatial discretisation.
-
-# Arguments
-- `simu::AlphaPEM`: Fuel-cell simulator instance.
-
-# Returns
-- `Nothing`: The function updates `simu.solver_variable_names` in place.
-"""
-function solver_variable_names_extension!(simu::AlphaPEM)
-    # Several points are considered in each GDL, MPL and GC. They must be inserted into the solver_variable_names.
-    new_points_location = ["C_v_agdl", "C_v_ampl", "C_v_cmpl", "C_v_cgdl",
-                           "s_agdl", "s_ampl", "s_cmpl", "s_cgdl",
-                           "C_H2_agdl", "C_H2_ampl", "C_O2_cmpl", "C_O2_cgdl",
-                           "T_agdl", "T_ampl", "T_cmpl", "T_cgdl"]
-
-    for variable in new_points_location
-        index = findfirst(==(variable), simu.solver_variable_names[1])
-        index === nothing && continue
-        # Delete the previous points.
-        deleteat!(simu.solver_variable_names[1], index)
-        # Increase the number of points.
-        if endswith(variable, "gdl")
-            splice!(simu.solver_variable_names[1], index:index-1,
-                ["$(variable)_$(i)" for i in 1:simu.fuel_cell.numerical_parameters.nb_gdl])
-        elseif endswith(variable, "mpl")
-            splice!(simu.solver_variable_names[1], index:index-1,
-                ["$(variable)_$(i)" for i in 1:simu.fuel_cell.numerical_parameters.nb_mpl])
-        end
-    end
-    return nothing
 end
 
 
@@ -148,18 +102,19 @@ function simulate_model!(simu::AlphaPEM,
     end
 
     # Initialize the variables' dictionaries.
-    if simu.cfg.type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
-                              :forced_convective_cathode_with_anodic_recirculation)
-        push!(simu.solver_variable_names,
-              ["Pasm", "Paem", "Pcsm", "Pcem", "Phi_asm", "Phi_aem", "Phi_csm", "Phi_cem"])
-        push!(simu.solver_variable_names, ["Wcp", "Wa_inj", "Wc_inj", "Abp_a", "Abp_c"])
-    end
-    simu.all_variable_names = vcat(
-        reduce(vcat, simu.solver_variable_names),
-        ["t", "i_fc", "C_O2_Pt", "Ucell", "v_a", "v_c", "Pa_in", "Pc_in"],
-        ["Phi_a_des", "Phi_c_des"],
+    has_auxiliary = simu.cfg.type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
+                                                :forced_convective_cathode_with_anodic_recirculation)
+    canonical_names = canonical_mea_solver_variable_names(simu.fuel_cell.numerical_parameters.nb_gdl,
+                                                          simu.fuel_cell.numerical_parameters.nb_mpl)
+    manifold_names = has_auxiliary ? MANIFOLD_SOLVER_VARIABLE_NAMES : String[]
+    auxiliary_names = has_auxiliary ? AUXILIARY_SOLVER_VARIABLE_NAMES : String[]
+    all_variable_names = vcat(
+        canonical_names,
+        manifold_names,
+        auxiliary_names,
+        DERIVED_VARIABLE_NAMES,
     )
-    simu.variables = Dict{String, Any}(k => Number[] for k in simu.all_variable_names)
+    simu.variables = Dict{String, Any}(k => Number[] for k in all_variable_names)
 
     # Create the dynamic evolution.
     #       Create time intervals
@@ -170,19 +125,13 @@ function simulate_model!(simu::AlphaPEM,
 
     #       Solve the differential equation system.
     #           Pack external data passed to the ODE right\-hand side.
-    packed = (fuel_cell=simu.fuel_cell, current_density=simu.current_density, cfg = simu.cfg,
-              solver_variable_names=simu.solver_variable_names)
+    packed = (fuel_cell=simu.fuel_cell, current_density=simu.current_density, cfg=simu.cfg)
     #           Define RHS in SciML signature: f(y, p, t) -> dy/dt.
-    rhs = (y, p, t) -> dydt(t, y, p.fuel_cell, p.current_density, p.cfg, p.solver_variable_names)
-    #           Stop integration as soon as a critical variable becomes negative.
-    #           The callback monitors the event condition continuously in time.
-    condition = (y, t, integ) -> event_negative(t, y, integ.p.fuel_cell, integ.p.solver_variable_names)
-    cb_negative = ContinuousCallback(condition, integ -> terminate!(integ))
+    rhs = (y, p, t) -> dydt(t, y, p.fuel_cell, p.current_density, p.cfg)
     #           Build and solve the ODE problem with FBDF for stiff dynamics.
     prob = ODEProblem(rhs, simu.initial_variable_values, simu.time_interval, packed)
     simu.sol = solve(prob, FBDF(autodiff=false); reltol=simu.fuel_cell.numerical_parameters.rtol,
-                     abstol=simu.fuel_cell.numerical_parameters.atol,
-                     callback=cb_negative)
+                     abstol=simu.fuel_cell.numerical_parameters.atol)
 
     #       Recover the variable values calculated by the solver into the dictionary.
     recovery!(simu)
@@ -277,18 +226,39 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector
     Phi_csm, Phi_cem = Phi_c_ini, Phi_c_ini
     Wcp, Wa_inj, Wc_inj, Abp_a, Abp_c = Wcp_ini, Wa_inj_ini, Wc_inj_ini, Abp_a_ini, Abp_c_ini
 
-    # Gathering of the variables initial value into one list, only for one gas channel node.
-    initial_variable_values_1D = vcat(
-        [C_v_agc], fill(C_v_agdl, nb_gdl), fill(C_v_ampl, nb_mpl), [C_v_acl, C_v_ccl],
-        fill(C_v_cmpl, nb_mpl), fill(C_v_cgdl, nb_gdl), [C_v_cgc],
-        [s_agc], fill(s_agdl, nb_gdl), fill(s_ampl, nb_mpl), [s_acl, s_ccl],
-        fill(s_cmpl, nb_mpl), fill(s_cgdl, nb_gdl), [s_cgc],
-        [lambda_acl, lambda_mem, lambda_ccl],
-        [C_H2_agc], fill(C_H2_agdl, nb_gdl), fill(C_H2_ampl, nb_mpl), [C_H2_acl, C_O2_ccl],
-        fill(C_O2_cmpl, nb_mpl), fill(C_O2_cgdl, nb_gdl), [C_O2_cgc], [C_N2_agc], [C_N2_cgc],
-        [T_agc], fill(T_agdl, nb_gdl), fill(T_ampl, nb_mpl), [T_acl], [T_mem], [T_ccl],
-        fill(T_cmpl, nb_mpl), fill(T_cgdl, nb_gdl), [T_cgc], [eta_c],
+    # Gather initial values in the canonical typed solver ordering.
+    names_1D = canonical_mea_solver_variable_names(nb_gdl, nb_mpl)
+    values_1D = Dict{String, Float64}(
+        "C_v_agc" => C_v_agc, "C_v_acl" => C_v_acl, "C_v_ccl" => C_v_ccl, "C_v_cgc" => C_v_cgc,
+        "s_agc" => s_agc, "s_acl" => s_acl, "s_ccl" => s_ccl, "s_cgc" => s_cgc,
+        "lambda_acl" => lambda_acl, "lambda_mem" => lambda_mem, "lambda_ccl" => lambda_ccl,
+        "C_H2_agc" => C_H2_agc, "C_H2_acl" => C_H2_acl,
+        "C_O2_ccl" => C_O2_ccl, "C_O2_cgc" => C_O2_cgc,
+        "C_N2_agc" => C_N2_agc, "C_N2_cgc" => C_N2_cgc,
+        "T_agc" => T_agc, "T_acl" => T_acl, "T_mem" => T_mem, "T_ccl" => T_ccl, "T_cgc" => T_cgc,
+        "eta_c" => eta_c,
     )
+    for i in 1:nb_gdl
+        values_1D["C_v_agdl_$(i)"] = C_v_agdl
+        values_1D["C_v_cgdl_$(i)"] = C_v_cgdl
+        values_1D["s_agdl_$(i)"] = s_agdl
+        values_1D["s_cgdl_$(i)"] = s_cgdl
+        values_1D["C_H2_agdl_$(i)"] = C_H2_agdl
+        values_1D["C_O2_cgdl_$(i)"] = C_O2_cgdl
+        values_1D["T_agdl_$(i)"] = T_agdl
+        values_1D["T_cgdl_$(i)"] = T_cgdl
+    end
+    for i in 1:nb_mpl
+        values_1D["C_v_ampl_$(i)"] = C_v_ampl
+        values_1D["C_v_cmpl_$(i)"] = C_v_cmpl
+        values_1D["s_ampl_$(i)"] = s_ampl
+        values_1D["s_cmpl_$(i)"] = s_cmpl
+        values_1D["C_H2_ampl_$(i)"] = C_H2_ampl
+        values_1D["C_O2_cmpl_$(i)"] = C_O2_cmpl
+        values_1D["T_ampl_$(i)"] = T_ampl
+        values_1D["T_cmpl_$(i)"] = T_cmpl
+    end
+    initial_variable_values_1D = [values_1D[name] for name in names_1D]
     # Replication for each gas channel node.
     initial_variable_values = repeat(initial_variable_values_1D, nb_gc)
 
@@ -318,19 +288,25 @@ function recovery!(simu::AlphaPEM)
     simu.variables["t"] = collect(simu.sol.t)
 
     # Recovery of the main variables dynamic evolution.
-    nb_gc = simu.fuel_cell.numerical_parameters.nb_gc
-    n_vars1 = length(simu.solver_variable_names[1])
-    for (index, key) in enumerate(simu.solver_variable_names[1]) # recovery of the MEA and GC variables
-        simu.variables[key] = [[simu.sol.u[j][index + (i - 1) * n_vars1] for j in eachindex(simu.sol.u)] for i in 1:nb_gc]
+    np = simu.fuel_cell.numerical_parameters
+    nb_gc, nb_gdl, nb_mpl = np.nb_gc, np.nb_gdl, np.nb_mpl
+    n_vars_mea_1D = _nb_solver_vars_per_gc(nb_gdl, nb_mpl)
+    canonical_names = canonical_mea_solver_variable_names(nb_gdl, nb_mpl)
+    length(canonical_names) == n_vars_mea_1D ||
+        throw(ArgumentError("Canonical MEA layout size mismatch in recovery!."))
+
+    for (index, key) in enumerate(canonical_names) # recovery of MEA and GC variables in canonical order
+        simu.variables[key] = [[simu.sol.u[j][index + (i - 1) * n_vars_mea_1D] for j in eachindex(simu.sol.u)]
+                               for i in 1:nb_gc]
     end
     if simu.cfg.type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
                               :forced_convective_cathode_with_anodic_recirculation)
-        for (index, key) in enumerate(simu.solver_variable_names[2]) # recovery of the manifold variables
-            simu.variables[key] = [simu.sol.u[j][index + nb_gc * n_vars1] for j in eachindex(simu.sol.u)]
+        for (index, key) in enumerate(MANIFOLD_SOLVER_VARIABLE_NAMES) # recovery of the manifold variables
+            simu.variables[key] = [simu.sol.u[j][index + nb_gc * n_vars_mea_1D] for j in eachindex(simu.sol.u)]
         end
-        n_vars2 = length(simu.solver_variable_names[2])
-        for (index, key) in enumerate(simu.solver_variable_names[3]) # recovery of the auxiliary variables
-            simu.variables[key] = [simu.sol.u[j][index + nb_gc * n_vars1 + n_vars2] for j in eachindex(simu.sol.u)]
+        n_vars2 = length(MANIFOLD_SOLVER_VARIABLE_NAMES)
+        for (index, key) in enumerate(AUXILIARY_SOLVER_VARIABLE_NAMES) # recovery of the auxiliary variables
+            simu.variables[key] = [simu.sol.u[j][index + nb_gc * n_vars_mea_1D + n_vars2] for j in eachindex(simu.sol.u)]
         end
     end
 
@@ -340,9 +316,6 @@ function recovery!(simu::AlphaPEM)
     simu.variables["C_O2_Pt"] = [[] for _ in 1:nb_gc]
     simu.variables["i_fc"] = [[] for _ in 1:nb_gc]
 
-    nb_gdl = simu.fuel_cell.numerical_parameters.nb_gdl
-    nb_mpl = simu.fuel_cell.numerical_parameters.nb_mpl
-    n_vars_mea_1D = _nb_solver_vars_per_gc(nb_gdl, nb_mpl)
 
     for (j, t_j) in enumerate(simu.variables["t"])
         # ... recovery of the variables inside the MEA 1D line.

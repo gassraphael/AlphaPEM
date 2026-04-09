@@ -220,22 +220,35 @@ function calculate_dif_eq_int_values(t::Float64,
 end
 
 
-# Typed solver-vector helpers depend on model structs (`MEAState1D`, manifold and
-# auxiliary containers). They are loaded only in the `Models` include context.
-if @isdefined(MEAState1D)
+"""Return canonical MEA variable names for one GC node in solver ordering."""
+function canonical_mea_solver_variable_names(nb_gdl::Int, nb_mpl::Int)::Vector{String}
+    return vcat(
+        ["C_v_agc"], ["C_v_agdl_$(i)" for i in 1:nb_gdl], ["C_v_ampl_$(i)" for i in 1:nb_mpl],
+        ["C_v_acl", "C_v_ccl"], ["C_v_cmpl_$(i)" for i in 1:nb_mpl], ["C_v_cgdl_$(i)" for i in 1:nb_gdl], ["C_v_cgc"],
+
+        ["s_agc"], ["s_agdl_$(i)" for i in 1:nb_gdl], ["s_ampl_$(i)" for i in 1:nb_mpl],
+        ["s_acl", "s_ccl"], ["s_cmpl_$(i)" for i in 1:nb_mpl], ["s_cgdl_$(i)" for i in 1:nb_gdl], ["s_cgc"],
+
+        ["lambda_acl", "lambda_mem", "lambda_ccl"],
+
+        ["C_H2_agc"], ["C_H2_agdl_$(i)" for i in 1:nb_gdl], ["C_H2_ampl_$(i)" for i in 1:nb_mpl], ["C_H2_acl", "C_O2_ccl"],
+        ["C_O2_cmpl_$(i)" for i in 1:nb_mpl], ["C_O2_cgdl_$(i)" for i in 1:nb_gdl], ["C_O2_cgc", "C_N2_agc", "C_N2_cgc"],
+
+        ["T_agc"], ["T_agdl_$(i)" for i in 1:nb_gdl], ["T_ampl_$(i)" for i in 1:nb_mpl],
+        ["T_acl", "T_mem", "T_ccl"], ["T_cmpl_$(i)" for i in 1:nb_mpl], ["T_cgdl_$(i)" for i in 1:nb_gdl], ["T_cgc"],
+
+        ["eta_c"],
+    )
+end
 
 """Count the number of MEA/GC variables per gas-channel node in the solver vector."""
 function _nb_solver_vars_per_gc(nb_gdl::Int, nb_mpl::Int)::Int
-    return fieldcount(AnodeGCState) +
-           nb_gdl * fieldcount(AnodeGDLState) +
-           nb_mpl * fieldcount(AnodeMPLState) +
-           fieldcount(AnodeCLState) +
-           fieldcount(MembraneState) +
-           fieldcount(CathodeCLState) +
-           nb_mpl * fieldcount(CathodeMPLState) +
-           nb_gdl * fieldcount(CathodeGDLState) +
-           fieldcount(CathodeGCState)
+    return length(canonical_mea_solver_variable_names(nb_gdl, nb_mpl))
 end
+
+# Typed solver-vector helpers depend on model structs (`MEAState1D`, manifold and
+# auxiliary containers). They are loaded only in the `Models` include context.
+if @isdefined(MEAState1D)
 
 """Unpack one GC-node segment of the solver vector into a typed 1D MEA state."""
 function _unpack_mea_state_1D(values::AbstractVector{<:Real}, nb_gdl::Int, nb_mpl::Int)
@@ -506,45 +519,3 @@ function _assert_auxiliary_derivative_complete(d::Auxiliary0DDerivative)
 end
 
 end
-
-
-# ______________________________________Function which gives the integration event______________________________________
-
-"""Create an integration event that stops the solver when a crucial variable (C_v, lambda, C_O2, C_H2)
-becomes non-physical (below a threshold of 1e-5).
-
-Parameters
-----------
-t :
-    Time (s).
-y : Vector
-    Vector of the solver variables.
-fc : AbstractFuelCell
-    Fuel cell instance providing model parameters (used to retrieve `nb_gc` and
-    the variable count per gas-channel node via `solver_variable_names`).
-solver_variable_names : Vector{<:Vector{<:String}}
-    Names of the solver variables.
-
-Returns
--------
-The difference between the minimum value of the crucial variables and 1e-5.
-"""
-function event_negative(t, y::Vector, fc::AbstractFuelCell,
-                        solver_variable_names::Vector{<:Vector{<:String}})
-
-    nb_gc = fc.numerical_parameters.nb_gc
-    negative_solver_variables = Dict() # Dictionary to store the crucial variables.
-
-    for (index, key) in enumerate(solver_variable_names[1])
-        if startswith(key, "C_v_") || startswith(key, "lambda_") ||
-           startswith(key, "C_O2_") || startswith(key, "C_H2_")
-            for i in 1:nb_gc
-                negative_solver_variables["$(key)_$i"] = y[index + (i - 1) * length(solver_variable_names[1])]
-            end
-        end
-    end
-
-    return minimum(values(negative_solver_variables)) - 1e-5 # 1e-5 is a control parameter to stop the program
-                                                               # before having negative values.
-end
-

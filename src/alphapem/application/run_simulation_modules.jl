@@ -130,18 +130,21 @@ end
 function _extract_last_internal_state(simu::AlphaPEM, cfg::SimulationConfig)
     initial_variable_values = []
 
+    np = simu.fuel_cell.numerical_parameters
+    mea_names = canonical_mea_solver_variable_names(np.nb_gdl, np.nb_mpl)
+
     for k in 1:simu.fuel_cell.numerical_parameters.nb_gc
-        for key in simu.solver_variable_names[1]
+        for key in mea_names
             push!(initial_variable_values, simu.variables[key][k][end])
         end
     end
 
     if cfg.type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
                               :forced_convective_cathode_with_anodic_recirculation)
-        for key in simu.solver_variable_names[2]
+        for key in MANIFOLD_SOLVER_VARIABLE_NAMES
             push!(initial_variable_values, simu.variables[key][end])
         end
-        for key in simu.solver_variable_names[3]
+        for key in AUXILIARY_SOLVER_VARIABLE_NAMES
             push!(initial_variable_values, simu.variables[key][end])
         end
     end

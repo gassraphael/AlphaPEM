@@ -193,5 +193,8 @@ function dydt(t::Float64, y::Vector{Float64}, fc::AbstractFuelCell, cd::Abstract
         append!(dif_eq_global, _pack_auxiliary_derivative(dif_eq_auxiliary))
     end
 
+    length(dif_eq_global) == expected_len ||
+        throw(ArgumentError("Unexpected derivative vector size for typed path."))
+
     return dif_eq_global
 end
