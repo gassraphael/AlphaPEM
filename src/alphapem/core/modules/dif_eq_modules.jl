@@ -380,6 +380,24 @@ function _pack_mea_derivative_1D(d::MEACellDerivative1D{nb_gdl, nb_mpl}) where {
     return out
 end
 
+"""Ensure all MEA node derivatives in the P2D container are fully assigned."""
+function _assert_fuelcell_derivative_complete(d::FuelCellDerivativeP2D{nb_gdl, nb_mpl, nb_gc}) where {nb_gdl, nb_mpl, nb_gc}
+    for i in 1:nb_gc
+        _assert_derivative_complete(d.nodes[i])
+    end
+    return nothing
+end
+
+"""Pack a full typed P2D MEA derivative into solver-vector ordering."""
+function _pack_fuelcell_derivative_p2d(d::FuelCellDerivativeP2D{nb_gdl, nb_mpl, nb_gc}) where {nb_gdl, nb_mpl, nb_gc}
+    out = Float64[]
+    sizehint!(out, nb_gc * _nb_solver_vars_per_gc(nb_gdl, nb_mpl))
+    for i in 1:nb_gc
+        append!(out, _pack_mea_derivative_1D(d.nodes[i]))
+    end
+    return out
+end
+
 """Count manifold state variables in the solver vector."""
 function _nb_solver_vars_manifolds(nb_man::Int)::Int
     manifold_lines = (:asm, :aem, :csm, :cem)

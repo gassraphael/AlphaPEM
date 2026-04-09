@@ -45,6 +45,7 @@ export MEACellDerivative1D, ManifoldLineDerivative
 export FuelCellDerivativeP2D
 export MEADissolvedWaterDerivative, MEALiquidWaterDerivative, MEAVaporDerivative
 export MEAH2O2SpeciesDerivative, MEAVoltageDerivative, MEATemperatureDerivative
+export GCGasDerivative, GCLiquidWaterDerivative, GCTemperatureDerivative
 
 # --- cell_intermediates.jl ---
 export AbstractCellIntermediate
@@ -72,12 +73,16 @@ export Auxiliary0DState, Auxiliary0DDerivative
 export MEASorptionSources, MEADissolvedWaterFlux, MEAWaterProductionSources
 export MEAGasReactionSources
 export MEAReactionHeat, MEASorptionHeat, MEAProtonHeat
-# dimension-dependent flux types
+# dimension-dependent MEA flux types
 export MEALiquidFluxes, MEAVaporFluxes, MEAHydrogenFluxes, MEAOxygenFluxes
 export MEALiquidSources, MEAVaporSources
 export MEAThermalFluxes, MEALiquidHeat, MEAElectricHeat
-# top-level containers
+# MEA top-level containers
 export MEAFlows1D, MEAHeatFlows1D
+# GC / along-channel flow types
+export GCVaporFlows, GCLiquidFlows, GCHydrogenFlows, GCOxygenFlows, GCNitrogenFlows
+export GCMassFlows, DesiredInletFlows
+export GCManifoldFlows1D
 
 end  # module Types
 

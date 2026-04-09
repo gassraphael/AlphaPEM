@@ -18,9 +18,9 @@ using Statistics
 
 # Include in dependency order
 include("cell_voltage_modules.jl")
-include("flows_1D_MEA_modules.jl")
+include("flows_MEA_1D_modules.jl")
 include("heat_modules.jl")
-include("flows_1D_GC_manifold_modules.jl")
+include("flows_GC_manifold_1D_modules.jl")
 include("dif_eq_modules.jl")
 include("display_calc_modules.jl")
 include("display_modules.jl")

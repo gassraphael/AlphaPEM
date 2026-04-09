@@ -19,10 +19,10 @@ Parameters
 ----------
 i_fc_cell : Float64
     Fuel cell current density at time t (A.m-2).
-sv : Vector{Dict}
-    Variables calculated by the solver. They correspond to the cell internal states.
+sv : AbstractVector{<:MEAState1D}
+    Typed internal states calculated by the solver.
     sv is a contraction of solver_variables for enhanced readability.
-    sv[i] is a Dict of internal state variables for gas channel i.
+    sv[i] is the typed 1D MEA state associated with gas channel i.
 fc : AbstractFuelCell
     Fuel cell instance providing model parameters.
 
@@ -33,17 +33,17 @@ Vector{Float64}
     Julia vectors are naturally 1-based, so no dummy element is stored at index 0.
     i_fc[i] corresponds to gas channel i, for i in 1:nb_gc.
 """
-function calculate_1D_GC_current_density(i_fc_cell::Float64, sv::AbstractVector{<:AbstractDict}, fc::AbstractFuelCell)::Vector{Float64}
+function calculate_1D_GC_current_density(i_fc_cell::Float64, sv::AbstractVector{<:MEAState1D}, fc::AbstractFuelCell)::Vector{Float64}
 
     # Extraction of the parameters
     nb_gc = fc.numerical_parameters.nb_gc
         # Fast path: if there is only one gas channel, the local current density equals the cell current density.
     nb_gc == 1 && return [Float64(i_fc_cell)]
     # Extraction of the variables
-    C_O2_ccl = [sv[i]["C_O2_ccl"] for i in 1:nb_gc]
+    C_O2_ccl = [sv[i].ccl.C_O2 for i in 1:nb_gc]
 
     # Residual function for NonlinearSolve solver applied on the local current density
-    function residuals!(res, x, p)
+    function residuals!(res, x, _)
 
         # Recovery of the guessed variable values
         U_cell_guessed  = x[1]

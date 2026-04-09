@@ -9,12 +9,12 @@
 
 Parameters
 ----------
-sv_1D_cell : Vector{Dict}
-    Variables calculated by the solver (cell internal states).
-sv_1D_manifold : Dict
-    Variables calculated by the solver (manifold internal states).
-sv_auxiliary : Dict
-    Variables calculated by the solver (auxiliary internal states).
+sv_1D_cell : AbstractVector{<:MEAState1D}
+    Typed variables calculated by the solver (cell internal states).
+sv_1D_manifold
+    Typed variables calculated by the solver (manifold internal states).
+sv_auxiliary
+    Typed variables calculated by the solver (auxiliary internal states).
 i_fc_cell : Float64
     Fuel cell current density at time t (A.m-2).
 v_a : Vector{Float64}
@@ -32,20 +32,19 @@ cfg : SimulationConfig
 
 Returns
 -------
-Dict{String, Dict}
-    Global and species-specific flows in the gas channels and auxiliaries.
-    Julia vectors are naturally 1-based, so no dummy element is stored at index 0.
+GCManifoldFlows1D{NB_GC}
+    Typed global and species-specific flows in the gas channels and auxiliaries.
 """
-function calculate_flows_1D_GC_manifold(sv_1D_cell::AbstractVector{<:AbstractDict},
-                                        sv_1D_manifold::Dict,
-                                        sv_auxiliary::Dict,
+function calculate_flows_1D_GC_manifold(sv_1D_cell::AbstractVector{<:MEAState1D},
+                                        sv_1D_manifold,
+                                        sv_auxiliary,
                                         i_fc_cell::Float64,
                                         v_a::Vector{Float64},
                                         v_c::Vector{Float64},
                                         Pa_in::Float64,
                                         Pc_in::Float64,
                                         fc::AbstractFuelCell,
-                                        cfg::SimulationConfig)::Dict{String, Dict}
+                                        cfg::SimulationConfig)
 
     # __________________________________________________Preliminaries___________________________________________________
 
@@ -60,13 +59,13 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::AbstractVector{<:AbstractDic
     type_auxiliary = cfg.type_auxiliary
 
     # Extraction of the variables
-    C_v_agc = [sv_1D_cell[i]["C_v_agc"] for i in 1:nb_gc]
-    C_v_cgc = [sv_1D_cell[i]["C_v_cgc"] for i in 1:nb_gc]
-    s_agc = [sv_1D_cell[i]["s_agc"] for i in 1:nb_gc]
-    s_cgc = [sv_1D_cell[i]["s_cgc"] for i in 1:nb_gc]
-    C_H2_agc = [sv_1D_cell[i]["C_H2_agc"] for i in 1:nb_gc]
-    C_O2_cgc = [sv_1D_cell[i]["C_O2_cgc"] for i in 1:nb_gc]
-    C_N2_cgc = [sv_1D_cell[i]["C_N2_cgc"] for i in 1:nb_gc]
+    C_v_agc = [sv_1D_cell[i].agc.C_v for i in 1:nb_gc]
+    C_v_cgc = [sv_1D_cell[i].cgc.C_v for i in 1:nb_gc]
+    s_agc = [sv_1D_cell[i].agc.s for i in 1:nb_gc]
+    s_cgc = [sv_1D_cell[i].cgc.s for i in 1:nb_gc]
+    C_H2_agc = [sv_1D_cell[i].agc.C_H2 for i in 1:nb_gc]
+    C_O2_cgc = [sv_1D_cell[i].cgc.C_O2 for i in 1:nb_gc]
+    C_N2_cgc = [sv_1D_cell[i].cgc.C_N2 for i in 1:nb_gc]
 
     # Intermediate values
     (P_agc, P_cgc, Phi_agc, Phi_cgc, y_H2_agc, y_O2_cgc, M_agc, M_cgc, M_ext, M_H2_N2_in, rho_agc, rho_cgc, k_purge,
@@ -98,7 +97,7 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::AbstractVector{<:AbstractDic
         #     Waem_to_aem_out = rho_aem_to_aem_out * v_a * Abp_a
         #     Wa_out = rho_aem_out_to_ext * v_a * Abp_a
     else  # type_auxiliary == :no_auxiliary (only 1 cell)
-        Wa_in = W_des["H2"] + W_des["H2O_inj_a"]  # This expression is also present in calculate_velocity_evolution.
+        Wa_in = W_des.H2 + W_des.H2O_inj_a  # This expression is also present in calculate_velocity_evolution.
         Wa_out = P_agc[nb_gc] / (R * T_des) * v_a[nb_gc] * Hagc * Wagc * nb_cell * nb_channel_in_gc
     end
 
@@ -125,7 +124,7 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::AbstractVector{<:AbstractDic
         # Wcem_to_cem_out = rho_cem_to_cem_out * v_c * Abp_c
         # Wc_out = rho_cem_out_to_ext * v_c * Abp_c
     else  # type_auxiliary == :no_auxiliary (only 1 cell)
-        Wc_in = W_des["dry_air"] + W_des["H2O_inj_c"]  # This expression is also present in calculate_velocity_evolution.
+        Wc_in = W_des.dry_air + W_des.H2O_inj_c  # This expression is also present in calculate_velocity_evolution.
         Wc_out = P_cgc[nb_gc] / (R * T_des) * v_c[nb_gc] * Hcgc * Wcgc * nb_cell * nb_channel_in_gc
     end
 
@@ -244,47 +243,14 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::AbstractVector{<:AbstractDic
     end
 
     if type_auxiliary == :no_auxiliary
-        return Dict{String, Dict}(
-            "Jv" => Dict(
-                "agc_in" => Jv_agc_in,
-                "agc_agc" => Jv_agc_agc,
-                "agc_out" => Jv_agc_out,
-                "cgc_in" => Jv_cgc_in,
-                "cgc_cgc" => Jv_cgc_cgc,
-                "cgc_out" => Jv_cgc_out
-            ),
-            "Jl" => Dict(
-                "agc_agc" => Jl_agc_agc,
-                "agc_out" => Jl_agc_out,
-                "cgc_cgc" => Jl_cgc_cgc,
-                "cgc_out" => Jl_cgc_out
-            ),
-            "J_H2" => Dict(
-                "agc_in" => J_H2_agc_in,
-                "agc_agc" => J_H2_agc_agc,
-                "agc_out" => J_H2_agc_out
-            ),
-            "J_O2" => Dict(
-                "cgc_in" => J_O2_cgc_in,
-                "cgc_cgc" => J_O2_cgc_cgc,
-                "cgc_out" => J_O2_cgc_out
-            ),
-            "J_N2" => Dict(
-                "agc_in" => J_N2_agc_in,
-                "agc_agc" => J_N2_agc_agc,
-                "agc_out" => J_N2_agc_out,
-                "cgc_in" => J_N2_cgc_in,
-                "cgc_cgc" => J_N2_cgc_cgc,
-                "cgc_out" => J_N2_cgc_out
-            ),
-            "W" => Dict(
-                "a_in" => Wa_in,
-                "a_out" => Wa_out,
-                "c_in" => Wc_in,
-                "c_out" => Wc_out
-            )
-        )
-    else
-        return nothing  # To be completed with the expressions of the flows for the other types of auxiliary.
+        Jv = GCVaporFlows{nb_gc}(Jv_agc_in, Jv_agc_agc, Jv_agc_out,
+                                 Jv_cgc_in, Jv_cgc_cgc, Jv_cgc_out)
+        Jl = GCLiquidFlows{nb_gc}(Jl_agc_agc, Jl_agc_out, Jl_cgc_cgc, Jl_cgc_out)
+        J_H2 = GCHydrogenFlows{nb_gc}(J_H2_agc_in, J_H2_agc_agc, J_H2_agc_out)
+        J_O2 = GCOxygenFlows{nb_gc}(J_O2_cgc_in, J_O2_cgc_cgc, J_O2_cgc_out)
+        J_N2 = GCNitrogenFlows{nb_gc}(J_N2_agc_in, J_N2_agc_agc, J_N2_agc_out,
+                                      J_N2_cgc_in, J_N2_cgc_cgc, J_N2_cgc_out)
+        W = GCMassFlows(Wa_in, Wa_out, Wc_in, Wc_out)
+        return GCManifoldFlows1D{nb_gc}(Jv, Jl, J_H2, J_O2, J_N2, W)
     end
 end

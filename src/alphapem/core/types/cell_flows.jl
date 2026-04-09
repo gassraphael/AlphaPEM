@@ -279,6 +279,137 @@ end
 # Top-level flow containers  (future return types of the calculation functions)
 # ────────────────────────────────────────────────────────────────────────────────
 
+# ────────────────────────────────────────────────────────────────────────────────
+# Along-channel (GC-level) flow structures
+#
+# These cover the fluxes that travel along the gas channel direction (x-direction)
+# between GC nodes, as well as the GC inlet/outlet boundary fluxes.
+# GC-to-MEA interface fluxes (e.g., agc_agdl) are stored per-node in MEAFlows1D.
+#
+# Type parameter:
+#   NB_GC : number of gas-channel nodes (spatial discretisation along the channel).
+# ────────────────────────────────────────────────────────────────────────────────
+
+"""Along-channel water-vapour molar fluxes at the GC level. Units: mol·m⁻²·s⁻¹
+
+Fields agc_agc and cgc_cgc are inter-node fluxes of length NB_GC - 1.
+"""
+struct GCVaporFlows{NB_GC}
+    agc_in  :: Float64          # Inlet vapour flux at the anode GC entry
+    agc_agc :: Vector{Float64}  # Along-channel inter-node vapour fluxes (length NB_GC - 1)
+    agc_out :: Float64          # Outlet vapour flux at the anode GC exit
+    cgc_in  :: Float64          # Inlet vapour flux at the cathode GC entry
+    cgc_cgc :: Vector{Float64}  # Along-channel inter-node vapour fluxes (length NB_GC - 1)
+    cgc_out :: Float64          # Outlet vapour flux at the cathode GC exit
+
+    function GCVaporFlows{NB_GC}(agc_in, agc_agc, agc_out,
+                                  cgc_in, cgc_cgc, cgc_out) where {NB_GC}
+        length(agc_agc) == NB_GC - 1 || throw(ArgumentError("agc_agc length must be NB_GC - 1 = $(NB_GC - 1)."))
+        length(cgc_cgc) == NB_GC - 1 || throw(ArgumentError("cgc_cgc length must be NB_GC - 1 = $(NB_GC - 1)."))
+        return new{NB_GC}(Float64(agc_in), collect(Float64, agc_agc), Float64(agc_out),
+                          Float64(cgc_in), collect(Float64, cgc_cgc), Float64(cgc_out))
+    end
+end
+
+"""Along-channel liquid-water mass fluxes at the GC level. Units: kg·m⁻²·s⁻¹
+
+Liquid water has no inlet in either gas channel (only exits).
+Fields agc_agc and cgc_cgc are inter-node fluxes of length NB_GC - 1.
+"""
+struct GCLiquidFlows{NB_GC}
+    agc_agc :: Vector{Float64}  # Along-channel inter-node liquid fluxes (length NB_GC - 1)
+    agc_out :: Float64          # Outlet liquid flux at the anode GC exit
+    cgc_cgc :: Vector{Float64}  # Along-channel inter-node liquid fluxes (length NB_GC - 1)
+    cgc_out :: Float64          # Outlet liquid flux at the cathode GC exit
+
+    function GCLiquidFlows{NB_GC}(agc_agc, agc_out, cgc_cgc, cgc_out) where {NB_GC}
+        length(agc_agc) == NB_GC - 1 || throw(ArgumentError("agc_agc length must be NB_GC - 1 = $(NB_GC - 1)."))
+        length(cgc_cgc) == NB_GC - 1 || throw(ArgumentError("cgc_cgc length must be NB_GC - 1 = $(NB_GC - 1)."))
+        return new{NB_GC}(collect(Float64, agc_agc), Float64(agc_out),
+                          collect(Float64, cgc_cgc), Float64(cgc_out))
+    end
+end
+
+"""Along-channel hydrogen molar fluxes at the anode GC level. Units: mol·m⁻²·s⁻¹
+
+Field agc_agc is the inter-node flux vector of length NB_GC - 1.
+"""
+struct GCHydrogenFlows{NB_GC}
+    agc_in  :: Float64          # Inlet H₂ flux at the anode GC entry
+    agc_agc :: Vector{Float64}  # Along-channel inter-node H₂ fluxes (length NB_GC - 1)
+    agc_out :: Float64          # Outlet H₂ flux at the anode GC exit
+
+    function GCHydrogenFlows{NB_GC}(agc_in, agc_agc, agc_out) where {NB_GC}
+        length(agc_agc) == NB_GC - 1 || throw(ArgumentError("agc_agc length must be NB_GC - 1 = $(NB_GC - 1)."))
+        return new{NB_GC}(Float64(agc_in), collect(Float64, agc_agc), Float64(agc_out))
+    end
+end
+
+"""Along-channel oxygen molar fluxes at the cathode GC level. Units: mol·m⁻²·s⁻¹
+
+Field cgc_cgc is the inter-node flux vector of length NB_GC - 1.
+"""
+struct GCOxygenFlows{NB_GC}
+    cgc_in  :: Float64          # Inlet O₂ flux at the cathode GC entry
+    cgc_cgc :: Vector{Float64}  # Along-channel inter-node O₂ fluxes (length NB_GC - 1)
+    cgc_out :: Float64          # Outlet O₂ flux at the cathode GC exit
+
+    function GCOxygenFlows{NB_GC}(cgc_in, cgc_cgc, cgc_out) where {NB_GC}
+        length(cgc_cgc) == NB_GC - 1 || throw(ArgumentError("cgc_cgc length must be NB_GC - 1 = $(NB_GC - 1)."))
+        return new{NB_GC}(Float64(cgc_in), collect(Float64, cgc_cgc), Float64(cgc_out))
+    end
+end
+
+"""Along-channel nitrogen molar fluxes at both GC sides. Units: mol·m⁻²·s⁻¹
+
+Fields agc_agc and cgc_cgc are inter-node flux vectors of length NB_GC - 1.
+"""
+struct GCNitrogenFlows{NB_GC}
+    agc_in  :: Float64          # Inlet N₂ flux at the anode GC entry
+    agc_agc :: Vector{Float64}  # Along-channel inter-node N₂ fluxes at anode (length NB_GC - 1)
+    agc_out :: Float64          # Outlet N₂ flux at the anode GC exit
+    cgc_in  :: Float64          # Inlet N₂ flux at the cathode GC entry
+    cgc_cgc :: Vector{Float64}  # Along-channel inter-node N₂ fluxes at cathode (length NB_GC - 1)
+    cgc_out :: Float64          # Outlet N₂ flux at the cathode GC exit
+
+    function GCNitrogenFlows{NB_GC}(agc_in, agc_agc, agc_out,
+                                     cgc_in, cgc_cgc, cgc_out) where {NB_GC}
+        length(agc_agc) == NB_GC - 1 || throw(ArgumentError("agc_agc length must be NB_GC - 1 = $(NB_GC - 1)."))
+        length(cgc_cgc) == NB_GC - 1 || throw(ArgumentError("cgc_cgc length must be NB_GC - 1 = $(NB_GC - 1)."))
+        return new{NB_GC}(Float64(agc_in), collect(Float64, agc_agc), Float64(agc_out),
+                          Float64(cgc_in), collect(Float64, cgc_cgc), Float64(cgc_out))
+    end
+end
+
+"""Total (global) mass flow rates through the GC inlets and outlets. Units: mol·s⁻¹"""
+struct GCMassFlows
+    Wa_in  :: Float64   # Total molar flow entering the anode GC
+    Wa_out :: Float64   # Total molar flow leaving the anode GC
+    Wc_in  :: Float64   # Total molar flow entering the cathode GC
+    Wc_out :: Float64   # Total molar flow leaving the cathode GC
+end
+
+"""Desired inlet flow setpoint at stack level. Units: mol·s⁻¹"""
+struct DesiredInletFlows
+    H2       :: Float64
+    dry_air  :: Float64
+    H2O_inj_a::Float64
+    H2O_inj_c::Float64
+end
+
+"""Complete along-channel flow container for one simulation step.
+
+Groups all GC-level typed flow structs returned by `calculate_flows_1D_GC_manifold`.
+"""
+struct GCManifoldFlows1D{NB_GC}
+    Jv   :: GCVaporFlows{NB_GC}
+    Jl   :: GCLiquidFlows{NB_GC}
+    J_H2 :: GCHydrogenFlows{NB_GC}
+    J_O2 :: GCOxygenFlows{NB_GC}
+    J_N2 :: GCNitrogenFlows{NB_GC}
+    W    :: GCMassFlows
+end
+
 """Complete 1D MEA flow output for one gas-channel column.
 """
 struct MEAFlows1D{NB_GDL, NB_MPL}

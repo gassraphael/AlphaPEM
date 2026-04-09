@@ -340,14 +340,15 @@ function recovery!(simu::AlphaPEM)
     simu.variables["C_O2_Pt"] = [[] for _ in 1:nb_gc]
     simu.variables["i_fc"] = [[] for _ in 1:nb_gc]
 
+    nb_gdl = simu.fuel_cell.numerical_parameters.nb_gdl
+    nb_mpl = simu.fuel_cell.numerical_parameters.nb_mpl
+    n_vars_mea_1D = _nb_solver_vars_per_gc(nb_gdl, nb_mpl)
+
     for (j, t_j) in enumerate(simu.variables["t"])
         # ... recovery of the variables inside the MEA 1D line.
-        solver_variables_1D_MEA = [Dict() for _ in 1:nb_gc]
-        for k in 1:nb_gc
-            for (index, variable) in enumerate(simu.solver_variable_names[1])
-                solver_variables_1D_MEA[k][variable] = simu.sol.u[j][index + (k - 1) * length(simu.solver_variable_names[1])]
-            end
-        end
+        solver_variables_1D_MEA = [_unpack_mea_state_1D(@view(simu.sol.u[j][(k - 1) * n_vars_mea_1D + 1:k * n_vars_mea_1D]),
+                                                        nb_gdl, nb_mpl)
+                                   for k in 1:nb_gc]
 
         # ... recovery of i_fc and C_O2_Pt.
         i_fc_cell = current(simu.current_density, t_j)

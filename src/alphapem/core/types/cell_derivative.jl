@@ -159,6 +159,32 @@ struct MEATemperatureDerivative{nb_gdl, nb_mpl}
 end
 
 # ────────────────────────────────────────────────────────────────────────────────
+# 1D gas-channel derivative contributions (per-physics, before final assembly)
+# ────────────────────────────────────────────────────────────────────────────────
+
+"""Gas-species contribution across anode/cathode gas channels for all GC nodes."""
+struct GCGasDerivative{nb_gc}
+    agc_C_v::NTuple{nb_gc, Float64}
+    agc_C_H2::NTuple{nb_gc, Float64}
+    agc_C_N2::NTuple{nb_gc, Float64}
+    cgc_C_v::NTuple{nb_gc, Float64}
+    cgc_C_O2::NTuple{nb_gc, Float64}
+    cgc_C_N2::NTuple{nb_gc, Float64}
+end
+
+"""Liquid-water saturation contribution across anode/cathode gas channels for all GC nodes."""
+struct GCLiquidWaterDerivative{nb_gc}
+    agc_s::NTuple{nb_gc, Float64}
+    cgc_s::NTuple{nb_gc, Float64}
+end
+
+"""Temperature contribution across anode/cathode gas channels for all GC nodes."""
+struct GCTemperatureDerivative{nb_gc}
+    agc_T::NTuple{nb_gc, Float64}
+    cgc_T::NTuple{nb_gc, Float64}
+end
+
+# ────────────────────────────────────────────────────────────────────────────────
 # Manifold line derivatives
 # ────────────────────────────────────────────────────────────────────────────────
 

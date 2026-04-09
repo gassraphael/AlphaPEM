@@ -13,8 +13,8 @@ i_fc : Float64
     The current density (A/m²).
 C_O2_Pt : Float64
     The oxygen concentration at the platinum surface in the cathode catalyst layer (mol/m³).
-sv : Dict
-    The dictionary containing the variables calculated by the solver.
+sv : MEAState1D
+    The typed 1D MEA state for one gas-channel column.
 fc : AbstractFuelCell
     The fuel cell instance providing model parameters.
 
@@ -23,16 +23,17 @@ Returns
 Float64
     The cell voltage in volt.
 """
-function calculate_cell_voltage(i_fc::Float64, C_O2_Pt::Float64, sv::Dict, fc::AbstractFuelCell)::Float64
+function calculate_cell_voltage(i_fc::Float64, C_O2_Pt::Float64, sv::MEAState1D, fc::AbstractFuelCell)::Float64
 
-    # Extraction of the variables
-    s_ccl, lambda_mem, lambda_ccl = sv["s_ccl"], sv["lambda_mem"], sv["lambda_ccl"]
-    C_H2_acl, C_O2_ccl = sv["C_H2_acl"], sv["C_O2_ccl"]
-    eta_c = sv["eta_c"]
-    T_acl, T_mem, T_ccl = sv["T_acl"], sv["T_mem"], sv["T_ccl"]
+    # Extraction of the variables (typed access via MEAState1D struct fields)
+    lambda_mem, lambda_ccl = sv.mem.lambda, sv.ccl.lambda
+    C_H2_acl, C_O2_ccl = sv.acl.C_H2, sv.ccl.C_O2
+    eta_c = sv.ccl.eta_c
+    T_acl, T_mem, T_ccl = sv.acl.T, sv.mem.T, sv.ccl.T
     # Extraction of the parameters
-    Hmem, Hacl, Hccl = fc.physical_parameters.Hmem, fc.physical_parameters.Hacl, fc.physical_parameters.Hccl
-    Re, kappa_co = fc.physical_parameters.Re, fc.physical_parameters.kappa_co
+    pp = fc.physical_parameters
+    Hmem, Hacl, Hccl = pp.Hmem, pp.Hacl, pp.Hccl
+    Re, kappa_co = pp.Re, pp.kappa_co
 
     # The equilibrium potential
     Ueq = E0 - 8.5e-4 * (T_ccl - 298.15) + R * T_ccl / (2 * F) * (log(R * T_acl * C_H2_acl / Pref_eq) +

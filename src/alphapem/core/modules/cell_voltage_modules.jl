@@ -11,8 +11,8 @@ Parameters
 ----------
 i_fc : Float64
     The current density (A/m²).
-sv_1D : Dict
-    The dictionary containing the variables calculated by the solver.
+sv : MEAState1D
+    The typed 1D MEA state for one gas-channel column.
 fc : AbstractFuelCell
     The fuel cell instance providing model parameters.
 
@@ -27,14 +27,14 @@ Sources
 in PEM Fuel Cells.
 """
 function calculate_C_O2_Pt(i_fc::Float64,
-                           sv_1D::Dict,
+                           sv::MEAState1D,
                            fc::AbstractFuelCell)::Float64
 
-    # Extraction of the variables
-    s_ccl = sv_1D["s_ccl"]
-    lambda_ccl = sv_1D["lambda_ccl"]
-    C_O2_ccl = sv_1D["C_O2_ccl"]
-    T_ccl = sv_1D["T_ccl"]
+    # Extraction of the variables (typed access via MEAState1D struct fields)
+    s_ccl      = sv.ccl.s
+    lambda_ccl = sv.ccl.lambda
+    C_O2_ccl   = sv.ccl.C_O2
+    T_ccl      = sv.ccl.T
     # Extraction of the parameters
     Hccl, K_O2_ad_Pt = fc.physical_parameters.Hccl, fc.physical_parameters.K_O2_ad_Pt
 

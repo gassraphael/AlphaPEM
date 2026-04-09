@@ -24,8 +24,8 @@ A nonlinear root solver from `NonlinearSolve.jl` is used.
 
 Parameters
 ----------
-sv : Vector{Dict}
-    Solver state variables. `sv[i]` provides the state dictionary of gas-channel node `i`.
+sv : AbstractVector{<:MEAState1D}
+    Typed solver state variables. `sv[i]` provides the state of gas-channel node `i`.
 i_fc_cell : Float64
     Fuel cell current density at time t (A.m-2).
 fc : AbstractFuelCell
@@ -47,7 +47,7 @@ Raises
 ErrorException
     If the nonlinear solver does not converge.
 """
-function calculate_velocity_evolution(sv::AbstractVector{<:AbstractDict}, i_fc_cell::Float64, fc::AbstractFuelCell, cfg::SimulationConfig)::Tuple{Vector{Float64}, Vector{Float64}, Float64, Float64}
+function calculate_velocity_evolution(sv::AbstractVector{<:MEAState1D}, i_fc_cell::Float64, fc::AbstractFuelCell, cfg::SimulationConfig)::Tuple{Vector{Float64}, Vector{Float64}, Float64, Float64}
 
     # Extraction of the parameters
     oc = fc.operating_conditions
@@ -59,18 +59,18 @@ function calculate_velocity_evolution(sv::AbstractVector{<:AbstractDict}, i_fc_c
     nb_gc, nb_gdl = np.nb_gc, np.nb_gdl
 
     # Extraction of the variables
-    C_v_agc = [sv[i]["C_v_agc"] for i in 1:nb_gc]
-    C_v_agdl_1 = [sv[i]["C_v_agdl_1"] for i in 1:nb_gc]
-    C_v_cgdl_nb_gdl = [sv[i]["C_v_cgdl_$(nb_gdl)"] for i in 1:nb_gc]
-    C_v_cgc = [sv[i]["C_v_cgc"] for i in 1:nb_gc]
-    C_H2_agc = [sv[i]["C_H2_agc"] for i in 1:nb_gc]
-    C_H2_agdl_1 = [sv[i]["C_H2_agdl_1"] for i in 1:nb_gc]
-    C_O2_cgdl_nb_gdl = [sv[i]["C_O2_cgdl_$(nb_gdl)"] for i in 1:nb_gc]
-    C_O2_cgc = [sv[i]["C_O2_cgc"] for i in 1:nb_gc]
-    C_N2_agc = [sv[i]["C_N2_agc"] for i in 1:nb_gc]
-    C_N2_cgc = [sv[i]["C_N2_cgc"] for i in 1:nb_gc]
-    T_agc = [sv[i]["T_agc"] for i in 1:nb_gc]
-    T_cgc = [sv[i]["T_cgc"] for i in 1:nb_gc]
+    C_v_agc = [sv[i].agc.C_v for i in 1:nb_gc]
+    C_v_agdl_1 = [sv[i].agdl[1].C_v for i in 1:nb_gc]
+    C_v_cgdl_nb_gdl = [sv[i].cgdl[nb_gdl].C_v for i in 1:nb_gc]
+    C_v_cgc = [sv[i].cgc.C_v for i in 1:nb_gc]
+    C_H2_agc = [sv[i].agc.C_H2 for i in 1:nb_gc]
+    C_H2_agdl_1 = [sv[i].agdl[1].C_H2 for i in 1:nb_gc]
+    C_O2_cgdl_nb_gdl = [sv[i].cgdl[nb_gdl].C_O2 for i in 1:nb_gc]
+    C_O2_cgc = [sv[i].cgc.C_O2 for i in 1:nb_gc]
+    C_N2_agc = [sv[i].agc.C_N2 for i in 1:nb_gc]
+    C_N2_cgc = [sv[i].cgc.C_N2 for i in 1:nb_gc]
+    T_agc = [sv[i].agc.T for i in 1:nb_gc]
+    T_cgc = [sv[i].cgc.T for i in 1:nb_gc]
 
     # Intermediate calculation
     #       Length of one gas channel node (m).
@@ -172,9 +172,9 @@ function calculate_velocity_evolution(sv::AbstractVector{<:AbstractDict}, i_fc_c
         # Desired molar flows at anode and cathode
         if cfg.type_auxiliary == :no_auxiliary
             W_des_calculated = desired_flows(sv, i_fc_cell, P_a_in, P_c_in, fc, cfg)
-            Wa_in_calculated = W_des_calculated["H2"] + W_des_calculated["H2O_inj_a"]  # Expression also present in flow calculations
+            Wa_in_calculated = W_des_calculated.H2 + W_des_calculated.H2O_inj_a  # Expression also present in flow calculations
             J_a_in_calculated = Wa_in_calculated / (Hagc * Wagc) / nb_cell / nb_channel_in_gc
-            Wc_in_calculated = W_des_calculated["dry_air"] + W_des_calculated["H2O_inj_c"]  # This expression is also present in calculate_velocity_evolution.
+            Wc_in_calculated = W_des_calculated.dry_air + W_des_calculated.H2O_inj_c  # This expression is also present in calculate_velocity_evolution.
             J_c_in_calculated = Wc_in_calculated / (Hcgc * Wcgc) / nb_cell / nb_channel_in_gc
         end
 
@@ -257,8 +257,8 @@ Calculate the desired flow for the air compressor and the humidifiers.
 
 Parameters
 ----------
-solver_variables : Vector{Dict}
-    Variables calculated by the solver at each gas-channel node.
+solver_variables : AbstractVector{<:MEAState1D}
+    Typed variables calculated by the solver at each gas-channel node.
 i_fc_cell : Real
     Fuel cell current density (A.m-2).
 Pa_in : Real
@@ -272,15 +272,15 @@ cfg : SimulationConfig
 
 Returns
 -------
-Dict
+DesiredInletFlows
     Desired hydrogen flow rate, dry-air flow rate, anode humidifier flow rate, and cathode humidifier flow rate.
 """
-@inline function desired_flows(solver_variables::AbstractVector{<:AbstractDict},
+@inline function desired_flows(solver_variables::AbstractVector{<:MEAState1D},
                        i_fc_cell::Real,
                        Pa_in::Real,
                        Pc_in::Real,
                        fc::AbstractFuelCell,
-                       cfg::SimulationConfig)::Dict
+                       cfg::SimulationConfig)::DesiredInletFlows
 
     # Extraction of the parameters
     oc = fc.operating_conditions
@@ -292,13 +292,12 @@ Dict
     nb_gc, nb_cell = np.nb_gc, pp.nb_cell
 
     # Extraction of the variables
-    # Pasm, Pcsm, Wcp = get(solver_variables, "Pasm", nothing), get(solver_variables, "Pcsm", nothing), get(solver_variables, "Wcp", nothing)
-    C_H2_acl = [solver_variables[i]["C_H2_acl"] for i in 1:nb_gc]
-    C_O2_ccl = [solver_variables[i]["C_O2_ccl"] for i in 1:nb_gc]
-    lambda_mem = [solver_variables[i]["lambda_mem"] for i in 1:nb_gc]
-    T_acl = [solver_variables[i]["T_acl"] for i in 1:nb_gc]
-    T_mem = [solver_variables[i]["T_mem"] for i in 1:nb_gc]
-    T_ccl = [solver_variables[i]["T_ccl"] for i in 1:nb_gc]
+    C_H2_acl = [solver_variables[i].acl.C_H2 for i in 1:nb_gc]
+    C_O2_ccl = [solver_variables[i].ccl.C_O2 for i in 1:nb_gc]
+    lambda_mem = [solver_variables[i].mem.lambda for i in 1:nb_gc]
+    T_acl = [solver_variables[i].acl.T for i in 1:nb_gc]
+    T_mem = [solver_variables[i].mem.T for i in 1:nb_gc]
+    T_ccl = [solver_variables[i].ccl.T for i in 1:nb_gc]
 
     # Physical quantities inside the stack
     #       The crossover current density i_n
@@ -315,26 +314,31 @@ Dict
        cfg.type_auxiliary == :forced_convective_cathode_with_flow_through_anode
         # The desired air compressor volume flow rate (mol.s-1). Warning: consider the minimum compressor flow!
         W_H2_des = 1 / y_H2_in * Sa * i_fc_cell / (2 * F) * (nb_cell * Aact)
-        Wacp_des_adjusted = adjust_compressor_flow_with_minimum(i_fc_cell, W_H2_des)  # Adjust the desired compressor flow to ensure a minimum flow is maintained.
+        Wacp_des_adjusted = adjust_compressor_flow_with_minimum(i_fc_cell, W_H2_des) # Adjust the desired compressor flow rate to ensure a minimum flow is maintained, based on the current density.
         W_air_ext_des = Pext / (Pext - Phi_ext * Psat(Text)) * 1 / y_O2_ext * Sc * i_fc_cell / (4 * F) * (nb_cell * Aact)
-        Wccp_des_adjusted = adjust_compressor_flow_with_minimum(i_fc_cell, W_air_ext_des)  # Adjust the desired compressor flow to ensure a minimum flow is maintained.
+        Wccp_des_adjusted = adjust_compressor_flow_with_minimum(i_fc_cell, W_air_ext_des) # Adjust the desired compressor flow rate to ensure a minimum flow is maintained, based on the current density.
 
         # The desired humidifier volume flow rate at the anode side Wa_v_inj_des (mol.s-1). Warning: consider the minimum compressor flow!
         if cfg.type_auxiliary == :forced_convective_cathode_with_flow_through_anode
-            # Prd = Pasm
-            # W_H2_des = 1 / y_H2_in * Sa * i_fc_cell / (2 * F) * (nb_cell * Aact)
-            # W_H2O_inj_a_des = Phi_a_des * Psat(T_des) / (Prd + Phi_a_des * Psat(T_des)) /
-            #                   (1 - Phi_a_des * Psat(T_des) / (Prd + Phi_a_des * Psat(T_des))) * W_H2_des
+             Pasm = NaN
+             Prd = Pasm
+             W_H2_des = 1 / y_H2_in * Sa * i_fc_cell / (2 * F) * (nb_cell * Aact)
+             W_H2O_inj_a_des = Phi_a_des * Psat(T_des) / (Prd + Phi_a_des * Psat(T_des)) /
+                               (1 - Phi_a_des * Psat(T_des) / (Prd + Phi_a_des * Psat(T_des))) * W_H2_des
         else  # type_auxiliary == "forced-convective_cathode_with_anodic_recirculation"
-            # W_H2O_inj_a_des = 0
+             W_H2O_inj_a_des = 0
         end
 
-        # The desired humidifier volume flow rate at the cathode side W_H2O_inj_c_des (mol.s-1)
-        # Pcp = Pcsm
-        # Wv_hum_in = Phi_ext * Psat(Text) / Pext * Wcp  # Vapor flow rate from the outside.
-        # W_H20_c_des = Phi_c_des * Psat(T_des) / Pcp * Wcp  # Desired vapor flow rate.
-        # W_H2O_inj_c_des = W_H20_c_des - Wv_hum_in  # Desired humidifier flow rate.
+         # The desired humidifier volume flow rate at the cathode side Wc_v_inj_des (mol.s-1). Warning: consider the minimum compressor flow!
+         Pcsm = NaN
+         Wcp = NaN
+         Pcp = Pcsm
+         Wv_hum_in = Phi_ext * Psat(Text) / Pext * Wcp  # Vapor flow rate from the outside.
+         W_H20_c_des = Phi_c_des * Psat(T_des) / Pcp * Wcp  # Desired vapor flow rate.
+         W_H2O_inj_c_des = W_H20_c_des - Wv_hum_in  # Desired humidifier flow rate.
 
+        _ = Wacp_des_adjusted
+        _ = Wccp_des_adjusted
         throw(ErrorException("desired_flows is not yet implemented in Julia for the forced-convective auxiliary branches because the translated Python source still depends on unavailable variables such as Pasm, Pcsm, and Wcp."))
     else  # cfg.type_auxiliary == :no_auxiliary
         # At the anode side
@@ -346,10 +350,7 @@ Dict
         W_H2O_inj_c_des = (Phi_c_des * Psat(T_des) / (Pc_in - Phi_c_des * Psat(T_des))) * W_dry_air_des
     end
 
-    return Dict("H2" => W_H2_des,
-                    "dry_air" => W_dry_air_des,
-                    "H2O_inj_a" => W_H2O_inj_a_des,
-                    "H2O_inj_c" => W_H2O_inj_c_des)
+    return DesiredInletFlows(W_H2_des, W_dry_air_des, W_H2O_inj_a_des, W_H2O_inj_c_des)
 end
 
 
