@@ -20,23 +20,28 @@ It is more efficient to express this function in the code than calling hmean fro
 function hmean(terms::AbstractVector, weights::Union{AbstractVector, Nothing}=nothing)
 
     n = length(terms)
-    if weights === nothing
-        weights = ones(n)  # Assign equal weights if not provided
-    end
-
-    if length(weights) != n
-        throw(ArgumentError("The length of terms and weights must be the same."))
-    end
-
-    # Calculate the weighted harmonic mean
+    # Calculate the weighted harmonic mean.
     weighted_sum = 0.0
     total_weight = 0.0
-    @inbounds for i in 1:n
-        w, t = weights[i], terms[i]
-        if t != 0
-            weighted_sum += w / t
+    if weights === nothing
+        @inbounds for i in 1:n
+            t = terms[i]
+            if t != 0
+                weighted_sum += 1.0 / t
+            end
         end
-        total_weight += w
+        total_weight = Float64(n)
+    else
+        if length(weights) != n
+            throw(ArgumentError("The length of terms and weights must be the same."))
+        end
+        @inbounds for i in 1:n
+            w, t = weights[i], terms[i]
+            if t != 0
+                weighted_sum += w / t
+            end
+            total_weight += w
+        end
     end
 
     if weighted_sum == 0

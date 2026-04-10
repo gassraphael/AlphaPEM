@@ -44,7 +44,7 @@ else
         cfgs[i] = SimulationConfig(
             type_fuel_cell = type_fuel_cell_list[i],
             type_current = current_params,
-            voltage_zone = :full,
+            voltage_zone = :before_voltage_drop,
             type_auxiliary = :no_auxiliary,
             type_purge = :no_purge,
             type_display = :synthetic,
