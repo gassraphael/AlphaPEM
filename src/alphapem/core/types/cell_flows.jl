@@ -193,23 +193,23 @@ end
 """Liquid-water phase-change source terms at each porous-layer node. Units: mol·m⁻³·s⁻¹
 """
 struct MEALiquidSources{NB_GDL, NB_MPL} # Sl
-    agdl :: NTuple{NB_GDL, Float64}
-    ampl :: NTuple{NB_MPL, Float64}
+    agdl :: Vector{Float64}
+    ampl :: Vector{Float64}
     acl  :: Float64
     ccl  :: Float64
-    cmpl :: NTuple{NB_MPL, Float64}
-    cgdl :: NTuple{NB_GDL, Float64}
+    cmpl :: Vector{Float64}
+    cgdl :: Vector{Float64}
 end
 
 """Water-vapour phase-change source terms at each porous-layer node. Units: mol·m⁻³·s⁻¹
 """
 struct MEAVaporSources{NB_GDL, NB_MPL} # Sv
-    agdl :: NTuple{NB_GDL, Float64}
-    ampl :: NTuple{NB_MPL, Float64}
+    agdl :: Vector{Float64}
+    ampl :: Vector{Float64}
     acl  :: Float64
     ccl  :: Float64
-    cmpl :: NTuple{NB_MPL, Float64}
-    cgdl :: NTuple{NB_GDL, Float64}
+    cmpl :: Vector{Float64}
+    cgdl :: Vector{Float64}
 end
 
 
@@ -390,11 +390,11 @@ struct GCMassFlows
 end
 
 """Desired inlet flow setpoint at stack level. Units: mol·s⁻¹"""
-struct DesiredInletFlows
-    H2       :: Float64
-    dry_air  :: Float64
-    H2O_inj_a::Float64
-    H2O_inj_c::Float64
+struct DesiredInletFlows{TH2<:Real, TAir<:Real, TH2Oa<:Real, TH2Oc<:Real}
+    H2       :: TH2
+    dry_air  :: TAir
+    H2O_inj_a:: TH2Oa
+    H2O_inj_c:: TH2Oc
 end
 
 """Complete along-channel flow container for one simulation step.

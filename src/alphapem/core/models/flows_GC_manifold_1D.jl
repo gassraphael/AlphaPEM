@@ -158,19 +158,23 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::AbstractVector{<:MEAState1D}
     # Liquid water flows at the GC (kg.m-2.s-1)
     #   At the anode side
     s_agc_outlet = 0.0  # Boundary condition at the outlet of the anode GC: no liquid water at the outlet.
-    Jl_agc_agc_conv = [rho_H2O_l(T_des) * K_v_liq_gas * v_a[i] * s_agc[i] for i in 1:nb_gc]
+    Jl_agc_agc_conv = [rho_H2O_l(T_des) * K_v_liq_gas * v_a[i] * s_agc[i] for i in 1:(nb_gc - 1)]
     Jl_agc_agc_dif = [-D_liq_dif * d_dx(s_agc[i], i == nb_gc ? s_agc_outlet : s_agc[i + 1], (Lgc / nb_gc) / 2)
-                      for i in 1:nb_gc]
-    Jl_agc_agc = [Jl_agc_agc_conv[i] + Jl_agc_agc_dif[i] for i in 1:nb_gc]
-    Jl_agc_out = Jl_agc_agc_conv[end] + Jl_agc_agc_dif[end]
+                      for i in 1:(nb_gc - 1)]
+    Jl_agc_agc = [Jl_agc_agc_conv[i] + Jl_agc_agc_dif[i] for i in 1:(nb_gc - 1)]
+    Jl_agc_agc_conv_out = rho_H2O_l(T_des) * K_v_liq_gas * v_a[nb_gc] * s_agc[nb_gc]
+    Jl_agc_agc_dif_out = -D_liq_dif * d_dx(s_agc[nb_gc], s_agc_outlet, (Lgc / nb_gc) / 2)
+    Jl_agc_out = Jl_agc_agc_conv_out + Jl_agc_agc_dif_out
 
     #   At the cathode side
     s_cgc_outlet = 0.0  # Boundary condition at the outlet of the cathode GC: no liquid water at the outlet.
-    Jl_cgc_cgc_conv = [rho_H2O_l(T_des) * K_v_liq_gas * v_c[i] * s_cgc[i] for i in 1:nb_gc]
+    Jl_cgc_cgc_conv = [rho_H2O_l(T_des) * K_v_liq_gas * v_c[i] * s_cgc[i] for i in 1:(nb_gc - 1)]
     Jl_cgc_cgc_dif = [-D_liq_dif * d_dx(s_cgc[i], i == nb_gc ? s_cgc_outlet : s_cgc[i + 1], (Lgc / nb_gc) / 2)
-                      for i in 1:nb_gc]
-    Jl_cgc_cgc = [Jl_cgc_cgc_conv[i] + Jl_cgc_cgc_dif[i] for i in 1:nb_gc]
-    Jl_cgc_out = Jl_cgc_cgc_conv[end] + Jl_cgc_cgc_dif[end]
+                      for i in 1:(nb_gc - 1)]
+    Jl_cgc_cgc = [Jl_cgc_cgc_conv[i] + Jl_cgc_cgc_dif[i] for i in 1:(nb_gc - 1)]
+    Jl_cgc_cgc_conv_out = rho_H2O_l(T_des) * K_v_liq_gas * v_c[nb_gc] * s_cgc[nb_gc]
+    Jl_cgc_cgc_dif_out = -D_liq_dif * d_dx(s_cgc[nb_gc], s_cgc_outlet, (Lgc / nb_gc) / 2)
+    Jl_cgc_out = Jl_cgc_cgc_conv_out + Jl_cgc_cgc_dif_out
 
     # H2 flows at the GC (mol.m-2.s-1)
     if type_auxiliary == :forced_convective_cathode_with_flow_through_anode

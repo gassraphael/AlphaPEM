@@ -40,9 +40,11 @@ function run_simulation(cfg::SimulationConfig)::AlphaPEM
     end
 
     # Disable interactive mode for non-blocking display.
-    plt.ioff()
-    # Ensure that the figures remain displayed after program execution.
-    plt.show(; block=true)
+    if cfg.type_display != :no_display
+        plt.ioff()
+        # Ensure that the figures remain displayed after program execution.
+        plt.show(; block=true)
+    end
 
     return AlphaPEM_simulator
 end
@@ -71,9 +73,11 @@ function run_simulation(cfgs::Vector{SimulationConfig})::Vector{AlphaPEM}
     end
 
     # Disable interactive mode for non-blocking display.
-    plt.ioff()
-    # Ensure that the figures remain displayed after program execution.
-    plt.show(; block=true)
+    if any(cfg -> cfg.type_display != :no_display, cfgs)
+        plt.ioff()
+        # Ensure that the figures remain displayed after program execution.
+        plt.show(; block=true)
+    end
 
     return AlphaPEM_simulators
 end

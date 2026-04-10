@@ -16,10 +16,6 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 # Importing the necessary libraries.
 using DifferentialEquations
 
-# Creating the variable names
-const MANIFOLD_SOLVER_VARIABLE_NAMES  = ["Pasm", "Paem", "Pcsm", "Pcem", "Phi_asm", "Phi_aem", "Phi_csm", "Phi_cem"]
-const AUXILIARY_SOLVER_VARIABLE_NAMES = ["Wcp", "Wa_inj", "Wc_inj", "Abp_a", "Abp_c"]
-const DERIVED_VARIABLE_NAMES          = ["t", "i_fc", "C_O2_Pt", "Ucell", "v_a", "v_c", "Pa_in", "Pc_in"]
 
 # _______________________________________________________AlphaPEM_______________________________________________________
 
@@ -28,9 +24,9 @@ mutable struct AlphaPEM
     fuel_cell::AbstractFuelCell
     current_density::AbstractCurrent
     cfg::SimulationConfig
-    variables::Dict
     time_interval::Tuple{Float64, Float64}
-    initial_variable_values::Vector
+    initial_variable_values::Vector{Float64}
+    outputs::Union{Nothing, SimulationOutputs}
     sol
 end
 
@@ -51,9 +47,9 @@ function AlphaPEM(fuel_cell::AbstractFuelCell, current_density::AbstractCurrent,
         fuel_cell, #
         current_density, #
         cfg, #
-        Dict{String, Any}(), # variables::Dict
         (0.0, 0.0), # time_interval::Tuple{Float64, Float64}
-        [], # initial_variable_values::Vector{Number}
+        Float64[], # initial_variable_values::Vector{Float64}
+        nothing, # outputs::Union{Nothing, SimulationOutputs}
         nothing, # sol
     )
     return simu
@@ -79,7 +75,7 @@ Nothing
     The function updates `simu` in place.
 """
 function simulate_model!(simu::AlphaPEM,
-                         initial_variable_values:: Union{Nothing, Vector}=nothing,
+                         initial_variable_values::Union{Nothing, AbstractVector{<:Real}}=nothing,
                          time_interval:: Union{Nothing, Tuple{Float64, Float64}}=nothing)
 
     # General warnings.
@@ -101,20 +97,8 @@ function simulate_model!(simu::AlphaPEM,
         throw(ArgumentError("The desired pressure is too low. It cannot be lower than the pressure outside the stack."))
     end
 
-    # Initialize the variables' dictionaries.
-    has_auxiliary = simu.cfg.type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
-                                                :forced_convective_cathode_with_anodic_recirculation)
-    canonical_names = canonical_mea_solver_variable_names(simu.fuel_cell.numerical_parameters.nb_gdl,
-                                                          simu.fuel_cell.numerical_parameters.nb_mpl)
-    manifold_names = has_auxiliary ? MANIFOLD_SOLVER_VARIABLE_NAMES : String[]
-    auxiliary_names = has_auxiliary ? AUXILIARY_SOLVER_VARIABLE_NAMES : String[]
-    all_variable_names = vcat(
-        canonical_names,
-        manifold_names,
-        auxiliary_names,
-        DERIVED_VARIABLE_NAMES,
-    )
-    simu.variables = Dict{String, Any}(k => Number[] for k in all_variable_names)
+    # Initialize the outputs.
+    simu.outputs = nothing
 
     # Create the dynamic evolution.
     #       Create time intervals
@@ -133,7 +117,7 @@ function simulate_model!(simu::AlphaPEM,
     simu.sol = solve(prob, FBDF(autodiff=false); reltol=simu.fuel_cell.numerical_parameters.rtol,
                      abstol=simu.fuel_cell.numerical_parameters.atol)
 
-    #       Recover the variable values calculated by the solver into the dictionary.
+    #       Recover the variable values calculated by the solver into outputs.
     recovery!(simu)
     return nothing
 end
@@ -151,7 +135,7 @@ without flow or load current.
 # Returns
 - `Vector`: Initial values of the solver variables.
 """
-function create_initial_variable_values(simu::AlphaPEM)::Vector
+function create_initial_variable_values(simu::AlphaPEM)::Vector{Float64}
     # Extraction of the parameter classes for better readability.
     oc = simu.fuel_cell.operating_conditions
     pp = simu.fuel_cell.physical_parameters
@@ -272,7 +256,7 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector
 end
 
 
-"""Populate `simu.variables` from the solver output.
+"""Populate `simu.outputs` from the solver output.
 
 Some derived internal quantities are rebuilt manually because they are not directly
 stored in the numerical solution object.
@@ -281,11 +265,11 @@ stored in the numerical solution object.
 - `simu::AlphaPEM`: Fuel-cell simulator instance.
 
 # Returns
-- `Nothing`: The function updates `simu.variables` in place.
+- `Nothing`: The function updates `simu.outputs` in place.
 """
 function recovery!(simu::AlphaPEM)
     # Recovery of the time span.
-    simu.variables["t"] = collect(simu.sol.t)
+    t_hist = collect(simu.sol.t)
 
     # Recovery of the main variables dynamic evolution.
     np = simu.fuel_cell.numerical_parameters
@@ -295,53 +279,49 @@ function recovery!(simu::AlphaPEM)
     length(canonical_names) == n_vars_mea_1D ||
         throw(ArgumentError("Canonical MEA layout size mismatch in recovery!."))
 
-    for (index, key) in enumerate(canonical_names) # recovery of MEA and GC variables in canonical order
-        simu.variables[key] = [[simu.sol.u[j][index + (i - 1) * n_vars_mea_1D] for j in eachindex(simu.sol.u)]
-                               for i in 1:nb_gc]
-    end
-    if simu.cfg.type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
-                              :forced_convective_cathode_with_anodic_recirculation)
-        for (index, key) in enumerate(MANIFOLD_SOLVER_VARIABLE_NAMES) # recovery of the manifold variables
-            simu.variables[key] = [simu.sol.u[j][index + nb_gc * n_vars_mea_1D] for j in eachindex(simu.sol.u)]
-        end
-        n_vars2 = length(MANIFOLD_SOLVER_VARIABLE_NAMES)
-        for (index, key) in enumerate(AUXILIARY_SOLVER_VARIABLE_NAMES) # recovery of the auxiliary variables
-            simu.variables[key] = [simu.sol.u[j][index + nb_gc * n_vars_mea_1D + n_vars2] for j in eachindex(simu.sol.u)]
-        end
-    end
+    # Typed output buffers.
+    n_t = length(t_hist)
+    solver_states = Vector{FuelCellStateP2D{nb_gdl, nb_mpl, nb_gc}}(undef, n_t)
+    i_fc_hist = [Float64[] for _ in 1:nb_gc]
+    C_O2_Pt_hist = [Float64[] for _ in 1:nb_gc]
+    v_a_hist = [Float64[] for _ in 1:nb_gc]
+    v_c_hist = [Float64[] for _ in 1:nb_gc]
+    Ucell_hist = Float64[]
+    Pa_in_hist = Float64[]
+    Pc_in_hist = Float64[]
 
-    # Recovery of more variables.
-    simu.variables["v_a"] = [[] for _ in 1:nb_gc]
-    simu.variables["v_c"] = [[] for _ in 1:nb_gc]
-    simu.variables["C_O2_Pt"] = [[] for _ in 1:nb_gc]
-    simu.variables["i_fc"] = [[] for _ in 1:nb_gc]
-
-
-    for (j, t_j) in enumerate(simu.variables["t"])
+    for (j, t_j) in enumerate(t_hist)
         # ... recovery of the variables inside the MEA 1D line.
         solver_variables_1D_MEA = [_unpack_mea_state_1D(@view(simu.sol.u[j][(k - 1) * n_vars_mea_1D + 1:k * n_vars_mea_1D]),
                                                         nb_gdl, nb_mpl)
                                    for k in 1:nb_gc]
+        solver_states[j] = FuelCellStateP2D{nb_gdl, nb_mpl, nb_gc}(Tuple(solver_variables_1D_MEA))
 
         # ... recovery of i_fc and C_O2_Pt.
         i_fc_cell = current(simu.current_density, t_j)
         i_fc = calculate_1D_GC_current_density(i_fc_cell, solver_variables_1D_MEA, simu.fuel_cell)
         for k in 1:nb_gc
-            push!(simu.variables["i_fc"][k], i_fc[k])
-            push!(simu.variables["C_O2_Pt"][k], calculate_C_O2_Pt(i_fc[k], solver_variables_1D_MEA[k], simu.fuel_cell))
+            c_o2_pt_k = calculate_C_O2_Pt(i_fc[k], solver_variables_1D_MEA[k], simu.fuel_cell)
+            push!(i_fc_hist[k], i_fc[k])
+            push!(C_O2_Pt_hist[k], c_o2_pt_k)
         end
 
         # ... recovery of Ucell, v_a, v_c, Pa_in and Pc_in.
-        push!(simu.variables["Ucell"], calculate_cell_voltage(i_fc[1], simu.variables["C_O2_Pt"][1][end],
-                                                                solver_variables_1D_MEA[1], simu.fuel_cell))
+        Ucell = calculate_cell_voltage(i_fc[1], C_O2_Pt_hist[1][end], solver_variables_1D_MEA[1], simu.fuel_cell)
+        push!(Ucell_hist, Ucell)
         v_a, v_c, Pa_in, Pc_in = calculate_velocity_evolution(solver_variables_1D_MEA, i_fc_cell, simu.fuel_cell, simu.cfg)
         for k in 1:nb_gc
-            push!(simu.variables["v_a"][k], v_a[k])
-            push!(simu.variables["v_c"][k], v_c[k])
+            push!(v_a_hist[k], v_a[k])
+            push!(v_c_hist[k], v_c[k])
         end
-        push!(simu.variables["Pa_in"], Pa_in)
-        push!(simu.variables["Pc_in"], Pc_in)
+        push!(Pa_in_hist, Pa_in)
+        push!(Pc_in_hist, Pc_in)
     end
+
+    simu.outputs = SimulationOutputs{nb_gdl, nb_mpl, nb_gc}(
+        SolverTrajectory{nb_gdl, nb_mpl, nb_gc}(t_hist, solver_states),
+        DerivedOutputs{nb_gc}(Ucell_hist, i_fc_hist, C_O2_Pt_hist, v_a_hist, v_c_hist, Pa_in_hist, Pc_in_hist),
+    )
     return nothing
 end
 

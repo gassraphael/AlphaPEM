@@ -22,6 +22,7 @@ include("cell_intermediates.jl")
 include("cell_balance.jl")
 include("auxiliary.jl")
 include("cell_flows.jl")
+include("simulation_outputs.jl")
 
 # ── Public API ────────────────────────────────────────────────────────────────
 
@@ -83,6 +84,9 @@ export MEAFlows1D, MEAHeatFlows1D
 export GCVaporFlows, GCLiquidFlows, GCHydrogenFlows, GCOxygenFlows, GCNitrogenFlows
 export GCMassFlows, DesiredInletFlows
 export GCManifoldFlows1D
+
+# --- simulation_outputs.jl ---
+export SolverTrajectory, DerivedOutputs, SimulationOutputs
 
 end  # module Types
 

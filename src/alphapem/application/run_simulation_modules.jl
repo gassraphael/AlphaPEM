@@ -118,6 +118,61 @@ function select_nth_elements(d::Dict, n::Integer)::Dict
 end
 
 
+"""Append one typed 1D MEA state to the canonical solver ordering."""
+function _append_mea_state_1D_to_solver_order!(dest::Vector{Float64}, s)
+    # C_v block
+    push!(dest, s.agc.C_v)
+    for i in eachindex(s.agdl); push!(dest, s.agdl[i].C_v); end
+    for i in eachindex(s.ampl); push!(dest, s.ampl[i].C_v); end
+    push!(dest, s.acl.C_v)
+    push!(dest, s.ccl.C_v)
+    for i in eachindex(s.cmpl); push!(dest, s.cmpl[i].C_v); end
+    for i in eachindex(s.cgdl); push!(dest, s.cgdl[i].C_v); end
+    push!(dest, s.cgc.C_v)
+
+    # s block
+    push!(dest, s.agc.s)
+    for i in eachindex(s.agdl); push!(dest, s.agdl[i].s); end
+    for i in eachindex(s.ampl); push!(dest, s.ampl[i].s); end
+    push!(dest, s.acl.s)
+    push!(dest, s.ccl.s)
+    for i in eachindex(s.cmpl); push!(dest, s.cmpl[i].s); end
+    for i in eachindex(s.cgdl); push!(dest, s.cgdl[i].s); end
+    push!(dest, s.cgc.s)
+
+    # lambda block
+    push!(dest, s.acl.lambda)
+    push!(dest, s.mem.lambda)
+    push!(dest, s.ccl.lambda)
+
+    # species block
+    push!(dest, s.agc.C_H2)
+    for i in eachindex(s.agdl); push!(dest, s.agdl[i].C_H2); end
+    for i in eachindex(s.ampl); push!(dest, s.ampl[i].C_H2); end
+    push!(dest, s.acl.C_H2)
+    push!(dest, s.ccl.C_O2)
+    for i in eachindex(s.cmpl); push!(dest, s.cmpl[i].C_O2); end
+    for i in eachindex(s.cgdl); push!(dest, s.cgdl[i].C_O2); end
+    push!(dest, s.cgc.C_O2)
+    push!(dest, s.agc.C_N2)
+    push!(dest, s.cgc.C_N2)
+
+    # temperature block
+    push!(dest, s.agc.T)
+    for i in eachindex(s.agdl); push!(dest, s.agdl[i].T); end
+    for i in eachindex(s.ampl); push!(dest, s.ampl[i].T); end
+    push!(dest, s.acl.T)
+    push!(dest, s.mem.T)
+    push!(dest, s.ccl.T)
+    for i in eachindex(s.cmpl); push!(dest, s.cmpl[i].T); end
+    for i in eachindex(s.cgdl); push!(dest, s.cgdl[i].T); end
+    push!(dest, s.cgc.T)
+
+    # voltage block
+    push!(dest, s.ccl.eta_c)
+    return dest
+end
+
 """Extract final internal states from a simulation to initialize the next one.
 
 # Arguments
@@ -128,24 +183,45 @@ end
 - `initial_variable_values`: Internal state vector.
 """
 function _extract_last_internal_state(simu::AlphaPEM, cfg::SimulationConfig)
-    initial_variable_values = []
+    initial_variable_values = Float64[]
 
+    # Fast typed path: read directly from typed simulation outputs when available.
+    if simu.outputs !== nothing
+        last_state = simu.outputs.solver.states[end]
+        for k in 1:simu.fuel_cell.numerical_parameters.nb_gc
+            _append_mea_state_1D_to_solver_order!(initial_variable_values, last_state.nodes[k])
+        end
+
+        if cfg.type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
+                                  :forced_convective_cathode_with_anodic_recirculation)
+            for key in MANIFOLD_SOLVER_VARIABLE_NAMES
+                push!(initial_variable_values, Float64(simu.variables[key][end]))
+            end
+            for key in AUXILIARY_SOLVER_VARIABLE_NAMES
+                push!(initial_variable_values, Float64(simu.variables[key][end]))
+            end
+        end
+
+        return initial_variable_values
+    end
+
+    # Legacy fallback path.
     np = simu.fuel_cell.numerical_parameters
     mea_names = canonical_mea_solver_variable_names(np.nb_gdl, np.nb_mpl)
 
     for k in 1:simu.fuel_cell.numerical_parameters.nb_gc
         for key in mea_names
-            push!(initial_variable_values, simu.variables[key][k][end])
+            push!(initial_variable_values, Float64(simu.variables[key][k][end]))
         end
     end
 
     if cfg.type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
                               :forced_convective_cathode_with_anodic_recirculation)
         for key in MANIFOLD_SOLVER_VARIABLE_NAMES
-            push!(initial_variable_values, simu.variables[key][end])
+            push!(initial_variable_values, Float64(simu.variables[key][end]))
         end
         for key in AUXILIARY_SOLVER_VARIABLE_NAMES
-            push!(initial_variable_values, simu.variables[key][end])
+            push!(initial_variable_values, Float64(simu.variables[key][end]))
         end
     end
 
@@ -193,13 +269,13 @@ function launch_AlphaPEM_for_step_current(simu::AlphaPEM)::AlphaPEM
 
             # time_interval actualization
             if i < n  # The final simulation does not require actualization.
-                t0_interval = simu.variables["t"][end]
+                t0_interval = _last_sim_time(simu)
                 tf_interval = (i + 1) * delta_t_dyn_step
                 time_interval = [t0_interval, tf_interval]  # Reset of the time interval
             end
 
             # Recovery of the internal states from the end of the preceding simulation.
-            initial_variable_values = _extract_last_internal_state(simu, computing_parameters["type_auxiliary"])
+            initial_variable_values = _extract_last_internal_state(simu, simu.cfg)
 
             # Display
             if simu.cfg.type_display != :no_display
@@ -253,13 +329,13 @@ function launch_AlphaPEM_for_polarization_current(simu::AlphaPEM)::AlphaPEM
 
             # time_interval actualization
             if i < n  # The final simulation does not require actualization.
-                t0_interval = simu.variables["t"][end]
+                t0_interval = _last_sim_time(simu)
                 tf_interval = delta_t_ini_pola + (i + 1) * delta_t_pola
                 time_interval = [t0_interval, tf_interval]  # Reset of the time interval
             end
 
             # Recovery of the internal states from the end of the preceding simulation.
-            initial_variable_values = _extract_last_internal_state(simu, cfg)
+            initial_variable_values = _extract_last_internal_state(simu, simu.cfg)
 
             # Display
             if simu.cfg.type_display != :no_display
@@ -318,7 +394,7 @@ function launch_AlphaPEM_for_polarization_current(simulators::Vector{AlphaPEM},
                         select_nth_elements(current_parameters, i),
                         select_nth_elements(computing_parameters, i))
         # Display
-        if simu.cfg.type_display != :no_display
+        if simulators[i].cfg.type_display != :no_display
             Display(simulators[i], ax1, ax2, ax3)
         end
     end
@@ -356,7 +432,7 @@ function launch_AlphaPEM_for_polarization_current_for_calibration(
     end
 
     # Dynamic display requires a dedicated use of the AlphaPEM class.
-    if simu.cfg.type_plot == :dynamic
+    if simulators[1].cfg.type_plot == :dynamic
         # Initialization
         #       Calculation of the plot update number (n) and the initial time interval (time_interval).
         initial_variable_values = nothing
@@ -382,16 +458,16 @@ function launch_AlphaPEM_for_polarization_current_for_calibration(
 
             # time_interval actualization
             if i < n  # The final simulation does not require actualization.
-                t0_interval = simulators[1].variables["t"][end]
+                t0_interval = _last_sim_time(simulators[1])
                 tf_interval = delta_t_ini_pola_cali + (i + 1) * delta_t_pola_cali
                 time_interval = [t0_interval, tf_interval]  # Reset of the time interval
             end
 
             # Recovery of the internal states from the end of the preceding simulation.
-            initial_variable_values = _extract_last_internal_state(simulators[1], computing_parameters["type_auxiliary"])
+            initial_variable_values = _extract_last_internal_state(simulators[1], simulators[1].cfg)
 
             # Display
-            if simu.cfg.type_display != :no_display
+            if simulators[1].cfg.type_display != :no_display
                 Display(simulators[1], ax1, ax2, ax3)
             end
         end
@@ -413,7 +489,7 @@ function launch_AlphaPEM_for_polarization_current_for_calibration(
                             select_nth_elements(current_parameters, i),
                             select_nth_elements(computing_parameters, i))
             # Display
-            if simu.cfg.type_display != :no_display
+            if simulators[i].cfg.type_display != :no_display
                 Display(simulators[i], ax1, ax2, ax3)
             end
         end
@@ -443,7 +519,7 @@ function launch_AlphaPEM_for_EIS_current(simulator::AlphaPEM,
                                          computing_parameters::Dict)::AlphaPEM
 
     # Check if the computing_parameters["type_current"] is valid
-    if simu.cfg.type_plot != :dynamic
+    if simulator.cfg.type_plot != :dynamic
         throw(ArgumentError("EIS has to be plot with a dynamic type_plot setting, because max_step has to be adjusted at each frequency."))
     end
 
@@ -473,9 +549,9 @@ function launch_AlphaPEM_for_EIS_current(simulator::AlphaPEM,
     time_interval = [t0_EIS_temp, tf_EIS_temp]
 
     # Recovery of the internal states from the end of the preceding simulation.
-    initial_variable_values = _extract_last_internal_state(simulator, computing_parameters["type_auxiliary"])
+    initial_variable_values = _extract_last_internal_state(simulator, simulator.cfg)
 
-    if simu.cfg.type_display == :multiple
+    if simulator.cfg.type_display == :multiple
         println("A display bug prevents the dynamic updating of the graphs, as it appears that too much data is involved. However, the data is correctly calculated, and the appropriate plots are saved in the 'results' folder. This display bug does not occur when using a 'synthetic' type_display.")
     end
 
@@ -486,17 +562,17 @@ function launch_AlphaPEM_for_EIS_current(simulator::AlphaPEM,
 
         # time_interval actualization
         if i < n  # The final simulation does not require actualization.
-            t0_EIS_temp = simulator.variables["t"][end]  # It is the initial time for 1 EIS point.
+            t0_EIS_temp = _last_sim_time(simulator)  # It is the initial time for 1 EIS point.
             tf_EIS_temp = t_new_start[i + 1] + delta_t_break_EIS[i + 1] + delta_t_measurement_EIS[i + 1]  # Final time for 1 EIS point.
             n_inf = findlast(x -> x <= t0_EIS_temp, t_new_start)  # It is the number of frequency changes already made.
             time_interval = [t0_EIS_temp, tf_EIS_temp]  # It is the time interval for 1 EIS point.
         end
 
         # Recovery of the internal states from the end of the preceding simulation.
-        initial_variable_values = _extract_last_internal_state(simulator, computing_parameters["type_auxiliary"])
+        initial_variable_values = _extract_last_internal_state(simulator, simulator.cfg)
 
         # Display
-        if simu.cfg.type_display != :no_display
+        if simulator.cfg.type_display != :no_display
             Display(simulator, ax1, ax2, ax3)
         end
     end
@@ -511,5 +587,15 @@ function launch_AlphaPEM_for_EIS_current(simulator::AlphaPEM,
     _ = n_inf
 
     return simulator
+end
+
+
+"""Return the last simulated time using typed outputs when available.
+Falls back to legacy dictionary storage during migration."""
+function _last_sim_time(simu::AlphaPEM)::Float64
+    if simu.outputs !== nothing
+        return simu.outputs.solver.t[end]
+    end
+    return Float64(simu.variables["t"][end])
 end
 
