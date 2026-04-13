@@ -357,7 +357,7 @@ function launch_AlphaPEM_for_polarization_current(simu::AlphaPEM)::AlphaPEM
 
     return simu
 end
-function launch_AlphaPEM_for_polarization_current(simulators::Vector{AlphaPEM},
+function launch_AlphaPEM_for_polarization_current(simulators::AbstractVector{<:AlphaPEM},
                                                   operating_inputs::Dict,
                                                   current_parameters::Dict,
                                                   computing_parameters::Dict)::AlphaPEM

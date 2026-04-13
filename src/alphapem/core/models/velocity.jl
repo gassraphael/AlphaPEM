@@ -274,23 +274,27 @@ DesiredInletFlows
     kappa_co = pp.kappa_co
     nb_gc, nb_cell = np.nb_gc, pp.nb_cell
 
-    # Extraction of the variables
-    C_H2_acl = [solver_variables[i].acl.C_H2 for i in 1:nb_gc]
-    C_O2_ccl = [solver_variables[i].ccl.C_O2 for i in 1:nb_gc]
-    lambda_mem = [solver_variables[i].mem.lambda for i in 1:nb_gc]
-    T_acl = [solver_variables[i].acl.T for i in 1:nb_gc]
-    T_mem = [solver_variables[i].mem.T for i in 1:nb_gc]
-    T_ccl = [solver_variables[i].ccl.T for i in 1:nb_gc]
-
     # Physical quantities inside the stack
     #       The crossover current density i_n
-    i_n = zeros(Float64, nb_gc)
-    weights_acl_mem_ccl = [Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl), Hccl / (Hacl + Hmem + Hccl)]
+    inv_H_total = 1.0 / (Hacl + Hmem + Hccl)
+    w_acl = Hacl * inv_H_total
+    w_mem = Hmem * inv_H_total
+    w_ccl = Hccl * inv_H_total
+    max_i_n = -Inf
     @inbounds for i in 1:nb_gc
-        T_acl_mem_ccl = average([T_acl[i], T_mem[i], T_ccl[i]], weights_acl_mem_ccl)
-        i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl[i] * k_H2(lambda_mem[i], T_mem[i], kappa_co)
-        i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl[i] * k_O2(lambda_mem[i], T_mem[i], kappa_co)
-        i_n[i] = i_H2 + i_O2
+        s_i = solver_variables[i]
+        T_acl_i = s_i.acl.T
+        T_mem_i = s_i.mem.T
+        T_ccl_i = s_i.ccl.T
+        lambda_mem_i = s_i.mem.lambda
+        C_H2_acl_i = s_i.acl.C_H2
+        C_O2_ccl_i = s_i.ccl.C_O2
+
+        T_acl_mem_ccl = w_acl * T_acl_i + w_mem * T_mem_i + w_ccl * T_ccl_i
+        i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl_i * k_H2(lambda_mem_i, T_mem_i, kappa_co)
+        i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl_i * k_O2(lambda_mem_i, T_mem_i, kappa_co)
+        i_n_i = i_H2 + i_O2
+        max_i_n = max(max_i_n, i_n_i)
     end
 
     if cfg.type_auxiliary == :forced_convective_cathode_with_anodic_recirculation ||
@@ -325,11 +329,11 @@ DesiredInletFlows
         throw(ErrorException("desired_flows is not yet implemented in Julia for the forced-convective auxiliary branches because the translated Python source still depends on unavailable variables such as Pasm, Pcsm, and Wcp."))
     else  # cfg.type_auxiliary == :no_auxiliary
         # At the anode side
-        W_H2_des = Sa * (i_fc_cell + maximum(i_n)) / (2 * F) * (nb_cell * Aact)
+        W_H2_des = Sa * (i_fc_cell + max_i_n) / (2 * F) * (nb_cell * Aact)
         W_H2O_inj_a_des = (Phi_a_des * Psat(T_des) / (Pa_in - Phi_a_des * Psat(T_des))) * W_H2_des
 
         # At the cathode side
-        W_dry_air_des = 1 / y_O2_ext * Sc * (i_fc_cell + maximum(i_n)) / (4 * F) * (nb_cell * Aact)
+        W_dry_air_des = 1 / y_O2_ext * Sc * (i_fc_cell + max_i_n) / (4 * F) * (nb_cell * Aact)
         W_H2O_inj_c_des = (Phi_c_des * Psat(T_des) / (Pc_in - Phi_c_des * Psat(T_des))) * W_dry_air_des
     end
 

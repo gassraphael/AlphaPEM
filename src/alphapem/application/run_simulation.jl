@@ -49,7 +49,7 @@ function run_simulation(cfg::SimulationConfig)::AlphaPEM
     return AlphaPEM_simulator
 end
 
-function run_simulation(cfgs::Vector{SimulationConfig})::Vector{AlphaPEM}
+function run_simulation(cfgs::AbstractVector{<:SimulationConfig})::Vector{AlphaPEM}
 
     # Determine the number of simulators to create based on the length of type_fuel_cells.
     nb_fuel_cells = length(cfgs)

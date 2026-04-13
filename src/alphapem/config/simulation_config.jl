@@ -29,9 +29,9 @@ using ..Config: AbstractCurrentParams, StepParams, PolarizationParams,
 
 export SimulationConfig, validate_config
 
-Base.@kwdef mutable struct SimulationConfig
+Base.@kwdef mutable struct SimulationConfig{T<:AbstractCurrentParams}
     type_fuel_cell::Symbol = :ZSW_GenStack
-    type_current::AbstractCurrentParams = PolarizationParams()
+    type_current::T = PolarizationParams()
     voltage_zone::Symbol = :full
     type_auxiliary::Symbol = :no_auxiliary
     type_purge::Symbol = :no_purge

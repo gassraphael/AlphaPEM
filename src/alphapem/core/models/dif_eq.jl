@@ -184,8 +184,8 @@ function dydt!(dy::Vector{Float64}, t::Float64, y::Vector{Float64}, fc::Abstract
 
     # Pack typed derivatives directly into the pre-allocated solver buffer dy (no allocation).
     fuelcell_derivative = FuelCellDerivativeP2D{nb_gdl, nb_mpl, nb_gc}(Tuple(dif_eq_mea_1D))
-    _assert_fuelcell_derivative_complete(fuelcell_derivative)
-    _pack_fuelcell_derivative_p2d!(dy, fuelcell_derivative)
+    _assert_fuelcell_derivative_complete!(fuelcell_derivative)
+    _pack_fuelcell_derivative_p2d!(dy, fuelcell_derivative, n_vars_per_gc)
 
     if has_auxiliary
         manifold_offset = n_vars_mea

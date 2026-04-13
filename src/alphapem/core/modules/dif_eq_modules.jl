@@ -340,87 +340,68 @@ function _nan_mea_derivative_1D(nb_gdl::Int, nb_mpl::Int)
     return MEACellDerivative1D{nb_gdl, nb_mpl}(agc, agdl, ampl, acl, mem, ccl, cmpl, cgdl, cgc)
 end
 
-"""Ensure all derivatives were assigned before returning to the solver."""
-function _assert_derivative_complete(d::MEACellDerivative1D{nb_gdl, nb_mpl}) where {nb_gdl, nb_mpl}
-    any(isnan, _pack_mea_derivative_1D(d)) &&
-        throw(ArgumentError("At least one derivative entry is missing (NaN sentinel detected)."))
+"""Ensure all scalar values in one typed 1D derivative are assigned (no NaN sentinel left)."""
+function _assert_derivative_complete!(d::MEACellDerivative1D{nb_gdl, nb_mpl}) where {nb_gdl, nb_mpl}
+    fail() = throw(ArgumentError("At least one derivative entry is missing (NaN sentinel detected)."))
+
+    isnan(d.agc.C_v) && fail()
+    isnan(d.agc.s) && fail()
+    isnan(d.agc.C_H2) && fail()
+    isnan(d.agc.C_N2) && fail()
+    isnan(d.agc.T) && fail()
+
+    for i in 1:nb_gdl
+        isnan(d.agdl[i].C_v) && fail()
+        isnan(d.agdl[i].s) && fail()
+        isnan(d.agdl[i].C_H2) && fail()
+        isnan(d.agdl[i].T) && fail()
+        isnan(d.cgdl[i].C_v) && fail()
+        isnan(d.cgdl[i].s) && fail()
+        isnan(d.cgdl[i].C_O2) && fail()
+        isnan(d.cgdl[i].T) && fail()
+    end
+
+    for i in 1:nb_mpl
+        isnan(d.ampl[i].C_v) && fail()
+        isnan(d.ampl[i].s) && fail()
+        isnan(d.ampl[i].C_H2) && fail()
+        isnan(d.ampl[i].T) && fail()
+        isnan(d.cmpl[i].C_v) && fail()
+        isnan(d.cmpl[i].s) && fail()
+        isnan(d.cmpl[i].C_O2) && fail()
+        isnan(d.cmpl[i].T) && fail()
+    end
+
+    isnan(d.acl.C_v) && fail()
+    isnan(d.acl.s) && fail()
+    isnan(d.acl.lambda) && fail()
+    isnan(d.acl.C_H2) && fail()
+    isnan(d.acl.T) && fail()
+
+    isnan(d.mem.lambda) && fail()
+    isnan(d.mem.T) && fail()
+
+    isnan(d.ccl.C_v) && fail()
+    isnan(d.ccl.s) && fail()
+    isnan(d.ccl.lambda) && fail()
+    isnan(d.ccl.C_O2) && fail()
+    isnan(d.ccl.T) && fail()
+    isnan(d.ccl.eta_c) && fail()
+
+    isnan(d.cgc.C_v) && fail()
+    isnan(d.cgc.s) && fail()
+    isnan(d.cgc.C_O2) && fail()
+    isnan(d.cgc.C_N2) && fail()
+    isnan(d.cgc.T) && fail()
     return nothing
-end
-
-"""Repack one typed 1D derivative container into the solver ordering."""
-function _pack_mea_derivative_1D(d::MEACellDerivative1D{nb_gdl, nb_mpl}) where {nb_gdl, nb_mpl}
-    out = Float64[]
-    sizehint!(out, _nb_solver_vars_per_gc(nb_gdl, nb_mpl))
-
-    # C_v block
-    push!(out, d.agc.C_v)
-    append!(out, [d.agdl[i].C_v for i in 1:nb_gdl])
-    append!(out, [d.ampl[i].C_v for i in 1:nb_mpl])
-    push!(out, d.acl.C_v)
-    push!(out, d.ccl.C_v)
-    append!(out, [d.cmpl[i].C_v for i in 1:nb_mpl])
-    append!(out, [d.cgdl[i].C_v for i in 1:nb_gdl])
-    push!(out, d.cgc.C_v)
-
-    # s block
-    push!(out, d.agc.s)
-    append!(out, [d.agdl[i].s for i in 1:nb_gdl])
-    append!(out, [d.ampl[i].s for i in 1:nb_mpl])
-    push!(out, d.acl.s)
-    push!(out, d.ccl.s)
-    append!(out, [d.cmpl[i].s for i in 1:nb_mpl])
-    append!(out, [d.cgdl[i].s for i in 1:nb_gdl])
-    push!(out, d.cgc.s)
-
-    # lambda block
-    push!(out, d.acl.lambda)
-    push!(out, d.mem.lambda)
-    push!(out, d.ccl.lambda)
-
-    # H2/O2/N2 block
-    push!(out, d.agc.C_H2)
-    append!(out, [d.agdl[i].C_H2 for i in 1:nb_gdl])
-    append!(out, [d.ampl[i].C_H2 for i in 1:nb_mpl])
-    push!(out, d.acl.C_H2)
-    push!(out, d.ccl.C_O2)
-    append!(out, [d.cmpl[i].C_O2 for i in 1:nb_mpl])
-    append!(out, [d.cgdl[i].C_O2 for i in 1:nb_gdl])
-    push!(out, d.cgc.C_O2)
-    push!(out, d.agc.C_N2)
-    push!(out, d.cgc.C_N2)
-
-    # T block + eta_c
-    push!(out, d.agc.T)
-    append!(out, [d.agdl[i].T for i in 1:nb_gdl])
-    append!(out, [d.ampl[i].T for i in 1:nb_mpl])
-    push!(out, d.acl.T)
-    push!(out, d.mem.T)
-    push!(out, d.ccl.T)
-    append!(out, [d.cmpl[i].T for i in 1:nb_mpl])
-    append!(out, [d.cgdl[i].T for i in 1:nb_gdl])
-    push!(out, d.cgc.T)
-    push!(out, d.ccl.eta_c)
-
-    return out
 end
 
 """Ensure all MEA node derivatives in the P2D container are fully assigned."""
-function _assert_fuelcell_derivative_complete(d::FuelCellDerivativeP2D{nb_gdl, nb_mpl, nb_gc}) where {nb_gdl, nb_mpl, nb_gc}
+function _assert_fuelcell_derivative_complete!(d::FuelCellDerivativeP2D{nb_gdl, nb_mpl, nb_gc}) where {nb_gdl, nb_mpl, nb_gc}
     for i in 1:nb_gc
-        _assert_derivative_complete(d.nodes[i])
+        _assert_derivative_complete!(d.nodes[i])
     end
     return nothing
-end
-
-"""Pack a full typed P2D MEA derivative into solver-vector ordering."""
-function _pack_fuelcell_derivative_p2d(d::FuelCellDerivativeP2D{nb_gdl, nb_mpl, nb_gc}) where {nb_gdl, nb_mpl, nb_gc}
-    n_per_gc = _nb_solver_vars_per_gc(nb_gdl, nb_mpl)
-    out = Float64[]
-    sizehint!(out, nb_gc * n_per_gc)
-    for i in 1:nb_gc
-        append!(out, _pack_mea_derivative_1D(d.nodes[i]))
-    end
-    return out
 end
 
 """Write one typed 1D derivative container directly into `dy` starting at `offset` (1-based, no allocation)."""
@@ -476,10 +457,10 @@ end
 
 """Write all GC-node typed derivatives directly into `dy` with zero allocations (SciML iip convention)."""
 function _pack_fuelcell_derivative_p2d!(dy::AbstractVector{Float64},
-                                         d::FuelCellDerivativeP2D{nb_gdl, nb_mpl, nb_gc}) where {nb_gdl, nb_mpl, nb_gc}
-    n_per_gc = _nb_solver_vars_per_gc(nb_gdl, nb_mpl)
+                                         d::FuelCellDerivativeP2D{nb_gdl, nb_mpl, nb_gc},
+                                         n_vars_per_gc::Int) where {nb_gdl, nb_mpl, nb_gc}
     for i in 1:nb_gc
-        _pack_mea_derivative_1D!(dy, (i - 1) * n_per_gc + 1, d.nodes[i])
+        _pack_mea_derivative_1D!(dy, (i - 1) * n_vars_per_gc + 1, d.nodes[i])
     end
     return nothing
 end

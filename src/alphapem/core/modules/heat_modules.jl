@@ -54,7 +54,8 @@ function heat_transfer_int_values(sv::MEAState1D,
     k_th_eff_agc_agdl = k_th_eff("agdl", T_agdl[1], C_v_agdl[1], s_agdl[1], nothing,
                                  C_H2_agdl[1], nothing, C_N2_agc, epsilon_gdl, nothing, epsilon_c)
 
-    k_th_eff_agdl_agdl = Vector{Number}(undef, max(nb_gdl - 1, 0))
+    T_k_th = typeof(k_th_eff_agc_agdl)
+    k_th_eff_agdl_agdl = Vector{T_k_th}(undef, max(nb_gdl - 1, 0))
     @inbounds for i in 1:(nb_gdl - 1)
         k_th_eff_agdl_agdl[i] = hmean([
             k_th_eff("agdl", T_agdl[i], C_v_agdl[i], s_agdl[i], nothing,
@@ -71,7 +72,7 @@ function heat_transfer_int_values(sv::MEAState1D,
              nothing, C_N2_agc, epsilon_mpl)
     ], [Hgdl_node / 2, Hmpl_node / 2])
 
-    k_th_eff_ampl_ampl = Vector{Number}(undef, max(nb_mpl - 1, 0))
+    k_th_eff_ampl_ampl = Vector{T_k_th}(undef, max(nb_mpl - 1, 0))
     @inbounds for i in 1:(nb_mpl - 1)
         k_th_eff_ampl_ampl[i] = hmean([
             k_th_eff("ampl", T_ampl[i], C_v_ampl[i], s_ampl[i], nothing,
@@ -103,7 +104,7 @@ function heat_transfer_int_values(sv::MEAState1D,
              C_N2_cgc, epsilon_mpl)
     ], [Hccl / 2, Hmpl_node / 2])
 
-    k_th_eff_cmpl_cmpl = Vector{Number}(undef, max(nb_mpl - 1, 0))
+    k_th_eff_cmpl_cmpl = Vector{T_k_th}(undef, max(nb_mpl - 1, 0))
     @inbounds for i in 1:(nb_mpl - 1)
         k_th_eff_cmpl_cmpl[i] = hmean([
             k_th_eff("cmpl", T_cmpl[i], C_v_cmpl[i], s_cmpl[i], nothing,
@@ -120,7 +121,7 @@ function heat_transfer_int_values(sv::MEAState1D,
              C_N2_cgc, epsilon_gdl, nothing, epsilon_c)
     ], [Hmpl_node / 2, Hgdl_node / 2])
 
-    k_th_eff_cgdl_cgdl = Vector{Number}(undef, max(nb_gdl - 1, 0))
+    k_th_eff_cgdl_cgdl = Vector{T_k_th}(undef, max(nb_gdl - 1, 0))
     @inbounds for i in 1:(nb_gdl - 1)
         k_th_eff_cgdl_cgdl[i] = hmean([
             k_th_eff("cgdl", T_cgdl[i], C_v_cgdl[i], s_cgdl[i], nothing,

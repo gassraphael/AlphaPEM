@@ -39,9 +39,8 @@ if length(type_fuel_cell_list) == 1
     algo_time = time() - start_time # Ending time
     println("Time of the algorithm in second : ", algo_time)
 else
-    cfgs = Vector{SimulationConfig}(undef, length(type_fuel_cell_list))
-    for i in 1:length(type_fuel_cell_list)
-        cfgs[i] = SimulationConfig(
+    cfgs = [
+        SimulationConfig(
             type_fuel_cell = type_fuel_cell_list[i],
             type_current = current_params,
             voltage_zone = :before_voltage_drop,
@@ -50,7 +49,8 @@ else
             type_display = :synthetic,
             type_plot = :fixed
         )
-    end
+        for i in 1:length(type_fuel_cell_list)
+    ]
     start_time = time() # Starting time
     run_simulation(cfgs)
     algo_time = time() - start_time # Ending time
