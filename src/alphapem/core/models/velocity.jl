@@ -121,14 +121,32 @@ function calculate_velocity_evolution(sv::AbstractVector{<:MEAState1D}, i_fc_cel
         J_tot_cgdl_cgc[i] = Jv_cgdl_cgc + J_O2_cgdl_cgc + Jl_cgdl_cgc  # Total molar flow from the CGDL to the CGC (mol.m-2.s-1).
     end
 
+    # Pre-allocated Float64 buffers for the residual closure.
+    # Re-used across Newton iterations and line-search evaluations (Float64 path only).
+    # The ForwardDiff Jacobian path (Dual element type) still allocates, as it needs typed arrays.
+    _res_J_a = Vector{Float64}(undef, nb_gc)
+    _res_J_c = Vector{Float64}(undef, nb_gc)
+    _res_P_a = Vector{Float64}(undef, nb_gc)
+    _res_P_c = Vector{Float64}(undef, nb_gc)
+    _res_v_a = Vector{Float64}(undef, nb_gc)
+    _res_v_c = Vector{Float64}(undef, nb_gc)
+
     # Residual function for the nonlinear solver applied to the inlet molar flows
     function residuals(J_in_guessed, _)
         # Intermediate values
         FT = eltype(J_in_guessed)  # Numeric type of the guessed inlet molar flows (Float64 or Dual for autodiff).
         J_a_in_guessed, J_c_in_guessed = J_in_guessed[1], J_in_guessed[2]
-        J_a, J_c = zeros(FT, nb_gc), zeros(FT, nb_gc)
-        P_a, P_c = zeros(FT, nb_gc), zeros(FT, nb_gc)
-        v_a, v_c = zeros(FT, nb_gc), zeros(FT, nb_gc)
+        if FT === Float64
+            # Reuse pre-allocated buffers — no heap allocation on the hot path.
+            J_a, J_c = _res_J_a, _res_J_c
+            P_a, P_c = _res_P_a, _res_P_c
+            v_a, v_c = _res_v_a, _res_v_c
+        else
+            # ForwardDiff Jacobian evaluation: element type is Dual — must allocate.
+            J_a, J_c = zeros(FT, nb_gc), zeros(FT, nb_gc)
+            P_a, P_c = zeros(FT, nb_gc), zeros(FT, nb_gc)
+            v_a, v_c = zeros(FT, nb_gc), zeros(FT, nb_gc)
+        end
 
         # Continuity equations are used for calculating the molar flows at all points along the GC at stationary state.
         @inbounds for i in 1:nb_gc
