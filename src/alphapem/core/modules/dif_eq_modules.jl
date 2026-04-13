@@ -251,67 +251,78 @@ end
 if @isdefined(MEAState1D)
 
 """Unpack one GC-node segment of the solver vector into a typed 1D MEA state."""
-function _unpack_mea_state_1D(values::AbstractVector{<:Real}, nb_gdl::Int, nb_mpl::Int)
-    idx = 1
+@inline function _unpack_mea_state_1D(values::AbstractVector{<:Real}, nb_gdl::Int, nb_mpl::Int)
+    return _unpack_mea_state_1D(values, Val(nb_gdl), Val(nb_mpl))
+end
 
-    C_v_agc = Float64(values[idx]); idx += 1
-    C_v_agdl = [Float64(values[idx + i - 1]) for i in 1:nb_gdl]; idx += nb_gdl
-    C_v_ampl = [Float64(values[idx + i - 1]) for i in 1:nb_mpl]; idx += nb_mpl
-    C_v_acl = Float64(values[idx]); idx += 1
-    C_v_ccl = Float64(values[idx]); idx += 1
-    C_v_cmpl = [Float64(values[idx + i - 1]) for i in 1:nb_mpl]; idx += nb_mpl
-    C_v_cgdl = [Float64(values[idx + i - 1]) for i in 1:nb_gdl]; idx += nb_gdl
-    C_v_cgc = Float64(values[idx]); idx += 1
+@inline function _unpack_mea_state_1D(values::AbstractVector{<:Real}, ::Val{N_GDL}, ::Val{N_MPL}) where {N_GDL, N_MPL}
+    idx = Ref(1)
 
-    s_agc = Float64(values[idx]); idx += 1
-    s_agdl = [Float64(values[idx + i - 1]) for i in 1:nb_gdl]; idx += nb_gdl
-    s_ampl = [Float64(values[idx + i - 1]) for i in 1:nb_mpl]; idx += nb_mpl
-    s_acl = Float64(values[idx]); idx += 1
-    s_ccl = Float64(values[idx]); idx += 1
-    s_cmpl = [Float64(values[idx + i - 1]) for i in 1:nb_mpl]; idx += nb_mpl
-    s_cgdl = [Float64(values[idx + i - 1]) for i in 1:nb_gdl]; idx += nb_gdl
-    s_cgc = Float64(values[idx]); idx += 1
+    @inline read_scalar!() = begin
+        @inbounds v = Float64(values[idx[]])
+        idx[] += 1
+        return v
+    end
+    @inline read_block!(::Val{N}) where {N} = ntuple(_ -> read_scalar!(), Val(N))
 
-    lambda_acl = Float64(values[idx]); idx += 1
-    lambda_mem = Float64(values[idx]); idx += 1
-    lambda_ccl = Float64(values[idx]); idx += 1
+    C_v_agc = read_scalar!()
+    C_v_agdl = read_block!(Val(N_GDL))
+    C_v_ampl = read_block!(Val(N_MPL))
+    C_v_acl = read_scalar!()
+    C_v_ccl = read_scalar!()
+    C_v_cmpl = read_block!(Val(N_MPL))
+    C_v_cgdl = read_block!(Val(N_GDL))
+    C_v_cgc = read_scalar!()
 
-    C_H2_agc = Float64(values[idx]); idx += 1
-    C_H2_agdl = [Float64(values[idx + i - 1]) for i in 1:nb_gdl]; idx += nb_gdl
-    C_H2_ampl = [Float64(values[idx + i - 1]) for i in 1:nb_mpl]; idx += nb_mpl
-    C_H2_acl = Float64(values[idx]); idx += 1
-    C_O2_ccl = Float64(values[idx]); idx += 1
-    C_O2_cmpl = [Float64(values[idx + i - 1]) for i in 1:nb_mpl]; idx += nb_mpl
-    C_O2_cgdl = [Float64(values[idx + i - 1]) for i in 1:nb_gdl]; idx += nb_gdl
-    C_O2_cgc = Float64(values[idx]); idx += 1
-    C_N2_agc = Float64(values[idx]); idx += 1
-    C_N2_cgc = Float64(values[idx]); idx += 1
+    s_agc = read_scalar!()
+    s_agdl = read_block!(Val(N_GDL))
+    s_ampl = read_block!(Val(N_MPL))
+    s_acl = read_scalar!()
+    s_ccl = read_scalar!()
+    s_cmpl = read_block!(Val(N_MPL))
+    s_cgdl = read_block!(Val(N_GDL))
+    s_cgc = read_scalar!()
 
-    T_agc = Float64(values[idx]); idx += 1
-    T_agdl = [Float64(values[idx + i - 1]) for i in 1:nb_gdl]; idx += nb_gdl
-    T_ampl = [Float64(values[idx + i - 1]) for i in 1:nb_mpl]; idx += nb_mpl
-    T_acl = Float64(values[idx]); idx += 1
-    T_mem = Float64(values[idx]); idx += 1
-    T_ccl = Float64(values[idx]); idx += 1
-    T_cmpl = [Float64(values[idx + i - 1]) for i in 1:nb_mpl]; idx += nb_mpl
-    T_cgdl = [Float64(values[idx + i - 1]) for i in 1:nb_gdl]; idx += nb_gdl
-    T_cgc = Float64(values[idx]); idx += 1
-    eta_c = Float64(values[idx]); idx += 1
+    lambda_acl = read_scalar!()
+    lambda_mem = read_scalar!()
+    lambda_ccl = read_scalar!()
 
-    idx == length(values) + 1 ||
+    C_H2_agc = read_scalar!()
+    C_H2_agdl = read_block!(Val(N_GDL))
+    C_H2_ampl = read_block!(Val(N_MPL))
+    C_H2_acl = read_scalar!()
+    C_O2_ccl = read_scalar!()
+    C_O2_cmpl = read_block!(Val(N_MPL))
+    C_O2_cgdl = read_block!(Val(N_GDL))
+    C_O2_cgc = read_scalar!()
+    C_N2_agc = read_scalar!()
+    C_N2_cgc = read_scalar!()
+
+    T_agc = read_scalar!()
+    T_agdl = read_block!(Val(N_GDL))
+    T_ampl = read_block!(Val(N_MPL))
+    T_acl = read_scalar!()
+    T_mem = read_scalar!()
+    T_ccl = read_scalar!()
+    T_cmpl = read_block!(Val(N_MPL))
+    T_cgdl = read_block!(Val(N_GDL))
+    T_cgc = read_scalar!()
+    eta_c = read_scalar!()
+
+    idx[] == length(values) + 1 ||
         throw(ArgumentError("Invalid 1D state segment length while unpacking solver vector."))
 
     agc = AnodeGCState(T_agc, C_v_agc, s_agc, C_H2_agc, C_N2_agc)
-    agdl = ntuple(i -> AnodeGDLState(T_agdl[i], C_v_agdl[i], s_agdl[i], C_H2_agdl[i]), nb_gdl)
-    ampl = ntuple(i -> AnodeMPLState(T_ampl[i], C_v_ampl[i], s_ampl[i], C_H2_ampl[i]), nb_mpl)
+    agdl = ntuple(i -> AnodeGDLState(T_agdl[i], C_v_agdl[i], s_agdl[i], C_H2_agdl[i]), Val(N_GDL))
+    ampl = ntuple(i -> AnodeMPLState(T_ampl[i], C_v_ampl[i], s_ampl[i], C_H2_ampl[i]), Val(N_MPL))
     acl = AnodeCLState(T_acl, C_v_acl, s_acl, lambda_acl, C_H2_acl)
     mem = MembraneState(T_mem, lambda_mem)
     ccl = CathodeCLState(T_ccl, C_v_ccl, s_ccl, lambda_ccl, C_O2_ccl, eta_c)
-    cmpl = ntuple(i -> CathodeMPLState(T_cmpl[i], C_v_cmpl[i], s_cmpl[i], C_O2_cmpl[i]), nb_mpl)
-    cgdl = ntuple(i -> CathodeGDLState(T_cgdl[i], C_v_cgdl[i], s_cgdl[i], C_O2_cgdl[i]), nb_gdl)
+    cmpl = ntuple(i -> CathodeMPLState(T_cmpl[i], C_v_cmpl[i], s_cmpl[i], C_O2_cmpl[i]), Val(N_MPL))
+    cgdl = ntuple(i -> CathodeGDLState(T_cgdl[i], C_v_cgdl[i], s_cgdl[i], C_O2_cgdl[i]), Val(N_GDL))
     cgc = CathodeGCState(T_cgc, C_v_cgc, s_cgc, C_O2_cgc, C_N2_cgc)
 
-    return MEAState1D{nb_gdl, nb_mpl}(agc, agdl, ampl, acl, mem, ccl, cmpl, cgdl, cgc)
+    return MEAState1D{N_GDL, N_MPL}(agc, agdl, ampl, acl, mem, ccl, cmpl, cgdl, cgc)
 end
 
 """Create a derivative container initialized with NaN values."""
