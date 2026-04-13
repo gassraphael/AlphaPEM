@@ -23,6 +23,12 @@ cd : AbstractCurrent
     Current profile instance (prescribes current as a function of time).
 cfg : SimulationConfig
     Simulation configuration (type_auxiliary, etc.).
+n_vars_per_gc : Int
+    Pre-calculated number of solver variables per gas-channel node.
+n_vars_manifold : Int
+    Pre-calculated number of solver variables in manifolds.
+n_vars_auxiliary : Int
+    Pre-calculated number of solver variables in auxiliary systems.
 
 Returns
 -------
@@ -30,7 +36,8 @@ Vector{Float64}
     Vector containing the derivative of the solver variables.
 """
 function dydt(t::Float64, y::Vector{Float64}, fc::AbstractFuelCell, cd::AbstractCurrent,
-              cfg::SimulationConfig)::Vector{Float64}
+              cfg::SimulationConfig, n_vars_per_gc::Int, n_vars_manifold::Int,
+              n_vars_auxiliary::Int)::Vector{Float64}
 
     # Extraction of frequently used parameters
     oc = fc.operating_conditions
@@ -45,11 +52,8 @@ function dydt(t::Float64, y::Vector{Float64}, fc::AbstractFuelCell, cd::Abstract
     has_auxiliary = type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
                                        :forced_convective_cathode_with_anodic_recirculation)
 
-    # Build typed local state and derivative containers for each GC node.
-    n_vars_per_gc = _nb_solver_vars_per_gc(nb_gdl, nb_mpl)
+    # Buil typed local state and derivative containers for each GC node, manifold, and auxiliary system.
     n_vars_mea = nb_gc * n_vars_per_gc
-    n_vars_manifold = has_auxiliary ? _nb_solver_vars_manifolds(nb_man) : 0
-    n_vars_auxiliary = _nb_solver_vars_auxiliary(type_auxiliary)
     expected_len = n_vars_mea + n_vars_manifold + n_vars_auxiliary
     length(y) == expected_len ||
         throw(ArgumentError("Unexpected solver vector size for typed path."))

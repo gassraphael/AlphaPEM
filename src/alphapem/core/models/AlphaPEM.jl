@@ -107,13 +107,24 @@ function simulate_model!(simu::AlphaPEM,
     simu.initial_variable_values = initial_variable_values === nothing ?
                                     create_initial_variable_values(simu) : initial_variable_values
 
-    #       Solve the differential equation system.
-    #           Pack external data passed to the ODE right\-hand side.
-    packed = (fuel_cell=simu.fuel_cell, current_density=simu.current_density, cfg=simu.cfg)
-    #           Define RHS in SciML signature: f(y, p, t) -> dy/dt.
-    rhs = (y, p, t) -> dydt(t, y, p.fuel_cell, p.current_density, p.cfg)
-    #           Build and solve the ODE problem with FBDF for stiff dynamics.
-    prob = ODEProblem(rhs, simu.initial_variable_values, simu.time_interval, packed)
+     #       Solve the differential equation system.
+     #           Pre-calculate constant solver vector dimensions to avoid recomputation in dydt.
+     np = simu.fuel_cell.numerical_parameters
+     nb_gdl, nb_mpl, nb_gc, nb_man = np.nb_gdl, np.nb_mpl, np.nb_gc, np.nb_man
+     n_vars_per_gc = _nb_solver_vars_per_gc(nb_gdl, nb_mpl)
+     has_auxiliary = simu.cfg.type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
+                                                  :forced_convective_cathode_with_anodic_recirculation)
+     n_vars_manifold = has_auxiliary ? _nb_solver_vars_manifolds(nb_man) : 0
+     n_vars_auxiliary = _nb_solver_vars_auxiliary(simu.cfg.type_auxiliary)
+
+     #           Pack external data passed to the ODE right\-hand side.
+     packed = (fuel_cell=simu.fuel_cell, current_density=simu.current_density, cfg=simu.cfg,
+               n_vars_per_gc=n_vars_per_gc, n_vars_manifold=n_vars_manifold, n_vars_auxiliary=n_vars_auxiliary)
+     #           Define RHS in SciML signature: f(y, p, t) -> dy/dt.
+     rhs = (y, p, t) -> dydt(t, y, p.fuel_cell, p.current_density, p.cfg, p.n_vars_per_gc,
+                             p.n_vars_manifold, p.n_vars_auxiliary)
+     #           Build and solve the ODE problem with FBDF for stiff dynamics.
+     prob = ODEProblem(rhs, simu.initial_variable_values, simu.time_interval, packed)
     simu.sol = solve(prob, FBDF(autodiff=false); reltol=simu.fuel_cell.numerical_parameters.rtol,
                      abstol=simu.fuel_cell.numerical_parameters.atol)
 
