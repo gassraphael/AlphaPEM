@@ -12,6 +12,7 @@ Pkg.activate(joinpath(@__DIR__, ".."))
 
 using Dates
 using Profile
+using Printf
 using AlphaPEM.Config: SimulationConfig, StepParams
 using AlphaPEM.Application: run_simulation
 
@@ -95,6 +96,50 @@ function extract_top_hotspots(flat_profile_text; n=5)
     return first(aggregated_hotspots, min(n, length(aggregated_hotspots)))
 end
 
+function format_line_span(line_text)
+    line_parts = split(line_text, ',')
+    unique_parts = unique(strip.(line_parts))
+    isempty(unique_parts) && return "?"
+    length(unique_parts) == 1 && return unique_parts[1]
+    return string(unique_parts[1], " (+", length(unique_parts) - 1, " more)")
+end
+
+function compact_path(file; maxlen=46)
+    normalized = replace(file, "\\" => "/")
+    trimmed = replace(normalized, "@AlphaPEM/" => "")
+    length(trimmed) <= maxlen && return trimmed
+    return string("...", last(trimmed, maxlen - 3))
+end
+
+function print_hotspots(io, hotspots, total_profiled_time)
+    total_samples = sum(h.count for h in hotspots)
+    println(io, rpad("Rank", 6), lpad("Samples", 10), lpad("Share", 9),
+            lpad("Est. s", 10), "  ", rpad("Location", 56), "Function")
+    println(io, repeat("-", 122))
+
+    isempty(hotspots) && begin
+        println(io, "No actionable AlphaPEM hotspots found.")
+        return
+    end
+
+    for (i, hotspot) in enumerate(hotspots)
+        pct = total_samples == 0 ? 0.0 : 100 * hotspot.count / total_samples
+        est_seconds = total_profiled_time * (pct / 100)
+        location = string(compact_path(hotspot.file), ":", format_line_span(hotspot.line))
+        sample_txt = string(hotspot.count)
+        pct_txt = @sprintf("%.1f%%", pct)
+        est_txt = @sprintf("%.4f", est_seconds)
+        println(io,
+                rpad(string(i), 6),
+                lpad(sample_txt, 10),
+                lpad(pct_txt, 9),
+                lpad(est_txt, 10),
+                "  ",
+                rpad(location, 56),
+                hotspot.function_name)
+    end
+end
+
 function make_step_config()
     current_params = StepParams(
         delta_t_ini = 30.0 * 60.0,
@@ -159,10 +204,8 @@ function main()
         println(io, "simulation_config: ", cfg)
         println(io, "")
         println(io, "Top 5 actionable AlphaPEM hotspots (aggregated by function, orchestration excluded):")
-        for (i, hotspot) in enumerate(top_hotspots)
-            println(io, string(i, ". ", hotspot.count, " samples | ", hotspot.file, ":", hotspot.line,
-                               " | ", hotspot.function_name))
-        end
+        println(io, "Columns: Rank | Samples | Share (within top 5) | Est. s (Share * total_profiled_time_s) | Location | Function")
+        print_hotspots(io, top_hotspots, total_profiled_time)
         println(io, "")
         println(io, "Top stack samples (flat view, sorted by count):")
         print(io, flat_profile_text)
@@ -174,10 +217,8 @@ function main()
     println("Mean profiled run time (s): ", mean_profiled_time)
     println("Min/Max profiled run time (s): ", min_profiled_time, " / ", max_profiled_time)
     println("Top 5 actionable hotspots:")
-    for (i, hotspot) in enumerate(top_hotspots)
-        println(i, ". ", hotspot.count, " samples | ", hotspot.file, ":", hotspot.line,
-                " | ", hotspot.function_name)
-    end
+    println("Columns: Rank | Samples | Share (within top 5) | Est. s (Share * total_profiled_time_s) | Location | Function")
+    print_hotspots(stdout, top_hotspots, total_profiled_time)
 end
 
 main()
