@@ -131,23 +131,8 @@ function calculate_velocity_evolution(sv::AbstractVector{<:MEAState1D}, i_fc_cel
     _res_v_a = Vector{Float64}(undef, nb_gc)
     _res_v_c = Vector{Float64}(undef, nb_gc)
 
-    # Residual function for the nonlinear solver applied to the inlet molar flows
-    function residuals(J_in_guessed, _)
-        # Intermediate values
-        FT = eltype(J_in_guessed)  # Numeric type of the guessed inlet molar flows (Float64 or Dual for autodiff).
-        J_a_in_guessed, J_c_in_guessed = J_in_guessed[1], J_in_guessed[2]
-        if FT === Float64
-            # Reuse pre-allocated buffers — no heap allocation on the hot path.
-            J_a, J_c = _res_J_a, _res_J_c
-            P_a, P_c = _res_P_a, _res_P_c
-            v_a, v_c = _res_v_a, _res_v_c
-        else
-            # ForwardDiff Jacobian evaluation: element type is Dual — must allocate.
-            J_a, J_c = zeros(FT, nb_gc), zeros(FT, nb_gc)
-            P_a, P_c = zeros(FT, nb_gc), zeros(FT, nb_gc)
-            v_a, v_c = zeros(FT, nb_gc), zeros(FT, nb_gc)
-        end
-
+    # Shared profile kernel used both by Newton residuals and final output extraction.
+    function compute_profiles!(J_a, J_c, P_a, P_c, v_a, v_c, J_a_in_guessed, J_c_in_guessed)
         # Continuity equations are used for calculating the molar flows at all points along the GC at stationary state.
         @inbounds for i in 1:nb_gc
             J_a_previous = i == 1 ? J_a_in_guessed : J_a[i - 1]
@@ -187,6 +172,27 @@ function calculate_velocity_evolution(sv::AbstractVector{<:MEAState1D}, i_fc_cel
         P_c_in = P_c[1] + 8 * π * mu_gaz_cgc[1] * L_node_gc / (Hcgc * Wcgc) *
                  (v_c[1] - J_tot_cgdl_cgc[1] / C_tot_cgdl[1])
 
+        return P_a_in, P_c_in
+    end
+
+    # In-place residual function for the nonlinear solver applied to inlet molar flows.
+    function residuals!(res, J_in_guessed, _)
+        # Intermediate values
+        FT = eltype(J_in_guessed)  # Numeric type of the guessed inlet molar flows (Float64 or Dual for autodiff).
+        J_a_in_guessed, J_c_in_guessed = J_in_guessed[1], J_in_guessed[2]
+        if FT === Float64
+            # Reuse pre-allocated buffers — no heap allocation on the hot path.
+            J_a, J_c = _res_J_a, _res_J_c
+            P_a, P_c = _res_P_a, _res_P_c
+            v_a, v_c = _res_v_a, _res_v_c
+        else
+            # ForwardDiff Jacobian evaluation: element type is Dual — must allocate.
+            J_a, J_c = Vector{FT}(undef, nb_gc), Vector{FT}(undef, nb_gc)
+            P_a, P_c = Vector{FT}(undef, nb_gc), Vector{FT}(undef, nb_gc)
+            v_a, v_c = Vector{FT}(undef, nb_gc), Vector{FT}(undef, nb_gc)
+        end
+        P_a_in, P_c_in = compute_profiles!(J_a, J_c, P_a, P_c, v_a, v_c, J_a_in_guessed, J_c_in_guessed)
+
         # Desired molar flows at anode and cathode
         if cfg.type_auxiliary == :no_auxiliary
             W_des_calculated = desired_flows(sv, i_fc_cell, P_a_in, P_c_in, fc, cfg)
@@ -197,9 +203,9 @@ function calculate_velocity_evolution(sv::AbstractVector{<:MEAState1D}, i_fc_cel
         end
 
         # Residuals: difference between the calculated and guessed inlet molar flows.
-        res_a = J_a_in_calculated - J_a_in_guessed
-        res_c = J_c_in_calculated - J_c_in_guessed
-        return [res_a, res_c]
+        res[1] = J_a_in_calculated - J_a_in_guessed
+        res[2] = J_c_in_calculated - J_c_in_guessed
+        return nothing
     end
 
     # Calculation of the initial molar flow using NonlinearSolve and the pressure-drop relation
@@ -208,8 +214,9 @@ function calculate_velocity_evolution(sv::AbstractVector{<:MEAState1D}, i_fc_cel
     x0 = [v_medium * Pa_des / (R * T_des), v_medium * Pc_des / (R * T_des)]
 
     #       Solver call
-    prob = NonlinearProblem(residuals, x0)
-    sol = solve(prob, NewtonRaphson(linesearch = LineSearchesJL(; method=LineSearches.BackTracking())); abstol=1e-10, reltol=1e-10, maxiters=200)
+    prob = NonlinearProblem(residuals!, x0)
+    solver = NewtonRaphson(linesearch = LineSearchesJL(; method=LineSearches.BackTracking()))
+    sol = solve(prob, solver; abstol=1e-10, reltol=1e-10, maxiters=200)
 
     #       Check for convergence
     if !SciMLBase.successful_retcode(sol)
@@ -219,52 +226,10 @@ function calculate_velocity_evolution(sv::AbstractVector{<:MEAState1D}, i_fc_cel
     #       Extract initial flow rates
     J_a_in, J_c_in = sol.u[1], sol.u[2]
 
-    # Calculation of the velocity profiles along the gas channels using the found inlet molar flows
-    #       Intermediate values
-    J_a, J_c = zeros(Float64, nb_gc), zeros(Float64, nb_gc)
-    P_a, P_c = zeros(Float64, nb_gc), zeros(Float64, nb_gc)
-    v_a, v_c = zeros(Float64, nb_gc), zeros(Float64, nb_gc)
+    # Reuse pre-allocated Float64 buffers to build final profiles (no extra vector allocation).
+    P_a_in, P_c_in = compute_profiles!(_res_J_a, _res_J_c, _res_P_a, _res_P_c, _res_v_a, _res_v_c, J_a_in, J_c_in)
 
-    #       Continuity equations are used for calculating the molar flows at all points along the GC at stationary state.
-    @inbounds for i in 1:nb_gc
-        J_a_previous = i == 1 ? J_a_in : J_a[i - 1]
-        J_c_previous = i == 1 ? J_c_in : J_c[i - 1]
-        J_a[i] = J_a_previous - J_tot_agc_agdl[i] * L_node_gc / Hagc
-        J_c[i] = J_c_previous + J_tot_cgdl_cgc[i] * L_node_gc / Hcgc
-    end
-    J_a_out = J_a[end]  # Inside the distributor, there are no mass transfer with the GDL.
-    J_c_out = J_c[end]  # Inside the distributor, there are no mass transfer with the GDL.
-
-    #       Velocities at the outlets of the GCs (m/s).
-    P_a_out = Pa_ext
-    P_c_out = Pc_ext
-    v_a_out = J_a_out / P_a_out * R * T_des
-    v_c_out = J_c_out / P_c_out * R * T_des
-
-    #       Backward calculation of pressures and velocities along the GC using modified Hagen-Poiseuille equation.
-    P_a[end] = P_a_out + 8 * π * mu_gaz_agc[end] * Ldist / (Hagc * Wagc) * v_a_out  # Hagen-Poiseuille equation inside the distributor.
-    v_a[end] = J_a[end] / P_a[end] * R * T_des  # It is considered that the outlet gas viscosity at static state is close to mu_gaz_agc[end] in order to simplify the calculations.
-    P_c[end] = P_c_out + 8 * π * mu_gaz_cgc[end] * Ldist / (Hcgc * Wcgc) * v_c_out
-    v_c[end] = J_c[end] / P_c[end] * R * T_des
-
-    @inbounds for i in nb_gc:-1:2
-        # At the node side
-        P_a[i - 1] = P_a[i] + 8 * π * mu_gaz_agc[i] * L_node_gc / (Hagc * Wagc) *
-                     (v_a[i] + J_tot_agc_agdl[i] / C_tot_agdl[i])  # Modified Hagen-Poiseuille equation, considering the convective vapor flow from the GC to the GDL.
-        v_a[i - 1] = J_a[i - 1] / P_a[i - 1] * R * T_des  # Velocity calculated using the known molar flow and pressure at node i-1.
-
-        # At the cathode side
-        P_c[i - 1] = P_c[i] + 8 * π * mu_gaz_cgc[i] * L_node_gc / (Hcgc * Wcgc) *
-                     (v_c[i] - J_tot_cgdl_cgc[i] / C_tot_cgdl[i])  # It is considered that the gas viscosity at static state is close to mu_gaz_cgc[i] in order to simplify the calculations.
-        v_c[i - 1] = J_c[i - 1] / P_c[i - 1] * R * T_des
-    end
-
-    P_a_in = P_a[1] + 8 * π * mu_gaz_agc[1] * L_node_gc / (Hagc * Wagc) *
-             (v_a[1] + J_tot_agc_agdl[1] / C_tot_agdl[1])
-    P_c_in = P_c[1] + 8 * π * mu_gaz_cgc[1] * L_node_gc / (Hcgc * Wcgc) *
-             (v_c[1] - J_tot_cgdl_cgc[1] / C_tot_cgdl[1])
-
-    return v_a, v_c, P_a_in, P_c_in
+    return _res_v_a, _res_v_c, P_a_in, P_c_in
 end
 
 
