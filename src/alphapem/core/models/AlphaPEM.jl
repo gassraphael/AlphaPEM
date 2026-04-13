@@ -117,14 +117,15 @@ function simulate_model!(simu::AlphaPEM,
      n_vars_manifold = has_auxiliary ? _nb_solver_vars_manifolds(nb_man) : 0
      n_vars_auxiliary = _nb_solver_vars_auxiliary(simu.cfg.type_auxiliary)
 
-     #           Pack external data passed to the ODE right\-hand side.
+     #           Pack external data passed to the ODE right-hand side.
      packed = (fuel_cell=simu.fuel_cell, current_density=simu.current_density, cfg=simu.cfg,
                n_vars_per_gc=n_vars_per_gc, n_vars_manifold=n_vars_manifold, n_vars_auxiliary=n_vars_auxiliary)
-     #           Define RHS in SciML signature: f(y, p, t) -> dy/dt.
-     rhs = (y, p, t) -> dydt(t, y, p.fuel_cell, p.current_density, p.cfg, p.n_vars_per_gc,
-                             p.n_vars_manifold, p.n_vars_auxiliary)
+     #           Define RHS in SciML iip=true signature: f!(dy, y, p, t) -> nothing.
+     #           The pre-allocated `dy` buffer is managed by the solver — zero output allocation per call.
+     rhs! = (dy, y, p, t) -> dydt!(dy, t, y, p.fuel_cell, p.current_density, p.cfg, p.n_vars_per_gc,
+                                   p.n_vars_manifold, p.n_vars_auxiliary)
      #           Build and solve the ODE problem with FBDF for stiff dynamics.
-     prob = ODEProblem(rhs, simu.initial_variable_values, simu.time_interval, packed)
+     prob = ODEProblem(rhs!, simu.initial_variable_values, simu.time_interval, packed)
     simu.sol = solve(prob, FBDF(autodiff=false); reltol=simu.fuel_cell.numerical_parameters.rtol,
                      abstol=simu.fuel_cell.numerical_parameters.atol)
 

@@ -403,12 +403,97 @@ end
 
 """Pack a full typed P2D MEA derivative into solver-vector ordering."""
 function _pack_fuelcell_derivative_p2d(d::FuelCellDerivativeP2D{nb_gdl, nb_mpl, nb_gc}) where {nb_gdl, nb_mpl, nb_gc}
+    n_per_gc = _nb_solver_vars_per_gc(nb_gdl, nb_mpl)
     out = Float64[]
-    sizehint!(out, nb_gc * _nb_solver_vars_per_gc(nb_gdl, nb_mpl))
+    sizehint!(out, nb_gc * n_per_gc)
     for i in 1:nb_gc
         append!(out, _pack_mea_derivative_1D(d.nodes[i]))
     end
     return out
+end
+
+"""Write one typed 1D derivative container directly into `dy` starting at `offset` (1-based, no allocation)."""
+function _pack_mea_derivative_1D!(dy::AbstractVector{Float64}, offset::Int,
+                                   d::MEACellDerivative1D{nb_gdl, nb_mpl}) where {nb_gdl, nb_mpl}
+    idx = offset
+    # C_v block
+    dy[idx] = d.agc.C_v; idx += 1
+    for i in 1:nb_gdl; dy[idx] = d.agdl[i].C_v; idx += 1; end
+    for i in 1:nb_mpl; dy[idx] = d.ampl[i].C_v; idx += 1; end
+    dy[idx] = d.acl.C_v; idx += 1
+    dy[idx] = d.ccl.C_v; idx += 1
+    for i in 1:nb_mpl; dy[idx] = d.cmpl[i].C_v; idx += 1; end
+    for i in 1:nb_gdl; dy[idx] = d.cgdl[i].C_v; idx += 1; end
+    dy[idx] = d.cgc.C_v; idx += 1
+    # s block
+    dy[idx] = d.agc.s; idx += 1
+    for i in 1:nb_gdl; dy[idx] = d.agdl[i].s; idx += 1; end
+    for i in 1:nb_mpl; dy[idx] = d.ampl[i].s; idx += 1; end
+    dy[idx] = d.acl.s; idx += 1
+    dy[idx] = d.ccl.s; idx += 1
+    for i in 1:nb_mpl; dy[idx] = d.cmpl[i].s; idx += 1; end
+    for i in 1:nb_gdl; dy[idx] = d.cgdl[i].s; idx += 1; end
+    dy[idx] = d.cgc.s; idx += 1
+    # lambda block
+    dy[idx] = d.acl.lambda; idx += 1
+    dy[idx] = d.mem.lambda; idx += 1
+    dy[idx] = d.ccl.lambda; idx += 1
+    # H2/O2/N2 block
+    dy[idx] = d.agc.C_H2; idx += 1
+    for i in 1:nb_gdl; dy[idx] = d.agdl[i].C_H2; idx += 1; end
+    for i in 1:nb_mpl; dy[idx] = d.ampl[i].C_H2; idx += 1; end
+    dy[idx] = d.acl.C_H2; idx += 1
+    dy[idx] = d.ccl.C_O2; idx += 1
+    for i in 1:nb_mpl; dy[idx] = d.cmpl[i].C_O2; idx += 1; end
+    for i in 1:nb_gdl; dy[idx] = d.cgdl[i].C_O2; idx += 1; end
+    dy[idx] = d.cgc.C_O2; idx += 1
+    dy[idx] = d.agc.C_N2; idx += 1
+    dy[idx] = d.cgc.C_N2; idx += 1
+    # T block + eta_c
+    dy[idx] = d.agc.T; idx += 1
+    for i in 1:nb_gdl; dy[idx] = d.agdl[i].T; idx += 1; end
+    for i in 1:nb_mpl; dy[idx] = d.ampl[i].T; idx += 1; end
+    dy[idx] = d.acl.T; idx += 1
+    dy[idx] = d.mem.T; idx += 1
+    dy[idx] = d.ccl.T; idx += 1
+    for i in 1:nb_mpl; dy[idx] = d.cmpl[i].T; idx += 1; end
+    for i in 1:nb_gdl; dy[idx] = d.cgdl[i].T; idx += 1; end
+    dy[idx] = d.cgc.T; idx += 1
+    dy[idx] = d.ccl.eta_c
+    return nothing
+end
+
+"""Write all GC-node typed derivatives directly into `dy` with zero allocations (SciML iip convention)."""
+function _pack_fuelcell_derivative_p2d!(dy::AbstractVector{Float64},
+                                         d::FuelCellDerivativeP2D{nb_gdl, nb_mpl, nb_gc}) where {nb_gdl, nb_mpl, nb_gc}
+    n_per_gc = _nb_solver_vars_per_gc(nb_gdl, nb_mpl)
+    for i in 1:nb_gc
+        _pack_mea_derivative_1D!(dy, (i - 1) * n_per_gc + 1, d.nodes[i])
+    end
+    return nothing
+end
+
+"""Write manifold derivatives directly into `dy` starting at `offset` (no allocation)."""
+function _pack_manifold_derivative_state!(dy::AbstractVector{Float64}, offset::Int, md)
+    idx = offset
+    for i in eachindex(md.asm.nodes); dy[idx] = md.asm.nodes[i].P;   idx += 1; end
+    for i in eachindex(md.aem.nodes); dy[idx] = md.aem.nodes[i].P;   idx += 1; end
+    for i in eachindex(md.csm.nodes); dy[idx] = md.csm.nodes[i].P;   idx += 1; end
+    for i in eachindex(md.cem.nodes); dy[idx] = md.cem.nodes[i].P;   idx += 1; end
+    for i in eachindex(md.asm.nodes); dy[idx] = md.asm.nodes[i].Phi; idx += 1; end
+    for i in eachindex(md.aem.nodes); dy[idx] = md.aem.nodes[i].Phi; idx += 1; end
+    for i in eachindex(md.csm.nodes); dy[idx] = md.csm.nodes[i].Phi; idx += 1; end
+    for i in eachindex(md.cem.nodes); dy[idx] = md.cem.nodes[i].Phi; idx += 1; end
+    return nothing
+end
+
+"""Write auxiliary derivatives directly into `dy` starting at `offset` (no allocation)."""
+function _pack_auxiliary_derivative!(dy::AbstractVector{Float64}, offset::Int, d::Auxiliary0DDerivative)
+    idx = offset
+    for f in _packed_auxiliary_fields()
+        dy[idx] = getfield(d, f); idx += 1
+    end
+    return nothing
 end
 
 """Count manifold state variables in the solver vector."""

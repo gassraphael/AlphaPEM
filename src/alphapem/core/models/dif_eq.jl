@@ -9,14 +9,17 @@ the 1D+1D+1D model to several 1D models in order to ease the coding.
 # Typed packing/unpacking and derivative consistency helpers are defined in
 # `src/alphapem/core/modules/dif_eq_modules.jl`.
 
-"""This function gives the system of differential equations to solve.
+"""In-place RHS for the ODE solver (SciML iip=true convention: f!(dy, y, p, t)).
+
+Writes the derivative directly into the pre-allocated vector `dy` managed by the solver,
+eliminating all output-vector allocations.
 
 Parameters
 ----------
-t : Float64
-    Time (s).
+dy : Vector{Float64}
+    Pre-allocated output vector (managed by the ODE solver). Written in place.
 y : Vector{Float64}
-    Vector of the solver variables.
+    Current solver state vector.
 fc : AbstractFuelCell
     Fuel cell instance providing model parameters.
 cd : AbstractCurrent
@@ -29,15 +32,10 @@ n_vars_manifold : Int
     Pre-calculated number of solver variables in manifolds.
 n_vars_auxiliary : Int
     Pre-calculated number of solver variables in auxiliary systems.
-
-Returns
--------
-Vector{Float64}
-    Vector containing the derivative of the solver variables.
 """
-function dydt(t::Float64, y::Vector{Float64}, fc::AbstractFuelCell, cd::AbstractCurrent,
-              cfg::SimulationConfig, n_vars_per_gc::Int, n_vars_manifold::Int,
-              n_vars_auxiliary::Int)::Vector{Float64}
+function dydt!(dy::Vector{Float64}, t::Float64, y::Vector{Float64}, fc::AbstractFuelCell, cd::AbstractCurrent,
+               cfg::SimulationConfig, n_vars_per_gc::Int, n_vars_manifold::Int,
+               n_vars_auxiliary::Int)
 
     # Extraction of frequently used parameters
     oc = fc.operating_conditions
@@ -52,7 +50,7 @@ function dydt(t::Float64, y::Vector{Float64}, fc::AbstractFuelCell, cd::Abstract
     has_auxiliary = type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
                                        :forced_convective_cathode_with_anodic_recirculation)
 
-    # Buil typed local state and derivative containers for each GC node, manifold, and auxiliary system.
+    # Build typed local state and derivative containers for each GC node, manifold, and auxiliary system.
     n_vars_mea = nb_gc * n_vars_per_gc
     expected_len = n_vars_mea + n_vars_manifold + n_vars_auxiliary
     length(y) == expected_len ||
@@ -109,7 +107,6 @@ function dydt(t::Float64, y::Vector{Float64}, fc::AbstractFuelCell, cd::Abstract
                          for i in 1:nb_gc]
 
     # Calculation of the dynamic evolutions inside the MEA.
-    # Each calculate_dyn_* builds one physics-specific derivative contribution over all GC nodes.
     dif_eq_mea_diss_water = [calculate_dyn_dissoved_water_evolution_inside_MEA(sv_mea_1D[i], pp,
                                                                                flows_1D_MEA[i].S_abs,
                                                                                flows_1D_MEA[i].J_lambda,
@@ -185,20 +182,21 @@ function dydt(t::Float64, y::Vector{Float64}, fc::AbstractFuelCell, cd::Abstract
         dif_eq_auxiliary = calculate_dyn_throttle_area_controler(dif_eq_auxiliary, sv_auxiliary, cfg)
     end
 
-    # Repack typed derivatives into solver ordering.
+    # Pack typed derivatives directly into the pre-allocated solver buffer dy (no allocation).
     fuelcell_derivative = FuelCellDerivativeP2D{nb_gdl, nb_mpl, nb_gc}(Tuple(dif_eq_mea_1D))
     _assert_fuelcell_derivative_complete(fuelcell_derivative)
-    dif_eq_global = _pack_fuelcell_derivative_p2d(fuelcell_derivative)
+    _pack_fuelcell_derivative_p2d!(dy, fuelcell_derivative)
 
     if has_auxiliary
+        manifold_offset = n_vars_mea
         _assert_manifold_derivative_complete(dif_eq_manifold_1D)
-        append!(dif_eq_global, _pack_manifold_derivative_state(dif_eq_manifold_1D))
+        _pack_manifold_derivative_state!(dy, manifold_offset + 1, dif_eq_manifold_1D)
+        aux_offset = n_vars_mea + n_vars_manifold
         _assert_auxiliary_derivative_complete(dif_eq_auxiliary)
-        append!(dif_eq_global, _pack_auxiliary_derivative(dif_eq_auxiliary))
+        _pack_auxiliary_derivative!(dy, aux_offset + 1, dif_eq_auxiliary)
     end
 
-    length(dif_eq_global) == expected_len ||
-        throw(ArgumentError("Unexpected derivative vector size for typed path."))
-
-    return dif_eq_global
+    return nothing
 end
+
+
