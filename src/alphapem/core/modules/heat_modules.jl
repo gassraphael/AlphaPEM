@@ -386,7 +386,7 @@ function k_th_eff(element::String,
                   C_N2=nothing,
                   epsilon::Union{Float64, Nothing}=nothing,
                   Hcl::Union{Float64, Nothing}=nothing,
-                  epsilon_c::Union{Float64, Nothing}=nothing)::Number
+                  epsilon_c::Union{Float64, Nothing}=nothing)
 
     if element == "agdl" || element == "cgdl"  # The effective thermal conductivity at the GDL.
         if C_v === nothing || s === nothing || C_N2 === nothing || epsilon === nothing || epsilon_c === nothing

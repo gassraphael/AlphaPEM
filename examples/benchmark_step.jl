@@ -78,7 +78,7 @@ function print_benchmark_report(rows, out_csv)
 end
 
 function main()
-    runs = parse(Int, get(ENV, "BENCHMARK_RUNS", "1"))
+    runs = parse(Int, get(ENV, "BENCHMARK_RUNS", "5"))
     out_dir = joinpath(@__DIR__, "..", "results", "benchmark")
     mkpath(out_dir)
     out_csv = joinpath(out_dir, "benchmark_step.csv")
