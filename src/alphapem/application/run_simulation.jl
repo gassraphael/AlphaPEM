@@ -1,84 +1,438 @@
 # -*- coding: utf-8 -*-
 
-"""This file is designated for executing the AlphaPEM software package.
+"""
+    AlphaPEM.Application.run_simulation
+
+Main execution module for AlphaPEM.
+Core orchestration logic lives here (launch, dispatch, API), while utility
+helpers are kept in `run_simulation_modules.jl`.
+
+Public API
+----------
+- `run_simulation(cfg::SimulationConfig)  -> AlphaPEM`
+- `run_simulation(cfgs::AbstractVector{<:SimulationConfig}) -> Vector{AlphaPEM}`
 """
 
-# _____________________________________________________Preliminaries____________________________________________________
+# ─────────────────────────────────────── Imports ─────────────────────────────
 
-# Shared package modules
-using ..Config: SimulationConfig, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
+using ..Config:   AbstractCurrentParams,
+                  SimulationConfig,
+                  StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
 using ..Fuelcell: create_fuelcell
 using ..Currents: create_current, step_duration
 using ..Core.Models: AlphaPEM, simulate_model!, Display, Save_plot
 
-
 include(joinpath(@__DIR__, "run_simulation_modules.jl"))
 
-# __________________________________________________Run simulation___________________________________________________
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Section 1 – Launch functions (single simulator)
+# ═══════════════════════════════════════════════════════════════════════════════
 
+"""
+    launch_AlphaPEM_for_step_current(simu) -> AlphaPEM
+
+Run a step-current simulation.
+
+- `:fixed` plot mode  : one full ODE solve followed by a display update.
+- `:dynamic` plot mode: incremental solves separated by `delta_t_dyn_step`
+  (from `simu.fuel_cell.numerical_parameters`).
+"""
+function launch_AlphaPEM_for_step_current(simu::AlphaPEM)::AlphaPEM
+    # Figures preparation
+    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(simu.cfg)
+
+    # Dynamic display requires a dedicated segmented simulation flow.
+    if simu.cfg.type_plot == :dynamic
+        # Certain conditions must be met.
+        if simu.cfg.type_display == :multiple
+            throw(ArgumentError("step current cannot be run with :dynamic plot and :multiple display (too many plots to handle)."))
+        end
+
+        # Extraction of parameters
+        p       = simu.cfg.type_current       # ::StepParams
+        tf_step = p.delta_t_ini + p.delta_t_load + p.delta_t_break
+        delta_t_dyn_step = simu.fuel_cell.numerical_parameters.delta_t_dyn_step
+        delta_t_dyn_step > 0 || throw(ArgumentError("delta_t_dyn_step must be > 0 for dynamic step runs."))
+
+        # Initialization
+        n             = floor(Int, tf_step / delta_t_dyn_step)
+        t0            = 0.0
+        initial_state = nothing
+
+        # Dynamic simulation
+        for i in 1:n
+            tf = i * delta_t_dyn_step
+            simulate_model!(simu, initial_state, (t0, tf))
+
+            # Display
+            simu.cfg.type_display != :no_display && Display(simu, ax1, ax2, ax3)
+
+            # Recovery of the internal states from the end of the preceding simulation.
+            initial_state = _extract_last_internal_state(simu, simu.cfg)
+            # Time interval actualization.
+            t0            = simu.outputs.solver.t[end]
+        end
+
+    else  # :fixed
+        # Simulation
+        simulate_model!(simu)
+        # Display
+        simu.cfg.type_display != :no_display && Display(simu, ax1, ax2, ax3)
+    end
+
+    # Plot saving
+    Save_plot(simu, fig1, fig2, fig3)
+    return simu
+end
+
+
+"""
+    launch_AlphaPEM_for_polarization_current(simu) -> AlphaPEM
+
+Run a polarization-curve simulation.
+
+- `:fixed` plot mode  : one full solve.
+- `:dynamic` plot mode: one solve per current step, with display refresh after each.
+"""
+function launch_AlphaPEM_for_polarization_current(simu::AlphaPEM)::AlphaPEM
+    # Figures preparation
+    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(simu.cfg)
+
+    # Dynamic display requires a dedicated segmented simulation flow.
+    if simu.cfg.type_plot == :dynamic
+        # Initialization
+        p            = simu.current_density            # ::PolarizationCurrent
+        delta_t_step = step_duration(p)
+        _, tf_full   = p.time_interval
+        n            = round(Int, (tf_full - p.delta_t_ini) / delta_t_step)
+        t0           = 0.0
+        tf           = p.delta_t_ini + delta_t_step
+        initial_state = nothing
+
+        # Dynamic simulation
+        for i in 1:n
+            simulate_model!(simu, initial_state, (t0, tf))
+
+            # Display
+            simu.cfg.type_display != :no_display && Display(simu, ax1, ax2, ax3)
+
+            # Recovery of the internal states from the end of the preceding simulation.
+            initial_state = _extract_last_internal_state(simu, simu.cfg)
+            # Time interval actualization.
+            t0 = simu.outputs.solver.t[end]
+            tf = p.delta_t_ini + (i + 1) * delta_t_step
+        end
+
+    else  # :fixed
+        # Simulation
+        simulate_model!(simu)
+        # Display
+        simu.cfg.type_display != :no_display && Display(simu, ax1, ax2, ax3)
+    end
+
+    # Plot saving
+    Save_plot(simu, fig1, fig2, fig3)
+    return simu
+end
+
+
+"""
+    launch_AlphaPEM_for_polarization_current_for_calibration(simu) -> AlphaPEM
+
+Run a calibration polarization simulation.
+
+- `:fixed` plot mode  : one full solve.
+- `:dynamic` plot mode: one solve per experimental current step (variable duration).
+"""
+function launch_AlphaPEM_for_polarization_current_for_calibration(simu::AlphaPEM)::AlphaPEM
+    # Figures preparation
+    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(simu.cfg)
+
+    # Dynamic display requires a dedicated segmented simulation flow.
+    if simu.cfg.type_plot == :dynamic
+        # Initialization
+        p          = simu.current_density           # ::PolarizationCalibrationCurrent
+        step_dts   = step_duration(p)               # Vector{Float64}: one duration per exp. step
+        n          = length(step_dts)
+        boundaries = cumsum(step_dts)               # absolute end-time of each step (after t_ini)
+        t0         = 0.0
+        initial_state = nothing
+
+        # Dynamic simulation
+        for i in 1:n
+            tf = p.delta_t_ini + boundaries[i]
+            simulate_model!(simu, initial_state, (t0, tf))
+
+            # Display
+            simu.cfg.type_display != :no_display && Display(simu, ax1, ax2, ax3)
+
+            # Recovery of the internal states from the end of the preceding simulation.
+            initial_state = _extract_last_internal_state(simu, simu.cfg)
+            # Time interval actualization.
+            t0 = simu.outputs.solver.t[end]
+        end
+
+    else  # :fixed
+        # Simulation
+        simulate_model!(simu)
+        # Display
+        simu.cfg.type_display != :no_display && Display(simu, ax1, ax2, ax3)
+    end
+
+    # Plot saving
+    Save_plot(simu, fig1, fig2, fig3)
+    return simu
+end
+
+
+"""
+    launch_AlphaPEM_for_EIS_current(simu) -> AlphaPEM
+
+Run an EIS simulation.  One ODE segment is solved per frequency point.
+"""
+function launch_AlphaPEM_for_EIS_current(simu::AlphaPEM)::AlphaPEM
+    # Check if `type_plot` is valid for EIS.
+    simu.cfg.type_plot == :dynamic ||
+        throw(ArgumentError(
+            "EIS requires `type_plot = :dynamic` so that `max_step` can be " *
+            "adjusted at each frequency."))
+
+    # Warnings
+    @warn "EIS simulation is currently not maintained.  Some unexpected bugs or " *
+          "incorrect results may occur.  This will be resolved in a future release."
+
+    # Figures preparation
+    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(simu.cfg)
+
+    # Initialization
+    cd = simu.current_density   # ::EISCurrent
+    n  = length(cd.t_new_start)
+
+    # A preliminary simulation run is necessary to equilibrate internal variables at i_EIS.
+    simulate_model!(simu, nothing, (0.0, cd.t0))
+    # Recovery of the internal states from the end of the preceding simulation.
+    initial_state = _extract_last_internal_state(simu, simu.cfg)
+
+    if simu.cfg.type_display == :multiple
+        @warn "Dynamic graph refresh is not available with `:multiple` display " *
+              "due to the volume of data involved.  Data are computed correctly " *
+              "and saved to the 'results' folder.  Use `:synthetic` to avoid this."
+    end
+
+    # Dynamic simulation: one segment per frequency.
+    for i in 1:n
+        # Time interval actualization
+        t0 = simu.outputs.solver.t[end]
+        tf = cd.t_new_start[i] + cd.delta_t_break[i] + cd.delta_t_measurement[i]
+
+        simulate_model!(simu, initial_state, (t0, tf))
+
+        # Recovery of the internal states from the end of the preceding simulation.
+        initial_state = _extract_last_internal_state(simu, simu.cfg)
+
+        # Display
+        simu.cfg.type_display != :no_display && Display(simu, ax1, ax2, ax3)
+    end
+
+    # Plot saving
+    Save_plot(simu, fig1, fig2, fig3)
+    return simu
+end
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Section 2 – Launch functions (multi-simulator batch runs)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+"""
+    launch_AlphaPEM_for_polarization_current(simulators) -> Vector{AlphaPEM}
+
+Run a batch of polarization-curve simulations sequentially, sharing one set of axes.
+"""
+function launch_AlphaPEM_for_polarization_current(
+    simulators::AbstractVector{<:AlphaPEM},
+)::Vector{<:AlphaPEM}
+    # Figures preparation
+    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(first(simulators).cfg)
+    for simu in simulators
+        # Simulation
+        simulate_model!(simu)
+        # Display
+        simu.cfg.type_display != :no_display && Display(simu, ax1, ax2, ax3)
+    end
+    # Plot saving
+    Save_plot(first(simulators), fig1, fig2, fig3)
+    return simulators
+end
+
+
+"""
+    launch_AlphaPEM_for_polarization_current_for_calibration(simulators) -> Vector{AlphaPEM}
+
+Run a batch of calibration polarization simulations sequentially, sharing one set of axes.
+"""
+function launch_AlphaPEM_for_polarization_current_for_calibration(
+    simulators::AbstractVector{<:AlphaPEM},
+)::Vector{<:AlphaPEM}
+    # Figures preparation
+    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(first(simulators).cfg)
+    for simu in simulators
+        # Simulation
+        simulate_model!(simu)
+        # Display
+        simu.cfg.type_display != :no_display && Display(simu, ax1, ax2, ax3)
+    end
+    # Plot saving
+    Save_plot(first(simulators), fig1, fig2, fig3)
+    return simulators
+end
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Section 3 – Dispatch helpers
+#
+#  These thin wrappers let `run_simulation` stay free of if/elseif chains.
+#  The compiler resolves the correct launch function at compile time from the
+#  concrete type of `cfg.type_current`.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+_dispatch_launch!(simu::AlphaPEM) =
+    _dispatch_launch!(simu, simu.cfg.type_current)
+
+_dispatch_launch!(simu::AlphaPEM, ::StepParams) =
+    launch_AlphaPEM_for_step_current(simu)
+
+_dispatch_launch!(simu::AlphaPEM, ::PolarizationParams) =
+    launch_AlphaPEM_for_polarization_current(simu)
+
+_dispatch_launch!(simu::AlphaPEM, ::PolarizationCalibrationParams) =
+    launch_AlphaPEM_for_polarization_current_for_calibration(simu)
+
+_dispatch_launch!(simu::AlphaPEM, ::EISParams) =
+    launch_AlphaPEM_for_EIS_current(simu)
+
+
+function _dispatch_launch!(simulators::AbstractVector{<:AlphaPEM})
+    isempty(simulators) && throw(ArgumentError("At least one simulator is required for a multi-simulator run."))
+
+    # Homogeneity check: all current-profile types must match in multi-simulator mode.
+    T = typeof(first(simulators).cfg.type_current)
+    all(s -> s.cfg.type_current isa T, simulators) ||
+        throw(ArgumentError(
+            "All configurations in a multi-simulator run must share the same " *
+            "current profile type (got mixed types)."))
+    return _dispatch_launch!(simulators, first(simulators).cfg.type_current)
+end
+
+_dispatch_launch!(sims::AbstractVector{<:AlphaPEM}, ::PolarizationParams) =
+    launch_AlphaPEM_for_polarization_current(sims)
+
+_dispatch_launch!(sims::AbstractVector{<:AlphaPEM}, ::PolarizationCalibrationParams) =
+    launch_AlphaPEM_for_polarization_current_for_calibration(sims)
+
+function _dispatch_launch!(sims::AbstractVector{<:AlphaPEM}, ::AbstractCurrentParams)
+    throw(ArgumentError(
+        "Multi-simulator runs only support `PolarizationParams` and " *
+        "`PolarizationCalibrationParams` current profiles."))
+end
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Section 4 – Display finalisation
+# ═══════════════════════════════════════════════════════════════════════════════
+
+"""Disable interactive mode and block until all figure windows are closed."""
+function _finalize_display!(cfg::SimulationConfig)
+    cfg.type_display != :no_display || return
+    # Disable interactive mode and block display until windows are closed.
+    plt.ioff()
+    plt.show(; block=true)
+end
+
+function _finalize_display!(cfgs::AbstractVector{<:SimulationConfig})
+    any(cfg -> cfg.type_display != :no_display, cfgs) || return
+    # Disable interactive mode and block display until windows are closed.
+    plt.ioff()
+    plt.show(; block=true)
+end
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Section 5 – Public API
+# ═══════════════════════════════════════════════════════════════════════════════
+
+"""
+    run_simulation(cfg::SimulationConfig) -> AlphaPEM
+
+Run a single PEM fuel cell simulation according to `cfg`.
+
+# Arguments
+- `cfg::SimulationConfig`: Configuration object specifying the fuel-cell type,
+  current profile, display mode, and plot style.
+
+# Returns
+- `AlphaPEM`: The completed simulator instance with all outputs populated.
+
+# Example
+```julia
+using AlphaPEM.Config: SimulationConfig, StepParams
+using AlphaPEM.Application: run_simulation
+
+cfg = SimulationConfig(
+    type_fuel_cell = :ZSW_GenStack,
+    type_current   = StepParams(),
+    type_display   = :synthetic,
+    type_plot      = :fixed,
+)
+simu = run_simulation(cfg)
+```
+"""
 function run_simulation(cfg::SimulationConfig)::AlphaPEM
-    # Build a Fuelcell object with the configuration given using the factory
-    fuel_cells = create_fuelcell(cfg.type_fuel_cell, cfg.voltage_zone)
-
-    # Build a Current object with the configuration given using the factory
-    current_density = create_current(cfg.type_current, fuel_cells)
-
-    # Create a simulator
-    AlphaPEM_simulator = AlphaPEM(fuel_cells, current_density, cfg)
+    # Build a Fuelcell object with the given configuration.
+    fuel_cell       = create_fuelcell(cfg.type_fuel_cell, cfg.voltage_zone)
+    # Build a Current object with the given configuration.
+    current_density = create_current(cfg.type_current, fuel_cell)
+    # Create a simulator.
+    simu            = AlphaPEM(fuel_cell, current_density, cfg)
 
     # Launch the simulation.
-    if cfg.type_current isa StepParams
-        launch_AlphaPEM_for_step_current(AlphaPEM_simulator)
-    elseif cfg.type_current isa PolarizationParams
-        launch_AlphaPEM_for_polarization_current(AlphaPEM_simulator)
-    elseif cfg.type_current isa PolarizationCalibrationParams
-        launch_AlphaPEM_for_polarization_current_for_calibration(AlphaPEM_simulator)
-    elseif cfg.type_current isa EISParams
-        launch_AlphaPEM_for_EIS_current(AlphaPEM_simulator)
-    else
-        throw(ArgumentError("You have to specify a type_current which is accepted."))
-    end
+    _dispatch_launch!(simu)
+    _finalize_display!(cfg)
 
-    # Disable interactive mode for non-blocking display.
-    if cfg.type_display != :no_display
-        plt.ioff()
-        # Ensure that the figures remain displayed after program execution.
-        plt.show(; block=true)
-    end
-
-    return AlphaPEM_simulator
+    return simu
 end
 
+
+"""
+    run_simulation(cfgs::AbstractVector{<:SimulationConfig}) -> Vector{AlphaPEM}
+
+Run a batch of PEM fuel cell simulations.
+
+All configurations must share the same current profile type
+(`PolarizationParams` or `PolarizationCalibrationParams`).  The simulators share
+a single set of figure axes so that their results can be compared on the same plot.
+
+# Arguments
+- `cfgs::AbstractVector{<:SimulationConfig}`: Vector of configuration objects.
+
+# Returns
+- `Vector{AlphaPEM}`: Completed simulator instances in the same order as `cfgs`.
+"""
 function run_simulation(cfgs::AbstractVector{<:SimulationConfig})::Vector{AlphaPEM}
+    isempty(cfgs) && throw(ArgumentError("`cfgs` must contain at least one SimulationConfig."))
 
-    # Determine the number of simulators to create based on the length of type_fuel_cells.
-    nb_fuel_cells = length(cfgs)
+    # Determine the number of simulators to create.
+    n                 = length(cfgs)
+    # Build Fuelcell objects for each configuration.
+    fuel_cells        = [create_fuelcell(cfgs[i].type_fuel_cell, cfgs[i].voltage_zone) for i in 1:n]
+    # Build Current objects for each configuration.
+    current_densities = [create_current(cfgs[i].type_current, fuel_cells[i])           for i in 1:n]
+    # Create one simulator per selected fuel cell / current configuration.
+    simulators        = [AlphaPEM(fuel_cells[i], current_densities[i], cfgs[i])        for i in 1:n]
 
-    # Build Fuelcell objects for each configuration using the factory
-    fuel_cells = [create_fuelcell(cfgs[i].type_fuel_cell, cfgs[i].voltage_zone) for i in 1:nb_fuel_cells]
+    # Launch the simulations.
+    _dispatch_launch!(simulators)
+    _finalize_display!(cfgs)
 
-    # Build Current objects for each configuration using the factory
-    current_densities = [create_current(cfgs[i].type_current, fuel_cells[i]) for i in 1:nb_fuel_cells]
-
-    # Create one simulator per selected fuel cell and current density configuration.
-    AlphaPEM_simulators = [AlphaPEM(fuel_cells[i], current_densities[i], cfgs[i]) for i in 1:nb_fuel_cells]
-
-    # Launch the simulation.
-    if all(cfg -> cfg.type_current isa PolarizationParams, cfgs)
-        launch_AlphaPEM_for_polarization_current(AlphaPEM_simulators)
-    elseif all(cfg -> cfg.type_current isa PolarizationCalibrationParams, cfgs)
-        launch_AlphaPEM_for_polarization_current_for_calibration(AlphaPEM_simulators)
-    else
-        throw(ArgumentError("You have to specify homogeneous type_current parameters accepted for multi-simulator runs."))
-    end
-
-    # Disable interactive mode for non-blocking display.
-    if any(cfg -> cfg.type_display != :no_display, cfgs)
-        plt.ioff()
-        # Ensure that the figures remain displayed after program execution.
-        plt.show(; block=true)
-    end
-
-    return AlphaPEM_simulators
+    return simulators
 end
-

@@ -3,11 +3,11 @@
 """
     AlphaPEM.Application
 
-This module contains the application entry points and runtime management for AlphaPEM,
-including the main simulation execution interface and orchestration logic.
+Application entry point for simulation execution and runtime plotting setup.
 
-Modules:
-    - run_simulation: Main execution module
+File responsibilities:
+- `run_simulation.jl`: public API + orchestration (launch, dispatch, final display)
+- `run_simulation_modules.jl`: internal helpers (figure preparation, internal-state utilities)
 """
 module Application
 
@@ -27,4 +27,3 @@ include("run_simulation.jl")
 export run_simulation
 
 end  # module Application
-
