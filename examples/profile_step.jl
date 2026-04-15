@@ -156,7 +156,7 @@ function make_step_config()
         type_auxiliary = :no_auxiliary,
         type_purge = :no_purge,
         type_display = :no_display,
-        type_plot = :fixed
+        display_timing = :postrun
     )
 end
 

@@ -1,12 +1,12 @@
 # examples/plot_currents.jl
 
-using Plots
 import Pkg
 Pkg.activate(joinpath(@__DIR__, ".."))
 
 # --- Load AlphaPEM from the project environment ---
 using AlphaPEM.Config: StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
 using AlphaPEM.Currents: StepCurrent, PolarizationCurrent, PolarizationCalibrationCurrent, EISCurrent, current
+using CairoMakie
 
 # --- Time resolution ---
 n_points = 1000  # points for plotting
@@ -23,7 +23,7 @@ step_c = StepCurrent(step_p)
 
 t0_step, tf_step = step_c.time_interval
 t_step = range(t0_step, tf_step, length=n_points)
-i_step = [current(step_c, t) for t in t_step]
+i_step_vals = [current(step_c, t) for t in t_step]
 
 # === Polarization Current ===
 pola_p = PolarizationParams(
@@ -67,50 +67,31 @@ t0_eis, tf_eis = eis_c.time_interval
 t_eis = range(t0_eis, tf_eis, length=n_points)
 i_eis = [current(eis_c, t) for t in t_eis]
 
-# === Plot Step Current ===
-plt_step = plot(
-    t_step ./ 60, i_step,
-    xlabel = "Time (min)",
-    ylabel = "Current density (A/m²)",
-    label = "Step Current",
-    lw = 2,
-    grid = true,
-    title = "Step Current Profile"
-)
-display(plt_step)
+# === Plot: all current profiles on a 2×2 figure ===
+fig = Figure(size = (1200, 800))
 
-# === Plot Polarization Current ===
-plt_pola = plot(
-    t_pola ./ 60, i_pola,
+ax1 = Axis(fig[1, 1],
+    title  = "Step Current Profile",
     xlabel = "Time (min)",
-    ylabel = "Current density (A/m²)",
-    label = "Polarization Current",
-    lw = 2,
-    grid = true,
-    title = "Polarization Current Profile"
-)
-display(plt_pola)
+    ylabel = "Current density (A m⁻²)")
+lines!(ax1, collect(t_step) ./ 60, i_step_vals, linewidth = 2)
 
-# === Plot Polarization Calibration Current ===
-plt_pola_cali = plot(
-    t_pola_cali ./ 60, i_pola_cali,
+ax2 = Axis(fig[1, 2],
+    title  = "Polarization Current Profile",
     xlabel = "Time (min)",
-    ylabel = "Current density (A/m²)",
-    label = "Polarization Calibration Current",
-    lw = 2,
-    grid = true,
-    title = "Polarization Calibration Current Profile"
-)
-display(plt_pola_cali)
+    ylabel = "Current density (A m⁻²)")
+lines!(ax2, collect(t_pola) ./ 60, i_pola, linewidth = 2)
 
- # === Plot EIS Current (commented for now) ===
- plt_eis = plot(
-     t_eis ./ 60, i_eis,
-     xlabel = "Time (min)",
-     ylabel = "Current density (A/m²)",
-     label = "EIS Current",
-     lw = 2,
-     grid = true,
-     title = "EIS Current Profile"
- )
- display(plt_eis)
+ax3 = Axis(fig[2, 1],
+    title  = "Polarization Calibration Current Profile",
+    xlabel = "Time (min)",
+    ylabel = "Current density (A m⁻²)")
+lines!(ax3, collect(t_pola_cali) ./ 60, i_pola_cali, linewidth = 2)
+
+ax4 = Axis(fig[2, 2],
+    title  = "EIS Current Profile",
+    xlabel = "Time (min)",
+    ylabel = "Current density (A m⁻²)")
+lines!(ax4, collect(t_eis) ./ 60, i_eis, linewidth = 2)
+
+display(fig)

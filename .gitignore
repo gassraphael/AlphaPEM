@@ -3,6 +3,7 @@ src/alphapem/parametrisation/results
 site
 env
 __pycache__
+__pycache__/
 */__pycache__/*
 *.pyc
 *.pyo

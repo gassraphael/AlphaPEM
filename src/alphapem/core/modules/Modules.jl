@@ -11,7 +11,6 @@ using ...Config: SimulationConfig, StepParams, PolarizationParams, PolarizationC
 using ...Fuelcell: AbstractFuelCell
 using ...Currents: AbstractCurrent, current
 using ..Types    # AlphaPEM.Core.Types: all domain structs (MEAThermalIntermediates, …)
-using PyCall
 using Interpolations
 using FFTW
 using Statistics
@@ -23,8 +22,7 @@ include("heat_modules.jl")
 include("flows_GC_manifold_1D_modules.jl")
 include("dif_eq_modules.jl")
 include("outputs_accessors.jl")
-include("plot_postprocessing_modules.jl")
-include("plotting_modules.jl")
+include("plot_postprocess.jl")
 
 end  # module Modules
 

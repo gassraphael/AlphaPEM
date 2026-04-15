@@ -53,7 +53,7 @@ function display_time_mask(outputs::SimulationOutputs,
                            cd::AbstractCurrent,
                            cfg::SimulationConfig)::BitVector
     t_hist = time_history(outputs)
-    if cfg.type_plot == :fixed
+    if cfg.display_timing == :postrun
         return BitVector(t_hist .>= 0.9 * display_start_time(cd))
     end
     return trues(length(t_hist))
@@ -199,12 +199,16 @@ MEA ordering used in the display layer.
 """
 function final_temperature_matrix_celsius(outputs::SimulationOutputs{nb_gdl, nb_mpl, nb_gc}) where {nb_gdl, nb_mpl, nb_gc}
     last_state = solver_state_history(outputs)[end]
-    n_cols = 2 * nb_gdl + 2 * nb_mpl + 5
+
+    # Derive through-plane temperature column count from canonical solver ordering.
+    solver_names = canonical_mea_solver_variable_names(nb_gdl, nb_mpl)
+    n_cols = count(name -> startswith(name, "T_"), solver_names)
+
     temp_matrix = Matrix{Float64}(undef, nb_gc, n_cols)
 
     for k in 1:nb_gc
         mea = mea_state_at(last_state, k)
-        temp_matrix[k, :] = vcat(
+        temp_row = vcat(
             mea.agc.T,
             [node.T for node in mea.agdl],
             [node.T for node in mea.ampl],
@@ -215,6 +219,9 @@ function final_temperature_matrix_celsius(outputs::SimulationOutputs{nb_gdl, nb_
             [node.T for node in mea.cgdl],
             mea.cgc.T,
         ) .- 273.15
+        length(temp_row) == n_cols ||
+            throw(ArgumentError("Temperature row size mismatch with inferred through-plane column count."))
+        temp_matrix[k, :] = temp_row
     end
 
     return temp_matrix

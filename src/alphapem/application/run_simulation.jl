@@ -33,8 +33,8 @@ include(joinpath(@__DIR__, "run_simulation_modules.jl"))
 
 Run a step-current simulation.
 
-- `:fixed` plot mode  : one full ODE solve followed by a display update.
-- `:dynamic` plot mode: incremental solves separated by `delta_t_dyn_step`
+- `:postrun` display timing : one full ODE solve followed by a display update.
+- `:live` display timing    : incremental solves separated by `delta_t_dyn_step`
   (from `simu.fuel_cell.numerical_parameters`).
 """
 function launch_AlphaPEM_for_step_current(simu::AlphaPEM)::AlphaPEM
@@ -42,10 +42,10 @@ function launch_AlphaPEM_for_step_current(simu::AlphaPEM)::AlphaPEM
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(simu.cfg)
 
     # Dynamic display requires a dedicated segmented simulation flow.
-    if simu.cfg.type_plot == :dynamic
+    if simu.cfg.display_timing == :live
         # Certain conditions must be met.
         if simu.cfg.type_display == :multiple
-            throw(ArgumentError("step current cannot be run with :dynamic plot and :multiple display (too many plots to handle)."))
+            throw(ArgumentError("step current cannot be run with `display_timing = :live` and `type_display = :multiple` (too many plots to handle)."))
         end
 
         # Extraction of parameters
@@ -73,7 +73,7 @@ function launch_AlphaPEM_for_step_current(simu::AlphaPEM)::AlphaPEM
             t0            = simu.outputs.solver.t[end]
         end
 
-    else  # :fixed
+    else  # :postrun
         # Simulation
         simulate_model!(simu)
         # Display
@@ -91,15 +91,15 @@ end
 
 Run a polarization-curve simulation.
 
-- `:fixed` plot mode  : one full solve.
-- `:dynamic` plot mode: one solve per current step, with display refresh after each.
+- `:postrun` display timing : one full solve.
+- `:live` display timing    : one solve per current step, with display refresh after each.
 """
 function launch_AlphaPEM_for_polarization_current(simu::AlphaPEM)::AlphaPEM
     # Figures preparation
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(simu.cfg)
 
     # Dynamic display requires a dedicated segmented simulation flow.
-    if simu.cfg.type_plot == :dynamic
+    if simu.cfg.display_timing == :live
         # Initialization
         p            = simu.current_density            # ::PolarizationCurrent
         delta_t_step = step_duration(p)
@@ -123,7 +123,7 @@ function launch_AlphaPEM_for_polarization_current(simu::AlphaPEM)::AlphaPEM
             tf = p.delta_t_ini + (i + 1) * delta_t_step
         end
 
-    else  # :fixed
+    else  # :postrun
         # Simulation
         simulate_model!(simu)
         # Display
@@ -141,15 +141,15 @@ end
 
 Run a calibration polarization simulation.
 
-- `:fixed` plot mode  : one full solve.
-- `:dynamic` plot mode: one solve per experimental current step (variable duration).
+- `:postrun` display timing : one full solve.
+- `:live` display timing    : one solve per experimental current step (variable duration).
 """
 function launch_AlphaPEM_for_polarization_current_for_calibration(simu::AlphaPEM)::AlphaPEM
     # Figures preparation
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(simu.cfg)
 
     # Dynamic display requires a dedicated segmented simulation flow.
-    if simu.cfg.type_plot == :dynamic
+    if simu.cfg.display_timing == :live
         # Initialization
         p          = simu.current_density           # ::PolarizationCalibrationCurrent
         step_dts   = step_duration(p)               # Vector{Float64}: one duration per exp. step
@@ -172,7 +172,7 @@ function launch_AlphaPEM_for_polarization_current_for_calibration(simu::AlphaPEM
             t0 = simu.outputs.solver.t[end]
         end
 
-    else  # :fixed
+    else  # :postrun
         # Simulation
         simulate_model!(simu)
         # Display
@@ -191,10 +191,10 @@ end
 Run an EIS simulation.  One ODE segment is solved per frequency point.
 """
 function launch_AlphaPEM_for_EIS_current(simu::AlphaPEM)::AlphaPEM
-    # Check if `type_plot` is valid for EIS.
-    simu.cfg.type_plot == :dynamic ||
+    # Check if `display_timing` is valid for EIS.
+    simu.cfg.display_timing == :live ||
         throw(ArgumentError(
-            "EIS requires `type_plot = :dynamic` so that `max_step` can be " *
+            "EIS requires `display_timing = :live` so that `max_step` can be " *
             "adjusted at each frequency."))
 
     # Warnings
@@ -343,17 +343,31 @@ end
 
 """Disable interactive mode and block until all figure windows are closed."""
 function _finalize_display!(cfg::SimulationConfig)
-    cfg.type_display != :no_display || return
-    # Disable interactive mode and block display until windows are closed.
-    plt.ioff()
-    plt.show(; block=true)
+    if _active_display_backend[] == :gl && _use_interactive_display(cfg)
+        # Fixed mode: show the fully populated figures only once computations are done.
+        if cfg.display_timing == :postrun && isempty(_interactive_screens)
+            _open_interactive_figures!(_prepared_interactive_figures...)
+        end
+
+        for screen in copy(_interactive_screens)
+            try
+                wait(screen)
+            catch err
+                @warn "Interactive GLMakie screen wait failed." exception=(err, catch_backtrace())
+            end
+        end
+        empty!(_interactive_screens)
+        empty!(_interactive_fig_to_screen)
+    end
+    empty!(_prepared_interactive_figures)
+    return nothing
 end
 
 function _finalize_display!(cfgs::AbstractVector{<:SimulationConfig})
-    any(cfg -> cfg.type_display != :no_display, cfgs) || return
-    # Disable interactive mode and block display until windows are closed.
-    plt.ioff()
-    plt.show(; block=true)
+    if !isempty(cfgs)
+        _finalize_display!(first(cfgs))
+    end
+    return nothing
 end
 
 
@@ -382,7 +396,7 @@ cfg = SimulationConfig(
     type_fuel_cell = :ZSW_GenStack,
     type_current   = StepParams(),
     type_display   = :synthetic,
-    type_plot      = :fixed,
+    display_timing = :postrun,
 )
 simu = run_simulation(cfg)
 ```

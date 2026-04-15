@@ -11,16 +11,8 @@ File responsibilities:
 """
 module Application
 
-using PyCall: PyNULL, pyimport, copy!
-
-const mpl = PyNULL()
-const plt = PyNULL()
-
-function __init__()
-    # Rebind Python objects at runtime to avoid NULL PyObject after precompilation.
-    copy!(mpl, pyimport("matplotlib"))
-    copy!(plt, pyimport("matplotlib.pyplot"))
-end
+using CairoMakie
+import GLMakie
 
 include("run_simulation.jl")
 

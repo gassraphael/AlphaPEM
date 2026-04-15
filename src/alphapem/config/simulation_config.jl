@@ -15,7 +15,7 @@ Constants:
 - ALLOWED_CURRENT_TYPES: Allowed current parameter types.
 - ALLOWED_VOLTAGE_ZONE: Allowed voltage zones.
 - ALLOWED_DISPLAY: Allowed display types.
-- ALLOWED_PLOT: Allowed plot types.
+- ALLOWED_DISPLAY_TIMING: Allowed display timing modes.
 - ALLOWED_PURGE: Allowed purge types.
 - ALLOWED_AUXILIARY: Allowed auxiliary system types.
 """
@@ -36,7 +36,7 @@ Base.@kwdef mutable struct SimulationConfig{T<:AbstractCurrentParams}
     type_auxiliary::Symbol = :no_auxiliary
     type_purge::Symbol = :no_purge
     type_display::Symbol = :synthetic
-    type_plot::Symbol = :fixed
+    display_timing::Symbol=:postrun
 end
 
 # --- Allowed values (tu peux enrichir plus tard) ---
@@ -71,9 +71,9 @@ const ALLOWED_DISPLAY = (
     :no_display
 )
 
-const ALLOWED_PLOT = (
-    :dynamic,
-    :fixed
+const ALLOWED_DISPLAY_TIMING = (
+    :live,
+    :postrun,
 )
 
 # --- Validation ---
@@ -95,8 +95,8 @@ function validate_config(cfg::SimulationConfig)
     cfg.type_display in ALLOWED_DISPLAY ||
         error("Invalid type_display: $(cfg.type_display)")
 
-    cfg.type_plot in ALLOWED_PLOT ||
-        error("Invalid type_plot: $(cfg.type_plot)")
+    cfg.display_timing in ALLOWED_DISPLAY_TIMING ||
+        error("Invalid display_timing: $(cfg.display_timing)")
 
     return cfg
 end

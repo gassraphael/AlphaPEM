@@ -349,112 +349,119 @@ end
 # Returns
 - `Nothing`
 """
-function display!(simu::AlphaPEM, ax1=nothing, ax2=nothing, ax3=nothing)
-    outputs = simu.outputs
-    outputs === nothing && throw(ArgumentError("Display requires available simulation outputs. Run simulate_model! first."))
+function _clear_dynamic_axes!(items...)
+    figures = Figure[]
 
-    # Folder name.
-    subfolder_name = String(split(String(simu.cfg.type_fuel_cell), '_')[1])
-
-    # Display.
-    if simu.cfg.type_current isa StepParams
-        if simu.cfg.type_display == :multiple
-            figs_axes = [plt.subplots(figsize=(8, 8)) for _ in 1:11]
-            figs = [fa[1] for fa in figs_axes]
-            axes = [fa[2] for fa in figs_axes]
-            plot_ifc_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, axes[1])
-            plot_C_v_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, axes[2])
-            plot_lambda_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, axes[3])
-            plot_s_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, axes[4])
-            plot_C_O2_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, axes[5])
-            plot_C_H2_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, axes[6])
-            plot_C_N2_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, axes[7])
-            plot_T_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, axes[8])
-            plot_Ucell(outputs, simu.current_density, simu.cfg, axes[9])
-            plot_P_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, axes[10])
-            plot_v_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, axes[11])
-
-            # Keep the same special handling as Python for step+multiple outputs.
-            saving_instructions!(simu, "results", subfolder_name, "step_current_ifc_1.pdf", figs[1])
-            saving_instructions!(simu, "results", subfolder_name, "step_current_Cv_1.pdf", figs[2])
-            saving_instructions!(simu, "results", subfolder_name, "step_current_lambda_1.pdf", figs[3])
-            saving_instructions!(simu, "results", subfolder_name, "step_current_s_1.pdf", figs[4])
-            saving_instructions!(simu, "results", subfolder_name, "step_current_C_O2_1.pdf", figs[5])
-            saving_instructions!(simu, "results", subfolder_name, "step_current_C_H2_1.pdf", figs[6])
-            saving_instructions!(simu, "results", subfolder_name, "step_current_C_N2_1.pdf", figs[7])
-            saving_instructions!(simu, "results", subfolder_name, "step_current_T_1.pdf", figs[8])
-            saving_instructions!(simu, "results", subfolder_name, "step_current_Ucell_1.pdf", figs[9])
-            saving_instructions!(simu, "results", subfolder_name, "step_current_P_1.pdf", figs[10])
-            saving_instructions!(simu, "results", subfolder_name, "step_current_v_1.pdf", figs[11])
-
-            # A break is necessary to plot the new points in dynamic mode.
-            plt.pause(0.1)
-        elseif simu.cfg.type_display == :synthetic
-            plot_ifc_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, ax1[1, 1])
-            plot_Ucell(outputs, simu.current_density, simu.cfg, ax1[1, 2])
-            plot_T_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, ax1[1, 3])
-
-            plot_C_v_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, ax1[2, 1])
-            plot_s_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, ax1[2, 2])
-            plot_lambda_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, ax1[2, 3])
-
-            plot_C_H2_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, ax1[3, 1])
-            plot_C_O2_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, ax1[3, 2])
-            plot_P_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, ax1[3, 3])
-
-            if simu.cfg.type_plot == :fixed
-                plot_T_pseudo_2D_final(outputs, simu.fuel_cell, ax2)
-            end
-
-            # A break is necessary to plot the new points in dynamic mode.
-            plt.pause(1.0)
+    function _visit(item)
+        item === nothing && return nothing
+        if item isa Axis
+            empty!(item)
+            fig = item.parent
+            fig in figures || push!(figures, fig)
+        elseif item isa AbstractArray
+            foreach(_visit, item)
         end
-    elseif simu.cfg.type_current isa PolarizationParams
-        if simu.cfg.type_display == :multiple
-            plot_polarisation_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, ax1[1])
-            plot_power_density_curve(outputs, simu.current_density, simu.cfg, ax1[2])
-            plot_cell_efficiency(outputs, simu.fuel_cell, simu.current_density, simu.cfg, ax1[3])
+        return nothing
+    end
 
-            plot_lambda_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, ax2[2])
-            plot_s_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, ax2[3])
-            plot_T_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, ax2[4])
-            # A break is necessary to plot the new points in dynamic mode.
-            plt.pause(0.1)
-        elseif simu.cfg.type_display == :synthetic
-            plot_polarisation_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, ax1)
-            # A break is necessary to plot the new points in dynamic mode.
-            plt.pause(0.1)
-        elseif simu.cfg.type_display == :no_display
-            plot_polarisation_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, ax1, false)
-        end
-    elseif simu.cfg.type_current isa PolarizationCalibrationParams
-        if simu.cfg.type_display == :multiple
-            plot_polarisation_curve_for_cali(outputs, simu.fuel_cell, simu.current_density, simu.cfg, ax1[1])
-            plot_lambda_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, ax1[2])
-            plot_s_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, ax1[3])
-            # A break is necessary to plot the new points in dynamic mode.
-            plt.pause(0.1)
-        elseif simu.cfg.type_display == :synthetic
-            plot_polarisation_curve_for_cali(outputs, simu.fuel_cell, simu.current_density, simu.cfg, ax1)
-            # A break is necessary to plot the new points in dynamic mode.
-            plt.pause(0.1)
-        end
-    elseif simu.cfg.type_current isa EISParams
-        Fourier_results = make_Fourier_transformation(outputs, simu.current_density, simu.cfg)
-        if simu.cfg.type_display == :multiple
-            plot_EIS_curve_Nyquist(simu.fuel_cell, simu.current_density, simu.cfg, Fourier_results, ax1)
-            plot_EIS_curve_Bode_amplitude(simu.fuel_cell, simu.current_density, simu.cfg, Fourier_results, ax2)
-            plot_EIS_curve_Bode_angle(simu.current_density, simu.cfg, Fourier_results, ax3)
-            # A break is necessary to plot the new points in dynamic mode.
-            plt.pause(0.1)
-        elseif simu.cfg.type_display == :synthetic
-            plot_EIS_curve_Nyquist(simu.fuel_cell, simu.current_density, simu.cfg, Fourier_results, ax1[1])
-            plot_EIS_curve_Bode_amplitude(simu.fuel_cell, simu.current_density, simu.cfg, Fourier_results, ax1[2])
-            plot_EIS_curve_Bode_angle(simu.current_density, simu.cfg, Fourier_results, ax1[3])
-            # A break is necessary to plot the new points in dynamic mode.
-            plt.pause(0.1)
+    foreach(_visit, items)
+
+    for fig in figures
+        for block in reverse(copy(fig.content))
+            block isa Legend && delete!(block)
         end
     end
+    return nothing
+end
+
+function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing)
+    outputs = simu.outputs
+    outputs === nothing && throw(ArgumentError("display! requires available simulation outputs. Run simulate_model! first."))
+    simu.cfg.type_display == :no_display && return nothing
+
+    simu.cfg.display_timing == :live && _clear_dynamic_axes!(_ax1, _ax2, _ax3)
+
+    if simu.cfg.type_current isa StepParams
+        if simu.cfg.type_display == :synthetic && _ax1 !== nothing
+            plot_ifc_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[1, 1])
+            plot_Ucell(outputs, simu.current_density, simu.cfg, _ax1[1, 2])
+            plot_T_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[1, 3])
+
+            plot_C_v_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[2, 1])
+            plot_s_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[2, 2])
+            plot_lambda_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[2, 3])
+
+            plot_C_H2_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[3, 1])
+            plot_C_O2_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[3, 2])
+            plot_P_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[3, 3])
+
+            if simu.cfg.display_timing == :postrun && _ax2 !== nothing
+                plot_T_pseudo_2D_final(outputs, simu.fuel_cell, _ax2.parent, _ax2)
+            end
+        elseif simu.cfg.type_display == :multiple && _ax1 isa AbstractVector && length(_ax1) >= 14
+            # Multiple mode: one figure per internal-state plot.
+            plot_ifc_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[1])
+            plot_Ucell(outputs, simu.current_density, simu.cfg, _ax1[2])
+            plot_T_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[3])
+            plot_C_v_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[4])
+            plot_s_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[5])
+            plot_lambda_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[6])
+            plot_C_H2_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[7])
+            plot_C_O2_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[8])
+            plot_P_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[9])
+            plot_C_N2_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[10])
+            plot_Phi_a_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[11])
+            plot_Phi_c_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[12])
+            plot_v_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[13])
+            plot_Re_nb_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[14])
+
+            if simu.cfg.display_timing == :postrun && _ax2 !== nothing
+                plot_T_pseudo_2D_final(outputs, simu.fuel_cell, _ax2.parent, _ax2)
+            end
+        end
+    elseif simu.cfg.type_current isa PolarizationParams
+        if simu.cfg.type_display == :synthetic && _ax1 !== nothing
+            plot_polarization_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1)
+        elseif simu.cfg.type_display == :multiple && _ax1 isa AbstractVector && length(_ax1) >= 5 && _ax2 !== nothing
+            # Multiple mode: internal states and derived polarization curves in individual figures.
+            plot_ifc_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[1])
+            plot_Ucell(outputs, simu.current_density, simu.cfg, _ax1[2])
+            plot_T_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[3])
+            plot_power_density_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[4])
+            plot_cell_efficiency(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[5])
+            if !(_ax2 isa AbstractVector)
+                plot_polarization_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax2)
+            end
+        end
+    elseif simu.cfg.type_current isa PolarizationCalibrationParams
+        if simu.cfg.type_display == :synthetic && _ax1 !== nothing
+            plot_polarization_curve_for_cali(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1)
+        elseif simu.cfg.type_display == :multiple && _ax1 isa AbstractVector && length(_ax1) >= 5 && _ax2 !== nothing
+            plot_ifc_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[1])
+            plot_Ucell(outputs, simu.current_density, simu.cfg, _ax1[2])
+            plot_T_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[3])
+            plot_power_density_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[4])
+            plot_cell_efficiency(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[5])
+            if !(_ax2 isa AbstractVector)
+                plot_polarization_curve_for_cali(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax2)
+            end
+        end
+    elseif simu.cfg.type_current isa EISParams
+        # EIS display uses one Fourier point per dynamic segment.
+        Fourier_results = make_Fourier_transformation(outputs, simu.current_density, simu.cfg)
+        if simu.cfg.type_display == :synthetic && _ax1 !== nothing
+            plot_EIS_curve_Nyquist(simu.current_density, Fourier_results, _ax1[1])
+            plot_EIS_curve_Bode_amplitude(simu.current_density, Fourier_results, _ax1[2])
+            plot_EIS_curve_Bode_angle(simu.current_density, Fourier_results, _ax1[3])
+        elseif simu.cfg.type_display == :multiple && _ax1 !== nothing && _ax2 !== nothing && _ax3 !== nothing
+            plot_EIS_curve_Nyquist(simu.current_density, Fourier_results, _ax1)
+            plot_EIS_curve_Bode_amplitude(simu.current_density, Fourier_results, _ax2)
+            plot_EIS_curve_Bode_angle(simu.current_density, Fourier_results, _ax3)
+        end
+    else
+        @warn "display!: plotting migration to CairoMakie is in progress; this simulation/display mode is not ported yet." maxlog=1
+    end
+
     return nothing
 end
 
@@ -472,8 +479,8 @@ The output filenames depend on the current profile and on the selected display m
 # Returns
 - `Nothing`
 """
-function save_plot!(simu::AlphaPEM, fig1=nothing, fig2=nothing, fig3=nothing)
-    simu.outputs === nothing && throw(ArgumentError("Save_plot requires available simulation outputs. Run simulate_model! first."))
+function save_plot!(simu::AlphaPEM, _fig1=nothing, _fig2=nothing, _fig3=nothing)
+    simu.outputs === nothing && throw(ArgumentError("save_plot! requires available simulation outputs. Run simulate_model! first."))
 
     # Folder name.
     subfolder_name = String(split(String(simu.cfg.type_fuel_cell), '_')[1])
@@ -481,34 +488,72 @@ function save_plot!(simu::AlphaPEM, fig1=nothing, fig2=nothing, fig3=nothing)
     # For the step current.
     if simu.cfg.type_current isa StepParams
         if simu.cfg.type_display == :synthetic
-            saving_instructions!(simu, "results", subfolder_name, "step_current_syn_1.pdf", fig1)
-            simu.cfg.type_plot == :fixed && saving_instructions!(simu, "results", subfolder_name, "final_temperature_dist_1.pdf", fig2)
+            saving_instructions!(simu, "results", subfolder_name, "step_current_syn_1.pdf", _fig1)
+            simu.cfg.display_timing == :postrun &&
+                saving_instructions!(simu, "results", subfolder_name, "final_temperature_dist_1.pdf", _fig2)
+        elseif simu.cfg.type_display == :multiple && _fig1 isa AbstractVector
+            # Multiple mode: one file per internal-state plot.
+            step_files = [
+                "ifc_1D_temporal_1.pdf",
+                "Ucell_temporal_1.pdf",
+                "T_1D_temporal_1.pdf",
+                "Cv_1D_temporal_1.pdf",
+                "s_1D_temporal_1.pdf",
+                "lambda_1D_temporal_1.pdf",
+                "CH2_1D_temporal_1.pdf",
+                "CO2_1D_temporal_1.pdf",
+                "P_1D_temporal_1.pdf",
+                "CN2_1D_temporal_1.pdf",
+                "Phi_a_1D_temporal_1.pdf",
+                "Phi_c_1D_temporal_1.pdf",
+                "v_1D_temporal_1.pdf",
+                "Re_1D_temporal_1.pdf",
+            ]
+            for (fig_i, filename) in zip(_fig1, step_files)
+                saving_instructions!(simu, "results", subfolder_name, filename, fig_i)
+            end
+            simu.cfg.display_timing == :postrun &&
+                saving_instructions!(simu, "results", subfolder_name, "final_temperature_dist_1.pdf", _fig2)
         end
     # For the polarization curve.
     elseif simu.cfg.type_current isa PolarizationParams
         if simu.cfg.type_display == :multiple
-            saving_instructions!(simu, "results", subfolder_name, "global_indicators_1.pdf", fig1)
-            saving_instructions!(simu, "results", subfolder_name, "pola_curve_syn_1.pdf", fig2)
+            if _fig1 isa AbstractVector && length(_fig1) >= 5
+                saving_instructions!(simu, "results", subfolder_name, "ifc_1D_temporal_1.pdf",     _fig1[1])
+                saving_instructions!(simu, "results", subfolder_name, "Ucell_temporal_1.pdf",      _fig1[2])
+                saving_instructions!(simu, "results", subfolder_name, "T_1D_temporal_1.pdf",       _fig1[3])
+                saving_instructions!(simu, "results", subfolder_name, "power_density_curve_1.pdf", _fig1[4])
+                saving_instructions!(simu, "results", subfolder_name, "efficiency_curve_1.pdf",    _fig1[5])
+            end
+            saving_instructions!(simu, "results", subfolder_name, "pola_curve_1.pdf", _fig2)
         elseif simu.cfg.type_display == :synthetic
-            saving_instructions!(simu, "results", subfolder_name, "pola_curve_1.pdf", fig1)
+            saving_instructions!(simu, "results", subfolder_name, "pola_curve_1.pdf", _fig1)
         end
     # For the EIS curve.
     elseif simu.cfg.type_current isa EISParams
         if simu.cfg.type_display == :multiple
-            saving_instructions!(simu, "results", subfolder_name, "Nyquist_plot_1.pdf", fig1)
-            saving_instructions!(simu, "results", subfolder_name, "Bode_amplitude_curve_1.pdf", fig2)
-            saving_instructions!(simu, "results", subfolder_name, "Bode_angle_curve_1.pdf", fig3)
+            saving_instructions!(simu, "results", subfolder_name, "Nyquist_plot_1.pdf", _fig1)
+            saving_instructions!(simu, "results", subfolder_name, "Bode_amplitude_curve_1.pdf", _fig2)
+            saving_instructions!(simu, "results", subfolder_name, "Bode_angle_curve_1.pdf", _fig3)
         elseif simu.cfg.type_display == :synthetic
-            saving_instructions!(simu, "results", subfolder_name, "Nyquist_plot_syn_1.pdf", fig1)
+            saving_instructions!(simu, "results", subfolder_name, "Nyquist_plot_syn_1.pdf", _fig1)
         end
     # For the polarization curve for calibration.
     elseif simu.cfg.type_current isa PolarizationCalibrationParams
         if simu.cfg.type_display == :multiple
-            saving_instructions!(simu, "results", subfolder_name, "impact_cali_on_internal_state_1.pdf", fig1)
+            if _fig1 isa AbstractVector && length(_fig1) >= 5
+                saving_instructions!(simu, "results", subfolder_name, "ifc_1D_temporal_cali_1.pdf",     _fig1[1])
+                saving_instructions!(simu, "results", subfolder_name, "Ucell_temporal_cali_1.pdf",      _fig1[2])
+                saving_instructions!(simu, "results", subfolder_name, "T_1D_temporal_cali_1.pdf",       _fig1[3])
+                saving_instructions!(simu, "results", subfolder_name, "power_density_curve_cali_1.pdf", _fig1[4])
+                saving_instructions!(simu, "results", subfolder_name, "efficiency_curve_cali_1.pdf",    _fig1[5])
+            end
+            saving_instructions!(simu, "results", subfolder_name, "pola_curve_cali_1.pdf", _fig2)
         elseif simu.cfg.type_display == :synthetic
-            saving_instructions!(simu, "results", subfolder_name, "pola_curve_cali_1.pdf", fig1)
+            saving_instructions!(simu, "results", subfolder_name, "pola_curve_cali_1.pdf", _fig1)
         end
     end
+
     return nothing
 end
 
@@ -573,9 +618,7 @@ function saving_instructions!(_simu::AlphaPEM,
     mkpath(folder_path)
 
     pdf_path = _resolve_pdf_export_path(folder_path, filename)
-
-    # Save calibrated PDF export for publication workflows.
-    fig.savefig(pdf_path; format="pdf", transparent=false, bbox_inches="tight", pad_inches=0.03)
+    save(pdf_path, fig; backend=CairoMakie)
     return nothing
 end
 

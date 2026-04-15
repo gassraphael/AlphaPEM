@@ -28,11 +28,11 @@ if length(type_fuel_cell_list) == 1
     cfg = SimulationConfig(
         type_fuel_cell = type_fuel_cell_list[1],
         type_current = current_params,
-        voltage_zone = :before_voltage_drop,
-        type_auxiliary = :no_auxiliary,
-        type_purge = :no_purge,
-        type_display = :no_display,
-        type_plot = :fixed
+        voltage_zone = :before_voltage_drop, # :before_voltage_drop, :full.
+        type_auxiliary = :no_auxiliary, # :forced_convective_cathode_with_anodic_recirculation, :forced_convective_cathode_with_flow_through_anode, :no_auxiliary.
+        type_purge = :no_purge, # :constant_purge, :periodic_purge, :no_purge.
+        type_display = :no_display, # :multiple, :synthetic, :no_display.
+        display_timing = :postrun # :live, :postrun.
     )
     start_time = time() # Starting time
     run_simulation(cfg)
@@ -43,11 +43,11 @@ else
         SimulationConfig(
             type_fuel_cell = type_fuel_cell_list[i],
             type_current = current_params,
-            voltage_zone = :before_voltage_drop,
-            type_auxiliary = :no_auxiliary,
-            type_purge = :no_purge,
-            type_display = :synthetic,
-            type_plot = :fixed
+            voltage_zone = :before_voltage_drop, # :before_voltage_drop, :full.
+            type_auxiliary = :no_auxiliary, # :forced_convective_cathode_with_anodic_recirculation, :forced_convective_cathode_with_flow_through_anode, :no_auxiliary.
+            type_purge = :no_purge, # :constant_purge, :periodic_purge, :no_purge.
+            type_display = :synthetic, # :multiple, :synthetic, :no_display.
+            display_timing = :postrun # :live, :postrun.
         )
         for i in 1:length(type_fuel_cell_list)
     ]
