@@ -14,10 +14,41 @@ This file intentionally contains only secondary support functions:
 
 """Apply global matplotlib style settings shared by all simulations."""
 function _setup_matplotlib_style!()
-    mpl.rcParams["font.family"] = "cmr10" # "cmr10" for English characters and "DejaVu Serif" for French ones
+    publication_palette = [
+        "#0072B2", "#D55E00", "#009E73", "#CC79A7", "#56B4E9",
+        "#E69F00", "#882255", "#44AA99", "#999933", "#332288", "#DDCC77",
+    ]
+    mpl.rcParams["font.family"] = "DejaVu Serif"
+    mpl.rcParams["mathtext.fontset"] = "stix"
     mpl.rcParams["axes.formatter.use_mathtext"] = true # For scientific notation
-    mpl.rcParams["lines.linewidth"] = 2.0
-    mpl.rcParams["lines.markersize"] = 5.0
+    mpl.rcParams["axes.prop_cycle"] = mpl.cycler("color", publication_palette)
+    mpl.rcParams["axes.linewidth"] = 1.1
+    mpl.rcParams["axes.labelsize"] = 11
+    mpl.rcParams["axes.titlesize"] = 11
+    mpl.rcParams["axes.titlepad"] = 8.0
+    mpl.rcParams["lines.linewidth"] = 2.2
+    mpl.rcParams["lines.markersize"] = 5.5
+    mpl.rcParams["lines.markeredgewidth"] = 0.9
+    mpl.rcParams["figure.dpi"] = 140
+    mpl.rcParams["savefig.dpi"] = 600
+    mpl.rcParams["savefig.transparent"] = false
+    mpl.rcParams["savefig.facecolor"] = "white"
+    mpl.rcParams["savefig.bbox"] = "tight"
+    mpl.rcParams["pdf.fonttype"] = 42
+    mpl.rcParams["ps.fonttype"] = 42
+    mpl.rcParams["svg.fonttype"] = "none"
+    mpl.rcParams["xtick.labelsize"] = 10
+    mpl.rcParams["ytick.labelsize"] = 10
+    mpl.rcParams["xtick.major.size"] = 6.0
+    mpl.rcParams["ytick.major.size"] = 6.0
+    mpl.rcParams["xtick.minor.size"] = 3.5
+    mpl.rcParams["ytick.minor.size"] = 3.5
+    mpl.rcParams["legend.fontsize"] = 9.5
+    mpl.rcParams["legend.frameon"] = false
+    mpl.rcParams["legend.borderaxespad"] = 0.4
+    mpl.rcParams["legend.handlelength"] = 2.2
+    mpl.rcParams["legend.handletextpad"] = 0.6
+    mpl.rcParams["figure.autolayout"] = false
 end
 
 """Return figure/axes layout for step-current runs."""
@@ -27,10 +58,9 @@ function _create_figures(cfg::SimulationConfig{<:StepParams})
         # Here, additional plots are unnecessary: saving is handled in `Display` for this mode.
         return (nothing, nothing, nothing, nothing, nothing, nothing)
     elseif cfg.type_display == :synthetic
-        mpl.rcParams["font.size"] = 13 # Font size for all text
-        fig1, ax1 = plt.subplots(3, 3; figsize=(14, 14))
-        fig2, ax2 = cfg.type_plot == :fixed ? plt.subplots(; figsize=(8, 8)) : (nothing, nothing)
-        plt.subplots_adjust(; left=0.04, right=0.98, top=0.96, bottom=0.07, wspace=0.2, hspace=0.15)
+        mpl.rcParams["font.size"] = 10.5 # Font size for all text
+        fig1, ax1 = plt.subplots(3, 3; figsize=(13.6, 11.2), constrained_layout=true)
+        fig2, ax2 = cfg.type_plot == :fixed ? plt.subplots(; figsize=(6.8, 5.8), constrained_layout=true) : (nothing, nothing)
         return (fig1, ax1, fig2, ax2, nothing, nothing)
     end
     return (nothing, nothing, nothing, nothing, nothing, nothing)
@@ -45,9 +75,8 @@ function _create_figures(cfg::SimulationConfig{<:PolarizationParams})
         plt.subplots_adjust(; left=0.04, right=0.98, top=0.96, bottom=0.07, wspace=0.2, hspace=0.15)
         return (fig1, ax1, fig2, ax2, nothing, nothing)
     elseif cfg.type_display == :synthetic
-        mpl.rcParams["font.size"] = 18 # Font size for all text
-        mpl.rcParams["legend.fontsize"] = 15 # Legend font size only
-        fig1, ax1 = plt.subplots(; figsize=(8, 8))
+        mpl.rcParams["font.size"] = 10.5 # Font size for all text
+        fig1, ax1 = plt.subplots(; figsize=(6.8, 5.2), constrained_layout=true)
         return (fig1, ax1, nothing, nothing, nothing, nothing)
     end
     return (nothing, nothing, nothing, nothing, nothing, nothing)
@@ -61,8 +90,8 @@ function _create_figures(cfg::SimulationConfig{<:PolarizationCalibrationParams})
         plt.subplots_adjust(; left=0.04, right=0.98, top=0.96, bottom=0.07, wspace=0.2, hspace=0.15)
         return (fig1, ax1, nothing, nothing, nothing, nothing)
     elseif cfg.type_display == :synthetic
-        mpl.rcParams["font.size"] = 18 # Font size for all text
-        fig1, ax1 = plt.subplots(; figsize=(8, 8))
+        mpl.rcParams["font.size"] = 10.5 # Font size for all text
+        fig1, ax1 = plt.subplots(; figsize=(6.8, 5.2), constrained_layout=true)
         return (fig1, ax1, nothing, nothing, nothing, nothing)
     end
     return (nothing, nothing, nothing, nothing, nothing, nothing)
@@ -77,9 +106,8 @@ function _create_figures(cfg::SimulationConfig{<:EISParams})
         fig3, ax3 = plt.subplots(; figsize=(8, 8))
         return (fig1, ax1, fig2, ax2, fig3, ax3)
     elseif cfg.type_display == :synthetic
-        mpl.rcParams["font.size"] = 13 # Font size for all text
-        fig1, ax1 = plt.subplots(1, 3; figsize=(14, 4.7))
-        plt.subplots_adjust(; left=0.04, right=0.98, top=0.96, bottom=0.07, wspace=0.2, hspace=0.15)
+        mpl.rcParams["font.size"] = 10.0 # Font size for all text
+        fig1, ax1 = plt.subplots(1, 3; figsize=(13.4, 4.3), constrained_layout=true)
         return (fig1, ax1, nothing, nothing, nothing, nothing)
     end
     return (nothing, nothing, nothing, nothing, nothing, nothing)

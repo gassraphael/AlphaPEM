@@ -36,7 +36,7 @@ nav:
           - Auxiliaries modules: functions/modules/auxiliaries_modules.md
           - Calibration modules: functions/modules/calibration_modules.md
           - Differential equations modules: functions/modules/dif_eq_modules.md
-          - Display modules: functions/modules/display_modules.md
+          - Plotting modules: functions/modules/plotting_modules.md
           - Flows modules: functions/modules/flows_modules.md
           - GUI modules: functions/modules/GUI_modules.md
           - Heat modules: functions/modules/heat_modules.md

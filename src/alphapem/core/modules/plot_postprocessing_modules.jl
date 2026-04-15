@@ -14,7 +14,7 @@ using Statistics
 # ___________________________________________Computational display functions____________________________________________
 
 """
-    make_Fourier_transformation(variables, cd, cfg)
+    make_Fourier_transformation(outputs, cd, cfg)
 
 This function calculates the Fourier transformation of both cell voltage and current density. It will be used to
 display the Nyquist and Bode diagrams.
@@ -24,22 +24,20 @@ delta_t_break_EIS time is observed to ensure the dynamic stability of the stack'
 delta_t_measurement_EIS time is needed to record the cell voltage and the current density.
 
 # Arguments
-- `variables::Dict`: Variables calculated by the solver. They correspond to the fuel cell internal states.
+- `outputs::SimulationOutputs`: Typed simulation outputs used by post-processing.
 - `cd::AbstractCurrent`: Current profile used by the simulation.
 - `cfg::SimulationConfig`: Simulation configuration.
 
 # Returns
-- `Dict`: Dictionary containing the Fourier transformation (FT) of the cell voltage and the current
-  density, all amplitude values of the cell voltage calculated by the FT, the amplitude of the cell voltage at the
-  frequency of the perturbation, all frequency values used by the FT, the frequency of the perturbation, and the
-  number of points used in the FT.
+- `FourierOutputs`: Structured Fourier post-processing outputs.
 """
-function make_Fourier_transformation(variables::Dict,
+function make_Fourier_transformation(outputs::SimulationOutputs,
                                      cd::AbstractCurrent,
-                                     cfg::SimulationConfig)::Dict
+                                     cfg::SimulationConfig)::FourierOutputs
 
     # Extraction of the variables
-    t, Ucell_t = variables["t"], variables["Ucell"]
+    t = time_history(outputs)
+    Ucell_t = derived_outputs(outputs).Ucell
     # EIS timing is only available for EIS current profiles.
     cfg.type_current isa EISParams ||
         throw(ArgumentError("make_Fourier_transformation requires type_current isa EISParams."))
@@ -66,14 +64,14 @@ function make_Fourier_transformation(variables::Dict,
     freq_t = fftfreq(N)[1:N÷2]                              # Recovery of all frequency values used by fft
     f      = freq_t[findfirst(A_period_t .== A)]             # Recovery of the studied frequency
 
-    return Dict{String, Any}(
-        "Ucell_Fourier" => Ucell_Fourier,
-        "ifc_Fourier"   => ifc_Fourier,
-        "A_period_t"    => A_period_t,
-        "A"             => A,
-        "freq_t"        => freq_t,
-        "f"             => f,
-        "N"             => N
+    return FourierOutputs(
+        ComplexF64.(Ucell_Fourier),
+        ComplexF64.(ifc_Fourier),
+        Float64.(A_period_t),
+        Float64(A),
+        Float64.(freq_t),
+        Float64(f),
+        N,
     )
 end
 
@@ -125,4 +123,5 @@ function round_nice(x)
     end
     return nice * 10^exp
 end
+
 

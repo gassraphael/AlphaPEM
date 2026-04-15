@@ -20,7 +20,7 @@ using ..Config:   AbstractCurrentParams,
                   StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
 using ..Fuelcell: create_fuelcell
 using ..Currents: create_current, step_duration
-using ..Core.Models: AlphaPEM, simulate_model!, Display, Save_plot
+using ..Core.Models: AlphaPEM, simulate_model!, display!, save_plot!
 
 include(joinpath(@__DIR__, "run_simulation_modules.jl"))
 
@@ -65,7 +65,7 @@ function launch_AlphaPEM_for_step_current(simu::AlphaPEM)::AlphaPEM
             simulate_model!(simu, initial_state, (t0, tf))
 
             # Display
-            simu.cfg.type_display != :no_display && Display(simu, ax1, ax2, ax3)
+            simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
 
             # Recovery of the internal states from the end of the preceding simulation.
             initial_state = _extract_last_internal_state(simu, simu.cfg)
@@ -77,11 +77,11 @@ function launch_AlphaPEM_for_step_current(simu::AlphaPEM)::AlphaPEM
         # Simulation
         simulate_model!(simu)
         # Display
-        simu.cfg.type_display != :no_display && Display(simu, ax1, ax2, ax3)
+        simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
     end
 
     # Plot saving
-    Save_plot(simu, fig1, fig2, fig3)
+    save_plot!(simu, fig1, fig2, fig3)
     return simu
 end
 
@@ -114,7 +114,7 @@ function launch_AlphaPEM_for_polarization_current(simu::AlphaPEM)::AlphaPEM
             simulate_model!(simu, initial_state, (t0, tf))
 
             # Display
-            simu.cfg.type_display != :no_display && Display(simu, ax1, ax2, ax3)
+            simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
 
             # Recovery of the internal states from the end of the preceding simulation.
             initial_state = _extract_last_internal_state(simu, simu.cfg)
@@ -127,11 +127,11 @@ function launch_AlphaPEM_for_polarization_current(simu::AlphaPEM)::AlphaPEM
         # Simulation
         simulate_model!(simu)
         # Display
-        simu.cfg.type_display != :no_display && Display(simu, ax1, ax2, ax3)
+        simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
     end
 
     # Plot saving
-    Save_plot(simu, fig1, fig2, fig3)
+    save_plot!(simu, fig1, fig2, fig3)
     return simu
 end
 
@@ -164,7 +164,7 @@ function launch_AlphaPEM_for_polarization_current_for_calibration(simu::AlphaPEM
             simulate_model!(simu, initial_state, (t0, tf))
 
             # Display
-            simu.cfg.type_display != :no_display && Display(simu, ax1, ax2, ax3)
+            simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
 
             # Recovery of the internal states from the end of the preceding simulation.
             initial_state = _extract_last_internal_state(simu, simu.cfg)
@@ -176,11 +176,11 @@ function launch_AlphaPEM_for_polarization_current_for_calibration(simu::AlphaPEM
         # Simulation
         simulate_model!(simu)
         # Display
-        simu.cfg.type_display != :no_display && Display(simu, ax1, ax2, ax3)
+        simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
     end
 
     # Plot saving
-    Save_plot(simu, fig1, fig2, fig3)
+    save_plot!(simu, fig1, fig2, fig3)
     return simu
 end
 
@@ -231,11 +231,11 @@ function launch_AlphaPEM_for_EIS_current(simu::AlphaPEM)::AlphaPEM
         initial_state = _extract_last_internal_state(simu, simu.cfg)
 
         # Display
-        simu.cfg.type_display != :no_display && Display(simu, ax1, ax2, ax3)
+        simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
     end
 
     # Plot saving
-    Save_plot(simu, fig1, fig2, fig3)
+    save_plot!(simu, fig1, fig2, fig3)
     return simu
 end
 
@@ -258,10 +258,10 @@ function launch_AlphaPEM_for_polarization_current(
         # Simulation
         simulate_model!(simu)
         # Display
-        simu.cfg.type_display != :no_display && Display(simu, ax1, ax2, ax3)
+        simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
     end
     # Plot saving
-    Save_plot(first(simulators), fig1, fig2, fig3)
+    save_plot!(first(simulators), fig1, fig2, fig3)
     return simulators
 end
 
@@ -280,10 +280,10 @@ function launch_AlphaPEM_for_polarization_current_for_calibration(
         # Simulation
         simulate_model!(simu)
         # Display
-        simu.cfg.type_display != :no_display && Display(simu, ax1, ax2, ax3)
+        simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
     end
     # Plot saving
-    Save_plot(first(simulators), fig1, fig2, fig3)
+    save_plot!(first(simulators), fig1, fig2, fig3)
     return simulators
 end
 

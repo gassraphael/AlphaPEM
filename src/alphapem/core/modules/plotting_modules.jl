@@ -13,7 +13,7 @@ using Interpolations
 # __________________________________________________Polarisation curve__________________________________________________
 
 """
-    plot_polarisation_curve(variables, operating_inputs, parameters, ax, show=true)
+    plot_polarisation_curve(outputs, fc, cd, cfg, ax, show=true)
 
 This function plots the model polarisation curve, and compare it to the experimental one (if it exists). The
 polarisation curve is a classical representation of the cell performances, showing the cell voltage as a function
@@ -25,18 +25,19 @@ time is observed to ensure the dynamic stability of the stack's variables before
 each polarisation point is recorded at the end of each delta_t_break_pola time.
 
 # Arguments
-- `variables::Dict{String, Any}`: Variables calculated by the solver. They correspond to the fuel
-  cell internal states.
-- `operating_inputs::Dict{String, Any}`: Operating inputs of the fuel cell.
-- `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
+- `outputs::SimulationOutputs`: Typed simulation outputs of the fuel cell model.
+- `fc::AbstractFuelCell`: Fuel-cell definition.
+- `cd::AbstractCurrent`: Current profile used by the simulation.
+- `cfg::SimulationConfig`: Global simulation configuration.
 - `ax`: Axes on which the polarisation curve will be plotted.
 - `show::Bool=true`: If true, the polarisation curve will be displayed. If false, it will not be displayed.
 """
-function plot_polarisation_curve(variables::Dict{String, Any},  fc::AbstractFuelCell, cd::AbstractCurrent,
+function plot_polarisation_curve(outputs::SimulationOutputs,  fc::AbstractFuelCell, cd::AbstractCurrent,
                                  cfg::SimulationConfig, ax, show::Bool=true)
 
     # Extraction of the variables
-    t, Ucell_t = collect(variables["t"]), collect(variables["Ucell"])
+    t = time_history(outputs)
+    Ucell_t = derived_outputs(outputs).Ucell
 
     delta_t_ini_pola, delta_t_load_pola, delta_t_break_pola = cd.delta_t_ini, delta_t_load(cd), cd.delta_t_break
     delta_i_pola, i_max_pola = cd.delta_i, cd.i_max
@@ -51,14 +52,10 @@ function plot_polarisation_curve(variables::Dict{String, Any},  fc::AbstractFuel
 
         # Recovery of ifc and Ucell from the model after each stack stabilisation
         nb_loads = floor(Int, i_max_pola / delta_i_pola)  # Number of loads which are made
-        ifc_discretized = zeros(nb_loads + 1)      # One point is taken at ifc = 0, before the first load.
-        Ucell_discretized = zeros(nb_loads + 1)    # One point is taken at ifc = 0, before the first load.
-        for i in 0:nb_loads
-            t_load = delta_t_ini_pola + i * (delta_t_load_pola + delta_t_break_pola)  # time for measurement
-            idx = argmin(abs.(t .- t_load))  # the corresponding index
-            ifc_discretized[i + 1] = ifc_t[idx]  # the last value at the end of each load
-            Ucell_discretized[i + 1] = Ucell_t[idx]  # the last value at the end of each load
-        end
+        sampling_times = [delta_t_ini_pola + i * (delta_t_load_pola + delta_t_break_pola) for i in 0:nb_loads]
+        sample_indices = nearest_time_indices(t, sampling_times)
+        ifc_discretized = ifc_t[sample_indices]      # One point is taken at ifc = 0, before the first load.
+        Ucell_discretized = Ucell_t[sample_indices]  # One point is taken at ifc = 0, before the first load.
 
         # Plot the experimental polarization curve and calculate the simulation error compared with experimental data
         if cfg.type_fuel_cell != :manual_setup &&
@@ -104,7 +101,7 @@ end
 
 
 """
-    plot_polarisation_curve_for_cali(variables, operating_inputs, parameters, ax)
+    plot_polarisation_curve_for_cali(outputs, fc, cd, cfg, ax)
 
 This function plots the model polarisation curve, and compare it to the experimental one. The
 polarisation curve is a classical representation of the cell performances, showing the cell voltage as a function
@@ -116,25 +113,20 @@ time is observed to ensure the dynamic stability of the stack's variables before
 each polarisation point is recorded at the end of each delta_t_break_pola time.
 
 # Arguments
-- `variables::Dict{String, Any}`: Variables calculated by the solver. They correspond to the fuel
-  cell internal states.
-- `operating_inputs::Dict{String, Any}`: Operating inputs of the fuel cell.
-- `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
+- `outputs::SimulationOutputs`: Typed simulation outputs of the fuel cell model.
+- `fc::AbstractFuelCell`: Fuel-cell definition.
+- `cd::AbstractCurrent`: Current profile used by the simulation.
+- `cfg::SimulationConfig`: Global simulation configuration.
 - `ax`: Axes on which the polarisation curve will be plotted.
 """
-function plot_polarisation_curve_for_cali(variables::Dict{String, Any},
+function plot_polarisation_curve_for_cali(outputs::SimulationOutputs,
                                           fc::AbstractFuelCell,
                                           cd::AbstractCurrent,
                                           cfg::SimulationConfig,
                                           ax)
     # Extraction of the variables
-    t, Ucell_t = collect(variables["t"]), collect(variables["Ucell"])
-    # Extraction of the operating inputs and the parameters
-
-    delta_t_ini_pola_cali = cd.delta_t_ini
-    delta_t_load_pola_cali = abs(cd.i_exp[1]) / cd.v_load
-    delta_t_break_pola_cali = cd.delta_t_break
-    voltage_zone = cfg.voltage_zone
+    t = time_history(outputs)
+    Ucell_t = derived_outputs(outputs).Ucell
     # Extraction of the experimental current density and voltage values for the calibration.
     i_exp_cali_t, U_exp_cali_t = fc.pola_exp_data_cali.i_exp, fc.pola_exp_data_cali.U_exp  # (A.m-2, V).
 
@@ -147,16 +139,9 @@ function plot_polarisation_curve_for_cali(variables::Dict{String, Any},
         end
 
         # Recovery of ifc and Ucell from the model after each stack stabilisation
-        nb_loads = length(i_exp_cali_t)  # Number of loads which are made
-        delta_t_cali = delta_t_load_pola_cali + delta_t_break_pola_cali  # s. It is the time of one load.
-        ifc_discretized = zeros(nb_loads)
-        Ucell_discretized = zeros(nb_loads)
-        for i in 1:nb_loads
-            t_load = delta_t_ini_pola_cali + i * delta_t_cali  # time for measurement
-            idx = argmin(abs.(t .- t_load))  # the corresponding index
-            ifc_discretized[i] = ifc_t[idx]  # the last value at the end of each load
-            Ucell_discretized[i] = Ucell_t[idx]  # the last value at the end of each load
-        end
+        sample_indices = polarisation_sampling_indices(outputs, cd)
+        ifc_discretized = ifc_t[sample_indices]
+        Ucell_discretized = Ucell_t[sample_indices]
 
         # Plot the experimental polarization curve
         i_exp_cali_t = i_exp_cali_t ./ 1e4  # Conversion in A/cm²
@@ -192,28 +177,29 @@ end
 # _______________________________________________________EIS curves_____________________________________________________
 
 """
-    plot_EIS_curve_Nyquist(parameters, Fourier_results, ax)
+    plot_EIS_curve_Nyquist(fc, cd, cfg, Fourier_results, ax)
 
 This function is used to plot the Nyquist diagram of the EIS curves.
 
 # Arguments
-- `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
-- `Fourier_results::Dict{String, Any}`: Dictionary containing the Fourier transformation (FT)
-  post-processing outputs.
+- `fc::AbstractFuelCell`: Fuel-cell definition.
+- `cd::AbstractCurrent`: Current profile used by the simulation.
+- `cfg::SimulationConfig`: Global simulation configuration.
+- `Fourier_results::FourierOutputs`: Structured Fourier post-processing outputs.
 - `ax`: Axes on which the Nyquist diagram will be plotted.
 """
-function plot_EIS_curve_Nyquist(fc::AbstractFuelCell,
+function plot_EIS_curve_Nyquist(_fc::AbstractFuelCell,
                                 cd::AbstractCurrent,
                                 cfg::SimulationConfig,
-                                Fourier_results::Dict{String, Any},
+                                Fourier_results::FourierOutputs,
                                 ax)
 
     # Extraction of the parameters
     i_EIS, ratio_EIS = cd.i_EIS, cd.ratio
     # Extraction of the Fourier results
-    Ucell_Fourier, ifc_Fourier = Fourier_results["Ucell_Fourier"], Fourier_results["ifc_Fourier"]
-    f_Fourier = Fourier_results["f"]
-    A_period_t, A, N = Fourier_results["A_period_t"], Fourier_results["A"], Fourier_results["N"]
+    Ucell_Fourier, ifc_Fourier = Fourier_results.Ucell_Fourier, Fourier_results.ifc_Fourier
+    f_Fourier = Fourier_results.f
+    A_period_t, A, N = Fourier_results.A_period_t, Fourier_results.A, Fourier_results.N
 
     # Calculation of the real and imaginary component of the impedance for each period
     Z0 = A / (ratio_EIS * (-i_EIS)) * 1e7  # Impedance of the perturbation in mΩ.cm². The sign of i is inverted to
@@ -238,19 +224,21 @@ end
 
 
 """
-    plot_EIS_curve_Bode_amplitude(parameters, Fourier_results, ax)
+    plot_EIS_curve_Bode_amplitude(fc, cd, cfg, Fourier_results, ax)
 
 This function is used to plot the amplitude Bode diagram of the EIS curves.
 
 # Arguments
-- `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
-- `Fourier_results::Dict{String, Any}`: Dictionary containing Fourier post-processing outputs.
+- `fc::AbstractFuelCell`: Fuel-cell definition.
+- `cd::AbstractCurrent`: Current profile used by the simulation.
+- `cfg::SimulationConfig`: Global simulation configuration.
+- `Fourier_results::FourierOutputs`: Structured Fourier post-processing outputs.
 - `ax`: Axes on which the amplitude Bode diagram will be plotted.
 """
-function plot_EIS_curve_Bode_amplitude(fc::AbstractFuelCell,
+function plot_EIS_curve_Bode_amplitude(_fc::AbstractFuelCell,
                                        cd::AbstractCurrent,
                                        cfg::SimulationConfig,
-                                       Fourier_results::Dict{String, Any},
+                                       Fourier_results::FourierOutputs,
                                        ax)
 
     # Extraction of the parameters
@@ -258,8 +246,8 @@ function plot_EIS_curve_Bode_amplitude(fc::AbstractFuelCell,
     ratio_EIS = cd.ratio
     f_EIS = (minimum(log10.(cd.f)), maximum(log10.(cd.f)), length(cd.f), 0)
     # Extraction of the Fourier results
-    A = Fourier_results["A"]
-    f = Fourier_results["f"]
+    A = Fourier_results.A
+    f = Fourier_results.f
 
     # Calculation of the impedance of the perturbation
     Z0 = A / (ratio_EIS * (-i_EIS)) * 1e7  # in mΩ.cm². The sign of i is inverted to comply with EIS standards.
@@ -276,35 +264,34 @@ end
 
 
 """
-    plot_EIS_curve_Bode_angle(parameters, Fourier_results, ax)
+    plot_EIS_curve_Bode_angle(cd, cfg, Fourier_results, ax)
 
 This function is used to plot the angle Bode diagram. It only works with an entry signal made with a cosinus
 (not a sinus).
 
 # Arguments
-- `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
-- `Fourier_results::Dict{String, Any}`: Dictionary containing Fourier post-processing outputs.
+- `cd::AbstractCurrent`: Current profile used by the simulation.
+- `cfg::SimulationConfig`: Global simulation configuration.
+- `Fourier_results::FourierOutputs`: Structured Fourier post-processing outputs.
 - `ax`: Axes on which the angle Bode diagram will be plotted.
 """
-function plot_EIS_curve_Bode_angle(fc::AbstractFuelCell,
-                                   cd::AbstractCurrent,
+function plot_EIS_curve_Bode_angle(cd::AbstractCurrent,
                                    cfg::SimulationConfig,
-                                   Fourier_results::Dict{String, Any},
+                                   Fourier_results::FourierOutputs,
                                    ax)
 
     # Extraction of the parameters
     f_EIS = (minimum(log10.(cd.f)), maximum(log10.(cd.f)), length(cd.f), 0)
     # Extraction of the Fourier results
-    Ucell_Fourier = Fourier_results["Ucell_Fourier"]
-    ifc_Fourier = Fourier_results["ifc_Fourier"]
-    A_period_t = Fourier_results["A_period_t"]
-    A = Fourier_results["A"]
-    f = Fourier_results["f"]
-    N = Fourier_results["N"]
+    Ucell_Fourier = Fourier_results.Ucell_Fourier
+    ifc_Fourier = Fourier_results.ifc_Fourier
+    A_period_t = Fourier_results.A_period_t
+    A = Fourier_results.A
+    f = Fourier_results.f
 
     # Calculation of the dephasing values at the frequency of the perturbation
-    theta_U_t = angle.(Ucell_Fourier[1:N÷2])  # Recovery of all dephasing values calculated by fft
-    theta_i_t = angle.(ifc_Fourier[1:N÷2]) .+ π  # Recovery of all dephasing values calculated by fft.
+    theta_U_t = angle.(Ucell_Fourier[1:Fourier_results.N÷2])  # Recovery of all dephasing values calculated by fft
+    theta_i_t = angle.(ifc_Fourier[1:Fourier_results.N÷2]) .+ π  # Recovery of all dephasing values calculated by fft.
     # An angle of pi is added to comply with EIS standards (device under load rather than current source).
     idx_A = findfirst(A_period_t .== A)
     theta_U = theta_U_t[idx_A]  # Dephasing at the frequency of the perturbation
@@ -326,41 +313,35 @@ end
 
 
 """
-    plot_EIS_curve_tests(variables, operating_inputs, parameters, Fourier_results)
+    plot_EIS_curve_tests(outputs, fc, cd, cfg, Fourier_results)
 
 This function is used to test the accuracy of the EIS results. It compares the reconstructed Ucell_Fourier(t)
 from the Fourier transformation with the current density ifc(t), and displays Ucell(t) given by the model with the
 reconstructed Ucell_Fourier(t).
 
 # Arguments
-- `variables::Dict{String, Any}`: Variables calculated by the solver. They correspond to the fuel
-  cell internal states.
-- `operating_inputs::Dict{String, Any}`: Operating inputs of the fuel cell.
-- `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
-- `Fourier_results::Dict{String, Any}`: Dictionary containing Fourier post-processing outputs.
+- `outputs::SimulationOutputs`: Typed simulation outputs of the fuel cell model.
+- `cd::AbstractCurrent`: Current profile used by the simulation.
+- `Fourier_results::FourierOutputs`: Structured Fourier post-processing outputs.
 """
-function plot_EIS_curve_tests(variables::Dict{String, Any},
-                              fc::AbstractFuelCell,
+function plot_EIS_curve_tests(outputs::SimulationOutputs,
                               cd::AbstractCurrent,
-                              cfg::SimulationConfig,
-                              Fourier_results::Dict{String, Any})
+                              Fourier_results::FourierOutputs)
 
     # Extraction of the variables
-    t = collect(variables["t"])
-    Ucell_t = variables["Ucell"]
-    # Extraction of the operating inputs and the parameters
+    t = time_history(outputs)
+    Ucell_t = derived_outputs(outputs).Ucell
 
     i_EIS = cd.i_EIS
     ratio_EIS = cd.ratio
     t_EIS = (cd.t0, cd.t_new_start, cd.tf, cd.delta_t_break, cd.delta_t_measurement)
     f_EIS = (minimum(log10.(cd.f)), maximum(log10.(cd.f)), length(cd.f), 0)
     # Extraction of the Fourier results
-    Ucell_Fourier = Fourier_results["Ucell_Fourier"]
-    ifc_Fourier = Fourier_results["ifc_Fourier"]
-    A_period_t = Fourier_results["A_period_t"]
-    A = Fourier_results["A"]
-    f = Fourier_results["f"]
-    N = Fourier_results["N"]
+    Ucell_Fourier = Fourier_results.Ucell_Fourier
+    ifc_Fourier = Fourier_results.ifc_Fourier
+    A_period_t = Fourier_results.A_period_t
+    A = Fourier_results.A
+    f = Fourier_results.f
 
     # Reconstructed Ucell with a cosinus form, and comparison of its form with the current density one.
     t0_EIS, t_new_start_EIS, tf_EIS, delta_t_break_EIS, delta_t_measurement_EIS = t_EIS
@@ -409,18 +390,19 @@ end
 # ____________________________________________Internal variables - 1D temporal__________________________________________
 
 """
-    plot_ifc_1D_temporal(variables, operating_inputs, parameters, ax)
+    plot_ifc_1D_temporal(outputs, fc, cd, cfg, ax)
 
 This function plots the current density as a function of time. The different current density values at different
 spatial localisation through the gas channel are plotted on the same graph, to compare their behaviour over time.
 
 # Arguments
-- `variables::Dict{String, Any}`: Variables calculated by the solver.
-- `operating_inputs::Dict{String, Any}`: Operating inputs of the fuel cell.
-- `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
+- `outputs::SimulationOutputs`: Typed simulation outputs of the fuel cell model.
+- `fc::AbstractFuelCell`: Fuel-cell definition.
+- `cd::AbstractCurrent`: Current profile used by the simulation.
+- `cfg::SimulationConfig`: Global simulation configuration.
 - `ax`: Axes on which the current density will be plotted.
 """
-function plot_ifc_1D_temporal(variables::Dict{String, Any},
+function plot_ifc_1D_temporal(outputs::SimulationOutputs,
                               fc::AbstractFuelCell,
                               cd::AbstractCurrent,
                               cfg::SimulationConfig,
@@ -430,15 +412,9 @@ function plot_ifc_1D_temporal(variables::Dict{String, Any},
     nb_gc = fc.numerical_parameters.nb_gc
 
     # Extraction of the variables
-    t_full = collect(variables["t"])
-    mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * cd.delta_t_ini  # select the time after 0.9*delta_t_ini
-    else
-        trues(length(t_full))
-    end
-    t = t_full[mask]
+    t = masked_time_history(outputs, cd, cfg)
     # Python previously used [None] to force 1-based indexing. Julia is natively 1-based.
-    i_fc_t = [collect(variables["i_fc"][i])[mask] ./ 1e4 for i in 1:nb_gc]  # Conversion in A/cm²
+    i_fc_t = [extract_masked_derived_gc_series(outputs, i, cd, cfg, x -> x.i_fc) ./ 1e4 for i in 1:nb_gc]  # Conversion in A/cm²
 
     # Collect handles and labels then build manually the legend
     handles = Any[]
@@ -480,34 +456,27 @@ cell, as a function of time.
 - `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
 - `ax`: Axes on which the vapor concentration will be plotted.
 """
-function plot_C_v_1D_temporal(variables::Dict{String, Any},
+function plot_C_v_1D_temporal(outputs::SimulationOutputs,
                               fc::AbstractFuelCell,
                               cd::AbstractCurrent,
                               cfg::SimulationConfig,
                               ax)
 
     # Extraction of the parameter
-    nb_gc, nb_gdl, nb_mpl = fc.numerical_parameters.nb_gc, fc.numerical_parameters.nb_gdl, fc.numerical_parameters.nb_mpl
-    type_current, type_plot = cfg.type_current, cfg.type_plot
+    nb_gdl_mid = middle_gdl_index(fc)
+    nb_mpl_mid = middle_mpl_index(fc)
 
     # Extraction of the variables
-    t_full = collect(variables["t"])
-    mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * cd.delta_t_ini
-    else
-        trues(length(t_full))
-    end
-    nb_gc_mid = Int(ceil(nb_gc / 2))  # Middle of the gas channel
-    t = t_full[mask]
-    C_v_agc_t = collect(variables["C_v_agc"][nb_gc_mid])[mask]
-    C_v_agdl_t = collect(variables["C_v_agdl_$(Int(ceil(nb_gdl / 2)))"][nb_gc_mid])[mask]
-    C_v_ampl_t = collect(variables["C_v_ampl_$(Int(ceil(nb_mpl / 2)))"][nb_gc_mid])[mask]
-    C_v_acl_t = collect(variables["C_v_acl"][nb_gc_mid])[mask]
-    C_v_ccl_t = collect(variables["C_v_ccl"][nb_gc_mid])[mask]
-    C_v_cmpl_t = collect(variables["C_v_cmpl_$(Int(ceil(nb_mpl / 2)))"][nb_gc_mid])[mask]
-    C_v_cgdl_t = collect(variables["C_v_cgdl_$(Int(ceil(nb_gdl / 2)))"][nb_gc_mid])[mask]
-    C_v_cgc_t = collect(variables["C_v_cgc"][nb_gc_mid])[mask]
-    T_ccl = collect(variables["T_ccl"][nb_gc_mid])[mask]
+    t = masked_time_history(outputs, cd, cfg)
+    C_v_agc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.C_v)
+    C_v_agdl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agdl[nb_gdl_mid].C_v)
+    C_v_ampl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ampl[nb_mpl_mid].C_v)
+    C_v_acl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.acl.C_v)
+    C_v_ccl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ccl.C_v)
+    C_v_cmpl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cmpl[nb_mpl_mid].C_v)
+    C_v_cgdl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgdl[nb_gdl_mid].C_v)
+    C_v_cgc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.C_v)
+    T_ccl = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ccl.T)
 
     # Plot the vapor concentrations at different spatial localisations Cv
     C_v_sat_ccl_t = [C_v_sat(T) for T in T_ccl]
@@ -546,53 +515,27 @@ as a function of time.
 - `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
 - `ax`: Axes on which the water content will be plotted.
 """
-function plot_lambda_1D_temporal(variables::Dict{String, Any},
+function plot_lambda_1D_temporal(outputs::SimulationOutputs,
                                  fc::AbstractFuelCell,
                                  cd::AbstractCurrent,
                                  cfg::SimulationConfig,
                                  ax)
 
-    # Extraction of the operating inputs and the parameters
-    nb_gc = fc.numerical_parameters.nb_gc
-
     # Extraction of the variables
-    t_full = collect(variables["t"])
-    mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * cd.delta_t_ini
-    else
-        trues(length(t_full))
-    end
-    nb_gc_mid = Int(ceil(nb_gc / 2))  # Middle of the gas channel
-    t = t_full[mask]
-    lambda_acl_t = collect(variables["lambda_acl"][nb_gc_mid])[mask]
-    lambda_mem_t = collect(variables["lambda_mem"][nb_gc_mid])[mask]
-    lambda_ccl_t = collect(variables["lambda_ccl"][nb_gc_mid])[mask]
+    t = masked_time_history(outputs, cd, cfg)
+    lambda_acl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.acl.lambda)
+    lambda_mem_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.mem.lambda)
+    lambda_ccl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ccl.lambda)
 
     # Plot the water content at different spatial localisations: lambda
     if cfg.type_current isa PolarizationParams
-        n = length(t)
-        ifc_t = zeros(n)
-        for i in 1:n
-            ifc_t[i] = current(cd, t[i]) / 1e4  # Conversion in A/cm²
-        end
-
-        # Recovery of the internal states from the model after each stack stabilisation
-        delta_t_ini_pola = cd.delta_t_ini
-        delta_t_load_pola = cd.delta_i / cd.v_load
-        delta_t_break_pola = cd.delta_t_break
-            nb_loads = floor(Int, cd.i_max / cd.delta_i)
-        ifc_discretized_t = zeros(nb_loads)
-        lambda_acl_discretized_t = zeros(nb_loads)
-        lambda_mem_discretized_t = zeros(nb_loads)
-        lambda_ccl_discretized_t = zeros(nb_loads)
-        for i in 1:nb_loads
-            t_load = delta_t_ini_pola + i * (delta_t_load_pola + delta_t_break_pola)
-            idx = argmin(abs.(t .- t_load))
-            ifc_discretized_t[i] = ifc_t[idx]
-            lambda_acl_discretized_t[i] = lambda_acl_t[idx]
-            lambda_mem_discretized_t[i] = lambda_mem_t[idx]
-            lambda_ccl_discretized_t[i] = lambda_ccl_t[idx]
-        end
+        t_hist = time_history(outputs)
+        ifc_t = current(cd, t_hist) ./ 1e4  # Conversion in A/cm²
+        sample_indices = polarisation_sampling_indices(outputs, cd)
+        ifc_discretized_t = ifc_t[sample_indices]
+        lambda_acl_discretized_t = extract_mid_mea_series(outputs, fc, mea -> mea.acl.lambda)[sample_indices]
+        lambda_mem_discretized_t = extract_mid_mea_series(outputs, fc, mea -> mea.mem.lambda)[sample_indices]
+        lambda_ccl_discretized_t = extract_mid_mea_series(outputs, fc, mea -> mea.ccl.lambda)[sample_indices]
         ax.scatter(ifc_discretized_t, lambda_acl_discretized_t; marker="o", color=colors(2))
         ax.scatter(ifc_discretized_t, lambda_mem_discretized_t; marker="o", color=colors(3))
         ax.scatter(ifc_discretized_t, lambda_ccl_discretized_t; marker="o", color=colors(4))
@@ -626,7 +569,7 @@ cell, as a function of time.
 - `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
 - `ax`: Axes on which the liquid water saturation will be plotted.
 """
-function plot_s_1D_temporal(variables::Dict{String, Any},
+function plot_s_1D_temporal(outputs::SimulationOutputs,
                             fc::AbstractFuelCell,
                             cd::AbstractCurrent,
                             cfg::SimulationConfig,
@@ -634,60 +577,34 @@ function plot_s_1D_temporal(variables::Dict{String, Any},
 
     # Extraction of the operating inputs and the parameters
 
-    nb_gc, nb_gdl, nb_mpl = fc.numerical_parameters.nb_gc, fc.numerical_parameters.nb_gdl, fc.numerical_parameters.nb_mpl
+    nb_gdl_mid = middle_gdl_index(fc)
+    nb_mpl_mid = middle_mpl_index(fc)
 
     # Extraction of the variables
-    t_full = collect(variables["t"])
-    mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * cd.delta_t_ini
-    else
-        trues(length(t_full))
-    end
-    nb_gc_mid = Int(ceil(nb_gc / 2))
-    t = t_full[mask]
-    s_agc_t = collect(variables["s_agc"][nb_gc_mid])[mask]
-    s_agdl_t = collect(variables["s_agdl_$(Int(ceil(nb_gdl / 2)))"][nb_gc_mid])[mask]
-    s_ampl_t = collect(variables["s_ampl_$(Int(ceil(nb_mpl / 2)))"][nb_gc_mid])[mask]
-    s_acl_t = collect(variables["s_acl"][nb_gc_mid])[mask]
-    s_ccl_t = collect(variables["s_ccl"][nb_gc_mid])[mask]
-    s_cmpl_t = collect(variables["s_cmpl_$(Int(ceil(nb_mpl / 2)))"][nb_gc_mid])[mask]
-    s_cgdl_t = collect(variables["s_cgdl_$(Int(ceil(nb_gdl / 2)))"][nb_gc_mid])[mask]
-    s_cgc_t = collect(variables["s_cgc"][nb_gc_mid])[mask]
+    t = masked_time_history(outputs, cd, cfg)
+    s_agc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.s)
+    s_agdl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agdl[nb_gdl_mid].s)
+    s_ampl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ampl[nb_mpl_mid].s)
+    s_acl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.acl.s)
+    s_ccl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ccl.s)
+    s_cmpl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cmpl[nb_mpl_mid].s)
+    s_cgdl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgdl[nb_gdl_mid].s)
+    s_cgc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.s)
 
     # Plot the liquid water saturation at different spatial localisations: s
     if cfg.type_current isa PolarizationParams
-        n = length(t)
-        ifc_t = zeros(n)
-        for i in 1:n
-            ifc_t[i] = current(cd, t[i]) / 1e4  # Conversion in A/cm²
-        end
-        # Recovery of the internal states from the model after each stack stabilisation
-        delta_t_ini_pola = cd.delta_t_ini
-        delta_t_load_pola = cd.delta_i / cd.v_load
-        delta_t_break_pola = cd.delta_t_break
-            nb_loads = floor(Int, cd.i_max / cd.delta_i)
-        ifc_discretized_t = zeros(nb_loads)
-        s_agc_discretized_t = zeros(nb_loads)
-        s_agdl_discretized_t = zeros(nb_loads)
-        s_ampl_discretized_t = zeros(nb_loads)
-        s_acl_discretized_t = zeros(nb_loads)
-        s_ccl_discretized_t = zeros(nb_loads)
-        s_cmpl_discretized_t = zeros(nb_loads)
-        s_cgdl_discretized_t = zeros(nb_loads)
-        s_cgc_discretized_t = zeros(nb_loads)
-        for i in 1:nb_loads
-            t_load = delta_t_ini_pola + i * (delta_t_load_pola + delta_t_break_pola)
-            idx = argmin(abs.(t .- t_load))
-            ifc_discretized_t[i] = ifc_t[idx]
-            s_agc_discretized_t[i] = s_agc_t[idx]
-            s_agdl_discretized_t[i] = s_agdl_t[idx]
-            s_ampl_discretized_t[i] = s_ampl_t[idx]
-            s_acl_discretized_t[i] = s_acl_t[idx]
-            s_ccl_discretized_t[i] = s_ccl_t[idx]
-            s_cmpl_discretized_t[i] = s_cmpl_t[idx]
-            s_cgdl_discretized_t[i] = s_cgdl_t[idx]
-            s_cgc_discretized_t[i] = s_cgc_t[idx]
-        end
+        t_hist = time_history(outputs)
+        ifc_t = current(cd, t_hist) ./ 1e4  # Conversion in A/cm²
+        sample_indices = polarisation_sampling_indices(outputs, cd)
+        ifc_discretized_t = ifc_t[sample_indices]
+        s_agc_discretized_t = extract_mid_mea_series(outputs, fc, mea -> mea.agc.s)[sample_indices]
+        s_agdl_discretized_t = extract_mid_mea_series(outputs, fc, mea -> mea.agdl[nb_gdl_mid].s)[sample_indices]
+        s_ampl_discretized_t = extract_mid_mea_series(outputs, fc, mea -> mea.ampl[nb_mpl_mid].s)[sample_indices]
+        s_acl_discretized_t = extract_mid_mea_series(outputs, fc, mea -> mea.acl.s)[sample_indices]
+        s_ccl_discretized_t = extract_mid_mea_series(outputs, fc, mea -> mea.ccl.s)[sample_indices]
+        s_cmpl_discretized_t = extract_mid_mea_series(outputs, fc, mea -> mea.cmpl[nb_mpl_mid].s)[sample_indices]
+        s_cgdl_discretized_t = extract_mid_mea_series(outputs, fc, mea -> mea.cgdl[nb_gdl_mid].s)[sample_indices]
+        s_cgc_discretized_t = extract_mid_mea_series(outputs, fc, mea -> mea.cgc.s)[sample_indices]
         ax.scatter(ifc_discretized_t, s_agc_discretized_t; marker="o", color=colors(0))
         ax.scatter(ifc_discretized_t, s_agdl_discretized_t; marker="o", color=colors(1))
         ax.scatter(ifc_discretized_t, s_ampl_discretized_t; marker="o", color=colors(2))
@@ -732,30 +649,22 @@ cell, as a function of time.
 - `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
 - `ax`: Axes on which the hydrogen concentration will be plotted.
 """
-function plot_C_H2_1D_temporal(variables::Dict{String, Any},
+function plot_C_H2_1D_temporal(outputs::SimulationOutputs,
                                fc::AbstractFuelCell,
                                cd::AbstractCurrent,
                                cfg::SimulationConfig,
                                ax)
 
     # Extraction of the parameters
-    nb_gc = fc.numerical_parameters.nb_gc
-    nb_gdl = fc.numerical_parameters.nb_gdl
-    nb_mpl = fc.numerical_parameters.nb_mpl
+    nb_gdl_mid = middle_gdl_index(fc)
+    nb_mpl_mid = middle_mpl_index(fc)
 
     # Extraction of the variables
-    t_full = collect(variables["t"])
-    mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * cd.delta_t_ini
-    else
-        trues(length(t_full))
-    end
-    nb_gc_mid = Int(ceil(nb_gc / 2))  # Middle of the gas channel
-    t = t_full[mask]
-    C_H2_agc_t = collect(variables["C_H2_agc"][nb_gc_mid])[mask]
-    C_H2_agdl_t = collect(variables["C_H2_agdl_$(Int(ceil(nb_gdl / 2)))"][nb_gc_mid])[mask]
-    C_H2_ampl_t = collect(variables["C_H2_ampl_$(Int(ceil(nb_mpl / 2)))"][nb_gc_mid])[mask]
-    C_H2_acl_t = collect(variables["C_H2_acl"][nb_gc_mid])[mask]
+    t = masked_time_history(outputs, cd, cfg)
+    C_H2_agc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.C_H2)
+    C_H2_agdl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agdl[nb_gdl_mid].C_H2)
+    C_H2_ampl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ampl[nb_mpl_mid].C_H2)
+    C_H2_acl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.acl.C_H2)
 
     # Plot the hydrogen concentration at different spatial localisations: C_H2
     ax.plot(t, C_H2_agc_t; color=colors(0))
@@ -787,7 +696,7 @@ cell, as a function of time.
 - `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
 - `ax`: Axes on which the oxygen concentration will be plotted.
 """
-function plot_C_O2_1D_temporal(variables::Dict{String, Any},
+function plot_C_O2_1D_temporal(outputs::SimulationOutputs,
                                fc::AbstractFuelCell,
                                cd::AbstractCurrent,
                                cfg::SimulationConfig,
@@ -795,25 +704,16 @@ function plot_C_O2_1D_temporal(variables::Dict{String, Any},
 
     # Extraction of the parameters
 
-    Hccl = fc.physical_parameters.Hccl
-    nb_gc = fc.numerical_parameters.nb_gc
-    nb_gdl = fc.numerical_parameters.nb_gdl
-    nb_mpl = fc.numerical_parameters.nb_mpl
+    nb_gdl_mid = middle_gdl_index(fc)
+    nb_mpl_mid = middle_mpl_index(fc)
 
     # Extraction of the variables
-    t_full = collect(variables["t"])
-    mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * cd.delta_t_ini
-    else
-        trues(length(t_full))
-    end
-    nb_gc_mid = Int(ceil(nb_gc / 2))
-    t = t_full[mask]
-    C_O2_ccl_t = collect(variables["C_O2_ccl"][nb_gc_mid])[mask]
-    C_O2_cmpl_t = collect(variables["C_O2_cmpl_$(Int(ceil(nb_mpl / 2)))"][nb_gc_mid])[mask]
-    C_O2_cgdl_t = collect(variables["C_O2_cgdl_$(Int(ceil(nb_gdl / 2)))"][nb_gc_mid])[mask]
-    C_O2_cgc_t = collect(variables["C_O2_cgc"][nb_gc_mid])[mask]
-    C_O2_Pt_t = collect(variables["C_O2_Pt"][nb_gc_mid])[mask]
+    t = masked_time_history(outputs, cd, cfg)
+    C_O2_ccl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ccl.C_O2)
+    C_O2_cmpl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cmpl[nb_mpl_mid].C_O2)
+    C_O2_cgdl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgdl[nb_gdl_mid].C_O2)
+    C_O2_cgc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.C_O2)
+    C_O2_Pt_t = extract_masked_mid_derived_gc_series(outputs, fc, cd, cfg, x -> x.C_O2_Pt)
 
     # Plot the oxygen concentration at different spatial localisations: C_O2
     ax.plot(t, C_O2_Pt_t; color=colors(10))
@@ -844,26 +744,16 @@ This function plots the nitrogen concentration as a function of time.
 - `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
 - `ax`: Axes on which the nitrogen concentration will be plotted.
 """
-function plot_C_N2_1D_temporal(variables::Dict{String, Any},
+function plot_C_N2_1D_temporal(outputs::SimulationOutputs,
                                fc::AbstractFuelCell,
                                cd::AbstractCurrent,
                                cfg::SimulationConfig,
                                ax)
 
-    # Extraction of the parameters
-    nb_gc = fc.numerical_parameters.nb_gc
-
     # Extraction of the variables
-    t_full = collect(variables["t"])
-    mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * cd.delta_t_ini
-    else
-        trues(length(t_full))
-    end
-    nb_gc_mid = Int(ceil(nb_gc / 2))
-    t = t_full[mask]
-    C_N2_agc_t = collect(variables["C_N2_agc"][nb_gc_mid])[mask]
-    C_N2_cgc_t = collect(variables["C_N2_cgc"][nb_gc_mid])[mask]
+    t = masked_time_history(outputs, cd, cfg)
+    C_N2_agc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.C_N2)
+    C_N2_cgc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.C_N2)
 
     # Plot C_N2
     ax.plot(t, C_N2_agc_t; color=colors(6))
@@ -891,7 +781,7 @@ This function plots the pressure at different spatial localisations as a functio
 - `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
 - `ax`: Axes on which the pressure will be plotted.
 """
-function plot_P_1D_temporal(variables::Dict{String, Any},
+function plot_P_1D_temporal(outputs::SimulationOutputs,
                             fc::AbstractFuelCell,
                             cd::AbstractCurrent,
                             cfg::SimulationConfig,
@@ -900,37 +790,30 @@ function plot_P_1D_temporal(variables::Dict{String, Any},
     # Extraction of the parameters
     Pa_des = fc.operating_conditions.Pa_des
     Pc_des = fc.operating_conditions.Pc_des
-    nb_gc = fc.numerical_parameters.nb_gc
-
     # Extraction of the variables
-    t_full = collect(variables["t"])
-    mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * cd.delta_t_ini
-    else
-        trues(length(t_full))
-    end
-    t = t_full[mask]
-    nb_gc_mid = Int(ceil(nb_gc / 2))
-    C_v_agc = collect(variables["C_v_agc"][nb_gc_mid])[mask]
-    C_H2_agc = collect(variables["C_H2_agc"][nb_gc_mid])[mask]
-    C_N2_agc = collect(variables["C_N2_agc"][nb_gc_mid])[mask]
-    T_agc = collect(variables["T_agc"][nb_gc_mid])[mask]
-    C_v_cgc = collect(variables["C_v_cgc"][nb_gc_mid])[mask]
-    C_O2_cgc = collect(variables["C_O2_cgc"][nb_gc_mid])[mask]
-    C_N2_cgc = collect(variables["C_N2_cgc"][nb_gc_mid])[mask]
-    T_cgc = collect(variables["T_cgc"][nb_gc_mid])[mask]
+    t = masked_time_history(outputs, cd, cfg)
+    C_v_agc = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.C_v)
+    C_H2_agc = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.C_H2)
+    C_N2_agc = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.C_N2)
+    T_agc = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.T)
+    C_v_cgc = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.C_v)
+    C_O2_cgc = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.C_O2)
+    C_N2_cgc = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.C_N2)
+    T_cgc = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.T)
     Pagc_t = (C_v_agc .+ C_H2_agc .+ C_N2_agc) .* R .* T_agc ./ 1e5  # Conversion in bar
     Pcgc_t = (C_v_cgc .+ C_O2_cgc .+ C_N2_cgc) .* R .* T_cgc ./ 1e5  # Conversion in bar
+    Pa_in_t = extract_masked_derived_series(outputs, cd, cfg, x -> x.Pa_in) ./ 1e5
+    Pa_out_t = fill(Pa_des / 1e5, length(t))
+    Pc_in_t = extract_masked_derived_series(outputs, cd, cfg, x -> x.Pc_in) ./ 1e5
+    Pc_out_t = fill(Pc_des / 1e5, length(t))
+
     if cfg.type_auxiliary != :no_auxiliary
-        Pasm_t = collect(variables["Pasm"])[mask] ./ 1e5
-        Paem_t = collect(variables["Paem"])[mask] ./ 1e5
-        Pcsm_t = collect(variables["Pcsm"])[mask] ./ 1e5
-        Pcem_t = collect(variables["Pcem"])[mask] ./ 1e5
-    else
-        Pa_in_t = collect(variables["Pa_in"])[mask] ./ 1e5
-        Pa_out_t = fill(Pa_des, length(t)) ./ 1e5
-        Pc_in_t = collect(variables["Pc_in"])[mask] ./ 1e5
-        Pc_out_t = fill(Pc_des, length(t)) ./ 1e5
+        @warn "plot_P_1D_temporal: auxiliary manifold pressures (Pasm/Paem/Pcsm/Pcem) are not fully migrated to typed outputs yet; temporary fallback curves are used."
+        # Temporary fallback while manifold typed post-processing is being completed.
+        Pasm_t = Pa_in_t
+        Paem_t = Pa_out_t
+        Pcsm_t = Pc_in_t
+        Pcem_t = Pc_out_t
     end
 
     # Plot the pressure at different spatial localisations: P
@@ -941,17 +824,14 @@ function plot_P_1D_temporal(variables::Dict{String, Any},
         ax.plot(t, Paem_t; color=colors(8))
         ax.plot(t, Pcsm_t; color=colors(9))
         ax.plot(t, Pcem_t; color=colors(10))
+        ax.legend([raw"$\mathregular{P_{agc}}$", raw"$\mathregular{P_{cgc}}$", raw"$\mathregular{P_{asm}}$",
+                   raw"$\mathregular{P_{aem}}$", raw"$\mathregular{P_{csm}}$", raw"$\mathregular{P_{cem}}$"];
+                  loc="best")
     else
         ax.plot(t, Pa_in_t; color=colors(7))
         ax.plot(t, Pa_out_t; color=colors(8))
         ax.plot(t, Pc_in_t; color=colors(9))
         ax.plot(t, Pc_out_t; color=colors(10))
-    end
-    if cfg.type_auxiliary != :no_auxiliary
-        ax.legend([raw"$\mathregular{P_{agc}}$", raw"$\mathregular{P_{cgc}}$", raw"$\mathregular{P_{asm}}$",
-                   raw"$\mathregular{P_{aem}}$", raw"$\mathregular{P_{csm}}$", raw"$\mathregular{P_{cem}}$"];
-                  loc="best")
-    else
         ax.legend([raw"$\mathregular{P_{agc}}$", raw"$\mathregular{P_{cgc}}$", raw"$\mathregular{P_{a,in}}$",
                    raw"$\mathregular{P_{a,out}}$", raw"$\mathregular{P_{c,in}}$", raw"$\mathregular{P_{c,out}}$"];
                   loc="best")
@@ -978,7 +858,7 @@ cell, as a function of time.
 - `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
 - `ax`: Axes on which the temperature will be plotted.
 """
-function plot_T_1D_temporal(variables::Dict{String, Any},
+function plot_T_1D_temporal(outputs::SimulationOutputs,
                             fc::AbstractFuelCell,
                             cd::AbstractCurrent,
                             cfg::SimulationConfig,
@@ -987,65 +867,36 @@ function plot_T_1D_temporal(variables::Dict{String, Any},
     # Extraction of the operating inputs and parameters
 
     T_des = fc.operating_conditions.T_des
-    nb_gc = fc.numerical_parameters.nb_gc
-    nb_gdl = fc.numerical_parameters.nb_gdl
-    nb_mpl = fc.numerical_parameters.nb_mpl
+    nb_gdl_mid = middle_gdl_index(fc)
+    nb_mpl_mid = middle_mpl_index(fc)
 
     # Extraction of the variables and the operating inputs
-    t_full = collect(variables["t"])
-    mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * cd.delta_t_ini
-    else
-        trues(length(t_full))
-    end
-    nb_gc_mid = Int(ceil(nb_gc / 2))  # Middle of the gas channel
-    t = t_full[mask]
-    T_agc_t = collect(variables["T_agc"][nb_gc_mid])[mask] .- 273.15
-    T_agdl_t = collect(variables["T_agdl_$(Int(ceil(nb_gdl / 2)))"][nb_gc_mid])[mask] .- 273.15
-    T_ampl_t = collect(variables["T_ampl_$(Int(ceil(nb_mpl / 2)))"][nb_gc_mid])[mask] .- 273.15
-    T_acl_t = collect(variables["T_acl"][nb_gc_mid])[mask] .- 273.15
-    T_mem_t = collect(variables["T_mem"][nb_gc_mid])[mask] .- 273.15
-    T_ccl_t = collect(variables["T_ccl"][nb_gc_mid])[mask] .- 273.15
-    T_cmpl_t = collect(variables["T_cmpl_$(Int(ceil(nb_mpl / 2)))"][nb_gc_mid])[mask] .- 273.15
-    T_cgdl_t = collect(variables["T_cgdl_$(Int(ceil(nb_gdl / 2)))"][nb_gc_mid])[mask] .- 273.15
-    T_cgc_t = collect(variables["T_cgc"][nb_gc_mid])[mask] .- 273.15
+    t = masked_time_history(outputs, cd, cfg)
+    T_agc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.T) .- 273.15
+    T_agdl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agdl[nb_gdl_mid].T) .- 273.15
+    T_ampl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ampl[nb_mpl_mid].T) .- 273.15
+    T_acl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.acl.T) .- 273.15
+    T_mem_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.mem.T) .- 273.15
+    T_ccl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ccl.T) .- 273.15
+    T_cmpl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cmpl[nb_mpl_mid].T) .- 273.15
+    T_cgdl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgdl[nb_gdl_mid].T) .- 273.15
+    T_cgc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.T) .- 273.15
 
     # Plot the temperature at different spatial localisations
     if cfg.type_current isa PolarizationParams
-        n = length(t)
-        ifc_t = zeros(n)
-        for i in 1:n
-            ifc_t[i] = current(cd, t[i]) / 1e4  # Conversion in A/cm²
-        end
-        # Recovery of the internal states from the model after each stack stabilisation
-        delta_t_ini_pola = cd.delta_t_ini
-        delta_t_load_pola = cd.delta_i / cd.v_load
-        delta_t_break_pola = cd.delta_t_break
-            nb_loads = floor(Int, cd.i_max / cd.delta_i)
-        ifc_discretized_t = zeros(nb_loads)
-        T_agc_discretized_t = zeros(nb_loads)
-        T_agdl_discretized_t = zeros(nb_loads)
-        T_ampl_discretized_t = zeros(nb_loads)
-        T_acl_discretized_t = zeros(nb_loads)
-        T_mem_discretized_t = zeros(nb_loads)
-        T_ccl_discretized_t = zeros(nb_loads)
-        T_cmpl_discretized_t = zeros(nb_loads)
-        T_cgdl_discretized_t = zeros(nb_loads)
-        T_cgc_discretized_t = zeros(nb_loads)
-        for i in 1:nb_loads
-            t_load = delta_t_ini_pola + i * (delta_t_load_pola + delta_t_break_pola)
-            idx = argmin(abs.(t .- t_load))
-            ifc_discretized_t[i] = ifc_t[idx]
-            T_agc_discretized_t[i] = T_agc_t[idx]
-            T_agdl_discretized_t[i] = T_agdl_t[idx]
-            T_ampl_discretized_t[i] = T_ampl_t[idx]
-            T_acl_discretized_t[i] = T_acl_t[idx]
-            T_mem_discretized_t[i] = T_mem_t[idx]
-            T_ccl_discretized_t[i] = T_ccl_t[idx]
-            T_cmpl_discretized_t[i] = T_cmpl_t[idx]
-            T_cgdl_discretized_t[i] = T_cgdl_t[idx]
-            T_cgc_discretized_t[i] = T_cgc_t[idx]
-        end
+        t_hist = time_history(outputs)
+        ifc_t = current(cd, t_hist) ./ 1e4  # Conversion in A/cm²
+        sample_indices = polarisation_sampling_indices(outputs, cd)
+        ifc_discretized_t = ifc_t[sample_indices]
+        T_agc_discretized_t = (extract_mid_mea_series(outputs, fc, mea -> mea.agc.T) .- 273.15)[sample_indices]
+        T_agdl_discretized_t = (extract_mid_mea_series(outputs, fc, mea -> mea.agdl[nb_gdl_mid].T) .- 273.15)[sample_indices]
+        T_ampl_discretized_t = (extract_mid_mea_series(outputs, fc, mea -> mea.ampl[nb_mpl_mid].T) .- 273.15)[sample_indices]
+        T_acl_discretized_t = (extract_mid_mea_series(outputs, fc, mea -> mea.acl.T) .- 273.15)[sample_indices]
+        T_mem_discretized_t = (extract_mid_mea_series(outputs, fc, mea -> mea.mem.T) .- 273.15)[sample_indices]
+        T_ccl_discretized_t = (extract_mid_mea_series(outputs, fc, mea -> mea.ccl.T) .- 273.15)[sample_indices]
+        T_cmpl_discretized_t = (extract_mid_mea_series(outputs, fc, mea -> mea.cmpl[nb_mpl_mid].T) .- 273.15)[sample_indices]
+        T_cgdl_discretized_t = (extract_mid_mea_series(outputs, fc, mea -> mea.cgdl[nb_gdl_mid].T) .- 273.15)[sample_indices]
+        T_cgc_discretized_t = (extract_mid_mea_series(outputs, fc, mea -> mea.cgc.T) .- 273.15)[sample_indices]
         T_des_discretized_t = fill(T_des - 273.15, length(ifc_discretized_t))
         ax.scatter(ifc_discretized_t, T_agc_discretized_t; marker="o", color=colors(0))
         ax.scatter(ifc_discretized_t, T_agdl_discretized_t; marker="o", color=colors(1))
@@ -1086,30 +937,24 @@ end
 
 
 """
-    plot_Ucell(variables, parameters, ax)
+    plot_Ucell(outputs, cd, cfg, ax)
 
 This function plots the cell voltage as a function of time.
 
 # Arguments
-- `variables::Dict{String, Any}`: Variables calculated by the solver.
-- `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
+- `outputs::SimulationOutputs`: Typed simulation outputs of the fuel cell model.
+- `cd::AbstractCurrent`: Current profile used by the simulation.
+- `cfg::SimulationConfig`: Global simulation configuration.
 - `ax`: Axes on which the cell voltage will be plotted.
 """
-function plot_Ucell(variables::Dict{String, Any},
-                    fc::AbstractFuelCell,
+function plot_Ucell(outputs::SimulationOutputs,
                     cd::AbstractCurrent,
                     cfg::SimulationConfig,
                     ax)
 
     # Extraction of the variables
-    t_full = collect(variables["t"])
-    mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * cd.delta_t_ini
-    else
-        trues(length(t_full))
-    end
-    t = t_full[mask]
-    Ucell_t = collect(variables["Ucell"])[mask]
+    t = masked_time_history(outputs, cd, cfg)
+    Ucell_t = extract_masked_derived_series(outputs, cd, cfg, x -> x.Ucell)
 
     # Plot the cell voltage: Ucell
     ax.plot(t, Ucell_t; color=colors(0), label=raw"$\mathregular{U_{cell}}$")
@@ -1124,41 +969,37 @@ end
 
 
 """
-    plot_Phi_a_1D_temporal(variables, operating_inputs, parameters, ax)
+    plot_Phi_a_1D_temporal(outputs, fc, cd, cfg, ax)
 
 This function plots the humidity at the anode side, at different spatial localisations, as a function of time.
 
 # Arguments
-- `variables::Dict{String, Any}`: Variables calculated by the solver.
-- `operating_inputs::Dict{String, Any}`: Operating inputs of the fuel cell.
-- `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
+- `outputs::SimulationOutputs`: Typed simulation outputs of the fuel cell model.
+- `fc::AbstractFuelCell`: Fuel-cell definition.
+- `cd::AbstractCurrent`: Current profile used by the simulation.
+- `cfg::SimulationConfig`: Global simulation configuration.
 - `ax`: Axes on which the humidity will be plotted.
 """
-function plot_Phi_a_1D_temporal(variables::Dict{String, Any},
+function plot_Phi_a_1D_temporal(outputs::SimulationOutputs,
                                 fc::AbstractFuelCell,
                                 cd::AbstractCurrent,
                                 cfg::SimulationConfig,
                                 ax)
     # Extraction of the operating inputs and parameters
     Phi_a_des = fc.operating_conditions.Phi_a_des
-    nb_gc = fc.numerical_parameters.nb_gc
 
     # Extraction of the variables
-    t_full = collect(variables["t"])
-    mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * cd.delta_t_ini
-    else
-        trues(length(t_full))
-    end
-    nb_gc_mid = Int(ceil(nb_gc / 2))
-    t = t_full[mask]
-    C_v_agc_t = collect(variables["C_v_agc"][nb_gc_mid])[mask]
-    T_agc_t = collect(variables["T_agc"][nb_gc_mid])[mask]
-    Phi_asm_t = collect(variables["Phi_asm"])[mask]
-    Phi_aem_t = collect(variables["Phi_aem"])[mask]
+    t = masked_time_history(outputs, cd, cfg)
+    C_v_agc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.C_v)
+    T_agc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.T)
 
     # Calculate the humidity Phi
     Phi_agc_t = C_v_agc_t .* R .* T_agc_t ./ Psat.(T_agc_t)
+    if cfg.type_auxiliary != :no_auxiliary
+        @warn "plot_Phi_a_1D_temporal: manifold humidities (Phi_asm/Phi_aem) are not yet available in typed outputs; using temporary Phi_a_des fallback."
+    end
+    Phi_asm_t = fill(Phi_a_des, length(t))
+    Phi_aem_t = fill(Phi_a_des, length(t))
 
     # Plot the humidity at different spatial localisations: Phi
     ax.plot(t, Phi_agc_t; color=colors(0), label=raw"$\mathregular{\Phi_{agc}}$")
@@ -1177,41 +1018,37 @@ end
 
 
 """
-    plot_Phi_c_1D_temporal(variables, operating_inputs, parameters, ax)
+    plot_Phi_c_1D_temporal(outputs, fc, cd, cfg, ax)
 
 This function plots the humidity at the cathode side, at different spatial localisations, as a function of time.
 
 # Arguments
-- `variables::Dict{String, Any}`: Variables calculated by the solver.
-- `operating_inputs::Dict{String, Any}`: Operating inputs of the fuel cell.
-- `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
+- `outputs::SimulationOutputs`: Typed simulation outputs of the fuel cell model.
+- `fc::AbstractFuelCell`: Fuel-cell definition.
+- `cd::AbstractCurrent`: Current profile used by the simulation.
+- `cfg::SimulationConfig`: Global simulation configuration.
 - `ax`: Axes on which the humidity will be plotted.
 """
-function plot_Phi_c_1D_temporal(variables::Dict{String, Any},
+function plot_Phi_c_1D_temporal(outputs::SimulationOutputs,
                                 fc::AbstractFuelCell,
                                 cd::AbstractCurrent,
                                 cfg::SimulationConfig,
                                 ax)
     # Extraction of the operating inputs and parameters
     Phi_c_des = fc.operating_conditions.Phi_c_des
-    nb_gc = fc.numerical_parameters.nb_gc
 
     # Extraction of the variables
-    t_full = collect(variables["t"])
-    mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * cd.delta_t_ini
-    else
-        trues(length(t_full))
-    end
-    nb_gc_mid = Int(ceil(nb_gc / 2))
-    t = t_full[mask]
-    C_v_cgc_t = collect(variables["C_v_cgc"][nb_gc_mid])[mask]
-    T_cgc_t = collect(variables["T_cgc"][nb_gc_mid])[mask]
-    Phi_csm_t = collect(variables["Phi_csm"])[mask]
-    Phi_cem_t = collect(variables["Phi_cem"])[mask]
+    t = masked_time_history(outputs, cd, cfg)
+    C_v_cgc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.C_v)
+    T_cgc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.T)
 
     # Calculate the humidity Phi
     Phi_cgc_t = C_v_cgc_t .* R .* T_cgc_t ./ Psat.(T_cgc_t)
+    if cfg.type_auxiliary != :no_auxiliary
+        @warn "plot_Phi_c_1D_temporal: manifold humidities (Phi_csm/Phi_cem) are not yet available in typed outputs; using temporary Phi_c_des fallback."
+    end
+    Phi_csm_t = fill(Phi_c_des, length(t))
+    Phi_cem_t = fill(Phi_c_des, length(t))
 
     # Plot the humidity at different spatial localisations: Phi
     ax.plot(t, Phi_cgc_t; color=colors(0), label=raw"$\mathregular{\Phi_{cgc}}$")
@@ -1230,35 +1067,27 @@ end
 
 
 """
-    plot_v_1D_temporal(variables, parameters, ax)
+    plot_v_1D_temporal(outputs, fc, cd, cfg, ax)
 
 This function plots the velocity at the anode and the cathode as a function of time.
 
 # Arguments
-- `variables::Dict{String, Any}`: Variables calculated by the solver.
-- `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
+- `outputs::SimulationOutputs`: Typed simulation outputs of the fuel cell model.
+- `fc::AbstractFuelCell`: Fuel-cell definition.
+- `cd::AbstractCurrent`: Current profile used by the simulation.
+- `cfg::SimulationConfig`: Global simulation configuration.
 - `ax`: Axes on which the pressure will be plotted.
 """
-function plot_v_1D_temporal(variables::Dict{String, Any},
+function plot_v_1D_temporal(outputs::SimulationOutputs,
                             fc::AbstractFuelCell,
                             cd::AbstractCurrent,
                             cfg::SimulationConfig,
                             ax)
 
-    # Extraction of the parameters
-    nb_gc = fc.numerical_parameters.nb_gc
-
     # Extraction of the variables
-    t_full = collect(variables["t"])
-    mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * cd.delta_t_ini
-    else
-        trues(length(t_full))
-    end
-    nb_gc_mid = Int(ceil(nb_gc / 2)) # Middle of the gas channel
-    t = t_full[mask]
-    v_a_t = collect(variables["v_a"][nb_gc_mid])[mask]
-    v_c_t = collect(variables["v_c"][nb_gc_mid])[mask]
+    t = masked_time_history(outputs, cd, cfg)
+    v_a_t = extract_masked_mid_derived_gc_series(outputs, fc, cd, cfg, x -> x.v_a)
+    v_c_t = extract_masked_mid_derived_gc_series(outputs, fc, cd, cfg, x -> x.v_c)
 
     # Plot the pressure at different spatial localisations: P
     ax.plot(t, v_a_t; color=colors(0))
@@ -1276,16 +1105,18 @@ end
 
 
 """
-    plot_Re_nb_1D_temporal(variables, parameters, ax)
+    plot_Re_nb_1D_temporal(outputs, fc, cd, cfg, ax)
 
 This function plots the Reynolds number at the center of the AGC and the CGC as a function of time.
 
 # Arguments
-- `variables::Dict{String, Any}`: Variables calculated by the solver.
-- `parameters::Dict{String, Any}`: Parameters of the fuel cell model.
+- `outputs::SimulationOutputs`: Typed simulation outputs of the fuel cell model.
+- `fc::AbstractFuelCell`: Fuel-cell definition.
+- `cd::AbstractCurrent`: Current profile used by the simulation.
+- `cfg::SimulationConfig`: Global simulation configuration.
 - `ax`: Axes on which the pressure will be plotted.
 """
-function plot_Re_nb_1D_temporal(variables::Dict{String, Any},
+function plot_Re_nb_1D_temporal(outputs::SimulationOutputs,
                                 fc::AbstractFuelCell,
                                 cd::AbstractCurrent,
                                 cfg::SimulationConfig,
@@ -1294,27 +1125,19 @@ function plot_Re_nb_1D_temporal(variables::Dict{String, Any},
     # Extraction of the parameters
     Hcgc = fc.physical_parameters.Hcgc
     Wcgc = fc.physical_parameters.Wcgc
-    nb_gc = fc.numerical_parameters.nb_gc
 
     # Extraction of the variables
-    t_full = collect(variables["t"])
-    mask = if cfg.type_plot == :fixed
-        t_full .>= 0.9 * cd.delta_t_ini
-    else
-        trues(length(t_full))
-    end
-    nb_gc_mid = Int(ceil(nb_gc / 2))
-    t = t_full[mask]
-    v_a_t = collect(variables["v_a"][nb_gc_mid])[mask]
-    v_c_t = collect(variables["v_c"][nb_gc_mid])[mask]
-    C_v_agc_t = collect(variables["C_v_agc"][nb_gc_mid])[mask]
-    C_v_cgc_t = collect(variables["C_v_cgc"][nb_gc_mid])[mask]
-    C_H2_agc_t = collect(variables["C_H2_agc"][nb_gc_mid])[mask]
-    C_O2_cgc_t = collect(variables["C_O2_cgc"][nb_gc_mid])[mask]
-    C_N2_agc_t = collect(variables["C_N2_agc"][nb_gc_mid])[mask]
-    C_N2_cgc_t = collect(variables["C_N2_cgc"][nb_gc_mid])[mask]
-    T_agc_t = collect(variables["T_agc"][nb_gc_mid])[mask]
-    T_cgc_t = collect(variables["T_cgc"][nb_gc_mid])[mask]
+    t = masked_time_history(outputs, cd, cfg)
+    v_a_t = extract_masked_mid_derived_gc_series(outputs, fc, cd, cfg, x -> x.v_a)
+    v_c_t = extract_masked_mid_derived_gc_series(outputs, fc, cd, cfg, x -> x.v_c)
+    C_v_agc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.C_v)
+    C_v_cgc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.C_v)
+    C_H2_agc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.C_H2)
+    C_O2_cgc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.C_O2)
+    C_N2_agc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.C_N2)
+    C_N2_cgc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.C_N2)
+    T_agc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.T)
+    T_cgc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.T)
 
     # Calculation of the Reynolds Number
     d_pipe = sqrt(4 * Hcgc * Wcgc / π)
@@ -1364,10 +1187,8 @@ end
 This function plots the temperature at different spatial localisations inside the fuel cell in pseudo 2D,
 for the last time step of the simulation.
 """
-function plot_T_pseudo_2D_final(variables::Dict{String, Any},
+function plot_T_pseudo_2D_final(outputs::SimulationOutputs,
                                 fc::AbstractFuelCell,
-                                cd::AbstractCurrent,
-                                cfg::SimulationConfig,
                                 ax)
 
     # Extraction of the operating inputs and parameters
@@ -1377,41 +1198,8 @@ function plot_T_pseudo_2D_final(variables::Dict{String, Any},
     nb_mpl = fc.numerical_parameters.nb_mpl
 
     # Construction of the temperature matrix for the pseudo-2D plot
-    var_order = vcat(["agc"],
-                     ["agdl$(j)" for j in 1:nb_gdl],
-                     ["ampl$(j)" for j in 1:nb_mpl],
-                     ["acl", "mem", "ccl"],
-                     ["cmpl$(j)" for j in 1:nb_mpl],
-                     ["cgdl$(j)" for j in 1:nb_gdl],
-                     ["cgc"])
-    n_cols = length(var_order)
-    temp_matrix = fill(NaN, nb_gc, n_cols)
-
-    # Helper to fetch the last element of a variable and convert to °C
-    last_celsius(arr) = collect(arr)[end] - 273.15
-
-    # Extraction of the last temperature values and insertion into the matrix
-    col = 1
-    for name in var_order
-        if name == "agc"
-            temp_matrix[:, col] = [last_celsius(variables["T_agc"][i]) for i in 1:nb_gc]
-        elseif startswith(name, "agdl")
-            j = parse(Int, replace(name, "agdl" => ""))
-            temp_matrix[:, col] = [last_celsius(variables["T_agdl_$(j)"][i]) for i in 1:nb_gc]
-        elseif startswith(name, "ampl")
-            j = parse(Int, replace(name, "ampl" => ""))
-            temp_matrix[:, col] = [last_celsius(variables["T_ampl_$(j)"][i]) for i in 1:nb_gc]
-        elseif name in ("acl", "mem", "ccl", "cgc")
-            temp_matrix[:, col] = [last_celsius(variables["T_$(name)"][i]) for i in 1:nb_gc]
-        elseif startswith(name, "cmpl")
-            j = parse(Int, replace(name, "cmpl" => ""))
-            temp_matrix[:, col] = [last_celsius(variables["T_cmpl_$(j)"][i]) for i in 1:nb_gc]
-        elseif startswith(name, "cgdl")
-            j = parse(Int, replace(name, "cgdl" => ""))
-            temp_matrix[:, col] = [last_celsius(variables["T_cgdl_$(j)"][i]) for i in 1:nb_gc]
-        end
-        col += 1
-    end
+    temp_matrix = final_temperature_matrix_celsius(outputs)
+    n_cols = size(temp_matrix, 2)
 
     # Plot the figure
     vmin = np.nanmin(temp_matrix)
@@ -1451,7 +1239,7 @@ function plot_T_pseudo_2D_final(variables::Dict{String, Any},
             "\$T_{des} = $(round(T_des, digits=1))\\,^\\circ C\$";
             transform=ax.transAxes, ha="right", va="bottom", fontsize=10,
             bbox=Dict{String, Any}("boxstyle"=>"round,pad=0.3", "fc"=>"white", "ec"=>"gray", "lw"=>0.5))
-    plt.subplots_adjust(left=0.1, right=0.95, top=0.95, bottom=0.1)
+    _apply_figure_layout!(ax)
 
     return nothing
 end
@@ -1460,22 +1248,21 @@ end
 # ___________________________________________________Global indicators__________________________________________________
 
 """
-    plot_power_density_curve(variables, operating_inputs, parameters, n, ax)
+    plot_power_density_curve(outputs, cd, cfg, ax)
 
 This function plots the power density curve Pfc, produced by a cell, as a function of the current density.
 """
-function plot_power_density_curve(variables::Dict{String, Any},
-                                  fc::AbstractFuelCell,
+function plot_power_density_curve(outputs::SimulationOutputs,
                                   cd::AbstractCurrent,
                                   cfg::SimulationConfig,
-                                  n::Integer,
                                   ax)
 
     # Extraction of the variables
-    t = variables["t"]
-    Ucell_t = variables["Ucell"]
+    t = time_history(outputs)
+    Ucell_t = derived_outputs(outputs).Ucell
 
     # Creation of the power density function: Pfc
+    n = length(t)
     ifc_t = zeros(n)
     Pfc_t = zeros(n)
     for i in 1:n
@@ -1497,37 +1284,34 @@ end
 
 
 """
-    plot_cell_efficiency(variables, operating_inputs, parameters, n, ax)
+    plot_cell_efficiency(outputs, fc, cd, cfg, ax)
 
 This function plots the fuel cell efficiency eta_fc as a function of the current density.
 """
-function plot_cell_efficiency(variables::Dict{String, Any},
+function plot_cell_efficiency(outputs::SimulationOutputs,
                               fc::AbstractFuelCell,
                               cd::AbstractCurrent,
                               cfg::SimulationConfig,
-                              n::Integer,
                               ax)
 
     # Extraction of the operating inputs and the parameters
-    
+
     Hmem = fc.physical_parameters.Hmem
     Hacl = fc.physical_parameters.Hacl
     Hccl = fc.physical_parameters.Hccl
     kappa_co = fc.physical_parameters.kappa_co
-    nb_gc = fc.numerical_parameters.nb_gc
-
     # Extraction of the variables
-    nb_gc_mid = Int(ceil(nb_gc / 2))
-    t = variables["t"]
-    Ucell_t = variables["Ucell"]
-    lambda_mem_t = variables["lambda_mem"][nb_gc_mid]
-    C_H2_acl_t = variables["C_H2_acl"][nb_gc_mid]
-    C_O2_ccl_t = variables["C_O2_ccl"][nb_gc_mid]
-    T_acl_t = variables["T_acl"][nb_gc_mid]
-    T_mem_t = variables["T_mem"][nb_gc_mid]
-    T_ccl_t = variables["T_ccl"][nb_gc_mid]
+    t = time_history(outputs)
+    Ucell_t = derived_outputs(outputs).Ucell
+    lambda_mem_t = extract_mid_mea_series(outputs, fc, mea -> mea.mem.lambda)
+    C_H2_acl_t = extract_mid_mea_series(outputs, fc, mea -> mea.acl.C_H2)
+    C_O2_ccl_t = extract_mid_mea_series(outputs, fc, mea -> mea.ccl.C_O2)
+    T_acl_t = extract_mid_mea_series(outputs, fc, mea -> mea.acl.T)
+    T_mem_t = extract_mid_mea_series(outputs, fc, mea -> mea.mem.T)
+    T_ccl_t = extract_mid_mea_series(outputs, fc, mea -> mea.ccl.T)
 
     # Creation of the fuel cell efficiency: eta_fc
+    n = length(t)
     ifc_t = zeros(n)
     Pfc_t = zeros(n)
     eta_fc_t = zeros(n)
@@ -1559,6 +1343,25 @@ end
 
 # _________________________________________________Plot instructions____________________________________________________
 
+"""Apply figure-level layout tuned for publication-like readability.
+
+When constrained layout is enabled, matplotlib handles spacing automatically.
+Otherwise, we tighten layout with conservative paddings to avoid text overlap.
+"""
+function _apply_figure_layout!(ax)
+    fig = ax.get_figure()
+    try
+        has_constrained = Bool(fig.get_constrained_layout())
+        if !has_constrained
+            fig.tight_layout(; pad=1.1, w_pad=0.8, h_pad=1.0)
+        end
+    catch
+        # Fallback for backends exposing a reduced API surface.
+        plt.tight_layout(; pad=1.1, w_pad=0.8, h_pad=1.0)
+    end
+    return nothing
+end
+
 """
     plot_general_instructions(ax, true)
 
@@ -1587,8 +1390,7 @@ function plot_general_instructions(ax, set_y::Bool=true)
     # Configure the appearance of major and minor ticks
     ax.tick_params(axis="both", which="major", size=10, width=1.5, direction="out")
     ax.tick_params(axis="both", which="minor", size=5, width=1.5, direction="out")
-    plt.subplots_adjust(left=0.1, right=0.95, top=0.95, bottom=0.1)
-    # Adjust layout to prevent overlap between labels and the figure
+    _apply_figure_layout!(ax)
     plt.show()  # Show the figure
 
     return nothing
@@ -1634,8 +1436,7 @@ function plot_pola_instructions(type_fuel_cell::Symbol, ax, show::Bool=true)
     # Configure the appearance of major and minor ticks
     ax.tick_params(axis="both", which="major", size=10, width=1.5, direction="out")
     ax.tick_params(axis="both", which="minor", size=5, width=1.5, direction="out")
-    plt.subplots_adjust(left=0.1, right=0.95, top=0.95, bottom=0.1)
-    # Adjust layout to prevent overlap between labels and the figure
+    _apply_figure_layout!(ax)
     if show
         plt.show()  # Show the figure
     end
@@ -1798,6 +1599,17 @@ end
 
 
 
+"""Return publication-grade kwargs for experimental polarisation markers."""
+_experimental_marker_kwargs(marker::AbstractString) = (
+    marker=marker,
+    s=42,
+    linewidths=1.1,
+    facecolors="white",
+    edgecolors="black",
+    zorder=4,
+)
+
+
 """
     plot_experimental_polarisation_curve(type_fuel_cell, i_fc_t, U_exp_t, ax)
 
@@ -1816,31 +1628,31 @@ function plot_experimental_polarisation_curve(type_fuel_cell::Symbol,
                                               ax)
     # ZSW-GenStack
     if type_fuel_cell == :ZSW_GenStack
-        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="s", color="black", label="Exp. - nominal")
+        ax.scatter(i_fc_t, U_exp_t; _experimental_marker_kwargs("s")..., label="Exp. - nominal")
     elseif type_fuel_cell == :ZSW_GenStack_Pa_1_61_Pc_1_41
-        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="v", color="black", label="Exp. - P\$_a\$/P\$_c\$ = 1.61/1.41 bar")
+        ax.scatter(i_fc_t, U_exp_t; _experimental_marker_kwargs("v")..., label="Exp. - P\$_a\$/P\$_c\$ = 1.61/1.41 bar")
     elseif type_fuel_cell == :ZSW_GenStack_Pa_2_01_Pc_1_81
-        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="^", color="black", label="Exp. - P\$_a\$/P\$_c\$ = 2.01/1.81 bar")
+        ax.scatter(i_fc_t, U_exp_t; _experimental_marker_kwargs("^")..., label="Exp. - P\$_a\$/P\$_c\$ = 2.01/1.81 bar")
     elseif type_fuel_cell == :ZSW_GenStack_Pa_2_4_Pc_2_2
-        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="p", color="black", label="Exp. - P\$_a\$/P\$_c\$ = 2.4/2.2 bar")
+        ax.scatter(i_fc_t, U_exp_t; _experimental_marker_kwargs("p")..., label="Exp. - P\$_a\$/P\$_c\$ = 2.4/2.2 bar")
     elseif type_fuel_cell == :ZSW_GenStack_Pa_2_8_Pc_2_6
-        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="D", color="black", label="Exp. - P\$_a\$/P\$_c\$ = 2.8/2.6 bar")
+        ax.scatter(i_fc_t, U_exp_t; _experimental_marker_kwargs("D")..., label="Exp. - P\$_a\$/P\$_c\$ = 2.8/2.6 bar")
     elseif type_fuel_cell == :ZSW_GenStack_T_62
-        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="P", color="black", label="Exp. - T = 62 \$^\\circ\$C")
+        ax.scatter(i_fc_t, U_exp_t; _experimental_marker_kwargs("P")..., label="Exp. - T = 62 \$^\\circ\$C")
     elseif type_fuel_cell == :ZSW_GenStack_T_76
-        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="X", color="black", label="Exp. - T = 76 \$^\\circ\$C")
+        ax.scatter(i_fc_t, U_exp_t; _experimental_marker_kwargs("X")..., label="Exp. - T = 76 \$^\\circ\$C")
     elseif type_fuel_cell == :ZSW_GenStack_T_84
-        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="*", color="black", label="Exp. - T = 84 \$^\\circ\$C")
+        ax.scatter(i_fc_t, U_exp_t; _experimental_marker_kwargs("*")..., label="Exp. - T = 84 \$^\\circ\$C")
 
     # EH-31
     elseif type_fuel_cell == :EH_31_1_5  # at 1.5 bar
-        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="s", color="black", label="Exp. - P = 1.5 bar")
+        ax.scatter(i_fc_t, U_exp_t; _experimental_marker_kwargs("s")..., label="Exp. - P = 1.5 bar")
     elseif type_fuel_cell == :EH_31_2_0  # at 2.0 bar
-        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="v", color="black", label="Exp. - P = 2.0 bar")
+        ax.scatter(i_fc_t, U_exp_t; _experimental_marker_kwargs("v")..., label="Exp. - P = 2.0 bar")
     elseif type_fuel_cell == :EH_31_2_25  # at 2.25 bar
-        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="^", color="black", label="Exp. - P = 2.25 bar")
+        ax.scatter(i_fc_t, U_exp_t; _experimental_marker_kwargs("^")..., label="Exp. - P = 2.25 bar")
     elseif type_fuel_cell == :EH_31_2_5  # at 2.5 bar
-        ax.scatter(i_fc_t, U_exp_t; linewidths=1.5, marker="p", color="black", label="Exp. - P = 2.5 bar")
+        ax.scatter(i_fc_t, U_exp_t; _experimental_marker_kwargs("p")..., label="Exp. - P = 2.5 bar")
     else
         throw(ArgumentError("Unknown type_fuel_cell: $type_fuel_cell"))
     end
@@ -1874,8 +1686,7 @@ function plot_EIS_Nyquist_instructions(type_fuel_cell::Symbol,
     # Configure the appearance of major and minor ticks
     ax.tick_params(axis="both", which="major", size=10, width=1.5, direction="out")
     ax.tick_params(axis="both", which="minor", size=5, width=1.5, direction="out")
-    plt.subplots_adjust(left=0.1, right=0.95, top=0.95, bottom=0.1)
-    # Adjust layout to prevent overlap between labels and the figure
+    _apply_figure_layout!(ax)
     plt.show()  # Show the figure
 
     # For EH-31 fuel cell
@@ -1949,8 +1760,7 @@ function plot_Bode_amplitude_instructions(f_EIS, type_fuel_cell::Symbol, ax)
     # Configure the appearance of major and minor ticks
     ax.tick_params(axis="both", which="major", size=10, width=1.5, direction="out")
     ax.tick_params(axis="both", which="minor", size=5, width=1.5, direction="out")
-    plt.subplots_adjust(left=0.1, right=0.95, top=0.95, bottom=0.1)
-    # Adjust layout to prevent overlap between labels and the figure
+    _apply_figure_layout!(ax)
     plt.show()  # Show the figure
 
     # For EH-31 fuel cell
@@ -1989,8 +1799,7 @@ function plot_Bode_phase_instructions(f_EIS, type_fuel_cell::Symbol, ax)
     # Configure the appearance of major and minor ticks
     ax.tick_params(axis="both", which="major", size=10, width=1.5, direction="out")
     ax.tick_params(axis="both", which="minor", size=5, width=1.5, direction="out")
-    plt.subplots_adjust(left=0.1, right=0.95, top=0.95, bottom=0.1)
-    # Adjust layout to prevent overlap between labels and the figure
+    _apply_figure_layout!(ax)
     plt.show()  # Show the figure
 
     # For EH-31 fuel cell
@@ -2006,4 +1815,5 @@ function plot_Bode_phase_instructions(f_EIS, type_fuel_cell::Symbol, ax)
 
     return nothing
 end
+
 

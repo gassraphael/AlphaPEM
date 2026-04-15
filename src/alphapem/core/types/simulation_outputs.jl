@@ -40,3 +40,14 @@ struct SimulationOutputs{nb_gdl, nb_mpl, nb_gc}
     derived :: DerivedOutputs{nb_gc}
 end
 
+"""Structured Fourier post-processing outputs used by EIS displays."""
+struct FourierOutputs
+    Ucell_Fourier :: Vector{ComplexF64}
+    ifc_Fourier   :: Vector{ComplexF64}
+    A_period_t    :: Vector{Float64}
+    A             :: Float64
+    freq_t        :: Vector{Float64}
+    f             :: Float64
+    N             :: Int
+end
+

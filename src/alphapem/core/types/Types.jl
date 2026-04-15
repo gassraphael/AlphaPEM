@@ -86,7 +86,7 @@ export GCMassFlows, DesiredInletFlows
 export GCManifoldFlows1D
 
 # --- simulation_outputs.jl ---
-export SolverTrajectory, DerivedOutputs, SimulationOutputs
+export SolverTrajectory, DerivedOutputs, SimulationOutputs, FourierOutputs
 
 end  # module Types
 

@@ -22,8 +22,9 @@ include("flows_MEA_1D_modules.jl")
 include("heat_modules.jl")
 include("flows_GC_manifold_1D_modules.jl")
 include("dif_eq_modules.jl")
-include("display_calc_modules.jl")
-include("display_modules.jl")
+include("outputs_accessors.jl")
+include("plot_postprocessing_modules.jl")
+include("plotting_modules.jl")
 
 end  # module Modules
 
