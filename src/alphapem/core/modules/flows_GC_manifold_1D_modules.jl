@@ -13,7 +13,7 @@ Calculate intermediate values used for GC/manifold flow computations.
 
 Arguments
 ---------
-sv_1D_cell : AbstractVector{<:MEAState1D}
+sv_1D_cell : AbstractVector{<:CellState1D}
     Typed variables computed by the solver (internal stack states).
 sv_auxiliary
     Typed variables computed by the auxiliary system (internal auxiliary states).
@@ -29,7 +29,7 @@ Tuple
       M_ext, M_H2_N2_in, rho_agc, rho_cgc, k_purge, Abp_a, Abp_c,
       mu_gaz_agc, mu_gaz_cgc)`
 """
-function flow_1D_GC_manifold_int_values(sv_1D_cell::AbstractVector{<:MEAState1D},
+function flow_1D_GC_manifold_int_values(sv_1D_cell::AbstractVector{<:CellState1D},
                                         sv_auxiliary,
                                         fc::AbstractFuelCell,
                                         cfg::SimulationConfig)

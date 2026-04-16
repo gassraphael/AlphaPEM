@@ -129,7 +129,7 @@ struct ManifoldState <: AbstractCellState
 end
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 1D MEA state  (one column = one GC node)
+# 1D cell-column state (MEA + AGC/CGC, one column = one GC node)
 # ────────────────────────────────────────────────────────────────────────────────
 
 """Complete 1D internal state for one gas-channel column.
@@ -141,7 +141,7 @@ nb_mpl : Int   Number of nodes in each MPL.
 
 Fields follow the through-plane order from anode to cathode.
 """
-struct MEAState1D{nb_gdl, nb_mpl}
+struct CellState1D{nb_gdl, nb_mpl}
     agc  :: AnodeGCState
     agdl :: NTuple{nb_gdl, AnodeGDLState}
     ampl :: NTuple{nb_mpl, AnodeMPLState}
@@ -192,11 +192,11 @@ struct _ManifoldDerivativeBundle{ASM, AEM, CSM, CEM}
     cem::CEM
 end
 # ────────────────────────────────────────────────────────────────────────────────
-# P2D fuel-cell state  (MEA stack only)
+# P2D fuel-cell state (cell columns = MEA + AGC/CGC)
 # ────────────────────────────────────────────────────────────────────────────────
 
-"""Complete P2D (1D+1D) internal state of the fuel cell MEA stack.
-Contains only the electrochemical core (gas channels along the flow direction).
+"""Complete P2D (1D+1D) internal state of the fuel-cell cell-column stack.
+Each node includes the full through-plane column (AGC + MEA core + CGC).
 
 Type parameters
 ---------------
@@ -206,10 +206,10 @@ nb_gc  : Int   Number of gas-channel nodes (spatial discretisation along the cha
                Typical range: 1 – 10.
 
 Fields:
-  - `nodes`: MEA stack at each gas-channel position.
+  - `nodes`: cell-column state at each gas-channel position.
 """
 struct FuelCellStateP2D{nb_gdl, nb_mpl, nb_gc}
-    nodes :: NTuple{nb_gc, MEAState1D{nb_gdl, nb_mpl}}
+    nodes :: NTuple{nb_gc, CellState1D{nb_gdl, nb_mpl}}
 end
 
 

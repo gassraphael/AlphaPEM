@@ -35,7 +35,7 @@ function assemble_mea_derivative_1D(dw::MEADissolvedWaterDerivative,
         CathodeGDLDerivative(vw.cgdl_C_v[j], lw.cgdl_s[j], sd.cgdl_C_O2[j], td.cgdl_T[j])
     end
 
-    return MEACellDerivative1D{NB_GDL, NB_MPL}(agc, agdl, ampl, acl, mem, ccl, cmpl, cgdl, cgc)
+    return CellDerivative1D{NB_GDL, NB_MPL}(agc, agdl, ampl, acl, mem, ccl, cmpl, cgdl, cgc)
 end
 
 # ____________________________________________________Main functions____________________________________________________
@@ -44,7 +44,7 @@ end
 
 Parameters
 ----------
-sv : MEAState1D{NB_GDL, NB_MPL}
+sv : CellState1D{NB_GDL, NB_MPL}
     Typed 1D internal state for one gas-channel column.
 pp : PhysicalParams
     Fuel-cell physical parameters container (geometry, thicknesses and porous properties).
@@ -61,7 +61,7 @@ MEADissolvedWaterDerivative
     Container with the lambda derivatives for the ACL, membrane and CCL.
 """
 function calculate_dyn_dissoved_water_evolution_inside_MEA(
-        sv::MEAState1D{NB_GDL, NB_MPL},
+        sv::CellState1D{NB_GDL, NB_MPL},
         pp::PhysicalParams,
         S_abs::MEASorptionSources,
         J_lambda::MEADissolvedWaterFlux,
@@ -82,7 +82,7 @@ end
 
 Parameters
 ----------
-sv : MEAState1D{NB_GDL, NB_MPL}
+sv : CellState1D{NB_GDL, NB_MPL}
     Typed 1D internal state for one gas-channel column.
 pp : PhysicalParams
     Fuel-cell physical parameters container (geometry, thicknesses and porous properties).
@@ -95,11 +95,11 @@ Sl : MEALiquidSources{NB_GDL, NB_MPL}
 
 Returns
 -------
-MEACellDerivative1D{NB_GDL, NB_MPL}
+CellDerivative1D{NB_GDL, NB_MPL}
     Updated derivative container with s (liquid saturation) derivatives filled in.
 """
 function calculate_dyn_liquid_water_evolution_inside_MEA(
-        sv::MEAState1D{NB_GDL, NB_MPL},
+        sv::CellState1D{NB_GDL, NB_MPL},
         pp::PhysicalParams,
         Jl::MEALiquidFluxes{NB_GDL, NB_MPL},
         S_abs::MEASorptionSources,
@@ -154,7 +154,7 @@ end
 
 Parameters
 ----------
-sv : MEAState1D{NB_GDL, NB_MPL}
+sv : CellState1D{NB_GDL, NB_MPL}
     Typed 1D internal state for one gas-channel column.
 pp : PhysicalParams
     Fuel-cell physical parameters container (geometry, thicknesses and porous properties).
@@ -167,11 +167,11 @@ S_abs : MEASorptionSources
 
 Returns
 -------
-MEACellDerivative1D{NB_GDL, NB_MPL}
+CellDerivative1D{NB_GDL, NB_MPL}
     Updated derivative container with C_v derivatives filled in.
 """
 function calculate_dyn_vapor_evolution_inside_MEA(
-        sv::MEAState1D{NB_GDL, NB_MPL},
+        sv::CellState1D{NB_GDL, NB_MPL},
         pp::PhysicalParams,
         Jv::MEAVaporFluxes{NB_GDL, NB_MPL},
         Sv::MEAVaporSources{NB_GDL, NB_MPL},
@@ -220,7 +220,7 @@ end
 
 Parameters
 ----------
-sv : MEAState1D{NB_GDL, NB_MPL}
+sv : CellState1D{NB_GDL, NB_MPL}
     Typed 1D internal state for one gas-channel column.
 pp : PhysicalParams
     Fuel-cell physical parameters container (geometry, thicknesses and porous properties).
@@ -235,11 +235,11 @@ S_O2 : MEAGasReactionSources
 
 Returns
 -------
-MEACellDerivative1D{NB_GDL, NB_MPL}
+CellDerivative1D{NB_GDL, NB_MPL}
     Updated derivative container with C_H2 and C_O2 derivatives filled in.
 """
 function calculate_dyn_H2_O2_N2_evolution_inside_MEA(
-        sv::MEAState1D{NB_GDL, NB_MPL},
+        sv::CellState1D{NB_GDL, NB_MPL},
         pp::PhysicalParams,
         J_H2::MEAHydrogenFluxes{NB_GDL, NB_MPL},
         J_O2::MEAOxygenFluxes{NB_GDL, NB_MPL},
@@ -305,7 +305,7 @@ i_n
 
 Returns
 -------
-MEACellDerivative1D{NB_GDL, NB_MPL}
+CellDerivative1D{NB_GDL, NB_MPL}
     Updated derivative container with eta_c derivative filled in (ccl).
 """
 function calculate_dyn_voltage_evolution(
@@ -351,7 +351,7 @@ Q_e : MEAElectricHeat{NB_GDL, NB_MPL}
 
 Returns
 -------
-MEACellDerivative1D{NB_GDL, NB_MPL}
+CellDerivative1D{NB_GDL, NB_MPL}
     Updated derivative container with T derivatives filled in for all MEA layers.
 """
 function calculate_dyn_temperature_evolution_inside_MEA(

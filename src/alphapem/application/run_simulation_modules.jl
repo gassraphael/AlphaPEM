@@ -222,8 +222,8 @@ end
 #  Internal-state helpers
 # ═══════════════════════════════════════════════════════════════════════════════
 
-"""Append one typed 1-D MEA state to canonical solver ordering."""
-function _append_mea_state_1D_to_solver_order!(dest::Vector{Float64}, state)
+"""Append one typed 1-D cell state (MEA+GC) to canonical solver ordering."""
+function _append_cell_state_1D_to_solver_order!(dest::Vector{Float64}, state)
     # C_v block
     push!(dest, state.agc.C_v)
     for node in state.agdl; push!(dest, node.C_v); end
@@ -278,7 +278,7 @@ function _extract_last_internal_state(simu::AlphaPEM, cfg::SimulationConfig)::Ve
     last_state = simu.outputs.solver.states[end]
 
     for k in 1:simu.fuel_cell.numerical_parameters.nb_gc
-        _append_mea_state_1D_to_solver_order!(dest, last_state.nodes[k])
+        _append_cell_state_1D_to_solver_order!(dest, last_state.nodes[k])
     end
 
     # Auxiliary typed state extraction is intentionally deferred until subsystem reactivation.

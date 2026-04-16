@@ -28,7 +28,7 @@ Tuple(29 elements)
     Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl, Dc_eff_cmpl_cgdl,
     Dc_eff_cgdl_cgdl, T_acl_mem_ccl)
 """
-function flows_1D_MEA_int_values(sv::MEAState1D, i_fc::Float64, fc::AbstractFuelCell)::Tuple
+function flows_1D_MEA_int_values(sv::CellState1D, i_fc::Float64, fc::AbstractFuelCell)::Tuple
 
     # Extraction of the parameters
     pp = fc.physical_parameters

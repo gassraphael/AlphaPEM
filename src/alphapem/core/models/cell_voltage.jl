@@ -13,8 +13,8 @@ i_fc : Float64
     The current density (A/m²).
 C_O2_Pt : Float64
     The oxygen concentration at the platinum surface in the cathode catalyst layer (mol/m³).
-sv : MEAState1D
-    The typed 1D MEA state for one gas-channel column.
+sv : CellState1D
+    The typed 1D cell-column state (MEA+GC) for one gas-channel position.
 fc : AbstractFuelCell
     The fuel cell instance providing model parameters.
 
@@ -23,9 +23,9 @@ Returns
 Float64
     The cell voltage in volt.
 """
-function calculate_cell_voltage(i_fc::Float64, C_O2_Pt::Float64, sv::MEAState1D, fc::AbstractFuelCell)::Float64
+function calculate_cell_voltage(i_fc::Float64, C_O2_Pt::Float64, sv::CellState1D, fc::AbstractFuelCell)::Float64
 
-    # Extraction of the variables (typed access via MEAState1D struct fields)
+    # Extraction of the variables
     lambda_mem, lambda_ccl = sv.mem.lambda, sv.ccl.lambda
     C_H2_acl, C_O2_ccl = sv.acl.C_H2, sv.ccl.C_O2
     eta_c = sv.ccl.eta_c

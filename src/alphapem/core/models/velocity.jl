@@ -24,7 +24,7 @@ A nonlinear root solver from `NonlinearSolve.jl` is used.
 
 Parameters
 ----------
-sv : AbstractVector{<:MEAState1D}
+sv : AbstractVector{<:CellState1D}
     Typed solver state variables. `sv[i]` provides the state of gas-channel node `i`.
 i_fc_cell : Float64
     Fuel cell current density at time t (A.m-2).
@@ -47,7 +47,7 @@ Raises
 ErrorException
     If the nonlinear solver does not converge.
 """
-function calculate_velocity_evolution(sv::AbstractVector{<:MEAState1D}, i_fc_cell::Float64, fc::AbstractFuelCell, cfg::SimulationConfig)::Tuple{Vector{Float64}, Vector{Float64}, Float64, Float64}
+function calculate_velocity_evolution(sv::AbstractVector{<:CellState1D}, i_fc_cell::Float64, fc::AbstractFuelCell, cfg::SimulationConfig)::Tuple{Vector{Float64}, Vector{Float64}, Float64, Float64}
 
     # Extraction of the parameters
     oc = fc.operating_conditions
@@ -240,7 +240,7 @@ Calculate the desired flow for the air compressor and the humidifiers.
 
 Parameters
 ----------
-solver_variables : AbstractVector{<:MEAState1D}
+solver_variables : AbstractVector{<:CellState1D}
     Typed variables calculated by the solver at each gas-channel node.
 i_fc_cell : Real
     Fuel cell current density (A.m-2).
@@ -258,7 +258,7 @@ Returns
 DesiredInletFlows
     Desired hydrogen flow rate, dry-air flow rate, anode humidifier flow rate, and cathode humidifier flow rate.
 """
-@inline function desired_flows(solver_variables::AbstractVector{<:MEAState1D},
+@inline function desired_flows(solver_variables::AbstractVector{<:CellState1D},
                        i_fc_cell::Real,
                        Pa_in::Real,
                        Pc_in::Real,

@@ -10,7 +10,7 @@ It is a component of the fuel cell model.
 
 Parameters
 ----------
-sv_1D : MEAState1D{NB_GDL, NB_MPL}
+sv_1D : CellState1D{NB_GDL, NB_MPL}
     Typed 1D internal state for one gas-channel column.
 i_fc : Float64
     Fuel cell current density at time t (A.m-2).
@@ -27,7 +27,7 @@ MEAHeatFlows1D{NB_GDL, NB_MPL}
     Typed heat transfer outputs (conductive fluxes and volumetric heat sources)
     for one gas-channel column.
 """
-function calculate_heat_transfers(sv_1D::MEAState1D{NB_GDL, NB_MPL},
+function calculate_heat_transfers(sv_1D::CellState1D{NB_GDL, NB_MPL},
                                   i_fc::Float64,
                                   fc::AbstractFuelCell,
                                   S_abs::MEASorptionSources,
@@ -36,7 +36,7 @@ function calculate_heat_transfers(sv_1D::MEAState1D{NB_GDL, NB_MPL},
 
     # ___________________________________________________Preliminaries__________________________________________________
 
-    # Extraction of the variables (typed access via MEAState1D struct fields)
+    # Extraction of the variables (typed access via CellState1D struct fields)
     T_acl, T_mem, T_ccl = sv_1D.acl.T, sv_1D.mem.T, sv_1D.ccl.T
     lambda_acl, lambda_mem, lambda_ccl = sv_1D.acl.lambda, sv_1D.mem.lambda, sv_1D.ccl.lambda
     s_acl, s_ccl, eta_c = sv_1D.acl.s, sv_1D.ccl.s, sv_1D.ccl.eta_c

@@ -11,8 +11,8 @@ Parameters
 ----------
 i_fc : Float64
     The current density (A/m²).
-sv : MEAState1D
-    The typed 1D MEA state for one gas-channel column.
+sv : CellState1D
+    The typed 1D cell-column state (MEA+GC) for one gas-channel position.
 fc : AbstractFuelCell
     The fuel cell instance providing model parameters.
 
@@ -27,10 +27,10 @@ Sources
 in PEM Fuel Cells.
 """
 function calculate_C_O2_Pt(i_fc::Float64,
-                           sv::MEAState1D,
+                           sv::CellState1D,
                            fc::AbstractFuelCell)::Float64
 
-    # Extraction of the variables (typed access via MEAState1D struct fields)
+    # Extraction of the variables (typed access via CellState1D struct fields)
     s_ccl      = sv.ccl.s
     lambda_ccl = sv.ccl.lambda
     C_O2_ccl   = sv.ccl.C_O2

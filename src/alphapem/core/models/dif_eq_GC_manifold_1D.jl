@@ -2,12 +2,12 @@
 #
 # Each public function computes one physics contribution (gas species, liquid water, temperature)
 # and returns per-node Float64 vectors. The caller assembles AnodeGCDerivative /
-# CathodeGCDerivative and then the full MEACellDerivative1D.
+# CathodeGCDerivative and then the full CellDerivative1D.
 
 # ____________________________________________________Main functions____________________________________________________
 
 """Assemble complete MEA derivatives by injecting GC contributions into existing MEA derivatives."""
-function assemble_gc_derivative_1D(mea::AbstractVector{<:MEACellDerivative1D{NB_GDL, NB_MPL}},
+function assemble_gc_derivative_1D(mea::AbstractVector{<:CellDerivative1D{NB_GDL, NB_MPL}},
                                    gas::GCGasDerivative{NB_GC},
                                    liq::GCLiquidWaterDerivative{NB_GC},
                                    temp::GCTemperatureDerivative{NB_GC}) where {NB_GDL, NB_MPL, NB_GC}
@@ -15,7 +15,7 @@ function assemble_gc_derivative_1D(mea::AbstractVector{<:MEACellDerivative1D{NB_
                 agc = AnodeGCDerivative(gas.agc_C_v[i], liq.agc_s[i], gas.agc_C_H2[i], gas.agc_C_N2[i], temp.agc_T[i])
                 cgc = CathodeGCDerivative(gas.cgc_C_v[i], liq.cgc_s[i], gas.cgc_C_O2[i], gas.cgc_C_N2[i], temp.cgc_T[i])
                 node = mea[i]
-                MEACellDerivative1D{NB_GDL, NB_MPL}(agc, node.agdl, node.ampl, node.acl, node.mem,
+                CellDerivative1D{NB_GDL, NB_MPL}(agc, node.agdl, node.ampl, node.acl, node.mem,
                                                     node.ccl, node.cmpl, node.cgdl, cgc)
             end for i in 1:NB_GC]
 end
@@ -27,7 +27,7 @@ GC-to-MEA interface fluxes are read directly from `flows_mea` (MEAFlows1D per no
 
 Parameters
 ----------
-sv             : typed state vector (one MEAState1D per GC node)
+sv             : typed state vector (one CellState1D per GC node)
 pp             : physical-parameters container (`pp.Hagc`, `pp.Hcgc`, `pp.Lgc`)
 cfg            : simulation configuration (`cfg.type_auxiliary`)
 flows_gc       : GCManifoldFlows1D — along-channel GC fluxes
@@ -39,7 +39,7 @@ GCGasDerivative{nb_gc}
     Typed gas-species derivative contribution for the gas channels.
 """
 function calculate_dyn_gas_evolution_inside_gas_channel(
-        sv             :: AbstractVector{<:MEAState1D},
+        sv             :: AbstractVector{<:CellState1D},
         pp             :: PhysicalParams,
         cfg            :: SimulationConfig,
         flows_gc       :: GCManifoldFlows1D{NB_GC},

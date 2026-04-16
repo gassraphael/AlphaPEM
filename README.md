@@ -1,12 +1,22 @@
 # AlphaPEM
 
-AlphaPEM is an open-source software package for simulating proton exchange membrane fuel cell (PEMFC) systems for embedded applications. It is based on a physics-based, finite-volume, pseudo-two-dimensional (1D+1D), dynamic, two-phase, and non-isothermal model. It quickly simulates the internal states and voltage dynamics of PEMFC systems for all current densities and operating conditions imposed on it. In particular, it is possible to apply a step current density or use current profiles to generate polarization curves or electrochemical impedance spectroscopy (EIS) curves. It can also automatically calibrate the undetermined parameters of the model to simulate a given real fuel cell system.
+AlphaPEM is an open-source software package for simulating proton exchange membrane fuel cell (PEMFC) systems for 
+embedded applications written in Julia. It is based on a physics-based, finite-volume, pseudo-two-dimensional (1D+1D),
+dynamic, two-phase, and non-isothermal model. It quickly simulates the internal states and voltage dynamics of PEMFC
+systems for all current densities and operating conditions imposed on it. In particular, it is possible to apply a 
+step current density or use current profiles to generate polarization curves or electrochemical impedance spectroscopy
+(EIS) curves. It can also automatically calibrate the undetermined parameters of the model to simulate a given real 
+fuel cell system.
 
-A detailed [presentation](https://doi.org/10.48550/arXiv.2407.12373) of this program has been published in the peer-reviewed journal SoftwareX (limited to [version V1.0](#major-updates)). Furthermore, comprehensive [documentation](https://gassraphael.github.io/AlphaPEM/) in Numpy style for the software functions is available.
+A detailed [presentation](https://doi.org/10.48550/arXiv.2407.12373) of this program has been published in the peer-reviewed journal SoftwareX (limited to 
+[version V1.0](#major-updates)). Furthermore, comprehensive [documentation](https://gassraphael.github.io/AlphaPEM/) in Numpy style for the software functions is
+available.
 
 Improvements to AlphaPEM are discussed in the [roadmap section](#roadmap).
 
-**Important note:** AlphaPEM is an ongoing research project and is not a commercial product. Therefore, the latest online version may contain bugs, and not all features may be available. The current work is detailled in the [work in progress](#work-in-progress) section. Relatively stable versions are listed in the [Major updates](#major-updates) section.
+**Important note:** AlphaPEM is an ongoing research project and is not a commercial product. Therefore, the latest 
+online version may contain bugs, and not all features may be available. The current work is detailled in the 
+[work in progress](#work-in-progress) section. Relatively stable versions are listed in the [Major updates](#major-updates) section.
 
 ![AlphaPEM graphical user interface](docs/images/demo.png "AlphaPEM graphical user interface (GUI)")
 
@@ -38,7 +48,8 @@ To install **AlphaPEM**, follow these steps in a shell:
     cd AlphaPEM
     ```
     
-3. Install Julia (using [VS Code](https://marketplace.visualstudio.com/items?itemName=julialang.language-julia) is suggested):
+3. Install Julia (using [Flexible Julia](https://plugins.jetbrains.com/plugin/29356-flexible-julia) plugin for
+[PyCharm](https://www.jetbrains.com/pycharm/) or using [VS Code](https://marketplace.visualstudio.com/items?itemName=julialang.language-julia) is suggested):
     - for Linux or macOS:
     ```sh
     curl -fsSL https://install.julialang.org | sh
@@ -63,27 +74,49 @@ To install **AlphaPEM**, follow these steps in a shell:
     julia --project=. -e 'using Pkg; Pkg.instantiate()'
     ```
 
-7. Install the required Python dependencies:
+7. Install the required Python dependencies (temporary: only needed for the GUI and parameter calibration modules, 
+which are not yet converted to Julia):
      ```sh
     PYTHON_FOR_PYCALL=$(julia --project=. -e 'using PyCall; print(PyCall.python)')
     "$PYTHON_FOR_PYCALL" -m pip install numpy matplotlib pygad ttkthemes
     ```
 
-## Installation via pip (to use AlphaPEM in other projects)
+## Installation as a package (to use AlphaPEM in other projects)
 
-To use **AlphaPEM** as a library in other projects, you can install it directly from GitHub using pip:
+AlphaPEM can be integrated into other projects, whether written in **Julia** or **Python**.
+
+### From a Julia project
+
+Install AlphaPEM directly from GitHub using Julia's package manager:
+
+```julia
+using Pkg
+Pkg.add(url="https://github.com/gassraphael/AlphaPEM.git")
+```
+
+Then, import the AlphaPEM module in your code:
+
+```julia
+using AlphaPEM
+```
+
+### From a Python project
+
+Install the [`juliacall`](https://github.com/JuliaPy/PythonCall.jl) bridge library and AlphaPEM:
 
 ```sh
-pip install alphapem @ git+https://github.com/gassraphael/AlphaPEM.git
+pip install juliacall
 ```
 
-Then, import the AlphaPEM class in your Python code:
+Then, call AlphaPEM from Python:
 
 ```python
-from alphapem import AlphaPEM
+from juliacall import Main as jl
+jl.Pkg.add(url="https://github.com/gassraphael/AlphaPEM.git")
+jl.seval("using AlphaPEM")
 ```
 
-This allows you to export and integrate the AlphaPEM package into your own applications without cloning the entire repository.
+This allows you to integrate AlphaPEM into your own applications without cloning the entire repository.
 
 # Start
 
@@ -96,50 +129,100 @@ The GUI provides a quick way to configure and run simulations without modifying 
 1. Execute the GUI file:
 
    ```sh
-   python3 src/alphapem/interfaces/GUI.py
+   julia --project=. src/alphapem/interfaces/GUI.jl
    ```
+
+   > **Note:** The GUI entrypoint is in Julia, but it still depends on Python packages through `PyCall` and is currently 
+     broken. Make sure the Python dependencies are installed (see installation step 7).
 
 2. In the GUI (as shown in the figure of [AlphaPEM section](#alphapem)):
 
-   - Select a predefined fuel cell specification from the 'Fuel cell' dropdown menu. Operating conditions and parameters can also be adjusted by selecting 'Enter your specifications' in this menu.
+   - Select a predefined fuel cell specification from the 'Fuel cell' dropdown menu. Operating conditions and 
+   parameters can also be adjusted by selecting 'Enter your specifications' in this menu.
 
-   - Choose the configuration you prefer for the auxiliaries, voltage zone, purge, display and plot under 'Model configuration'.
+   - Choose the configuration you prefer for the auxiliaries, voltage zone, purge and display under 
+   'Model configuration'.
 
-   - Select your desired simulation type at the bottom of the GUI (e.g., current density step, polarization curve, or EIS curve).
+   - Select your desired simulation type at the bottom of the GUI (e.g., current density step, polarization curve,
+   or EIS curve).
 
 3. Run the simulation to generate results (internal states and voltage dynamics) in the /results directory.
 
 ## Using the command line (programmers)
 
-The main.py file is used for standard operation and provides full control for programmers. This allows for using any physically acceptable current density function, beyond the predefined configurations of the GUI.
+The `examples/` directory contains ready-to-run Julia scripts that provide full control over simulations. This is 
+the recommended entry point for programmers, as it allows using any physically acceptable current density function
+and configuration, beyond what the GUI offers.
 
-1. Modify parameters and input current densities directly in the appropriate configuration files (e.g., src/alphapem/config/parameters.py or src/alphapem/config/current_densities.py) if needed.
+### Available example scripts
 
-2. Select a predefined fuel cell specification, a given configuration and the desired simulation directly at the beginning of the src/alphapem/application/run_simulation.py file.
+| Script | Description                                                                                   |
+|---|-----------------------------------------------------------------------------------------------|
+| `run_step.jl` | Simulates a step current density                                                              |
+| `run_polarization.jl` | Generates a polarization curve *(currently broken, work in progress)*                         |
+| `run_polarization_for_cali.jl` | Generates polarization curves for calibration purposes *(currently broken, work in progress)* |
+| `run_EIS.jl` | Generates an EIS curve *(currently broken, work in progress)*                                 |
+| `plot_currents.jl` | Plots the current density profiles                                                            |
+| `benchmark_step.jl` | Benchmarks the step simulation                                                                |
+| `profile_step.jl` | Profiles the step simulation                                                                  |
 
-3. Execute the main file to generate results (internal states and voltage dynamics) in the /results directory:
+### Steps to run a simulation
 
-```sh
-python3 src/alphapem/application/run_simulation.py
-```
+> The following steps are **configuration choices to make inside the example script you select** in `examples/`.
 
-4. Automated parameter calibration (advanced)
+1. **Choose an example script** in `examples/` according to your objective (`run_step.jl`, `run_polarization.jl`,
+   `run_EIS.jl`, etc.).
 
-   To adapt AlphaPEM to a new, specific fuel cell, you must calibrate the undetermined physical parameters (like GDL porosity) using experimental data. This functionality is not yet available from the GUI. The calibration uses a genetic algorithm (PyGAD) to match simulated results to experimental data.
+2. **Open this script and edit its configuration blocks** (`current_params = ...` and `cfg = SimulationConfig(...)`).
 
-   1. Input Experimental Data: place experimental polarization curves (at least three) into the file: src/alphapem/config/pola_exp_values.
+3. **Set the fuel cell and model options in this script** via `SimulationConfig`:
 
-   2. Configure Parameters: input the operating conditions and accessible physical parameters of your fuel cell system in: src/alphapem/parametrisation/calibration_modules.
+   | Field | Allowed values |
+   |---|---|
+   | `type_fuel_cell` | Fuel cell model symbol implemented in `src/alphapem/fuelcell/` (e.g., `:ZSW_GenStack`, `:EH31`, `:default`) |
+   | `type_current` | `StepParams(...)`, `PolarizationParams(...)`, `EISParams(...)` |
+   | `voltage_zone` | `:before_voltage_drop`, `:full` |
+   | `type_auxiliary` | `:no_auxiliary`, `:forced_convective_cathode_with_anodic_recirculation`, `:forced_convective_cathode_with_flow_through_anode` |
+   | `type_purge` | `:no_purge`, `:constant_purge`, `:periodic_purge` |
+   | `type_display` | `:synthetic`, `:multiple`, `:no_display` |
+   | `display_timing` | `:postrun`, `:live` |
 
-   3. Run Calibration: execute the calibration program (preferably on a computing cluster due to computational cost):
+4. **Run the edited script** to generate results (internal states and voltage dynamics) in the `/results` directory:
+
    ```sh
-   python3 src/alphapem/parametrisation/calibration.py
+   julia --project=. examples/run_step.jl
+   ```
+
+### Automated parameter calibration (advanced)
+
+To adapt AlphaPEM to a new, specific fuel cell, you must calibrate the undetermined physical parameters (e.g., 
+GDL porosity) using experimental polarization curves. The calibration relies on a genetic algorithm (PyGAD) and 
+is computationally intensive — running it on a computing cluster is strongly recommended.
+
+> ⚠️ The calibration entrypoint is in Julia, but it still depends on Python packages through `PyCall`. It is also currently broken.
+
+1. **Input experimental data:** place at least three experimental polarization curves into your fuel cell description
+   in `src/alphapem/fuelcell`.
+
+2. **Configure parameters:** set the operating conditions and accessible physical parameters of your fuel cell 
+system in `src/alphapem/parametrisation/calibration_modules.jl`.
+
+3. **Run the calibration:**
+   ```sh
+   julia --project=. src/alphapem/parametrisation/calibration.jl
    ```
 
 # Major updates
 
-- V1.4 - under construction - This version of AlphaPEM includes: 
+- V2.0 - under construction - This version of AlphaPEM includes: 
+    - the transition from the original programming language to Julia, leveraging its high execution speed while 
+      maintaining a high-level language framework.
+    - the abandonment of dictionary usage in favor of increased reliance on object-oriented programming.
     - the redesign of the AlphaPEM architecture so that the code is closer to industry standards.
+    - a progressive migration process: `interfaces` (GUI) and `parametrisation` (calibration) are not yet fully
+      converted to Julia and still rely on Python.
+    - `run_polarization.jl`, `run_polarization_for_cali.jl`, and `run_EIS.jl` are currently broken (work in
+      progress).
 - [V1.3](https://github.com/gassraphael/AlphaPEM/tree/65dd73ed306a054c80018447f7943b9d9f973ffb) - 2026.02.16 - This version of AlphaPEM includes: 
 	- the addition of O2 flow to Pt particules which improves the modeling of overvoltage due to flooding at high curent densities.
 		- the limiting liquid water saturation coefficient ($s_{lim}$) has been definitively removed, as this model replaces it.
@@ -161,8 +244,9 @@ python3 src/alphapem/application/run_simulation.py
 
 # Work in progress
 
-- Sensitivity analysis and calibration of the model using pre-selected data from ZSW-GenStack or EH-31 is currently underway.
-- Auxiliaries are temporarily removed, as they require reconstruction. 
+- Sensitivity analysis and calibration of the model using pre-selected data from ZSW-GenStack or EH-31 is currently 
+underway.
+- Auxiliaries are temporarily removed, as they require reconstruction.
 
 
 # Roadmap
@@ -237,4 +321,3 @@ Contributions from the community are welcome! If you would like to contribute to
 For any questions or support, please contact me at [gassraphael@proton.me](mailto:gassraphael@proton.me).
 
 Thank you for using **AlphaPEM**!
-

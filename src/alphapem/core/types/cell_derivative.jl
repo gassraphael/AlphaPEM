@@ -85,11 +85,11 @@ struct ManifoldDerivative <: AbstractCellDerivative
 end
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 1D MEA derivative
+# 1D cell-column derivative (MEA + AGC/CGC)
 # ────────────────────────────────────────────────────────────────────────────────
 
 """Complete 1D derivative container for one gas-channel column."""
-struct MEACellDerivative1D{nb_gdl, nb_mpl}
+struct CellDerivative1D{nb_gdl, nb_mpl}
     agc::AnodeGCDerivative
     agdl::NTuple{nb_gdl, AnodeGDLDerivative}
     ampl::NTuple{nb_mpl, AnodeMPLDerivative}
@@ -102,7 +102,7 @@ struct MEACellDerivative1D{nb_gdl, nb_mpl}
 end
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 1D MEA derivative contributions (per-physics, before final assembly)
+# 1D MEA-core derivative contributions (per-physics, before final assembly)
 # ────────────────────────────────────────────────────────────────────────────────
 
 """Dissolved-water contribution (lambda only) for ACL, membrane and CCL."""
@@ -194,13 +194,13 @@ struct ManifoldLineDerivative{nb_nodes}
 end
 
 # ────────────────────────────────────────────────────────────────────────────────
-# P2D fuel-cell derivatives (MEA stack only)
+# P2D fuel-cell derivatives (cell columns = MEA + AGC/CGC)
 # ────────────────────────────────────────────────────────────────────────────────
 
-"""Complete P2D derivative container for the MEA stack.
+"""Complete P2D derivative container for the cell-column stack.
 """
 struct FuelCellDerivativeP2D{nb_gdl, nb_mpl, nb_gc}
-    nodes::NTuple{nb_gc, MEACellDerivative1D{nb_gdl, nb_mpl}}
+    nodes::NTuple{nb_gc, CellDerivative1D{nb_gdl, nb_mpl}}
 end
 
 

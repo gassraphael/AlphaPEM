@@ -32,7 +32,7 @@ struct MEAThermalIntermediates{nb_gdl, nb_mpl} <: AbstractCellIntermediate
 end
 
 # Per-GC-column intermediates.
-struct MEAIntermediates1D{nb_gdl, nb_mpl} <: AbstractCellIntermediate
+struct CellIntermediates1D{nb_gdl, nb_mpl} <: AbstractCellIntermediate
     agc::AnodeGCIntermediates
     cgc::CathodeGCIntermediates
     rho_Cp0::MEAThermalIntermediates{nb_gdl, nb_mpl}
@@ -68,7 +68,7 @@ end
 struct FuelCellIntermediatesP2D{nb_gdl, nb_mpl, nb_gc, MI, AI} <: AbstractCellIntermediate
     # MI is the manifold-intermediates container type (e.g. ManifoldIntermediates{nb_man}).
     # AI is the auxiliary-intermediates container type (e.g. AuxiliaryIntermediates).
-    mea::NTuple{nb_gc, MEAIntermediates1D{nb_gdl, nb_mpl}}
+    mea::NTuple{nb_gc, CellIntermediates1D{nb_gdl, nb_mpl}}
     manifold::MI
     auxiliary::AI
 end

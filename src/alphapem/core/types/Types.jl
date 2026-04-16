@@ -32,7 +32,7 @@ export AnodeGCState, AnodeGDLState, AnodeMPLState, AnodeCLState
 export MembraneState
 export CathodeCLState, CathodeMPLState, CathodeGDLState, CathodeGCState
 export ManifoldState
-export MEAState1D, ManifoldLine
+export CellState1D, ManifoldLine
 export _ManifoldStateBundle, _ManifoldDerivativeBundle
 export FuelCellStateP2D
 
@@ -42,7 +42,7 @@ export AnodeGCDerivative, AnodeGDLDerivative, AnodeMPLDerivative, AnodeCLDerivat
 export MembraneDerivative
 export CathodeCLDerivative, CathodeMPLDerivative, CathodeGDLDerivative, CathodeGCDerivative
 export ManifoldDerivative
-export MEACellDerivative1D, ManifoldLineDerivative
+export CellDerivative1D, ManifoldLineDerivative
 export FuelCellDerivativeP2D
 export MEADissolvedWaterDerivative, MEALiquidWaterDerivative, MEAVaporDerivative
 export MEAH2O2SpeciesDerivative, MEAVoltageDerivative, MEATemperatureDerivative
@@ -51,7 +51,7 @@ export GCGasDerivative, GCLiquidWaterDerivative, GCTemperatureDerivative
 # --- cell_intermediates.jl ---
 export AbstractCellIntermediate
 export AnodeGCIntermediates, CathodeGCIntermediates
-export MEAThermalIntermediates, MEAIntermediates1D
+export MEAThermalIntermediates, CellIntermediates1D
 export ManifoldNodeIntermediates, ManifoldIntermediates
 export AuxiliaryIntermediates
 export FuelCellIntermediatesP2D
@@ -63,7 +63,7 @@ export AnodeGCBalance, AnodeGDLBalance, AnodeMPLBalance, AnodeCLBalance
 export MembraneBalance
 export CathodeCLBalance, CathodeMPLBalance, CathodeGDLBalance, CathodeGCBalance
 export ManifoldBalance
-export MEABalance1D, ManifoldLineBalance
+export CellBalance1D, ManifoldLineBalance
 export FuelCellBalanceP2D
 
 # --- auxiliary.jl ---

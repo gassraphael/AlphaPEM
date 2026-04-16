@@ -26,7 +26,7 @@ cd : AbstractCurrent
     Current profile instance (prescribes current as a function of time).
 cfg : SimulationConfig
     Simulation configuration (type_auxiliary, etc.).
-n_vars_per_gc : Int
+n_vars_cell_1D : Int
     Pre-calculated number of solver variables per gas-channel node.
 n_vars_manifold : Int
     Pre-calculated number of solver variables in manifolds.
@@ -34,7 +34,7 @@ n_vars_auxiliary : Int
     Pre-calculated number of solver variables in auxiliary systems.
 """
 function dydt!(dy::Vector{Float64}, t::Float64, y::Vector{Float64}, fc::AbstractFuelCell, cd::AbstractCurrent,
-               cfg::SimulationConfig, n_vars_per_gc::Int, n_vars_manifold::Int,
+               cfg::SimulationConfig, n_vars_cell_1D::Int, n_vars_manifold::Int,
                n_vars_auxiliary::Int)
 
     # Extraction of frequently used parameters
@@ -51,19 +51,19 @@ function dydt!(dy::Vector{Float64}, t::Float64, y::Vector{Float64}, fc::Abstract
                                        :forced_convective_cathode_with_anodic_recirculation)
 
     # Build typed local state and derivative containers for each GC node, manifold, and auxiliary system.
-    n_vars_mea = nb_gc * n_vars_per_gc
-    expected_len = n_vars_mea + n_vars_manifold + n_vars_auxiliary
+    n_vars_cell_P2D = nb_gc * n_vars_cell_1D
+    expected_len = n_vars_cell_P2D + n_vars_manifold + n_vars_auxiliary
     length(y) == expected_len ||
         throw(ArgumentError("Unexpected solver vector size for typed path."))
 
-    sv_mea_1D = [_unpack_mea_state_1D(@view(y[(i - 1) * n_vars_per_gc + 1:i * n_vars_per_gc]),
+    sv_cell_1D = [_unpack_cell_state_1D(@view(y[(i - 1) * n_vars_cell_1D + 1:i * n_vars_cell_1D]),
                                       nb_gdl, nb_mpl)
                  for i in 1:nb_gc]
-    dif_eq_mea_1D = Vector{typeof(_nan_mea_derivative_1D(nb_gdl, nb_mpl))}(undef, nb_gc)
+    dif_eq_cell_1D = Vector{typeof(_nan_cell_derivative_1D(nb_gdl, nb_mpl))}(undef, nb_gc)
 
     if has_auxiliary
-        manifold_offset = n_vars_mea
-        aux_offset = n_vars_mea + n_vars_manifold
+        manifold_offset = n_vars_cell_P2D
+        aux_offset = n_vars_cell_P2D + n_vars_manifold
         sv_manifold_1D = _unpack_manifold_state(@view(y[manifold_offset + 1:aux_offset]), nb_man)
         sv_auxiliary = _unpack_auxiliary_state(@view(y[aux_offset + 1:end]))
         dif_eq_manifold_1D = _nan_manifold_derivative_state(nb_man)
@@ -77,54 +77,54 @@ function dydt!(dy::Vector{Float64}, t::Float64, y::Vector{Float64}, fc::Abstract
 
     # Conditions to pursue the calculations
     for i in 1:nb_gc
-        if sv_mea_1D[i].ccl.eta_c > E0
+        if sv_cell_1D[i].ccl.eta_c > E0
             throw(ArgumentError("The cathode overpotential is higher than the open circuit voltage at time t = " *
                                 string(t) * " s. It means that the voltage is negative, which is not possible."))
         end
     end
 
     # Intermediate values (one container per GC node)
-    dif_eq_int_values = [calculate_dif_eq_int_values(t, sv_mea_1D[i], fc, cfg, sv_manifold_1D, sv_auxiliary)
+    dif_eq_int_values = [calculate_dif_eq_int_values(t, sv_cell_1D[i], fc, cfg, sv_manifold_1D, sv_auxiliary)
                          for i in 1:nb_gc]
 
     # Calculate the local current density at each node of the GC.
     i_fc_cell = current(cd, t)
-    i_fc = calculate_1D_GC_current_density(i_fc_cell, sv_mea_1D, fc)
+    i_fc = calculate_1D_GC_current_density(i_fc_cell, sv_cell_1D, fc)
 
     # Calculation of the oxygen concentration at the platinum surface in the cathode catalyst layer
-    C_O2_Pt = [calculate_C_O2_Pt(i_fc[i], sv_mea_1D[i], fc) for i in 1:nb_gc]
+    C_O2_Pt = [calculate_C_O2_Pt(i_fc[i], sv_cell_1D[i], fc) for i in 1:nb_gc]
 
     # Calculation of the velocities inside the GC and the manifolds
-    v_a, v_c, Pa_in, Pc_in = calculate_velocity_evolution(sv_mea_1D, i_fc_cell, fc, cfg)
+    v_a, v_c, Pa_in, Pc_in = calculate_velocity_evolution(sv_cell_1D, i_fc_cell, fc, cfg)
 
     # Calculation of the flows for each GC node.
-    flows_1D_MEA = [calculate_flows_1D_MEA(sv_mea_1D[i], i_fc[i], v_a[i], v_c[i], fc)
+    flows_1D_MEA = [calculate_flows_1D_MEA(sv_cell_1D[i], i_fc[i], v_a[i], v_c[i], fc)
                     for i in 1:nb_gc]
-    flows_1D_GC_manifold = calculate_flows_1D_GC_manifold(sv_mea_1D, sv_manifold_1D, sv_auxiliary, i_fc_cell,
+    flows_1D_GC_manifold = calculate_flows_1D_GC_manifold(sv_cell_1D, sv_manifold_1D, sv_auxiliary, i_fc_cell,
                                                            v_a, v_c, Pa_in, Pc_in, fc, cfg)
-    heat_flows_global = [calculate_heat_transfers(sv_mea_1D[i], i_fc[i], fc, flows_1D_MEA[i].S_abs,
+    heat_flows_global = [calculate_heat_transfers(sv_cell_1D[i], i_fc[i], fc, flows_1D_MEA[i].S_abs,
                                                   flows_1D_MEA[i].Sl)
                          for i in 1:nb_gc]
 
     # Calculation of the dynamic evolutions inside the MEA.
-    dif_eq_mea_diss_water = [calculate_dyn_dissoved_water_evolution_inside_MEA(sv_mea_1D[i], pp,
+    dif_eq_mea_diss_water = [calculate_dyn_dissoved_water_evolution_inside_MEA(sv_cell_1D[i], pp,
                                                                                flows_1D_MEA[i].S_abs,
                                                                                flows_1D_MEA[i].J_lambda,
                                                                                flows_1D_MEA[i].Sp)
                              for i in 1:nb_gc]
-    dif_eq_mea_liq_water = [calculate_dyn_liquid_water_evolution_inside_MEA(sv_mea_1D[i],
+    dif_eq_mea_liq_water = [calculate_dyn_liquid_water_evolution_inside_MEA(sv_cell_1D[i],
                                                                             pp,
                                                                             flows_1D_MEA[i].Jl,
                                                                             flows_1D_MEA[i].S_abs,
                                                                             flows_1D_MEA[i].Sl)
                             for i in 1:nb_gc]
-    dif_eq_mea_vapor_water = [calculate_dyn_vapor_evolution_inside_MEA(sv_mea_1D[i],
+    dif_eq_mea_vapor_water = [calculate_dyn_vapor_evolution_inside_MEA(sv_cell_1D[i],
                                                                        pp,
                                                                        flows_1D_MEA[i].Jv,
                                                                        flows_1D_MEA[i].Sv,
                                                                        flows_1D_MEA[i].S_abs)
                               for i in 1:nb_gc]
-    dif_eq_mea_species = [calculate_dyn_H2_O2_N2_evolution_inside_MEA(sv_mea_1D[i],
+    dif_eq_mea_species = [calculate_dyn_H2_O2_N2_evolution_inside_MEA(sv_cell_1D[i],
                                                                       pp,
                                                                       flows_1D_MEA[i].J_H2,
                                                                       flows_1D_MEA[i].J_O2,
@@ -132,8 +132,8 @@ function dydt!(dy::Vector{Float64}, t::Float64, y::Vector{Float64}, fc::Abstract
                                                                       flows_1D_MEA[i].S_O2)
                           for i in 1:nb_gc]
     dif_eq_voltage = [calculate_dyn_voltage_evolution(i_fc[i], C_O2_Pt[i],
-                                                      sv_mea_1D[i].ccl.T,
-                                                      sv_mea_1D[i].ccl.eta_c,
+                                                      sv_cell_1D[i].ccl.T,
+                                                      sv_cell_1D[i].ccl.eta_c,
                                                       pp,
                                                       dif_eq_int_values[i].i_n)
                       for i in 1:nb_gc]
@@ -148,7 +148,7 @@ function dydt!(dy::Vector{Float64}, t::Float64, y::Vector{Float64}, fc::Abstract
                                for i in 1:nb_gc]
 
     for i in 1:nb_gc
-        dif_eq_mea_1D[i] = assemble_mea_derivative_1D(dif_eq_mea_diss_water[i],
+        dif_eq_cell_1D[i] = assemble_mea_derivative_1D(dif_eq_mea_diss_water[i],
                                                       dif_eq_mea_liq_water[i],
                                                       dif_eq_mea_vapor_water[i],
                                                       dif_eq_mea_species[i],
@@ -157,7 +157,7 @@ function dydt!(dy::Vector{Float64}, t::Float64, y::Vector{Float64}, fc::Abstract
     end
 
     #       Inside the gas channels: compute independent GC contributions, then assemble once.
-    dif_eq_gc_gas = calculate_dyn_gas_evolution_inside_gas_channel(sv_mea_1D,
+    dif_eq_gc_gas = calculate_dyn_gas_evolution_inside_gas_channel(sv_cell_1D,
                                                                    pp,
                                                                    cfg,
                                                                    flows_1D_GC_manifold,
@@ -167,7 +167,7 @@ function dydt!(dy::Vector{Float64}, t::Float64, y::Vector{Float64}, fc::Abstract
                                                                    flows_1D_GC_manifold,
                                                                    flows_1D_MEA)
     dif_eq_gc_temperature = calculate_dyn_temperature_evolution_inside_gas_channel(nb_gc)
-    dif_eq_mea_1D = assemble_gc_derivative_1D(dif_eq_mea_1D,
+    dif_eq_cell_1D = assemble_gc_derivative_1D(dif_eq_cell_1D,
                                               dif_eq_gc_gas,
                                               dif_eq_gc_liq,
                                               dif_eq_gc_temperature)
@@ -183,15 +183,15 @@ function dydt!(dy::Vector{Float64}, t::Float64, y::Vector{Float64}, fc::Abstract
     end
 
     # Pack typed derivatives directly into the pre-allocated solver buffer dy (no allocation).
-    fuelcell_derivative = FuelCellDerivativeP2D{nb_gdl, nb_mpl, nb_gc}(Tuple(dif_eq_mea_1D))
+    fuelcell_derivative = FuelCellDerivativeP2D{nb_gdl, nb_mpl, nb_gc}(Tuple(dif_eq_cell_1D))
     _assert_fuelcell_derivative_complete!(fuelcell_derivative)
-    _pack_fuelcell_derivative_p2d!(dy, fuelcell_derivative, n_vars_per_gc)
+    _pack_fuelcell_derivative_p2d!(dy, fuelcell_derivative, n_vars_cell_1D)
 
     if has_auxiliary
-        manifold_offset = n_vars_mea
+        manifold_offset = n_vars_cell_P2D
         _assert_manifold_derivative_complete(dif_eq_manifold_1D)
         _pack_manifold_derivative_state!(dy, manifold_offset + 1, dif_eq_manifold_1D)
-        aux_offset = n_vars_mea + n_vars_manifold
+        aux_offset = n_vars_cell_P2D + n_vars_manifold
         _assert_auxiliary_derivative_complete(dif_eq_auxiliary)
         _pack_auxiliary_derivative!(dy, aux_offset + 1, dif_eq_auxiliary)
     end

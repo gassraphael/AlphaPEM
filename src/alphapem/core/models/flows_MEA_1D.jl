@@ -29,7 +29,7 @@ Dict{String, Dict}
     have length `nb_gdl - 1` or `nb_mpl - 1`, while node-based source vectors have length
     `nb_gdl` or `nb_mpl`.
 """
-function calculate_flows_1D_MEA(sv_1D::MEAState1D,
+function calculate_flows_1D_MEA(sv_1D::CellState1D,
                                 i_fc::Float64,
                                 v_a::Float64,
                                 v_c::Float64,

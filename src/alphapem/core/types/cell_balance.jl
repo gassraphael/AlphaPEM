@@ -106,11 +106,11 @@ struct ManifoldBalance <: AbstractLayerBalance
 end
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 1D MEA balance  (one column = one GC node)
+# 1D cell-column balance (MEA + AGC/CGC, one column = one GC node)
 # ────────────────────────────────────────────────────────────────────────────────
 
 """Complete 1D balance container for one gas-channel column."""
-struct MEABalance1D{nb_gdl, nb_mpl}
+struct CellBalance1D{nb_gdl, nb_mpl}
     agc::AnodeGCBalance
     agdl::NTuple{nb_gdl, AnodeGDLBalance}
     ampl::NTuple{nb_mpl, AnodeMPLBalance}
@@ -132,13 +132,13 @@ struct ManifoldLineBalance{nb_nodes}
 end
 
 # ────────────────────────────────────────────────────────────────────────────────
-# P2D fuel-cell balances  (MEA stack only)
+# P2D fuel-cell balances (cell columns = MEA + AGC/CGC)
 # ────────────────────────────────────────────────────────────────────────────────
 
-"""Complete P2D balance container for the MEA stack.
+"""Complete P2D balance container for the cell-column stack.
 Manifold balances are kept separate (to be grouped later).
 """
 struct FuelCellBalanceP2D{nb_gdl, nb_mpl, nb_gc}
-    nodes :: NTuple{nb_gc, MEABalance1D{nb_gdl, nb_mpl}}
+    nodes :: NTuple{nb_gc, CellBalance1D{nb_gdl, nb_mpl}}
 end
 

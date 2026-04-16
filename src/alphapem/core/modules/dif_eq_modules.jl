@@ -216,12 +216,12 @@ function calculate_dif_eq_int_values(t::Float64,
 
     agc_int = AnodeGCIntermediates(P_agc, C_tot_agc, rho_agc, mu_gaz_agc)
     cgc_int = CathodeGCIntermediates(P_cgc, C_tot_cgc, rho_cgc, mu_gaz_cgc)
-    return MEAIntermediates1D{nb_gdl, nb_mpl}(agc_int, cgc_int, rho_Cp0, i_n, T_acl_mem_ccl, v_re, k_purge)
+    return CellIntermediates1D{nb_gdl, nb_mpl}(agc_int, cgc_int, rho_Cp0, i_n, T_acl_mem_ccl, v_re, k_purge)
 end
 
 
-"""Return canonical MEA variable names for one GC node in solver ordering."""
-function canonical_mea_solver_variable_names(nb_gdl::Int, nb_mpl::Int)::Vector{String}
+"""Return canonical Cell (MEA+GC) variable names for one GC node in solver ordering."""
+function canonical_cell_solver_variable_names_1D(nb_gdl::Int, nb_mpl::Int)::Vector{String}
     return vcat(
         ["C_v_agc"], ["C_v_agdl_$(i)" for i in 1:nb_gdl], ["C_v_ampl_$(i)" for i in 1:nb_mpl],
         ["C_v_acl", "C_v_ccl"], ["C_v_cmpl_$(i)" for i in 1:nb_mpl], ["C_v_cgdl_$(i)" for i in 1:nb_gdl], ["C_v_cgc"],
@@ -241,21 +241,25 @@ function canonical_mea_solver_variable_names(nb_gdl::Int, nb_mpl::Int)::Vector{S
     )
 end
 
-"""Count the number of MEA/GC variables per gas-channel node in the solver vector."""
-function _nb_solver_vars_per_gc(nb_gdl::Int, nb_mpl::Int)::Int
-    return length(canonical_mea_solver_variable_names(nb_gdl, nb_mpl))
+"""Backward-compatible alias for historical naming."""
+canonical_mea_solver_variable_names(nb_gdl::Int, nb_mpl::Int) =
+    canonical_cell_solver_variable_names_1D(nb_gdl, nb_mpl)
+
+"""Count the number of CellState1D variables (MEA+GC) per gas-channel node in the solver vector."""
+function _nb_solver_vars_cell_1D(nb_gdl::Int, nb_mpl::Int)::Int
+    return length(canonical_cell_solver_variable_names_1D(nb_gdl, nb_mpl))
 end
 
-# Typed solver-vector helpers depend on model structs (`MEAState1D`, manifold and
+# Typed solver-vector helpers depend on model structs (`CellState1D`, manifold and
 # auxiliary containers). They are loaded only in the `Models` include context.
-if @isdefined(MEAState1D)
+if @isdefined(CellState1D)
 
-"""Unpack one GC-node segment of the solver vector into a typed 1D MEA state."""
-@inline function _unpack_mea_state_1D(values::AbstractVector{<:Real}, nb_gdl::Int, nb_mpl::Int)
-    return _unpack_mea_state_1D(values, Val(nb_gdl), Val(nb_mpl))
+"""Unpack one GC-node segment of the solver vector into a typed `CellState1D`."""
+@inline function _unpack_cell_state_1D(values::AbstractVector{<:Real}, nb_gdl::Int, nb_mpl::Int)
+    return _unpack_cell_state_1D(values, Val(nb_gdl), Val(nb_mpl))
 end
 
-@inline function _unpack_mea_state_1D(values::AbstractVector{<:Real}, ::Val{N_GDL}, ::Val{N_MPL}) where {N_GDL, N_MPL}
+@inline function _unpack_cell_state_1D(values::AbstractVector{<:Real}, ::Val{N_GDL}, ::Val{N_MPL}) where {N_GDL, N_MPL}
     idx = Ref(1)
 
     @inline read_scalar!() = begin
@@ -322,11 +326,11 @@ end
     cgdl = ntuple(i -> CathodeGDLState(T_cgdl[i], C_v_cgdl[i], s_cgdl[i], C_O2_cgdl[i]), Val(N_GDL))
     cgc = CathodeGCState(T_cgc, C_v_cgc, s_cgc, C_O2_cgc, C_N2_cgc)
 
-    return MEAState1D{N_GDL, N_MPL}(agc, agdl, ampl, acl, mem, ccl, cmpl, cgdl, cgc)
+    return CellState1D{N_GDL, N_MPL}(agc, agdl, ampl, acl, mem, ccl, cmpl, cgdl, cgc)
 end
 
 """Create a derivative container initialized with NaN values."""
-function _nan_mea_derivative_1D(nb_gdl::Int, nb_mpl::Int)
+function _nan_cell_derivative_1D(nb_gdl::Int, nb_mpl::Int)
     z = NaN
     agc = AnodeGCDerivative(z, z, z, z, z)
     agdl = ntuple(_ -> AnodeGDLDerivative(z, z, z, z), nb_gdl)
@@ -337,11 +341,11 @@ function _nan_mea_derivative_1D(nb_gdl::Int, nb_mpl::Int)
     cmpl = ntuple(_ -> CathodeMPLDerivative(z, z, z, z), nb_mpl)
     cgdl = ntuple(_ -> CathodeGDLDerivative(z, z, z, z), nb_gdl)
     cgc = CathodeGCDerivative(z, z, z, z, z)
-    return MEACellDerivative1D{nb_gdl, nb_mpl}(agc, agdl, ampl, acl, mem, ccl, cmpl, cgdl, cgc)
+    return CellDerivative1D{nb_gdl, nb_mpl}(agc, agdl, ampl, acl, mem, ccl, cmpl, cgdl, cgc)
 end
 
 """Ensure all scalar values in one typed 1D derivative are assigned (no NaN sentinel left)."""
-function _assert_derivative_complete!(d::MEACellDerivative1D{nb_gdl, nb_mpl}) where {nb_gdl, nb_mpl}
+function _assert_cell_derivative_complete!(d::CellDerivative1D{nb_gdl, nb_mpl}) where {nb_gdl, nb_mpl}
     fail() = throw(ArgumentError("At least one derivative entry is missing (NaN sentinel detected)."))
 
     isnan(d.agc.C_v) && fail()
@@ -399,14 +403,14 @@ end
 """Ensure all MEA node derivatives in the P2D container are fully assigned."""
 function _assert_fuelcell_derivative_complete!(d::FuelCellDerivativeP2D{nb_gdl, nb_mpl, nb_gc}) where {nb_gdl, nb_mpl, nb_gc}
     for i in 1:nb_gc
-        _assert_derivative_complete!(d.nodes[i])
+        _assert_cell_derivative_complete!(d.nodes[i])
     end
     return nothing
 end
 
 """Write one typed 1D derivative container directly into `dy` starting at `offset` (1-based, no allocation)."""
-function _pack_mea_derivative_1D!(dy::AbstractVector{Float64}, offset::Int,
-                                   d::MEACellDerivative1D{nb_gdl, nb_mpl}) where {nb_gdl, nb_mpl}
+function _pack_cell_derivative_1D!(dy::AbstractVector{Float64}, offset::Int,
+                                   d::CellDerivative1D{nb_gdl, nb_mpl}) where {nb_gdl, nb_mpl}
     idx = offset
     # C_v block
     dy[idx] = d.agc.C_v; idx += 1
@@ -458,9 +462,9 @@ end
 """Write all GC-node typed derivatives directly into `dy` with zero allocations (SciML iip convention)."""
 function _pack_fuelcell_derivative_p2d!(dy::AbstractVector{Float64},
                                          d::FuelCellDerivativeP2D{nb_gdl, nb_mpl, nb_gc},
-                                         n_vars_per_gc::Int) where {nb_gdl, nb_mpl, nb_gc}
+                                         n_vars_cell_1D::Int) where {nb_gdl, nb_mpl, nb_gc}
     for i in 1:nb_gc
-        _pack_mea_derivative_1D!(dy, (i - 1) * n_vars_per_gc + 1, d.nodes[i])
+        _pack_cell_derivative_1D!(dy, (i - 1) * n_vars_cell_1D + 1, d.nodes[i])
     end
     return nothing
 end

@@ -217,7 +217,7 @@ end
 # Thermal inter-layer fluxes and per-layer heat sources  (dimension-dependent)
 # ────────────────────────────────────────────────────────────────────────────────
 
-"""Thermal (conductive) inter-layer fluxes through the full MEA stack.
+"""Thermal (conductive) inter-layer fluxes through one full through-plane column (AGC→CGC).
 Two extra fields (`acl_mem`, `mem_ccl`) compared to the mass-flux structs.
 Units: W·m⁻²
 """
@@ -411,6 +411,7 @@ struct GCManifoldFlows1D{NB_GC}
 end
 
 """Complete 1D MEA flow output for one gas-channel column.
+Includes MEA-core quantities and GC/MEA interface fluxes.
 """
 struct MEAFlows1D{NB_GDL, NB_MPL}
     Jv       :: MEAVaporFluxes{NB_GDL, NB_MPL}
@@ -427,6 +428,7 @@ struct MEAFlows1D{NB_GDL, NB_MPL}
 end
 
 """Complete 1D MEA heat transfer output for one gas-channel column.
+Includes MEA-core heat terms and GC/MEA interface conductive fluxes.
 
 This is the future return type of `calculate_heat_transfers`, replacing
 the former `Dict{String, Dict}`.

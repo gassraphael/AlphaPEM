@@ -19,10 +19,10 @@ Parameters
 ----------
 i_fc_cell : Float64
     Fuel cell current density at time t (A.m-2).
-sv : AbstractVector{<:MEAState1D}
+sv : AbstractVector{<:CellState1D}
     Typed internal states calculated by the solver.
     sv is a contraction of solver_variables for enhanced readability.
-    sv[i] is the typed 1D MEA state associated with gas channel i.
+    sv[i] is the typed 1D cell-column state (MEA+GC) associated with gas channel i.
 fc : AbstractFuelCell
     Fuel cell instance providing model parameters.
 
@@ -33,7 +33,7 @@ Vector{Float64}
     Julia vectors are naturally 1-based, so no dummy element is stored at index 0.
     i_fc[i] corresponds to gas channel i, for i in 1:nb_gc.
 """
-function calculate_1D_GC_current_density(i_fc_cell::Float64, sv::AbstractVector{<:MEAState1D}, fc::AbstractFuelCell)::Vector{Float64}
+function calculate_1D_GC_current_density(i_fc_cell::Float64, sv::AbstractVector{<:CellState1D}, fc::AbstractFuelCell)::Vector{Float64}
 
     # Extraction of the parameters
     nb_gc = fc.numerical_parameters.nb_gc

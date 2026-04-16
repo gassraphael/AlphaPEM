@@ -201,7 +201,7 @@ function final_temperature_matrix_celsius(outputs::SimulationOutputs{nb_gdl, nb_
     last_state = solver_state_history(outputs)[end]
 
     # Derive through-plane temperature column count from canonical solver ordering.
-    solver_names = canonical_mea_solver_variable_names(nb_gdl, nb_mpl)
+    solver_names = canonical_cell_solver_variable_names_1D(nb_gdl, nb_mpl)
     n_cols = count(name -> startswith(name, "T_"), solver_names)
 
     temp_matrix = Matrix{Float64}(undef, nb_gc, n_cols)

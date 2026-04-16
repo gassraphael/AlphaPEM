@@ -20,7 +20,7 @@ Returns
 Tuple
     Tuple containing the intermediate values used by the heat calculation.
 """
-function heat_transfer_int_values(sv::MEAState1D,
+function heat_transfer_int_values(sv::CellState1D,
                                   fc::AbstractFuelCell)::Tuple
 
     # Extraction of the parameters
@@ -30,7 +30,7 @@ function heat_transfer_int_values(sv::MEAState1D,
     Hmem, epsilon_gdl, epsilon_mpl, epsilon_c = pp.Hmem, pp.epsilon_gdl, pp.epsilon_mpl, pp.epsilon_c
     nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl
 
-    # Extraction of the variables (typed access via MEAState1D struct fields)
+    # Extraction of the variables (typed access via CellState1D struct fields)
     C_v_acl, C_v_ccl = sv.acl.C_v, sv.ccl.C_v
     C_v_agdl, C_v_ampl = [sv.agdl[i].C_v for i in 1:nb_gdl], [sv.ampl[i].C_v for i in 1:nb_mpl]
     C_v_cmpl, C_v_cgdl = [sv.cmpl[i].C_v for i in 1:nb_mpl], [sv.cgdl[i].C_v for i in 1:nb_gdl]

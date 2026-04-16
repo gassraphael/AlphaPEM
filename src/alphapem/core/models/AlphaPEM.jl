@@ -111,7 +111,7 @@ function simulate_model!(simu::AlphaPEM,
      #           Pre-calculate constant solver vector dimensions to avoid recomputation in dydt.
      np = simu.fuel_cell.numerical_parameters
      nb_gdl, nb_mpl, nb_gc, nb_man = np.nb_gdl, np.nb_mpl, np.nb_gc, np.nb_man
-     n_vars_per_gc = _nb_solver_vars_per_gc(nb_gdl, nb_mpl)
+     n_vars_cell_1D = _nb_solver_vars_cell_1D(nb_gdl, nb_mpl)
      has_auxiliary = simu.cfg.type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
                                                   :forced_convective_cathode_with_anodic_recirculation)
      n_vars_manifold = has_auxiliary ? _nb_solver_vars_manifolds(nb_man) : 0
@@ -119,10 +119,10 @@ function simulate_model!(simu::AlphaPEM,
 
      #           Pack external data passed to the ODE right-hand side.
      packed = (fuel_cell=simu.fuel_cell, current_density=simu.current_density, cfg=simu.cfg,
-               n_vars_per_gc=n_vars_per_gc, n_vars_manifold=n_vars_manifold, n_vars_auxiliary=n_vars_auxiliary)
+               n_vars_cell_1D=n_vars_cell_1D, n_vars_manifold=n_vars_manifold, n_vars_auxiliary=n_vars_auxiliary)
      #           Define RHS in SciML iip=true signature: f!(dy, y, p, t) -> nothing.
      #           The pre-allocated `dy` buffer is managed by the solver — zero output allocation per call.
-     rhs! = (dy, y, p, t) -> dydt!(dy, t, y, p.fuel_cell, p.current_density, p.cfg, p.n_vars_per_gc,
+     rhs! = (dy, y, p, t) -> dydt!(dy, t, y, p.fuel_cell, p.current_density, p.cfg, p.n_vars_cell_1D,
                                    p.n_vars_manifold, p.n_vars_auxiliary)
      #           Build and solve the ODE problem with FBDF for stiff dynamics.
      prob = ODEProblem(rhs!, simu.initial_variable_values, simu.time_interval, packed)
@@ -223,7 +223,7 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector{Float64}
     Wcp, Wa_inj, Wc_inj, Abp_a, Abp_c = Wcp_ini, Wa_inj_ini, Wc_inj_ini, Abp_a_ini, Abp_c_ini
 
     # Gather initial values in the canonical typed solver ordering.
-    names_1D = canonical_mea_solver_variable_names(nb_gdl, nb_mpl)
+    names_1D = canonical_cell_solver_variable_names_1D(nb_gdl, nb_mpl)
     values_1D = Dict{String, Float64}(
         "C_v_agc" => C_v_agc, "C_v_acl" => C_v_acl, "C_v_ccl" => C_v_ccl, "C_v_cgc" => C_v_cgc,
         "s_agc" => s_agc, "s_acl" => s_acl, "s_ccl" => s_ccl, "s_cgc" => s_cgc,
@@ -286,9 +286,9 @@ function recovery!(simu::AlphaPEM)
     # Recovery of the main variables dynamic evolution.
     np = simu.fuel_cell.numerical_parameters
     nb_gc, nb_gdl, nb_mpl = np.nb_gc, np.nb_gdl, np.nb_mpl
-    n_vars_mea_1D = _nb_solver_vars_per_gc(nb_gdl, nb_mpl)
-    canonical_names = canonical_mea_solver_variable_names(nb_gdl, nb_mpl)
-    length(canonical_names) == n_vars_mea_1D ||
+    n_vars_cell_1D = _nb_solver_vars_cell_1D(nb_gdl, nb_mpl)
+    canonical_names = canonical_cell_solver_variable_names_1D(nb_gdl, nb_mpl)
+    length(canonical_names) == n_vars_cell_1D ||
         throw(ArgumentError("Canonical MEA layout size mismatch in recovery!."))
 
     # Typed output buffers.
@@ -304,24 +304,24 @@ function recovery!(simu::AlphaPEM)
 
     for (j, t_j) in enumerate(t_hist)
         # ... recovery of the variables inside the MEA 1D line.
-        solver_variables_1D_MEA = [_unpack_mea_state_1D(@view(simu.sol.u[j][(k - 1) * n_vars_mea_1D + 1:k * n_vars_mea_1D]),
+        sv_cell_1D = [_unpack_cell_state_1D(@view(simu.sol.u[j][(k - 1) * n_vars_cell_1D + 1:k * n_vars_cell_1D]),
                                                         nb_gdl, nb_mpl)
                                    for k in 1:nb_gc]
-        solver_states[j] = FuelCellStateP2D{nb_gdl, nb_mpl, nb_gc}(Tuple(solver_variables_1D_MEA))
+        solver_states[j] = FuelCellStateP2D{nb_gdl, nb_mpl, nb_gc}(Tuple(sv_cell_1D))
 
         # ... recovery of i_fc and C_O2_Pt.
         i_fc_cell = current(simu.current_density, t_j)
-        i_fc = calculate_1D_GC_current_density(i_fc_cell, solver_variables_1D_MEA, simu.fuel_cell)
+        i_fc = calculate_1D_GC_current_density(i_fc_cell, sv_cell_1D, simu.fuel_cell)
         for k in 1:nb_gc
-            c_o2_pt_k = calculate_C_O2_Pt(i_fc[k], solver_variables_1D_MEA[k], simu.fuel_cell)
+            c_o2_pt_k = calculate_C_O2_Pt(i_fc[k], sv_cell_1D[k], simu.fuel_cell)
             push!(i_fc_hist[k], i_fc[k])
             push!(C_O2_Pt_hist[k], c_o2_pt_k)
         end
 
         # ... recovery of Ucell, v_a, v_c, Pa_in and Pc_in.
-        Ucell = calculate_cell_voltage(i_fc[1], C_O2_Pt_hist[1][end], solver_variables_1D_MEA[1], simu.fuel_cell)
+        Ucell = calculate_cell_voltage(i_fc[1], C_O2_Pt_hist[1][end], sv_cell_1D[1], simu.fuel_cell)
         push!(Ucell_hist, Ucell)
-        v_a, v_c, Pa_in, Pc_in = calculate_velocity_evolution(solver_variables_1D_MEA, i_fc_cell, simu.fuel_cell, simu.cfg)
+        v_a, v_c, Pa_in, Pc_in = calculate_velocity_evolution(sv_cell_1D, i_fc_cell, simu.fuel_cell, simu.cfg)
         for k in 1:nb_gc
             push!(v_a_hist[k], v_a[k])
             push!(v_c_hist[k], v_c[k])

@@ -9,7 +9,7 @@
 
 Parameters
 ----------
-sv_1D_cell : AbstractVector{<:MEAState1D}
+sv_1D_cell : AbstractVector{<:CellState1D}
     Typed variables calculated by the solver (cell internal states).
 sv_1D_manifold
     Typed variables calculated by the solver (manifold internal states).
@@ -35,7 +35,7 @@ Returns
 GCManifoldFlows1D{NB_GC}
     Typed global and species-specific flows in the gas channels and auxiliaries.
 """
-function calculate_flows_1D_GC_manifold(sv_1D_cell::AbstractVector{<:MEAState1D},
+function calculate_flows_1D_GC_manifold(sv_1D_cell::AbstractVector{<:CellState1D},
                                         sv_1D_manifold,
                                         sv_auxiliary,
                                         i_fc_cell::Float64,
