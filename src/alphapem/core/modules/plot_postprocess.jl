@@ -8,6 +8,7 @@ transformations, simulation error calculation, and axis-tick rounding helpers.
 
 # Importing the necessary libraries
 using FFTW
+using Interpolations: linear_interpolation, Line
 using Statistics
 
 
@@ -95,6 +96,61 @@ function calculate_simulation_error(Ucell::Vector,
     # Distance between the simulated and the experimental polarization curves (RMSE: root-mean-square error).
     res1 = (Ucell .- U_exp_t) ./ U_exp_t .* 100  # in %.
     return round(sqrt(mean(res1 .^ 2)), digits=2)
+end
+
+
+"""Return polarization points sampled at stabilization times (fixed mode).
+
+The returned current density is in A.cm^-2 to match plotting conventions."""
+function _polarization_points(outputs::SimulationOutputs,
+                              cd::AbstractCurrent)
+    t_hist = time_history(outputs)
+    Ucell_t = derived_outputs(outputs).Ucell
+    ifc_t = [current(cd, t) / 1e4 for t in t_hist]
+    sample_indices = polarisation_sampling_indices(outputs, cd)
+    return ifc_t[sample_indices], Ucell_t[sample_indices]
+end
+
+"""Return true when legacy RMSE comparison against experiments is enabled."""
+function _pola_rmse_enabled(cfg::SimulationConfig)::Bool
+    return cfg.type_fuel_cell != :manual_setup &&
+           cfg.type_auxiliary in (:forced_convective_cathode_with_flow_through_anode, :no_auxiliary)
+end
+
+"""Compute polarization RMSE using legacy logic (interpolate model voltage on experimental currents)."""
+function _polarization_rmse(ifc_discretized::AbstractVector{<:Real},
+                            Ucell_discretized::AbstractVector{<:Real},
+                            i_exp::AbstractVector{<:Real},
+                            U_exp::AbstractVector{<:Real})
+    itp = linear_interpolation(collect(ifc_discretized), collect(Ucell_discretized); extrapolation_bc=Line())
+    Ucell_interpolated = itp.(collect(i_exp))
+    return calculate_simulation_error(Ucell_interpolated, collect(U_exp))
+end
+
+"""Compute one EIS impedance point from Fourier outputs."""
+function _eis_point(cd::AbstractCurrent,
+                    Fourier_results::FourierOutputs)
+    i_EIS = cd.i_EIS
+    ratio_EIS = cd.ratio
+
+    Z0 = Fourier_results.A / (ratio_EIS * (-i_EIS)) * 1e7
+
+    theta_U_t = angle.(Fourier_results.Ucell_Fourier[1:Fourier_results.N÷2])
+    theta_i_t = angle.(Fourier_results.ifc_Fourier[1:Fourier_results.N÷2])
+    idx_A = findfirst(Fourier_results.A_period_t .== Fourier_results.A)
+    idx_A === nothing && return (NaN, NaN, NaN, NaN, NaN)
+
+    theta_U = theta_U_t[idx_A]
+    theta_i = theta_i_t[idx_A]
+
+    Z_real = Z0 * cos(theta_U - theta_i)
+    Z_imag = Z0 * sin(theta_U - theta_i)
+
+    # Same convention as the legacy implementation for Bode phase.
+    phi_deg = mod((theta_U - (theta_i + π)) * 180 / π, 360)
+    phi_deg > 180 && (phi_deg -= 360)
+
+    return (Z_real, -Z_imag, Fourier_results.f, abs(Z0), phi_deg)
 end
 
 

@@ -31,6 +31,7 @@ include("../modules/heat_modules.jl")
 include("../modules/flows_GC_manifold_1D_modules.jl")
 include("../modules/outputs_accessors.jl")
 include("../modules/plot_postprocess.jl")
+include("../modules/plot_helpers.jl")
 
 # ── Include model files in dependency order ─────────────────────────────────
 include("../modules/dif_eq_modules.jl")

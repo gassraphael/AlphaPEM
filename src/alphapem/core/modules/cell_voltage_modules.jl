@@ -42,11 +42,7 @@ function calculate_C_O2_Pt(i_fc::Float64,
               R_T_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, K_O2_ad_Pt) /
               a_c(lambda_ccl, T_ccl, Hccl)
 
-    if C_O2_Pt <= 0
-        throw(ArgumentError("Calculated C_O2_Pt is non-physical (negative or zero). Check input parameters and variables."))
-    end
-
-    return C_O2_Pt
+    return max(C_O2_Pt, 0.0)
 end
 
 

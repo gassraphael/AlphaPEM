@@ -2,10 +2,14 @@
 #
 # Native CairoMakie plotting recipes for AlphaPEM (progressive migration stage).
 
-include("../modules/plot_helpers.jl")
 
 using .PlotHelpers: _publication_colors,
                     _finalize_axis!,
+                    _label_with_rmse,
+                    _polarization_legend_base,
+                    _experimental_marker,
+                    _set_polarization_axis_limits!,
+                    _set_polarization_fixed_ticks!,
                     _format_fixed,
                     _compact_tick_labels,
                     _nice_tick_step,
@@ -600,55 +604,53 @@ end
 #  Polarization Curves
 # ═══════════════════════════════════════════════════════════════════════════════
 
-"""Return polarization points sampled at stabilization times (fixed mode).
-
-The returned current density is in A.cm^-2 to match plotting conventions."""
-function _polarization_points(outputs::SimulationOutputs,
-                              cd::AbstractCurrent)
-    t_hist = time_history(outputs)
-    Ucell_t = derived_outputs(outputs).Ucell
-    ifc_t = [current(cd, t) / 1e4 for t in t_hist]
-    sample_indices = polarisation_sampling_indices(outputs, cd)
-    return ifc_t[sample_indices], Ucell_t[sample_indices]
-end
-
-
 """Plot polarization curve with unified CairoMakie style conventions."""
 function plot_polarization_curve(outputs::SimulationOutputs,
                                  fc::AbstractFuelCell,
                                  cd::AbstractCurrent,
                                  cfg::SimulationConfig,
                                  ax)
-    model_label = "Model ($(String(cfg.type_fuel_cell)))"
+    palette = _publication_colors()
+    model_color = palette[1]
+    exp_color = RGBf(0.10, 0.10, 0.10)
+    model_label_base = _polarization_legend_base(cfg.type_fuel_cell;
+                                                 simulation=true,
+                                                 calibration=false)
+    exp_label = _polarization_legend_base(cfg.type_fuel_cell;
+                                          simulation=false,
+                                          calibration=false)
 
     if cfg.display_timing == :postrun
         ifc_discretized, Ucell_discretized = _polarization_points(outputs, cd)
-        lines!(ax, ifc_discretized, Ucell_discretized;
-               color=:black, linewidth=2.6, label=model_label)
-        scatter!(ax, ifc_discretized, Ucell_discretized;
-                 color=:black, markersize=7)
 
         y_series = [Ucell_discretized]
-        # Plot available experimental points when fuel-cell data provide them.
+        sim_error = nothing
         if hasproperty(fc, :pola_exp_data)
             exp_data = getproperty(fc, :pola_exp_data)
             if hasproperty(exp_data, :i_exp) && hasproperty(exp_data, :U_exp)
                 i_exp = getproperty(exp_data, :i_exp) ./ 1e4
                 U_exp = getproperty(exp_data, :U_exp)
                 scatter!(ax, i_exp, U_exp;
-                         color=:white, strokecolor=:black, strokewidth=1.2,
-                         markersize=9, label="Experiment")
+                         color=exp_color, marker=_experimental_marker(cfg.type_fuel_cell), markersize=12,
+                         strokecolor=:white, strokewidth=0.5,
+                         label=exp_label)
                 push!(y_series, U_exp)
+                _pola_rmse_enabled(cfg) && (sim_error = _polarization_rmse(ifc_discretized, Ucell_discretized, i_exp, U_exp))
             end
         end
 
-        _set_dense_ticks!(ax, ifc_discretized, y_series)
+        model_label = _label_with_rmse(model_label_base, sim_error)
+        lines!(ax, ifc_discretized, Ucell_discretized;
+               color=model_color, linewidth=3.0, label=model_label)
+
+        _set_polarization_axis_limits!(ax)
+        _set_polarization_fixed_ticks!(ax)
         _finalize_axis!(ax;
                         xlabel=rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"),
                         ylabel=rich("Cell voltage ", lsub("U", "cell"), " (V)"),
                         title="Polarization curve",
                         legend=true,
-                        legend_position=:lt)
+                        legend_position=:rt)
     else
         # Dynamic mode: display the latest simulated operating point.
         t_hist = time_history(outputs)
@@ -656,15 +658,19 @@ function plot_polarization_curve(outputs::SimulationOutputs,
         idx = lastindex(t_hist)
         ifc_last = current(cd, t_hist[idx]) / 1e4
         Ucell_last = Ucell_t[idx]
-        scatter!(ax, [ifc_last], [Ucell_last]; color=:black, markersize=8, label=model_label)
+        scatter!(ax, [ifc_last], [Ucell_last];
+                 color=:white, marker=:circle, markersize=8,
+                 strokecolor=model_color, strokewidth=1.8,
+                 label=model_label_base)
 
-        _set_dense_ticks!(ax, [ifc_last], [[Ucell_last]])
+        _set_polarization_axis_limits!(ax)
+        _set_polarization_fixed_ticks!(ax)
         _finalize_axis!(ax;
                         xlabel=rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"),
                         ylabel=rich("Cell voltage ", lsub("U", "cell"), " (V)"),
                         title="Polarization point (dynamic)",
                         legend=true,
-                        legend_position=:lt)
+                        legend_position=:rt)
     end
     return nothing
 end
@@ -676,49 +682,66 @@ function plot_polarization_curve_for_cali(outputs::SimulationOutputs,
                                           cd::AbstractCurrent,
                                           cfg::SimulationConfig,
                                           ax)
-    model_label = "Model calibration ($(String(cfg.type_fuel_cell)))"
+    palette = _publication_colors()
+    model_color = palette[1]
+    exp_color = RGBf(0.10, 0.10, 0.10)
+    model_label_base = _polarization_legend_base(cfg.type_fuel_cell;
+                                                 simulation=true,
+                                                 calibration=true)
+    exp_label = _polarization_legend_base(cfg.type_fuel_cell;
+                                          simulation=false,
+                                          calibration=true)
 
     if cfg.display_timing == :postrun
         ifc_discretized, Ucell_discretized = _polarization_points(outputs, cd)
-        lines!(ax, ifc_discretized, Ucell_discretized;
-               color=:black, linewidth=2.6, label=model_label)
-        scatter!(ax, ifc_discretized, Ucell_discretized;
-                 color=:black, markersize=7)
 
         y_series = [Ucell_discretized]
+        sim_error = nothing
         if hasproperty(fc, :pola_exp_data_cali)
             exp_data = getproperty(fc, :pola_exp_data_cali)
             if hasproperty(exp_data, :i_exp) && hasproperty(exp_data, :U_exp)
                 i_exp = getproperty(exp_data, :i_exp) ./ 1e4
                 U_exp = getproperty(exp_data, :U_exp)
                 scatter!(ax, i_exp, U_exp;
-                         color=:white, strokecolor=:black, strokewidth=1.2,
-                         markersize=9, label="Experiment calibration")
+                         color=exp_color, marker=_experimental_marker(cfg.type_fuel_cell), markersize=12,
+                         strokecolor=:white, strokewidth=0.5,
+                         label=exp_label)
                 push!(y_series, U_exp)
+                # Legacy calibration logic: RMSE is computed directly point-to-point.
+                _pola_rmse_enabled(cfg) && (sim_error = calculate_simulation_error(Ucell_discretized, U_exp))
             end
         end
 
-        _set_dense_ticks!(ax, ifc_discretized, y_series)
+        model_label = _label_with_rmse(model_label_base, sim_error)
+        lines!(ax, ifc_discretized, Ucell_discretized;
+               color=model_color, linewidth=3.0, label=model_label)
+
+        _set_polarization_axis_limits!(ax)
+        _set_polarization_fixed_ticks!(ax)
         _finalize_axis!(ax;
                         xlabel=rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"),
                         ylabel=rich("Cell voltage ", lsub("U", "cell"), " (V)"),
                         title="Polarization curve (calibration)",
                         legend=true,
-                        legend_position=:lt)
+                        legend_position=:rt)
     else
         t_hist = time_history(outputs)
         Ucell_t = derived_outputs(outputs).Ucell
         idx = lastindex(t_hist)
         ifc_last = current(cd, t_hist[idx]) / 1e4
         Ucell_last = Ucell_t[idx]
-        scatter!(ax, [ifc_last], [Ucell_last]; color=:black, markersize=8, label=model_label)
-        _set_dense_ticks!(ax, [ifc_last], [[Ucell_last]])
+        scatter!(ax, [ifc_last], [Ucell_last];
+                 color=:white, marker=:circle, markersize=8,
+                 strokecolor=model_color, strokewidth=1.8,
+                 label=model_label_base)
+        _set_polarization_axis_limits!(ax)
+        _set_polarization_fixed_ticks!(ax)
         _finalize_axis!(ax;
                         xlabel=rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"),
                         ylabel=rich("Cell voltage ", lsub("U", "cell"), " (V)"),
                         title="Polarization point (calibration, dynamic)",
                         legend=true,
-                        legend_position=:lt)
+                        legend_position=:rt)
     end
     return nothing
 end
@@ -767,7 +790,7 @@ function plot_power_density_curve(outputs::SimulationOutputs,
                         ylabel=rich("Power density ", lsub("P", "cell"), " (W·cm⁻²)"),
                         title="Power density point (dynamic)",
                         legend=true,
-                        legend_position=:lt)
+                        legend_position=:rt)
     end
     return nothing
 end
@@ -818,33 +841,6 @@ function plot_cell_efficiency(outputs::SimulationOutputs,
                         legend_position=:lb)
     end
     return nothing
-end
-
-"""Compute one EIS impedance point from Fourier outputs.
-"""
-function _eis_point(cd::AbstractCurrent,
-                    Fourier_results::FourierOutputs)
-    i_EIS = cd.i_EIS
-    ratio_EIS = cd.ratio
-
-    Z0 = Fourier_results.A / (ratio_EIS * (-i_EIS)) * 1e7
-
-    theta_U_t = angle.(Fourier_results.Ucell_Fourier[1:Fourier_results.N÷2])
-    theta_i_t = angle.(Fourier_results.ifc_Fourier[1:Fourier_results.N÷2])
-    idx_A = findfirst(Fourier_results.A_period_t .== Fourier_results.A)
-    idx_A === nothing && return (NaN, NaN, NaN, NaN, NaN)
-
-    theta_U = theta_U_t[idx_A]
-    theta_i = theta_i_t[idx_A]
-
-    Z_real = Z0 * cos(theta_U - theta_i)
-    Z_imag = Z0 * sin(theta_U - theta_i)
-
-    # Same convention as the legacy implementation for Bode phase.
-    phi_deg = mod((theta_U - (theta_i + π)) * 180 / π, 360)
-    phi_deg > 180 && (phi_deg -= 360)
-
-    return (Z_real, -Z_imag, Fourier_results.f, abs(Z0), phi_deg)
 end
 
 
@@ -1003,5 +999,4 @@ function plot_T_pseudo_2D_final(outputs::SimulationOutputs,
           align=(:left, :center), space=:relative, color=:black)
     return nothing
 end
-
 

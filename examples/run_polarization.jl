@@ -31,7 +31,7 @@ if length(type_fuel_cell_list) == 1
         voltage_zone = :before_voltage_drop, # :before_voltage_drop, :full.
         type_auxiliary = :no_auxiliary, # :forced_convective_cathode_with_anodic_recirculation, :forced_convective_cathode_with_flow_through_anode, :no_auxiliary.
         type_purge = :no_purge, # :constant_purge, :periodic_purge, :no_purge.
-        type_display = :no_display, # :multiple, :synthetic, :no_display.
+        type_display = :synthetic, # :multiple, :synthetic, :no_display.
         display_timing = :postrun # :live, :postrun.
     )
     start_time = time() # Starting time

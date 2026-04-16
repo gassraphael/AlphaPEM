@@ -180,7 +180,8 @@ function polarisation_sampling_times(cd::AbstractCurrent)::Vector{Float64}
         delta_i = getproperty(cd, :delta_i)
         delta_t_load = delta_i / getproperty(cd, :v_load)
         nb_loads = floor(Int, getproperty(cd, :i_max) / delta_i)
-        return [delta_t_ini + i * (delta_t_load + delta_t_break) for i in 1:nb_loads]
+        # Include i = 0 to capture the OCV point before the first load.
+        return [delta_t_ini + i * (delta_t_load + delta_t_break) for i in 0:nb_loads]
     elseif hasproperty(cd, :i_exp) && hasproperty(cd, :v_load)
         i_exp = getproperty(cd, :i_exp)
         delta_t_load = abs(i_exp[1]) / getproperty(cd, :v_load)
@@ -226,5 +227,4 @@ function final_temperature_matrix_celsius(outputs::SimulationOutputs{nb_gdl, nb_
 
     return temp_matrix
 end
-
 

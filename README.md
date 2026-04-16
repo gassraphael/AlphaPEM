@@ -159,8 +159,8 @@ and configuration, beyond what the GUI offers.
 | Script | Description                                                                                   |
 |---|-----------------------------------------------------------------------------------------------|
 | `run_step.jl` | Simulates a step current density                                                              |
-| `run_polarization.jl` | Generates a polarization curve *(currently broken, work in progress)*                         |
-| `run_polarization_for_cali.jl` | Generates polarization curves for calibration purposes *(currently broken, work in progress)* |
+| `run_polarization.jl` | Generates a polarization curve                                                                 |
+| `run_polarization_for_cali.jl` | Generates polarization curves for calibration purposes |
 | `run_EIS.jl` | Generates an EIS curve *(currently broken, work in progress)*                                 |
 | `plot_currents.jl` | Plots the current density profiles                                                            |
 | `benchmark_step.jl` | Benchmarks the step simulation                                                                |
@@ -221,8 +221,7 @@ system in `src/alphapem/parametrisation/calibration_modules.jl`.
     - the redesign of the AlphaPEM architecture so that the code is closer to industry standards.
     - a progressive migration process: `interfaces` (GUI) and `parametrisation` (calibration) are not yet fully
       converted to Julia and still rely on Python.
-    - `run_polarization.jl`, `run_polarization_for_cali.jl`, and `run_EIS.jl` are currently broken (work in
-      progress).
+    - `run_EIS.jl` is currently broken (work in progress).
 - [V1.3](https://github.com/gassraphael/AlphaPEM/tree/65dd73ed306a054c80018447f7943b9d9f973ffb) - 2026.02.16 - This version of AlphaPEM includes: 
 	- the addition of O2 flow to Pt particules which improves the modeling of overvoltage due to flooding at high curent densities.
 		- the limiting liquid water saturation coefficient ($s_{lim}$) has been definitively removed, as this model replaces it.

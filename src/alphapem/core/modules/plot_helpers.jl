@@ -7,12 +7,20 @@ using CairoMakie
 
 export _publication_colors,
        _finalize_axis!,
+       _label_with_rmse,
+       _polarization_legend_base,
+       _experimental_marker,
+       _set_polarization_xlims!,
+       _set_polarization_axis_limits!,
+       _set_polarization_fixed_ticks!,
        _format_fixed,
        _compact_tick_labels,
        _nice_tick_step,
        _colorbar_ticks_auto,
        _rounded_major_ticks,
        _set_dense_ticks!,
+       _clear_dynamic_axes!,
+       saving_instructions!,
        lsub
 
 """Return a reproducible publication-oriented color set."""
@@ -65,6 +73,110 @@ function _finalize_axis!(ax;
                    framewidth=0.8, framecolor=(:black, 0.35),
                    backgroundcolor=(:white, 0.88), padding=(6, 6, 6, 6))
     end
+    return nothing
+end
+
+"""Append legacy RMSE text to a model legend label when available."""
+function _label_with_rmse(base_label, sim_error)
+    sim_error === nothing && return base_label
+    return rich(base_label, " - ΔU", subscript("RMSE"), " = $(sim_error) %")
+end
+
+"""Return the legacy polarization legend base text used in historical Python plots."""
+function _polarization_legend_base(type_fuel_cell::Symbol;
+                                   simulation::Bool=true,
+                                   calibration::Bool=false)
+    prefix = simulation ? "Sim. - " : "Exp. - "
+
+    if type_fuel_cell == :ZSW_GenStack
+        suffix = calibration && simulation ? "nominal operating conditions" : "nominal"
+        return prefix * suffix
+    elseif type_fuel_cell == :ZSW_GenStack_Pa_1_61_Pc_1_41
+        return rich(prefix, "P", subscript("a"), "/P", subscript("c"), " = 1.61/1.41 bar")
+    elseif type_fuel_cell == :ZSW_GenStack_Pa_2_01_Pc_1_81
+        return rich(prefix, "P", subscript("a"), "/P", subscript("c"), " = 2.01/1.81 bar")
+    elseif type_fuel_cell == :ZSW_GenStack_Pa_2_4_Pc_2_2
+        return rich(prefix, "P", subscript("a"), "/P", subscript("c"), " = 2.4/2.2 bar")
+    elseif type_fuel_cell == :ZSW_GenStack_Pa_2_8_Pc_2_6
+        return rich(prefix, "P", subscript("a"), "/P", subscript("c"), " = 2.8/2.6 bar")
+    elseif type_fuel_cell == :ZSW_GenStack_T_62
+        return prefix * "T = 62 °C"
+    elseif type_fuel_cell == :ZSW_GenStack_T_76
+        return prefix * "T = 76 °C"
+    elseif type_fuel_cell == :ZSW_GenStack_T_84
+        return prefix * "T = 84 °C"
+    elseif type_fuel_cell == :EH_31_1_5
+        return prefix * "P = 1.5 bar"
+    elseif type_fuel_cell == :EH_31_2_0
+        return prefix * "P = 2.0 bar"
+    elseif type_fuel_cell == :EH_31_2_25
+        return prefix * "P = 2.25 bar"
+    elseif type_fuel_cell == :EH_31_2_5
+        return prefix * "P = 2.5 bar"
+    end
+
+    return simulation ? "Simulation" : "Experiment"
+end
+
+"""Return an experimental marker style consistent with historical plotting conventions."""
+function _experimental_marker(type_fuel_cell::Symbol)::Symbol
+    if type_fuel_cell in (:ZSW_GenStack, :EH_31_1_5)
+        return :rect
+    elseif type_fuel_cell in (:ZSW_GenStack_Pa_1_61_Pc_1_41, :EH_31_2_0)
+        return :utriangle
+    elseif type_fuel_cell in (:ZSW_GenStack_Pa_2_01_Pc_1_81, :EH_31_2_25)
+        return :dtriangle
+    elseif type_fuel_cell in (:ZSW_GenStack_Pa_2_4_Pc_2_2, :EH_31_2_5)
+        return :pentagon
+    elseif type_fuel_cell == :ZSW_GenStack_Pa_2_8_Pc_2_6
+        return :diamond
+    elseif type_fuel_cell == :ZSW_GenStack_T_62
+        return :cross
+    elseif type_fuel_cell == :ZSW_GenStack_T_76
+        return :xcross
+    elseif type_fuel_cell == :ZSW_GenStack_T_84
+        return :star5
+    end
+    return :rect
+end
+
+"""Ensure polarization plots keep the OCV point visible at x = 0."""
+function _set_polarization_xlims!(ax, x_values::AbstractVector{<:Real})
+    xfinite = filter(isfinite, collect(x_values))
+    isempty(xfinite) && return nothing
+
+    xmin, xmax = extrema(xfinite)
+    xmin = min(0.0, xmin)
+    if xmin == xmax
+        delta = max(abs(xmin), 1.0) * 0.05
+        xmin -= delta
+        xmax += delta
+    else
+        margin = max((xmax - xmin) * 0.03, 1e-6)
+        xmin -= margin
+        xmax += margin
+    end
+    xlims!(ax, xmin, xmax)
+    return nothing
+end
+
+"""Apply fixed axis limits for polarization charts."""
+function _set_polarization_axis_limits!(ax)
+    xlims!(ax, 0.0, 3.0)
+    ylims!(ax, 0.4, 1.2)
+    return nothing
+end
+
+"""Apply fixed major ticks for polarization charts over full axis ranges.
+
+Uses larger major intervals than dense auto-ticks to keep figures readable."""
+function _set_polarization_fixed_ticks!(ax)
+    xticks = collect(0.0:0.5:3.0)
+    yticks = collect(0.4:0.1:1.2)
+    ax.xticks = xticks
+    ax.yticks = yticks
+    ax.xtickformat = _compact_tick_labels
+    ax.ytickformat = _compact_tick_labels
     return nothing
 end
 
@@ -184,6 +296,84 @@ end
 
 """Create a visual subscript label, e.g. lsub("T", "agc") -> T_agc (rendered with subscript)."""
 lsub(base::AbstractString, idx::AbstractString) = rich(base, subscript(idx))
+
+"""Clear dynamic axes and attached legends for live plot refresh."""
+function _clear_dynamic_axes!(items...)
+    figures = Figure[]
+
+    function _visit(item)
+        item === nothing && return nothing
+        if item isa Axis
+            empty!(item)
+            fig = item.parent
+            fig in figures || push!(figures, fig)
+        elseif item isa AbstractArray
+            foreach(_visit, item)
+        end
+        return nothing
+    end
+
+    foreach(_visit, items)
+
+    for fig in figures
+        for block in reverse(copy(fig.content))
+            block isa Legend && delete!(block)
+        end
+    end
+    return nothing
+end
+
+"""Return a coherent PDF export path with incremented index when needed."""
+function _resolve_pdf_export_path(folder_path::String,
+                                  filename::String)::String
+    stem, _suffix = splitext(filename)
+    candidate_stem = stem
+
+    if isfile(joinpath(folder_path, candidate_stem * ".pdf"))
+        stem_with_index = match(r"^(.*)_(\d+)$", stem)
+        prefix = stem_with_index === nothing ? stem : stem_with_index.captures[1]
+        counter = stem_with_index === nothing ? 1 : parse(Int, stem_with_index.captures[2]) + 1
+
+        while true
+            candidate_stem = "$(prefix)_$(counter)"
+            !isfile(joinpath(folder_path, candidate_stem * ".pdf")) && break
+            counter += 1
+        end
+    end
+
+    return joinpath(folder_path, candidate_stem * ".pdf")
+end
+
+"""Save a figure to the project results directory."""
+function saving_instructions!(_simu,
+                              root_folder::String,
+                              subfolder_name::String,
+                              filename::String,
+                              fig)
+    fig === nothing && return nothing
+
+    # Resolve current file and define repository markers to locate project root.
+    cur = abspath(@__FILE__)
+    markers = [".git", "Project.toml", "Manifest.toml", "README.md"]
+    project_root = nothing
+    parent = dirname(cur)
+    while true
+        any(ispath(joinpath(parent, m)) for m in markers) && (project_root = parent; break)
+        new_parent = dirname(parent)
+        new_parent == parent && break
+        parent = new_parent
+    end
+    # Fallback to current working directory if no marker found.
+    project_root === nothing && (project_root = pwd())
+
+    # Build destination folder under project root and create it.
+    folder_path = joinpath(project_root, root_folder, subfolder_name)
+    mkpath(folder_path)
+
+    pdf_path = _resolve_pdf_export_path(folder_path, filename)
+    save(pdf_path, fig; backend=CairoMakie)
+    return nothing
+end
 
 end # module PlotHelpers
 

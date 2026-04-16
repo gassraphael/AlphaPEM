@@ -15,6 +15,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 
 # Importing the necessary libraries.
 using DifferentialEquations
+using .PlotHelpers: _clear_dynamic_axes!, saving_instructions!
 
 
 # _______________________________________________________AlphaPEM_______________________________________________________
@@ -349,30 +350,6 @@ end
 # Returns
 - `Nothing`
 """
-function _clear_dynamic_axes!(items...)
-    figures = Figure[]
-
-    function _visit(item)
-        item === nothing && return nothing
-        if item isa Axis
-            empty!(item)
-            fig = item.parent
-            fig in figures || push!(figures, fig)
-        elseif item isa AbstractArray
-            foreach(_visit, item)
-        end
-        return nothing
-    end
-
-    foreach(_visit, items)
-
-    for fig in figures
-        for block in reverse(copy(fig.content))
-            block isa Legend && delete!(block)
-        end
-    end
-    return nothing
-end
 
 function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing)
     outputs = simu.outputs
@@ -554,71 +531,6 @@ function save_plot!(simu::AlphaPEM, _fig1=nothing, _fig2=nothing, _fig3=nothing)
         end
     end
 
-    return nothing
-end
-
-
-"""Return a coherent PDF export path with incremented index when needed."""
-function _resolve_pdf_export_path(folder_path::String,
-                                  filename::String)::String
-    stem, _suffix = splitext(filename)
-    candidate_stem = stem
-
-    if isfile(joinpath(folder_path, candidate_stem * ".pdf"))
-        stem_with_index = match(r"^(.*)_(\d+)$", stem)
-        prefix = stem_with_index === nothing ? stem : stem_with_index.captures[1]
-        counter = stem_with_index === nothing ? 1 : parse(Int, stem_with_index.captures[2]) + 1
-
-        while true
-            candidate_stem = "$(prefix)_$(counter)"
-            !isfile(joinpath(folder_path, candidate_stem * ".pdf")) && break
-            counter += 1
-        end
-    end
-
-    return joinpath(folder_path, candidate_stem * ".pdf")
-end
-
-
-"""Save a figure to the project results directory.
-
-# Arguments
-- `simu::AlphaPEM`: Fuel-cell simulator instance.
-- `root_folder::String`: Root folder for saving.
-- `subfolder_name::String`: Subfolder name for saving.
-- `filename::String`: Target filename.
-- `fig`: Figure object to save.
-
-# Returns
-- `Nothing`
-"""
-function saving_instructions!(_simu::AlphaPEM,
-                              root_folder::String,
-                              subfolder_name::String,
-                              filename::String,
-                              fig)
-    fig === nothing && return nothing
-
-    # Resolve current file and define repository markers to locate project root.
-    cur = abspath(@__FILE__)
-    markers = [".git", "Project.toml", "Manifest.toml", "README.md"]
-    project_root = nothing
-    parent = dirname(cur)
-    while true
-        any(ispath(joinpath(parent, m)) for m in markers) && (project_root = parent; break)
-        new_parent = dirname(parent)
-        new_parent == parent && break
-        parent = new_parent
-    end
-    # Fallback to current working directory if no marker found.
-    project_root === nothing && (project_root = pwd())
-
-    # Build destination folder under project root and create it.
-    folder_path = joinpath(project_root, root_folder, subfolder_name)
-    mkpath(folder_path)
-
-    pdf_path = _resolve_pdf_export_path(folder_path, filename)
-    save(pdf_path, fig; backend=CairoMakie)
     return nothing
 end
 
