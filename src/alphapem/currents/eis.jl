@@ -34,6 +34,7 @@ struct EISCurrent <: AbstractCurrent
     tf::Float64
     delta_t_break::Vector{Float64}
     delta_t_measurement::Vector{Float64}
+    phase_offsets::Vector{Float64}
     time_interval::Tuple{Float64, Float64}
 end
 
@@ -78,6 +79,13 @@ function EISCurrent(p::EISParams)
         end
     end
 
+    # Keep a continuous phase across frequency changes.
+    phase_offsets = zeros(Float64, p.nb_f)
+    for i in 2:p.nb_f
+        dt_prev = t_new_start[i] - t_new_start[i - 1]
+        phase_offsets[i] = phase_offsets[i - 1] + 2π * f[i - 1] * dt_prev
+    end
+
     return EISCurrent(
         Float64(p.i_EIS),
         Float64(p.ratio),
@@ -87,6 +95,7 @@ function EISCurrent(p::EISParams)
         tf,
         delta_t_break,
         delta_t_measurement,
+        phase_offsets,
         (0.0, tf)
     )
 end
@@ -112,8 +121,10 @@ function current(c::EISCurrent, t::Real)
     n_inf = searchsortedlast(c.t_new_start, t)
     n_inf = max(1, n_inf)  # Ensure index is at least 1
 
-    # Compute the sinusoidal perturbation for the current frequency
-    i_disruption = (c.ratio * c.i_EIS) * cos(2 * π * c.f[n_inf] * t)
+    # Segment-local phase with precomputed offset for continuity.
+    tau = t - c.t_new_start[n_inf]
+    phase = 2 * π * c.f[n_inf] * tau + c.phase_offsets[n_inf]
+    i_disruption = (c.ratio * c.i_EIS) * cos(phase)
 
     return c.i_EIS + i_disruption
 end
