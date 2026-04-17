@@ -46,24 +46,57 @@ function make_Fourier_transformation(outputs::SimulationOutputs,
     # Creation of the current density vector at the same time points as the cell voltage.
     ifc_t = current(cd, t)
 
-    # Identify the areas where Ucell and ifc can be measured for the EIS: after equilibrium and at each frequency change
-    t_new_start_EIS = cd.t_new_start
-    delta_t_break_EIS = cd.delta_t_break
-    delta_t_measurement_EIS = cd.delta_t_measurement
-    n_inf = findlast(t_new_start_EIS .<= t[1])  # Number of frequency changes already applied.
-    mask_EIS = (t .> (t[1] + delta_t_break_EIS[n_inf])) .& (t .< (t[1] + delta_t_break_EIS[n_inf] + delta_t_measurement_EIS[n_inf]))
-    Ucell_EIS_measured = Ucell_t[mask_EIS]
-    ifc_EIS_measured   = ifc_t[mask_EIS]
+    isempty(t) && return FourierOutputs(ComplexF64[], ComplexF64[], Float64[], NaN, Float64[], NaN, 0)
+
+    # Identify the active EIS segment for the current live run and keep only its measurement window.
+    n_inf = searchsortedlast(cd.t_new_start, t[1])
+    n_inf = clamp(n_inf, 1, length(cd.f))
+    t_start = cd.t_new_start[n_inf]
+    t_measure_start = t_start + cd.delta_t_break[n_inf]
+    t_measure_end = t_measure_start + cd.delta_t_measurement[n_inf]
+
+    mask_EIS = (t .>= t_measure_start) .& (t .<= t_measure_end)
+    t_measured = t[mask_EIS]
+    Ucell_measured = Ucell_t[mask_EIS]
+    ifc_measured = ifc_t[mask_EIS]
+
+    # Not enough raw samples yet to reconstruct one period at the target EIS resolution:
+    # return NaNs so dynamic plotting can safely skip this update.
+    min_raw_points = max(2, cd.nb_points)
+    if length(t_measured) < min_raw_points
+        return FourierOutputs(ComplexF64[], ComplexF64[], Float64[], NaN, Float64[], NaN, 0)
+    end
+
+    # FFT requires uniformly sampled data. Re-sample each segment using nb_points per period.
+    dt = 1.0 / (cd.f[n_inf] * cd.nb_points)
+    n_uniform = floor(Int, (t_measure_end - t_measure_start) / dt) + 1
+    n_uniform = max(n_uniform, cd.nb_points + 1)
+    t_uniform = collect(range(t_measure_start, stop=t_measure_end, length=n_uniform))
+
+    itp_U = linear_interpolation(t_measured, Ucell_measured; extrapolation_bc=Line())
+    itp_i = linear_interpolation(t_measured, ifc_measured; extrapolation_bc=Line())
+    Ucell_EIS_measured = itp_U.(t_uniform)
+    ifc_EIS_measured = itp_i.(t_uniform)
 
     # Determination of the Fourier transformation
     N             = length(Ucell_EIS_measured)              # Number of points used for the Fourier transformation
-    Ucell_Fourier = fft(Ucell_EIS_measured)                  # Ucell Fourier transformation
-    ifc_Fourier   = fft(ifc_EIS_measured)                    # ifc Fourier transformation
-    A_period_t    = vcat([abs(Ucell_Fourier[1]) / N],        # Recovery of all amplitude values calculated by fft
+    Ucell_Fourier = fft(Ucell_EIS_measured)                 # Ucell Fourier transformation
+    ifc_Fourier   = fft(ifc_EIS_measured)                   # ifc Fourier transformation
+    A_period_t    = vcat([abs(Ucell_Fourier[1]) / N],       # Recovery of all amplitude values calculated by fft
                           abs.(Ucell_Fourier[2:N÷2]) .* 2 ./ N)
-    A      = maximum(A_period_t[2:end])                      # Amplitude at the frequency of the perturbation
-    freq_t = fftfreq(N)[1:N÷2]                              # Recovery of all frequency values used by fft
-    f      = freq_t[findfirst(A_period_t .== A)]             # Recovery of the studied frequency
+
+    # Ignore the DC component when searching the perturbation amplitude.
+    if length(A_period_t) <= 1
+        return FourierOutputs(ComplexF64.(Ucell_Fourier), ComplexF64.(ifc_Fourier), Float64.(A_period_t), NaN, Float64[], NaN, N)
+    end
+
+    idx_A_local = argmax(@view A_period_t[2:end])
+    idx_A = idx_A_local + 1
+    A = A_period_t[idx_A]
+
+    dt_uniform = t_uniform[2] - t_uniform[1]
+    freq_t = collect(0:(N ÷ 2 - 1)) ./ (N * dt_uniform)    # Frequencies in Hz associated with FFT bins
+    f = freq_t[idx_A]
 
     return FourierOutputs(
         ComplexF64.(Ucell_Fourier),
@@ -179,6 +212,3 @@ function round_nice(x)
     end
     return nice * 10^exp
 end
-
-
-

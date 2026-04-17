@@ -853,14 +853,19 @@ function plot_EIS_curve_Nyquist(cd::AbstractCurrent,
                                 Fourier_results::FourierOutputs,
                                 ax)
     Z_real, minus_Z_imag, _f, _abs_Z, _phi = _eis_point(cd, Fourier_results)
-    scatter!(ax, [Z_real], [minus_Z_imag]; color=_publication_colors()[1], markersize=8, label="Nyquist")
-    _set_dense_ticks!(ax, [Z_real], [[minus_Z_imag]])
+    isfinite(Z_real) && isfinite(minus_Z_imag) || return nothing
+
+    scatter!(ax, [Z_real], [minus_Z_imag];
+             color=_publication_colors()[1], markersize=7,
+             strokecolor=:white, strokewidth=0.4)
+
+    # Keep Nyquist geometry visually correct for publication use.
+    ax.aspect = DataAspect()
     _finalize_axis!(ax;
                     xlabel=rich("Real impedance ", lsub("Z", "real"), " (mΩ·cm²)"),
                     ylabel=rich("Imaginary impedance ", rich("-", lsub("Z", "imag")), " (mΩ·cm²)"),
                     title="EIS - Nyquist",
-                    legend=true,
-                    legend_position=:rb)
+                    legend=false)
     return nothing
 end
 
@@ -870,14 +875,18 @@ function plot_EIS_curve_Bode_amplitude(cd::AbstractCurrent,
                                        Fourier_results::FourierOutputs,
                                        ax)
     _Z_real, _minus_Z_imag, f, abs_Z, _phi = _eis_point(cd, Fourier_results)
-    scatter!(ax, [f], [abs_Z]; color=_publication_colors()[2], markersize=8, label="Bode amplitude")
-    _set_dense_ticks!(ax, [f], [[abs_Z]])
+    isfinite(f) && isfinite(abs_Z) || return nothing
+
+    scatter!(ax, [f], [abs_Z];
+             color=_publication_colors()[2], markersize=7,
+             strokecolor=:white, strokewidth=0.4)
+
+    ax.xscale = log10
     _finalize_axis!(ax;
                     xlabel=rich("Frequency ", lsub("f", ""), " (Hz)"),
                     ylabel=rich("Impedance amplitude ", lsub("|Z|", ""), " (mΩ·cm²)"),
                     title="EIS - Bode amplitude",
-                    legend=true,
-                    legend_position=:rb)
+                    legend=false)
     return nothing
 end
 
@@ -887,14 +896,18 @@ function plot_EIS_curve_Bode_angle(cd::AbstractCurrent,
                                    Fourier_results::FourierOutputs,
                                    ax)
     _Z_real, _minus_Z_imag, f, _abs_Z, phi_deg = _eis_point(cd, Fourier_results)
-    scatter!(ax, [f], [phi_deg]; color=_publication_colors()[3], markersize=8, label="Bode phase")
-    _set_dense_ticks!(ax, [f], [[phi_deg]])
+    isfinite(f) && isfinite(phi_deg) || return nothing
+
+    scatter!(ax, [f], [phi_deg];
+             color=_publication_colors()[3], markersize=7,
+             strokecolor=:white, strokewidth=0.4)
+
+    ax.xscale = log10
     _finalize_axis!(ax;
                     xlabel=rich("Frequency ", lsub("f", ""), " (Hz)"),
                     ylabel=rich("Phase ", lsub("ϕ", ""), " (°)"),
                     title="EIS - Bode phase",
-                    legend=true,
-                    legend_position=:rb)
+                    legend=false)
     return nothing
 end
 

@@ -356,7 +356,8 @@ function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing)
     outputs === nothing && throw(ArgumentError("display! requires available simulation outputs. Run simulate_model! first."))
     simu.cfg.type_display == :no_display && return nothing
 
-    simu.cfg.display_timing == :live && _clear_dynamic_axes!(_ax1, _ax2, _ax3)
+    simu.cfg.display_timing == :live && !(simu.cfg.type_current isa EISParams) &&
+        _clear_dynamic_axes!(_ax1, _ax2, _ax3)
 
     if simu.cfg.type_current isa StepParams
         if simu.cfg.type_display == :synthetic && _ax1 !== nothing

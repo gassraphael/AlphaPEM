@@ -24,6 +24,7 @@ perturbation is applied with varying frequencies.
 - `tf::Float64`: Final simulation time (s)
 - `delta_t_break::Vector{Float64}`: Stabilization durations (s)
 - `delta_t_measurement::Vector{Float64}`: Measurement durations (s)
+- `nb_points::Int`: Target points per period for EIS processing
 """
 struct EISCurrent <: AbstractCurrent
     i_EIS::Float64
@@ -34,6 +35,7 @@ struct EISCurrent <: AbstractCurrent
     tf::Float64
     delta_t_break::Vector{Float64}
     delta_t_measurement::Vector{Float64}
+    nb_points::Int
     phase_offsets::Vector{Float64}
     time_interval::Tuple{Float64, Float64}
 end
@@ -95,6 +97,7 @@ function EISCurrent(p::EISParams)
         tf,
         delta_t_break,
         delta_t_measurement,
+        p.nb_points,
         phase_offsets,
         (0.0, tf)
     )
