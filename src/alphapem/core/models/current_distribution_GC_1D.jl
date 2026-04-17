@@ -66,13 +66,13 @@ function calculate_1D_GC_current_density(i_fc_cell::Float64, sv::AbstractVector{
     # Calculation of the 1D GC current density by solving the system of equations defined by the residuals function
     # using NonlinearSolve with Levenberg-Marquardt
     #       Initial guesses
-    x0 = Vector(undef, 2 * nb_gc + 1)
+    x0 = Vector{Float64}(undef, 2 * nb_gc + 1)
     x0[1]            = calculate_cell_voltage(i_fc_cell, C_O2_ccl[1], sv[1], fc)
     x0[2:nb_gc+1]   .= i_fc_cell
     x0[nb_gc+2:2*nb_gc+1] = C_O2_ccl
     #       Solver call
     prob = NonlinearProblem(residuals!, x0, nothing)
-    sol  = solve(prob, LevenbergMarquardt())
+    sol  = solve(prob, LevenbergMarquardt(); abstol=1e-6, reltol=1e-6, maxiters=400)
 
     #       Check for convergence
     if !successful_retcode(sol.retcode)

@@ -23,7 +23,7 @@ Returns
 Float64
     The cell voltage in volt.
 """
-function calculate_cell_voltage(i_fc::Float64, C_O2_Pt::Float64, sv::CellState1D, fc::AbstractFuelCell)::Float64
+function calculate_cell_voltage(i_fc::Real, C_O2_Pt::Real, sv::CellState1D, fc::AbstractFuelCell)
 
     # Extraction of the variables
     lambda_mem, lambda_ccl = sv.mem.lambda, sv.ccl.lambda

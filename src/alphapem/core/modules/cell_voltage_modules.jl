@@ -26,9 +26,9 @@ Sources
 1. Liang Hao - Article 2015 - Modeling and Experimental Validation of Pt Loading and Electrode Composition Effects
 in PEM Fuel Cells.
 """
-function calculate_C_O2_Pt(i_fc::Float64,
+function calculate_C_O2_Pt(i_fc::Real,
                            sv::CellState1D,
-                           fc::AbstractFuelCell)::Float64
+                           fc::AbstractFuelCell)
 
     # Extraction of the variables (typed access via CellState1D struct fields)
     s_ccl      = sv.ccl.s
