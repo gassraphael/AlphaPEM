@@ -17,7 +17,7 @@ current_params = StepParams(
     delta_t_load = 30.0,         # (s). Loading time for the step current density function, from 0 to i_step.
     delta_t_break = 2.0 * 60.0,  # (s). Time at i_step current density for the stabilisation of the internal states.
     i_ini = 1.0e4,               # (A.m-2). Initial current density for the step current density function.
-    i_step = 2.0e4               # (A.m-2). Current density for the step current density function.
+    i_step = 1.5e4               # (A.m-2). Current density for the step current density function.
 )
 
 cfg = SimulationConfig(

@@ -95,6 +95,8 @@ function plot_lambda_1D_temporal(outputs::SimulationOutputs,
                                  cfg::SimulationConfig,
                                  ax)
     palette = _publication_colors()
+    nb_gc = fc.numerical_parameters.nb_gc
+    mid_gc = middle_gas_channel_index(fc)
     if cfg.display_timing == :postrun && cfg.type_current isa Union{PolarizationParams, PolarizationCalibrationParams}
         t_hist = time_history(outputs)
         sample_indices = polarisation_sampling_indices(outputs, cd)
@@ -120,12 +122,23 @@ function plot_lambda_1D_temporal(outputs::SimulationOutputs,
                color=palette[3], label=lsub("λ", "acl"))
         lines!(ax, t, extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.mem.lambda);
                color=palette[4], label=lsub("λ", "mem"))
-        lines!(ax, t, extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ccl.lambda);
-               color=palette[5], label=lsub("λ", "ccl"))
+        lambda_ccl_in_t = extract_masked_mea_series(outputs, 1, cd, cfg, mea -> mea.ccl.lambda)
+        lambda_ccl_mid_t = extract_masked_mea_series(outputs, mid_gc, cd, cfg, mea -> mea.ccl.lambda)
+        lambda_ccl_out_t = extract_masked_mea_series(outputs, nb_gc, cd, cfg, mea -> mea.ccl.lambda)
+        lines!(ax, t, lambda_ccl_in_t;
+               color=palette[5], linestyle=:dash, label=lsub("λ", "ccl,in"))
+        mid_gc != 1 && mid_gc != nb_gc &&
+            lines!(ax, t, lambda_ccl_mid_t;
+                   color=palette[5], linestyle=:solid, label=lsub("λ", "ccl,mid"))
+        nb_gc != 1 &&
+            lines!(ax, t, lambda_ccl_out_t;
+                   color=palette[5], linestyle=:dot, label=lsub("λ", "ccl,out"))
         lambda_acl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.acl.lambda)
         lambda_mem_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.mem.lambda)
-        lambda_ccl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ccl.lambda)
-        _set_dense_ticks!(ax, t, [lambda_acl_t, lambda_mem_t, lambda_ccl_t])
+        y_series = [lambda_acl_t, lambda_mem_t, lambda_ccl_in_t]
+        mid_gc != 1 && mid_gc != nb_gc && push!(y_series, lambda_ccl_mid_t)
+        nb_gc != 1 && push!(y_series, lambda_ccl_out_t)
+        _set_dense_ticks!(ax, t, y_series)
         _finalize_axis!(ax;
                         xlabel=rich("Time ", lsub("t", ""), " (s)"),
                         ylabel=rich("Water content ", lsub("λ", ""), " (-)"),
@@ -238,30 +251,43 @@ function plot_C_O2_1D_temporal(outputs::SimulationOutputs,
     palette = _publication_colors()
     nb_gdl_mid = middle_gdl_index(fc)
     nb_mpl_mid = middle_mpl_index(fc)
+    nb_gc = fc.numerical_parameters.nb_gc
+    mid_gc = middle_gas_channel_index(fc)
     t = masked_time_history(outputs, cd, cfg)
 
-    lines!(ax, t, extract_masked_mid_derived_gc_series(outputs, fc, cd, cfg, x -> x.C_O2_Pt);
+    C_O2_Pt_t = extract_masked_mid_derived_gc_series(outputs, fc, cd, cfg, x -> x.C_O2_Pt)
+    lines!(ax, t, C_O2_Pt_t;
            color=palette[10], label=lsub("C", "O₂,Pt"))
     lines!(ax, t, extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ccl.C_O2);
-           color=palette[4], label=lsub("C", "O₂,ccl"))
+           color=palette[5], label=lsub("C", "O₂,ccl"))
     lines!(ax, t, extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cmpl[nb_mpl_mid].C_O2);
-           color=palette[5], label=lsub("C", "O₂,cmpl"))
+           color=palette[6], label=lsub("C", "O₂,cmpl"))
     lines!(ax, t, extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgdl[nb_gdl_mid].C_O2);
-           color=palette[6], label=lsub("C", "O₂,cgdl"))
-    lines!(ax, t, extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.C_O2);
-           color=palette[7], label=lsub("C", "O₂,cgc"))
+           color=palette[7], label=lsub("C", "O₂,cgdl"))
+    C_O2_cgc_in_t = extract_masked_mea_series(outputs, 1, cd, cfg, mea -> mea.cgc.C_O2)
+    C_O2_cgc_mid_t = extract_masked_mea_series(outputs, mid_gc, cd, cfg, mea -> mea.cgc.C_O2)
+    C_O2_cgc_out_t = extract_masked_mea_series(outputs, nb_gc, cd, cfg, mea -> mea.cgc.C_O2)
+    lines!(ax, t, C_O2_cgc_in_t;
+           color=palette[8], linestyle=:dash, label=lsub("C", "O₂,cgc,in"))
+    mid_gc != 1 && mid_gc != nb_gc &&
+        lines!(ax, t, C_O2_cgc_mid_t;
+               color=palette[8], linestyle=:solid, label=lsub("C", "O₂,cgc,mid"))
+    nb_gc != 1 &&
+        lines!(ax, t, C_O2_cgc_out_t;
+               color=palette[8], linestyle=:dot, label=lsub("C", "O₂,cgc,out"))
 
-    C_O2_Pt_t = extract_masked_mid_derived_gc_series(outputs, fc, cd, cfg, x -> x.C_O2_Pt)
     C_O2_ccl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ccl.C_O2)
     C_O2_cmpl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cmpl[nb_mpl_mid].C_O2)
     C_O2_cgdl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgdl[nb_gdl_mid].C_O2)
-    C_O2_cgc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.C_O2)
-    _set_dense_ticks!(ax, t, [C_O2_Pt_t, C_O2_ccl_t, C_O2_cmpl_t, C_O2_cgdl_t, C_O2_cgc_t])
+    y_series = [C_O2_Pt_t, C_O2_ccl_t, C_O2_cmpl_t, C_O2_cgdl_t, C_O2_cgc_in_t]
+    mid_gc != 1 && mid_gc != nb_gc && push!(y_series, C_O2_cgc_mid_t)
+    nb_gc != 1 && push!(y_series, C_O2_cgc_out_t)
+    _set_dense_ticks!(ax, t, y_series)
     _finalize_axis!(ax;
                     xlabel=rich("Time ", lsub("t", ""), " (s)"),
                     ylabel=rich("Oxygen concentration ", lsub("C", "O₂"), " (mol·m⁻³)"),
                     legend=true,
-                    legend_position=:lb)
+                    legend_position=:lt)
     return nothing
 end
 
