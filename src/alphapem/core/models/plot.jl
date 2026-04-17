@@ -1028,15 +1028,17 @@ function plot_T_pseudo_2D_final(outputs::SimulationOutputs,
         x_labels_rich = [rich("x", subscript("$(i)")) for i in 1:n_cols]
     end
 
-     # Build Y-axis labels with flow type annotation on the first row
-     y_labels_rich = Any[]
-     flow_label = cfg.type_flow == :counter_flow ?
-         rich("cathode inlet\n(counter-flow)") :
-         rich("inlet\n(co-flow)")
-     push!(y_labels_rich, flow_label)
-     for i in 2:n_rows
-         push!(y_labels_rich, string(i))
-     end
+    # Build Y-axis labels: annotate the two extremities while keeping numeric labels inside.
+    y_labels_rich = Any[string(i) for i in 1:n_rows]
+    if n_rows == 1
+        y_labels_rich[1] = rich("1 layer")
+    elseif cfg.type_flow == :counter_flow
+        y_labels_rich[1] = rich("cathode inlet\n(counter-flow)")
+        y_labels_rich[end] = rich("anode inlet\n(counter-flow)")
+    else
+        y_labels_rich[1] = rich("inlet\n(co-flow)")
+        y_labels_rich[end] = rich("outlet\n(co-flow)")
+    end
 
     ax.xticks = (1:length(x_labels_rich), x_labels_rich)
     ax.yticks = (1:n_rows, y_labels_rich)
