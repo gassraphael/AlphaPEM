@@ -41,11 +41,29 @@ function plot_ifc_1D_temporal(outputs::SimulationOutputs,
     end
     i_fc_series = [extract_masked_derived_gc_series(outputs, i, cd, cfg, x -> x.i_fc) ./ 1e4 for i in 1:nb_gc]
     _set_dense_ticks!(ax, t, vcat([i_fc_cell_t], i_fc_series))
-    _finalize_axis!(ax;
-                    xlabel=rich("Time ", lsub("t", ""), " (s)"),
-                    ylabel=rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"),
-                    legend=true,
-                    legend_position=:lb)
+
+     _finalize_axis!(ax;
+                     xlabel=rich("Time ", lsub("t", ""), " (s)"),
+                     ylabel=rich("Current density ", rich(lsub("i", "fc"), "\n"), " (A·cm⁻²)"),
+                     legend=true,
+                     legend_position=:lb)
+
+    # Add flow configuration annotation in bottom-right corner
+    flow_note = cfg.type_flow == :counter_flow ?
+        rich(lsub("i", "fc,1"), " = cathode inlet\n(counter-flow)") :
+        rich(lsub("i", "fc,1"), " = inlet\n(co-flow)")
+    pad_x = 0.012f0
+    box_h = 0.130f0
+    box_w = clamp(0.29f0, 0.22f0, 0.36f0)
+    x_right = 0.975f0
+    x_left = x_right - box_w
+    y_bottom = 0.002f0
+    poly!(ax, Rect2f(x_left, y_bottom, box_w, box_h);
+          color=(:white, 0.92), strokecolor=(:black, 0.75), strokewidth=0.5, space=:relative)
+    text!(ax, x_left + pad_x, y_bottom + box_h / 2;
+          text=flow_note,
+          align=(:left, :center), space=:relative, color=:black, fontsize=11)
+
     return nothing
 end
 
@@ -949,7 +967,8 @@ on `ax.parent`, which is more fragile when the figure grid changes.
 function plot_T_pseudo_2D_final(outputs::SimulationOutputs,
                                 fc::AbstractFuelCell,
                                 fig,
-                                ax)
+                                ax,
+                                cfg::SimulationConfig)
     temp_matrix = final_temperature_matrix_celsius(outputs)
     n_rows, n_cols = size(temp_matrix)
     nb_gdl = fc.numerical_parameters.nb_gdl
@@ -1008,11 +1027,22 @@ function plot_T_pseudo_2D_final(outputs::SimulationOutputs,
         # Safe fallback in case matrix geometry and expected stack differ.
         x_labels_rich = [rich("x", subscript("$(i)")) for i in 1:n_cols]
     end
+
+     # Build Y-axis labels with flow type annotation on the first row
+     y_labels_rich = Any[]
+     flow_label = cfg.type_flow == :counter_flow ?
+         rich("cathode inlet\n(counter-flow)") :
+         rich("inlet\n(co-flow)")
+     push!(y_labels_rich, flow_label)
+     for i in 2:n_rows
+         push!(y_labels_rich, string(i))
+     end
+
     ax.xticks = (1:length(x_labels_rich), x_labels_rich)
-    ax.yticks = (1:n_rows, string.(1:n_rows))
+    ax.yticks = (1:n_rows, y_labels_rich)
     ax.xticklabelrotation = π / 3
     ax.xticklabelsize = 10
-    ax.yticklabelsize = 11
+    ax.yticklabelsize = 10
 
     # Add a temperature scale to compare values across the 2D map.
     cbar_ticks = _colorbar_ticks_auto(tmin, tmax)
@@ -1020,22 +1050,21 @@ function plot_T_pseudo_2D_final(outputs::SimulationOutputs,
              label=rich("Temperature ", lsub("T", ""), " (°C)"),
              ticks=cbar_ticks)
 
-
-    T_des = fc.operating_conditions.T_des - 273.15
-    T_des_round = round(T_des; digits=1)
-    # White boxed annotation for readability, tightly fitted around the text.
-    t_des_plain = "T_des = $(T_des_round) °C"
-    pad_x = 0.012f0
-    box_h = 0.060f0
-    box_w = clamp(0.0096f0 * length(t_des_plain) + 2f0 * pad_x, 0.17f0, 0.27f0)
-    x_right = 0.985f0
-    x_left = x_right - box_w
-    y_bottom = 0.008f0
-    poly!(ax, Rect2f(x_left, y_bottom, box_w, box_h);
-          color=(:white, 0.92), strokecolor=(:black, 0.75), strokewidth=0.8, space=:relative)
-    text!(ax, x_left + pad_x, y_bottom + box_h / 2;
-          text=rich("T", subscript("des"), " = $(T_des_round) °C"),
-          align=(:left, :center), space=:relative, color=:black)
+     T_des = fc.operating_conditions.T_des - 273.15
+     T_des_round = round(T_des; digits=1)
+     # White boxed annotation for readability, tightly fitted around the text.
+     t_des_plain = "T_des = $(T_des_round) °C"
+     pad_x = 0.012f0
+     box_h = 0.060f0
+     box_w = clamp(0.0096f0 * length(t_des_plain) + 2f0 * pad_x, 0.20f0, 0.32f0)
+     x_right = 0.985f0
+     x_left = x_right - box_w
+     y_bottom_text = 0.008f0
+     poly!(ax, Rect2f(x_left, y_bottom_text, box_w, box_h);
+           color=(:white, 0.92), strokecolor=(:black, 0.75), strokewidth=0.8, space=:relative)
+     text!(ax, x_left + pad_x, y_bottom_text + box_h / 2;
+           text=rich("T", subscript("des"), " = $(T_des_round) °C"),
+           align=(:left, :center), space=:relative, color=:black)
     return nothing
 end
 

@@ -94,6 +94,12 @@ function simulate_model!(simu::AlphaPEM,
         println("Warning: auxiliaries were temporarily removed; \"no_auxiliary\" is automatically used.\n")
     end
 
+    # Flow configuration warning for ZSW fuel cells with co_flow.
+    if contains(string(typeof(simu.fuel_cell)), "ZSWFuelCell") && simu.cfg.type_flow == :co_flow
+        @warn "ZSWFuelCell with standard operating conditions typically requires counter-flow configuration for optimal performance. " *
+              "Consider setting type_flow = :counter_flow in SimulationConfig."
+    end
+
     if simu.fuel_cell.operating_conditions.Pa_des < Pext || simu.fuel_cell.operating_conditions.Pc_des < Pext
         throw(ArgumentError("The desired pressure is too low. It cannot be lower than the pressure outside the stack."))
     end
@@ -374,7 +380,7 @@ function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing)
             plot_P_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[3, 3])
 
             if simu.cfg.display_timing == :postrun && _ax2 !== nothing
-                plot_T_pseudo_2D_final(outputs, simu.fuel_cell, _ax2.parent, _ax2)
+                plot_T_pseudo_2D_final(outputs, simu.fuel_cell, _ax2.parent, _ax2, simu.cfg)
             end
         elseif simu.cfg.type_display == :multiple && _ax1 isa AbstractVector && length(_ax1) >= 14
             # Multiple mode: one figure per internal-state plot.
@@ -394,7 +400,7 @@ function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing)
             plot_Re_nb_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[14])
 
             if simu.cfg.display_timing == :postrun && _ax2 !== nothing
-                plot_T_pseudo_2D_final(outputs, simu.fuel_cell, _ax2.parent, _ax2)
+                plot_T_pseudo_2D_final(outputs, simu.fuel_cell, _ax2.parent, _ax2, simu.cfg)
             end
         end
     elseif simu.cfg.type_current isa PolarizationParams

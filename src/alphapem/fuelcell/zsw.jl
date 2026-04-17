@@ -385,7 +385,7 @@ end
 function zsw_numerical_params()
     return NumericalParams(
         # Setting the number of model points placed inside each layer:
-        nb_gc = 10,                             # Number of model nodes placed inside each gas channel
+        nb_gc = 5,                             # Number of model nodes placed inside each gas channel
         nb_gdl = 3,                            # Number of model nodes placed inside each GDL
         nb_mpl = 2,                            # Number of model nodes placed inside each MPL
         nb_man = 1,                            # Number of model nodes placed inside each manifold line

@@ -34,6 +34,7 @@ Base.@kwdef mutable struct SimulationConfig{T<:AbstractCurrentParams}
     type_current::T = PolarizationParams()
     voltage_zone::Symbol = :full
     type_auxiliary::Symbol = :no_auxiliary
+    type_flow::Symbol = :counter_flow
     type_purge::Symbol = :no_purge
     type_display::Symbol = :synthetic
     display_timing::Symbol=:postrun
@@ -57,6 +58,11 @@ const ALLOWED_AUXILIARY = (
     :forced_convective_cathode_with_anodic_recirculation,
     :forced_convective_cathode_with_flow_through_anode,
     :no_auxiliary
+)
+
+const ALLOWED_FLOW = (
+    :co_flow,
+    :counter_flow,
 )
 
 const ALLOWED_PURGE = (
@@ -88,6 +94,9 @@ function validate_config(cfg::SimulationConfig)
 
     cfg.type_auxiliary in ALLOWED_AUXILIARY ||
         error("Invalid type_auxiliary: $(cfg.type_auxiliary)")
+
+    cfg.type_flow in ALLOWED_FLOW ||
+        error("Invalid type_flow: $(cfg.type_flow)")
 
     cfg.type_purge in ALLOWED_PURGE ||
         error("Invalid type_purge: $(cfg.type_purge)")
