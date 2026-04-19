@@ -361,6 +361,10 @@ function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing)
     outputs = simu.outputs
     outputs === nothing && throw(ArgumentError("display! requires available simulation outputs. Run simulate_model! first."))
     simu.cfg.type_display == :no_display && return nothing
+    nb_gc = simu.fuel_cell.numerical_parameters.nb_gc
+    has_extended_gc_profiles = nb_gc >= 3
+    is_postrun_display = simu.cfg.display_timing == :postrun
+    can_plot_extended_gc_postrun = has_extended_gc_profiles && is_postrun_display
 
     simu.cfg.display_timing == :live && !(simu.cfg.type_current isa EISParams) &&
         _clear_dynamic_axes!(_ax1, _ax2, _ax3)
@@ -379,7 +383,8 @@ function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing)
             plot_C_O2_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[3, 2])
             plot_P_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[3, 3])
 
-            if simu.cfg.display_timing == :postrun && _ax2 isa AbstractMatrix && size(_ax2, 1) >= 2 && size(_ax2, 2) >= 2
+            if (can_plot_extended_gc_postrun &&
+                _ax2 isa AbstractMatrix && size(_ax2, 1) >= 2 && size(_ax2, 2) >= 2)
                 plot_T_pseudo_2D_final(outputs, simu.fuel_cell, _ax2[1, 1].parent, _ax2[1, 1], simu.cfg)
                 plot_ifc_GC_final(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax2[1, 2])
                 plot_C_O2_Pt_GC_final(outputs, simu.fuel_cell, simu.cfg, _ax2[2, 1])
@@ -402,7 +407,7 @@ function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing)
             plot_v_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[13])
             plot_Re_nb_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[14])
 
-            if simu.cfg.display_timing == :postrun && _ax2 !== nothing
+            if can_plot_extended_gc_postrun && _ax2 !== nothing
                 plot_T_pseudo_2D_final(outputs, simu.fuel_cell, _ax2.parent, _ax2, simu.cfg)
                 if _ax3 isa AbstractVector && length(_ax3) >= 3
                     plot_ifc_GC_final(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax3[1])
@@ -475,6 +480,10 @@ The output filenames depend on the current profile and on the selected display m
 """
 function save_plot!(simu::AlphaPEM, _fig1=nothing, _fig2=nothing, _fig3=nothing)
     simu.outputs === nothing && throw(ArgumentError("save_plot! requires available simulation outputs. Run simulate_model! first."))
+    nb_gc = simu.fuel_cell.numerical_parameters.nb_gc
+    has_extended_gc_profiles = nb_gc >= 3
+    is_postrun_display = simu.cfg.display_timing == :postrun
+    can_save_extended_gc_postrun = has_extended_gc_profiles && is_postrun_display
 
     # Folder name.
     subfolder_name = String(split(String(simu.cfg.type_fuel_cell), '_')[1])
@@ -483,8 +492,9 @@ function save_plot!(simu::AlphaPEM, _fig1=nothing, _fig2=nothing, _fig3=nothing)
     if simu.cfg.type_current isa StepParams
         if simu.cfg.type_display == :synthetic
             saving_instructions!(simu, "results", subfolder_name, "step_current_syn_1.pdf", _fig1)
-            simu.cfg.display_timing == :postrun &&
+            if can_save_extended_gc_postrun
                 saving_instructions!(simu, "results", subfolder_name, "final_GC_profiles_1.pdf", _fig2)
+            end
         elseif simu.cfg.type_display == :multiple && _fig1 isa AbstractVector
             # Multiple mode: one file per internal-state plot.
             step_files = [
@@ -506,13 +516,14 @@ function save_plot!(simu::AlphaPEM, _fig1=nothing, _fig2=nothing, _fig3=nothing)
             for (fig_i, filename) in zip(_fig1, step_files)
                 saving_instructions!(simu, "results", subfolder_name, filename, fig_i)
             end
-            simu.cfg.display_timing == :postrun &&
+            if can_save_extended_gc_postrun
                 saving_instructions!(simu, "results", subfolder_name, "final_temperature_map_and_current_GC_1.pdf", _fig2)
-            if simu.cfg.display_timing == :postrun && _fig3 isa AbstractVector && length(_fig3) >= 3
+            end
+            if can_save_extended_gc_postrun && _fig3 isa AbstractVector && length(_fig3) >= 3
                 saving_instructions!(simu, "results", subfolder_name, "ifc_GC_final_1.pdf", _fig3[1])
                 saving_instructions!(simu, "results", subfolder_name, "CO2_Pt_GC_final_1.pdf", _fig3[2])
                 saving_instructions!(simu, "results", subfolder_name, "lambda_mem_GC_final_1.pdf", _fig3[3])
-            elseif simu.cfg.display_timing == :postrun
+            elseif can_save_extended_gc_postrun
                 saving_instructions!(simu, "results", subfolder_name, "ifc_GC_final_1.pdf", _fig3)
             end
         end

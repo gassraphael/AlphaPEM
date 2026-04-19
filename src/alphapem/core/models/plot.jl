@@ -11,11 +11,10 @@ using .PlotHelpers: _publication_colors,
                     _set_polarization_axis_limits!,
                     _set_polarization_fixed_ticks!,
                     _format_fixed,
-                    _compact_tick_labels,
                     _nice_tick_step,
                     _colorbar_ticks_auto,
-                    _rounded_major_ticks,
                     _set_dense_ticks!,
+                    _plot_final_profile_along_gc!,
                     gc_direction_labels,
                     lsub
 
@@ -961,47 +960,6 @@ end
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-"""Plot one final profile along the gas channel with the publication GC style."""
-function _plot_final_profile_along_gc!(ax,
-                                       x_gc::AbstractVector{<:Real},
-                                       y_final::AbstractVector{<:Real},
-                                       cfg::SimulationConfig;
-                                       color,
-                                       series_label,
-                                       ylabel,
-                                       reference_value=nothing,
-                                       reference_label=nothing,
-                                       legend_position=:rt)
-    lines!(ax, x_gc, y_final; color=color, linewidth=2.8, label=series_label)
-    scatter!(ax, x_gc, y_final; color=color, markersize=8)
-
-    has_reference = reference_value !== nothing && isfinite(reference_value)
-    if has_reference
-        lines!(ax, [first(x_gc), last(x_gc)], [reference_value, reference_value];
-               color=:black, linestyle=:dash, linewidth=2.0,
-               label=reference_label)
-    end
-
-    y_finite = filter(isfinite, has_reference ? vcat(collect(y_final), [reference_value]) : collect(y_final))
-    if !isempty(y_finite)
-        ymin, ymax = extrema(y_finite)
-        ymin == ymax && (delta = max(abs(ymin), 1.0) * 0.05; ymin -= delta; ymax += delta)
-        ax.yticks = _rounded_major_ticks(ymin, ymax)
-        ax.ytickformat = _compact_tick_labels
-    end
-
-    _finalize_axis!(ax;
-                    xlabel=rich("Through gas-channel"; font=:bold),
-                    ylabel=ylabel,
-                    legend=true,
-                    legend_position=legend_position)
-
-    ax.xticks = (x_gc, gc_direction_labels(cfg, length(x_gc); triple_break_cathode_inlet=true))
-    ax.xticklabelrotation = π / 10
-    ax.xticklabelsize = 10
-    ax.xminorticksvisible = false
-    return nothing
-end
 
 """Plot the final current-density distribution along the gas channel."""
 function plot_ifc_GC_final(outputs::SimulationOutputs,
