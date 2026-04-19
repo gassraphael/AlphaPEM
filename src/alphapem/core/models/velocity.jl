@@ -223,7 +223,7 @@ function calculate_velocity_evolution(sv::AbstractVector{<:CellState1D}, i_fc_ce
     #       Solver call
     prob = NonlinearProblem(residuals!, x0)
     solver = NewtonRaphson(linesearch = LineSearchesJL(; method=LineSearches.BackTracking()))
-    sol = solve(prob, solver; abstol=1e-10, reltol=1e-10, maxiters=200)
+    sol = solve(prob, solver; abstol=1e-10, reltol=1e-10, maxiters=300)
 
     #       Check for convergence
     if !SciMLBase.successful_retcode(sol)

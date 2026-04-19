@@ -957,9 +957,51 @@ function plot_EIS_curve_Bode_angle(cd::AbstractCurrent,
 end
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  Final GC Current and Thermal Maps
+#  Final GC Maps and Profiles
 # ═══════════════════════════════════════════════════════════════════════════════
 
+
+"""Plot one final profile along the gas channel with the publication GC style."""
+function _plot_final_profile_along_gc!(ax,
+                                       x_gc::AbstractVector{<:Real},
+                                       y_final::AbstractVector{<:Real},
+                                       cfg::SimulationConfig;
+                                       color,
+                                       series_label,
+                                       ylabel,
+                                       reference_value=nothing,
+                                       reference_label=nothing,
+                                       legend_position=:rt)
+    lines!(ax, x_gc, y_final; color=color, linewidth=2.8, label=series_label)
+    scatter!(ax, x_gc, y_final; color=color, markersize=8)
+
+    has_reference = reference_value !== nothing && isfinite(reference_value)
+    if has_reference
+        lines!(ax, [first(x_gc), last(x_gc)], [reference_value, reference_value];
+               color=:black, linestyle=:dash, linewidth=2.0,
+               label=reference_label)
+    end
+
+    y_finite = filter(isfinite, has_reference ? vcat(collect(y_final), [reference_value]) : collect(y_final))
+    if !isempty(y_finite)
+        ymin, ymax = extrema(y_finite)
+        ymin == ymax && (delta = max(abs(ymin), 1.0) * 0.05; ymin -= delta; ymax += delta)
+        ax.yticks = _rounded_major_ticks(ymin, ymax)
+        ax.ytickformat = _compact_tick_labels
+    end
+
+    _finalize_axis!(ax;
+                    xlabel=rich("Through gas-channel"; font=:bold),
+                    ylabel=ylabel,
+                    legend=true,
+                    legend_position=legend_position)
+
+    ax.xticks = (x_gc, gc_direction_labels(cfg, length(x_gc); triple_break_cathode_inlet=true))
+    ax.xticklabelrotation = π / 10
+    ax.xticklabelsize = 10
+    ax.xminorticksvisible = false
+    return nothing
+end
 
 """Plot the final current-density distribution along the gas channel."""
 function plot_ifc_GC_final(outputs::SimulationOutputs,
@@ -971,37 +1013,57 @@ function plot_ifc_GC_final(outputs::SimulationOutputs,
     nb_gc = fc.numerical_parameters.nb_gc
     x_gc = collect(1:nb_gc)
 
-    nb_gc = gas_channel_count(outputs)
     i_fc_hist = derived_outputs(outputs).i_fc
     i_fc_final = [i_fc_hist[k][end] for k in 1:nb_gc] ./ 1e4 # A·cm⁻²
     i_fc_cell_final = current(cd, time_history(outputs)[end]) / 1e4
 
-    lines!(ax, x_gc, i_fc_final; color=palette[1], linewidth=2.8,
-           label=rich(lsub("i", "fc,1D,final")))
-    scatter!(ax, x_gc, i_fc_final; color=palette[1], markersize=8)
-    lines!(ax, [first(x_gc), last(x_gc)], [i_fc_cell_final, i_fc_cell_final];
-           color=:black, linestyle=:dash, linewidth=2.0,
-           label=rich(lsub("i", "fc,cell,final")))
+    _plot_final_profile_along_gc!(ax, x_gc, i_fc_final, cfg;
+                                  color=palette[1],
+                                  series_label=rich(lsub("i", "fc,1D,final")),
+                                  ylabel=rich("Final current density ", lsub("i", "fc"), " (A·cm⁻²)"),
+                                  reference_value=i_fc_cell_final,
+                                  reference_label=rich(lsub("i", "fc,cell,final")),
+                                  legend_position=:rt)
+    return nothing
+end
 
-    y_finite = filter(isfinite, vcat(i_fc_final, [i_fc_cell_final]))
-    if !isempty(y_finite)
-        ymin, ymax = extrema(y_finite)
-        ymin == ymax && (delta = max(abs(ymin), 1.0) * 0.05; ymin -= delta; ymax += delta)
-        ax.yticks = _rounded_major_ticks(ymin, ymax)
-        ax.ytickformat = _compact_tick_labels
-    end
+"""Plot the final dissolved-oxygen concentration at Pt sites along the gas channel."""
+function plot_C_O2_Pt_GC_final(outputs::SimulationOutputs,
+                               fc::AbstractFuelCell,
+                               cfg::SimulationConfig,
+                               ax)
+    palette = _publication_colors()
+    nb_gc = fc.numerical_parameters.nb_gc
+    x_gc = collect(1:nb_gc)
 
-    _finalize_axis!(ax;
-                    xlabel=rich("Through gas-channel"; font=:bold),
-                    ylabel=rich("Final current density ", lsub("i", "fc"), " (A·cm⁻²)"),
-                    legend=true,
-                    legend_position=:rt)
+    C_O2_Pt_hist = derived_outputs(outputs).C_O2_Pt
+    C_O2_Pt_final = [C_O2_Pt_hist[k][end] for k in 1:nb_gc]
 
-    # Enforce categorical labels on x; keep minor ticks on y (set by _finalize_axis!).
-    ax.xticks = (x_gc, gc_direction_labels(cfg, nb_gc; triple_break_cathode_inlet=true))
-    ax.xticklabelrotation = π / 10
-    ax.xticklabelsize = 10
-    ax.xminorticksvisible = false
+    _plot_final_profile_along_gc!(ax, x_gc, C_O2_Pt_final, cfg;
+                                  color=palette[10],
+                                  series_label=rich(lsub("C", "O₂,Pt,final")),
+                                  ylabel=rich("Final oxygen concentration ", lsub("C", "O₂,Pt"), " (mol·m⁻³)"),
+                                  legend_position=:rt)
+    return nothing
+end
+
+"""Plot the final membrane water-content distribution along the gas channel."""
+function plot_lambda_mem_GC_final(outputs::SimulationOutputs,
+                                  fc::AbstractFuelCell,
+                                  cfg::SimulationConfig,
+                                  ax)
+    palette = _publication_colors()
+    nb_gc = fc.numerical_parameters.nb_gc
+    x_gc = collect(1:nb_gc)
+
+    last_state = solver_state_history(outputs)[end]
+    lambda_mem_final = [mea_state_at(last_state, k).mem.lambda for k in 1:nb_gc]
+
+    _plot_final_profile_along_gc!(ax, x_gc, lambda_mem_final, cfg;
+                                  color=palette[4],
+                                  series_label=rich(lsub("λ", "mem,final")),
+                                  ylabel=rich("Final water content ", lsub("λ", "mem"), " (-)"),
+                                  legend_position=:rt)
     return nothing
 end
 

@@ -2,7 +2,7 @@
 
 julia_version = "1.12.5"
 manifest_format = "2.0"
-project_hash = "4073b1e29b3943aae7678e5c276ff0c6602eeec2"
+project_hash = "c373c41f1ba2e1ab5fbf81e13ff9b8f245826c17"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "f7304359109c768cf32dc5fa2d371565bb63b68a"
@@ -87,7 +87,7 @@ uuid = "a95523ee-d6da-40b5-98cc-27bc505739d5"
 version = "0.1.10"
 
 [[deps.AlphaPEM]]
-deps = ["CairoMakie", "DifferentialEquations", "DualNumbers", "FFTW", "Interpolations", "LineSearches", "NonlinearSolve", "SciMLBase", "Statistics"]
+deps = ["CairoMakie", "DifferentialEquations", "DualNumbers", "FFTW", "GLMakie", "Interpolations", "LineSearches", "NonlinearSolve", "SciMLBase", "Statistics"]
 path = "."
 uuid = "5b79a72d-1548-47c5-a674-b96c56ecabf8"
 version = "1.4.0"

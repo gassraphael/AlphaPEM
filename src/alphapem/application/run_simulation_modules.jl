@@ -135,14 +135,25 @@ function _create_figures(cfg::SimulationConfig{<:StepParams})
             push!(ax1, a)
         end
         fig2, ax2 = cfg.display_timing == :postrun ? _make_single_axis(size=(740, 620)) : (nothing, nothing)
-        fig3, ax3 = cfg.display_timing == :postrun ? _make_single_axis(size=(740, 620)) : (nothing, nothing)
+        if cfg.display_timing == :postrun
+            fig3 = Figure[]
+            ax3 = Axis[]
+            for _ in 1:3
+                f, a = _make_single_axis(size=(740, 620))
+                push!(fig3, f)
+                push!(ax3, a)
+            end
+        else
+            fig3, ax3 = nothing, nothing
+        end
         return (fig1, ax1, fig2, ax2, fig3, ax3)
     elseif cfg.type_display == :synthetic
         fig1, ax1 = _make_grid_axes(3, 3; size=(1360, 1120))
         if cfg.display_timing == :postrun
-            fig2 = Figure(; size=(1260, 620))
+            fig2 = Figure(; size=(1260, 1120))
             # Keep the middle column free for the heatmap colorbar.
-            ax2 = [Axis(fig2[1, 1]) Axis(fig2[1, 3])]
+            ax2 = [Axis(fig2[1, 1]) Axis(fig2[1, 3]);
+                   Axis(fig2[2, 1]) Axis(fig2[2, 3])]
             return (fig1, ax1, fig2, ax2, nothing, nothing)
         end
         return (fig1, ax1, nothing, nothing, nothing, nothing)
