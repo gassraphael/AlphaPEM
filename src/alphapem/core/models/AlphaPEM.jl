@@ -379,8 +379,9 @@ function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing)
             plot_C_O2_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[3, 2])
             plot_P_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[3, 3])
 
-            if simu.cfg.display_timing == :postrun && _ax2 !== nothing
-                plot_T_pseudo_2D_final(outputs, simu.fuel_cell, _ax2.parent, _ax2, simu.cfg)
+            if simu.cfg.display_timing == :postrun && _ax2 isa AbstractMatrix && size(_ax2, 2) >= 2
+                plot_T_pseudo_2D_final(outputs, simu.fuel_cell, _ax2[1, 1].parent, _ax2[1, 1], simu.cfg)
+                plot_ifc_GC_final(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax2[1, 2])
             end
         elseif simu.cfg.type_display == :multiple && _ax1 isa AbstractVector && length(_ax1) >= 14
             # Multiple mode: one figure per internal-state plot.
@@ -401,6 +402,7 @@ function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing)
 
             if simu.cfg.display_timing == :postrun && _ax2 !== nothing
                 plot_T_pseudo_2D_final(outputs, simu.fuel_cell, _ax2.parent, _ax2, simu.cfg)
+                _ax3 !== nothing && plot_ifc_GC_final(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax3)
             end
         end
     elseif simu.cfg.type_current isa PolarizationParams
@@ -498,6 +500,8 @@ function save_plot!(simu::AlphaPEM, _fig1=nothing, _fig2=nothing, _fig3=nothing)
             end
             simu.cfg.display_timing == :postrun &&
                 saving_instructions!(simu, "results", subfolder_name, "final_temperature_dist_1.pdf", _fig2)
+            simu.cfg.display_timing == :postrun &&
+                saving_instructions!(simu, "results", subfolder_name, "ifc_GC_final_1.pdf", _fig3)
         end
     # For the polarization curve.
     elseif simu.cfg.type_current isa PolarizationParams

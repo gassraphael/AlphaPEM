@@ -13,7 +13,6 @@ using SciMLBase
 
 # ________________________________________________________Velocity______________________________________________________
 
-
 """
     calculate_velocity_evolution(sv, i_fc_cell, fc, cfg)
 
@@ -37,9 +36,9 @@ Returns
 -------
 Tuple(Vector{Float64}, Vector{Float64}, Float64, Float64)
     Tuple of (v_a, v_c, Pa_in, Pc_in):
-    - Anode gas velocity profile (m.s-1)
-    - Cathode gas velocity profile (m.s-1)
-    - Anode inlet pressure (Pa)
+    - Anode gas velocity profile (m.s-1), indexed in the nominal GC order (`sv[i]`).
+    - Cathode gas velocity profile (m.s-1), indexed in the nominal GC order (`sv[i]`).
+    - Physical anode inlet pressure (Pa): at index 1 in `:co_flow`, at index `end` in `:counter_flow`.
     - Cathode inlet pressure (Pa)
 
 Raises
@@ -58,18 +57,26 @@ function calculate_velocity_evolution(sv::AbstractVector{<:CellState1D}, i_fc_ce
     Lgc, Ldist, nb_channel_in_gc, nb_cell = pp.Lgc, pp.Ldist, pp.nb_channel_in_gc, pp.nb_cell
     nb_gc, nb_gdl = np.nb_gc, np.nb_gdl
 
+    (cfg.type_flow == :co_flow || cfg.type_flow == :counter_flow) ||
+        throw(ArgumentError("Unsupported type_flow in calculate_velocity_evolution: $(cfg.type_flow)"))
+
+    # In counter-flow, the anode inlet is physically located at GC index `nb_gc`.
+    # We therefore build an anode-oriented view (inlet -> outlet) and map back at return.
+    is_counter_flow = cfg.type_flow == :counter_flow
+    agc_order = anode_gc_order(nb_gc, cfg.type_flow)
+
     # Extraction of the variables
-    C_v_agc = [sv[i].agc.C_v for i in 1:nb_gc]
-    C_v_agdl_1 = [sv[i].agdl[1].C_v for i in 1:nb_gc]
+    C_v_agc = [sv[i].agc.C_v for i in agc_order]
+    C_v_agdl_1 = [sv[i].agdl[1].C_v for i in agc_order]
     C_v_cgdl_nb_gdl = [sv[i].cgdl[nb_gdl].C_v for i in 1:nb_gc]
     C_v_cgc = [sv[i].cgc.C_v for i in 1:nb_gc]
-    C_H2_agc = [sv[i].agc.C_H2 for i in 1:nb_gc]
-    C_H2_agdl_1 = [sv[i].agdl[1].C_H2 for i in 1:nb_gc]
+    C_H2_agc = [sv[i].agc.C_H2 for i in agc_order]
+    C_H2_agdl_1 = [sv[i].agdl[1].C_H2 for i in agc_order]
     C_O2_cgdl_nb_gdl = [sv[i].cgdl[nb_gdl].C_O2 for i in 1:nb_gc]
     C_O2_cgc = [sv[i].cgc.C_O2 for i in 1:nb_gc]
-    C_N2_agc = [sv[i].agc.C_N2 for i in 1:nb_gc]
+    C_N2_agc = [sv[i].agc.C_N2 for i in agc_order]
     C_N2_cgc = [sv[i].cgc.C_N2 for i in 1:nb_gc]
-    T_agc = [sv[i].agc.T for i in 1:nb_gc]
+    T_agc = [sv[i].agc.T for i in agc_order]
     T_cgc = [sv[i].cgc.T for i in 1:nb_gc]
 
     # Intermediate calculation
@@ -229,7 +236,9 @@ function calculate_velocity_evolution(sv::AbstractVector{<:CellState1D}, i_fc_ce
     # Reuse pre-allocated Float64 buffers to build final profiles (no extra vector allocation).
     P_a_in, P_c_in = compute_profiles!(_res_J_a, _res_J_c, _res_P_a, _res_P_c, _res_v_a, _res_v_c, J_a_in, J_c_in)
 
-    return _res_v_a, _res_v_c, P_a_in, P_c_in
+    # Re-project anode velocity to the nominal GC indexing used everywhere else in the model.
+    v_a = is_counter_flow ? reverse(_res_v_a) : _res_v_a
+    return v_a, _res_v_c, P_a_in, P_c_in # P_a_in is a physical anode inlet pressure (flow-dependent location).
 end
 
 

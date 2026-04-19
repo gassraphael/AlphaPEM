@@ -57,15 +57,17 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::AbstractVector{<:CellState1D
     Wagc, Wcgc, Lgc, nb_channel_in_gc, A_T_a, A_T_c = pp.Wagc, pp.Wcgc, pp.Lgc, pp.nb_channel_in_gc, pp.A_T_a, pp.A_T_c
     nb_gc = np.nb_gc
     type_auxiliary = cfg.type_auxiliary
+    agc_order = anode_gc_order(nb_gc, cfg.type_flow)
 
     # Extraction of the variables
-    C_v_agc = [sv_1D_cell[i].agc.C_v for i in 1:nb_gc]
+    C_v_agc = [sv_1D_cell[i].agc.C_v for i in agc_order]
     C_v_cgc = [sv_1D_cell[i].cgc.C_v for i in 1:nb_gc]
-    s_agc = [sv_1D_cell[i].agc.s for i in 1:nb_gc]
+    s_agc = [sv_1D_cell[i].agc.s for i in agc_order]
     s_cgc = [sv_1D_cell[i].cgc.s for i in 1:nb_gc]
-    C_H2_agc = [sv_1D_cell[i].agc.C_H2 for i in 1:nb_gc]
+    C_H2_agc = [sv_1D_cell[i].agc.C_H2 for i in agc_order]
     C_O2_cgc = [sv_1D_cell[i].cgc.C_O2 for i in 1:nb_gc]
     C_N2_cgc = [sv_1D_cell[i].cgc.C_N2 for i in 1:nb_gc]
+    v_a_o = [v_a[i] for i in agc_order] # velocity oriented in the anode flow direction
 
     # Intermediate values
     (P_agc, P_cgc, Phi_agc, Phi_cgc, y_H2_agc, y_O2_cgc, M_agc, M_cgc, M_ext, M_H2_N2_in, rho_agc, rho_cgc, k_purge,
@@ -98,7 +100,7 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::AbstractVector{<:CellState1D
         #     Wa_out = rho_aem_out_to_ext * v_a * Abp_a
     else  # type_auxiliary == :no_auxiliary (only 1 cell)
         Wa_in = W_des.H2 + W_des.H2O_inj_a  # This expression is also present in calculate_velocity_evolution.
-        Wa_out = P_agc[nb_gc] / (R * T_des) * v_a[nb_gc] * Hagc * Wagc * nb_cell * nb_channel_in_gc
+        Wa_out = P_agc[agc_order[end]] / (R * T_des) * v_a_o[end] * Hagc * Wagc * nb_cell * nb_channel_in_gc
     end
 
     # Anode flow entering/leaving the stack in mol.m-2.s-1
@@ -143,8 +145,8 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::AbstractVector{<:CellState1D
     else  # type_auxiliary == :no_auxiliary
         Jv_agc_in = Phi_a_des * Psat(T_des) / Pa_in * Ja_in
     end
-    Jv_agc_agc = [C_v_agc[i] * v_a[i] for i in 1:(nb_gc - 1)]
-    Jv_agc_out = C_v_agc[nb_gc] * R * T_des / P_agc[nb_gc] * Ja_out
+    Jv_agc_agc = [C_v_agc[i] * v_a_o[i] for i in 1:(nb_gc - 1)]
+    Jv_agc_out = C_v_agc[end] * R * T_des / P_agc[agc_order[end]] * Ja_out
 
     if type_auxiliary == :forced_convective_cathode_with_anodic_recirculation ||
        type_auxiliary == :forced_convective_cathode_with_flow_through_anode
@@ -158,12 +160,12 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::AbstractVector{<:CellState1D
     # Liquid water flows at the GC (kg.m-2.s-1)
     #   At the anode side
     s_agc_outlet = 0.0  # Boundary condition at the outlet of the anode GC: no liquid water at the outlet.
-    Jl_agc_agc_conv = [rho_H2O_l(T_des) * K_v_liq_gas * v_a[i] * s_agc[i] for i in 1:(nb_gc - 1)]
+    Jl_agc_agc_conv = [rho_H2O_l(T_des) * K_v_liq_gas * v_a_o[i] * s_agc[i] for i in 1:(nb_gc - 1)]
     Jl_agc_agc_dif = [-D_liq_dif * d_dx(s_agc[i], i == nb_gc ? s_agc_outlet : s_agc[i + 1], (Lgc / nb_gc) / 2)
                       for i in 1:(nb_gc - 1)]
     Jl_agc_agc = [Jl_agc_agc_conv[i] + Jl_agc_agc_dif[i] for i in 1:(nb_gc - 1)]
-    Jl_agc_agc_conv_out = rho_H2O_l(T_des) * K_v_liq_gas * v_a[nb_gc] * s_agc[nb_gc]
-    Jl_agc_agc_dif_out = -D_liq_dif * d_dx(s_agc[nb_gc], s_agc_outlet, (Lgc / nb_gc) / 2)
+    Jl_agc_agc_conv_out = rho_H2O_l(T_des) * K_v_liq_gas * v_a_o[end] * s_agc[end]
+    Jl_agc_agc_dif_out = -D_liq_dif * d_dx(s_agc[end], s_agc_outlet, (Lgc / nb_gc) / 2)
     Jl_agc_out = Jl_agc_agc_conv_out + Jl_agc_agc_dif_out
 
     #   At the cathode side
@@ -183,8 +185,8 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::AbstractVector{<:CellState1D
         # J_H2_agc_out = y_H2_agc * (1 - Phi_agc_to_aem_in * Psat(T_des) / Pagc_to_aem_in) * Ja_out
     else  # type_auxiliary == :forced_convective_cathode_with_anodic_recirculation or type_auxiliary == :no_auxiliary
         J_H2_agc_in = (1 - Phi_a_des * Psat(T_des) / Pa_in) * Ja_in
-        J_H2_agc_agc = [C_H2_agc[i] * v_a[i] for i in 1:(nb_gc - 1)]
-        J_H2_agc_out = C_H2_agc[nb_gc] * R * T_des / P_agc[nb_gc] * Ja_out
+        J_H2_agc_agc = [C_H2_agc[i] * v_a_o[i] for i in 1:(nb_gc - 1)]
+        J_H2_agc_out = C_H2_agc[end] * R * T_des / P_agc[agc_order[end]] * Ja_out
     end
 
     # O2 flows at the GC (mol.m-2.s-1)

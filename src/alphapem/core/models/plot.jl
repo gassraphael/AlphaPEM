@@ -16,6 +16,7 @@ using .PlotHelpers: _publication_colors,
                     _colorbar_ticks_auto,
                     _rounded_major_ticks,
                     _set_dense_ticks!,
+                    gc_direction_labels,
                     lsub
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -956,8 +957,60 @@ function plot_EIS_curve_Bode_angle(cd::AbstractCurrent,
 end
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  Final 2D Thermal Map
+#  Final GC Current and Thermal Maps
 # ═══════════════════════════════════════════════════════════════════════════════
+
+
+"""Plot the final current-density distribution along the gas channel."""
+function plot_ifc_GC_final(outputs::SimulationOutputs,
+                           fc::AbstractFuelCell,
+                           cd::AbstractCurrent,
+                           cfg::SimulationConfig,
+                           ax)
+    palette = _publication_colors()
+    nb_gc = fc.numerical_parameters.nb_gc
+    x_gc = collect(1:nb_gc)
+
+    nb_gc = gas_channel_count(outputs)
+    i_fc_hist = derived_outputs(outputs).i_fc
+    i_fc_final = [i_fc_hist[k][end] for k in 1:nb_gc] ./ 1e4 # A·cm⁻²
+    i_fc_cell_final = current(cd, time_history(outputs)[end]) / 1e4
+
+    lines!(ax, x_gc, i_fc_final; color=palette[1], linewidth=2.8,
+           label=rich(lsub("i", "fc,1D,final")))
+    scatter!(ax, x_gc, i_fc_final; color=palette[1], markersize=8)
+    lines!(ax, [first(x_gc), last(x_gc)], [i_fc_cell_final, i_fc_cell_final];
+           color=:black, linestyle=:dash, linewidth=2.0,
+           label=rich(lsub("i", "fc,cell,final")))
+
+    # Y-axis: rounded major ticks from data range (same convention as other temporal plots).
+    y_all = vcat(i_fc_final, [i_fc_cell_final])
+    y_finite = filter(isfinite, y_all)
+    if !isempty(y_finite)
+        ymin, ymax = extrema(y_finite)
+        if ymin == ymax
+            delta = max(abs(ymin), 1.0) * 0.05
+            ymin -= delta
+            ymax += delta
+        end
+        ax.yticks = _rounded_major_ticks(ymin, ymax)
+        ax.ytickformat = _compact_tick_labels
+    end
+
+    _finalize_axis!(ax;
+                    xlabel=rich("Through gas-channel"; font=:bold),
+                    ylabel=rich("Final current density ", lsub("i", "fc"), " (A·cm⁻²)"),
+                    legend=true,
+                    legend_position=:rt)
+
+    # Enforce integer major ticks in x and preserve custom inlet/outlet labels.
+    ax.xticks = (x_gc, gc_direction_labels(cfg, nb_gc; triple_break_cathode_inlet=true))
+    ax.xticklabelrotation = π / 10
+    ax.xticklabelsize = 10
+    ax.xminorticksvisible = false
+    ax.yminorticksvisible = false
+    return nothing
+end
 
 """Plot final pseudo-2D temperature map.
 
@@ -1029,16 +1082,7 @@ function plot_T_pseudo_2D_final(outputs::SimulationOutputs,
     end
 
     # Build Y-axis labels: annotate the two extremities while keeping numeric labels inside.
-    y_labels_rich = Any[string(i) for i in 1:n_rows]
-    if n_rows == 1
-        y_labels_rich[1] = rich("1 layer")
-    elseif cfg.type_flow == :counter_flow
-        y_labels_rich[1] = rich("cathode inlet\n(counter-flow)")
-        y_labels_rich[end] = rich("anode inlet\n(counter-flow)")
-    else
-        y_labels_rich[1] = rich("inlet\n(co-flow)")
-        y_labels_rich[end] = rich("outlet\n(co-flow)")
-    end
+    y_labels_rich = gc_direction_labels(cfg, n_rows)
 
     ax.xticks = (1:length(x_labels_rich), x_labels_rich)
     ax.yticks = (1:n_rows, y_labels_rich)

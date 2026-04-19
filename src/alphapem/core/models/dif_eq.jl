@@ -163,9 +163,10 @@ function dydt!(dy::Vector{Float64}, t::Float64, y::Vector{Float64}, fc::Abstract
                                                                    flows_1D_GC_manifold,
                                                                    flows_1D_MEA)
     dif_eq_gc_liq = calculate_dyn_liq_evolution_inside_gas_channel(T_des,
-                                                                   pp,
-                                                                   flows_1D_GC_manifold,
-                                                                   flows_1D_MEA)
+                                                                    pp,
+                                                                    cfg,
+                                                                    flows_1D_GC_manifold,
+                                                                    flows_1D_MEA)
     dif_eq_gc_temperature = calculate_dyn_temperature_evolution_inside_gas_channel(nb_gc)
     dif_eq_cell_1D = assemble_gc_derivative_1D(dif_eq_cell_1D,
                                               dif_eq_gc_gas,

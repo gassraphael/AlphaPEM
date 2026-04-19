@@ -21,6 +21,7 @@ export _publication_colors,
        _set_dense_ticks!,
        _clear_dynamic_axes!,
        saving_instructions!,
+       gc_direction_labels,
        lsub
 
 """Return a reproducible publication-oriented color set."""
@@ -296,6 +297,23 @@ end
 
 """Create a visual subscript label, e.g. lsub("T", "agc") -> T_agc (rendered with subscript)."""
 lsub(base::AbstractString, idx::AbstractString) = rich(base, subscript(idx))
+
+"""Return GC-direction labels consistent with final postrun maps."""
+function gc_direction_labels(cfg,
+                             nb_gc::Int;
+                             triple_break_cathode_inlet::Bool=false)
+    labels = Any[string(i) for i in 1:nb_gc]
+    if nb_gc == 1
+        labels[1] = rich("1 layer")
+    elseif cfg.type_flow == :counter_flow
+        labels[1] = rich("cathode inlet\n(counter-flow)")
+        labels[end] = rich("anode inlet\n(counter-flow)")
+    else
+        labels[1] = rich("inlet\n(co-flow)")
+        labels[end] = rich("outlet\n(co-flow)")
+    end
+    return labels
+end
 
 """Clear dynamic axes and attached legends for live plot refresh."""
 function _clear_dynamic_axes!(items...)

@@ -7,6 +7,50 @@ This module is used to calculate intermediate values for auxiliary flow calculat
 # _____________________________________________________Preliminaries____________________________________________________
 
 """
+    anode_gc_order(nb_gc, type_flow)
+
+Return the anode GC traversal order (from physical inlet to physical outlet).
+
+- The returned sequence gives the **physical GC index** at each **numerical flow position**.
+  In other words, `order[p] = i` means:
+  - `p` is the position in flow-oriented numerical arrays (inlet -> outlet),
+  - `i` is the corresponding physical GC index in the model state arrays (`sv[i]`).
+
+- `:co_flow`      -> `1:nb_gc`
+- `:counter_flow` -> `nb_gc:-1:1`
+"""
+@inline function anode_gc_order(nb_gc::Int, type_flow::Symbol)
+    if type_flow == :co_flow
+        return 1:nb_gc
+    elseif type_flow == :counter_flow
+        return nb_gc:-1:1
+    else
+        throw(ArgumentError("Unsupported type_flow for GC orientation: $(type_flow)"))
+    end
+end
+
+"""
+    anode_gc_pos_map(nb_gc, type_flow)
+
+Return a lookup vector `pos` such that `pos[i]` gives the position of
+physical GC index `i` along the anode flow direction (inlet -> outlet).
+
+- `i` is the **physical GC index** used by model state arrays (`sv[i]`).
+- `pos[i]` is the **numerical position** in flow-oriented arrays (inlet -> outlet).
+
+This is the inverse mapping of `anode_gc_order`:
+- `order[p] = i`  <=>  `pos[i] = p`
+"""
+@inline function anode_gc_pos_map(nb_gc::Int, type_flow::Symbol)::Vector{Int}
+    order = anode_gc_order(nb_gc, type_flow)
+    pos = zeros(Int, nb_gc)
+    @inbounds for p in 1:nb_gc
+        pos[order[p]] = p
+    end
+    return pos
+end
+
+"""
     flow_1D_GC_manifold_int_values(sv_1D_cell, sv_auxiliary, fc, cfg)
 
 Calculate intermediate values used for GC/manifold flow computations.
@@ -196,5 +240,4 @@ function flow_1D_GC_manifold_int_values(sv_1D_cell::AbstractVector{<:CellState1D
     return P_agc, P_cgc, Phi_agc, Phi_cgc, y_H2_agc, y_O2_cgc, M_agc, M_cgc, M_ext, M_H2_N2_in, rho_agc, rho_cgc,
            k_purge, Abp_a, Abp_c, mu_gaz_agc, mu_gaz_cgc
 end
-
 

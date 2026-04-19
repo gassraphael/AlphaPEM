@@ -55,6 +55,9 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
     type_auxiliary = cfg.type_auxiliary
     L_node = Lgc / NB_GC
 
+    # Map each physical anode GC index to its position along the flow direction.
+    agc_pos = anode_gc_pos_map(NB_GC, cfg.type_flow)
+
     # Anode GC: water vapour
     agc_C_v = ntuple(NB_GC) do i
         fac_a = 1.0 / (1.0 - sv[i].agc.s)
@@ -63,8 +66,9 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
             J_out = Jv.agc_out
             fac_a * (J_in - J_out) / Lgc - flows_mea[i].Jv.agc_agdl / Hagc
         else
-            J_in = i == 1 ? Jv.agc_in : Jv.agc_agc[i - 1]
-            J_out = i == NB_GC ? Jv.agc_out : Jv.agc_agc[i]
+            p = agc_pos[i]
+            J_in = p == 1 ? Jv.agc_in : Jv.agc_agc[p - 1]
+            J_out = p == NB_GC ? Jv.agc_out : Jv.agc_agc[p]
             fac_a * (J_in - J_out) / L_node - flows_mea[i].Jv.agc_agdl / Hagc
         end
     end
@@ -77,8 +81,9 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
             J_out = JH2.agc_out
             fac_a * (J_in - J_out) / Lgc - flows_mea[i].J_H2.agc_agdl / Hagc
         else
-            J_in = i == 1 ? JH2.agc_in : JH2.agc_agc[i - 1]
-            J_out = i == NB_GC ? JH2.agc_out : JH2.agc_agc[i]
+            p = agc_pos[i]
+            J_in = p == 1 ? JH2.agc_in : JH2.agc_agc[p - 1]
+            J_out = p == NB_GC ? JH2.agc_out : JH2.agc_agc[p]
             fac_a * (J_in - J_out) / L_node - flows_mea[i].J_H2.agc_agdl / Hagc
         end
     end
@@ -93,8 +98,9 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
             J_out = JN2.agc_out
             fac_a * (J_in - J_out) / Lgc
         else
-            J_in = i == 1 ? JN2.agc_in : JN2.agc_agc[i - 1]
-            J_out = i == NB_GC ? JN2.agc_out : JN2.agc_agc[i]
+            p = agc_pos[i]
+            J_in = p == 1 ? JN2.agc_in : JN2.agc_agc[p - 1]
+            J_out = p == NB_GC ? JN2.agc_out : JN2.agc_agc[p]
             fac_a * (J_in - J_out) / L_node
         end
     end
@@ -164,6 +170,7 @@ GCLiquidWaterDerivative{nb_gc}
 function calculate_dyn_liq_evolution_inside_gas_channel(
         T_des     :: Float64,
         pp        :: PhysicalParams,
+        cfg       :: SimulationConfig,
         flows_gc  :: GCManifoldFlows1D{NB_GC},
         flows_mea :: AbstractVector) where {NB_GC}
 
@@ -174,6 +181,9 @@ function calculate_dyn_liq_evolution_inside_gas_channel(
     Lgc = pp.Lgc
     L_node = Lgc / NB_GC
 
+    # Map each physical anode GC index to its position along the flow direction.
+    agc_pos = anode_gc_pos_map(NB_GC, cfg.type_flow)
+
     # Anode GC: liquid water
     agc_s = ntuple(NB_GC) do i
         if NB_GC == 1
@@ -181,8 +191,9 @@ function calculate_dyn_liq_evolution_inside_gas_channel(
             J_out = Jl.agc_out
             inv_rho * ((J_in - J_out) / Lgc - flows_mea[i].Jl.agc_agdl / Hagc)
         else
-            J_in = i == 1 ? 0.0 : Jl.agc_agc[i - 1]
-            J_out = i == NB_GC ? Jl.agc_out : Jl.agc_agc[i]
+            p = agc_pos[i]
+            J_in = p == 1 ? 0.0 : Jl.agc_agc[p - 1]
+            J_out = p == NB_GC ? Jl.agc_out : Jl.agc_agc[p]
             inv_rho * ((J_in - J_out) / L_node - flows_mea[i].Jl.agc_agdl / Hagc)
         end
     end
@@ -246,7 +257,7 @@ function calculate_dyn_manifold_pressure_and_humidity_evolution(
     #    type_auxiliary == :forced_convective_cathode_with_flow_through_anode
     #     # At the anode side
     #     if type_auxiliary == :forced_convective_cathode_with_anodic_recirculation
-    #         dif_eq["dPasm / dt"] = (W.Wa_in + W_asm_in_re_to_asm - nb_cell * Wasm_to_asm_out) / Vasm * R * T_des
+    #         dif_eq["dPasm / dt"] = (W.Wa_in + Wv_asm_in_re_to_asm - nb_cell * Wasm_to_asm_out) / Vasm * R * T_des
     #         dif_eq["dPaem / dt"] = (nb_cell * Waem_in_to_aem - Waem_to_aem_out - Waem_to_aem_out_re) / Vaem * R * T_des
     #     else  # type_auxiliary == :forced_convective_cathode_with_flow_through_anode
     #         dif_eq["dPasm / dt"] = (W.Wa_in - nb_cell * Wasm_to_asm_out) / Vasm * R * T_des
