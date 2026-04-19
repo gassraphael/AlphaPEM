@@ -2,7 +2,8 @@
 
 AlphaPEM is an open-source software package for simulating proton exchange membrane fuel cell (PEMFC) systems for 
 embedded applications written in Julia. It is based on a physics-based, finite-volume, pseudo-two-dimensional (1D+1D),
-dynamic, two-phase, and non-isothermal model. It quickly simulates the internal states and voltage dynamics of PEMFC
+dynamic, two-phase, and non-isothermal model, supporting both co-flow and counter-flow gas channel configurations.
+It quickly simulates the internal states and voltage dynamics of PEMFC
 systems for all current densities and operating conditions imposed on it. In particular, it is possible to apply a 
 step current density or use current profiles to generate polarization curves or electrochemical impedance spectroscopy
 (EIS) curves. It can also automatically calibrate the undetermined parameters of the model to simulate a given real 
@@ -140,7 +141,7 @@ The GUI provides a quick way to configure and run simulations without modifying 
    - Select a predefined fuel cell specification from the 'Fuel cell' dropdown menu. Operating conditions and 
    parameters can also be adjusted by selecting 'Enter your specifications' in this menu.
 
-   - Choose the configuration you prefer for the auxiliaries, voltage zone, purge and display under 
+   - Choose the configuration you prefer for the auxiliaries, flow, voltage zone, purge and display under 
    'Model configuration'.
 
    - Select your desired simulation type at the bottom of the GUI (e.g., current density step, polarization curve,

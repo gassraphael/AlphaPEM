@@ -983,16 +983,10 @@ function plot_ifc_GC_final(outputs::SimulationOutputs,
            color=:black, linestyle=:dash, linewidth=2.0,
            label=rich(lsub("i", "fc,cell,final")))
 
-    # Y-axis: rounded major ticks from data range (same convention as other temporal plots).
-    y_all = vcat(i_fc_final, [i_fc_cell_final])
-    y_finite = filter(isfinite, y_all)
+    y_finite = filter(isfinite, vcat(i_fc_final, [i_fc_cell_final]))
     if !isempty(y_finite)
         ymin, ymax = extrema(y_finite)
-        if ymin == ymax
-            delta = max(abs(ymin), 1.0) * 0.05
-            ymin -= delta
-            ymax += delta
-        end
+        ymin == ymax && (delta = max(abs(ymin), 1.0) * 0.05; ymin -= delta; ymax += delta)
         ax.yticks = _rounded_major_ticks(ymin, ymax)
         ax.ytickformat = _compact_tick_labels
     end
@@ -1003,12 +997,11 @@ function plot_ifc_GC_final(outputs::SimulationOutputs,
                     legend=true,
                     legend_position=:rt)
 
-    # Enforce integer major ticks in x and preserve custom inlet/outlet labels.
+    # Enforce categorical labels on x; keep minor ticks on y (set by _finalize_axis!).
     ax.xticks = (x_gc, gc_direction_labels(cfg, nb_gc; triple_break_cathode_inlet=true))
     ax.xticklabelrotation = π / 10
     ax.xticklabelsize = 10
     ax.xminorticksvisible = false
-    ax.yminorticksvisible = false
     return nothing
 end
 
