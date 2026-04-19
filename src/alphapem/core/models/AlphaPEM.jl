@@ -476,7 +476,7 @@ function save_plot!(simu::AlphaPEM, _fig1=nothing, _fig2=nothing, _fig3=nothing)
         if simu.cfg.type_display == :synthetic
             saving_instructions!(simu, "results", subfolder_name, "step_current_syn_1.pdf", _fig1)
             simu.cfg.display_timing == :postrun &&
-                saving_instructions!(simu, "results", subfolder_name, "final_temperature_dist_1.pdf", _fig2)
+                saving_instructions!(simu, "results", subfolder_name, "final_temperature_map_and_current_GC_1.pdf", _fig2)
         elseif simu.cfg.type_display == :multiple && _fig1 isa AbstractVector
             # Multiple mode: one file per internal-state plot.
             step_files = [
@@ -499,7 +499,7 @@ function save_plot!(simu::AlphaPEM, _fig1=nothing, _fig2=nothing, _fig3=nothing)
                 saving_instructions!(simu, "results", subfolder_name, filename, fig_i)
             end
             simu.cfg.display_timing == :postrun &&
-                saving_instructions!(simu, "results", subfolder_name, "final_temperature_dist_1.pdf", _fig2)
+                saving_instructions!(simu, "results", subfolder_name, "final_temperature_map_and_current_GC_1.pdf", _fig2)
             simu.cfg.display_timing == :postrun &&
                 saving_instructions!(simu, "results", subfolder_name, "ifc_GC_final_1.pdf", _fig3)
         end
