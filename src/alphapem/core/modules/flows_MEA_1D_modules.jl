@@ -459,7 +459,7 @@ h_a
     Effective convective-conductive mass transfer coefficient at the anode in m.s-1.
 """
 function h_a(P, T, Wgc::Float64, Hgc::Float64)
-    Sh = 0.9247 * log(Wgc / Hgc) + 2.3787  # Sherwood coefficient.
+    Sh = 0.9247 * NaNMath.log(Wgc / Hgc) + 2.3787  # Sherwood coefficient.
     return Sh * Da(P, T) / Hgc
 end
 
@@ -483,7 +483,7 @@ h_c
     Effective convective-conductive mass transfer coefficient at the cathode in m.s-1.
 """
 function h_c(P, T, Wgc::Float64, Hgc::Float64)
-    Sh = 0.9247 * log(Wgc / Hgc) + 2.3787  # Sherwood coefficient.y
+    Sh = 0.9247 * NaNMath.log(Wgc / Hgc) + 2.3787  # Sherwood coefficient.y
     return Sh * Dc(P, T) / Hgc
 end
 
@@ -723,8 +723,8 @@ function Svl(element::String,
         D_value = Dc(Ptot, T)  # Diffusion coefficient at the cathode.
     end
 
-    Svl_cond = gamma_cond * M_H2O / (R * T) * epsilon * (1 - s) * D_value * Ptot * log((Ptot - Psat(T)) / (Ptot - P_v))
-    Svl_evap = gamma_evap * M_H2O / (R * T) * epsilon * s * D_value * Ptot * log((Ptot - Psat(T)) / (Ptot - P_v))
+    Svl_cond = gamma_cond * M_H2O / (R * T) * epsilon * (1 - s) * D_value * Ptot * NaNMath.log((Ptot - Psat(T)) / (Ptot - P_v))
+    Svl_evap = gamma_evap * M_H2O / (R * T) * epsilon * s * D_value * Ptot * NaNMath.log((Ptot - Psat(T)) / (Ptot - P_v))
 
     # Transition function between condensation and evaporation
     K_transition = 3e-3 # This is a constant that defines the sharpness of the transition between two states.
@@ -786,7 +786,7 @@ function K0(element::String,
         else
             beta1 = -2.60
         end
-        return epsilon / (8 * log(epsilon)^2) * (epsilon - epsilon_p)^(alpha_p + 2) *
+        return epsilon / (8 * NaNMath.log(epsilon)^2) * (epsilon - epsilon_p)^(alpha_p + 2) *
                4.6e-6^2 / ((1 - epsilon_p)^alpha_p * ((alpha_p + 1) * epsilon - epsilon_p)^2) * exp(beta1 * epsilon_c)
 
     elseif element == "mpl"

@@ -39,7 +39,8 @@ Run a step-current simulation.
 """
 function launch_AlphaPEM_for_step_current(simu::AlphaPEM)::AlphaPEM
     # Figures preparation
-    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(simu.cfg)
+    nb_gc = simu.fuel_cell.numerical_parameters.nb_gc
+    fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(simu.cfg, nb_gc)
 
     # Dynamic display requires a dedicated segmented simulation flow.
     if simu.cfg.display_timing == :live

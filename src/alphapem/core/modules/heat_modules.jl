@@ -323,8 +323,8 @@ function k_th_gaz_mixture(k_th_g::Vector,
             if i == j
                 A_W[i, j] = 1.0
             else
-                A_W[i, j] = (epsilon_TS * (1 + sqrt(mu_g[i] / mu_g[j]) * (M[j] / M[i])^0.25)^2) /
-                            sqrt(8 * (1 + M[i] / M[j]))
+                A_W[i, j] = (epsilon_TS * (1 + NaNMath.sqrt(mu_g[i] / mu_g[j]) * (M[j] / M[i])^0.25)^2) /
+                            NaNMath.sqrt(8 * (1 + M[i] / M[j]))
             end
         end
     end

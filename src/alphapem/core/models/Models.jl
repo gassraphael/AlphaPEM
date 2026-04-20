@@ -10,6 +10,7 @@ module Models
 
 using DifferentialEquations
 using CairoMakie
+using NaNMath    # NaNMath avoids hard DomainError on rare non-physical transients (log argument <= 0).
 using ...Utils   # AlphaPEM.Utils: constants + maths/physics functions
 using ...Config  # AlphaPEM.Config: experimental data (pola_exp_values, ...)
 using ...Config: SimulationConfig, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
