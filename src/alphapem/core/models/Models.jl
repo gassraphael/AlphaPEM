@@ -27,6 +27,7 @@ const interpolate = Utils.interpolate
 
 # ── Include shared helpers exactly once ─────
 include("../modules/cell_voltage_modules.jl")
+include("../modules/current_distribution_modules.jl")
 include("../modules/flows_MEA_1D_modules.jl")
 include("../modules/heat_modules.jl")
 include("../modules/flows_GC_manifold_1D_modules.jl")

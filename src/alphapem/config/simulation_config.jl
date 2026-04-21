@@ -26,6 +26,7 @@ module SimulationConfigModule
 
 using ..Config: AbstractCurrentParams, StepParams, PolarizationParams,
                  PolarizationCalibrationParams, EISParams
+using ..StateScalingModule: StateScaling
 
 export SimulationConfig, validate_config
 
@@ -38,6 +39,7 @@ Base.@kwdef mutable struct SimulationConfig{T<:AbstractCurrentParams}
     type_purge::Symbol = :no_purge
     type_display::Symbol = :synthetic
     display_timing::Symbol=:postrun
+    state_scaling::StateScaling = StateScaling()
 end
 
 # --- Allowed values (tu peux enrichir plus tard) ---
@@ -106,6 +108,30 @@ function validate_config(cfg::SimulationConfig)
 
     cfg.display_timing in ALLOWED_DISPLAY_TIMING ||
         error("Invalid display_timing: $(cfg.display_timing)")
+
+    cell_scaling = cfg.state_scaling.cell
+    manifold_scaling = cfg.state_scaling.manifold
+    auxiliary_scaling = cfg.state_scaling.auxiliary
+
+    for (name, value) in (
+        ("state_scaling.cell.C_v", cell_scaling.C_v),
+        ("state_scaling.cell.C_H2", cell_scaling.C_H2),
+        ("state_scaling.cell.C_O2", cell_scaling.C_O2),
+        ("state_scaling.cell.C_N2", cell_scaling.C_N2),
+        ("state_scaling.cell.T", cell_scaling.T),
+        ("state_scaling.cell.lambda", cell_scaling.lambda),
+        ("state_scaling.cell.eta_c", cell_scaling.eta_c),
+        ("state_scaling.cell.s", cell_scaling.s),
+        ("state_scaling.manifold.P", manifold_scaling.P),
+        ("state_scaling.manifold.Phi", manifold_scaling.Phi),
+        ("state_scaling.auxiliary.Wcp", auxiliary_scaling.Wcp),
+        ("state_scaling.auxiliary.Wa_inj", auxiliary_scaling.Wa_inj),
+        ("state_scaling.auxiliary.Wc_inj", auxiliary_scaling.Wc_inj),
+        ("state_scaling.auxiliary.Abp_a", auxiliary_scaling.Abp_a),
+        ("state_scaling.auxiliary.Abp_c", auxiliary_scaling.Abp_c),
+    )
+        value > 0.0 || error("Invalid $name: $value (must be > 0)")
+    end
 
     return cfg
 end

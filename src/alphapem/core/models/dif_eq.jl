@@ -14,6 +14,11 @@ the 1D+1D+1D model to several 1D models in order to ease the coding.
 Writes the derivative directly into the pre-allocated vector `dy` managed by the solver,
 eliminating all output-vector allocations.
 
+The solver vector `y` is dimensionless and scaled so that most state variables are
+of order 1. The physical model itself is still evaluated in physical units:
+`y` is first unscaled into a physical state vector, then `dy` is rescaled before
+being returned to the ODE solver.
+
 Parameters
 ----------
 dy : Vector{Float64}
@@ -32,10 +37,12 @@ n_vars_manifold : Int
     Pre-calculated number of solver variables in manifolds.
 n_vars_auxiliary : Int
     Pre-calculated number of solver variables in auxiliary systems.
+ * solver_state_scaling : Vector{Float64}
+     Scaling factors aligned with the full solver state vector ordering.
 """
 function dydt!(dy::Vector{Float64}, t::Float64, y::Vector{Float64}, fc::AbstractFuelCell, cd::AbstractCurrent,
                cfg::SimulationConfig, n_vars_cell_1D::Int, n_vars_manifold::Int,
-               n_vars_auxiliary::Int)
+               n_vars_auxiliary::Int, solver_state_scaling::Vector{Float64})
 
     # Extraction of frequently used parameters
     oc = fc.operating_conditions
@@ -55,8 +62,14 @@ function dydt!(dy::Vector{Float64}, t::Float64, y::Vector{Float64}, fc::Abstract
     expected_len = n_vars_cell_P2D + n_vars_manifold + n_vars_auxiliary
     length(y) == expected_len ||
         throw(ArgumentError("Unexpected solver vector size for typed path."))
+    length(solver_state_scaling) == expected_len ||
+        throw(ArgumentError("Unexpected solver scaling vector size for typed path."))
 
-    sv_cell_1D = [_unpack_cell_state_1D(@view(y[(i - 1) * n_vars_cell_1D + 1:i * n_vars_cell_1D]),
+    # Convert the solver state back to physical units before evaluating the
+    # transport, electrochemical and thermal equations.
+    y_phys = unscale_values(y, solver_state_scaling)
+
+    sv_cell_1D = [_unpack_cell_state_1D(@view(y_phys[(i - 1) * n_vars_cell_1D + 1:i * n_vars_cell_1D]),
                                       nb_gdl, nb_mpl)
                  for i in 1:nb_gc]
     dif_eq_cell_1D = Vector{typeof(_nan_cell_derivative_1D(nb_gdl, nb_mpl))}(undef, nb_gc)
@@ -64,8 +77,8 @@ function dydt!(dy::Vector{Float64}, t::Float64, y::Vector{Float64}, fc::Abstract
     if has_auxiliary
         manifold_offset = n_vars_cell_P2D
         aux_offset = n_vars_cell_P2D + n_vars_manifold
-        sv_manifold_1D = _unpack_manifold_state(@view(y[manifold_offset + 1:aux_offset]), nb_man)
-        sv_auxiliary = _unpack_auxiliary_state(@view(y[aux_offset + 1:end]))
+        sv_manifold_1D = _unpack_manifold_state(@view(y_phys[manifold_offset + 1:aux_offset]), nb_man)
+        sv_auxiliary = _unpack_auxiliary_state(@view(y_phys[aux_offset + 1:end]))
         dif_eq_manifold_1D = _nan_manifold_derivative_state(nb_man)
         dif_eq_auxiliary = _nan_auxiliary_derivative()
     else
@@ -196,6 +209,9 @@ function dydt!(dy::Vector{Float64}, t::Float64, y::Vector{Float64}, fc::Abstract
         _assert_auxiliary_derivative_complete(dif_eq_auxiliary)
         _pack_auxiliary_derivative!(dy, aux_offset + 1, dif_eq_auxiliary)
     end
+
+    # Convert physical derivatives back to solver-space derivatives.
+    dy ./= solver_state_scaling
 
     return nothing
 end

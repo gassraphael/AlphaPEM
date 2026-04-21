@@ -31,6 +31,13 @@ mutable struct AlphaPEM
     sol
 end
 
+"""Build the fixed internal scaling vector aligned with the solver state layout."""
+function _build_internal_solver_state_scaling(simu::AlphaPEM)::Vector{Float64}
+    np = simu.fuel_cell.numerical_parameters
+    return build_solver_state_scaling(np.nb_gc, np.nb_gdl, np.nb_mpl, np.nb_man,
+                                      simu.cfg.type_auxiliary, StateScaling())
+end
+
 
 """Create an `AlphaPEM` simulator from typed fuel-cell, current-profile, and configuration objects.
 
@@ -63,9 +70,11 @@ Parameters
 ----------
 simu : AlphaPEM
     Fuel cell simulator instance.
-initial_variable_values : Union{Nothing, Vector}, optional
-    Initial values of the solver variables. If `nothing`, values are generated
-    from a no-current equilibrium.
+ initial_variable_values : Union{Nothing, Vector}, optional
+     Initial values of the physical solver variables. If `nothing`, values are
+     generated from a no-current equilibrium. These values remain stored in
+     physical units on `simu.initial_variable_values`, then are internally
+     scaled before the ODE problem is solved.
 time_interval : Union{Nothing, Tuple{Float64, Float64}}, optional
     Time interval for numerical resolution. If `nothing`, it is generated
     according to the chosen current profile.
@@ -124,15 +133,24 @@ function simulate_model!(simu::AlphaPEM,
      n_vars_manifold = has_auxiliary ? _nb_solver_vars_manifolds(nb_man) : 0
      n_vars_auxiliary = _nb_solver_vars_auxiliary(simu.cfg.type_auxiliary)
 
+     #           Build the fixed internal scaling vector and scale the initial state.
+     #           The ODE solver only sees the dimensionless scaled state vector,
+     #           while the rest of the code keeps physical units.
+     solver_state_scaling = _build_internal_solver_state_scaling(simu)
+     length(solver_state_scaling) == length(simu.initial_variable_values) ||
+         throw(ArgumentError("Internal solver scaling size mismatch in simulate_model!."))
+     initial_solver_values = scale_values(simu.initial_variable_values, solver_state_scaling)
+
      #           Pack external data passed to the ODE right-hand side.
      packed = (fuel_cell=simu.fuel_cell, current_density=simu.current_density, cfg=simu.cfg,
-               n_vars_cell_1D=n_vars_cell_1D, n_vars_manifold=n_vars_manifold, n_vars_auxiliary=n_vars_auxiliary)
+               n_vars_cell_1D=n_vars_cell_1D, n_vars_manifold=n_vars_manifold,
+               n_vars_auxiliary=n_vars_auxiliary, solver_state_scaling=solver_state_scaling)
      #           Define RHS in SciML iip=true signature: f!(dy, y, p, t) -> nothing.
      #           The pre-allocated `dy` buffer is managed by the solver — zero output allocation per call.
      rhs! = (dy, y, p, t) -> dydt!(dy, t, y, p.fuel_cell, p.current_density, p.cfg, p.n_vars_cell_1D,
-                                   p.n_vars_manifold, p.n_vars_auxiliary)
+                                   p.n_vars_manifold, p.n_vars_auxiliary, p.solver_state_scaling)
      #           Build and solve the ODE problem with FBDF for stiff dynamics.
-     prob = ODEProblem(rhs!, simu.initial_variable_values, simu.time_interval, packed)
+     prob = ODEProblem(rhs!, initial_solver_values, simu.time_interval, packed)
     simu.sol = solve(prob, FBDF(autodiff=false); reltol=simu.fuel_cell.numerical_parameters.rtol,
                      abstol=simu.fuel_cell.numerical_parameters.atol)
 
@@ -294,9 +312,12 @@ function recovery!(simu::AlphaPEM)
     np = simu.fuel_cell.numerical_parameters
     nb_gc, nb_gdl, nb_mpl = np.nb_gc, np.nb_gdl, np.nb_mpl
     n_vars_cell_1D = _nb_solver_vars_cell_1D(nb_gdl, nb_mpl)
+    solver_state_scaling = _build_internal_solver_state_scaling(simu)
     canonical_names = canonical_cell_solver_variable_names_1D(nb_gdl, nb_mpl)
     length(canonical_names) == n_vars_cell_1D ||
         throw(ArgumentError("Canonical MEA layout size mismatch in recovery!."))
+    length(solver_state_scaling) == length(simu.sol.u[1]) ||
+        throw(ArgumentError("Internal solver scaling size mismatch in recovery!."))
 
     # Typed output buffers.
     n_t = length(t_hist)
@@ -310,8 +331,9 @@ function recovery!(simu::AlphaPEM)
     Pc_in_hist = Float64[]
 
     for (j, t_j) in enumerate(t_hist)
+        y_phys_j = unscale_values(simu.sol.u[j], solver_state_scaling)
         # ... recovery of the variables inside the MEA 1D line.
-        sv_cell_1D = [_unpack_cell_state_1D(@view(simu.sol.u[j][(k - 1) * n_vars_cell_1D + 1:k * n_vars_cell_1D]),
+        sv_cell_1D = [_unpack_cell_state_1D(@view(y_phys_j[(k - 1) * n_vars_cell_1D + 1:k * n_vars_cell_1D]),
                                                         nb_gdl, nb_mpl)
                                    for k in 1:nb_gc]
         solver_states[j] = FuelCellStateP2D{nb_gdl, nb_mpl, nb_gc}(Tuple(sv_cell_1D))

@@ -245,6 +245,182 @@ end
 canonical_mea_solver_variable_names(nb_gdl::Int, nb_mpl::Int) =
     canonical_cell_solver_variable_names_1D(nb_gdl, nb_mpl)
 
+# ─────────────────────────────────────────────────────────────────────────────
+# State vector scaling — build, scale, unscale
+#
+# Why this exists
+# ----------------
+# The solver state mixes variables with heterogeneous physical magnitudes:
+#   - species concentrations are typically O(10)
+#   - temperatures are typically O(10²)
+#   - cathode overpotential is typically O(10⁻¹)
+#   - liquid saturation can be much smaller than 1 in dry/transient regimes
+#
+# Such disparities do not change the physics, but they can make the numerical
+# integration problem harder to condition and can make uniform tolerances less
+# balanced across components. The solver therefore works on a dimensionless
+# state vector whose entries are brought closer to O(1).
+#
+# Convention:  x̂ = x / x_ref   (dimensionless, order-1 solver variable)
+#              dx̂/dt = (dx/dt) / x_ref
+#
+# Important: the physical equations are never rewritten in scaled variables.
+# Scaling is applied only at the solver boundary, so all model kernels continue
+# to read and produce physical quantities in their native units:
+#   - y0_phys    → y0_scaled    before ODEProblem
+#   - y_scaled   → y_phys       at the start of dydt!
+#   - dy_phys    → dy_scaled    at the end of dydt!
+#   - sol_scaled → sol_phys     in recovery!
+# ─────────────────────────────────────────────────────────────────────────────
+
+"""
+    cell_state_scale(name, scaling) -> Float64
+
+Return the reference value for a canonical cell state variable name.
+The mapping is derived from the variable prefix, consistent with
+`canonical_cell_solver_variable_names_1D`.
+
+This keeps the canonical solver ordering as the single source of truth while
+ensuring that each physical family (temperature, concentrations, saturation,
+etc.) receives an appropriate reference magnitude.
+"""
+function cell_state_scale(name::AbstractString, scaling::CellStateScaling)::Float64
+    startswith(name, "C_v_")     && return scaling.C_v
+    startswith(name, "s_")       && return scaling.s
+    startswith(name, "lambda_")  && return scaling.lambda
+    startswith(name, "C_H2_")    && return scaling.C_H2
+    startswith(name, "C_O2_")    && return scaling.C_O2
+    startswith(name, "C_N2_")    && return scaling.C_N2
+    startswith(name, "T_")       && return scaling.T
+    name == "eta_c"              && return scaling.eta_c
+    throw(ArgumentError("Unknown canonical cell state variable name: \"$name\""))
+end
+
+"""
+    build_cell_state_scaling_1D(nb_gdl, nb_mpl, scaling) -> Vector{Float64}
+
+Build the reference vector for one GC-node cell state segment, in canonical
+solver ordering, derived from `canonical_cell_solver_variable_names_1D`.
+No manual re-enumeration of the variable order.
+
+This design avoids maintaining an additional hard-coded layout for the scaling,
+which would be error-prone and could silently diverge from the true solver
+ordering.
+"""
+function build_cell_state_scaling_1D(nb_gdl::Int, nb_mpl::Int,
+                                     scaling::CellStateScaling)::Vector{Float64}
+    names = canonical_cell_solver_variable_names_1D(nb_gdl, nb_mpl)
+    return [cell_state_scale(n, scaling) for n in names]
+end
+
+"""
+    build_solver_state_scaling(nb_gc, nb_gdl, nb_mpl, nb_man, type_auxiliary,
+                               state_scaling) -> Vector{Float64}
+
+Build the full solver state scaling vector, in the same three-segment ordering
+as the ODE solver vector:
+  1. Cell P2D  (nb_gc repetitions of the 1D cell block)
+  2. Manifolds (identity placeholders — see warning below)
+  3. Auxiliaries (identity placeholders — see warning below)
+
+The purpose is to provide a single scaling vector aligned with the exact solver
+layout so that scaling/unscaling can be done mechanically, without touching the
+physical equations. For manifolds and auxiliaries, the current references are
+temporary identity placeholders; warnings are emitted to make this explicit.
+"""
+function build_solver_state_scaling(nb_gc::Int, nb_gdl::Int, nb_mpl::Int, nb_man::Int,
+                                    type_auxiliary::Symbol,
+                                    state_scaling::StateScaling)::Vector{Float64}
+    scales = Float64[]
+
+    # Segment 1 — Cell P2D: repeat the 1D block for each gas-channel node.
+    cell_scales_1D = build_cell_state_scaling_1D(nb_gdl, nb_mpl, state_scaling.cell)
+    append!(scales, repeat(cell_scales_1D, nb_gc))
+
+    # Segment 2 — Manifolds (active only with auxiliary subsystems).
+    has_auxiliary = type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
+                                       :forced_convective_cathode_with_anodic_recirculation)
+    if has_auxiliary
+        # TODO: dedicated manifold scaling references should be calibrated and
+        #       set here once the manifold subsystem is fully reactivated.
+        #       Current placeholder uses identity (P_ref=1, Phi_ref=1), which
+        #       leaves manifold variables in physical units. This is acceptable
+        #       as a temporary compatibility choice, but it does not provide the
+        #       same order-1 normalization as the cell state vector.
+        manifold_scaling_warning =
+            "Manifold state scaling uses identity references (P_ref=1, Phi_ref=1). " *
+            "This is a temporary placeholder. Dedicated manifold scaling should be " *
+            "adjusted when the manifold subsystem is reactivated."
+        @warn manifold_scaling_warning maxlog=1
+        m = state_scaling.manifold
+        # Order mirrors _pack_manifold_derivative_state! / _unpack_manifold_state:
+        # P_asm, P_aem, P_csm, P_cem, Phi_asm, Phi_aem, Phi_csm, Phi_cem
+        append!(scales, fill(m.P,   4 * nb_man))
+        append!(scales, fill(m.Phi, 4 * nb_man))
+
+        # TODO: dedicated auxiliary scaling references should be calibrated and
+        #       set here once the BoP auxiliary subsystem is fully reactivated.
+        #       Current placeholder uses identity, leaving auxiliary variables
+        #       (Wcp, Wa_inj, Wc_inj, Abp_a, Abp_c) in physical units. This keeps
+        #       the implementation simple today, but the same conditioning logic
+        #       should eventually be extended to these states as well.
+        auxiliary_scaling_warning =
+            "Auxiliary state scaling uses identity references (all refs = 1). " *
+            "This is a temporary placeholder. Dedicated auxiliary scaling should be " *
+            "adjusted when the auxiliary subsystem is reactivated."
+        @warn auxiliary_scaling_warning maxlog=1
+        a = state_scaling.auxiliary
+        # Order mirrors _packed_auxiliary_fields() / Auxiliary0DState field order.
+        append!(scales, [a.Wcp, a.Wa_inj, a.Wc_inj, a.Abp_a, a.Abp_c])
+    end
+
+    return scales
+end
+
+"""
+    build_internal_solver_state_scaling(fc, cfg) -> Vector{Float64}
+
+Build the fixed internal solver scaling vector used during integration.
+
+This helper lives in `core/modules` rather than `core/models` so that the
+solver-scaling infrastructure remains grouped with the packing/unpacking helpers
+and can be reused by both the RHS and the simulation orchestration code.
+"""
+function build_internal_solver_state_scaling(fc::AbstractFuelCell,
+                                             cfg::SimulationConfig)::Vector{Float64}
+    np = fc.numerical_parameters
+    return build_solver_state_scaling(np.nb_gc, np.nb_gdl, np.nb_mpl, np.nb_man,
+                                      cfg.type_auxiliary, StateScaling())
+end
+
+"""
+    scale_values(values, scales) -> Vector{Float64}
+
+Convert a physical state vector to a dimensionless (scaled) solver vector.
+    x̂[i] = x[i] / scales[i]
+
+This transformation is used only for the solver-facing representation, not for
+the model equations themselves.
+"""
+@inline function scale_values(values::AbstractVector{Float64},
+                              scales::AbstractVector{Float64})::Vector{Float64}
+    return values ./ scales
+end
+
+"""
+    unscale_values(values_scaled, scales) -> Vector{Float64}
+
+Convert a dimensionless (scaled) solver vector back to physical units.
+    x[i] = x̂[i] * scales[i]
+
+This inverse transformation is what allows the RHS and post-processing code to
+continue working entirely with physical variables.
+"""
+@inline function unscale_values(values_scaled::AbstractVector{Float64},
+                                scales::AbstractVector{Float64})::Vector{Float64}
+    return values_scaled .* scales
+end
+
 """Count the number of CellState1D variables (MEA+GC) per gas-channel node in the solver vector."""
 function _nb_solver_vars_cell_1D(nb_gdl::Int, nb_mpl::Int)::Int
     return length(canonical_cell_solver_variable_names_1D(nb_gdl, nb_mpl))
