@@ -246,8 +246,10 @@ function Dcap(element::String,
         throw(ArgumentError("The element should be either 'gdl', 'mpl' or 'cl'."))
     end
 
+    s_num = s + 1e-7 # To avoid numerical issues when s is slightly negative due to numerical noise.
+
     return sigma(T) * K0_value / nu_l(T) * abs(cos(theta_c_value)) *
-           (epsilon / K0_value)^0.5 * (s^e + 1e-7) * (1.417 - 4.24 * s + 3.789 * s^2)
+           (epsilon / K0_value)^0.5 * s_num^e * (1.417 - 4.24 * s + 3.789 * s^2)
 end
 
 
@@ -289,7 +291,7 @@ function Pcap(element::String,
         throw(ArgumentError("The element should be either 'gdl', 'mpl' or 'cl'."))
     end
 
-    s_num = s + 1e-7 # To avoid numerical issues when s = 0.
+    s_num = s + 1e-7 # To avoid numerical issues when s is slightly negative due to numerical noise.
 
     return sigma(T) * abs(cos(theta_c_value)) * (epsilon / K0_value)^0.5 *
            (1.417 * s_num - 2.12 * s_num^2 + 1.263 * s_num^3)

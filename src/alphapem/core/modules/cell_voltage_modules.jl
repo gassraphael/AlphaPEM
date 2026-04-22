@@ -139,7 +139,8 @@ in PEM Fuel Cells.
 function R_O2_dif_l(s, lambdaa, T, Hcl::Float64)
 
     delta_ion_val = delta_ion(lambdaa, T, Hcl)
-    delta_H2O_l = (s * epsilon_cl(lambdaa, T, Hcl) * r_carb^3 / epsilon_carb(Hcl) +
+    s_num = s + 1e-7 # To avoid numerical issues when s is slightly negative due to numerical noise.
+    delta_H2O_l = (s_num * epsilon_cl(lambdaa, T, Hcl) * r_carb^3 / epsilon_carb(Hcl) +
                   (r_carb + delta_ion_val)^3)^(1 / 3) -
                   (r_carb + delta_ion_val) # The liquid water film thickness in the CL, in m.
 
