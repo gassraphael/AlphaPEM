@@ -140,6 +140,7 @@ function simulate_model!(simu::AlphaPEM,
      length(solver_state_scaling) == length(simu.initial_variable_values) ||
          throw(ArgumentError("Internal solver scaling size mismatch in simulate_model!."))
      initial_solver_values = scale_values(simu.initial_variable_values, solver_state_scaling)
+     atol_scaled = np.atol ./ solver_state_scaling # preserves the same physical absolute precision after scaling.
 
      #           Pack external data passed to the ODE right-hand side.
      packed = (fuel_cell=simu.fuel_cell, current_density=simu.current_density, cfg=simu.cfg,
@@ -150,9 +151,8 @@ function simulate_model!(simu::AlphaPEM,
      rhs! = (dy, y, p, t) -> dydt!(dy, t, y, p.fuel_cell, p.current_density, p.cfg, p.n_vars_cell_1D,
                                    p.n_vars_manifold, p.n_vars_auxiliary, p.solver_state_scaling)
      #           Build and solve the ODE problem with FBDF for stiff dynamics.
-     prob = ODEProblem(rhs!, initial_solver_values, simu.time_interval, packed)
-    simu.sol = solve(prob, FBDF(autodiff=false); reltol=simu.fuel_cell.numerical_parameters.rtol,
-                     abstol=simu.fuel_cell.numerical_parameters.atol)
+      prob = ODEProblem(rhs!, initial_solver_values, simu.time_interval, packed)
+      simu.sol = solve(prob, FBDF(autodiff=false); reltol=np.rtol, abstol=atol_scaled)
 
     #       Recover the variable values calculated by the solver into outputs.
     recovery!(simu)
