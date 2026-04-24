@@ -35,7 +35,7 @@ The scaling is split by subsystem:
 module StateScalingModule
 
 export CellStateScaling, ManifoldStateScaling, AuxiliaryStateScaling,
-       CurrentDistributionScaling, StateScaling
+       CurrentDistributionScaling, DAEAlgebraicScaling, StateScaling
 
 """
 Scaling references for cell state variables integrated by the solver.
@@ -94,6 +94,19 @@ Base.@kwdef struct CurrentDistributionScaling
 end
 
 """
+Scaling references for algebraic variables appended in the IDA DAE state.
+
+Unknown ordering is fixed as:
+`[U_cell, i_fc[1:nb_gc], C_O2_Pt[1:nb_gc], J_a_in, J_c_in]`.
+"""
+Base.@kwdef struct DAEAlgebraicScaling
+    U::Float64 = 1.0
+    i_fc::Float64 = 1.0e4
+    C_O2_Pt::Float64 = 10.0
+    J_in::Float64 = 1.0e3
+end
+
+"""
 Top-level state scaling configuration used internally by the solver interface.
 
 It groups the fixed reference values applied to each subsystem when converting
@@ -104,6 +117,7 @@ Base.@kwdef struct StateScaling
     manifold::ManifoldStateScaling = ManifoldStateScaling()
     auxiliary::AuxiliaryStateScaling = AuxiliaryStateScaling()
     current_distribution::CurrentDistributionScaling = CurrentDistributionScaling()
+    dae_algebraic::DAEAlgebraicScaling = DAEAlgebraicScaling()
 end
 
 end # module

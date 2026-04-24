@@ -8,7 +8,7 @@ module Modules
 using ...Utils   # AlphaPEM.Utils: constants + maths/physics functions
 using ...Config  # AlphaPEM.Config: experimental data (pola_exp_values, ...)
 using ...Config: SimulationConfig, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
-using ...Config: StateScaling, CellStateScaling, ManifoldStateScaling, AuxiliaryStateScaling
+using ...Config: StateScaling, CellStateScaling, ManifoldStateScaling, AuxiliaryStateScaling, DAEAlgebraicScaling
 using ...Fuelcell: AbstractFuelCell
 using ...Currents: AbstractCurrent, current
 using ..Types    # AlphaPEM.Core.Types: all domain structs (MEAThermalIntermediates, …)

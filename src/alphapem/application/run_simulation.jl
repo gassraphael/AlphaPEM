@@ -20,7 +20,8 @@ using ..Config:   AbstractCurrentParams,
                   StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
 using ..Fuelcell: create_fuelcell
 using ..Currents: create_current, step_duration
-using ..Core.Models: AlphaPEM, simulate_model!, display!, save_plot!
+using ..Core.Models: AlphaPEM, simulate_model!, display!, save_plot!,
+                     build_internal_solver_state_scaling, unscale_values
 
 include(joinpath(@__DIR__, "run_simulation_modules.jl"))
 
@@ -69,7 +70,7 @@ function launch_AlphaPEM_for_step_current(simu::AlphaPEM)::AlphaPEM
             simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
 
             # Recovery of the internal states from the end of the preceding simulation.
-            initial_state = _extract_last_internal_state(simu, simu.cfg)
+            initial_state = _extract_last_internal_state(simu)
             # Time interval actualization.
             t0            = simu.outputs.solver.t[end]
         end
@@ -118,7 +119,7 @@ function launch_AlphaPEM_for_polarization_current(simu::AlphaPEM)::AlphaPEM
             simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
 
             # Recovery of the internal states from the end of the preceding simulation.
-            initial_state = _extract_last_internal_state(simu, simu.cfg)
+            initial_state = _extract_last_internal_state(simu)
             # Time interval actualization.
             t0 = simu.outputs.solver.t[end]
             tf = p.delta_t_ini + (i + 1) * delta_t_step
@@ -168,7 +169,7 @@ function launch_AlphaPEM_for_polarization_current_for_calibration(simu::AlphaPEM
             simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
 
             # Recovery of the internal states from the end of the preceding simulation.
-            initial_state = _extract_last_internal_state(simu, simu.cfg)
+            initial_state = _extract_last_internal_state(simu)
             # Time interval actualization.
             t0 = simu.outputs.solver.t[end]
         end
@@ -212,7 +213,7 @@ function launch_AlphaPEM_for_EIS_current(simu::AlphaPEM)::AlphaPEM
     # A preliminary simulation run is necessary to equilibrate internal variables at i_EIS.
     simulate_model!(simu, nothing, (0.0, cd.t0))
     # Recovery of the internal states from the end of the preceding simulation.
-    initial_state = _extract_last_internal_state(simu, simu.cfg)
+    initial_state = _extract_last_internal_state(simu)
 
     if simu.cfg.type_display == :multiple
         @warn "Dynamic graph refresh is not available with `:multiple` display " *
@@ -229,7 +230,7 @@ function launch_AlphaPEM_for_EIS_current(simu::AlphaPEM)::AlphaPEM
         simulate_model!(simu, initial_state, (t0, tf))
 
         # Recovery of the internal states from the end of the preceding simulation.
-        initial_state = _extract_last_internal_state(simu, simu.cfg)
+        initial_state = _extract_last_internal_state(simu)
 
         # Display
         simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)

@@ -15,6 +15,9 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 
 # Importing the necessary libraries.
 using DifferentialEquations
+using SparseArrays: sparse, SparseMatrixCSC, rowvals, nzrange, nonzeros
+using SciMLBase: DAEFunction, successful_retcode
+using Sundials: IDA
 using .PlotHelpers: _clear_dynamic_axes!, saving_instructions!
 
 
@@ -30,14 +33,6 @@ mutable struct AlphaPEM
     outputs::Union{Nothing, SimulationOutputs}
     sol
 end
-
-"""Build the fixed internal scaling vector aligned with the solver state layout."""
-function _build_internal_solver_state_scaling(simu::AlphaPEM)::Vector{Float64}
-    np = simu.fuel_cell.numerical_parameters
-    return build_solver_state_scaling(np.nb_gc, np.nb_gdl, np.nb_mpl, np.nb_man,
-                                      simu.cfg.type_auxiliary, StateScaling())
-end
-
 
 """Create an `AlphaPEM` simulator from typed fuel-cell, current-profile, and configuration objects.
 
@@ -74,7 +69,7 @@ simu : AlphaPEM
      Initial values of the physical solver variables. If `nothing`, values are
      generated from a no-current equilibrium. These values remain stored in
      physical units on `simu.initial_variable_values`, then are internally
-     scaled before the ODE problem is solved.
+     scaled before the DAE problem is solved.
 time_interval : Union{Nothing, Tuple{Float64, Float64}}, optional
     Time interval for numerical resolution. If `nothing`, it is generated
     according to the chosen current profile.
@@ -123,8 +118,8 @@ function simulate_model!(simu::AlphaPEM,
     simu.initial_variable_values = initial_variable_values === nothing ?
                                     create_initial_variable_values(simu) : initial_variable_values
 
-     #       Solve the differential equation system.
-     #           Pre-calculate constant solver vector dimensions to avoid recomputation in dydt.
+     #       Solve the differential-algebraic equation system.
+     #           Pre-calculate constant solver vector dimensions to avoid recomputation in dae_residual!.
      np = simu.fuel_cell.numerical_parameters
      nb_gdl, nb_mpl, nb_gc, nb_man = np.nb_gdl, np.nb_mpl, np.nb_gc, np.nb_man
      n_vars_cell_1D = _nb_solver_vars_cell_1D(nb_gdl, nb_mpl)
@@ -132,27 +127,58 @@ function simulate_model!(simu::AlphaPEM,
                                                   :forced_convective_cathode_with_anodic_recirculation)
      n_vars_manifold = has_auxiliary ? _nb_solver_vars_manifolds(nb_man) : 0
      n_vars_auxiliary = _nb_solver_vars_auxiliary(simu.cfg.type_auxiliary)
+     differential_vars = build_solver_differential_vars(nb_gc, nb_gdl, nb_mpl, nb_man,
+                                                        simu.cfg.type_auxiliary;
+                                                        include_algebraic=true)
+
+     simu.initial_variable_values = _ensure_dae_initial_values!(simu, simu.initial_variable_values,
+                                                                n_vars_cell_1D, n_vars_manifold,
+                                                                n_vars_auxiliary)
 
      #           Build the fixed internal scaling vector and scale the initial state.
-     #           The ODE solver only sees the dimensionless scaled state vector,
+     #           IDA only sees the dimensionless scaled state vector,
      #           while the rest of the code keeps physical units.
-     solver_state_scaling = _build_internal_solver_state_scaling(simu)
+     solver_state_scaling = build_solver_state_scaling(simu; include_algebraic=true)
      length(solver_state_scaling) == length(simu.initial_variable_values) ||
          throw(ArgumentError("Internal solver scaling size mismatch in simulate_model!."))
      initial_solver_values = scale_values(simu.initial_variable_values, solver_state_scaling)
      atol_scaled = np.atol ./ solver_state_scaling # preserves the same physical absolute precision after scaling.
-
-     #           Pack external data passed to the ODE right-hand side.
+     #           Pack external data passed to the DAE residual.
      packed = (fuel_cell=simu.fuel_cell, current_density=simu.current_density, cfg=simu.cfg,
                n_vars_cell_1D=n_vars_cell_1D, n_vars_manifold=n_vars_manifold,
-               n_vars_auxiliary=n_vars_auxiliary, solver_state_scaling=solver_state_scaling)
-     #           Define RHS in SciML iip=true signature: f!(dy, y, p, t) -> nothing.
-     #           The pre-allocated `dy` buffer is managed by the solver — zero output allocation per call.
-     rhs! = (dy, y, p, t) -> dydt!(dy, t, y, p.fuel_cell, p.current_density, p.cfg, p.n_vars_cell_1D,
-                                   p.n_vars_manifold, p.n_vars_auxiliary, p.solver_state_scaling)
-     #           Build and solve the ODE problem with FBDF for stiff dynamics.
-      prob = ODEProblem(rhs!, initial_solver_values, simu.time_interval, packed)
-      simu.sol = solve(prob, FBDF(autodiff=false); reltol=np.rtol, abstol=atol_scaled)
+               n_vars_auxiliary=n_vars_auxiliary, solver_state_scaling=solver_state_scaling,
+               differential_vars=differential_vars)
+     #           Define DAE residual in SciML iip=true signature: F!(res, dydt, y, p, t) -> nothing.
+     #           The pre-allocated buffers are managed by the solver — zero output allocation per call.
+     residual! = (res, dydt_IDA, y, p, t) -> dae_residual!(res, dydt_IDA, y, t, p.fuel_cell, p.current_density,
+                                                            p.cfg, p.n_vars_cell_1D, p.n_vars_manifold,
+                                                            p.n_vars_auxiliary, p.solver_state_scaling)
+
+     #           Build a consistent initial derivative vector for differential rows.
+     initial_solver_derivatives = _build_consistent_initial_solver_derivatives(residual!, packed,
+                                                                                initial_solver_values,
+                                                                                simu.time_interval[1],
+                                                                                differential_vars)
+
+     #           Build a sparse Jacobian structure for IDA/KLU.
+     #           SciML then uses this pattern to compute sparse Jacobians robustly.
+     jac_prototype = _build_dae_jacobian_prototype(residual!, packed,
+                                                    initial_solver_derivatives,
+                                                    initial_solver_values,
+                                                    simu.time_interval[1],
+                                                    differential_vars)
+     jacobian! = (J, dydt_IDA, y, p, gamma, t) -> _dae_jacobian_fd!(J, dydt_IDA, y, p, gamma, t,
+                                                                    residual!, differential_vars)
+      #           Build and solve the DAE problem with IDA (Sundials).
+     dae_fun = DAEFunction(residual!; jac=jacobian!, jac_prototype=jac_prototype)
+     prob = DAEProblem(dae_fun, initial_solver_derivatives, initial_solver_values, simu.time_interval, packed;
+                       differential_vars=differential_vars)
+     simu.sol = solve(prob, IDA(linear_solver=:KLU);
+                      reltol=np.rtol, abstol=atol_scaled,
+                      initializealg=NoInit())
+     #           Check that the solver converged successfully; raise an informative error otherwise.
+     successful_retcode(simu.sol.retcode) ||
+     throw(ErrorException("IDA solve failed in simulate_model!: retcode = $(simu.sol.retcode)"))
 
     #       Recover the variable values calculated by the solver into outputs.
     recovery!(simu)
@@ -160,7 +186,7 @@ function simulate_model!(simu::AlphaPEM,
 end
 
 
-"""Build the default initial state vector for the ODE solver.
+"""Build the default initial state vector for the DAE solver.
 
 The initial state corresponds to an equilibrium condition inside the fuel cell with
 hydrogen, oxygen, and nitrogen at the external pressure, humidity, and temperature,
@@ -293,10 +319,49 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector{Float64}
 end
 
 
-"""Populate `simu.outputs` from the solver output.
+"""Append missing DAE algebraic initial values in physical units when needed."""
+function _ensure_dae_initial_values!(simu::AlphaPEM,
+                                     initial_values::Vector{Float64},
+                                     n_vars_cell_1D::Int,
+                                     n_vars_manifold::Int,
+                                     n_vars_auxiliary::Int)::Vector{Float64}
+    np = simu.fuel_cell.numerical_parameters
+    pp = simu.fuel_cell.physical_parameters
+    nb_gc = np.nb_gc
+    n_diff = nb_gc * n_vars_cell_1D + n_vars_manifold + n_vars_auxiliary
+    n_alg = _nb_solver_vars_algebraic(nb_gc)
 
-Some derived internal quantities are rebuilt manually because they are not directly
-stored in the numerical solution object.
+    length(initial_values) == n_diff + n_alg && return initial_values
+    length(initial_values) == n_diff ||
+        throw(ArgumentError("Initial state size mismatch in _ensure_dae_initial_values!."))
+
+    # Build typed differential states from the physical initialization.
+    sv_cell_1D = [_unpack_cell_state_1D(@view(initial_values[(k - 1) * n_vars_cell_1D + 1:k * n_vars_cell_1D]),
+                                        np.nb_gdl, np.nb_mpl)
+                  for k in 1:nb_gc]
+    t0 = simu.time_interval[1]
+    i_fc_cell_0 = current(simu.current_density, t0)
+
+    # Initialize current-distribution algebraic states with existing robust kernels.
+    i_fc_0 = calculate_1D_GC_current_density(i_fc_cell_0, sv_cell_1D, simu.fuel_cell)
+    C_O2_Pt_0 = [calculate_C_O2_Pt(i_fc_0[k], sv_cell_1D[k], simu.fuel_cell) for k in 1:nb_gc]
+    U_cell_0 = calculate_cell_voltage(i_fc_0[1], C_O2_Pt_0[1], sv_cell_1D[1], simu.fuel_cell)
+
+    # Initialize inlet-flow algebraic states via pressure-consistent desired flows.
+    _, _, Pa_in_0, Pc_in_0 = calculate_velocity_evolution(sv_cell_1D, i_fc_cell_0, simu.fuel_cell, simu.cfg)
+    W_des_0 = desired_flows(sv_cell_1D, i_fc_cell_0, Pa_in_0, Pc_in_0, simu.fuel_cell, simu.cfg)
+    J_a_in_0 = (W_des_0.H2 + W_des_0.H2O_inj_a) / (pp.Hagc * pp.Wagc) / pp.nb_cell / pp.nb_channel_in_gc
+    J_c_in_0 = (W_des_0.dry_air + W_des_0.H2O_inj_c) / (pp.Hcgc * pp.Wcgc) / pp.nb_cell / pp.nb_channel_in_gc
+
+    append!(initial_values, [U_cell_0])
+    append!(initial_values, i_fc_0)
+    append!(initial_values, C_O2_Pt_0)
+    append!(initial_values, [J_a_in_0, J_c_in_0])
+    return initial_values
+end
+
+
+"""Populate `simu.outputs` from the solver output.
 
 # Arguments
 - `simu::AlphaPEM`: Fuel-cell simulator instance.
@@ -310,9 +375,15 @@ function recovery!(simu::AlphaPEM)
 
     # Recovery of the main variables dynamic evolution.
     np = simu.fuel_cell.numerical_parameters
-    nb_gc, nb_gdl, nb_mpl = np.nb_gc, np.nb_gdl, np.nb_mpl
+    nb_gc, nb_gdl, nb_mpl, nb_man = np.nb_gc, np.nb_gdl, np.nb_mpl, np.nb_man
     n_vars_cell_1D = _nb_solver_vars_cell_1D(nb_gdl, nb_mpl)
-    solver_state_scaling = _build_internal_solver_state_scaling(simu)
+    has_auxiliary = simu.cfg.type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
+                                                 :forced_convective_cathode_with_anodic_recirculation)
+    n_vars_manifold = has_auxiliary ? _nb_solver_vars_manifolds(nb_man) : 0
+    n_vars_auxiliary = _nb_solver_vars_auxiliary(simu.cfg.type_auxiliary)
+    n_diff = nb_gc * n_vars_cell_1D + n_vars_manifold + n_vars_auxiliary
+
+    solver_state_scaling = build_solver_state_scaling(simu; include_algebraic=true)
     canonical_names = canonical_cell_solver_variable_names_1D(nb_gdl, nb_mpl)
     length(canonical_names) == n_vars_cell_1D ||
         throw(ArgumentError("Canonical MEA layout size mismatch in recovery!."))
@@ -330,31 +401,39 @@ function recovery!(simu::AlphaPEM)
     Pa_in_hist = Float64[]
     Pc_in_hist = Float64[]
 
-    for (j, t_j) in enumerate(t_hist)
+    for j in eachindex(t_hist)
         y_phys_j = unscale_values(simu.sol.u[j], solver_state_scaling)
-        # ... recovery of the variables inside the MEA 1D line.
+
+        # Recovery of the variables inside the MEA 1D line.
         sv_cell_1D = [_unpack_cell_state_1D(@view(y_phys_j[(k - 1) * n_vars_cell_1D + 1:k * n_vars_cell_1D]),
-                                                        nb_gdl, nb_mpl)
-                                   for k in 1:nb_gc]
+                                            nb_gdl, nb_mpl)
+                      for k in 1:nb_gc]
         solver_states[j] = FuelCellStateP2D{nb_gdl, nb_mpl, nb_gc}(Tuple(sv_cell_1D))
 
-        # ... recovery of i_fc and C_O2_Pt.
-        i_fc_cell = current(simu.current_density, t_j)
-        i_fc = calculate_1D_GC_current_density(i_fc_cell, sv_cell_1D, simu.fuel_cell)
+        # Recovery of the DAE algebraic states in canonical ordering:
+        # [U_cell, i_fc[1:nb_gc], C_O2_Pt[1:nb_gc], J_a_in, J_c_in]
+        alg_offset = n_diff
+        U_cell = y_phys_j[alg_offset + 1]
+        i_fc = @view(y_phys_j[alg_offset + 2:alg_offset + 1 + nb_gc])
+        C_O2_Pt = @view(y_phys_j[alg_offset + 2 + nb_gc:alg_offset + 1 + 2 * nb_gc])
+        J_a_in = y_phys_j[alg_offset + 2 * nb_gc + 2]
+        J_c_in = y_phys_j[alg_offset + 2 * nb_gc + 3]
+        # Store these algebraic states for each time step.
+        push!(Ucell_hist, U_cell)
         for k in 1:nb_gc
-            c_o2_pt_k = calculate_C_O2_Pt(i_fc[k], sv_cell_1D[k], simu.fuel_cell)
             push!(i_fc_hist[k], i_fc[k])
-            push!(C_O2_Pt_hist[k], c_o2_pt_k)
+            push!(C_O2_Pt_hist[k], C_O2_Pt[k])
         end
 
-        # ... recovery of Ucell, v_a, v_c, Pa_in and Pc_in.
-        Ucell = calculate_cell_voltage(i_fc[1], C_O2_Pt_hist[1][end], sv_cell_1D[1], simu.fuel_cell)
-        push!(Ucell_hist, Ucell)
-        v_a, v_c, Pa_in, Pc_in = calculate_velocity_evolution(sv_cell_1D, i_fc_cell, simu.fuel_cell, simu.cfg)
+        # Recover velocity profiles and inlet pressures from the algebraic inlet flow densities.
+        v_a, v_c, Pa_in, Pc_in = velocity_profiles_from_inlet_flows(sv_cell_1D, J_a_in, J_c_in,
+                                                                     simu.fuel_cell, simu.cfg)
+        # Store anode and cathode velocity profiles for each gas channel node.
         for k in 1:nb_gc
             push!(v_a_hist[k], v_a[k])
             push!(v_c_hist[k], v_c[k])
         end
+        # Store inlet pressures for anode and cathode sides.
         push!(Pa_in_hist, Pa_in)
         push!(Pc_in_hist, Pc_in)
     end
@@ -590,5 +669,4 @@ function save_plot!(simu::AlphaPEM, _fig1=nothing, _fig2=nothing, _fig3=nothing)
 
     return nothing
 end
-
 

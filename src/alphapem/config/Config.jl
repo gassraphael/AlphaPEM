@@ -23,13 +23,13 @@ include("fuel_cell_parameters.jl")
 include("state_scaling.jl")
 include("simulation_config.jl")
 using .StateScalingModule: CellStateScaling, ManifoldStateScaling, AuxiliaryStateScaling,
-                           CurrentDistributionScaling, StateScaling
+                           CurrentDistributionScaling, DAEAlgebraicScaling, StateScaling
 using .SimulationConfigModule: SimulationConfig, validate_config
 
 export AbstractCurrentParams, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
 export AbstractFuelCellParams, PhysicalParams, OperatingConditions, PolaExperimentalData, NumericalParams
 export CellStateScaling, ManifoldStateScaling, AuxiliaryStateScaling,
-       CurrentDistributionScaling, StateScaling
+       CurrentDistributionScaling, DAEAlgebraicScaling, StateScaling
 export SimulationConfig, validate_config
 
 end  # module Config

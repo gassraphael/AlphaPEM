@@ -245,6 +245,37 @@ end
 canonical_mea_solver_variable_names(nb_gdl::Int, nb_mpl::Int) =
     canonical_cell_solver_variable_names_1D(nb_gdl, nb_mpl)
 
+"""Return canonical algebraic variable names for the DAE.
+
+The algebraic block is appended after the differential solver state and follows
+the fixed ordering:
+    [U_cell, i_fc[1:nb_gc], C_O2_Pt[1:nb_gc], J_a_in, J_c_in]
+"""
+function canonical_algebraic_solver_variable_names(nb_gc::Int)::Vector{String}
+    return vcat(
+        ["U_cell"],
+        ["i_fc_$(i)" for i in 1:nb_gc],
+        ["C_O2_Pt_$(i)" for i in 1:nb_gc],
+        ["J_a_in", "J_c_in"],
+    )
+end
+
+"""Return the reference value for a canonical DAE algebraic variable name."""
+function algebraic_state_scale(name::AbstractString, scaling::DAEAlgebraicScaling)::Float64
+    name == "U_cell" && return scaling.U
+    startswith(name, "i_fc_") && return scaling.i_fc
+    startswith(name, "C_O2_Pt_") && return scaling.C_O2_Pt
+    (name == "J_a_in" || name == "J_c_in") && return scaling.J_in
+    throw(ArgumentError("Unknown canonical algebraic state variable name: \"$name\""))
+end
+
+"""Build scaling references for the DAE algebraic block."""
+function build_algebraic_state_scaling(nb_gc::Int,
+                                       scaling::DAEAlgebraicScaling)::Vector{Float64}
+    names = canonical_algebraic_solver_variable_names(nb_gc)
+    return [algebraic_state_scale(n, scaling) for n in names]
+end
+
 # ─────────────────────────────────────────────────────────────────────────────
 # State vector scaling — build, scale, unscale
 #
@@ -330,7 +361,8 @@ temporary identity placeholders; warnings are emitted to make this explicit.
 """
 function build_solver_state_scaling(nb_gc::Int, nb_gdl::Int, nb_mpl::Int, nb_man::Int,
                                     type_auxiliary::Symbol,
-                                    state_scaling::StateScaling)::Vector{Float64}
+                                    state_scaling::StateScaling;
+                                    include_algebraic::Bool=false)::Vector{Float64}
     scales = Float64[]
 
     # Segment 1 — Cell P2D: repeat the 1D block for each gas-channel node.
@@ -374,7 +406,21 @@ function build_solver_state_scaling(nb_gc::Int, nb_gdl::Int, nb_mpl::Int, nb_man
         append!(scales, [a.Wcp, a.Wa_inj, a.Wc_inj, a.Abp_a, a.Abp_c])
     end
 
+    # Segment 4 — DAE algebraic variables appended after the differential state.
+    include_algebraic && append!(scales, build_algebraic_state_scaling(nb_gc, state_scaling.dae_algebraic))
+
     return scales
+end
+
+"""Build solver scaling from any simulation-like container exposing `fuel_cell` and `cfg`.
+
+This helper intentionally avoids a concrete `AlphaPEM` type annotation to prevent
+cross-module load-order coupling (`core/modules` is loaded before `core/models`).
+"""
+function build_solver_state_scaling(simu;
+                                    include_algebraic::Bool=true)::Vector{Float64}
+    return build_internal_solver_state_scaling(simu.fuel_cell, simu.cfg;
+                                               include_algebraic=include_algebraic)
 end
 
 """
@@ -387,10 +433,12 @@ solver-scaling infrastructure remains grouped with the packing/unpacking helpers
 and can be reused by both the RHS and the simulation orchestration code.
 """
 function build_internal_solver_state_scaling(fc::AbstractFuelCell,
-                                             cfg::SimulationConfig)::Vector{Float64}
+                                             cfg::SimulationConfig;
+                                             include_algebraic::Bool=false)::Vector{Float64}
     np = fc.numerical_parameters
     return build_solver_state_scaling(np.nb_gc, np.nb_gdl, np.nb_mpl, np.nb_man,
-                                      cfg.type_auxiliary, StateScaling())
+                                      cfg.type_auxiliary, StateScaling();
+                                      include_algebraic=include_algebraic)
 end
 
 """
@@ -424,6 +472,87 @@ end
 """Count the number of CellState1D variables (MEA+GC) per gas-channel node in the solver vector."""
 function _nb_solver_vars_cell_1D(nb_gdl::Int, nb_mpl::Int)::Int
     return length(canonical_cell_solver_variable_names_1D(nb_gdl, nb_mpl))
+end
+
+"""Count algebraic variables appended in the DAE solver vector."""
+function _nb_solver_vars_algebraic(nb_gc::Int)::Int
+    return length(canonical_algebraic_solver_variable_names(nb_gc))
+end
+
+"""Build the solver differential/algebraic mask for DAEProblem construction.
+
+Why this mask matters
+---------------------
+IDA solves a mixed DAE system `F(t, y, ydot) = 0` where only part of `y`
+corresponds to true differential states. The remaining states are algebraic
+constraints and must be flagged explicitly.
+
+This `BitVector` is used in two places with the exact same meaning:
+1) `DAEProblem(...; differential_vars=mask)` so Sundials knows which rows are
+   differential vs algebraic;
+2) `_build_consistent_initial_solver_derivatives(...)` so only differential
+   entries are assigned in `ydot0` while algebraic entries are left untouched.
+
+Keeping one canonical constructor for this mask avoids subtle inconsistencies
+between problem definition and initialisation.
+"""
+function build_solver_differential_vars(nb_gc::Int, nb_gdl::Int, nb_mpl::Int, nb_man::Int,
+                                        type_auxiliary::Symbol;
+                                        include_algebraic::Bool=false)::BitVector
+    n_vars_cell_1D = _nb_solver_vars_cell_1D(nb_gdl, nb_mpl)
+    has_auxiliary = type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
+                                       :forced_convective_cathode_with_anodic_recirculation)
+    n_vars_manifold = has_auxiliary ? _nb_solver_vars_manifolds(nb_man) : 0
+    n_vars_auxiliary = _nb_solver_vars_auxiliary(type_auxiliary)
+    n_diff = nb_gc * n_vars_cell_1D + n_vars_manifold + n_vars_auxiliary
+
+    if include_algebraic
+        n_alg = _nb_solver_vars_algebraic(nb_gc)
+        # Differential block first, algebraic block appended at the end.
+        # This mirrors the canonical DAE state layout used everywhere else.
+        return vcat(trues(n_diff), falses(n_alg))
+    end
+    return trues(n_diff)
+end
+
+"""Build a consistent initial `dy/dt` guess in scaled solver coordinates for IDA.
+
+The DAE residual uses the convention:
+    F_diff = ydot_IDA - f(y)
+
+At `t0`, if we started with `ydot0 = 0`, the differential residual would be
+`F_diff(t0) = -f(y0)`, which can be large and lead to poor Newton starts.
+This helper computes one residual evaluation at `(t0, y0, ydot=0)` and sets:
+    ydot0[i] = -F_i(t0, y0, 0)
+for differential rows only, i.e. `ydot0 ≈ f(y0)`.
+
+Algebraic rows are intentionally left at zero because those equations do not
+define a time derivative.
+"""
+function _build_consistent_initial_solver_derivatives(residual!,
+                                                      packed,
+                                                      initial_solver_values::Vector{Float64},
+                                                      t0::Float64,
+                                                      differential_vars::BitVector)::Vector{Float64}
+    n = length(initial_solver_values)
+    n == length(differential_vars) ||
+        throw(ArgumentError("differential_vars size mismatch in _build_consistent_initial_solver_derivatives."))
+
+    # Start from a neutral guess: no derivative anywhere.
+    dydt0 = zeros(Float64, n)
+
+    # One residual call at (t0, y0, ydot=0) gives the mismatch F(t0, y0, 0).
+    # For differential rows, we then negate this mismatch to enforce
+    # F_diff(t0, y0, ydot0) ≈ 0 before IDA starts iterating.
+    res0 = zeros(Float64, n)
+    residual!(res0, dydt0, initial_solver_values, packed, t0)
+
+    @inbounds for i in eachindex(differential_vars)
+        differential_vars[i] || continue
+        dydt0[i] = -res0[i]
+    end
+
+    return dydt0
 end
 
 # Typed solver-vector helpers depend on model structs (`CellState1D`, manifold and
@@ -636,34 +765,34 @@ function _pack_cell_derivative_1D!(dy::AbstractVector{Float64}, offset::Int,
 end
 
 """Write all GC-node typed derivatives directly into `dy` with zero allocations (SciML iip convention)."""
-function _pack_fuelcell_derivative_p2d!(dy::AbstractVector{Float64},
+function _pack_fuelcell_derivative_p2d!(dydt::AbstractVector{Float64},
                                          d::FuelCellDerivativeP2D{nb_gdl, nb_mpl, nb_gc},
                                          n_vars_cell_1D::Int) where {nb_gdl, nb_mpl, nb_gc}
     for i in 1:nb_gc
-        _pack_cell_derivative_1D!(dy, (i - 1) * n_vars_cell_1D + 1, d.nodes[i])
+        _pack_cell_derivative_1D!(dydt, (i - 1) * n_vars_cell_1D + 1, d.nodes[i])
     end
     return nothing
 end
 
 """Write manifold derivatives directly into `dy` starting at `offset` (no allocation)."""
-function _pack_manifold_derivative_state!(dy::AbstractVector{Float64}, offset::Int, md)
+function _pack_manifold_derivative_state!(dydt::AbstractVector{Float64}, offset::Int, md)
     idx = offset
-    for i in eachindex(md.asm.nodes); dy[idx] = md.asm.nodes[i].P;   idx += 1; end
-    for i in eachindex(md.aem.nodes); dy[idx] = md.aem.nodes[i].P;   idx += 1; end
-    for i in eachindex(md.csm.nodes); dy[idx] = md.csm.nodes[i].P;   idx += 1; end
-    for i in eachindex(md.cem.nodes); dy[idx] = md.cem.nodes[i].P;   idx += 1; end
-    for i in eachindex(md.asm.nodes); dy[idx] = md.asm.nodes[i].Phi; idx += 1; end
-    for i in eachindex(md.aem.nodes); dy[idx] = md.aem.nodes[i].Phi; idx += 1; end
-    for i in eachindex(md.csm.nodes); dy[idx] = md.csm.nodes[i].Phi; idx += 1; end
-    for i in eachindex(md.cem.nodes); dy[idx] = md.cem.nodes[i].Phi; idx += 1; end
+    for i in eachindex(md.asm.nodes); dydt[idx] = md.asm.nodes[i].P;   idx += 1; end
+    for i in eachindex(md.aem.nodes); dydt[idx] = md.aem.nodes[i].P;   idx += 1; end
+    for i in eachindex(md.csm.nodes); dydt[idx] = md.csm.nodes[i].P;   idx += 1; end
+    for i in eachindex(md.cem.nodes); dydt[idx] = md.cem.nodes[i].P;   idx += 1; end
+    for i in eachindex(md.asm.nodes); dydt[idx] = md.asm.nodes[i].Phi; idx += 1; end
+    for i in eachindex(md.aem.nodes); dydt[idx] = md.aem.nodes[i].Phi; idx += 1; end
+    for i in eachindex(md.csm.nodes); dydt[idx] = md.csm.nodes[i].Phi; idx += 1; end
+    for i in eachindex(md.cem.nodes); dydt[idx] = md.cem.nodes[i].Phi; idx += 1; end
     return nothing
 end
 
 """Write auxiliary derivatives directly into `dy` starting at `offset` (no allocation)."""
-function _pack_auxiliary_derivative!(dy::AbstractVector{Float64}, offset::Int, d::Auxiliary0DDerivative)
+function _pack_auxiliary_derivative!(dydt::AbstractVector{Float64}, offset::Int, d::Auxiliary0DDerivative)
     idx = offset
     for f in _packed_auxiliary_fields()
-        dy[idx] = getfield(d, f); idx += 1
+        dydt[idx] = getfield(d, f); idx += 1
     end
     return nothing
 end

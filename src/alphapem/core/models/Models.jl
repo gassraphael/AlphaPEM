@@ -48,6 +48,7 @@ include("dif_eq_MEA_1D.jl")
 include("dif_eq_GC_manifold_1D.jl")
 include("dif_eq_auxiliaries.jl")
 include("dif_eq.jl")
+include("dae_jacobian.jl")
 include("AlphaPEM.jl")
 
 # Public API

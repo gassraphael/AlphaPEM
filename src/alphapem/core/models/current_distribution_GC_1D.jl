@@ -57,17 +57,8 @@ function calculate_1D_GC_current_density(i_fc_cell::Float64, sv::AbstractVector{
         @views i_fc_guessed    = x_phys[2:nb_gc+1]        # view: no copy allocated
         @views C_O2_Pt_guessed = x_phys[nb_gc+2:2*nb_gc+1]  # view: no copy allocated
 
-        # Residuals: difference between guessed and calculated values
-        #   Equation set 1 – cell voltage consistency across all GC positions (nb_gc equations)
-        @inbounds for i in 1:nb_gc
-            res[i] = calculate_cell_voltage(i_fc_guessed[i], C_O2_Pt_guessed[i], sv[i], fc) - U_cell_guessed
-        end
-        #   Equation set 2 – average current density conservation (1 equation)
-        res[nb_gc+1] = i_fc_cell - average(i_fc_guessed)
-        #   Equation set 3 – oxygen concentration at the Pt surface (nb_gc equations)
-        @inbounds for i in 1:nb_gc
-            res[nb_gc+1+i] = calculate_C_O2_Pt(i_fc_guessed[i], sv[i], fc) - C_O2_Pt_guessed[i]
-        end
+        # Residuals: difference between guessed and calculated algebraic states.
+        gc_current_distribution_residuals!(res, U_cell_guessed, i_fc_guessed, C_O2_Pt_guessed, i_fc_cell, sv, fc)
 
         # Return dimensionless residuals to balance equation blocks.
         res ./= res_scales

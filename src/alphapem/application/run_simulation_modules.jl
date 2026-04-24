@@ -241,75 +241,24 @@ end
 #  Internal-state helpers
 # ═══════════════════════════════════════════════════════════════════════════════
 
-"""Append one typed 1-D cell state (MEA+GC) to canonical solver ordering."""
-function _append_cell_state_1D_to_solver_order!(dest::Vector{Float64}, state)
-    # C_v block
-    push!(dest, state.agc.C_v)
-    for node in state.agdl; push!(dest, node.C_v); end
-    for node in state.ampl; push!(dest, node.C_v); end
-    push!(dest, state.acl.C_v, state.ccl.C_v)
-    for node in state.cmpl; push!(dest, node.C_v); end
-    for node in state.cgdl; push!(dest, node.C_v); end
-    push!(dest, state.cgc.C_v)
-
-    # s block
-    push!(dest, state.agc.s)
-    for node in state.agdl; push!(dest, node.s); end
-    for node in state.ampl; push!(dest, node.s); end
-    push!(dest, state.acl.s, state.ccl.s)
-    for node in state.cmpl; push!(dest, node.s); end
-    for node in state.cgdl; push!(dest, node.s); end
-    push!(dest, state.cgc.s)
-
-    # lambda block
-    push!(dest, state.acl.lambda, state.mem.lambda, state.ccl.lambda)
-
-    # species block
-    push!(dest, state.agc.C_H2)
-    for node in state.agdl; push!(dest, node.C_H2); end
-    for node in state.ampl; push!(dest, node.C_H2); end
-    push!(dest, state.acl.C_H2, state.ccl.C_O2)
-    for node in state.cmpl; push!(dest, node.C_O2); end
-    for node in state.cgdl; push!(dest, node.C_O2); end
-    push!(dest, state.cgc.C_O2, state.agc.C_N2, state.cgc.C_N2)
-
-    # temperature block
-    push!(dest, state.agc.T)
-    for node in state.agdl; push!(dest, node.T); end
-    for node in state.ampl; push!(dest, node.T); end
-    push!(dest, state.acl.T, state.mem.T, state.ccl.T)
-    for node in state.cmpl; push!(dest, node.T); end
-    for node in state.cgdl; push!(dest, node.T); end
-    push!(dest, state.cgc.T)
-
-    # voltage block
-    push!(dest, state.ccl.eta_c)
-    return dest
-end
 
 """
 Extract final internal states from a simulation to initialize the next segment.
+
+For DAE segmented runs, the restart vector must keep the full canonical solver
+layout (differential + algebraic) so that IDA resumes from the exact end state
+without external algebraic re-solves.
 """
-function _extract_last_internal_state(simu::AlphaPEM, cfg::SimulationConfig)::Vector{Float64}
-    dest = Float64[]
+function _extract_last_internal_state(simu::AlphaPEM)::Vector{Float64}
+    simu.sol === nothing && throw(ArgumentError("Cannot extract internal state before a successful solve."))
 
-    # Fast typed path: read directly from typed simulation outputs.
-    last_state = simu.outputs.solver.states[end]
+    solver_state_scaling = build_internal_solver_state_scaling(simu.fuel_cell, simu.cfg; include_algebraic=true)
+    length(solver_state_scaling) == length(simu.sol.u[end]) ||
+        throw(ArgumentError("Internal solver scaling size mismatch in _extract_last_internal_state."))
 
-    for k in 1:simu.fuel_cell.numerical_parameters.nb_gc
-        _append_cell_state_1D_to_solver_order!(dest, last_state.nodes[k])
-    end
-
-    # Auxiliary typed state extraction is intentionally deferred until subsystem reactivation.
-    if cfg.type_auxiliary in (
-        :forced_convective_cathode_with_flow_through_anode,
-        :forced_convective_cathode_with_anodic_recirculation,
-    )
-        error("Auxiliary state extraction is not yet implemented in the typed API.")
-    end
-
-    return dest
+    # `simu.sol.u[end]` is stored in scaled solver coordinates.
+    # Convert back to physical units because `simulate_model!` expects physical
+    # initial values before applying its internal scaling pipeline.
+    return unscale_values(simu.sol.u[end], solver_state_scaling)
 end
-
-
 
