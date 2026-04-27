@@ -44,8 +44,8 @@ function _build_dae_jacobian_prototype(residual!,
     # perturb each state one at a time, recompute the residual, estimate sensitivities
     # by central finite differences, and keep only entries above an adaptive noise threshold.
     fd_eps = cbrt(eps(Float64)) # Robust FD perturbation step for structural detection.
-    sensitivity_atol = 1e-14 # Ignore finite difference noise
-    sensitivity_rtol = 1e-8
+    sensitivity_atol = 1e-14 # In order to ignore finite difference noise
+    sensitivity_rtol = 1e-8 # In order to ignore finite difference noise
     for j in 1:n
         yj = initial_solver_values[j]
         delta = fd_eps * max(abs(yj), 1.0)
@@ -114,16 +114,20 @@ function _dae_jacobian_fd!(J,
         yj = y[j]
         delta = fd_eps * max(abs(yj), 1.0)
 
-        y_perturbed = copy(y)
-        y_perturbed[j] += delta
+        y_perturbed_plus = copy(y)
+        y_perturbed_plus[j] += delta
+        res_perturbed_plus = similar(res0) # allocates same type/size uninitialized;
+        residual!(res_perturbed_plus, dydt_IDA, y_perturbed_plus, packed, t) # computes the residual at the perturbed state
 
-        res_perturbed = similar(res0) # allocates same type/size uninitialized;
-        residual!(res_perturbed, dydt_IDA, y_perturbed, packed, t) # computes the residual at the perturbed state
+        y_perturbed_minus = copy(y)
+        y_perturbed_minus[j] -= delta
+        res_perturbed_minus = similar(res0) # allocates same type/size uninitialized;
+        residual!(res_perturbed_minus, dydt_IDA, y_perturbed_minus, packed, t) # computes the residual at the perturbed state
 
-        inv_delta = 1.0 / delta
-        @inbounds for idx in nzrange(J, j) # Iterate over the stored nonzero entries of column `j` in `J`
+        inv_2delta = 0.5 / delta
+        @inbounds for idx in nzrange(J, j) # Loop over nonzero entries in column j of the Jacobian prototype.
             i = rows[idx]
-            vals[idx] = (res_perturbed[i] - res0[i]) * inv_delta # Finite-difference sensitivity for dF[i]/dy[j]
+            vals[idx] = (res_perturbed_plus[i] - res_perturbed_minus[i]) * inv_2delta # Finite difference estimate for dF[i]/dy[j]
         end
     end
 
