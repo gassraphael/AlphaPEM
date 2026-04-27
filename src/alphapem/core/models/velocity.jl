@@ -51,7 +51,7 @@ function calculate_velocity_evolution(sv::AbstractVector{<:CellState1D}, i_fc_ce
     # Extraction of the parameters
     oc = fc.operating_conditions
     pp = fc.physical_parameters
-    np = fc.numerical_parameters
+    np = cfg.numerical_parameters
     T_des, Pa_des, Pc_des = oc.T_des, oc.Pa_des, oc.Pc_des
     Hagc, Hcgc, Wagc, Wcgc = pp.Hagc, pp.Hcgc, pp.Wagc, pp.Wcgc
     Lgc, Ldist, nb_channel_in_gc, nb_cell = pp.Lgc, pp.Ldist, pp.nb_channel_in_gc, pp.nb_cell
@@ -255,7 +255,7 @@ function velocity_profiles_from_inlet_flows(sv::AbstractVector{<:CellState1D},
 
     oc = fc.operating_conditions
     pp = fc.physical_parameters
-    np = fc.numerical_parameters
+    np = cfg.numerical_parameters
     T_des, Pa_des, Pc_des = oc.T_des, oc.Pa_des, oc.Pc_des
     Hagc, Hcgc, Wagc, Wcgc = pp.Hagc, pp.Hcgc, pp.Wagc, pp.Wcgc
     Lgc, Ldist = pp.Lgc, pp.Ldist
@@ -427,7 +427,7 @@ DesiredInletFlows
     # Extraction of the parameters
     oc = fc.operating_conditions
     pp = fc.physical_parameters
-    np = fc.numerical_parameters
+    np = cfg.numerical_parameters
     T_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in = oc.T_des, oc.Sa, oc.Sc, oc.Phi_a_des, oc.Phi_c_des, oc.y_H2_in
     Hacl, Hmem, Hccl, Aact = pp.Hacl, pp.Hmem, pp.Hccl, pp.Aact
     kappa_co = pp.kappa_co

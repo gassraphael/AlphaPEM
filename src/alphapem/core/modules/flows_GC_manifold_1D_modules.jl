@@ -80,7 +80,7 @@ function flow_1D_GC_manifold_int_values(sv_1D_cell::AbstractVector{<:CellState1D
     # Extract parameters
     oc = fc.operating_conditions
     pp = fc.physical_parameters
-    np = fc.numerical_parameters
+    np = cfg.numerical_parameters
     T_des, y_H2_in = oc.T_des, oc.y_H2_in
     Hmem, Hacl, Hccl, kappa_co = pp.Hmem, pp.Hacl, pp.Hccl, pp.kappa_co
     nb_gc, purge_time, delta_purge = np.nb_gc, np.purge_time, np.delta_purge

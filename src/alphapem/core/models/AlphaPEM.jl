@@ -120,7 +120,7 @@ function simulate_model!(simu::AlphaPEM,
 
      #       Solve the differential-algebraic equation system.
      #           Pre-calculate constant solver vector dimensions to avoid recomputation in dae_residual!.
-     np = simu.fuel_cell.numerical_parameters
+     np = simu.cfg.numerical_parameters
      nb_gdl, nb_mpl, nb_gc, nb_man = np.nb_gdl, np.nb_mpl, np.nb_gc, np.nb_man
      n_vars_cell_1D = _nb_solver_vars_cell_1D(nb_gdl, nb_mpl)
      has_auxiliary = simu.cfg.type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
@@ -202,7 +202,7 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector{Float64}
     # Extraction of the parameter classes for better readability.
     oc = simu.fuel_cell.operating_conditions
     pp = simu.fuel_cell.physical_parameters
-    np = simu.fuel_cell.numerical_parameters
+    np = simu.cfg.numerical_parameters
     # Extraction of frequently used parameters
     T_des, Pa_des, Pc_des = oc.T_des, oc.Pa_des, oc.Pc_des
     Phi_a_des, Phi_c_des, y_H2_in = oc.Phi_a_des, oc.Phi_c_des, oc.y_H2_in
@@ -332,7 +332,7 @@ function _ensure_dae_initial_values!(simu::AlphaPEM,
                                      n_vars_cell_1D::Int,
                                      n_vars_manifold::Int,
                                      n_vars_auxiliary::Int)::Vector{Float64}
-    np = simu.fuel_cell.numerical_parameters
+    np = simu.cfg.numerical_parameters
     pp = simu.fuel_cell.physical_parameters
     nb_gc = np.nb_gc
     n_diff = nb_gc * n_vars_cell_1D + n_vars_manifold + n_vars_auxiliary
@@ -350,7 +350,7 @@ function _ensure_dae_initial_values!(simu::AlphaPEM,
     i_fc_cell_0 = current(simu.current_density, t0)
 
     # Initialize current-distribution algebraic states with existing robust kernels.
-    i_fc_0 = calculate_1D_GC_current_density(i_fc_cell_0, sv_cell_1D, simu.fuel_cell)
+    i_fc_0 = calculate_1D_GC_current_density(i_fc_cell_0, sv_cell_1D, simu.cfg, simu.fuel_cell)
     C_O2_Pt_0 = [calculate_C_O2_Pt(i_fc_0[k], sv_cell_1D[k], simu.fuel_cell) for k in 1:nb_gc]
     U_cell_0 = calculate_cell_voltage(i_fc_0[1], C_O2_Pt_0[1], sv_cell_1D[1], simu.fuel_cell)
 
@@ -381,7 +381,7 @@ function recovery!(simu::AlphaPEM)
     t_hist = collect(simu.sol.t)
 
     # Recovery of the main variables dynamic evolution.
-    np = simu.fuel_cell.numerical_parameters
+    np = simu.cfg.numerical_parameters
     nb_gc, nb_gdl, nb_mpl, nb_man = np.nb_gc, np.nb_gdl, np.nb_mpl, np.nb_man
     n_vars_cell_1D = _nb_solver_vars_cell_1D(nb_gdl, nb_mpl)
     has_auxiliary = simu.cfg.type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
@@ -469,7 +469,7 @@ function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing)
     outputs = simu.outputs
     outputs === nothing && throw(ArgumentError("display! requires available simulation outputs. Run simulate_model! first."))
     simu.cfg.type_display == :no_display && return nothing
-    nb_gc = simu.fuel_cell.numerical_parameters.nb_gc
+    nb_gc = simu.cfg.numerical_parameters.nb_gc
     has_extended_gc_profiles = nb_gc >= 3
     is_postrun_display = simu.cfg.display_timing == :postrun
     can_plot_extended_gc_postrun = has_extended_gc_profiles && is_postrun_display
@@ -479,50 +479,50 @@ function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing)
 
     if simu.cfg.type_current isa StepParams
         if simu.cfg.type_display == :synthetic && _ax1 !== nothing
-            plot_ifc_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[1, 1])
+            plot_ifc_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[1, 1])
             plot_Ucell(outputs, simu.current_density, simu.cfg, _ax1[1, 2])
             plot_T_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[1, 3])
 
-            plot_C_v_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[2, 1])
-            plot_s_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[2, 2])
-            plot_lambda_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[2, 3])
+            plot_C_v_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[2, 1])
+            plot_s_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[2, 2])
+            plot_lambda_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[2, 3])
 
-            plot_C_H2_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[3, 1])
-            plot_C_O2_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[3, 2])
+            plot_C_H2_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[3, 1])
+            plot_C_O2_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[3, 2])
             plot_P_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[3, 3])
 
             if (can_plot_extended_gc_postrun &&
                 _ax2 isa AbstractMatrix && size(_ax2, 1) >= 2 && size(_ax2, 2) >= 2)
                 plot_T_pseudo_2D_final(outputs, simu.fuel_cell, _ax2[1, 1].parent, _ax2[1, 1], simu.cfg)
-                plot_ifc_GC_final(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax2[1, 2])
-                plot_C_O2_Pt_GC_final(outputs, simu.fuel_cell, simu.cfg, _ax2[2, 1])
-                plot_lambda_mem_GC_final(outputs, simu.fuel_cell, simu.cfg, _ax2[2, 2])
+                plot_ifc_GC_final(outputs, simu.current_density, simu.cfg, _ax2[1, 2])
+                plot_C_O2_Pt_GC_final(outputs, simu.cfg, _ax2[2, 1])
+                plot_lambda_mem_GC_final(outputs, simu.cfg, _ax2[2, 2])
             end
         elseif simu.cfg.type_display == :multiple && _ax1 isa AbstractVector && length(_ax1) >= 14
             # Multiple mode: one figure per internal-state plot.
-            plot_ifc_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[1])
+            plot_ifc_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[1])
             plot_Ucell(outputs, simu.current_density, simu.cfg, _ax1[2])
             plot_T_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[3])
-            plot_C_v_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[4])
-            plot_s_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[5])
-            plot_lambda_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[6])
-            plot_C_H2_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[7])
-            plot_C_O2_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[8])
+            plot_C_v_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[4])
+            plot_s_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[5])
+            plot_lambda_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[6])
+            plot_C_H2_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[7])
+            plot_C_O2_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[8])
             plot_P_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[9])
-            plot_C_N2_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[10])
-            plot_Phi_a_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[11])
-            plot_Phi_c_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[12])
-            plot_v_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[13])
+            plot_C_N2_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[10])
+            plot_Phi_a_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[11])
+            plot_Phi_c_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[12])
+            plot_v_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[13])
             plot_Re_nb_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[14])
 
             if can_plot_extended_gc_postrun && _ax2 !== nothing
                 plot_T_pseudo_2D_final(outputs, simu.fuel_cell, _ax2.parent, _ax2, simu.cfg)
                 if _ax3 isa AbstractVector && length(_ax3) >= 3
-                    plot_ifc_GC_final(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax3[1])
-                    plot_C_O2_Pt_GC_final(outputs, simu.fuel_cell, simu.cfg, _ax3[2])
-                    plot_lambda_mem_GC_final(outputs, simu.fuel_cell, simu.cfg, _ax3[3])
+                    plot_ifc_GC_final(outputs, simu.current_density, simu.cfg, _ax3[1])
+                    plot_C_O2_Pt_GC_final(outputs, simu.cfg, _ax3[2])
+                    plot_lambda_mem_GC_final(outputs, simu.cfg, _ax3[3])
                 elseif _ax3 !== nothing
-                    plot_ifc_GC_final(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax3)
+                    plot_ifc_GC_final(outputs, simu.current_density, simu.cfg, _ax3)
                 end
             end
         end
@@ -531,11 +531,11 @@ function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing)
             plot_polarization_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1)
         elseif simu.cfg.type_display == :multiple && _ax1 isa AbstractVector && length(_ax1) >= 5 && _ax2 !== nothing
             # Multiple mode: internal states and derived polarization curves in individual figures.
-            plot_ifc_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[1])
+            plot_ifc_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[1])
             plot_Ucell(outputs, simu.current_density, simu.cfg, _ax1[2])
             plot_T_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[3])
-            plot_power_density_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[4])
-            plot_cell_efficiency(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[5])
+            plot_power_density_curve(outputs, simu.current_density, simu.cfg, _ax1[4])
+            plot_cell_efficiency(outputs, simu.current_density, simu.cfg, _ax1[5])
             if !(_ax2 isa AbstractVector)
                 plot_polarization_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax2)
             end
@@ -544,11 +544,11 @@ function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing)
         if simu.cfg.type_display == :synthetic && _ax1 !== nothing
             plot_polarization_curve_for_cali(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1)
         elseif simu.cfg.type_display == :multiple && _ax1 isa AbstractVector && length(_ax1) >= 5 && _ax2 !== nothing
-            plot_ifc_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[1])
+            plot_ifc_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[1])
             plot_Ucell(outputs, simu.current_density, simu.cfg, _ax1[2])
             plot_T_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[3])
-            plot_power_density_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[4])
-            plot_cell_efficiency(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[5])
+            plot_power_density_curve(outputs, simu.current_density, simu.cfg, _ax1[4])
+            plot_cell_efficiency(outputs, simu.current_density, simu.cfg, _ax1[5])
             if !(_ax2 isa AbstractVector)
                 plot_polarization_curve_for_cali(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax2)
             end
@@ -588,7 +588,7 @@ The output filenames depend on the current profile and on the selected display m
 """
 function save_plot!(simu::AlphaPEM, _fig1=nothing, _fig2=nothing, _fig3=nothing)
     simu.outputs === nothing && throw(ArgumentError("save_plot! requires available simulation outputs. Run simulate_model! first."))
-    nb_gc = simu.fuel_cell.numerical_parameters.nb_gc
+    nb_gc = simu.cfg.numerical_parameters.nb_gc
     has_extended_gc_profiles = nb_gc >= 3
     is_postrun_display = simu.cfg.display_timing == :postrun
     can_save_extended_gc_postrun = has_extended_gc_profiles && is_postrun_display

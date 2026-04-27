@@ -36,7 +36,7 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
     # Extraction of frequently used parameters
     oc = fc.operating_conditions
     pp = fc.physical_parameters
-    np = fc.numerical_parameters
+    np = cfg.numerical_parameters
     T_des = oc.T_des
     nb_gc, nb_gdl, nb_mpl = np.nb_gc, np.nb_gdl, np.nb_mpl
     type_auxiliary = cfg.type_auxiliary
@@ -95,8 +95,8 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
     alg_current_len = 2 * nb_gc + 1
     alg_current_end = alg_current_start + alg_current_len - 1
     res_current = @view(res[alg_current_start:alg_current_end])
-    gc_current_distribution_residuals!(res_current, U_cell, i_fc, C_O2_Pt, i_fc_cell, sv_cell_1D, fc)
-    _, current_res_scales = _build_gc_current_density_scaling(nb_gc)
+    gc_current_distribution_residuals!(res_current, U_cell, i_fc, C_O2_Pt, i_fc_cell, sv_cell_1D, fc, cfg)
+    _, current_res_scales = _build_gc_current_density_scaling(cfg)
     res_current ./= current_res_scales
 
     # Algebraic block B: inlet-flow residuals in physical units.
@@ -122,11 +122,11 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
                          for i in 1:nb_gc]
 
     # Calculation of the flows for each GC node.
-    flows_1D_MEA = [calculate_flows_1D_MEA(sv_cell_1D[i], i_fc[i], v_a[i], v_c[i], fc)
+    flows_1D_MEA = [calculate_flows_1D_MEA(sv_cell_1D[i], i_fc[i], v_a[i], v_c[i], fc, cfg)
                     for i in 1:nb_gc]
-    flows_1D_GC_manifold = calculate_flows_1D_GC_manifold(sv_cell_1D, sv_manifold_1D, sv_auxiliary, i_fc_cell,
+    flows_1D_GC_manifold = calculate_flows_1D_GC_manifold(sv_cell_1D, sv_auxiliary, i_fc_cell,
                                                            v_a, v_c, Pa_in, Pc_in, fc, cfg)
-    heat_flows_global = [calculate_heat_transfers(sv_cell_1D[i], i_fc[i], fc, flows_1D_MEA[i].S_abs,
+    heat_flows_global = [calculate_heat_transfers(sv_cell_1D[i], i_fc[i], fc, cfg, flows_1D_MEA[i].S_abs,
                                                   flows_1D_MEA[i].Sl)
                          for i in 1:nb_gc]
 

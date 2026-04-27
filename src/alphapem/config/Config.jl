@@ -20,6 +20,7 @@ module Config
 
 include("current_parameters.jl")
 include("fuel_cell_parameters.jl")
+include("numerical_parameters.jl")
 include("state_scaling.jl")
 include("simulation_config.jl")
 using .StateScalingModule: CellStateScaling, ManifoldStateScaling, AuxiliaryStateScaling,

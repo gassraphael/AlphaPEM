@@ -25,7 +25,7 @@ Constants:
 module SimulationConfigModule
 
 using ..Config: AbstractCurrentParams, StepParams, PolarizationParams,
-                 PolarizationCalibrationParams, EISParams
+                 PolarizationCalibrationParams, EISParams, NumericalParams
 using ..StateScalingModule: StateScaling
 
 export SimulationConfig, validate_config
@@ -33,6 +33,7 @@ export SimulationConfig, validate_config
 Base.@kwdef mutable struct SimulationConfig{T<:AbstractCurrentParams}
     type_fuel_cell::Symbol = :ZSW_GenStack
     type_current::T = PolarizationParams()
+    numerical_parameters::NumericalParams = NumericalParams()
     voltage_zone::Symbol = :full
     type_auxiliary::Symbol = :no_auxiliary
     type_flow::Symbol = :counter_flow
@@ -114,6 +115,15 @@ function validate_config(cfg::SimulationConfig)
     auxiliary_scaling = cfg.state_scaling.auxiliary
 
     for (name, value) in (
+        ("numerical_parameters.nb_gc", cfg.numerical_parameters.nb_gc),
+        ("numerical_parameters.nb_gdl", cfg.numerical_parameters.nb_gdl),
+        ("numerical_parameters.nb_mpl", cfg.numerical_parameters.nb_mpl),
+        ("numerical_parameters.nb_man", cfg.numerical_parameters.nb_man),
+        ("numerical_parameters.purge_time", cfg.numerical_parameters.purge_time),
+        ("numerical_parameters.delta_purge", cfg.numerical_parameters.delta_purge),
+        ("numerical_parameters.delta_t_dyn_step", cfg.numerical_parameters.delta_t_dyn_step),
+        ("numerical_parameters.rtol", cfg.numerical_parameters.rtol),
+        ("numerical_parameters.atol", cfg.numerical_parameters.atol),
         ("state_scaling.cell.C_v", cell_scaling.C_v),
         ("state_scaling.cell.C_H2", cell_scaling.C_H2),
         ("state_scaling.cell.C_O2", cell_scaling.C_O2),
@@ -132,6 +142,11 @@ function validate_config(cfg::SimulationConfig)
     )
         value > 0.0 || error("Invalid $name: $value (must be > 0)")
     end
+
+    cfg.numerical_parameters.nb_gc >= 1 || error("Invalid numerical_parameters.nb_gc: must be >= 1")
+    cfg.numerical_parameters.nb_gdl >= 1 || error("Invalid numerical_parameters.nb_gdl: must be >= 1")
+    cfg.numerical_parameters.nb_mpl >= 1 || error("Invalid numerical_parameters.nb_mpl: must be >= 1")
+    cfg.numerical_parameters.nb_man >= 1 || error("Invalid numerical_parameters.nb_man: must be >= 1")
 
     return cfg
 end

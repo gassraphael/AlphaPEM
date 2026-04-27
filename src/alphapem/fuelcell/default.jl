@@ -12,7 +12,6 @@ struct DefaultFuelCell <: AbstractFuelCell
     operating_conditions::OperatingConditions
     pola_exp_data::PolaExperimentalData
     pola_exp_data_cali::PolaExperimentalData
-    numerical_parameters::NumericalParams
 end
 
 function DefaultFuelCell()
@@ -20,8 +19,7 @@ function DefaultFuelCell()
         PhysicalParams(),
         OperatingConditions(),
         PolaExperimentalData(),
-        PolaExperimentalData(),
-        NumericalParams()
+        PolaExperimentalData()
     )
     return fc
 end

@@ -16,6 +16,8 @@ i_fc : Float64
     Current density of the fuel cell (A/m²).
 fc : AbstractFuelCell
     The fuel cell instance providing model parameters.
+cfg : SimulationConfig
+    Simulation configuration (provides numerical parameters).
 
 Returns
 -------
@@ -28,11 +30,11 @@ Tuple(29 elements)
     Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl, Dc_eff_cmpl_cgdl,
     Dc_eff_cgdl_cgdl, T_acl_mem_ccl)
 """
-function flows_1D_MEA_int_values(sv::CellState1D, i_fc::Float64, fc::AbstractFuelCell)::Tuple
+function flows_1D_MEA_int_values(sv::CellState1D, i_fc::Float64, fc::AbstractFuelCell, cfg::SimulationConfig)::Tuple
 
     # Extraction of the parameters
     pp = fc.physical_parameters
-    np = fc.numerical_parameters
+    np = cfg.numerical_parameters
     Hacl, Hccl, Hmem, Hgdl, Hmpl = pp.Hacl, pp.Hccl, pp.Hmem, pp.Hgdl, pp.Hmpl
     Wagc, Wcgc = pp.Wagc, pp.Wcgc
     epsilon_gdl, epsilon_mpl, epsilon_c, e = pp.epsilon_gdl, pp.epsilon_mpl, pp.epsilon_c, pp.e

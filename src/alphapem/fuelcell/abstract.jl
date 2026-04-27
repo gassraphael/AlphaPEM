@@ -30,10 +30,3 @@ function pola_exp_data(fc::AbstractFuelCell, type_fuel_cell::Symbol, voltage_zon
     throw(MethodError(experimental_values, (fc, type_fuel_cell, voltage_zone)))
 end
 
-"""
-    numerical_params(fc::AbstractFuelCell)::NumericalParams
-Return the numerical parameters of the fuel cell.
-"""
-function numerical_params(fc::AbstractFuelCell)::NumericalParams
-    throw(MethodError(numerical_params, (fc,)))
-end

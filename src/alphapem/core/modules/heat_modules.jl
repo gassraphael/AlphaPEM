@@ -14,6 +14,8 @@ sv : Dict
     `sv` is a contraction of solver_variables for enhanced readability.
 fc : AbstractFuelCell
     The fuel cell instance providing model parameters.
+cfg : SimulationConfig
+    Simulation configuration (provides numerical parameters).
 
 Returns
 -------
@@ -21,11 +23,12 @@ Tuple
     Tuple containing the intermediate values used by the heat calculation.
 """
 function heat_transfer_int_values(sv::CellState1D,
-                                  fc::AbstractFuelCell)::Tuple
+                                  fc::AbstractFuelCell,
+                                  cfg::SimulationConfig)::Tuple
 
     # Extraction of the parameters
     pp = fc.physical_parameters
-    np = fc.numerical_parameters
+    np = cfg.numerical_parameters
     Hgdl, Hmpl, Hacl, Hccl = pp.Hgdl, pp.Hmpl, pp.Hacl, pp.Hccl
     Hmem, epsilon_gdl, epsilon_mpl, epsilon_c = pp.Hmem, pp.epsilon_gdl, pp.epsilon_mpl, pp.epsilon_c
     nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl

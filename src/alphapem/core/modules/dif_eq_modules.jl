@@ -26,7 +26,7 @@ function calculate_dif_eq_int_values(t::Float64,
     # Extraction of the parameters
     oc = fc.operating_conditions
     pp = fc.physical_parameters
-    np = fc.numerical_parameters
+    np = cfg.numerical_parameters
     T_des, y_H2_in = oc.T_des, oc.y_H2_in
     Hmem, Hacl, Hccl = pp.Hmem, pp.Hacl, pp.Hccl
     A_T_a, A_T_c = pp.A_T_a, pp.A_T_c
@@ -419,12 +419,12 @@ cross-module load-order coupling (`core/modules` is loaded before `core/models`)
 """
 function build_solver_state_scaling(simu;
                                     include_algebraic::Bool=true)::Vector{Float64}
-    return build_internal_solver_state_scaling(simu.fuel_cell, simu.cfg;
+    return build_internal_solver_state_scaling(simu.cfg;
                                                include_algebraic=include_algebraic)
 end
 
 """
-    build_internal_solver_state_scaling(fc, cfg) -> Vector{Float64}
+    build_internal_solver_state_scaling(cfg) -> Vector{Float64}
 
 Build the fixed internal solver scaling vector used during integration.
 
@@ -432,10 +432,9 @@ This helper lives in `core/modules` rather than `core/models` so that the
 solver-scaling infrastructure remains grouped with the packing/unpacking helpers
 and can be reused by both the RHS and the simulation orchestration code.
 """
-function build_internal_solver_state_scaling(fc::AbstractFuelCell,
-                                             cfg::SimulationConfig;
+function build_internal_solver_state_scaling(cfg::SimulationConfig;
                                              include_algebraic::Bool=false)::Vector{Float64}
-    np = fc.numerical_parameters
+    np = cfg.numerical_parameters
     return build_solver_state_scaling(np.nb_gc, np.nb_gdl, np.nb_mpl, np.nb_man,
                                       cfg.type_auxiliary, StateScaling();
                                       include_algebraic=include_algebraic)

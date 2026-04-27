@@ -33,13 +33,14 @@ function calculate_flows_1D_MEA(sv_1D::CellState1D,
                                 i_fc::Float64,
                                 v_a::Float64,
                                 v_c::Float64,
-                                fc::AbstractFuelCell)
+                                fc::AbstractFuelCell,
+                                cfg::SimulationConfig)
 
     # ___________________________________________________Preliminaries__________________________________________________
 
     # Extraction of parameters
     pp = fc.physical_parameters
-    np = fc.numerical_parameters
+    np = cfg.numerical_parameters
     T_des = fc.operating_conditions.T_des
     Hmem, Hacl, Hccl = pp.Hmem, pp.Hacl, pp.Hccl
     Wagc, Wcgc, Hagc, Hcgc = pp.Wagc, pp.Wcgc, pp.Hagc, pp.Hcgc
@@ -76,7 +77,7 @@ function calculate_flows_1D_MEA(sv_1D::CellState1D,
      D_eff_EOD_mem_ccl, D_lambda_eff_acl_mem, D_lambda_eff_mem_ccl, D_cap_agdl_agdl, D_cap_agdl_ampl,
      D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_ccl_cmpl, D_cap_cmpl_cmpl, D_cap_cmpl_cgdl, D_cap_cgdl_cgdl,
      Da_eff_agdl_agdl, Da_eff_agdl_ampl, Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl,
-     Dc_eff_cmpl_cgdl, Dc_eff_cgdl_cgdl, T_acl_mem_ccl) = flows_1D_MEA_int_values(sv_1D, i_fc, fc)
+     Dc_eff_cmpl_cgdl, Dc_eff_cgdl_cgdl, T_acl_mem_ccl) = flows_1D_MEA_int_values(sv_1D, i_fc, fc, cfg)
 
     # ________________________________________Dissolved water flows (mol.m-2.s-1)_______________________________________
 

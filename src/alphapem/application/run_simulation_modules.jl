@@ -252,7 +252,7 @@ without external algebraic re-solves.
 function _extract_last_internal_state(simu::AlphaPEM)::Vector{Float64}
     simu.sol === nothing && throw(ArgumentError("Cannot extract internal state before a successful solve."))
 
-    solver_state_scaling = build_internal_solver_state_scaling(simu.fuel_cell, simu.cfg; include_algebraic=true)
+    solver_state_scaling = build_internal_solver_state_scaling(simu.cfg; include_algebraic=true)
     length(solver_state_scaling) == length(simu.sol.u[end]) ||
         throw(ArgumentError("Internal solver scaling size mismatch in _extract_last_internal_state."))
 

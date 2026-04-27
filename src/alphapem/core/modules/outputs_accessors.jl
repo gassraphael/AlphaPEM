@@ -26,15 +26,15 @@ gas_channel_count(::SimulationOutputs{nb_gdl, nb_mpl, nb_gc}) where {nb_gdl, nb_
 
 
 """Return the middle gas-channel index used by legacy display routines."""
-middle_gas_channel_index(fc::AbstractFuelCell) = cld(fc.numerical_parameters.nb_gc, 2)
+middle_gas_channel_index(cfg::SimulationConfig) = cld(cfg.numerical_parameters.nb_gc, 2)
 
 
 """Return the middle GDL index used by legacy display routines."""
-middle_gdl_index(fc::AbstractFuelCell) = cld(fc.numerical_parameters.nb_gdl, 2)
+middle_gdl_index(cfg::SimulationConfig) = cld(cfg.numerical_parameters.nb_gdl, 2)
 
 
 """Return the middle MPL index used by legacy display routines."""
-middle_mpl_index(fc::AbstractFuelCell) = cld(fc.numerical_parameters.nb_mpl, 2)
+middle_mpl_index(cfg::SimulationConfig) = cld(cfg.numerical_parameters.nb_mpl, 2)
 
 
 """Return the display start time when a current profile exposes one.
@@ -81,7 +81,7 @@ mea_state_at(state::FuelCellStateP2D, gc_index::Integer) = state.nodes[gc_index]
 
 
 """Return the MEA state located at the middle of the gas channel."""
-middle_mea_state(state::FuelCellStateP2D, fc::AbstractFuelCell) = mea_state_at(state, middle_gas_channel_index(fc))
+middle_mea_state(state::FuelCellStateP2D, cfg::SimulationConfig) = mea_state_at(state, middle_gas_channel_index(cfg))
 
 
 """Collect a time series from the typed MEA-state history for one GC position."""
@@ -94,8 +94,8 @@ end
 
 """Collect a time series from the typed MEA-state history at the middle GC position."""
 extract_mid_mea_series(outputs::SimulationOutputs,
-                       fc::AbstractFuelCell,
-                       extractor::Function) = extract_mea_series(outputs, middle_gas_channel_index(fc), extractor)
+                       cfg::SimulationConfig,
+                       extractor::Function) = extract_mea_series(outputs, middle_gas_channel_index(cfg), extractor)
 
 
 """Collect and mask a time series from the typed MEA-state history for one GC position."""
@@ -111,11 +111,10 @@ end
 
 """Collect and mask a time series from the typed MEA-state history at the middle GC position."""
 extract_masked_mid_mea_series(outputs::SimulationOutputs,
-                              fc::AbstractFuelCell,
-                              cd::AbstractCurrent,
                               cfg::SimulationConfig,
+                              cd::AbstractCurrent,
                               extractor::Function) =
-    extract_masked_mea_series(outputs, middle_gas_channel_index(fc), cd, cfg, extractor)
+    extract_masked_mea_series(outputs, middle_gas_channel_index(cfg), cd, cfg, extractor)
 
 
 """Collect a derived time series stored per gas-channel node."""
@@ -139,18 +138,17 @@ end
 
 """Collect a derived time series stored per gas-channel node at the middle GC position."""
 extract_mid_derived_gc_series(outputs::SimulationOutputs,
-                              fc::AbstractFuelCell,
+                              cfg::SimulationConfig,
                               accessor::Function) =
-    extract_derived_gc_series(outputs, middle_gas_channel_index(fc), accessor)
+    extract_derived_gc_series(outputs, middle_gas_channel_index(cfg), accessor)
 
 
 """Collect and mask a derived time series stored per gas-channel node at the middle GC position."""
 extract_masked_mid_derived_gc_series(outputs::SimulationOutputs,
-                                     fc::AbstractFuelCell,
-                                     cd::AbstractCurrent,
                                      cfg::SimulationConfig,
+                                     cd::AbstractCurrent,
                                      accessor::Function) =
-    extract_masked_derived_gc_series(outputs, middle_gas_channel_index(fc), cd, cfg, accessor)
+    extract_masked_derived_gc_series(outputs, middle_gas_channel_index(cfg), cd, cfg, accessor)
 
 
 """Return the nearest indices in `t_hist` associated with sampling times."""

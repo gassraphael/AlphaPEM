@@ -14,7 +14,6 @@ mutable struct ZSWFuelCell <: AbstractFuelCell
     operating_conditions::OperatingConditions
     pola_exp_data::PolaExperimentalData
     pola_exp_data_cali::PolaExperimentalData
-    numerical_parameters::NumericalParams
 end
 
 # Simple constructor for ZSW
@@ -24,14 +23,12 @@ function ZSWFuelCell(type_fuel_cell::Symbol, voltage_zone::Symbol)
         PhysicalParams(),
         OperatingConditions(),
         PolaExperimentalData(),
-        PolaExperimentalData(),
-        NumericalParams()
+        PolaExperimentalData()
     )
     fc.physical_parameters = zsw_physical_params()
     fc.operating_conditions = zsw_operating_conditions(type_fuel_cell)
     fc.pola_exp_data = zsw_pola_exp_data(type_fuel_cell, voltage_zone)
     fc.pola_exp_data_cali = zsw_pola_exp_data_calibration(type_fuel_cell, voltage_zone)
-    fc.numerical_parameters = zsw_numerical_params()
     return fc
 end
 
@@ -382,18 +379,3 @@ function zsw_pola_exp_data_calibration(type_fuel_cell::Symbol, voltage_zone::Sym
     return PolaExperimentalData(i_exp = i_exp_cali .* 1e4, U_exp = U_exp_cali)
 end
 
-function zsw_numerical_params()
-    return NumericalParams(
-        # Setting the number of model points placed inside each layer:
-        nb_gc = 1,                             # Number of model nodes placed inside each gas channel
-        nb_gdl = 3,                            # Number of model nodes placed inside each GDL
-        nb_mpl = 2,                            # Number of model nodes placed inside each MPL
-        nb_man = 1,                            # Number of model nodes placed inside each manifold line
-        # Setting the purging parameters of the system and the dynamic display of the step current density function:
-        purge_time = 0.6,                      # The time for purging the system in seconds
-        delta_purge = 15.0,                    # The time between two purges in seconds
-        # Setting the tolerances for the system of ODEs solver:
-        rtol = 1e-4,                           # Relative tolerance for the system of ODEs solver
-        atol = 1e-7                            # Absolute tolerance for the system of ODEs solver
-    )
-end

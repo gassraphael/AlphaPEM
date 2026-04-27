@@ -36,11 +36,11 @@ Run a step-current simulation.
 
 - `:postrun` display timing : one full ODE solve followed by a display update.
 - `:live` display timing    : incremental solves separated by `delta_t_dyn_step`
-  (from `simu.fuel_cell.numerical_parameters`).
+  (from `simu.cfg.numerical_parameters`).
 """
 function launch_AlphaPEM_for_step_current(simu::AlphaPEM)::AlphaPEM
     # Figures preparation
-    nb_gc = simu.fuel_cell.numerical_parameters.nb_gc
+    nb_gc = simu.cfg.numerical_parameters.nb_gc
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(simu.cfg, nb_gc)
 
     # Dynamic display requires a dedicated segmented simulation flow.
@@ -53,7 +53,7 @@ function launch_AlphaPEM_for_step_current(simu::AlphaPEM)::AlphaPEM
         # Extraction of parameters
         p       = simu.cfg.type_current       # ::StepParams
         tf_step = p.delta_t_ini + p.delta_t_load + p.delta_t_break
-        delta_t_dyn_step = simu.fuel_cell.numerical_parameters.delta_t_dyn_step
+        delta_t_dyn_step = simu.cfg.numerical_parameters.delta_t_dyn_step
         delta_t_dyn_step > 0 || throw(ArgumentError("delta_t_dyn_step must be > 0 for dynamic step runs."))
 
         # Initialization

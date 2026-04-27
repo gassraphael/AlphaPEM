@@ -11,8 +11,6 @@ Parameters
 ----------
 sv_1D_cell : AbstractVector{<:CellState1D}
     Typed variables calculated by the solver (cell internal states).
-sv_1D_manifold
-    Typed variables calculated by the solver (manifold internal states).
 sv_auxiliary
     Typed variables calculated by the solver (auxiliary internal states).
 i_fc_cell : Float64
@@ -36,7 +34,6 @@ GCManifoldFlows1D{NB_GC}
     Typed global and species-specific flows in the gas channels and auxiliaries.
 """
 function calculate_flows_1D_GC_manifold(sv_1D_cell::AbstractVector{<:CellState1D},
-                                        sv_1D_manifold,
                                         sv_auxiliary,
                                         i_fc_cell::Float64,
                                         v_a::Vector{Float64},
@@ -51,7 +48,7 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::AbstractVector{<:CellState1D
     # Extraction of the parameters
     oc = fc.operating_conditions
     pp = fc.physical_parameters
-    np = fc.numerical_parameters
+    np = cfg.numerical_parameters
     T_des, Phi_a_des, Phi_c_des, Sa, Sc, y_H2_in = oc.T_des, oc.Phi_a_des, oc.Phi_c_des, oc.Sa, oc.Sc, oc.y_H2_in
     Aact, nb_cell, Hagc, Hcgc = pp.Aact, pp.nb_cell, pp.Hagc, pp.Hcgc
     Wagc, Wcgc, Lgc, nb_channel_in_gc, A_T_a, A_T_c = pp.Wagc, pp.Wcgc, pp.Lgc, pp.nb_channel_in_gc, pp.A_T_a, pp.A_T_c

@@ -10,7 +10,8 @@ physical API for `calculate_1D_GC_current_density`.
 """
 
 """Build unknown and residual scaling vectors for the GC current solve."""
-function _build_gc_current_density_scaling(nb_gc::Int)::Tuple{Vector{Float64}, Vector{Float64}}
+function _build_gc_current_density_scaling(cfg::SimulationConfig)::Tuple{Vector{Float64}, Vector{Float64}}
+    nb_gc = cfg.numerical_parameters.nb_gc
     cd_scaling = StateScaling().current_distribution
 
     x_scales = Vector{Float64}(undef, 2 * nb_gc + 1)
@@ -38,8 +39,10 @@ function gc_current_distribution_residuals!(res::AbstractVector,
                                             C_O2_Pt::AbstractVector{<:Real},
                                             i_fc_cell::Real,
                                             sv::AbstractVector{<:CellState1D},
-                                            fc::AbstractFuelCell)
-    nb_gc = fc.numerical_parameters.nb_gc
+                                            fc::AbstractFuelCell,
+                                            cfg::SimulationConfig)
+    nb_gc = cfg.numerical_parameters.nb_gc
+    length(sv) == nb_gc || throw(ArgumentError("sv size mismatch with cfg.numerical_parameters.nb_gc in gc_current_distribution_residuals!."))
     length(i_fc) == nb_gc || throw(ArgumentError("i_fc size mismatch in gc_current_distribution_residuals!."))
     length(C_O2_Pt) == nb_gc || throw(ArgumentError("C_O2_Pt size mismatch in gc_current_distribution_residuals!."))
     length(res) == 2 * nb_gc + 1 || throw(ArgumentError("res size mismatch in gc_current_distribution_residuals!."))

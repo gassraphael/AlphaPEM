@@ -23,6 +23,8 @@ sv : AbstractVector{<:CellState1D}
     Typed internal states calculated by the solver.
     sv is a contraction of solver_variables for enhanced readability.
     sv[i] is the typed 1D cell-column state (MEA+GC) associated with gas channel i.
+ cfg : SimulationConfig
+     Simulation configuration (source of truth for numerical discretisation).
 fc : AbstractFuelCell
     Fuel cell instance providing model parameters.
 
@@ -33,10 +35,13 @@ Vector{Float64}
     Julia vectors are naturally 1-based, so no dummy element is stored at index 0.
     i_fc[i] corresponds to gas channel i, for i in 1:nb_gc.
 """
-function calculate_1D_GC_current_density(i_fc_cell::Float64, sv::AbstractVector{<:CellState1D}, fc::AbstractFuelCell)::Vector{Float64}
+function calculate_1D_GC_current_density(i_fc_cell::Float64,
+                                         sv::AbstractVector{<:CellState1D},
+                                         cfg::SimulationConfig,
+                                         fc::AbstractFuelCell)::Vector{Float64}
 
     # Extraction of the parameters
-    nb_gc = fc.numerical_parameters.nb_gc
+    nb_gc = cfg.numerical_parameters.nb_gc
         # Fast path: if there is only one gas channel, the local current density equals the cell current density.
     nb_gc == 1 && return [Float64(i_fc_cell)]
     # Extraction of the variables
@@ -44,7 +49,7 @@ function calculate_1D_GC_current_density(i_fc_cell::Float64, sv::AbstractVector{
 
     # Internal scaling improves conditioning of this nonlinear solve (mixed
     # voltage/current/concentration magnitudes) while keeping a physical API.
-    x_scales, res_scales = _build_gc_current_density_scaling(nb_gc)
+    x_scales, res_scales = _build_gc_current_density_scaling(cfg)
 
     # Residual function for NonlinearSolve solver applied on the local current density
     function residuals!(res, x, _)
@@ -58,7 +63,7 @@ function calculate_1D_GC_current_density(i_fc_cell::Float64, sv::AbstractVector{
         @views C_O2_Pt_guessed = x_phys[nb_gc+2:2*nb_gc+1]  # view: no copy allocated
 
         # Residuals: difference between guessed and calculated algebraic states.
-        gc_current_distribution_residuals!(res, U_cell_guessed, i_fc_guessed, C_O2_Pt_guessed, i_fc_cell, sv, fc)
+        gc_current_distribution_residuals!(res, U_cell_guessed, i_fc_guessed, C_O2_Pt_guessed, i_fc_cell, sv, fc, cfg)
 
         # Return dimensionless residuals to balance equation blocks.
         res ./= res_scales

@@ -30,6 +30,7 @@ MEAHeatFlows1D{NB_GDL, NB_MPL}
 function calculate_heat_transfers(sv_1D::CellState1D{NB_GDL, NB_MPL},
                                   i_fc::Float64,
                                   fc::AbstractFuelCell,
+                                  cfg::SimulationConfig,
                                   S_abs::MEASorptionSources,
                                   Sl::MEALiquidSources{NB_GDL, NB_MPL}
                                   )::MEAHeatFlows1D{NB_GDL, NB_MPL} where {NB_GDL, NB_MPL}
@@ -43,7 +44,7 @@ function calculate_heat_transfers(sv_1D::CellState1D{NB_GDL, NB_MPL},
 
     # Extraction of the parameters
     pp = fc.physical_parameters
-    np = fc.numerical_parameters
+    np = cfg.numerical_parameters
     T_des = fc.operating_conditions.T_des
     Hmem, Hgdl, Hmpl, Hacl, Hccl = pp.Hmem, pp.Hgdl, pp.Hmpl, pp.Hacl, pp.Hccl
     epsilon_gdl, epsilon_mpl, epsilon_c = pp.epsilon_gdl, pp.epsilon_mpl, pp.epsilon_c
@@ -52,7 +53,7 @@ function calculate_heat_transfers(sv_1D::CellState1D{NB_GDL, NB_MPL},
     # Intermediate values
     (Hgdl_node, Hmpl_node, k_th_eff_agc_agdl, k_th_eff_agdl_agdl, k_th_eff_agdl_ampl, k_th_eff_ampl_ampl,
      k_th_eff_ampl_acl, k_th_eff_acl_mem, k_th_eff_mem_ccl, k_th_eff_ccl_cmpl, k_th_eff_cmpl_cmpl,
-     k_th_eff_cmpl_cgdl, k_th_eff_cgdl_cgdl, k_th_eff_cgdl_cgc) = heat_transfer_int_values(sv_1D, fc)
+     k_th_eff_cmpl_cgdl, k_th_eff_cgdl_cgdl, k_th_eff_cgdl_cgc) = heat_transfer_int_values(sv_1D, fc, cfg)
 
     # ______________________________________________Heat flows (J.m-2.s-1)______________________________________________
 

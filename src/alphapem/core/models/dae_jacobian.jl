@@ -45,7 +45,7 @@ function _build_dae_jacobian_prototype(residual!,
     # by central finite differences, and keep only entries above an adaptive noise threshold.
     fd_eps = cbrt(eps(Float64)) # Robust FD perturbation step for structural detection.
     sensitivity_atol = 1e-14 # In order to ignore finite difference noise
-    sensitivity_rtol = 1e-8 # In order to ignore finite difference noise
+    sensitivity_rtol = 1e-6 # In order to ignore finite difference noise
     for j in 1:n
         yj = initial_solver_values[j]
         delta = fd_eps * max(abs(yj), 1.0)

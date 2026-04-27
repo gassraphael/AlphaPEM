@@ -24,13 +24,12 @@ using .PlotHelpers: _publication_colors,
 
 """Plot current density through the gas-channel direction as a function of time."""
 function plot_ifc_1D_temporal(outputs::SimulationOutputs,
-                              fc::AbstractFuelCell,
                               cd::AbstractCurrent,
                               cfg::SimulationConfig,
                               ax)
     palette = _publication_colors()
     t = masked_time_history(outputs, cd, cfg)
-    nb_gc = fc.numerical_parameters.nb_gc
+    nb_gc = cfg.numerical_parameters.nb_gc
 
     i_fc_cell_t = current(cd, t) ./ 1e4
     lines!(ax, t, i_fc_cell_t; color=:black, linewidth=2.8, label=lsub("i", "fc,cell"))
@@ -69,26 +68,25 @@ end
 
 """Plot vapour concentration through the MEA middle channel as a function of time."""
 function plot_C_v_1D_temporal(outputs::SimulationOutputs,
-                              fc::AbstractFuelCell,
                               cd::AbstractCurrent,
                               cfg::SimulationConfig,
                               ax)
     palette = _publication_colors()
-    nb_gdl_mid = middle_gdl_index(fc)
-    nb_mpl_mid = middle_mpl_index(fc)
+    nb_gdl_mid = middle_gdl_index(cfg)
+    nb_mpl_mid = middle_mpl_index(cfg)
     t = masked_time_history(outputs, cd, cfg)
-    T_ccl = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ccl.T)
+    T_ccl = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ccl.T)
     C_v_sat_ccl = [C_v_sat(T) for T in T_ccl]
 
     series = [
-        (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.C_v), lsub("C", "v,agc")),
-        (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agdl[nb_gdl_mid].C_v), lsub("C", "v,agdl")),
-        (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ampl[nb_mpl_mid].C_v), lsub("C", "v,ampl")),
-        (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.acl.C_v), lsub("C", "v,acl")),
-        (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ccl.C_v), lsub("C", "v,ccl")),
-        (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cmpl[nb_mpl_mid].C_v), lsub("C", "v,cmpl")),
-        (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgdl[nb_gdl_mid].C_v), lsub("C", "v,cgdl")),
-        (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.C_v), lsub("C", "v,cgc")),
+        (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agc.C_v), lsub("C", "v,agc")),
+        (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agdl[nb_gdl_mid].C_v), lsub("C", "v,agdl")),
+        (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ampl[nb_mpl_mid].C_v), lsub("C", "v,ampl")),
+        (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.acl.C_v), lsub("C", "v,acl")),
+        (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ccl.C_v), lsub("C", "v,ccl")),
+        (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cmpl[nb_mpl_mid].C_v), lsub("C", "v,cmpl")),
+        (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgdl[nb_gdl_mid].C_v), lsub("C", "v,cgdl")),
+        (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgc.C_v), lsub("C", "v,cgc")),
     ]
 
     for (i, (y, lbl)) in enumerate(series)
@@ -108,21 +106,20 @@ end
 
 """Plot membrane/CL water content as a function of time."""
 function plot_lambda_1D_temporal(outputs::SimulationOutputs,
-                                 fc::AbstractFuelCell,
                                  cd::AbstractCurrent,
                                  cfg::SimulationConfig,
                                  ax)
     palette = _publication_colors()
-    nb_gc = fc.numerical_parameters.nb_gc
-    mid_gc = middle_gas_channel_index(fc)
+    nb_gc = cfg.numerical_parameters.nb_gc
+    mid_gc = middle_gas_channel_index(cfg)
     if cfg.display_timing == :postrun && cfg.type_current isa Union{PolarizationParams, PolarizationCalibrationParams}
         t_hist = time_history(outputs)
         sample_indices = polarisation_sampling_indices(outputs, cd)
         ifc_discretized = [current(cd, t_hist[idx]) / 1e4 for idx in sample_indices]
 
-        lambda_acl_t = extract_mid_mea_series(outputs, fc, mea -> mea.acl.lambda)[sample_indices]
-        lambda_mem_t = extract_mid_mea_series(outputs, fc, mea -> mea.mem.lambda)[sample_indices]
-        lambda_ccl_t = extract_mid_mea_series(outputs, fc, mea -> mea.ccl.lambda)[sample_indices]
+        lambda_acl_t = extract_mid_mea_series(outputs, cfg, mea -> mea.acl.lambda)[sample_indices]
+        lambda_mem_t = extract_mid_mea_series(outputs, cfg, mea -> mea.mem.lambda)[sample_indices]
+        lambda_ccl_t = extract_mid_mea_series(outputs, cfg, mea -> mea.ccl.lambda)[sample_indices]
 
         scatter!(ax, ifc_discretized, lambda_acl_t; color=palette[3], markersize=8, label=lsub("λ", "acl"))
         scatter!(ax, ifc_discretized, lambda_mem_t; color=palette[4], markersize=8, label=lsub("λ", "mem"))
@@ -136,9 +133,9 @@ function plot_lambda_1D_temporal(outputs::SimulationOutputs,
                         legend_position=:lb)
     else
         t = masked_time_history(outputs, cd, cfg)
-        lines!(ax, t, extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.acl.lambda);
+        lines!(ax, t, extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.acl.lambda);
                color=palette[3], label=lsub("λ", "acl"))
-        lines!(ax, t, extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.mem.lambda);
+        lines!(ax, t, extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.mem.lambda);
                color=palette[4], label=lsub("λ", "mem"))
         lambda_ccl_in_t = extract_masked_mea_series(outputs, 1, cd, cfg, mea -> mea.ccl.lambda)
         lambda_ccl_mid_t = extract_masked_mea_series(outputs, mid_gc, cd, cfg, mea -> mea.ccl.lambda)
@@ -151,8 +148,8 @@ function plot_lambda_1D_temporal(outputs::SimulationOutputs,
         nb_gc != 1 &&
             lines!(ax, t, lambda_ccl_out_t;
                    color=palette[5], linestyle=:dot, label=lsub("λ", "ccl,out"))
-        lambda_acl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.acl.lambda)
-        lambda_mem_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.mem.lambda)
+        lambda_acl_t = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.acl.lambda)
+        lambda_mem_t = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.mem.lambda)
         y_series = [lambda_acl_t, lambda_mem_t, lambda_ccl_in_t]
         mid_gc != 1 && mid_gc != nb_gc && push!(y_series, lambda_ccl_mid_t)
         nb_gc != 1 && push!(y_series, lambda_ccl_out_t)
@@ -168,27 +165,26 @@ end
 
 """Plot liquid water saturation as a function of time."""
 function plot_s_1D_temporal(outputs::SimulationOutputs,
-                            fc::AbstractFuelCell,
                             cd::AbstractCurrent,
                             cfg::SimulationConfig,
                             ax)
     palette = _publication_colors()
-    nb_gdl_mid = middle_gdl_index(fc)
-    nb_mpl_mid = middle_mpl_index(fc)
+    nb_gdl_mid = middle_gdl_index(cfg)
+    nb_mpl_mid = middle_mpl_index(cfg)
     if cfg.display_timing == :postrun && cfg.type_current isa Union{PolarizationParams, PolarizationCalibrationParams}
         t_hist = time_history(outputs)
         sample_indices = polarisation_sampling_indices(outputs, cd)
         ifc_discretized = [current(cd, t_hist[idx]) / 1e4 for idx in sample_indices]
 
         series = [
-            (extract_mid_mea_series(outputs, fc, mea -> mea.agc.s)[sample_indices], lsub("s", "agc")),
-            (extract_mid_mea_series(outputs, fc, mea -> mea.agdl[nb_gdl_mid].s)[sample_indices], lsub("s", "agdl")),
-            (extract_mid_mea_series(outputs, fc, mea -> mea.ampl[nb_mpl_mid].s)[sample_indices], lsub("s", "ampl")),
-            (extract_mid_mea_series(outputs, fc, mea -> mea.acl.s)[sample_indices], lsub("s", "acl")),
-            (extract_mid_mea_series(outputs, fc, mea -> mea.ccl.s)[sample_indices], lsub("s", "ccl")),
-            (extract_mid_mea_series(outputs, fc, mea -> mea.cmpl[nb_mpl_mid].s)[sample_indices], lsub("s", "cmpl")),
-            (extract_mid_mea_series(outputs, fc, mea -> mea.cgdl[nb_gdl_mid].s)[sample_indices], lsub("s", "cgdl")),
-            (extract_mid_mea_series(outputs, fc, mea -> mea.cgc.s)[sample_indices], lsub("s", "cgc")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.agc.s)[sample_indices], lsub("s", "agc")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.agdl[nb_gdl_mid].s)[sample_indices], lsub("s", "agdl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.ampl[nb_mpl_mid].s)[sample_indices], lsub("s", "ampl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.acl.s)[sample_indices], lsub("s", "acl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.ccl.s)[sample_indices], lsub("s", "ccl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.cmpl[nb_mpl_mid].s)[sample_indices], lsub("s", "cmpl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.cgdl[nb_gdl_mid].s)[sample_indices], lsub("s", "cgdl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.cgc.s)[sample_indices], lsub("s", "cgc")),
         ]
 
         for (i, (y, lbl)) in enumerate(series)
@@ -204,14 +200,14 @@ function plot_s_1D_temporal(outputs::SimulationOutputs,
         t = masked_time_history(outputs, cd, cfg)
 
         series = [
-            (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.s), lsub("s", "agc")),
-            (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agdl[nb_gdl_mid].s), lsub("s", "agdl")),
-            (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ampl[nb_mpl_mid].s), lsub("s", "ampl")),
-            (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.acl.s), lsub("s", "acl")),
-            (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ccl.s), lsub("s", "ccl")),
-            (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cmpl[nb_mpl_mid].s), lsub("s", "cmpl")),
-            (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgdl[nb_gdl_mid].s), lsub("s", "cgdl")),
-            (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.s), lsub("s", "cgc")),
+            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agc.s), lsub("s", "agc")),
+            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agdl[nb_gdl_mid].s), lsub("s", "agdl")),
+            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ampl[nb_mpl_mid].s), lsub("s", "ampl")),
+            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.acl.s), lsub("s", "acl")),
+            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ccl.s), lsub("s", "ccl")),
+            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cmpl[nb_mpl_mid].s), lsub("s", "cmpl")),
+            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgdl[nb_gdl_mid].s), lsub("s", "cgdl")),
+            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgc.s), lsub("s", "cgc")),
         ]
 
         for (i, (y, lbl)) in enumerate(series)
@@ -229,28 +225,27 @@ end
 
 """Plot hydrogen concentration as a function of time."""
 function plot_C_H2_1D_temporal(outputs::SimulationOutputs,
-                               fc::AbstractFuelCell,
                                cd::AbstractCurrent,
                                cfg::SimulationConfig,
                                ax)
     palette = _publication_colors()
-    nb_gdl_mid = middle_gdl_index(fc)
-    nb_mpl_mid = middle_mpl_index(fc)
+    nb_gdl_mid = middle_gdl_index(cfg)
+    nb_mpl_mid = middle_mpl_index(cfg)
     t = masked_time_history(outputs, cd, cfg)
 
-    lines!(ax, t, extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.C_H2);
+    lines!(ax, t, extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agc.C_H2);
            color=palette[1], label=lsub("C", "H₂,agc"))
-    lines!(ax, t, extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agdl[nb_gdl_mid].C_H2);
+    lines!(ax, t, extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agdl[nb_gdl_mid].C_H2);
            color=palette[2], label=lsub("C", "H₂,agdl"))
-    lines!(ax, t, extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ampl[nb_mpl_mid].C_H2);
+    lines!(ax, t, extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ampl[nb_mpl_mid].C_H2);
            color=palette[3], label=lsub("C", "H₂,ampl"))
-    lines!(ax, t, extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.acl.C_H2);
+    lines!(ax, t, extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.acl.C_H2);
            color=palette[4], label=lsub("C", "H₂,acl"))
 
-    C_H2_agc_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.C_H2)
-    C_H2_agdl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agdl[nb_gdl_mid].C_H2)
-    C_H2_ampl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ampl[nb_mpl_mid].C_H2)
-    C_H2_acl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.acl.C_H2)
+    C_H2_agc_t = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agc.C_H2)
+    C_H2_agdl_t = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agdl[nb_gdl_mid].C_H2)
+    C_H2_ampl_t = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ampl[nb_mpl_mid].C_H2)
+    C_H2_acl_t = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.acl.C_H2)
     _set_dense_ticks!(ax, t, [C_H2_agc_t, C_H2_agdl_t, C_H2_ampl_t, C_H2_acl_t])
     _finalize_axis!(ax;
                     xlabel=rich("Time ", lsub("t", ""), " (s)"),
@@ -262,25 +257,24 @@ end
 
 """Plot oxygen concentration as a function of time."""
 function plot_C_O2_1D_temporal(outputs::SimulationOutputs,
-                               fc::AbstractFuelCell,
                                cd::AbstractCurrent,
                                cfg::SimulationConfig,
                                ax)
     palette = _publication_colors()
-    nb_gdl_mid = middle_gdl_index(fc)
-    nb_mpl_mid = middle_mpl_index(fc)
-    nb_gc = fc.numerical_parameters.nb_gc
-    mid_gc = middle_gas_channel_index(fc)
+    nb_gdl_mid = middle_gdl_index(cfg)
+    nb_mpl_mid = middle_mpl_index(cfg)
+    nb_gc = cfg.numerical_parameters.nb_gc
+    mid_gc = middle_gas_channel_index(cfg)
     t = masked_time_history(outputs, cd, cfg)
 
-    C_O2_Pt_t = extract_masked_mid_derived_gc_series(outputs, fc, cd, cfg, x -> x.C_O2_Pt)
+    C_O2_Pt_t = extract_masked_mid_derived_gc_series(outputs, cfg, cd, x -> x.C_O2_Pt)
     lines!(ax, t, C_O2_Pt_t;
            color=palette[10], label=lsub("C", "O₂,Pt"))
-    lines!(ax, t, extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ccl.C_O2);
+    lines!(ax, t, extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ccl.C_O2);
            color=palette[5], label=lsub("C", "O₂,ccl"))
-    lines!(ax, t, extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cmpl[nb_mpl_mid].C_O2);
+    lines!(ax, t, extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cmpl[nb_mpl_mid].C_O2);
            color=palette[6], label=lsub("C", "O₂,cmpl"))
-    lines!(ax, t, extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgdl[nb_gdl_mid].C_O2);
+    lines!(ax, t, extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgdl[nb_gdl_mid].C_O2);
            color=palette[7], label=lsub("C", "O₂,cgdl"))
     C_O2_cgc_in_t = extract_masked_mea_series(outputs, 1, cd, cfg, mea -> mea.cgc.C_O2)
     C_O2_cgc_mid_t = extract_masked_mea_series(outputs, mid_gc, cd, cfg, mea -> mea.cgc.C_O2)
@@ -294,9 +288,9 @@ function plot_C_O2_1D_temporal(outputs::SimulationOutputs,
         lines!(ax, t, C_O2_cgc_out_t;
                color=palette[8], linestyle=:dot, label=lsub("C", "O₂,cgc,out"))
 
-    C_O2_ccl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ccl.C_O2)
-    C_O2_cmpl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cmpl[nb_mpl_mid].C_O2)
-    C_O2_cgdl_t = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgdl[nb_gdl_mid].C_O2)
+    C_O2_ccl_t = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ccl.C_O2)
+    C_O2_cmpl_t = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cmpl[nb_mpl_mid].C_O2)
+    C_O2_cgdl_t = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgdl[nb_gdl_mid].C_O2)
     y_series = [C_O2_Pt_t, C_O2_ccl_t, C_O2_cmpl_t, C_O2_cgdl_t, C_O2_cgc_in_t]
     mid_gc != 1 && mid_gc != nb_gc && push!(y_series, C_O2_cgc_mid_t)
     nb_gc != 1 && push!(y_series, C_O2_cgc_out_t)
@@ -316,8 +310,8 @@ function plot_T_1D_temporal(outputs::SimulationOutputs,
                             cfg::SimulationConfig,
                             ax)
     palette = _publication_colors()
-    nb_gdl_mid = middle_gdl_index(fc)
-    nb_mpl_mid = middle_mpl_index(fc)
+    nb_gdl_mid = middle_gdl_index(cfg)
+    nb_mpl_mid = middle_mpl_index(cfg)
     T_des = fc.operating_conditions.T_des - 273.15
     if cfg.display_timing == :postrun && cfg.type_current isa Union{PolarizationParams, PolarizationCalibrationParams}
         t_hist = time_history(outputs)
@@ -325,15 +319,15 @@ function plot_T_1D_temporal(outputs::SimulationOutputs,
         ifc_discretized = [current(cd, t_hist[idx]) / 1e4 for idx in sample_indices]
 
         series = [
-            (extract_mid_mea_series(outputs, fc, mea -> mea.agc.T)[sample_indices] .- 273.15, lsub("T", "agc")),
-            (extract_mid_mea_series(outputs, fc, mea -> mea.agdl[nb_gdl_mid].T)[sample_indices] .- 273.15, lsub("T", "agdl")),
-            (extract_mid_mea_series(outputs, fc, mea -> mea.ampl[nb_mpl_mid].T)[sample_indices] .- 273.15, lsub("T", "ampl")),
-            (extract_mid_mea_series(outputs, fc, mea -> mea.acl.T)[sample_indices] .- 273.15, lsub("T", "acl")),
-            (extract_mid_mea_series(outputs, fc, mea -> mea.mem.T)[sample_indices] .- 273.15, lsub("T", "mem")),
-            (extract_mid_mea_series(outputs, fc, mea -> mea.ccl.T)[sample_indices] .- 273.15, lsub("T", "ccl")),
-            (extract_mid_mea_series(outputs, fc, mea -> mea.cmpl[nb_mpl_mid].T)[sample_indices] .- 273.15, lsub("T", "cmpl")),
-            (extract_mid_mea_series(outputs, fc, mea -> mea.cgdl[nb_gdl_mid].T)[sample_indices] .- 273.15, lsub("T", "cgdl")),
-            (extract_mid_mea_series(outputs, fc, mea -> mea.cgc.T)[sample_indices] .- 273.15, lsub("T", "cgc")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.agc.T)[sample_indices] .- 273.15, lsub("T", "agc")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.agdl[nb_gdl_mid].T)[sample_indices] .- 273.15, lsub("T", "agdl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.ampl[nb_mpl_mid].T)[sample_indices] .- 273.15, lsub("T", "ampl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.acl.T)[sample_indices] .- 273.15, lsub("T", "acl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.mem.T)[sample_indices] .- 273.15, lsub("T", "mem")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.ccl.T)[sample_indices] .- 273.15, lsub("T", "ccl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.cmpl[nb_mpl_mid].T)[sample_indices] .- 273.15, lsub("T", "cmpl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.cgdl[nb_gdl_mid].T)[sample_indices] .- 273.15, lsub("T", "cgdl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.cgc.T)[sample_indices] .- 273.15, lsub("T", "cgc")),
         ]
 
         for (i, (y, lbl)) in enumerate(series)
@@ -352,15 +346,15 @@ function plot_T_1D_temporal(outputs::SimulationOutputs,
         t = masked_time_history(outputs, cd, cfg)
 
         series = [
-            (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.T) .- 273.15, lsub("T", "agc")),
-            (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agdl[nb_gdl_mid].T) .- 273.15, lsub("T", "agdl")),
-            (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ampl[nb_mpl_mid].T) .- 273.15, lsub("T", "ampl")),
-            (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.acl.T) .- 273.15, lsub("T", "acl")),
-            (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.mem.T) .- 273.15, lsub("T", "mem")),
-            (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.ccl.T) .- 273.15, lsub("T", "ccl")),
-            (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cmpl[nb_mpl_mid].T) .- 273.15, lsub("T", "cmpl")),
-            (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgdl[nb_gdl_mid].T) .- 273.15, lsub("T", "cgdl")),
-            (extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.T) .- 273.15, lsub("T", "cgc")),
+            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agc.T) .- 273.15, lsub("T", "agc")),
+            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agdl[nb_gdl_mid].T) .- 273.15, lsub("T", "agdl")),
+            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ampl[nb_mpl_mid].T) .- 273.15, lsub("T", "ampl")),
+            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.acl.T) .- 273.15, lsub("T", "acl")),
+            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.mem.T) .- 273.15, lsub("T", "mem")),
+            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ccl.T) .- 273.15, lsub("T", "ccl")),
+            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cmpl[nb_mpl_mid].T) .- 273.15, lsub("T", "cmpl")),
+            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgdl[nb_gdl_mid].T) .- 273.15, lsub("T", "cgdl")),
+            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgc.T) .- 273.15, lsub("T", "cgc")),
         ]
 
         for (i, (y, lbl)) in enumerate(series)
@@ -397,12 +391,11 @@ end
 
 """Plot nitrogen concentration at AGC and CGC for each GC node as a function of time."""
 function plot_C_N2_1D_temporal(outputs::SimulationOutputs,
-                               fc::AbstractFuelCell,
                                cd::AbstractCurrent,
                                cfg::SimulationConfig,
                                ax)
     palette = _publication_colors()
-    nb_gc = fc.numerical_parameters.nb_gc
+    nb_gc = cfg.numerical_parameters.nb_gc
     t = masked_time_history(outputs, cd, cfg)
 
     C_N2_series = Vector{Vector{Float64}}()
@@ -426,23 +419,22 @@ end
 
 """Plot relative humidity through the anode layers at the middle GC node as a function of time."""
 function plot_Phi_a_1D_temporal(outputs::SimulationOutputs,
-                                fc::AbstractFuelCell,
                                 cd::AbstractCurrent,
                                 cfg::SimulationConfig,
                                 ax)
     palette = _publication_colors()
-    nb_gdl_mid = middle_gdl_index(fc)
-    nb_mpl_mid = middle_mpl_index(fc)
+    nb_gdl_mid = middle_gdl_index(cfg)
+    nb_mpl_mid = middle_mpl_index(cfg)
     t = masked_time_history(outputs, cd, cfg)
 
     series = [
-        (extract_masked_mid_mea_series(outputs, fc, cd, cfg,
+        (extract_masked_mid_mea_series(outputs, cfg, cd,
              mea -> mea.agc.C_v / C_v_sat(mea.agc.T)),                                    lsub("Φ", "a,agc")),
-        (extract_masked_mid_mea_series(outputs, fc, cd, cfg,
+        (extract_masked_mid_mea_series(outputs, cfg, cd,
              mea -> mea.agdl[nb_gdl_mid].C_v / C_v_sat(mea.agdl[nb_gdl_mid].T)),          lsub("Φ", "a,agdl")),
-        (extract_masked_mid_mea_series(outputs, fc, cd, cfg,
+        (extract_masked_mid_mea_series(outputs, cfg, cd,
              mea -> mea.ampl[nb_mpl_mid].C_v / C_v_sat(mea.ampl[nb_mpl_mid].T)),          lsub("Φ", "a,ampl")),
-        (extract_masked_mid_mea_series(outputs, fc, cd, cfg,
+        (extract_masked_mid_mea_series(outputs, cfg, cd,
              mea -> mea.acl.C_v / C_v_sat(mea.acl.T)),                                    lsub("Φ", "a,acl")),
     ]
 
@@ -463,23 +455,22 @@ end
 
 """Plot relative humidity through the cathode layers at the middle GC node as a function of time."""
 function plot_Phi_c_1D_temporal(outputs::SimulationOutputs,
-                                fc::AbstractFuelCell,
                                 cd::AbstractCurrent,
                                 cfg::SimulationConfig,
                                 ax)
     palette = _publication_colors()
-    nb_gdl_mid = middle_gdl_index(fc)
-    nb_mpl_mid = middle_mpl_index(fc)
+    nb_gdl_mid = middle_gdl_index(cfg)
+    nb_mpl_mid = middle_mpl_index(cfg)
     t = masked_time_history(outputs, cd, cfg)
 
     series = [
-        (extract_masked_mid_mea_series(outputs, fc, cd, cfg,
+        (extract_masked_mid_mea_series(outputs, cfg, cd,
              mea -> mea.ccl.C_v / C_v_sat(mea.ccl.T)),                                    lsub("Φ", "c,ccl")),
-        (extract_masked_mid_mea_series(outputs, fc, cd, cfg,
+        (extract_masked_mid_mea_series(outputs, cfg, cd,
              mea -> mea.cmpl[nb_mpl_mid].C_v / C_v_sat(mea.cmpl[nb_mpl_mid].T)),          lsub("Φ", "c,cmpl")),
-        (extract_masked_mid_mea_series(outputs, fc, cd, cfg,
+        (extract_masked_mid_mea_series(outputs, cfg, cd,
              mea -> mea.cgdl[nb_gdl_mid].C_v / C_v_sat(mea.cgdl[nb_gdl_mid].T)),          lsub("Φ", "c,cgdl")),
-        (extract_masked_mid_mea_series(outputs, fc, cd, cfg,
+        (extract_masked_mid_mea_series(outputs, cfg, cd,
              mea -> mea.cgc.C_v / C_v_sat(mea.cgc.T)),                                    lsub("Φ", "c,cgc")),
     ]
 
@@ -500,12 +491,11 @@ end
 
 """Plot anode and cathode gas velocities for each GC node as a function of time."""
 function plot_v_1D_temporal(outputs::SimulationOutputs,
-                            fc::AbstractFuelCell,
                             cd::AbstractCurrent,
                             cfg::SimulationConfig,
                             ax)
     palette = _publication_colors()
-    nb_gc = fc.numerical_parameters.nb_gc
+    nb_gc = cfg.numerical_parameters.nb_gc
     t = masked_time_history(outputs, cd, cfg)
 
     v_series = Vector{Vector{Float64}}()
@@ -539,7 +529,7 @@ function plot_Re_nb_1D_temporal(outputs::SimulationOutputs,
                                 cfg::SimulationConfig,
                                 ax)
     palette = _publication_colors()
-    nb_gc = fc.numerical_parameters.nb_gc
+    nb_gc = cfg.numerical_parameters.nb_gc
     pp = fc.physical_parameters
     t = masked_time_history(outputs, cd, cfg)
     n_t = length(t)
@@ -611,14 +601,14 @@ function plot_P_1D_temporal(outputs::SimulationOutputs,
     Pc_des = fc.operating_conditions.Pc_des
     t = masked_time_history(outputs, cd, cfg)
 
-    C_v_agc = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.C_v)
-    C_H2_agc = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.C_H2)
-    C_N2_agc = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.C_N2)
-    T_agc = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.agc.T)
-    C_v_cgc = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.C_v)
-    C_O2_cgc = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.C_O2)
-    C_N2_cgc = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.C_N2)
-    T_cgc = extract_masked_mid_mea_series(outputs, fc, cd, cfg, mea -> mea.cgc.T)
+    C_v_agc = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agc.C_v)
+    C_H2_agc = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agc.C_H2)
+    C_N2_agc = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agc.C_N2)
+    T_agc = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agc.T)
+    C_v_cgc = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgc.C_v)
+    C_O2_cgc = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgc.C_O2)
+    C_N2_cgc = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgc.C_N2)
+    T_cgc = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgc.T)
 
     P_agc = (C_v_agc .+ C_H2_agc .+ C_N2_agc) .* R .* T_agc ./ 1e5
     P_cgc = (C_v_cgc .+ C_O2_cgc .+ C_N2_cgc) .* R .* T_cgc ./ 1e5
@@ -800,7 +790,6 @@ end
 
 Power density is defined as P = U_cell × i_fc, expressed in W·cm⁻²."""
 function plot_power_density_curve(outputs::SimulationOutputs,
-                                  fc::AbstractFuelCell,
                                   cd::AbstractCurrent,
                                   cfg::SimulationConfig,
                                   ax)
@@ -845,7 +834,6 @@ end
 Voltage efficiency is defined as η_v = U_cell / E_th, where E_th = 1.481 V is the
 thermoneutral voltage based on the higher heating value (HHV) of hydrogen."""
 function plot_cell_efficiency(outputs::SimulationOutputs,
-                              fc::AbstractFuelCell,
                               cd::AbstractCurrent,
                               cfg::SimulationConfig,
                               ax)
@@ -963,12 +951,11 @@ end
 
 """Plot the final current-density distribution along the gas channel."""
 function plot_ifc_GC_final(outputs::SimulationOutputs,
-                           fc::AbstractFuelCell,
                            cd::AbstractCurrent,
                            cfg::SimulationConfig,
                            ax)
     palette = _publication_colors()
-    nb_gc = fc.numerical_parameters.nb_gc
+    nb_gc = cfg.numerical_parameters.nb_gc
     x_gc = collect(1:nb_gc)
 
     i_fc_hist = derived_outputs(outputs).i_fc
@@ -987,11 +974,10 @@ end
 
 """Plot the final dissolved-oxygen concentration at Pt sites along the gas channel."""
 function plot_C_O2_Pt_GC_final(outputs::SimulationOutputs,
-                               fc::AbstractFuelCell,
                                cfg::SimulationConfig,
                                ax)
     palette = _publication_colors()
-    nb_gc = fc.numerical_parameters.nb_gc
+    nb_gc = cfg.numerical_parameters.nb_gc
     x_gc = collect(1:nb_gc)
 
     C_O2_Pt_hist = derived_outputs(outputs).C_O2_Pt
@@ -1007,11 +993,10 @@ end
 
 """Plot the final membrane water-content distribution along the gas channel."""
 function plot_lambda_mem_GC_final(outputs::SimulationOutputs,
-                                  fc::AbstractFuelCell,
                                   cfg::SimulationConfig,
                                   ax)
     palette = _publication_colors()
-    nb_gc = fc.numerical_parameters.nb_gc
+    nb_gc = cfg.numerical_parameters.nb_gc
     x_gc = collect(1:nb_gc)
 
     last_state = solver_state_history(outputs)[end]
@@ -1037,8 +1022,8 @@ function plot_T_pseudo_2D_final(outputs::SimulationOutputs,
                                 cfg::SimulationConfig)
     temp_matrix = final_temperature_matrix_celsius(outputs)
     n_rows, n_cols = size(temp_matrix)
-    nb_gdl = fc.numerical_parameters.nb_gdl
-    nb_mpl = fc.numerical_parameters.nb_mpl
+    nb_gdl = cfg.numerical_parameters.nb_gdl
+    nb_mpl = cfg.numerical_parameters.nb_mpl
 
     # Orange very light (cold) -> red very dark (hot).
     thermal_cmap = [
