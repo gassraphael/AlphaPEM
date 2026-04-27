@@ -188,15 +188,15 @@ end
 
 """Build the default initial state vector for the DAE solver.
 
-The initial state corresponds to an equilibrium condition inside the fuel cell with
-hydrogen, oxygen, and nitrogen at the external pressure, humidity, and temperature,
-without flow or load current.
+The initial state represents a no-flow thermodynamic equilibrium: the cell has been
+maintained at the desired operating temperature, pressure, and relative humidity long
+enough for full relaxation, with no liquid water (s = 0) and no load current.
 
 # Arguments
 - `simu::AlphaPEM`: Fuel-cell simulator instance.
 
 # Returns
-- `Vector`: Initial values of the solver variables.
+- `Vector{Float64}`: Initial values of the differential solver variables in canonical ordering.
 """
 function create_initial_variable_values(simu::AlphaPEM)::Vector{Float64}
     # Extraction of the parameter classes for better readability.
@@ -221,8 +221,7 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector{Float64}
         Phi_a_ini, Phi_c_ini = Phi_a_des, Phi_c_des
     end
 
-    Psat_ini = 101325 * 10 ^ (-2.1794 + 0.02953 * (T_ini - 273.15) - 9.1837e-5 * (T_ini - 273.15)^2 +
-                              1.4454e-7 * (T_ini - 273.15)^3)
+    Psat_ini = Psat(T_ini)
     #   Initial fuel cell states.
     C_v_a_ini = Phi_a_ini * Psat_ini / (R * T_ini)
     C_v_c_ini = Phi_c_ini * Psat_ini / (R * T_ini)
@@ -238,13 +237,21 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector{Float64}
     end
 
     s_ini = 0.0
-    lambda_mem_ini = lambda_eq(C_v_c_ini, s_ini, T_ini)
+    # Ionomer water content: each CL equilibrates with its own local humidity at rest.
+    lambda_acl_ini = lambda_eq(C_v_a_ini, s_ini, T_ini)   # Anode CL ↔ anode humidity
+    lambda_ccl_ini = lambda_eq(C_v_c_ini, s_ini, T_ini)   # Cathode CL ↔ cathode humidity
+    lambda_mem_ini = (lambda_acl_ini + lambda_ccl_ini) / 2 # Membrane: linear-profile average
+    # Cathode overpotential: quasi-static value consistent with the initial current.
     i_fc_ini = current(simu.current_density, simu.time_interval[1])
+    #       Crossover current density (H2 and O2 membrane permeation).
     i_n_ini = 2 * F * R * T_ini / Hmem * C_H2_ini * k_H2(lambda_mem_ini, T_ini, kappa_co) +
               4 * F * R * T_ini / Hmem * C_O2_ini * k_O2(lambda_mem_ini, T_ini, kappa_co)
+    #       Compute the true oxygen concentration at Pt directly from local CCL variables.
+    C_O2_Pt_ini = calculate_C_O2_Pt(i_fc_ini, s_ini, lambda_ccl_ini, C_O2_ini, T_ini, simu.fuel_cell)
+    #       Butler-Volmer quasi-static inversion: solve dη_c/dt = 0.
     eta_c_ini = R * T_ini / (alpha_c * F) * log((i_fc_ini + i_n_ini) / i0_c_ref *
                                                  1 / exp(-Eact_O2_red / (R * T_ini) * (1 / T_ini - 1 / Tref_O2_red)) *
-                                                 (C_O2ref_red / C_O2_ini)^kappa_c)
+                                                 (C_O2ref_red / C_O2_Pt_ini)^kappa_c)
 
     # Initial auxiliary system state.
     Wcp_ini = 0.0
@@ -257,7 +264,7 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector{Float64}
     C_v_agc, C_v_agdl, C_v_ampl, C_v_acl = (C_v_a_ini, C_v_a_ini, C_v_a_ini, C_v_a_ini)
     C_v_ccl, C_v_cmpl, C_v_cgdl, C_v_cgc = (C_v_c_ini, C_v_c_ini, C_v_c_ini, C_v_c_ini)
     s_agc, s_agdl, s_ampl, s_acl, s_ccl, s_cmpl, s_cgdl, s_cgc = (s_ini, s_ini, s_ini, s_ini, s_ini, s_ini, s_ini, s_ini)
-    lambda_acl, lambda_mem, lambda_ccl = (lambda_mem_ini, lambda_mem_ini, lambda_mem_ini)
+    lambda_acl, lambda_mem, lambda_ccl = lambda_acl_ini, lambda_mem_ini, lambda_ccl_ini
     C_H2_agc, C_H2_agdl, C_H2_ampl, C_H2_acl = (C_H2_ini, C_H2_ini, C_H2_ini, C_H2_ini)
     C_O2_ccl, C_O2_cmpl, C_O2_cgdl, C_O2_cgc = (C_O2_ini, C_O2_ini, C_O2_ini, C_O2_ini)
     if simu.cfg.type_auxiliary == :forced_convective_cathode_with_flow_through_anode

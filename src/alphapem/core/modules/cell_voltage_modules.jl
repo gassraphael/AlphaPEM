@@ -35,6 +35,23 @@ function calculate_C_O2_Pt(i_fc::Real,
     lambda_ccl = sv.ccl.lambda
     C_O2_ccl   = sv.ccl.C_O2
     T_ccl      = sv.ccl.T
+
+    return calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, fc)
+end
+
+
+"""Calculate oxygen concentration at Pt surface from explicit cathode CL state variables.
+
+This overload avoids constructing a full `CellState1D` when only local CCL
+variables are needed (e.g. during initialization).
+"""
+function calculate_C_O2_Pt(i_fc::Real,
+                           s_ccl::Real,
+                           lambda_ccl::Real,
+                           C_O2_ccl::Real,
+                           T_ccl::Real,
+                           fc::AbstractFuelCell)
+
     # Extraction of the parameters
     Hccl, K_O2_ad_Pt = fc.physical_parameters.Hccl, fc.physical_parameters.K_O2_ad_Pt
 

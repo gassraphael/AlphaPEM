@@ -1,20 +1,15 @@
 # -*- coding: utf-8 -*-
 
 """Sparse Jacobian helpers for the DAE/IDA integration path.
-
-This file keeps Jacobian-related setup outside `AlphaPEM.jl` so that
-`simulate_model!` remains focused on orchestration while the sparse linear-algebra
-plumbing required by `IDA(linear_solver=:KLU)` stays isolated and testable.
 """
 
 using SparseArrays: sparse, SparseMatrixCSC, rowvals, nzrange, nonzeros
 
 """Build a sparse Jacobian prototype for the DAE residual.
 
-The prototype is built once at solve setup time using a conservative strategy:
-- always include the diagonal,
-- always include couplings involving algebraic rows/columns,
-- add numerically detected differential couplings around the initial state.
+ The prototype is built once at solve setup time using a conservative strategy:
+ - always include the diagonal,
+ - add numerically detected couplings around the initial state.
 
 This keeps the setup robust for `IDA(linear_solver=:KLU)` while avoiding a fully
 manual Jacobian implementation.
@@ -25,21 +20,19 @@ function _build_dae_jacobian_prototype(residual!,
                                        initial_solver_values::Vector{Float64},
                                        t0::Float64,
                                        differential_vars::BitVector)::SparseMatrixCSC{Float64, Int}
+    # Initialisation
     n = length(initial_solver_values)
     n == length(initial_solver_derivatives) ||
         throw(ArgumentError("State/derivative size mismatch in _build_dae_jacobian_prototype."))
     n == length(differential_vars) ||
         throw(ArgumentError("differential_vars size mismatch in _build_dae_jacobian_prototype."))
-
-    n_diff = count(differential_vars)
-    n_alg = n - n_diff
-
     # Baseline residual at the initial scaled state.
     res0 = zeros(Float64, n)
     residual!(res0, initial_solver_derivatives, initial_solver_values, packed, t0)
 
-    rows = Int[]
-    cols = Int[]
+    # `rows[k], cols[k]` is the position of the k-th stored nonzero entry.
+    rows = Int[] # Row indices of nonzero entries in the Jacobian prototype.
+    cols = Int[] # Column indices of nonzero entries in the Jacobian prototype.
 
     # 1) Always include the diagonal.
     for i in 1:n
@@ -47,39 +40,31 @@ function _build_dae_jacobian_prototype(residual!,
         push!(cols, i)
     end
 
-    # 2) Conservative dense couplings for algebraic rows/columns.
-    #    The algebraic block is small (`2*nb_gc + 3`) and can couple broadly.
-    if n_alg > 0
-        alg_first = n_diff + 1
-        for j in alg_first:n
-            for i in 1:n
-                push!(rows, i)
-                push!(cols, j)
-            end
-        end
-        for i in alg_first:n
-            for j in 1:n
-                push!(rows, i)
-                push!(cols, j)
-            end
-        end
-    end
-
-    # 3) Numerical probing for differential-to-differential couplings near (t0, y0, ydot0).
-    fd_eps = sqrt(eps(Float64))
-    sensitivity_threshold = 1e-12
-    for j in 1:n_diff
+    # 2) Numerically probe local couplings around (t0, y0, ydot0):
+    # perturb each state one at a time, recompute the residual, estimate sensitivities
+    # by central finite differences, and keep only entries above an adaptive noise threshold.
+    fd_eps = cbrt(eps(Float64)) # Robust FD perturbation step for structural detection.
+    sensitivity_atol = 1e-14 # Ignore finite difference noise
+    sensitivity_rtol = 1e-8
+    for j in 1:n
         yj = initial_solver_values[j]
         delta = fd_eps * max(abs(yj), 1.0)
 
-        y_perturbed = copy(initial_solver_values)
-        y_perturbed[j] += delta
-        res_perturbed = similar(res0)
-        residual!(res_perturbed, initial_solver_derivatives, y_perturbed, packed, t0)
+        y_perturbed_plus = copy(initial_solver_values)
+        y_perturbed_plus[j] += delta
+        res_perturbed_plus = similar(res0) # allocates same type/size uninitialized;
+        residual!(res_perturbed_plus, initial_solver_derivatives, y_perturbed_plus, packed, t0) # computes the residual at the perturbed state
 
-        inv_delta = 1.0 / delta
-        @inbounds for i in 1:n_diff
-            abs((res_perturbed[i] - res0[i]) * inv_delta) > sensitivity_threshold || continue
+        y_perturbed_minus = copy(initial_solver_values)
+        y_perturbed_minus[j] -= delta
+        res_perturbed_minus = similar(res0)
+        residual!(res_perturbed_minus, initial_solver_derivatives, y_perturbed_minus, packed, t0) # computes the residual at the perturbed state
+
+        inv_2delta = 0.5 / delta # Precompute the inverse of 2*delta for central difference sensitivity estimation.
+        @inbounds for i in 1:n
+            sensitivity = (res_perturbed_plus[i] - res_perturbed_minus[i]) * inv_2delta # Central finite difference sensitivity estimate for dF[i]/dy[j]
+            local_scale = max(abs(res0[i]), abs(res_perturbed_plus[i]), abs(res_perturbed_minus[i]), 1.0)
+            abs(sensitivity) > (sensitivity_atol + sensitivity_rtol * local_scale) || continue # Skip entries that are below the noise threshold.
             push!(rows, i)
             push!(cols, j)
         end
@@ -118,12 +103,13 @@ function _dae_jacobian_fd!(J,
     residual!(res0, dydt_IDA, y, packed, t)
 
     # Finite-difference Jacobian of dF/dy.
-    # Important: write only existing CSC nonzeros to keep a fixed sparsity
-    # pattern compatible with Sundials sparse matrix handles.
-    fd_eps = sqrt(eps(Float64))
-    fill!(J, 0.0)
-    rows = rowvals(J)
-    vals = nonzeros(J)
+    # Important: write only to entries that already exist in the sparse matrix
+    # to keep a fixed sparsity pattern compatible with Sundials sparse matrix handles.
+    fd_eps = cbrt(eps(Float64))  # Robust FD step for Jacobian values.
+    fill!(J, 0.0)      # Reset nonzero values, keep sparse structure
+    rows = rowvals(J)  # for each stored position `idx` in column `j`, `rows[idx]` is the row `i` of that exact nonzero entry.
+    vals = nonzeros(J) # `vals[idx]` is `J[rows[idx], j]`, so `vals[idx] = ...` updates that entry in place, with no sparsity change and no extra allocation.
+
     for j in 1:n
         yj = y[j]
         delta = fd_eps * max(abs(yj), 1.0)
@@ -131,13 +117,13 @@ function _dae_jacobian_fd!(J,
         y_perturbed = copy(y)
         y_perturbed[j] += delta
 
-        res_perturbed = similar(res0)
-        residual!(res_perturbed, dydt_IDA, y_perturbed, packed, t)
+        res_perturbed = similar(res0) # allocates same type/size uninitialized;
+        residual!(res_perturbed, dydt_IDA, y_perturbed, packed, t) # computes the residual at the perturbed state
 
         inv_delta = 1.0 / delta
-        @inbounds for idx in nzrange(J, j)
+        @inbounds for idx in nzrange(J, j) # Iterate over the stored nonzero entries of column `j` in `J`
             i = rows[idx]
-            vals[idx] = (res_perturbed[i] - res0[i]) * inv_delta
+            vals[idx] = (res_perturbed[i] - res0[i]) * inv_delta # Finite-difference sensitivity for dF[i]/dy[j]
         end
     end
 
