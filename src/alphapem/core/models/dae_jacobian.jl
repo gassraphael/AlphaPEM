@@ -45,20 +45,25 @@ function _build_dae_jacobian_prototype(residual!,
     # by central finite differences, and keep only entries above an adaptive noise threshold.
     fd_eps = cbrt(eps(Float64)) # Robust FD perturbation step for structural detection.
     sensitivity_atol = 1e-14 # In order to ignore finite difference noise
-    sensitivity_rtol = 1e-6 # In order to ignore finite difference noise
+    sensitivity_rtol = 1e-8 # In order to ignore finite difference noise
+
+    # Reuse buffers to avoid O(n) allocations per perturbed column.
+    y_work = copy(initial_solver_values) # Working copy of the state vector for perturbations.
+    res_perturbed_plus = Vector{Float64}(undef, n) # Residual at y + delta*e_j
+    res_perturbed_minus = Vector{Float64}(undef, n) # Residual at y - delta*e_j
+
     for j in 1:n
         yj = initial_solver_values[j]
         delta = fd_eps * max(abs(yj), 1.0)
 
-        y_perturbed_plus = copy(initial_solver_values)
-        y_perturbed_plus[j] += delta
-        res_perturbed_plus = similar(res0) # allocates same type/size uninitialized;
-        residual!(res_perturbed_plus, initial_solver_derivatives, y_perturbed_plus, packed, t0) # computes the residual at the perturbed state
+        y_work[j] = yj + delta # Perturb the j-th state variable by +delta.
+        residual!(res_perturbed_plus, initial_solver_derivatives, y_work, packed, t0) # Compute the residual at the perturbed state.
 
-        y_perturbed_minus = copy(initial_solver_values)
-        y_perturbed_minus[j] -= delta
-        res_perturbed_minus = similar(res0)
-        residual!(res_perturbed_minus, initial_solver_derivatives, y_perturbed_minus, packed, t0) # computes the residual at the perturbed state
+        y_work[j] = yj - delta # Perturb the j-th state variable by -delta.
+        residual!(res_perturbed_minus, initial_solver_derivatives, y_work, packed, t0) # Compute the residual at the perturbed state.
+
+        # Restore exact baseline state for the next column perturbation.
+        y_work[j] = yj
 
         inv_2delta = 0.5 / delta # Precompute the inverse of 2*delta for central difference sensitivity estimation.
         @inbounds for i in 1:n
@@ -98,10 +103,6 @@ function _dae_jacobian_fd!(J,
     n == length(differential_vars) ||
         throw(ArgumentError("differential_vars size mismatch in _dae_jacobian_fd!."))
 
-    # Baseline residual.
-    res0 = zeros(Float64, n)
-    residual!(res0, dydt_IDA, y, packed, t)
-
     # Finite-difference Jacobian of dF/dy.
     # Important: write only to entries that already exist in the sparse matrix
     # to keep a fixed sparsity pattern compatible with Sundials sparse matrix handles.
@@ -110,19 +111,23 @@ function _dae_jacobian_fd!(J,
     rows = rowvals(J)  # for each stored position `idx` in column `j`, `rows[idx]` is the row `i` of that exact nonzero entry.
     vals = nonzeros(J) # `vals[idx]` is `J[rows[idx], j]`, so `vals[idx] = ...` updates that entry in place, with no sparsity change and no extra allocation.
 
+    # Reuse work arrays to remove per-column allocations inside Newton iterations.
+    y_work = copy(y) # Working copy of the state vector for perturbations.
+    res_perturbed_plus = Vector{Float64}(undef, n) # Residual at y + delta*e_j
+    res_perturbed_minus = Vector{Float64}(undef, n) # Residual at y - delta*e_j
+
     for j in 1:n
         yj = y[j]
         delta = fd_eps * max(abs(yj), 1.0)
 
-        y_perturbed_plus = copy(y)
-        y_perturbed_plus[j] += delta
-        res_perturbed_plus = similar(res0) # allocates same type/size uninitialized;
-        residual!(res_perturbed_plus, dydt_IDA, y_perturbed_plus, packed, t) # computes the residual at the perturbed state
+        y_work[j] = yj + delta # Perturb the j-th state variable by +delta.
+        residual!(res_perturbed_plus, dydt_IDA, y_work, packed, t) # Compute the residual at the perturbed state.
 
-        y_perturbed_minus = copy(y)
-        y_perturbed_minus[j] -= delta
-        res_perturbed_minus = similar(res0) # allocates same type/size uninitialized;
-        residual!(res_perturbed_minus, dydt_IDA, y_perturbed_minus, packed, t) # computes the residual at the perturbed state
+        y_work[j] = yj - delta # Perturb the j-th state variable by -delta.
+        residual!(res_perturbed_minus, dydt_IDA, y_work, packed, t) # Compute the residual at the perturbed state.
+
+        # Restore exact baseline state for the next column perturbation.
+        y_work[j] = yj
 
         inv_2delta = 0.5 / delta
         @inbounds for idx in nzrange(J, j) # Loop over nonzero entries in column j of the Jacobian prototype.
@@ -139,4 +144,3 @@ function _dae_jacobian_fd!(J,
 
     return nothing
 end
-
