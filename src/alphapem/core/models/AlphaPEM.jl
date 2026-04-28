@@ -65,7 +65,7 @@ Parameters
 ----------
 simu : AlphaPEM
     Fuel cell simulator instance.
- initial_variable_values : Union{Nothing, Vector}, optional
+ initial_variable_values : Union{Nothing, Vector{Float64}}, optional
      Initial values of the physical solver variables. If `nothing`, values are
      generated from a no-current equilibrium. These values remain stored in
      physical units on `simu.initial_variable_values`, then are internally
@@ -80,7 +80,7 @@ Nothing
     The function updates `simu` in place.
 """
 function simulate_model!(simu::AlphaPEM,
-                         initial_variable_values::Union{Nothing, AbstractVector{<:Real}}=nothing,
+                         initial_variable_values::Union{Nothing, Vector{Float64}}=nothing,
                          time_interval:: Union{Nothing, Tuple{Float64, Float64}}=nothing)
 
     # General warnings.
@@ -121,13 +121,12 @@ function simulate_model!(simu::AlphaPEM,
      #       Solve the differential-algebraic equation system.
      #           Pre-calculate constant solver vector dimensions to avoid recomputation in dae_residual!.
      np = simu.cfg.numerical_parameters
-     nb_gdl, nb_mpl, nb_gc, nb_man = np.nb_gdl, np.nb_mpl, np.nb_gc, np.nb_man
-     n_vars_cell_1D = _nb_solver_vars_cell_1D(nb_gdl, nb_mpl)
+     n_vars_cell_1D = _nb_solver_vars_cell_1D(np.nb_gdl, np.nb_mpl)
      has_auxiliary = simu.cfg.type_auxiliary in (:forced_convective_cathode_with_flow_through_anode,
                                                   :forced_convective_cathode_with_anodic_recirculation)
-     n_vars_manifold = has_auxiliary ? _nb_solver_vars_manifolds(nb_man) : 0
+     n_vars_manifold = has_auxiliary ? _nb_solver_vars_manifolds(np.nb_man) : 0
      n_vars_auxiliary = _nb_solver_vars_auxiliary(simu.cfg.type_auxiliary)
-     differential_vars = build_solver_differential_vars(nb_gc, nb_gdl, nb_mpl, nb_man,
+     differential_vars = build_solver_differential_vars(np.nb_gc, np.nb_gdl, np.nb_mpl, np.nb_man,
                                                         simu.cfg.type_auxiliary;
                                                         include_algebraic=true)
 
@@ -139,8 +138,6 @@ function simulate_model!(simu::AlphaPEM,
      #           IDA only sees the dimensionless scaled state vector,
      #           while the rest of the code keeps physical units.
      solver_state_scaling = build_solver_state_scaling(simu; include_algebraic=true)
-     length(solver_state_scaling) == length(simu.initial_variable_values) ||
-         throw(ArgumentError("Internal solver scaling size mismatch in simulate_model!."))
      initial_solver_values = scale_values(simu.initial_variable_values, solver_state_scaling)
      atol_scaled = np.atol ./ solver_state_scaling # preserves the same physical absolute precision after scaling.
      #           Pack external data passed to the DAE residual.
@@ -349,13 +346,16 @@ function _ensure_dae_initial_values!(simu::AlphaPEM,
     t0 = simu.time_interval[1]
     i_fc_cell_0 = current(simu.current_density, t0)
 
-    # Initialize current-distribution algebraic states with existing robust kernels.
-    i_fc_0 = calculate_1D_GC_current_density(i_fc_cell_0, sv_cell_1D, simu.cfg, simu.fuel_cell)
-    C_O2_Pt_0 = [calculate_C_O2_Pt(i_fc_0[k], sv_cell_1D[k], simu.fuel_cell) for k in 1:nb_gc]
-    U_cell_0 = calculate_cell_voltage(i_fc_0[1], C_O2_Pt_0[1], sv_cell_1D[1], simu.fuel_cell)
+    # Initialise the algebraic DAE states directly from the differential state.
+    i_fc_0 = fill(i_fc_cell_0, nb_gc)
+    C_O2_Pt_ref = calculate_C_O2_Pt(i_fc_cell_0, sv_cell_1D[1], simu.fuel_cell)
+    C_O2_Pt_0 = fill(C_O2_Pt_ref, nb_gc)
+    U_cell_0 = calculate_cell_voltage(i_fc_cell_0, C_O2_Pt_ref, sv_cell_1D[1], simu.fuel_cell)
 
-    # Initialize inlet-flow algebraic states via pressure-consistent desired flows.
-    _, _, Pa_in_0, Pc_in_0 = calculate_velocity_evolution(sv_cell_1D, i_fc_cell_0, simu.fuel_cell, simu.cfg)
+    # Approximate inlet pressures from the current GC gas states, then deduce
+    # the inlet molar flows directly from the desired-flow model.
+    Pa_in_0 = (sv_cell_1D[1].agc.C_v + sv_cell_1D[1].agc.C_H2 + sv_cell_1D[1].agc.C_N2) * R * sv_cell_1D[1].agc.T
+    Pc_in_0 = (sv_cell_1D[1].cgc.C_v + sv_cell_1D[1].cgc.C_O2 + sv_cell_1D[1].cgc.C_N2) * R * sv_cell_1D[1].cgc.T
     W_des_0 = desired_flows(sv_cell_1D, i_fc_cell_0, Pa_in_0, Pc_in_0, simu.fuel_cell, simu.cfg)
     J_a_in_0 = (W_des_0.H2 + W_des_0.H2O_inj_a) / (pp.Hagc * pp.Wagc) / pp.nb_cell / pp.nb_channel_in_gc
     J_c_in_0 = (W_des_0.dry_air + W_des_0.H2O_inj_c) / (pp.Hcgc * pp.Wcgc) / pp.nb_cell / pp.nb_channel_in_gc

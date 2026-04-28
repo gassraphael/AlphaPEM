@@ -9,7 +9,7 @@ import Pkg
 Pkg.activate(joinpath(@__DIR__, ".."))
 
 # --- Load AlphaPEM from the project environment ---
-using AlphaPEM.Config: SimulationConfig, StepParams
+using AlphaPEM.Config: SimulationConfig, StepParams, NumericalParams
 using AlphaPEM.Application: run_simulation
 
 current_params = StepParams(

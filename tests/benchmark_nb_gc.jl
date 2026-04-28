@@ -42,11 +42,11 @@ end
 
 function make_step_cfg(nb_gc::Int)
     step = StepParams(
-        delta_t_ini = 60.0,
-        delta_t_load = 5.0,
-        delta_t_break = 15.0,
+        delta_t_ini = 30.0 * 60.0,
+        delta_t_load = 30.0,
+        delta_t_break = 2.0 * 60.0,
         i_ini = 1.0e4,
-        i_step = 2.0e4,
+        i_step = 1.5e4,
     )
     return SimulationConfig(
         type_fuel_cell = :ZSW_GenStack,
@@ -62,11 +62,11 @@ end
 
 function make_pola_cfg(nb_gc::Int)
     pola = PolarizationParams(
-        delta_t_ini = 60.0,
-        delta_i = 0.10e4,
-        v_load = 0.05e4,
-        delta_t_break = 20.0,
-        i_max = 0.6e4,
+        delta_t_ini = 30.0 * 60.0,
+        delta_i = 0.05e4,
+        v_load = 0.01e4,
+        delta_t_break = 15.0 * 60.0,
+        i_max = 3.0e4,
     )
     return SimulationConfig(
         type_fuel_cell = :ZSW_GenStack,
