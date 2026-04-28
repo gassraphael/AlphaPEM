@@ -14,7 +14,7 @@ when creating an instance of the structure."""
 This structure contains the numerical parameters for the fuel cell simulation.
 """
 Base.@kwdef struct NumericalParams <: AbstractFuelCellParams
-    nb_gc::Int = 5                  # Number of model nodes placed inside each gas channel
+    nb_gc::Int = 1                  # Number of model nodes placed inside each gas channel
     nb_gdl::Int = 3                 # Number of model nodes placed inside each GDL
     nb_mpl::Int = 2                 # Number of model nodes placed inside each MPL
     nb_man::Int = 1                 # Number of model nodes placed inside each manifold line

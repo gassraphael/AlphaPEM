@@ -1,10 +1,20 @@
 # -*- coding: utf-8 -*-
 
 """
-Performance benchmark for AlphaPEM.
-- 1 first run including compilation
-- N measured runs (N=1 by default)
-- Simple CSV export in results/benchmark/benchmark_step.csv
+Performance benchmark for AlphaPEM using a current step signal.
+
+What is measured:
+- 1 first run including JIT compilation time (warm-up)
+- N subsequent equal measured runs without compilation overhead (N=5 by default,
+  configurable via the BENCHMARK_RUNS environment variable)
+
+For each run, the following metrics are recorded:
+- Wall-clock execution time (s)
+- Memory allocated (GB)
+- Garbage collection time (s)
+
+Results are printed as a summary table (avg, min, max) and exported to
+results/benchmark/benchmark_step.csv.
 """
 
 import Pkg
