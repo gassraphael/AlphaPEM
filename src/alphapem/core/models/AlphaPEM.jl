@@ -15,7 +15,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 
 # Importing the necessary libraries.
 using DifferentialEquations
-using SparseArrays: sparse, SparseMatrixCSC, rowvals, nzrange, nonzeros
+using SparseArrays: sparse, SparseMatrixCSC, rowvals, nzrange, nonzeros, nnz
 using SciMLBase: DAEFunction, successful_retcode
 using Sundials: IDA
 using .PlotHelpers: _clear_dynamic_axes!, saving_instructions!
@@ -169,27 +169,13 @@ function simulate_model!(simu::AlphaPEM,
                                                     initial_solver_values,
                                                     simu.time_interval[1],
                                                     differential_vars)
-     n_state = length(initial_solver_values) # Jacobian dimension (state size seen by IDA).
-     jac_y_work = copy(initial_solver_values) # Reusable perturbed state vector for FD Jacobian.
-     jac_res_plus = Vector{Float64}(undef, n_state) # Reusable residual buffer at y + delta*e_j.
-     jac_res_minus = Vector{Float64}(undef, n_state) # Reusable residual buffer at y - delta*e_j.
-     diag_nz_indices = Vector{Int}(undef, n_state) # Sparse-storage index of each diagonal J[i,i].
-     jac_rows = rowvals(jac_prototype) # Row lookup for each nonzero stored in CSC columns.
-     @inbounds for j in 1:n_state
-         diag_idx = 0 # Sentinel: detects a missing diagonal entry in the prototype.
-         for idx in nzrange(jac_prototype, j)
-             if jac_rows[idx] == j
-                 diag_idx = idx # Store where the diagonal value is located in `nonzeros(J)`.
-                 break
-             end
-         end
-         diag_idx == 0 && throw(ArgumentError("Jacobian prototype must contain all diagonal entries.")) # Safety for gamma*I update.
-         diag_nz_indices[j] = diag_idx # Cached once, then reused at every Jacobian evaluation.
-     end
+     #           Build the column coloring and pre-allocate all FD Jacobian work buffers.
+     #           This replaces the manual per-buffer allocation; see JacobianColoringCache.
+     jac_cache = _build_jacobian_coloring_cache(jac_prototype, differential_vars)
+     n_state = length(initial_solver_values)
      jacobian! = (J, dydt_IDA, y, p, gamma, t) -> _dae_jacobian_fd!(J, dydt_IDA, y, p, gamma, t,
-                                                                    residual!, differential_vars,
-                                                                    jac_y_work, jac_res_plus,
-                                                                    jac_res_minus, diag_nz_indices)
+                                                                      residual!, differential_vars,
+                                                                      jac_cache)
       #           Build and solve the DAE problem with IDA (Sundials).
      dae_fun = DAEFunction(residual!; jac=jacobian!, jac_prototype=jac_prototype)
      prob = DAEProblem(dae_fun, initial_solver_derivatives, initial_solver_values, simu.time_interval, packed;

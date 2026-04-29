@@ -22,7 +22,7 @@ current_params = PolarizationParams(
 # List of fuel cell types to simulate. You can add more fuel cell types to the list,
 # but make sure they are implemented in the create_fuelcell factory function.
 type_fuel_cell_list = [:ZSW_GenStack]
-nb_gc_pola = 3
+nb_gc_pola = 1
 
 # If only one fuel cell type is selected, run a single simulation. Otherwise, run multiple simulations in parallel.
 if length(type_fuel_cell_list) == 1

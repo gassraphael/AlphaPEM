@@ -31,7 +31,7 @@ function make_step_config()
         delta_t_load = 30.0,
         delta_t_break = 2.0 * 60.0,
         i_ini = 1.0e4,
-        i_step = 2.0e4
+        i_step = 1.5e4
     )
 
     return SimulationConfig(
