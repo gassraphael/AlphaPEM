@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Performance benchmark for AlphaPEM using a current step signal.
+Performance benchmark for AlphaPEM using a polarisation signal.
 
 What is measured:
 - 1 first run including JIT compilation time (warm-up)
@@ -14,7 +14,7 @@ For each run, the following metrics are recorded:
 - Garbage collection time (s)
 
 Results are printed as a summary table (avg, min, max) and exported to
-results/benchmark/benchmark_step.csv.
+results/benchmark/benchmark_pola.csv.
 """
 
 import Pkg
@@ -22,16 +22,16 @@ Pkg.activate(joinpath(@__DIR__, ".."))
 
 using Dates
 using Printf
-using AlphaPEM.Config: SimulationConfig, StepParams, NumericalParams
+using AlphaPEM.Config: SimulationConfig, PolarizationParams, NumericalParams
 using AlphaPEM.Application: run_simulation
 
-function make_step_config()
-    current_params = StepParams(
-        delta_t_ini = 30.0 * 60.0,
-        delta_t_load = 30.0,
-        delta_t_break = 2.0 * 60.0,
-        i_ini = 1.0e4,
-        i_step = 1.5e4
+function make_pola_config()
+    current_params = PolarizationParams(
+        delta_t_ini = 120.0 * 60.0,  # (s). Initial time at zero current density for the stabilisation of the internal states.
+        delta_i = 0.05e4,            # (A.m-2). Current density step for the polarisation current density function.
+        v_load = 0.01e4,             # (A.m-2.s-1). Loading rate for one step current of the polarisation current density function.
+        delta_t_break = 15.0 * 60.0, # (s). Breaking time for one step current, for the stabilisation of the internal states.
+        i_max = 3.0e4                # Maximum current (default value, can be overridden by experimental current values if provided).
     )
 
     return SimulationConfig(
@@ -92,11 +92,11 @@ function main()
     runs = parse(Int, get(ENV, "BENCHMARK_RUNS", "5"))
     out_dir = joinpath(@__DIR__, "..", "results", "benchmark")
     mkpath(out_dir)
-    out_csv = joinpath(out_dir, "benchmark_step.csv")
+    out_csv = joinpath(out_dir, "benchmark_pola.csv")
 
     rows = NamedTuple[]
     println("First launch (includes compilation)...")
-    m0 = @timed run_simulation(make_step_config())
+    m0 = @timed run_simulation(make_pola_config())
     push!(rows, (
         timestamp = Dates.format(now(), dateformat"yyyy-mm-ddTHH:MM:SS"),
         phase = "first_run_with_compilation",
@@ -108,7 +108,7 @@ function main()
 
     for i in 1:runs
         println("Measured run ", i, "/", runs, "...")
-        m = @timed run_simulation(make_step_config())
+        m = @timed run_simulation(make_pola_config())
         push!(rows, (
             timestamp = Dates.format(now(), dateformat"yyyy-mm-ddTHH:MM:SS"),
             phase = "measured",
