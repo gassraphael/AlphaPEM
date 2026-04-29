@@ -57,12 +57,9 @@ end
 
 """
 Scaling references for manifold states.
-
-Current values are identity placeholders. This keeps the manifold subsystem in
-physical units until dedicated references are defined and validated.
 """
 Base.@kwdef struct ManifoldStateScaling
-    P::Float64 = 1.0
+    P::Float64 = 1.0e5
     Phi::Float64 = 1.0
 end
 

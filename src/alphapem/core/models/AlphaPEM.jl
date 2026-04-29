@@ -196,7 +196,7 @@ function simulate_model!(simu::AlphaPEM,
                        differential_vars=differential_vars)
      simu.sol = solve(prob, IDA(linear_solver=:KLU);
                       reltol=np.rtol, abstol=atol_scaled,
-                      initializealg=NoInit())
+                      initializealg=BrownFullBasicInit())
      #           Check that the solver converged successfully; raise an informative error otherwise.
      successful_retcode(simu.sol.retcode) ||
      throw(ErrorException("IDA solve failed in simulate_model!: retcode = $(simu.sol.retcode)"))
