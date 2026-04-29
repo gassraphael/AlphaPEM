@@ -27,11 +27,34 @@ dydt_IDA : Vector{Float64}
 y : Vector{Float64}
     Current state vector provided by the solver (scaled solver coordinates),
     containing both differential and algebraic variables.
+n_vars_cell_1D : Int
+    Number of state variables for a single gas-channel (GC) column (MEA + GC).
+n_vars_manifold : Int
+    Number of manifold state variables (0 when no auxiliary system is present).
+n_vars_auxiliary : Int
+    Number of auxiliary-system state variables (0 when no auxiliary system is present).
+solver_state_scaling : Vector{Float64}
+    Reference magnitudes used to non-dimensionalise `y` and `dydt_IDA`.
+    Built once by `build_solver_state_scaling` and reused at every residual call.
+y_phys_work : Vector{Float64}
+    Pre-allocated work buffer that receives the un-scaled physical state
+    `y_phys = y .* solver_state_scaling`.  Avoids a heap allocation per call.
+flows_work : Vector{MEAFlowsWorkspace}
+    One pre-allocated workspace per GC node.  Passed to `calculate_flows_1D_MEA!`
+    so that the in-place variant can reuse its internal arrays without allocating
+    new memory at each residual evaluation.
+heat_work : MEAHeatWorkspace
+    Single pre-allocated workspace shared across all GC nodes for
+    `calculate_heat_transfers!`.  Heat flows for each node are computed
+    sequentially, so one workspace is sufficient.
 """
 function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vector{Float64}, t::Float64,
                        fc::AbstractFuelCell, cd::AbstractCurrent, cfg::SimulationConfig,
                        n_vars_cell_1D::Int, n_vars_manifold::Int,
-                       n_vars_auxiliary::Int, solver_state_scaling::Vector{Float64})
+                       n_vars_auxiliary::Int, solver_state_scaling::Vector{Float64},
+                       y_phys_work::Vector{Float64},
+                       flows_work::Vector{MEAFlowsWorkspace},
+                       heat_work::MEAHeatWorkspace)
 
     # Extraction of frequently used parameters
     oc = fc.operating_conditions
@@ -55,13 +78,22 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
         throw(ArgumentError("Unexpected residual vector size in dae_residual!."))
     length(solver_state_scaling) == expected_len ||
         throw(ArgumentError("Unexpected solver scaling vector size in dae_residual!."))
+    length(y_phys_work) == expected_len ||
+        throw(ArgumentError("Unexpected physical-state work buffer size in dae_residual!."))
+    length(flows_work) == nb_gc ||
+        throw(ArgumentError("Unexpected MEA flow workspace count in dae_residual!."))
 
     # Convert the solver state back to physical units before evaluating the
     # transport, electrochemical and thermal equations.
-    y_phys = unscale_values(y, solver_state_scaling)
-    sv_cell_1D = [_unpack_cell_state_1D(@view(y_phys[(i - 1) * n_vars_cell_1D + 1:i * n_vars_cell_1D]),
-                                        nb_gdl, nb_mpl)
-                 for i in 1:nb_gc]
+    unscale_values!(y_phys_work, y, solver_state_scaling)
+    y_phys = y_phys_work
+    cell_state_type = typeof(_unpack_cell_state_1D(@view(y_phys[1:n_vars_cell_1D]), nb_gdl, nb_mpl))
+    sv_cell_1D = Vector{cell_state_type}(undef, nb_gc)
+    @inbounds for i in 1:nb_gc
+        i_start = (i - 1) * n_vars_cell_1D + 1
+        i_stop = i * n_vars_cell_1D
+        sv_cell_1D[i] = _unpack_cell_state_1D(@view(y_phys[i_start:i_stop]), nb_gdl, nb_mpl)
+    end
     dif_eq_cell_1D = Vector{typeof(_nan_cell_derivative_1D(nb_gdl, nb_mpl))}(undef, nb_gc)
 
     if has_auxiliary
@@ -117,67 +149,63 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
         end
     end
 
-    # Intermediate values (one container per GC node)
-    dif_eq_int_values = [calculate_dif_eq_int_values(t, sv_cell_1D[i], fc, cfg, sv_manifold_1D, sv_auxiliary)
-                         for i in 1:nb_gc]
-
     # Calculation of the flows for each GC node.
-    flows_1D_MEA = [calculate_flows_1D_MEA(sv_cell_1D[i], i_fc[i], v_a[i], v_c[i], fc, cfg)
-                    for i in 1:nb_gc]
+    # The in-place variant reuses the pre-allocated workspace to avoid allocations inside the solver loop.
+    first_flow = calculate_flows_1D_MEA!(flows_work[1], sv_cell_1D[1], i_fc[1], v_a[1], v_c[1], fc, cfg)
+    flows_1D_MEA = Vector{typeof(first_flow)}(undef, nb_gc)
+    flows_1D_MEA[1] = first_flow
+    @inbounds for i in 2:nb_gc
+        flows_1D_MEA[i] = calculate_flows_1D_MEA!(flows_work[i], sv_cell_1D[i], i_fc[i], v_a[i], v_c[i], fc, cfg)
+    end
     flows_1D_GC_manifold = calculate_flows_1D_GC_manifold(sv_cell_1D, sv_auxiliary, i_fc_cell,
                                                            v_a, v_c, Pa_in, Pc_in, fc, cfg)
-    heat_flows_global = [calculate_heat_transfers(sv_cell_1D[i], i_fc[i], fc, cfg, flows_1D_MEA[i].S_abs,
-                                                  flows_1D_MEA[i].Sl)
-                         for i in 1:nb_gc]
-
     # Calculation of the dynamic evolutions inside the MEA.
-    dif_eq_mea_diss_water = [calculate_dyn_dissoved_water_evolution_inside_MEA(sv_cell_1D[i], pp,
-                                                                                flows_1D_MEA[i].S_abs,
-                                                                                flows_1D_MEA[i].J_lambda,
-                                                                                flows_1D_MEA[i].Sp)
-                             for i in 1:nb_gc]
-    dif_eq_mea_liq_water = [calculate_dyn_liquid_water_evolution_inside_MEA(sv_cell_1D[i],
-                                                                             pp,
-                                                                             flows_1D_MEA[i].Jl,
-                                                                             flows_1D_MEA[i].S_abs,
-                                                                             flows_1D_MEA[i].Sl)
-                            for i in 1:nb_gc]
-    dif_eq_mea_vapor_water = [calculate_dyn_vapor_evolution_inside_MEA(sv_cell_1D[i],
-                                                                        pp,
-                                                                        flows_1D_MEA[i].Jv,
-                                                                        flows_1D_MEA[i].Sv,
-                                                                        flows_1D_MEA[i].S_abs)
-                              for i in 1:nb_gc]
-    dif_eq_mea_species = [calculate_dyn_H2_O2_N2_evolution_inside_MEA(sv_cell_1D[i],
-                                                                       pp,
-                                                                       flows_1D_MEA[i].J_H2,
-                                                                       flows_1D_MEA[i].J_O2,
-                                                                       flows_1D_MEA[i].S_H2,
-                                                                       flows_1D_MEA[i].S_O2)
-                          for i in 1:nb_gc]
-    dif_eq_voltage = [calculate_dyn_voltage_evolution(i_fc[i], C_O2_Pt[i],
-                                                      sv_cell_1D[i].ccl.T,
-                                                      sv_cell_1D[i].ccl.eta_c,
-                                                      pp,
-                                                      dif_eq_int_values[i].i_n)
-                      for i in 1:nb_gc]
-    dif_eq_mea_temperature = [calculate_dyn_temperature_evolution_inside_MEA(dif_eq_int_values[i].rho_Cp0,
-                                                                             pp,
-                                                                             heat_flows_global[i].Jt,
-                                                                             heat_flows_global[i].Q_r,
-                                                                             heat_flows_global[i].Q_sorp,
-                                                                             heat_flows_global[i].Q_liq,
-                                                                             heat_flows_global[i].Q_p,
-                                                                             heat_flows_global[i].Q_e)
-                              for i in 1:nb_gc]
+    @inbounds for i in 1:nb_gc
+        dif_eq_int_values_i = calculate_dif_eq_int_values(t, sv_cell_1D[i], fc, cfg, sv_manifold_1D, sv_auxiliary)
+        # heat_work is shared across iterations (sequential loop) — one workspace is sufficient.
+        heat_flows_i = calculate_heat_transfers!(heat_work, sv_cell_1D[i], i_fc[i], fc, cfg, flows_1D_MEA[i].S_abs,
+                                                 flows_1D_MEA[i].Sl)
 
-    for i in 1:nb_gc
-        dif_eq_cell_1D[i] = assemble_mea_derivative_1D(dif_eq_mea_diss_water[i],
-                                                       dif_eq_mea_liq_water[i],
-                                                       dif_eq_mea_vapor_water[i],
-                                                       dif_eq_mea_species[i],
-                                                       dif_eq_voltage[i],
-                                                       dif_eq_mea_temperature[i])
+        dif_eq_mea_diss_water_i = calculate_dyn_dissoved_water_evolution_inside_MEA(sv_cell_1D[i], pp,
+                                                                                      flows_1D_MEA[i].S_abs,
+                                                                                      flows_1D_MEA[i].J_lambda,
+                                                                                      flows_1D_MEA[i].Sp)
+        dif_eq_mea_liq_water_i = calculate_dyn_liquid_water_evolution_inside_MEA(sv_cell_1D[i],
+                                                                                   pp,
+                                                                                   flows_1D_MEA[i].Jl,
+                                                                                   flows_1D_MEA[i].S_abs,
+                                                                                   flows_1D_MEA[i].Sl)
+        dif_eq_mea_vapor_water_i = calculate_dyn_vapor_evolution_inside_MEA(sv_cell_1D[i],
+                                                                             pp,
+                                                                             flows_1D_MEA[i].Jv,
+                                                                             flows_1D_MEA[i].Sv,
+                                                                             flows_1D_MEA[i].S_abs)
+        dif_eq_mea_species_i = calculate_dyn_H2_O2_N2_evolution_inside_MEA(sv_cell_1D[i],
+                                                                            pp,
+                                                                            flows_1D_MEA[i].J_H2,
+                                                                            flows_1D_MEA[i].J_O2,
+                                                                            flows_1D_MEA[i].S_H2,
+                                                                            flows_1D_MEA[i].S_O2)
+        dif_eq_voltage_i = calculate_dyn_voltage_evolution(i_fc[i], C_O2_Pt[i],
+                                                            sv_cell_1D[i].ccl.T,
+                                                            sv_cell_1D[i].ccl.eta_c,
+                                                            pp,
+                                                            dif_eq_int_values_i.i_n)
+        dif_eq_mea_temperature_i = calculate_dyn_temperature_evolution_inside_MEA(dif_eq_int_values_i.rho_Cp0,
+                                                                                   pp,
+                                                                                   heat_flows_i.Jt,
+                                                                                   heat_flows_i.Q_r,
+                                                                                   heat_flows_i.Q_sorp,
+                                                                                   heat_flows_i.Q_liq,
+                                                                                   heat_flows_i.Q_p,
+                                                                                   heat_flows_i.Q_e)
+
+        dif_eq_cell_1D[i] = assemble_mea_derivative_1D(dif_eq_mea_diss_water_i,
+                                                       dif_eq_mea_liq_water_i,
+                                                       dif_eq_mea_vapor_water_i,
+                                                       dif_eq_mea_species_i,
+                                                       dif_eq_voltage_i,
+                                                       dif_eq_mea_temperature_i)
     end
 
     #       Inside the gas channels: compute independent GC contributions, then assemble once.

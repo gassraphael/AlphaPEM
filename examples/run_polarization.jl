@@ -8,7 +8,7 @@ You can modify any SimulationConfig parameter below.
 import Pkg
 Pkg.activate(joinpath(@__DIR__, ".."))
 
-using AlphaPEM.Config: SimulationConfig, PolarizationParams
+using AlphaPEM.Config: SimulationConfig, PolarizationParams, NumericalParams
 using AlphaPEM.Application: run_simulation
 
 current_params = PolarizationParams(
@@ -22,7 +22,7 @@ current_params = PolarizationParams(
 # List of fuel cell types to simulate. You can add more fuel cell types to the list,
 # but make sure they are implemented in the create_fuelcell factory function.
 type_fuel_cell_list = [:ZSW_GenStack]
-nb_gc_pola = 1
+nb_gc_pola = 3
 
 # If only one fuel cell type is selected, run a single simulation. Otherwise, run multiple simulations in parallel.
 if length(type_fuel_cell_list) == 1

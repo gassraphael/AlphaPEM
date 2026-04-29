@@ -7,6 +7,89 @@
 # Water management – scalar flux / source terms
 # ────────────────────────────────────────────────────────────────────────────────
 
+@inline _as_f64_vec(v::Vector{Float64}) = v
+@inline _as_f64_vec(v) = collect(Float64, v)
+
+"""Reusable vector workspace for `calculate_flows_1D_MEA!`.
+Holds all per-layer vectors that are otherwise reallocated every call.
+"""
+mutable struct MEAFlowsWorkspace
+    C_v_agdl::Vector{Float64}
+    C_v_ampl::Vector{Float64}
+    C_v_cmpl::Vector{Float64}
+    C_v_cgdl::Vector{Float64}
+    s_agdl::Vector{Float64}
+    s_ampl::Vector{Float64}
+    s_cmpl::Vector{Float64}
+    s_cgdl::Vector{Float64}
+    C_H2_agdl::Vector{Float64}
+    C_H2_ampl::Vector{Float64}
+    C_O2_cmpl::Vector{Float64}
+    C_O2_cgdl::Vector{Float64}
+    T_agdl::Vector{Float64}
+    T_ampl::Vector{Float64}
+    T_cmpl::Vector{Float64}
+    T_cgdl::Vector{Float64}
+    Jl_agdl_agdl::Vector{Float64}
+    Jl_ampl_ampl::Vector{Float64}
+    Jl_cmpl_cmpl::Vector{Float64}
+    Jl_cgdl_cgdl::Vector{Float64}
+    Jv_agdl_agdl::Vector{Float64}
+    Jv_ampl_ampl::Vector{Float64}
+    Jv_cmpl_cmpl::Vector{Float64}
+    Jv_cgdl_cgdl::Vector{Float64}
+    J_H2_agdl_agdl::Vector{Float64}
+    J_H2_ampl_ampl::Vector{Float64}
+    J_O2_cmpl_cmpl::Vector{Float64}
+    J_O2_cgdl_cgdl::Vector{Float64}
+    Sl_agdl::Vector{Float64}
+    Sl_ampl::Vector{Float64}
+    Sl_cmpl::Vector{Float64}
+    Sl_cgdl::Vector{Float64}
+    Sv_agdl::Vector{Float64}
+    Sv_ampl::Vector{Float64}
+    Sv_cmpl::Vector{Float64}
+    Sv_cgdl::Vector{Float64}
+end
+
+function MEAFlowsWorkspace(nb_gdl::Int, nb_mpl::Int)
+    return MEAFlowsWorkspace(
+        Vector{Float64}(undef, nb_gdl), Vector{Float64}(undef, nb_mpl),
+        Vector{Float64}(undef, nb_mpl), Vector{Float64}(undef, nb_gdl),
+        Vector{Float64}(undef, nb_gdl), Vector{Float64}(undef, nb_mpl),
+        Vector{Float64}(undef, nb_mpl), Vector{Float64}(undef, nb_gdl),
+        Vector{Float64}(undef, nb_gdl), Vector{Float64}(undef, nb_mpl),
+        Vector{Float64}(undef, nb_mpl), Vector{Float64}(undef, nb_gdl),
+        Vector{Float64}(undef, nb_gdl), Vector{Float64}(undef, nb_mpl),
+        Vector{Float64}(undef, nb_mpl), Vector{Float64}(undef, nb_gdl),
+        Vector{Float64}(undef, max(nb_gdl - 1, 0)), Vector{Float64}(undef, max(nb_mpl - 1, 0)),
+        Vector{Float64}(undef, max(nb_mpl - 1, 0)), Vector{Float64}(undef, max(nb_gdl - 1, 0)),
+        Vector{Float64}(undef, max(nb_gdl - 1, 0)), Vector{Float64}(undef, max(nb_mpl - 1, 0)),
+        Vector{Float64}(undef, max(nb_mpl - 1, 0)), Vector{Float64}(undef, max(nb_gdl - 1, 0)),
+        Vector{Float64}(undef, max(nb_gdl - 1, 0)), Vector{Float64}(undef, max(nb_mpl - 1, 0)),
+        Vector{Float64}(undef, max(nb_mpl - 1, 0)), Vector{Float64}(undef, max(nb_gdl - 1, 0)),
+        Vector{Float64}(undef, nb_gdl), Vector{Float64}(undef, nb_mpl),
+        Vector{Float64}(undef, nb_mpl), Vector{Float64}(undef, nb_gdl),
+        Vector{Float64}(undef, nb_gdl), Vector{Float64}(undef, nb_mpl),
+        Vector{Float64}(undef, nb_mpl), Vector{Float64}(undef, nb_gdl)
+    )
+end
+
+"""Reusable vector workspace for `calculate_heat_transfers!`."""
+mutable struct MEAHeatWorkspace
+    Jt_agdl_agdl::Vector{Float64}
+    Jt_ampl_ampl::Vector{Float64}
+    Jt_cmpl_cmpl::Vector{Float64}
+    Jt_cgdl_cgdl::Vector{Float64}
+end
+
+function MEAHeatWorkspace(nb_gdl::Int, nb_mpl::Int)
+    return MEAHeatWorkspace(Vector{Float64}(undef, max(nb_gdl - 1, 0)),
+                            Vector{Float64}(undef, max(nb_mpl - 1, 0)),
+                            Vector{Float64}(undef, max(nb_mpl - 1, 0)),
+                            Vector{Float64}(undef, max(nb_gdl - 1, 0)))
+end
+
 """Sorption (absorption) source terms for water in the catalyst layers. Units: mol·m⁻³·s⁻¹
 """
 struct MEASorptionSources # S_abs
@@ -108,10 +191,10 @@ struct MEALiquidFluxes{NB_GDL, NB_MPL} # Jl
         length(ampl_ampl) == NB_MPL - 1 || throw(ArgumentError("ampl_ampl length must be NB_MPL - 1."))
         length(cmpl_cmpl) == NB_MPL - 1 || throw(ArgumentError("cmpl_cmpl length must be NB_MPL - 1."))
         length(cgdl_cgdl) == NB_GDL - 1 || throw(ArgumentError("cgdl_cgdl length must be NB_GDL - 1."))
-        return new{NB_GDL, NB_MPL}(agc_agdl, collect(Float64, agdl_agdl), agdl_ampl,
-                                   collect(Float64, ampl_ampl), ampl_acl, ccl_cmpl,
-                                   collect(Float64, cmpl_cmpl), cmpl_cgdl,
-                                   collect(Float64, cgdl_cgdl), cgdl_cgc)
+        return new{NB_GDL, NB_MPL}(agc_agdl, _as_f64_vec(agdl_agdl), agdl_ampl,
+                                   _as_f64_vec(ampl_ampl), ampl_acl, ccl_cmpl,
+                                   _as_f64_vec(cmpl_cmpl), cmpl_cgdl,
+                                   _as_f64_vec(cgdl_cgdl), cgdl_cgc)
     end
 end
 
@@ -138,10 +221,10 @@ struct MEAVaporFluxes{NB_GDL, NB_MPL} # Jv
         length(ampl_ampl) == NB_MPL - 1 || throw(ArgumentError("ampl_ampl length must be NB_MPL - 1."))
         length(cmpl_cmpl) == NB_MPL - 1 || throw(ArgumentError("cmpl_cmpl length must be NB_MPL - 1."))
         length(cgdl_cgdl) == NB_GDL - 1 || throw(ArgumentError("cgdl_cgdl length must be NB_GDL - 1."))
-        return new{NB_GDL, NB_MPL}(agc_agdl, collect(Float64, agdl_agdl), agdl_ampl,
-                                   collect(Float64, ampl_ampl), ampl_acl, ccl_cmpl,
-                                   collect(Float64, cmpl_cmpl), cmpl_cgdl,
-                                   collect(Float64, cgdl_cgdl), cgdl_cgc)
+        return new{NB_GDL, NB_MPL}(agc_agdl, _as_f64_vec(agdl_agdl), agdl_ampl,
+                                   _as_f64_vec(ampl_ampl), ampl_acl, ccl_cmpl,
+                                   _as_f64_vec(cmpl_cmpl), cmpl_cgdl,
+                                   _as_f64_vec(cgdl_cgdl), cgdl_cgc)
     end
 end
 
@@ -160,8 +243,8 @@ struct MEAHydrogenFluxes{NB_GDL, NB_MPL} # J_H2
                                                ampl_ampl, ampl_acl) where {NB_GDL, NB_MPL}
         length(agdl_agdl) == NB_GDL - 1 || throw(ArgumentError("agdl_agdl length must be NB_GDL - 1."))
         length(ampl_ampl) == NB_MPL - 1 || throw(ArgumentError("ampl_ampl length must be NB_MPL - 1."))
-        return new{NB_GDL, NB_MPL}(agc_agdl, collect(Float64, agdl_agdl), agdl_ampl,
-                                   collect(Float64, ampl_ampl), ampl_acl)
+        return new{NB_GDL, NB_MPL}(agc_agdl, _as_f64_vec(agdl_agdl), agdl_ampl,
+                                   _as_f64_vec(ampl_ampl), ampl_acl)
     end
 end
 
@@ -180,8 +263,8 @@ struct MEAOxygenFluxes{NB_GDL, NB_MPL} # J_O2
                                              cgdl_cgdl, cgdl_cgc) where {NB_GDL, NB_MPL}
         length(cmpl_cmpl) == NB_MPL - 1 || throw(ArgumentError("cmpl_cmpl length must be NB_MPL - 1."))
         length(cgdl_cgdl) == NB_GDL - 1 || throw(ArgumentError("cgdl_cgdl length must be NB_GDL - 1."))
-        return new{NB_GDL, NB_MPL}(ccl_cmpl, collect(Float64, cmpl_cmpl), cmpl_cgdl,
-                                   collect(Float64, cgdl_cgdl), cgdl_cgc)
+        return new{NB_GDL, NB_MPL}(ccl_cmpl, _as_f64_vec(cmpl_cmpl), cmpl_cgdl,
+                                   _as_f64_vec(cgdl_cgdl), cgdl_cgc)
     end
 end
 
@@ -245,10 +328,10 @@ struct MEAThermalFluxes{NB_GDL, NB_MPL} # Jt
         length(ampl_ampl) == NB_MPL - 1 || throw(ArgumentError("ampl_ampl length must be NB_MPL - 1."))
         length(cmpl_cmpl) == NB_MPL - 1 || throw(ArgumentError("cmpl_cmpl length must be NB_MPL - 1."))
         length(cgdl_cgdl) == NB_GDL - 1 || throw(ArgumentError("cgdl_cgdl length must be NB_GDL - 1."))
-        return new{NB_GDL, NB_MPL}(agc_agdl, collect(Float64, agdl_agdl), agdl_ampl,
-                                   collect(Float64, ampl_ampl), ampl_acl, acl_mem,
-                                   mem_ccl, ccl_cmpl, collect(Float64, cmpl_cmpl),
-                                   cmpl_cgdl, collect(Float64, cgdl_cgdl), cgdl_cgc)
+        return new{NB_GDL, NB_MPL}(agc_agdl, _as_f64_vec(agdl_agdl), agdl_ampl,
+                                   _as_f64_vec(ampl_ampl), ampl_acl, acl_mem,
+                                   mem_ccl, ccl_cmpl, _as_f64_vec(cmpl_cmpl),
+                                   cmpl_cgdl, _as_f64_vec(cgdl_cgdl), cgdl_cgc)
     end
 end
 
@@ -306,8 +389,8 @@ struct GCVaporFlows{NB_GC}
                                   cgc_in, cgc_cgc, cgc_out) where {NB_GC}
         length(agc_agc) == NB_GC - 1 || throw(ArgumentError("agc_agc length must be NB_GC - 1 = $(NB_GC - 1)."))
         length(cgc_cgc) == NB_GC - 1 || throw(ArgumentError("cgc_cgc length must be NB_GC - 1 = $(NB_GC - 1)."))
-        return new{NB_GC}(Float64(agc_in), collect(Float64, agc_agc), Float64(agc_out),
-                          Float64(cgc_in), collect(Float64, cgc_cgc), Float64(cgc_out))
+        return new{NB_GC}(Float64(agc_in), _as_f64_vec(agc_agc), Float64(agc_out),
+                          Float64(cgc_in), _as_f64_vec(cgc_cgc), Float64(cgc_out))
     end
 end
 
@@ -325,8 +408,8 @@ struct GCLiquidFlows{NB_GC}
     function GCLiquidFlows{NB_GC}(agc_agc, agc_out, cgc_cgc, cgc_out) where {NB_GC}
         length(agc_agc) == NB_GC - 1 || throw(ArgumentError("agc_agc length must be NB_GC - 1 = $(NB_GC - 1)."))
         length(cgc_cgc) == NB_GC - 1 || throw(ArgumentError("cgc_cgc length must be NB_GC - 1 = $(NB_GC - 1)."))
-        return new{NB_GC}(collect(Float64, agc_agc), Float64(agc_out),
-                          collect(Float64, cgc_cgc), Float64(cgc_out))
+        return new{NB_GC}(_as_f64_vec(agc_agc), Float64(agc_out),
+                          _as_f64_vec(cgc_cgc), Float64(cgc_out))
     end
 end
 
@@ -341,7 +424,7 @@ struct GCHydrogenFlows{NB_GC}
 
     function GCHydrogenFlows{NB_GC}(agc_in, agc_agc, agc_out) where {NB_GC}
         length(agc_agc) == NB_GC - 1 || throw(ArgumentError("agc_agc length must be NB_GC - 1 = $(NB_GC - 1)."))
-        return new{NB_GC}(Float64(agc_in), collect(Float64, agc_agc), Float64(agc_out))
+        return new{NB_GC}(Float64(agc_in), _as_f64_vec(agc_agc), Float64(agc_out))
     end
 end
 
@@ -356,7 +439,7 @@ struct GCOxygenFlows{NB_GC}
 
     function GCOxygenFlows{NB_GC}(cgc_in, cgc_cgc, cgc_out) where {NB_GC}
         length(cgc_cgc) == NB_GC - 1 || throw(ArgumentError("cgc_cgc length must be NB_GC - 1 = $(NB_GC - 1)."))
-        return new{NB_GC}(Float64(cgc_in), collect(Float64, cgc_cgc), Float64(cgc_out))
+        return new{NB_GC}(Float64(cgc_in), _as_f64_vec(cgc_cgc), Float64(cgc_out))
     end
 end
 
@@ -376,8 +459,8 @@ struct GCNitrogenFlows{NB_GC}
                                      cgc_in, cgc_cgc, cgc_out) where {NB_GC}
         length(agc_agc) == NB_GC - 1 || throw(ArgumentError("agc_agc length must be NB_GC - 1 = $(NB_GC - 1)."))
         length(cgc_cgc) == NB_GC - 1 || throw(ArgumentError("cgc_cgc length must be NB_GC - 1 = $(NB_GC - 1)."))
-        return new{NB_GC}(Float64(agc_in), collect(Float64, agc_agc), Float64(agc_out),
-                          Float64(cgc_in), collect(Float64, cgc_cgc), Float64(cgc_out))
+        return new{NB_GC}(Float64(agc_in), _as_f64_vec(agc_agc), Float64(agc_out),
+                          Float64(cgc_in), _as_f64_vec(cgc_cgc), Float64(cgc_out))
     end
 end
 
@@ -430,7 +513,7 @@ end
 """Complete 1D MEA heat transfer output for one gas-channel column.
 Includes MEA-core heat terms and GC/MEA interface conductive fluxes.
 
-This is the future return type of `calculate_heat_transfers`, replacing
+This is the return type of `calculate_heat_transfers!`, replacing
 the former `Dict{String, Dict}`.
 """
 struct MEAHeatFlows1D{NB_GDL, NB_MPL}

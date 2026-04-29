@@ -96,7 +96,11 @@ function _dae_jacobian_fd!(J,
                            gamma::Float64,
                            t::Float64,
                            residual!,
-                           differential_vars::BitVector)
+                           differential_vars::BitVector,
+                           y_work::Vector{Float64},
+                           res_perturbed_plus::Vector{Float64},
+                           res_perturbed_minus::Vector{Float64},
+                           diag_nz_indices::Vector{Int})
     n = length(y)
     n == length(dydt_IDA) ||
         throw(ArgumentError("State/derivative size mismatch in _dae_jacobian_fd!."))
@@ -111,10 +115,8 @@ function _dae_jacobian_fd!(J,
     rows = rowvals(J)  # for each stored position `idx` in column `j`, `rows[idx]` is the row `i` of that exact nonzero entry.
     vals = nonzeros(J) # `vals[idx]` is `J[rows[idx], j]`, so `vals[idx] = ...` updates that entry in place, with no sparsity change and no extra allocation.
 
-    # Reuse work arrays to remove per-column allocations inside Newton iterations.
-    y_work = copy(y) # Working copy of the state vector for perturbations.
-    res_perturbed_plus = Vector{Float64}(undef, n) # Residual at y + delta*e_j
-    res_perturbed_minus = Vector{Float64}(undef, n) # Residual at y - delta*e_j
+    # Reuse preallocated work arrays to remove per-call allocations inside Newton iterations.
+    copyto!(y_work, y) # Reset perturbation workspace from current Newton state.
 
     for j in 1:n
         yj = y[j]
@@ -139,7 +141,7 @@ function _dae_jacobian_fd!(J,
     # Add gamma * dF/d(dy/dt): identity on differential rows only.
     @inbounds for i in eachindex(differential_vars)
         differential_vars[i] || continue
-        J[i, i] += gamma
+        vals[diag_nz_indices[i]] += gamma # Add exact dF/d(dy/dt) contribution on differential rows.
     end
 
     return nothing

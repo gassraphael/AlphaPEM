@@ -6,7 +6,7 @@ It is a component of the fuel cell model.
 
 # ____________________________________________________Heat transfers____________________________________________________
 
-"""Calculate the heat transfers occurring inside the fuel cell system.
+"""In-place heat-transfer computation with reusable workspace.
 
 Parameters
 ----------
@@ -27,13 +27,14 @@ MEAHeatFlows1D{NB_GDL, NB_MPL}
     Typed heat transfer outputs (conductive fluxes and volumetric heat sources)
     for one gas-channel column.
 """
-function calculate_heat_transfers(sv_1D::CellState1D{NB_GDL, NB_MPL},
-                                  i_fc::Float64,
-                                  fc::AbstractFuelCell,
-                                  cfg::SimulationConfig,
-                                  S_abs::MEASorptionSources,
-                                  Sl::MEALiquidSources{NB_GDL, NB_MPL}
-                                  )::MEAHeatFlows1D{NB_GDL, NB_MPL} where {NB_GDL, NB_MPL}
+function calculate_heat_transfers!(work::MEAHeatWorkspace,
+                                   sv_1D::CellState1D{NB_GDL, NB_MPL},
+                                   i_fc::Float64,
+                                   fc::AbstractFuelCell,
+                                   cfg::SimulationConfig,
+                                   S_abs::MEASorptionSources,
+                                   Sl::MEALiquidSources{NB_GDL, NB_MPL}
+                                   )::MEAHeatFlows1D{NB_GDL, NB_MPL} where {NB_GDL, NB_MPL}
 
     # ___________________________________________________Preliminaries__________________________________________________
 
@@ -44,11 +45,9 @@ function calculate_heat_transfers(sv_1D::CellState1D{NB_GDL, NB_MPL},
 
     # Extraction of the parameters
     pp = fc.physical_parameters
-    np = cfg.numerical_parameters
     T_des = fc.operating_conditions.T_des
     Hmem, Hgdl, Hmpl, Hacl, Hccl = pp.Hmem, pp.Hgdl, pp.Hmpl, pp.Hacl, pp.Hccl
     epsilon_gdl, epsilon_mpl, epsilon_c = pp.epsilon_gdl, pp.epsilon_mpl, pp.epsilon_c
-    nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl
 
     # Intermediate values
     (Hgdl_node, Hmpl_node, k_th_eff_agc_agdl, k_th_eff_agdl_agdl, k_th_eff_agdl_ampl, k_th_eff_ampl_ampl,
@@ -61,12 +60,16 @@ function calculate_heat_transfers(sv_1D::CellState1D{NB_GDL, NB_MPL},
     T_agc_mean = T_des
     T_cgc_mean = T_des
     Jt_agc_agdl = -k_th_eff_agc_agdl * d_dx(T_agc_mean, sv_1D.agdl[1].T, Hgdl_node / 2)
-    Jt_agdl_agdl = [-k_th_eff_agdl_agdl[i] * d_dx(sv_1D.agdl[i].T, sv_1D.agdl[i + 1].T, Hgdl_node / 2)
-                    for i in 1:(nb_gdl - 1)]
-    Jt_agdl_ampl = -k_th_eff_agdl_ampl * d_dx(sv_1D.agdl[nb_gdl].T, sv_1D.ampl[1].T, Hgdl_node / 2, Hmpl_node / 2)
-    Jt_ampl_ampl = [-k_th_eff_ampl_ampl[i] * d_dx(sv_1D.ampl[i].T, sv_1D.ampl[i + 1].T, Hmpl_node / 2)
-                    for i in 1:(nb_mpl - 1)]
-    Jt_ampl_acl = -k_th_eff_ampl_acl * d_dx(sv_1D.ampl[nb_mpl].T, T_acl, Hmpl_node / 2, Hacl / 2)
+    Jt_agdl_agdl = work.Jt_agdl_agdl
+    @inbounds for i in 1:(NB_GDL - 1)
+        Jt_agdl_agdl[i] = -k_th_eff_agdl_agdl[i] * d_dx(sv_1D.agdl[i].T, sv_1D.agdl[i + 1].T, Hgdl_node / 2)
+    end
+    Jt_agdl_ampl = -k_th_eff_agdl_ampl * d_dx(sv_1D.agdl[NB_GDL].T, sv_1D.ampl[1].T, Hgdl_node / 2, Hmpl_node / 2)
+    Jt_ampl_ampl = work.Jt_ampl_ampl
+    @inbounds for i in 1:(NB_MPL - 1)
+        Jt_ampl_ampl[i] = -k_th_eff_ampl_ampl[i] * d_dx(sv_1D.ampl[i].T, sv_1D.ampl[i + 1].T, Hmpl_node / 2)
+    end
+    Jt_ampl_acl = -k_th_eff_ampl_acl * d_dx(sv_1D.ampl[NB_MPL].T, T_acl, Hmpl_node / 2, Hacl / 2)
 
     # Membrane side
     Jt_acl_mem = -k_th_eff_acl_mem * d_dx(T_acl, T_mem, Hacl / 2, Hmem / 2)
@@ -74,12 +77,16 @@ function calculate_heat_transfers(sv_1D::CellState1D{NB_GDL, NB_MPL},
 
     # Cathode side
     Jt_ccl_cmpl = -k_th_eff_ccl_cmpl * d_dx(T_ccl, sv_1D.cmpl[1].T, Hccl / 2, Hmpl_node / 2)
-    Jt_cmpl_cmpl = [-k_th_eff_cmpl_cmpl[i] * d_dx(sv_1D.cmpl[i].T, sv_1D.cmpl[i + 1].T, Hmpl_node / 2)
-                    for i in 1:(nb_mpl - 1)]
-    Jt_cmpl_cgdl = -k_th_eff_cmpl_cgdl * d_dx(sv_1D.cmpl[nb_mpl].T, sv_1D.cgdl[1].T, Hmpl_node, Hgdl_node)
-    Jt_cgdl_cgdl = [-k_th_eff_cgdl_cgdl[i] * d_dx(sv_1D.cgdl[i].T, sv_1D.cgdl[i + 1].T, Hgdl_node / 2)
-                    for i in 1:(nb_gdl - 1)]
-    Jt_cgdl_cgc = -k_th_eff_cgdl_cgc * d_dx(sv_1D.cgdl[nb_gdl].T, T_cgc_mean, Hgdl_node / 2)
+    Jt_cmpl_cmpl = work.Jt_cmpl_cmpl
+    @inbounds for i in 1:(NB_MPL - 1)
+        Jt_cmpl_cmpl[i] = -k_th_eff_cmpl_cmpl[i] * d_dx(sv_1D.cmpl[i].T, sv_1D.cmpl[i + 1].T, Hmpl_node / 2)
+    end
+    Jt_cmpl_cgdl = -k_th_eff_cmpl_cgdl * d_dx(sv_1D.cmpl[NB_MPL].T, sv_1D.cgdl[1].T, Hmpl_node, Hgdl_node)
+    Jt_cgdl_cgdl = work.Jt_cgdl_cgdl
+    @inbounds for i in 1:(NB_GDL - 1)
+        Jt_cgdl_cgdl[i] = -k_th_eff_cgdl_cgdl[i] * d_dx(sv_1D.cgdl[i].T, sv_1D.cgdl[i + 1].T, Hgdl_node / 2)
+    end
+    Jt_cgdl_cgc = -k_th_eff_cgdl_cgc * d_dx(sv_1D.cgdl[NB_GDL].T, T_cgc_mean, Hgdl_node / 2)
 
     Jt = MEAThermalFluxes{NB_GDL, NB_MPL}(
         Jt_agc_agdl, Jt_agdl_agdl, Jt_agdl_ampl, Jt_ampl_ampl, Jt_ampl_acl,
@@ -136,3 +143,4 @@ function calculate_heat_transfers(sv_1D::CellState1D{NB_GDL, NB_MPL},
 
     return MEAHeatFlows1D{NB_GDL, NB_MPL}(Jt, Q_r, Q_sorp, Q_liq, Q_p, Q_e)
 end
+

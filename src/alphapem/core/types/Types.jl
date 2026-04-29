@@ -80,6 +80,7 @@ export MEALiquidSources, MEAVaporSources
 export MEAThermalFluxes, MEALiquidHeat, MEAElectricHeat
 # MEA top-level containers
 export MEAFlows1D, MEAHeatFlows1D
+export MEAFlowsWorkspace, MEAHeatWorkspace
 # GC / along-channel flow types
 export GCVaporFlows, GCLiquidFlows, GCHydrogenFlows, GCOxygenFlows, GCNitrogenFlows
 export GCMassFlows, DesiredInletFlows

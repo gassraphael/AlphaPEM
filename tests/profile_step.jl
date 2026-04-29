@@ -13,7 +13,7 @@ Pkg.activate(joinpath(@__DIR__, ".."))
 using Dates
 using Profile
 using Printf
-using AlphaPEM.Config: SimulationConfig, StepParams
+using AlphaPEM.Config: SimulationConfig, StepParams, NumericalParams
 using AlphaPEM.Application: run_simulation
 
 function collect_flat_profile_text()
@@ -146,12 +146,13 @@ function make_step_config()
         delta_t_load = 30.0,
         delta_t_break = 2.0 * 60.0,
         i_ini = 1.0e4,
-        i_step = 2.0e4
+        i_step = 1.5e4
     )
 
     return SimulationConfig(
         type_fuel_cell = :ZSW_GenStack,
         type_current = current_params,
+        numerical_parameters = NumericalParams(nb_gc = 3),
         voltage_zone = :full,
         type_auxiliary = :no_auxiliary,
         type_purge = :no_purge,

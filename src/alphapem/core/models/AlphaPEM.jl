@@ -141,15 +141,20 @@ function simulate_model!(simu::AlphaPEM,
      initial_solver_values = scale_values(simu.initial_variable_values, solver_state_scaling)
      atol_scaled = np.atol ./ solver_state_scaling # preserves the same physical absolute precision after scaling.
      #           Pack external data passed to the DAE residual.
+     y_phys_work = similar(initial_solver_values)
+     flows_work = [MEAFlowsWorkspace(np.nb_gdl, np.nb_mpl) for _ in 1:np.nb_gc]
+     heat_work = MEAHeatWorkspace(np.nb_gdl, np.nb_mpl)
      packed = (fuel_cell=simu.fuel_cell, current_density=simu.current_density, cfg=simu.cfg,
-               n_vars_cell_1D=n_vars_cell_1D, n_vars_manifold=n_vars_manifold,
-               n_vars_auxiliary=n_vars_auxiliary, solver_state_scaling=solver_state_scaling,
-               differential_vars=differential_vars)
+              n_vars_cell_1D=n_vars_cell_1D, n_vars_manifold=n_vars_manifold,
+              n_vars_auxiliary=n_vars_auxiliary, solver_state_scaling=solver_state_scaling,
+               differential_vars=differential_vars, y_phys_work=y_phys_work,
+               flows_work=flows_work, heat_work=heat_work)
      #           Define DAE residual in SciML iip=true signature: F!(res, dydt, y, p, t) -> nothing.
      #           The pre-allocated buffers are managed by the solver — zero output allocation per call.
      residual! = (res, dydt_IDA, y, p, t) -> dae_residual!(res, dydt_IDA, y, t, p.fuel_cell, p.current_density,
-                                                            p.cfg, p.n_vars_cell_1D, p.n_vars_manifold,
-                                                            p.n_vars_auxiliary, p.solver_state_scaling)
+                                                           p.cfg, p.n_vars_cell_1D, p.n_vars_manifold,
+                                                           p.n_vars_auxiliary, p.solver_state_scaling,
+                                                            p.y_phys_work, p.flows_work, p.heat_work)
 
      #           Build a consistent initial derivative vector for differential rows.
      initial_solver_derivatives = _build_consistent_initial_solver_derivatives(residual!, packed,
@@ -164,8 +169,27 @@ function simulate_model!(simu::AlphaPEM,
                                                     initial_solver_values,
                                                     simu.time_interval[1],
                                                     differential_vars)
+     n_state = length(initial_solver_values) # Jacobian dimension (state size seen by IDA).
+     jac_y_work = copy(initial_solver_values) # Reusable perturbed state vector for FD Jacobian.
+     jac_res_plus = Vector{Float64}(undef, n_state) # Reusable residual buffer at y + delta*e_j.
+     jac_res_minus = Vector{Float64}(undef, n_state) # Reusable residual buffer at y - delta*e_j.
+     diag_nz_indices = Vector{Int}(undef, n_state) # Sparse-storage index of each diagonal J[i,i].
+     jac_rows = rowvals(jac_prototype) # Row lookup for each nonzero stored in CSC columns.
+     @inbounds for j in 1:n_state
+         diag_idx = 0 # Sentinel: detects a missing diagonal entry in the prototype.
+         for idx in nzrange(jac_prototype, j)
+             if jac_rows[idx] == j
+                 diag_idx = idx # Store where the diagonal value is located in `nonzeros(J)`.
+                 break
+             end
+         end
+         diag_idx == 0 && throw(ArgumentError("Jacobian prototype must contain all diagonal entries.")) # Safety for gamma*I update.
+         diag_nz_indices[j] = diag_idx # Cached once, then reused at every Jacobian evaluation.
+     end
      jacobian! = (J, dydt_IDA, y, p, gamma, t) -> _dae_jacobian_fd!(J, dydt_IDA, y, p, gamma, t,
-                                                                    residual!, differential_vars)
+                                                                    residual!, differential_vars,
+                                                                    jac_y_work, jac_res_plus,
+                                                                    jac_res_minus, diag_nz_indices)
       #           Build and solve the DAE problem with IDA (Sundials).
      dae_fun = DAEFunction(residual!; jac=jacobian!, jac_prototype=jac_prototype)
      prob = DAEProblem(dae_fun, initial_solver_derivatives, initial_solver_values, simu.time_interval, packed;
@@ -676,4 +700,6 @@ function save_plot!(simu::AlphaPEM, _fig1=nothing, _fig2=nothing, _fig3=nothing)
 
     return nothing
 end
+
+
 

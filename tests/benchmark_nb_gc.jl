@@ -24,7 +24,7 @@ using Printf
 using AlphaPEM.Config: SimulationConfig, StepParams, PolarizationParams, NumericalParams
 using AlphaPEM.Application: run_simulation
 
-const DEFAULT_NB_GC_VALUES = [1, 3, 5]
+const DEFAULT_NB_GC_VALUES = [1, 2, 3]
 
 function parse_nb_gc_values()
     raw = strip(get(ENV, "BENCHMARK_NB_GC", ""))

@@ -468,6 +468,18 @@ continue working entirely with physical variables.
     return values_scaled .* scales
 end
 
+"""In-place variant to unscale solver values into a reusable buffer."""
+@inline function unscale_values!(dest::AbstractVector{Float64},
+                                 values_scaled::AbstractVector{Float64},
+                                 scales::AbstractVector{Float64})::Nothing
+    length(dest) == length(values_scaled) == length(scales) ||
+        throw(ArgumentError("unscale_values!: size mismatch."))
+    @inbounds @simd for i in eachindex(dest, values_scaled, scales)
+        dest[i] = values_scaled[i] * scales[i]
+    end
+    return nothing
+end
+
 """Count the number of CellState1D variables (MEA+GC) per gas-channel node in the solver vector."""
 function _nb_solver_vars_cell_1D(nb_gdl::Int, nb_mpl::Int)::Int
     return length(canonical_cell_solver_variable_names_1D(nb_gdl, nb_mpl))
