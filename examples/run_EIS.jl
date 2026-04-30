@@ -8,7 +8,7 @@ You can modify any SimulationConfig parameter below.
 import Pkg
 Pkg.activate(joinpath(@__DIR__, ".."))
 
-using AlphaPEM.Config: SimulationConfig, EISParams
+using AlphaPEM.Config: SimulationConfig, EISParams, NumericalParams
 using AlphaPEM.Application: run_simulation
 
 current_params = EISParams(
@@ -23,6 +23,7 @@ current_params = EISParams(
 cfg = SimulationConfig(
     type_fuel_cell = :ZSW_GenStack,
     type_current = current_params,
+    numerical_parameters = NumericalParams(nb_gc = 1),
     voltage_zone = :full, # :before_voltage_drop, :full.
     type_auxiliary = :no_auxiliary, # :forced_convective_cathode_with_anodic_recirculation, :forced_convective_cathode_with_flow_through_anode, :no_auxiliary.
     type_purge = :no_purge, # :constant_purge, :periodic_purge, :no_purge.

@@ -5,6 +5,9 @@
 
 # _____________________________________________________Flow modules_____________________________________________________
 
+@inline _bounded_saturation_value(s::Real) = clamp(Float64(s), 1e-9, 1.0 - 1e-9)
+@inline _positive_pressure_value(P::Real) = max(Float64(P), 1.0)
+
 """Calculate intermediate values for the flows calculation.
 
 Parameters
@@ -238,6 +241,7 @@ function Dcap(element::String,
               epsilon_c::Union{Float64, Nothing}=nothing)
 
     K0_value = K0(element, epsilon, epsilon_c)
+    s_eff = _bounded_saturation_value(s)
     if element == "gdl"
         theta_c_value = theta_c_gdl
     elseif element == "mpl"
@@ -249,7 +253,8 @@ function Dcap(element::String,
     end
 
     return sigma(T) * K0_value / nu_l(T) * abs(cos(theta_c_value)) *
-           (epsilon / K0_value)^0.5 * (s^e + 1e-7) * (1.417 - 4.24 * s + 3.789 * s^2)
+           (epsilon / K0_value)^0.5 * (s_eff^e + 1e-7) *
+           (1.417 - 4.24 * s_eff + 3.789 * s_eff^2)
 end
 
 
@@ -281,6 +286,7 @@ function Pcap(element::String,
               epsilon_c::Union{Float64, Nothing}=nothing)
 
     K0_value = K0(element, epsilon, epsilon_c)
+    s_eff = _bounded_saturation_value(s)
     if element == "gdl"
         theta_c_value = theta_c_gdl
     elseif element == "mpl"
@@ -291,10 +297,8 @@ function Pcap(element::String,
         throw(ArgumentError("The element should be either 'gdl', 'mpl' or 'cl'."))
     end
 
-    s_num = s + 1e-7 # To avoid numerical issues when s is slightly negative due to numerical noise.
-
     return sigma(T) * abs(cos(theta_c_value)) * (epsilon / K0_value)^0.5 *
-           (1.417 * s_num - 2.12 * s_num^2 + 1.263 * s_num^3)
+           (1.417 * s_eff - 2.12 * s_eff^2 + 1.263 * s_eff^3)
 end
 
 
@@ -313,7 +317,9 @@ Da :
     Diffusion coefficient at the anode in m².s-1.
 """
 function Da(P, T)
-    return 1.644e-4 * (T / 333)^2.334 * (101325 / P)
+    T_eff = _positive_temperature_value(T)
+    P_eff = _positive_pressure_value(P)
+    return 1.644e-4 * (T_eff / 333)^2.334 * (101325 / P_eff)
 end
 
 
@@ -332,7 +338,9 @@ Dc
     Diffusion coefficient at the cathode in m².s-1.
 """
 function Dc(P, T)
-    return 3.242e-5 * (T / 333)^2.334 * (101325 / P)
+    T_eff = _positive_temperature_value(T)
+    P_eff = _positive_pressure_value(P)
+    return 3.242e-5 * (T_eff / 333)^2.334 * (101325 / P_eff)
 end
 
 
@@ -367,6 +375,7 @@ function Da_eff(element::String,
                 epsilon::Float64,
                 epsilon_c::Union{Float64, Nothing}=nothing)
 
+    s_eff = _bounded_saturation_value(s)
     if element == "gdl" # The effective diffusion coefficient at the GDL using Tomadakis and Sotirchos model.
         # According to the GDL porosity, the GDL compression effect is different.
         if epsilon < 0.67
@@ -375,13 +384,13 @@ function Da_eff(element::String,
             beta2 = -0.90
         end
         tau_gdl = 1 / (((epsilon - epsilon_p) / (1 - epsilon_p))^alpha_p)
-        return epsilon / tau_gdl * exp(beta2 * epsilon_c) * (1 - s)^r_s_gdl * Da(P, T)
+        return epsilon / tau_gdl * exp(beta2 * epsilon_c) * (1 - s_eff)^r_s_gdl * Da(P, T)
 
     elseif element == "mpl" # The effective diffusion coefficient at the MPL using Bruggeman model.
-        return epsilon / tau_mpl * (1 - s)^r_s_mpl * Da(P, T)
+        return epsilon / tau_mpl * (1 - s_eff)^r_s_mpl * Da(P, T)
 
     elseif element == "cl" # The effective diffusion coefficient at the CL using Bruggeman model.
-        return epsilon / tau_cl * (1 - s)^r_s_cl * Da(P, T)
+        return epsilon / tau_cl * (1 - s_eff)^r_s_cl * Da(P, T)
 
     else
         throw(ArgumentError("The element should be either 'gdl', 'mpl' or 'cl'."))
@@ -420,6 +429,7 @@ function Dc_eff(element::String,
                 epsilon::Float64,
                 epsilon_c::Union{Float64, Nothing}=nothing)
 
+    s_eff = _bounded_saturation_value(s)
     if element == "gdl" # The effective diffusion coefficient at the GDL using Tomadakis and Sotirchos model.
         # According to the GDL porosity, the GDL compression effect is different.
         if epsilon < 0.67
@@ -428,13 +438,13 @@ function Dc_eff(element::String,
             beta2 = -0.90
         end
         tau_gdl = 1 / (((epsilon - epsilon_p) / (1 - epsilon_p))^alpha_p)
-        return epsilon / tau_gdl * exp(beta2 * epsilon_c) * (1 - s)^r_s_gdl * Dc(P, T)
+        return epsilon / tau_gdl * exp(beta2 * epsilon_c) * (1 - s_eff)^r_s_gdl * Dc(P, T)
 
     elseif element == "mpl" # The effective diffusion coefficient at the MPL using Bruggeman model.
-        return epsilon / tau_mpl * (1 - s)^r_s_mpl * Dc(P, T)
+        return epsilon / tau_mpl * (1 - s_eff)^r_s_mpl * Dc(P, T)
 
     elseif element == "cl" # The effective diffusion coefficient at the CL using Bruggeman model.
-        return epsilon / tau_cl * (1 - s)^r_s_cl * Dc(P, T)
+        return epsilon / tau_cl * (1 - s_eff)^r_s_cl * Dc(P, T)
 
     else
         throw(ArgumentError("The element should be either 'gdl', 'mpl' or 'cl'."))
@@ -672,9 +682,10 @@ gamma_sorp
 """
 function gamma_sorp(C_v, s, lambdaa, T, Hcl::Float64)
 
+    T_eff = _positive_temperature_value(T)
     fv_value = fv(lambdaa, T)
-    gamma_abs = (1.14e-5 * fv_value) / Hcl * exp(2416 * (1 / 303 - 1 / T))
-    gamma_des = (4.59e-5 * fv_value) / Hcl * exp(2416 * (1 / 303 - 1 / T))
+    gamma_abs = (1.14e-5 * fv_value) / Hcl * exp(2416 * (1 / 303 - 1 / T_eff))
+    gamma_des = (4.59e-5 * fv_value) / Hcl * exp(2416 * (1 / 303 - 1 / T_eff))
 
     # Transition function between absorption and desorption
     K_transition = 10  # It is a constant that defines the sharpness of the transition between two states.
@@ -714,23 +725,27 @@ function Svl(element::String,
              T,
              epsilon::Float64)
 
+    s_eff = _bounded_saturation_value(s)
+    C_v_eff = _nonnegative_value(C_v)
+    T_eff = _positive_temperature_value(T)
     # Calculation of the total and partial pressures
-    Ptot = Ctot * R * T # Total pressure.
-    P_v = C_v * R * T # Partial pressure of vapor.
+    Ptot = _positive_pressure_value(Ctot * R * T_eff) # Total pressure.
+    P_v = C_v_eff * R * T_eff # Partial pressure of vapor.
+    Psat_eff = min(Psat(T_eff), Ptot - eps(Float64))
 
     # Determination of the diffusion coefficient at the anode or the cathode
     if element == "anode"
-        D_value = Da(Ptot, T)  # Diffusion coefficient at the anode.
+        D_value = Da(Ptot, T_eff)  # Diffusion coefficient at the anode.
     else  # element == "cathode"
-        D_value = Dc(Ptot, T)  # Diffusion coefficient at the cathode.
+        D_value = Dc(Ptot, T_eff)  # Diffusion coefficient at the cathode.
     end
 
-    Svl_cond = gamma_cond * M_H2O / (R * T) * epsilon * (1 - s) * D_value * Ptot * NaNMath.log((Ptot - Psat(T)) / (Ptot - P_v))
-    Svl_evap = gamma_evap * M_H2O / (R * T) * epsilon * s * D_value * Ptot * NaNMath.log((Ptot - Psat(T)) / (Ptot - P_v))
+    Svl_cond = gamma_cond * M_H2O / (R * T_eff) * epsilon * (1 - s_eff) * D_value * Ptot * log((Ptot - Psat_eff) / (Ptot - P_v))
+    Svl_evap = gamma_evap * M_H2O / (R * T_eff) * epsilon * s_eff * D_value * Ptot * log((Ptot - Psat_eff) / (Ptot - P_v))
 
     # Transition function between condensation and evaporation
     K_transition = 3e-3 # This is a constant that defines the sharpness of the transition between two states.
-    w = 0.5 * (1 + tanh(K_transition * (Psat(T) - P_v))) # Transition function.
+    w = 0.5 * (1 + tanh(K_transition * (Psat_eff - P_v))) # Transition function.
 
     return w * Svl_evap + (1 - w) * Svl_cond # Interpolation between condensation and evaporation.
 end
@@ -749,7 +764,8 @@ sigma :
     Water surface tension in N.m-1.
 """
 function sigma(T)
-    return 235.8e-3 * ((647.15 - T) / 647.15)^1.256 * (1 - 0.625 * (647.15 - T) / 647.15)
+    T_eff = _liquid_water_temperature_value(T)
+    return 235.8e-3 * ((647.15 - T_eff) / 647.15)^1.256 * (1 - 0.625 * (647.15 - T_eff) / 647.15)
 end
 
 
@@ -861,4 +877,3 @@ function k_O2(lambdaa, T, kappa_co::Float64)
 
     return w * k_O2_v + (1 - w) * k_O2_l  # Interpolation between under-saturated and liquid-equilibrated O2 crossover.
 end
-

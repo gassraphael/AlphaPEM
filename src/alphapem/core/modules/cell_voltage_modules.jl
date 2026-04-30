@@ -5,6 +5,8 @@
 
 # _________________________________________________Cell voltage modules_________________________________________________
 
+@inline _nonnegative_value(x::Real) = max(Float64(x), eps(Float64))
+
 """Calculate the oxygen concentration at the platinum surface in the cathode catalyst layer.
 
 Parameters
@@ -55,11 +57,9 @@ function calculate_C_O2_Pt(i_fc::Real,
     # Extraction of the parameters
     Hccl, K_O2_ad_Pt = fc.physical_parameters.Hccl, fc.physical_parameters.K_O2_ad_Pt
 
-    C_O2_Pt = C_O2_ccl - i_fc / (4 * F * Hccl) *
-              R_T_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, K_O2_ad_Pt) /
-              a_c(lambda_ccl, T_ccl, Hccl)
-
-    return max(C_O2_Pt, 0.0)
+    return C_O2_ccl - i_fc / (4 * F * Hccl) *
+           R_T_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, K_O2_ad_Pt) /
+           a_c(lambda_ccl, T_ccl, Hccl)
 end
 
 
@@ -155,13 +155,14 @@ in PEM Fuel Cells.
 """
 function R_O2_dif_l(s, lambdaa, T, Hcl::Float64)
 
-    delta_ion_val = delta_ion(lambdaa, T, Hcl)
-    s_num = s + 1e-7 # To avoid numerical issues when s is slightly negative due to numerical noise.
-    delta_H2O_l = (s_num * epsilon_cl(lambdaa, T, Hcl) * r_carb^3 / epsilon_carb(Hcl) +
+    T_eff = _positive_temperature_value(T)
+    delta_ion_val = delta_ion(lambdaa, T_eff, Hcl)
+    s_num = _nonnegative_value(s)
+    delta_H2O_l = (s_num * epsilon_cl(lambdaa, T_eff, Hcl) * r_carb^3 / epsilon_carb(Hcl) +
                   (r_carb + delta_ion_val)^3)^(1 / 3) -
                   (r_carb + delta_ion_val) # The liquid water film thickness in the CL, in m.
 
-    D_O2_dif_l = 10^(-8.410 + 773.8 / T - (506.4 / T)^2) # The effective diffusion coefficient of O2 in the liquid water film, in m².s-1.
+    D_O2_dif_l = 10^(-8.410 + 773.8 / T_eff - (506.4 / T_eff)^2) # The effective diffusion coefficient of O2 in the liquid water film, in m².s-1.
 
     return delta_H2O_l / D_O2_dif_l
 end
@@ -219,9 +220,10 @@ water management and impedance spectra.
 """
 function R_O2_dif_ion(lambdaa, T, Hcl::Float64)
 
-    D_O2_dif_ion = 17.45e-10 * exp(-1514 / T) # This is the effective diffusion coefficient of O2 in the ionomer film, in m².s-1.
+    T_eff = _positive_temperature_value(T)
+    D_O2_dif_ion = 17.45e-10 * exp(-1514 / T_eff) # This is the effective diffusion coefficient of O2 in the ionomer film, in m².s-1.
 
-    return delta_ion(lambdaa, T, Hcl) / D_O2_dif_ion
+    return delta_ion(lambdaa, T_eff, Hcl) / D_O2_dif_ion
 end
 
 
@@ -464,8 +466,9 @@ in PEM Fuel Cells.
 """
 function epsilon_mc(lambda_cl, T_cl, Hcl::Float64)
 
+    lambda_eff = _nonnegative_value(lambda_cl)
     epsilon_mc_val = IC * epsilon_carb(Hcl) * rho_carb / rho_ion *
-                     (1 + (M_H2O * rho_ion) / (rho_H2O_l(T_cl) * M_eq) * lambda_cl)
+                     (1 + (M_H2O * rho_ion) / (rho_H2O_l(T_cl) * M_eq) * lambda_eff)
 
     if epsilon_mc_val >= 1
         println("epsilon_mc: ", epsilon_mc_val, " Hcl: ", Hcl, " IC: ", IC, " wt_Pt: ", wt_Pt)
@@ -505,4 +508,3 @@ function epsilon_cl(lambda_cl, T_cl, Hcl::Float64)
     end
     return epsilon_cl_val
 end
-

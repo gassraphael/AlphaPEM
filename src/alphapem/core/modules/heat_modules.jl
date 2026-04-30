@@ -5,6 +5,21 @@
 
 # _________________________________________________Heat transfer modules________________________________________________
 
+function _safe_porous_phase_weights(epsilon::Float64, s)
+    s_eff = _bounded_saturation_value(s)
+    return [max(1 - epsilon, 0.0), max(epsilon * s_eff, 0.0), max(epsilon * (1 - s_eff), 0.0)]
+end
+
+function _safe_cl_phase_weights(epsilon_cl_val::Float64, epsilon_mc_val::Float64, s)
+    s_eff = _bounded_saturation_value(s)
+    return [
+        max(1 - epsilon_cl_val - epsilon_mc_val, 0.0),
+        max(epsilon_mc_val, 0.0),
+        max(epsilon_cl_val * s_eff, 0.0),
+        max(epsilon_cl_val * (1 - s_eff), 0.0),
+    ]
+end
+
 """Calculate intermediate values for the heat transfer calculation.
 
 Parameters
@@ -168,17 +183,19 @@ function sigma_p_eff(element::String,
                      T,
                      Hcl::Union{Float64, Nothing}=nothing)
 
+    T_eff = _positive_temperature_value(T)
     lambda_transition = 1.0
 
     if element == "mem"  # The proton conductivity at the membrane.
-        sigma_p_eff_low = 0.1879 * exp(1268 * (1 / 303.15 - 1 / T))
-        sigma_p_eff_high = (0.5139 * lambdaa - 0.326) * exp(1268 * (1 / 303.15 - 1 / T))
+        sigma_p_eff_low = 0.1879 * exp(1268 * (1 / 303.15 - 1 / T_eff))
+        sigma_p_eff_high = (0.5139 * lambdaa - 0.326) * exp(1268 * (1 / 303.15 - 1 / T_eff))
     elseif element == "ccl"  # The effective proton conductivity at the cathode catalyst layer.
         if Hcl === nothing
             throw(ArgumentError("Hcl must be provided when element == 'ccl'."))
         end
-        sigma_p_eff_low = epsilon_mc(lambdaa, T, Hcl) * 0.1879 * exp(1268 * (1 / 303.15 - 1 / T))
-        sigma_p_eff_high = epsilon_mc(lambdaa, T, Hcl) * (0.5139 * lambdaa - 0.326) * exp(1268 * (1 / 303.15 - 1 / T))
+        epsilon_mc_eff = epsilon_mc(lambdaa, T_eff, Hcl)
+        sigma_p_eff_low = epsilon_mc_eff * 0.1879 * exp(1268 * (1 / 303.15 - 1 / T_eff))
+        sigma_p_eff_high = epsilon_mc_eff * (0.5139 * lambdaa - 0.326) * exp(1268 * (1 / 303.15 - 1 / T_eff))
     else
         throw(ArgumentError("The element should be either 'mem' or 'ccl'."))
     end
@@ -239,7 +256,7 @@ function sigma_e_eff(element::String,
         if lambda_cl === nothing || T_cl === nothing || Hcl === nothing
             throw(ArgumentError("lambda_cl, T_cl and Hcl must be provided when element == 'cl'."))
         end
-        return (1 - epsilon_cl(lambda_cl, T_cl, Hcl) - epsilon_mc(lambda_cl, T_cl, Hcl)) * sigma_e_cl
+        return max(1 - epsilon_cl(lambda_cl, T_cl, Hcl) - epsilon_mc(lambda_cl, T_cl, Hcl), eps(Float64)) * sigma_e_cl
 
     else
         throw(ArgumentError("The element should be either 'gdl', 'mpl' or 'cl'."))
@@ -418,7 +435,7 @@ function k_th_eff(element::String,
                                         [M_H2O, M_O2, M_N2])
         end
         return hmean([k_th_gdl * exp(beta3 * epsilon_c), k_th("H2O_l", T), k_th_gaz],
-                     [1 - epsilon, epsilon * s, epsilon * (1 - s)])
+                     _safe_porous_phase_weights(epsilon, s))
 
     elseif element == "ampl" || element == "cmpl"  # The effective thermal conductivity at the MPL.
         if C_v === nothing || s === nothing || C_N2 === nothing || epsilon === nothing
@@ -446,7 +463,7 @@ function k_th_eff(element::String,
                                         [M_H2O, M_O2, M_N2])
         end
         return hmean([k_th_mpl, k_th("H2O_l", T), k_th_gaz],
-                     [1 - epsilon, epsilon * s, epsilon * (1 - s)])
+                     _safe_porous_phase_weights(epsilon, s))
 
     elseif element == "acl" || element == "ccl"  # The effective thermal conductivity at the CL.
         if C_v === nothing || s === nothing || lambdaa === nothing || C_N2 === nothing || Hcl === nothing
@@ -481,7 +498,7 @@ function k_th_eff(element::String,
         end
 
         return hmean([k_th_cl, k_th_eff_mem, k_th("H2O_l", T), k_th_gaz],
-                     [1 - epsilon_cl_val - epsilon_mc_val, epsilon_mc_val, epsilon_cl_val * s, epsilon_cl_val * (1 - s)])
+                     _safe_cl_phase_weights(epsilon_cl_val, epsilon_mc_val, s))
 
     elseif element == "mem"  # The effective thermal conductivity at the membrane.
         if lambdaa === nothing
@@ -624,10 +641,10 @@ function calculate_rho_Cp0(element::String,
 
         if element == "agdl" || element == "cgdl"  # In the GDLs.
             return average([rho_gdl * Cp_gdl, rho_H2O_l(T) * Cp0("H2O_l", T), rho_Cp0_gaz],
-                           [1 - epsilon, epsilon * s, epsilon * (1 - s)])
+                           _safe_porous_phase_weights(epsilon, s))
         else  # In the MPLs.
             return average([rho_mpl * Cp_mpl, rho_H2O_l(T) * Cp0("H2O_l", T), rho_Cp0_gaz],
-                           [1 - epsilon, epsilon * s, epsilon * (1 - s)])
+                           _safe_porous_phase_weights(epsilon, s))
         end
 
     elseif element == "acl" || element == "ccl"  # The volumetric heat capacity at the CL.
@@ -655,7 +672,7 @@ function calculate_rho_Cp0(element::String,
         end
 
         return average([rho_cl * Cp_cl, rho_mem * Cp_mem, rho_H2O_l(T) * Cp0("H2O_l", T), rho_Cp0_gaz],
-                       [1 - epsilon_cl_val - epsilon_mc_val, epsilon_mc_val, epsilon_cl_val * s, epsilon_cl_val * (1 - s)])
+                       _safe_cl_phase_weights(epsilon_cl_val, epsilon_mc_val, s))
 
     elseif element == "mem"  # The volumetric heat capacity at the membrane.
         if lambdaa === nothing
@@ -704,4 +721,3 @@ delta_h_abs
 function delta_h_abs(T)
     return delta_h_liq(T)
 end
-

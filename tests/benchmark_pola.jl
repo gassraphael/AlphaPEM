@@ -37,7 +37,7 @@ function make_pola_config()
     return SimulationConfig(
         type_fuel_cell = :ZSW_GenStack,
         type_current = current_params,
-        numerical_parameters = NumericalParams(nb_gc = 1),
+        numerical_parameters = NumericalParams(nb_gc = 5),
         voltage_zone = :full,
         type_auxiliary = :no_auxiliary,
         type_purge = :no_purge,

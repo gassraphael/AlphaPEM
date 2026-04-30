@@ -14,7 +14,7 @@ It is intended for quick validation of the EIS plotting pipeline.
 import Pkg
 Pkg.activate(joinpath(@__DIR__, ".."))
 
-using AlphaPEM.Config: SimulationConfig, EISParams
+using AlphaPEM.Config: SimulationConfig, EISParams, NumericalParams
 using AlphaPEM.Application: run_simulation
 
 current_params = EISParams(
@@ -29,6 +29,7 @@ current_params = EISParams(
 cfg = SimulationConfig(
     type_fuel_cell = :ZSW_GenStack,
     type_current = current_params,
+    numerical_parameters = NumericalParams(nb_gc = 1),
     voltage_zone = :full,
     type_auxiliary = :no_auxiliary,
     type_purge = :no_purge,
