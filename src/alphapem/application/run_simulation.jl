@@ -202,10 +202,6 @@ function launch_AlphaPEM_for_EIS_current(simu::AlphaPEM)::AlphaPEM
             "EIS requires `display_timing = :live` so that `max_step` can be " *
             "adjusted at each frequency."))
 
-    # Warnings
-    @warn "EIS simulation is currently not maintained.  Some unexpected bugs or " *
-          "incorrect results may occur.  This will be resolved in a future release."
-
     # Figures preparation
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(simu.cfg)
 

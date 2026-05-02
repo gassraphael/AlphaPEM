@@ -95,10 +95,6 @@ function simulate_model!(simu::AlphaPEM,
         println("Warning: EH-Group fuel cell examples may be outdated. Using ZSW-GenStack is recommended.\n")
     end
 
-    if simu.cfg.voltage_zone == :EIS
-        throw(ArgumentError("The EIS generation is currently undergoing maintenance."))
-    end
-
     if simu.cfg.type_auxiliary in (:forced_convective_cathode_with_anodic_recirculation,
                               :forced_convective_cathode_with_flow_through_anode)
         simu.cfg.type_auxiliary = :no_auxiliary
@@ -154,17 +150,21 @@ function simulate_model!(simu::AlphaPEM,
     y_phys_work = similar(initial_scaled_variable_values)
     flows_work = [MEAFlowsWorkspace(np.nb_gdl, np.nb_mpl) for _ in 1:np.nb_gc]
     heat_work = MEAHeatWorkspace(np.nb_gdl, np.nb_mpl)
+    _, current_res_scales = _build_gc_current_density_scaling(simu.cfg)
+    j_in_scale = StateScaling().dae_algebraic.J_in
     packed = (fuel_cell=simu.fuel_cell, current_density=simu.current_density, cfg=simu.cfg,
              n_vars_cell_1D=n_vars_cell_1D, n_vars_manifold=n_vars_manifold,
              n_vars_auxiliary=n_vars_auxiliary, solver_state_scaling=solver_state_scaling,
               differential_vars=differential_vars, y_phys_work=y_phys_work,
-              flows_work=flows_work, heat_work=heat_work)
+              flows_work=flows_work, heat_work=heat_work,
+              current_res_scales=current_res_scales, j_in_scale=j_in_scale)
     #           Define DAE residual in SciML iip=true signature: F!(res, dydt, y, p, t) -> nothing.
     #           The pre-allocated buffers are managed by the solver — zero output allocation per call.
     residual! = (res, dydt_IDA, y, p, t) -> dae_residual!(res, dydt_IDA, y, t, p.fuel_cell, p.current_density,
                                                           p.cfg, p.n_vars_cell_1D, p.n_vars_manifold,
                                                           p.n_vars_auxiliary, p.solver_state_scaling,
-                                                           p.y_phys_work, p.flows_work, p.heat_work)
+                                                           p.y_phys_work, p.flows_work, p.heat_work,
+                                                           p.current_res_scales, p.j_in_scale)
      #           Build a consistent initial derivative vector for differential rows.
     simu.initial_derivative_values = initial_derivative_values === nothing ?
                                      _build_consistent_initial_solver_derivatives(residual!, packed,

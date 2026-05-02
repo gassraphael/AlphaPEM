@@ -47,6 +47,12 @@ heat_work : MEAHeatWorkspace
     Single pre-allocated workspace shared across all GC nodes for
     `calculate_heat_transfers!`.  Heat flows for each node are computed
     sequentially, so one workspace is sufficient.
+current_res_scales : Vector{Float64}
+    Reference magnitudes used to non-dimensionalise the current-distribution
+    residuals.  Built once by `build_current_residual_scaling` and reused at every residual call.
+j_in_scale : Float64
+    Reference magnitude used to non-dimensionalise the inlet-flow residuals.
+    Built once by `build_j_in_residual_scaling` and reused at every residual call.
 """
 function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vector{Float64}, t::Float64,
                        fc::AbstractFuelCell, cd::AbstractCurrent, cfg::SimulationConfig,
@@ -54,7 +60,9 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
                        n_vars_auxiliary::Int, solver_state_scaling::Vector{Float64},
                        y_phys_work::Vector{Float64},
                        flows_work::Vector{MEAFlowsWorkspace},
-                       heat_work::MEAHeatWorkspace)
+                       heat_work::MEAHeatWorkspace,
+                       current_res_scales::Vector{Float64},
+                       j_in_scale::Float64)
 
     # Extraction of frequently used parameters
     oc = fc.operating_conditions
@@ -128,7 +136,6 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
     alg_current_end = alg_current_start + alg_current_len - 1
     res_current = @view(res[alg_current_start:alg_current_end])
     gc_current_distribution_residuals!(res_current, U_cell, i_fc, C_O2_Pt, i_fc_cell, sv_cell_1D, fc, cfg)
-    _, current_res_scales = _build_gc_current_density_scaling(cfg)
     res_current ./= current_res_scales
 
     # Algebraic block B: inlet-flow residuals in physical units.
@@ -136,7 +143,7 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
     alg_flow_end = alg_flow_start + 1
     res_flow = @view(res[alg_flow_start:alg_flow_end])
     velocity_inlet_flow_residuals!(res_flow, J_a_in, J_c_in, sv_cell_1D, i_fc_cell, fc, cfg)
-    res_flow ./= StateScaling().dae_algebraic.J_in
+    res_flow ./= j_in_scale
 
     # Rebuild flow-dependent fields from algebraic states.
     v_a, v_c, Pa_in, Pc_in = velocity_profiles_from_inlet_flows(sv_cell_1D, J_a_in, J_c_in, fc, cfg)
@@ -263,5 +270,4 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
 
     return nothing
 end
-
 

@@ -21,10 +21,10 @@ Pkg.activate(joinpath(@__DIR__, ".."))
 
 using Dates
 using Printf
-using AlphaPEM.Config: SimulationConfig, StepParams, PolarizationParams, NumericalParams
+using AlphaPEM.Config: SimulationConfig, StepParams, PolarizationParams, EISParams, NumericalParams
 using AlphaPEM.Application: run_simulation
 
-const DEFAULT_NB_GC_VALUES = [1, 5, 10]
+const DEFAULT_NB_GC_VALUES = [1, 3, 5]
 
 function parse_nb_gc_values()
     raw = strip(get(ENV, "BENCHMARK_NB_GC", ""))
@@ -77,6 +77,28 @@ function make_pola_cfg(nb_gc::Int)
         type_purge = :no_purge,
         type_display = :no_display,
         display_timing = :postrun,
+    )
+end
+
+function make_eis_cfg(nb_gc::Int)
+    current_params = EISParams(
+        i_EIS = 1.0e4,        # (A/m²). Parameters for the EIS curve.
+        ratio = 5.0 / 100.0,  # (.). Parameters for the EIS curve.
+        f_power_min = -3.0,   # (.). Power of the minimum frequency for the EIS current density function.
+        f_power_max = 5.0,    # (.). Power of the maximum frequency for the EIS current density function.
+        nb_f = 90,            # (.). Number of frequencies tested for the EIS current density function.
+        nb_points = 50,       # (.). Number of points calculated per specific period for the EIS current density function.
+    )
+
+    return SimulationConfig(
+        type_fuel_cell = :ZSW_GenStack,
+        type_current = current_params,
+        numerical_parameters = NumericalParams(nb_gc = nb_gc),
+        voltage_zone = :full,
+        type_auxiliary = :no_auxiliary,
+        type_purge = :no_purge,
+        type_display = :no_display,
+        display_timing = :live
     )
 end
 
@@ -170,7 +192,22 @@ function main()
         err = warm_pola.err,
     ))
 
-    for scenario in ("step", "pola")
+    println("Warm-up #3: run_eis with nb_gc = 1")
+    warm_eis = timed_run(make_eis_cfg(1))
+    push!(rows, (
+        timestamp = Dates.format(now(), dateformat"yyyy-mm-ddTHH:MM:SS"),
+        phase = "warmup",
+        scenario = "eis",
+        nb_gc = 1,
+        run_index = 0,
+        status = warm_eis.status,
+        time_s = warm_eis.time_s,
+        alloc_gb = warm_eis.alloc_gb,
+        gc_s = warm_eis.gc_s,
+        err = warm_eis.err,
+    ))
+
+    for scenario in ("step", "pola", "eis")
         for nb_gc in nb_gc_values
             for i in 1:runs
                 println("Measured run ", i, "/", runs, " | scenario=", scenario, " nb_gc=", nb_gc)
