@@ -25,7 +25,7 @@ current_params = PolarizationParams(
 # :ZSW_GenStack, :ZSW_GenStack_Pa_1_61_Pc_1_41, :ZSW_GenStack_Pa_2_01_Pc_1_81,
 # :ZSW_GenStack_Pa_2_4_Pc_2_2, :ZSW_GenStack_Pa_2_8_Pc_2_6, :ZSW_GenStack_T_62,
 # :ZSW_GenStack_T_76, :ZSW_GenStack_T_84
-type_fuel_cell_list = [:ZSW_GenStack_T_84]
+type_fuel_cell_list = [:ZSW_GenStack]
 nb_gc_pola = 5
 
 # If only one fuel cell type is selected, run a single simulation. Otherwise, run multiple simulations in parallel.

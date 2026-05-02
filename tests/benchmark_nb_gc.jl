@@ -140,7 +140,7 @@ function print_summary(rows)
 
     println("\nBenchmark results")
     println("-----------------")
-    for scenario in ("step", "pola")
+    for scenario in ("step", "pola", "eis")
         sub = filter(r -> r.scenario == scenario, measured)
         isempty(sub) && continue
         println("\nScenario: ", scenario)
@@ -211,7 +211,13 @@ function main()
         for nb_gc in nb_gc_values
             for i in 1:runs
                 println("Measured run ", i, "/", runs, " | scenario=", scenario, " nb_gc=", nb_gc)
-                result = scenario == "step" ? timed_run(make_step_cfg(nb_gc)) : timed_run(make_pola_cfg(nb_gc))
+                result = if scenario == "step"
+                    timed_run(make_step_cfg(nb_gc))
+                elseif scenario == "pola"
+                    timed_run(make_pola_cfg(nb_gc))
+                else
+                    timed_run(make_eis_cfg(nb_gc))
+                end
                 push!(rows, (
                     timestamp = Dates.format(now(), dateformat"yyyy-mm-ddTHH:MM:SS"),
                     phase = "measured",
@@ -237,4 +243,3 @@ function main()
 end
 
 main()
-
