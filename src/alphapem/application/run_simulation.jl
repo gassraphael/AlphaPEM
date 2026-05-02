@@ -21,7 +21,7 @@ using ..Config:   AbstractCurrentParams,
 using ..Fuelcell: create_fuelcell
 using ..Currents: create_current, step_duration
 using ..Core.Models: AlphaPEM, simulate_model!, display!, save_plot!,
-                     build_internal_solver_state_scaling, unscale_values
+                     build_solver_state_scaling, unscale_values
 
 include(joinpath(@__DIR__, "run_simulation_modules.jl"))
 
@@ -59,18 +59,19 @@ function launch_AlphaPEM_for_step_current(simu::AlphaPEM)::AlphaPEM
         # Initialization
         n             = floor(Int, tf_step / delta_t_dyn_step)
         t0            = 0.0
-        initial_state = nothing
+        initial_variable_values = nothing
+        initial_derivative_values = nothing
 
         # Dynamic simulation
         for i in 1:n
             tf = i * delta_t_dyn_step
-            simulate_model!(simu, initial_state, (t0, tf))
+            simulate_model!(simu, initial_variable_values, initial_derivative_values, (t0, tf))
 
             # Display
             simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
 
             # Recovery of the internal states from the end of the preceding simulation.
-            initial_state = _extract_last_internal_state(simu)
+            initial_variable_values, initial_derivative_values = _extract_last_internal_state(simu)
             # Time interval actualization.
             t0            = simu.outputs.solver.t[end]
         end
@@ -109,17 +110,18 @@ function launch_AlphaPEM_for_polarization_current(simu::AlphaPEM)::AlphaPEM
         n            = round(Int, (tf_full - p.delta_t_ini) / delta_t_step)
         t0           = 0.0
         tf           = p.delta_t_ini + delta_t_step
-        initial_state = nothing
+        initial_variable_values = nothing
+        initial_derivative_values = nothing
 
         # Dynamic simulation
         for i in 1:n
-            simulate_model!(simu, initial_state, (t0, tf))
+            simulate_model!(simu, initial_variable_values, initial_derivative_values, (t0, tf))
 
             # Display
             simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
 
             # Recovery of the internal states from the end of the preceding simulation.
-            initial_state = _extract_last_internal_state(simu)
+            initial_variable_values, initial_derivative_values = _extract_last_internal_state(simu)
             # Time interval actualization.
             t0 = simu.outputs.solver.t[end]
             tf = p.delta_t_ini + (i + 1) * delta_t_step
@@ -158,18 +160,19 @@ function launch_AlphaPEM_for_polarization_current_for_calibration(simu::AlphaPEM
         n          = length(step_dts)
         boundaries = cumsum(step_dts)               # absolute end-time of each step (after t_ini)
         t0         = 0.0
-        initial_state = nothing
+        initial_variable_values = nothing
+        initial_derivative_values = nothing
 
         # Dynamic simulation
         for i in 1:n
             tf = p.delta_t_ini + boundaries[i]
-            simulate_model!(simu, initial_state, (t0, tf))
+            simulate_model!(simu, initial_variable_values, initial_derivative_values, (t0, tf))
 
             # Display
             simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
 
             # Recovery of the internal states from the end of the preceding simulation.
-            initial_state = _extract_last_internal_state(simu)
+            initial_variable_values, initial_derivative_values = _extract_last_internal_state(simu)
             # Time interval actualization.
             t0 = simu.outputs.solver.t[end]
         end
@@ -209,11 +212,13 @@ function launch_AlphaPEM_for_EIS_current(simu::AlphaPEM)::AlphaPEM
     # Initialization
     cd = simu.current_density   # ::EISCurrent
     n  = length(cd.t_new_start)
+    initial_variable_values = nothing
+    initial_derivative_values = nothing
 
     # A preliminary simulation run is necessary to equilibrate internal variables at i_EIS.
-    simulate_model!(simu, nothing, (0.0, cd.t0))
+    simulate_model!(simu, initial_variable_values, initial_derivative_values, (0.0, cd.t0))
     # Recovery of the internal states from the end of the preceding simulation.
-    initial_state = _extract_last_internal_state(simu)
+    initial_variable_values, initial_derivative_values = _extract_last_internal_state(simu)
 
     if simu.cfg.type_display == :multiple
         @warn "Dynamic graph refresh is not available with `:multiple` display " *
@@ -227,10 +232,10 @@ function launch_AlphaPEM_for_EIS_current(simu::AlphaPEM)::AlphaPEM
         t0 = simu.outputs.solver.t[end]
         tf = cd.t_new_start[i] + cd.delta_t_break[i] + cd.delta_t_measurement[i]
 
-        simulate_model!(simu, initial_state, (t0, tf))
+        simulate_model!(simu, initial_variable_values, initial_derivative_values, (t0, tf))
 
         # Recovery of the internal states from the end of the preceding simulation.
-        initial_state = _extract_last_internal_state(simu)
+        initial_variable_values, initial_derivative_values = _extract_last_internal_state(simu)
 
         # Display
         simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)

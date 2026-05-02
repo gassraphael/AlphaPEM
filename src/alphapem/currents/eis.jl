@@ -60,7 +60,7 @@ function EISCurrent(p::EISParams)
     delta_t_break = Float64[]  # List of stabilization durations for each frequency
     delta_t_measurement = Float64[]  # List of measurement durations for each frequency
 
-    t0 = 120.0 * 60.0  # Initial stabilization time (s)
+    t0 = 30 * 60.0  # Initial stabilization time (s)
     t_new_start = [t0]  # Start times for each frequency segment
     tf = t0  # Final simulation time (will be updated in the loop below)
 

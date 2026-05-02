@@ -412,28 +412,13 @@ function build_solver_state_scaling(nb_gc::Int, nb_gdl::Int, nb_mpl::Int, nb_man
     return scales
 end
 
-"""Build solver scaling from any simulation-like container exposing `fuel_cell` and `cfg`.
-
-This helper intentionally avoids a concrete `AlphaPEM` type annotation to prevent
-cross-module load-order coupling (`core/modules` is loaded before `core/models`).
 """
-function build_solver_state_scaling(simu;
-                                    include_algebraic::Bool=true)::Vector{Float64}
-    return build_internal_solver_state_scaling(simu.cfg;
-                                               include_algebraic=include_algebraic)
-end
-
-"""
-    build_internal_solver_state_scaling(cfg) -> Vector{Float64}
+    build_solver_state_scaling(cfg) -> Vector{Float64}
 
 Build the fixed internal solver scaling vector used during integration.
-
-This helper lives in `core/modules` rather than `core/models` so that the
-solver-scaling infrastructure remains grouped with the packing/unpacking helpers
-and can be reused by both the RHS and the simulation orchestration code.
 """
-function build_internal_solver_state_scaling(cfg::SimulationConfig;
-                                             include_algebraic::Bool=false)::Vector{Float64}
+function build_solver_state_scaling(cfg::SimulationConfig;
+                                    include_algebraic::Bool=false)::Vector{Float64}
     np = cfg.numerical_parameters
     return build_solver_state_scaling(np.nb_gc, np.nb_gdl, np.nb_mpl, np.nb_man,
                                       cfg.type_auxiliary, StateScaling();
@@ -542,10 +527,10 @@ define a time derivative.
 """
 function _build_consistent_initial_solver_derivatives(residual!,
                                                       packed,
-                                                      initial_solver_values::Vector{Float64},
+                                                      initial_scaled_variable_values::Vector{Float64},
                                                       t0::Float64,
                                                       differential_vars::BitVector)::Vector{Float64}
-    n = length(initial_solver_values)
+    n = length(initial_scaled_variable_values)
     n == length(differential_vars) ||
         throw(ArgumentError("differential_vars size mismatch in _build_consistent_initial_solver_derivatives."))
 
@@ -556,7 +541,7 @@ function _build_consistent_initial_solver_derivatives(residual!,
     # For differential rows, we then negate this mismatch to enforce
     # F_diff(t0, y0, ydot0) ≈ 0 before IDA starts iterating.
     res0 = zeros(Float64, n)
-    residual!(res0, dydt0, initial_solver_values, packed, t0)
+    residual!(res0, dydt0, initial_scaled_variable_values, packed, t0)
 
     @inbounds for i in eachindex(differential_vars)
         differential_vars[i] || continue

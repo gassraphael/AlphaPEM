@@ -249,16 +249,15 @@ For DAE segmented runs, the restart vector must keep the full canonical solver
 layout (differential + algebraic) so that IDA resumes from the exact end state
 without external algebraic re-solves.
 """
-function _extract_last_internal_state(simu::AlphaPEM)::Vector{Float64}
+function _extract_last_internal_state(simu::AlphaPEM)::Tuple{Vector{Float64}, Vector{Float64}}
     simu.sol === nothing && throw(ArgumentError("Cannot extract internal state before a successful solve."))
 
-    solver_state_scaling = build_internal_solver_state_scaling(simu.cfg; include_algebraic=true)
+    solver_state_scaling = build_solver_state_scaling(simu.cfg; include_algebraic=true)
     length(solver_state_scaling) == length(simu.sol.u[end]) ||
         throw(ArgumentError("Internal solver scaling size mismatch in _extract_last_internal_state."))
 
     # `simu.sol.u[end]` is stored in scaled solver coordinates.
     # Convert back to physical units because `simulate_model!` expects physical
     # initial values before applying its internal scaling pipeline.
-    return unscale_values(simu.sol.u[end], solver_state_scaling)
+    return unscale_values(simu.sol.u[end], solver_state_scaling), copy(simu.sol.du[end])
 end
-

@@ -21,6 +21,7 @@ export _publication_colors,
        _set_dense_ticks!,
        _plot_final_profile_along_gc!,
        _clear_dynamic_axes!,
+       _clear_dynamic_legends!,
        saving_instructions!,
        gc_direction_labels,
        lsub
@@ -384,6 +385,31 @@ function _clear_dynamic_axes!(items...)
     return nothing
 end
 
+"""Remove dynamic legends without clearing already plotted data."""
+function _clear_dynamic_legends!(items...)
+    figures = Figure[]
+
+    function _visit(item)
+        item === nothing && return nothing
+        if item isa Axis
+            fig = item.parent
+            fig in figures || push!(figures, fig)
+        elseif item isa AbstractArray
+            foreach(_visit, item)
+        end
+        return nothing
+    end
+
+    foreach(_visit, items)
+
+    for fig in figures
+        for block in reverse(copy(fig.content))
+            block isa Legend && delete!(block)
+        end
+    end
+    return nothing
+end
+
 """Return a coherent PDF export path with incremented index when needed."""
 function _resolve_pdf_export_path(folder_path::String,
                                   filename::String)::String
@@ -437,5 +463,4 @@ function saving_instructions!(_simu,
 end
 
 end # module PlotHelpers
-
 
