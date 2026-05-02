@@ -18,7 +18,7 @@ step_p = StepParams(
     delta_t_load = 30.0,    # delta_t_load = 30 s
     delta_t_break = 2*60.0, # delta_t_break = 2 min
     i_ini = 1.0e4,          # i_ini = 1.0 A/cm²
-    i_step = 2.0e4          # i_step = 2.0 A/cm²
+    i_step = 1.5e4          # i_step = 2.0 A/cm²
 )
 step_c = StepCurrent(step_p)
 
@@ -71,7 +71,7 @@ t0_eis, tf_eis = eis_c.time_interval
 t_eis = Float64[]
 
 # Include the initial stabilization/ramp with a moderate resolution.
-append!(t_eis, collect(range(0.0, stop=t0_eis, length=2000)))
+append!(t_eis, collect(range(0.0, stop=eis_c.t0, length=2000)))
 
 for k in eachindex(eis_c.f)
     t_start = eis_c.t_new_start[k]
@@ -79,13 +79,10 @@ for k in eachindex(eis_c.f)
     dt = 1.0 / (eis_c.f[k] * eis_p.nb_points)
 
     t_segment = collect(t_start:dt:t_stop)
-    if !isempty(t_eis) && !isempty(t_segment) && t_segment[1] == t_eis[end]
-        t_segment = t_segment[2:end]
-    end
     append!(t_eis, t_segment)
 end
 
-i_eis = current(eis_c, t_eis) ./ 1e4
+i_eis = [current(eis_c, t) for t in t_eis] ./ 1e4
 
 # === Plot: all current profiles on a 2×2 figure ===
 fig = Figure(size = (1200, 800))

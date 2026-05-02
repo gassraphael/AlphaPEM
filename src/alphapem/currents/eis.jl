@@ -115,9 +115,9 @@ Compute the EIS current density at time `t`.
 function current(c::EISCurrent, t::Real)
     if t < c.t0
         # Smooth ramp to i_EIS (using tanh for a gradual increase)
-        delta_t_ini = 3 * 60.0  # Duration of the initial ramp (s)
+        delta_t_load = 3 * 60.0  # Duration of the initial ramp (s)
         return c.i_EIS *
-            (1.0 + tanh(4 * (t - 2 * (delta_t_ini / 2)) / delta_t_ini)) / 2
+            (1.0 + tanh(4 * (t - (delta_t_load / 2)) / (delta_t_load / 2))) / 2
     end
 
     # Find current frequency index (which frequency segment are we in?)
@@ -127,7 +127,7 @@ function current(c::EISCurrent, t::Real)
     # Segment-local phase with precomputed offset for continuity.
     tau = t - c.t_new_start[n_inf]
     phase = 2 * π * c.f[n_inf] * tau + c.phase_offsets[n_inf]
-    i_disruption = (c.ratio * c.i_EIS) * cos(phase)
+    i_disruption = (c.ratio * c.i_EIS) * sin(phase)
 
     return c.i_EIS + i_disruption
 end
