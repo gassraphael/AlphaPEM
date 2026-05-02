@@ -574,7 +574,8 @@ D_lambda
     Diffusion coefficient of water in the membrane in m².s-1.
 """
 function D_lambda(lambdaa)
-    return 4.1e-10 * (lambdaa / 25.0)^0.15 * (1.0 + tanh((lambdaa - 2.5) / 1.4))
+    lambda_eff = _nonnegative_value(lambdaa)
+    return 4.1e-10 * (lambda_eff / 25.0)^0.15 * (1.0 + tanh((lambda_eff - 2.5) / 1.4))
 end
 
 
@@ -804,7 +805,7 @@ function K0(element::String,
         else
             beta1 = -2.60
         end
-        return epsilon / (8 * NaNMath.log(epsilon)^2) * (epsilon - epsilon_p)^(alpha_p + 2) *
+        return epsilon / (8 * log(epsilon)^2) * (epsilon - epsilon_p)^(alpha_p + 2) *
                4.6e-6^2 / ((1 - epsilon_p)^alpha_p * ((alpha_p + 1) * epsilon - epsilon_p)^2) * exp(beta1 * epsilon_c)
 
     elseif element == "mpl"
@@ -837,9 +838,10 @@ k_H2
 """
 function k_H2(lambdaa, T, kappa_co::Float64)
 
+    T_eff = _positive_temperature_value(T)
     # Calculation of the permeability coefficient of the membrane for hydrogen
-    k_H2_d = kappa_co * (0.29 + 2.2 * fv(lambdaa, T)) * 1e-14 * exp(Eact_H2_cros_v / R * (1 / Tref_cross - 1 / T))
-    k_H2_l = kappa_co * 1.8 * 1e-14 * exp(Eact_H2_cros_l / R * (1 / Tref_cross - 1 / T))
+    k_H2_d = kappa_co * (0.29 + 2.2 * fv(lambdaa, T)) * 1e-14 * exp(Eact_H2_cros_v / R * (1 / Tref_cross - 1 / T_eff))
+    k_H2_l = kappa_co * 1.8 * 1e-14 * exp(Eact_H2_cros_l / R * (1 / Tref_cross - 1 / T_eff))
 
     # Transition function between under-saturated and liquid-saturated states
     K_transition = 10  # It is a constant that defines the sharpness of the transition between two states.
@@ -867,9 +869,10 @@ k_O2
 """
 function k_O2(lambdaa, T, kappa_co::Float64)
 
+    T_eff = _positive_temperature_value(T)
     # Calculation of the permeability coefficient of the membrane for oxygen
-    k_O2_v = kappa_co * (0.11 + 1.9 * fv(lambdaa, T)) * 1e-14 * exp(Eact_O2_cros_v / R * (1 / Tref_cross - 1 / T))
-    k_O2_l = kappa_co * 1.2 * 1e-14 * exp(Eact_O2_cros_l / R * (1 / Tref_cross - 1 / T))
+    k_O2_v = kappa_co * (0.11 + 1.9 * fv(lambdaa, T)) * 1e-14 * exp(Eact_O2_cros_v / R * (1 / Tref_cross - 1 / T_eff))
+    k_O2_l = kappa_co * 1.2 * 1e-14 * exp(Eact_O2_cros_l / R * (1 / Tref_cross - 1 / T_eff))
 
     # Transition function between under-saturated and liquid-saturated states
     K_transition = 10  # It is a constant that defines the sharpness of the transition between two states.
