@@ -24,7 +24,7 @@ using Printf
 using AlphaPEM.Config: SimulationConfig, StepParams, PolarizationParams, EISParams, NumericalParams
 using AlphaPEM.Application: run_simulation
 
-const DEFAULT_NB_GC_VALUES = [1, 3, 5]
+const DEFAULT_NB_GC_VALUES = [1, 5, 10]
 
 function parse_nb_gc_values()
     raw = strip(get(ENV, "BENCHMARK_NB_GC", ""))
@@ -140,7 +140,8 @@ function print_summary(rows)
 
     println("\nBenchmark results")
     println("-----------------")
-    for scenario in ("step", "pola", "eis")
+    for scenario in ("step", "pola")
+#    for scenario in ("step", "pola", "eis")
         sub = filter(r -> r.scenario == scenario, measured)
         isempty(sub) && continue
         println("\nScenario: ", scenario)
@@ -192,31 +193,33 @@ function main()
         err = warm_pola.err,
     ))
 
-    println("Warm-up #3: run_eis with nb_gc = 1")
-    warm_eis = timed_run(make_eis_cfg(1))
-    push!(rows, (
-        timestamp = Dates.format(now(), dateformat"yyyy-mm-ddTHH:MM:SS"),
-        phase = "warmup",
-        scenario = "eis",
-        nb_gc = 1,
-        run_index = 0,
-        status = warm_eis.status,
-        time_s = warm_eis.time_s,
-        alloc_gb = warm_eis.alloc_gb,
-        gc_s = warm_eis.gc_s,
-        err = warm_eis.err,
-    ))
+#    println("Warm-up #3: run_eis with nb_gc = 1")
+#    warm_eis = timed_run(make_eis_cfg(1))
+#    push!(rows, (
+#        timestamp = Dates.format(now(), dateformat"yyyy-mm-ddTHH:MM:SS"),
+#        phase = "warmup",
+#        scenario = "eis",
+#        nb_gc = 1,
+#        run_index = 0,
+#        status = warm_eis.status,
+#        time_s = warm_eis.time_s,
+#        alloc_gb = warm_eis.alloc_gb,
+#        gc_s = warm_eis.gc_s,
+#        err = warm_eis.err,
+#    ))
 
-    for scenario in ("step", "pola", "eis")
+    for scenario in ("step", "pola")
+#    for scenario in ("step", "pola", "eis")
         for nb_gc in nb_gc_values
             for i in 1:runs
                 println("Measured run ", i, "/", runs, " | scenario=", scenario, " nb_gc=", nb_gc)
                 result = if scenario == "step"
                     timed_run(make_step_cfg(nb_gc))
-                elseif scenario == "pola"
-                    timed_run(make_pola_cfg(nb_gc))
                 else
-                    timed_run(make_eis_cfg(nb_gc))
+#                elseif scenario == "pola"
+                    timed_run(make_pola_cfg(nb_gc))
+#                else
+#                    timed_run(make_eis_cfg(nb_gc))
                 end
                 push!(rows, (
                     timestamp = Dates.format(now(), dateformat"yyyy-mm-ddTHH:MM:SS"),
