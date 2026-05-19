@@ -5,7 +5,6 @@
 
 # _________________________________________________Cell voltage modules_________________________________________________
 
-@inline _nonnegative_value(x::Real) = max(Float64(x), eps(Float64))
 
 """Calculate the oxygen concentration at the platinum surface in the cathode catalyst layer.
 

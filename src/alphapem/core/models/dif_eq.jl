@@ -36,9 +36,9 @@ n_vars_auxiliary : Int
 solver_state_scaling : Vector{Float64}
     Reference magnitudes used to non-dimensionalise `y` and `dydt_IDA`.
     Built once by `build_solver_state_scaling` and reused at every residual call.
-y_phys_work : Vector{Float64}
-    Pre-allocated work buffer that receives the un-scaled physical state
-    `y_phys = y .* solver_state_scaling`.  Avoids a heap allocation per call.
+y_phys : Vector{Float64}
+    Pre-allocated work buffer that receives the un-scaled physical state values converted from the solver state `y`.
+    Built once by `build_solver_state_scaling` and reused at every residual call.
 flows_work : Vector{MEAFlowsWorkspace}
     One pre-allocated workspace per GC node.  Passed to `calculate_flows_1D_MEA!`
     so that the in-place variant can reuse its internal arrays without allocating
@@ -58,7 +58,7 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
                        fc::AbstractFuelCell, cd::AbstractCurrent, cfg::SimulationConfig,
                        n_vars_cell_1D::Int, n_vars_manifold::Int,
                        n_vars_auxiliary::Int, solver_state_scaling::Vector{Float64},
-                       y_phys_work::Vector{Float64},
+                       y_phys::Vector{Float64},
                        flows_work::Vector{MEAFlowsWorkspace},
                        heat_work::MEAHeatWorkspace,
                        current_res_scales::Vector{Float64},
@@ -86,15 +86,14 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
         throw(ArgumentError("Unexpected residual vector size in dae_residual!."))
     length(solver_state_scaling) == expected_len ||
         throw(ArgumentError("Unexpected solver scaling vector size in dae_residual!."))
-    length(y_phys_work) == expected_len ||
+    length(y_phys) == expected_len ||
         throw(ArgumentError("Unexpected physical-state work buffer size in dae_residual!."))
     length(flows_work) == nb_gc ||
         throw(ArgumentError("Unexpected MEA flow workspace count in dae_residual!."))
 
     # Convert the solver state back to physical units before evaluating the
     # transport, electrochemical and thermal equations.
-    unscale_values!(y_phys_work, y, solver_state_scaling)
-    y_phys = y_phys_work
+    unscale_values!(y_phys, y, solver_state_scaling)
     cell_state_type = typeof(_unpack_cell_state_1D(@view(y_phys[1:n_vars_cell_1D]), nb_gdl, nb_mpl))
     sv_cell_1D = Vector{cell_state_type}(undef, nb_gc)
     @inbounds for i in 1:nb_gc
@@ -149,11 +148,8 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
     v_a, v_c, Pa_in, Pc_in = velocity_profiles_from_inlet_flows(sv_cell_1D, J_a_in, J_c_in, fc, cfg)
 
     # Conditions to pursue the calculations
-    for i in 1:nb_gc
-        if sv_cell_1D[i].ccl.eta_c > E0
-            throw(ArgumentError("The cathode overpotential is higher than the open circuit voltage at time t = " *
-                                string(t) * " s. It means that the voltage is negative, which is not possible."))
-        end
+    if U_cell < 0
+        throw(ArgumentError("The voltage is negative, which is not possible."))
     end
 
     # Calculation of the flows for each GC node.

@@ -10,8 +10,6 @@ include(joinpath(@__DIR__, "physics_constants.jl"))
 
 # __________________________________________________Physical functions__________________________________________________
 
-@inline _positive_temperature_value(T::Real) = max(Float64(T), 1.0)
-@inline _liquid_water_temperature_value(T::Real) = clamp(Float64(T), 140.0 + 1e-6, 647.15 - 1e-6)
 
 """
     rho_H2O_l(T)

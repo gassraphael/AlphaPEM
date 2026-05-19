@@ -13,6 +13,7 @@ Modules:
 module Utils
 
 include("physics_constants.jl")
+include("safe_helpers.jl")
 include("maths_functions.jl")
 include("physics_functions.jl")
 

@@ -5,8 +5,6 @@
 
 # _____________________________________________________Flow modules_____________________________________________________
 
-@inline _bounded_saturation_value(s::Real) = clamp(Float64(s), 1e-9, 1.0 - 1e-9)
-@inline _positive_pressure_value(P::Real) = max(Float64(P), 1.0)
 
 """Calculate intermediate values for the flows calculation.
 
