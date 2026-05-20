@@ -190,6 +190,7 @@ function simulate_model!(simu::AlphaPEM,
     initialization_algorithm = has_solver_restart_state ? NoInit() : BrownFullBasicInit()
     simu.sol = solve(prob, IDA(linear_solver=:KLU);
                      reltol=np.rtol, abstol=atol_scaled,
+                     tstops=solver_tstops(simu.current_density, simu.time_interval),
                      initializealg=initialization_algorithm)
     #           Check that the solver converged successfully; raise an informative error otherwise.
     successful_retcode(simu.sol.retcode) ||

@@ -12,6 +12,14 @@ models, so they live in the shared utility layer.
 @inline _positive_pressure_value(P::Real) = max(Float64(P), 1.0)
 @inline _nonnegative_value(x::Real) = max(Float64(x), eps(Float64))
 
+"""
+    _positive_concentration_value(x)
+
+Lower-bound a species concentration to 1e-4 mol/m³.
+Use this when the concentration appears inside a logarithm to avoid Newton/Jacobian blow-up.
+"""
+@inline _positive_concentration_value(x::Real) = max(Float64(x), 1e-4)
+
 function _safe_porous_phase_weights(epsilon::Float64, s)
     s_eff = _bounded_saturation_value(s)
     return [max(1 - epsilon, 0.0), max(epsilon * s_eff, 0.0), max(epsilon * (1 - s_eff), 0.0)]

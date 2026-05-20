@@ -55,9 +55,10 @@ function calculate_C_O2_Pt(i_fc::Real,
 
     # Extraction of the parameters
     Hccl, K_O2_ad_Pt = fc.physical_parameters.Hccl, fc.physical_parameters.K_O2_ad_Pt
-    return C_O2_ccl - i_fc / (4 * F * Hccl) *
-           R_T_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, K_O2_ad_Pt) /
-           a_c(lambda_ccl, T_ccl, Hccl)
+    C_O2_Pt_raw = C_O2_ccl - i_fc / (4 * F * Hccl) *
+                  R_T_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, K_O2_ad_Pt) /
+                  a_c(lambda_ccl, T_ccl, Hccl)
+    return _positive_concentration_value(C_O2_Pt_raw) # This avoids an unphysical negative C_O2_Pt and keeps Newton stable.
 end
 
 
