@@ -32,6 +32,7 @@ function calculate_cell_voltage(i_fc::Real, C_O2_Pt::Real, sv::CellState1D, fc::
     T_acl = _positive_temperature_value(sv.acl.T)
     T_mem = _positive_temperature_value(sv.mem.T)
     T_ccl = _positive_temperature_value(sv.ccl.T)
+    C_O2_Pt_safe = _positive_concentration_value(C_O2_Pt)
     # Extraction of the parameters
     pp = fc.physical_parameters
     Hmem, Hacl, Hccl = pp.Hmem, pp.Hacl, pp.Hccl
@@ -40,7 +41,7 @@ function calculate_cell_voltage(i_fc::Real, C_O2_Pt::Real, sv::CellState1D, fc::
     # The equilibrium potential
     Ueq = E0 - 8.5e-4 * (T_ccl - 298.15) + R * T_ccl / (2 * F) *
           (log(R * T_acl * C_H2_acl / Pref_eq) +
-           0.5 * log(R * T_ccl * C_O2_Pt / Pref_eq))
+           0.5 * log(R * T_ccl * C_O2_Pt_safe / Pref_eq))
 
     # The crossover current density
     T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],

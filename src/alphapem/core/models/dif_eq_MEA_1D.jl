@@ -317,8 +317,13 @@ function calculate_dyn_voltage_evolution(
         i_n
 )::MEAVoltageDerivative
 
+    # During nonlinear/DAE iterations the algebraic unknown `C_O2_Pt` can briefly
+    # step outside its physical domain (e.g. slightly negative). Protect the
+    # Butler–Volmer concentration term which uses fractional powers.
+    C_O2_Pt_safe = _positive_concentration_value(C_O2_Pt)
+
     deta_c = 1 / (pp.C_scl * pp.Hccl) * ((i_fc + i_n) -
-             pp.i0_c_ref * (C_O2_Pt / C_O2ref_red)^pp.kappa_c *
+             pp.i0_c_ref * (C_O2_Pt_safe / C_O2ref_red)^pp.kappa_c *
              exp(-Eact_O2_red / (R * T_ccl) * (1 / T_ccl - 1 / Tref_O2_red)) *
              exp(alpha_c * F / (R * T_ccl) * eta_c))
 
