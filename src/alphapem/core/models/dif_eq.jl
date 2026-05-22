@@ -147,11 +147,6 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
     # Rebuild flow-dependent fields from algebraic states.
     v_a, v_c, Pa_in, Pc_in = velocity_profiles_from_inlet_flows(sv_cell_1D, J_a_in, J_c_in, fc, cfg)
 
-    # Conditions to pursue the calculations
-    if U_cell < 0
-        throw(ArgumentError("The voltage is negative, which is not possible."))
-    end
-
     # Calculation of the flows for each GC node.
     # The in-place variant reuses the pre-allocated workspace to avoid allocations inside the solver loop.
     first_flow = calculate_flows_1D_MEA!(flows_work[1], sv_cell_1D[1], i_fc[1], v_a[1], v_c[1], fc, cfg)
