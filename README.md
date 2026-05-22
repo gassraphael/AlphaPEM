@@ -23,6 +23,7 @@ online version may contain bugs, and not all features may be available. The curr
 
 # Table of Contents
 
+- [Repository Structure](#repository-structure)
 - [Installation](#installation)
 - [Start](#start)
 - [Major updates](#major-updates)
@@ -31,6 +32,44 @@ online version may contain bugs, and not all features may be available. The curr
 - [Related publications](#related-publications) 
 - [Contributions](#contributions)
 - [Contact](#contact)
+
+
+# Repository Structure
+
+The repository is organized around a Julia package in `src/`, example scripts in `examples/`, and supporting
+documentation, tests, and generated results. The main folders are:
+
+```bash
+├── docs                    # MkDocs documentation
+├── examples                # Ready-to-run Julia scripts for step, polarization, EIS
+├── results                 # Output directory for generated simulation results and reference benchmark outputs
+├── scripts                 # Helper shell scripts for local execution or cluster workflows
+├── src                     # Julia source code for AlphaPEM
+│   └── alphapem
+│       ├── application     # High-level simulation entry points and orchestration
+│       ├── config          # Simulation and fuel-cell configuration types and parameter definitions
+│       ├── core            # Core physical models (balances, equations, transport, heat)
+│       │   ├── models      # Physical submodels assembled during the solve
+│       │   ├── modules     # Physics blocks separated from the models repository for improved comprehensibility
+│       │   └── types       # Shared structs and type definitions across the codebase
+│       ├── currents        # Current profile definitions (step, polarization, EIS)
+│       ├── fuelcell        # Predefined fuel-cell models and cell-specific data
+│       ├── interfaces      # GUI entry point and user-facing interfaces
+│       ├── parametrisation # Parameter calibration and identification routines
+│       └── utils           # Shared utility functions
+├── tests                   # Benchmark and profiling scripts used for validation and performance checks
+├── Manifest.toml           # Locked dependency versions for reproducible environments
+├── Project.toml            # Julia package definition and dependencies
+└── README.md               # Project overview, installation, and usage guide
+```
+
+The most relevant entry points are:
+
+- `examples/run_step.jl` for a step-current simulation.
+- `examples/run_polarization.jl` for a polarization curve.
+- `examples/run_EIS.jl` for impedance simulations *(currently work in progress)*.
+- `src/alphapem/interfaces/GUI.jl` for the graphical user interface.
+- `src/alphapem/parametrisation/calibration.jl` for parameter calibration *(currently work in progress)*.
 
 
 # Installation
