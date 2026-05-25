@@ -28,6 +28,7 @@ online version may contain bugs, and not all features may be available. The curr
 - [Start](#start)
 - [Major updates](#major-updates)
 - [Work in progress](#work-in-progress)
+- [Valid parameter region analysis](#valid-parameter-region-analysis)
 - [Roadmap](#roadmap)
 - [Related publications](#related-publications) 
 - [Contributions](#contributions)
@@ -121,6 +122,37 @@ which are not yet converted to Julia):
     "$PYTHON_FOR_PYCALL" -m pip install numpy matplotlib pygad ttkthemes
     ```
 
+8. *(Optional)* **PRIM-based valid parameter region analysis** — only required if you intend to use
+   `examples/run_parameter_validity.jl` and the `Parametrisation.ValidParameterRegion` module.
+
+   a. Install **R**, a **C++ compiler**, and the required **system libraries** for R packages:
+      - Linux (Debian/Ubuntu):
+        ```sh
+        sudo apt update && sudo apt install -y \
+            r-base build-essential cmake \
+            libcurl4-openssl-dev libssl-dev libxml2-dev \
+            libwebp-dev libpng-dev libtiff5-dev libjpeg-dev \
+            libfreetype6-dev libfontconfig1-dev libharfbuzz-dev libfribidi-dev
+        ```
+      - macOS (using Homebrew): `brew install r` (Xcode Command Line Tools include a C++ compiler and all required headers)
+      - Windows: Install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) alongside R.
+
+   b. Clone the **IRD package** (Interpretable Regional Descriptors) into the `external/` folder at the root
+      of the repository:
+      ```sh
+      git clone https://github.com/slds-lmu/supplementary_2023_ird.git external/supplementary_2023_ird
+      ```
+      The relevant sub-directory used by AlphaPEM is
+      `external/supplementary_2023_ird/irdpackage`.
+
+   c. Install the required R packages using the bundled setup script:
+      ```sh
+      sudo Rscript src/alphapem/parametrisation/validity/R/install_r_packages.R
+      ```
+      On Windows, open a terminal as Administrator and omit `sudo`.
+
+   After these three steps, `run_prim_analysis` in AlphaPEM will work without any additional setup.
+
 ## Installation as a package (to use AlphaPEM in other projects)
 
 AlphaPEM can be integrated into other projects, whether written in **Julia** or **Python**.
@@ -202,6 +234,7 @@ and configuration, beyond what the GUI offers.
 | `run_polarization.jl` | Generates a polarization curve                                                                 |
 | `run_polarization_for_cali.jl` | Generates polarization curves for calibration purposes |
 | `run_EIS.jl` | Generates an EIS curve *(currently broken, work in progress)*                                 |
+| `run_parameter_validity.jl` | Identifies the valid parameter region via LHS sampling, batch simulation and PRIM *(requires R + IRD package, see [installation step 8](#installation-from-source))* |
 | `plot_currents.jl` | Plots the current density profiles                                                            |
 | `benchmark_step.jl` | Benchmarks the step simulation                                                                |
 | `profile_step.jl` | Profiles the step simulation                                                                  |
@@ -288,6 +321,58 @@ underway.
 - Auxiliaries are temporarily removed, as they require reconstruction.
 
 
+# Valid parameter region analysis
+
+A sub-system (`Parametrisation.ValidParameterRegion`) identifies the region of AlphaPEM's
+undetermined-parameter space that reliably produces physically valid polarization curves.
+This is a prerequisite step before genetic-algorithm calibration: working within the valid region
+avoids wasting calibration budget on non-physical configurations.
+
+## Workflow
+
+| Step | Action |
+|------|--------|
+| **1** | Draw configurations from the prior parameter ranges by Latin Hypercube Sampling |
+| **2** | Simulate each configuration with AlphaPEM (multi-threaded) and label the polarization curve *valid* or *invalid* based on physical criteria (voltage range, monotonicity, positivity) |
+| **3** | *(optional, requires R)* Apply PRIM and MaxBox to find a compact axis-aligned hyperbox in parameter space with a high validity rate (≥ 80 %). Bounds are saved as a YAML file ready to inject into calibration. |
+| **4** | Export all results: classified CSV, original and restricted bounds YAML, validation summary, side-by-side comparison report |
+
+## Running the analysis
+
+```sh
+julia --project=. --threads=auto examples/run_parameter_validity.jl
+```
+
+Edit the `USER SETTINGS` block at the top of the script to choose the fuel-cell type, the
+number of samples, and whether to enable PRIM (`RUN_PRIM = true`).
+
+To use the restricted bounds in a subsequent calibration:
+
+```julia
+using AlphaPEM.Parametrisation.ValidParameterRegion: load_restricted_bounds
+bounds = load_restricted_bounds("results/model_validity/restricted_bounds_PRIM.yaml")
+```
+
+## Credits
+
+This pipeline is adapted from the master's thesis:
+
+> **Sensitivity Analysis and Surrogate Modeling of PEM Fuel Cells**  
+> Nathaly Vergel Serrano, Dejvis Toptani, Camila Bermudez Valderrama  
+> Supervised by Dr. Giuseppe Casalicchio and Fiona Ewald  
+> In collaboration with Luis Winkler (ZSW Ulm) and Prof. Herbert Palm (UAS Munich)  
+> Statistical Consulting, Master in Statistics and Data Science  
+> Institute of Statistics, Ludwig-Maximilians-Universität München  
+> Repository: <https://github.com/nathaly-vergel/Official-Sensitivity-Analysis-and-Surrogate-Modeling-of-PEM-Fuel-Cells>
+
+The PRIM and MaxBox algorithms are provided by the **IRD package** (Interpretable Regional
+Descriptors):
+
+> Scholbeck, C. A., Casalicchio, G., Molnar, C., Bischl, B., & Heumann, C. (2023).  
+> *Post-hoc Unit-Coherent Interpretable Regions* — supplementary material.  
+> Repository: <https://github.com/slds-lmu/supplementary_2023_ird>
+
+
 # Roadmap
 
 - Spatial extension to 1D+1D for modeling the thermal evolution.
@@ -343,6 +428,14 @@ This work has been supported:
 It also includes components licensed under the [BSD-3-Clause license](src/alphapem/parametrisation/LICENSE-BSD-3-CLAUSE):
 
 - calibration/parameter_calibration.py from [PyGAD](https://github.com/ahmedfgad/GeneticAlgorithmPython). 
+
+It optionally uses the following external tool, which is **not distributed with AlphaPEM** but must be
+cloned separately by the user (see [installation step 8](#installation-from-source)):
+
+- **IRD package** (`irdpackage`) from [supplementary_2023_ird](https://github.com/slds-lmu/supplementary_2023_ird),
+  licensed under the **GNU Lesser General Public License v3 (LGPL-3.0)**.
+  AlphaPEM invokes it as an independent subprocess via `Rscript`; no source code from this package
+  is incorporated into AlphaPEM.
 
 ## New contributors
 

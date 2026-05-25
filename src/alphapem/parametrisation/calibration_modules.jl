@@ -6,16 +6,17 @@
 # _____________________________________________________Preliminaries____________________________________________________
 
 # Importing the necessary libraries
-using PyCall
 using Dates
 using Statistics
 using LinearAlgebra
 using Interpolations
 using Printf
 
-# Keep colorama for colored output (optional, can be replaced with native Julia)
-const Fore = pyimport("colorama").Fore
-const Style = pyimport("colorama").Style
+# ANSI colour helpers (replaces the former colorama/PyCall dependency).
+module _Colours
+    const RED   = "\e[31m"
+    const RESET = "\e[0m"
+end
 
 # Importing functions
 include(joinpath(@__DIR__, "../config/current_densities.jl"))
@@ -501,8 +502,8 @@ function print_calibration_results(convergence::Vector,
         param_name = varbound[idx][1]
         println("Optimized parameter $param_name: $(solution[idx])")
     end
-    println(Fore.RED, "\nSimulation error (RMSE): ", sim_error, " %")
-    println(Style.RESET_ALL)
+    println(_Colours.RED, "\nSimulation error (RMSE): ", sim_error, " %")
+    println(_Colours.RESET)
     best_solution_generation = hasattr(ga_instance, "best_solution_generation") ? py"int"(ga_instance.best_solution_generation) : -1
     if best_solution_generation != -1
         println("Best fitness value reached after $best_solution_generation generations.")
