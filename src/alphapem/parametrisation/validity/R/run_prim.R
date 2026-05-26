@@ -32,7 +32,7 @@
 # Packages must be pre-installed via:
 #   sudo Rscript src/alphapem/parametrisation/validity/R/install_r_packages.R
 # (see README.md § Installation — step 8c)
-required <- c("optparse", "data.table", "mlr3", "mlr3learners", "mlr3pipelines",
+required <- c("optparse", "data.table", "mlr3", "mlr3learners",
               "iml", "yaml", "jsonlite", "tools", "R6", "checkmate", "paradox")
 miss <- required[!vapply(required, requireNamespace, logical(1), quietly = TRUE)]
 if (length(miss)) {
@@ -199,17 +199,24 @@ if (!opt$target %in% names(df)) {
 }
 names(df)[names(df) == opt$target] <- "validity"
 
-# Coerce target to binary factor (negative class first, positive last)
+# Coerce target to binary factor (positive class vs. all others → "invalid")
+# Multiple negative classes (e.g. "failed", "invalid") are merged into one.
 if (!is.factor(df$validity)) df$validity <- factor(df$validity)
 labs <- levels(df$validity)
 if (!(opt$positive %in% labs)) {
   stop("Positive class '", opt$positive, "' not in target levels: ",
        paste(labs, collapse = ", "))
 }
-neg <- setdiff(labs, opt$positive)
-if (length(neg) != 1) {
-  stop("Target must be binary. Found: ", paste(labs, collapse = ", "))
+neg_labels <- setdiff(labs, opt$positive)
+neg        <- "invalid"  # canonical label for the merged negative class
+if (length(neg_labels) > 1) {
+  message("Merging ", length(neg_labels), " negative classes (",
+          paste(neg_labels, collapse = ", "), ") into '", neg, "'")
+} else if (length(neg_labels) == 1) {
+  neg <- neg_labels
 }
+# Recode: positive stays, everything else → neg
+df$validity <- ifelse(df$validity == opt$positive, opt$positive, neg)
 df$validity <- factor(df$validity, levels = c(neg, opt$positive))
 
 # ---- Select features (intersection of x_interest keys and data columns) -----

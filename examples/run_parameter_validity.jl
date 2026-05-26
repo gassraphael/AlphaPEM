@@ -30,17 +30,6 @@ using AlphaPEM.Parametrisation.ValidParameterRegion
 # USER SETTINGS  (edit here)
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Fuel-cell type to analyse.
-# Currently supported: :ZSW_GenStack
-const FUEL_CELL_TYPE = Symbol(get(ENV, "ALPHAPEM_VALIDITY_FUEL_CELL", "ZSW_GenStack"))
-
-# Voltage zone — :before_voltage_drop or :full (includes water-management region)
-const VOLTAGE_ZONE = Symbol(get(ENV, "ALPHAPEM_VALIDITY_VOLTAGE_ZONE", "full"))
-
-# Number of configurations to simulate.
-# 2 000 is a quick test; 10 000 gives better PRIM coverage.
-const N_SAMPLES = parse(Int, get(ENV, "ALPHAPEM_VALIDITY_NSAMPLES", "2000"))
-
 # Root directory for all output files.
 const OUTPUT_DIR = get(ENV, "ALPHAPEM_VALIDITY_OUTPUT_DIR", "results/model_validity")
 
@@ -48,8 +37,6 @@ const OUTPUT_DIR = get(ENV, "ALPHAPEM_VALIDITY_OUTPUT_DIR", "results/model_valid
 # Requires R + the IRD package cloned at IRD_PACKAGE_DIR (see README § Installation).
 const RUN_PRIM = lowercase(get(ENV, "RUN_PRIM", "false")) in ("1", "true", "yes")
 
-# Path to the locally cloned irdpackage (only used when RUN_PRIM = true).
-const IRD_PACKAGE_DIR = get(ENV, "IRD_DIR", "external/supplementary_2023_ird/irdpackage")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # BUILD CONFIGURATION
@@ -64,9 +51,9 @@ criteria_cfg = ValidityCriteriaConfig(
 )
 
 analysis_cfg = ValidityAnalysisConfig(
-    fuel_cell_type       = FUEL_CELL_TYPE,
-    voltage_zone         = VOLTAGE_ZONE,
-    n_samples            = N_SAMPLES,
+    fuel_cell_type       = :ZSW_GenStack,
+    voltage_zone         = :full,
+    n_samples            = 100,
     sampling_seed        = 42,
     validation_criteria  = criteria_cfg,
     output_dir           = OUTPUT_DIR,
@@ -77,7 +64,7 @@ analysis_cfg = ValidityAnalysisConfig(
 # PRIM configuration (only used when RUN_PRIM = true)
 prim_cfg = RUN_PRIM ? PRIMConfig(
     data_path             = joinpath(OUTPUT_DIR, "classified_for_prim.csv"),
-    ird_package_dir       = IRD_PACKAGE_DIR,
+    ird_package_dir       = "external/supplementary_2023_ird/irdpackage",
     reference_config_path = joinpath(OUTPUT_DIR, "reference_config.yaml"),
     output_dir            = OUTPUT_DIR,
     methods               = [:PRIM, :MaxBox],
@@ -91,13 +78,6 @@ prim_cfg = RUN_PRIM ? PRIMConfig(
 
 println("="^72)
 println("  AlphaPEM — Parameter Validity Region Analysis")
-println("="^72)
-println("  Fuel cell type  : ", FUEL_CELL_TYPE)
-println("  Voltage zone    : ", VOLTAGE_ZONE)
-println("  Samples         : ", N_SAMPLES)
-println("  Threads         : ", Threads.nthreads())
-println("  Output dir      : ", OUTPUT_DIR)
-println("  PRIM enabled    : ", RUN_PRIM)
 println("="^72)
 println()
 
@@ -144,12 +124,12 @@ println()
 println("="^72)
 println("  Pipeline steps")
 println("="^72)
-println("    ✅  STEP 1 — LHS sampling                        (complete)")
+println("    ✅  STEP 1 — LHS sampling                         (complete)")
 println("    ✅  STEP 2 — Batch simulation & classification    (complete)")
 if RUN_PRIM
     println("    ✅  STEP 3 — PRIM restriction via R irdpackage   (complete)")
 else
-    println("    --  STEP 3 — PRIM restriction via R irdpackage   (skipped: RUN_PRIM=false)")
+    println("    -- STEP 3 — PRIM restriction via R irdpackage    (skipped: RUN_PRIM=false)")
 end
 println("    ✅  STEP 4 — Export results                       (complete)")
 println("="^72)

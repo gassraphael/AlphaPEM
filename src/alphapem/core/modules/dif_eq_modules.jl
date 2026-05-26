@@ -647,57 +647,58 @@ end
 
 """Ensure all scalar values in one typed 1D derivative are assigned (no NaN sentinel left)."""
 function _assert_cell_derivative_complete!(d::CellDerivative1D{nb_gdl, nb_mpl}) where {nb_gdl, nb_mpl}
-    fail() = throw(ArgumentError("At least one derivative entry is missing (NaN sentinel detected)."))
+    fail(field::String) = throw(ArgumentError(
+        "Derivative entry is NaN (sentinel detected) in field: $field"))
 
-    isnan(d.agc.C_v) && fail()
-    isnan(d.agc.s) && fail()
-    isnan(d.agc.C_H2) && fail()
-    isnan(d.agc.C_N2) && fail()
-    isnan(d.agc.T) && fail()
+    isnan(d.agc.C_v) && fail("agc.C_v")
+    isnan(d.agc.s) && fail("agc.s")
+    isnan(d.agc.C_H2) && fail("agc.C_H2")
+    isnan(d.agc.C_N2) && fail("agc.C_N2")
+    isnan(d.agc.T) && fail("agc.T")
 
     for i in 1:nb_gdl
-        isnan(d.agdl[i].C_v) && fail()
-        isnan(d.agdl[i].s) && fail()
-        isnan(d.agdl[i].C_H2) && fail()
-        isnan(d.agdl[i].T) && fail()
-        isnan(d.cgdl[i].C_v) && fail()
-        isnan(d.cgdl[i].s) && fail()
-        isnan(d.cgdl[i].C_O2) && fail()
-        isnan(d.cgdl[i].T) && fail()
+        isnan(d.agdl[i].C_v) && fail("agdl[$i].C_v")
+        isnan(d.agdl[i].s) && fail("agdl[$i].s")
+        isnan(d.agdl[i].C_H2) && fail("agdl[$i].C_H2")
+        isnan(d.agdl[i].T) && fail("agdl[$i].T")
+        isnan(d.cgdl[i].C_v) && fail("cgdl[$i].C_v")
+        isnan(d.cgdl[i].s) && fail("cgdl[$i].s")
+        isnan(d.cgdl[i].C_O2) && fail("cgdl[$i].C_O2")
+        isnan(d.cgdl[i].T) && fail("cgdl[$i].T")
     end
 
     for i in 1:nb_mpl
-        isnan(d.ampl[i].C_v) && fail()
-        isnan(d.ampl[i].s) && fail()
-        isnan(d.ampl[i].C_H2) && fail()
-        isnan(d.ampl[i].T) && fail()
-        isnan(d.cmpl[i].C_v) && fail()
-        isnan(d.cmpl[i].s) && fail()
-        isnan(d.cmpl[i].C_O2) && fail()
-        isnan(d.cmpl[i].T) && fail()
+        isnan(d.ampl[i].C_v) && fail("ampl[$i].C_v")
+        isnan(d.ampl[i].s) && fail("ampl[$i].s")
+        isnan(d.ampl[i].C_H2) && fail("ampl[$i].C_H2")
+        isnan(d.ampl[i].T) && fail("ampl[$i].T")
+        isnan(d.cmpl[i].C_v) && fail("cmpl[$i].C_v")
+        isnan(d.cmpl[i].s) && fail("cmpl[$i].s")
+        isnan(d.cmpl[i].C_O2) && fail("cmpl[$i].C_O2")
+        isnan(d.cmpl[i].T) && fail("cmpl[$i].T")
     end
 
-    isnan(d.acl.C_v) && fail()
-    isnan(d.acl.s) && fail()
-    isnan(d.acl.lambda) && fail()
-    isnan(d.acl.C_H2) && fail()
-    isnan(d.acl.T) && fail()
+    isnan(d.acl.C_v) && fail("acl.C_v")
+    isnan(d.acl.s) && fail("acl.s")
+    isnan(d.acl.lambda) && fail("acl.lambda")
+    isnan(d.acl.C_H2) && fail("acl.C_H2")
+    isnan(d.acl.T) && fail("acl.T")
 
-    isnan(d.mem.lambda) && fail()
-    isnan(d.mem.T) && fail()
+    isnan(d.mem.lambda) && fail("mem.lambda")
+    isnan(d.mem.T) && fail("mem.T")
 
-    isnan(d.ccl.C_v) && fail()
-    isnan(d.ccl.s) && fail()
-    isnan(d.ccl.lambda) && fail()
-    isnan(d.ccl.C_O2) && fail()
-    isnan(d.ccl.T) && fail()
-    isnan(d.ccl.eta_c) && fail()
+    isnan(d.ccl.C_v) && fail("ccl.C_v")
+    isnan(d.ccl.s) && fail("ccl.s")
+    isnan(d.ccl.lambda) && fail("ccl.lambda")
+    isnan(d.ccl.C_O2) && fail("ccl.C_O2")
+    isnan(d.ccl.T) && fail("ccl.T")
+    isnan(d.ccl.eta_c) && fail("ccl.eta_c")
 
-    isnan(d.cgc.C_v) && fail()
-    isnan(d.cgc.s) && fail()
-    isnan(d.cgc.C_O2) && fail()
-    isnan(d.cgc.C_N2) && fail()
-    isnan(d.cgc.T) && fail()
+    isnan(d.cgc.C_v) && fail("cgc.C_v")
+    isnan(d.cgc.s) && fail("cgc.s")
+    isnan(d.cgc.C_O2) && fail("cgc.C_O2")
+    isnan(d.cgc.C_N2) && fail("cgc.C_N2")
+    isnan(d.cgc.T) && fail("cgc.T")
     return nothing
 end
 

@@ -23,7 +23,7 @@ This function calculates the water density, in kg.m-3, as a function of the temp
 - `rho_H2O_l`: Water density in kg.m-3.
 """
 function rho_H2O_l(T)
-    T_Celsius = T - 273.15
+    T_Celsius = _positive_temperature_value(T - 273.15)
     return ((999.83952 + 16.945176 * T_Celsius - 7.9870401e-3 * T_Celsius^2 - 46.170461e-6 * T_Celsius^3 +
              105.56302e-9 * T_Celsius^4 - 280.54253e-12 * T_Celsius^5) / (1 + 16.879850e-3 * T_Celsius))
 end

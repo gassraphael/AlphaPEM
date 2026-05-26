@@ -682,7 +682,7 @@ gamma_sorp
 function gamma_sorp(C_v, s, lambdaa, T, Hcl::Float64)
 
     T_eff = _positive_temperature_value(T)
-    fv_value = fv(lambdaa, T)
+    fv_value = fv(lambdaa, T_eff)
     gamma_abs = (1.14e-5 * fv_value) / Hcl * exp(2416 * (1 / 303 - 1 / T_eff))
     gamma_des = (4.59e-5 * fv_value) / Hcl * exp(2416 * (1 / 303 - 1 / T_eff))
 
@@ -729,7 +729,7 @@ function Svl(element::String,
     T_eff = _positive_temperature_value(T)
     # Calculation of the total and partial pressures
     Ptot = _positive_pressure_value(Ctot * R * T_eff) # Total pressure.
-    P_v = C_v_eff * R * T_eff # Partial pressure of vapor.
+    P_v = _bounded_vapor_pressure_value(C_v_eff * R * T_eff, Ptot)
     Psat_eff = min(Psat(T_eff), Ptot - eps(Float64))
 
     # Determination of the diffusion coefficient at the anode or the cathode

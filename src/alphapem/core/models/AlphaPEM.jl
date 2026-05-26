@@ -191,7 +191,8 @@ function simulate_model!(simu::AlphaPEM,
     simu.sol = solve(prob, IDA(linear_solver=:KLU);
                      reltol=np.rtol, abstol=atol_scaled,
                      tstops=solver_tstops(simu.current_density, simu.time_interval),
-                     initializealg=initialization_algorithm)
+                     initializealg=initialization_algorithm,
+                     maxiters=np.maxiters)
     #           Check that the solver converged successfully; raise an informative error otherwise.
     successful_retcode(simu.sol.retcode) ||
     throw(ErrorException("IDA solve failed in simulate_model!: retcode = $(simu.sol.retcode)"))
