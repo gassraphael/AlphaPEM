@@ -13,8 +13,11 @@ criteria are satisfied simultaneously:
   Values outside this window indicate a non-physical equilibrium or a solver failure.
 - **approx_monotonic** — Voltage decreases (approximately) with current density.
   Small upward bumps below a configurable tolerance are accepted; large rises are not.
-- **positive_voltages** — No voltage in the curve falls below a minimum threshold
-  (default 0 V). Negative voltages are unphysical under normal operation.
+- **positive_voltages** — The simulation reached the expected maximum current density
+  (within a relative tolerance). When the solver triggers its safety stop before
+  `i_max` is reached, it means cell voltage would have gone negative at that operating
+  point — the criterion therefore fails. For the vector-based overload this criterion
+  still checks the minimum voltage directly (legacy behaviour).
 
 # Exports
 - `ValidityCriteriaConfig`      — Configurable thresholds for each criterion
@@ -71,7 +74,12 @@ Thresholds and activation flags controlling how a polarization curve is validate
   Default `0.0`.
 - `apply_start_range::Bool`: Enable the starting-voltage check. Default `true`.
 - `apply_monotonicity::Bool`: Enable the monotonicity check. Default `true`.
-- `apply_positive_voltages::Bool`: Enable the no-negative-voltage check. Default `true`.
+- `apply_positive_voltages::Bool`: Enable the current-coverage (positive-voltage proxy) check.
+  Default `true`.
+- `current_reach_tol::Float64`: Relative tolerance for the current-coverage check.
+  A simulation passes if `ifc_max_achieved ≥ ifc_max_expected × (1 − tol)`.
+  Default `0.01` (1 %).  Only used by the simulator-based overload; the vector-based
+  overload still uses `min_voltage_threshold` directly.
 
 # Example
 ```julia
@@ -85,6 +93,7 @@ Base.@kwdef struct ValidityCriteriaConfig
     voltage_range::Tuple{Float64, Float64} = (0.0, E0)
     monotonic_threshold::Float64           = 0.005
     min_voltage_threshold::Float64         = 0.0
+    current_reach_tol::Float64             = 0.01
     apply_start_range::Bool                = true
     apply_monotonicity::Bool               = true
     apply_positive_voltages::Bool          = true
@@ -223,16 +232,13 @@ function classify_polarization_curve(simu,   # ::AlphaPEM
         return ValidationResult(:invalid, false, false, false, "simulator outputs do not contain solver.t")
     end
 
-    t_hist = outputs.solver.t
+    t_hist     = outputs.solver.t
     Ucell_full = outputs.derived.Ucell
 
     # Extract discretized polarization points (sampled at stabilization times).
-    # `_extract_polarization_sampling_indices` returns both the time-history indices
-    # and the analytically computed current density at each sample, so we never
-    # need to call `current()` from the external `Currents` module.
-    local sample_indices, ifc_sampled
+    local sample_indices, ifc_sampled, sample_times
     try
-        sample_indices, ifc_sampled = _extract_polarization_sampling_indices(t_hist, cd)
+        sample_indices, ifc_sampled, sample_times = _extract_polarization_sampling_indices(t_hist, cd)
     catch e
         # Not a polarization profile or unsupported structure.
         return ValidationResult(:invalid, nothing, nothing, nothing,
@@ -241,21 +247,65 @@ function classify_polarization_curve(simu,   # ::AlphaPEM
 
     # Extract stabilized cell voltages at the sampling times.
     Ucell_sampled = Float64[Ucell_full[i] for i in sample_indices]
+    ifc_sampled_f = collect(Float64, ifc_sampled)
 
-    # Delegate to the vector-based classifier
-    return classify_polarization_curve(Ucell_sampled, collect(Float64, ifc_sampled), cfg)
+    U_sorted, i_sorted = _sorted_curve(Ucell_sampled, ifc_sampled_f)
+
+    # ── Criterion 1: starting voltage ─────────────────────────────────────────
+    start_ok = cfg.apply_start_range ?
+               check_start_voltage_range(U_sorted, cfg.voltage_range) : nothing
+
+    # ── Criterion 2: approximate monotonicity ─────────────────────────────────
+    mono_ok = cfg.apply_monotonicity ?
+              check_monotonicity(U_sorted, i_sorted, cfg.monotonic_threshold) : nothing
+
+    # ── Criterion 3: current coverage (proxy for positive voltages) ───────────
+    # The simulator stops before U_cell can go negative (safety stop).
+    # So, it is verified if the simulation reached the expected maximum current
+    # density: if it stopped early, the operating limit (U_cell → 0) was hit.
+    pos_ok = if cfg.apply_positive_voltages
+        t_end            = t_hist[end]
+        # Last expected sample time that was actually reached by the solver.
+        # sample_times are analytical; t_end is the exact solver stop time.
+        k_last           = something(findlast(st -> st <= t_end, sample_times), 0)
+        ifc_max_achieved = k_last > 0 ? ifc_sampled_f[k_last] : 0.0
+        ifc_max_expected = ifc_sampled_f[end]
+        check_positive_voltages(ifc_max_achieved, ifc_max_expected, cfg.current_reach_tol)
+    else
+        nothing
+    end
+
+    # ── Aggregate ─────────────────────────────────────────────────────────────
+    all_ok = !any(x -> x === false, [start_ok, mono_ok, pos_ok])
+    classification = all_ok ? :valid : :invalid
+
+    details = if classification == :valid
+        "all enabled criteria passed"
+    else
+        failed = String[]
+        (start_ok === false) && push!(failed, "start_in_range")
+        (mono_ok  === false) && push!(failed, "approx_monotonic")
+        (pos_ok   === false) && push!(failed, "positive_voltages")
+        isempty(failed) ? "invalid" : "failed: " * join(failed, ", ")
+    end
+
+    return ValidationResult(classification, start_ok, mono_ok, pos_ok, details)
 end
 
 
 """
     _extract_polarization_sampling_indices(t_hist, cd)
-        -> (indices::Vector{Int}, ifc_values::Vector{Float64})
+        -> (indices::Vector{Int}, ifc_values::Vector{Float64}, sample_times::Vector{Float64})
 
 Extract the indices in `t_hist` corresponding to characteristic polarization sampling
-times, together with the analytically computed current density at each sample.
+times, together with the analytically computed current density at each sample and the
+sample times themselves.
 
-Returns a tuple `(indices, ifc_values)` so that callers never need to call `current()`
-from the `Currents` module, keeping this module free of external dependencies.
+Returns a tuple `(indices, ifc_values, sample_times)` so that callers never need to
+call `current()` from the `Currents` module, keeping this module free of external
+dependencies.  The `sample_times` vector is additionally used by
+`classify_polarization_curve(simu, cfg)` to determine how far into the profile the
+simulation actually ran (current-coverage check).
 """
 function _extract_polarization_sampling_indices(t_hist::AbstractVector{<:Real},
                                                  cd)
@@ -285,7 +335,7 @@ function _extract_polarization_sampling_indices(t_hist::AbstractVector{<:Real},
         ifc_values   = Float64[k * delta_i for k in 0:nb_loads]
 
         indices = [argmin(abs.(t_hist .- t)) for t in sample_times]
-        return indices, ifc_values
+        return indices, ifc_values, sample_times
 
     # ── Calibration polarization profile ──────────────────────────────────────
     elseif hasproperty(cd, :i_exp) && hasproperty(cd, :v_load)
@@ -299,7 +349,7 @@ function _extract_polarization_sampling_indices(t_hist::AbstractVector{<:Real},
         ifc_values   = collect(Float64, i_exp)
 
         indices = [argmin(abs.(t_hist .- t)) for t in sample_times]
-        return indices, ifc_values
+        return indices, ifc_values, sample_times
     end
 
     throw(ArgumentError("Unsupported current profile for polarization sampling"))
@@ -366,12 +416,39 @@ end
 
 
 """
+    check_positive_voltages(ifc_max_achieved, ifc_max_expected, tol = 0.01) -> Bool
+
+Return `true` when the simulation reached the expected maximum current density.
+
+`ifc_max_achieved` is the last current-density step that was fully simulated;
+`ifc_max_expected` is the target value from the current profile.  The criterion
+passes when `ifc_max_achieved ≥ ifc_max_expected × (1 − tol)`.
+
+When `ifc_max_expected ≤ 0` the check is vacuously `true`.
+
+This is the overload used by `classify_polarization_curve(simu, cfg)`: because the
+simulator now triggers a safety stop before U_cell can go negative, the sign of the
+sampled voltages is no longer a reliable indicator of the operating limit.  Comparing
+achieved vs. expected current density is the correct proxy.
+"""
+function check_positive_voltages(ifc_max_achieved::Real,
+                                  ifc_max_expected::Real,
+                                  tol::Float64 = 0.01)::Bool
+    ifc_max_expected <= 0.0 && return true
+    return ifc_max_achieved >= ifc_max_expected * (1.0 - tol)
+end
+
+
+"""
     check_positive_voltages(Ucell, min_voltage = 0.0) -> Bool
 
 Return `true` when every element of `Ucell` is ≥ `min_voltage`.
+
+This legacy overload is used by the vector-based `classify_polarization_curve(Ucell, ifc, cfg)`
+where no simulation metadata is available.
 """
 function check_positive_voltages(Ucell::Vector{Float64},
-                                 min_voltage::Float64 = 0.0)::Bool
+                                  min_voltage::Float64 = 0.0)::Bool
     isempty(Ucell) && return false
     for u in Ucell
         (isfinite(u) && u >= min_voltage) || return false
