@@ -57,18 +57,20 @@ export PRIMConfig,
 All options needed to run one PRIM analysis via the R `irdpackage`.
 
 # Fields
-- `data_path::String`: Path to the CSV of classified configurations
-  (columns: parameter names + `classification`).
+- `data_path::String`: Path to the CSV of classified configurations.
+  **Leave empty** when calling via `find_valid_region` — it is set automatically.
 - `ird_package_dir::String`: Path to the local `irdpackage` folder.
   Default: `"external/supplementary_2023_ird/irdpackage"`.
 - `reference_config_path::String`: Path to a YAML file with the reference (known-valid)
   configuration used as *x_interest* in PRIM.
+  **Leave empty** when calling via `find_valid_region` — it is set automatically.
 - `probability_range::Tuple{Float64,Float64}`: Target P(valid) interval for the box.
   Default `(0.8, 1.0)` — keep only regions estimated ≥ 80 % valid.
 - `methods::Vector{Symbol}`: IRD methods to run. Supported: `:PRIM`, `:MaxBox`.
 - `categorical_params::Vector{Symbol}`: Parameters to treat as categorical (e.g., `[:e]`).
 - `seed::Int`: Random seed for the Random Forest and PRIM. Default `42`.
-- `output_dir::String`: Directory where YAML bounds and reports are saved.
+- `output_dir::String`: Output directory. **Leave empty** when calling via
+  `find_valid_region` — it is fixed to `VALIDITY_OUTPUT_DIR` automatically.
 - `target_column::String`: Name of the classification column. Default `"classification"`.
 - `positive_class::String`: Label of the valid class. Default `"valid"`.
 
@@ -82,14 +84,14 @@ cfg = PRIMConfig(
 ```
 """
 Base.@kwdef struct PRIMConfig
-    data_path::String
+    data_path::String                           = ""   # set internally by find_valid_region
     ird_package_dir::String                     = "external/supplementary_2023_ird/irdpackage"
-    reference_config_path::String
+    reference_config_path::String               = ""   # set internally by find_valid_region
     probability_range::Tuple{Float64, Float64}  = (0.8, 1.0)
     methods::Vector{Symbol}                     = [:PRIM, :MaxBox]
     categorical_params::Vector{Symbol}          = [:e]
     seed::Int                                   = 42
-    output_dir::String                          = "results/model_validity"
+    output_dir::String                          = ""   # set internally by find_valid_region
     target_column::String                       = "classification"
     positive_class::String                      = "valid"
 end

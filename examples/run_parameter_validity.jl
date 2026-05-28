@@ -14,6 +14,9 @@
 #   STEP 3 — (optional) Restrict the valid region via PRIM (requires R + IRD package)
 #   STEP 4 — Export all results (CSV, YAML bounds, text reports)
 #
+# All output files are written to:
+#   <project_root>/results/model_validity/   (fixed, see VALIDITY_OUTPUT_DIR)
+#
 # Usage:
 #   julia --project=. --threads=auto examples/run_parameter_validity.jl
 #
@@ -30,11 +33,9 @@ using AlphaPEM.Parametrisation.ValidParameterRegion
 # USER SETTINGS  (edit here)
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Root directory for all output files.
-const OUTPUT_DIR = get(ENV, "ALPHAPEM_VALIDITY_OUTPUT_DIR", "results/model_validity")
-
 # Set to true to run PRIM (STEP 3).
-# Requires R + the IRD package cloned at IRD_PACKAGE_DIR (see README § Installation).
+# Requires R + the IRD package cloned at the default IRD_PACKAGE_DIR
+# (see README § Installation).
 const RUN_PRIM = lowercase(get(ENV, "RUN_PRIM", "false")) in ("1", "true", "yes")
 
 
@@ -56,20 +57,16 @@ analysis_cfg = ValidityAnalysisConfig(
     n_samples            = 100,
     sampling_seed        = 42,
     validation_criteria  = criteria_cfg,
-    output_dir           = OUTPUT_DIR,
     parallel             = true,
     checkpoint_interval  = 100,
 )
 
 # PRIM configuration (only used when RUN_PRIM = true)
 prim_cfg = RUN_PRIM ? PRIMConfig(
-    data_path             = joinpath(OUTPUT_DIR, "classified_for_prim.csv"),
-    ird_package_dir       = "external/supplementary_2023_ird/irdpackage",
-    reference_config_path = joinpath(OUTPUT_DIR, "reference_config.yaml"),
-    output_dir            = OUTPUT_DIR,
-    methods               = [:PRIM, :MaxBox],
-    probability_range     = (0.8, 1.0),
-    seed                  = 42,
+    ird_package_dir   = "external/supplementary_2023_ird/irdpackage",
+    methods           = [:PRIM, :MaxBox],
+    probability_range = (0.8, 1.0),
+    seed              = 42,
 ) : nothing
 
 # ─────────────────────────────────────────────────────────────────────────────

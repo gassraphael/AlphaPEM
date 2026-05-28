@@ -85,6 +85,15 @@ using AlphaPEM.Currents: create_current
 # with the parent module (AlphaPEM the package).
 import AlphaPEM.Core.Models: AlphaPEM as AlphaPEMSimulator, simulate_model!
 
+# ─── Fixed output directory (not user-configurable) ──────────────────────────
+"""
+    VALIDITY_OUTPUT_DIR
+
+Absolute path to the fixed output directory for all validity-analysis results.
+Resolves to `<project_root>/results/model_validity` regardless of the working directory.
+"""
+const VALIDITY_OUTPUT_DIR = abspath(joinpath(@__DIR__, "..", "..", "..", "results", "model_validity"))
+
 # ─── Sub-modules ─────────────────────────────────────────────────────────────
 include(joinpath(@__DIR__, "validity/validity_criteria.jl"))
 include(joinpath(@__DIR__, "validity/configuration_sampling.jl"))
@@ -117,6 +126,8 @@ export ValidityCriteria,
        ConfigurationSampling,
        PRIMInterface,
        ResultsExport,
+       # Fixed output path
+       VALIDITY_OUTPUT_DIR,
        # Top-level workflow
        ValidityAnalysisConfig,
        ValidityAnalysisResult,
@@ -175,7 +186,6 @@ launched with a single struct.
   Defaults to fast-batch settings (short stabilisation times) optimised for validity
   testing rather than high-fidelity calibration.
 - `nb_gc::Int`: Number of gas-channel nodes used in batch runs. Default `1` (fastest).
-- `output_dir::String`: Root directory for all generated files. Default `"results/model_validity"`.
 - `parallel::Bool`: Use multi-threading (`Threads.@threads`) for batch simulation.
   Default `true`.
 - `checkpoint_interval::Int`: Save intermediate results every N simulations.
@@ -198,7 +208,6 @@ Base.@kwdef struct ValidityAnalysisConfig
     validation_criteria::ValidityCriteriaConfig = ValidityCriteriaConfig()
     polarization_params::PolarizationParams = PolarizationParams()
     nb_gc::Int                          = 1   # Minimum spatial resolution for speed
-    output_dir::String                  = "results/model_validity"
     parallel::Bool                      = true
     checkpoint_interval::Int            = 100
 end
@@ -285,7 +294,7 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
                                 prim_cfg::Union{PRIMConfig, Nothing} = nothing
                                 )::ValidityAnalysisResult
     overall_start = time()
-    mkpath(cfg.output_dir)
+    mkpath(VALIDITY_OUTPUT_DIR)
     output_files = Dict{Symbol, String}()
 
     # ── STEP 1: LHS sampling ──────────────────────────────────────────────────
@@ -299,7 +308,7 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
     )
 
     # Export original bounds to YAML
-    orig_bounds_path = abspath(joinpath(cfg.output_dir, "original_bounds.yaml"))
+    orig_bounds_path = abspath(joinpath(VALIDITY_OUTPUT_DIR, "original_bounds.yaml"))
     export_parameter_bounds(orig_bounds, orig_bounds_path;
                             method   = :prior,
                             metadata = Dict("fuel_cell_type" => string(cfg.fuel_cell_type),
@@ -312,13 +321,13 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
     data, summary = classify_batch_simulations(X, pb, cfg)
 
     # Export classified CSV
-    export_cfg = ExportConfig(output_dir = cfg.output_dir, timestamp = true, overwrite = true)
+    export_cfg = ExportConfig(output_dir = VALIDITY_OUTPUT_DIR, timestamp = true, overwrite = true)
     csv_path   = export_classified_configurations(data, export_cfg)
     output_files[:classified_csv] = csv_path
     @info "  → Classified CSV: $csv_path"
 
     # Export validation summary
-    summary_path = abspath(joinpath(cfg.output_dir, "validation_summary.txt"))
+    summary_path = abspath(joinpath(VALIDITY_OUTPUT_DIR, "validation_summary.txt"))
     export_validation_summary(summary, summary_path)
     output_files[:validation_summary] = summary_path
     @info "  → Validation summary: $summary_path"
@@ -336,7 +345,7 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
             mstr = string(r.method)
 
             # Export restricted bounds YAML
-            bounds_path = abspath(joinpath(cfg.output_dir,
+            bounds_path = abspath(joinpath(VALIDITY_OUTPUT_DIR,
                                            "restricted_bounds_$(mstr).yaml"))
             export_parameter_bounds(r.restricted_bounds, bounds_path;
                                     method   = r.method,
@@ -349,7 +358,7 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
             @info "  → Restricted bounds ($(mstr)): $bounds_path"
 
             # Export PRIM comparison report
-            report_path = abspath(joinpath(cfg.output_dir,
+            report_path = abspath(joinpath(VALIDITY_OUTPUT_DIR,
                                            "prim_report_$(mstr).txt"))
             prim_metrics = merge(
                 r.rf_metrics,
@@ -450,7 +459,7 @@ function classify_batch_simulations(samples::Matrix{Float64},
 
     # Checkpointing setup.
     do_checkpoints = cfg.checkpoint_interval > 0
-    ckpt_dir = joinpath(cfg.output_dir, "checkpoints")
+    ckpt_dir = joinpath(VALIDITY_OUTPUT_DIR, "checkpoints")
     do_checkpoints && mkpath(ckpt_dir)
 
     start_time = time()
@@ -668,7 +677,7 @@ Step 3 of the pipeline: run PRIM via the R `irdpackage` and return the restricte
   - a `String` path to an already existing YAML reference file, **or**
   - a `Dict{Symbol,<:Any}` / `NamedTuple` of parameter → value mappings.
     In this case the reference YAML is written to
-    `<prim_cfg.output_dir>/reference_config.yaml` automatically.
+    `VALIDITY_OUTPUT_DIR/reference_config.yaml` automatically.
 - `prim_cfg::PRIMConfig` — PRIM options (methods, bounds on probability, seed, …).
 
 ## Returns
@@ -676,14 +685,14 @@ Step 3 of the pipeline: run PRIM via the R `irdpackage` and return the restricte
 
 ## Notes
 - The classified CSV used as input to R is written to
-  `<prim_cfg.output_dir>/classified_for_prim.csv` (only parameter + classification
+  `VALIDITY_OUTPUT_DIR/classified_for_prim.csv` (only parameter + classification
   columns; diagnostic columns are dropped).
-- The `prim_cfg.data_path` field is overridden with this temporary CSV path.
+- All output files go to `VALIDITY_OUTPUT_DIR` regardless of any path set in `prim_cfg`.
 """
 function find_valid_region(classified_data::DataFrame,
                             reference_config,
                             prim_cfg::PRIMConfig)::Vector{PRIMResult}
-    mkpath(prim_cfg.output_dir)
+    mkpath(VALIDITY_OUTPUT_DIR)
 
     # IRD expects a binary target (valid / invalid). Failed simulations are
     # conservatively re-labeled as invalid for the PRIM learning step.
@@ -703,7 +712,7 @@ function find_valid_region(classified_data::DataFrame,
                      "is_monotonic", "has_positive_voltages", "error_message"])
     keep_cols = [c for c in names(data_for_prim) if !(c in diag_cols)]
 
-    csv_path = abspath(joinpath(prim_cfg.output_dir, "classified_for_prim.csv"))
+    csv_path = abspath(joinpath(VALIDITY_OUTPUT_DIR, "classified_for_prim.csv"))
     CSV.write(csv_path, data_for_prim[:, keep_cols])
     @info "Classified data written to: $csv_path"
 
@@ -712,7 +721,7 @@ function find_valid_region(classified_data::DataFrame,
         abspath(reference_config)
     else
         # Write the reference mapping to a temporary YAML file
-        ref_path = abspath(joinpath(prim_cfg.output_dir, "reference_config.yaml"))
+        ref_path = abspath(joinpath(VALIDITY_OUTPUT_DIR, "reference_config.yaml"))
         _write_reference_yaml(reference_config, ref_path)
         @info "Reference config written to: $ref_path"
         ref_path
@@ -727,7 +736,7 @@ function find_valid_region(classified_data::DataFrame,
         methods               = prim_cfg.methods,
         categorical_params    = prim_cfg.categorical_params,
         seed                  = prim_cfg.seed,
-        output_dir            = prim_cfg.output_dir,
+        output_dir            = VALIDITY_OUTPUT_DIR,
         target_column         = prim_cfg.target_column,
         positive_class        = prim_cfg.positive_class,
     )
