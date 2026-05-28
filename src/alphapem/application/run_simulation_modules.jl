@@ -230,9 +230,6 @@ function figures_preparation(cfg::SimulationConfig, nb_gc::Union{Nothing, Intege
     _setup_makie_theme!(cfg)
     figs = cfg.type_current isa StepParams ? _create_figures(cfg, nb_gc) : _create_figures(cfg)
     _store_prepared_figures!(figs[1], figs[3], figs[5])
-    # Dynamic mode opens windows immediately so plots can be refreshed while solving.
-    _active_display_backend[] == :gl && cfg.display_timing == :live &&
-        _open_interactive_figures!(figs[1], figs[3], figs[5])
     return figs
 end
 

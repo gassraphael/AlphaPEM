@@ -730,7 +730,7 @@ function Svl(element::String,
     # Calculation of the total and partial pressures
     Ptot = _positive_pressure_value(Ctot * R * T_eff) # Total pressure.
     P_v = _bounded_vapor_pressure_value(C_v_eff * R * T_eff, Ptot)
-    Psat_eff = min(Psat(T_eff), Ptot - eps(Float64))
+    Psat_eff = min(Psat(T_eff), prevfloat(Ptot))
 
     # Determination of the diffusion coefficient at the anode or the cathode
     if element == "anode"

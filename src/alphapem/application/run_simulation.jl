@@ -20,6 +20,7 @@ using ..Config:   AbstractCurrentParams,
                   StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
 using ..Fuelcell: create_fuelcell
 using ..Currents: create_current, step_duration
+using SciMLBase: ReturnCode
 using ..Core.Models: AlphaPEM, simulate_model!, display!, save_plot!,
                      build_solver_state_scaling, unscale_values
 
@@ -68,7 +69,15 @@ function launch_AlphaPEM_for_step_current(simu::AlphaPEM)::AlphaPEM
             simulate_model!(simu, initial_variable_values, initial_derivative_values, (t0, tf))
 
             # Display
-            simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
+            if simu.cfg.type_display != :no_display
+                display!(simu, ax1, ax2, ax3)
+                # Open the window after the first data point (lazy), then yield to the
+                # GLMakie render thread so the window updates visually between iterations.
+                if _active_display_backend[] == :gl
+                    _open_interactive_figures!(fig1, fig2, fig3)
+                    sleep(0.001)
+                end
+            end
 
             # Recovery of the internal states from the end of the preceding simulation.
             initial_variable_values, initial_derivative_values = _extract_last_internal_state(simu)
@@ -117,8 +126,20 @@ function launch_AlphaPEM_for_polarization_current(simu::AlphaPEM)::AlphaPEM
         for i in 1:n
             simulate_model!(simu, initial_variable_values, initial_derivative_values, (t0, tf))
 
+            # Safety stop: cell voltage or O2 concentration became non-positive.
+            simu.sol.retcode === ReturnCode.Terminated && break
+
             # Display
-            simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
+            if simu.cfg.type_display != :no_display
+                display!(simu, ax1, ax2, ax3)
+                # On the first iteration, open the figure window now that it has content.
+                # On subsequent iterations the call is a no-op (window already open).
+                if _active_display_backend[] == :gl
+                    _open_interactive_figures!(fig1, fig2)
+                    # Yield to the GLMakie render thread so the window updates visually.
+                    sleep(0.001)
+                end
+            end
 
             # Recovery of the internal states from the end of the preceding simulation.
             initial_variable_values, initial_derivative_values = _extract_last_internal_state(simu)
@@ -168,8 +189,17 @@ function launch_AlphaPEM_for_polarization_current_for_calibration(simu::AlphaPEM
             tf = p.delta_t_ini + boundaries[i]
             simulate_model!(simu, initial_variable_values, initial_derivative_values, (t0, tf))
 
+            # Safety stop: cell voltage or O2 concentration became non-positive.
+            simu.sol.retcode === ReturnCode.Terminated && break
+
             # Display
-            simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
+            if simu.cfg.type_display != :no_display
+                display!(simu, ax1, ax2, ax3)
+                if _active_display_backend[] == :gl
+                    _open_interactive_figures!(fig1, fig2)
+                    sleep(0.001)
+                end
+            end
 
             # Recovery of the internal states from the end of the preceding simulation.
             initial_variable_values, initial_derivative_values = _extract_last_internal_state(simu)
@@ -234,7 +264,13 @@ function launch_AlphaPEM_for_EIS_current(simu::AlphaPEM)::AlphaPEM
         initial_variable_values, initial_derivative_values = _extract_last_internal_state(simu)
 
         # Display
-        simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
+        if simu.cfg.type_display != :no_display
+            display!(simu, ax1, ax2, ax3)
+            if _active_display_backend[] == :gl
+                _open_interactive_figures!(fig1, fig2, fig3)
+                sleep(0.001)
+            end
+        end
     end
 
     # Plot saving

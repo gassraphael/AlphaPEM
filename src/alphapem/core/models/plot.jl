@@ -692,19 +692,22 @@ function plot_polarization_curve(outputs::SimulationOutputs,
         idx = lastindex(t_hist)
         ifc_last = current(cd, t_hist[idx]) / 1e4
         Ucell_last = Ucell_t[idx]
-        scatter!(ax, [ifc_last], [Ucell_last];
+        sc = scatter!(ax, [ifc_last], [Ucell_last];
                  color=:white, marker=:circle, markersize=8,
-                 strokecolor=model_color, strokewidth=1.8,
-                 label=model_label_base)
+                 strokecolor=model_color, strokewidth=1.8)
 
         _set_polarization_axis_limits!(ax)
         _set_polarization_fixed_ticks!(ax)
         _finalize_axis!(ax;
                         xlabel=rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"),
                         ylabel=rich("Cell voltage ", lsub("U", "cell"), " (V)"),
-                        title="Polarization point (dynamic)",
-                        legend=true,
-                        legend_position=:rt)
+                        title="Polarization points",
+                        legend=false)   # skip auto-legend (would create N entries)
+        # Single legend entry representing the model curve style.
+        axislegend(ax, [sc], [model_label_base];
+                   position=:rt, framevisible=true,
+                   framewidth=0.8, framecolor=(:black, 0.35),
+                   backgroundcolor=(:white, 0.88), padding=(6, 6, 6, 6))
     end
     return nothing
 end
@@ -764,18 +767,20 @@ function plot_polarization_curve_for_cali(outputs::SimulationOutputs,
         idx = lastindex(t_hist)
         ifc_last = current(cd, t_hist[idx]) / 1e4
         Ucell_last = Ucell_t[idx]
-        scatter!(ax, [ifc_last], [Ucell_last];
+        sc = scatter!(ax, [ifc_last], [Ucell_last];
                  color=:white, marker=:circle, markersize=8,
-                 strokecolor=model_color, strokewidth=1.8,
-                 label=model_label_base)
+                 strokecolor=model_color, strokewidth=1.8)
         _set_polarization_axis_limits!(ax)
         _set_polarization_fixed_ticks!(ax)
         _finalize_axis!(ax;
                         xlabel=rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"),
                         ylabel=rich("Cell voltage ", lsub("U", "cell"), " (V)"),
                         title="Polarization point (calibration, dynamic)",
-                        legend=true,
-                        legend_position=:rt)
+                        legend=false)   # skip auto-legend
+        axislegend(ax, [sc], [model_label_base];
+                   position=:rt, framevisible=true,
+                   framewidth=0.8, framecolor=(:black, 0.35),
+                   backgroundcolor=(:white, 0.88), padding=(6, 6, 6, 6))
     end
     return nothing
 end

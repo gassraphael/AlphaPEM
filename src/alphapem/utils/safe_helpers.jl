@@ -17,9 +17,12 @@ models, so they live in the shared utility layer.
 
 Clamp `P_v` to `(0, Ptot)` so `Ptot - P_v` stays strictly positive and the
 `log((Ptot - Psat) / (Ptot - P_v))` term remains numerically safe.
+Use prevfloat instead of Ptot - eps(Float64) to avoid issues because Ptot is
+big in Pascals and eps(Float64) is small in Pascals, which can lead to underflow
+and not actually reduce the value of Ptot.
 """
 @inline _bounded_vapor_pressure_value(P_v::Real, Ptot::Real) =
-    clamp(Float64(P_v), 0.0, Float64(Ptot) - eps(Float64))
+    clamp(Float64(P_v), 0.0, prevfloat(Float64(Ptot)))
 
 """
     _positive_concentration_value(x)
