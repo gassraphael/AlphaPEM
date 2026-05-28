@@ -8,7 +8,7 @@ transformations, simulation error calculation, and axis-tick rounding helpers.
 
 # Importing the necessary libraries
 using FFTW
-using Interpolations: linear_interpolation, Line
+using Interpolations: linear_interpolation, Line, deduplicate_knots!
 using Statistics
 
 
@@ -73,8 +73,10 @@ function make_Fourier_transformation(outputs::SimulationOutputs,
     n_uniform = max(n_uniform, cd.nb_points + 1)
     t_uniform = collect(range(t_measure_start, stop=t_measure_end, length=n_uniform))
 
-    itp_U = linear_interpolation(t_measured, Ucell_measured; extrapolation_bc=Line())
-    itp_i = linear_interpolation(t_measured, ifc_measured; extrapolation_bc=Line())
+    t_meas = copy(t_measured)
+    deduplicate_knots!(t_meas)
+    itp_U = linear_interpolation(t_meas, Ucell_measured; extrapolation_bc=Line())
+    itp_i = linear_interpolation(t_meas, ifc_measured; extrapolation_bc=Line())
     Ucell_EIS_measured = itp_U.(t_uniform)
     ifc_EIS_measured = itp_i.(t_uniform)
 
@@ -155,7 +157,10 @@ function _polarization_rmse(ifc_discretized::AbstractVector{<:Real},
                             Ucell_discretized::AbstractVector{<:Real},
                             i_exp::AbstractVector{<:Real},
                             U_exp::AbstractVector{<:Real})
-    itp = linear_interpolation(collect(ifc_discretized), collect(Ucell_discretized); extrapolation_bc=Line())
+    ifc_vec = collect(ifc_discretized)
+    ucell_vec = collect(Ucell_discretized)
+    deduplicate_knots!(ifc_vec)
+    itp = linear_interpolation(ifc_vec, ucell_vec; extrapolation_bc=Line())
     Ucell_interpolated = itp.(collect(i_exp))
     return calculate_simulation_error(Ucell_interpolated, collect(U_exp))
 end

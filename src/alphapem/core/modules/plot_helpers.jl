@@ -170,16 +170,29 @@ function _set_polarization_axis_limits!(ax)
     return nothing
 end
 
-"""Apply fixed major ticks for polarization charts over full axis ranges.
+"""Apply adaptive tick formatting for polarization charts.
 
-Uses larger major intervals than dense auto-ticks to keep figures readable."""
+Major ticks are placed at a fixed spacing (0.5 A·cm⁻² on x, 0.1 V on y) via
+tick *functions* rather than fixed arrays.  Makie calls these functions with the
+current view limits `(vmin, vmax)` at every pan/zoom event, so ticks extend
+correctly outside the nominal polarization domain when the user moves the window."""
 function _set_polarization_fixed_ticks!(ax)
-    xticks = collect(0.0:0.5:3.0)
-    yticks = collect(0.4:0.1:1.2)
-    ax.xticks = xticks
-    ax.yticks = yticks
-    ax.xtickformat = _compact_tick_labels
-    ax.ytickformat = _compact_tick_labels
+    function _x_ticks(vmin, vmax)
+        step  = 0.5
+        start = ceil(vmin / step) * step
+        stop  = floor(vmax / step) * step
+        vals  = start <= stop ? collect(start:step:stop) : Float64[]
+        return vals, _compact_tick_labels(vals)
+    end
+    function _y_ticks(vmin, vmax)
+        step  = 0.1
+        start = ceil(vmin / step) * step
+        stop  = floor(vmax / step) * step
+        vals  = start <= stop ? collect(start:step:stop) : Float64[]
+        return vals, _compact_tick_labels(vals)
+    end
+    ax.xticks = _x_ticks
+    ax.yticks = _y_ticks
     return nothing
 end
 

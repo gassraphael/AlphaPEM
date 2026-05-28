@@ -28,6 +28,7 @@ online version may contain bugs, and not all features may be available. The curr
 - [Start](#start)
 - [Major updates](#major-updates)
 - [Work in progress](#work-in-progress)
+- [Valid parameter region analysis](#valid-parameter-region-analysis)
 - [Roadmap](#roadmap)
 - [Related publications](#related-publications) 
 - [Contributions](#contributions)
@@ -40,7 +41,7 @@ The repository is organized around a Julia package in `src/`, example scripts in
 documentation, tests, and generated results. The main folders are:
 
 ```bash
-├── docs                    # MkDocs documentation
+├── docs                    # User documentation
 ├── examples                # Ready-to-run Julia scripts for step, polarization, EIS
 ├── results                 # Output directory for generated simulation results and reference benchmark outputs
 ├── scripts                 # Helper shell scripts for local execution or cluster workflows
@@ -67,8 +68,8 @@ The most relevant entry points are:
 
 - `examples/run_step.jl` for a step-current simulation.
 - `examples/run_polarization.jl` for a polarization curve.
-- `examples/run_EIS.jl` for impedance simulations *(currently work in progress)*.
-- `src/alphapem/interfaces/GUI.jl` for the graphical user interface.
+- `examples/run_EIS.jl` for impedance simulations.
+- `src/alphapem/interfaces/GUI.jl` for the graphical user interface *(currently work in progress)*.
 - `src/alphapem/parametrisation/calibration.jl` for parameter calibration *(currently work in progress)*.
 
 
@@ -201,10 +202,8 @@ and configuration, beyond what the GUI offers.
 | `run_step.jl` | Simulates a step current density                                                              |
 | `run_polarization.jl` | Generates a polarization curve                                                                 |
 | `run_polarization_for_cali.jl` | Generates polarization curves for calibration purposes |
-| `run_EIS.jl` | Generates an EIS curve *(currently broken, work in progress)*                                 |
+| `run_EIS.jl` | Generates an EIS curve                                  |
 | `plot_currents.jl` | Plots the current density profiles                                                            |
-| `benchmark_step.jl` | Benchmarks the step simulation                                                                |
-| `profile_step.jl` | Profiles the step simulation                                                                  |
 
 ### Steps to run a simulation
 
@@ -261,7 +260,6 @@ system in `src/alphapem/parametrisation/calibration_modules.jl`.
     - the redesign of the AlphaPEM architecture so that the code is closer to industry standards.
     - a progressive migration process: `interfaces` (GUI) and `parametrisation` (calibration) are not yet fully
       converted to Julia and still rely on Python.
-    - `run_EIS.jl` is currently broken (work in progress).
 - [V1.3](https://github.com/gassraphael/AlphaPEM/tree/65dd73ed306a054c80018447f7943b9d9f973ffb) - 2026.02.16 - This version of AlphaPEM includes: 
 	- the addition of O2 flow to Pt particules which improves the modeling of overvoltage due to flooding at high curent densities.
 		- the limiting liquid water saturation coefficient ($s_{lim}$) has been definitively removed, as this model replaces it.
