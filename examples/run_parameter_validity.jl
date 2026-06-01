@@ -18,7 +18,7 @@
 #   <project_root>/results/model_validity/   (fixed, see VALIDITY_OUTPUT_DIR)
 #
 # Usage:
-#   julia --project=. --threads=auto examples/run_parameter_validity.jl
+#   julia --project=. examples/run_parameter_validity.jl
 #
 # For PRIM (STEP 3), R must be installed and the IRD package cloned:
 #   git clone https://github.com/slds-lmu/supplementary_2023_ird.git external/
@@ -27,7 +27,64 @@
 import Pkg
 Pkg.activate(joinpath(@__DIR__, ".."))
 
+# ─────────────────────────────────────────────────────────────────────────────
+# THREADING
+#
+# These two constants must stay at the very top of the script, BEFORE any
+# heavy `using` statement.  Julia's thread count is fixed at startup; if more
+# threads are needed the script re-executes itself immediately with the correct
+# --threads flag, before paying the cost of loading any package.
+# ─────────────────────────────────────────────────────────────────────────────
+
+const PARALLEL  = true   # true  → multi-threaded batch simulation
+                         # false → sequential (useful for debugging)
+
+const N_THREADS = 0      # Number of Julia threads to request.
+                         #   0  → use all available cores (Sys.CPU_THREADS)
+                         #   N  → use exactly min(N, Sys.CPU_THREADS) threads
+
+# ── Auto-restart with the right thread count ─────────────────────────────────
+if PARALLEL
+    n_desired = N_THREADS == 0 ? Sys.CPU_THREADS : min(N_THREADS, Sys.CPU_THREADS)
+    if Threads.nthreads() < n_desired
+        julia_bin = joinpath(Sys.BINDIR, "julia")
+        project   = Base.active_project()
+        script    = @__FILE__
+        @info "Re-launching with $n_desired thread(s) (currently $(Threads.nthreads()))…"
+        exit(run(`$julia_bin --threads=$n_desired --project=$project $script $ARGS`).exitcode)
+    end
+end
+
+@info "Running with $(Threads.nthreads()) thread(s)$(PARALLEL ? " — parallel batch enabled" : " — sequential mode")."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# IMPORTS  (after the restart check — only reached with the correct thread count)
+# ─────────────────────────────────────────────────────────────────────────────
+
 using AlphaPEM.Parametrisation.ValidParameterRegion
+using Logging
+
+# ─────────────────────────────────────────────────────────────────────────────
+# LOGGING FILTER
+#
+# During batch simulation the IDA solver may trigger "Safety stop" warnings
+# whenever a configuration exceeds the fuel cell's physical operating limit and
+# the simulation is terminated gracefully.  These warnings are expected, already
+# captured in the :invalid classification, and only pollute the progress bar
+# display.  The filter below silences them while keeping all other
+# Info / Warn / Error messages intact.
+# ─────────────────────────────────────────────────────────────────────────────
+
+struct _SuppressSafetyWarnings <: AbstractLogger
+    base::AbstractLogger
+end
+Logging.min_enabled_level(l::_SuppressSafetyWarnings) = Logging.min_enabled_level(l.base)
+Logging.shouldlog(l::_SuppressSafetyWarnings, args...)  = Logging.shouldlog(l.base, args...)
+function Logging.handle_message(l::_SuppressSafetyWarnings, level, msg, args...; kwargs...)
+    level == Logging.Warn && startswith(string(msg), "Safety stop") && return
+    Logging.handle_message(l.base, level, msg, args...; kwargs...)
+end
+Logging.catch_exceptions(l::_SuppressSafetyWarnings) = Logging.catch_exceptions(l.base)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # USER SETTINGS  (edit here)
@@ -54,10 +111,10 @@ criteria_cfg = ValidityCriteriaConfig(
 analysis_cfg = ValidityAnalysisConfig(
     fuel_cell_type       = :ZSW_GenStack,
     voltage_zone         = :full,
-    n_samples            = 100,
+    n_samples            = 20,
     sampling_seed        = 42,
     validation_criteria  = criteria_cfg,
-    parallel             = true,
+    parallel             = PARALLEL,        # ← driven by the constant above
     checkpoint_interval  = 100,
 )
 
@@ -78,7 +135,9 @@ println("  AlphaPEM — Parameter Validity Region Analysis")
 println("="^72)
 println()
 
-result = run_validity_analysis(analysis_cfg, prim_cfg)
+result = with_logger(_SuppressSafetyWarnings(current_logger())) do
+    run_validity_analysis(analysis_cfg, prim_cfg)
+end
 
 # ─────────────────────────────────────────────────────────────────────────────
 # DISPLAY RESULTS
@@ -130,4 +189,3 @@ else
 end
 println("    ✅  STEP 4 — Export results                       (complete)")
 println("="^72)
-

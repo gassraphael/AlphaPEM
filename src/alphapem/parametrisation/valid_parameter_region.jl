@@ -71,6 +71,7 @@ module ValidParameterRegion
 # ─── Standard library ────────────────────────────────────────────────────────
 using Printf
 using Dates
+using LinearAlgebra: BLAS
 
 # ─── External packages ───────────────────────────────────────────────────────
 using DataFrames
@@ -466,6 +467,11 @@ function classify_batch_simulations(samples::Matrix{Float64},
 
     if cfg.parallel && Threads.nthreads() > 1
         # ── Parallel branch ─────────────────────────────────────────────────
+        # Restrict BLAS to 1 thread per Julia thread to avoid over-subscription:
+        # with N Julia threads each spawning M BLAS threads, you would get N×M
+        # OS threads competing for the same CPU cores.
+        BLAS.set_num_threads(1)
+
         prog = Progress(n_samples;
                         desc   = "Batch simulation ($(Threads.nthreads()) threads): ",
                         barlen = 40,
@@ -782,4 +788,3 @@ function _write_reference_yaml(reference_config, filepath::String)::Nothing
 end
 
 end # module ValidParameterRegion
-
