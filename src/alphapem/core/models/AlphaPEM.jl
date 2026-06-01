@@ -461,7 +461,7 @@ function _build_jacobian_closure(residual!, packed, simu::AlphaPEM, dims,
 end
 
 
-"""Build a `DiscreteCallback` that stops the solver when U_cell ≤ 0 or any C_O2_Pt[k] ≤ 0.
+"""Build a `DiscreteCallback` that stops the solver when U_cell ≤ 0 or any C_O2_Pt[k] ≤ 1e-4.
 
 A `Ref{Bool}` guard ensures the callback fires at most once per solve call: after
 `terminate!` IDA may still take a few micro-steps before honouring the stop flag,

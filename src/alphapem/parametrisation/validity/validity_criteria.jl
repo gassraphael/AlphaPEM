@@ -54,7 +54,8 @@ export ValidityCriteriaConfig,
        classify_polarization_curve,
        check_start_voltage_range,
        check_monotonicity,
-       check_positive_voltages
+       check_positive_voltages,
+       _extract_polarization_sampling_indices
 
 # ─────────────────────────────────────────────────────────────────────────────
 # DATA STRUCTURES

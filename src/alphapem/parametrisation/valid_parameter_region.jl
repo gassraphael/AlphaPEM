@@ -345,10 +345,10 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
 
     # ── Create or reuse run directory ─────────────────────────────────────────
     run_dir = if cfg.reuse_from !== nothing
-        # Reuse existing run directory
+        # Reuse existing directory.
         cfg.reuse_from
     else
-        # Generate new timestamped directory
+        # Generate timestamped directory.
         _generate_run_directory(cfg)
     end
 
@@ -633,12 +633,10 @@ function classify_batch_simulations(samples::Matrix{Float64},
     start_time = time()
 
     if cfg.parallel && Threads.nthreads() > 1
-        # ── Parallel branch ─────────────────────────────────────────────────
-        # Restrict BLAS to 1 thread per Julia thread to avoid over-subscription:
-        # with N Julia threads each spawning M BLAS threads, you would get N×M
-        # OS threads competing for the same CPU cores.
+        # Limit BLAS to 1 thread per Julia thread to avoid oversubscription.
         BLAS.set_num_threads(1)
 
+    # ── Parallel branch ──────────────────────────────────────────────────────
         prog = Progress(n_samples;
                         desc   = "Batch simulation ($(Threads.nthreads()) threads): ",
                         barlen = 40,
@@ -670,7 +668,7 @@ function classify_batch_simulations(samples::Matrix{Float64},
         finish!(prog)
 
     else
-        # ── Sequential branch ────────────────────────────────────────────────
+        # Sequential branch.
         prog = Progress(n_samples;
                         desc   = "Batch simulation (sequential): ",
                         barlen = 40,
@@ -797,11 +795,16 @@ function _simulate_one_configuration(sample::Vector{Float64},
         # Classify the resulting polarization curve.
         vr = classify_polarization_curve(simu, val_cfg)
 
-        # Extract current and voltage arrays from simulation results
-        I_arr = Vector{Float64}(simu.results.I)
-        U_arr = Vector{Float64}(simu.results.U)
+        # Extract sampled curve points (same as used in classification).
+        _outputs    = simu.outputs
+        _Ucell_full = _outputs.derived.Ucell
+        _t_hist     = _outputs.solver.t
+        _cd         = simu.current_density
+        _idx, _ifc, _ = ValidityCriteria._extract_polarization_sampling_indices(_t_hist, _cd)
+        I_arr = collect(Float64, _ifc)
+        U_arr = Float64[_Ucell_full[i] for i in _idx]
 
-        # `ValidationResult` uses `nothing` for disabled criteria; normalise to `missing`.
+        # Normalize `nothing` to `missing` for DataFrame compatibility.
         _n2m(x) = x === nothing ? missing : x
 
         return (
@@ -816,7 +819,7 @@ function _simulate_one_configuration(sample::Vector{Float64},
         )
 
     catch e
-        # Solver divergence, numerical overflow, or any other exception.
+        # Solver divergence or numerical overflow.
         return (:failed, "simulation exception", missing, missing, missing,
                 sprint(showerror, e), nothing, nothing)
     end
@@ -1028,3 +1031,4 @@ function _write_reference_yaml(reference_config, filepath::String)::Nothing
 end
 
 end # module ValidParameterRegion
+

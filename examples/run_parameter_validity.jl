@@ -101,7 +101,7 @@ criteria_cfg = ValidityCriteriaConfig(
 analysis_cfg = ValidityAnalysisConfig(
     fuel_cell_type         = :ZSW_GenStack,
     voltage_zone           = :full,
-    n_samples              = 200,
+    n_samples              = 200,           # Total number of configurations to simulate (LHS samples)
     validation_criteria    = criteria_cfg,
     parallel               = PARALLEL,      # ← driven by the constant above
     save_curves            = true,          # Set to true to save polarization curves
@@ -153,7 +153,7 @@ println("─"^72)
 println("  Simulations : ", s.total_simulations)
 println("  Valid       : ", s.valid_count, "  (", valid_pct, " %)")
 println("  Invalid     : ", s.invalid_count)
-s.failed_count > 0 && println("  Failed      : ", s.failed_count)
+println("  Failed      : ", s.failed_count)
 
 println()
 println("─"^72)
