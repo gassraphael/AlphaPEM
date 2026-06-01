@@ -21,8 +21,8 @@ Base.@kwdef struct NumericalParams <: AbstractFuelCellParams
     purge_time::Float64 = 0.6       # The time for purging the system in seconds
     delta_purge::Float64 = 15.0     # The time between two purges in seconds
     delta_t_dyn_step::Float64 = 0.1 # Time for dynamic display of the step current density function in seconds
-    rtol::Float64 = 1e-5            # Relative tolerance for the system of ODEs solver
-    atol::Float64 = 1e-8            # Absolute tolerance for the system of ODEs solver
-    maxiters::Int = 1e6             # Maximum number of internal time steps that the IDA solver is allowed to take.
+    rtol::Float64 = 1e-3            # Relative tolerance for the system of ODEs solver
+    atol::Float64 = 1e-6            # Absolute tolerance for the system of ODEs solver
+    maxiters::Int = 1e5             # Maximum number of internal time steps that the IDA solver is allowed to take.
 end
 
