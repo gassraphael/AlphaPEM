@@ -115,13 +115,6 @@ To install **AlphaPEM**, follow these steps in a shell:
     julia --project=. -e 'using Pkg; Pkg.instantiate()'
     ```
 
-7. Install the required Python dependencies (temporary: only needed for the GUI and parameter calibration modules, 
-which are not yet converted to Julia):
-     ```sh
-    PYTHON_FOR_PYCALL=$(julia --project=. -e 'using PyCall; print(PyCall.python)')
-    "$PYTHON_FOR_PYCALL" -m pip install numpy matplotlib pygad ttkthemes
-    ```
-
 ## Installation as a package (to use AlphaPEM in other projects)
 
 AlphaPEM can be integrated into other projects, whether written in **Julia** or **Python**.
@@ -165,29 +158,41 @@ You have two main ways to run AlphaPEM:
 
 ## Using the graphical user interface (GUI)
 
-The GUI provides a quick way to configure and run simulations without modifying the source code. However, it does not yet grant access to all the functionalities of the code.
+### Web-Based Interface (V2.0+)
 
-1. Execute the GUI file:
+AlphaPEM now includes a modern, web-based graphical interface built entirely in Julia.
+The interface is accessible through your local browser and requires no dependencies other than Julia.
 
-   ```sh
-   julia --project=. src/alphapem/interfaces/GUI.jl
-   ```
+**To launch the simulator:**
 
-   > **Note:** The GUI entrypoint is in Julia, but it still depends on Python packages through `PyCall` and is currently 
-     broken. Make sure the Python dependencies are installed (see installation step 7).
+```sh
+julia run_web_app.jl
+```
 
-2. In the GUI (as shown in the figure of [AlphaPEM section](#alphapem)):
+The simulator will:
+1. Start a local web server on `http://localhost:8000`
+2. Automatically open the interface in your default browser
+3. Allow you to configure and run simulations
 
-   - Select a predefined fuel cell specification from the 'Fuel cell' dropdown menu. Operating conditions and 
-   parameters can also be adjusted by selecting 'Enter your specifications' in this menu.
+**Using the interface:**
 
-   - Choose the configuration you prefer for the auxiliaries, flow, voltage zone, purge and display under 
-   'Model configuration'.
+1. **Home Page**: Overview of AlphaPEM capabilities
+2. **Simulator Tab**:
+   - Select or configure a fuel cell model
+   - Set operating conditions (temperature, pressure, stoichiometry, humidity)
+   - Configure accessible physical parameters (dimensions, volumes)
+   - Adjust undetermined parameters (porosity, thickness, etc.)
+   - Set model configuration (auxiliaries, voltage zone, purge, display)
+   - Choose computing parameters (solver tolerances, mesh nodes)
+3. **Simulation Tab**: Select simulation type and launch
+4. **Results Tab**: View outputs and download data
 
-   - Select your desired simulation type at the bottom of the GUI (e.g., current density step, polarization curve,
-   or EIS curve).
+**Network Security:**
 
-3. Run the simulation to generate results (internal states and voltage dynamics) in the /results directory.
+- The server runs on `localhost:8000` (local machine only)
+- No data is sent to external servers
+- Results are stored locally in the `/results` directory
+- Automatic browser access without network exposure
 
 ## Using the command line (programmers)
 
@@ -197,13 +202,13 @@ and configuration, beyond what the GUI offers.
 
 ### Available example scripts
 
-| Script | Description                                                                                   |
-|---|-----------------------------------------------------------------------------------------------|
-| `run_step.jl` | Simulates a step current density                                                              |
-| `run_polarization.jl` | Generates a polarization curve                                                                 |
+| Script | Description                                                                         |
+|---|-------------------------------------------------------------------------------------|
+| `run_step.jl` | Simulates a step current density                                                    |
+| `run_polarization.jl` | Generates a polarization curve                                                       |
 | `run_polarization_for_cali.jl` | Generates polarization curves for calibration purposes |
-| `run_EIS.jl` | Generates an EIS curve                                  |
-| `plot_currents.jl` | Plots the current density profiles                                                            |
+| `run_EIS.jl` | Generates an EIS curve                           |
+| `plot_currents.jl` | Plots the current density profiles                                                  |
 
 ### Steps to run a simulation
 
@@ -253,13 +258,13 @@ system in `src/alphapem/parametrisation/calibration_modules.jl`.
 
 # Major updates
 
-- V2.0 - under construction - This version of AlphaPEM includes: 
-    - the transition from the original programming language to Julia, leveraging its high execution speed while 
+- V2.0 - under construction - This version of AlphaPEM includes:
+    - the transition from the original programming language to Julia, leveraging its high execution speed while
       maintaining a high-level language framework.
     - the abandonment of dictionary usage in favor of increased reliance on object-oriented programming.
     - the redesign of the AlphaPEM architecture so that the code is closer to industry standards.
-    - a progressive migration process: `interfaces` (GUI) and `parametrisation` (calibration) are not yet fully
-      converted to Julia and still rely on Python.
+    - complete migration of the `interfaces` (GUI) module to Julia using Genie.jl and Stipple.jl.
+    - progressive migration of the `parametrisation` (calibration) module.
 - [V1.3](https://github.com/gassraphael/AlphaPEM/tree/65dd73ed306a054c80018447f7943b9d9f973ffb) - 2026.02.16 - This version of AlphaPEM includes: 
 	- the addition of O2 flow to Pt particules which improves the modeling of overvoltage due to flooding at high curent densities.
 		- the limiting liquid water saturation coefficient ($s_{lim}$) has been definitively removed, as this model replaces it.

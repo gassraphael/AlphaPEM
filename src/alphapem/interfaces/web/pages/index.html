@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlphaPEM - PEM Fuel Cell Simulator</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <h1>AlphaPEM</h1>
+                <p class="subtitle">PEM Fuel Cell Simulator</p>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <section class="hero">
+                <h2>Welcome to AlphaPEM</h2>
+                <p>
+                    AlphaPEM is an open-source software package for simulating proton exchange membrane
+                    fuel cell (PEMFC) systems using physics-based models.
+                </p>
+                <p>
+                    It quickly simulates the internal states and voltage dynamics of PEMFC systems
+                    for all current densities and operating conditions.
+                </p>
+            </section>
+
+            <section class="features">
+                <h2>Available Simulations</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h3>Step Current</h3>
+                        <p>
+                            Simulates a step current density change and monitors the cell response,
+                            including voltage dynamics and internal states evolution.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <h3>Polarization Curve</h3>
+                        <p>
+                            Generates a complete polarization curve by sweeping current density,
+                            showing cell voltage as a function of current output.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <h3>EIS Spectroscopy</h3>
+                        <p>
+                            Performs electrochemical impedance spectroscopy analysis across a range
+                            of frequencies to characterize impedance response.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cta-section">
+                <h2>Get Started</h2>
+                <p>Configure your fuel cell and run simulations</p>
+                <a href="/simulator" class="btn btn-primary btn-large">
+                    Launch Simulator
+                </a>
+            </section>
+
+            <section class="info-section">
+                <h3>About AlphaPEM</h3>
+                <ul>
+                    <li><strong>Physics-based Model:</strong> 1D+1D pseudo-2D finite volume approach</li>
+                    <li><strong>Dynamic Simulation:</strong> Two-phase, non-isothermal with thermal effects</li>
+                    <li><strong>Configuration Support:</strong> Co-flow and counter-flow gas channels</li>
+                    <li><strong>Parameter Calibration:</strong> Optimize model to real fuel cell data</li>
+                    <li><strong>Open Source:</strong> Licensed under GNU GPL 3.0</li>
+                </ul>
+
+                <h3>References</h3>
+                <ul>
+                    <li>
+                        Gass et al. (2025)
+                        <em>AlphaPEM: An Open-Source Dynamic 1D Physics-Based PEM Fuel Cell Model for Embedded Applications</em>
+                        SoftwareX
+                    </li>
+                    <li>
+                        Gass et al. (2025)
+                        <em>An Advanced 1D Physics-Based Model for PEM Hydrogen Fuel Cells With Enhanced Overvoltage Prediction</em>
+                        International Journal of Hydrogen Energy
+                    </li>
+                </ul>
+
+                <h3>Contact & Documentation</h3>
+                <p>
+                    For more information, visit:
+                    <a href="https://github.com/gassraphael/AlphaPEM" target="_blank">
+                        GitHub Repository
+                    </a>
+                    or
+                    <a href="https://gassraphael.github.io/AlphaPEM/" target="_blank">
+                        Documentation
+                    </a>
+                </p>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 Raphaël Gass - AlphaPEM</p>
+            <p>Licensed under GNU GPL 3.0</p>
+        </footer>
+    </div>
+</body>
+</html>
+

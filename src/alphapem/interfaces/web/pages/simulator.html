@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlphaPEM Simulator</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .simulator-wrapper {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .tabs-container {
+            display: flex;
+            border-bottom: 2px solid #e6e6e6;
+            overflow-x: auto;
+            background: #f9f9f9;
+        }
+
+        .tab-button {
+            flex: 1;
+            min-width: 120px;
+            padding: 16px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 4px solid transparent;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .tab-button:hover {
+            background: #f0f0f0;
+            color: #0066cc;
+        }
+
+        .tab-button.active {
+            color: #0066cc;
+            border-bottom-color: #0066cc;
+            background: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .input-value-display {
+            font-size: 12px;
+            color: #0066cc;
+            font-weight: 600;
+            min-width: 60px;
+        }
+
+        .tab-status {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ddd;
+            margin-right: 5px;
+        }
+
+        .tab-status.complete {
+            background: #00b300;
+        }
+
+        .tab-status.incomplete {
+            background: #ff9900;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0066cc;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e6e6e6;
+            padding-bottom: 10px;
+        }
+
+        .preset-values {
+            background: #f0f7ff;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #0066cc;
+            margin-bottom: 10px;
+        }
+
+        .validation-error {
+            color: #e60000;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .validation-success {
+            color: #00b300;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .btn-simulate {
+            padding: 15px 25px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-simulate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-step {
+            background: linear-gradient(135deg, #0066cc, #0052a3);
+            color: white;
+        }
+
+        .btn-pola {
+            background: linear-gradient(135deg, #009900, #006600);
+            color: white;
+        }
+
+        .btn-eis {
+            background: linear-gradient(135deg, #ff6600, #cc4400);
+            color: white;
+        }
+
+        .alerts {
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .progress-indicator {
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0066cc;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-nav {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-nav:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-nav:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <h1>AlphaPEM</h1>
+                <p class="subtitle">PEM Fuel Cell Simulator - Configuration</p>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="simulator-wrapper">
+                <!-- Alerts -->
+                <div class="alerts">
+                    <div id="error-alert" class="alert alert-danger"></div>
+                    <div id="success-alert" class="alert alert-success"></div>
+                    <div id="info-alert" class="alert alert-info"></div>
+                </div>
+
+                <!-- Tabs Navigation -->
+                <div class="tabs-container">
+                    <button class="tab-button active" onclick="switchTab(0)">1. Fuel Cell</button>
+                    <button class="tab-button" onclick="switchTab(1)">2. Model Config</button>
+                    <button class="tab-button" onclick="switchTab(2)">3. Numerical</button>
+                    <button class="tab-button" onclick="switchTab(3)">4. Step</button>
+                    <button class="tab-button" onclick="switchTab(4)">5. Polarization</button>
+                    <button class="tab-button" onclick="switchTab(5)">6. EIS</button>
+                    <button class="tab-button" onclick="switchTab(6)">7. Run</button>
+                </div>
+
+                <!-- Tab Contents -->
+                <div class="tab-content active">
+                    <!-- TAB 1: Fuel Cell Selection -->
+                    <h3>Select Fuel Cell Model</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="fuel_cell_type">Fuel Cell Type *</label>
+                            <select id="fuel_cell_type" onchange="updateFuelCellDefaults()">
+                                <option value="">-- Select a fuel cell --</option>
+                                <option value="ZSW_GenStack">ZSW GenStack (2022)</option>
+                                <option value="ZSW_GenStack_Pa_1_61_Pc_1_41">ZSW GenStack Pa=1.61 bar, Pc=1.41 bar</option>
+                                <option value="ZSW_GenStack_Pa_2_01_Pc_1_81">ZSW GenStack Pa=2.01 bar, Pc=1.81 bar</option>
+                                <option value="ZSW_GenStack_Pa_2_4_Pc_2_2">ZSW GenStack Pa=2.4 bar, Pc=2.2 bar</option>
+                                <option value="ZSW_GenStack_Pa_2_8_Pc_2_6">ZSW GenStack Pa=2.8 bar, Pc=2.6 bar</option>
+                                <option value="ZSW_GenStack_T_62">ZSW GenStack T=62°C</option>
+                                <option value="ZSW_GenStack_T_76">ZSW GenStack T=76°C</option>
+                                <option value="ZSW_GenStack_T_84">ZSW GenStack T=84°C</option>
+                                <option value="EH31_1_5">EH-31: P=1.5 bar</option>
+                                <option value="EH31_2_0">EH-31: P=2.0 bar</option>
+                                <option value="EH31_2_25">EH-31: P=2.25 bar</option>
+                                <option value="EH31_2_5">EH-31: P=2.5 bar</option>
+                            </select>
+                            <p class="help-text">Choose a predefined fuel cell model</p>
+                        </div>
+                    </div>
+                    <div class="nav-buttons">
+                        <button class="btn-nav" disabled>← Previous</button>
+                        <button class="btn-nav" onclick="switchTab(1)">Next →</button>
+                    </div>
+                </div>
+
+                <!-- TAB 2: Model Configuration -->
+                <div class="tab-content">
+                    <h3>Model Configuration</h3>
+                    <div class="form-section">
+                        <label>Voltage Zone:</label>
+                        <div style="margin: 10px 0;">
+                            <label><input type="radio" name="voltage_zone" value="before_voltage_drop" checked> Before Voltage Drop</label>
+                            <label style="margin-left: 20px;"><input type="radio" name="voltage_zone" value="full"> Full</label>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <label>Auxiliaries:</label>
+                        <div style="margin: 10px 0;">
+                            <label><input type="radio" name="type_auxiliary" value="no_auxiliary" checked> No Auxiliary</label>
+                            <label style="margin-left: 20px;"><input type="radio" name="type_auxiliary" value="forced_convective_cathode_with_anodic_recirculation"> Cathode + Anodic Recirculation</label>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <label>Flow Type:</label>
+                        <div style="margin: 10px 0;">
+                            <label><input type="radio" name="type_flow" value="counter_flow" checked> Counter Flow</label>
+                            <label style="margin-left: 20px;"><input type="radio" name="type_flow" value="co_flow"> Co-flow</label>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <label>Purge Mode:</label>
+                        <div style="margin: 10px 0;">
+                            <label><input type="radio" name="type_purge" value="no_purge" checked> No Purge</label>
+                            <label style="margin-left: 20px;"><input type="radio" name="type_purge" value="periodic_purge"> Periodic</label>
+                            <label style="margin-left: 20px;"><input type="radio" name="type_purge" value="constant_purge"> Constant</label>
+                        </div>
+                    </div>
+
+                    <div class="nav-buttons">
+                        <button class="btn-nav" onclick="switchTab(0)">← Previous</button>
+                        <button class="btn-nav" onclick="switchTab(2)">Next →</button>
+                    </div>
+                </div>
+
+                <!-- TAB 3: Numerical Parameters -->
+                <div class="tab-content">
+                    <h3>Numerical Parameters</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="nb_gc">GC Nodes</label>
+                            <input type="number" id="nb_gc" value="10" min="1" max="100">
+                            <p class="help-text">Number of gas channel nodes</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="nb_gdl">GDL Nodes</label>
+                            <input type="number" id="nb_gdl" value="5" min="1" max="50">
+                            <p class="help-text">Number of GDL nodes</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="nb_mpl">MPL Nodes</label>
+                            <input type="number" id="nb_mpl" value="5" min="1" max="50">
+                            <p class="help-text">Number of MPL nodes</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="rtol">Relative Tolerance</label>
+                            <input type="number" id="rtol" value="1e-5" step="1e-6">
+                            <p class="help-text">Solver rtol</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="atol">Absolute Tolerance</label>
+                            <input type="number" id="atol" value="1e-8" step="1e-9">
+                            <p class="help-text">Solver atol</p>
+                        </div>
+                    </div>
+                    <div class="nav-buttons">
+                        <button class="btn-nav" onclick="switchTab(1)">← Previous</button>
+                        <button class="btn-nav" onclick="switchTab(3)">Next →</button>
+                    </div>
+                </div>
+
+                <!-- TAB 4: Step Current -->
+                <div class="tab-content">
+                    <h3>Step Current Parameters</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="step_delta_t_ini">Initial Stabilization (s)</label>
+                            <input type="number" id="step_delta_t_ini" value="1800" step="60">
+                            <p class="help-text">Time at zero current for stabilization</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="step_delta_t_load">Loading Time (s)</label>
+                            <input type="number" id="step_delta_t_load" value="30" step="1">
+                            <p class="help-text">Time to ramp to target current</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="step_delta_t_break">Break Time (s)</label>
+                            <input type="number" id="step_delta_t_break" value="120" step="60">
+                            <p class="help-text">Time at target current</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="step_i_ini">Initial Current (A/m²)</label>
+                            <input type="number" id="step_i_ini" value="10000" step="1000">
+                            <p class="help-text">Initial current density</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="step_i_step">Step Current (A/m²)</label>
+                            <input type="number" id="step_i_step" value="15000" step="1000">
+                            <p class="help-text">Target current density</p>
+                        </div>
+                    </div>
+                    <div class="nav-buttons">
+                        <button class="btn-nav" onclick="switchTab(2)">← Previous</button>
+                        <button class="btn-nav" onclick="switchTab(4)">Next →</button>
+                    </div>
+                </div>
+
+                <!-- TAB 5: Polarization -->
+                <div class="tab-content">
+                    <h3>Polarization Curve Parameters</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="pola_delta_t_ini">Initial Stabilization (s)</label>
+                            <input type="number" id="pola_delta_t_ini" value="1800" step="60">
+                        </div>
+                        <div class="form-group">
+                            <label for="pola_delta_t_load">Loading Time (s)</label>
+                            <input type="number" id="pola_delta_t_load" value="30" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="pola_delta_t_break">Break Time (s)</label>
+                            <input type="number" id="pola_delta_t_break" value="120" step="60">
+                        </div>
+                        <div class="form-group">
+                            <label for="pola_delta_i">Current Step (A/m²)</label>
+                            <input type="number" id="pola_delta_i" value="5000" step="1000">
+                            <p class="help-text">Increment between points</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="pola_i_max">Max Current (A/m²)</label>
+                            <input type="number" id="pola_i_max" value="20000" step="1000">
+                            <p class="help-text">Maximum current density</p>
+                        </div>
+                    </div>
+                    <div class="nav-buttons">
+                        <button class="btn-nav" onclick="switchTab(3)">← Previous</button>
+                        <button class="btn-nav" onclick="switchTab(5)">Next →</button>
+                    </div>
+                </div>
+
+                <!-- TAB 6: EIS -->
+                <div class="tab-content">
+                    <h3>EIS Spectroscopy Parameters</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="eis_i_static">Static Current (A/m²)</label>
+                            <input type="number" id="eis_i_static" value="10000" step="1000">
+                        </div>
+                        <div class="form-group">
+                            <label for="eis_ratio">AC Current Ratio (%)</label>
+                            <input type="number" id="eis_ratio" value="5" step="1" min="0" max="20">
+                        </div>
+                        <div class="form-group">
+                            <label for="eis_f_power_min">Min Frequency (10^x Hz)</label>
+                            <input type="number" id="eis_f_power_min" value="0" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="eis_f_power_max">Max Frequency (10^x Hz)</label>
+                            <input type="number" id="eis_f_power_max" value="4" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="eis_nb_frequencies">Number of Frequencies</label>
+                            <input type="number" id="eis_nb_frequencies" value="10" min="1" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label for="eis_nb_points">Points per Frequency</label>
+                            <input type="number" id="eis_nb_points" value="20" min="1" max="100">
+                        </div>
+                    </div>
+                    <div class="nav-buttons">
+                        <button class="btn-nav" onclick="switchTab(4)">← Previous</button>
+                        <button class="btn-nav" onclick="switchTab(6)">Next →</button>
+                    </div>
+                </div>
+
+                <!-- TAB 7: Run Simulation -->
+                <div class="tab-content">
+                    <h3>Launch Simulation</h3>
+                    <p style="margin-bottom: 20px; color: #666;">
+                        All parameters are configured. Choose which simulation type to run:
+                    </p>
+
+                    <div id="progress-indicator" class="progress-indicator">
+                        <div class="spinner"></div>
+                        <p>Running simulation... This may take a few minutes.</p>
+                    </div>
+
+                    <div class="simulation-buttons">
+                        <button class="btn-simulate btn-step" onclick="runSimulation('step')">
+                            Step Current
+                        </button>
+                        <button class="btn-simulate btn-pola" onclick="runSimulation('polarization')">
+                            Polarization Curve
+                        </button>
+                        <button class="btn-simulate btn-eis" onclick="runSimulation('eis')">
+                            EIS Spectroscopy
+                        </button>
+                    </div>
+
+                    <div class="nav-buttons">
+                        <button class="btn-nav" onclick="switchTab(5)">← Previous</button>
+                        <button class="btn-nav" disabled>Next →</button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="/" class="btn btn-primary">← Back to Home</a>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 Raphaël Gass - AlphaPEM</p>
+        </footer>
+    </div>
+
+    <script>
+        // ===== TAB MANAGEMENT =====
+
+        let tabStates = [
+            { name: 'Fuel Cell', complete: false },
+            { name: 'Model Config', complete: false },
+            { name: 'Numerical', complete: false },
+            { name: 'Step', complete: false },
+            { name: 'Polarization', complete: false },
+            { name: 'EIS', complete: false },
+            { name: 'Run', complete: false }
+        ];
+
+        function switchTab(tabIndex) {
+            const tabs = document.querySelectorAll('.tab-content');
+            const buttons = document.querySelectorAll('.tab-button');
+
+            // Validate current tab before switching
+            if (!validateCurrentTab()) {
+                showError('Please correct errors in current tab before proceeding');
+                return;
+            }
+
+            tabs.forEach((tab, idx) => {
+                tab.classList.toggle('active', idx === tabIndex);
+            });
+
+            buttons.forEach((btn, idx) => {
+                btn.classList.toggle('active', idx === tabIndex);
+            });
+
+            // Scroll to top of content
+            document.querySelector('.tab-content.active').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Validate current active tab
+        function validateCurrentTab() {
+            const fuel_cell = document.getElementById('fuel_cell_type').value;
+            const nb_gc = document.getElementById('nb_gc').value;
+
+            if (!fuel_cell || !nb_gc) return false;
+            return true;
+        }
+
+        // Update tab status indicators
+        function updateTabStatus(tabIndex, complete) {
+            tabStates[tabIndex].complete = complete;
+            const button = document.querySelectorAll('.tab-button')[tabIndex];
+            const status = button.querySelector('.tab-status') || document.createElement('span');
+            status.className = 'tab-status ' + (complete ? 'complete' : 'incomplete');
+            if (!button.querySelector('.tab-status')) {
+                button.insertBefore(status, button.firstChild);
+            }
+        }
+
+        // ===== FUEL CELL SELECTION =====
+
+        function updateFuelCellDefaults() {
+            const fuelCellType = document.getElementById('fuel_cell_type').value;
+            if (!fuelCellType) {
+                clearPresetValues();
+                return;
+            }
+
+            fetch(`/api/fuel_cell_defaults/${fuelCellType}`)
+                .then(r => r.json())
+                .then(data => {
+                    showPresetValues(fuelCellType);
+                    updateTabStatus(0, true);
+                    showInfo(`Fuel cell "${fuelCellType}" loaded with defaults`);
+                })
+                .catch(e => {
+                    showError('Failed to load fuel cell defaults: ' + e.message);
+                    updateTabStatus(0, false);
+                });
+        }
+
+        function showPresetValues(fuelCellName) {
+            const presetDiv = document.getElementById('preset-info') ||
+                document.querySelector('.form-grid').appendChild(document.createElement('div'));
+            presetDiv.id = 'preset-info';
+            presetDiv.className = 'preset-values';
+            presetDiv.innerHTML = `
+                <strong>✓ Presets Loaded:</strong> ${fuelCellName}<br>
+                <small>Numerical defaults applied</small>
+            `;
+        }
+
+        function clearPresetValues() {
+            const presetDiv = document.getElementById('preset-info');
+            if (presetDiv) presetDiv.remove();
+        }
+
+        // ===== FORM DATA COLLECTION =====
+
+        function collectFormData() {
+            return {
+                fuel_cell_type: document.getElementById('fuel_cell_type').value,
+                voltage_zone: document.querySelector('input[name="voltage_zone"]:checked').value,
+                type_auxiliary: document.querySelector('input[name="type_auxiliary"]:checked').value,
+                type_flow: document.querySelector('input[name="type_flow"]:checked').value,
+                type_purge: document.querySelector('input[name="type_purge"]:checked').value,
+                numerical_parameters: {
+                    nb_gc: parseInt(document.getElementById('nb_gc').value),
+                    nb_gdl: parseInt(document.getElementById('nb_gdl').value),
+                    nb_mpl: parseInt(document.getElementById('nb_mpl').value),
+                    rtol: parseFloat(document.getElementById('rtol').value),
+                    atol: parseFloat(document.getElementById('atol').value),
+                },
+                step_parameters: {
+                    delta_t_ini: parseFloat(document.getElementById('step_delta_t_ini').value),
+                    delta_t_load: parseFloat(document.getElementById('step_delta_t_load').value),
+                    delta_t_break: parseFloat(document.getElementById('step_delta_t_break').value),
+                    i_ini: parseFloat(document.getElementById('step_i_ini').value),
+                    i_step: parseFloat(document.getElementById('step_i_step').value),
+                },
+                polarization_parameters: {
+                    delta_t_ini: parseFloat(document.getElementById('pola_delta_t_ini').value),
+                    delta_t_load: parseFloat(document.getElementById('pola_delta_t_load').value),
+                    delta_t_break: parseFloat(document.getElementById('pola_delta_t_break').value),
+                    delta_i: parseFloat(document.getElementById('pola_delta_i').value),
+                    i_max: parseFloat(document.getElementById('pola_i_max').value),
+                },
+                eis_parameters: {
+                    i_static: parseFloat(document.getElementById('eis_i_static').value),
+                    ratio: parseFloat(document.getElementById('eis_ratio').value) / 100,
+                    f_power_min: parseInt(document.getElementById('eis_f_power_min').value),
+                    f_power_max: parseInt(document.getElementById('eis_f_power_max').value),
+                    nb_frequencies: parseInt(document.getElementById('eis_nb_frequencies').value),
+                    nb_points: parseInt(document.getElementById('eis_nb_points').value),
+                },
+            };
+        }
+
+        // ===== VALIDATION =====
+
+        function validateParameters(params) {
+            const errors = [];
+
+            if (!params.fuel_cell_type)
+                errors.push('Please select a fuel cell');
+
+            if (!params.numerical_parameters.nb_gc || params.numerical_parameters.nb_gc < 1)
+                errors.push('GC nodes must be >= 1');
+
+            if (params.numerical_parameters.rtol <= 0 || params.numerical_parameters.rtol > 1e-3)
+                errors.push('Solver rtol must be between 1e-9 and 1e-3');
+
+            if (params.numerical_parameters.atol <= 0 || params.numerical_parameters.atol > 1e-3)
+                errors.push('Solver atol must be between 1e-9 and 1e-3');
+
+            if (params.step_parameters.i_ini >= params.step_parameters.i_step)
+                errors.push('Step: Initial current must be < Step current');
+
+            if (params.polarization_parameters.delta_i > params.polarization_parameters.i_max)
+                errors.push('Pola: Current step must be < Max current');
+
+            return errors;
+        }
+
+        // ===== SIMULATION EXECUTION =====
+
+        function runSimulation(simType) {
+            const params = collectFormData();
+            const errors = validateParameters(params);
+
+            if (errors.length > 0) {
+                showError('Validation Errors:\n' + errors.join('\n'));
+                return;
+            }
+
+            showProgress();
+            updateTabStatus(6, false); // Mark as running
+
+            const endpoint = `/api/simulate/${simType}`;
+
+            fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(params)
+            })
+            .then(r => r.json())
+            .then(data => {
+                hideProgress();
+                if (data.success) {
+                    updateTabStatus(6, true);
+                    showSuccess(`✓ ${simType} simulation completed!\nRedirecting to results...`);
+                    setTimeout(() => {
+                        window.location.href = `/results/${data.result_id}`;
+                    }, 2000);
+                } else {
+                    updateTabStatus(6, false);
+                    showError('Simulation failed:\n' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(e => {
+                hideProgress();
+                updateTabStatus(6, false);
+                showError('API error:\n' + e.message);
+            });
+        }
+
+        // ===== UI HELPERS =====
+
+        function showError(msg) {
+            const alert = document.getElementById('error-alert');
+            alert.textContent = msg;
+            alert.classList.add('show');
+            alert.style.display = 'block';
+            setTimeout(() => {
+                alert.classList.remove('show');
+                alert.style.display = 'none';
+            }, 6000);
+        }
+
+        function showSuccess(msg) {
+            const alert = document.getElementById('success-alert');
+            alert.textContent = msg;
+            alert.classList.add('show');
+            alert.style.display = 'block';
+            setTimeout(() => {
+                alert.classList.remove('show');
+                alert.style.display = 'none';
+            }, 5000);
+        }
+
+        function showInfo(msg) {
+            const alert = document.getElementById('info-alert');
+            alert.textContent = msg;
+            alert.classList.add('show');
+            alert.style.display = 'block';
+            setTimeout(() => {
+                alert.classList.remove('show');
+                alert.style.display = 'none';
+            }, 4000);
+        }
+
+        function showProgress() {
+            document.getElementById('progress-indicator').style.display = 'block';
+        }
+
+        function hideProgress() {
+            document.getElementById('progress-indicator').style.display = 'none';
+        }
+
+        // ===== INPUT VALIDATION ON CHANGE =====
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Real-time validation for number inputs
+            const numberInputs = document.querySelectorAll('input[type="number"]');
+            numberInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    // Basic validation feedback could be added here
+                });
+            });
+
+            // Tab switching with keyboard (optional)
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'ArrowRight') {
+                    const activeTab = document.querySelector('.tab-button.active');
+                    const nextBtn = activeTab?.nextElementSibling;
+                    if (nextBtn && nextBtn.classList.contains('tab-button')) {
+                        const tabs = document.querySelectorAll('.tab-button');
+                        Array.from(tabs).forEach((t, i) => {
+                            if (t === nextBtn) switchTab(i);
+                        });
+                    }
+                }
+                if (e.ctrlKey && e.key === 'ArrowLeft') {
+                    const activeTab = document.querySelector('.tab-button.active');
+                    const prevBtn = activeTab?.previousElementSibling;
+                    if (prevBtn && prevBtn.classList.contains('tab-button')) {
+                        const tabs = document.querySelectorAll('.tab-button');
+                        Array.from(tabs).forEach((t, i) => {
+                            if (t === prevBtn) switchTab(i);
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
