@@ -101,11 +101,11 @@ criteria_cfg = ValidityCriteriaConfig(
 analysis_cfg = ValidityAnalysisConfig(
     fuel_cell_type         = :ZSW_GenStack,
     voltage_zone           = :full,
-    n_samples              = 200,           # Total number of configurations to simulate (LHS samples)
+    n_samples              = 1000,          # Total number of configurations to simulate (LHS samples). Minimum 1000 samples.
     validation_criteria    = criteria_cfg,
     parallel               = PARALLEL,      # ← driven by the constant above
     save_curves            = true,          # Set to true to save polarization curves
-    reuse_from             = nothing,       # Set to "path/to/previous/run" to reuse curves
+    reuse_from             = nothing,       # Set to "path/to/previous/run" to reuse curves. ex: "results/model_validity/20260601_001_s01000"
     hyperbox_finder_method = nothing,       # nothing (skip this step), ':PRIM', or ':MaxBox'.
 )
 

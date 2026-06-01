@@ -355,8 +355,6 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
     mkpath(run_dir)
     output_files = Dict{Symbol, String}()
 
-    @info "Run directory: $run_dir"
-
     # ── STEP 1: LHS sampling ──────────────────────────────────────────────────
     @info "STEP 1 — Generating $(cfg.n_samples) LHS samples…"
     X, pb = generate_test_samples(cfg)
@@ -374,7 +372,6 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
                             metadata = Dict("fuel_cell_type" => string(cfg.fuel_cell_type),
                                             "voltage_zone"   => string(cfg.voltage_zone)))
     output_files[:bounds_prior_yaml] = bounds_path
-    @info "  → Prior bounds: $bounds_path"
 
     # ── STEP 2: Batch simulation + classification ─────────────────────────────
     if cfg.reuse_from !== nothing
@@ -409,7 +406,6 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
     csv_path = abspath(joinpath(run_dir, "configurations.csv"))
     CSV.write(csv_path, data)
     output_files[:configurations_csv] = csv_path
-    @info "  → Configurations: $csv_path"
 
     # Extract summary stats from data
     classifications = data.classification
@@ -437,7 +433,6 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
     summary_path = abspath(joinpath(run_dir, "summary.txt"))
     export_validation_summary(summary, summary_path)
     output_files[:summary] = summary_path
-    @info "  → Summary: $summary_path"
 
     # ── STEP 3: PRIM (optional) ───────────────────────────────────────────────
     prim_results       = PRIMResult[]
@@ -475,7 +470,6 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
             export_prim_report(orig_bounds, r.restricted_bounds, report_path;
                                prim_metrics = prim_metrics)
             output_files[Symbol("report_prim_$(mstr)")] = report_path
-            @info "  → PRIM report ($(mstr)): $report_path"
         end
 
         # Use the first successful method's bounds as the canonical restricted result
@@ -701,7 +695,6 @@ function classify_batch_simulations(samples::Matrix{Float64},
     if cfg.save_curves && curves_collection !== nothing && !isempty(curves_collection)
         curves_path = abspath(joinpath(run_dir, "curves.csv"))
         _save_curves_to_csv(curves_collection, curves_path)
-        @info "  → Curves: $curves_path"
     end
 
     # Build the final DataFrame.
@@ -910,7 +903,6 @@ function find_valid_region(classified_data::DataFrame,
 
     csv_path = abspath(joinpath(run_dir, "configurations_for_prim.csv"))
     CSV.write(csv_path, data_for_prim[:, keep_cols])
-    @info "Classified data for PRIM written to: $csv_path"
 
     # ── 2. Resolve reference config YAML path ─────────────────────────────────
     ref_yaml_path = if reference_config isa String
@@ -919,7 +911,6 @@ function find_valid_region(classified_data::DataFrame,
         # Write the reference mapping to a temporary YAML file
         ref_path = abspath(joinpath(run_dir, "reference_config.yaml"))
         _write_reference_yaml(reference_config, ref_path)
-        @info "Reference config written to: $ref_path"
         ref_path
     end
 
