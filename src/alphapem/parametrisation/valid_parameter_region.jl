@@ -60,6 +60,7 @@ cfg = ValidityAnalysisConfig(
     n_samples      = 2000,
     voltage_zone   = :full,
     output_dir     = "results/model_validity",
+    hyperbox_finder_method = :PRIM,
 )
 
 results = run_validity_analysis(cfg)   # ← full pipeline (Steps 1-2-4)
@@ -191,6 +192,12 @@ launched with a single struct.
   Default `true`.
 - `checkpoint_interval::Int`: Save intermediate results every N simulations.
   Set to `0` to disable. Default `100`.
+- `save_curves::Bool`: Save polarization curves to CSV. Default `true`.
+- `reuse_from::Union{String, Nothing}": Path to previous run directory to reuse curves.
+- `hyperbox_finder_method::Union{Symbol, Nothing}`: Hyperbox-finder method to run.
+  Supported values: `:PRIM` (default) and `:MaxBox`.
+  Set to `nothing` to skip the hyperbox-finder step entirely.
+  Default `:PRIM`.
 
 # Example
 ```julia
@@ -198,6 +205,7 @@ cfg = ValidityAnalysisConfig(
     fuel_cell_type = :ZSW_GenStack,
     n_samples      = 500,       # quick test
     parallel       = false,
+    hyperbox_finder_method   = :PRIM,    # or `nothing` to skip, or `:MaxBox` to select MaxBox
 )
 ```
 """
@@ -210,7 +218,9 @@ Base.@kwdef struct ValidityAnalysisConfig
     polarization_params::PolarizationParams = PolarizationParams()
     nb_gc::Int                          = 1   # Minimum spatial resolution for speed
     parallel::Bool                      = true
-    checkpoint_interval::Int            = 100
+    save_curves::Bool                   = true   # Save polarization curves to curves.csv
+    reuse_from::Union{String, Nothing}  = nothing  # Path to previous run directory to reuse curves
+    hyperbox_finder_method::Union{Symbol, Nothing} = :PRIM # e.g. :PRIM or :MaxBox; set to `nothing` to skip
 end
 
 
@@ -244,11 +254,47 @@ end
 # ─────────────────────────────────────────────────────────────────────────────
 
 """
+    _generate_run_directory(cfg::ValidityAnalysisConfig) -> String
+
+Generate a timestamped and auto-indexed output directory for the current run.
+
+Directory structure: `<VALIDITY_OUTPUT_DIR>/<YYYYMMDD>_<NNN>_s<NSAMPLES>/`
+where:
+  - YYYYMMDD = current date
+  - NNN = auto-incremented index if multiple runs on the same day
+  - NSAMPLES = number of samples in `cfg`
+
+All output files for this run will be written to the returned directory.
+
+# Example
+```julia
+dir = _generate_run_directory(cfg)  # → "results/model_validity/20260601_001_s0020/"
+```
+"""
+function _generate_run_directory(cfg::ValidityAnalysisConfig)::String
+    date_str = Dates.format(Dates.today(), "yyyymmdd")
+
+    # Find the next available index for this date
+    base_dir = VALIDITY_OUTPUT_DIR
+    mkpath(base_dir)
+
+    index = 1
+    while isdir(joinpath(base_dir, @sprintf("%s_%03d_s%05d", date_str, index, cfg.n_samples)))
+        index += 1
+    end
+
+    run_dir = joinpath(base_dir, @sprintf("%s_%03d_s%05d", date_str, index, cfg.n_samples))
+    mkpath(run_dir)
+    return run_dir
+end
+
+
+"""
     run_validity_analysis(cfg::ValidityAnalysisConfig,
                           prim_cfg::Union{PRIMConfig,Nothing} = nothing)
         ::ValidityAnalysisResult
 
-Execute the complete validity-analysis pipeline (Steps 3–6) and return all results.
+Execute the complete validity-analysis pipeline (Steps 1–4) and return all results.
 
 ## Pipeline
 
@@ -257,46 +303,59 @@ Execute the complete validity-analysis pipeline (Steps 3–6) and return all res
 | 1    | Draw `cfg.n_samples` configurations by Latin Hypercube Sampling                         |
 | 2    | Simulate each configuration with AlphaPEM and classify the polarization curve           |
 | 3    | *(optional)* Restrict bounds via PRIM/MaxBox if `prim_cfg` is provided                 |
-| 4    | Export results: classified CSV, bounds YAML, validation summary, PRIM report            |
+| 4    | Export results: classified CSV, curves CSV, bounds YAML, validation summary, PRIM report|
+
+## Output Organization
+
+All results are automatically organised in a timestamped directory:
+```
+results/model_validity/<YYYYMMDD>_<NNN>_s<NSAMPLES>/
+├── summary.txt               (validation summary)
+├── configurations.csv        (classified parameter combinations)
+├── curves.csv               (polarization curves, if save_curves=true)
+├── bounds_prior.yaml        (original parameter bounds)
+├── bounds_restricted_*.yaml (PRIM-restricted bounds, if PRIM is run)
+└── ...
+```
 
 ## Arguments
 - `cfg::ValidityAnalysisConfig` — master configuration (sampling, simulation, criteria, …).
+  - Set `save_curves=true` to save U(I) curves for each configuration.
+  - Set `reuse_from="/path/to/previous/run"` to skip simulation and reuse curves.
 - `prim_cfg::Union{PRIMConfig,Nothing}` — PRIM options.  Pass `nothing` (default) to skip
-  Step 5 and return only the classified dataset + original bounds.
+  PRIM analysis.
 
 ## Returns
 A `ValidityAnalysisResult` with all intermediate outputs and paths to generated files.
 
-## Example
-```julia
-using AlphaPEM.Parametrisation.ValidParameterRegion
-
+## Reuse curves from a previous run with different classification criteria
 cfg = ValidityAnalysisConfig(
     fuel_cell_type = :ZSW_GenStack,
-    n_samples      = 2000,
-    output_dir     = "results/model_validity",
+    n_samples      = 500,
+    reuse_from     = "results/model_validity/20260601_001_s0500/",
+    validation_criteria = ValidityCriteriaConfig(monotonic_threshold=0.01),
 )
-
-# Steps 1+2+4 only (without PRIM):
 result = run_validity_analysis(cfg)
-
-# Full pipeline with PRIM:
-prim_cfg = PRIMConfig(
-    ird_package_dir       = "external/supplementary_2023_ird/irdpackage",
-    reference_config_path = "results/model_validity/reference_config.yaml",
-    output_dir            = "results/model_validity",
-)
-result = run_validity_analysis(cfg, prim_cfg)
-
-println("Restricted bounds: ", result.output_files[:restricted_bounds_PRIM_yaml])
 ```
 """
 function run_validity_analysis(cfg::ValidityAnalysisConfig,
                                 prim_cfg::Union{PRIMConfig, Nothing} = nothing
                                 )::ValidityAnalysisResult
     overall_start = time()
-    mkpath(VALIDITY_OUTPUT_DIR)
+
+    # ── Create or reuse run directory ─────────────────────────────────────────
+    run_dir = if cfg.reuse_from !== nothing
+        # Reuse existing run directory
+        cfg.reuse_from
+    else
+        # Generate new timestamped directory
+        _generate_run_directory(cfg)
+    end
+
+    mkpath(run_dir)
     output_files = Dict{Symbol, String}()
+
+    @info "Run directory: $run_dir"
 
     # ── STEP 1: LHS sampling ──────────────────────────────────────────────────
     @info "STEP 1 — Generating $(cfg.n_samples) LHS samples…"
@@ -309,29 +368,76 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
     )
 
     # Export original bounds to YAML
-    orig_bounds_path = abspath(joinpath(VALIDITY_OUTPUT_DIR, "original_bounds.yaml"))
-    export_parameter_bounds(orig_bounds, orig_bounds_path;
+    bounds_path = abspath(joinpath(run_dir, "bounds_prior.yaml"))
+    export_parameter_bounds(orig_bounds, bounds_path;
                             method   = :prior,
                             metadata = Dict("fuel_cell_type" => string(cfg.fuel_cell_type),
                                             "voltage_zone"   => string(cfg.voltage_zone)))
-    output_files[:original_bounds_yaml] = orig_bounds_path
-    @info "  → Original bounds: $orig_bounds_path"
+    output_files[:bounds_prior_yaml] = bounds_path
+    @info "  → Prior bounds: $bounds_path"
 
     # ── STEP 2: Batch simulation + classification ─────────────────────────────
-    @info "STEP 2 — Batch simulation and classification…"
-    data, summary = classify_batch_simulations(X, pb, cfg)
+    if cfg.reuse_from !== nothing
+        @info "STEP 2 — Loading cached curves from $(cfg.reuse_from)…"
+        try
+            curves_path = joinpath(cfg.reuse_from, "curves.csv")
+            data = classify_batch_simulations(X, pb, cfg, run_dir; curves_df = _load_curves_from_csv(curves_path))
+            output_files[:curves_csv] = curves_path
+            @info "  → Using curves from: $curves_path"
+        catch e
+            @warn "Failed to load cached curves: $e. Running fresh simulation…"
+            result_tuple = classify_batch_simulations(X, pb, cfg, run_dir)
+            if result_tuple isa NamedTuple
+                data, summary = result_tuple.data, result_tuple.summary
+            else
+                data = result_tuple
+                summary = nothing
+            end
+        end
+    else
+        @info "STEP 2 — Batch simulation and classification…"
+        result_tuple = classify_batch_simulations(X, pb, cfg, run_dir)
+        if result_tuple isa NamedTuple
+            data, summary = result_tuple.data, result_tuple.summary
+        else
+            data = result_tuple
+            summary = nothing
+        end
+    end
 
     # Export classified CSV
-    export_cfg = ExportConfig(output_dir = VALIDITY_OUTPUT_DIR, timestamp = true, overwrite = true)
-    csv_path   = export_classified_configurations(data, export_cfg)
-    output_files[:classified_csv] = csv_path
-    @info "  → Classified CSV: $csv_path"
+    csv_path = abspath(joinpath(run_dir, "configurations.csv"))
+    CSV.write(csv_path, data)
+    output_files[:configurations_csv] = csv_path
+    @info "  → Configurations: $csv_path"
+
+    # Extract summary stats from data
+    classifications = data.classification
+    n_valid   = count(==("valid"),   classifications)
+    n_invalid = count(==("invalid"), classifications)
+    n_failed  = count(==("failed"),  classifications)
+
+    criteria_breakdown = Dict{Symbol, Int}(
+        :start_voltage    => count(x -> x === false, data.start_in_range),
+        :monotonicity     => count(x -> x === false, data.is_monotonic),
+        :positive_voltage => count(x -> x === false, data.has_positive_voltages),
+    )
+
+    summary = ValidationSummary(
+        cfg.n_samples,
+        n_valid,
+        n_invalid,
+        n_failed,
+        criteria_breakdown,
+        0.0,  # elapsed time, already computed in classify_batch_simulations
+        Dates.format(Dates.now(), "yyyy-mm-ddTHH:MM:SS")
+    )
 
     # Export validation summary
-    summary_path = abspath(joinpath(VALIDITY_OUTPUT_DIR, "validation_summary.txt"))
+    summary_path = abspath(joinpath(run_dir, "summary.txt"))
     export_validation_summary(summary, summary_path)
-    output_files[:validation_summary] = summary_path
-    @info "  → Validation summary: $summary_path"
+    output_files[:summary] = summary_path
+    @info "  → Summary: $summary_path"
 
     # ── STEP 3: PRIM (optional) ───────────────────────────────────────────────
     prim_results       = PRIMResult[]
@@ -340,14 +446,13 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
     if prim_cfg !== nothing
         @info "STEP 3 — Running PRIM analysis…"
         ref_config   = get_reference_config(cfg.fuel_cell_type)
-        prim_results = find_valid_region(data, ref_config, prim_cfg)
+        prim_results = find_valid_region(data, ref_config, prim_cfg, run_dir)
 
         for r in prim_results
             mstr = string(r.method)
 
             # Export restricted bounds YAML
-            bounds_path = abspath(joinpath(VALIDITY_OUTPUT_DIR,
-                                           "restricted_bounds_$(mstr).yaml"))
+            bounds_path = abspath(joinpath(run_dir, "bounds_restricted_$(mstr).yaml"))
             export_parameter_bounds(r.restricted_bounds, bounds_path;
                                     method   = r.method,
                                     metadata = Dict(
@@ -355,12 +460,11 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
                                         "precision"      => r.precision,
                                         "coverage"       => r.coverage,
                                     ))
-            output_files[Symbol("restricted_bounds_$(mstr)_yaml")] = bounds_path
+            output_files[Symbol("bounds_restricted_$(mstr)_yaml")] = bounds_path
             @info "  → Restricted bounds ($(mstr)): $bounds_path"
 
             # Export PRIM comparison report
-            report_path = abspath(joinpath(VALIDITY_OUTPUT_DIR,
-                                           "prim_report_$(mstr).txt"))
+            report_path = abspath(joinpath(run_dir, "report_prim_$(mstr).txt"))
             prim_metrics = merge(
                 r.rf_metrics,
                 Dict("box_precision" => r.precision,
@@ -370,7 +474,7 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
             )
             export_prim_report(orig_bounds, r.restricted_bounds, report_path;
                                prim_metrics = prim_metrics)
-            output_files[Symbol("prim_report_$(mstr)")] = report_path
+            output_files[Symbol("report_prim_$(mstr)")] = report_path
             @info "  → PRIM report ($(mstr)): $report_path"
         end
 
@@ -418,7 +522,8 @@ end
 
 
 """
-    classify_batch_simulations(samples, bounds, cfg) -> (DataFrame, ValidationSummary)
+    classify_batch_simulations(samples, bounds, cfg, run_dir; curves_df=nothing)
+        -> (DataFrame, ValidationSummary) | DataFrame
 
 Step 2 of the pipeline: simulate all sampled configurations with AlphaPEM and
 classify each polarization curve.
@@ -428,19 +533,31 @@ Each row in `samples` is mapped to a `PhysicalParams` struct via
 with a fast polarization profile.  The resulting curve is classified by
 `ValidityCriteria.classify_polarization_curve`.
 
+If `curves_df` is provided (reusing cached curves), the function skips simulation
+and re-classifies the cached curves with the current validation criteria.
+
 # Arguments
 - `samples::Matrix{Float64}`: Sample matrix of size `(n, p)` (one configuration per row).
 - `bounds::ParameterBounds`: Column-to-parameter mapping and fuel-cell metadata.
-- `cfg::ValidityAnalysisConfig`: Master configuration (parallel, checkpoint, criteria, …).
+- `cfg::ValidityAnalysisConfig`: Master configuration (parallel, criteria, …).
+- `run_dir::String`: Output directory for saving curves (if `cfg.save_curves=true`).
+- `curves_df::Union{DataFrame,Nothing}`: Pre-computed curves (for reuse). If provided,
+  skip simulation. Default: `nothing` (simulate).
 
 # Returns
-A named tuple `(data::DataFrame, summary::ValidationSummary)` where:
-- `data` has one row per configuration with parameter columns + classification columns.
-- `summary` holds aggregate statistics (counts, criterion breakdown, elapsed time).
+A `DataFrame` with one row per configuration:
+  - Parameter columns (from `samples`)
+  - Classification columns: `classification`, `validation_details`, `start_in_range`,
+    `is_monotonic`, `has_positive_voltages`, `error_message`
+  - (optional) Curve columns: `current_density`, `voltage` (flattened by sample_id)
+
+Also returns `ValidationSummary` if newly simulated. If reusing curves, returns only the DataFrame.
 """
 function classify_batch_simulations(samples::Matrix{Float64},
                                      bounds::ParameterBounds,
-                                     cfg::ValidityAnalysisConfig)
+                                     cfg::ValidityAnalysisConfig,
+                                     run_dir::String;
+                                     curves_df::Union{DataFrame, Nothing} = nothing)
     n_samples = size(samples, 1)
     param_names = [b.name for b in bounds.bounds]
 
@@ -450,6 +567,58 @@ function classify_batch_simulations(samples::Matrix{Float64},
     # Numerical setup for batch runs: minimum spatial resolution for speed.
     num_params = NumericalParams(nb_gc = cfg.nb_gc)
 
+    # If reusing curves, skip simulation and just re-classify
+    if curves_df !== nothing
+        @info "Re-classifying $(n_samples) cached curves with current criteria…"
+
+        # Re-classify each configuration using the cached curves
+        classifications  = Vector{Symbol}(undef, n_samples)
+        val_details      = Vector{Union{String, Missing}}(undef, n_samples)
+        start_in_range   = Vector{Union{Bool, Missing}}(undef, n_samples)
+        is_monotonic     = Vector{Union{Bool, Missing}}(undef, n_samples)
+        has_positive_v   = Vector{Union{Bool, Missing}}(undef, n_samples)
+        error_messages   = Vector{Union{String, Missing}}(undef, n_samples)
+
+        for i in 1:n_samples
+            # Extract the I and U arrays for this sample
+            sample_curves = filter(row -> row.sample_id == i, curves_df)
+            if nrow(sample_curves) == 0
+                classifications[i] = :failed
+                val_details[i] = "no cached curve"
+                start_in_range[i] = missing
+                is_monotonic[i] = missing
+                has_positive_v[i] = missing
+                error_messages[i] = "sample_id not found in cache"
+                continue
+            end
+
+            I_arr = Vector{Float64}(sample_curves.current_density)
+            U_arr = Vector{Float64}(sample_curves.voltage)
+
+            # Re-classify using the vector-based overload: Ucell, ifc
+            vr = classify_polarization_curve(U_arr, I_arr, cfg.validation_criteria)
+
+            _n2m(x) = x === nothing ? missing : x
+            classifications[i] = vr.classification
+            val_details[i]     = vr.details
+            start_in_range[i]  = _n2m(vr.start_in_range)
+            is_monotonic[i]    = _n2m(vr.is_monotonic)
+            has_positive_v[i]  = _n2m(vr.has_positive_voltages)
+            error_messages[i]  = missing
+        end
+
+        # Build results dataframe (no new curves to save)
+        data = _build_results_dataframe(
+            samples, param_names,
+            classifications, val_details,
+            start_in_range, is_monotonic, has_positive_v, error_messages
+        )
+
+        return data
+    end
+
+    # === FRESH SIMULATION MODE ===
+
     # Pre-allocate result vectors.
     classifications  = Vector{Symbol}(undef, n_samples)
     val_details      = Vector{Union{String, Missing}}(undef, n_samples)
@@ -458,10 +627,8 @@ function classify_batch_simulations(samples::Matrix{Float64},
     has_positive_v   = Vector{Union{Bool, Missing}}(undef, n_samples)
     error_messages   = Vector{Union{String, Missing}}(undef, n_samples)
 
-    # Checkpointing setup.
-    do_checkpoints = cfg.checkpoint_interval > 0
-    ckpt_dir = joinpath(VALIDITY_OUTPUT_DIR, "checkpoints")
-    do_checkpoints && mkpath(ckpt_dir)
+    # If saving curves, prepare a vector to collect (sample_id, I, U) tuples
+    curves_collection = cfg.save_curves ? Tuple{Int, Vector{Float64}, Vector{Float64}}[] : nothing
 
     start_time = time()
 
@@ -479,7 +646,7 @@ function classify_batch_simulations(samples::Matrix{Float64},
         prog_lock = ReentrantLock()
 
         Threads.@threads for i in 1:n_samples
-            cl, det, sir, im, hpv, err = _simulate_one_configuration(
+            cl, det, sir, im, hpv, err, I_arr, U_arr = _simulate_one_configuration(
                 samples[i, :], bounds, base_params,
                 cfg.polarization_params, num_params, cfg.validation_criteria
             )
@@ -489,6 +656,12 @@ function classify_batch_simulations(samples::Matrix{Float64},
             is_monotonic[i]    = im
             has_positive_v[i]  = hpv
             error_messages[i]  = err
+
+            if cfg.save_curves && U_arr !== nothing
+                lock(prog_lock) do
+                    push!(curves_collection, (i, I_arr, U_arr))
+                end
+            end
 
             lock(prog_lock) do
                 next!(prog)
@@ -504,7 +677,7 @@ function classify_batch_simulations(samples::Matrix{Float64},
                         color  = :cyan)
 
         for i in 1:n_samples
-            cl, det, sir, im, hpv, err = _simulate_one_configuration(
+            cl, det, sir, im, hpv, err, I_arr, U_arr = _simulate_one_configuration(
                 samples[i, :], bounds, base_params,
                 cfg.polarization_params, num_params, cfg.validation_criteria
             )
@@ -515,27 +688,23 @@ function classify_batch_simulations(samples::Matrix{Float64},
             has_positive_v[i]  = hpv
             error_messages[i]  = err
 
-            next!(prog)
-
-            # Periodic checkpoint: flush partial results to CSV.
-            if do_checkpoints && i % cfg.checkpoint_interval == 0
-                partial = _build_results_dataframe(
-                    samples[1:i, :], param_names,
-                    classifications[1:i], val_details[1:i],
-                    start_in_range[1:i], is_monotonic[1:i],
-                    has_positive_v[1:i], error_messages[1:i]
-                )
-                ckpt_path = joinpath(ckpt_dir, @sprintf("checkpoint_%06d.csv", i))
-                CSV.write(ckpt_path, partial)
-                @info @sprintf("  Checkpoint saved: %s  (%d valid / %d sim so far)",
-                               basename(ckpt_path),
-                               count(==(:valid), classifications[1:i]), i)
+            if cfg.save_curves && U_arr !== nothing
+                push!(curves_collection, (i, I_arr, U_arr))
             end
+
+            next!(prog)
         end
         finish!(prog)
     end
 
     elapsed = time() - start_time
+
+    # Save curves to CSV if requested
+    if cfg.save_curves && curves_collection !== nothing && !isempty(curves_collection)
+        curves_path = abspath(joinpath(run_dir, "curves.csv"))
+        _save_curves_to_csv(curves_collection, curves_path)
+        @info "  → Curves: $curves_path"
+    end
 
     # Build the final DataFrame.
     data = _build_results_dataframe(
@@ -577,12 +746,24 @@ end
 
 """
     _simulate_one_configuration(sample, bounds, base_params, polar_params, num_params, val_cfg)
-      -> (classification, details, start_in_range, is_monotonic, has_positive_v, error_msg)
+      -> (classification, details, start_in_range, is_monotonic, has_positive_v, error_msg,
+          I_array, U_array)
 
 Run a single AlphaPEM polarization simulation with the given sampled parameters
-and return its classification tuple.
+and return its classification tuple along with the polarization curve arrays.
 
 Any exception raised by the solver is caught and recorded as `:failed`.
+
+# Returns
+A tuple:
+  - classification::Symbol (:valid, :invalid, or :failed)
+  - details::String
+  - start_in_range::Union{Bool, Missing}
+  - is_monotonic::Union{Bool, Missing}
+  - has_positive_voltages::Union{Bool, Missing}
+  - error_message::Union{String, Missing}
+  - I_array::Union{Vector{Float64}, Nothing} — current density (A/m²), or nothing if failed
+  - U_array::Union{Vector{Float64}, Nothing} — cell voltage (V), or nothing if failed
 """
 function _simulate_one_configuration(sample::Vector{Float64},
                                       bounds::ParameterBounds,
@@ -616,6 +797,10 @@ function _simulate_one_configuration(sample::Vector{Float64},
         # Classify the resulting polarization curve.
         vr = classify_polarization_curve(simu, val_cfg)
 
+        # Extract current and voltage arrays from simulation results
+        I_arr = Vector{Float64}(simu.results.I)
+        U_arr = Vector{Float64}(simu.results.U)
+
         # `ValidationResult` uses `nothing` for disabled criteria; normalise to `missing`.
         _n2m(x) = x === nothing ? missing : x
 
@@ -625,12 +810,15 @@ function _simulate_one_configuration(sample::Vector{Float64},
             _n2m(vr.start_in_range),
             _n2m(vr.is_monotonic),
             _n2m(vr.has_positive_voltages),
-            missing
+            missing,
+            I_arr,
+            U_arr
         )
 
     catch e
         # Solver divergence, numerical overflow, or any other exception.
-        return (:failed, "simulation exception", missing, missing, missing, sprint(showerror, e))
+        return (:failed, "simulation exception", missing, missing, missing,
+                sprint(showerror, e), nothing, nothing)
     end
 end
 
@@ -671,7 +859,7 @@ end
 # ─────────────────────────────────────────────────────────────────────────────
 
 """
-    find_valid_region(classified_data, reference_config, prim_cfg::PRIMConfig)
+    find_valid_region(classified_data, reference_config, prim_cfg::PRIMConfig, run_dir::String)
         -> Vector{PRIMResult}
 
 Step 3 of the pipeline: run PRIM via the R `irdpackage` and return the restricted bounds.
@@ -682,23 +870,22 @@ Step 3 of the pipeline: run PRIM via the R `irdpackage` and return the restricte
 - `reference_config` — either:
   - a `String` path to an already existing YAML reference file, **or**
   - a `Dict{Symbol,<:Any}` / `NamedTuple` of parameter → value mappings.
-    In this case the reference YAML is written to
-    `VALIDITY_OUTPUT_DIR/reference_config.yaml` automatically.
+    In this case the reference YAML is written to `run_dir/reference_config.yaml`.
 - `prim_cfg::PRIMConfig` — PRIM options (methods, bounds on probability, seed, …).
+- `run_dir::String` — output directory for PRIM results.
 
 ## Returns
 `Vector{PRIMResult}` — one entry per IRD method that was successfully run.
 
 ## Notes
-- The classified CSV used as input to R is written to
-  `VALIDITY_OUTPUT_DIR/classified_for_prim.csv` (only parameter + classification
-  columns; diagnostic columns are dropped).
-- All output files go to `VALIDITY_OUTPUT_DIR` regardless of any path set in `prim_cfg`.
+- The classified CSV used as input to R is written to `run_dir/configurations_for_prim.csv`.
+- All output files go to `run_dir`.
 """
 function find_valid_region(classified_data::DataFrame,
                             reference_config,
-                            prim_cfg::PRIMConfig)::Vector{PRIMResult}
-    mkpath(VALIDITY_OUTPUT_DIR)
+                            prim_cfg::PRIMConfig,
+                            run_dir::String)::Vector{PRIMResult}
+    mkpath(run_dir)
 
     # IRD expects a binary target (valid / invalid). Failed simulations are
     # conservatively re-labeled as invalid for the PRIM learning step.
@@ -718,16 +905,16 @@ function find_valid_region(classified_data::DataFrame,
                      "is_monotonic", "has_positive_voltages", "error_message"])
     keep_cols = [c for c in names(data_for_prim) if !(c in diag_cols)]
 
-    csv_path = abspath(joinpath(VALIDITY_OUTPUT_DIR, "classified_for_prim.csv"))
+    csv_path = abspath(joinpath(run_dir, "configurations_for_prim.csv"))
     CSV.write(csv_path, data_for_prim[:, keep_cols])
-    @info "Classified data written to: $csv_path"
+    @info "Classified data for PRIM written to: $csv_path"
 
     # ── 2. Resolve reference config YAML path ─────────────────────────────────
     ref_yaml_path = if reference_config isa String
         abspath(reference_config)
     else
         # Write the reference mapping to a temporary YAML file
-        ref_path = abspath(joinpath(VALIDITY_OUTPUT_DIR, "reference_config.yaml"))
+        ref_path = abspath(joinpath(run_dir, "reference_config.yaml"))
         _write_reference_yaml(reference_config, ref_path)
         @info "Reference config written to: $ref_path"
         ref_path
@@ -742,13 +929,66 @@ function find_valid_region(classified_data::DataFrame,
         methods               = prim_cfg.methods,
         categorical_params    = prim_cfg.categorical_params,
         seed                  = prim_cfg.seed,
-        output_dir            = VALIDITY_OUTPUT_DIR,
+        output_dir            = run_dir,
         target_column         = prim_cfg.target_column,
         positive_class        = prim_cfg.positive_class,
     )
 
     # ── 4. Delegate to PRIMInterface ──────────────────────────────────────────
     return PRIMInterface.run_prim_analysis(updated_cfg)
+end
+
+
+"""
+    _save_curves_to_csv(curves_collection, filepath)
+
+Save polarization curves to a CSV file.
+
+# Arguments
+- `curves_collection::Vector{Tuple{Int, Vector, Vector}}` — vector of (sample_id, I_array, U_array) tuples.
+- `filepath::String` — output CSV file path.
+
+# CSV Structure
+```
+sample_id,current_density,voltage
+1,0.0,1.23
+1,100.0,1.20
+1,200.0,1.15
+...
+```
+
+Each configuration can have multiple I-U points. Rows are grouped by sample_id.
+"""
+function _save_curves_to_csv(curves_collection::Vector{Tuple{Int, Vector{Float64}, Vector{Float64}}},
+                              filepath::String)::Nothing
+    mkpath(dirname(filepath))
+
+    # Build a flat structure: for each (sample_id, I_array, U_array), create one row per point
+    all_rows = []
+    for (sample_id, I_arr, U_arr) in curves_collection
+        if length(I_arr) == length(U_arr)
+            for (i_val, u_val) in zip(I_arr, U_arr)
+                push!(all_rows, Dict(:sample_id => sample_id, :current_density => i_val, :voltage => u_val))
+            end
+        end
+    end
+
+    # Convert to DataFrame and write
+    curves_df = DataFrame(all_rows)
+    CSV.write(filepath, curves_df)
+    return nothing
+end
+
+
+"""
+    _load_curves_from_csv(filepath) -> DataFrame
+
+Load polarization curves from a CSV file.
+
+Returns a `DataFrame` with columns: `sample_id`, `current_density`, `voltage`.
+"""
+function _load_curves_from_csv(filepath::String)::DataFrame
+    return CSV.read(filepath, DataFrame)
 end
 
 

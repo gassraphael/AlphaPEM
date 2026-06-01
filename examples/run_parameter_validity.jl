@@ -87,16 +87,6 @@ end
 Logging.catch_exceptions(l::_SuppressSafetyWarnings) = Logging.catch_exceptions(l.base)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# USER SETTINGS  (edit here)
-# ─────────────────────────────────────────────────────────────────────────────
-
-# Set to true to run PRIM (STEP 3).
-# Requires R + the IRD package cloned at the default IRD_PACKAGE_DIR
-# (see README § Installation).
-const RUN_PRIM = lowercase(get(ENV, "RUN_PRIM", "false")) in ("1", "true", "yes")
-
-
-# ─────────────────────────────────────────────────────────────────────────────
 # BUILD CONFIGURATION
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -109,22 +99,32 @@ criteria_cfg = ValidityCriteriaConfig(
 )
 
 analysis_cfg = ValidityAnalysisConfig(
-    fuel_cell_type       = :ZSW_GenStack,
-    voltage_zone         = :full,
-    n_samples            = 20,
-    sampling_seed        = 42,
-    validation_criteria  = criteria_cfg,
-    parallel             = PARALLEL,        # ← driven by the constant above
-    checkpoint_interval  = 100,
+    fuel_cell_type         = :ZSW_GenStack,
+    voltage_zone           = :full,
+    n_samples              = 200,
+    validation_criteria    = criteria_cfg,
+    parallel               = PARALLEL,      # ← driven by the constant above
+    save_curves            = true,          # Set to true to save polarization curves
+    reuse_from             = nothing,       # Set to "path/to/previous/run" to reuse curves
+    hyperbox_finder_method = nothing,       # nothing (skip this step), ':PRIM', or ':MaxBox'.
 )
 
-# PRIM configuration (only used when RUN_PRIM = true)
-prim_cfg = RUN_PRIM ? PRIMConfig(
-    ird_package_dir   = "external/supplementary_2023_ird/irdpackage",
-    methods           = [:PRIM, :MaxBox],
-    probability_range = (0.8, 1.0),
-    seed              = 42,
-) : nothing
+# PRIM configuration (built from `analysis_cfg.hyperbox_finder_method` if provided)
+prim_cfg = if analysis_cfg.hyperbox_finder_method === nothing
+    nothing
+else
+    # Validate option and convert to the vector expected by PRIMConfig
+    allowed = Set([:PRIM, :MaxBox])
+    if !(analysis_cfg.hyperbox_finder_method in allowed)
+        error("Invalid hyperbox_finder_method: $(analysis_cfg.hyperbox_finder_method). Use :PRIM or :MaxBox or nothing.")
+    end
+    PRIMConfig(
+        ird_package_dir   = "external/supplementary_2023_ird/irdpackage",
+        methods           = [analysis_cfg.hyperbox_finder_method],
+        probability_range = (0.8, 1.0),
+        seed              = 42,
+    )
+end
 
 # ─────────────────────────────────────────────────────────────────────────────
 # RUN  (full pipeline in one call)
@@ -163,7 +163,7 @@ for (k, v) in sort(collect(result.output_files); by = x -> string(x[1]))
     println("  $(rpad(string(k), 38)) → $v")
 end
 
-if RUN_PRIM && !isempty(result.prim_results)
+if prim_cfg !== nothing && !isempty(result.prim_results)
     println()
     println("─"^72)
     println("  PRIM bounds summary")
@@ -182,10 +182,10 @@ println("  Pipeline steps")
 println("="^72)
 println("    ✅  STEP 1 — LHS sampling                         (complete)")
 println("    ✅  STEP 2 — Batch simulation & classification    (complete)")
-if RUN_PRIM
+if prim_cfg !== nothing
     println("    ✅  STEP 3 — PRIM restriction via R irdpackage   (complete)")
 else
-    println("    -- STEP 3 — PRIM restriction via R irdpackage    (skipped: RUN_PRIM=false)")
+    println("    -- STEP 3 — PRIM restriction via R irdpackage    (skipped: PRIM disabled)")
 end
 println("    ✅  STEP 4 — Export results                       (complete)")
 println("="^72)

@@ -38,16 +38,16 @@ function zsw_physical_params()::PhysicalParams
         Aact = 283.87e-4,                    # Active area of the catalyst layer in m²
         nb_cell = 26,                        # Number of cells in the stack
         # Catalyst layer
-        Hacl = 1.4393939393939392e-5,         # Thickness of the anode catalyst layer in meters
-        Hccl = 1.4696969696969697e-5,         # Thickness of the cathode catalyst layer in meters
+        Hacl = 8.112569325675836e-6,         # Thickness of the anode catalyst layer in meters
+        Hccl = 7.605652607044295e-6,         # Thickness of the cathode catalyst layer in meters
         # Membrane
-        Hmem = 1.1565656565656567e-5,        # Thickness of the membrane in meters
+        Hmem = 13.646579963107156e-6,        # Thickness of the membrane in meters
         # Gas diffusion layer
-        Hgdl = 1.3232323232323232e-4,        # Thickness of the gas diffusion layer in meters
-        epsilon_gdl = 0.6616161616161617,    # Anode/cathode GDL porosity
+        Hgdl = 121.28496643671034e-6,        # Thickness of the gas diffusion layer in meters
+        epsilon_gdl = 0.8436478459989776,    # Anode/cathode GDL porosity
         epsilon_c = 0.2,                     # Compression ratio of the GDL
         #   Microporous layer
-        Hmpl = 5.8181818181818185e-5,         # Thickness of the microporous layer in meters
+        Hmpl = 43.98306893354156e-6,         # Thickness of the microporous layer in meters
         epsilon_mpl = 0.425,                 # Porosity of the microporous layer
         # Gas channel
         Hagc = 230e-6,                       # Thickness of the anode gas channel in meters
@@ -66,14 +66,14 @@ function zsw_physical_params()::PhysicalParams
         Vaem = 25.8e-3 * 9.01e-4,            # Exhaust manifold volume at the anode in m³
         Vcem = 25.8e-3 * 22.61e-4,           # Exhaust manifold volume at the cathode in m³
         # Interaction parameters between fluids and PEMFC structure
-        e = 4,                               # Capillary exponent
-        K_l_ads = 26.0,                       # Ratio between the liquid and vapor sorption rates of water in the membrane
-        K_O2_ad_Pt = 8.363636363636363,      # Interfacial resistance coefficient of O2 adsorption on the Pt sites
+        e = 3,                               # Capillary exponent
+        K_l_ads = 1.0,                       # Ratio between the liquid and vapor sorption rates of water in the membrane
+        K_O2_ad_Pt = 7.346634385810734,      # Interfacial resistance coefficient of O2 adsorption on the Pt sites
         # Voltage polarization
-        Re = 7.0e-7,           # Electron conduction resistance of the circuit in Ω·m²
-        i0_c_ref = 2.118181818181818,                     # Reference exchange current density at the cathode in A·m⁻²
-        kappa_co = 29.49757575757576,       # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
-        kappa_c = 3.2803030303030303,         # Overpotential correction exponent
+        Re = 1.545654084145453e-7,           # Electron conduction resistance of the circuit in Ω·m²
+        i0_c_ref = 15.0,                     # Reference exchange current density at the cathode in A·m⁻²
+        kappa_co = 21.423681082096856,       # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
+        kappa_c = 0.253020870903792,         # Overpotential correction exponent
         C_scl = 2e7                          # Volumetric space-charge layer capacitance in F·m⁻³
     )
 end
