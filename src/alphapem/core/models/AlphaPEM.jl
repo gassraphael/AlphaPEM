@@ -483,7 +483,7 @@ function _build_physical_safety_callback(n_diff::Int, nb_gc::Int,
         # C_O2_Pt[k] occupies slots n_diff+2+nb_gc … n_diff+1+2*nb_gc.
         for k in 1:nb_gc
             idx = n_diff + 1 + nb_gc + k
-            u[idx] * solver_state_scaling[idx] <= 0.0 && return true
+            u[idx] * solver_state_scaling[idx] <= 1e-4 && return true
         end
         return false
     end
@@ -500,10 +500,10 @@ function _build_physical_safety_callback(n_diff::Int, nb_gc::Int,
         else
             for k in 1:nb_gc
                 idx  = n_diff + 1 + nb_gc + k
-                C_O2 = u[idx] * solver_state_scaling[idx]
-                if C_O2 <= 0.0
+                C_O2_Pt = u[idx] * solver_state_scaling[idx]
+                if C_O2_Pt <= 1e-4
                     @warn("Safety stop: oxygen concentration at Pt C_O2_Pt[$k] = " *
-                          "$(round(C_O2; digits=6)) mol/m³ ≤ 0 " *
+                          "$(round(C_O2_Pt; digits=6)) mol/m³ ≤ 1e-4 " *
                           "at t = $(round(t; digits=6)) s. " *
                           "The requested current density is too high — oxygen starvation detected. " *
                           "Simulation terminated safely.")
