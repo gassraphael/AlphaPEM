@@ -28,7 +28,8 @@ using .StateScalingModule: CellStateScaling, ManifoldStateScaling, AuxiliaryStat
 using .SimulationConfigModule: SimulationConfig, validate_config
 
 export AbstractCurrentParams, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
-export AbstractFuelCellParams, PhysicalParams, OperatingConditions, PolaExperimentalData, NumericalParams
+export AbstractFuelCellParams, PhysicalParams, OperatingConditions, PolaExperimentalData, NumericalParams,
+       PARAMETER_METADATA, UNDETERMINED_PARAMETER_BOUNDS
 export CellStateScaling, ManifoldStateScaling, AuxiliaryStateScaling,
        CurrentDistributionScaling, DAEAlgebraicScaling, StateScaling
 export SimulationConfig, validate_config

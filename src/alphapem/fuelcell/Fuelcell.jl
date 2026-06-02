@@ -21,7 +21,8 @@ include("zsw.jl")
 include("factory.jl")
 include("default.jl")
 
-export create_fuelcell, DefaultFuelCell, AbstractFuelCell, EH31FuelCell, ZSWFuelCell
+export create_fuelcell, DefaultFuelCell, AbstractFuelCell, EH31FuelCell, ZSWFuelCell,
+       zsw_undetermined_parameters, eh31_undetermined_parameters
 
 end  # module Fuelcell
 

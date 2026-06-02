@@ -287,3 +287,42 @@ function eh31_pola_exp_data_calibration(type_fuel_cell::Symbol, voltage_zone::Sy
 end
 
 
+"""
+    eh31_undetermined_parameters(voltage_zone::Symbol) -> Vector{Tuple{Symbol, Float64, Float64}}
+
+Return the list of undetermined parameters for EH-31 fuel cell with their bounds.
+
+Each tuple contains: (parameter_name, min_bound, max_bound)
+
+For EH-31, the cathode catalyst-layer thickness (Hccl) mirrors the anode thickness (Hacl),
+so only Hacl is sampled as an undetermined parameter.
+
+# Arguments
+- `voltage_zone::Symbol`: `:full` or `:before_voltage_drop` (determines which parameters are included)
+
+# Returns
+Vector of tuples: (parameter_symbol, min_value, max_value) in calibration order
+"""
+function eh31_undetermined_parameters(voltage_zone::Symbol = :full)::Vector{Tuple{Symbol, Float64, Float64}}
+    voltage_zone in (:full, :before_voltage_drop) ||
+        throw(ArgumentError("voltage_zone must be :full or :before_voltage_drop (got $voltage_zone)"))
+
+    params = [
+        (:Hacl,        8e-6, 20e-6),  # Anode/cathode catalyst-layer thickness (Hccl = Hacl)
+        (:Hmem,       15e-6, 50e-6),  # Membrane thickness
+        (:epsilon_gdl, 0.40, 0.95),   # GDL porosity
+        (:e,           3, ),          # Capillary exponent (integer)
+        (:Re,          5e-7, 5e-6),   # Electron-conduction resistance
+        (:i0_c_ref,    0.1, 100.0),   # Reference cathode exchange current density
+        (:kappa_co,   0.01, 40.0),    # Crossover correction coefficient
+        (:kappa_c,    0.25, 4.0),     # Overpotential correction exponent
+    ]
+
+    if voltage_zone == :full
+        push!(params, (:K_O2_ad_Pt, 0.1, 10.0))    # O₂ adsorption resistance coefficient
+    end
+
+    return params
+end
+
+
