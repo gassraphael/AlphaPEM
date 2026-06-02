@@ -67,7 +67,6 @@ function zsw_physical_params()::PhysicalParams
         Vcem = 25.8e-3 * 22.61e-4,           # Exhaust manifold volume at the cathode in m³
         # Interaction parameters between fluids and PEMFC structure
         e = 3,                               # Capillary exponent
-        K_l_ads = 1.0,                       # Ratio between the liquid and vapor sorption rates of water in the membrane
         K_O2_ad_Pt = 7.346634385810734,      # Interfacial resistance coefficient of O2 adsorption on the Pt sites
         # Voltage polarization
         Re = 1.545654084145453e-7,           # Electron conduction resistance of the circuit in Ω·m²
@@ -415,7 +414,6 @@ function zsw_undetermined_parameters(voltage_zone::Symbol = :full)::Vector{Tuple
     ]
 
     if voltage_zone == :full
-        push!(params, (:K_l_ads,    1.0, 100.0))   # Liquid/vapor water-sorption rate ratio
         push!(params, (:K_O2_ad_Pt, 0.1, 10.0))    # O₂ adsorption resistance coefficient
     end
 
