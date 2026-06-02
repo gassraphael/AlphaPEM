@@ -197,7 +197,7 @@ function bounds_for_fuel_cell(fuel_cell_type::Symbol,
 
         if voltage_zone == :full
             _push!(:K_l_ads, 1.0, 100.0; unit = "—", description = "Liquid/vapor water-sorption rate ratio")
-            _push!(:K_O2_ad_Pt, 1.0, 10.0; unit = "—", description = "O₂ adsorption resistance coefficient")
+            _push!(:K_O2_ad_Pt, 0.1, 10.0; unit = "—", description = "Resistance coefficient of O₂ adsorption on Pt")
         end
 
     elseif fuel_cell_type in (:EH_31_1_5, :EH_31_2_0, :EH_31_2_25, :EH_31_2_5)

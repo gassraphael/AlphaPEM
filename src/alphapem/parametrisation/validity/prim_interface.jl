@@ -133,6 +133,46 @@ end
 # ─────────────────────────────────────────────────────────────────────────────
 
 """
+    _filter_r_stderr(r_stderr)::String
+
+Filter R stderr to remove informational messages and keep only actual errors/warnings.
+Removes lines related to:
+- Package loading and patching
+- PRIM algorithm trace messages (peeling/pasting iterations)
+- Informational messages from IRD helpers
+- Final completion messages
+"""
+function _filter_r_stderr(r_stderr::String)::String
+    # List of patterns for informational messages that should be filtered
+    informational_patterns = [
+        r"^\[irdpackage\]",                    # Package loading messages
+        r"^peeling iteration",                 # PRIM peeling iterations
+        r"^pasting iteration",                 # PRIM pasting iterations
+        r"^Ignoring x_interest keys",          # Unused keys info
+        r"^The `desired_class`",               # Class assignment confirmation
+        r"^Saved RF metrics:",                 # Saved files info
+        r"^run_prim\.R — done\.",              # Completion message
+    ]
+
+    lines = split(r_stderr, "\n")
+    filtered_lines = String[]
+
+    for line in lines
+        # Keep empty lines and lines that are NOT in the informational patterns
+        is_informational = any(
+            occursin(pattern, line)
+            for pattern in informational_patterns
+        )
+        if !is_informational && !isempty(strip(line))
+            push!(filtered_lines, line)
+        end
+    end
+
+    return join(filtered_lines, "\n")
+end
+
+
+"""
     _find_rscript()::String
 
 Return the absolute path to the `Rscript` executable used by RCall.jl.
@@ -467,8 +507,11 @@ function run_prim_analysis(cfg::PRIMConfig)::Vector{PRIMResult}
     if !isempty(r_stdout)
         @info "R stdout:\n$r_stdout"
     end
-    if !isempty(r_stderr)
-        @warn "R stderr:\n$r_stderr"
+
+    # Filter and display only significant stderr messages (actual errors/warnings)
+    r_stderr_filtered = _filter_r_stderr(r_stderr)
+    if !isempty(r_stderr_filtered)
+        @warn "R stderr:\n$r_stderr_filtered"
     end
 
     # ── 6. Parse RF metrics (shared across all methods in this run) ───────────

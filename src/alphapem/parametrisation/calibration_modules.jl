@@ -62,7 +62,7 @@ function parameter_bounds_for_calibration(type_fuel_cell::String,
         # Constants based on the interaction between fluids and the structure
         e_min, e_max = 3, 5  # It is the capillary exponent, and should be an int number.
         K_l_ads_min, K_l_ads_max = 1, 100  # . It is the ratio between the liquid and vapor sorption rates of water in the membrane.
-        K_O2_ad_Pt_min, K_O2_ad_Pt_max = 1, 10  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
+        K_O2_ad_Pt_min, K_O2_ad_Pt_max = 0.1, 10  # . It is the interfacial resistance coefficient of O2 adsorption on the Pt sites.
         # Voltage polarization
         Re_min, Re_max = 5e-8, 5e-6  # Ω.m². It is the electron conduction resistance of the circuit.
         i0_c_ref_min, i0_c_ref_max = 1e-1, 100  # A.m-2. It is the dry reference exchange current density at the cathode.
