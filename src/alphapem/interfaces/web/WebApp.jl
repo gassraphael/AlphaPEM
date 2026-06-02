@@ -35,13 +35,30 @@ using Genie.Renderer.Json
 using Genie.Requests
 import Logging
 
-# Set logging configuration to minimize debug output
-Logging.global_logger(Logging.ConsoleLogger(stdout, Logging.Info))
-
-# Suppress debug-level logging from HTTP packages
-for logger_name in [:HTTPDebugger, :Genie, :HTTP, :GenieSession]
-    # This prevents debug messages from appearing
+# Custom logger filter to suppress Info messages from HTTP/WebSocket packages
+struct FilterLogger <: Logging.AbstractLogger
+    logger::Logging.AbstractLogger
 end
+
+function Logging.handle_message(logger::FilterLogger, level, message, _module, group, id, file, line; kwargs...)
+    # Suppress Info messages from specific packages
+    if level == Logging.Info
+        module_name = string(_module)
+        # Filter out messages from HTTP, WebSocket, and Genie packages during startup
+        if any(occursin(pkg, module_name) for pkg in ["HTTP", "OpenSSL", "Genie"])
+            return
+        end
+    end
+    Logging.handle_message(logger.logger, level, message, _module, group, id, file, line; kwargs...)
+end
+
+Logging.shouldlog(logger::FilterLogger, level, _module, group, id) =
+    Logging.shouldlog(logger.logger, level, _module, group, id)
+
+Logging.min_enabled_level(logger::FilterLogger) = Logging.min_enabled_level(logger.logger)
+
+# Apply the custom logger
+Logging.global_logger(FilterLogger(Logging.ConsoleLogger(stdout, Logging.Info)))
 
 # ========================================
 # LOAD APP CONFIGURATION
@@ -80,7 +97,7 @@ const HOST = config[:server_host]
 const PORT = config[:server_port]
 
 try
-    @info "🚀 AlphaPEM Simulator is running on http://$HOST:$PORT/"
+    @info "   AlphaPEM Simulator is running on http://$HOST:$PORT/"
     @info "   Press Ctrl+C to stop the server"
 
     # Start the Genie server
@@ -89,7 +106,7 @@ try
         HOST,
         ws_port = PORT + 1,
         async = false,
-        verbose = true
+        verbose = false
     )
 
 catch e
