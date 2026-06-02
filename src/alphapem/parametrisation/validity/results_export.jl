@@ -165,12 +165,13 @@ function export_parameter_bounds(bounds::Dict{Symbol, Tuple{Float64, Float64}},
         Dict(string(k) => v for (k, v) in metadata)
     )
 
-    # Write YAML manually for deterministic key ordering and consistent float format
-    open(filepath, "w") do io
-        println(io, "metadata:")
-        for (k, v) in sort(collect(meta_block))
-            println(io, "  $(k): $(v)")
-        end
+     # Write YAML manually for deterministic key ordering and consistent float format
+     open(filepath, "w") do io
+         println(io, "metadata:")
+         for k in sort(collect(keys(meta_block)))
+             v = meta_block[k]
+             println(io, "  $(k): $(v)")
+         end
         println(io, "parameters:")
         for name in sort(collect(keys(bounds)))
             lo, hi = bounds[Symbol(name)]
@@ -210,14 +211,15 @@ function export_prim_report(original_bounds::Dict{Symbol, Tuple{Float64, Float64
         println(io, "  AlphaPEM — PRIM Valid-Region Restriction Report")
         println(io, "="^72)
         println(io, "  Generated : ", Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS"))
-        if !isempty(prim_metrics)
-            println(io, "-"^72)
-            println(io, "  PRIM metrics")
-            println(io, "-"^72)
-            for (k, v) in sort(collect(prim_metrics))
-                @printf(io, "    %-22s : %g\n", string(k), v)
-            end
-        end
+         if !isempty(prim_metrics)
+             println(io, "-"^72)
+             println(io, "  PRIM metrics")
+             println(io, "-"^72)
+             for k in sort(collect(keys(prim_metrics)))
+                 v = prim_metrics[k]
+                 @printf(io, "    %-22s : %g\n", string(k), v)
+             end
+         end
         println(io, "-"^72)
         println(io, table)
         println(io, "="^72)
@@ -254,11 +256,12 @@ function export_validation_summary(summary::ValidationSummary,
         @printf(io, "  Failed    : %d  (%.1f %%)\n",
                 summary.failed_count,
                 100.0 * summary.failed_count / max(1, summary.total_simulations))
-        println(io, "-"^60)
-        println(io, "  Per-criterion failures (among invalid/failed):")
-        for (k, v) in sort(collect(summary.criteria_breakdown))
-            @printf(io, "    %-22s : %d\n", string(k), v)
-        end
+         println(io, "-"^60)
+         println(io, "  Per-criterion failures (among invalid/failed):")
+         for k in sort(collect(keys(summary.criteria_breakdown)))
+             v = summary.criteria_breakdown[k]
+             @printf(io, "    %-22s : %d\n", string(k), v)
+         end
         println(io, "="^60)
     end
     return nothing
