@@ -172,14 +172,6 @@
             font-size: 12px;
             margin-top: 4px;
         }
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 30px;
-            padding: 20px;
-            background: #f9f9f9;
-            border-radius: 8px;
-        }
 
         .btn-simulate {
             padding: 15px 25px;
@@ -222,10 +214,34 @@
             border-radius: 6px;
             margin-bottom: 10px;
             display: none;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
         }
 
         .alert.show {
             display: block;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
         }
 
         .progress-indicator {
@@ -275,6 +291,172 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+
+        /* ===== NEW SIMULATION TYPE SELECTOR STYLES ===== */
+
+        .simulation-type-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f9f9f9 0%, #ffffff 100%);
+            border-radius: 8px;
+        }
+
+        .btn-select-sim {
+            padding: 30px 20px;
+            border: 3px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            min-height: 180px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-select-sim:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-select-sim.active {
+            border-color: #0066cc;
+            background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
+            box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1), 0 8px 16px rgba(0, 102, 204, 0.15);
+        }
+
+        .btn-select-step {
+            color: #0066cc;
+        }
+
+        .btn-select-step.active {
+            border-color: #0066cc;
+        }
+
+        .btn-select-pola {
+            color: #009900;
+        }
+
+        .btn-select-pola.active {
+            border-color: #009900;
+            background: linear-gradient(135deg, #f0fff0 0%, #ffffff 100%);
+        }
+
+        .btn-select-eis {
+            color: #ff6600;
+        }
+
+        .btn-select-eis.active {
+            border-color: #ff6600;
+            background: linear-gradient(135deg, #fff5f0 0%, #ffffff 100%);
+        }
+
+        .sim-type-icon {
+            font-size: 48px;
+            line-height: 1;
+        }
+
+        .sim-type-label {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .sim-type-description {
+            font-size: 13px;
+            color: #777;
+            font-weight: normal;
+        }
+
+        /* ===== PARAMETERS PANEL STYLES ===== */
+
+        .parameters-panel {
+            margin: 20px 0 30px 0;
+            padding: 25px;
+            background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+            border: 2px solid #0066cc;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.1);
+        }
+
+        .parameters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e6e6e6;
+        }
+
+        .parameters-header h4 {
+            margin: 0;
+            color: #0066cc;
+            font-size: 18px;
+        }
+
+        .btn-close-params {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-close-params:hover {
+            background: #e6e6e6;
+            color: #333;
+        }
+
+        .sim-params {
+            width: 100%;
+        }
+
+        .parameters-footer {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #e6e6e6;
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn-run-simulation {
+            padding: 18px 60px;
+            font-size: 18px;
+            font-weight: 700;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #0066cc, #0052a3);
+            color: white;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 8px rgba(0, 102, 204, 0.3);
+        }
+
+        .btn-run-simulation:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 102, 204, 0.4);
+        }
+
+        .btn-run-simulation:active {
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body>
@@ -299,11 +481,9 @@
                 <div class="tabs-container">
                     <button class="tab-button active" onclick="switchTab(0)">1. Fuel Cell</button>
                     <button class="tab-button" onclick="switchTab(1)">2. Model Config</button>
-                    <button class="tab-button" onclick="switchTab(2)">3. Numerical</button>
-                    <button class="tab-button" onclick="switchTab(3)">4. Step</button>
-                    <button class="tab-button" onclick="switchTab(4)">5. Polarization</button>
-                    <button class="tab-button" onclick="switchTab(5)">6. EIS</button>
-                    <button class="tab-button" onclick="switchTab(6)">7. Run</button>
+                    <button class="tab-button" onclick="switchTab(2)">3. Physical Params</button>
+                    <button class="tab-button" onclick="switchTab(3)">4. Numerical</button>
+                    <button class="tab-button" onclick="switchTab(4)">5. Run</button>
                 </div>
 
                 <!-- Tab Contents -->
@@ -379,70 +559,159 @@
                     </div>
                 </div>
 
-                <!-- TAB 3: Numerical Parameters -->
+                <!-- TAB 3: Physical Parameters -->
                 <div class="tab-content">
-                    <h3>Numerical Parameters</h3>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="nb_gc">GC Nodes</label>
-                            <input type="number" id="nb_gc" value="10" min="1" max="100">
-                            <p class="help-text">Number of gas channel nodes</p>
-                        </div>
-                        <div class="form-group">
-                            <label for="nb_gdl">GDL Nodes</label>
-                            <input type="number" id="nb_gdl" value="5" min="1" max="50">
-                            <p class="help-text">Number of GDL nodes</p>
-                        </div>
-                        <div class="form-group">
-                            <label for="nb_mpl">MPL Nodes</label>
-                            <input type="number" id="nb_mpl" value="5" min="1" max="50">
-                            <p class="help-text">Number of MPL nodes</p>
-                        </div>
-                        <div class="form-group">
-                            <label for="rtol">Relative Tolerance</label>
-                            <input type="number" id="rtol" value="1e-5" step="1e-6">
-                            <p class="help-text">Solver rtol</p>
-                        </div>
-                        <div class="form-group">
-                            <label for="atol">Absolute Tolerance</label>
-                            <input type="number" id="atol" value="1e-8" step="1e-9">
-                            <p class="help-text">Solver atol</p>
+                    <h3>Physical Parameters</h3>
+
+                    <!-- Operating Conditions -->
+                    <div class="form-section">
+                        <div class="section-title">Operating Conditions</div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="T_fc">Temperature (°C)</label>
+                                <input type="number" id="T_fc" value="60" min="-273.15" max="200" step="0.1">
+                                <p class="help-text">Cell temperature</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="Pa">Anode Pressure (bar)</label>
+                                <input type="number" id="Pa" value="1.5" min="0" max="10" step="0.01">
+                                <p class="help-text">Anode inlet pressure</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="Pc">Cathode Pressure (bar)</label>
+                                <input type="number" id="Pc" value="1.5" min="0" max="10" step="0.01">
+                                <p class="help-text">Cathode inlet pressure</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="Sa">Anode Stoichiometry</label>
+                                <input type="number" id="Sa" value="2.0" min="1" max="10" step="0.1">
+                                <p class="help-text">H₂ stoichiometry ratio</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="Sc">Cathode Stoichiometry</label>
+                                <input type="number" id="Sc" value="2.0" min="1" max="10" step="0.1">
+                                <p class="help-text">O₂ stoichiometry ratio</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="Phi_a">Anode Humidity</label>
+                                <input type="number" id="Phi_a" value="0.6" min="0" max="1" step="0.01">
+                                <p class="help-text">Relative humidity (0-1)</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="Phi_c">Cathode Humidity</label>
+                                <input type="number" id="Phi_c" value="0.6" min="0" max="1" step="0.01">
+                                <p class="help-text">Relative humidity (0-1)</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="y_H2_in">H₂ Inlet Ratio</label>
+                                <input type="number" id="y_H2_in" value="0.95" min="0" max="1" step="0.01">
+                                <p class="help-text">H₂ mole fraction in inlet</p>
+                            </div>
                         </div>
                     </div>
+
+                    <!-- Accessible Parameters -->
+                    <div class="form-section">
+                        <div class="section-title">Accessible Parameters</div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="Aact">Active Area (cm²)</label>
+                                <input type="number" id="Aact" value="100" min="1" step="10">
+                                <p class="help-text">Fuel cell active area</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="nb_cell">Number of Cells</label>
+                                <input type="number" id="nb_cell" value="1" min="1" step="1">
+                                <p class="help-text">Cells in series</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="Vasm">Supply Anode Manifold (cm³)</label>
+                                <input type="number" id="Vasm" value="100" min="1" step="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="Vcsm">Supply Cathode Manifold (cm³)</label>
+                                <input type="number" id="Vcsm" value="100" min="1" step="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="Vaem">Exhaust Anode Manifold (cm³)</label>
+                                <input type="number" id="Vaem" value="100" min="1" step="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="Vcem">Exhaust Cathode Manifold (cm³)</label>
+                                <input type="number" id="Vcem" value="100" min="1" step="10">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Undetermined Parameters -->
+                    <div class="form-section">
+                        <div class="section-title">Undetermined Parameters (Model Calibration)</div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="epsilon_gdl">GDL Porosity</label>
+                                <input type="number" id="epsilon_gdl" value="0.7" min="0" max="1" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="epsilon_mpl">MPL Porosity</label>
+                                <input type="number" id="epsilon_mpl" value="0.5" min="0" max="1" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="epsilon_c">Compression Ratio</label>
+                                <input type="number" id="epsilon_c" value="0.2" min="0" max="1" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="K_O2_ad_Pt">O₂ Adsorption Coefficient</label>
+                                <input type="number" id="K_O2_ad_Pt" value="2.0" min="0" step="0.1">
+                            </div>
+                            <div class="form-group">
+                                <label for="Re">Electron Resistance (Ω.mm²)</label>
+                                <input type="number" id="Re" value="1.0" min="0" step="0.1">
+                            </div>
+                            <div class="form-group">
+                                <label for="i0_c_ref">Exchange Current (A/m²)</label>
+                                <input type="number" id="i0_c_ref" value="1.0" min="0" step="0.1">
+                            </div>
+                            <div class="form-group">
+                                <label for="C_scl">Double Layer Capacitance (F/cm³)</label>
+                                <input type="number" id="C_scl" value="20.0" min="0" step="1">
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="nav-buttons">
                         <button class="btn-nav" onclick="switchTab(1)">← Previous</button>
                         <button class="btn-nav" onclick="switchTab(3)">Next →</button>
                     </div>
                 </div>
 
-                <!-- TAB 4: Step Current -->
+                <!-- TAB 4: Numerical Parameters -->
                 <div class="tab-content">
-                    <h3>Step Current Parameters</h3>
+                    <h3>Numerical Parameters</h3>
                     <div class="form-grid">
                         <div class="form-group">
-                            <label for="step_delta_t_ini">Initial Stabilization (s)</label>
-                            <input type="number" id="step_delta_t_ini" value="1800" step="60">
-                            <p class="help-text">Time at zero current for stabilization</p>
+                            <label for="nb_gc">GC Nodes</label>
+                            <input type="number" id="nb_gc" value="1" min="1" max="100">
+                            <p class="help-text">Number of gas channel nodes</p>
                         </div>
                         <div class="form-group">
-                            <label for="step_delta_t_load">Loading Time (s)</label>
-                            <input type="number" id="step_delta_t_load" value="30" step="1">
-                            <p class="help-text">Time to ramp to target current</p>
+                            <label for="nb_gdl">GDL Nodes</label>
+                            <input type="number" id="nb_gdl" value="3" min="1" max="50">
+                            <p class="help-text">Number of GDL nodes</p>
                         </div>
                         <div class="form-group">
-                            <label for="step_delta_t_break">Break Time (s)</label>
-                            <input type="number" id="step_delta_t_break" value="120" step="60">
-                            <p class="help-text">Time at target current</p>
+                            <label for="nb_mpl">MPL Nodes</label>
+                            <input type="number" id="nb_mpl" value="2" min="1" max="50">
+                            <p class="help-text">Number of MPL nodes</p>
                         </div>
                         <div class="form-group">
-                            <label for="step_i_ini">Initial Current (A/m²)</label>
-                            <input type="number" id="step_i_ini" value="10000" step="1000">
-                            <p class="help-text">Initial current density</p>
+                            <label for="rtol">Relative Tolerance</label>
+                            <input type="number" id="rtol" value="1e-3" step="1e-6">
+                            <p class="help-text">Solver rtol</p>
                         </div>
                         <div class="form-group">
-                            <label for="step_i_step">Step Current (A/m²)</label>
-                            <input type="number" id="step_i_step" value="15000" step="1000">
-                            <p class="help-text">Target current density</p>
+                            <label for="atol">Absolute Tolerance</label>
+                            <input type="number" id="atol" value="1e-6" step="1e-9">
+                            <p class="help-text">Solver atol</p>
                         </div>
                     </div>
                     <div class="nav-buttons">
@@ -451,100 +720,153 @@
                     </div>
                 </div>
 
-                <!-- TAB 5: Polarization -->
-                <div class="tab-content">
-                    <h3>Polarization Curve Parameters</h3>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="pola_delta_t_ini">Initial Stabilization (s)</label>
-                            <input type="number" id="pola_delta_t_ini" value="1800" step="60">
-                        </div>
-                        <div class="form-group">
-                            <label for="pola_delta_t_load">Loading Time (s)</label>
-                            <input type="number" id="pola_delta_t_load" value="30" step="1">
-                        </div>
-                        <div class="form-group">
-                            <label for="pola_delta_t_break">Break Time (s)</label>
-                            <input type="number" id="pola_delta_t_break" value="120" step="60">
-                        </div>
-                        <div class="form-group">
-                            <label for="pola_delta_i">Current Step (A/m²)</label>
-                            <input type="number" id="pola_delta_i" value="5000" step="1000">
-                            <p class="help-text">Increment between points</p>
-                        </div>
-                        <div class="form-group">
-                            <label for="pola_i_max">Max Current (A/m²)</label>
-                            <input type="number" id="pola_i_max" value="20000" step="1000">
-                            <p class="help-text">Maximum current density</p>
-                        </div>
-                    </div>
-                    <div class="nav-buttons">
-                        <button class="btn-nav" onclick="switchTab(3)">← Previous</button>
-                        <button class="btn-nav" onclick="switchTab(5)">Next →</button>
-                    </div>
-                </div>
-
-                <!-- TAB 6: EIS -->
-                <div class="tab-content">
-                    <h3>EIS Spectroscopy Parameters</h3>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="eis_i_static">Static Current (A/m²)</label>
-                            <input type="number" id="eis_i_static" value="10000" step="1000">
-                        </div>
-                        <div class="form-group">
-                            <label for="eis_ratio">AC Current Ratio (%)</label>
-                            <input type="number" id="eis_ratio" value="5" step="1" min="0" max="20">
-                        </div>
-                        <div class="form-group">
-                            <label for="eis_f_power_min">Min Frequency (10^x Hz)</label>
-                            <input type="number" id="eis_f_power_min" value="0" step="1">
-                        </div>
-                        <div class="form-group">
-                            <label for="eis_f_power_max">Max Frequency (10^x Hz)</label>
-                            <input type="number" id="eis_f_power_max" value="4" step="1">
-                        </div>
-                        <div class="form-group">
-                            <label for="eis_nb_frequencies">Number of Frequencies</label>
-                            <input type="number" id="eis_nb_frequencies" value="10" min="1" max="100">
-                        </div>
-                        <div class="form-group">
-                            <label for="eis_nb_points">Points per Frequency</label>
-                            <input type="number" id="eis_nb_points" value="20" min="1" max="100">
-                        </div>
-                    </div>
-                    <div class="nav-buttons">
-                        <button class="btn-nav" onclick="switchTab(4)">← Previous</button>
-                        <button class="btn-nav" onclick="switchTab(6)">Next →</button>
-                    </div>
-                </div>
-
-                <!-- TAB 7: Run Simulation -->
+                <!-- TAB 5: Run Simulation -->
                 <div class="tab-content">
                     <h3>Launch Simulation</h3>
-                    <p style="margin-bottom: 20px; color: #666;">
-                        All parameters are configured. Choose which simulation type to run:
+                    <p style="margin-bottom: 30px; color: #666; font-size: 16px;">
+                        All configuration parameters are set. Click on the simulation type you want to run:
                     </p>
 
-                    <div id="progress-indicator" class="progress-indicator">
-                        <div class="spinner"></div>
-                        <p>Running simulation... This may take a few minutes.</p>
+                    <!-- Simulation Type Selection Buttons -->
+                    <div class="simulation-type-selector">
+                        <button class="btn-select-sim btn-select-step" onclick="selectSimulationType('step')" id="btn-select-step">
+                            <div class="sim-type-icon">⚡</div>
+                            <div class="sim-type-label">Step Current</div>
+                            <div class="sim-type-description">Chronoamperometry test</div>
+                        </button>
+                        <button class="btn-select-sim btn-select-pola" onclick="selectSimulationType('polarization')" id="btn-select-pola">
+                            <div class="sim-type-icon">📈</div>
+                            <div class="sim-type-label">Polarization Curve</div>
+                            <div class="sim-type-description">V-I characteristic curve</div>
+                        </button>
+                        <button class="btn-select-sim btn-select-eis" onclick="selectSimulationType('eis')" id="btn-select-eis">
+                            <div class="sim-type-icon">🔬</div>
+                            <div class="sim-type-label">EIS Spectroscopy</div>
+                            <div class="sim-type-description">Impedance analysis</div>
+                        </button>
                     </div>
 
-                    <div class="simulation-buttons">
-                        <button class="btn-simulate btn-step" onclick="runSimulation('step')">
-                            Step Current
-                        </button>
-                        <button class="btn-simulate btn-pola" onclick="runSimulation('polarization')">
-                            Polarization Curve
-                        </button>
-                        <button class="btn-simulate btn-eis" onclick="runSimulation('eis')">
-                            EIS Spectroscopy
-                        </button>
+                    <!-- Parameters Panel (Hidden by default) -->
+                    <div id="parameters-panel" class="parameters-panel" style="display: none;">
+                        <div class="parameters-header">
+                            <h4 id="param-title">Step Current Parameters</h4>
+                            <button class="btn-close-params" onclick="deselectSimulationType()" title="Close parameters">✕</button>
+                        </div>
+
+                        <!-- Step Parameters -->
+                        <div id="step-params" class="sim-params" style="display: none;">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="step_delta_t_ini">Initial Stabilization (s)</label>
+                                    <input type="number" id="step_delta_t_ini" value="1800" step="60">
+                                    <p class="help-text">Time at zero current for stabilization</p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="step_delta_t_load">Loading Time (s)</label>
+                                    <input type="number" id="step_delta_t_load" value="30" step="1">
+                                    <p class="help-text">Time to ramp to target current</p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="step_delta_t_break">Break Time (s)</label>
+                                    <input type="number" id="step_delta_t_break" value="120" step="60">
+                                    <p class="help-text">Time at target current</p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="step_i_ini">Initial Current (A/m²)</label>
+                                    <input type="number" id="step_i_ini" value="10000" step="1000">
+                                    <p class="help-text">Initial current density</p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="step_i_step">Step Current (A/m²)</label>
+                                    <input type="number" id="step_i_step" value="15000" step="1000">
+                                    <p class="help-text">Target current density</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Polarization Parameters -->
+                        <div id="pola-params" class="sim-params" style="display: none;">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="pola_delta_t_ini">Initial Stabilization (s)</label>
+                                    <input type="number" id="pola_delta_t_ini" value="1800" step="60">
+                                    <p class="help-text">Time at zero current for stabilization</p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="pola_delta_t_load">Loading Time (s)</label>
+                                    <input type="number" id="pola_delta_t_load" value="30" step="1">
+                                    <p class="help-text">Time to ramp to each current step</p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="pola_delta_t_break">Break Time (s)</label>
+                                    <input type="number" id="pola_delta_t_break" value="120" step="60">
+                                    <p class="help-text">Time to hold each current step</p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="pola_delta_i">Current Step (A/m²)</label>
+                                    <input type="number" id="pola_delta_i" value="5000" step="1000">
+                                    <p class="help-text">Increment between points</p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="pola_i_max">Max Current (A/m²)</label>
+                                    <input type="number" id="pola_i_max" value="20000" step="1000">
+                                    <p class="help-text">Maximum current density</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- EIS Parameters -->
+                        <div id="eis-params" class="sim-params" style="display: none;">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="eis_i_static">Static Current (A/m²)</label>
+                                    <input type="number" id="eis_i_static" value="10000" step="1000">
+                                    <p class="help-text">DC operating point</p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="eis_ratio">AC Current Ratio (%)</label>
+                                    <input type="number" id="eis_ratio" value="5" step="1" min="0" max="20">
+                                    <p class="help-text">AC amplitude as % of DC current</p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="eis_f_power_min">Min Frequency (10^x Hz)</label>
+                                    <input type="number" id="eis_f_power_min" value="0" step="1">
+                                    <p class="help-text">Minimum frequency exponent</p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="eis_f_power_max">Max Frequency (10^x Hz)</label>
+                                    <input type="number" id="eis_f_power_max" value="4" step="1">
+                                    <p class="help-text">Maximum frequency exponent</p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="eis_nb_frequencies">Number of Frequencies</label>
+                                    <input type="number" id="eis_nb_frequencies" value="10" min="1" max="100">
+                                    <p class="help-text">Frequency points per decade</p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="eis_nb_points">Points per Frequency</label>
+                                    <input type="number" id="eis_nb_points" value="20" min="1" max="100">
+                                    <p class="help-text">Data points per frequency</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Run Button -->
+                        <div class="parameters-footer">
+                            <button class="btn-run-simulation" onclick="runSelectedSimulation()">
+                                ▶ Run Simulation
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Progress Indicator -->
+                    <div id="progress-indicator" class="progress-indicator">
+                        <div class="spinner"></div>
+                        <p>Running simulation... This may take a few seconds.</p>
                     </div>
 
                     <div class="nav-buttons">
-                        <button class="btn-nav" onclick="switchTab(5)">← Previous</button>
+                        <button class="btn-nav" onclick="switchTab(3)">← Previous</button>
                         <button class="btn-nav" disabled>Next →</button>
                     </div>
                 </div>
@@ -566,12 +888,12 @@
         let tabStates = [
             { name: 'Fuel Cell', complete: false },
             { name: 'Model Config', complete: false },
+            { name: 'Physical Params', complete: false },
             { name: 'Numerical', complete: false },
-            { name: 'Step', complete: false },
-            { name: 'Polarization', complete: false },
-            { name: 'EIS', complete: false },
             { name: 'Run', complete: false }
         ];
+
+        let currentSimulationType = null;  // Track selected simulation type
 
         function switchTab(tabIndex) {
             const tabs = document.querySelectorAll('.tab-content');
@@ -662,7 +984,34 @@
                 type_auxiliary: document.querySelector('input[name="type_auxiliary"]:checked').value,
                 type_flow: document.querySelector('input[name="type_flow"]:checked').value,
                 type_purge: document.querySelector('input[name="type_purge"]:checked').value,
-                numerical_parameters: {
+                operating_conditions: {
+                    T_fc: parseFloat(document.getElementById('T_fc').value),
+                    Pa: parseFloat(document.getElementById('Pa').value),
+                    Pc: parseFloat(document.getElementById('Pc').value),
+                    Sa: parseFloat(document.getElementById('Sa').value),
+                    Sc: parseFloat(document.getElementById('Sc').value),
+                    Phi_a: parseFloat(document.getElementById('Phi_a').value),
+                    Phi_c: parseFloat(document.getElementById('Phi_c').value),
+                    y_H2_in: parseFloat(document.getElementById('y_H2_in').value),
+                },
+                accessible_parameters: {
+                    Aact: parseFloat(document.getElementById('Aact').value),
+                    nb_cell: parseInt(document.getElementById('nb_cell').value),
+                    Vasm: parseFloat(document.getElementById('Vasm').value),
+                    Vcsm: parseFloat(document.getElementById('Vcsm').value),
+                    Vaem: parseFloat(document.getElementById('Vaem').value),
+                    Vcem: parseFloat(document.getElementById('Vcem').value),
+                },
+                undetermined_parameters: {
+                    epsilon_gdl: parseFloat(document.getElementById('epsilon_gdl').value),
+                    epsilon_mpl: parseFloat(document.getElementById('epsilon_mpl').value),
+                    epsilon_c: parseFloat(document.getElementById('epsilon_c').value),
+                    K_O2_ad_Pt: parseFloat(document.getElementById('K_O2_ad_Pt').value),
+                    Re: parseFloat(document.getElementById('Re').value),
+                    i0_c_ref: parseFloat(document.getElementById('i0_c_ref').value),
+                    C_scl: parseFloat(document.getElementById('C_scl').value),
+                },
+                computing_parameters: {
                     nb_gc: parseInt(document.getElementById('nb_gc').value),
                     nb_gdl: parseInt(document.getElementById('nb_gdl').value),
                     nb_mpl: parseInt(document.getElementById('nb_mpl').value),
@@ -702,13 +1051,13 @@
             if (!params.fuel_cell_type)
                 errors.push('Please select a fuel cell');
 
-            if (!params.numerical_parameters.nb_gc || params.numerical_parameters.nb_gc < 1)
+            if (!params.computing_parameters.nb_gc || params.computing_parameters.nb_gc < 1)
                 errors.push('GC nodes must be >= 1');
 
-            if (params.numerical_parameters.rtol <= 0 || params.numerical_parameters.rtol > 1e-3)
+            if (params.computing_parameters.rtol <= 0 || params.computing_parameters.rtol > 1e-3)
                 errors.push('Solver rtol must be between 1e-9 and 1e-3');
 
-            if (params.numerical_parameters.atol <= 0 || params.numerical_parameters.atol > 1e-3)
+            if (params.computing_parameters.atol <= 0 || params.computing_parameters.atol > 1e-3)
                 errors.push('Solver atol must be between 1e-9 and 1e-3');
 
             if (params.step_parameters.i_ini >= params.step_parameters.i_step)
@@ -720,6 +1069,69 @@
             return errors;
         }
 
+        // ===== SIMULATION TYPE SELECTION =====
+
+        function selectSimulationType(simType) {
+            currentSimulationType = simType;
+
+            // Update button states
+            document.getElementById('btn-select-step').classList.toggle('active', simType === 'step');
+            document.getElementById('btn-select-pola').classList.toggle('active', simType === 'polarization');
+            document.getElementById('btn-select-eis').classList.toggle('active', simType === 'eis');
+
+            // Update parameters panel title and show correct parameters
+            const titleMap = {
+                'step': 'Step Current Parameters',
+                'polarization': 'Polarization Curve Parameters',
+                'eis': 'EIS Spectroscopy Parameters'
+            };
+
+            document.getElementById('param-title').textContent = titleMap[simType];
+
+            // Hide all parameter sections
+            document.getElementById('step-params').style.display = 'none';
+            document.getElementById('pola-params').style.display = 'none';
+            document.getElementById('eis-params').style.display = 'none';
+
+            // Show selected parameter section
+            const paramId = {
+                'step': 'step-params',
+                'polarization': 'pola-params',
+                'eis': 'eis-params'
+            }[simType];
+
+            if (paramId) {
+                document.getElementById(paramId).style.display = 'block';
+            }
+
+            // Show parameters panel
+            document.getElementById('parameters-panel').style.display = 'block';
+
+            // Scroll to parameters panel
+            document.getElementById('parameters-panel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function deselectSimulationType() {
+            currentSimulationType = null;
+
+            // Reset button states
+            document.getElementById('btn-select-step').classList.remove('active');
+            document.getElementById('btn-select-pola').classList.remove('active');
+            document.getElementById('btn-select-eis').classList.remove('active');
+
+            // Hide parameters panel
+            document.getElementById('parameters-panel').style.display = 'none';
+        }
+
+        function runSelectedSimulation() {
+            if (!currentSimulationType) {
+                showError('Please select a simulation type first');
+                return;
+            }
+
+            runSimulation(currentSimulationType);
+        }
+
         // ===== SIMULATION EXECUTION =====
 
         function runSimulation(simType) {
@@ -727,12 +1139,12 @@
             const errors = validateParameters(params);
 
             if (errors.length > 0) {
-                showError('Validation Errors:\n' + errors.join('\n'));
+                showError('Validation Errors:\n' + errors.map(e => '  • ' + e).join('\n'));
                 return;
             }
 
             showProgress();
-            updateTabStatus(6, false); // Mark as running
+            updateTabStatus(4, false); // Mark as running
 
             const endpoint = `/api/simulate/${simType}`;
 
@@ -741,23 +1153,29 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(params)
             })
-            .then(r => r.json())
-            .then(data => {
+            .then(r => {
+                // Log response status for debugging
+                console.log(`Simulation response status: ${r.status}`);
+                return r.json().then(data => ({ status: r.status, data: data }));
+            })
+            .then(({ status, data }) => {
                 hideProgress();
-                if (data.success) {
-                    updateTabStatus(6, true);
+                if (status === 200 && data.success) {
+                    updateTabStatus(4, true);
                     showSuccess(`✓ ${simType} simulation completed!\nRedirecting to results...`);
                     setTimeout(() => {
                         window.location.href = `/results/${data.result_id}`;
                     }, 2000);
                 } else {
-                    updateTabStatus(6, false);
-                    showError('Simulation failed:\n' + (data.error || 'Unknown error'));
+                    updateTabStatus(4, false);
+                    const errorMsg = data.error || 'Unknown error';
+                    showError('Simulation failed:\n' + (Array.isArray(errorMsg) ? errorMsg.join('\n') : errorMsg));
                 }
             })
             .catch(e => {
                 hideProgress();
-                updateTabStatus(6, false);
+                updateTabStatus(4, false);
+                console.error('Fetch error:', e);
                 showError('API error:\n' + e.message);
             });
         }
@@ -766,13 +1184,22 @@
 
         function showError(msg) {
             const alert = document.getElementById('error-alert');
-            alert.textContent = msg;
+            // Handle both string and array messages
+            let errorText = msg;
+            if (Array.isArray(msg)) {
+                errorText = '❌ ERRORS:\n' + msg.map(e => '  • ' + e).join('\n');
+            } else if (typeof msg === 'object') {
+                errorText = '❌ ERROR:\n' + JSON.stringify(msg, null, 2);
+            }
+            alert.textContent = errorText;
             alert.classList.add('show');
             alert.style.display = 'block';
+            // Print to console as well for terminal visibility
+            console.error('Simulation Error:', msg);
             setTimeout(() => {
                 alert.classList.remove('show');
                 alert.style.display = 'none';
-            }, 6000);
+            }, 8000);
         }
 
         function showSuccess(msg) {
@@ -780,6 +1207,7 @@
             alert.textContent = msg;
             alert.classList.add('show');
             alert.style.display = 'block';
+            console.log('Success:', msg);
             setTimeout(() => {
                 alert.classList.remove('show');
                 alert.style.display = 'none';
@@ -791,6 +1219,7 @@
             alert.textContent = msg;
             alert.classList.add('show');
             alert.style.display = 'block';
+            console.info('Info:', msg);
             setTimeout(() => {
                 alert.classList.remove('show');
                 alert.style.display = 'none';
