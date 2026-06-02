@@ -295,7 +295,7 @@ system in `src/alphapem/parametrisation/calibration_modules.jl`.
       maintaining a high-level language framework.
     - the abandonment of dictionary usage in favor of increased reliance on object-oriented programming.
     - the redesign of the AlphaPEM architecture so that the code is closer to industry standards.
-    - complete migration of the `interfaces` (GUI) module to Julia using Genie.jl and Stipple.jl.
+    - progressive migration of the `interfaces` (GUI) module to Julia using Genie.jl and Stipple.jl.
     - progressive migration of the `parametrisation` (calibration) module.
 - [V1.3](https://github.com/gassraphael/AlphaPEM/tree/65dd73ed306a054c80018447f7943b9d9f973ffb) - 2026.02.16 - This version of AlphaPEM includes: 
 	- the addition of O2 flow to Pt particules which improves the modeling of overvoltage due to flooding at high curent densities.
@@ -318,6 +318,7 @@ system in `src/alphapem/parametrisation/calibration_modules.jl`.
 
 # Work in progress
 
+- GUI and calibration are currently under development.
 - Sensitivity analysis and calibration of the model using pre-selected data from ZSW-GenStack or EH-31 is currently 
 underway.
 - Auxiliaries are temporarily removed, as they require reconstruction.

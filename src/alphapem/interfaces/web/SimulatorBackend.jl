@@ -114,9 +114,6 @@ Get default parameters for a specific fuel cell type.
 Dictionary with all default operating conditions and parameters.
 """
 function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
-    # Convert string to symbol
-    fc_symbol = Symbol(fuel_cell_type)
-
     # TODO: Load from fuel cell database in AlphaPEM
     # For now, return generic defaults
 
@@ -221,6 +218,22 @@ Dict with :valid (bool) and :errors (array) fields
 function validate_parameters(params::Dict)::Dict
     errors = String[]
 
+    # Auto-fill missing sections from fuel cell defaults if available
+    if haskey(params, :fuel_cell_type)
+        try
+            defaults = get_fuel_cell_defaults(string(params[:fuel_cell_type]))
+            for section in [:operating_conditions, :accessible_parameters,
+                           :undetermined_parameters, :computing_parameters]
+                if !haskey(params, section)
+                    params[section] = get(defaults, section, Dict())
+                    @info "Auto-filled missing section: $section from defaults"
+                end
+            end
+        catch e
+            @warn "Could not auto-fill parameters from defaults: $e"
+        end
+    end
+
     # Check structure
     required_sections = [:operating_conditions, :accessible_parameters,
                         :undetermined_parameters, :computing_parameters]
@@ -232,6 +245,7 @@ function validate_parameters(params::Dict)::Dict
     end
 
     if !isempty(errors)
+        @error "Parameter validation failed" errors=errors
         return Dict(:valid => false, :errors => errors)
     end
 
@@ -315,7 +329,20 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
 
     # Build current profile parameters based on simulation type
     current_params = if sim_type == :step
-        sp = params[:step_parameters]
+        sp = get(params, :step_parameters, Dict())
+        # Merge with defaults if available
+        if haskey(params, :fuel_cell_type)
+            try
+                defaults = get_fuel_cell_defaults(string(params[:fuel_cell_type]))
+                for (key, val) in get(defaults, :step_parameters, Dict())
+                    if !haskey(sp, key)
+                        sp[key] = val
+                    end
+                end
+            catch e
+                @warn "Could not merge step parameter defaults: $e"
+            end
+        end
         StepParams(
             delta_t_ini = sp[:delta_t_ini],
             delta_t_load = sp[:delta_t_load],
@@ -324,7 +351,20 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
             i_step = sp[:i_step],
         )
     elseif sim_type == :polarization
-        pp = params[:polarization_parameters]
+        pp = get(params, :polarization_parameters, Dict())
+        # Merge with defaults if available
+        if haskey(params, :fuel_cell_type)
+            try
+                defaults = get_fuel_cell_defaults(string(params[:fuel_cell_type]))
+                for (key, val) in get(defaults, :polarization_parameters, Dict())
+                    if !haskey(pp, key)
+                        pp[key] = val
+                    end
+                end
+            catch e
+                @warn "Could not merge polarization parameter defaults: $e"
+            end
+        end
         PolarizationParams(
             delta_t_ini = pp[:delta_t_ini],
             delta_t_load = pp[:delta_t_load],
@@ -333,7 +373,20 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
             i_max = pp[:i_max],
         )
     elseif sim_type == :eis
-        ep = params[:eis_parameters]
+        ep = get(params, :eis_parameters, Dict())
+        # Merge with defaults if available
+        if haskey(params, :fuel_cell_type)
+            try
+                defaults = get_fuel_cell_defaults(string(params[:fuel_cell_type]))
+                for (key, val) in get(defaults, :eis_parameters, Dict())
+                    if !haskey(ep, key)
+                        ep[key] = val
+                    end
+                end
+            catch e
+                @warn "Could not merge EIS parameter defaults: $e"
+            end
+        end
         EISParams(
             i_static = ep[:i_static],
             ratio = ep[:ratio],
@@ -346,8 +399,8 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
         error("Unknown simulation type: $sim_type")
     end
 
-    # Build numerical parameters
-    cp = params[:numerical_parameters]
+    # Build numerical parameters (from computing_parameters)
+    cp = params[:computing_parameters]
     num_params = NumericalParams(
         nb_gc = cp[:nb_gc],
         nb_gdl = cp[:nb_gdl],
@@ -361,10 +414,10 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
         type_fuel_cell = Symbol(params[:fuel_cell_type]),
         type_current = current_params,
         numerical_parameters = num_params,
-        voltage_zone = Symbol(params[:voltage_zone]),
-        type_auxiliary = Symbol(params[:type_auxiliary]),
-        type_flow = Symbol(params[:type_flow]),
-        type_purge = Symbol(params[:type_purge]),
+        voltage_zone = Symbol(get(params, :voltage_zone, "fuel_cell")),
+        type_auxiliary = Symbol(get(params, :type_auxiliary, "none")),
+        type_flow = Symbol(get(params, :type_flow, "constant")),
+        type_purge = Symbol(get(params, :type_purge, "no_purge")),
         type_display = :no_display,     # Server-side, don't display plots
         display_timing = :postrun,      # Display after simulation
     )
@@ -387,8 +440,6 @@ function run_step_simulation(config::SimulationConfig)::Dict
     result_id = generate_result_id()
 
     try
-        @info "Starting step simulation: $result_id"
-
         start_time = time()
         run_simulation(config)
         elapsed = time() - start_time
@@ -401,12 +452,12 @@ function run_step_simulation(config::SimulationConfig)::Dict
             :config => config,
         )
 
-        @info "Step simulation completed: $result_id in $(round(elapsed, digits=2))s"
+        @info "    Step simulation completed: $result_id in $(round(elapsed, digits=2))s"
 
         return Dict(:id => result_id, :status => "completed")
 
     catch e
-        @error "Step simulation failed: $result_id" exception=e
+        @error "    Step simulation failed: $result_id" exception=e
 
         SIMULATION_RESULTS[result_id] = Dict(
             :type => "step",
@@ -425,8 +476,6 @@ function run_polarization_simulation(config::SimulationConfig)::Dict
     result_id = generate_result_id()
 
     try
-        @info "Starting polarization simulation: $result_id"
-
         start_time = time()
         run_simulation(config)
         elapsed = time() - start_time
@@ -439,12 +488,12 @@ function run_polarization_simulation(config::SimulationConfig)::Dict
             :config => config,
         )
 
-        @info "Polarization simulation completed: $result_id"
+        @info "    Polarization simulation completed: $result_id"
 
         return Dict(:id => result_id, :status => "completed")
 
     catch e
-        @error "Polarization simulation failed: $result_id" exception=e
+        @error "    Polarization simulation failed: $result_id" exception=e
 
         SIMULATION_RESULTS[result_id] = Dict(
             :type => "polarization",
@@ -463,8 +512,6 @@ function run_eis_simulation(config::SimulationConfig)::Dict
     result_id = generate_result_id()
 
     try
-        @info "Starting EIS simulation: $result_id"
-
         start_time = time()
         run_simulation(config)
         elapsed = time() - start_time
@@ -477,12 +524,12 @@ function run_eis_simulation(config::SimulationConfig)::Dict
             :config => config,
         )
 
-        @info "EIS simulation completed: $result_id"
+        @info "    EIS simulation completed: $result_id"
 
         return Dict(:id => result_id, :status => "completed")
 
     catch e
-        @error "EIS simulation failed: $result_id" exception=e
+        @error "    EIS simulation failed: $result_id" exception=e
 
         SIMULATION_RESULTS[result_id] = Dict(
             :type => "eis",

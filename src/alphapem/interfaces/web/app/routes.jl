@@ -12,6 +12,18 @@ Routes handle:
 
 using Genie, Genie.Router, Genie.Renderer, Genie.Requests, HTTP
 using JSON
+using Logging
+
+# Helper function to convert JSON string keys to symbols recursively
+function string_keys_to_symbols(dict::Dict)
+    result = Dict()
+    for (k, v) in dict
+        key = isa(k, String) ? Symbol(k) : k
+        value = isa(v, Dict) ? string_keys_to_symbols(v) : v
+        result[key] = value
+    end
+    return result
+end
 
 include("../SimulatorBackend.jl")
 
@@ -115,11 +127,18 @@ end
 # - If invalid: {:valid => false, :errors => [...]}
 route("/api/validate_parameters"; method="POST") do
     try
-        params = JSON.parse(String(Requests.rawpayload()))
+        params = string_keys_to_symbols(JSON.parse(String(Requests.rawpayload())))
         validation_result = SimulatorBackend.validate_parameters(params)
+
+        if !validation_result[:valid]
+            @warn "Parameter validation failed" errors=validation_result[:errors]
+        else
+            @info "Parameters validated successfully"
+        end
 
         json(validation_result)
     catch e
+        @error "Parameter validation error" exception=e
         json(Dict(:error => "Parameter validation failed: $(string(e))", :valid => false))
     end
 end
@@ -140,12 +159,34 @@ end
 # - If error: {:success => false, :error => "..."}
 route("/api/simulate/step"; method="POST") do
     try
-        params = JSON.parse(String(Requests.rawpayload()))
+        params = string_keys_to_symbols(JSON.parse(String(Requests.rawpayload())))
+        @info "Step simulation requested" fuel_cell_type=get(params, :fuel_cell_type, "unknown")
+
+        # Merge with fuel cell defaults before validation
+        if haskey(params, :fuel_cell_type)
+            try
+                defaults = SimulatorBackend.get_fuel_cell_defaults(string(params[:fuel_cell_type]))
+                for (key, default_value) in defaults
+                    if !haskey(params, key)
+                        params[key] = default_value
+                    elseif isa(default_value, Dict) && isa(params[key], Dict)
+                        for (subkey, subvalue) in default_value
+                            if !haskey(params[key], subkey)
+                                params[key][subkey] = subvalue
+                            end
+                        end
+                    end
+                end
+            catch e
+                @warn "Could not merge fuel cell defaults for step" exception=e
+            end
+        end
 
         # Validate before running
         validation = SimulatorBackend.validate_parameters(params)
         if !validation[:valid]
-            return json(Dict(:success => false, :error => validation[:errors]))
+            @error "Step simulation validation failed" errors=validation[:errors]
+            return json(Dict(:success => false, :error => validation[:errors]), status=400)
         end
 
         # Build simulation configuration
@@ -156,7 +197,8 @@ route("/api/simulate/step"; method="POST") do
 
         json(Dict(:success => true, :result_id => result[:id], :message => "Step simulation completed"))
     catch e
-        json(Dict(:success => false, :error => "Step simulation failed: $(string(e))"))
+        @error "Step simulation error" exception=e
+        json(Dict(:success => false, :error => "Step simulation failed: $(string(e))"), status=500)
     end
 end
 
@@ -175,11 +217,33 @@ end
 # - If error: {:success => false, :error => "..."}
 route("/api/simulate/polarization"; method="POST") do
     try
-        params = JSON.parse(String(Requests.rawpayload()))
+        params = string_keys_to_symbols(JSON.parse(String(Requests.rawpayload())))
+        @info "Polarization curve simulation requested" fuel_cell_type=get(params, :fuel_cell_type, "unknown")
+
+        # Merge with fuel cell defaults before validation
+        if haskey(params, :fuel_cell_type)
+            try
+                defaults = SimulatorBackend.get_fuel_cell_defaults(string(params[:fuel_cell_type]))
+                for (key, default_value) in defaults
+                    if !haskey(params, key)
+                        params[key] = default_value
+                    elseif isa(default_value, Dict) && isa(params[key], Dict)
+                        for (subkey, subvalue) in default_value
+                            if !haskey(params[key], subkey)
+                                params[key][subkey] = subvalue
+                            end
+                        end
+                    end
+                end
+            catch e
+                @warn "Could not merge fuel cell defaults for polarization" exception=e
+            end
+        end
 
         validation = SimulatorBackend.validate_parameters(params)
         if !validation[:valid]
-            return json(Dict(:success => false, :error => validation[:errors]))
+            @error "Polarization simulation validation failed" errors=validation[:errors]
+            return json(Dict(:success => false, :error => validation[:errors]), status=400)
         end
 
         config = SimulatorBackend.build_simulation_config(params, :polarization)
@@ -187,7 +251,8 @@ route("/api/simulate/polarization"; method="POST") do
 
         json(Dict(:success => true, :result_id => result[:id], :message => "Polarization curve completed"))
     catch e
-        json(Dict(:success => false, :error => "Polarization simulation failed: $(string(e))"))
+        @error "Polarization simulation error" exception=e
+        json(Dict(:success => false, :error => "Polarization simulation failed: $(string(e))"), status=500)
     end
 end
 
@@ -210,11 +275,33 @@ end
 # - If error: {:success => false, :error => "..."}
 route("/api/simulate/eis"; method="POST") do
     try
-        params = JSON.parse(String(Requests.rawpayload()))
+        params = string_keys_to_symbols(JSON.parse(String(Requests.rawpayload())))
+        @info "EIS simulation requested" fuel_cell_type=get(params, :fuel_cell_type, "unknown")
+
+        # Merge with fuel cell defaults before validation
+        if haskey(params, :fuel_cell_type)
+            try
+                defaults = SimulatorBackend.get_fuel_cell_defaults(string(params[:fuel_cell_type]))
+                for (key, default_value) in defaults
+                    if !haskey(params, key)
+                        params[key] = default_value
+                    elseif isa(default_value, Dict) && isa(params[key], Dict)
+                        for (subkey, subvalue) in default_value
+                            if !haskey(params[key], subkey)
+                                params[key][subkey] = subvalue
+                            end
+                        end
+                    end
+                end
+            catch e
+                @warn "Could not merge fuel cell defaults for EIS" exception=e
+            end
+        end
 
         validation = SimulatorBackend.validate_parameters(params)
         if !validation[:valid]
-            return json(Dict(:success => false, :error => validation[:errors]))
+            @error "EIS simulation validation failed" errors=validation[:errors]
+            return json(Dict(:success => false, :error => validation[:errors]), status=400)
         end
 
         config = SimulatorBackend.build_simulation_config(params, :eis)
@@ -222,7 +309,8 @@ route("/api/simulate/eis"; method="POST") do
 
         json(Dict(:success => true, :result_id => result[:id], :message => "EIS simulation completed"))
     catch e
-        json(Dict(:success => false, :error => "EIS simulation failed: $(string(e))"))
+        @error "EIS simulation error" exception=e
+        json(Dict(:success => false, :error => "EIS simulation failed: $(string(e))"), status=500)
     end
 end
 
@@ -246,6 +334,7 @@ route("/api/status/:result_id"; method="GET") do
         status = SimulatorBackend.get_simulation_status(result_id)
         json(status)
     catch e
+        @error "Status check failed" result_id=result_id exception=e
         json(Dict(:status => "error", :message => "Status check failed: $(string(e))"))
     end
 end
@@ -270,6 +359,7 @@ route("/api/results/:result_id"; method="GET") do
         results = SimulatorBackend.get_detailed_results(result_id)
         json(results)
     catch e
+        @error "Result retrieval failed" result_id=result_id exception=e
         json(Dict(:error => "Result retrieval failed: $(string(e))", :status => 500))
     end
 end
