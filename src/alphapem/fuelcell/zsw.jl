@@ -379,3 +379,48 @@ function zsw_pola_exp_data_calibration(type_fuel_cell::Symbol, voltage_zone::Sym
     return PolaExperimentalData(i_exp = i_exp_cali .* 1e4, U_exp = U_exp_cali)
 end
 
+
+"""
+    zsw_undetermined_parameters(voltage_zone::Symbol) -> Vector{Tuple{Symbol, Float64, Float64}}
+
+Return the list of undetermined parameters for ZSW fuel cell with their bounds.
+
+Each tuple contains: (parameter_name, min_bound, max_bound)
+
+The bounds may differ slightly from the general defaults in UNDETERMINED_PARAMETER_BOUNDS
+based on ZSW-specific calibration experience.
+
+# Arguments
+- `voltage_zone::Symbol`: `:full` or `:before_voltage_drop` (determines which parameters are included)
+
+# Returns
+Vector of tuples: (parameter_symbol, min_value, max_value) in calibration order
+"""
+function zsw_undetermined_parameters(voltage_zone::Symbol = :full)::Vector{Tuple{Symbol, Float64, Float64}}
+    voltage_zone in (:full, :before_voltage_drop) ||
+        throw(ArgumentError("voltage_zone must be :full or :before_voltage_drop (got $voltage_zone)"))
+
+    params = [
+        (:Hacl,        5e-6, 15e-6),  # Anode catalyst-layer thickness
+        (:Hccl,        5e-6, 20e-6),  # Cathode catalyst-layer thickness
+        (:Hmem,        5e-6, 30e-6),  # Membrane thickness
+        (:Hgdl,      100e-6, 150e-6), # Gas-diffusion-layer thickness
+        (:Hmpl,       40e-6, 100e-6), # Microporous-layer thickness
+        (:epsilon_gdl,   0.5, 0.9),   # GDL porosity
+        (:e,             3.0, 5.0),   # Capillary exponent (integer)
+        (:Re,          5e-8, 5e-6),   # Electron-conduction resistance
+        (:i0_c_ref,    0.1, 100.0),   # Reference cathode exchange current density
+        (:kappa_co,   0.01, 40.0),    # Crossover correction coefficient
+        (:kappa_c,    0.25, 4.0),     # Overpotential correction exponent
+    ]
+
+    if voltage_zone == :full
+        push!(params, (:K_l_ads,    1.0, 100.0))   # Liquid/vapor water-sorption rate ratio
+        push!(params, (:K_O2_ad_Pt, 0.1, 10.0))    # O₂ adsorption resistance coefficient
+    end
+
+    return params
+end
+
+
+

@@ -68,6 +68,60 @@ end
 
 
 # ============================================================
+# UNDETERMINED PARAMETER BOUNDS
+# ============================================================
+
+"""
+    UNDETERMINED_PARAMETER_BOUNDS
+
+Dictionary of default bounds for undetermined physical parameters.
+These bounds serve as fallback values when no fuel-cell-specific bounds are available.
+
+Each parameter is mapped to a tuple: (min::Float64, max::Float64, type::Symbol)
+where type is either :real or :int.
+"""
+const UNDETERMINED_PARAMETER_BOUNDS = Dict{Symbol, Tuple{Float64, Float64, Symbol}}(
+    :Hacl          => (5e-6, 20e-6, :real),           # Anode catalyst-layer thickness
+    :Hccl          => (5e-6, 20e-6, :real),           # Cathode catalyst-layer thickness
+    :Hmem          => (5e-6, 50e-6, :real),           # Membrane thickness
+    :Hgdl          => (100e-6, 150e-6, :real),        # Gas-diffusion-layer thickness
+    :Hmpl          => (40e-6, 100e-6, :real),         # Microporous-layer thickness
+    :epsilon_gdl   => (0.5, 0.95, :real),             # GDL porosity
+    :e             => (3.0, 5.0, :int),               # Capillary exponent
+    :K_l_ads       => (1.0, 100.0, :real),            # Liquid/vapor water-sorption rate ratio
+    :K_O2_ad_Pt    => (0.1, 10.0, :real),             # Resistance coefficient of O₂ adsorption on the Pt sites
+    :Re            => (5e-8, 5e-6, :real),            # Electron-conduction resistance
+    :i0_c_ref      => (0.1, 80.0, :real),             # Reference cathode exchange current density
+    :kappa_co      => (0.01, 40.0, :real),            # Crossover correction coefficient
+    :kappa_c       => (0.25, 4.0, :real),             # Overpotential correction exponent
+)
+
+
+"""
+    PARAMETER_METADATA
+
+Metadata for undetermined parameters: unit and description.
+Used for displaying and exporting parameter bounds.
+"""
+const PARAMETER_METADATA = Dict{Symbol, Tuple{String, String}}(
+    :Hacl          => ("m", "Anode catalyst-layer thickness"),
+    :Hccl          => ("m", "Cathode catalyst-layer thickness"),
+    :Hmem          => ("m", "Membrane thickness"),
+    :Hgdl          => ("m", "Gas-diffusion-layer thickness"),
+    :Hmpl          => ("m", "Microporous-layer thickness"),
+    :epsilon_gdl   => ("—", "GDL porosity"),
+    :e             => ("—", "Capillary exponent"),
+    :K_l_ads       => ("—", "Liquid/vapor water-sorption rate ratio"),
+    :K_O2_ad_Pt    => ("—", "O₂ adsorption resistance coefficient"),
+    :Re            => ("Ω·m²", "Electron-conduction resistance"),
+    :i0_c_ref      => ("A·m⁻²", "Reference cathode exchange current density"),
+    :kappa_co      => ("—", "Crossover correction coefficient"),
+    :kappa_c       => ("—", "Overpotential correction exponent"),
+)
+
+
+
+# ============================================================
 # OPERATING PARAMETERS
 # ============================================================
 

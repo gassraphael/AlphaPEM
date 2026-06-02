@@ -49,8 +49,8 @@ module ConfigurationSampling
 using Random
 using LatinHypercubeSampling: randomLHC, scaleLHC
 
-using AlphaPEM.Config: PhysicalParams
-using AlphaPEM.Fuelcell: create_fuelcell
+using AlphaPEM.Config: PhysicalParams, PARAMETER_METADATA
+using AlphaPEM.Fuelcell: create_fuelcell, zsw_undetermined_parameters, eh31_undetermined_parameters
 
 export ParameterBound,
        ParameterBounds,
@@ -151,8 +151,9 @@ end
 
 Return the undetermined-parameter bounds for a given fuel-cell type and voltage zone.
 
-Bounds are adapted from `parameter_bounds_for_calibration()` in `calibration_modules.jl`,
-restricted to the undetermined physical parameters (operating inputs are excluded).
+Bounds are built by fetching undetermined parameters from the fuel-cell-specific function
+(e.g., `zsw_undetermined_parameters` for ZSW types) and combining them with metadata
+from `PARAMETER_METADATA`.
 
 # Supported `fuel_cell_type` values
 - `:ZSW_GenStack` (and pressure/temperature variants)
@@ -165,15 +166,8 @@ function bounds_for_fuel_cell(fuel_cell_type::Symbol,
 
     bounds = ParameterBound[]
 
-    # Helper for concise insertion.
-    _push!(name::Symbol, mn::Real, mx::Real;
-           type::Symbol = :real,
-           unit::String = "",
-           description::String = "") = push!(bounds,
-                                            ParameterBound(name, Float64(mn), Float64(mx), type, unit, description))
-
-    # Bounds are adapted from `parameter_bounds_for_calibration()`.
-    if fuel_cell_type in (
+    # Determine which undetermined parameters apply to this fuel-cell type
+    undetermined_params = if fuel_cell_type in (
         :ZSW_GenStack,
         :ZSW_GenStack_Pa_1_61_Pc_1_41,
         :ZSW_GenStack_Pa_2_01_Pc_1_81,
@@ -183,40 +177,30 @@ function bounds_for_fuel_cell(fuel_cell_type::Symbol,
         :ZSW_GenStack_T_76,
         :ZSW_GenStack_T_84,
     )
-        _push!(:Hacl, 5e-6, 15e-6; unit = "m", description = "Anode catalyst-layer thickness")
-        _push!(:Hccl, 5e-6, 20e-6; unit = "m", description = "Cathode catalyst-layer thickness")
-        _push!(:Hmem, 5e-6, 30e-6; unit = "m", description = "Membrane thickness")
-        _push!(:Hgdl, 100e-6, 150e-6; unit = "m", description = "Gas-diffusion-layer thickness")
-        _push!(:Hmpl, 40e-6, 100e-6; unit = "m", description = "Microporous-layer thickness")
-        _push!(:epsilon_gdl, 0.5, 0.9; unit = "—", description = "GDL porosity")
-        _push!(:e, 3, 5; type = :int, unit = "—", description = "Capillary exponent")
-        _push!(:Re, 5e-8, 5e-6; unit = "Ω·m²", description = "Electron-conduction resistance")
-        _push!(:i0_c_ref, 1e-1, 100.0; unit = "A·m⁻²", description = "Reference cathode exchange current density")
-        _push!(:kappa_co, 0.01, 40.0; unit = "—", description = "Crossover correction coefficient")
-        _push!(:kappa_c, 0.25, 4.0; unit = "—", description = "Overpotential correction exponent")
-
-        if voltage_zone == :full
-            _push!(:K_l_ads, 1.0, 100.0; unit = "—", description = "Liquid/vapor water-sorption rate ratio")
-            _push!(:K_O2_ad_Pt, 0.1, 10.0; unit = "—", description = "Resistance coefficient of O₂ adsorption on Pt")
-        end
-
+        zsw_undetermined_parameters(voltage_zone)
     elseif fuel_cell_type in (:EH_31_1_5, :EH_31_2_0, :EH_31_2_25, :EH_31_2_5)
-        # The EH-31 calibration assumes Hccl == Hacl. We therefore only sample Hacl and
-        # will mirror Hccl in `apply_bounds_to_params`.
-        _push!(:Hacl, 8e-6, 20e-6; unit = "m", description = "Anode/cathode catalyst-layer thickness (Hccl = Hacl)")
-        _push!(:Hmem, 15e-6, 50e-6; unit = "m", description = "Membrane thickness")
-        _push!(:epsilon_gdl, 0.40, 0.95; unit = "—", description = "GDL porosity")
-        _push!(:e, 3, 5; type = :int, unit = "—", description = "Capillary exponent")
-        _push!(:Re, 5e-7, 5e-6; unit = "Ω·m²", description = "Electron-conduction resistance")
-        _push!(:i0_c_ref, 1e-1, 100.0; unit = "A·m⁻²", description = "Reference cathode exchange current density")
-        _push!(:kappa_co, 0.01, 40.0; unit = "—", description = "Crossover correction coefficient")
-        _push!(:kappa_c, 0.25, 4.0; unit = "—", description = "Overpotential correction exponent")
-        if voltage_zone == :full
-            _push!(:K_O2_ad_Pt, 1.0, 10.0; unit = "—", description = "O₂ adsorption resistance coefficient")
-        end
-
+        eh31_undetermined_parameters(voltage_zone)
     else
         throw(ArgumentError("Unsupported fuel_cell_type: $fuel_cell_type"))
+    end
+
+    # Build ParameterBound objects by combining fuel-cell-specific bounds with metadata
+    for (param_name, min_val, max_val) in undetermined_params
+        if !haskey(PARAMETER_METADATA, param_name)
+            throw(ArgumentError("No metadata found for parameter $param_name"))
+        end
+
+        unit, description = PARAMETER_METADATA[param_name]
+
+        # Determine parameter type (real or int) based on parameter name
+        param_type = if param_name == :e
+            :int
+        else
+            :real
+        end
+
+        push!(bounds, ParameterBound(param_name, Float64(min_val), Float64(max_val),
+                                     param_type, unit, description))
     end
 
     # Sanity checks.
