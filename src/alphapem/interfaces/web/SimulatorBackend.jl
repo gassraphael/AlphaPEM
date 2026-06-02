@@ -36,8 +36,6 @@ function initialize_backend()
     if !isdir(RESULTS_DIR)
         mkpath(RESULTS_DIR)
     end
-
-    @info "SimulatorBackend initialized. Results directory: $RESULTS_DIR"
 end
 
 # ------ FUEL CELL PRESETS ------
