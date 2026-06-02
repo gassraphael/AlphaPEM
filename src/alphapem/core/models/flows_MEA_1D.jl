@@ -43,7 +43,7 @@ function calculate_flows_1D_MEA!(work::MEAFlowsWorkspace,
     Hmem, Hacl, Hccl = pp.Hmem, pp.Hacl, pp.Hccl
     Wagc, Wcgc, Hagc, Hcgc = pp.Wagc, pp.Wcgc, pp.Hagc, pp.Hcgc
     epsilon_gdl, epsilon_mpl = pp.epsilon_gdl, pp.epsilon_mpl
-    K_l_ads, kappa_co = pp.K_l_ads, pp.kappa_co
+    kappa_co = pp.kappa_co
     nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl
 
     # Extraction of the variables
@@ -212,7 +212,7 @@ function calculate_flows_1D_MEA!(work::MEAFlowsWorkspace,
     Sv_abs_acl = (1 - s_acl) * gamma_sorp(C_v_acl, s_acl, lambda_acl, T_acl, Hacl) * rho_mem / M_eq *
                  (lambda_eq(C_v_acl, s_acl, T_acl) - lambda_acl)
     if s_acl > 0
-        Sl_abs_acl = s_acl * K_l_ads * gamma_sorp(C_v_acl, s_acl, lambda_acl, T_acl, Hacl) * rho_mem / M_eq *
+        Sl_abs_acl = s_acl * gamma_sorp(C_v_acl, s_acl, lambda_acl, T_acl, Hacl) * rho_mem / M_eq *
                      (lambda_eq(C_v_acl, s_acl, T_acl) - lambda_acl)
     else
         Sl_abs_acl = 0.0
@@ -222,7 +222,7 @@ function calculate_flows_1D_MEA!(work::MEAFlowsWorkspace,
     Sv_abs_ccl = (1 - s_ccl) * gamma_sorp(C_v_ccl, s_ccl, lambda_ccl, T_ccl, Hccl) * rho_mem / M_eq *
                  (lambda_eq(C_v_ccl, s_ccl, T_ccl) - lambda_ccl)
     if s_ccl > 0
-        Sl_abs_ccl = s_ccl * K_l_ads * gamma_sorp(C_v_ccl, s_ccl, lambda_ccl, T_ccl, Hccl) * rho_mem / M_eq *
+        Sl_abs_ccl = s_ccl * gamma_sorp(C_v_ccl, s_ccl, lambda_ccl, T_ccl, Hccl) * rho_mem / M_eq *
                      (lambda_eq(C_v_ccl, s_ccl, T_ccl) - lambda_ccl)
     else
         Sl_abs_ccl = 0.0

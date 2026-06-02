@@ -67,7 +67,6 @@ function eh31_physical_params()::PhysicalParams
         Vcem = Vcsm,                         # Exhaust manifold volume at the cathode in m³
         # Interaction parameters between fluids and PEMFC structure
         e = 4,                               # Capillary exponent
-        K_l_ads = 1.0,                       # Ratio between the liquid and vapor sorption rates of water in the membrane
         K_O2_ad_Pt = 5.4,                    # Interfacial resistance coefficient of O2 adsorption on the Pt sites
         # Voltage polarization
         Re = 1e-6,                           # Electron conduction resistance of the circuit in Ω·m²
