@@ -56,6 +56,7 @@ Base.@kwdef struct PhysicalParams <: AbstractFuelCellParams
     Vcem::Float64 = 2.4e-3          # Exhaust manifold volume at the cathode in m³
     #   Interaction parameters between fluids and PEMFC structure
     e::Int64 = 5                    # Capillary exponent
+    gamma_sorp_l::Float64 = 0.5    # Sorption rate of liquid water in the membrane
     K_O2_ad_Pt::Float64 = 5.4       # Interfacial resistance coefficient of O2 adsorption on the Pt sites
     #   Voltage polarization
     Re::Float64 = 1e-6              # Electron conduction resistance of the circuit in Ω·m²

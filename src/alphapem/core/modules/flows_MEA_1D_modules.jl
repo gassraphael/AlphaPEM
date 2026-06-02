@@ -659,7 +659,7 @@ function fv(lambdaa, T)
 end
 
 
-"""This function calculates the sorption rate of water in the membrane, in s-1.
+"""This function calculates the sorption rate of vapor in the membrane, in s-1.
 
 Parameters
 ----------
@@ -677,9 +677,9 @@ Hcl : Float64
 Returns
 -------
 gamma_sorp
-    Sorption rate of water in the membrane in s-1.
+    Sorption rate of vapor in the membrane in s-1.
 """
-function gamma_sorp(C_v, s, lambdaa, T, Hcl::Float64)
+function gamma_sorp_v(C_v, s, lambdaa, T, Hcl::Float64)
 
     T_eff = _positive_temperature_value(T)
     fv_value = fv(lambdaa, T_eff)

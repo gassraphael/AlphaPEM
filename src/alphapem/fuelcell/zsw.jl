@@ -67,6 +67,7 @@ function zsw_physical_params()::PhysicalParams
         Vcem = 25.8e-3 * 22.61e-4,           # Exhaust manifold volume at the cathode in m³
         # Interaction parameters between fluids and PEMFC structure
         e = 3,                               # Capillary exponent
+        gamma_sorp_l = 0.5,                  # Sorption rate of liquid water in the membrane
         K_O2_ad_Pt = 7.346634385810734,      # Interfacial resistance coefficient of O2 adsorption on the Pt sites
         # Voltage polarization
         Re = 1.545654084145453e-7,           # Electron conduction resistance of the circuit in Ω·m²
