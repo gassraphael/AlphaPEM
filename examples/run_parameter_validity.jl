@@ -63,6 +63,7 @@ end
 
 using AlphaPEM.Parametrisation.ValidParameterRegion
 using Logging
+using Printf
 
 # ─────────────────────────────────────────────────────────────────────────────
 # LOGGING FILTER
@@ -105,22 +106,35 @@ analysis_cfg = ValidityAnalysisConfig(
     validation_criteria    = criteria_cfg,
     parallel               = PARALLEL,              # ← driven by the constant above
     save_curves            = true,                  # Set to true to save polarization curves
-    reuse_from             = nothing,               # Set to "path/to/previous/run" to reuse curves. ex: "results/model_validity/20260601_001_s01000"
-    hyperbox_finder_method = :PRIM,                 # nothing (skip this step), ':PRIM', or ':MaxBox'.
+    reuse_from             = "results/model_validity/2026.06.02 - 10000 samples - before voltage drop - V1",               # Set to "path/to/previous/run" to reuse curves. ex: "results/model_validity/2026.06.02 - 10000 samples - before voltage drop - V1"
+    hyperbox_finder_method = [:PRIM, :MaxBox],                 # nothing (skip this step), ':PRIM', or ':MaxBox'.
 )
 
-# PRIM configuration (built from `analysis_cfg.hyperbox_finder_method` if provided)
-prim_cfg = if analysis_cfg.hyperbox_finder_method === nothing
+# IRD configuration (built from `analysis_cfg.hyperbox_finder_method` if provided)
+ird_cfg = if analysis_cfg.hyperbox_finder_method === nothing
     nothing
 else
-    # Validate option and convert to the vector expected by PRIMConfig
+    # Validate option and convert to the vector expected by IRDConfig
     allowed = Set([:PRIM, :MaxBox])
-    if !(analysis_cfg.hyperbox_finder_method in allowed)
-        error("Invalid hyperbox_finder_method: $(analysis_cfg.hyperbox_finder_method). Use :PRIM or :MaxBox or nothing.")
+    methods_vec = if isa(analysis_cfg.hyperbox_finder_method, Symbol)
+        # Single method: convert to vector
+        if !(analysis_cfg.hyperbox_finder_method in allowed)
+            error("Invalid hyperbox_finder_method: $(analysis_cfg.hyperbox_finder_method). Use :PRIM, :MaxBox or nothing.")
+        end
+        [analysis_cfg.hyperbox_finder_method]
+    else
+        # Vector of methods: validate each one
+        for m in analysis_cfg.hyperbox_finder_method
+            if !(m in allowed)
+                error("Invalid hyperbox_finder_method: $m. Use :PRIM or :MaxBox only.")
+            end
+        end
+        analysis_cfg.hyperbox_finder_method
     end
-    PRIMConfig(
+
+    IRDConfig(
         ird_package_dir   = "external/supplementary_2023_ird/irdpackage",
-        methods           = [analysis_cfg.hyperbox_finder_method],
+        methods           = methods_vec,
         probability_range = (0.8, 1.0),
         seed              = 42,
     )
@@ -136,7 +150,7 @@ println("="^72)
 println()
 
 result = with_logger(_SuppressSafetyWarnings(current_logger())) do
-    run_validity_analysis(analysis_cfg, prim_cfg)
+    run_validity_analysis(analysis_cfg, ird_cfg)
 end
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -155,24 +169,37 @@ println("  Valid       : ", s.valid_count, "  (", valid_pct, " %)")
 println("  Invalid     : ", s.invalid_count)
 println("  Failed      : ", s.failed_count)
 
-println()
-println("─"^72)
-println("  Generated files")
-println("─"^72)
-for (k, v) in sort(collect(result.output_files); by = x -> string(x[1]))
-    println("  $(rpad(string(k), 38)) → $v")
-end
-
-if prim_cfg !== nothing && !isempty(result.prim_results)
+if ird_cfg !== nothing && !isempty(result.prim_results)
     println()
     println("─"^72)
-    println("  PRIM bounds summary")
+    println("  Restricted region analysis")
     println("─"^72)
+
+    # Display results for each method
     for r in result.prim_results
-        println("  Method    : ", r.method)
-        println("  Precision : ", round(r.precision; digits = 3))
-        println("  Coverage  : ", round(r.coverage;  digits = 3))
-        println()
+        println("  $(rpad(string(r.method), 10)) │ Precision: $(round(r.precision; digits=3))  Coverage: $(round(r.coverage; digits=3))  Valid in box: $(r.n_valid_inside)/$(r.n_inside_box)")
+    end
+end
+
+println()
+println("─"^72)
+println("  Key output files")
+println("─"^72)
+
+# Display essential files
+if haskey(result.output_files, :parameter_classification_csv)
+    println("  Classifications : ", basename(result.output_files[:parameter_classification_csv]))
+end
+if haskey(result.output_files, :generated_curves_csv)
+    println("  Curves          : ", basename(result.output_files[:generated_curves_csv]))
+end
+
+if ird_cfg !== nothing && !isempty(result.prim_results)
+    if haskey(result.output_files, :bounds_restricted_yaml)
+        println("  Bounds          : ", basename(result.output_files[:bounds_restricted_yaml]))
+    end
+    if haskey(result.output_files, :final_report_txt)
+        println("  Report          : ", basename(result.output_files[:final_report_txt]))
     end
 end
 
@@ -182,10 +209,10 @@ println("  Pipeline steps")
 println("="^72)
 println("    ✅  STEP 1 — LHS sampling                         (complete)")
 println("    ✅  STEP 2 — Batch simulation & classification    (complete)")
-if prim_cfg !== nothing
-    println("    ✅  STEP 3 — PRIM restriction via R irdpackage   (complete)")
+if ird_cfg !== nothing
+    println("    ✅  STEP 3 — IRD methods analysis (PRIM/MaxBox)   (complete)")
 else
-    println("    -- STEP 3 — PRIM restriction via R irdpackage    (skipped: PRIM disabled)")
+    println("    -- STEP 3 — IRD methods analysis (PRIM/MaxBox)    (skipped: disabled)")
 end
 println("    ✅  STEP 4 — Export results                       (complete)")
 println("="^72)

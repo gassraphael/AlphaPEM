@@ -358,22 +358,21 @@ bounds = load_restricted_bounds("results/model_validity/restricted_bounds_PRIM.y
 
 ## Credits
 
-This pipeline is adapted from the master's thesis:
+This pipeline is adapted from the internship projects of master's students in statistics and data science:
 
 > **Sensitivity Analysis and Surrogate Modeling of PEM Fuel Cells**  
-> Nathaly Vergel Serrano, Dejvis Toptani, Camila Bermudez Valderrama  
-> Supervised by Dr. Giuseppe Casalicchio and Fiona Ewald  
-> In collaboration with Luis Winkler (ZSW Ulm) and Prof. Herbert Palm (UAS Munich)  
-> Statistical Consulting, Master in Statistics and Data Science  
-> Institute of Statistics, Ludwig-Maximilians-Universität München  
-> Repository: <https://github.com/nathaly-vergel/Official-Sensitivity-Analysis-and-Surrogate-Modeling-of-PEM-Fuel-Cells>
+> Nathaly Vergel Serrano, Dejvis Toptani, Camila Bermudez Valderrama,  
+> From the Department of Statistics in the University of Munich,
+> Supervised by Dr. Giuseppe Casalicchio and Fiona Ewald,  
+> In collaboration with Luis Winkler (ZSW Ulm) and Prof. Herbert Palm (UAS Munich),
+> Repository: <https://github.com/nathaly-vergel/Official-Sensitivity-Analysis-and-Surrogate-Modeling-of-PEM-Fuel-Cells>.
 
-The PRIM and MaxBox algorithms are provided by the **IRD package** (Interpretable Regional
-Descriptors):
+The PRIM and MaxBox algorithms are provided by the **IRD package** (Interpretable Regional Descriptors):
 
-> Scholbeck, C. A., Casalicchio, G., Molnar, C., Bischl, B., & Heumann, C. (2023).  
-> *Post-hoc Unit-Coherent Interpretable Regions* — supplementary material.  
-> Repository: <https://github.com/slds-lmu/supplementary_2023_ird>
+> Susanne Dandl, Giuseppe Casalicchio, Bernd Bischl & Ludwig Bothmann, 
+> From the Department of Statistics in the University of Munich,
+> Repository: <https://github.com/slds-lmu/supplementary_2023_ird>,
+> Conference paper: <https://link.springer.com/chapter/10.1007/978-3-031-43418-1_29>.
 
 
 # Roadmap

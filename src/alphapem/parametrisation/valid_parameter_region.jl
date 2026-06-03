@@ -99,12 +99,12 @@ const VALIDITY_OUTPUT_DIR = abspath(joinpath(@__DIR__, "..", "..", "..", "result
 # ─── Sub-modules ─────────────────────────────────────────────────────────────
 include(joinpath(@__DIR__, "validity/validity_criteria.jl"))
 include(joinpath(@__DIR__, "validity/configuration_sampling.jl"))
-include(joinpath(@__DIR__, "validity/prim_interface.jl"))
+include(joinpath(@__DIR__, "validity/ird_interface.jl"))
 include(joinpath(@__DIR__, "validity/results_export.jl"))
 
 using .ValidityCriteria
 using .ConfigurationSampling
-using .PRIMInterface
+using .IRDInterface
 using .ResultsExport
 
 # Re-export sub-module types into this namespace for convenient access
@@ -113,8 +113,8 @@ using .ValidityCriteria:      ValidityCriteriaConfig, ValidationResult,
 using .ConfigurationSampling: ParameterBound, ParameterBounds, SamplingConfig,
                                bounds_for_fuel_cell, generate_lhs_samples,
                                apply_bounds_to_params, get_reference_config
-using .PRIMInterface:         PRIMConfig, PRIMResult,
-                               run_prim_analysis
+using .IRDInterface:          IRDConfig, IRDResult,
+                               run_ird_analysis
 using .ResultsExport:         ExportConfig, ValidationSummary,
                                export_classified_configurations,
                                export_parameter_bounds,
@@ -126,7 +126,7 @@ using .ResultsExport:         ExportConfig, ValidationSummary,
 # Public API
 export ValidityCriteria,
        ConfigurationSampling,
-       PRIMInterface,
+       IRDInterface,
        ResultsExport,
        # Fixed output path
        VALIDITY_OUTPUT_DIR,
@@ -151,12 +151,12 @@ export ValidityCriteria,
        bounds_for_fuel_cell,
        generate_lhs_samples,
        apply_bounds_to_params,
-       get_reference_config,
-       # PRIMInterface types & functions
-       PRIMConfig,
-       PRIMResult,
-       run_prim_analysis,
-       # ResultsExport types & functions
+        get_reference_config,
+        # IRDInterface types & functions
+        IRDConfig,
+        IRDResult,
+        run_ird_analysis,
+        # ResultsExport types & functions
        ExportConfig,
        ValidationSummary,
        export_classified_configurations,
@@ -215,12 +215,12 @@ Base.@kwdef struct ValidityAnalysisConfig
     n_samples::Int                      = 2000
     sampling_seed::Int                  = 42
     validation_criteria::ValidityCriteriaConfig = ValidityCriteriaConfig()
-    polarization_params::PolarizationParams = PolarizationParams()
+    polarization_params::PolarizationParams = PolarizationParams(delta_i = 0.1e4)
     nb_gc::Int                          = 1   # Minimum spatial resolution for speed
     parallel::Bool                      = true
     save_curves::Bool                   = true   # Save polarization curves to curves.csv
     reuse_from::Union{String, Nothing}  = nothing  # Path to previous run directory to reuse curves
-    hyperbox_finder_method::Union{Symbol, Nothing} = :PRIM # e.g. :PRIM or :MaxBox; set to `nothing` to skip
+    hyperbox_finder_method::Union{Symbol, Vector{Symbol}, Nothing} = :PRIM # e.g. :PRIM, :MaxBox, [:PRIM, :MaxBox]; set to `nothing` to skip
 end
 
 
@@ -243,9 +243,129 @@ struct ValidityAnalysisResult
     original_bounds::Dict{Symbol, Tuple{Float64, Float64}}
     restricted_bounds::Dict{Symbol, Tuple{Float64, Float64}}
     validation_summary::ValidationSummary
-    prim_results::Vector{PRIMResult}
+    prim_results::Vector{IRDResult}
     output_files::Dict{Symbol, String}
     execution_time::Float64
+end
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CONSOLIDATION HELPERS
+# ─────────────────────────────────────────────────────────────────────────────
+
+"""
+    _export_consolidated_bounds(ird_results::Vector{IRDResult},
+                                 original_bounds::Dict,
+                                 output_path::String,
+                                 cfg::ValidityAnalysisConfig)
+
+Export a consolidated YAML file containing bounds from all methods.
+"""
+function _export_consolidated_bounds(ird_results::Vector{IRDResult},
+                                      original_bounds::Dict,
+                                      output_path::String,
+                                      cfg::ValidityAnalysisConfig)
+    # Use the first method's restricted bounds as the primary result
+    # (in practice, they should be very similar across methods)
+    if isempty(ird_results)
+        return
+    end
+
+    primary_bounds = first(ird_results).restricted_bounds
+    export_parameter_bounds(primary_bounds, output_path;
+                           method   = :restricted,
+                           metadata = Dict(
+                               "fuel_cell_type"    => string(cfg.fuel_cell_type),
+                               "methods_compared"  => join(string.(getfield.(ird_results, :method)), ", "),
+                               "primary_precision" => first(ird_results).precision,
+                               "primary_coverage"  => first(ird_results).coverage,
+                           ))
+end
+
+
+"""
+    _export_consolidated_report(ird_results::Vector{IRDResult},
+                                 summary::ValidationSummary,
+                                 output_path::String,
+                                 cfg::ValidityAnalysisConfig,
+                                 overall_start::Float64)
+
+Export a consolidated text report comparing all methods with detailed bounds analysis.
+"""
+function _export_consolidated_report(ird_results::Vector{IRDResult},
+                                      summary::ValidationSummary,
+                                      output_path::String,
+                                      cfg::ValidityAnalysisConfig,
+                                      overall_start::Float64)
+    valid_pct = round(summary.valid_count / max(1, summary.total_simulations) * 100; digits = 1)
+    overall_elapsed = time() - overall_start
+
+    open(output_path, "w") do f
+        # Header with timestamp and execution time
+        write(f, "="^80 * "\n")
+        write(f, "  AlphaPEM — Parameter Validity Region Analysis Report\n")
+        write(f, "="^80 * "\n")
+        write(f, "  Generated: $(Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS"))\n")
+        write(f, "  Total time: $(round(overall_elapsed; digits=1)) s\n")
+        write(f, "="^80 * "\n\n")
+
+        write(f, "INITIAL CLASSIFICATION OVERVIEW\n")
+        write(f, "─"^80 * "\n")
+        write(f, @sprintf("  Total simulations : %d\n", summary.total_simulations))
+        write(f, @sprintf("  Valid             : %d (%.1f%%)\n", summary.valid_count, valid_pct))
+        write(f, @sprintf("  Invalid           : %d\n", summary.invalid_count))
+        write(f, @sprintf("  Failed            : %d\n\n", summary.failed_count))
+
+        if !isempty(ird_results)
+            write(f, "RESTRICTED REGION ANALYSIS — METHOD COMPARISON\n")
+            write(f, "─"^80 * "\n")
+            # Updated header with Valid in box metric
+            write(f, @sprintf("  %-10s │ Precision │ Recall │ Box Precision │ Coverage │ Valid Box  │ RF AUC\n", "Method"))
+            write(f, "─"^80 * "\n")
+
+            for r in ird_results
+                precision_rf = get(r.rf_metrics, "precision", 0.0)
+                recall_rf    = get(r.rf_metrics, "recall", 0.0)
+                auc          = get(r.rf_metrics, "AUC", 0.0)
+                write(f, @sprintf("  %-10s │   %.3f   │ %.3f  │     %.3f      │  %.3f   │ %4d/%-5d │ %.4f\n",
+                    string(r.method), precision_rf, recall_rf, r.precision, r.coverage, r.n_valid_inside, r.n_inside_box, auc))
+            end
+            write(f, "─"^80 * "\n\n")
+
+            # Detailed bounds table for each method
+            for r in ird_results
+                method_str = string(r.method)
+                write(f, "DETAILED BOUNDS — $method_str\n")
+                write(f, "┌─────────────┬───────────┬───────────┬───────────┬───────────┬──────────┐\n")
+                write(f, "│ Parameter   │ Orig Min  │ Orig Max  │ Rest Min  │ Rest Max  │ Shrink % │\n")
+                write(f, "├─────────────┼───────────┼───────────┼───────────┼───────────┼──────────┤\n")
+
+                # Get sorted parameter names
+                param_names = sort(collect(keys(r.restricted_bounds)))
+
+                for name in param_names
+                    orig_lo, orig_hi = r.original_bounds[name]
+                    rest_lo, rest_hi = r.restricted_bounds[name]
+
+                    # Calculate shrinkage percentage
+                    orig_width = orig_hi - orig_lo
+                    rest_width = rest_hi - rest_lo
+                    shrink_pct = if orig_width > 0
+                        (orig_width - rest_width) / orig_width * 100
+                    else
+                        0.0
+                    end
+
+                    write(f, @sprintf("│ %-11s │ %.3e │ %.3e │ %.3e │ %.3e │ %6.1f %% │\n",
+                        String(name), orig_lo, orig_hi, rest_lo, rest_hi, shrink_pct))
+                end
+
+                write(f, "└─────────────┴───────────┴───────────┴───────────┴───────────┴──────────┘\n\n")
+            end
+        end
+
+        write(f, "═"^80 * "\n")
+    end
 end
 
 
@@ -256,34 +376,39 @@ end
 """
     _generate_run_directory(cfg::ValidityAnalysisConfig) -> String
 
-Generate a timestamped and auto-indexed output directory for the current run.
+Generate a descriptive output directory for the current run.
 
-Directory structure: `<VALIDITY_OUTPUT_DIR>/<YYYYMMDD>_<NNN>_s<NSAMPLES>/`
+Directory structure: `<VALIDITY_OUTPUT_DIR>/<YYYY.MM.DD - N samples - zone - VN>/`
 where:
-  - YYYYMMDD = current date
-  - NNN = auto-incremented index if multiple runs on the same day
-  - NSAMPLES = number of samples in `cfg`
+  - YYYY.MM.DD = current date
+  - N = number of samples
+  - zone = voltage zone (before_voltage_drop or full)
+  - VN = version number (V1, V2, etc.)
 
 All output files for this run will be written to the returned directory.
 
 # Example
 ```julia
-dir = _generate_run_directory(cfg)  # → "results/model_validity/20260601_001_s0020/"
+dir = _generate_run_directory(cfg)  # → "results/model_validity/2026.06.02 - 10000 samples - before voltage drop - V1/"
 ```
 """
 function _generate_run_directory(cfg::ValidityAnalysisConfig)::String
-    date_str = Dates.format(Dates.today(), "yyyymmdd")
+    date_str = Dates.format(Dates.today(), "yyyy.mm.dd")
+    zone_str = string(cfg.voltage_zone)
 
-    # Find the next available index for this date
+    # Create base directory name without version
     base_dir = VALIDITY_OUTPUT_DIR
     mkpath(base_dir)
 
-    index = 1
-    while isdir(joinpath(base_dir, @sprintf("%s_%03d_s%05d", date_str, index, cfg.n_samples)))
-        index += 1
+    base_dirname = "$date_str - $(cfg.n_samples) samples - $zone_str"
+
+    # Find the next available version
+    version = 1
+    while isdir(joinpath(base_dir, "$base_dirname - V$version"))
+        version += 1
     end
 
-    run_dir = joinpath(base_dir, @sprintf("%s_%03d_s%05d", date_str, index, cfg.n_samples))
+    run_dir = joinpath(base_dir, "$base_dirname - V$version")
     mkpath(run_dir)
     return run_dir
 end
@@ -339,7 +464,7 @@ result = run_validity_analysis(cfg)
 ```
 """
 function run_validity_analysis(cfg::ValidityAnalysisConfig,
-                                prim_cfg::Union{PRIMConfig, Nothing} = nothing
+                                ird_cfg::Union{IRDConfig, Nothing} = nothing
                                 )::ValidityAnalysisResult
     overall_start = time()
 
@@ -366,21 +491,21 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
     )
 
     # Export original bounds to YAML
-    bounds_path = abspath(joinpath(run_dir, "bounds_prior.yaml"))
+    bounds_path = abspath(joinpath(run_dir, "bounds_initial.yaml"))
     export_parameter_bounds(orig_bounds, bounds_path;
-                            method   = :prior,
+                            method   = :initial,
                             metadata = Dict("fuel_cell_type" => string(cfg.fuel_cell_type),
                                             "voltage_zone"   => string(cfg.voltage_zone)))
-    output_files[:bounds_prior_yaml] = bounds_path
+    output_files[:bounds_initial_yaml] = bounds_path
 
     # ── STEP 2: Batch simulation + classification ─────────────────────────────
     if cfg.reuse_from !== nothing
         @info "STEP 2 — Loading cached curves from $(cfg.reuse_from)…"
         try
-            curves_path = joinpath(cfg.reuse_from, "curves.csv")
+            curves_path = joinpath(cfg.reuse_from, "generated_curves.csv")
             data = classify_batch_simulations(X, pb, cfg, run_dir; curves_df = _load_curves_from_csv(curves_path))
-            output_files[:curves_csv] = curves_path
-            @info "  → Using curves from: $curves_path"
+            output_files[:generated_curves_csv] = curves_path
+            @info "    → Using curves from: $curves_path"
         catch e
             @warn "Failed to load cached curves: $e. Running fresh simulation…"
             result_tuple = classify_batch_simulations(X, pb, cfg, run_dir)
@@ -402,10 +527,18 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
         end
     end
 
+    # Record generated curves if saved
+    if cfg.save_curves
+        generated_curves_path = abspath(joinpath(run_dir, "generated_curves.csv"))
+        if isfile(generated_curves_path)
+            output_files[:generated_curves_csv] = generated_curves_path
+        end
+    end
+
     # Export classified CSV
-    csv_path = abspath(joinpath(run_dir, "configurations.csv"))
+    csv_path = abspath(joinpath(run_dir, "parameter_classification.csv"))
     CSV.write(csv_path, data)
-    output_files[:configurations_csv] = csv_path
+    output_files[:parameter_classification_csv] = csv_path
 
     # Extract summary stats from data
     classifications = data.classification
@@ -429,66 +562,57 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
         Dates.format(Dates.now(), "yyyy-mm-ddTHH:MM:SS")
     )
 
-    # Export validation summary
-    summary_path = abspath(joinpath(run_dir, "summary.txt"))
-    export_validation_summary(summary, summary_path)
-    output_files[:summary] = summary_path
+    # Note: summary info is included in final_report.txt if IRD is run
+    # For standalone runs without IRD, summary info is available in the console output
 
-    # ── STEP 3: PRIM (optional) ───────────────────────────────────────────────
-    prim_results       = PRIMResult[]
-    restricted_bounds  = orig_bounds          # default: unchanged when PRIM is skipped
 
-    if prim_cfg !== nothing
-        @info "STEP 3 — Running PRIM analysis…"
+    # ── STEP 3: IRD methods (optional) ───────────────────────────────────────────────
+    ird_results        = IRDResult[]
+    restricted_bounds  = orig_bounds          # default: unchanged when IRD is skipped
+
+    if ird_cfg !== nothing
+        @info "STEP 3 — Running IRD analysis…"
         ref_config   = get_reference_config(cfg.fuel_cell_type)
-        prim_results = find_valid_region(data, ref_config, prim_cfg, run_dir)
 
-        for r in prim_results
-            mstr = string(r.method)
-
-            # Export restricted bounds YAML
-            bounds_path = abspath(joinpath(run_dir, "bounds_restricted_$(mstr).yaml"))
-            export_parameter_bounds(r.restricted_bounds, bounds_path;
-                                    method   = r.method,
-                                    metadata = Dict(
-                                        "fuel_cell_type" => string(cfg.fuel_cell_type),
-                                        "precision"      => r.precision,
-                                        "coverage"       => r.coverage,
-                                    ))
-            output_files[Symbol("bounds_restricted_$(mstr)_yaml")] = bounds_path
-            @info "  → Restricted bounds ($(mstr)): $bounds_path"
-
-            # Export PRIM comparison report
-            report_path = abspath(joinpath(run_dir, "report_prim_$(mstr).txt"))
-            prim_metrics = merge(
-                r.rf_metrics,
-                Dict("box_precision" => r.precision,
-                     "box_coverage"  => r.coverage,
-                     "n_inside_box"  => Float64(r.n_inside_box),
-                     "n_valid_inside"=> Float64(r.n_valid_inside))
-            )
-            export_prim_report(orig_bounds, r.restricted_bounds, report_path;
-                               prim_metrics = prim_metrics)
-            output_files[Symbol("report_prim_$(mstr)")] = report_path
+        # Use a temporary directory for intermediate R results (kept clean, not in run_dir)
+        temp_ird_dir = mktempdir()
+        try
+            ird_results = find_valid_region(data, ref_config, ird_cfg, temp_ird_dir)
+        finally
+            # Clean up temporary directory
+            try
+                rm(temp_ird_dir; recursive=true)
+            catch
+            end
         end
 
-        # Use the first successful method's bounds as the canonical restricted result
-        if !isempty(prim_results)
-            restricted_bounds = first(prim_results).restricted_bounds
+        if !isempty(ird_results)
+            # Generate consolidated bounds file directly
+            consolidated_bounds_path = abspath(joinpath(run_dir, "bounds_restricted.yaml"))
+            _export_consolidated_bounds(ird_results, orig_bounds, consolidated_bounds_path, cfg)
+            output_files[:bounds_restricted_yaml] = consolidated_bounds_path
+
+            # Generate consolidated final report directly
+            consolidated_report_path = abspath(joinpath(run_dir, "final_report.txt"))
+            _export_consolidated_report(ird_results, summary, consolidated_report_path, cfg, overall_start)
+            output_files[:final_report_txt] = consolidated_report_path
+
+            # Use the first successful method's bounds as the canonical restricted result
+            restricted_bounds = first(ird_results).restricted_bounds
         end
     else
-        @info "STEP 3 — Skipped (pass a PRIMConfig to enable PRIM analysis)."
+        @info "STEP 3 — Skipped (pass an IRDConfig to enable IRD analysis)."
     end
 
     overall_elapsed = time() - overall_start
-    @info @sprintf("Pipeline complete in %.1f s.", overall_elapsed)
+    @info @sprintf("  Pipeline complete in %.1f s.", overall_elapsed)
 
     return ValidityAnalysisResult(
         cfg,
         orig_bounds,
         restricted_bounds,
         summary,
-        prim_results,
+        ird_results,
         output_files,
         overall_elapsed,
     )
@@ -563,7 +687,7 @@ function classify_batch_simulations(samples::Matrix{Float64},
 
     # If reusing curves, skip simulation and just re-classify
     if curves_df !== nothing
-        @info "Re-classifying $(n_samples) cached curves with current criteria…"
+        @info "  Re-classifying $(n_samples) cached curves with current criteria…"
 
         # Re-classify each configuration using the cached curves
         classifications  = Vector{Symbol}(undef, n_samples)
@@ -693,7 +817,7 @@ function classify_batch_simulations(samples::Matrix{Float64},
 
     # Save curves to CSV if requested
     if cfg.save_curves && curves_collection !== nothing && !isempty(curves_collection)
-        curves_path = abspath(joinpath(run_dir, "curves.csv"))
+        curves_path = abspath(joinpath(run_dir, "generated_curves.csv"))
         _save_curves_to_csv(curves_collection, curves_path)
     end
 
@@ -855,10 +979,10 @@ end
 # ─────────────────────────────────────────────────────────────────────────────
 
 """
-    find_valid_region(classified_data, reference_config, prim_cfg::PRIMConfig, run_dir::String)
-        -> Vector{PRIMResult}
+    find_valid_region(classified_data, reference_config, ird_cfg::IRDConfig, run_dir::String)
+        -> Vector{IRDResult}
 
-Step 3 of the pipeline: run PRIM via the R `irdpackage` and return the restricted bounds.
+Step 3 of the pipeline: run IRD methods via the R `irdpackage` and return the restricted bounds.
 
 ## Arguments
 - `classified_data::DataFrame` — output of `classify_batch_simulations` (columns:
@@ -867,31 +991,31 @@ Step 3 of the pipeline: run PRIM via the R `irdpackage` and return the restricte
   - a `String` path to an already existing YAML reference file, **or**
   - a `Dict{Symbol,<:Any}` / `NamedTuple` of parameter → value mappings.
     In this case the reference YAML is written to `run_dir/reference_config.yaml`.
-- `prim_cfg::PRIMConfig` — PRIM options (methods, bounds on probability, seed, …).
-- `run_dir::String` — output directory for PRIM results.
+- `ird_cfg::IRDConfig` — IRD options (methods, bounds on probability, seed, …).
+- `run_dir::String` — output directory for IRD results.
 
 ## Returns
-`Vector{PRIMResult}` — one entry per IRD method that was successfully run.
+`Vector{IRDResult}` — one entry per IRD method that was successfully run.
 
 ## Notes
-- The classified CSV used as input to R is written to `run_dir/configurations_for_prim.csv`.
+- The classified CSV used as input to R is written to `run_dir/configurations_for_ird.csv`.
 - All output files go to `run_dir`.
 """
 function find_valid_region(classified_data::DataFrame,
                             reference_config,
-                            prim_cfg::PRIMConfig,
-                            run_dir::String)::Vector{PRIMResult}
+                            ird_cfg::IRDConfig,
+                            run_dir::String)::Vector{IRDResult}
     mkpath(run_dir)
 
     # IRD expects a binary target (valid / invalid). Failed simulations are
-    # conservatively re-labeled as invalid for the PRIM learning step.
-    data_for_prim = copy(classified_data)
-    if :classification in propertynames(data_for_prim)
-        n_failed = count(==("failed"), data_for_prim.classification)
+    # conservatively re-labeled as invalid for the IRD learning step.
+    data_for_ird = copy(classified_data)
+    if :classification in propertynames(data_for_ird)
+        n_failed = count(==("failed"), data_for_ird.classification)
         if n_failed > 0
-            data_for_prim.classification =
-                [c == "failed" ? "invalid" : c for c in data_for_prim.classification]
-            @info "PRIM preprocessing: re-labeled $n_failed failed simulations as invalid."
+            data_for_ird.classification =
+                [c == "failed" ? "invalid" : c for c in data_for_ird.classification]
+            @info "  IRD preprocessing: re-labeled $n_failed failed simulations as invalid."
         end
     end
 
@@ -899,10 +1023,10 @@ function find_valid_region(classified_data::DataFrame,
     # Determine which columns are parameter columns (drop diagnostics)
     diag_cols = Set(["sample_id", "validation_details", "start_in_range",
                      "is_monotonic", "has_positive_voltages", "error_message"])
-    keep_cols = [c for c in names(data_for_prim) if !(c in diag_cols)]
+    keep_cols = [c for c in names(data_for_ird) if !(c in diag_cols)]
 
-    csv_path = abspath(joinpath(run_dir, "configurations_for_prim.csv"))
-    CSV.write(csv_path, data_for_prim[:, keep_cols])
+    csv_path = abspath(joinpath(run_dir, "configurations_for_ird.csv"))
+    CSV.write(csv_path, data_for_ird[:, keep_cols])
 
     # ── 2. Resolve reference config YAML path ─────────────────────────────────
     ref_yaml_path = if reference_config isa String
@@ -914,22 +1038,22 @@ function find_valid_region(classified_data::DataFrame,
         ref_path
     end
 
-    # ── 3. Build updated PRIMConfig with the correct data / reference paths ───
-    updated_cfg = PRIMConfig(
+    # ── 3. Build updated IRDConfig with the correct data / reference paths ───
+    updated_cfg = IRDConfig(
         data_path             = csv_path,
-        ird_package_dir       = prim_cfg.ird_package_dir,
+        ird_package_dir       = ird_cfg.ird_package_dir,
         reference_config_path = ref_yaml_path,
-        probability_range     = prim_cfg.probability_range,
-        methods               = prim_cfg.methods,
-        categorical_params    = prim_cfg.categorical_params,
-        seed                  = prim_cfg.seed,
+        probability_range     = ird_cfg.probability_range,
+        methods               = ird_cfg.methods,
+        categorical_params    = ird_cfg.categorical_params,
+        seed                  = ird_cfg.seed,
         output_dir            = run_dir,
-        target_column         = prim_cfg.target_column,
-        positive_class        = prim_cfg.positive_class,
+        target_column         = ird_cfg.target_column,
+        positive_class        = ird_cfg.positive_class,
     )
 
-    # ── 4. Delegate to PRIMInterface ──────────────────────────────────────────
-    return PRIMInterface.run_prim_analysis(updated_cfg)
+    # ── 4. Delegate to IRDInterface ──────────────────────────────────────────
+    return IRDInterface.run_ird_analysis(updated_cfg)
 end
 
 

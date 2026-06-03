@@ -72,20 +72,22 @@ write_ird_yaml <- function(
     as.character(v)
   }
 
-  params <- lapply(feature_names, function(f) {
-    entry <- list(name = f)
-    if (is_categorical(f)) {
-      entry$type <- "categorical"
-      vals <- normalize_levels(levels_rd[[f]])
-      if (is.null(vals)) {
-        if (is.factor(data_pc[[f]])) {
-          vals <- levels(data_pc[[f]])
-        } else {
-          vals <- unique(as.character(data_pc[[f]]))
-        }
-      }
-      entry$values <- vals
-      entry$fixed  <- length(vals) == 1
+   params <- lapply(feature_names, function(f) {
+     entry <- list(name = f)
+     if (is_categorical(f)) {
+       entry$type <- "categorical"
+       vals <- normalize_levels(levels_rd[[f]])
+       if (is.null(vals)) {
+         if (is.factor(data_pc[[f]])) {
+           vals <- levels(data_pc[[f]])
+         } else {
+           vals <- unique(as.character(data_pc[[f]]))
+         }
+       }
+       # Force values to always be a list in YAML, even for single values
+       # by wrapping in a class that the YAML handler recognizes as a sequence
+       entry$values <- as.list(vals)
+       entry$fixed  <- length(vals) == 1
     } else {
       entry$type <- "continuous"
       low  <- as.numeric(lower_rd[[f]])

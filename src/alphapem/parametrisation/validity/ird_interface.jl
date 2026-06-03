@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
 """
-    PRIMInterface
+    IRDInterface
 
-Julia interface to the R `irdpackage` for PRIM-based valid-region analysis.
+Julia interface to the R `irdpackage` for valid-region analysis using IRD methods (PRIM, MaxBox, etc).
 
 This module wraps calls to the IRD (Interpretable Regional Descriptors) R package via
-`RCall.jl`.  The package provides the PRIM (Patient Rule Induction Method) and MaxBox
-algorithms, which find axis-aligned hyperboxes in the parameter space where the
+`RCall.jl`.  The package provides the PRIM (Patient Rule Induction Method), MaxBox,
+and other algorithms, which find axis-aligned hyperboxes in the parameter space where the
 AlphaPEM model is most likely to produce valid polarization curves.
 
 ## Pipeline overview
 
 1. A Random Forest is trained on the classified configurations to predict P(valid).
-2. PRIM (and optionally MaxBox) peels and pastes the box to maximise precision while
+2. Selected IRD methods (PRIM, MaxBox, etc) find hyperboxes to maximise precision while
    keeping the reference configuration inside the box.
 3. Bounds are post-processed to tighten them without reducing the validity rate.
 4. Results are saved as YAML files in `output_dir`.
@@ -30,11 +30,11 @@ The relevant sub-directory is `external/supplementary_2023_ird/irdpackage`.
 It is loaded via `devtools::load_all()` through `RCall.jl`.
 
 # Exports
-- `PRIMConfig`: All options for one PRIM analysis run
-- `PRIMResult`: Structured output of one PRIM/MaxBox run
-- `run_prim_analysis`: Execute the full PRIM pipeline and return results
+- `IRDConfig`: All options for one IRD analysis run
+- `IRDResult`: Structured output of one IRD method run
+- `run_ird_analysis`: Execute the full IRD pipeline and return results
 """
-module PRIMInterface
+module IRDInterface
 
 using RCall
 using CSV
@@ -43,18 +43,18 @@ using Dates
 using Printf
 using YAML
 
-export PRIMConfig,
-       PRIMResult,
-       run_prim_analysis
+export IRDConfig,
+       IRDResult,
+       run_ird_analysis
 
 # ─────────────────────────────────────────────────────────────────────────────
 # DATA STRUCTURES
 # ─────────────────────────────────────────────────────────────────────────────
 
 """
-    PRIMConfig
+    IRDConfig
 
-All options needed to run one PRIM analysis via the R `irdpackage`.
+All options needed to run one IRD analysis via the R `irdpackage`.
 
 # Fields
 - `data_path::String`: Path to the CSV of classified configurations.
@@ -62,13 +62,13 @@ All options needed to run one PRIM analysis via the R `irdpackage`.
 - `ird_package_dir::String`: Path to the local `irdpackage` folder.
   Default: `"external/supplementary_2023_ird/irdpackage"`.
 - `reference_config_path::String`: Path to a YAML file with the reference (known-valid)
-  configuration used as *x_interest* in PRIM.
+  configuration used as *x_interest* in the IRD methods.
   **Leave empty** when calling via `find_valid_region` — it is set automatically.
 - `probability_range::Tuple{Float64,Float64}`: Target P(valid) interval for the box.
   Default `(0.8, 1.0)` — keep only regions estimated ≥ 80 % valid.
 - `methods::Vector{Symbol}`: IRD methods to run. Supported: `:PRIM`, `:MaxBox`.
 - `categorical_params::Vector{Symbol}`: Parameters to treat as categorical (e.g., `[:e]`).
-- `seed::Int`: Random seed for the Random Forest and PRIM. Default `42`.
+- `seed::Int`: Random seed for the Random Forest and IRD methods. Default `42`.
 - `output_dir::String`: Output directory. **Leave empty** when calling via
   `find_valid_region` — it is fixed to `VALIDITY_OUTPUT_DIR` automatically.
 - `target_column::String`: Name of the classification column. Default `"classification"`.
@@ -76,14 +76,14 @@ All options needed to run one PRIM analysis via the R `irdpackage`.
 
 # Example
 ```julia
-cfg = PRIMConfig(
+cfg = IRDConfig(
     data_path             = "results/model_validity/classified_configs.csv",
     reference_config_path = "results/model_validity/reference_ZSW.yaml",
     output_dir            = "results/model_validity",
 )
 ```
 """
-Base.@kwdef struct PRIMConfig
+Base.@kwdef struct IRDConfig
     data_path::String                           = ""   # set internally by find_valid_region
     ird_package_dir::String                     = "external/supplementary_2023_ird/irdpackage"
     reference_config_path::String               = ""   # set internally by find_valid_region
@@ -98,14 +98,14 @@ end
 
 
 """
-    PRIMResult
+    IRDResult
 
-Structured output of one completed PRIM or MaxBox run.
+Structured output of one completed IRD method run (PRIM, MaxBox, etc).
 
 # Fields
 - `method::Symbol`: Which algorithm was used (`:PRIM` or `:MaxBox`).
-- `restricted_bounds::Dict{Symbol,Tuple{Float64,Float64}}`: PRIM-derived bounds per parameter.
-- `original_bounds::Dict{Symbol,Tuple{Float64,Float64}}`: Original (pre-PRIM) bounds.
+- `restricted_bounds::Dict{Symbol,Tuple{Float64,Float64}}`: IRD-derived bounds per parameter.
+- `original_bounds::Dict{Symbol,Tuple{Float64,Float64}}`: Original (pre-IRD) bounds.
 - `precision::Float64`: Share of valid configurations inside the found box (0–1).
 - `coverage::Float64`: Share of all configurations retained by the box (0–1).
 - `n_inside_box::Int`: Total number of configurations inside the box.
@@ -115,7 +115,7 @@ Structured output of one completed PRIM or MaxBox run.
 - `output_files::Dict{Symbol,String}`: Paths to generated files
   (keys: `:bounds_yaml`, `:report_txt`).
 """
-struct PRIMResult
+struct IRDResult
     method::Symbol
     restricted_bounds::Dict{Symbol, Tuple{Float64, Float64}}
     original_bounds::Dict{Symbol, Tuple{Float64, Float64}}
@@ -148,6 +148,7 @@ function _filter_r_stderr(r_stderr::String)::String
         r"^\[irdpackage\]",                    # Package loading messages
         r"^peeling iteration",                 # PRIM peeling iterations
         r"^pasting iteration",                 # PRIM pasting iterations
+        r"^iteration \d+ with \d+ candidates", # PRIM/MaxBox iteration progress
         r"^Ignoring x_interest keys",          # Unused keys info
         r"^The `desired_class`",               # Class assignment confirmation
         r"^Saved RF metrics:",                 # Saved files info
@@ -170,6 +171,7 @@ function _filter_r_stderr(r_stderr::String)::String
 
     return join(filtered_lines, "\n")
 end
+
 
 
 """
@@ -257,7 +259,7 @@ end
 """
     _parse_rf_metrics(rf_txt_path)::Dict{String,Float64}
 
-Parse the `RF_metrics_<run_name>.txt` file saved by `run_prim.R`.
+Parse the `RF_metrics_<run_name>.txt` file saved by `run_ird_methods.R`.
 
 Extracts `classif.auc`, `classif.precision`, `classif.recall` from the
 "[Test set]" block (first table encountered). Returns zeros for any metric
@@ -392,33 +394,33 @@ end
 # ─────────────────────────────────────────────────────────────────────────────
 
 """
-    run_prim_analysis(cfg::PRIMConfig)::Vector{PRIMResult}
+    run_ird_analysis(cfg::IRDConfig)::Vector{IRDResult}
 
-Execute the full IRD/PRIM pipeline and return one `PRIMResult` per requested method.
+Execute the full IRD pipeline and return one `IRDResult` per requested method.
 
 Steps performed:
 1. Check that the IRD package directory and required R scripts are present.
-2. Locate the bundled `run_prim.R` and `ird_helpers.R` scripts.
-3. Call `Rscript run_prim.R` as a subprocess with appropriate arguments.
+2. Locate the bundled `run_ird_methods.R` and `ird_helpers.R` scripts.
+3. Call `Rscript run_ird_methods.R` as a subprocess with appropriate arguments.
 4. Parse the generated `IRD_bounds_<method>_<run_name>.yaml` files.
 5. Parse the `RF_metrics_<run_name>.txt` file.
 6. Compute precision/coverage from the classified configurations CSV.
-7. Return one `PRIMResult` per method.
+7. Return one `IRDResult` per method.
 
 # Example
 ```julia
-cfg = PRIMConfig(
+cfg = IRDConfig(
     data_path             = "results/model_validity/classified_configs.csv",
     reference_config_path = "results/model_validity/reference_ZSW.yaml",
 )
-results = run_prim_analysis(cfg)
+results = run_ird_analysis(cfg)
 for r in results
     @info "\$(r.method): precision=\$(round(r.precision; digits=3)), " *
           "coverage=\$(round(r.coverage; digits=3))"
 end
 ```
 """
-function run_prim_analysis(cfg::PRIMConfig)::Vector{PRIMResult}
+function run_ird_analysis(cfg::IRDConfig)::Vector{IRDResult}
     # ── 1. Validate inputs ────────────────────────────────────────────────────
     isfile(cfg.data_path) ||
         error("Classified data CSV not found: $(cfg.data_path)")
@@ -441,7 +443,7 @@ function run_prim_analysis(cfg::PRIMConfig)::Vector{PRIMResult}
 
     # ── 3. Locate bundled R scripts ───────────────────────────────────────────
     r_dir       = joinpath(@__DIR__, "R")
-    run_prim_r  = joinpath(r_dir, "run_prim.R")
+    run_prim_r  = joinpath(r_dir, "run_ird_methods.R")
     helpers_r   = joinpath(r_dir, "ird_helpers.R")
 
     isfile(run_prim_r) ||
@@ -475,7 +477,7 @@ function run_prim_analysis(cfg::PRIMConfig)::Vector{PRIMResult}
     ])
 
     # ── 5. Run the R script ───────────────────────────────────────────────────
-    @info "Running PRIM analysis via Rscript…  (methods: $methods_s)"
+    @info "  Running IRD analysis via Rscript…  (methods: $methods_s)"
     stdout_buf = IOBuffer()
     stderr_buf = IOBuffer()
     try
@@ -504,10 +506,6 @@ function run_prim_analysis(cfg::PRIMConfig)::Vector{PRIMResult}
     r_stdout = String(take!(stdout_buf))
     r_stderr = String(take!(stderr_buf))
 
-    if !isempty(r_stdout)
-        @info "R stdout:\n$r_stdout"
-    end
-
     # Filter and display only significant stderr messages (actual errors/warnings)
     r_stderr_filtered = _filter_r_stderr(r_stderr)
     if !isempty(r_stderr_filtered)
@@ -518,8 +516,8 @@ function run_prim_analysis(cfg::PRIMConfig)::Vector{PRIMResult}
     rf_txt      = joinpath(cfg.output_dir, "RF_metrics_$(run_name).txt")
     rf_metrics  = _parse_rf_metrics(rf_txt)
 
-    # ── 7. Build PRIMResult for each method ───────────────────────────────────
-    results = PRIMResult[]
+    # ── 7. Build IRDResult for each method ───────────────────────────────────
+    results = IRDResult[]
 
     for method in cfg.methods
         method_str = string(method)
@@ -552,7 +550,7 @@ function run_prim_analysis(cfg::PRIMConfig)::Vector{PRIMResult}
             :rf_metrics  => rf_txt,
         )
 
-        push!(results, PRIMResult(
+        push!(results, IRDResult(
             method,
             restricted_bounds,
             original_bounds,
@@ -563,18 +561,13 @@ function run_prim_analysis(cfg::PRIMConfig)::Vector{PRIMResult}
             rf_metrics,
             output_files,
         ))
-
-        @info @sprintf(
-            "  %s — precision=%.3f, coverage=%.3f  (%d/%d valid inside box)",
-            method_str, precision, coverage, n_valid_inside, n_inside
-        )
     end
 
     isempty(results) &&
-        @warn "run_prim_analysis: no results were produced. Check R stderr above."
+        @warn "run_ird_analysis: no results were produced. Check R stderr above."
 
     return results
 end
 
-end # module PRIMInterface
+end # module IRDInterface
 
