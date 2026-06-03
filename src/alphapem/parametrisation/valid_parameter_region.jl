@@ -38,14 +38,13 @@ Steps 1–2–4 always run; Step 3 is enabled by passing a `PRIMConfig`.
 
 ## Credits
 
-This work is inspired by the master's thesis:
-  *Sensitivity Analysis and Surrogate Modeling of PEM Fuel Cells*,
-  by Nathaly Vergel Serrano, Dejvis Toptani, and Camila Bermudez Valderrama,
-  supervised by Dr. Giuseppe Casalicchio and Fiona Ewald,
-  in collaboration with Luis Winkler (ZSW Ulm) and Prof. Herbert Palm (UAS Munich).
-  Statistical Consulting, Master in Statistics and Data Science,
-  Institute of Statistics, Ludwig-Maximilians-Universität München.
-  Repository: https://github.com/nathaly-vergel/Official-Sensitivity-Analysis-and-Surrogate-Modeling-of-PEM-Fuel-Cells
+This pipeline is adapted from the internship projects of master's students in statistics and data science:
+  **Sensitivity Analysis and Surrogate Modeling of PEM Fuel Cells**
+  Nathaly Vergel Serrano, Dejvis Toptani, Camila Bermudez Valderrama,
+  From the Department of Statistics in the University of Munich,
+  Supervised by Dr. Giuseppe Casalicchio and Fiona Ewald,
+  In collaboration with Luis Winkler (ZSW Ulm) and Prof. Herbert Palm (UAS Munich),
+  Repository: <https://github.com/nathaly-vergel/Official-Sensitivity-Analysis-and-Surrogate-Modeling-of-PEM-Fuel-Cells>.
 
 The IRD/PRIM framework used downstream relies on:
   https://github.com/slds-lmu/supplementary_2023_ird
@@ -302,15 +301,15 @@ function _export_consolidated_report(ird_results::Vector{IRDResult},
 
     open(output_path, "w") do f
         # Header with timestamp and execution time
-        write(f, "="^80 * "\n")
+        write(f, "="^82 * "\n")
         write(f, "  AlphaPEM — Parameter Validity Region Analysis Report\n")
-        write(f, "="^80 * "\n")
+        write(f, "="^82 * "\n")
         write(f, "  Generated: $(Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS"))\n")
         write(f, "  Total time: $(round(overall_elapsed; digits=1)) s\n")
-        write(f, "="^80 * "\n\n")
+        write(f, "="^82 * "\n\n")
 
         write(f, "INITIAL CLASSIFICATION OVERVIEW\n")
-        write(f, "─"^80 * "\n")
+        write(f, "─"^82 * "\n")
         write(f, @sprintf("  Total simulations : %d\n", summary.total_simulations))
         write(f, @sprintf("  Valid             : %d (%.1f%%)\n", summary.valid_count, valid_pct))
         write(f, @sprintf("  Invalid           : %d\n", summary.invalid_count))
@@ -318,19 +317,19 @@ function _export_consolidated_report(ird_results::Vector{IRDResult},
 
         if !isempty(ird_results)
             write(f, "RESTRICTED REGION ANALYSIS — METHOD COMPARISON\n")
-            write(f, "─"^80 * "\n")
+            write(f, "─"^82 * "\n")
             # Updated header with Valid in box metric
             write(f, @sprintf("  %-10s │ Precision │ Recall │ Box Precision │ Coverage │ Valid Box  │ RF AUC\n", "Method"))
-            write(f, "─"^80 * "\n")
+            write(f, "─"^82 * "\n")
 
             for r in ird_results
                 precision_rf = get(r.rf_metrics, "precision", 0.0)
                 recall_rf    = get(r.rf_metrics, "recall", 0.0)
                 auc          = get(r.rf_metrics, "AUC", 0.0)
-                write(f, @sprintf("  %-10s │   %.3f   │ %.3f  │     %.3f      │  %.3f   │ %4d/%-5d │ %.4f\n",
+                write(f, @sprintf("  %-10s │   %.3f   │ %.3f  │     %.3f     │  %.3f   │ %4d/%-5d │ %.3f\n",
                     string(r.method), precision_rf, recall_rf, r.precision, r.coverage, r.n_valid_inside, r.n_inside_box, auc))
             end
-            write(f, "─"^80 * "\n\n")
+            write(f, "─"^82 * "\n\n")
 
             # Detailed bounds table for each method
             for r in ird_results
@@ -364,7 +363,7 @@ function _export_consolidated_report(ird_results::Vector{IRDResult},
             end
         end
 
-        write(f, "═"^80 * "\n")
+        write(f, "═"^82 * "\n")
     end
 end
 

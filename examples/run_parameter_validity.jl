@@ -11,7 +11,7 @@
 # Workflow:
 #   STEP 1 — Draw configurations by Latin Hypercube Sampling
 #   STEP 2 — Simulate each configuration with AlphaPEM and classify the curve
-#   STEP 3 — (optional) Restrict the valid region via PRIM (requires R + IRD package)
+#   STEP 3 — Restrict the valid region via IRD methods (PRIM, MaxBox, etc. — requires R + IRD package)
 #   STEP 4 — Export all results (CSV, YAML bounds, text reports)
 #
 # All output files are written to:
@@ -20,8 +20,8 @@
 # Usage:
 #   julia --project=. examples/run_parameter_validity.jl
 #
-# For PRIM (STEP 3), R must be installed and the IRD package cloned:
-#   git clone https://github.com/slds-lmu/supplementary_2023_ird.git external/
+# For IRD methods (STEP 3), R must be installed and the IRD package cloned:
+#   git clone https://github.com/slds-lmu/supplementary_2023_ird.git external/IRD_method_2023
 #   See README.md § Installation — step 8 for full instructions.
 
 import Pkg
@@ -107,38 +107,36 @@ analysis_cfg = ValidityAnalysisConfig(
     parallel               = PARALLEL,              # ← driven by the constant above
     save_curves            = true,                  # Set to true to save polarization curves
     reuse_from             = "results/model_validity/2026.06.02 - 10000 samples - before voltage drop - V1",               # Set to "path/to/previous/run" to reuse curves. ex: "results/model_validity/2026.06.02 - 10000 samples - before voltage drop - V1"
-    hyperbox_finder_method = [:PRIM, :MaxBox],                 # nothing (skip this step), ':PRIM', or ':MaxBox'.
+    hyperbox_finder_method = [:PRIM, :MaxBox],                 # Vector of IRD methods: :PRIM, :MaxBox
 )
 
-# IRD configuration (built from `analysis_cfg.hyperbox_finder_method` if provided)
-ird_cfg = if analysis_cfg.hyperbox_finder_method === nothing
-    nothing
-else
-    # Validate option and convert to the vector expected by IRDConfig
-    allowed = Set([:PRIM, :MaxBox])
-    methods_vec = if isa(analysis_cfg.hyperbox_finder_method, Symbol)
-        # Single method: convert to vector
-        if !(analysis_cfg.hyperbox_finder_method in allowed)
-            error("Invalid hyperbox_finder_method: $(analysis_cfg.hyperbox_finder_method). Use :PRIM, :MaxBox or nothing.")
-        end
-        [analysis_cfg.hyperbox_finder_method]
-    else
-        # Vector of methods: validate each one
-        for m in analysis_cfg.hyperbox_finder_method
-            if !(m in allowed)
-                error("Invalid hyperbox_finder_method: $m. Use :PRIM or :MaxBox only.")
-            end
-        end
-        analysis_cfg.hyperbox_finder_method
+# IRD configuration (required — STEP 3 is no longer optional)
+# Validate the methods and build the IRD config
+allowed = Set([:PRIM, :MaxBox])
+methods_vec = if isa(analysis_cfg.hyperbox_finder_method, Symbol)
+    # Single method: convert to vector
+    if !(analysis_cfg.hyperbox_finder_method in allowed)
+        error("Invalid hyperbox_finder_method: $(analysis_cfg.hyperbox_finder_method). Use :PRIM, :MaxBox, or a vector of these.")
     end
-
-    IRDConfig(
-        ird_package_dir   = "external/supplementary_2023_ird/irdpackage",
-        methods           = methods_vec,
-        probability_range = (0.8, 1.0),
-        seed              = 42,
-    )
+    [analysis_cfg.hyperbox_finder_method]
+else
+    # Vector of methods: validate each one
+    isempty(analysis_cfg.hyperbox_finder_method) &&
+        error("hyperbox_finder_method cannot be empty. Provide at least one IRD method (:PRIM, :MaxBox, or others).")
+    for m in analysis_cfg.hyperbox_finder_method
+        if !(m in allowed)
+            error("Invalid hyperbox_finder_method: $m. Use :PRIM or :MaxBox only.")
+        end
+    end
+    analysis_cfg.hyperbox_finder_method
 end
+
+ird_cfg = IRDConfig(
+    ird_package_dir   = "external/IRD_method_2023/irdpackage",
+    methods           = methods_vec,
+    probability_range = (0.8, 1.0),
+    seed              = 42,
+)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # RUN  (full pipeline in one call)
@@ -169,16 +167,14 @@ println("  Valid       : ", s.valid_count, "  (", valid_pct, " %)")
 println("  Invalid     : ", s.invalid_count)
 println("  Failed      : ", s.failed_count)
 
-if ird_cfg !== nothing && !isempty(result.prim_results)
-    println()
-    println("─"^72)
-    println("  Restricted region analysis")
-    println("─"^72)
+println()
+println("─"^72)
+println("  Restricted region analysis (IRD methods)")
+println("─"^72)
 
-    # Display results for each method
-    for r in result.prim_results
-        println("  $(rpad(string(r.method), 10)) │ Precision: $(round(r.precision; digits=3))  Coverage: $(round(r.coverage; digits=3))  Valid in box: $(r.n_valid_inside)/$(r.n_inside_box)")
-    end
+# Display results for each method
+for r in result.prim_results
+    println("  $(rpad(string(r.method), 10)) │ Precision: $(round(r.precision; digits=3))  Coverage: $(round(r.coverage; digits=3))  Valid in box: $(r.n_valid_inside)/$(r.n_inside_box)")
 end
 
 println()
@@ -193,14 +189,11 @@ end
 if haskey(result.output_files, :generated_curves_csv)
     println("  Curves          : ", basename(result.output_files[:generated_curves_csv]))
 end
-
-if ird_cfg !== nothing && !isempty(result.prim_results)
-    if haskey(result.output_files, :bounds_restricted_yaml)
-        println("  Bounds          : ", basename(result.output_files[:bounds_restricted_yaml]))
-    end
-    if haskey(result.output_files, :final_report_txt)
-        println("  Report          : ", basename(result.output_files[:final_report_txt]))
-    end
+if haskey(result.output_files, :bounds_restricted_yaml)
+    println("  Bounds          : ", basename(result.output_files[:bounds_restricted_yaml]))
+end
+if haskey(result.output_files, :final_report_txt)
+    println("  Report          : ", basename(result.output_files[:final_report_txt]))
 end
 
 println()
@@ -209,10 +202,6 @@ println("  Pipeline steps")
 println("="^72)
 println("    ✅  STEP 1 — LHS sampling                         (complete)")
 println("    ✅  STEP 2 — Batch simulation & classification    (complete)")
-if ird_cfg !== nothing
-    println("    ✅  STEP 3 — IRD methods analysis (PRIM/MaxBox)   (complete)")
-else
-    println("    -- STEP 3 — IRD methods analysis (PRIM/MaxBox)    (skipped: disabled)")
-end
+println("    ✅  STEP 3 — IRD methods analysis (PRIM/MaxBox)   (complete)")
 println("    ✅  STEP 4 — Export results                       (complete)")
 println("="^72)

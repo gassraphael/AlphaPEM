@@ -118,7 +118,7 @@ To install **AlphaPEM**, follow these steps in a shell:
 7. *(Optional)* **PRIM-based valid parameter region analysis** — only required if you intend to use
    `examples/run_parameter_validity.jl` and the `Parametrisation.ValidParameterRegion` module.
 
-   a. Install **R**, a **C++ compiler**, and the required **system libraries** for R packages:
+    a. Install **R**, a **C++ compiler**, and the required **system libraries** for R packages:
       - Linux (Debian/Ubuntu):
         ```sh
         sudo apt update && sudo apt install -y \
@@ -130,13 +130,11 @@ To install **AlphaPEM**, follow these steps in a shell:
       - macOS (using Homebrew): `brew install r` (Xcode Command Line Tools include a C++ compiler and all required headers)
       - Windows: Install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) alongside R.
 
-   b. Clone the **IRD package** (Interpretable Regional Descriptors) into the `external/` folder at the root
-      of the repository:
-      ```sh
-      git clone https://github.com/slds-lmu/supplementary_2023_ird.git external/supplementary_2023_ird
-      ```
-      The relevant sub-directory used by AlphaPEM is
-      `external/supplementary_2023_ird/irdpackage`.
+    b. Clone the **IRD package** (Interpretable Regional Descriptors) into the `external/` folder at the root
+       of the repository:
+       ```sh
+       git clone https://github.com/slds-lmu/supplementary_2023_ird.git external/IRD_method_2023
+       ```
 
    c. Install the required R packages using the bundled setup script:
       ```sh
@@ -144,7 +142,7 @@ To install **AlphaPEM**, follow these steps in a shell:
       ```
       On Windows, open a terminal as Administrator and omit `sudo`.
 
-   After these three steps, `run_prim_analysis` in AlphaPEM will work without any additional setup.
+    After these three steps, `run_validity_analysis` in AlphaPEM will work without any additional setup.
 
 ## Installation as a package (to use AlphaPEM in other projects)
 
@@ -239,7 +237,7 @@ and configuration, beyond what the GUI offers.
 | `run_polarization.jl` | Generates a polarization curve                                                                 |
 | `run_polarization_for_cali.jl` | Generates polarization curves for calibration purposes |
 | `run_EIS.jl` | Generates an EIS curve <br/>                               |
-| `run_parameter_validity.jl` | Identifies the valid parameter region via LHS sampling, batch simulation and PRIM *(requires R + IRD package, see [installation step 8](#installation-from-source))* |
+| `run_parameter_validity.jl` | Identifies the valid parameter region via LHS sampling, batch simulation and IRD methods (PRIM, MaxBox) — *requires R + IRD package ([installation step 7](#installation-from-source))* |
 | `plot_currents.jl` | Plots the current density profiles                                                            |
 
 ### Steps to run a simulation
@@ -333,28 +331,13 @@ avoids wasting calibration budget on non-physical configurations.
 
 ## Workflow
 
-| Step | Action |
-|------|--------|
-| **1** | Draw configurations from the prior parameter ranges by Latin Hypercube Sampling |
-| **2** | Simulate each configuration with AlphaPEM (multi-threaded) and label the polarization curve *valid* or *invalid* based on physical criteria (voltage range, monotonicity, positivity) |
-| **3** | *(optional, requires R)* Apply PRIM and MaxBox to find a compact axis-aligned hyperbox in parameter space with a high validity rate (≥ 80 %). Bounds are saved as a YAML file ready to inject into calibration. |
-| **4** | Export all results: classified CSV, original and restricted bounds YAML, validation summary, side-by-side comparison report |
+| Step | Action                                                                                                                                                                                                                |
+|------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **1** | Draw configurations from the prior parameter ranges by Latin Hypercube Sampling                                                                                                                                       |
+| **2** | Simulate each configuration with AlphaPEM (multi-threaded) and label the polarization curve *valid* or *invalid* based on physical criteria (voltage range, monotonicity, positivity)                                 |
+| **3** | Apply IRD methods (PRIM, MaxBox) to find compact axis-aligned hyperboxes in parameter space with high validity rates (≥ 80 %). Bounds are saved as YAML files ready to inject into calibration. |
+| **4** | Export all results: classified CSV, original and restricted bounds YAML, validation summary, side-by-side comparison report                                                                                           |
 
-## Running the analysis
-
-```sh
-julia --project=. --threads=auto examples/run_parameter_validity.jl
-```
-
-Edit the `USER SETTINGS` block at the top of the script to choose the fuel-cell type, the
-number of samples, and whether to enable PRIM (`RUN_PRIM = true`).
-
-To use the restricted bounds in a subsequent calibration:
-
-```julia
-using AlphaPEM.Parametrisation.ValidParameterRegion: load_restricted_bounds
-bounds = load_restricted_bounds("results/model_validity/restricted_bounds_PRIM.yaml")
-```
 
 ## Credits
 

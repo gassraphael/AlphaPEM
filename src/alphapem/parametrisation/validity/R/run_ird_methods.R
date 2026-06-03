@@ -125,7 +125,7 @@ option_list <- list(
     help = "Random seed [default: %default]."),
   make_option("--ird_pkg_dir",
     type = "character",
-    default = file.path("external", "supplementary_2023_ird", "irdpackage"),
+    default = file.path("external", "IRD_method_2023", "irdpackage"),
     help = "Path to local irdpackage directory."),
   make_option("--helpers_path",
     type = "character", default = NULL,

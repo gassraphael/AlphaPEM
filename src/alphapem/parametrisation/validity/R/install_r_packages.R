@@ -6,7 +6,7 @@
 #
 # This file is the R equivalent of `julia --project=. -e 'using Pkg; Pkg.instantiate()'`.
 # Specific versions are pinned to ensure compatibility with the irdpackage
-# (external/supplementary_2023_ird/), which uses the paradox 0.x API
+# (external/IRD_method_2023/), which uses the paradox 0.x API
 # (ParamDbl$new, ParamInt$new, ParamFct$new, ParamSet$new, SamplerUnif).
 # paradox 1.0+ dropped these classes; mlr3 0.19+ requires paradox >= 1.0.1.
 # Therefore mlr3 must be pinned to 0.18.0 (last version accepting paradox 0.x).
@@ -121,3 +121,4 @@ for (pkg in latest) {
 message("\nAll R packages installed successfully.")
 message("You can now run:")
 message("  RUN_PRIM=true julia --project=. --threads=auto examples/run_parameter_validity.jl")
+

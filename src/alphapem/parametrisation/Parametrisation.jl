@@ -30,7 +30,7 @@ result = run_validity_analysis(cfg)   # generates original_bounds.yaml + classif
 
 # With PRIM (requires R + IRD package):
 prim_cfg = PRIMConfig(
-    ird_package_dir       = "external/supplementary_2023_ird/irdpackage",
+    ird_package_dir       = "external/IRD_method_2023/irdpackage",
     reference_config_path = "results/model_validity/reference_config.yaml",
     output_dir            = "results/model_validity",
 )

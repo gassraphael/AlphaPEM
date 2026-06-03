@@ -23,10 +23,10 @@ AlphaPEM model is most likely to produce valid polarization curves.
 The IRD package must be cloned locally before use:
 
 ```bash
-git clone https://github.com/slds-lmu/supplementary_2023_ird.git external/
+git clone https://github.com/slds-lmu/supplementary_2023_ird.git external/IRD_method_2023
 ```
 
-The relevant sub-directory is `external/supplementary_2023_ird/irdpackage`.
+The relevant sub-directory is `external/IRD_method_2023/irdpackage`.
 It is loaded via `devtools::load_all()` through `RCall.jl`.
 
 # Exports
@@ -60,7 +60,7 @@ All options needed to run one IRD analysis via the R `irdpackage`.
 - `data_path::String`: Path to the CSV of classified configurations.
   **Leave empty** when calling via `find_valid_region` — it is set automatically.
 - `ird_package_dir::String`: Path to the local `irdpackage` folder.
-  Default: `"external/supplementary_2023_ird/irdpackage"`.
+  Default: `"external/IRD_method_2023/irdpackage"`.
 - `reference_config_path::String`: Path to a YAML file with the reference (known-valid)
   configuration used as *x_interest* in the IRD methods.
   **Leave empty** when calling via `find_valid_region` — it is set automatically.
@@ -85,7 +85,7 @@ cfg = IRDConfig(
 """
 Base.@kwdef struct IRDConfig
     data_path::String                           = ""   # set internally by find_valid_region
-    ird_package_dir::String                     = "external/supplementary_2023_ird/irdpackage"
+    ird_package_dir::String                     = "external/IRD_method_2023/irdpackage"
     reference_config_path::String               = ""   # set internally by find_valid_region
     probability_range::Tuple{Float64, Float64}  = (0.8, 1.0)
     methods::Vector{Symbol}                     = [:PRIM, :MaxBox]
@@ -434,7 +434,7 @@ function run_ird_analysis(cfg::IRDConfig)::Vector{IRDResult}
 
         Please run the following commands before using run_prim_analysis:
 
-            git clone https://github.com/slds-lmu/supplementary_2023_ird.git external/
+            git clone https://github.com/slds-lmu/supplementary_2023_ird.git external/IRD_method_2023
 
         Also ensure that R is installed and available in your PATH, and that the
         required R packages are installed (devtools, mlr3, mlr3learners, mlr3pipelines,
@@ -477,7 +477,7 @@ function run_ird_analysis(cfg::IRDConfig)::Vector{IRDResult}
     ])
 
     # ── 5. Run the R script ───────────────────────────────────────────────────
-    @info "  Running IRD analysis via Rscript…  (methods: $methods_s)"
+    @info "  Running IRD analysis using a surrogate model (Random Forest) and methods: $methods_s."
     stdout_buf = IOBuffer()
     stderr_buf = IOBuffer()
     try
