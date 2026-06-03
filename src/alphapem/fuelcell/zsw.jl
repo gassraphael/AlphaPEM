@@ -401,17 +401,16 @@ function zsw_undetermined_parameters(voltage_zone::Symbol = :full)::Vector{Tuple
         throw(ArgumentError("voltage_zone must be :full or :before_voltage_drop (got $voltage_zone)"))
 
     params = [
-        (:Hacl,        5e-6, 15e-6),  # Anode catalyst-layer thickness
-        (:Hccl,        5e-6, 20e-6),  # Cathode catalyst-layer thickness
-        (:Hmem,        5e-6, 30e-6),  # Membrane thickness
-        (:Hgdl,      100e-6, 150e-6), # Gas-diffusion-layer thickness
-        (:Hmpl,       40e-6, 100e-6), # Microporous-layer thickness
-        (:epsilon_gdl,   0.5, 0.9),   # GDL porosity
-        (:e,             3.0, 5.0),   # Capillary exponent (integer)
-        (:Re,          5e-8, 5e-6),   # Electron-conduction resistance
-        (:i0_c_ref,    0.1, 100.0),   # Reference cathode exchange current density
-        (:kappa_co,   0.01, 40.0),    # Crossover correction coefficient
-        (:kappa_c,    0.25, 4.0),     # Overpotential correction exponent
+        (:Hacl,     5.045e-6, 15e-6),     # Anode catalyst-layer thickness
+        (:Hccl,         5e-6, 15.44e-6),  # Cathode catalyst-layer thickness
+        (:Hmem,     7.015e-6, 30e-6),     # Membrane thickness
+        (:Hgdl,       100e-6, 149.6e-6),  # Gas-diffusion-layer thickness
+        (:Hmpl,        40e-6, 91.37e-6),  # Microporous-layer thickness
+        (:epsilon_gdl,   0.7, 0.9),       # GDL porosity
+        (:Re,           5e-8, 5e-6),      # Electron-conduction resistance
+        (:i0_c_ref,    5.634, 100.0),     # Reference cathode exchange current density
+        (:kappa_co,     4.48, 37.67),     # Crossover correction coefficient
+        (:kappa_c,      0.25, 3.293),     # Overpotential correction exponent
     ]
 
     if voltage_zone == :full
