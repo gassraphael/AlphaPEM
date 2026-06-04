@@ -14,8 +14,9 @@ After starting, your browser will automatically open to:
 To stop the server, press Ctrl+C in the terminal.
 """
 
-# Suppress GTK warnings
-ENV["GTK_MODULES"] = "gail:atk"
+# Suppress GTK warnings and errors
+ENV["GTK_MODULES"] = ""
+ENV["GTK_DEBUG"] = ""
 
 include(joinpath(@__DIR__, "src", "alphapem", "interfaces", "web", "WebApp.jl"))
 
