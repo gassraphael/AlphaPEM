@@ -403,7 +403,7 @@ function zsw_undetermined_parameters(voltage_zone::Symbol = :full)::Vector{Tuple
     params = [
         (:Hacl,     5.045e-6, 15e-6),     # Anode catalyst-layer thickness
         (:Hccl,         5e-6, 15.44e-6),  # Cathode catalyst-layer thickness
-        (:Hmem,     7.015e-6, 30e-6),     # Membrane thickness
+        (:Hmem,        10e-6, 30e-6),     # Membrane thickness
         (:Hgdl,       100e-6, 149.6e-6),  # Gas-diffusion-layer thickness
         (:Hmpl,        40e-6, 91.37e-6),  # Microporous-layer thickness
         (:epsilon_gdl,   0.7, 0.9),       # GDL porosity
