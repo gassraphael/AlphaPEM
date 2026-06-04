@@ -441,7 +441,8 @@ function run_step_simulation(config::SimulationConfig)::Dict
 
     try
         start_time = time()
-        run_simulation(config)
+        # Capture the actual output from the simulation
+        output = run_simulation(config)
         elapsed = time() - start_time
 
         SIMULATION_RESULTS[result_id] = Dict(
@@ -450,6 +451,7 @@ function run_step_simulation(config::SimulationConfig)::Dict
             :start_time => DateTime(now()),
             :elapsed_time => elapsed,
             :config => config,
+            :output => output,  # Store the actual simulation results
         )
 
         @info "    Step simulation completed: $result_id in $(round(elapsed, digits=2))s"
@@ -477,7 +479,8 @@ function run_polarization_simulation(config::SimulationConfig)::Dict
 
     try
         start_time = time()
-        run_simulation(config)
+        # Capture the actual output from the simulation
+        output = run_simulation(config)
         elapsed = time() - start_time
 
         SIMULATION_RESULTS[result_id] = Dict(
@@ -486,6 +489,7 @@ function run_polarization_simulation(config::SimulationConfig)::Dict
             :start_time => DateTime(now()),
             :elapsed_time => elapsed,
             :config => config,
+            :output => output,  # Store the actual simulation results
         )
 
         @info "    Polarization simulation completed: $result_id"
@@ -513,7 +517,8 @@ function run_eis_simulation(config::SimulationConfig)::Dict
 
     try
         start_time = time()
-        run_simulation(config)
+        # Capture the actual output from the simulation
+        output = run_simulation(config)
         elapsed = time() - start_time
 
         SIMULATION_RESULTS[result_id] = Dict(
@@ -522,6 +527,7 @@ function run_eis_simulation(config::SimulationConfig)::Dict
             :start_time => DateTime(now()),
             :elapsed_time => elapsed,
             :config => config,
+            :output => output,  # Store the actual simulation results
         )
 
         @info "    EIS simulation completed: $result_id"
@@ -564,7 +570,7 @@ function get_simulation_status(result_id::String)::Dict
 end
 
 """
-Get detailed results data with simulated/generated data.
+Get detailed results data with actual simulation data.
 
 Returns full dataset including time series, KPIs, etc.
 """
@@ -576,8 +582,17 @@ function get_detailed_results(result_id::String)::Dict
     result = SIMULATION_RESULTS[result_id]
     sim_type = result[:type]
 
-    # Generate synthetic data for visualization
-    data = generate_simulation_data(sim_type)
+    # Use actual simulation output if available, otherwise fall back to synthetic data
+    if haskey(result, :output) && result[:output] !== nothing
+        try
+            data = extract_simulation_data(result[:output], sim_type)
+        catch e
+            @warn "Could not extract simulation data, using synthetic data: $e"
+            data = generate_simulation_data(sim_type)
+        end
+    else
+        data = generate_simulation_data(sim_type)
+    end
 
     return Dict(
         :simulation_type => sim_type,
@@ -588,6 +603,135 @@ function get_detailed_results(result_id::String)::Dict
         :kpis => calculate_kpis(data),
         :plots => [],
     )
+end
+
+"""
+Extract a scalar time series from solver states using the provided accessor function.
+The accessor receives one CellState1D and returns a Float64.
+Values are averaged across all GC nodes at each timestep.
+"""
+function _extract_state_series(solver::Any, accessor::Function)::Vector{Float64}
+    result = Float64[]
+    for state in solver.states
+        vals = Float64[]
+        for node in state.nodes
+            try
+                push!(vals, Float64(accessor(node)))
+            catch
+            end
+        end
+        push!(result, isempty(vals) ? NaN : mean(vals))
+    end
+    return result
+end
+
+
+"""
+Extract actual simulation data from SimulationOutputs object.
+"""
+function extract_simulation_data(output::Any, sim_type::String)::Dict
+    # output is an AlphaPEM object, we need output.outputs to get SimulationOutputs
+    # Then access: output.outputs.solver and output.outputs.derived
+
+    try
+        # Check if output has .outputs field
+        if !hasfield(typeof(output), :outputs) || output.outputs === nothing
+            error("No simulation outputs available in AlphaPEM object")
+        end
+
+        sim_outputs = output.outputs
+        solver = sim_outputs.solver
+        derived = sim_outputs.derived
+
+        time_vec = collect(solver.t)  # Convert to Vector{Float64}
+        voltage_vec = collect(derived.Ucell)  # Voltage in V
+
+        # For data stored per GC node, calculate mean across all GC nodes at each timestep
+        current_vec = mean_across(derived.i_fc)  # Current in A/m²
+        O2_conc = mean_across(derived.C_O2_Pt)  # O2 concentration at catalyst
+        v_anode = mean_across(derived.v_a)  # Anode velocity
+        v_cathode = mean_across(derived.v_c)  # Cathode velocity
+
+        # Handle empty vectors
+        if isempty(current_vec)
+            current_vec = zeros(length(time_vec))
+        end
+
+        if sim_type == "step"
+            # For step simulation, extract complete time series data
+            power_vec = voltage_vec .* current_vec
+
+            # Extract state-based variables (mean across GC nodes) to match :synthetic display
+            T_vec     = _extract_state_series(solver, node -> node.ccl.T)
+            C_v_vec   = _extract_state_series(solver, node -> node.agc.C_v)
+            lambda_vec = _extract_state_series(solver, node -> node.mem.lambda)
+            C_H2_vec  = _extract_state_series(solver, node -> node.agc.C_H2)
+            s_vec     = _extract_state_series(solver, node -> begin
+                agdl = node.agdl
+                isempty(agdl) ? node.agc.s : agdl[1].s
+            end)
+            C_O2_vec  = _extract_state_series(solver, node -> begin
+                cgdl = node.cgdl
+                isempty(cgdl) ? node.cgc.C_O2 : cgdl[1].C_O2
+            end)
+
+            result = Dict(
+                :time => time_vec,
+                :voltage => voltage_vec,
+                :current => current_vec,
+                :power => power_vec,
+                :Pa_in => derived.Pa_in,
+                :Pc_in => derived.Pc_in,
+                :O2_concentration => O2_conc,
+                :anode_velocity => v_anode,
+                :cathode_velocity => v_cathode,
+                # State-based variables matching :synthetic panels
+                :T => T_vec,
+                :C_v => C_v_vec,
+                :s => s_vec,
+                :lambda => lambda_vec,
+                :C_H2 => C_H2_vec,
+                :C_O2 => C_O2_vec,
+                :data_points => length(time_vec),
+            )
+
+            return result
+
+        elseif sim_type == "polarization"
+            # For polarization, voltage and current form the V-I curve
+            power_vec = voltage_vec .* current_vec
+
+            result = Dict(
+                :current => current_vec,
+                :voltage => voltage_vec,
+                :power => power_vec,
+                :Pa_in => derived.Pa_in,
+                :Pc_in => derived.Pc_in,
+                :O2_concentration => O2_conc,
+                :data_points => length(current_vec),
+            )
+
+            return result
+
+        elseif sim_type == "eis"
+            # For EIS, we have impedance data
+            # The structure might be different, so we try to extract what's available
+            result = Dict(
+                :voltage => voltage_vec,
+                :current => current_vec,
+                :Pa_in => derived.Pa_in,
+                :Pc_in => derived.Pc_in,
+                :data_points => length(time_vec),
+            )
+
+            return result
+        else
+            return Dict(:data_points => 0)
+        end
+    catch e
+        @error "Error extracting simulation data: $e"
+        rethrow(e)
+    end
 end
 
 """
@@ -676,6 +820,16 @@ Calculate mean of an array.
 """
 function mean(arr::Vector)
     length(arr) > 0 ? sum(arr) / length(arr) : 0.0
+end
+
+"""
+Calculate mean of a vector of vectors.
+"""
+function mean_across(vec_of_vecs::Vector{Vector{T}}) where T
+    if isempty(vec_of_vecs) || isempty(vec_of_vecs[1])
+        return Float64[]
+    end
+    return [mean(vec_of_vecs[i]) for i in 1:length(vec_of_vecs)]
 end
 
 """
