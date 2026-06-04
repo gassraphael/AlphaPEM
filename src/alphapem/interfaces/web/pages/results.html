@@ -289,10 +289,7 @@
                     <div style="margin: 20px 0 30px 0;">
                         <label style="font-weight: 600;">Select Result to Display:</label>
                         <select id="result-selector" onchange="displaySelectedResult()" style="margin: 10px 0; width: 100%; max-width: 400px;">
-                            <option value="voltage">← Voltage Response over Time</option>
-                            <option value="current">← Current Density Distribution</option>
-                            <option value="power">← Power Output</option>
-                            <option value="efficiency">← Efficiency Metrics</option>
+                            <!-- Options will be populated dynamically from available data -->
                         </select>
                     </div>
 
@@ -450,11 +447,18 @@
                 voltage: [0.85, 0.84, 0.83, 0.82, 0.81, 0.80, 0.79, 0.78, 0.77, 0.76, 0.75],
                 current: [5000, 7000, 9000, 11000, 13000, 15000, 15000, 15000, 15000, 15000, 15000],
                 power: [4250, 5880, 7470, 9020, 10530, 12000, 11850, 11700, 11550, 11400, 11250],
-                efficiency: [78, 76, 74, 72, 70, 68, 67, 66, 65, 64, 63]
+                T: [353, 353.5, 354, 354.2, 354.5, 354.8, 355, 355.1, 355.2, 355.3, 355.4],
+                C_v: [8.5, 8.6, 8.7, 8.8, 8.9, 9.0, 9.1, 9.1, 9.2, 9.2, 9.3],
+                s: [0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.11, 0.11, 0.12, 0.12, 0.13],
+                lambda: [6, 6.2, 6.4, 6.6, 6.8, 7.0, 7.1, 7.2, 7.3, 7.4, 7.5],
+                C_H2: [25, 24, 23, 22, 21, 20, 19.5, 19, 18.5, 18, 17.5],
+                C_O2: [9, 8.5, 8, 7.5, 7, 6.5, 6.2, 6, 5.8, 5.6, 5.4],
+                Pa_in: [161000, 161000, 161000, 161000, 161000, 161000, 161000, 161000, 161000, 161000, 161000]
             }
         };
 
         let currentResultData = mockSimulationData.step;
+        let currentSimulationType = 'step';
         const resultId = window.location.pathname.split('/').pop();
 
         // ===== INITIALIZATION =====
@@ -477,8 +481,22 @@
                     document.getElementById('results-loader').style.display = 'none';
                     document.getElementById('results-content').style.display = 'block';
 
-                    // Generate synthetic data for demo
-                    generateSyntheticData(data.simulation_type);
+                    // Check if we have real simulation data by looking for specific fields
+                    const hasRealData = data.data && (
+                        (data.data.time && data.data.time.length > 0) ||  // Step sim
+                        (data.data.current && data.data.current.length > 0) ||  // Polarization sim
+                        (data.data.frequency && data.data.frequency.length > 0)  // EIS sim
+                    );
+
+                    if (hasRealData) {
+                        // Real data is available - use it
+                        console.log('Using real simulation data');
+                        useRealSimulationData(data.data);
+                    } else {
+                        // No real data, generate synthetic
+                        console.warn('No real data available, using synthetic data');
+                        generateSyntheticData(data.simulation_type);
+                    }
                 })
                 .catch(e => {
                     console.error('Failed to load results:', e);
@@ -486,8 +504,136 @@
                 });
         }
 
+        // Use real simulation data from the API
+        function useRealSimulationData(data) {
+            if (data.time) {
+                // Step simulation data
+                currentResultData = {
+                    time: data.time,
+                    voltage: data.voltage || [],
+                    current: data.current || [],
+                    power: data.power || [],
+                    Pa_in: data.Pa_in || [],
+                    Pc_in: data.Pc_in || [],
+                    O2_concentration: data.O2_concentration || [],
+                    anode_velocity: data.anode_velocity || [],
+                    cathode_velocity: data.cathode_velocity || [],
+                    // State-based variables matching :synthetic panels
+                    T: data.T || [],
+                    C_v: data.C_v || [],
+                    s: data.s || [],
+                    lambda: data.lambda || [],
+                    C_H2: data.C_H2 || [],
+                    C_O2: data.C_O2 || [],
+                };
+            } else if (data.current) {
+                // Polarization or general V-I curve data
+                currentResultData = {
+                    current: data.current,
+                    voltage: data.voltage || [],
+                    power: data.power || [],
+                    Pa_in: data.Pa_in || [],
+                    Pc_in: data.Pc_in || [],
+                    O2_concentration: data.O2_concentration || []
+                };
+            } else if (data.frequency) {
+                // EIS data
+                currentResultData = {
+                    frequency: data.frequency,
+                    impedance_real: data.impedance_real || [],
+                    impedance_imag: data.impedance_imag || []
+                };
+            } else {
+                // Fallback to synthetic if format is unexpected
+                generateSyntheticData('step');
+                return;
+            }
+
+            console.log('Loaded real simulation data:', currentResultData);
+
+            // Populate the result selector with available data fields
+            populateResultSelector();
+        }
+
+        // Populate the result selector based on available data, matching :synthetic display options
+        function populateResultSelector() {
+            const selector = document.getElementById('result-selector');
+            selector.innerHTML = ''; // Clear existing options
+
+            let availableFields = [];
+
+            if (currentSimulationType === 'step') {
+                // Match exactly the 9 panels of :synthetic step display:
+                // Row 1: ifc, Ucell, T
+                // Row 2: C_v, s, lambda
+                // Row 3: C_H2, C_O2, P (Pa_in)
+                const syntheticStepFields = [
+                    { value: 'current',  label: 'Current Density (A/m²)'         },
+                    { value: 'voltage',  label: 'Cell Voltage (V)'                },
+                    { value: 'T',        label: 'Temperature (K)'                 },
+                    { value: 'C_v',      label: 'Water Vapor Concentration (mol/m³)' },
+                    { value: 's',        label: 'Liquid Water Saturation (–)'     },
+                    { value: 'lambda',   label: 'Membrane Water Content (–)'      },
+                    { value: 'C_H2',     label: 'H₂ Concentration (mol/m³)'      },
+                    { value: 'C_O2',     label: 'O₂ Concentration (mol/m³)'      },
+                    { value: 'Pa_in',    label: 'Anode Inlet Pressure (Pa)'       },
+                ];
+                // Only add options for which data actually exists
+                for (const field of syntheticStepFields) {
+                    const d = currentResultData[field.value];
+                    if (d && d.length > 0) {
+                        availableFields.push(field);
+                    }
+                }
+            } else if (currentSimulationType === 'polarization' || currentSimulationType === 'polarization_calibration') {
+                // :synthetic polarization = single V-I polarization curve
+                if (currentResultData.voltage && currentResultData.voltage.length > 0) {
+                    availableFields.push({ value: 'voltage', label: 'Polarization Curve (V vs A/m²)' });
+                }
+                if (currentResultData.power && currentResultData.power.length > 0) {
+                    availableFields.push({ value: 'power', label: 'Power Density Curve (W/m² vs A/m²)' });
+                }
+            } else if (currentSimulationType === 'eis') {
+                // :synthetic EIS = Nyquist + Bode amplitude + Bode phase
+                if (currentResultData.impedance_real && currentResultData.impedance_real.length > 0) {
+                    availableFields.push({ value: 'nyquist',       label: 'Nyquist Plot (−Im(Z) vs Re(Z))'   });
+                    availableFields.push({ value: 'bode_amplitude', label: 'Bode Plot – Amplitude (|Z| vs f)' });
+                    availableFields.push({ value: 'bode_phase',     label: 'Bode Plot – Phase Angle (° vs f)' });
+                } else {
+                    // Fallback when impedance data is not available
+                    if (currentResultData.voltage && currentResultData.voltage.length > 0)
+                        availableFields.push({ value: 'voltage', label: 'Cell Voltage (V)' });
+                    if (currentResultData.current && currentResultData.current.length > 0)
+                        availableFields.push({ value: 'current', label: 'Current Density (A/m²)' });
+                }
+            } else {
+                // Generic fallback
+                if (currentResultData.voltage && currentResultData.voltage.length > 0)
+                    availableFields.push({ value: 'voltage', label: 'Cell Voltage (V)' });
+                if (currentResultData.current && currentResultData.current.length > 0)
+                    availableFields.push({ value: 'current', label: 'Current Density (A/m²)' });
+            }
+
+            if (availableFields.length === 0) {
+                availableFields.push({ value: 'voltage', label: 'Cell Voltage (V)' });
+            }
+
+            availableFields.forEach(field => {
+                const option = document.createElement('option');
+                option.value = field.value;
+                option.textContent = field.label;
+                selector.appendChild(option);
+            });
+
+            // Select first option and update plot
+            selector.value = availableFields[0].value;
+            displaySelectedResult();
+        }
+
         // Generate synthetic data based on simulation type
         function generateSyntheticData(simType) {
+            console.warn('Using synthetic data - real simulation data not available');
+            currentSimulationType = simType;
             if (simType === 'step') {
                 currentResultData = mockSimulationData.step;
             } else if (simType === 'polarization') {
@@ -496,16 +642,18 @@
                     current: Array.from({length: 21}, (_, i) => i * 1000),
                     voltage: Array.from({length: 21}, (_, i) => 0.85 - i * 0.015),
                     power: Array.from({length: 21}, (_, i) => (0.85 - i * 0.015) * (i * 1000)),
-                    efficiency: Array.from({length: 21}, (_, i) => 80 - i * 2)
                 };
             } else if (simType === 'eis') {
                 // Generate EIS data
                 currentResultData = {
                     frequency: Array.from({length: 20}, (_, i) => Math.pow(10, i * 0.2)),
                     impedance_real: Array.from({length: 20}, (_, i) => 0.1 + i * 0.005),
-                    impedance_imag: Array.from({length: 20}, (_, i) => 0.05 * Math.sin(i * 0.3))
+                    impedance_imag: Array.from({length: 20}, (_, i) => -0.05 * Math.sin(i * 0.3))
                 };
             }
+            // Update the selector and plot with the generated data
+            populateResultSelector();
+            updateKPIs();
         }
 
         // ===== PLOT FUNCTIONS =====
@@ -522,12 +670,62 @@
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, width, height);
 
-            // Draw simple line chart
-            drawLineChart(ctx, width, height, currentResultData.time || currentResultData.current, currentResultData.voltage);
+            // Get selected data type
+            const selector = document.getElementById('result-selector');
+            const selectedType = selector.value;
+
+            // Special case: Nyquist plot (X = Re(Z), Y = -Im(Z))
+            if (selectedType === 'nyquist') {
+                const xData = currentResultData.impedance_real || [];
+                const yData = (currentResultData.impedance_imag || []).map(v => -v);
+                drawLineChart(ctx, width, height, xData, yData);
+                return;
+            }
+
+            // Special case: Bode plots (X = frequency, log scale)
+            if (selectedType === 'bode_amplitude') {
+                const freq = currentResultData.frequency || [];
+                const re = currentResultData.impedance_real || [];
+                const im = currentResultData.impedance_imag || [];
+                const yData = re.map((r, i) => Math.sqrt(r * r + (im[i] || 0) * (im[i] || 0)));
+                drawLineChart(ctx, width, height, freq, yData);
+                return;
+            }
+            if (selectedType === 'bode_phase') {
+                const freq = currentResultData.frequency || [];
+                const re = currentResultData.impedance_real || [];
+                const im = currentResultData.impedance_imag || [];
+                const yData = re.map((r, i) => Math.atan2(im[i] || 0, r) * 180 / Math.PI);
+                drawLineChart(ctx, width, height, freq, yData);
+                return;
+            }
+
+            // Determine X and Y data based on simulation type and selection
+            let xData, yData;
+
+            if (currentResultData.time && currentSimulationType === 'step') {
+                // Step simulation — X axis is time
+                xData = currentResultData.time;
+                yData = currentResultData[selectedType] || currentResultData.voltage;
+            } else if (currentResultData.current && currentSimulationType === 'polarization') {
+                // Polarization — X axis is current density
+                xData = currentResultData.current;
+                yData = currentResultData[selectedType] || currentResultData.voltage;
+            } else if (currentResultData.frequency) {
+                // EIS fallback
+                xData = currentResultData.frequency;
+                yData = currentResultData[selectedType] || currentResultData.impedance_real;
+            } else {
+                xData = [1, 2, 3];
+                yData = [1, 2, 3];
+            }
+
+            // Draw simple line chart (without points)
+            drawLineChart(ctx, width, height, xData, yData);
         }
 
         function drawLineChart(ctx, width, height, xData, yData) {
-            if (!xData || !yData) return;
+            if (!xData || !yData || xData.length === 0 || yData.length === 0) return;
 
             const padding = 40;
             const graphWidth = width - 2 * padding;
@@ -538,6 +736,10 @@
             const yMax = Math.max(...yData);
             const xMin = Math.min(...xData);
             const xMax = Math.max(...xData);
+
+            // Prevent division by zero
+            const yRange = yMax - yMin > 0 ? yMax - yMin : 1;
+            const xRange = xMax - xMin > 0 ? xMax - xMin : 1;
 
             // Draw axes
             ctx.strokeStyle = '#ccc';
@@ -562,29 +764,19 @@
                 ctx.stroke();
             }
 
-            // Draw line
+            // Draw line (without points)
             ctx.strokeStyle = '#0066cc';
             ctx.lineWidth = 2;
             ctx.beginPath();
 
             for (let i = 0; i < xData.length; i++) {
-                const x = padding + ((xData[i] - xMin) / (xMax - xMin)) * graphWidth;
-                const y = height - padding - ((yData[i] - yMin) / (yMax - yMin)) * graphHeight;
+                const x = padding + ((xData[i] - xMin) / xRange) * graphWidth;
+                const y = height - padding - ((yData[i] - yMin) / yRange) * graphHeight;
 
                 if (i === 0) ctx.moveTo(x, y);
                 else ctx.lineTo(x, y);
             }
             ctx.stroke();
-
-            // Draw points
-            ctx.fillStyle = '#0066cc';
-            for (let i = 0; i < xData.length; i++) {
-                const x = padding + ((xData[i] - xMin) / (xMax - xMin)) * graphWidth;
-                const y = height - padding - ((yData[i] - yMin) / (yMax - yMin)) * graphHeight;
-                ctx.beginPath();
-                ctx.arc(x, y, 3, 0, Math.PI * 2);
-                ctx.fill();
-            }
 
             // Labels
             ctx.fillStyle = '#333';
@@ -605,24 +797,44 @@
 
         function updatePlotTitle(selectedType) {
             const titles = {
-                'voltage': 'Voltage Response over Time',
-                'current': 'Current Density Distribution',
-                'power': 'Power Output',
-                'efficiency': 'Efficiency Metrics'
+                // Step :synthetic panels
+                'current':        'Current Density (A/m²)',
+                'voltage':        'Cell Voltage (V)',
+                'T':              'Temperature (K)',
+                'C_v':            'Water Vapor Concentration (mol/m³)',
+                's':              'Liquid Water Saturation (–)',
+                'lambda':         'Membrane Water Content (–)',
+                'C_H2':           'H₂ Concentration (mol/m³)',
+                'C_O2':           'O₂ Concentration (mol/m³)',
+                'Pa_in':          'Anode Inlet Pressure (Pa)',
+                // Polarization :synthetic panels
+                'power':          'Power Density (W/m²)',
+                // EIS :synthetic panels
+                'nyquist':        'Nyquist Plot  –Im(Z) vs Re(Z)  (Ω·m²)',
+                'bode_amplitude': 'Bode Plot – |Z| (Ω·m²) vs Frequency (Hz)',
+                'bode_phase':     'Bode Plot – Phase Angle (°) vs Frequency (Hz)',
+                // Legacy / extra fields
+                'Pc_in':          'Cathode Inlet Pressure (Pa)',
+                'O2_concentration': 'O₂ Concentration at Pt Sites (mol/m³)',
+                'anode_velocity': 'Anode Gas Velocity (m/s)',
+                'cathode_velocity': 'Cathode Gas Velocity (m/s)',
             };
-            document.getElementById('plot-title').textContent = titles[selectedType] || 'Voltage Response';
+            document.getElementById('plot-title').textContent = titles[selectedType] || 'Simulation Data';
         }
 
         // ===== STATISTICS =====
 
         function updateStats(dataType) {
-            let data = [];
-            if (dataType === 'voltage') data = currentResultData.voltage;
-            else if (dataType === 'current') data = currentResultData.current;
-            else if (dataType === 'power') data = currentResultData.power;
-            else if (dataType === 'efficiency') data = currentResultData.efficiency;
+            let data = currentResultData[dataType] || [];
 
-            if (data.length > 0) {
+            if (Array.isArray(data) && data.length > 0) {
+                // Filter out non-numeric values
+                data = data.filter(x => typeof x === 'number' && isFinite(x));
+
+                if (data.length === 0) {
+                    return;
+                }
+
                 const min = Math.min(...data);
                 const max = Math.max(...data);
                 const avg = data.reduce((a, b) => a + b, 0) / data.length;
@@ -713,6 +925,9 @@
                 'polarization': 'Polarization Curve',
                 'eis': 'EIS Spectroscopy'
             };
+
+            // Store simulation type globally so populateResultSelector can use it
+            currentSimulationType = data.simulation_type || 'step';
 
             document.getElementById('result-title').textContent =
                 typeMap[data.simulation_type] + ' - Results';
