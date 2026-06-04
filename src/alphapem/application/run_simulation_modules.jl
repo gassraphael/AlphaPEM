@@ -12,6 +12,8 @@ This file intentionally contains only secondary support functions:
 #  Figure-preparation helpers (Makie backends)
 # ═══════════════════════════════════════════════════════════════════════════════
 
+using CairoMakie, GLMakie, WGLMakie
+
 const _interactive_screens = Any[]
 const _interactive_fig_to_screen = IdDict{Any, Any}()
 const _active_display_backend = Ref{Symbol}(:cairo)
@@ -22,13 +24,28 @@ _use_interactive_display(cfg::SimulationConfig) =
     cfg.type_display != :no_display
 
 """Apply a publication-oriented Makie theme and activate the required backend."""
-function _setup_makie_theme!(cfg::SimulationConfig)
+function _setup_makie_theme!(cfg::SimulationConfig; backend::Symbol=:auto)
     publication_palette = [
         "#0072B2", "#D55E00", "#009E73", "#CC79A7", "#56B4E9",
         "#E69F00", "#882255", "#44AA99", "#999933", "#332288", "#DDCC77",
     ]
 
-    if _use_interactive_display(cfg)
+    if backend == :wgl
+        WGLMakie.activate!()
+        _active_display_backend[] = :wgl
+    elseif backend == :cairo
+        CairoMakie.activate!()
+        _active_display_backend[] = :cairo
+    elseif backend == :gl
+        try
+            GLMakie.activate!()
+            _active_display_backend[] = :gl
+        catch err
+            @warn "GLMakie could not be activated; falling back to CairoMakie non-interactive display." exception=(err, catch_backtrace())
+            CairoMakie.activate!()
+            _active_display_backend[] = :cairo
+        end
+    elseif _use_interactive_display(cfg)
         try
             GLMakie.activate!()
             _active_display_backend[] = :gl
@@ -224,13 +241,164 @@ end
 
 
 """Configure the appropriate Makie backend and return the figure/axes layout required for `cfg`."""
-function figures_preparation(cfg::SimulationConfig, nb_gc::Union{Nothing, Integer}=nothing)
+function figures_preparation(cfg::SimulationConfig,
+                             nb_gc::Union{Nothing, Integer}=nothing;
+                             backend::Symbol=:auto)
     cfg.type_display == :no_display &&
         return (nothing, nothing, nothing, nothing, nothing, nothing)
-    _setup_makie_theme!(cfg)
+    _setup_makie_theme!(cfg; backend=backend)
     figs = cfg.type_current isa StepParams ? _create_figures(cfg, nb_gc) : _create_figures(cfg)
     _store_prepared_figures!(figs[1], figs[3], figs[5])
     return figs
+end
+
+
+"""Return web-plot metadata in the same order as figures are populated by `display!`."""
+function _web_plot_specs(cfg::SimulationConfig, nb_gc::Integer)::Vector{Dict{String, String}}
+    has_extended_gc_profiles = nb_gc >= 3 && cfg.display_timing == :postrun
+    specs = Dict{String, String}[]
+
+    add_spec!(filename::String, title::String, group::String, key::String) =
+        push!(specs, Dict(
+            "filename" => filename,
+            "title"    => title,
+            "group"    => group,
+            "key"      => key,
+        ))
+
+    if cfg.type_current isa StepParams
+        add_spec!("01_ifc_1d_temporal.html",     "Current density evolution along the MEA",   "Internal states",      "ifc_1d_temporal")
+        add_spec!("02_ucell_temporal.html",      "Cell voltage",                               "Internal states",      "Ucell_temporal")
+        add_spec!("03_t_1d_temporal.html",       "Temperature evolution",                      "Internal states",      "T_1D_temporal")
+        add_spec!("04_cv_1d_temporal.html",      "Water vapour concentration evolution",       "Internal states",      "Cv_1D_temporal")
+        add_spec!("05_s_1d_temporal.html",       "Liquid saturation evolution",                "Internal states",      "s_1D_temporal")
+        add_spec!("06_lambda_1d_temporal.html",  "Membrane water content evolution",           "Internal states",      "lambda_1D_temporal")
+        add_spec!("07_ch2_1d_temporal.html",     "Hydrogen concentration evolution",           "Internal states",      "CH2_1D_temporal")
+        add_spec!("08_co2_1d_temporal.html",     "Oxygen concentration evolution",             "Internal states",      "CO2_1D_temporal")
+        add_spec!("09_p_1d_temporal.html",       "Pressure evolution",                         "Internal states",      "P_1D_temporal")
+        add_spec!("10_cn2_1d_temporal.html",     "Nitrogen concentration evolution",           "Internal states",      "CN2_1D_temporal")
+        add_spec!("11_phi_a_1d_temporal.html",   "Anode relative humidity evolution",          "Internal states",      "Phi_a_1D_temporal")
+        add_spec!("12_phi_c_1d_temporal.html",   "Cathode relative humidity evolution",        "Internal states",      "Phi_c_1D_temporal")
+        add_spec!("13_v_1d_temporal.html",       "Gas velocity evolution",                     "Internal states",      "v_1D_temporal")
+        add_spec!("14_re_1d_temporal.html",      "Reynolds number evolution",                  "Internal states",      "Re_1D_temporal")
+        if has_extended_gc_profiles
+            add_spec!("15_t_pseudo_2d_final.html",      "Final pseudo-2D temperature map",             "Final gas-channel profiles", "T_pseudo_2D_final")
+            add_spec!("16_ifc_gc_final.html",           "Final gas-channel current-density profile",    "Final gas-channel profiles", "ifc_GC_final")
+            add_spec!("17_co2_pt_gc_final.html",        "Final Pt oxygen concentration profile",        "Final gas-channel profiles", "CO2_Pt_GC_final")
+            add_spec!("18_lambda_mem_gc_final.html",    "Final membrane water-content profile",         "Final gas-channel profiles", "lambda_mem_GC_final")
+        end
+    elseif cfg.type_current isa PolarizationParams
+        add_spec!("01_ifc_1d_temporal.html",     "Current density evolution along the MEA",   "Internal states",      "ifc_1d_temporal")
+        add_spec!("02_ucell_temporal.html",      "Cell voltage",                               "Internal states",      "Ucell_temporal")
+        add_spec!("03_t_1d_temporal.html",       "Temperature evolution",                      "Internal states",      "T_1D_temporal")
+        add_spec!("04_power_density_curve.html", "Power-density curve",                        "Performance curves",   "power_density_curve")
+        add_spec!("05_efficiency_curve.html",    "Cell efficiency",                            "Performance curves",   "efficiency_curve")
+        add_spec!("06_polarization_curve.html",  "Polarization curve",                         "Performance curves",   "polarization_curve")
+    elseif cfg.type_current isa PolarizationCalibrationParams
+        add_spec!("01_ifc_1d_temporal_cali.html",     "Current density evolution along the MEA",   "Internal states",      "ifc_1d_temporal_cali")
+        add_spec!("02_ucell_temporal_cali.html",      "Cell voltage",                               "Internal states",      "Ucell_temporal_cali")
+        add_spec!("03_t_1d_temporal_cali.html",       "Temperature evolution",                      "Internal states",      "T_1D_temporal_cali")
+        add_spec!("04_power_density_curve_cali.html", "Power-density curve",                        "Performance curves",   "power_density_curve_cali")
+        add_spec!("05_efficiency_curve_cali.html",    "Cell efficiency",                            "Performance curves",   "efficiency_curve_cali")
+        add_spec!("06_polarization_curve_cali.html",  "Calibration polarization curve",             "Performance curves",   "polarization_curve_cali")
+    elseif cfg.type_current isa EISParams
+        add_spec!("01_nyquist_plot.html",        "Nyquist plot",                                "EIS",                  "Nyquist_plot")
+        add_spec!("02_bode_amplitude_plot.html", "Bode amplitude plot",                         "EIS",                  "Bode_amplitude_curve")
+        add_spec!("03_bode_angle_plot.html",     "Bode angle plot",                             "EIS",                  "Bode_angle_curve")
+    end
+
+    return specs
+end
+
+
+"""Export one WGLMakie figure as a self-contained interactive HTML file."""
+function _export_web_figure(fig, output_path::String, title::String)
+    # Use Makie's save() function which generates proper interactive HTML with WebGL
+    # instead of export_static() which only exports a static PNG image
+    save(output_path, fig)
+    return nothing
+end
+
+
+"""Flatten the `(fig1, fig2, fig3)` layout returned by `figures_preparation` in display order."""
+function _collect_web_figures(fig1, fig2, fig3)::Vector{Any}
+    figures = Any[]
+    for fig in (fig1, fig2, fig3)
+        fig === nothing && continue
+        if fig isa AbstractVector
+            append!(figures, fig)
+        else
+            push!(figures, fig)
+        end
+    end
+    return figures
+end
+
+
+"""Generate WGLMakie plots for a completed simulation and save them as interactive HTML files.
+
+This function calls the same `plot.jl` routines used by the native display, so the
+web interface renders identical figures. WGLMakie provides full interactivity:
+zoom, pan, rotation, tooltips, etc.
+
+# Arguments
+- `simu::AlphaPEM`: Completed simulation instance (must have `outputs != nothing`).
+- `output_dir::String`: Directory path where HTML files will be written.
+
+# Returns
+- `Vector{Dict{String, String}}`: Metadata for the generated interactive HTML files.
+"""
+function generate_web_plots(simu::AlphaPEM, output_dir::String)::Vector{Dict{String, String}}
+    simu.outputs === nothing && return Dict{String, String}[]
+
+    isdir(output_dir) || mkpath(output_dir)
+
+    # Temporarily switch to :multiple / :postrun for web rendering.
+    orig_display = simu.cfg.type_display
+    orig_timing  = simu.cfg.display_timing
+    simu.cfg.type_display   = :multiple
+    simu.cfg.display_timing = :postrun
+
+    plot_specs = Dict{String, String}[]
+
+    try
+        @debug "Activating WGLMakie for web plot generation..."
+        WGLMakie.activate!()
+        nb_gc  = simu.cfg.numerical_parameters.nb_gc
+        @debug "Preparing figures with nb_gc=$nb_gc..."
+        fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(simu.cfg, nb_gc; backend=:wgl)
+
+        if fig1 === nothing
+            @warn "No figures prepared; skipping web plot generation"
+            return Dict{String, String}[]
+        end
+
+        @debug "Populating figures with simulation data..."
+        # Populate figures using the same routines as the native display.
+        display!(simu, ax1, ax2, ax3)
+
+        rendered_figures = _collect_web_figures(fig1, fig2, fig3)
+        plot_specs = _web_plot_specs(simu.cfg, nb_gc)
+
+        length(rendered_figures) == length(plot_specs) ||
+            throw(ArgumentError("Web plot export mismatch: $(length(rendered_figures)) figures rendered for $(length(plot_specs)) plot specifications."))
+
+        for (spec, fig) in zip(plot_specs, rendered_figures)
+            output_path = joinpath(output_dir, spec["filename"])
+            @debug "Saving interactive web plot to $output_path..."
+            _export_web_figure(fig, output_path, spec["title"])
+        end
+
+    catch e
+        @error "Error during web plot generation: $e" exception=e
+        rethrow(e)
+    finally
+        simu.cfg.type_display   = orig_display
+        simu.cfg.display_timing = orig_timing
+    end
+
+    @debug "Web plot generation completed: $(length(plot_specs)) plots saved"
+    return plot_specs
 end
 
 

@@ -14,10 +14,12 @@ This module manages:
 
 module SimulatorBackend
 
+export PLOTS_DIR, initialize_backend, run_step_simulation, run_polarization_simulation, run_eis_simulation, get_detailed_results
+
 using AlphaPEM
 using AlphaPEM.Config: SimulationConfig, StepParams, PolarizationParams, EISParams, NumericalParams
 using AlphaPEM.Config: PhysicalParams, OperatingConditions
-using AlphaPEM.Application: run_simulation
+using AlphaPEM.Application: run_simulation, generate_web_plots
 using AlphaPEM.Fuelcell
 using JSON
 using Dates
@@ -26,6 +28,7 @@ using Logging
 # ------ MODULE CONFIGURATION ------
 
 const RESULTS_DIR = joinpath(pwd(), "results")
+const PLOTS_DIR = joinpath(RESULTS_DIR, "web_plots")
 const SIMULATION_RESULTS = Dict{String, Dict}()  # In-memory result cache
 
 """
@@ -35,6 +38,9 @@ function initialize_backend()
     # Create results directory if it doesn't exist
     if !isdir(RESULTS_DIR)
         mkpath(RESULTS_DIR)
+    end
+    if !isdir(PLOTS_DIR)
+        mkpath(PLOTS_DIR)
     end
 end
 
@@ -445,6 +451,18 @@ function run_step_simulation(config::SimulationConfig)::Dict
         output = run_simulation(config)
         elapsed = time() - start_time
 
+         # Generate WGLMakie plots using the same functions as the native display.
+         plot_dir = joinpath(PLOTS_DIR, result_id)
+         plot_files = try
+             @debug "    Generating web plots to directory: $plot_dir"
+             files = generate_web_plots(output, plot_dir)
+             @debug "    Generated $(length(files)) plot files: $files"
+             files
+         catch e
+             @error "    Failed to generate web plots for step simulation" exception=e
+              Dict{String, String}[]
+         end
+
         SIMULATION_RESULTS[result_id] = Dict(
             :type => "step",
             :status => "completed",
@@ -452,6 +470,7 @@ function run_step_simulation(config::SimulationConfig)::Dict
             :elapsed_time => elapsed,
             :config => config,
             :output => output,  # Store the actual simulation results
+            :plot_files => plot_files,
         )
 
         @info "    Step simulation completed: $result_id in $(round(elapsed, digits=2))s"
@@ -483,6 +502,18 @@ function run_polarization_simulation(config::SimulationConfig)::Dict
         output = run_simulation(config)
         elapsed = time() - start_time
 
+         # Generate WGLMakie plots using the same functions as the native display.
+         plot_dir = joinpath(PLOTS_DIR, result_id)
+         plot_files = try
+             @debug "    Generating web plots to directory: $plot_dir"
+             files = generate_web_plots(output, plot_dir)
+             @debug "    Generated $(length(files)) plot files: $files"
+             files
+         catch e
+             @error "    Failed to generate web plots for polarization simulation" exception=e
+              Dict{String, String}[]
+         end
+
         SIMULATION_RESULTS[result_id] = Dict(
             :type => "polarization",
             :status => "completed",
@@ -490,6 +521,7 @@ function run_polarization_simulation(config::SimulationConfig)::Dict
             :elapsed_time => elapsed,
             :config => config,
             :output => output,  # Store the actual simulation results
+            :plot_files => plot_files,
         )
 
         @info "    Polarization simulation completed: $result_id"
@@ -517,17 +549,42 @@ function run_eis_simulation(config::SimulationConfig)::Dict
 
     try
         start_time = time()
+        # EIS requires :live display_timing for frequency-by-frequency stepping.
+        eis_config = SimulationConfig(
+            type_fuel_cell     = config.type_fuel_cell,
+            type_current       = config.type_current,
+            numerical_parameters = config.numerical_parameters,
+            voltage_zone       = config.voltage_zone,
+            type_auxiliary     = config.type_auxiliary,
+            type_flow          = config.type_flow,
+            type_purge         = config.type_purge,
+            type_display       = :no_display,
+            display_timing     = :live,
+        )
         # Capture the actual output from the simulation
-        output = run_simulation(config)
+        output = run_simulation(eis_config)
         elapsed = time() - start_time
+
+         # Generate WGLMakie plots using the same functions as the native display.
+         plot_dir = joinpath(PLOTS_DIR, result_id)
+         plot_files = try
+             @debug "    Generating web plots to directory: $plot_dir"
+             files = generate_web_plots(output, plot_dir)
+             @debug "    Generated $(length(files)) plot files: $files"
+             files
+         catch e
+             @error "    Failed to generate web plots for EIS simulation" exception=e
+             Dict{String, String}[]
+         end
 
         SIMULATION_RESULTS[result_id] = Dict(
             :type => "eis",
             :status => "completed",
             :start_time => DateTime(now()),
             :elapsed_time => elapsed,
-            :config => config,
+            :config => eis_config,
             :output => output,  # Store the actual simulation results
+            :plot_files => plot_files,
         )
 
         @info "    EIS simulation completed: $result_id"
@@ -569,6 +626,59 @@ function get_simulation_status(result_id::String)::Dict
     end
 end
 
+
+function _legacy_plot_title(filename::AbstractString, index::Integer)::String
+    if occursin("plot_main", filename)
+        return "Main Results"
+    elseif occursin("plot_gc", filename)
+        return "Gas Channel Profiles"
+    end
+    return "Plot $(index)"
+end
+
+
+function _get_plot_field(entry, key::AbstractString, fallback::String)::String
+    if entry isa AbstractDict
+        if haskey(entry, key)
+            return String(entry[key])
+        elseif haskey(entry, Symbol(key))
+            return String(entry[Symbol(key)])
+        end
+    end
+    return fallback
+end
+
+
+"""Normalize stored plot metadata so the API always returns `{url, title, group, key}` objects."""
+function _normalize_plot_entries(result_id::String, entries)::Vector{Dict{String, String}}
+    plots = Dict{String, String}[]
+
+    for (index, entry) in enumerate(entries)
+        if entry isa AbstractString
+            filename = String(entry)
+            push!(plots, Dict(
+                "url"   => "/api/plots/$(result_id)/$(filename)",
+                "title" => _legacy_plot_title(filename, index),
+                "group" => "Plots",
+                "key"   => "plot_$(index)",
+            ))
+            continue
+        end
+
+        filename = _get_plot_field(entry, "filename", "")
+        isempty(filename) && continue
+
+        push!(plots, Dict(
+            "url"   => "/api/plots/$(result_id)/$(filename)",
+            "title" => _get_plot_field(entry, "title", "Plot $(index)"),
+            "group" => _get_plot_field(entry, "group", "Plots"),
+            "key"   => _get_plot_field(entry, "key", "plot_$(index)"),
+        ))
+    end
+
+    return plots
+end
+
 """
 Get detailed results data with actual simulation data.
 
@@ -594,6 +704,10 @@ function get_detailed_results(result_id::String)::Dict
         data = generate_simulation_data(sim_type)
     end
 
+    # Build normalized metadata for the generated interactive plot files.
+    plot_entries = get(result, :plot_files, Any[])
+    plot_urls = _normalize_plot_entries(result_id, plot_entries)
+
     return Dict(
         :simulation_type => sim_type,
         :status => result[:status],
@@ -601,7 +715,7 @@ function get_detailed_results(result_id::String)::Dict
         :elapsed_time => result[:elapsed_time],
         :data => data,
         :kpis => calculate_kpis(data),
-        :plots => [],
+        :plots => plot_urls,
     )
 end
 
@@ -896,5 +1010,4 @@ function generate_result_id()::String
 end
 
 end  # end module SimulatorBackend
-
 

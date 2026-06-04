@@ -68,9 +68,41 @@
 
         .plots-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            grid-template-columns: minmax(320px, 1fr);
             gap: 20px;
-            margin-bottom: 30px;
+            margin: 20px auto 30px;
+            max-width: 900px;
+            justify-content: center;
+        }
+
+        .plot-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .plot-selector-field {
+            width: 100%;
+        }
+
+        .plot-selector-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #335;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .plot-selector {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #c8d8ea;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #223;
+            background: white;
         }
 
         .plot-container {
@@ -78,23 +110,63 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 15px;
-            text-align: center;
+            min-height: 500px;
+            overflow: hidden;
+            position: relative;
         }
 
-        .plot-container img {
-            max-width: 100%;
-            height: auto;
+        .plot-toolbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .plot-tool-btn {
+            width: 34px;
+            height: 34px;
+            border: 1px solid #c8d8ea;
+            border-radius: 6px;
+            background: #fff;
+            color: #223;
+            font-size: 16px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .plot-tool-btn:hover {
+            border-color: #8bb2d9;
+            background: #f4f9ff;
+        }
+
+        .plot-tool-btn.active {
+            background: #e6f2ff;
+            border-color: #6da5dd;
+            color: #004e9e;
+        }
+
+        .plot-viewport {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        .plot-frame {
+            width: 100%;
+            height: 600px;
+            border: none;
             border-radius: 4px;
         }
 
         .plot-title {
             font-weight: 600;
             color: #333;
-            margin-top: 10px;
+            margin-bottom: 10px;
             font-size: 14px;
         }
 
-        .plot-placeholder {
+        .plot-loading {
             background: linear-gradient(135deg, #f0f0f0, #e6e6e6);
             height: 300px;
             display: flex;
@@ -229,6 +301,12 @@
             font-size: 14px;
             color: #0066cc;
         }
+
+        @media (max-width: 980px) {
+            .plots-grid {
+                max-width: 760px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -273,81 +351,23 @@
 
                     <div class="info-box">
                         <strong>ℹ️ Results Ready:</strong> Your simulation has completed successfully.
-                        View the plots below or download the complete data in your preferred format.
+                        View the interactive plots below to explore your results with full zoom and pan controls.
                     </div>
                 </div>
 
                 <!-- Plots Section -->
                 <div class="results-container">
-                    <div class="section-header">📊 Simulation Results</div>
+                    <div class="section-header">📊 Interactive Simulation Results (Powered by WGLMakie)</div>
 
                     <div class="info-box">
-                        <strong>ℹ️ Data Visualization:</strong> The plots below show your simulation results.
-                        Use the controls to analyze different aspects of the simulation.
+                        <strong>ℹ️ Interactive Controls:</strong> Use your mouse to zoom (scroll), pan (drag), and interact with the plots.
+                        You can explore the full range of values including areas outside the initial viewport. Select the plot you want to inspect from the list below.
                     </div>
 
-                    <div style="margin: 20px 0 30px 0;">
-                        <label style="font-weight: 600;">Select Result to Display:</label>
-                        <select id="result-selector" onchange="displaySelectedResult()" style="margin: 10px 0; width: 100%; max-width: 400px;">
-                            <!-- Options will be populated dynamically from available data -->
-                        </select>
-                    </div>
+                    <div id="plots-container" class="plots-grid"></div>
 
-                    <div class="plots-grid">
-                        <div class="plot-container">
-                            <canvas id="main-plot" width="400" height="300"></canvas>
-                            <div class="plot-title" id="plot-title">Voltage Response</div>
-                        </div>
-                        <div class="plot-container">
-                            <div id="plot-stats" style="padding: 20px; text-align: left;">
-                                <h4 style="margin: 0 0 15px 0;">Parameters Summary</h4>
-                                <table class="data-table" style="width: 100%;">
-                                    <tr>
-                                        <td><strong>Min Value</strong></td>
-                                        <td id="stat-min">--</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Max Value</strong></td>
-                                        <td id="stat-max">--</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Average</strong></td>
-                                        <td id="stat-avg">--</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Std Dev</strong></td>
-                                        <td id="stat-std">--</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Data Points</strong></td>
-                                        <td id="stat-points">--</td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Summary Statistics -->
-                    <div style="margin-top: 30px; padding: 20px; background: #f9f9f9; border-radius: 8px;">
-                        <h3 style="margin: 0 0 15px 0;">Key Performance Indicators</h3>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
-                            <div style="text-align: center; padding: 15px; background: white; border-radius: 6px;">
-                                <div style="font-size: 12px; color: #999; margin-bottom: 5px;">Peak Voltage</div>
-                                <div style="font-size: 20px; font-weight: 700; color: #0066cc;" id="kpi-peak-voltage">--</div>
-                            </div>
-                            <div style="text-align: center; padding: 15px; background: white; border-radius: 6px;">
-                                <div style="font-size: 12px; color: #999; margin-bottom: 5px;">Min Voltage</div>
-                                <div style="font-size: 20px; font-weight: 700; color: #e60000;" id="kpi-min-voltage">--</div>
-                            </div>
-                            <div style="text-align: center; padding: 15px; background: white; border-radius: 6px;">
-                                <div style="font-size: 12px; color: #999; margin-bottom: 5px;">Average Power</div>
-                                <div style="font-size: 20px; font-weight: 700; color: #00b300;" id="kpi-avg-power">--</div>
-                            </div>
-                            <div style="text-align: center; padding: 15px; background: white; border-radius: 6px;">
-                                <div style="font-size: 12px; color: #999; margin-bottom: 5px;">Efficiency</div>
-                                <div style="font-size: 20px; font-weight: 700; color: #ff6600;" id="kpi-efficiency">--</div>
-                            </div>
-                        </div>
+                    <div id="plot-loading" class="plot-loading">
+                        Loading plots...
                     </div>
                 </div>
 
@@ -365,31 +385,18 @@
                             📄 JSON (Full)
                         </button>
                         <button class="export-format" onclick="downloadResults('xlsx')">
-                            📑 XLSX (spreadsheet)
-                        </button>
-                        <button class="export-format" onclick="downloadResults('pdf')">
-                            📋 PDF (Report)
+                            📑 XLSX (Spreadsheet)
                         </button>
                     </div>
 
                     <div class="comparison-note">
-                        💡 <strong>Tip:</strong> Use CSV for data analysis, JSON for archival, XLSX for Excel, or PDF for reports.
+                        💡 <strong>Tip:</strong> Use CSV for data analysis, JSON for archival, or XLSX for Excel.
                     </div>
                 </div>
 
                 <!-- Data Analytics Section -->
                 <div class="results-container">
-                    <div class="section-header">📈 Data Analytics</div>
-
-                    <div style="margin: 20px 0;">
-                        <label style="font-weight: 600;">Analysis Options:</label>
-                        <div style="margin: 15px 0; display: flex; gap: 10px; flex-wrap: wrap;">
-                            <button class="export-format" onclick="analyzeData('summary')">Summary Stats</button>
-                            <button class="export-format" onclick="analyzeData('detailed')">Detailed Data</button>
-                            <button class="export-format" onclick="analyzeData('trends')">Trends Analysis</button>
-                            <button class="export-format" onclick="analyzeData('validation')">Validation Report</button>
-                        </div>
-                    </div>
+                    <div class="section-header">📊 Data Analytics</div>
 
                     <div id="analytics-content">
                         <table class="data-table" style="width: 100%;">
@@ -399,12 +406,11 @@
                                     <th>Voltage (V)</th>
                                     <th>Current (A/m²)</th>
                                     <th>Power (W)</th>
-                                    <th>Efficiency (%)</th>
                                 </tr>
                             </thead>
                             <tbody id="data-table-body">
                                 <tr>
-                                    <td colspan="5" style="text-align: center; color: #999;">Simulation data will appear here...</td>
+                                    <td colspan="4" style="text-align: center; color: #999;">Simulation data will appear here...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -440,34 +446,14 @@
     </div>
 
     <script>
-        // ===== MOCK DATA - Will be replaced with real API data =====
-        const mockSimulationData = {
-            step: {
-                time: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50],
-                voltage: [0.85, 0.84, 0.83, 0.82, 0.81, 0.80, 0.79, 0.78, 0.77, 0.76, 0.75],
-                current: [5000, 7000, 9000, 11000, 13000, 15000, 15000, 15000, 15000, 15000, 15000],
-                power: [4250, 5880, 7470, 9020, 10530, 12000, 11850, 11700, 11550, 11400, 11250],
-                T: [353, 353.5, 354, 354.2, 354.5, 354.8, 355, 355.1, 355.2, 355.3, 355.4],
-                C_v: [8.5, 8.6, 8.7, 8.8, 8.9, 9.0, 9.1, 9.1, 9.2, 9.2, 9.3],
-                s: [0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.11, 0.11, 0.12, 0.12, 0.13],
-                lambda: [6, 6.2, 6.4, 6.6, 6.8, 7.0, 7.1, 7.2, 7.3, 7.4, 7.5],
-                C_H2: [25, 24, 23, 22, 21, 20, 19.5, 19, 18.5, 18, 17.5],
-                C_O2: [9, 8.5, 8, 7.5, 7, 6.5, 6.2, 6, 5.8, 5.6, 5.4],
-                Pa_in: [161000, 161000, 161000, 161000, 161000, 161000, 161000, 161000, 161000, 161000, 161000]
-            }
-        };
-
-        let currentResultData = mockSimulationData.step;
-        let currentSimulationType = 'step';
         const resultId = window.location.pathname.split('/').pop();
+        let currentResultData = {};
+        let currentSimulationType = 'step';
 
         // ===== INITIALIZATION =====
 
         document.addEventListener('DOMContentLoaded', function() {
             loadResults();
-            drawMainPlot();
-            updateKPIs();
-
             setInterval(checkStatus, 3000);
         });
 
@@ -481,22 +467,14 @@
                     document.getElementById('results-loader').style.display = 'none';
                     document.getElementById('results-content').style.display = 'block';
 
-                    // Check if we have real simulation data by looking for specific fields
-                    const hasRealData = data.data && (
-                        (data.data.time && data.data.time.length > 0) ||  // Step sim
-                        (data.data.current && data.data.current.length > 0) ||  // Polarization sim
-                        (data.data.frequency && data.data.frequency.length > 0)  // EIS sim
-                    );
+                    currentSimulationType = data.simulation_type || 'step';
+                    currentResultData = data.data || {};
 
-                    if (hasRealData) {
-                        // Real data is available - use it
-                        console.log('Using real simulation data');
-                        useRealSimulationData(data.data);
-                    } else {
-                        // No real data, generate synthetic
-                        console.warn('No real data available, using synthetic data');
-                        generateSyntheticData(data.simulation_type);
-                    }
+                    // Display WGLMakie-generated interactive plots if available.
+                    displayInteractivePlots(data.plots || []);
+
+                    // Populate data table.
+                    populateDataTable();
                 })
                 .catch(e => {
                     console.error('Failed to load results:', e);
@@ -504,408 +482,308 @@
                 });
         }
 
-        // Use real simulation data from the API
-        function useRealSimulationData(data) {
-            if (data.time) {
-                // Step simulation data
-                currentResultData = {
-                    time: data.time,
-                    voltage: data.voltage || [],
-                    current: data.current || [],
-                    power: data.power || [],
-                    Pa_in: data.Pa_in || [],
-                    Pc_in: data.Pc_in || [],
-                    O2_concentration: data.O2_concentration || [],
-                    anode_velocity: data.anode_velocity || [],
-                    cathode_velocity: data.cathode_velocity || [],
-                    // State-based variables matching :synthetic panels
-                    T: data.T || [],
-                    C_v: data.C_v || [],
-                    s: data.s || [],
-                    lambda: data.lambda || [],
-                    C_H2: data.C_H2 || [],
-                    C_O2: data.C_O2 || [],
-                };
-            } else if (data.current) {
-                // Polarization or general V-I curve data
-                currentResultData = {
-                    current: data.current,
-                    voltage: data.voltage || [],
-                    power: data.power || [],
-                    Pa_in: data.Pa_in || [],
-                    Pc_in: data.Pc_in || [],
-                    O2_concentration: data.O2_concentration || []
-                };
-            } else if (data.frequency) {
-                // EIS data
-                currentResultData = {
-                    frequency: data.frequency,
-                    impedance_real: data.impedance_real || [],
-                    impedance_imag: data.impedance_imag || []
-                };
-            } else {
-                // Fallback to synthetic if format is unexpected
-                generateSyntheticData('step');
-                return;
-            }
+        // ===== INTERACTIVE PLOT DISPLAY (WGLMakie) =====
 
-            console.log('Loaded real simulation data:', currentResultData);
+        function normalizePlotEntries(plotEntries) {
+            if (!Array.isArray(plotEntries)) return [];
 
-            // Populate the result selector with available data fields
-            populateResultSelector();
+            return plotEntries.map((entry, index) => {
+                if (typeof entry === 'string') {
+                    return {
+                        url: entry,
+                        title: `Plot ${index + 1}`,
+                        group: 'Plots',
+                        key: `plot_${index + 1}`
+                    };
+                }
+
+                return {
+                    url: entry.url,
+                    title: entry.title || `Plot ${index + 1}`,
+                    group: entry.group || 'Plots',
+                    key: entry.key || `plot_${index + 1}`
+                };
+            }).filter(plot => !!plot.url);
         }
 
-        // Populate the result selector based on available data, matching :synthetic display options
-        function populateResultSelector() {
-            const selector = document.getElementById('result-selector');
-            selector.innerHTML = ''; // Clear existing options
-
-            let availableFields = [];
-
-            if (currentSimulationType === 'step') {
-                // Match exactly the 9 panels of :synthetic step display:
-                // Row 1: ifc, Ucell, T
-                // Row 2: C_v, s, lambda
-                // Row 3: C_H2, C_O2, P (Pa_in)
-                const syntheticStepFields = [
-                    { value: 'current',  label: 'Current Density (A/m²)'         },
-                    { value: 'voltage',  label: 'Cell Voltage (V)'                },
-                    { value: 'T',        label: 'Temperature (K)'                 },
-                    { value: 'C_v',      label: 'Water Vapor Concentration (mol/m³)' },
-                    { value: 's',        label: 'Liquid Water Saturation (–)'     },
-                    { value: 'lambda',   label: 'Membrane Water Content (–)'      },
-                    { value: 'C_H2',     label: 'H₂ Concentration (mol/m³)'      },
-                    { value: 'C_O2',     label: 'O₂ Concentration (mol/m³)'      },
-                    { value: 'Pa_in',    label: 'Anode Inlet Pressure (Pa)'       },
-                ];
-                // Only add options for which data actually exists
-                for (const field of syntheticStepFields) {
-                    const d = currentResultData[field.value];
-                    if (d && d.length > 0) {
-                        availableFields.push(field);
-                    }
+        function buildPlotOptions(selector, plots) {
+            const groups = new Map();
+            plots.forEach((plot, index) => {
+                if (!groups.has(plot.group)) {
+                    groups.set(plot.group, []);
                 }
-            } else if (currentSimulationType === 'polarization' || currentSimulationType === 'polarization_calibration') {
-                // :synthetic polarization = single V-I polarization curve
-                if (currentResultData.voltage && currentResultData.voltage.length > 0) {
-                    availableFields.push({ value: 'voltage', label: 'Polarization Curve (V vs A/m²)' });
-                }
-                if (currentResultData.power && currentResultData.power.length > 0) {
-                    availableFields.push({ value: 'power', label: 'Power Density Curve (W/m² vs A/m²)' });
-                }
-            } else if (currentSimulationType === 'eis') {
-                // :synthetic EIS = Nyquist + Bode amplitude + Bode phase
-                if (currentResultData.impedance_real && currentResultData.impedance_real.length > 0) {
-                    availableFields.push({ value: 'nyquist',       label: 'Nyquist Plot (−Im(Z) vs Re(Z))'   });
-                    availableFields.push({ value: 'bode_amplitude', label: 'Bode Plot – Amplitude (|Z| vs f)' });
-                    availableFields.push({ value: 'bode_phase',     label: 'Bode Plot – Phase Angle (° vs f)' });
-                } else {
-                    // Fallback when impedance data is not available
-                    if (currentResultData.voltage && currentResultData.voltage.length > 0)
-                        availableFields.push({ value: 'voltage', label: 'Cell Voltage (V)' });
-                    if (currentResultData.current && currentResultData.current.length > 0)
-                        availableFields.push({ value: 'current', label: 'Current Density (A/m²)' });
-                }
-            } else {
-                // Generic fallback
-                if (currentResultData.voltage && currentResultData.voltage.length > 0)
-                    availableFields.push({ value: 'voltage', label: 'Cell Voltage (V)' });
-                if (currentResultData.current && currentResultData.current.length > 0)
-                    availableFields.push({ value: 'current', label: 'Current Density (A/m²)' });
-            }
-
-            if (availableFields.length === 0) {
-                availableFields.push({ value: 'voltage', label: 'Cell Voltage (V)' });
-            }
-
-            availableFields.forEach(field => {
-                const option = document.createElement('option');
-                option.value = field.value;
-                option.textContent = field.label;
-                selector.appendChild(option);
+                groups.get(plot.group).push({ plot, index });
             });
 
-            // Select first option and update plot
-            selector.value = availableFields[0].value;
-            displaySelectedResult();
+            groups.forEach((groupPlots, groupName) => {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = groupName;
+
+                groupPlots.forEach(({ plot, index }) => {
+                    const option = document.createElement('option');
+                    option.value = String(index);
+                    option.textContent = plot.title;
+                    optgroup.appendChild(option);
+                });
+
+                selector.appendChild(optgroup);
+            });
         }
 
-        // Generate synthetic data based on simulation type
-        function generateSyntheticData(simType) {
-            console.warn('Using synthetic data - real simulation data not available');
-            currentSimulationType = simType;
-            if (simType === 'step') {
-                currentResultData = mockSimulationData.step;
-            } else if (simType === 'polarization') {
-                // Generate polarization curve
-                currentResultData = {
-                    current: Array.from({length: 21}, (_, i) => i * 1000),
-                    voltage: Array.from({length: 21}, (_, i) => 0.85 - i * 0.015),
-                    power: Array.from({length: 21}, (_, i) => (0.85 - i * 0.015) * (i * 1000)),
+        function renderPlotInPanel(panel, plot) {
+            const title = panel.querySelector('.plot-title');
+            const oldFrame = panel.querySelector('.plot-frame');
+            const plotContainer = panel.querySelector('.plot-container');
+            const viewport = panel.querySelector('.plot-viewport');
+
+            if (title) {
+                title.textContent = plot.title;
+            }
+            if (!oldFrame || !plotContainer || !viewport) return;
+
+            // Display a local loading state while replacing the iframe.
+            const loading = document.createElement('div');
+            loading.className = 'plot-loading';
+            loading.style.height = '120px';
+            loading.textContent = 'Loading plot...';
+            plotContainer.appendChild(loading);
+
+            // Force teardown of the previous WGL/WebGL context before loading another plot.
+            oldFrame.src = 'about:blank';
+            oldFrame.remove();
+
+            window.setTimeout(function() {
+                const frame = document.createElement('iframe');
+                frame.className = 'plot-frame';
+                frame.setAttribute('sandbox', 'allow-same-origin allow-scripts');
+                frame.dataset.ready = '0';
+                frame.src = `${plot.url}${plot.url.includes('?') ? '&' : '?'}_ts=${Date.now()}`;
+                frame.onload = function() {
+                    loading.remove();
+                    window.setTimeout(function() {
+                        frame.dataset.ready = '1';
+                    }, 250);
+                    applyToolbarState(panel);
                 };
-            } else if (simType === 'eis') {
-                // Generate EIS data
-                currentResultData = {
-                    frequency: Array.from({length: 20}, (_, i) => Math.pow(10, i * 0.2)),
-                    impedance_real: Array.from({length: 20}, (_, i) => 0.1 + i * 0.005),
-                    impedance_imag: Array.from({length: 20}, (_, i) => -0.05 * Math.sin(i * 0.3))
+                frame.onerror = function() {
+                    loading.remove();
+                    const message = document.createElement('p');
+                    message.style.color = '#999';
+                    message.style.fontStyle = 'italic';
+                    message.textContent = 'Failed to load plot.';
+                    plotContainer.appendChild(message);
                 };
-            }
-            // Update the selector and plot with the generated data
-            populateResultSelector();
-            updateKPIs();
+                viewport.insertBefore(frame, viewport.firstChild);
+            }, 80);
         }
 
-        // ===== PLOT FUNCTIONS =====
-
-        function drawMainPlot() {
-            const canvas = document.getElementById('main-plot');
-            if (!canvas) return;
-
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
-
-            // Clear canvas
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, width, height);
-
-            // Get selected data type
-            const selector = document.getElementById('result-selector');
-            const selectedType = selector.value;
-
-            // Special case: Nyquist plot (X = Re(Z), Y = -Im(Z))
-            if (selectedType === 'nyquist') {
-                const xData = currentResultData.impedance_real || [];
-                const yData = (currentResultData.impedance_imag || []).map(v => -v);
-                drawLineChart(ctx, width, height, xData, yData);
-                return;
+        function ensurePanelViewState(panel) {
+            if (!panel._viewState) {
+                panel._viewState = {};
             }
-
-            // Special case: Bode plots (X = frequency, log scale)
-            if (selectedType === 'bode_amplitude') {
-                const freq = currentResultData.frequency || [];
-                const re = currentResultData.impedance_real || [];
-                const im = currentResultData.impedance_imag || [];
-                const yData = re.map((r, i) => Math.sqrt(r * r + (im[i] || 0) * (im[i] || 0)));
-                drawLineChart(ctx, width, height, freq, yData);
-                return;
-            }
-            if (selectedType === 'bode_phase') {
-                const freq = currentResultData.frequency || [];
-                const re = currentResultData.impedance_real || [];
-                const im = currentResultData.impedance_imag || [];
-                const yData = re.map((r, i) => Math.atan2(im[i] || 0, r) * 180 / Math.PI);
-                drawLineChart(ctx, width, height, freq, yData);
-                return;
-            }
-
-            // Determine X and Y data based on simulation type and selection
-            let xData, yData;
-
-            if (currentResultData.time && currentSimulationType === 'step') {
-                // Step simulation — X axis is time
-                xData = currentResultData.time;
-                yData = currentResultData[selectedType] || currentResultData.voltage;
-            } else if (currentResultData.current && currentSimulationType === 'polarization') {
-                // Polarization — X axis is current density
-                xData = currentResultData.current;
-                yData = currentResultData[selectedType] || currentResultData.voltage;
-            } else if (currentResultData.frequency) {
-                // EIS fallback
-                xData = currentResultData.frequency;
-                yData = currentResultData[selectedType] || currentResultData.impedance_real;
-            } else {
-                xData = [1, 2, 3];
-                yData = [1, 2, 3];
-            }
-
-            // Draw simple line chart (without points)
-            drawLineChart(ctx, width, height, xData, yData);
         }
 
-        function drawLineChart(ctx, width, height, xData, yData) {
-            if (!xData || !yData || xData.length === 0 || yData.length === 0) return;
-
-            const padding = 40;
-            const graphWidth = width - 2 * padding;
-            const graphHeight = height - 2 * padding;
-
-            // Find min/max
-            const yMin = Math.min(...yData);
-            const yMax = Math.max(...yData);
-            const xMin = Math.min(...xData);
-            const xMax = Math.max(...xData);
-
-            // Prevent division by zero
-            const yRange = yMax - yMin > 0 ? yMax - yMin : 1;
-            const xRange = xMax - xMin > 0 ? xMax - xMin : 1;
-
-            // Draw axes
-            ctx.strokeStyle = '#ccc';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(padding, height - padding);
-            ctx.lineTo(width - padding, height - padding);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(padding, padding);
-            ctx.lineTo(padding, height - padding);
-            ctx.stroke();
-
-            // Draw grid lines
-            ctx.strokeStyle = '#eee';
-            for (let i = 0; i <= 5; i++) {
-                const y = padding + (graphHeight / 5) * i;
-                ctx.beginPath();
-                ctx.moveTo(padding, y);
-                ctx.lineTo(width - padding, y);
-                ctx.stroke();
-            }
-
-            // Draw line (without points)
-            ctx.strokeStyle = '#0066cc';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-
-            for (let i = 0; i < xData.length; i++) {
-                const x = padding + ((xData[i] - xMin) / xRange) * graphWidth;
-                const y = height - padding - ((yData[i] - yMin) / yRange) * graphHeight;
-
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-
-            // Labels
-            ctx.fillStyle = '#333';
-            ctx.font = '12px Arial';
-            ctx.textAlign = 'right';
-            ctx.fillText(yMax.toFixed(2), padding - 10, padding + 5);
-            ctx.fillText(yMin.toFixed(2), padding - 10, height - padding + 5);
+        function getPlotFrame(panel) {
+            const frame = panel.querySelector('.plot-frame');
+            if (!frame || frame.dataset.ready !== '1') return null;
+            return frame;
         }
 
-        function displaySelectedResult() {
-            const selector = document.getElementById('result-selector');
-            const selected = selector.value;
-
-            updatePlotTitle(selected);
-            drawMainPlot();
-            updateStats(selected);
+        function getPlotCanvas(panel) {
+            const frame = getPlotFrame(panel);
+            if (!frame || !frame.contentDocument) return null;
+            return frame.contentDocument.querySelector('canvas');
         }
 
-        function updatePlotTitle(selectedType) {
-            const titles = {
-                // Step :synthetic panels
-                'current':        'Current Density (A/m²)',
-                'voltage':        'Cell Voltage (V)',
-                'T':              'Temperature (K)',
-                'C_v':            'Water Vapor Concentration (mol/m³)',
-                's':              'Liquid Water Saturation (–)',
-                'lambda':         'Membrane Water Content (–)',
-                'C_H2':           'H₂ Concentration (mol/m³)',
-                'C_O2':           'O₂ Concentration (mol/m³)',
-                'Pa_in':          'Anode Inlet Pressure (Pa)',
-                // Polarization :synthetic panels
-                'power':          'Power Density (W/m²)',
-                // EIS :synthetic panels
-                'nyquist':        'Nyquist Plot  –Im(Z) vs Re(Z)  (Ω·m²)',
-                'bode_amplitude': 'Bode Plot – |Z| (Ω·m²) vs Frequency (Hz)',
-                'bode_phase':     'Bode Plot – Phase Angle (°) vs Frequency (Hz)',
-                // Legacy / extra fields
-                'Pc_in':          'Cathode Inlet Pressure (Pa)',
-                'O2_concentration': 'O₂ Concentration at Pt Sites (mol/m³)',
-                'anode_velocity': 'Anode Gas Velocity (m/s)',
-                'cathode_velocity': 'Cathode Gas Velocity (m/s)',
+        function getCanvasCenterInFrame(panel) {
+            const frame = getPlotFrame(panel);
+            const canvas = getPlotCanvas(panel);
+            if (!frame || !canvas || !frame.contentWindow) return null;
+            const rect = canvas.getBoundingClientRect();
+            return {
+                frame: frame,
+                canvas: canvas,
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2
             };
-            document.getElementById('plot-title').textContent = titles[selectedType] || 'Simulation Data';
         }
 
-        // ===== STATISTICS =====
+        function getOrbitControls(panel) {
+            const canvas = getPlotCanvas(panel);
+            if (!canvas || !canvas.wglmakie_screen) return null;
+            const rootScene = canvas.wglmakie_screen.root_scene;
+            if (!rootScene || !rootScene.orbitcontrols) return null;
+            return rootScene.orbitcontrols;
+        }
 
-        function updateStats(dataType) {
-            let data = currentResultData[dataType] || [];
+        function zoomOrbitControls(panel, factor) {
+            const controls = getOrbitControls(panel);
+            if (!controls || !controls.object || !controls.target) return false;
 
-            if (Array.isArray(data) && data.length > 0) {
-                // Filter out non-numeric values
-                data = data.filter(x => typeof x === 'number' && isFinite(x));
+            const camera = controls.object;
+            const target = controls.target;
+            if (!camera.position || !camera.position.clone) return false;
 
-                if (data.length === 0) {
-                    return;
-                }
+            const offset = camera.position.clone().sub(target);
+            if (!offset || !offset.multiplyScalar) return false;
+            offset.multiplyScalar(factor);
+            camera.position.copy(target.clone().add(offset));
+            controls.update();
+            return true;
+        }
 
-                const min = Math.min(...data);
-                const max = Math.max(...data);
-                const avg = data.reduce((a, b) => a + b, 0) / data.length;
-                const std = Math.sqrt(data.reduce((sq, n) => sq + Math.pow(n - avg, 2), 0) / data.length);
+        function resetOrbitControls(panel) {
+            const controls = getOrbitControls(panel);
+            if (!controls || typeof controls.reset !== 'function') return false;
+            controls.reset();
+            return true;
+        }
 
-                document.getElementById('stat-min').textContent = min.toFixed(4);
-                document.getElementById('stat-max').textContent = max.toFixed(4);
-                document.getElementById('stat-avg').textContent = avg.toFixed(4);
-                document.getElementById('stat-std').textContent = std.toFixed(4);
-                document.getElementById('stat-points').textContent = data.length;
+        function dispatchWheelToPlot(panel, deltaY) {
+            const center = getCanvasCenterInFrame(panel);
+            if (!center) return false;
+            const frame = center.frame;
+            const canvas = center.canvas;
+            const WheelCtor = frame.contentWindow.WheelEvent || WheelEvent;
+            const event = new WheelCtor('wheel', {
+                deltaY: deltaY,
+                clientX: center.x,
+                clientY: center.y,
+                bubbles: true,
+                cancelable: true
+            });
+            canvas.dispatchEvent(event);
+            return true;
+        }
+
+        function dispatchDblClickToPlot(panel) {
+            const center = getCanvasCenterInFrame(panel);
+            if (!center) return false;
+            const frame = center.frame;
+            const canvas = center.canvas;
+            const MouseCtor = frame.contentWindow.MouseEvent || MouseEvent;
+            const event = new MouseCtor('dblclick', {
+                clientX: center.x,
+                clientY: center.y,
+                bubbles: true,
+                cancelable: true
+            });
+            canvas.dispatchEvent(event);
+            return true;
+        }
+
+        function applyToolbarState(panel) {
+            ensurePanelViewState(panel);
+            const frame = panel.querySelector('.plot-frame');
+            if (frame) frame.style.cursor = 'default';
+        }
+
+        function bindPlotToolbar(panel) {
+            ensurePanelViewState(panel);
+            const buttons = panel.querySelectorAll('.plot-tool-btn');
+
+            buttons.forEach((btn) => {
+                btn.addEventListener('click', function() {
+                    const action = btn.getAttribute('data-action');
+                    if (action === 'zoom-in') {
+                        if (!zoomOrbitControls(panel, 1 / 1.2)) {
+                            dispatchWheelToPlot(panel, -240);
+                        }
+                    } else if (action === 'zoom-out') {
+                        if (!zoomOrbitControls(panel, 1.2)) {
+                            dispatchWheelToPlot(panel, 240);
+                        }
+                    } else if (action === 'home') {
+                        if (!resetOrbitControls(panel)) {
+                            // Fallback for 2D: try the native reset gesture first.
+                            if (!dispatchDblClickToPlot(panel)) {
+                                for (let i = 0; i < 6; i++) dispatchWheelToPlot(panel, 260);
+                            }
+                        }
+                    }
+                    applyToolbarState(panel);
+                });
+            });
+        }
+
+        function displayInteractivePlots(plotEntries) {
+            const container = document.getElementById('plots-container');
+            const loading   = document.getElementById('plot-loading');
+            const plots     = normalizePlotEntries(plotEntries);
+
+            container.innerHTML = '';
+
+            if (!plots || plots.length === 0) {
+                loading.style.display = 'flex';
+                loading.textContent = 'No plots available for this simulation.';
+                return;
+            }
+
+            loading.style.display = 'none';
+            const panel = document.createElement('div');
+            panel.className = 'plot-panel';
+            panel.innerHTML = `
+                <div class="plot-selector-field">
+                    <label class="plot-selector-label">Available plots</label>
+                    <select class="plot-selector"></select>
+                </div>
+                <div class="plot-container">
+                    <div class="plot-title"></div>
+                    <div class="plot-toolbar">
+                        <button class="plot-tool-btn" data-action="zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
+                        <button class="plot-tool-btn" data-action="zoom-out" title="Zoom out" aria-label="Zoom out">-</button>
+                        <button class="plot-tool-btn" data-action="home" title="Reset view" aria-label="Reset view">⌂</button>
+                    </div>
+                    <div class="plot-viewport">
+                        <iframe class="plot-frame" sandbox="allow-same-origin allow-scripts"></iframe>
+                    </div>
+                </div>
+            `;
+
+            const selector = panel.querySelector('.plot-selector');
+            buildPlotOptions(selector, plots);
+            panel._plots = plots;
+            bindPlotToolbar(panel);
+            applyToolbarState(panel);
+
+            selector.value = '0';
+            renderPlotInPanel(panel, plots[0]);
+
+            selector.addEventListener('change', function(event) {
+                const selectedPlot = plots[Number(event.target.value)] || plots[0];
+                renderPlotInPanel(panel, selectedPlot);
+            });
+
+            container.appendChild(panel);
+        }
+
+        function populateDataTable() {
+            const tbody = document.getElementById('data-table-body');
+            if (!tbody) return;
+
+            tbody.innerHTML = ''; // Clear placeholder
+
+            if (!currentResultData.time || currentResultData.time.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">No data available</td></tr>';
+                return;
+            }
+
+            const len = currentResultData.time.length;
+            const step = Math.max(1, Math.floor(len / 50)); // Show max 50 rows
+
+            for (let i = 0; i < len; i += step) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${(currentResultData.time[i] || i).toFixed(4)}</td>
+                    <td>${(currentResultData.voltage ? currentResultData.voltage[i] : 'N/A').toFixed(4)}</td>
+                    <td>${(currentResultData.current ? currentResultData.current[i] : 'N/A').toFixed(4)}</td>
+                    <td>${(currentResultData.power ? currentResultData.power[i] : 'N/A').toFixed(4)}</td>
+                `;
+                tbody.appendChild(row);
             }
         }
 
-        function updateKPIs() {
-            if (currentResultData.voltage) {
-                const voltages = currentResultData.voltage;
-                document.getElementById('kpi-peak-voltage').textContent = Math.max(...voltages).toFixed(3) + ' V';
-                document.getElementById('kpi-min-voltage').textContent = Math.min(...voltages).toFixed(3) + ' V';
-            }
-
-            if (currentResultData.power) {
-                const powers = currentResultData.power;
-                document.getElementById('kpi-avg-power').textContent = (powers.reduce((a, b) => a + b) / powers.length).toFixed(0) + ' W';
-            }
-
-            if (currentResultData.efficiency) {
-                const eff = currentResultData.efficiency;
-                document.getElementById('kpi-efficiency').textContent = (eff.reduce((a, b) => a + b) / eff.length).toFixed(1) + ' %';
-            }
-        }
-
-        // ===== ANALYSIS FUNCTIONS =====
-
-        function analyzeData(analysisType) {
-            const html = {
-                'summary': '<strong>Summary Statistics:</strong><br>Min: ' + Math.min(...currentResultData.voltage).toFixed(3) + '<br>Max: ' + Math.max(...currentResultData.voltage).toFixed(3) + '<br>Mean: ' + (currentResultData.voltage.reduce((a,b) => a+b) / currentResultData.voltage.length).toFixed(3),
-                'detailed': '<strong>Detailed Analysis Complete</strong><br>All data points have been exported.',
-                'trends': '<strong>Trend Analysis:</strong><br>Voltage trending downward over time.<br>Current stable during hold period.',
-                'validation': '<strong>Validation Report:</strong><br>✓ All parameters in valid range<br>✓ No anomalies detected<br>✓ Data quality: GOOD'
-            };
-
-            const content = document.getElementById('analytics-content');
-            if (html[analysisType]) {
-                content.innerHTML = '<div style="padding: 20px; background: #f0f7ff; border-radius: 6px; border-left: 4px solid #0066cc;">' + html[analysisType] + '</div>';
-            }
-        }
-
-        // ===== DOWNLOAD FUNCTION =====
-
-        function downloadTable(format) {
-            if (format === 'csv') {
-                let csv = 'Time,Voltage,Current,Power,Efficiency\n';
-                for (let i = 0; i < currentResultData.voltage.length; i++) {
-                    csv += (currentResultData.time ? currentResultData.time[i] : i) + ',';
-                    csv += currentResultData.voltage[i] + ',';
-                    csv += (currentResultData.current ? currentResultData.current[i] : 'N/A') + ',';
-                    csv += (currentResultData.power ? currentResultData.power[i] : 'N/A') + ',';
-                    csv += (currentResultData.efficiency ? currentResultData.efficiency[i] : 'N/A') + '\n';
-                }
-
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `alphapem_data_${resultId}.csv`;
-                a.click();
-                window.URL.revokeObjectURL(url);
-            }
-        }
-
-        // ===== EXISTING FUNCTIONS =====
+        // ===== HELPER FUNCTIONS =====
 
         function checkStatus() {
             fetch(`/api/status/${resultId}`)
@@ -926,13 +804,12 @@
                 'eis': 'EIS Spectroscopy'
             };
 
-            // Store simulation type globally so populateResultSelector can use it
             currentSimulationType = data.simulation_type || 'step';
 
             document.getElementById('result-title').textContent =
-                typeMap[data.simulation_type] + ' - Results';
+                (typeMap[data.simulation_type] || data.simulation_type) + ' - Results';
             document.getElementById('result-type').textContent =
-                typeMap[data.simulation_type];
+                typeMap[data.simulation_type] || data.simulation_type;
             document.getElementById('result-id').textContent = resultId;
             document.getElementById('result-duration').textContent =
                 (data.elapsed_time || 0).toFixed(2) + ' s';
@@ -974,7 +851,26 @@
                 </a>
             `;
         }
+
+        function downloadTable(format) {
+            if (format === 'csv' && currentResultData.voltage) {
+                let csv = 'Time,Voltage,Current,Power\n';
+                const len = currentResultData.voltage.length;
+                for (let i = 0; i < len; i++) {
+                    csv += (currentResultData.time ? currentResultData.time[i] : i) + ',';
+                    csv += currentResultData.voltage[i] + ',';
+                    csv += (currentResultData.current ? currentResultData.current[i] : 'N/A') + ',';
+                    csv += (currentResultData.power   ? currentResultData.power[i]   : 'N/A') + '\n';
+                }
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `alphapem_data_${resultId}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            }
+        }
     </script>
 </body>
 </html>
-
