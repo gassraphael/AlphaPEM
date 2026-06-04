@@ -115,35 +115,6 @@
             position: relative;
         }
 
-        .plot-toolbar {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-
-        .plot-tool-btn {
-            width: 34px;
-            height: 34px;
-            border: 1px solid #c8d8ea;
-            border-radius: 6px;
-            background: #fff;
-            color: #223;
-            font-size: 16px;
-            line-height: 1;
-            cursor: pointer;
-        }
-
-        .plot-tool-btn:hover {
-            border-color: #8bb2d9;
-            background: #f4f9ff;
-        }
-
-        .plot-tool-btn.active {
-            background: #e6f2ff;
-            border-color: #6da5dd;
-            color: #004e9e;
-        }
-
         .plot-viewport {
             position: relative;
             width: 100%;
@@ -563,7 +534,6 @@
                     window.setTimeout(function() {
                         frame.dataset.ready = '1';
                     }, 250);
-                    applyToolbarState(panel);
                 };
                 frame.onerror = function() {
                     loading.remove();
@@ -575,135 +545,6 @@
                 };
                 viewport.insertBefore(frame, viewport.firstChild);
             }, 80);
-        }
-
-        function ensurePanelViewState(panel) {
-            if (!panel._viewState) {
-                panel._viewState = {};
-            }
-        }
-
-        function getPlotFrame(panel) {
-            const frame = panel.querySelector('.plot-frame');
-            if (!frame || frame.dataset.ready !== '1') return null;
-            return frame;
-        }
-
-        function getPlotCanvas(panel) {
-            const frame = getPlotFrame(panel);
-            if (!frame || !frame.contentDocument) return null;
-            return frame.contentDocument.querySelector('canvas');
-        }
-
-        function getCanvasCenterInFrame(panel) {
-            const frame = getPlotFrame(panel);
-            const canvas = getPlotCanvas(panel);
-            if (!frame || !canvas || !frame.contentWindow) return null;
-            const rect = canvas.getBoundingClientRect();
-            return {
-                frame: frame,
-                canvas: canvas,
-                x: rect.left + rect.width / 2,
-                y: rect.top + rect.height / 2
-            };
-        }
-
-        function getOrbitControls(panel) {
-            const canvas = getPlotCanvas(panel);
-            if (!canvas || !canvas.wglmakie_screen) return null;
-            const rootScene = canvas.wglmakie_screen.root_scene;
-            if (!rootScene || !rootScene.orbitcontrols) return null;
-            return rootScene.orbitcontrols;
-        }
-
-        function zoomOrbitControls(panel, factor) {
-            const controls = getOrbitControls(panel);
-            if (!controls || !controls.object || !controls.target) return false;
-
-            const camera = controls.object;
-            const target = controls.target;
-            if (!camera.position || !camera.position.clone) return false;
-
-            const offset = camera.position.clone().sub(target);
-            if (!offset || !offset.multiplyScalar) return false;
-            offset.multiplyScalar(factor);
-            camera.position.copy(target.clone().add(offset));
-            controls.update();
-            return true;
-        }
-
-        function resetOrbitControls(panel) {
-            const controls = getOrbitControls(panel);
-            if (!controls || typeof controls.reset !== 'function') return false;
-            controls.reset();
-            return true;
-        }
-
-        function dispatchWheelToPlot(panel, deltaY) {
-            const center = getCanvasCenterInFrame(panel);
-            if (!center) return false;
-            const frame = center.frame;
-            const canvas = center.canvas;
-            const WheelCtor = frame.contentWindow.WheelEvent || WheelEvent;
-            const event = new WheelCtor('wheel', {
-                deltaY: deltaY,
-                clientX: center.x,
-                clientY: center.y,
-                bubbles: true,
-                cancelable: true
-            });
-            canvas.dispatchEvent(event);
-            return true;
-        }
-
-        function dispatchDblClickToPlot(panel) {
-            const center = getCanvasCenterInFrame(panel);
-            if (!center) return false;
-            const frame = center.frame;
-            const canvas = center.canvas;
-            const MouseCtor = frame.contentWindow.MouseEvent || MouseEvent;
-            const event = new MouseCtor('dblclick', {
-                clientX: center.x,
-                clientY: center.y,
-                bubbles: true,
-                cancelable: true
-            });
-            canvas.dispatchEvent(event);
-            return true;
-        }
-
-        function applyToolbarState(panel) {
-            ensurePanelViewState(panel);
-            const frame = panel.querySelector('.plot-frame');
-            if (frame) frame.style.cursor = 'default';
-        }
-
-        function bindPlotToolbar(panel) {
-            ensurePanelViewState(panel);
-            const buttons = panel.querySelectorAll('.plot-tool-btn');
-
-            buttons.forEach((btn) => {
-                btn.addEventListener('click', function() {
-                    const action = btn.getAttribute('data-action');
-                    if (action === 'zoom-in') {
-                        if (!zoomOrbitControls(panel, 1 / 1.2)) {
-                            dispatchWheelToPlot(panel, -240);
-                        }
-                    } else if (action === 'zoom-out') {
-                        if (!zoomOrbitControls(panel, 1.2)) {
-                            dispatchWheelToPlot(panel, 240);
-                        }
-                    } else if (action === 'home') {
-                        if (!resetOrbitControls(panel)) {
-                            // Fallback for 2D: try the native reset gesture first.
-                            if (!dispatchDblClickToPlot(panel)) {
-                                for (let i = 0; i < 6; i++) dispatchWheelToPlot(panel, 260);
-                            }
-                        }
-                    }
-                    applyToolbarState(panel);
-                });
-            });
         }
 
         function displayInteractivePlots(plotEntries) {
@@ -729,11 +570,6 @@
                 </div>
                 <div class="plot-container">
                     <div class="plot-title"></div>
-                    <div class="plot-toolbar">
-                        <button class="plot-tool-btn" data-action="zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
-                        <button class="plot-tool-btn" data-action="zoom-out" title="Zoom out" aria-label="Zoom out">-</button>
-                        <button class="plot-tool-btn" data-action="home" title="Reset view" aria-label="Reset view">⌂</button>
-                    </div>
                     <div class="plot-viewport">
                         <iframe class="plot-frame" sandbox="allow-same-origin allow-scripts"></iframe>
                     </div>
@@ -742,9 +578,6 @@
 
             const selector = panel.querySelector('.plot-selector');
             buildPlotOptions(selector, plots);
-            panel._plots = plots;
-            bindPlotToolbar(panel);
-            applyToolbarState(panel);
 
             selector.value = '0';
             renderPlotInPanel(panel, plots[0]);
