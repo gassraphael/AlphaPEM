@@ -96,9 +96,30 @@ configure_genie()
 const HOST = config[:server_host]
 const PORT = config[:server_port]
 
+# Function to open URL in default browser
+function open_browser(url::String)
+    try
+        if Sys.iswindows()
+            run(`cmd /c start $url`)
+        elseif Sys.isapple()
+            run(`open $url`)
+        else  # Linux and others
+            run(`xdg-open $url`)
+        end
+    catch e
+        @warn "Could not automatically open browser: $e"
+        @info "Please manually navigate to: $url"
+    end
+end
+
 try
     @info "   AlphaPEM Simulator is running on http://$HOST:$PORT/"
     @info "   Press Ctrl+C to stop the server"
+
+    # Open browser automatically
+    url = "http://$HOST:$PORT/"
+    sleep(1)  # Give server a moment to start
+    open_browser(url)
 
     # Start the Genie server
     Genie.up(
