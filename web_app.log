@@ -1,0 +1,48 @@
+  Activating project at `~/Documents/Doctorat/4. Algorithmes/AlphaPEM`
+[ Info: Loading AlphaPEM Web Application...
+[ Info:    AlphaPEM Simulator is running on http://127.0.0.1:8000/
+[ Info:    Press Ctrl+C to stop the server
+
+┌ Error: Failed to start server
+│   exception = IOError: listen: address already in use (EADDRINUSE)
+└ @ Main ~/Documents/Doctorat/4. Algorithmes/AlphaPEM/src/alphapem/interfaces/web/WebApp.jl:134
+ERROR: LoadError: IOError: listen: address already in use (EADDRINUSE)
+Stacktrace:
+  [1] _uv_error(prefix::String, c::Int32)
+    @ Base ./libuv.jl:114
+  [2] uv_error
+    @ ./libuv.jl:113 [inlined]
+  [3] #listen#11
+    @ ~/.julia/juliaup/julia-1.12.5+0.x64.linux.gnu/share/julia/stdlib/v1.12/Sockets/src/Sockets.jl:648 [inlined]
+  [4] listen
+    @ ~/.julia/juliaup/julia-1.12.5+0.x64.linux.gnu/share/julia/stdlib/v1.12/Sockets/src/Sockets.jl:647 [inlined]
+  [5] listen(addr::Sockets.InetAddr{Sockets.IPv4}; backlog::Int64)
+    @ Sockets ~/.julia/juliaup/julia-1.12.5+0.x64.linux.gnu/share/julia/stdlib/v1.12/Sockets/src/Sockets.jl:641
+  [6] listen
+    @ ~/.julia/juliaup/julia-1.12.5+0.x64.linux.gnu/share/julia/stdlib/v1.12/Sockets/src/Sockets.jl:638 [inlined]
+  [7] HTTP.Servers.Listener(addr::Sockets.InetAddr{Sockets.IPv4}, host::String, port::String; sslconfig::Nothing, reuseaddr::Bool, backlog::Int64, server::Nothing, listenany::Bool, kw::@Kwargs{verbose::Bool, rate_limit::Nothing})
+    @ HTTP.Servers ~/.julia/packages/HTTP/Y97L1/src/Servers.jl:69
+  [8] Listener
+    @ ~/.julia/packages/HTTP/Y97L1/src/Servers.jl:39 [inlined]
+  [9] HTTP.Servers.Listener(host::String, port::Int64; kw::@Kwargs{verbose::Bool, rate_limit::Nothing, server::Nothing, reuseaddr::Bool})
+    @ HTTP.Servers ~/.julia/packages/HTTP/Y97L1/src/Servers.jl:74
+ [10] Listener
+    @ ~/.julia/packages/HTTP/Y97L1/src/Servers.jl:74 [inlined]
+ [11] #listen!#7
+    @ ~/.julia/packages/HTTP/Y97L1/src/Servers.jl:326 [inlined]
+ [12] up(port::Int64, host::String; ws_port::Int64, async::Bool, verbose::Bool, ratelimit::Nothing, server::Nothing, wsserver::Nothing, open_browser::Bool, reuseaddr::Bool, updateconfig::Bool, protocol::String, query::Dict{Any, Any}, http_kwargs::@Kwargs{})
+    @ Genie.Server ~/.julia/packages/Genie/o5yO5/src/Server.jl:106
+ [13] top-level scope
+    @ ~/Documents/Doctorat/4. Algorithmes/AlphaPEM/src/alphapem/interfaces/web/WebApp.jl:125
+ [14] include(mapexpr::Function, mod::Module, _path::String)
+    @ Base ./Base.jl:307
+ [15] top-level scope
+    @ ~/Documents/Doctorat/4. Algorithmes/AlphaPEM/run_web_app.jl:21
+ [16] include(mod::Module, _path::String)
+    @ Base ./Base.jl:306
+ [17] exec_options(opts::Base.JLOptions)
+    @ Base ./client.jl:317
+ [18] _start()
+    @ Base ./client.jl:550
+in expression starting at /home/raphael/Documents/Doctorat/4. Algorithmes/AlphaPEM/src/alphapem/interfaces/web/WebApp.jl:115
+in expression starting at /home/raphael/Documents/Doctorat/4. Algorithmes/AlphaPEM/run_web_app.jl:21

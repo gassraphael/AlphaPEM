@@ -13,9 +13,10 @@ module Application
 
 using CairoMakie
 import GLMakie
+import WGLMakie
 
 include("run_simulation.jl")
 
-export run_simulation
+export run_simulation, generate_web_plots
 
 end  # module Application
