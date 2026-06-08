@@ -1240,7 +1240,8 @@
                     if (preSelectedSection) preSelectedSection.style.display = 'none';
                     if (customSection) customSection.style.display = 'block';
                     updateTabStatus(0, true);
-                    updateUndeterminedHighlighting('custom');
+                    // Load generic defaults for custom mode to get undetermined highlighting
+                    updateFuelCellDefaults('default');
                 }
                 // Hide preset warning if switching to custom
                 const presetWarning = document.getElementById('preset-warning');
@@ -1250,7 +1251,7 @@
             }
         }
 
-        function updateUndeterminedHighlighting(fuelCellType) {
+        function updateUndeterminedHighlighting(fuelCellType, serverUndeterminedList) {
             const legend = document.getElementById('undetermined-legend');
             if (!legend) return;
 
@@ -1260,14 +1261,17 @@
                 return;
             }
 
-            // Define undetermined parameters for each type
-            const undeterminedMap = {
-                'ZSW_GenStack': ['Hacl', 'Hccl', 'Hmem', 'Hgdl', 'Hmpl', 'epsilon_gdl', 'Re', 'i0_c_ref', 'kappa_co', 'kappa_c', 'K_O2_ad_Pt'],
-                'EH31_2022': ['Hacl', 'Hccl', 'Hmem', 'epsilon_gdl', 'e', 'Re', 'i0_c_ref', 'kappa_co', 'kappa_c', 'K_O2_ad_Pt'],
-                'custom': ['Hacl', 'Hccl', 'Hmem', 'Hgdl', 'Hmpl', 'epsilon_gdl', 'epsilon_mpl', 'epsilon_c', 'Re', 'i0_c_ref', 'kappa_co', 'kappa_c', 'K_O2_ad_Pt']
-            };
-
-            const undeterminedList = undeterminedMap[fuelCellType] || undeterminedMap['custom'];
+            // Use list from server if provided, otherwise fallback to local map
+            let undeterminedList = serverUndeterminedList;
+            
+            if (!undeterminedList) {
+                const undeterminedMap = {
+                    'ZSW_GenStack': ['Hacl', 'Hccl', 'Hmem', 'Hgdl', 'Hmpl', 'epsilon_gdl', 'Re', 'i0_c_ref', 'kappa_co', 'kappa_c', 'K_O2_ad_Pt'],
+                    'EH31_2022': ['Hacl', 'Hccl', 'Hmem', 'epsilon_gdl', 'e', 'Re', 'i0_c_ref', 'kappa_co', 'kappa_c', 'K_O2_ad_Pt'],
+                    'custom': ['Hacl', 'Hccl', 'Hmem', 'Hgdl', 'Hmpl', 'epsilon_gdl', 'epsilon_mpl', 'epsilon_c', 'Re', 'i0_c_ref', 'kappa_co', 'kappa_c', 'K_O2_ad_Pt']
+                };
+                undeterminedList = undeterminedMap[fuelCellType] || undeterminedMap['custom'];
+            }
             
             // Show legend
             legend.style.display = 'block';
@@ -1282,10 +1286,14 @@
             });
         }
 
-        function updateFuelCellDefaults() {
+        function updateFuelCellDefaults(forcedType) {
             try {
-                const fuelCellTypeEl = document.querySelector('input[name="fuel_cell_type"]:checked');
-                const fuelCellType = fuelCellTypeEl ? fuelCellTypeEl.value : '';
+                let fuelCellType = forcedType;
+                if (!fuelCellType) {
+                    const fuelCellTypeEl = document.querySelector('input[name="fuel_cell_type"]:checked');
+                    fuelCellType = fuelCellTypeEl ? fuelCellTypeEl.value : '';
+                }
+
                 if (!fuelCellType) {
                     updateTabStatus(0, false);
                     const expSection = document.getElementById('experimental-presets-section');
@@ -1333,8 +1341,9 @@
                         // Populate Physical Parameters
                         populateParams(ap);
                         populateParams(up);
-
-                        updateUndeterminedHighlighting(fuelCellType);
+                        
+                        // Update highlighting using the list sent by server
+                        updateUndeterminedHighlighting(fuelCellType, data.undetermined_list);
 
                         // Populate Operating Conditions
                         setVal('T_fc', oc.T_fc);

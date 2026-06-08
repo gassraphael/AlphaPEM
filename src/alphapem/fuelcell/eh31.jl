@@ -25,14 +25,14 @@ function EH31FuelCell(type_fuel_cell::Symbol, voltage_zone::Symbol)
          PolaExperimentalData(),
          PolaExperimentalData()
     )
-    fc.physical_parameters = eh31_physical_params()
-    fc.operating_conditions = eh31_operating_conditions(type_fuel_cell)
-    fc.pola_exp_data = eh31_pola_exp_data(type_fuel_cell, voltage_zone)
-    fc.pola_exp_data_cali = eh31_pola_exp_data_calibration(type_fuel_cell, voltage_zone)
+    fc.physical_parameters = physical_parameters(fc)
+    fc.operating_conditions = operating_conditions(fc, type_fuel_cell)
+    fc.pola_exp_data = pola_exp_data(fc, type_fuel_cell, voltage_zone)
+    fc.pola_exp_data_cali = pola_exp_data_calibration(fc, type_fuel_cell, voltage_zone)
     return fc
 end
 
-function eh31_physical_params()::PhysicalParams
+function physical_parameters(fc::EH31FuelCell)::PhysicalParams
     # Define local variables for parameters used in multiple places or calculations
     Hcl = 8.593e-6                      # Thickness of the catalyst layers in meters
     Hgc = 500e-6                        # Thickness of the gas channels in meters
@@ -92,7 +92,7 @@ function eh31_physical_params()::PhysicalParams
 end
 
 
-function eh31_operating_conditions(type_fuel_cell::Symbol)::OperatingConditions
+function operating_conditions(fc::EH31FuelCell, type_fuel_cell::Symbol)::OperatingConditions
     if type_fuel_cell == :EH_31_1_5 || type_fuel_cell == :EH31_2022
         T_des                   = 74.0 + 273.15  # K.  It is the desired fuel cell temperature.
         Pa_des                  = 1.5e5          # Pa. It is the desired pressures of the fuel gas at the anode.
@@ -145,8 +145,8 @@ function eh31_operating_conditions(type_fuel_cell::Symbol)::OperatingConditions
 end
 
 
-function eh31_pola_exp_data(type_fuel_cell::Symbol, voltage_zone::Symbol)
-    if type_fuel_cell == :EH_31_1_5  # at 1.5 bar
+function pola_exp_data(fc::EH31FuelCell, type_fuel_cell::Symbol, voltage_zone::Symbol)::PolaExperimentalData
+    if type_fuel_cell == :EH_31_1_5 || type_fuel_cell == :EH31_2022 # at 1.5 bar
         if voltage_zone == :full
             i_exp_pola = [0.050, 0.068, 0.089, 0.110, 0.147, 0.185, 0.233, 0.293, 0.352, 0.395,
                           0.455, 0.510, 0.556, 0.620, 0.672, 0.738, 0.799, 0.850, 0.892, 0.942,
@@ -257,8 +257,8 @@ operating conditions. The experimental values are used for calibrating the model
 number of points compared to the polarization data function. These points are specifically chosen to be as few as
 possible while still providing a good representation of the polarisation curve.
 """
-function eh31_pola_exp_data_calibration(type_fuel_cell::Symbol, voltage_zone::Symbol)
-    if type_fuel_cell == :EH_31_1_5  # at 1.5 bar
+function pola_exp_data_calibration(fc::EH31FuelCell, type_fuel_cell::Symbol, voltage_zone::Symbol)::PolaExperimentalData
+    if type_fuel_cell == :EH_31_1_5 || type_fuel_cell == :EH31_2022 # at 1.5 bar
         if voltage_zone == :full
             i_exp_cali = [0.050, 0.110, 0.293, 1.039, 1.683, 1.966, 2.246]
             U_exp_cali = [0.900, 0.850, 0.794, 0.681, 0.599, 0.556, 0.500]
@@ -311,7 +311,7 @@ end
 
 
 """
-    eh31_undetermined_parameters(voltage_zone::Symbol) -> Vector{Tuple{Symbol, Float64, Float64}}
+    undetermined_parameters(fc::EH31FuelCell, voltage_zone::Symbol) -> Vector{Tuple{Symbol, Float64, Float64}}
 
 Return the list of undetermined parameters for EH-31 fuel cell with their bounds.
 
@@ -326,7 +326,7 @@ so only Hacl is sampled as an undetermined parameter.
 # Returns
 Vector of tuples: (parameter_symbol, min_value, max_value) in calibration order
 """
-function eh31_undetermined_parameters(voltage_zone::Symbol = :full)::Vector{Tuple{Symbol, Float64, Float64}}
+function undetermined_parameters(fc::EH31FuelCell, voltage_zone::Symbol = :full)::Vector{Tuple{Symbol, Float64, Float64}}
     voltage_zone in (:full, :before_voltage_drop) ||
         throw(ArgumentError("voltage_zone must be :full or :before_voltage_drop (got $voltage_zone)"))
 
@@ -334,7 +334,7 @@ function eh31_undetermined_parameters(voltage_zone::Symbol = :full)::Vector{Tupl
         (:Hacl,        8e-6, 20e-6),  # Anode/cathode catalyst-layer thickness (Hccl = Hacl)
         (:Hmem,       15e-6, 50e-6),  # Membrane thickness
         (:epsilon_gdl, 0.40, 0.95),   # GDL porosity
-        (:e,           3, ),          # Capillary exponent (integer)
+        (:e,           3, 4),         # Capillary exponent
         (:Re,          5e-7, 5e-6),   # Electron-conduction resistance
         (:i0_c_ref,    0.1, 100.0),   # Reference cathode exchange current density
         (:kappa_co,   0.01, 40.0),    # Crossover correction coefficient

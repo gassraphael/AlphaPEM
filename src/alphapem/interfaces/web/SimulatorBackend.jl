@@ -124,11 +124,12 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
         # This ensures we get exactly the parameters defined in fuelcell/*.jl
         fc = AlphaPEM.Fuelcell.create_fuelcell(mapped_type, :before_voltage_drop)
         
+        # Get undetermined parameters list for this fuel cell
+        und_params_list = AlphaPEM.Fuelcell.undetermined_parameters(fc, :before_voltage_drop)
+        und_param_keys = [p[1] for p in und_params_list]
+
         ap = fc.physical_parameters
         oc = fc.operating_conditions
-        
-        # Get all undetermined parameter keys from Config to separate them
-        undetermined_keys = keys(AlphaPEM.Config.UNDETERMINED_PARAMETER_BOUNDS)
         
         # Helper to convert struct to Dict
         function struct_to_dict(obj)
@@ -145,8 +146,9 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
         undetermined = Dict()
         
         for (k, v) in ap_dict
-            # Fields in UNDETERMINED_PARAMETER_BOUNDS or explicitly requested as undetermined in UI
-            if k in undetermined_keys || k in [:epsilon_mpl, :epsilon_c, :gamma_sorp_l, :C_scl]
+            # Use the keys from undetermined_parameters() if available, 
+            # otherwise fallback to generic detection
+            if k in und_param_keys
                 undetermined[k] = v
             else
                 accessible[k] = v
@@ -166,6 +168,7 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
             ),
             :accessible_parameters => accessible,
             :undetermined_parameters => undetermined,
+            :undetermined_list => und_param_keys, # Explicitly send the list for UI highlighting
             :param_metadata => PARAM_UI_CONVERSION,
             :computing_parameters => Dict(
                 :nb_gc => 1,
@@ -235,6 +238,7 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
             :kappa_c => 1.0,            # Overpotential exponent
             :C_scl => 2e7,              # F/m³ - Double layer capacitance
         ),
+        :undetermined_list => [:Hacl, :Hccl, :Hmem, :Hgdl, :Hmpl, :epsilon_gdl, :e, :Re, :i0_c_ref, :kappa_co, :kappa_c, :K_O2_ad_Pt, :C_scl],
         :computing_parameters => Dict(
             :nb_gc => 1,                # GC nodes
             :nb_gdl => 5,               # GDL nodes

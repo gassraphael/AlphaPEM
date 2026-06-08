@@ -22,7 +22,8 @@ include("factory.jl")
 include("default.jl")
 
 export create_fuelcell, DefaultFuelCell, AbstractFuelCell, EH31FuelCell, ZSWFuelCell,
-       zsw_undetermined_parameters, eh31_undetermined_parameters
+       undetermined_parameters, physical_parameters, operating_conditions,
+       pola_exp_data, pola_exp_data_calibration
 
 end  # module Fuelcell
 
