@@ -11,3 +11,4 @@ __pycache__/
 *.ods
 .idea
 *.egg-info
+*.junie

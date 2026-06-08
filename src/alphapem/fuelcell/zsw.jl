@@ -25,14 +25,14 @@ function ZSWFuelCell(type_fuel_cell::Symbol, voltage_zone::Symbol)
         PolaExperimentalData(),
         PolaExperimentalData()
     )
-    fc.physical_parameters = zsw_physical_params()
-    fc.operating_conditions = zsw_operating_conditions(type_fuel_cell)
-    fc.pola_exp_data = zsw_pola_exp_data(type_fuel_cell, voltage_zone)
-    fc.pola_exp_data_cali = zsw_pola_exp_data_calibration(type_fuel_cell, voltage_zone)
+    fc.physical_parameters = physical_parameters(fc)
+    fc.operating_conditions = operating_conditions(fc, type_fuel_cell)
+    fc.pola_exp_data = pola_exp_data(fc, type_fuel_cell, voltage_zone)
+    fc.pola_exp_data_cali = pola_exp_data_calibration(fc, type_fuel_cell, voltage_zone)
     return fc
 end
 
-function zsw_physical_params()::PhysicalParams
+function physical_parameters(fc::ZSWFuelCell)::PhysicalParams
     return PhysicalParams(
         # Global
         Aact = 283.87e-4,                    # Active area of the catalyst layer in m²
@@ -78,7 +78,7 @@ function zsw_physical_params()::PhysicalParams
 end
 
 
-function zsw_operating_conditions(type_fuel_cell::Symbol)::OperatingConditions
+function operating_conditions(fc::ZSWFuelCell, type_fuel_cell::Symbol)::OperatingConditions
     if type_fuel_cell == :ZSW_GenStack_Pa_1_61_Pc_1_41
         T_des                   = 68.0 + 273.15  # K.  It is the desired fuel cell temperature.
         Pa_des                  = 1.61e5         # Pa. It is the desired pressures of the fuel gas at the anode.
@@ -157,7 +157,7 @@ function zsw_operating_conditions(type_fuel_cell::Symbol)::OperatingConditions
 end
 
 
-function zsw_pola_exp_data(type_fuel_cell::Symbol, voltage_zone::Symbol)::PolaExperimentalData
+function pola_exp_data(fc::ZSWFuelCell, type_fuel_cell::Symbol, voltage_zone::Symbol)::PolaExperimentalData
     if type_fuel_cell == :ZSW_GenStack
         if voltage_zone == :full
             i_exp_pola = [0.001, 0.050, 0.099, 0.150, 0.200, 0.299, 0.400, 0.498, 0.700, 0.901,
@@ -282,7 +282,7 @@ operating conditions. The experimental values are used for calibrating the model
 number of points compared to the polarization data function. These points are specifically chosen to be as few as
 possible while still providing a good representation of the polarisation curve.
 """
-function zsw_pola_exp_data_calibration(type_fuel_cell::Symbol, voltage_zone::Symbol)::PolaExperimentalData
+function pola_exp_data_calibration(fc::ZSWFuelCell, type_fuel_cell::Symbol, voltage_zone::Symbol)::PolaExperimentalData
     if type_fuel_cell == :ZSW_GenStack
         if voltage_zone == :full
             i_exp_cali = [0.001, 0.050, 0.498, 1.099, 1.700, 2.000, 2.500]
@@ -380,7 +380,7 @@ end
 
 
 """
-    zsw_undetermined_parameters(voltage_zone::Symbol) -> Vector{Tuple{Symbol, Float64, Float64}}
+    undetermined_parameters(fc::ZSWFuelCell, voltage_zone::Symbol) -> Vector{Tuple{Symbol, Float64, Float64}}
 
 Return the list of undetermined parameters for ZSW fuel cell with their bounds.
 
@@ -395,7 +395,7 @@ based on ZSW-specific calibration experience.
 # Returns
 Vector of tuples: (parameter_symbol, min_value, max_value) in calibration order
 """
-function zsw_undetermined_parameters(voltage_zone::Symbol = :full)::Vector{Tuple{Symbol, Float64, Float64}}
+function undetermined_parameters(fc::ZSWFuelCell, voltage_zone::Symbol = :full)::Vector{Tuple{Symbol, Float64, Float64}}
     voltage_zone in (:full, :before_voltage_drop) ||
         throw(ArgumentError("voltage_zone must be :full or :before_voltage_drop (got $voltage_zone)"))
 
