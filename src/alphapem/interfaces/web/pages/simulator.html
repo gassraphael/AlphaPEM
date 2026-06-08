@@ -113,10 +113,26 @@
             margin-top: 4px;
         }
 
+        .disabled-radio {
+            color: #999;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .maintenance-tag {
+            display: block;
+            font-size: 11px;
+            font-style: italic;
+            color: #d9534f;
+            margin-left: 24px;
+            margin-top: 2px;
+        }
+
         .input-row {
             display: flex;
-            gap: 10px;
-            align-items: center;
+            gap: 15px;
+            align-items: flex-start;
+            flex-wrap: wrap;
         }
 
         .input-value-display {
@@ -467,19 +483,19 @@
         }
 
         .undetermined-param {
-            background-color: #fff9c4 !important;
-            border: 2px solid #fbc02d !important;
+            background-color: #f0f7ff !important;
+            border: 1px solid #cce5ff !important;
         }
 
         .undetermined-info {
-            background-color: #fff9c4;
-            border: 1px solid #fbc02d;
-            padding: 10px 15px;
+            background-color: #f0f7ff;
+            border: 1px solid #cce5ff;
+            padding: 8px 12px;
             border-radius: 6px;
-            margin-bottom: 20px;
-            font-size: 13px;
-            color: #856404;
-            line-height: 1.5;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: #004085;
+            line-height: 1.4;
         }
     </style>
 </head>
@@ -503,12 +519,12 @@
 
                 <!-- Tabs Navigation -->
                 <div class="tabs-container">
-                    <button class="tab-button active" onclick="switchTab(0)">1. Fuel cell</button>
-                    <button class="tab-button" onclick="switchTab(1)">2. Physical parameters</button>
-                    <button class="tab-button" onclick="switchTab(2)">3. Operating conditions</button>
-                    <button class="tab-button" onclick="switchTab(3)">4. Numerical parameters</button>
-                    <button class="tab-button" onclick="switchTab(4)">5. Model configuration</button>
-                    <button class="tab-button" onclick="switchTab(5)">6. Run</button>
+                    <button class="tab-button active" onclick="switchTab(0)">Fuel cell</button>
+                    <button class="tab-button" onclick="switchTab(1)">Physical parameters</button>
+                    <button class="tab-button" onclick="switchTab(2)">Operating conditions</button>
+                    <button class="tab-button" onclick="switchTab(3)">Numerical parameters</button>
+                    <button class="tab-button" onclick="switchTab(4)">Model configuration</button>
+                    <button class="tab-button" onclick="switchTab(5)">Run</button>
                 </div>
 
                 <!-- Tab Contents -->
@@ -519,7 +535,7 @@
                         <label class="section-title">Configuration Type:</label>
                         <div class="input-row">
                             <label><input type="radio" name="config_type" value="pre_selected" checked onchange="toggleFuelCellSelection()"> Pre-selected fuel cell</label>
-                            <label style="margin-left: 20px;"><input type="radio" name="config_type" value="custom" onchange="toggleFuelCellSelection()"> Custom fuel cell (start from scratch)</label>
+                            <label><input type="radio" name="config_type" value="custom" onchange="toggleFuelCellSelection()"> Custom fuel cell (start from scratch)</label>
                         </div>
                     </div>
 
@@ -527,7 +543,7 @@
                         <label class="section-title">Fuel cell type *</label>
                         <div class="input-row">
                             <label><input type="radio" name="fuel_cell_type" value="ZSW_GenStack" checked onchange="updateFuelCellDefaults()"> ZSW (2022)</label>
-                            <label style="margin-left: 20px;"><input type="radio" name="fuel_cell_type" value="EH31_2022" onchange="updateFuelCellDefaults()"> EH-31 (2022)</label>
+                            <label><input type="radio" name="fuel_cell_type" value="EH31_2022" onchange="updateFuelCellDefaults()"> EH-31 (2022)</label>
                         </div>
                         <p class="help-text">Choose a predefined fuel cell model</p>
                     </div>
@@ -547,7 +563,7 @@
 
                     <div id="undetermined-legend" class="undetermined-info" style="display: none;">
                         <strong>Highlighted parameters:</strong> These are "undetermined" parameters.
-                        They are difficult to measure directly and have been calibrated to match experimental data. 
+                        They are difficult to measure directly and <span id="undetermined-status">have been calibrated</span> to match experimental data. 
                         Modifying them requires expertise as they significantly impact the model's accuracy.
                     </div>
 
@@ -665,8 +681,8 @@
                                 <p class="help-text">Electron conduction resistance of the circuit</p>
                             </div>
                             <div class="form-group" id="group-i0_c_ref">
-                                <label for="i0_c_ref">i<sub>0,c,ref</sub> (A/m²)</label>
-                                <input type="number" id="i0_c_ref" min="0" step="0.1">
+                                <label for="i0_c_ref">i<sub>0,c,ref</sub> (A/cm²)</label>
+                                <input type="number" id="i0_c_ref" min="0" step="0.01">
                                 <p class="help-text">Reference exchange current density at the cathode</p>
                             </div>
                             <div class="form-group" id="group-kappa_co">
@@ -760,42 +776,42 @@
 
                     <div class="form-grid">
                         <div class="form-group">
-                            <label for="T_fc">Temperature (°C)</label>
+                            <label for="T_fc">T (°C)</label>
                             <input type="number" id="T_fc" min="-273.15" max="200" step="0.1" oninput="checkOCModification()">
                             <p class="help-text">Cell temperature</p>
                         </div>
                         <div class="form-group">
-                            <label for="Pa">Anode Pressure (bar)</label>
+                            <label for="Pa">P<sub>a</sub> (bar)</label>
                             <input type="number" id="Pa" min="0" max="10" step="0.01" oninput="checkOCModification()">
                             <p class="help-text">Anode inlet pressure</p>
                         </div>
                         <div class="form-group">
-                            <label for="Pc">Cathode Pressure (bar)</label>
+                            <label for="Pc">P<sub>c</sub> (bar)</label>
                             <input type="number" id="Pc" min="0" max="10" step="0.01" oninput="checkOCModification()">
                             <p class="help-text">Cathode inlet pressure</p>
                         </div>
                         <div class="form-group">
-                            <label for="Sa">Anode Stoichiometry</label>
+                            <label for="Sa">S<sub>a</sub></label>
                             <input type="number" id="Sa" min="1" max="10" step="0.1" oninput="checkOCModification()">
                             <p class="help-text">H₂ stoichiometry ratio</p>
                         </div>
                         <div class="form-group">
-                            <label for="Sc">Cathode Stoichiometry</label>
+                            <label for="Sc">S<sub>c</sub></label>
                             <input type="number" id="Sc" min="1" max="10" step="0.1" oninput="checkOCModification()">
                             <p class="help-text">O₂ stoichiometry ratio</p>
                         </div>
                         <div class="form-group">
-                            <label for="Phi_a">Anode Humidity</label>
+                            <label for="Phi_a">&Phi;<sub>a</sub></label>
                             <input type="number" id="Phi_a" min="0" max="1" step="0.01" oninput="checkOCModification()">
                             <p class="help-text">Relative humidity (0-1)</p>
                         </div>
                         <div class="form-group">
-                            <label for="Phi_c">Cathode Humidity</label>
+                            <label for="Phi_c">&Phi;<sub>c</sub></label>
                             <input type="number" id="Phi_c" min="0" max="1" step="0.01" oninput="checkOCModification()">
                             <p class="help-text">Relative humidity (0-1)</p>
                         </div>
                         <div class="form-group">
-                            <label for="y_H2_in">H₂ Inlet Ratio</label>
+                            <label for="y_H2_in">y<sub>H2,in</sub></label>
                             <input type="number" id="y_H2_in" min="0" max="1" step="0.01" oninput="checkOCModification()">
                             <p class="help-text">H₂ mole fraction in inlet</p>
                         </div>
@@ -811,33 +827,33 @@
                     <h3>Numerical Parameters</h3>
                     <div class="form-grid">
                         <div class="form-group">
-                            <label for="nb_gc">GC Nodes</label>
+                            <label for="nb_gc">n<sub>gc</sub></label>
                             <input type="number" id="nb_gc" value="1" min="1" max="100">
                             <p class="help-text">Number of gas channel nodes</p>
                         </div>
                         <div class="form-group">
-                            <label for="nb_gdl">GDL Nodes</label>
+                            <label for="nb_gdl">n<sub>gdl</sub></label>
                             <input type="number" id="nb_gdl" value="3" min="1" max="50">
                             <p class="help-text">Number of GDL nodes</p>
                         </div>
                         <div class="form-group">
-                            <label for="nb_mpl">MPL Nodes</label>
+                            <label for="nb_mpl">n<sub>mpl</sub></label>
                             <input type="number" id="nb_mpl" value="2" min="1" max="50">
                             <p class="help-text">Number of MPL nodes</p>
                         </div>
                         <div class="form-group">
-                            <label for="rtol">Relative Tolerance</label>
+                            <label for="rtol">rtol</label>
                             <input type="number" id="rtol" value="1e-3" step="1e-6">
-                            <p class="help-text">Solver rtol</p>
+                            <p class="help-text">Solver relative tolerance</p>
                         </div>
                         <div class="form-group">
-                            <label for="atol">Absolute Tolerance</label>
+                            <label for="atol">atol</label>
                             <input type="number" id="atol" value="1e-6" step="1e-9">
-                            <p class="help-text">Solver atol</p>
+                            <p class="help-text">Solver absolute tolerance</p>
                         </div>
                         <div class="form-group">
-                            <label for="maxiters">Max Iterations</label>
-                            <input type="number" id="maxiters" value="10000" min="1" step="1000">
+                            <label for="maxiters">maxiters</label>
+                            <input type="number" id="maxiters" value="1e4" min="1" step="1000">
                             <p class="help-text">Maximum number of solver iterations</p>
                         </div>
                     </div>
@@ -854,33 +870,54 @@
                         <label class="section-title">Voltage Zone:</label>
                         <div class="input-row">
                             <label><input type="radio" name="voltage_zone" value="before_voltage_drop" checked> Before Voltage Drop</label>
-                            <label style="margin-left: 20px;"><input type="radio" name="voltage_zone" value="full"> Full</label>
+                            <label><input type="radio" name="voltage_zone" value="full"> Full</label>
                         </div>
+                        <p class="help-text">'Before Voltage Drop' stops the simulation before mass transport losses; 'Full' simulates the entire operating range.</p>
                     </div>
 
                     <div class="form-section">
                         <label class="section-title">Auxiliaries:</label>
                         <div class="input-row">
                             <label><input type="radio" name="type_auxiliary" value="no_auxiliary" checked> No Auxiliary</label>
-                            <label style="margin-left: 20px;"><input type="radio" name="type_auxiliary" value="forced_convective_cathode_with_anodic_recirculation"> Cathode + Anodic Recirculation</label>
+                            <label class="disabled-radio" title="Currently under maintenance">
+                                <input type="radio" name="type_auxiliary" value="forced_convective_cathode_with_anodic_recirculation" disabled> 
+                                Forced convective cathode with anodic recirculation
+                                <span class="maintenance-tag">(under maintenance)</span>
+                            </label>
+                            <label class="disabled-radio" title="Currently under maintenance">
+                                <input type="radio" name="type_auxiliary" value="forced_convective_cathode_with_flow_through_anode" disabled> 
+                                Forced convective cathode with flow-through anode
+                                <span class="maintenance-tag">(under maintenance)</span>
+                            </label>
                         </div>
+                        <p class="help-text">Configures the fuel cell system: standalone stack (with ideal balance of plant), cathode compressor with anodic recirculation loop, or cathode compressor with flow-through anode.</p>
                     </div>
 
                     <div class="form-section">
                         <label class="section-title">Flow Type:</label>
                         <div class="input-row">
                             <label><input type="radio" name="type_flow" value="counter_flow" checked> Counter Flow</label>
-                            <label style="margin-left: 20px;"><input type="radio" name="type_flow" value="co_flow"> Co-flow</label>
+                            <label><input type="radio" name="type_flow" value="co_flow"> Co-flow</label>
                         </div>
+                        <p class="help-text">Defines if reactants flow in opposite directions (Counter Flow) or in the same direction (Co-flow).</p>
                     </div>
 
                     <div class="form-section">
                         <label class="section-title">Purge Mode:</label>
                         <div class="input-row">
                             <label><input type="radio" name="type_purge" value="no_purge" checked> No Purge</label>
-                            <label style="margin-left: 20px;"><input type="radio" name="type_purge" value="periodic_purge"> Periodic</label>
-                            <label style="margin-left: 20px;"><input type="radio" name="type_purge" value="constant_purge"> Constant</label>
+                            <label class="disabled-radio" title="Currently under maintenance">
+                                <input type="radio" name="type_purge" value="periodic_purge" disabled> 
+                                Periodic
+                                <span class="maintenance-tag">(under maintenance)</span>
+                            </label>
+                            <label class="disabled-radio" title="Currently under maintenance">
+                                <input type="radio" name="type_purge" value="constant_purge" disabled> 
+                                Constant
+                                <span class="maintenance-tag">(under maintenance)</span>
+                            </label>
                         </div>
+                        <p class="help-text">Anode purging strategy: no purge, periodic, or constant purge.</p>
                     </div>
 
                     <div class="nav-buttons">
@@ -901,17 +938,17 @@
                         <button class="btn-select-sim btn-select-step" onclick="selectSimulationType('step')" id="btn-select-step">
                             <div class="sim-type-icon">⚡</div>
                             <div class="sim-type-label">Step Current</div>
-                            <div class="sim-type-description">Chronoamperometry test</div>
+                            <div class="sim-type-description">A simple current step simulation</div>
                         </button>
                         <button class="btn-select-sim btn-select-pola" onclick="selectSimulationType('polarization')" id="btn-select-pola">
                             <div class="sim-type-icon">📈</div>
-                            <div class="sim-type-label">Polarization Curve</div>
+                            <div class="sim-type-label">Polarization curve</div>
                             <div class="sim-type-description">V-I characteristic curve</div>
                         </button>
                         <button class="btn-select-sim btn-select-eis" onclick="selectSimulationType('eis')" id="btn-select-eis">
                             <div class="sim-type-icon">🔬</div>
-                            <div class="sim-type-label">EIS Spectroscopy</div>
-                            <div class="sim-type-description">Impedance analysis</div>
+                            <div class="sim-type-label">EIS curve</div>
+                            <div class="sim-type-description">Electrochemical impedance spectroscopy analysis</div>
                         </button>
                     </div>
 
@@ -926,8 +963,8 @@
                         <div id="step-params" class="sim-params" style="display: none;">
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="step_delta_t_ini">Initial Stabilization (s)</label>
-                                    <input type="number" id="step_delta_t_ini" value="1800" step="60">
+                                    <label for="step_delta_t_ini">Initial Stabilization (min)</label>
+                                    <input type="number" id="step_delta_t_ini" value="30" step="1">
                                     <p class="help-text">Time at zero current for stabilization</p>
                                 </div>
                                 <div class="form-group">
@@ -936,18 +973,18 @@
                                     <p class="help-text">Time to ramp to target current</p>
                                 </div>
                                 <div class="form-group">
-                                    <label for="step_delta_t_break">Break Time (s)</label>
-                                    <input type="number" id="step_delta_t_break" value="120" step="60">
+                                    <label for="step_delta_t_break">Break Time (min)</label>
+                                    <input type="number" id="step_delta_t_break" value="2" step="0.1">
                                     <p class="help-text">Time at target current</p>
                                 </div>
                                 <div class="form-group">
-                                    <label for="step_i_ini">Initial Current (A/m²)</label>
-                                    <input type="number" id="step_i_ini" value="10000" step="1000">
+                                    <label for="step_i_ini">Initial Current (A/cm²)</label>
+                                    <input type="number" id="step_i_ini" value="1.0" step="0.1">
                                     <p class="help-text">Initial current density</p>
                                 </div>
                                 <div class="form-group">
-                                    <label for="step_i_step">Step Current (A/m²)</label>
-                                    <input type="number" id="step_i_step" value="15000" step="1000">
+                                    <label for="step_i_step">Step Current (A/cm²)</label>
+                                    <input type="number" id="step_i_step" value="2.0" step="0.1">
                                     <p class="help-text">Target current density</p>
                                 </div>
                             </div>
@@ -957,29 +994,29 @@
                         <div id="pola-params" class="sim-params" style="display: none;">
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="pola_delta_t_ini">Initial Stabilization (s)</label>
-                                    <input type="number" id="pola_delta_t_ini" value="1800" step="60">
+                                    <label for="pola_delta_t_ini">Initial Stabilization (min)</label>
+                                    <input type="number" id="pola_delta_t_ini" value="120" step="1">
                                     <p class="help-text">Time at zero current for stabilization</p>
                                 </div>
                                 <div class="form-group">
-                                    <label for="pola_delta_t_load">Loading Time (s)</label>
-                                    <input type="number" id="pola_delta_t_load" value="30" step="1">
-                                    <p class="help-text">Time to ramp to each current step</p>
+                                    <label for="pola_v_load">v<sub>load</sub> (A/cm²·s)</label>
+                                    <input type="number" id="pola_v_load" value="0.01" step="0.001">
+                                    <p class="help-text">Loading rate for current steps</p>
                                 </div>
                                 <div class="form-group">
-                                    <label for="pola_delta_t_break">Break Time (s)</label>
-                                    <input type="number" id="pola_delta_t_break" value="120" step="60">
+                                    <label for="pola_delta_t_break">Break Time (min)</label>
+                                    <input type="number" id="pola_delta_t_break" value="15" step="1">
                                     <p class="help-text">Time to hold each current step</p>
                                 </div>
                                 <div class="form-group">
-                                    <label for="pola_delta_i">Current Step (A/m²)</label>
-                                    <input type="number" id="pola_delta_i" value="5000" step="1000">
+                                    <label for="pola_delta_i">Current Step (A/cm²)</label>
+                                    <input type="number" id="pola_delta_i" value="0.05" step="0.01">
                                     <p class="help-text">Increment between points</p>
                                 </div>
                                 <div class="form-group">
-                                    <label for="pola_i_max">Max Current (A/m²)</label>
-                                    <input type="number" id="pola_i_max" value="20000" step="1000">
-                                    <p class="help-text">Maximum current density</p>
+                                    <label for="pola_i_max">Max Current (A/cm²)</label>
+                                    <input type="number" id="pola_i_max" value="2.5" step="0.1">
+                                    <p class="help-text">Maximum current density (can be overwritten if experimental data are used and perform at different maximum current density)</p>
                                 </div>
                             </div>
                         </div>
@@ -988,8 +1025,8 @@
                         <div id="eis-params" class="sim-params" style="display: none;">
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="eis_i_static">Static Current (A/m²)</label>
-                                    <input type="number" id="eis_i_static" value="10000" step="1000">
+                                    <label for="eis_i_static">Static Current (A/cm²)</label>
+                                    <input type="number" id="eis_i_static" value="1.0" step="0.1">
                                     <p class="help-text">DC operating point</p>
                                 </div>
                                 <div class="form-group">
@@ -1079,9 +1116,19 @@
             'epsilon_gdl': { factor: 1.0, unit: '', precision: 3 },
             'K_O2_ad_Pt': { factor: 1.0, unit: '', precision: 3 },
             'kappa_c': { factor: 1.0, unit: '', precision: 3 },
-            'i0_c_ref': { factor: 1.0, unit: 'A/m²', precision: 1 },
+            'i0_c_ref': { factor: 1e-4, unit: 'A/cm²', precision: 2 },
             'kappa_co': { factor: 1.0, unit: 'mol·m⁻¹·s⁻¹·Pa⁻¹', precision: 2 },
-            'C_scl': { factor: 1e-6, unit: 'MF/m³', precision: 0 }
+            'C_scl': { factor: 1e-6, unit: 'MF/m³', precision: 0 },
+            // Run Parameters
+            'delta_t_ini': { factor: 1/60, unit: 'min', precision: 1 },
+            'delta_t_break': { factor: 1/60, unit: 'min', precision: 1 },
+            'i_ini': { factor: 1e-4, unit: 'A/cm²', precision: 2 },
+            'i_step': { factor: 1e-4, unit: 'A/cm²', precision: 2 },
+            'delta_i': { factor: 1e-4, unit: 'A/cm²', precision: 2 },
+            'i_max': { factor: 1e-4, unit: 'A/cm²', precision: 2 },
+            'i_EIS': { factor: 1e-4, unit: 'A/cm²', precision: 2 },
+            'i_static': { factor: 1e-4, unit: 'A/cm²', precision: 2 },
+            'v_load': { factor: 1e-4, unit: 'A/cm²·s', precision: 3 }
         };
 
         let tabStates = [
@@ -1284,6 +1331,16 @@
                 const group = document.getElementById('group-' + paramId);
                 if (group) group.classList.add('undetermined-param');
             });
+
+            // Update text based on fuelCellType
+            const statusEl = document.getElementById('undetermined-status');
+            if (statusEl) {
+                if (fuelCellType === 'custom' || fuelCellType === 'default') {
+                    statusEl.textContent = 'need to be calibrated';
+                } else {
+                    statusEl.textContent = 'have been calibrated';
+                }
+            }
         }
 
         function updateFuelCellDefaults(forcedType) {
@@ -1315,6 +1372,9 @@
                         const ap = data.accessible_parameters || {};
                         const up = data.undetermined_parameters || {};
                         const cp = data.computing_parameters || {};
+                        const sp = data.step_parameters || {};
+                        const pp = data.polarization_parameters || {};
+                        const ep = data.eis_parameters || {};
                         const mc = data.model_config || {};
                         const meta = data.param_metadata || {};
                         globalParamMetadata = meta;
@@ -1326,14 +1386,15 @@
                         };
 
                         // Helper for parameter conversion and population
-                        const populateParams = (params) => {
+                        const populateParams = (params, prefix = '') => {
                             for (const [key, value] of Object.entries(params)) {
                                 const m = meta[key];
+                                const id = prefix ? prefix + '_' + key : key;
                                 if (m) {
                                     const prec = m.precision !== undefined ? m.precision : (m.factor >= 1e6 ? 3 : 2);
-                                    setVal(key, (value * m.factor).toFixed(prec));
+                                    setVal(id, (value * m.factor).toFixed(prec));
                                 } else {
-                                    setVal(key, value);
+                                    setVal(id, value);
                                 }
                             }
                         };
@@ -1365,9 +1426,24 @@
                         setVal('nb_gc', cp.nb_gc);
                         setVal('nb_gdl', cp.nb_gdl);
                         setVal('nb_mpl', cp.nb_mpl);
-                        setVal('rtol', cp.rtol);
-                        setVal('atol', cp.atol);
-                        setVal('maxiters', cp.maxiters);
+                        
+                        // Use scientific notation for numerical tolerances and iterations
+                        const formatExp = (v) => (v !== undefined && v !== null) ? v.toExponential().replace('e+', 'e') : '';
+                        setVal('rtol', formatExp(cp.rtol));
+                        setVal('atol', formatExp(cp.atol));
+                        setVal('maxiters', formatExp(cp.maxiters));
+
+                        // Populate Simulation Parameters
+                        populateParams(sp, 'step');
+                        populateParams(pp, 'pola');
+                        
+                        // Special handling for EIS which has some renamed fields in UI
+                        if (ep.i_EIS !== undefined) setVal('eis_i_static', (ep.i_EIS * meta.i_EIS.factor).toFixed(meta.i_EIS.precision));
+                        if (ep.ratio !== undefined) setVal('eis_ratio', (ep.ratio * 100).toFixed(1));
+                        if (ep.f_power_min !== undefined) setVal('eis_f_power_min', ep.f_power_min);
+                        if (ep.f_power_max !== undefined) setVal('eis_f_power_max', ep.f_power_max);
+                        if (ep.nb_f !== undefined) setVal('eis_nb_frequencies', ep.nb_f);
+                        if (ep.nb_points !== undefined) setVal('eis_nb_points', ep.nb_points);
 
                         // Populate Model Configuration
                         if (mc) {
@@ -1468,7 +1544,7 @@
             const preset = document.getElementById('operating_conditions_preset').value;
             const warning = document.getElementById('modification-warning');
 
-            if (preset === 'none' || !lastSelectedPresetValues) {
+            if (!lastSelectedPresetValues) {
                 warning.style.display = 'none';
                 return;
             }
@@ -1508,20 +1584,26 @@
              // If modified, use the base type (ZSW_GenStack or EH31_2022) to avoid showing exp data.
              // If NOT modified and a preset is selected, use that preset symbol.
              let finalFuelCellType = fuelCellType;
-             if (!isModified && presetValue && presetValue !== 'none') {
+             const configType = document.querySelector('input[name="config_type"]:checked').value;
+             
+             if (configType === 'custom') {
+                 finalFuelCellType = 'default';
+             } else if (isModified) {
+                 finalFuelCellType = 'custom_' + fuelCellType;
+             } else if (presetValue && presetValue !== 'none') {
                  finalFuelCellType = presetValue;
              }
 
-             const getVal = (id) => {
+             const getVal = (id, baseParamName) => {
                  const el = document.getElementById(id);
                  if (!el) return 0;
                  const val = parseFloat(el.value);
-                 const meta = globalParamMetadata[id];
+                 const meta = globalParamMetadata[baseParamName || id];
                  return meta ? val / meta.factor : val;
              };
 
              return {
-                 config_type: document.querySelector('input[name="config_type"]:checked').value,
+                 config_type: configType,
                  fuel_cell_type: finalFuelCellType,
                  voltage_zone: document.querySelector('input[name="voltage_zone"]:checked').value,
                  type_auxiliary: document.querySelector('input[name="type_auxiliary"]:checked').value,
@@ -1572,36 +1654,36 @@
                      kappa_c: getVal('kappa_c'),
                      C_scl: getVal('C_scl'),
                  },
-	                model_config: {
-	                    voltage_zone: document.querySelector('input[name="voltage_zone"]:checked').value,
-	                    type_auxiliary: document.querySelector('input[name="type_auxiliary"]:checked').value,
-	                    type_flow: document.querySelector('input[name="type_flow"]:checked').value,
-	                    type_purge: document.querySelector('input[name="type_purge"]:checked').value,
-	                },
-	                computing_parameters: {
-	                    nb_gc: parseInt(document.getElementById('nb_gc').value),
-	                    nb_gdl: parseInt(document.getElementById('nb_gdl').value),
-	                    nb_mpl: parseInt(document.getElementById('nb_mpl').value),
+                 model_config: {
+                     voltage_zone: document.querySelector('input[name="voltage_zone"]:checked').value,
+                     type_auxiliary: document.querySelector('input[name="type_auxiliary"]:checked').value,
+                     type_flow: document.querySelector('input[name="type_flow"]:checked').value,
+                     type_purge: document.querySelector('input[name="type_purge"]:checked').value,
+                 },
+                 computing_parameters: {
+                     nb_gc: parseInt(document.getElementById('nb_gc').value),
+                     nb_gdl: parseInt(document.getElementById('nb_gdl').value),
+                     nb_mpl: parseInt(document.getElementById('nb_mpl').value),
                     rtol: parseFloat(document.getElementById('rtol').value),
                     atol: parseFloat(document.getElementById('atol').value),
-                    maxiters: parseInt(document.getElementById('maxiters').value),
+                    maxiters: Math.round(parseFloat(document.getElementById('maxiters').value)),
                 },
                 step_parameters: {
-                    delta_t_ini: parseFloat(document.getElementById('step_delta_t_ini').value),
-                    delta_t_load: parseFloat(document.getElementById('step_delta_t_load').value),
-                    delta_t_break: parseFloat(document.getElementById('step_delta_t_break').value),
-                    i_ini: parseFloat(document.getElementById('step_i_ini').value),
-                    i_step: parseFloat(document.getElementById('step_i_step').value),
+                    delta_t_ini: getVal('step_delta_t_ini', 'delta_t_ini'),
+                    delta_t_load: getVal('step_delta_t_load', 'delta_t_load'),
+                    delta_t_break: getVal('step_delta_t_break', 'delta_t_break'),
+                    i_ini: getVal('step_i_ini', 'i_ini'),
+                    i_step: getVal('step_i_step', 'i_step'),
                 },
                 polarization_parameters: {
-                    delta_t_ini: parseFloat(document.getElementById('pola_delta_t_ini').value),
-                    delta_t_load: parseFloat(document.getElementById('pola_delta_t_load').value),
-                    delta_t_break: parseFloat(document.getElementById('pola_delta_t_break').value),
-                    delta_i: parseFloat(document.getElementById('pola_delta_i').value),
-                    i_max: parseFloat(document.getElementById('pola_i_max').value),
+                    delta_t_ini: getVal('pola_delta_t_ini', 'delta_t_ini'),
+                    v_load: getVal('pola_v_load', 'v_load'),
+                    delta_t_break: getVal('pola_delta_t_break', 'delta_t_break'),
+                    delta_i: getVal('pola_delta_i', 'delta_i'),
+                    i_max: getVal('pola_i_max', 'i_max'),
                 },
                 eis_parameters: {
-                    i_static: parseFloat(document.getElementById('eis_i_static').value),
+                    i_static: getVal('eis_i_static', 'i_static'),
                     ratio: parseFloat(document.getElementById('eis_ratio').value) / 100,
                     f_power_min: parseInt(document.getElementById('eis_f_power_min').value),
                     f_power_max: parseInt(document.getElementById('eis_f_power_max').value),

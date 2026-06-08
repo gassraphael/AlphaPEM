@@ -74,9 +74,19 @@ const PARAM_UI_CONVERSION = Dict(
     :epsilon_gdl => (factor=1.0, unit="", precision=3),
     :K_O2_ad_Pt => (factor=1.0, unit="", precision=3),
     :kappa_c => (factor=1.0, unit="", precision=3),
-    :i0_c_ref => (factor=1.0, unit="A/m²", precision=1),
+    :i0_c_ref => (factor=1e-4, unit="A/cm²", precision=2),
     :kappa_co => (factor=1.0, unit="mol·m⁻¹·s⁻¹·Pa⁻¹", precision=2),
     :C_scl => (factor=1e-6, unit="MF/m³", precision=0),
+    # Run Parameters
+    :delta_t_ini => (factor=1/60, unit="min", precision=1),
+    :delta_t_break => (factor=1/60, unit="min", precision=1),
+    :i_ini => (factor=1e-4, unit="A/cm²", precision=2),
+    :i_step => (factor=1e-4, unit="A/cm²", precision=2),
+    :delta_i => (factor=1e-4, unit="A/cm²", precision=2),
+    :i_max => (factor=1e-4, unit="A/cm²", precision=2),
+    :i_EIS => (factor=1e-4, unit="A/cm²", precision=2),
+    :i_static => (factor=1e-4, unit="A/cm²", precision=2),
+    :v_load => (factor=1e-4, unit="A/cm²·s", precision=3),
 )
 
 """
@@ -184,6 +194,9 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
                 :type_flow => "counter_flow",
                 :type_purge => "no_purge",
             ),
+            :step_parameters => struct_to_dict(StepParams()),
+            :polarization_parameters => struct_to_dict(PolarizationParams()),
+            :eis_parameters => struct_to_dict(EISParams()),
             :param_metadata => PARAM_UI_CONVERSION,
         )
     catch e
@@ -201,6 +214,28 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
             :Phi_a => 0.6,              # Anode humidity
             :Phi_c => 0.6,              # Cathode humidity
             :y_H2_in => 0.95,           # Anode inlet H2 ratio
+        ),
+        :step_parameters => Dict(
+            :delta_t_ini => 1800.0,
+            :delta_t_load => 30.0,
+            :delta_t_break => 120.0,
+            :i_ini => 10000.0,
+            :i_step => 20000.0,
+        ),
+        :polarization_parameters => Dict(
+            :delta_t_ini => 7200.0,
+            :delta_i => 500.0,
+            :v_load => 100.0,
+            :delta_t_break => 900.0,
+            :i_max => 25000.0,
+        ),
+        :eis_parameters => Dict(
+            :i_EIS => 10000.0,
+            :ratio => 0.05,
+            :f_power_min => -3.0,
+            :f_power_max => 5.0,
+            :nb_f => 90,
+            :nb_points => 50,
         ),
         :accessible_parameters => Dict(
             :Aact => 0.03,              # m² - Active area
@@ -418,11 +453,11 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
             end
         end
         StepParams(
-            delta_t_ini = sp[:delta_t_ini],
+            delta_t_ini = sp[:delta_t_ini] * 60.0,
             delta_t_load = sp[:delta_t_load],
-            delta_t_break = sp[:delta_t_break],
-            i_ini = sp[:i_ini],
-            i_step = sp[:i_step],
+            delta_t_break = sp[:delta_t_break] * 60.0,
+            i_ini = sp[:i_ini] * 1e4,
+            i_step = sp[:i_step] * 1e4,
         )
     elseif sim_type == :polarization
         pp = get(params, :polarization_parameters, Dict())
@@ -440,11 +475,11 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
             end
         end
         PolarizationParams(
-            delta_t_ini = pp[:delta_t_ini],
-            delta_t_load = pp[:delta_t_load],
-            delta_t_break = pp[:delta_t_break],
-            delta_i = pp[:delta_i],
-            i_max = pp[:i_max],
+            delta_t_ini = pp[:delta_t_ini] * 60.0,
+            delta_i = pp[:delta_i] * 1e4,
+            v_load = pp[:v_load] * 1e4,
+            delta_t_break = pp[:delta_t_break] * 60.0,
+            i_max = pp[:i_max] * 1e4,
         )
     elseif sim_type == :eis
         ep = get(params, :eis_parameters, Dict())
@@ -462,11 +497,11 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
             end
         end
         EISParams(
-            i_static = ep[:i_static],
-            ratio = ep[:ratio],
+            i_EIS = ep[:i_static] * 1e4,
+            ratio = ep[:ratio] / 100.0,
             f_power_min = ep[:f_power_min],
             f_power_max = ep[:f_power_max],
-            nb_frequencies = ep[:nb_frequencies],
+            nb_f = ep[:nb_frequencies],
             nb_points = ep[:nb_points],
         )
     else
