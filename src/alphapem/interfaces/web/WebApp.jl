@@ -116,12 +116,14 @@ try
     @info "   AlphaPEM Simulator is running on http://$HOST:$PORT/"
     @info "   Press Ctrl+C to stop the server"
 
-    # Open browser automatically
+    # Open browser automatically in the background
     url = "http://$HOST:$PORT/"
-    sleep(1)  # Give server a moment to start
-    open_browser(url)
+    @async begin
+        sleep(2)  # Give server a moment to start
+        open_browser(url)
+    end
 
-    # Start the Genie server
+    # Start the Genie server (blocking call)
     Genie.up(
         PORT,
         HOST,

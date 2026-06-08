@@ -17,6 +17,7 @@ const FUELCELL_TYPE_MAP = Dict(
     :ZSW_GenStack_T_62 => ZSWFuelCell,
     :ZSW_GenStack_T_76 => ZSWFuelCell,
     :ZSW_GenStack_T_84 => ZSWFuelCell,
+    :EH31_2022 => EH31FuelCell,
     :EH_31_1_5 => EH31FuelCell,
     :EH_31_2_0 => EH31FuelCell,
     :EH_31_2_25 => EH31FuelCell,

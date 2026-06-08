@@ -36,6 +36,7 @@ const theta_c_mpl::Float64 = 135 * π / 180  # radian. It is the contact angle o
 const theta_c_cl::Float64 = 95 * π / 180   # radian. It is the contact angle of CL for liquid water.
 const theta_l_rem::Float64 = 5e-5  # s/m. It is the coefficient of liquid water removal from the GDL to the GC [Ansys Fluent value from their User Guide].
 const K_v_liq_gas::Float64 = 0.02  # . It is the liquid to gas velocity ratio in the GC [Ansys Fluent value from their User Guide].
+const gamma_sorp_l::Float64 = 0.5 # s-1. Sorption rate of liquid water in the membrane [Ansys Fluent value from their User Guide].
 const D_liq_dif::Float64 = 1e-5  # kg.m-1.s-1. It is the diffusion coefficient of liquid water in the GC [Ansys Fluent value from their User Guide].
 const gamma_cond::Float64 = 1e8  # s-1. It is the overall condensation rate constant for water [Ansys Fluent value from their User Guide].
 const gamma_evap::Float64 = 1e8  # s-1. It is the overall evaporation rate constant for water [Ansys Fluent value from their User Guide].

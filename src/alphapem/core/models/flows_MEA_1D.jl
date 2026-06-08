@@ -43,7 +43,7 @@ function calculate_flows_1D_MEA!(work::MEAFlowsWorkspace,
     Hmem, Hacl, Hccl = pp.Hmem, pp.Hacl, pp.Hccl
     Wagc, Wcgc, Hagc, Hcgc = pp.Wagc, pp.Wcgc, pp.Hagc, pp.Hcgc
     epsilon_gdl, epsilon_mpl = pp.epsilon_gdl, pp.epsilon_mpl
-    gamma_sorp_l, kappa_co = pp.gamma_sorp_l, pp.kappa_co
+    kappa_co = pp.kappa_co
     nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl
 
     # Extraction of the variables

@@ -443,6 +443,15 @@ simu = run_simulation(cfg)
 function run_simulation(cfg::SimulationConfig)::AlphaPEM
     # Build a Fuelcell object with the given configuration.
     fuel_cell       = create_fuelcell(cfg.type_fuel_cell, cfg.voltage_zone)
+    
+    # Override with custom parameters if provided
+    if cfg.physical_parameters !== nothing
+        fuel_cell.physical_parameters = cfg.physical_parameters
+    end
+    if cfg.operating_conditions !== nothing
+        fuel_cell.operating_conditions = cfg.operating_conditions
+    end
+
     # Build a Current object with the given configuration.
     current_density = create_current(cfg.type_current, fuel_cell)
     # Create a simulator.
@@ -477,7 +486,17 @@ function run_simulation(cfgs::AbstractVector{<:SimulationConfig})::Vector{AlphaP
     # Determine the number of simulators to create.
     n                 = length(cfgs)
     # Build Fuelcell objects for each configuration.
-    fuel_cells        = [create_fuelcell(cfgs[i].type_fuel_cell, cfgs[i].voltage_zone) for i in 1:n]
+    fuel_cells = []
+    for i in 1:n
+        fc = create_fuelcell(cfgs[i].type_fuel_cell, cfgs[i].voltage_zone)
+        if cfgs[i].physical_parameters !== nothing
+            fc.physical_parameters = cfgs[i].physical_parameters
+        end
+        if cfgs[i].operating_conditions !== nothing
+            fc.operating_conditions = cfgs[i].operating_conditions
+        end
+        push!(fuel_cells, fc)
+    end
     # Build Current objects for each configuration.
     current_densities = [create_current(cfgs[i].type_current, fuel_cells[i])           for i in 1:n]
     # Create one simulator per selected fuel cell / current configuration.
