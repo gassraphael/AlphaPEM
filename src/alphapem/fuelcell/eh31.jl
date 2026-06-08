@@ -33,13 +33,27 @@ function EH31FuelCell(type_fuel_cell::Symbol, voltage_zone::Symbol)
 end
 
 function eh31_physical_params()::PhysicalParams
+    # Define local variables for parameters used in multiple places or calculations
+    Hcl = 8.593e-6                      # Thickness of the catalyst layers in meters
+    Hgc = 500e-6                        # Thickness of the gas channels in meters
+    Wgc = 450e-6                        # Width of the gas channels in meters
+
+    # Manifold parameters
+    Lm = 2.03                           # Length of the manifold in meters
+    A_T_a = 11.8e-4                     # Inlet/exhaust anode manifold throttle area in m²
+    A_T_c = 34.4e-4                     # Inlet/exhaust cathode manifold throttle area in m²
+    Vasm = Lm * A_T_a                   # Supply manifold volume at the anode in m³
+    Vcsm = Lm * A_T_c                   # Supply manifold volume at the cathode in m³
+    Vaem = Vasm                         # Exhaust manifold volume at the anode in m³
+    Vcem = Vcsm                         # Exhaust manifold volume at the cathode in m³
+
     return PhysicalParams(
         # Global
         Aact = 85e-4,                        # Active area of the catalyst layer in m²
         nb_cell = 1,                         # Number of cells in the stack
         # Catalyst layer
-        Hacl = 8.593e-6,                     # Thickness of the anode catalyst layer in meters
-        Hccl = Hacl,                         # Thickness of the cathode catalyst layer in meters
+        Hacl = Hcl,                          # Thickness of the anode catalyst layer in meters
+        Hccl = Hcl,                          # Thickness of the cathode catalyst layer in meters
         # Membrane
         Hmem = 16.06e-6,                     # Thickness of the membrane in meters
         # Gas diffusion layer
@@ -50,24 +64,23 @@ function eh31_physical_params()::PhysicalParams
         Hmpl = 30e-6,                        # Thickness of the microporous layer in meters
         epsilon_mpl = 0.4,                   # Porosity of the microporous layer
         # Gas channel
-        Hagc = 500e-6,                       # Thickness of the anode gas channel in meters
-        Hcgc = Hagc,                         # Thickness of the cathode gas channel in meters
-        Wagc = 450e-6,                       # Width of the anode gas channel in meters
-        Wcgc = Wagc,                         # Width of the cathode gas channel in meters
+        Hagc = Hgc,                          # Thickness of the anode gas channel in meters
+        Hcgc = Hgc,                          # Thickness of the cathode gas channel in meters
+        Wagc = Wgc,                          # Width of the anode gas channel in meters
+        Wcgc = Wgc,                          # Width of the cathode gas channel in meters
         Lgc = 144e-3,                        # Length of the gas channel in meters
         nb_channel_in_gc = 67,               # Number of channels in the bipolar plate
         Ldist = 5e-2,                        # Length of the distributor (between gas channel and manifold) in meters
         #   Auxiliaries
-        Lm = 2.03,                           # Length of the manifold in meters
-        A_T_a = 11.8e-4,                     # Inlet/exhaust anode manifold throttle area in m²
-        A_T_c = 34.4e-4,                     # Inlet/exhaust cathode manifold throttle area in m²
-        Vasm = Lm * A_T_a,                   # Supply manifold volume at the anode in m³
-        Vcsm = Lm * A_T_c,                   # Supply manifold volume at the cathode in m³
-        Vaem = Vasm,                         # Exhaust manifold volume at the anode in m³
-        Vcem = Vcsm,                         # Exhaust manifold volume at the cathode in m³
+        Lm = Lm,                             # Length of the manifold in meters
+        A_T_a = A_T_a,                       # Inlet/exhaust anode manifold throttle area in m²
+        A_T_c = A_T_c,                       # Inlet/exhaust cathode manifold throttle area in m²
+        Vasm = Vasm,                         # Supply manifold volume at the anode in m³
+        Vcsm = Vcsm,                         # Supply manifold volume at the cathode in m³
+        Vaem = Vaem,                         # Exhaust manifold volume at the anode in m³
+        Vcem = Vcem,                         # Exhaust manifold volume at the cathode in m³
         # Interaction parameters between fluids and PEMFC structure
         e = 4,                               # Capillary exponent
-        gamma_sorp_l = 0.5,                  # Sorption rate of liquid water in the membrane
         K_O2_ad_Pt = 5.4,                    # Interfacial resistance coefficient of O2 adsorption on the Pt sites
         # Voltage polarization
         Re = 1e-6,                           # Electron conduction resistance of the circuit in Ω·m²
@@ -80,7 +93,7 @@ end
 
 
 function eh31_operating_conditions(type_fuel_cell::Symbol)::OperatingConditions
-    if type_fuel_cell == :EH_31_1_5
+    if type_fuel_cell == :EH_31_1_5 || type_fuel_cell == :EH31_2022
         T_des                   = 74.0 + 273.15  # K.  It is the desired fuel cell temperature.
         Pa_des                  = 1.5e5          # Pa. It is the desired pressures of the fuel gas at the anode.
         Pc_des                  = 1.5e5          # Pa. It is the desired pressures of the fuel gas at the cathode.
@@ -117,7 +130,15 @@ function eh31_operating_conditions(type_fuel_cell::Symbol)::OperatingConditions
         Phi_c_des               = 0.6            # It is the desired relative humidity at the cathode.
         y_H2_in                 = 1.0            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
     else
-        error("Unknown type_fuel_cell: $type_fuel_cell")
+        # Default nominal conditions for EH-31 (2022)
+        T_des                   = 74.0 + 273.15
+        Pa_des                  = 1.5e5
+        Pc_des                  = 1.5e5
+        Sa                      = 1.2
+        Sc                      = 2.0
+        Phi_a_des               = 0.4
+        Phi_c_des               = 0.6
+        y_H2_in                 = 1.0
     end
 
     return OperatingConditions(T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in)
@@ -220,7 +241,8 @@ function eh31_pola_exp_data(type_fuel_cell::Symbol, voltage_zone::Symbol)
             throw(ArgumentError("The voltage_zone should be either :full or :before_voltage_drop."))
         end
     else
-        error("Unknown type_fuel_cell: $type_fuel_cell")
+        # Return empty experimental data for custom/unknown types
+        return PolaExperimentalData(i_exp = Float64[], U_exp = Float64[])
     end
 
     return PolaExperimentalData(i_exp = i_exp_pola .* 1e4, U_exp = U_exp_pola)
@@ -280,7 +302,8 @@ function eh31_pola_exp_data_calibration(type_fuel_cell::Symbol, voltage_zone::Sy
             throw(ArgumentError("The voltage_zone should be either :full or :before_voltage_drop."))
         end
     else
-        throw(ArgumentError("Unknown type_fuel_cell: $type_fuel_cell"))
+        # Return empty experimental data for custom/unknown types
+        return PolaExperimentalData(i_exp = Float64[], U_exp = Float64[])
     end
 
     return PolaExperimentalData(i_exp = i_exp_cali .* 1e4, U_exp = U_exp_cali)

@@ -25,7 +25,8 @@ Constants:
 module SimulationConfigModule
 
 using ..Config: AbstractCurrentParams, StepParams, PolarizationParams,
-                 PolarizationCalibrationParams, EISParams, NumericalParams
+                 PolarizationCalibrationParams, EISParams, NumericalParams,
+                 PhysicalParams, OperatingConditions
 using ..StateScalingModule: StateScaling
 
 export SimulationConfig, validate_config
@@ -41,6 +42,10 @@ Base.@kwdef mutable struct SimulationConfig{T<:AbstractCurrentParams}
     type_display::Symbol = :synthetic
     display_timing::Symbol=:postrun
     state_scaling::StateScaling = StateScaling()
+    
+    # Optional custom parameters to override defaults
+    physical_parameters::Union{Nothing, PhysicalParams} = nothing
+    operating_conditions::Union{Nothing, OperatingConditions} = nothing
 end
 
 # --- Allowed values (tu peux enrichir plus tard) ---

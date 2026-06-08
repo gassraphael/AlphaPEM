@@ -47,63 +47,52 @@ end
 # ------ FUEL CELL PRESETS ------
 
 """
+Metadata for parameters: factor to convert from SI (m, m², etc.) to UI units,
+and the target unit string.
+"""
+const PARAM_UI_CONVERSION = Dict(
+    :Aact => (factor=1e4, unit="cm²", precision=1),
+    :Hacl => (factor=1e6, unit="μm", precision=1),
+    :Hccl => (factor=1e6, unit="μm", precision=1),
+    :Hmem => (factor=1e6, unit="μm", precision=1),
+    :Hgdl => (factor=1e6, unit="μm", precision=1),
+    :Hmpl => (factor=1e6, unit="μm", precision=1),
+    :Hagc => (factor=1e6, unit="μm", precision=1),
+    :Hcgc => (factor=1e6, unit="μm", precision=1),
+    :Wagc => (factor=1e6, unit="μm", precision=1),
+    :Wcgc => (factor=1e6, unit="μm", precision=1),
+    :Lgc  => (factor=1e3, unit="mm", precision=1),
+    :Ldist => (factor=1e3, unit="mm", precision=1),
+    :Lm   => (factor=1e3, unit="mm", precision=1),
+    :A_T_a => (factor=1e4, unit="cm²", precision=1),
+    :A_T_c => (factor=1e4, unit="cm²", precision=1),
+    :Vasm => (factor=1e6, unit="cm³", precision=1),
+    :Vcsm => (factor=1e6, unit="cm³", precision=1),
+    :Vaem => (factor=1e6, unit="cm³", precision=1),
+    :Vcem => (factor=1e6, unit="cm³", precision=1),
+    :Re   => (factor=1e6, unit="μΩ·m²", precision=3),
+    :epsilon_gdl => (factor=1.0, unit="", precision=3),
+    :K_O2_ad_Pt => (factor=1.0, unit="", precision=3),
+    :kappa_c => (factor=1.0, unit="", precision=3),
+    :i0_c_ref => (factor=1.0, unit="A/m²", precision=1),
+    :kappa_co => (factor=1.0, unit="mol·m⁻¹·s⁻¹·Pa⁻¹", precision=2),
+    :C_scl => (factor=1e-6, unit="MF/m³", precision=0),
+)
+
+"""
 Get list of available fuel cell models.
 
 Returns a dictionary with fuel cell types and their descriptions.
 """
 function get_available_fuel_cells()::Dict
     fuel_cells = Dict(
-        :default => Dict(
-            :name => "Default Model",
-            :description => "Generic PEM fuel cell",
-        ),
         :ZSW_GenStack => Dict(
-            :name => "ZSW GenStack",
-            :description => "ZSW GenStack (2022) - calibrated reference cell",
+            :name => "ZSW",
+            :description => "ZSW GenStack",
         ),
-        :ZSW_GenStack_Pa_1_61_Pc_1_41 => Dict(
-            :name => "ZSW GenStack Pa=1.61 bar, Pc=1.41 bar",
-            :description => "ZSW GenStack at specific pressure conditions",
-        ),
-        :ZSW_GenStack_Pa_2_01_Pc_1_81 => Dict(
-            :name => "ZSW GenStack Pa=2.01 bar, Pc=1.81 bar",
-            :description => "ZSW GenStack at specific pressure conditions",
-        ),
-        :ZSW_GenStack_Pa_2_4_Pc_2_2 => Dict(
-            :name => "ZSW GenStack Pa=2.4 bar, Pc=2.2 bar",
-            :description => "ZSW GenStack at specific pressure conditions",
-        ),
-        :ZSW_GenStack_Pa_2_8_Pc_2_6 => Dict(
-            :name => "ZSW GenStack Pa=2.8 bar, Pc=2.6 bar",
-            :description => "ZSW GenStack at specific pressure conditions",
-        ),
-        :ZSW_GenStack_T_62 => Dict(
-            :name => "ZSW GenStack T=62°C",
-            :description => "ZSW GenStack at low temperature",
-        ),
-        :ZSW_GenStack_T_76 => Dict(
-            :name => "ZSW GenStack T=76°C",
-            :description => "ZSW GenStack at medium temperature",
-        ),
-        :ZSW_GenStack_T_84 => Dict(
-            :name => "ZSW GenStack T=84°C",
-            :description => "ZSW GenStack at high temperature",
-        ),
-        :EH31_1_5 => Dict(
-            :name => "EH-31: P=1.5 bar",
-            :description => "EH-31 fuel cell at 1.5 bar",
-        ),
-        :EH31_2_0 => Dict(
-            :name => "EH-31: P=2.0 bar",
-            :description => "EH-31 fuel cell at 2.0 bar",
-        ),
-        :EH31_2_25 => Dict(
-            :name => "EH-31: P=2.25 bar",
-            :description => "EH-31 fuel cell at 2.25 bar",
-        ),
-        :EH31_2_5 => Dict(
-            :name => "EH-31: P=2.5 bar",
-            :description => "EH-31 fuel cell at 2.5 bar",
+        :EH31_2022 => Dict(
+            :name => "EH-31 (2022)",
+            :description => "EH-31 fuel cell",
         ),
     )
 
@@ -120,9 +109,85 @@ Get default parameters for a specific fuel cell type.
 Dictionary with all default operating conditions and parameters.
 """
 function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
-    # TODO: Load from fuel cell database in AlphaPEM
-    # For now, return generic defaults
+    # Handle mapping to internal symbols
+    mapped_type = if fuel_cell_type == "ZSW_GenStack"
+        :ZSW_GenStack
+    elseif fuel_cell_type == "EH31_2022"
+        :EH31_2022
+    else
+        Symbol(fuel_cell_type)
+    end
 
+    # Load parameters using AlphaPEM functions
+    try
+        # Use the factory to create a fuel cell instance
+        # This ensures we get exactly the parameters defined in fuelcell/*.jl
+        fc = AlphaPEM.Fuelcell.create_fuelcell(mapped_type, :before_voltage_drop)
+        
+        ap = fc.physical_parameters
+        oc = fc.operating_conditions
+        
+        # Get all undetermined parameter keys from Config to separate them
+        undetermined_keys = keys(AlphaPEM.Config.UNDETERMINED_PARAMETER_BOUNDS)
+        
+        # Helper to convert struct to Dict
+        function struct_to_dict(obj)
+            d = Dict{Symbol, Any}()
+            for field in fieldnames(typeof(obj))
+                d[field] = getfield(obj, field)
+            end
+            return d
+        end
+        
+        ap_dict = struct_to_dict(ap)
+        
+        accessible = Dict()
+        undetermined = Dict()
+        
+        for (k, v) in ap_dict
+            # Fields in UNDETERMINED_PARAMETER_BOUNDS or explicitly requested as undetermined in UI
+            if k in undetermined_keys || k in [:epsilon_mpl, :epsilon_c, :gamma_sorp_l, :C_scl]
+                undetermined[k] = v
+            else
+                accessible[k] = v
+            end
+        end
+
+        return Dict(
+            :operating_conditions => Dict(
+                :T_fc => oc.T_des - 273.15,
+                :Pa => oc.Pa_des / 1e5,
+                :Pc => oc.Pc_des / 1e5,
+                :Sa => oc.Sa,
+                :Sc => oc.Sc,
+                :Phi_a => oc.Phi_a_des,
+                :Phi_c => oc.Phi_c_des,
+                :y_H2_in => oc.y_H2_in,
+            ),
+            :accessible_parameters => accessible,
+            :undetermined_parameters => undetermined,
+            :param_metadata => PARAM_UI_CONVERSION,
+            :computing_parameters => Dict(
+                :nb_gc => 1,
+                :nb_gdl => 3,
+                :nb_mpl => 2,
+                :rtol => 1e-3,
+                :atol => 1e-6,
+                :maxiters => 10000,
+            ),
+            :model_config => Dict(
+                :voltage_zone => "before_voltage_drop",
+                :type_auxiliary => "no_auxiliary",
+                :type_flow => "counter_flow",
+                :type_purge => "no_purge",
+            ),
+            :param_metadata => PARAM_UI_CONVERSION,
+        )
+    catch e
+        @warn "Error loading fuel cell defaults for $mapped_type" exception=e
+    end
+
+    # Fallback to generic defaults (units matched to UI expectations)
     defaults = Dict(
         :operating_conditions => Dict(
             :T_fc => 60.0,              # °C - Cell temperature
@@ -135,42 +200,40 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
             :y_H2_in => 0.95,           # Anode inlet H2 ratio
         ),
         :accessible_parameters => Dict(
-            :Aact => 100.0,             # cm² - Active area
+            :Aact => 0.03,              # m² - Active area
             :nb_cell => 1,              # Number of cells
-            :Hagc => 100.0,             # µm - Anode GC thickness
-            :Hcgc => 100.0,             # µm - Cathode GC thickness
-            :Wagc => 100.0,             # µm - Anode GC width
-            :Wcgc => 100.0,             # µm - Cathode GC width
-            :Lgc => 100.0,              # mm - GC length
+            :Hagc => 500e-6,            # m - Anode GC thickness
+            :Hcgc => 500e-6,            # m - Cathode GC thickness
+            :Wagc => 450e-6,            # m - Anode GC width
+            :Wcgc => 450e-6,            # m - Cathode GC width
+            :Lgc => 0.144,              # m - GC length
             :nb_channel_in_gc => 50,    # Number of channels
-            :Ldist => 50.0,             # mm - Distributor length
-            :Lm => 50.0,                # mm - Manifold length
-            :A_T_a => 10.0,             # cm² - Anode throttle area
-            :A_T_c => 10.0,             # cm² - Cathode throttle area
-            :Vasm => 100.0,             # cm³ - Supply anode manifold
-            :Vcsm => 100.0,             # cm³ - Supply cathode manifold
-            :Vaem => 100.0,             # cm³ - Exhaust anode manifold
-            :Vcem => 100.0,             # cm³ - Exhaust cathode manifold
-            :V_endplate_a => 50.0,      # cm³ - Anode endplate
-            :V_endplate_c => 50.0,      # cm³ - Cathode endplate
+            :Ldist => 0.05,             # m - Distributor length
+            :Lm => 0.025,               # m - Manifold length
+            :A_T_a => 1e-3,             # m² - Anode throttle area
+            :A_T_c => 1e-3,             # m² - Cathode throttle area
+            :Vasm => 5e-5,              # m³ - Supply anode manifold
+            :Vcsm => 5e-5,              # m³ - Supply cathode manifold
+            :Vaem => 5e-5,              # m³ - Exhaust anode manifold
+            :Vcem => 5e-5,              # m³ - Exhaust cathode manifold
         ),
         :undetermined_parameters => Dict(
-            :Hgdl => 200.0,             # µm - GDL thickness
-            :Hmpl => 50.0,              # µm - MPL thickness
-            :Hacl => 10.0,              # µm - Anode CL thickness
-            :Hccl => 10.0,              # µm - Cathode CL thickness
-            :Hmem => 10.0,              # µm - Membrane thickness
+            :Hgdl => 200e-6,            # m - GDL thickness
+            :Hmpl => 50e-6,             # m - MPL thickness
+            :Hacl => 10e-6,             # m - Anode CL thickness
+            :Hccl => 10e-6,             # m - Cathode CL thickness
+            :Hmem => 15e-6,             # m - Membrane thickness
             :epsilon_gdl => 0.7,        # GDL porosity
             :epsilon_mpl => 0.5,        # MPL porosity
             :epsilon_c => 0.2,          # Compression ratio
             :e => 4,                    # Capillary exponent
-            :K_l_ads => 5.0,            # Sorption ratio
-            :K_O2_ad_Pt => 2.0,         # O2 adsorption coefficient
-            :Re => 1.0,                 # Ω.mm² - Electron resistance
-            :i0_c_ref => 1.0,           # A/m² - Exchange current
-            :kappa_co => 1.0,           # mol/(m.s.Pa) - Crossover
+            :gamma_sorp_l => 0.5,       # Sorption rate
+            :K_O2_ad_Pt => 5.4,         # O2 adsorption coefficient
+            :Re => 1.5e-7,              # Ω.m² - Electron resistance
+            :i0_c_ref => 15.0,          # A/m² - Exchange current
+            :kappa_co => 20.0,          # mol/(m.s.Pa) - Crossover
             :kappa_c => 1.0,            # Overpotential exponent
-            :C_scl => 20.0,             # F/cm³ - Double layer capacitance
+            :C_scl => 2e7,              # F/m³ - Double layer capacitance
         ),
         :computing_parameters => Dict(
             :nb_gc => 1,                # GC nodes
@@ -203,6 +266,7 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
             :nb_frequencies => 10,       # Number of frequencies
             :nb_points => 20,            # Points per frequency
         ),
+        :param_metadata => PARAM_UI_CONVERSION,
     )
 
     return defaults
@@ -415,6 +479,42 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
         atol = cp[:atol],
     )
 
+    # Build custom physical parameters
+    ap_data = get(params, :accessible_parameters, Dict())
+    up_data = get(params, :undetermined_parameters, Dict())
+    
+    # Merge both into a single dict for PhysicalParams, converting keys to symbols
+    phys_dict = Dict{Symbol, Any}()
+    for (k, v) in ap_data
+        phys_dict[Symbol(k)] = v
+    end
+    for (k, v) in up_data
+        phys_dict[Symbol(k)] = v
+    end
+    
+    # Filter out unknown fields to avoid Keyword Argument errors
+    valid_phys_fields = fieldnames(PhysicalParams)
+    filtered_phys_dict = Dict{Symbol, Any}()
+    for (k, v) in phys_dict
+        if k in valid_phys_fields
+            filtered_phys_dict[k] = v
+        end
+    end
+    custom_ap = PhysicalParams(; filtered_phys_dict...)
+    
+    # Build custom operating conditions
+    oc_data = get(params, :operating_conditions, Dict())
+    custom_oc = OperatingConditions(
+        T_des     = Float64(get(oc_data, "T_fc", get(oc_data, :T_fc, 60.0))) + 273.15,
+        Pa_des    = Float64(get(oc_data, "Pa", get(oc_data, :Pa, 1.5))) * 1e5,
+        Pc_des    = Float64(get(oc_data, "Pc", get(oc_data, :Pc, 1.5))) * 1e5,
+        Sa        = Float64(get(oc_data, "Sa", get(oc_data, :Sa, 2.0))),
+        Sc        = Float64(get(oc_data, "Sc", get(oc_data, :Sc, 2.0))),
+        Phi_a_des = Float64(get(oc_data, "Phi_a", get(oc_data, :Phi_a, 0.6))),
+        Phi_c_des = Float64(get(oc_data, "Phi_c", get(oc_data, :Phi_c, 0.6))),
+        y_H2_in   = Float64(get(oc_data, "y_H2_in", get(oc_data, :y_H2_in, 0.95)))
+    )
+
     # Build SimulationConfig
     config = SimulationConfig(
         type_fuel_cell = Symbol(params[:fuel_cell_type]),
@@ -426,6 +526,8 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
         type_purge = Symbol(get(params, :type_purge, "no_purge")),
         type_display = :no_display,     # Server-side, don't display plots
         display_timing = :postrun,      # Display after simulation
+        physical_parameters = custom_ap,
+        operating_conditions = custom_oc,
     )
 
     return config

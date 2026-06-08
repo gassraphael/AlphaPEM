@@ -47,7 +47,7 @@
 
         .tab-content {
             display: none;
-            padding: 30px;
+            padding: 20px 25px;
             animation: fadeIn 0.3s ease;
         }
 
@@ -210,16 +210,24 @@
         }
 
         .alert {
-            padding: 15px;
+            padding: 6px 12px;
             border-radius: 6px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             display: none;
-            white-space: pre-wrap;
             word-wrap: break-word;
             max-height: 300px;
             overflow-y: auto;
-            font-family: monospace;
             font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .alert p {
+            margin: 0;
+        }
+
+        .alert-log {
+            font-family: monospace;
+            white-space: pre-wrap;
         }
 
         .alert.show {
@@ -457,6 +465,22 @@
         .btn-run-simulation:active {
             transform: translateY(0);
         }
+
+        .undetermined-param {
+            background-color: #fff9c4 !important;
+            border: 2px solid #fbc02d !important;
+        }
+
+        .undetermined-info {
+            background-color: #fff9c4;
+            border: 1px solid #fbc02d;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #856404;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -464,7 +488,7 @@
         <header class="header">
             <div class="logo">
                 <h1>AlphaPEM</h1>
-                <p class="subtitle">PEM Fuel Cell Simulator - Configuration</p>
+                <p class="subtitle">PEM fuel cell simulator - configuration</p>
             </div>
         </header>
 
@@ -479,37 +503,36 @@
 
                 <!-- Tabs Navigation -->
                 <div class="tabs-container">
-                    <button class="tab-button active" onclick="switchTab(0)">1. Fuel Cell</button>
-                    <button class="tab-button" onclick="switchTab(1)">2. Model Config</button>
-                    <button class="tab-button" onclick="switchTab(2)">3. Physical Params</button>
-                    <button class="tab-button" onclick="switchTab(3)">4. Numerical</button>
-                    <button class="tab-button" onclick="switchTab(4)">5. Run</button>
+                    <button class="tab-button active" onclick="switchTab(0)">1. Fuel cell</button>
+                    <button class="tab-button" onclick="switchTab(1)">2. Physical parameters</button>
+                    <button class="tab-button" onclick="switchTab(2)">3. Operating conditions</button>
+                    <button class="tab-button" onclick="switchTab(3)">4. Numerical parameters</button>
+                    <button class="tab-button" onclick="switchTab(4)">5. Model configuration</button>
+                    <button class="tab-button" onclick="switchTab(5)">6. Run</button>
                 </div>
 
                 <!-- Tab Contents -->
                 <div class="tab-content active">
-                    <!-- TAB 1: Fuel Cell Selection -->
-                    <h3>Select Fuel Cell Model</h3>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="fuel_cell_type">Fuel Cell Type *</label>
-                            <select id="fuel_cell_type" onchange="updateFuelCellDefaults()">
-                                <option value="">-- Select a fuel cell --</option>
-                                <option value="ZSW_GenStack">ZSW GenStack (2022)</option>
-                                <option value="ZSW_GenStack_Pa_1_61_Pc_1_41">ZSW GenStack Pa=1.61 bar, Pc=1.41 bar</option>
-                                <option value="ZSW_GenStack_Pa_2_01_Pc_1_81">ZSW GenStack Pa=2.01 bar, Pc=1.81 bar</option>
-                                <option value="ZSW_GenStack_Pa_2_4_Pc_2_2">ZSW GenStack Pa=2.4 bar, Pc=2.2 bar</option>
-                                <option value="ZSW_GenStack_Pa_2_8_Pc_2_6">ZSW GenStack Pa=2.8 bar, Pc=2.6 bar</option>
-                                <option value="ZSW_GenStack_T_62">ZSW GenStack T=62°C</option>
-                                <option value="ZSW_GenStack_T_76">ZSW GenStack T=76°C</option>
-                                <option value="ZSW_GenStack_T_84">ZSW GenStack T=84°C</option>
-                                <option value="EH31_1_5">EH-31: P=1.5 bar</option>
-                                <option value="EH31_2_0">EH-31: P=2.0 bar</option>
-                                <option value="EH31_2_25">EH-31: P=2.25 bar</option>
-                                <option value="EH31_2_5">EH-31: P=2.5 bar</option>
-                            </select>
-                            <p class="help-text">Choose a predefined fuel cell model</p>
+                    <!-- TAB 1: Fuel cell Selection -->
+                    <h3>Select Fuel cell model</h3>
+                    <div class="form-section">
+                        <label class="section-title">Configuration Type:</label>
+                        <div class="input-row">
+                            <label><input type="radio" name="config_type" value="pre_selected" checked onchange="toggleFuelCellSelection()"> Pre-selected fuel cell</label>
+                            <label style="margin-left: 20px;"><input type="radio" name="config_type" value="custom" onchange="toggleFuelCellSelection()"> Custom fuel cell (start from scratch)</label>
                         </div>
+                    </div>
+
+                    <div id="pre-selected-section" class="form-section">
+                        <label class="section-title">Fuel cell type *</label>
+                        <div class="input-row">
+                            <label><input type="radio" name="fuel_cell_type" value="ZSW_GenStack" checked onchange="updateFuelCellDefaults()"> ZSW (2022)</label>
+                            <label style="margin-left: 20px;"><input type="radio" name="fuel_cell_type" value="EH31_2022" onchange="updateFuelCellDefaults()"> EH-31 (2022)</label>
+                        </div>
+                        <p class="help-text">Choose a predefined fuel cell model</p>
+                    </div>
+                    <div id="custom-section" style="display: none;">
+                        <p class="help-text">You will define all parameters manually in the following tabs.</p>
                     </div>
                     <div class="nav-buttons">
                         <button class="btn-nav" disabled>← Previous</button>
@@ -517,39 +540,197 @@
                     </div>
                 </div>
 
-                <!-- TAB 2: Model Configuration -->
+                <!-- TAB 2: Physical Parameters -->
                 <div class="tab-content">
-                    <h3>Model Configuration</h3>
+                    <h3>Physical Parameters</h3>
+                    <div id="preset-warning" class="alert alert-info" style="display: none;"><strong>Note:</strong> You have selected a pre-configured fuel cell. Modifying these values will impact the simulation results.</div>
+
+                    <div id="undetermined-legend" class="undetermined-info" style="display: none;">
+                        <strong>Highlighted parameters:</strong> These are "undetermined" parameters.
+                        They are difficult to measure directly and have been calibrated to match experimental data. 
+                        Modifying them requires expertise as they significantly impact the model's accuracy.
+                    </div>
+
+                    <!-- Cell geometric Parameters -->
                     <div class="form-section">
-                        <label>Voltage Zone:</label>
-                        <div style="margin: 10px 0;">
-                            <label><input type="radio" name="voltage_zone" value="before_voltage_drop" checked> Before Voltage Drop</label>
-                            <label style="margin-left: 20px;"><input type="radio" name="voltage_zone" value="full"> Full</label>
+                        <div class="section-title">Cell geometric parameters</div>
+                        <div class="form-grid">
+                            <div class="form-group" id="group-Aact">
+                                <label for="Aact">A<sub>act</sub> (cm²)</label>
+                                <input type="number" id="Aact" min="0.1" step="0.1">
+                                <p class="help-text">Active area of the catalyst layer</p>
+                            </div>
+                            <div class="form-group" id="group-nb_cell">
+                                <label for="nb_cell">n<sub>cell</sub></label>
+                                <input type="number" id="nb_cell" min="1" step="1">
+                                <p class="help-text">Number of cells in the stack</p>
+                            </div>
+                            <div class="form-group" id="group-nb_channel_in_gc">
+                                <label for="nb_channel_in_gc">n<sub>channel</sub></label>
+                                <input type="number" id="nb_channel_in_gc" min="1" step="1">
+                                <p class="help-text">Number of channels in the bipolar plate</p>
+                            </div>
+                            <div class="form-group" id="group-Hacl">
+                                <label for="Hacl">H<sub>acl</sub> (μm)</label>
+                                <input type="number" id="Hacl" min="0.1" step="0.1">
+                                <p class="help-text">Thickness of the anode catalyst layer</p>
+                            </div>
+                            <div class="form-group" id="group-Hccl">
+                                <label for="Hccl">H<sub>ccl</sub> (μm)</label>
+                                <input type="number" id="Hccl" min="0.1" step="0.1">
+                                <p class="help-text">Thickness of the cathode catalyst layer</p>
+                            </div>
+                            <div class="form-group" id="group-Hmem">
+                                <label for="Hmem">H<sub>mem</sub> (μm)</label>
+                                <input type="number" id="Hmem" min="0.1" step="0.1">
+                                <p class="help-text">Thickness of the membrane</p>
+                            </div>
+                            <div class="form-group" id="group-Hgdl">
+                                <label for="Hgdl">H<sub>gdl</sub> (μm)</label>
+                                <input type="number" id="Hgdl" min="1" step="0.1">
+                                <p class="help-text">Thickness of the gas diffusion layer</p>
+                            </div>
+                            <div class="form-group" id="group-Hmpl">
+                                <label for="Hmpl">H<sub>mpl</sub> (μm)</label>
+                                <input type="number" id="Hmpl" min="0.1" step="0.1">
+                                <p class="help-text">Thickness of the microporous layer</p>
+                            </div>
+                            <div class="form-group" id="group-Hagc">
+                                <label for="Hagc">H<sub>agc</sub> (μm)</label>
+                                <input type="number" id="Hagc" min="0.1" step="0.1">
+                                <p class="help-text">Thickness of the anode gas channel</p>
+                            </div>
+                            <div class="form-group" id="group-Hcgc">
+                                <label for="Hcgc">H<sub>cgc</sub> (μm)</label>
+                                <input type="number" id="Hcgc" min="0.1" step="0.1">
+                                <p class="help-text">Thickness of the cathode gas channel</p>
+                            </div>
+                            <div class="form-group" id="group-Wagc">
+                                <label for="Wagc">W<sub>agc</sub> (μm)</label>
+                                <input type="number" id="Wagc" min="0.1" step="0.1">
+                                <p class="help-text">Width of the anode gas channel</p>
+                            </div>
+                            <div class="form-group" id="group-Wcgc">
+                                <label for="Wcgc">W<sub>cgc</sub> (μm)</label>
+                                <input type="number" id="Wcgc" min="0.1" step="0.1">
+                                <p class="help-text">Width of the cathode gas channel</p>
+                            </div>
+                            <div class="form-group" id="group-Lgc">
+                                <label for="Lgc">L<sub>gc</sub> (mm)</label>
+                                <input type="number" id="Lgc" min="1" step="0.1">
+                                <p class="help-text">Length of the gas channel</p>
+                            </div>
                         </div>
                     </div>
 
+                    <!-- Cell material parameters -->
                     <div class="form-section">
-                        <label>Auxiliaries:</label>
-                        <div style="margin: 10px 0;">
-                            <label><input type="radio" name="type_auxiliary" value="no_auxiliary" checked> No Auxiliary</label>
-                            <label style="margin-left: 20px;"><input type="radio" name="type_auxiliary" value="forced_convective_cathode_with_anodic_recirculation"> Cathode + Anodic Recirculation</label>
+                        <div class="section-title">Cell material parameters</div>
+                        <div class="form-grid">
+                            <div class="form-group" id="group-epsilon_gdl">
+                                <label for="epsilon_gdl">ε<sub>gdl</sub></label>
+                                <input type="number" id="epsilon_gdl" min="0" max="1" step="0.001">
+                                <p class="help-text">Anode/cathode GDL porosity</p>
+                            </div>
+                            <div class="form-group" id="group-epsilon_mpl">
+                                <label for="epsilon_mpl">ε<sub>mpl</sub></label>
+                                <input type="number" id="epsilon_mpl" min="0" max="1" step="0.001">
+                                <p class="help-text">Porosity of the microporous layer</p>
+                            </div>
+                            <div class="form-group" id="group-epsilon_c">
+                                <label for="epsilon_c">ε<sub>c</sub></label>
+                                <input type="number" id="epsilon_c" min="0" max="1" step="0.001">
+                                <p class="help-text">Compression ratio of the GDL</p>
+                            </div>
+                            <div class="form-group" id="group-e">
+                                <label for="e">e</label>
+                                <input type="number" id="e" min="0" step="0.1">
+                                <p class="help-text">Capillary exponent</p>
+                            </div>
+                            <div class="form-group" id="group-K_O2_ad_Pt">
+                                <label for="K_O2_ad_Pt">K<sub>O2,ad,Pt</sub></label>
+                                <input type="number" id="K_O2_ad_Pt" min="0" step="0.001">
+                                <p class="help-text">Interfacial resistance coefficient of O2 adsorption on the Pt sites</p>
+                            </div>
                         </div>
                     </div>
 
+                    <!-- Electrochemical parameters -->
                     <div class="form-section">
-                        <label>Flow Type:</label>
-                        <div style="margin: 10px 0;">
-                            <label><input type="radio" name="type_flow" value="counter_flow" checked> Counter Flow</label>
-                            <label style="margin-left: 20px;"><input type="radio" name="type_flow" value="co_flow"> Co-flow</label>
+                        <div class="section-title">Electrochemical parameters</div>
+                        <div class="form-grid">
+                            <div class="form-group" id="group-Re">
+                                <label for="Re">R<sub>e</sub> (μΩ·m²)</label>
+                                <input type="number" id="Re" min="0.001" step="0.001">
+                                <p class="help-text">Electron conduction resistance of the circuit</p>
+                            </div>
+                            <div class="form-group" id="group-i0_c_ref">
+                                <label for="i0_c_ref">i<sub>0,c,ref</sub> (A/m²)</label>
+                                <input type="number" id="i0_c_ref" min="0" step="0.1">
+                                <p class="help-text">Reference exchange current density at the cathode</p>
+                            </div>
+                            <div class="form-group" id="group-kappa_co">
+                                <label for="kappa_co">κ<sub>co</sub> (mol·m⁻¹·s⁻¹·Pa⁻¹)</label>
+                                <input type="number" id="kappa_co" min="0" step="0.01">
+                                <p class="help-text">Crossover correction coefficient</p>
+                            </div>
+                            <div class="form-group" id="group-kappa_c">
+                                <label for="kappa_c">κ<sub>c</sub></label>
+                                <input type="number" id="kappa_c" min="0" step="0.001">
+                                <p class="help-text">Overpotential correction exponent</p>
+                            </div>
+                            <div class="form-group" id="group-C_scl">
+                                <label for="C_scl">C<sub>scl</sub> (MF/m³)</label>
+                                <input type="number" id="C_scl" min="0" step="1">
+                                <p class="help-text">Volumetric space-charge layer capacitance</p>
+                            </div>
                         </div>
                     </div>
 
+                    <!-- Manifold geometric parameters -->
                     <div class="form-section">
-                        <label>Purge Mode:</label>
-                        <div style="margin: 10px 0;">
-                            <label><input type="radio" name="type_purge" value="no_purge" checked> No Purge</label>
-                            <label style="margin-left: 20px;"><input type="radio" name="type_purge" value="periodic_purge"> Periodic</label>
-                            <label style="margin-left: 20px;"><input type="radio" name="type_purge" value="constant_purge"> Constant</label>
+                        <div class="section-title">Manifold geometric parameters</div>
+                        <div class="form-grid">
+                            <div class="form-group" id="group-A_T_a">
+                                <label for="A_T_a">A<sub>T,a</sub> (cm²)</label>
+                                <input type="number" id="A_T_a" min="0.1" step="0.1">
+                                <p class="help-text">Inlet/exhaust anode manifold throttle area</p>
+                            </div>
+                            <div class="form-group" id="group-A_T_c">
+                                <label for="A_T_c">A<sub>T,c</sub> (cm²)</label>
+                                <input type="number" id="A_T_c" min="0.1" step="0.1">
+                                <p class="help-text">Inlet/exhaust cathode manifold throttle area</p>
+                            </div>
+                            <div class="form-group" id="group-Vasm">
+                                <label for="Vasm">V<sub>asm</sub> (cm³)</label>
+                                <input type="number" id="Vasm" min="1" step="0.1">
+                                <p class="help-text">Supply manifold volume at the anode</p>
+                            </div>
+                            <div class="form-group" id="group-Vcsm">
+                                <label for="Vcsm">V<sub>csm</sub> (cm³)</label>
+                                <input type="number" id="Vcsm" min="1" step="0.1">
+                                <p class="help-text">Supply manifold volume at the cathode</p>
+                            </div>
+                            <div class="form-group" id="group-Vaem">
+                                <label for="Vaem">V<sub>aem</sub> (cm³)</label>
+                                <input type="number" id="Vaem" min="1" step="0.1">
+                                <p class="help-text">Exhaust manifold volume at the anode</p>
+                            </div>
+                            <div class="form-group" id="group-Vcem">
+                                <label for="Vcem">V<sub>cem</sub> (cm³)</label>
+                                <input type="number" id="Vcem" min="1" step="0.1">
+                                <p class="help-text">Exhaust manifold volume at the cathode</p>
+                            </div>
+                            <div class="form-group" id="group-Ldist">
+                                <label for="Ldist">L<sub>dist</sub> (mm)</label>
+                                <input type="number" id="Ldist" min="1" step="0.1">
+                                <p class="help-text">Length of the distributor</p>
+                            </div>
+                            <div class="form-group" id="group-Lm">
+                                <label for="Lm">L<sub>m</sub> (mm)</label>
+                                <input type="number" id="Lm" min="1" step="0.1">
+                                <p class="help-text">Length of the manifold</p>
+                            </div>
                         </div>
                     </div>
 
@@ -559,125 +740,66 @@
                     </div>
                 </div>
 
-                <!-- TAB 3: Physical Parameters -->
+                <!-- TAB 3: Operating Conditions (New Tab) -->
                 <div class="tab-content">
-                    <h3>Physical Parameters</h3>
+                    <h3>Operating Conditions</h3>
 
-                    <!-- Operating Conditions -->
-                    <div class="form-section">
-                        <div class="section-title">Operating Conditions</div>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="T_fc">Temperature (°C)</label>
-                                <input type="number" id="T_fc" value="60" min="-273.15" max="200" step="0.1">
-                                <p class="help-text">Cell temperature</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="Pa">Anode Pressure (bar)</label>
-                                <input type="number" id="Pa" value="1.5" min="0" max="10" step="0.01">
-                                <p class="help-text">Anode inlet pressure</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="Pc">Cathode Pressure (bar)</label>
-                                <input type="number" id="Pc" value="1.5" min="0" max="10" step="0.01">
-                                <p class="help-text">Cathode inlet pressure</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="Sa">Anode Stoichiometry</label>
-                                <input type="number" id="Sa" value="2.0" min="1" max="10" step="0.1">
-                                <p class="help-text">H₂ stoichiometry ratio</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="Sc">Cathode Stoichiometry</label>
-                                <input type="number" id="Sc" value="2.0" min="1" max="10" step="0.1">
-                                <p class="help-text">O₂ stoichiometry ratio</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="Phi_a">Anode Humidity</label>
-                                <input type="number" id="Phi_a" value="0.6" min="0" max="1" step="0.01">
-                                <p class="help-text">Relative humidity (0-1)</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="Phi_c">Cathode Humidity</label>
-                                <input type="number" id="Phi_c" value="0.6" min="0" max="1" step="0.01">
-                                <p class="help-text">Relative humidity (0-1)</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="y_H2_in">H₂ Inlet Ratio</label>
-                                <input type="number" id="y_H2_in" value="0.95" min="0" max="1" step="0.01">
-                                <p class="help-text">H₂ mole fraction in inlet</p>
-                            </div>
+                    <div id="experimental-presets-section" class="form-section" style="display: none; background: #f0f7ff; padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #0066cc;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="operating_conditions_preset">Experimental Data Presets</label>
+                            <select id="operating_conditions_preset" onchange="applyOperatingConditionsPreset()">
+                                <option value="none">-- Select experimental conditions (Optional) --</option>
+                            </select>
+                            <p class="help-text" style="color: #0066cc;">Select a preset to match experimental data from the manufacturer</p>
                         </div>
                     </div>
 
-                    <!-- Accessible Parameters -->
-                    <div class="form-section">
-                        <div class="section-title">Accessible Parameters</div>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="Aact">Active Area (cm²)</label>
-                                <input type="number" id="Aact" value="100" min="1" step="10">
-                                <p class="help-text">Fuel cell active area</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="nb_cell">Number of Cells</label>
-                                <input type="number" id="nb_cell" value="1" min="1" step="1">
-                                <p class="help-text">Cells in series</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="Vasm">Supply Anode Manifold (cm³)</label>
-                                <input type="number" id="Vasm" value="100" min="1" step="10">
-                            </div>
-                            <div class="form-group">
-                                <label for="Vcsm">Supply Cathode Manifold (cm³)</label>
-                                <input type="number" id="Vcsm" value="100" min="1" step="10">
-                            </div>
-                            <div class="form-group">
-                                <label for="Vaem">Exhaust Anode Manifold (cm³)</label>
-                                <input type="number" id="Vaem" value="100" min="1" step="10">
-                            </div>
-                            <div class="form-group">
-                                <label for="Vcem">Exhaust Cathode Manifold (cm³)</label>
-                                <input type="number" id="Vcem" value="100" min="1" step="10">
-                            </div>
-                        </div>
+                    <div id="modification-warning" class="alert alert-warning" style="display: none;">
+                        <strong>⚠️ Warning :</strong> The operating conditions have been modified manually. The experimental data will not be displayed during the simulation.
                     </div>
 
-                    <!-- Undetermined Parameters -->
-                    <div class="form-section">
-                        <div class="section-title">Undetermined Parameters (Model Calibration)</div>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="epsilon_gdl">GDL Porosity</label>
-                                <input type="number" id="epsilon_gdl" value="0.7" min="0" max="1" step="0.01">
-                            </div>
-                            <div class="form-group">
-                                <label for="epsilon_mpl">MPL Porosity</label>
-                                <input type="number" id="epsilon_mpl" value="0.5" min="0" max="1" step="0.01">
-                            </div>
-                            <div class="form-group">
-                                <label for="epsilon_c">Compression Ratio</label>
-                                <input type="number" id="epsilon_c" value="0.2" min="0" max="1" step="0.01">
-                            </div>
-                            <div class="form-group">
-                                <label for="K_O2_ad_Pt">O₂ Adsorption Coefficient</label>
-                                <input type="number" id="K_O2_ad_Pt" value="2.0" min="0" step="0.1">
-                            </div>
-                            <div class="form-group">
-                                <label for="Re">Electron Resistance (Ω.mm²)</label>
-                                <input type="number" id="Re" value="1.0" min="0" step="0.1">
-                            </div>
-                            <div class="form-group">
-                                <label for="i0_c_ref">Exchange Current (A/m²)</label>
-                                <input type="number" id="i0_c_ref" value="1.0" min="0" step="0.1">
-                            </div>
-                            <div class="form-group">
-                                <label for="C_scl">Double Layer Capacitance (F/cm³)</label>
-                                <input type="number" id="C_scl" value="20.0" min="0" step="1">
-                            </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="T_fc">Temperature (°C)</label>
+                            <input type="number" id="T_fc" min="-273.15" max="200" step="0.1" oninput="checkOCModification()">
+                            <p class="help-text">Cell temperature</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="Pa">Anode Pressure (bar)</label>
+                            <input type="number" id="Pa" min="0" max="10" step="0.01" oninput="checkOCModification()">
+                            <p class="help-text">Anode inlet pressure</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="Pc">Cathode Pressure (bar)</label>
+                            <input type="number" id="Pc" min="0" max="10" step="0.01" oninput="checkOCModification()">
+                            <p class="help-text">Cathode inlet pressure</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="Sa">Anode Stoichiometry</label>
+                            <input type="number" id="Sa" min="1" max="10" step="0.1" oninput="checkOCModification()">
+                            <p class="help-text">H₂ stoichiometry ratio</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="Sc">Cathode Stoichiometry</label>
+                            <input type="number" id="Sc" min="1" max="10" step="0.1" oninput="checkOCModification()">
+                            <p class="help-text">O₂ stoichiometry ratio</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="Phi_a">Anode Humidity</label>
+                            <input type="number" id="Phi_a" min="0" max="1" step="0.01" oninput="checkOCModification()">
+                            <p class="help-text">Relative humidity (0-1)</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="Phi_c">Cathode Humidity</label>
+                            <input type="number" id="Phi_c" min="0" max="1" step="0.01" oninput="checkOCModification()">
+                            <p class="help-text">Relative humidity (0-1)</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="y_H2_in">H₂ Inlet Ratio</label>
+                            <input type="number" id="y_H2_in" min="0" max="1" step="0.01" oninput="checkOCModification()">
+                            <p class="help-text">H₂ mole fraction in inlet</p>
                         </div>
                     </div>
-
                     <div class="nav-buttons">
                         <button class="btn-nav" onclick="switchTab(1)">← Previous</button>
                         <button class="btn-nav" onclick="switchTab(3)">Next →</button>
@@ -713,6 +835,11 @@
                             <input type="number" id="atol" value="1e-6" step="1e-9">
                             <p class="help-text">Solver atol</p>
                         </div>
+                        <div class="form-group">
+                            <label for="maxiters">Max Iterations</label>
+                            <input type="number" id="maxiters" value="10000" min="1" step="1000">
+                            <p class="help-text">Maximum number of solver iterations</p>
+                        </div>
                     </div>
                     <div class="nav-buttons">
                         <button class="btn-nav" onclick="switchTab(2)">← Previous</button>
@@ -720,7 +847,49 @@
                     </div>
                 </div>
 
-                <!-- TAB 5: Run Simulation -->
+                <!-- TAB 5: Model Configuration -->
+                <div class="tab-content">
+                    <h3>Model Configuration</h3>
+                    <div class="form-section">
+                        <label class="section-title">Voltage Zone:</label>
+                        <div class="input-row">
+                            <label><input type="radio" name="voltage_zone" value="before_voltage_drop" checked> Before Voltage Drop</label>
+                            <label style="margin-left: 20px;"><input type="radio" name="voltage_zone" value="full"> Full</label>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <label class="section-title">Auxiliaries:</label>
+                        <div class="input-row">
+                            <label><input type="radio" name="type_auxiliary" value="no_auxiliary" checked> No Auxiliary</label>
+                            <label style="margin-left: 20px;"><input type="radio" name="type_auxiliary" value="forced_convective_cathode_with_anodic_recirculation"> Cathode + Anodic Recirculation</label>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <label class="section-title">Flow Type:</label>
+                        <div class="input-row">
+                            <label><input type="radio" name="type_flow" value="counter_flow" checked> Counter Flow</label>
+                            <label style="margin-left: 20px;"><input type="radio" name="type_flow" value="co_flow"> Co-flow</label>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <label class="section-title">Purge Mode:</label>
+                        <div class="input-row">
+                            <label><input type="radio" name="type_purge" value="no_purge" checked> No Purge</label>
+                            <label style="margin-left: 20px;"><input type="radio" name="type_purge" value="periodic_purge"> Periodic</label>
+                            <label style="margin-left: 20px;"><input type="radio" name="type_purge" value="constant_purge"> Constant</label>
+                        </div>
+                    </div>
+
+                    <div class="nav-buttons">
+                        <button class="btn-nav" onclick="switchTab(3)">← Previous</button>
+                        <button class="btn-nav" onclick="switchTab(5)">Next →</button>
+                    </div>
+                </div>
+
+                <!-- TAB 6: Run Simulation (New position) -->
                 <div class="tab-content">
                     <h3>Launch Simulation</h3>
                     <p style="margin-bottom: 30px; color: #666; font-size: 16px;">
@@ -866,7 +1035,7 @@
                     </div>
 
                     <div class="nav-buttons">
-                        <button class="btn-nav" onclick="switchTab(3)">← Previous</button>
+                        <button class="btn-nav" onclick="switchTab(4)">← Previous</button>
                         <button class="btn-nav" disabled>Next →</button>
                     </div>
                 </div>
@@ -885,138 +1054,528 @@
     <script>
         // ===== TAB MANAGEMENT =====
 
+        // Default metadata for SI <-> UI conversion (synced with SimulatorBackend.jl)
+        let globalParamMetadata = {
+            'Aact': { factor: 1e4, unit: 'cm²', precision: 1 },
+            'Hacl': { factor: 1e6, unit: 'μm', precision: 1 },
+            'Hccl': { factor: 1e6, unit: 'μm', precision: 1 },
+            'Hmem': { factor: 1e6, unit: 'μm', precision: 1 },
+            'Hgdl': { factor: 1e6, unit: 'μm', precision: 1 },
+            'Hmpl': { factor: 1e6, unit: 'μm', precision: 1 },
+            'Hagc': { factor: 1e6, unit: 'μm', precision: 1 },
+            'Hcgc': { factor: 1e6, unit: 'μm', precision: 1 },
+            'Wagc': { factor: 1e6, unit: 'μm', precision: 1 },
+            'Wcgc': { factor: 1e6, unit: 'μm', precision: 1 },
+            'Lgc':  { factor: 1e3, unit: 'mm', precision: 1 },
+            'Ldist': { factor: 1e3, unit: 'mm', precision: 1 },
+            'Lm':   { factor: 1e3, unit: 'mm', precision: 1 },
+            'A_T_a': { factor: 1e4, unit: 'cm²', precision: 1 },
+            'A_T_c': { factor: 1e4, unit: 'cm²', precision: 1 },
+            'Vasm': { factor: 1e6, unit: 'cm³', precision: 1 },
+            'Vcsm': { factor: 1e6, unit: 'cm³', precision: 1 },
+            'Vaem': { factor: 1e6, unit: 'cm³', precision: 1 },
+            'Vcem': { factor: 1e6, unit: 'cm³', precision: 1 },
+            'Re':   { factor: 1e6, unit: 'μΩ·m²', precision: 3 },
+            'epsilon_gdl': { factor: 1.0, unit: '', precision: 3 },
+            'K_O2_ad_Pt': { factor: 1.0, unit: '', precision: 3 },
+            'kappa_c': { factor: 1.0, unit: '', precision: 3 },
+            'i0_c_ref': { factor: 1.0, unit: 'A/m²', precision: 1 },
+            'kappa_co': { factor: 1.0, unit: 'mol·m⁻¹·s⁻¹·Pa⁻¹', precision: 2 },
+            'C_scl': { factor: 1e-6, unit: 'MF/m³', precision: 0 }
+        };
+
         let tabStates = [
             { name: 'Fuel Cell', complete: false },
-            { name: 'Model Config', complete: false },
             { name: 'Physical Params', complete: false },
+            { name: 'Operating Conditions', complete: false },
             { name: 'Numerical', complete: false },
+            { name: 'Model Config', complete: false },
             { name: 'Run', complete: false }
         ];
 
         let currentSimulationType = null;  // Track selected simulation type
+        let lastSelectedPresetValues = null; // Store preset values to detect manual changes
 
         function switchTab(tabIndex) {
-            const tabs = document.querySelectorAll('.tab-content');
-            const buttons = document.querySelectorAll('.tab-button');
+            try {
+                const tabs = document.querySelectorAll('.tab-content');
+                const buttons = document.querySelectorAll('.tab-button');
 
-            // Validate current tab before switching
-            if (!validateCurrentTab()) {
-                showError('Please correct errors in current tab before proceeding');
-                return;
+                if (tabIndex < 0 || tabIndex >= tabs.length) return;
+
+                // Validate current tab before switching
+                if (!validateCurrentTab()) {
+                    showError('Please correct errors in current tab before proceeding');
+                    return;
+                }
+
+                // Switch classes
+                tabs.forEach((tab, idx) => {
+                    tab.classList.toggle('active', idx === tabIndex);
+                });
+
+                buttons.forEach((btn, idx) => {
+                    btn.classList.toggle('active', idx === tabIndex);
+                });
+
+                // Scroll to top of content
+                const activeTab = tabs[tabIndex];
+                if (activeTab) {
+                    activeTab.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+
+                // Show/hide preset warning based on tab and config type
+                const configTypeEl = document.querySelector('input[name="config_type"]:checked');
+                const configType = configTypeEl ? configTypeEl.value : 'pre_selected';
+                const presetWarning = document.getElementById('preset-warning');
+                
+                if (presetWarning) {
+                    if (tabIndex === 1 && configType === 'pre_selected') { // Physical Params tab
+                        presetWarning.style.display = 'block';
+                    } else {
+                        presetWarning.style.display = 'none';
+                    }
+                }
+
+                // Show/hide experimental presets section in Tab 3 (index 2)
+                if (tabIndex === 2) {
+                    const expSection = document.getElementById('experimental-presets-section');
+                    if (expSection) {
+                        expSection.style.display = (configType === 'pre_selected') ? 'block' : 'none';
+                    }
+                }
+            } catch (e) {
+                console.error('Error switching tab:', e);
+                // Last resort fallback
+                const tabs = document.querySelectorAll('.tab-content');
+                const buttons = document.querySelectorAll('.tab-button');
+                if (tabs[tabIndex]) {
+                    tabs.forEach((t, i) => t.classList.toggle('active', i === tabIndex));
+                    buttons.forEach((b, i) => b.classList.toggle('active', i === tabIndex));
+                }
             }
-
-            tabs.forEach((tab, idx) => {
-                tab.classList.toggle('active', idx === tabIndex);
-            });
-
-            buttons.forEach((btn, idx) => {
-                btn.classList.toggle('active', idx === tabIndex);
-            });
-
-            // Scroll to top of content
-            document.querySelector('.tab-content.active').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         // Validate current active tab
         function validateCurrentTab() {
-            const fuel_cell = document.getElementById('fuel_cell_type').value;
-            const nb_gc = document.getElementById('nb_gc').value;
+            try {
+                const tabs = document.querySelectorAll('.tab-content');
+                let activeIndex = -1;
+                tabs.forEach((tab, i) => {
+                    if (tab.classList.contains('active')) activeIndex = i;
+                });
 
-            if (!fuel_cell || !nb_gc) return false;
-            return true;
+                if (activeIndex === -1) return true;
+
+                const configTypeEl = document.querySelector('input[name="config_type"]:checked');
+                const configType = configTypeEl ? configTypeEl.value : 'pre_selected';
+                
+                // Tab 0: Fuel Cell Selection
+                if (activeIndex === 0) {
+                    const fuelCellTypeEl = document.querySelector('input[name="fuel_cell_type"]:checked');
+                    const fuel_cell = fuelCellTypeEl ? fuelCellTypeEl.value : '';
+                    
+                    if (configType === 'pre_selected' && !fuel_cell) {
+                        return false;
+                    }
+                    updateTabStatus(0, true);
+                    return true;
+                }
+
+                // Tab 3 (Numerical): Check nb_gc
+                if (activeIndex === 3) {
+                    const nbGcEl = document.getElementById('nb_gc');
+                    const nb_gc = nbGcEl ? nbGcEl.value : '';
+                    if (!nb_gc) return false;
+                }
+
+                return true;
+            } catch (e) {
+                console.error('Validation error:', e);
+                return true; // Don't block navigation on validation crash
+            }
         }
 
         // Update tab status indicators
         function updateTabStatus(tabIndex, complete) {
-            tabStates[tabIndex].complete = complete;
-            const button = document.querySelectorAll('.tab-button')[tabIndex];
-            const status = button.querySelector('.tab-status') || document.createElement('span');
-            status.className = 'tab-status ' + (complete ? 'complete' : 'incomplete');
-            if (!button.querySelector('.tab-status')) {
-                button.insertBefore(status, button.firstChild);
+            try {
+                if (!tabStates[tabIndex]) return;
+                tabStates[tabIndex].complete = complete;
+                
+                const buttons = document.querySelectorAll('.tab-button');
+                const button = buttons[tabIndex];
+                if (!button) return;
+
+                let status = button.querySelector('.tab-status');
+                if (!status) {
+                    status = document.createElement('span');
+                    button.insertBefore(status, button.firstChild);
+                }
+                status.className = 'tab-status ' + (complete ? 'complete' : 'incomplete');
+            } catch (e) {
+                console.error('Error updating tab status:', e);
             }
         }
 
         // ===== FUEL CELL SELECTION =====
 
-        function updateFuelCellDefaults() {
-            const fuelCellType = document.getElementById('fuel_cell_type').value;
+        function toggleFuelCellSelection() {
+            try {
+                const configTypeEl = document.querySelector('input[name="config_type"]:checked');
+                const configType = configTypeEl ? configTypeEl.value : 'pre_selected';
+                const preSelectedSection = document.getElementById('pre-selected-section');
+                const customSection = document.getElementById('custom-section');
+                const fuelCellTypeEl = document.querySelector('input[name="fuel_cell_type"]:checked');
+
+                if (configType === 'pre_selected') {
+                    if (preSelectedSection) preSelectedSection.style.display = 'block';
+                    if (customSection) customSection.style.display = 'none';
+                    if (fuelCellTypeEl && fuelCellTypeEl.value) {
+                        updateFuelCellDefaults();
+                    } else {
+                        updateTabStatus(0, false);
+                        updateUndeterminedHighlighting(null);
+                    }
+                } else {
+                    if (preSelectedSection) preSelectedSection.style.display = 'none';
+                    if (customSection) customSection.style.display = 'block';
+                    updateTabStatus(0, true);
+                    updateUndeterminedHighlighting('custom');
+                }
+                // Hide preset warning if switching to custom
+                const presetWarning = document.getElementById('preset-warning');
+                if (presetWarning) presetWarning.style.display = 'none';
+            } catch (e) {
+                console.error('Error toggling fuel cell selection:', e);
+            }
+        }
+
+        function updateUndeterminedHighlighting(fuelCellType) {
+            const legend = document.getElementById('undetermined-legend');
+            if (!legend) return;
+
             if (!fuelCellType) {
-                clearPresetValues();
+                legend.style.display = 'none';
+                document.querySelectorAll('.form-group').forEach(el => el.classList.remove('undetermined-param'));
                 return;
             }
 
-            fetch(`/api/fuel_cell_defaults/${fuelCellType}`)
+            // Define undetermined parameters for each type
+            const undeterminedMap = {
+                'ZSW_GenStack': ['Hacl', 'Hccl', 'Hmem', 'Hgdl', 'Hmpl', 'epsilon_gdl', 'Re', 'i0_c_ref', 'kappa_co', 'kappa_c', 'K_O2_ad_Pt'],
+                'EH31_2022': ['Hacl', 'Hccl', 'Hmem', 'epsilon_gdl', 'e', 'Re', 'i0_c_ref', 'kappa_co', 'kappa_c', 'K_O2_ad_Pt'],
+                'custom': ['Hacl', 'Hccl', 'Hmem', 'Hgdl', 'Hmpl', 'epsilon_gdl', 'epsilon_mpl', 'epsilon_c', 'Re', 'i0_c_ref', 'kappa_co', 'kappa_c', 'K_O2_ad_Pt']
+            };
+
+            const undeterminedList = undeterminedMap[fuelCellType] || undeterminedMap['custom'];
+            
+            // Show legend
+            legend.style.display = 'block';
+
+            // Remove all highlights first
+            document.querySelectorAll('.form-group').forEach(el => el.classList.remove('undetermined-param'));
+
+            // Apply highlights
+            undeterminedList.forEach(paramId => {
+                const group = document.getElementById('group-' + paramId);
+                if (group) group.classList.add('undetermined-param');
+            });
+        }
+
+        function updateFuelCellDefaults() {
+            try {
+                const fuelCellTypeEl = document.querySelector('input[name="fuel_cell_type"]:checked');
+                const fuelCellType = fuelCellTypeEl ? fuelCellTypeEl.value : '';
+                if (!fuelCellType) {
+                    updateTabStatus(0, false);
+                    const expSection = document.getElementById('experimental-presets-section');
+                    if (expSection) expSection.style.display = 'none';
+                    return;
+                }
+
+                // Update the experimental presets list
+                updateExperimentalPresetsList(fuelCellType);
+
+                fetch(`/api/fuel_cell_defaults/${fuelCellType}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (!data || data.error) {
+                            throw new Error((data && data.error) ? data.error : 'Invalid defaults payload');
+                        }
+
+                        const oc = data.operating_conditions || {};
+                        const ap = data.accessible_parameters || {};
+                        const up = data.undetermined_parameters || {};
+                        const cp = data.computing_parameters || {};
+                        const mc = data.model_config || {};
+                        const meta = data.param_metadata || {};
+                        globalParamMetadata = meta;
+
+                        // Helper for safe setting
+                        const setVal = (id, val) => {
+                            const el = document.getElementById(id);
+                            if (el) el.value = val ?? '';
+                        };
+
+                        // Helper for parameter conversion and population
+                        const populateParams = (params) => {
+                            for (const [key, value] of Object.entries(params)) {
+                                const m = meta[key];
+                                if (m) {
+                                    const prec = m.precision !== undefined ? m.precision : (m.factor >= 1e6 ? 3 : 2);
+                                    setVal(key, (value * m.factor).toFixed(prec));
+                                } else {
+                                    setVal(key, value);
+                                }
+                            }
+                        };
+
+                        // Populate Physical Parameters
+                        populateParams(ap);
+                        populateParams(up);
+
+                        updateUndeterminedHighlighting(fuelCellType);
+
+                        // Populate Operating Conditions
+                        setVal('T_fc', oc.T_fc);
+                        setVal('Pa', oc.Pa);
+                        setVal('Pc', oc.Pc);
+                        setVal('Sa', oc.Sa);
+                        setVal('Sc', oc.Sc);
+                        setVal('Phi_a', oc.Phi_a);
+                        setVal('Phi_c', oc.Phi_c);
+                        setVal('y_H2_in', oc.y_H2_in);
+
+                        // Reset preset selection and warning
+                        const presetEl = document.getElementById('operating_conditions_preset');
+                        if (presetEl) presetEl.value = 'none';
+                        lastSelectedPresetValues = { ...oc };
+                        if (typeof checkOCModification === 'function') checkOCModification();
+
+                        // Populate Numerical Parameters
+                        setVal('nb_gc', cp.nb_gc);
+                        setVal('nb_gdl', cp.nb_gdl);
+                        setVal('nb_mpl', cp.nb_mpl);
+                        setVal('rtol', cp.rtol);
+                        setVal('atol', cp.atol);
+                        setVal('maxiters', cp.maxiters);
+
+                        // Populate Model Configuration
+                        if (mc) {
+                            ['voltage_zone', 'type_auxiliary', 'type_flow', 'type_purge'].forEach(name => {
+                                const val = mc[name];
+                                if (val) {
+                                    const radio = document.querySelector(`input[name="${name}"][value="${val}"]`);
+                                    if (radio) radio.checked = true;
+                                }
+                            });
+                        }
+
+                        updateTabStatus(0, true);
+                    })
+                    .catch(e => {
+                        showError('Failed to load fuel cell defaults: ' + e.message);
+                        updateTabStatus(0, false);
+                    });
+            } catch (err) {
+                console.error('Error in updateFuelCellDefaults:', err);
+            }
+        }
+
+        function updateExperimentalPresetsList(fuelCellType) {
+            const presetSelect = document.getElementById('operating_conditions_preset');
+            const expSection = document.getElementById('experimental-presets-section');
+            
+            // Clear current options (except first)
+            while (presetSelect.options.length > 1) {
+                presetSelect.remove(1);
+            }
+
+            if (fuelCellType === 'ZSW_GenStack') {
+                const presets = [
+                    { value: 'ZSW_GenStack', label: 'Nominal' },
+                    { value: 'ZSW_GenStack_Pa_1_61_Pc_1_41', label: 'P<sub>a,des</sub> = 1.61, P<sub>c,des</sub> = 1.41' },
+                    { value: 'ZSW_GenStack_Pa_2_01_Pc_1_81', label: 'P<sub>a,des</sub> = 2.01, P<sub>c,des</sub> = 1.81' },
+                    { value: 'ZSW_GenStack_Pa_2_4_Pc_2_2', label: 'P<sub>a,des</sub> = 2.4, P<sub>c,des</sub> = 2.2' },
+                    { value: 'ZSW_GenStack_Pa_2_8_Pc_2_6', label: 'P<sub>a,des</sub> = 2.8, P<sub>c,des</sub> = 2.6' },
+                    { value: 'ZSW_GenStack_T_62', label: 'T = 62°C' },
+                    { value: 'ZSW_GenStack_T_76', label: 'T = 76°C' },
+                    { value: 'ZSW_GenStack_T_84', label: 'T = 84°C' }
+                ];
+                presets.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.value;
+                    opt.innerHTML = p.label;
+                    presetSelect.add(opt);
+                });
+                expSection.style.display = 'block';
+            } else if (fuelCellType === 'EH31_2022') {
+                const presets = [
+                    { value: 'EH_31_1_5', label: 'P = 1.5 bar' },
+                    { value: 'EH_31_2_0', label: 'P = 2.0 bar' },
+                    { value: 'EH_31_2_25', label: 'P = 2.25 bar' },
+                    { value: 'EH_31_2_5', label: 'P = 2.5 bar' }
+                ];
+                presets.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.value;
+                    opt.innerHTML = p.label;
+                    presetSelect.add(opt);
+                });
+                expSection.style.display = 'block';
+            } else {
+                expSection.style.display = 'none';
+            }
+        }
+
+        function applyOperatingConditionsPreset() {
+            const preset = document.getElementById('operating_conditions_preset').value;
+            if (preset === 'none') {
+                checkOCModification();
+                return;
+            }
+
+            fetch(`/api/fuel_cell_defaults/${preset}`)
                 .then(r => r.json())
                 .then(data => {
-                    showPresetValues(fuelCellType);
-                    updateTabStatus(0, true);
-                    showInfo(`Fuel cell "${fuelCellType}" loaded with defaults`);
-                })
-                .catch(e => {
-                    showError('Failed to load fuel cell defaults: ' + e.message);
-                    updateTabStatus(0, false);
+                    if (data && data.operating_conditions) {
+                        const oc = data.operating_conditions;
+                        document.getElementById('T_fc').value = oc.T_fc ?? '';
+                        document.getElementById('Pa').value = oc.Pa ?? '';
+                        document.getElementById('Pc').value = oc.Pc ?? '';
+                        document.getElementById('Sa').value = oc.Sa ?? '';
+                        document.getElementById('Sc').value = oc.Sc ?? '';
+                        document.getElementById('Phi_a').value = oc.Phi_a ?? '';
+                        document.getElementById('Phi_c').value = oc.Phi_c ?? '';
+                        document.getElementById('y_H2_in').value = oc.y_H2_in ?? '';
+                        
+                        lastSelectedPresetValues = { ...oc };
+                        checkOCModification();
+                    }
                 });
         }
 
-        function showPresetValues(fuelCellName) {
-            const presetDiv = document.getElementById('preset-info') ||
-                document.querySelector('.form-grid').appendChild(document.createElement('div'));
-            presetDiv.id = 'preset-info';
-            presetDiv.className = 'preset-values';
-            presetDiv.innerHTML = `
-                <strong>✓ Presets Loaded:</strong> ${fuelCellName}<br>
-                <small>Numerical defaults applied</small>
-            `;
+        function checkOCModification() {
+            const preset = document.getElementById('operating_conditions_preset').value;
+            const warning = document.getElementById('modification-warning');
+
+            if (preset === 'none' || !lastSelectedPresetValues) {
+                warning.style.display = 'none';
+                return;
+            }
+
+            const currentValues = {
+                T_fc: parseFloat(document.getElementById('T_fc').value),
+                Pa: parseFloat(document.getElementById('Pa').value),
+                Pc: parseFloat(document.getElementById('Pc').value),
+                Sa: parseFloat(document.getElementById('Sa').value),
+                Sc: parseFloat(document.getElementById('Sc').value),
+                Phi_a: parseFloat(document.getElementById('Phi_a').value),
+                Phi_c: parseFloat(document.getElementById('Phi_c').value),
+                y_H2_in: parseFloat(document.getElementById('y_H2_in').value),
+            };
+
+            let modified = false;
+            for (const key in lastSelectedPresetValues) {
+                // Use a small epsilon for float comparison
+                if (Math.abs(currentValues[key] - lastSelectedPresetValues[key]) > 1e-6) {
+                    modified = true;
+                    break;
+                }
+            }
+
+            warning.style.display = modified ? 'block' : 'none';
         }
 
-        function clearPresetValues() {
-            const presetDiv = document.getElementById('preset-info');
-            if (presetDiv) presetDiv.remove();
-        }
 
         // ===== FORM DATA COLLECTION =====
 
-        function collectFormData() {
-            return {
-                fuel_cell_type: document.getElementById('fuel_cell_type').value,
-                voltage_zone: document.querySelector('input[name="voltage_zone"]:checked').value,
-                type_auxiliary: document.querySelector('input[name="type_auxiliary"]:checked').value,
-                type_flow: document.querySelector('input[name="type_flow"]:checked').value,
-                type_purge: document.querySelector('input[name="type_purge"]:checked').value,
-                operating_conditions: {
-                    T_fc: parseFloat(document.getElementById('T_fc').value),
-                    Pa: parseFloat(document.getElementById('Pa').value),
-                    Pc: parseFloat(document.getElementById('Pc').value),
-                    Sa: parseFloat(document.getElementById('Sa').value),
-                    Sc: parseFloat(document.getElementById('Sc').value),
-                    Phi_a: parseFloat(document.getElementById('Phi_a').value),
-                    Phi_c: parseFloat(document.getElementById('Phi_c').value),
-                    y_H2_in: parseFloat(document.getElementById('y_H2_in').value),
-                },
-                accessible_parameters: {
-                    Aact: parseFloat(document.getElementById('Aact').value),
-                    nb_cell: parseInt(document.getElementById('nb_cell').value),
-                    Vasm: parseFloat(document.getElementById('Vasm').value),
-                    Vcsm: parseFloat(document.getElementById('Vcsm').value),
-                    Vaem: parseFloat(document.getElementById('Vaem').value),
-                    Vcem: parseFloat(document.getElementById('Vcem').value),
-                },
-                undetermined_parameters: {
-                    epsilon_gdl: parseFloat(document.getElementById('epsilon_gdl').value),
-                    epsilon_mpl: parseFloat(document.getElementById('epsilon_mpl').value),
-                    epsilon_c: parseFloat(document.getElementById('epsilon_c').value),
-                    K_O2_ad_Pt: parseFloat(document.getElementById('K_O2_ad_Pt').value),
-                    Re: parseFloat(document.getElementById('Re').value),
-                    i0_c_ref: parseFloat(document.getElementById('i0_c_ref').value),
-                    C_scl: parseFloat(document.getElementById('C_scl').value),
-                },
-                computing_parameters: {
-                    nb_gc: parseInt(document.getElementById('nb_gc').value),
-                    nb_gdl: parseInt(document.getElementById('nb_gdl').value),
-                    nb_mpl: parseInt(document.getElementById('nb_mpl').value),
+         function collectFormData() {
+             const fuelCellTypeEl = document.querySelector('input[name="fuel_cell_type"]:checked');
+             const fuelCellType = fuelCellTypeEl ? fuelCellTypeEl.value : '';
+             const presetValue = document.getElementById('operating_conditions_preset').value;
+             const isModified = document.getElementById('modification-warning').style.display === 'block';
+            
+             // If modified, use the base type (ZSW_GenStack or EH31_2022) to avoid showing exp data.
+             // If NOT modified and a preset is selected, use that preset symbol.
+             let finalFuelCellType = fuelCellType;
+             if (!isModified && presetValue && presetValue !== 'none') {
+                 finalFuelCellType = presetValue;
+             }
+
+             const getVal = (id) => {
+                 const el = document.getElementById(id);
+                 if (!el) return 0;
+                 const val = parseFloat(el.value);
+                 const meta = globalParamMetadata[id];
+                 return meta ? val / meta.factor : val;
+             };
+
+             return {
+                 config_type: document.querySelector('input[name="config_type"]:checked').value,
+                 fuel_cell_type: finalFuelCellType,
+                 voltage_zone: document.querySelector('input[name="voltage_zone"]:checked').value,
+                 type_auxiliary: document.querySelector('input[name="type_auxiliary"]:checked').value,
+                 type_flow: document.querySelector('input[name="type_flow"]:checked').value,
+                 type_purge: document.querySelector('input[name="type_purge"]:checked').value,
+                 operating_conditions: {
+                     T_fc: parseFloat(document.getElementById('T_fc').value),
+                     Pa: parseFloat(document.getElementById('Pa').value),
+                     Pc: parseFloat(document.getElementById('Pc').value),
+                     Sa: parseFloat(document.getElementById('Sa').value),
+                     Sc: parseFloat(document.getElementById('Sc').value),
+                     Phi_a: parseFloat(document.getElementById('Phi_a').value),
+                     Phi_c: parseFloat(document.getElementById('Phi_c').value),
+                     y_H2_in: parseFloat(document.getElementById('y_H2_in').value),
+                 },
+                 accessible_parameters: {
+                     Aact: getVal('Aact'),
+                     nb_cell: parseInt(document.getElementById('nb_cell').value),
+                     Hagc: getVal('Hagc'),
+                     Hcgc: getVal('Hcgc'),
+                     Wagc: getVal('Wagc'),
+                     Wcgc: getVal('Wcgc'),
+                     Lgc: getVal('Lgc'),
+                     nb_channel_in_gc: parseInt(document.getElementById('nb_channel_in_gc').value),
+                     Ldist: getVal('Ldist'),
+                     Lm: getVal('Lm'),
+                     A_T_a: getVal('A_T_a'),
+                     A_T_c: getVal('A_T_c'),
+                     Vasm: getVal('Vasm'),
+                     Vcsm: getVal('Vcsm'),
+                     Vaem: getVal('Vaem'),
+                     Vcem: getVal('Vcem'),
+                 },
+                 undetermined_parameters: {
+                     Hgdl: getVal('Hgdl'),
+                     Hmpl: getVal('Hmpl'),
+                     Hacl: getVal('Hacl'),
+                     Hccl: getVal('Hccl'),
+                     Hmem: getVal('Hmem'),
+                     epsilon_gdl: getVal('epsilon_gdl'),
+                     epsilon_mpl: getVal('epsilon_mpl'),
+                     epsilon_c: getVal('epsilon_c'),
+                     e: getVal('e'),
+                     K_O2_ad_Pt: getVal('K_O2_ad_Pt'),
+                     Re: getVal('Re'),
+                     i0_c_ref: getVal('i0_c_ref'),
+                     kappa_co: getVal('kappa_co'),
+                     kappa_c: getVal('kappa_c'),
+                     C_scl: getVal('C_scl'),
+                 },
+	                model_config: {
+	                    voltage_zone: document.querySelector('input[name="voltage_zone"]:checked').value,
+	                    type_auxiliary: document.querySelector('input[name="type_auxiliary"]:checked').value,
+	                    type_flow: document.querySelector('input[name="type_flow"]:checked').value,
+	                    type_purge: document.querySelector('input[name="type_purge"]:checked').value,
+	                },
+	                computing_parameters: {
+	                    nb_gc: parseInt(document.getElementById('nb_gc').value),
+	                    nb_gdl: parseInt(document.getElementById('nb_gdl').value),
+	                    nb_mpl: parseInt(document.getElementById('nb_mpl').value),
                     rtol: parseFloat(document.getElementById('rtol').value),
                     atol: parseFloat(document.getElementById('atol').value),
+                    maxiters: parseInt(document.getElementById('maxiters').value),
                 },
                 step_parameters: {
                     delta_t_ini: parseFloat(document.getElementById('step_delta_t_ini').value),
@@ -1048,7 +1607,7 @@
         function validateParameters(params) {
             const errors = [];
 
-            if (!params.fuel_cell_type)
+            if (params.config_type === 'pre_selected' && !params.fuel_cell_type)
                 errors.push('Please select a fuel cell');
 
             if (!params.computing_parameters.nb_gc || params.computing_parameters.nb_gc < 1)
@@ -1144,7 +1703,7 @@
             }
 
             showProgress();
-            updateTabStatus(4, false); // Mark as running
+            updateTabStatus(5, false); // Mark as running
 
             const endpoint = `/api/simulate/${simType}`;
 
@@ -1161,20 +1720,20 @@
             .then(({ status, data }) => {
                 hideProgress();
                 if (status === 200 && data.success) {
-                    updateTabStatus(4, true);
+                    updateTabStatus(5, true);
                     showSuccess(`✓ ${simType} simulation completed!\nRedirecting to results...`);
                     setTimeout(() => {
                         window.location.href = `/results/${data.result_id}`;
                     }, 2000);
                 } else {
-                    updateTabStatus(4, false);
+                    updateTabStatus(5, false);
                     const errorMsg = data.error || 'Unknown error';
                     showError('Simulation failed:\n' + (Array.isArray(errorMsg) ? errorMsg.join('\n') : errorMsg));
                 }
             })
             .catch(e => {
                 hideProgress();
-                updateTabStatus(4, false);
+                updateTabStatus(5, false);
                 console.error('Fetch error:', e);
                 showError('API error:\n' + e.message);
             });
@@ -1268,8 +1827,16 @@
                     }
                 }
             });
+
+            // Initial call to set the correct state for fuel cell selection
+            toggleFuelCellSelection();
+            
+            // If pre-selected is active (default), load the defaults for the checked fuel cell
+            const fuelCellTypeEl = document.querySelector('input[name="fuel_cell_type"]:checked');
+            if (fuelCellTypeEl && fuelCellTypeEl.value) {
+                updateFuelCellDefaults();
+            }
         });
     </script>
 </body>
 </html>
-

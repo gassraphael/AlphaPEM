@@ -67,7 +67,6 @@ function zsw_physical_params()::PhysicalParams
         Vcem = 25.8e-3 * 22.61e-4,           # Exhaust manifold volume at the cathode in m³
         # Interaction parameters between fluids and PEMFC structure
         e = 3,                               # Capillary exponent
-        gamma_sorp_l = 0.5,                  # Sorption rate of liquid water in the membrane
         K_O2_ad_Pt = 7.346634385810734,      # Interfacial resistance coefficient of O2 adsorption on the Pt sites
         # Voltage polarization
         Re = 1.545654084145453e-7,           # Electron conduction resistance of the circuit in Ω·m²
@@ -80,16 +79,7 @@ end
 
 
 function zsw_operating_conditions(type_fuel_cell::Symbol)::OperatingConditions
-    if type_fuel_cell == :ZSW_GenStack
-        T_des                   = 68.0 + 273.15  # K.  It is the desired fuel cell temperature.
-        Pa_des                  = 2.2e5          # Pa. It is the desired pressures of the fuel gas at the anode.
-        Pc_des                  = 2.0e5          # Pa. It is the desired pressures of the fuel gas at the cathode.
-        Sa                      = 1.6            # It is the stoichiometric ratio of hydrogen at the anode.
-        Sc                      = 1.6            # It is the stoichiometric ratio of oxygen at the cathode.
-        Phi_a_des               = 0.398          # It is the desired relative humidity at the anode.
-        Phi_c_des               = 0.50           # It is the desired relative humidity at the cathode.
-        y_H2_in                 = 0.7            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-    elseif type_fuel_cell == :ZSW_GenStack_Pa_1_61_Pc_1_41
+    if type_fuel_cell == :ZSW_GenStack_Pa_1_61_Pc_1_41
         T_des                   = 68.0 + 273.15  # K.  It is the desired fuel cell temperature.
         Pa_des                  = 1.61e5         # Pa. It is the desired pressures of the fuel gas at the anode.
         Pc_des                  = 1.41e5         # Pa. It is the desired pressures of the fuel gas at the cathode.
@@ -152,8 +142,15 @@ function zsw_operating_conditions(type_fuel_cell::Symbol)::OperatingConditions
         Phi_a_des               = 0.398          # It is the desired relative humidity at the anode.
         Phi_c_des               = 0.50           # It is the desired relative humidity at the cathode.
         y_H2_in                 = 0.7            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
-    else
-        error("Unknown type_fuel_cell: $type_fuel_cell")
+    else # type_fuel_cell == :ZSW_GenStack - nominal conditions
+        T_des                   = 68.0 + 273.15  # K.  It is the desired fuel cell temperature.
+        Pa_des                  = 2.2e5          # Pa. It is the desired pressures of the fuel gas at the anode.
+        Pc_des                  = 2.0e5          # Pa. It is the desired pressures of the fuel gas at the cathode.
+        Sa                      = 1.6            # It is the stoichiometric ratio of hydrogen at the anode.
+        Sc                      = 1.6            # It is the stoichiometric ratio of oxygen at the cathode.
+        Phi_a_des               = 0.398          # It is the desired relative humidity at the anode.
+        Phi_c_des               = 0.50           # It is the desired relative humidity at the cathode.
+        y_H2_in                 = 0.7            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
     end
 
     return OperatingConditions(T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in)
@@ -270,7 +267,8 @@ function zsw_pola_exp_data(type_fuel_cell::Symbol, voltage_zone::Symbol)::PolaEx
             throw(ArgumentError("The voltage_zone should be either :full or :before_voltage_drop."))
         end
     else
-        error("Unknown type_fuel_cell: $type_fuel_cell")
+        # Return empty experimental data for custom/unknown types
+        return PolaExperimentalData(i_exp = Float64[], U_exp = Float64[])
     end
 
     return PolaExperimentalData(i_exp = i_exp_pola .* 1e4, U_exp = U_exp_pola)
@@ -373,7 +371,8 @@ function zsw_pola_exp_data_calibration(type_fuel_cell::Symbol, voltage_zone::Sym
             throw(ArgumentError("The voltage_zone should be either :full or :before_voltage_drop."))
         end
     else
-        throw(ArgumentError("Unknown type_fuel_cell: $type_fuel_cell"))
+        # Return empty experimental data for custom/unknown types
+        return PolaExperimentalData(i_exp = Float64[], U_exp = Float64[])
     end
 
     return PolaExperimentalData(i_exp = i_exp_cali .* 1e4, U_exp = U_exp_cali)

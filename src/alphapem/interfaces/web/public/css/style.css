@@ -425,10 +425,15 @@ textarea {
    ======================================== */
 
 .alert {
-    padding: var(--spacing-md);
+    padding: 6px 12px;
     border-radius: var(--radius-md);
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
     border-left: 4px solid;
+    font-size: 13px;
+}
+
+.alert p {
+    margin: 0;
 }
 
 .alert-success {
