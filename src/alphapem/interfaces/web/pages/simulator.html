@@ -497,6 +497,70 @@
             color: #004085;
             line-height: 1.4;
         }
+
+        /* Model Type Indicator Styles */
+        .model-type-container {
+            grid-column: 1 / -1;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+        }
+
+        .model-type-title {
+            font-size: 13px;
+            color: #6c757d;
+            margin-bottom: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .model-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-size: 22px;
+            font-weight: 800;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 5px;
+        }
+
+        .model-badge-1d {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            color: #0d47a1;
+            border: 2px solid #1976d2;
+        }
+
+        .model-badge-1d1d {
+            background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+            color: #4a148c;
+            border: 2px solid #7b1fa2;
+            transform: scale(1.05);
+        }
+
+        .model-description {
+            margin-top: 15px;
+            font-size: 15px;
+            color: #495057;
+            max-width: 600px;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        .model-description b {
+            color: #212529;
+            font-weight: 700;
+        }
     </style>
 </head>
 <body>
@@ -825,10 +889,21 @@
                 <!-- TAB 4: Numerical Parameters -->
                 <div class="tab-content">
                     <h3>Numerical Parameters</h3>
+
+                    <div class="model-type-container">
+                        <div class="model-type-title">Simulation Model</div>
+                        <div id="model-type-badge" class="model-badge model-badge-1d">
+                            Pure 1D Model
+                        </div>
+                        <div id="model-type-desc" class="model-description">
+                            Classic one-dimensional simulation across the cell thickness.
+                        </div>
+                    </div>
+
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="nb_gc">n<sub>gc</sub></label>
-                            <input type="number" id="nb_gc" value="1" min="1" max="100">
+                            <input type="number" id="nb_gc" value="1" min="1" max="100" oninput="updateModelType()">
                             <p class="help-text">Number of gas channel nodes</p>
                         </div>
                         <div class="form-group">
@@ -1068,7 +1143,8 @@
                     <!-- Progress Indicator -->
                     <div id="progress-indicator" class="progress-indicator">
                         <div class="spinner"></div>
-                        <p>Running simulation... This may take a few seconds.</p>
+                        <p>Running simulation... <span id="simulation-timer">0s</span></p>
+                        <p class="help-text">Please wait, this may take a few seconds.</p>
                     </div>
 
                     <div class="nav-buttons">
@@ -1144,6 +1220,7 @@
         let currentSimulationType = null;  // Track selected simulation type
         let lastSelectedPresetValues = null; // Store preset values to detect manual changes
         let defaultsLoaded = false; // Flag to track if fuel cell defaults have been loaded
+        let simulationTimerInterval = null; // Interval for the simulation timer
 
         function switchTab(tabIndex) {
             try {
@@ -1429,6 +1506,9 @@
                         setVal('nb_gc', cp.nb_gc);
                         setVal('nb_gdl', cp.nb_gdl);
                         setVal('nb_mpl', cp.nb_mpl);
+                        
+                        // Update model type indicator
+                        if (typeof updateModelType === 'function') updateModelType();
                         
                         // Use scientific notation for numerical tolerances and iterations
                         const formatExp = (v) => (v !== undefined && v !== null) ? v.toExponential().replace('e+', 'e') : '';
@@ -1804,6 +1884,18 @@
                 return;
             }
 
+            // Start timer
+            const timerEl = document.getElementById('simulation-timer');
+            if (timerEl) timerEl.textContent = '0s';
+            let startTime = Date.now();
+            if (simulationTimerInterval) clearInterval(simulationTimerInterval);
+            simulationTimerInterval = setInterval(() => {
+                if (timerEl) {
+                    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                    timerEl.textContent = elapsed + 's';
+                }
+            }, 1000);
+
             showProgress();
             updateTabStatus(5, false); // Mark as running
 
@@ -1893,6 +1985,10 @@
 
         function hideProgress() {
             document.getElementById('progress-indicator').style.display = 'none';
+            if (simulationTimerInterval) {
+                clearInterval(simulationTimerInterval);
+                simulationTimerInterval = null;
+            }
         }
 
         // ===== INPUT VALIDATION ON CHANGE =====
@@ -1905,6 +2001,23 @@
                     // Basic validation feedback could be added here
                 });
             });
+
+            // Check if we are loading from a previous result
+            const urlParams = new URLSearchParams(window.location.search);
+            const fromResult = urlParams.get('from_result');
+
+            if (fromResult) {
+                loadParamsFromResult(fromResult);
+            } else {
+                // Initial call to set the correct state for fuel cell selection
+                toggleFuelCellSelection();
+                
+                // If pre-selected is active (default), load the defaults for the checked fuel cell
+                const fuelCellTypeEl = document.querySelector('input[name="fuel_cell_type"]:checked');
+                if (fuelCellTypeEl && fuelCellTypeEl.value) {
+                    updateFuelCellDefaults();
+                }
+            }
 
             // Tab switching with keyboard (optional)
             document.addEventListener('keydown', function(e) {
@@ -1930,15 +2043,152 @@
                 }
             });
 
-            // Initial call to set the correct state for fuel cell selection
-            toggleFuelCellSelection();
-            
-            // If pre-selected is active (default), load the defaults for the checked fuel cell
-            const fuelCellTypeEl = document.querySelector('input[name="fuel_cell_type"]:checked');
-            if (fuelCellTypeEl && fuelCellTypeEl.value) {
-                updateFuelCellDefaults();
-            }
+            // Initial model type update
+            if (typeof updateModelType === 'function') updateModelType();
         });
+
+        function loadParamsFromResult(resultId) {
+            showProgress();
+            fetch(`/api/results/${resultId}`)
+                .then(r => r.json())
+                .then(data => {
+                    hideProgress();
+                    if (data && data.input_params) {
+                        applyInputParams(data.input_params, data.simulation_type);
+                        showInfo("Parameters loaded from previous run.");
+                    } else {
+                        showError("Could not find parameters for this result.");
+                        toggleFuelCellSelection();
+                        const fuelCellTypeEl = document.querySelector('input[name="fuel_cell_type"]:checked');
+                        if (fuelCellTypeEl && fuelCellTypeEl.value) updateFuelCellDefaults();
+                    }
+                })
+                .catch(e => {
+                    hideProgress();
+                    console.error('Failed to load previous parameters:', e);
+                    showError('Failed to load previous parameters: ' + e.message);
+                    toggleFuelCellSelection();
+                    const fuelCellTypeEl = document.querySelector('input[name="fuel_cell_type"]:checked');
+                    if (fuelCellTypeEl && fuelCellTypeEl.value) updateFuelCellDefaults();
+                });
+        }
+
+        function applyInputParams(params, simType) {
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.value = val ?? '';
+            };
+
+            const populateUIParams = (p, prefix = '') => {
+                if (!p) return;
+                for (const [key, value] of Object.entries(p)) {
+                    const m = globalParamMetadata[key];
+                    const id = prefix ? prefix + '_' + key : key;
+                    if (m) {
+                        const prec = m.precision !== undefined ? m.precision : (m.factor >= 1e6 ? 3 : 2);
+                        setVal(id, (value * m.factor).toFixed(prec));
+                    } else {
+                        setVal(id, value);
+                    }
+                }
+            };
+
+            // 1. Fuel Cell & Config
+            if (params.config_type) {
+                const radio = document.querySelector(`input[name="config_type"][value="${params.config_type}"]`);
+                if (radio) radio.checked = true;
+            }
+
+            let baseFuelCellType = params.fuel_cell_type;
+            if (baseFuelCellType && baseFuelCellType.startsWith('custom_')) {
+                baseFuelCellType = baseFuelCellType.replace('custom_', '');
+            } else if (baseFuelCellType === 'default') {
+                // Keep default or try to find which one it was
+            }
+
+            if (baseFuelCellType) {
+                const radio = document.querySelector(`input[name="fuel_cell_type"][value="${baseFuelCellType}"]`);
+                if (radio) radio.checked = true;
+            }
+
+            toggleFuelCellSelection();
+
+            ['voltage_zone', 'type_auxiliary', 'type_flow', 'type_purge'].forEach(name => {
+                const val = params[name] || (params.model_config ? params.model_config[name] : null);
+                if (val) {
+                    const radio = document.querySelector(`input[name="${name}"][value="${val}"]`);
+                    if (radio) radio.checked = true;
+                }
+            });
+
+            // 2. Parameters
+            populateUIParams(params.accessible_parameters);
+            populateUIParams(params.undetermined_parameters);
+            populateUIParams(params.computing_parameters);
+            
+            if (params.operating_conditions) {
+                const oc = params.operating_conditions;
+                setVal('T_fc', oc.T_fc);
+                setVal('Pa', oc.Pa);
+                setVal('Pc', oc.Pc);
+                setVal('Sa', oc.Sa);
+                setVal('Sc', oc.Sc);
+                setVal('Phi_a', oc.Phi_a);
+                setVal('Phi_c', oc.Phi_c);
+                setVal('y_H2_in', oc.y_H2_in);
+            }
+
+            // 3. Simulation specific
+            populateUIParams(params.step_parameters, 'step');
+            populateUIParams(params.polarization_parameters, 'pola');
+            
+            const ep = params.eis_parameters;
+            if (ep) {
+                const m = globalParamMetadata;
+                if (ep.i_static !== undefined) setVal('eis_i_static', (ep.i_static * m.i_EIS.factor).toFixed(m.i_EIS.precision));
+                if (ep.ratio !== undefined) setVal('eis_ratio', (ep.ratio * 100).toFixed(1));
+                setVal('eis_f_power_min', ep.f_power_min);
+                setVal('eis_f_power_max', ep.f_power_max);
+                setVal('eis_nb_frequencies', ep.nb_frequencies);
+                setVal('eis_nb_points', ep.nb_points);
+            }
+
+            // Select simulation type
+            if (simType) {
+                selectSimulationType(simType);
+            }
+
+            defaultsLoaded = true;
+            if (typeof updateModelType === 'function') updateModelType();
+
+            // Navigate directly to the Run tab so the user can launch immediately
+            updateTabStatus(0, true);
+            switchTab(5);
+        }
+
+        function updateModelType() {
+            const nb_gc_el = document.getElementById('nb_gc');
+            if (!nb_gc_el) return;
+            
+            const n_gc = parseInt(nb_gc_el.value) || 1;
+            const badge = document.getElementById('model-type-badge');
+            const desc = document.getElementById('model-type-desc');
+            const container = document.querySelector('.model-type-container');
+            
+            if (!badge || !desc || !container) return;
+            
+            if (n_gc === 1) {
+                badge.textContent = "Pure 1D Model";
+                badge.className = "model-badge model-badge-1d";
+                desc.innerHTML = "One-dimensional simulation across the cell thickness (<b>n<sub>gc</sub> = 1</b>). Ideal for rapid local analysis of the membrane-electrode assembly performance.";
+                container.style.borderColor = "#1976d2";
+            } else {
+                badge.textContent = "1D + 1D Model";
+                badge.className = "model-badge model-badge-1d1d";
+                desc.innerHTML = "Pseudo-2D model accounting for variations along the gas channels (<b>n<sub>gc</sub> = " + n_gc + "</b>). Necessary for simulating current density and temperature gradients across the active area.";
+                container.style.borderColor = "#7b1fa2";
+            }
+        }
     </script>
 </body>
 </html>

@@ -38,6 +38,7 @@ Stipple = "4acbeb90-81a0-11ea-1966-bdaff8155998"
 StippleUI = "a3c5d34a-b254-4859-a8fa-b86abb7e84a3"
 Sundials = "c3572dad-4567-51f8-b174-8c6c989267f4"
 YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
+XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
 
 [compat]
 CSV = "0.10.16"
@@ -72,3 +73,4 @@ Stipple = "0.31"
 StippleUI = "0.24"
 Sundials = "5"
 YAML = "0.4.16"
+XLSX = "0.11.10"

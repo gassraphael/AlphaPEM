@@ -3,54 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AlphaPEM - Simulation Results</title>
+    <title>AlphaPEM - Simulation results</title>
     <link rel="stylesheet" href="/css/style.css">
     <style>
         .results-container {
             background: white;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin: 15px 0;
         }
 
         .result-header {
-            border-bottom: 3px solid #0066cc;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .result-header h2 {
             color: #0066cc;
-            margin: 0 0 10px 0;
+            margin: 0;
+            font-size: 22px;
         }
 
         .result-meta {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+            width: 100%;
         }
 
         .meta-item {
             background: #f9f9f9;
-            padding: 15px;
+            padding: 10px 12px;
             border-radius: 6px;
-            border-left: 4px solid #0066cc;
+            border-left: 3px solid #0066cc;
         }
 
         .meta-label {
-            font-size: 12px;
-            color: #999;
+            font-size: 10px;
+            color: #777;
             text-transform: uppercase;
             font-weight: 600;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
         }
 
         .meta-value {
-            font-size: 18px;
+            font-size: 14px;
             font-weight: 700;
-            color: #0066cc;
+            color: #333;
+        }
+
+        .results-main-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        @media (max-width: 1100px) {
+            .results-main-layout {
+                grid-template-columns: 1fr;
+            }
         }
 
         .result-section {
@@ -164,8 +184,8 @@
         }
 
         .data-table td {
-            padding: 12px;
-            border-bottom: 1px solid #e6e6e6;
+            padding: 8px 10px;
+            border-bottom: 1px solid #f0f0f0;
         }
 
         .data-table tr:hover {
@@ -198,11 +218,8 @@
 
         .action-buttons {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
-            margin-top: 30px;
-            padding-top: 30px;
-            border-top: 2px solid #e6e6e6;
         }
 
         .btn-secondary {
@@ -245,6 +262,34 @@
             height: 50px;
             animation: spin 1s linear infinite;
             margin: 20px auto;
+        }
+
+        .spinner-small {
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-top: 2px solid #0066cc;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0066cc;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin: 10px auto;
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
         }
 
         @keyframes spin {
@@ -296,118 +341,82 @@
             </div>
 
             <div id="results-content" style="display: none;">
-                <!-- Result Header -->
+                <!-- Result Summary & Actions -->
                 <div class="results-container">
                     <div class="result-header">
                         <h2 id="result-title">Simulation Results</h2>
-                        <div class="result-meta">
-                            <div class="meta-item">
-                                <div class="meta-label">Status</div>
-                                <div class="meta-value"><span id="result-status" class="status-badge status-success">Completed</span></div>
+                        <div class="action-buttons">
+                            <a href="#" class="btn btn-secondary" onclick="editSimulation(); return false;" title="Relaunch with same stack">
+                                🔄 New simulation with same stack
+                            </a>
+                            <a href="/simulator" class="btn btn-secondary">
+                                ➕ New simulation with different stack
+                            </a>
+                            <a href="/" class="btn btn-secondary">
+                                🏠 Home
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="result-meta">
+                        <div class="meta-item">
+                            <div class="meta-label">Status</div>
+                            <div class="meta-value"><span id="result-status" class="status-badge status-success">Completed</span></div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Type</div>
+                            <div class="meta-value" id="result-type">Step Current</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Duration</div>
+                            <div class="meta-value" id="result-duration">--</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Result ID</div>
+                            <div class="meta-value" style="font-size: 11px;" id="result-id">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="results-main-layout">
+                    <!-- Left Column: Export & Actions -->
+                    <div class="left-column">
+                        <div class="results-container">
+                            <div class="section-header">📥 Download</div>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <button class="export-format" style="margin:0; width: 100%; text-align: left;" onclick="downloadResults('pdf', this)">
+                                    📄 Figure (PDF)
+                                </button>
+                                <button class="export-format" style="margin:0; width: 100%; text-align: left;" onclick="downloadResults('xlsx', this)">
+                                    📊 Data (XLSX)
+                                </button>
                             </div>
-                            <div class="meta-item">
-                                <div class="meta-label">Type</div>
-                                <div class="meta-value" id="result-type">Step Current</div>
-                            </div>
-                            <div class="meta-item">
-                                <div class="meta-label">Duration</div>
-                                <div class="meta-value" id="result-duration">--</div>
-                            </div>
-                            <div class="meta-item">
-                                <div class="meta-label">Result ID</div>
-                                <div class="meta-value" style="font-size: 12px;" id="result-id">--</div>
-                            </div>
+                            <p style="font-size: 11px; color: #666; margin-top: 10px;">
+                                💡 PDF: current plot.<br>
+                                💡 XLSX: all data.
+                            </p>
                         </div>
                     </div>
 
-                    <div class="info-box">
-                        <strong>ℹ️ Results Ready:</strong> Your simulation has completed successfully.
-                        View the interactive plots below to explore your results with full zoom and pan controls.
+                    <!-- Right Column: Interactive Plot -->
+                    <div class="right-column">
+                        <div class="results-container" style="min-height: 700px;">
+                            <div class="section-header">📈 Graphical Results</div>
+
+                            <div id="plots-container" class="plots-grid"></div>
+
+                            <div id="plot-loading" class="plot-loading">
+                                <div style="text-align: center;">
+                                    <div class="spinner"></div>
+                                    <p>Loading interactive plot...</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Plots Section -->
-                <div class="results-container">
-                    <div class="section-header">📊 Interactive Simulation Results (Powered by WGLMakie)</div>
-
-                    <div class="info-box">
-                        <strong>ℹ️ Interactive Controls:</strong> Use your mouse to zoom (scroll), pan (drag), and interact with the plots.
-                        You can explore the full range of values including areas outside the initial viewport. Select the plot you want to inspect from the list below.
-                    </div>
-
-                    <div id="plots-container" class="plots-grid"></div>
-
-                    <div id="plot-loading" class="plot-loading">
-                        Loading plots...
-                    </div>
-                </div>
-
-                <!-- Data Export Section -->
-                <div class="results-container">
-                    <div class="section-header">Download Results</div>
-
-                    <p>Export your simulation data in various formats:</p>
-
-                    <div style="margin: 20px 0;">
-                        <button class="export-format" onclick="downloadResults('csv')">
-                            📊 CSV (Data)
-                        </button>
-                        <button class="export-format" onclick="downloadResults('json')">
-                            📄 JSON (Full)
-                        </button>
-                        <button class="export-format" onclick="downloadResults('xlsx')">
-                            📑 XLSX (Spreadsheet)
-                        </button>
-                    </div>
-
-                    <div class="comparison-note">
-                        💡 <strong>Tip:</strong> Use CSV for data analysis, JSON for archival, or XLSX for Excel.
-                    </div>
-                </div>
-
-                <!-- Data Analytics Section -->
-                <div class="results-container">
-                    <div class="section-header">📊 Data Analytics</div>
-
-                    <div id="analytics-content">
-                        <table class="data-table" style="width: 100%;">
-                            <thead>
-                                <tr>
-                                    <th>Time (s)</th>
-                                    <th>Voltage (V)</th>
-                                    <th>Current (A/m²)</th>
-                                    <th>Power (W)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="data-table-body">
-                                <tr>
-                                    <td colspan="4" style="text-align: center; color: #999;">Simulation data will appear here...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div style="margin: 20px 0; text-align: center;">
-                        <button onclick="downloadTable('csv')" class="btn btn-secondary" style="margin: 5px;">
-                            📊 Download Table (CSV)
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="results-container">
-                    <div class="action-buttons">
-                        <a href="/simulator" class="btn btn-primary">
-                            ➕ New Simulation
-                        </a>
-                        <a href="/" class="btn btn-secondary">
-                            🏠 Home
-                        </a>
-                        <button class="btn btn-secondary" onclick="window.print()">
-                            🖨️ Print
-                        </button>
-                    </div>
-                </div>
+                <!-- Re-inserting script hooks if needed, but the main content above replaces multiple sections -->
+                <div id="extra-sections-placeholder"></div>
             </div>
         </main>
 
@@ -426,6 +435,14 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadResults();
             setInterval(checkStatus, 3000);
+
+            // Keep-alive: ping the server every 30 seconds to prevent HTTP session timeout
+            setInterval(() => {
+                fetch('/api/fuel_cells')
+                    .then(() => { /* keep alive */ })
+                    .catch(e => console.warn('Keep-alive ping failed', e));
+            }, 30000); // 30 seconds
+
         });
 
         // ===== LOAD RESULTS =====
@@ -443,14 +460,15 @@
 
                     // Display WGLMakie-generated interactive plots if available.
                     displayInteractivePlots(data.plots || []);
-
-                    // Populate data table.
-                    populateDataTable();
                 })
                 .catch(e => {
                     console.error('Failed to load results:', e);
                     showResultError('Failed to load results: ' + e.message);
                 });
+        }
+
+        function editSimulation() {
+            window.location.href = `/simulator?from_result=${resultId}`;
         }
 
         // ===== INTERACTIVE PLOT DISPLAY (WGLMakie) =====
@@ -501,69 +519,111 @@
             });
         }
 
-        function renderPlotInPanel(panel, plot) {
+        // The plot files are static HTML pages embedding a base64-encoded PNG
+        // image (no WebSocket, no Bonito session). Switching plots is therefore
+        // just a matter of changing the iframe's `src`. We reuse a single iframe
+        // per panel to avoid any race condition / leftover state from a previous
+        // load — which was the root cause of the "infinite spinner" bug after a
+        // short idle period.
+
+        function renderPlotInPanel(panel, plot, plotIndex) {
             const title = panel.querySelector('.plot-title');
-            const oldFrame = panel.querySelector('.plot-frame');
             const plotContainer = panel.querySelector('.plot-container');
             const viewport = panel.querySelector('.plot-viewport');
+            const selector = panel.querySelector('.plot-selector');
 
             if (title) {
                 title.textContent = plot.title;
             }
-            if (!oldFrame || !plotContainer || !viewport) return;
+            if (!plotContainer || !viewport) return;
 
-            // Display a local loading state while replacing the iframe.
-            const loading = document.createElement('div');
-            loading.className = 'plot-loading';
-            loading.style.height = '120px';
-            loading.textContent = 'Loading plot...';
-            plotContainer.appendChild(loading);
+            // Always reset loading state at the start: any previous in-flight
+            // load is now irrelevant because we are about to start a new one.
+            plotIsLoading = true;
+            if (selector) selector.disabled = true;
 
-            // Force teardown of the previous WGL/WebGL context before loading another plot.
-            oldFrame.src = 'about:blank';
-            oldFrame.remove();
+            // Show (or create) the loading overlay.
+            let loading = plotContainer.querySelector('.plot-loading-active');
+            if (!loading) {
+                loading = document.createElement('div');
+                loading.className = 'plot-loading-active';
+                loading.style.position = 'absolute';
+                loading.style.top = '0';
+                loading.style.left = '0';
+                loading.style.width = '100%';
+                loading.style.height = '100%';
+                loading.style.zIndex = '150';
+                loading.style.display = 'flex';
+                loading.style.flexDirection = 'column';
+                loading.style.justifyContent = 'center';
+                loading.style.alignItems = 'center';
+                loading.style.background = 'rgba(249, 249, 249, 0.9)';
+                loading.style.borderRadius = '8px';
+                loading.innerHTML = '<div class="spinner-large" style="width:40px; height:40px; border-width:4px;"></div><p style="margin-top:15px; color:#0066cc; font-weight:600;">Chargement du graphique...</p>';
+                plotContainer.appendChild(loading);
+            } else {
+                loading.style.display = 'flex';
+            }
 
-            window.setTimeout(function() {
-                const frame = document.createElement('iframe');
+            // Reuse the existing iframe if any, otherwise create one.
+            let frame = viewport.querySelector('iframe.plot-frame');
+            if (!frame) {
+                frame = document.createElement('iframe');
                 frame.className = 'plot-frame';
-                frame.setAttribute('sandbox', 'allow-same-origin allow-scripts');
-                frame.dataset.ready = '0';
-                frame.src = `${plot.url}${plot.url.includes('?') ? '&' : '?'}_ts=${Date.now()}`;
-                frame.onload = function() {
-                    loading.remove();
-                    window.setTimeout(function() {
-                        frame.dataset.ready = '1';
-                    }, 250);
-                };
-                frame.onerror = function() {
-                    loading.remove();
-                    const message = document.createElement('p');
-                    message.style.color = '#999';
-                    message.style.fontStyle = 'italic';
-                    message.textContent = 'Failed to load plot.';
-                    plotContainer.appendChild(message);
-                };
-                viewport.insertBefore(frame, viewport.firstChild);
-            }, 80);
+                viewport.appendChild(frame);
+            }
+
+            // Replace handlers each time so that stale closures from a previous
+            // load can never re-enable / re-disable the selector unexpectedly.
+            const finish = function() {
+                if (loadTimeout) clearTimeout(loadTimeout);
+                if (loading && loading.parentElement) loading.remove();
+                if (selector) selector.disabled = false;
+                plotIsLoading = false;
+            };
+
+            frame.onload = finish;
+            frame.onerror = function() {
+                finish();
+                console.warn('Plot iframe failed to load:', plot.url);
+            };
+
+            // Safety timer: don't leave the spinner spinning forever if onload
+            // never fires for any reason.
+            const loadTimeout = setTimeout(() => {
+                console.warn('Plot load timeout reached for', plot.url);
+                finish();
+            }, 30000);
+
+            // Force a real navigation even if src would be identical (cache-bust
+            // with a timestamp) — this guarantees `onload` will fire.
+            const url = new URL(plot.url, window.location.origin);
+            url.searchParams.set('_v', Date.now());
+            frame.src = url.toString();
         }
+
+        let globalPlots = [];
+        let globalPanel = null;
+        let currentPlotIndex = 0;
+        let plotIsLoading = false; // true while an iframe is being (re)loaded
 
         function displayInteractivePlots(plotEntries) {
             const container = document.getElementById('plots-container');
             const loading   = document.getElementById('plot-loading');
-            const plots     = normalizePlotEntries(plotEntries);
+            globalPlots     = normalizePlotEntries(plotEntries);
 
             container.innerHTML = '';
 
-            if (!plots || plots.length === 0) {
+            if (!globalPlots || globalPlots.length === 0) {
                 loading.style.display = 'flex';
                 loading.textContent = 'No plots available for this simulation.';
                 return;
             }
 
             loading.style.display = 'none';
-            const panel = document.createElement('div');
-            panel.className = 'plot-panel';
-            panel.innerHTML = `
+            globalPanel = document.createElement('div');
+            globalPanel.className = 'plot-panel';
+            globalPanel.innerHTML = `
                 <div class="plot-selector-field">
                     <label class="plot-selector-label">Available plots</label>
                     <select class="plot-selector"></select>
@@ -571,50 +631,25 @@
                 <div class="plot-container">
                     <div class="plot-title"></div>
                     <div class="plot-viewport">
-                        <iframe class="plot-frame" sandbox="allow-same-origin allow-scripts"></iframe>
                     </div>
                 </div>
             `;
 
-            const selector = panel.querySelector('.plot-selector');
-            buildPlotOptions(selector, plots);
+            const selector = globalPanel.querySelector('.plot-selector');
+            buildPlotOptions(selector, globalPlots);
 
-            selector.value = '0';
-            renderPlotInPanel(panel, plots[0]);
+            currentPlotIndex = 0;
+            renderPlotInPanel(globalPanel, globalPlots[0], 0);
 
             selector.addEventListener('change', function(event) {
-                const selectedPlot = plots[Number(event.target.value)] || plots[0];
-                renderPlotInPanel(panel, selectedPlot);
+                currentPlotIndex = Number(event.target.value);
+                const selectedPlot = globalPlots[currentPlotIndex] || globalPlots[0];
+                renderPlotInPanel(globalPanel, selectedPlot, currentPlotIndex);
             });
 
-            container.appendChild(panel);
+            container.appendChild(globalPanel);
         }
 
-        function populateDataTable() {
-            const tbody = document.getElementById('data-table-body');
-            if (!tbody) return;
-
-            tbody.innerHTML = ''; // Clear placeholder
-
-            if (!currentResultData.time || currentResultData.time.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">No data available</td></tr>';
-                return;
-            }
-
-            const len = currentResultData.time.length;
-            const step = Math.max(1, Math.floor(len / 50)); // Show max 50 rows
-
-            for (let i = 0; i < len; i += step) {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${(currentResultData.time[i] || i).toFixed(4)}</td>
-                    <td>${(currentResultData.voltage ? currentResultData.voltage[i] : 'N/A').toFixed(4)}</td>
-                    <td>${(currentResultData.current ? currentResultData.current[i] : 'N/A').toFixed(4)}</td>
-                    <td>${(currentResultData.power ? currentResultData.power[i] : 'N/A').toFixed(4)}</td>
-                `;
-                tbody.appendChild(row);
-            }
-        }
 
         // ===== HELPER FUNCTIONS =====
 
@@ -624,7 +659,7 @@
                 .then(data => {
                     if (data.status === 'completed') {
                         document.getElementById('result-duration').textContent =
-                            (data.elapsed_time || 0).toFixed(2) + ' seconds';
+                            (data.elapsed_time || 0).toFixed(2) + ' s';
                     }
                 })
                 .catch(e => console.error('Status check failed:', e));
@@ -652,25 +687,65 @@
             statusSpan.className = 'status-badge status-' + data.status;
         }
 
-        function downloadResults(format) {
-            const endpoint = `/api/download/${resultId}?format=${format}`;
+        function downloadResults(format, btn) {
+            let endpoint = `/api/download/${resultId}?format=${format}`;
+            
+            // Add loading indicator to button if provided
+            let originalContent = '';
+            if (btn) {
+                originalContent = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = `<span class="spinner-small"></span> ` + originalContent;
+            }
+
+            if (format === 'pdf') {
+                const selector = document.querySelector('.plot-selector');
+                if (selector) {
+                    endpoint += `&index=${selector.value}`;
+                }
+            }
 
             fetch(endpoint)
                 .then(r => {
                     if (!r.ok) throw new Error('Download failed');
-                    return r.blob();
+                    
+                    // Try to get filename from Content-Disposition header
+                    const disposition = r.headers.get('Content-Disposition');
+                    let filename = `alphapem_results_${resultId}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
+                    
+                    if (disposition && disposition.indexOf('filename=') !== -1) {
+                        const filenameMatch = disposition.match(/filename=([^;]+)/);
+                        if (filenameMatch && filenameMatch[1]) {
+                            filename = filenameMatch[1].replace(/["]/g, '');
+                        }
+                    }
+                    
+                    return r.blob().then(blob => ({ blob, filename }));
                 })
-                .then(blob => {
+                .then(({ blob, filename }) => {
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `alphapem_results_${resultId}.${format}`;
+                    a.download = filename;
                     document.body.appendChild(a);
                     a.click();
                     window.URL.revokeObjectURL(url);
                     document.body.removeChild(a);
+                    
+                    // Restore button
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = originalContent;
+                    }
                 })
-                .catch(e => showResultError('Download failed: ' + e.message));
+                .catch(e => {
+                    // Restore button on error
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = originalContent;
+                    }
+                    showResultError('Download failed: ' + e.message);
+                });
         }
 
         function showResultError(msg) {
@@ -685,25 +760,6 @@
             `;
         }
 
-        function downloadTable(format) {
-            if (format === 'csv' && currentResultData.voltage) {
-                let csv = 'Time,Voltage,Current,Power\n';
-                const len = currentResultData.voltage.length;
-                for (let i = 0; i < len; i++) {
-                    csv += (currentResultData.time ? currentResultData.time[i] : i) + ',';
-                    csv += currentResultData.voltage[i] + ',';
-                    csv += (currentResultData.current ? currentResultData.current[i] : 'N/A') + ',';
-                    csv += (currentResultData.power   ? currentResultData.power[i]   : 'N/A') + '\n';
-                }
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `alphapem_data_${resultId}.csv`;
-                a.click();
-                window.URL.revokeObjectURL(url);
-            }
-        }
     </script>
 </body>
 </html>
