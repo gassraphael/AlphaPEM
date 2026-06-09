@@ -74,11 +74,12 @@ const PARAM_UI_CONVERSION = Dict(
     :epsilon_gdl => (factor=1.0, unit="", precision=3),
     :K_O2_ad_Pt => (factor=1.0, unit="", precision=3),
     :kappa_c => (factor=1.0, unit="", precision=3),
-    :i0_c_ref => (factor=1e-4, unit="A/cm²", precision=2),
+    :i0_c_ref => (factor=1.0, unit="A/m²", precision=2),
     :kappa_co => (factor=1.0, unit="mol·m⁻¹·s⁻¹·Pa⁻¹", precision=2),
     :C_scl => (factor=1e-6, unit="MF/m³", precision=0),
     # Run Parameters
     :delta_t_ini => (factor=1/60, unit="min", precision=1),
+    :delta_t_load => (factor=1.0, unit="s", precision=1),
     :delta_t_break => (factor=1/60, unit="min", precision=1),
     :i_ini => (factor=1e-4, unit="A/cm²", precision=2),
     :i_step => (factor=1e-4, unit="A/cm²", precision=2),
@@ -186,7 +187,7 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
                 :nb_mpl => 2,
                 :rtol => 1e-3,
                 :atol => 1e-6,
-                :maxiters => 10000,
+                :maxiters => 100000,
             ),
             :model_config => Dict(
                 :voltage_zone => "before_voltage_drop",
@@ -236,6 +237,12 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
             :f_power_max => 5.0,
             :nb_f => 90,
             :nb_points => 50,
+        ),
+        :model_config => Dict(
+            :voltage_zone => "before_voltage_drop",
+            :type_auxiliary => "no_auxiliary",
+            :type_flow => "counter_flow",
+            :type_purge => "no_purge",
         ),
         :accessible_parameters => Dict(
             :Aact => 0.03,              # m² - Active area
@@ -453,11 +460,11 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
             end
         end
         StepParams(
-            delta_t_ini = sp[:delta_t_ini] * 60.0,
+            delta_t_ini = sp[:delta_t_ini],
             delta_t_load = sp[:delta_t_load],
-            delta_t_break = sp[:delta_t_break] * 60.0,
-            i_ini = sp[:i_ini] * 1e4,
-            i_step = sp[:i_step] * 1e4,
+            delta_t_break = sp[:delta_t_break],
+            i_ini = sp[:i_ini],
+            i_step = sp[:i_step],
         )
     elseif sim_type == :polarization
         pp = get(params, :polarization_parameters, Dict())
@@ -475,11 +482,11 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
             end
         end
         PolarizationParams(
-            delta_t_ini = pp[:delta_t_ini] * 60.0,
-            delta_i = pp[:delta_i] * 1e4,
-            v_load = pp[:v_load] * 1e4,
-            delta_t_break = pp[:delta_t_break] * 60.0,
-            i_max = pp[:i_max] * 1e4,
+            delta_t_ini = pp[:delta_t_ini],
+            delta_i = pp[:delta_i],
+            v_load = pp[:v_load],
+            delta_t_break = pp[:delta_t_break],
+            i_max = pp[:i_max],
         )
     elseif sim_type == :eis
         ep = get(params, :eis_parameters, Dict())
@@ -497,8 +504,8 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
             end
         end
         EISParams(
-            i_EIS = ep[:i_static] * 1e4,
-            ratio = ep[:ratio] / 100.0,
+            i_EIS = ep[:i_static],
+            ratio = ep[:ratio],
             f_power_min = ep[:f_power_min],
             f_power_max = ep[:f_power_max],
             nb_f = ep[:nb_frequencies],
@@ -516,29 +523,51 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
         nb_mpl = cp[:nb_mpl],
         rtol = cp[:rtol],
         atol = cp[:atol],
+        maxiters = get(cp, :maxiters, 100000), # Increased default to match NumericalParams
     )
 
     # Build custom physical parameters
     ap_data = get(params, :accessible_parameters, Dict())
     up_data = get(params, :undetermined_parameters, Dict())
     
-    # Merge both into a single dict for PhysicalParams, converting keys to symbols
-    phys_dict = Dict{Symbol, Any}()
-    for (k, v) in ap_data
-        phys_dict[Symbol(k)] = v
+    # 1. Determine base fuel cell type for defaults
+    fc_type_str = string(get(params, :fuel_cell_type, "ZSW_GenStack"))
+    v_zone_str = string(get(params, :voltage_zone, "before_voltage_drop"))
+    
+    # Strip "custom_" prefix if present to get the base model defaults
+    base_type_str = replace(fc_type_str, "custom_" => "")
+    base_type = Symbol(base_type_str)
+    v_zone = Symbol(v_zone_str)
+
+    # 2. Get base physical parameters for this fuel cell type
+    base_fc = try
+        AlphaPEM.Fuelcell.create_fuelcell(base_type, v_zone)
+    catch
+        # Fallback to ZSW
+        AlphaPEM.Fuelcell.create_fuelcell(:ZSW_GenStack, :before_voltage_drop)
     end
-    for (k, v) in up_data
-        phys_dict[Symbol(k)] = v
+    base_ap = base_fc.physical_parameters
+    
+    # 3. Start with base parameters as a Dict
+    filtered_phys_dict = Dict{Symbol, Any}()
+    for field in fieldnames(PhysicalParams)
+        filtered_phys_dict[field] = getfield(base_ap, field)
     end
     
-    # Filter out unknown fields to avoid Keyword Argument errors
-    valid_phys_fields = fieldnames(PhysicalParams)
-    filtered_phys_dict = Dict{Symbol, Any}()
-    for (k, v) in phys_dict
-        if k in valid_phys_fields
-            filtered_phys_dict[k] = v
+    # 4. Override with web data (which is already in SI units)
+    for (k, v) in ap_data
+        key = Symbol(k)
+        if haskey(filtered_phys_dict, key)
+            filtered_phys_dict[key] = Float64(v)
         end
     end
+    for (k, v) in up_data
+        key = Symbol(k)
+        if haskey(filtered_phys_dict, key)
+            filtered_phys_dict[key] = Float64(v)
+        end
+    end
+    
     custom_ap = PhysicalParams(; filtered_phys_dict...)
     
     # Build custom operating conditions
@@ -554,15 +583,31 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
         y_H2_in   = Float64(get(oc_data, "y_H2_in", get(oc_data, :y_H2_in, 0.95)))
     )
 
-    # Build SimulationConfig
+    # Build model configuration (accept both flattened payload and nested model_config payload)
+    model_cfg = get(params, :model_config, Dict())
+    voltage_zone = Symbol(get(params, :voltage_zone, get(model_cfg, :voltage_zone, "before_voltage_drop")))
+    type_auxiliary = Symbol(get(params, :type_auxiliary, get(model_cfg, :type_auxiliary, "no_auxiliary")))
+    type_flow = Symbol(get(params, :type_flow, get(model_cfg, :type_flow, "counter_flow")))
+    type_purge = Symbol(get(params, :type_purge, get(model_cfg, :type_purge, "no_purge")))
+
+    # Resolve base fuel-cell symbol to ensure factory compatibility. Synthetic IDs
+    # like "custom_*" or "default" are mapped back to known types (ZSW/EH31)
+    # to avoid falling back to DefaultFuelCell (which causes NaN derivatives).
+    resolved_fuel_cell_type = if base_fc isa AlphaPEM.Fuelcell.ZSWFuelCell ||
+                                 base_fc isa AlphaPEM.Fuelcell.EH31FuelCell
+        base_type
+    else
+        :ZSW_GenStack
+    end
+
     config = SimulationConfig(
-        type_fuel_cell = Symbol(params[:fuel_cell_type]),
+        type_fuel_cell = resolved_fuel_cell_type,
         type_current = current_params,
         numerical_parameters = num_params,
-        voltage_zone = Symbol(get(params, :voltage_zone, "fuel_cell")),
-        type_auxiliary = Symbol(get(params, :type_auxiliary, "none")),
-        type_flow = Symbol(get(params, :type_flow, "constant")),
-        type_purge = Symbol(get(params, :type_purge, "no_purge")),
+        voltage_zone = voltage_zone,
+        type_auxiliary = type_auxiliary,
+        type_flow = type_flow,
+        type_purge = type_purge,
         type_display = :no_display,     # Server-side, don't display plots
         display_timing = :postrun,      # Display after simulation
         physical_parameters = custom_ap,
@@ -585,9 +630,9 @@ Dictionary with :id and :status
 """
 function run_step_simulation(config::SimulationConfig)::Dict
     result_id = generate_result_id()
+    start_time = time()
 
     try
-        start_time = time()
         # Capture the actual output from the simulation
         output = run_simulation(config)
         elapsed = time() - start_time
@@ -619,11 +664,14 @@ function run_step_simulation(config::SimulationConfig)::Dict
         return Dict(:id => result_id, :status => "completed")
 
     catch e
+        elapsed = time() - start_time
         @error "    Step simulation failed: $result_id" exception=e
 
         SIMULATION_RESULTS[result_id] = Dict(
             :type => "step",
             :status => "failed",
+            :start_time => DateTime(now()),
+            :elapsed_time => elapsed,
             :error => string(e),
         )
 
@@ -636,9 +684,9 @@ Run a polarization curve simulation.
 """
 function run_polarization_simulation(config::SimulationConfig)::Dict
     result_id = generate_result_id()
+    start_time = time()
 
     try
-        start_time = time()
         # Capture the actual output from the simulation
         output = run_simulation(config)
         elapsed = time() - start_time
@@ -670,11 +718,14 @@ function run_polarization_simulation(config::SimulationConfig)::Dict
         return Dict(:id => result_id, :status => "completed")
 
     catch e
+        elapsed = time() - start_time
         @error "    Polarization simulation failed: $result_id" exception=e
 
         SIMULATION_RESULTS[result_id] = Dict(
             :type => "polarization",
             :status => "failed",
+            :start_time => DateTime(now()),
+            :elapsed_time => elapsed,
             :error => string(e),
         )
 
@@ -687,9 +738,9 @@ Run an EIS simulation.
 """
 function run_eis_simulation(config::SimulationConfig)::Dict
     result_id = generate_result_id()
+    start_time = time()
 
     try
-        start_time = time()
         # EIS requires :live display_timing for frequency-by-frequency stepping.
         eis_config = SimulationConfig(
             type_fuel_cell     = config.type_fuel_cell,
@@ -733,11 +784,14 @@ function run_eis_simulation(config::SimulationConfig)::Dict
         return Dict(:id => result_id, :status => "completed")
 
     catch e
+        elapsed = time() - start_time
         @error "    EIS simulation failed: $result_id" exception=e
 
         SIMULATION_RESULTS[result_id] = Dict(
             :type => "eis",
             :status => "failed",
+            :start_time => DateTime(now()),
+            :elapsed_time => elapsed,
             :error => string(e),
         )
 
@@ -852,8 +906,9 @@ function get_detailed_results(result_id::String)::Dict
     return Dict(
         :simulation_type => sim_type,
         :status => result[:status],
-        :start_time => Dates.format(result[:start_time], "yyyy-mm-dd HH:MM:SS"),
-        :elapsed_time => result[:elapsed_time],
+        :start_time => haskey(result, :start_time) ? Dates.format(result[:start_time], "yyyy-mm-dd HH:MM:SS") : "N/A",
+        :elapsed_time => get(result, :elapsed_time, 0.0),
+        :error => get(result, :error, ""),
         :data => data,
         :kpis => calculate_kpis(data),
         :plots => plot_urls,
