@@ -7,7 +7,7 @@ A generic fallback FuelCell using default parameters, for unknown or manual type
 """
 
 
-struct DefaultFuelCell <: AbstractFuelCell
+mutable struct DefaultFuelCell <: AbstractFuelCell
     physical_parameters::PhysicalParams
     operating_conditions::OperatingConditions
     pola_exp_data::PolaExperimentalData

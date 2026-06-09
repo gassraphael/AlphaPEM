@@ -1,6 +1,6 @@
 # plot.jl
 #
-# Native CairoMakie plotting recipes for AlphaPEM (progressive migration stage).
+# Native CairoMakie plotting recipes for AlphaPEM.
 
 
 using .PlotHelpers: _publication_colors,
