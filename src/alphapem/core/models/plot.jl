@@ -530,51 +530,18 @@ function plot_Re_nb_1D_temporal(outputs::SimulationOutputs,
                                 ax)
     palette = _publication_colors()
     nb_gc = cfg.numerical_parameters.nb_gc
-    pp = fc.physical_parameters
-    t = masked_time_history(outputs, cd, cfg)
-    n_t = length(t)
+    t_full = time_history(outputs)
+    mask = display_time_mask(outputs, cd, cfg)
+    t = t_full[mask]
 
-    # Hydraulic diameters of the rectangular gas channels.
-    Dh_a = 2 * pp.Hagc * pp.Wagc / (pp.Hagc + pp.Wagc)
-    Dh_c = 2 * pp.Hcgc * pp.Wcgc / (pp.Hcgc + pp.Wcgc)
+    # Use the centralized calculation function
+    Re_a_full, Re_c_full = calculate_reynolds_numbers(outputs, fc)
 
     Re_series = Vector{Vector{Float64}}()
     for i in 1:nb_gc
-        # Gas velocities.
-        v_a_i = extract_masked_derived_gc_series(outputs, i, cd, cfg, x -> x.v_a)
-        v_c_i = extract_masked_derived_gc_series(outputs, i, cd, cfg, x -> x.v_c)
-        # Anode GC state.
-        C_v_agc  = extract_masked_mea_series(outputs, i, cd, cfg, mea -> mea.agc.C_v)
-        C_H2_agc = extract_masked_mea_series(outputs, i, cd, cfg, mea -> mea.agc.C_H2)
-        T_agc    = extract_masked_mea_series(outputs, i, cd, cfg, mea -> mea.agc.T)
-        # Cathode GC state.
-        C_v_cgc  = extract_masked_mea_series(outputs, i, cd, cfg, mea -> mea.cgc.C_v)
-        C_O2_cgc = extract_masked_mea_series(outputs, i, cd, cfg, mea -> mea.cgc.C_O2)
-        C_N2_cgc = extract_masked_mea_series(outputs, i, cd, cfg, mea -> mea.cgc.C_N2)
-        T_cgc    = extract_masked_mea_series(outputs, i, cd, cfg, mea -> mea.cgc.T)
+        Re_a_i = Re_a_full[i][mask]
+        Re_c_i = Re_c_full[i][mask]
 
-        Re_a_i = Vector{Float64}(undef, n_t)
-        Re_c_i = Vector{Float64}(undef, n_t)
-        for j in 1:n_t
-            # Anode: H₂O + H₂ mixture (same approximation as flow modules).
-            x_H2O_a = C_v_agc[j] + C_H2_agc[j] > 0 ?
-                      C_v_agc[j] / (C_v_agc[j] + C_H2_agc[j]) : 0.0
-            rho_a   = C_v_agc[j] * M_H2O + C_H2_agc[j] * M_H2   # kg·m⁻³
-            mu_a    = mu_mixture_gases(["H2O_v", "H2"], [x_H2O_a, 1 - x_H2O_a], T_agc[j])
-            Re_a_i[j] = mu_a > 0 ? rho_a * abs(v_a_i[j]) * Dh_a / mu_a : 0.0
-
-            # Cathode: H₂O + O₂ + N₂ mixture.
-            C_dry_c  = max(C_O2_cgc[j] + C_N2_cgc[j], eps(Float64))
-            y_O2_c   = C_O2_cgc[j] / C_dry_c
-            x_H2O_c  = C_v_cgc[j] + C_O2_cgc[j] + C_N2_cgc[j] > 0 ?
-                       C_v_cgc[j] / (C_v_cgc[j] + C_O2_cgc[j] + C_N2_cgc[j]) : 0.0
-            x_O2_c   = y_O2_c * (1 - x_H2O_c)
-            x_N2_c   = (1 - y_O2_c) * (1 - x_H2O_c)
-            rho_c    = C_v_cgc[j] * M_H2O + C_O2_cgc[j] * M_O2 + C_N2_cgc[j] * M_N2
-            mu_c     = mu_mixture_gases(["H2O_v", "O2", "N2"],
-                                        [x_H2O_c, x_O2_c, x_N2_c], T_cgc[j])
-            Re_c_i[j] = mu_c > 0 ? rho_c * abs(v_c_i[j]) * Dh_c / mu_c : 0.0
-        end
         push!(Re_series, Re_a_i, Re_c_i)
         lines!(ax, t, Re_a_i; color=palette[mod1(i, length(palette))],
                linestyle=:solid, label=lsub("Re", "a,$(i)"))

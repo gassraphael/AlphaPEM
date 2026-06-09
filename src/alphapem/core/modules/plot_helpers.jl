@@ -46,6 +46,12 @@ end
 
 """Add interactive 'Reset View' and 'Zoom' buttons to a specific axis."""
 function _add_axis_toolbar!(ax)
+    # Don't add toolbar for static backends (CairoMakie)
+    # This prevents buttons from appearing in PDF/PNG exports.
+    if string(Makie.current_backend()) == "CairoMakie"
+        return nothing
+    end
+
     # 1. Identify parent Figure
     fig = nothing
     curr = ax

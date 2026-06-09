@@ -27,6 +27,7 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Stipple = "4acbeb90-81a0-11ea-1966-bdaff8155998"
 StippleUI = "a3c5d34a-b254-4859-a8fa-b86abb7e84a3"
 Sundials = "c3572dad-4567-51f8-b174-8c6c989267f4"
+XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
 
 [compat]
 CairoMakie = "0.15"
@@ -51,3 +52,4 @@ Statistics = "1.11"
 Stipple = "0.31"
 StippleUI = "0.24"
 Sundials = "5"
+XLSX = "0.11.10"

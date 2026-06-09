@@ -217,3 +217,68 @@ function round_nice(x)
     end
     return nice * 10^exp
 end
+
+
+"""
+    calculate_reynolds_numbers(outputs, fc)
+
+Compute the Reynolds number at each gas-channel node for both anode (AGC) and cathode (CGC).
+
+The hydraulic diameter is computed as Dh = 2HW/(H+W) for a rectangular cross-section.
+Gas-mixture density is derived from concentrations; dynamic viscosity uses the
+mixture rule from `mu_mixture_gases`.
+
+# Returns
+- `Re_a`: Vector of vectors (per node) of anode Reynolds numbers over time.
+- `Re_c`: Vector of vectors (per node) of cathode Reynolds numbers over time.
+"""
+function calculate_reynolds_numbers(outputs::SimulationOutputs,
+                                    fc::AbstractFuelCell)
+    nb_gc = gas_channel_count(outputs)
+    pp = fc.physical_parameters
+    t = time_history(outputs)
+    n_t = length(t)
+
+    # Hydraulic diameters of the rectangular gas channels.
+    Dh_a = 2 * pp.Hagc * pp.Wagc / (pp.Hagc + pp.Wagc)
+    Dh_c = 2 * pp.Hcgc * pp.Wcgc / (pp.Hcgc + pp.Wcgc)
+
+    Re_a = [Vector{Float64}(undef, n_t) for _ in 1:nb_gc]
+    Re_c = [Vector{Float64}(undef, n_t) for _ in 1:nb_gc]
+
+    for i in 1:nb_gc
+        # Gas velocities.
+        v_a_i = extract_derived_gc_series(outputs, i, x -> x.v_a)
+        v_c_i = extract_derived_gc_series(outputs, i, x -> x.v_c)
+        # Anode GC state.
+        C_v_agc  = extract_mea_series(outputs, i, mea -> mea.agc.C_v)
+        C_H2_agc = extract_mea_series(outputs, i, mea -> mea.agc.C_H2)
+        T_agc    = extract_mea_series(outputs, i, mea -> mea.agc.T)
+        # Cathode GC state.
+        C_v_cgc  = extract_mea_series(outputs, i, mea -> mea.cgc.C_v)
+        C_O2_cgc = extract_mea_series(outputs, i, mea -> mea.cgc.C_O2)
+        C_N2_cgc = extract_mea_series(outputs, i, mea -> mea.cgc.C_N2)
+        T_cgc    = extract_mea_series(outputs, i, mea -> mea.cgc.T)
+
+        for j in 1:n_t
+            # Anode: H₂O + H₂ mixture.
+            x_H2O_a = C_v_agc[j] + C_H2_agc[j] > 0 ?
+                      C_v_agc[j] / (C_v_agc[j] + C_H2_agc[j]) : 0.0
+            rho_a   = C_v_agc[j] * M_H2O + C_H2_agc[j] * M_H2
+            mu_a    = mu_mixture_gases(["H2O_v", "H2"], [x_H2O_a, 1 - x_H2O_a], T_agc[j])
+            Re_a[i][j] = mu_a > 0 ? rho_a * abs(v_a_i[j]) * Dh_a / mu_a : 0.0
+
+            # Cathode: H₂O + O₂ + N₂ mixture.
+            C_dry_c  = max(C_O2_cgc[j] + C_N2_cgc[j], eps(Float64))
+            y_O2_c   = C_O2_cgc[j] / C_dry_c
+            x_H2O_c  = C_v_cgc[j] + C_O2_cgc[j] + C_N2_cgc[j] > 0 ?
+                       C_v_cgc[j] / (C_v_cgc[j] + C_O2_cgc[j] + C_N2_cgc[j]) : 0.0
+            x_O2_c   = y_O2_c * (1 - x_H2O_c)
+            x_N2_c   = (1 - y_O2_c) * (1 - x_H2O_c)
+            rho_c    = C_v_cgc[j] * M_H2O + C_O2_cgc[j] * M_O2 + C_N2_cgc[j] * M_N2
+            mu_c     = mu_mixture_gases(["H2O_v", "O2", "N2"], [x_H2O_c, x_O2_c, x_N2_c], T_cgc[j])
+            Re_c[i][j] = mu_c > 0 ? rho_c * abs(v_c_i[j]) * Dh_c / mu_c : 0.0
+        end
+    end
+    return Re_a, Re_c
+end
