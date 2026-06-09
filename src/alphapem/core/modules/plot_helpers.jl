@@ -6,6 +6,7 @@ module PlotHelpers
 using CairoMakie
 
 export _publication_colors,
+       _add_axis_toolbar!,
        _finalize_axis!,
        _label_with_rmse,
        _polarization_legend_base,
@@ -43,6 +44,111 @@ function _publication_colors()
     ]
 end
 
+"""Add interactive 'Reset View' and 'Zoom' buttons to a specific axis."""
+function _add_axis_toolbar!(ax)
+    # 1. Identify parent Figure
+    fig = nothing
+    curr = ax
+    try
+        while curr !== nothing && !(curr isa Figure)
+            if hasproperty(curr, :parent)
+                curr = curr.parent
+            else
+                break
+            end
+        end
+        fig = curr
+    catch
+        return nothing
+    end
+    (fig === nothing || !(fig isa Figure)) && return nothing
+
+    # 2. Identify position of the axis in the layout
+    gc = nothing
+    for content in fig.layout.content
+        if content.content == ax
+            gc = content
+            break
+        end
+    end
+    gc === nothing && return nothing
+
+    # 3. Check for existing toolbar to avoid duplicates
+    # We check if there's already a GridLayout in the Top() position of this cell
+    for content in fig.layout.content
+        if content.parent == gc.parent && 
+           content.span == gc.span && 
+           content.side == Top() && 
+           content.content isa GridLayout
+            return nothing
+        end
+    end
+
+    # 4. Create the toolbar layout
+    # Using Top() places buttons in the decoration area of the axis,
+    # aligned with the title.
+    gl = gc.parent[gc.span.rows, gc.span.cols, Top()] = GridLayout(
+        halign = :right, 
+        tellwidth = false, 
+        padding = (0, 4, 1, 0)
+    )
+    
+    # 5. Design: Styled background capsule
+    Box(gl[1, 1:3], color = (:gray95, 0.7), strokewidth = 0.5, strokecolor = :gray80, cornerradius = 4)
+    
+    btn_attr = (
+        width = 22, 
+        height = 22,
+        buttoncolor = :transparent,
+        buttoncolor_hover = (:black, 0.08),
+        buttoncolor_active = (:black, 0.15),
+        labelcolor = :black,
+        strokewidth = 0,
+        cornerradius = 4,
+        padding = (0, 0, 0, 0),
+        fontsize = 14
+    )
+    
+    btn_in  = Button(gl[1, 1]; label = "+", btn_attr...)
+    btn_out = Button(gl[1, 2]; label = "-", btn_attr...)
+    btn_res = Button(gl[1, 3]; label = "⌂", btn_attr...)
+    
+    colgap!(gl, 0)
+
+    # 6. Interaction Logic
+    on(btn_res.clicks) do _
+        autolimits!(ax)
+    end
+
+    on(btn_in.clicks) do _
+        _zoom_axis!(ax, 0.8)
+    end
+
+    on(btn_out.clicks) do _
+        _zoom_axis!(ax, 1.25)
+    end
+
+    return nothing
+end
+
+"""Helper to zoom into an axis (2D or 3D)."""
+function _zoom_axis!(ax, factor)
+    tname = string(typeof(ax))
+    if ax isa Axis || occursin("Axis3", tname)
+        lims = ax.finallimits[]
+        center = lims.origin + lims.widths / 2
+        new_widths = lims.widths * factor
+        new_origin = center - new_widths / 2
+        
+        # Apply limits. Axis3 supports x/y/zlims!
+        xlims!(ax, new_origin[1], new_origin[1] + new_widths[1])
+        ylims!(ax, new_origin[2], new_origin[2] + new_widths[2])
+        if occursin("Axis3", tname) && length(new_origin) >= 3
+            zlims!(ax, new_origin[3], new_origin[3] + new_widths[3])
+        end
+    end
+end
+
 """Apply common axis formatting for scientific figures."""
 function _finalize_axis!(ax;
                          xlabel="",
@@ -70,6 +176,9 @@ function _finalize_axis!(ax;
     ax.yminorticksize = 5
     ax.xticklabelsize = 15
     ax.yticklabelsize = 15
+
+    # Add interactive 'Reset View' (house) and zoom buttons to the axis.
+    _add_axis_toolbar!(ax)
 
     if legend
         axislegend(ax; position=legend_position, framevisible=true,
