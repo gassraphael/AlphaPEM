@@ -50,7 +50,7 @@ using Random
 using LatinHypercubeSampling: randomLHC, scaleLHC
 
 using AlphaPEM.Config: PhysicalParams, PARAMETER_METADATA
-using AlphaPEM.Fuelcell: create_fuelcell, zsw_undetermined_parameters, eh31_undetermined_parameters
+using AlphaPEM.Fuelcell: create_fuelcell, DefaultFuelCell, undetermined_parameters
 
 export ParameterBound,
        ParameterBounds,
@@ -151,8 +151,8 @@ end
 
 Return the undetermined-parameter bounds for a given fuel-cell type and voltage zone.
 
-Bounds are built by fetching undetermined parameters from the fuel-cell-specific function
-(e.g., `zsw_undetermined_parameters` for ZSW types) and combining them with metadata
+Bounds are built by fetching undetermined parameters from the fuel cell model
+(via `undetermined_parameters`) and combining them with metadata
 from `PARAMETER_METADATA`.
 
 # Supported `fuel_cell_type` values
@@ -166,23 +166,16 @@ function bounds_for_fuel_cell(fuel_cell_type::Symbol,
 
     bounds = ParameterBound[]
 
-    # Determine which undetermined parameters apply to this fuel-cell type
-    undetermined_params = if fuel_cell_type in (
-        :ZSW_GenStack,
-        :ZSW_GenStack_Pa_1_61_Pc_1_41,
-        :ZSW_GenStack_Pa_2_01_Pc_1_81,
-        :ZSW_GenStack_Pa_2_4_Pc_2_2,
-        :ZSW_GenStack_Pa_2_8_Pc_2_6,
-        :ZSW_GenStack_T_62,
-        :ZSW_GenStack_T_76,
-        :ZSW_GenStack_T_84,
-    )
-        zsw_undetermined_parameters(voltage_zone)
-    elseif fuel_cell_type in (:EH_31_1_5, :EH_31_2_0, :EH_31_2_25, :EH_31_2_5)
-        eh31_undetermined_parameters(voltage_zone)
-    else
+    # Create fuel cell instance to get its undetermined parameters
+    fc = create_fuelcell(fuel_cell_type, voltage_zone)
+
+    # If the factory returned a DefaultFuelCell but the type wasn't explicitly :default,
+    # it means the fuel_cell_type was not recognized.
+    if fc isa DefaultFuelCell && fuel_cell_type !== :default
         throw(ArgumentError("Unsupported fuel_cell_type: $fuel_cell_type"))
     end
+
+    undetermined_params = undetermined_parameters(fc, voltage_zone)
 
     # Build ParameterBound objects by combining fuel-cell-specific bounds with metadata
     for (param_name, min_val, max_val) in undetermined_params
