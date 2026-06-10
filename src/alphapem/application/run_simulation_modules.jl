@@ -311,15 +311,6 @@ function _web_plot_specs(cfg::SimulationConfig, nb_gc::Integer)::Vector{Dict{Str
 end
 
 
-"""Export one WGLMakie figure as a self-contained interactive HTML file."""
-function _export_web_figure(fig, output_path::String, title::String)
-    # Use Makie's save() function which generates proper interactive HTML with WebGL
-    # instead of export_static() which only exports a static PNG image
-    save(output_path, fig)
-    return nothing
-end
-
-
 """Flatten the `(fig1, fig2, fig3)` layout returned by `figures_preparation` in display order."""
 function _collect_web_figures(fig1, fig2, fig3)::Vector{Any}
     figures = Any[]
@@ -335,23 +326,24 @@ function _collect_web_figures(fig1, fig2, fig3)::Vector{Any}
 end
 
 
-"""Generate WGLMakie plots for a completed simulation and save them as interactive HTML files.
+"""Prepare interactive WGLMakie figures for a completed simulation, keeping them in memory.
 
 This function calls the same `plot.jl` routines used by the native display, so the
-web interface renders identical figures. WGLMakie provides full interactivity:
-zoom, pan, rotation, tooltips, etc.
+web interface renders identical figures. The figures are returned alongside their
+metadata so a live Bonito server can host them as dynamic routes — this is what
+guarantees real interactivity (zoom, pan, hover, ...) and avoids the limitations
+of any HTML pre-export (which can only ever serialize a frozen snapshot).
 
 # Arguments
 - `simu::AlphaPEM`: Completed simulation instance (must have `outputs != nothing`).
-- `output_dir::String`: Directory path where HTML files will be written.
 
 # Returns
-- `Vector{Dict{String, String}}`: Metadata for the generated interactive HTML files.
+- `Tuple{Vector{Dict{String,String}}, Vector{Any}}`: `(specs, figures)`, with one
+  spec per figure, in the same order. Returns `(Dict[], Any[])` if no outputs
+  are available.
 """
-function generate_web_plots(simu::AlphaPEM, output_dir::String)::Vector{Dict{String, String}}
-    simu.outputs === nothing && return Dict{String, String}[]
-
-    isdir(output_dir) || mkpath(output_dir)
+function prepare_web_figures(simu::AlphaPEM)::Tuple{Vector{Dict{String, String}}, Vector{Any}}
+    simu.outputs === nothing && return (Dict{String, String}[], Any[])
 
     # Temporarily switch to :multiple / :postrun for web rendering.
     orig_display = simu.cfg.type_display
@@ -360,6 +352,7 @@ function generate_web_plots(simu::AlphaPEM, output_dir::String)::Vector{Dict{Str
     simu.cfg.display_timing = :postrun
 
     plot_specs = Dict{String, String}[]
+    rendered_figures = Any[]
 
     try
         @debug "Activating WGLMakie for web plot generation..."
@@ -370,7 +363,7 @@ function generate_web_plots(simu::AlphaPEM, output_dir::String)::Vector{Dict{Str
 
         if fig1 === nothing
             @warn "No figures prepared; skipping web plot generation"
-            return Dict{String, String}[]
+            return (Dict{String, String}[], Any[])
         end
 
         @debug "Populating figures with simulation data..."
@@ -381,24 +374,18 @@ function generate_web_plots(simu::AlphaPEM, output_dir::String)::Vector{Dict{Str
         plot_specs = _web_plot_specs(simu.cfg, nb_gc)
 
         length(rendered_figures) == length(plot_specs) ||
-            throw(ArgumentError("Web plot export mismatch: $(length(rendered_figures)) figures rendered for $(length(plot_specs)) plot specifications."))
-
-        for (spec, fig) in zip(plot_specs, rendered_figures)
-            output_path = joinpath(output_dir, spec["filename"])
-            @debug "Saving interactive web plot to $output_path..."
-            _export_web_figure(fig, output_path, spec["title"])
-        end
+            throw(ArgumentError("Web plot mismatch: $(length(rendered_figures)) figures rendered for $(length(plot_specs)) plot specifications."))
 
     catch e
-        @error "Error during web plot generation: $e" exception=e
+        @error "Error during web plot preparation: $e" exception=e
         rethrow(e)
     finally
         simu.cfg.type_display   = orig_display
         simu.cfg.display_timing = orig_timing
     end
 
-    @debug "Web plot generation completed: $(length(plot_specs)) plots saved"
-    return plot_specs
+    @debug "Web plot preparation completed: $(length(plot_specs)) figures ready"
+    return (plot_specs, rendered_figures)
 end
 
 

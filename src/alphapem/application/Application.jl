@@ -17,6 +17,6 @@ import WGLMakie
 
 include("run_simulation.jl")
 
-export run_simulation, generate_web_plots
+export run_simulation, prepare_web_figures
 
 end  # module Application

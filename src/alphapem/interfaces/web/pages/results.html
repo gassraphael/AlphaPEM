@@ -519,18 +519,20 @@
             });
         }
 
-        // The plot files are static HTML pages embedding a base64-encoded PNG
-        // image (no WebSocket, no Bonito session). Switching plots is therefore
-        // just a matter of changing the iframe's `src`. We reuse a single iframe
-        // per panel to avoid any race condition / leftover state from a previous
-        // load — which was the root cause of the "infinite spinner" bug after a
-        // short idle period.
+        // Each plot is served live by a Bonito server running inside the
+        // Julia process: the iframe URL points to a dynamic Bonito route
+        // that opens a fresh WGLMakie session on every load. Recreating the
+        // iframe (and busting the query string) on every switch ensures we
+        // always get a brand-new session, which is what guarantees that
+        // interactivity (zoom, pan, hover) keeps working indefinitely and
+        // never triggers "Plot initialized multiple times".
 
         function renderPlotInPanel(panel, plot, plotIndex) {
             const title = panel.querySelector('.plot-title');
             const plotContainer = panel.querySelector('.plot-container');
             const viewport = panel.querySelector('.plot-viewport');
             const selector = panel.querySelector('.plot-selector');
+            const requestId = ++currentPlotRequestId;
 
             if (title) {
                 title.textContent = plot.title;
@@ -565,17 +567,16 @@
                 loading.style.display = 'flex';
             }
 
-            // Reuse the existing iframe if any, otherwise create one.
-            let frame = viewport.querySelector('iframe.plot-frame');
-            if (!frame) {
-                frame = document.createElement('iframe');
-                frame.className = 'plot-frame';
-                viewport.appendChild(frame);
-            }
+            // Always recreate the iframe to guarantee a clean JS/WebGL context.
+            viewport.innerHTML = '';
+            const frame = document.createElement('iframe');
+            frame.className = 'plot-frame';
+            viewport.appendChild(frame);
 
             // Replace handlers each time so that stale closures from a previous
             // load can never re-enable / re-disable the selector unexpectedly.
             const finish = function() {
+                if (requestId !== currentPlotRequestId) return;
                 if (loadTimeout) clearTimeout(loadTimeout);
                 if (loading && loading.parentElement) loading.remove();
                 if (selector) selector.disabled = false;
@@ -606,6 +607,7 @@
         let globalPanel = null;
         let currentPlotIndex = 0;
         let plotIsLoading = false; // true while an iframe is being (re)loaded
+        let currentPlotRequestId = 0;
 
         function displayInteractivePlots(plotEntries) {
             const container = document.getElementById('plots-container');

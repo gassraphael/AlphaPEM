@@ -19,7 +19,7 @@ export PLOTS_DIR, initialize_backend, run_step_simulation, run_polarization_simu
 using AlphaPEM
 using AlphaPEM.Config: SimulationConfig, StepParams, PolarizationParams, EISParams, NumericalParams
 using AlphaPEM.Config: PhysicalParams, OperatingConditions
-using AlphaPEM.Application: run_simulation, generate_web_plots, figures_preparation, display!
+using AlphaPEM.Application: run_simulation, prepare_web_figures, figures_preparation, display!
 using JSON
 using Dates
 using Logging
@@ -44,6 +44,141 @@ const RESULTS_DIR = joinpath(pwd(), "results")
 const PLOTS_DIR = joinpath(RESULTS_DIR, "web_plots")
 const SIMULATION_RESULTS = Dict{String, Dict}()  # In-memory result cache
 
+# ------ INTERACTIVE PLOT SERVER (Bonito) ------
+#
+# Option A architecture: we keep a single live Bonito server in the Julia
+# process. Each simulation registers one route per figure under
+# `/plots/<result_id>/<plot_key>` returning a fresh `Bonito.App(() -> fig)`.
+# The frontend iframe points to those URLs, so every plot switch opens a
+# brand new Bonito session, which is what guarantees true interactivity
+# (zoom, pan, hover, ...) without the spinner / "Plot initialized multiple
+# times" issue that any pre-export to HTML would cause.
+
+const BONITO_HOST = "127.0.0.1"
+const BONITO_PORT = 9384
+const BONITO_SERVER = Ref{Any}(nothing)
+const BONITO_LOCK   = ReentrantLock()
+# Keep figures alive so the closures registered as Bonito apps don't get GC'd.
+const BONITO_FIGURES = Dict{String, Vector{Any}}()
+const BONITO_ROUTES  = Dict{String, Vector{String}}()
+
+"""
+Lazy-start (and return) the global Bonito server used to host interactive plots.
+"""
+function _bonito_server()
+    if BONITO_SERVER[] === nothing
+        Bonito = WGLMakie.Bonito
+        lock(BONITO_LOCK) do
+            if BONITO_SERVER[] === nothing
+                @info "    Starting interactive plot server on http://$(BONITO_HOST):$(BONITO_PORT)/"
+                BONITO_SERVER[] = Bonito.Server(BONITO_HOST, BONITO_PORT)
+            end
+        end
+    end
+    return BONITO_SERVER[]
+end
+
+"""
+Build the public base URL of the Bonito server (as seen by the browser).
+
+Reads the host/port from the live server because Bonito may pick a different
+port than requested if the preferred one is already in use.
+"""
+function _bonito_base_url()::String
+    server = _bonito_server()
+    proto = try
+        String(getfield(server, :protocol))
+    catch
+        "http://"
+    end
+    host = try
+        String(getfield(server, :url))
+    catch
+        BONITO_HOST
+    end
+    port = try
+        Int(getfield(server, :port))
+    catch
+        BONITO_PORT
+    end
+    # `proto` from Bonito already ends with "://"
+    return string(proto, host, ":", port)
+end
+
+"""
+Register one Bonito route per figure for the given simulation `result_id`.
+
+`specs` is the list of `_web_plot_specs(...)` dicts; `figures` is the matching
+list of WGLMakie `Figure` objects. Routes are added to the global Bonito
+server and the figures are stored in `BONITO_FIGURES` so they stay alive.
+
+Returns an updated copy of `specs` where each entry has an absolute `"url"`
+field pointing to the Bonito server. The original `"filename"` / `"title"` /
+`"group"` / `"key"` fields are preserved.
+"""
+function register_bonito_plots!(result_id::String, specs, figures)
+    isempty(specs) && return specs
+
+    Bonito = WGLMakie.Bonito
+    server = _bonito_server()
+
+    # Drop any previously registered routes/figures for this result_id so a
+    # re-run cleanly overwrites the old ones.
+    _unregister_bonito_plots!(result_id)
+
+    BONITO_FIGURES[result_id] = collect(figures)
+    BONITO_ROUTES[result_id]  = String[]
+
+    enriched = Dict{String, String}[]
+    for (i, spec) in enumerate(specs)
+        fig = figures[i]
+        key = haskey(spec, "key") ? String(spec["key"]) : "plot_$(i)"
+        title = haskey(spec, "title") ? String(spec["title"]) : "Plot $(i)"
+        route_path = "/plots/$(result_id)/$(key)"
+
+        # Capture `fig` by value so each closure returns its own figure.
+        app = Bonito.App(() -> fig; title=title)
+        try
+            Bonito.route!(server, route_path => app)
+        catch e
+            @error "    Failed to register Bonito route $route_path" exception=e
+            rethrow(e)
+        end
+        push!(BONITO_ROUTES[result_id], route_path)
+
+        new_spec = Dict{String, String}()
+        for (k, v) in spec
+            new_spec[String(k)] = String(v)
+        end
+        new_spec["url"] = string(_bonito_base_url(), route_path)
+        new_spec["key"] = key
+        push!(enriched, new_spec)
+    end
+
+    return enriched
+end
+
+"""
+Tear down previously registered Bonito routes/figures for `result_id`.
+"""
+function _unregister_bonito_plots!(result_id::String)
+    haskey(BONITO_ROUTES, result_id) || return nothing
+    Bonito = WGLMakie.Bonito
+    server = BONITO_SERVER[]
+    if server !== nothing
+        for route_path in BONITO_ROUTES[result_id]
+            try
+                Bonito.HTTPServer.delete_route!(server, route_path)
+            catch e
+                @debug "    Could not delete Bonito route $route_path: $e"
+            end
+        end
+    end
+    delete!(BONITO_ROUTES,  result_id)
+    delete!(BONITO_FIGURES, result_id)
+    return nothing
+end
+
 """
 Initialize backend directories and caches.
 """
@@ -55,9 +190,16 @@ function initialize_backend()
     if !isdir(PLOTS_DIR)
         mkpath(PLOTS_DIR)
     end
-    
+
     # Ensure WGLMakie is active for the web interface
     WGLMakie.activate!()
+
+    # Eagerly start the Bonito plot server so the first plot switch is fast.
+    try
+        _bonito_server()
+    catch e
+        @warn "    Could not start Bonito plot server eagerly: $e"
+    end
 end
 
 # ------ FUEL CELL PRESETS ------
@@ -652,15 +794,14 @@ function run_step_simulation(config::SimulationConfig; params=nothing)::Dict
         # Capture the actual output from the simulation
         output = run_simulation(config)
 
-         # Generate WGLMakie plots using the same functions as the native display.
-         plot_dir = joinpath(PLOTS_DIR, result_id)
+         # Prepare WGLMakie figures and host them via the live Bonito server.
          plot_files = try
-             @debug "    Generating web plots to directory: $plot_dir"
-             files = generate_web_plots(output, plot_dir)
-             @debug "    Generated $(length(files)) plot files: $files"
-             files
+             specs, figs = prepare_web_figures(output)
+             enriched = register_bonito_plots!(result_id, specs, figs)
+             @debug "    Registered $(length(enriched)) Bonito plot routes for $result_id"
+             enriched
          catch e
-             @error "    Failed to generate web plots for step simulation" exception=e
+             @error "    Failed to prepare/register web plots for step simulation" exception=e
               Dict{String, String}[]
          end
 
@@ -708,15 +849,14 @@ function run_polarization_simulation(config::SimulationConfig; params=nothing)::
         # Capture the actual output from the simulation
         output = run_simulation(config)
 
-         # Generate WGLMakie plots using the same functions as the native display.
-         plot_dir = joinpath(PLOTS_DIR, result_id)
+         # Prepare WGLMakie figures and host them via the live Bonito server.
          plot_files = try
-             @debug "    Generating web plots to directory: $plot_dir"
-             files = generate_web_plots(output, plot_dir)
-             @debug "    Generated $(length(files)) plot files: $files"
-             files
+             specs, figs = prepare_web_figures(output)
+             enriched = register_bonito_plots!(result_id, specs, figs)
+             @debug "    Registered $(length(enriched)) Bonito plot routes for $result_id"
+             enriched
          catch e
-             @error "    Failed to generate web plots for polarization simulation" exception=e
+             @error "    Failed to prepare/register web plots for polarization simulation" exception=e
               Dict{String, String}[]
          end
 
@@ -776,15 +916,14 @@ function run_eis_simulation(config::SimulationConfig; params=nothing)::Dict
         # Capture the actual output from the simulation
         output = run_simulation(eis_config)
 
-         # Generate WGLMakie plots using the same functions as the native display.
-         plot_dir = joinpath(PLOTS_DIR, result_id)
+         # Prepare WGLMakie figures and host them via the live Bonito server.
          plot_files = try
-             @debug "    Generating web plots to directory: $plot_dir"
-             files = generate_web_plots(output, plot_dir)
-             @debug "    Generated $(length(files)) plot files: $files"
-             files
+             specs, figs = prepare_web_figures(output)
+             enriched = register_bonito_plots!(result_id, specs, figs)
+             @debug "    Registered $(length(enriched)) Bonito plot routes for $result_id"
+             enriched
          catch e
-             @error "    Failed to generate web plots for EIS simulation" exception=e
+             @error "    Failed to prepare/register web plots for EIS simulation" exception=e
              Dict{String, String}[]
          end
 
@@ -882,11 +1021,20 @@ function _normalize_plot_entries(result_id::String, entries)::Vector{Dict{String
             continue
         end
 
-        filename = _get_plot_field(entry, "filename", "")
-        isempty(filename) && continue
+        # When the spec already carries a fully-qualified URL (e.g. the live
+        # Bonito plot server), use it directly. Otherwise fall back to the
+        # legacy filename-based `/api/plots/...` route.
+        explicit_url = _get_plot_field(entry, "url", "")
+        url = if !isempty(explicit_url)
+            explicit_url
+        else
+            filename = _get_plot_field(entry, "filename", "")
+            isempty(filename) ? "" : "/api/plots/$(result_id)/$(filename)"
+        end
+        isempty(url) && continue
 
         push!(plots, Dict(
-            "url"   => "/api/plots/$(result_id)/$(filename)",
+            "url"   => url,
             "title" => _get_plot_field(entry, "title", "Plot $(index)"),
             "group" => _get_plot_field(entry, "group", "Plots"),
             "key"   => _get_plot_field(entry, "key", "plot_$(index)"),
