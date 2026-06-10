@@ -1964,7 +1964,7 @@
             // Start timer
             const timerEl = document.getElementById('simulation-timer');
             if (timerEl) timerEl.textContent = '0s';
-            let startTime = Date.now();
+            const startTime = Date.now();
             if (simulationTimerInterval) clearInterval(simulationTimerInterval);
             simulationTimerInterval = setInterval(() => {
                 if (timerEl) {
@@ -1972,6 +1972,9 @@
                     timerEl.textContent = elapsed + 's';
                 }
             }, 1000);
+
+            // Include start time in parameters to sync duration display
+            params.req_start_time = startTime / 1000;
 
             showProgress();
             updateTabStatus(5, false); // Mark as running

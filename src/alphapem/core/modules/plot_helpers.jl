@@ -6,6 +6,9 @@ module PlotHelpers
 using CairoMakie
 
 export _publication_colors,
+       _macroscopic_color,
+       _cell_current_color,
+       _cell_voltage_color,
        _add_axis_toolbar!,
        _finalize_axis!,
        _label_with_rmse,
@@ -53,6 +56,23 @@ function _publication_colors()
         RGBf(0.20, 0.13, 0.53),
         RGBf(0.86, 0.80, 0.47),
     ]
+end
+
+"""Return a dedicated color for cell-wide (macroscopic) variables like current or voltage.
+We use a vibrant but professional Deep Blue that is distinct from regional colors.
+"""
+function _macroscopic_color()
+    return RGBf(0.1, 0.4, 0.7)
+end
+
+"""Return a dedicated color for the cell-wide current density."""
+function _cell_current_color(nb_gc::Int)
+    return _macroscopic_color()
+end
+
+"""Return a dedicated color for the cell-wide voltage, consistent across AlphaPEM."""
+function _cell_voltage_color()
+    return _macroscopic_color()
 end
 
 """Add interactive 'Reset View' and 'Zoom' buttons to a specific axis."""

@@ -4,6 +4,9 @@
 
 
 using .PlotHelpers: _publication_colors,
+                    _macroscopic_color,
+                    _cell_current_color,
+                    _cell_voltage_color,
                     _finalize_axis!,
                     _label_with_rmse,
                     _polarization_legend_base,
@@ -33,36 +36,44 @@ function plot_ifc_1D_temporal(outputs::SimulationOutputs,
     nb_gc = cfg.numerical_parameters.nb_gc
 
     i_fc_cell_t = current(cd, t) ./ 1e4
-    lines!(ax, t, i_fc_cell_t; color=:black, linewidth=2.8, label=lsub("i", "fc,cell"))
+    lines!(ax, t, i_fc_cell_t; color=_cell_current_color(nb_gc), linewidth=2.8, label=lsub("i", "fc,cell"))
 
-    for i in 1:nb_gc
-        i_fc_t = extract_derived_gc_series(outputs, i, x -> x.i_fc) ./ 1e4
-        lines!(ax, t, i_fc_t; color=palette[mod1(i, length(palette))], label=lsub("i", "fc,$(i)"))
+    all_series = [i_fc_cell_t]
+    if nb_gc > 1
+        i_fc_series = [extract_derived_gc_series(outputs, i, x -> x.i_fc) ./ 1e4 for i in 1:nb_gc]
+        for i in 1:nb_gc
+            lines!(ax, t, i_fc_series[i]; color=palette[mod1(i, length(palette))], label=lsub("i", "fc,$(i)"))
+        end
+        append!(all_series, i_fc_series)
+        _set_dense_ticks!(ax, t, all_series)
+    else
+        _set_dense_ticks!(ax, t, all_series)
     end
-    i_fc_series = [extract_derived_gc_series(outputs, i, x -> x.i_fc) ./ 1e4 for i in 1:nb_gc]
-    _set_dense_ticks!(ax, t, vcat([i_fc_cell_t], i_fc_series))
+
     _finalize_axis!(ax;
                     xlabel=rich("Time ", lsub("t", ""), " (s)"),
                     ylabel=rich("Current density ", rich(lsub("i", "fc"), "\n"), " (A·cm⁻²)"),
                     legend=true,
                     legend_position=:lb)
-    _set_initial_temporal_limits!(ax, t, vcat([i_fc_cell_t], i_fc_series), initial_time_range(outputs, cd, cfg))
+    _set_initial_temporal_limits!(ax, t, all_series, initial_time_range(outputs, cd, cfg))
 
-    # Add flow configuration annotation in bottom-right corner
-    flow_note = cfg.type_flow == :counter_flow ?
-        rich(lsub("i", "fc,1"), " = cathode inlet\n(counter-flow)") :
-        rich(lsub("i", "fc,1"), " = inlet\n(co-flow)")
-    pad_x = 0.012f0
-    box_h = 0.130f0
-    box_w = clamp(0.29f0, 0.22f0, 0.36f0)
-    x_right = 0.975f0
-    x_left = x_right - box_w
-    y_bottom = 0.002f0
-    poly!(ax, Rect2f(x_left, y_bottom, box_w, box_h);
-          color=(:white, 0.92), strokecolor=(:black, 0.75), strokewidth=0.5, space=:relative)
-    text!(ax, x_left + pad_x, y_bottom + box_h / 2;
-          text=flow_note,
-          align=(:left, :center), space=:relative, color=:black, fontsize=11)
+    if nb_gc > 1
+        # Add flow configuration annotation in bottom-right corner
+        flow_note = cfg.type_flow == :counter_flow ?
+            rich(lsub("i", "fc,1"), " = cathode inlet\n(counter-flow)") :
+            rich(lsub("i", "fc,1"), " = inlet\n(co-flow)")
+        pad_x = 0.012f0
+        box_h = 0.130f0
+        box_w = clamp(0.29f0, 0.22f0, 0.36f0)
+        x_right = 0.975f0
+        x_left = x_right - box_w
+        y_bottom = 0.002f0
+        poly!(ax, Rect2f(x_left, y_bottom, box_w, box_h);
+              color=(:white, 0.92), strokecolor=(:black, 0.75), strokewidth=0.5, space=:relative)
+        text!(ax, x_left + pad_x, y_bottom + box_h / 2;
+              text=flow_note,
+              align=(:left, :center), space=:relative, color=:black, fontsize=11)
+    end
 
     return nothing
 end
@@ -337,10 +348,8 @@ function plot_T_1D_temporal(outputs::SimulationOutputs,
         ]
 
         for (i, (y, lbl)) in enumerate(series)
-            scatter!(ax, ifc_discretized, y; color=palette[mod1(i, length(palette))], markersize=8, label=lbl)
+            lines!(ax, ifc_discretized, y; color=palette[mod1(i, length(palette))], linewidth=2.4, label=lbl)
         end
-        lines!(ax, [minimum(ifc_discretized), maximum(ifc_discretized)], [T_des, T_des];
-               color=:black, linestyle=:dash, label=lsub("T", "des"))
 
         _set_dense_ticks!(ax, ifc_discretized, [s[1] for s in series])
         _finalize_axis!(ax;
@@ -386,7 +395,7 @@ function plot_Ucell(outputs::SimulationOutputs,
                     ax)
     t = time_history(outputs)
     Ucell_t = extract_derived_series(outputs, x -> x.Ucell)
-    lines!(ax, t, Ucell_t; color=:black, label=lsub("U", "cell"))
+    lines!(ax, t, Ucell_t; color=_cell_voltage_color(), label=lsub("U", "cell"))
     _set_dense_ticks!(ax, t, [Ucell_t])
     _finalize_axis!(ax;
                     xlabel=rich("Time ", lsub("t", ""), " (s)"),
@@ -624,7 +633,7 @@ function plot_polarization_curve(outputs::SimulationOutputs,
                                  cfg::SimulationConfig,
                                  ax)
     palette = _publication_colors()
-    model_color = palette[1]
+    model_color = _cell_voltage_color()
     exp_color = RGBf(0.10, 0.10, 0.10)
     model_label_base = _polarization_legend_base(cfg.type_fuel_cell;
                                                  simulation=true,
@@ -699,7 +708,7 @@ function plot_polarization_curve_for_cali(outputs::SimulationOutputs,
                                           cfg::SimulationConfig,
                                           ax)
     palette = _publication_colors()
-    model_color = palette[1]
+    model_color = _cell_voltage_color()
     exp_color = RGBf(0.10, 0.10, 0.10)
     model_label_base = _polarization_legend_base(cfg.type_fuel_cell;
                                                  simulation=true,
@@ -777,15 +786,14 @@ function plot_power_density_curve(outputs::SimulationOutputs,
                                   cd::AbstractCurrent,
                                   cfg::SimulationConfig,
                                   ax)
+    model_color = _macroscopic_color()
     model_label = "Model ($(String(cfg.type_fuel_cell)))"
 
     if cfg.display_timing == :postrun
         ifc_discretized, Ucell_discretized = _polarization_points(outputs, cd)
         P_discretized = ifc_discretized .* Ucell_discretized   # W·cm⁻²
         lines!(ax, ifc_discretized, P_discretized;
-               color=:black, linewidth=2.6, label=model_label)
-        scatter!(ax, ifc_discretized, P_discretized;
-                 color=:black, markersize=7)
+               color=model_color, linewidth=3.0, label=model_label)
         _set_dense_ticks!(ax, ifc_discretized, [P_discretized])
         _finalize_axis!(ax;
                         xlabel=rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"),
@@ -800,7 +808,7 @@ function plot_power_density_curve(outputs::SimulationOutputs,
         idx      = lastindex(t_hist)
         ifc_last = current(cd, t_hist[idx]) / 1e4
         P_last   = ifc_last * Ucell_t[idx]
-        scatter!(ax, [ifc_last], [P_last]; color=:black, markersize=8, label=model_label)
+        scatter!(ax, [ifc_last], [P_last]; color=model_color, markersize=8, label=model_label)
         _set_dense_ticks!(ax, [ifc_last], [[P_last]])
         _finalize_axis!(ax;
                         xlabel=rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"),
@@ -822,39 +830,37 @@ function plot_cell_efficiency(outputs::SimulationOutputs,
                               cfg::SimulationConfig,
                               ax)
     E_th = 1.481   # V — HHV-based thermoneutral voltage for H₂/O₂ PEM fuel cell.
+    model_color = _macroscopic_color()
     model_label = "Model ($(String(cfg.type_fuel_cell)))"
 
     if cfg.display_timing == :postrun
         ifc_discretized, Ucell_discretized = _polarization_points(outputs, cd)
         eta_discretized = Ucell_discretized ./ E_th
         lines!(ax, ifc_discretized, eta_discretized;
-               color=:black, linewidth=2.6, label=model_label)
-        scatter!(ax, ifc_discretized, eta_discretized;
-                 color=:black, markersize=7)
-        # Reference line at η = 1 (upper thermodynamic bound).
-        lines!(ax, [ifc_discretized[1], ifc_discretized[end]], [1.0, 1.0];
-               color=:gray, linestyle=:dot, linewidth=1.4, label="η = 1")
+               color=model_color, linewidth=3.0, label=model_label)
         _set_dense_ticks!(ax, ifc_discretized, [eta_discretized])
+        # Ensure efficiency curve is properly framed around its values.
+        ylims!(ax, minimum(eta_discretized) * 0.95, min(1.0, maximum(eta_discretized) * 1.05))
         _finalize_axis!(ax;
                         xlabel=rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"),
                         ylabel=rich("Voltage efficiency ", lsub("η", "v"), " (–)"),
                         title="Cell efficiency curve",
                         legend=true,
-                        legend_position=:lb)
+                        legend_position=:rt)
     else
         t_hist   = time_history(outputs)
         Ucell_t  = derived_outputs(outputs).Ucell
         idx      = lastindex(t_hist)
         ifc_last = current(cd, t_hist[idx]) / 1e4
         eta_last = Ucell_t[idx] / E_th
-        scatter!(ax, [ifc_last], [eta_last]; color=:black, markersize=8, label=model_label)
+        scatter!(ax, [ifc_last], [eta_last]; color=model_color, markersize=8, label=model_label)
         _set_dense_ticks!(ax, [ifc_last], [[eta_last]])
         _finalize_axis!(ax;
                         xlabel=rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"),
                         ylabel=rich("Voltage efficiency ", lsub("η", "v"), " (–)"),
                         title="Cell efficiency point (dynamic)",
                         legend=true,
-                        legend_position=:lb)
+                        legend_position=:rt)
     end
     return nothing
 end
