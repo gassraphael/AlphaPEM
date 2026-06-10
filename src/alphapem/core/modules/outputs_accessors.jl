@@ -44,35 +44,15 @@ When no dedicated initialisation time exists, the full history is kept.
 display_start_time(cd::AbstractCurrent) = hasproperty(cd, :delta_t_ini) ? getproperty(cd, :delta_t_ini) : 0.0
 
 
-"""Build the temporal mask used by display functions.
 
-The historical display logic keeps only the tail of fixed simulations and all
-points in dynamic mode.
-"""
-function display_time_mask(outputs::SimulationOutputs,
-                           cd::AbstractCurrent,
-                           cfg::SimulationConfig)::BitVector
+"""Return the recommended initial time range for temporal displays."""
+function initial_time_range(outputs::SimulationOutputs,
+                            cd::AbstractCurrent,
+                            cfg::SimulationConfig)::Tuple{Float64, Float64}
     t_hist = time_history(outputs)
-    if cfg.display_timing == :postrun
-        return BitVector(t_hist .>= 0.9 * display_start_time(cd))
-    end
-    return trues(length(t_hist))
-end
-
-
-"""Return the masked simulation time history used for display."""
-masked_time_history(outputs::SimulationOutputs,
-                    cd::AbstractCurrent,
-                    cfg::SimulationConfig) = time_history(outputs)[display_time_mask(outputs, cd, cfg)]
-
-
-"""Collect and mask a derived time series stored once per time step."""
-function extract_masked_derived_series(outputs::SimulationOutputs,
-                                       cd::AbstractCurrent,
-                                       cfg::SimulationConfig,
-                                       accessor::Function)
-    mask = display_time_mask(outputs, cd, cfg)
-    return collect(extract_derived_series(outputs, accessor))[mask]
+    t_start = 0.95*display_start_time(cd)
+    t_end = isempty(t_hist) ? t_start + 1.0 : t_hist[end]
+    return (max(0.0, t_start), t_end)
 end
 
 
@@ -98,25 +78,6 @@ extract_mid_mea_series(outputs::SimulationOutputs,
                        extractor::Function) = extract_mea_series(outputs, middle_gas_channel_index(cfg), extractor)
 
 
-"""Collect and mask a time series from the typed MEA-state history for one GC position."""
-function extract_masked_mea_series(outputs::SimulationOutputs,
-                                   gc_index::Integer,
-                                   cd::AbstractCurrent,
-                                   cfg::SimulationConfig,
-                                   extractor::Function)
-    mask = display_time_mask(outputs, cd, cfg)
-    return collect(extract_mea_series(outputs, gc_index, extractor))[mask]
-end
-
-
-"""Collect and mask a time series from the typed MEA-state history at the middle GC position."""
-extract_masked_mid_mea_series(outputs::SimulationOutputs,
-                              cfg::SimulationConfig,
-                              cd::AbstractCurrent,
-                              extractor::Function) =
-    extract_masked_mea_series(outputs, middle_gas_channel_index(cfg), cd, cfg, extractor)
-
-
 """Collect a derived time series stored per gas-channel node."""
 function extract_derived_gc_series(outputs::SimulationOutputs,
                                    gc_index::Integer,
@@ -125,30 +86,11 @@ function extract_derived_gc_series(outputs::SimulationOutputs,
 end
 
 
-"""Collect and mask a derived time series stored per gas-channel node."""
-function extract_masked_derived_gc_series(outputs::SimulationOutputs,
-                                          gc_index::Integer,
-                                          cd::AbstractCurrent,
-                                          cfg::SimulationConfig,
-                                          accessor::Function)
-    mask = display_time_mask(outputs, cd, cfg)
-    return collect(extract_derived_gc_series(outputs, gc_index, accessor))[mask]
-end
-
-
 """Collect a derived time series stored per gas-channel node at the middle GC position."""
 extract_mid_derived_gc_series(outputs::SimulationOutputs,
                               cfg::SimulationConfig,
                               accessor::Function) =
     extract_derived_gc_series(outputs, middle_gas_channel_index(cfg), accessor)
-
-
-"""Collect and mask a derived time series stored per gas-channel node at the middle GC position."""
-extract_masked_mid_derived_gc_series(outputs::SimulationOutputs,
-                                     cfg::SimulationConfig,
-                                     cd::AbstractCurrent,
-                                     accessor::Function) =
-    extract_masked_derived_gc_series(outputs, middle_gas_channel_index(cfg), cd, cfg, accessor)
 
 
 """Return the nearest indices in `t_hist` associated with sampling times."""

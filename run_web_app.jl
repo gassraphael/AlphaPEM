@@ -18,5 +18,16 @@ To stop the server, press Ctrl+C in the terminal.
 ENV["GTK_MODULES"] = ""
 ENV["GTK_DEBUG"] = ""
 
+# Handle optional port argument
+if length(ARGS) > 0
+    try
+        # Validate that the argument is a number
+        port = parse(Int, ARGS[1])
+        ENV["ALPHAPEM_PORT"] = string(port)
+    catch
+        println("Warning: Invalid port argument '$(ARGS[1])'. Using default port 8000.")
+    end
+end
+
 include(joinpath(@__DIR__, "src", "alphapem", "interfaces", "web", "WebApp.jl"))
 
