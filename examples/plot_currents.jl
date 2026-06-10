@@ -6,7 +6,7 @@ Pkg.activate(joinpath(@__DIR__, ".."))
 # --- Load AlphaPEM from the project environment ---
 using AlphaPEM.Config: StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
 using AlphaPEM.Currents: StepCurrent, PolarizationCurrent, PolarizationCalibrationCurrent, EISCurrent, current
-using AlphaPEM.Core.Models.PlotHelpers: _publication_colors, _finalize_axis!, lsub
+using AlphaPEM.Core.Models.PlotHelpers: _publication_colors, _cell_current_color, _finalize_axis!, lsub
 using CairoMakie
 
 # --- Time resolution ---
@@ -89,7 +89,7 @@ fig = Figure(size = (1200, 800))
 palette = _publication_colors()
 
 ax1 = Axis(fig[1, 1], title = "Step current")
-lines!(ax1, collect(t_step), i_step_vals, color=:black, linewidth=2.8)
+lines!(ax1, collect(t_step), i_step_vals, color=_cell_current_color(1), linewidth=2.8)
 _finalize_axis!(ax1;
     xlabel = rich("Time ", lsub("t", ""), " (s)"),
     ylabel = rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"))

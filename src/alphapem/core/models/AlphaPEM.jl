@@ -684,27 +684,28 @@ function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing)
         if simu.cfg.type_display == :synthetic && _ax1 !== nothing
             plot_polarization_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1)
         elseif simu.cfg.type_display == :multiple && _ax1 isa AbstractVector && length(_ax1) >= 5 && _ax2 !== nothing
-            # Multiple mode: internal states and derived polarization curves in individual figures.
-            plot_ifc_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[1])
-            plot_Ucell(outputs, simu.current_density, simu.cfg, _ax1[2])
-            plot_T_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[3])
-            plot_power_density_curve(outputs, simu.current_density, simu.cfg, _ax1[4])
-            plot_cell_efficiency(outputs, simu.current_density, simu.cfg, _ax1[5])
+            # Multiple mode: Performance curves (Polarization, Power, Efficiency) followed by Internal states.
+            plot_polarization_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[1])
+            plot_power_density_curve(outputs, simu.current_density, simu.cfg, _ax1[2])
+            plot_cell_efficiency(outputs, simu.current_density, simu.cfg, _ax1[3])
+            plot_ifc_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[4])
+            plot_Ucell(outputs, simu.current_density, simu.cfg, _ax1[5])
             if !(_ax2 isa AbstractVector)
-                plot_polarization_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax2)
+                plot_T_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax2)
             end
         end
     elseif simu.cfg.type_current isa PolarizationCalibrationParams
         if simu.cfg.type_display == :synthetic && _ax1 !== nothing
             plot_polarization_curve_for_cali(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1)
         elseif simu.cfg.type_display == :multiple && _ax1 isa AbstractVector && length(_ax1) >= 5 && _ax2 !== nothing
-            plot_ifc_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[1])
-            plot_Ucell(outputs, simu.current_density, simu.cfg, _ax1[2])
-            plot_T_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[3])
-            plot_power_density_curve(outputs, simu.current_density, simu.cfg, _ax1[4])
-            plot_cell_efficiency(outputs, simu.current_density, simu.cfg, _ax1[5])
+            # Multiple mode (Calibration): Performance curves followed by Internal states.
+            plot_polarization_curve_for_cali(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[1])
+            plot_power_density_curve(outputs, simu.current_density, simu.cfg, _ax1[2])
+            plot_cell_efficiency(outputs, simu.current_density, simu.cfg, _ax1[3])
+            plot_ifc_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[4])
+            plot_Ucell(outputs, simu.current_density, simu.cfg, _ax1[5])
             if !(_ax2 isa AbstractVector)
-                plot_polarization_curve_for_cali(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax2)
+                plot_T_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax2)
             end
         end
     elseif simu.cfg.type_current isa EISParams
