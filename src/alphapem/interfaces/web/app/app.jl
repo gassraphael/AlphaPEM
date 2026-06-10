@@ -26,7 +26,7 @@ Configure the Genie server with appropriate settings for AlphaPEM simulator.
 # Configure Genie settings
 const GENIE_CONFIG = Dict(
     :server_host => "127.0.0.1",           # localhost only (secure)
-    :server_port => 8000,                  # Default port
+    :server_port => parse(Int, get(ENV, "ALPHAPEM_PORT", "8000")), # Port from env or default
     :server_workers => 4,                  # Worker threads
     :log_level => Logging.Warn,            # Verbosity level
     :env => "dev",                         # Development mode

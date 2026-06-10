@@ -29,13 +29,12 @@ using Statistics: mean
 using XLSX
 
 # Import AlphaPEM internals for data extraction
-import AlphaPEM.Core.Models: SimulationOutputs, masked_time_history, extract_masked_derived_gc_series, 
-                             extract_masked_mid_mea_series, middle_gdl_index, middle_mpl_index,
-                             extract_masked_derived_series, time_history, derived_outputs,
+import AlphaPEM.Core.Models: middle_gdl_index, middle_mpl_index,
+                             time_history, derived_outputs,
                              make_Fourier_transformation, C_v_sat, extract_mea_series, 
-                             extract_mid_mea_series, extract_masked_mea_series,
-                             display_time_mask
-import AlphaPEM.Core.Modules: _eis_point, calculate_reynolds_numbers
+                             extract_mid_mea_series, extract_derived_series,
+                             extract_derived_gc_series, extract_mid_derived_gc_series
+import AlphaPEM.Core.Modules: _eis_point, calculate_reynolds_numbers, final_temperature_matrix_celsius
 import AlphaPEM.Application: _web_plot_specs
 import AlphaPEM.Currents: current
 import AlphaPEM.Utils: R
@@ -789,6 +788,9 @@ Dictionary with :id and :status
 function run_step_simulation(config::SimulationConfig; params=nothing)::Dict
     result_id = generate_result_id("step")
     start_time = time()
+    if !isnothing(params) && haskey(params, :req_start_time)
+        start_time = params[:req_start_time]
+    end
 
     try
         # Capture the actual output from the simulation
@@ -844,6 +846,9 @@ Run a polarization curve simulation.
 function run_polarization_simulation(config::SimulationConfig; params=nothing)::Dict
     result_id = generate_result_id("polarization")
     start_time = time()
+    if !isnothing(params) && haskey(params, :req_start_time)
+        start_time = params[:req_start_time]
+    end
 
     try
         # Capture the actual output from the simulation
@@ -899,6 +904,9 @@ Run an EIS simulation.
 function run_eis_simulation(config::SimulationConfig; params=nothing)::Dict
     result_id = generate_result_id("eis")
     start_time = time()
+    if !isnothing(params) && haskey(params, :req_start_time)
+        start_time = params[:req_start_time]
+    end
 
     try
         # EIS requires :live display_timing for frequency-by-frequency stepping.
@@ -1318,25 +1326,25 @@ function _get_plot_data(simu, key, config)
     
     # ── Temporal plots ────────────────────────────────────────────────────────
     if key in ["ifc_1d_temporal", "ifc_1d_temporal_cali"]
-        t = masked_time_history(outputs, cd, config)
+        t = time_history(outputs)
         headers = ["Time (s)", "i_fc_cell (A/cm²)"]
         for i in 1:nb_gc
             push!(headers, "i_fc_$(i) (A/cm²)")
         end
         data = hcat(t, current(cd, t) ./ 1e4)
         for i in 1:nb_gc
-            data = hcat(data, extract_masked_derived_gc_series(outputs, i, cd, config, x -> x.i_fc) ./ 1e4)
+            data = hcat(data, extract_derived_gc_series(outputs, i, x -> x.i_fc) ./ 1e4)
         end
         return headers, data
         
     elseif key in ["Ucell_temporal", "Ucell_temporal_cali"]
-        t = masked_time_history(outputs, cd, config)
+        t = time_history(outputs)
         headers = ["Time (s)", "Cell Voltage (V)"]
-        data = hcat(t, extract_masked_derived_series(outputs, cd, config, x -> x.Ucell))
+        data = hcat(t, extract_derived_series(outputs, x -> x.Ucell))
         return headers, data
         
     elseif key in ["T_1D_temporal", "T_1D_temporal_cali"]
-        t = masked_time_history(outputs, cd, config)
+        t = time_history(outputs)
         headers = ["Time (s)"]
         data = reshape(t, :, 1)
         # Average T for each layer
@@ -1353,12 +1361,12 @@ function _get_plot_data(simu, key, config)
         ]
         for (acc, name) in layers
             push!(headers, name)
-            data = hcat(data, extract_masked_mid_mea_series(outputs, config, cd, acc))
+            data = hcat(data, extract_mid_mea_series(outputs, config, acc))
         end
         return headers, data
 
     elseif key == "Cv_1D_temporal"
-        t = masked_time_history(outputs, cd, config)
+        t = time_history(outputs)
         headers = ["Time (s)"]
         data = reshape(t, :, 1)
         layers = [
@@ -1373,15 +1381,15 @@ function _get_plot_data(simu, key, config)
         ]
         for (acc, name) in layers
             push!(headers, name)
-            data = hcat(data, extract_masked_mid_mea_series(outputs, config, cd, acc))
+            data = hcat(data, extract_mid_mea_series(outputs, config, acc))
         end
         push!(headers, "Cv_sat_ccl (mol/m³)")
-        T_ccl = extract_masked_mid_mea_series(outputs, config, cd, mea -> mea.ccl.T)
+        T_ccl = extract_mid_mea_series(outputs, config, mea -> mea.ccl.T)
         data = hcat(data, [C_v_sat(T) for T in T_ccl])
         return headers, data
 
     elseif key == "s_1D_temporal"
-        t = masked_time_history(outputs, cd, config)
+        t = time_history(outputs)
         headers = ["Time (s)"]
         data = reshape(t, :, 1)
         layers = [
@@ -1396,66 +1404,66 @@ function _get_plot_data(simu, key, config)
         ]
         for (acc, name) in layers
             push!(headers, name)
-            data = hcat(data, extract_masked_mid_mea_series(outputs, config, cd, acc))
+            data = hcat(data, extract_mid_mea_series(outputs, config, acc))
         end
         return headers, data
 
     elseif key == "lambda_1D_temporal"
-        t = masked_time_history(outputs, cd, config)
+        t = time_history(outputs)
         headers = ["Time (s)", "lambda_acl (-)", "lambda_mem (-)", "lambda_ccl (-)"]
         data = hcat(t, 
-            extract_masked_mid_mea_series(outputs, config, cd, node -> node.acl.lambda),
-            extract_masked_mid_mea_series(outputs, config, cd, node -> node.mem.lambda),
-            extract_masked_mid_mea_series(outputs, config, cd, node -> node.ccl.lambda)
+            extract_mid_mea_series(outputs, config, node -> node.acl.lambda),
+            extract_mid_mea_series(outputs, config, node -> node.mem.lambda),
+            extract_mid_mea_series(outputs, config, node -> node.ccl.lambda)
         )
         return headers, data
 
     elseif key == "CH2_1D_temporal"
-        t = masked_time_history(outputs, cd, config)
+        t = time_history(outputs)
         headers = ["Time (s)"]
         data = reshape(t, :, 1)
         for i in 1:nb_gc
             push!(headers, "CH2_$(i) (mol/m³)")
-            data = hcat(data, extract_masked_mea_series(outputs, i, cd, config, mea -> mea.agc.C_H2))
+            data = hcat(data, extract_mea_series(outputs, i, mea -> mea.agc.C_H2))
         end
         return headers, data
 
     elseif key == "CO2_1D_temporal"
-        t = masked_time_history(outputs, cd, config)
+        t = time_history(outputs)
         headers = ["Time (s)"]
         data = reshape(t, :, 1)
         for i in 1:nb_gc
             push!(headers, "CO2_$(i) (mol/m³)")
-            data = hcat(data, extract_masked_mea_series(outputs, i, cd, config, mea -> mea.cgc.C_O2))
+            data = hcat(data, extract_mea_series(outputs, i, mea -> mea.cgc.C_O2))
         end
         return headers, data
 
     elseif key == "P_1D_temporal"
-        t = masked_time_history(outputs, cd, config)
+        t = time_history(outputs)
         headers = ["Time (s)"]
         data = reshape(t, :, 1)
         for i in 1:nb_gc
             push!(headers, "Pa_$(i) (Pa)")
-            data = hcat(data, extract_masked_mea_series(outputs, i, cd, config, mea -> (mea.agc.C_H2 + mea.agc.C_v + mea.agc.C_N2) * R * mea.agc.T))
+            data = hcat(data, extract_mea_series(outputs, i, mea -> (mea.agc.C_H2 + mea.agc.C_v + mea.agc.C_N2) * R * mea.agc.T))
             push!(headers, "Pc_$(i) (Pa)")
-            data = hcat(data, extract_masked_mea_series(outputs, i, cd, config, mea -> (mea.cgc.C_O2 + mea.cgc.C_v + mea.cgc.C_N2) * R * mea.cgc.T))
+            data = hcat(data, extract_mea_series(outputs, i, mea -> (mea.cgc.C_O2 + mea.cgc.C_v + mea.cgc.C_N2) * R * mea.cgc.T))
         end
         return headers, data
 
     elseif key == "CN2_1D_temporal"
-        t = masked_time_history(outputs, cd, config)
+        t = time_history(outputs)
         headers = ["Time (s)"]
         data = reshape(t, :, 1)
         for i in 1:nb_gc
             push!(headers, "CN2_$(i) (mol/m³)")
-            data = hcat(data, extract_masked_mea_series(outputs, i, cd, config, mea -> mea.agc.C_N2))
+            data = hcat(data, extract_mea_series(outputs, i, mea -> mea.agc.C_N2))
             push!(headers, "CN2_cgc_$(i) (mol/m³)")
-            data = hcat(data, extract_masked_mea_series(outputs, i, cd, config, mea -> mea.cgc.C_N2))
+            data = hcat(data, extract_mea_series(outputs, i, mea -> mea.cgc.C_N2))
         end
         return headers, data
 
     elseif key == "Phi_a_1D_temporal"
-        t = masked_time_history(outputs, cd, config)
+        t = time_history(outputs)
         headers = ["Time (s)"]
         data = reshape(t, :, 1)
         layers = [
@@ -1466,12 +1474,12 @@ function _get_plot_data(simu, key, config)
         ]
         for (acc, name) in layers
             push!(headers, name)
-            data = hcat(data, extract_masked_mid_mea_series(outputs, config, cd, acc))
+            data = hcat(data, extract_mid_mea_series(outputs, config, acc))
         end
         return headers, data
 
     elseif key == "Phi_c_1D_temporal"
-        t = masked_time_history(outputs, cd, config)
+        t = time_history(outputs)
         headers = ["Time (s)"]
         data = reshape(t, :, 1)
         layers = [
@@ -1482,58 +1490,57 @@ function _get_plot_data(simu, key, config)
         ]
         for (acc, name) in layers
             push!(headers, name)
-            data = hcat(data, extract_masked_mid_mea_series(outputs, config, cd, acc))
+            data = hcat(data, extract_mid_mea_series(outputs, config, acc))
         end
         return headers, data
 
     elseif key == "v_1D_temporal"
-        t = masked_time_history(outputs, cd, config)
+        t = time_history(outputs)
         headers = ["Time (s)"]
         data = reshape(t, :, 1)
         for i in 1:nb_gc
             push!(headers, "v_a_$(i) (m/s)")
-            data = hcat(data, extract_masked_derived_gc_series(outputs, i, cd, config, x -> x.v_a))
+            data = hcat(data, extract_derived_gc_series(outputs, i, x -> x.v_a))
             push!(headers, "v_c_$(i) (m/s)")
-            data = hcat(data, extract_masked_derived_gc_series(outputs, i, cd, config, x -> x.v_c))
+            data = hcat(data, extract_derived_gc_series(outputs, i, x -> x.v_c))
         end
         return headers, data
 
     elseif key == "Re_1D_temporal"
         Re_a_full, Re_c_full = calculate_reynolds_numbers(outputs, simu.fuel_cell)
-        t_full = time_history(outputs)
-        mask = display_time_mask(outputs, cd, config)
+        t = time_history(outputs)
 
         headers = ["Time (s)"]
-        data = reshape(t_full[mask], :, 1)
+        data = reshape(t, :, 1)
 
         for i in 1:nb_gc
             push!(headers, "Re_a_$(i) (-)")
-            data = hcat(data, Re_a_full[i][mask])
+            data = hcat(data, Re_a_full[i])
             push!(headers, "Re_c_$(i) (-)")
-            data = hcat(data, Re_c_full[i][mask])
+            data = hcat(data, Re_c_full[i])
         end
         return headers, data
 
     # ── Performance curves ───────────────────────────────────────────────────
     elseif key in ["polarization_curve", "polarization_curve_cali"]
-        t = masked_time_history(outputs, cd, config)
+        t = time_history(outputs)
         headers = ["Current Density (A/cm²)", "Cell Voltage (V)"]
         i_fc = current(cd, t) ./ 1e4
-        Ucell = extract_masked_derived_series(outputs, cd, config, x -> x.Ucell)
+        Ucell = extract_derived_series(outputs, x -> x.Ucell)
         return headers, hcat(i_fc, Ucell)
 
     elseif key in ["power_density_curve", "power_density_curve_cali"]
-        t = masked_time_history(outputs, cd, config)
+        t = time_history(outputs)
         headers = ["Current Density (A/cm²)", "Power Density (W/cm²)"]
         i_fc = current(cd, t) ./ 1e4
-        Ucell = extract_masked_derived_series(outputs, cd, config, x -> x.Ucell)
+        Ucell = extract_derived_series(outputs, x -> x.Ucell)
         return headers, hcat(i_fc, Ucell .* i_fc)
 
     elseif key in ["efficiency_curve", "efficiency_curve_cali"]
-        t = masked_time_history(outputs, cd, config)
+        t = time_history(outputs)
         headers = ["Current Density (A/cm²)", "Efficiency (%)"]
         i_fc = current(cd, t) ./ 1e4
-        Ucell = extract_masked_derived_series(outputs, cd, config, x -> x.Ucell)
+        Ucell = extract_derived_series(outputs, x -> x.Ucell)
         # Efficiency approx: Ucell / 1.25 * 100
         return headers, hcat(i_fc, (Ucell ./ 1.25) .* 100)
 

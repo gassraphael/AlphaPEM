@@ -14,6 +14,7 @@ export _publication_colors,
        _set_polarization_xlims!,
        _set_polarization_axis_limits!,
        _set_polarization_fixed_ticks!,
+       _set_initial_temporal_limits!,
        _format_fixed,
        _compact_tick_labels,
        _nice_tick_step,
@@ -26,6 +27,16 @@ export _publication_colors,
        saving_instructions!,
        gc_direction_labels,
        lsub
+
+# Internal storage for axis metadata that cannot be attached directly to Makie objects.
+const _axis_initial_limits = WeakKeyDict{Any, Observable{Any}}()
+
+"""Helper to get or create the initial limits observable for an axis."""
+function _get_initial_limits_obs(ax)
+    return get!(_axis_initial_limits, ax) do
+        Observable{Any}(nothing)
+    end
+end
 
 """Return a reproducible publication-oriented color set."""
 function _publication_colors()
@@ -122,8 +133,13 @@ function _add_axis_toolbar!(ax)
     colgap!(gl, 0)
 
     # 6. Interaction Logic
+    obs = _get_initial_limits_obs(ax)
     on(btn_res.clicks) do _
-        autolimits!(ax)
+        if obs[] !== nothing
+            limits!(ax, obs[]...)
+        else
+            autolimits!(ax)
+        end
     end
 
     on(btn_in.clicks) do _
@@ -184,6 +200,7 @@ function _finalize_axis!(ax;
     ax.yticklabelsize = 15
 
     # Add interactive 'Reset View' (house) and zoom buttons to the axis.
+    _get_initial_limits_obs(ax)
     _add_axis_toolbar!(ax)
 
     if legend
@@ -394,33 +411,73 @@ function _rounded_major_ticks(xmin::Real, xmax::Real; n_major::Int=7)
 end
 
 
-"""Force dense major ticks (at least 6) on both axes from plotted data ranges."""
+"""Force adaptive dense major ticks (at least 6) on both axes.
+
+Ticks are configured as functions that react to pan/zoom events, ensuring
+they extend correctly even when the user moves outside the initial data domain.
+"""
 function _set_dense_ticks!(ax,
                            x::AbstractVector{<:Real},
                            ys::AbstractVector{<:AbstractVector{<:Real}};
                            n_major::Int=7)
-    xfinite = filter(isfinite, collect(x))
-    yfinite = filter(isfinite, vcat((collect(y) for y in ys)...))
-    if !isempty(xfinite)
-        xmin, xmax = extrema(xfinite)
-        if xmin == xmax
-            delta = max(abs(xmin), 1.0) * 0.05
-            xmin -= delta
-            xmax += delta
-        end
-        ax.xticks = _rounded_major_ticks(xmin, xmax; n_major=n_major)
-        ax.xtickformat = _compact_tick_labels
+    # Define adaptive tick functions using closures that capture n_major.
+    function _adaptive_x_ticks(vmin, vmax)
+        ticks = _rounded_major_ticks(vmin, vmax; n_major=n_major)
+        return ticks, _compact_tick_labels(ticks)
     end
-    if !isempty(yfinite)
-        ymin, ymax = extrema(yfinite)
+    function _adaptive_y_ticks(vmin, vmax)
+        ticks = _rounded_major_ticks(vmin, vmax; n_major=n_major)
+        return ticks, _compact_tick_labels(ticks)
+    end
+
+    ax.xticks = _adaptive_x_ticks
+    ax.yticks = _adaptive_y_ticks
+    
+    # We also keep minor ticks visible (configured in _finalize_axis!).
+    return nothing
+end
+
+
+"""Calculate and apply initial framing for temporal plots.
+
+X limits are set to `t_range`, and Y limits are automatically computed from
+data present within that range. This ensures the 'Home' button resets to a
+clean, relevant view of the results after initialization.
+"""
+function _set_initial_temporal_limits!(ax,
+                                       t::AbstractVector{<:Real},
+                                       y_series::AbstractVector{<:AbstractVector{<:Real}},
+                                       t_range::Tuple{Float64, Float64})
+    t_start, t_end = t_range
+    
+    # Calculate Y limits based on data visible in the initial X range.
+    mask = (t .>= t_start) .& (t .<= t_end)
+    y_visible = Float64[]
+    for y in y_series
+        append!(y_visible, y[mask])
+    end
+    
+    y_finite = filter(isfinite, y_visible)
+    if !isempty(y_finite)
+        ymin, ymax = extrema(y_finite)
         if ymin == ymax
             delta = max(abs(ymin), 1.0) * 0.05
             ymin -= delta
             ymax += delta
+        else
+            margin = (ymax - ymin) * 0.05
+            ymin -= margin
+            ymax += margin
         end
-        ax.yticks = _rounded_major_ticks(ymin, ymax; n_major=n_major)
-        ax.ytickformat = _compact_tick_labels
+        
+        # Apply limits and store them for the 'Home' button.
+        obs = _get_initial_limits_obs(ax)
+        obs[] = (t_start, t_end, ymin, ymax)
+        limits!(ax, t_start, t_end, ymin, ymax)
+    else
+        xlims!(ax, t_start, t_end)
     end
+    
     return nothing
 end
 

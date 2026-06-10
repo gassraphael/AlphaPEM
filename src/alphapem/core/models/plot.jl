@@ -10,6 +10,7 @@ using .PlotHelpers: _publication_colors,
                     _experimental_marker,
                     _set_polarization_axis_limits!,
                     _set_polarization_fixed_ticks!,
+                    _set_initial_temporal_limits!,
                     _format_fixed,
                     _nice_tick_step,
                     _colorbar_ticks_auto,
@@ -28,24 +29,24 @@ function plot_ifc_1D_temporal(outputs::SimulationOutputs,
                               cfg::SimulationConfig,
                               ax)
     palette = _publication_colors()
-    t = masked_time_history(outputs, cd, cfg)
+    t = time_history(outputs)
     nb_gc = cfg.numerical_parameters.nb_gc
 
     i_fc_cell_t = current(cd, t) ./ 1e4
     lines!(ax, t, i_fc_cell_t; color=:black, linewidth=2.8, label=lsub("i", "fc,cell"))
 
     for i in 1:nb_gc
-        i_fc_t = extract_masked_derived_gc_series(outputs, i, cd, cfg, x -> x.i_fc) ./ 1e4
+        i_fc_t = extract_derived_gc_series(outputs, i, x -> x.i_fc) ./ 1e4
         lines!(ax, t, i_fc_t; color=palette[mod1(i, length(palette))], label=lsub("i", "fc,$(i)"))
     end
-    i_fc_series = [extract_masked_derived_gc_series(outputs, i, cd, cfg, x -> x.i_fc) ./ 1e4 for i in 1:nb_gc]
+    i_fc_series = [extract_derived_gc_series(outputs, i, x -> x.i_fc) ./ 1e4 for i in 1:nb_gc]
     _set_dense_ticks!(ax, t, vcat([i_fc_cell_t], i_fc_series))
-
-     _finalize_axis!(ax;
-                     xlabel=rich("Time ", lsub("t", ""), " (s)"),
-                     ylabel=rich("Current density ", rich(lsub("i", "fc"), "\n"), " (A·cm⁻²)"),
-                     legend=true,
-                     legend_position=:lb)
+    _finalize_axis!(ax;
+                    xlabel=rich("Time ", lsub("t", ""), " (s)"),
+                    ylabel=rich("Current density ", rich(lsub("i", "fc"), "\n"), " (A·cm⁻²)"),
+                    legend=true,
+                    legend_position=:lb)
+    _set_initial_temporal_limits!(ax, t, vcat([i_fc_cell_t], i_fc_series), initial_time_range(outputs, cd, cfg))
 
     # Add flow configuration annotation in bottom-right corner
     flow_note = cfg.type_flow == :counter_flow ?
@@ -74,19 +75,19 @@ function plot_C_v_1D_temporal(outputs::SimulationOutputs,
     palette = _publication_colors()
     nb_gdl_mid = middle_gdl_index(cfg)
     nb_mpl_mid = middle_mpl_index(cfg)
-    t = masked_time_history(outputs, cd, cfg)
-    T_ccl = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ccl.T)
+    t = time_history(outputs)
+    T_ccl = extract_mid_mea_series(outputs, cfg, mea -> mea.ccl.T)
     C_v_sat_ccl = [C_v_sat(T) for T in T_ccl]
 
     series = [
-        (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agc.C_v), lsub("C", "v,agc")),
-        (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agdl[nb_gdl_mid].C_v), lsub("C", "v,agdl")),
-        (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ampl[nb_mpl_mid].C_v), lsub("C", "v,ampl")),
-        (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.acl.C_v), lsub("C", "v,acl")),
-        (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ccl.C_v), lsub("C", "v,ccl")),
-        (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cmpl[nb_mpl_mid].C_v), lsub("C", "v,cmpl")),
-        (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgdl[nb_gdl_mid].C_v), lsub("C", "v,cgdl")),
-        (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgc.C_v), lsub("C", "v,cgc")),
+        (extract_mid_mea_series(outputs, cfg, mea -> mea.agc.C_v), lsub("C", "v,agc")),
+        (extract_mid_mea_series(outputs, cfg, mea -> mea.agdl[nb_gdl_mid].C_v), lsub("C", "v,agdl")),
+        (extract_mid_mea_series(outputs, cfg, mea -> mea.ampl[nb_mpl_mid].C_v), lsub("C", "v,ampl")),
+        (extract_mid_mea_series(outputs, cfg, mea -> mea.acl.C_v), lsub("C", "v,acl")),
+        (extract_mid_mea_series(outputs, cfg, mea -> mea.ccl.C_v), lsub("C", "v,ccl")),
+        (extract_mid_mea_series(outputs, cfg, mea -> mea.cmpl[nb_mpl_mid].C_v), lsub("C", "v,cmpl")),
+        (extract_mid_mea_series(outputs, cfg, mea -> mea.cgdl[nb_gdl_mid].C_v), lsub("C", "v,cgdl")),
+        (extract_mid_mea_series(outputs, cfg, mea -> mea.cgc.C_v), lsub("C", "v,cgc")),
     ]
 
     for (i, (y, lbl)) in enumerate(series)
@@ -101,6 +102,7 @@ function plot_C_v_1D_temporal(outputs::SimulationOutputs,
                     ylabel=rich("Vapor concentration ", lsub("C", "v"), " (mol·m⁻³)"),
                     legend=true,
                     legend_position=:rt)
+    _set_initial_temporal_limits!(ax, t, vcat([s[1] for s in series], [C_v_sat_ccl]), initial_time_range(outputs, cd, cfg))
     return nothing
 end
 
@@ -132,14 +134,14 @@ function plot_lambda_1D_temporal(outputs::SimulationOutputs,
                         legend=true,
                         legend_position=:lb)
     else
-        t = masked_time_history(outputs, cd, cfg)
-        lines!(ax, t, extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.acl.lambda);
+        t = time_history(outputs)
+        lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.acl.lambda);
                color=palette[3], label=lsub("λ", "acl"))
-        lines!(ax, t, extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.mem.lambda);
+        lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.mem.lambda);
                color=palette[4], label=lsub("λ", "mem"))
-        lambda_ccl_in_t = extract_masked_mea_series(outputs, 1, cd, cfg, mea -> mea.ccl.lambda)
-        lambda_ccl_mid_t = extract_masked_mea_series(outputs, mid_gc, cd, cfg, mea -> mea.ccl.lambda)
-        lambda_ccl_out_t = extract_masked_mea_series(outputs, nb_gc, cd, cfg, mea -> mea.ccl.lambda)
+        lambda_ccl_in_t = extract_mea_series(outputs, 1, mea -> mea.ccl.lambda)
+        lambda_ccl_mid_t = extract_mea_series(outputs, mid_gc, mea -> mea.ccl.lambda)
+        lambda_ccl_out_t = extract_mea_series(outputs, nb_gc, mea -> mea.ccl.lambda)
         lines!(ax, t, lambda_ccl_in_t;
                color=palette[5], linestyle=:dash, label=lsub("λ", "ccl,in"))
         mid_gc != 1 && mid_gc != nb_gc &&
@@ -148,8 +150,8 @@ function plot_lambda_1D_temporal(outputs::SimulationOutputs,
         nb_gc != 1 &&
             lines!(ax, t, lambda_ccl_out_t;
                    color=palette[5], linestyle=:dot, label=lsub("λ", "ccl,out"))
-        lambda_acl_t = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.acl.lambda)
-        lambda_mem_t = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.mem.lambda)
+        lambda_acl_t = extract_mid_mea_series(outputs, cfg, mea -> mea.acl.lambda)
+        lambda_mem_t = extract_mid_mea_series(outputs, cfg, mea -> mea.mem.lambda)
         y_series = [lambda_acl_t, lambda_mem_t, lambda_ccl_in_t]
         mid_gc != 1 && mid_gc != nb_gc && push!(y_series, lambda_ccl_mid_t)
         nb_gc != 1 && push!(y_series, lambda_ccl_out_t)
@@ -159,6 +161,7 @@ function plot_lambda_1D_temporal(outputs::SimulationOutputs,
                         ylabel=rich("Water content ", lsub("λ", ""), " (-)"),
                         legend=true,
                         legend_position=:lb)
+        _set_initial_temporal_limits!(ax, t, y_series, initial_time_range(outputs, cd, cfg))
     end
     return nothing
 end
@@ -197,17 +200,17 @@ function plot_s_1D_temporal(outputs::SimulationOutputs,
                         legend=true,
                         legend_position=:rt)
     else
-        t = masked_time_history(outputs, cd, cfg)
+        t = time_history(outputs)
 
         series = [
-            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agc.s), lsub("s", "agc")),
-            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agdl[nb_gdl_mid].s), lsub("s", "agdl")),
-            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ampl[nb_mpl_mid].s), lsub("s", "ampl")),
-            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.acl.s), lsub("s", "acl")),
-            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ccl.s), lsub("s", "ccl")),
-            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cmpl[nb_mpl_mid].s), lsub("s", "cmpl")),
-            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgdl[nb_gdl_mid].s), lsub("s", "cgdl")),
-            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgc.s), lsub("s", "cgc")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.agc.s), lsub("s", "agc")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.agdl[nb_gdl_mid].s), lsub("s", "agdl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.ampl[nb_mpl_mid].s), lsub("s", "ampl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.acl.s), lsub("s", "acl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.ccl.s), lsub("s", "ccl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.cmpl[nb_mpl_mid].s), lsub("s", "cmpl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.cgdl[nb_gdl_mid].s), lsub("s", "cgdl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.cgc.s), lsub("s", "cgc")),
         ]
 
         for (i, (y, lbl)) in enumerate(series)
@@ -219,6 +222,7 @@ function plot_s_1D_temporal(outputs::SimulationOutputs,
                         ylabel=rich("Liquid saturation ", lsub("s", ""), " (-)"),
                         legend=true,
                         legend_position=:rt)
+        _set_initial_temporal_limits!(ax, t, [s[1] for s in series], initial_time_range(outputs, cd, cfg))
     end
     return nothing
 end
@@ -231,27 +235,28 @@ function plot_C_H2_1D_temporal(outputs::SimulationOutputs,
     palette = _publication_colors()
     nb_gdl_mid = middle_gdl_index(cfg)
     nb_mpl_mid = middle_mpl_index(cfg)
-    t = masked_time_history(outputs, cd, cfg)
+    t = time_history(outputs)
 
-    lines!(ax, t, extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agc.C_H2);
+    lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.agc.C_H2);
            color=palette[1], label=lsub("C", "H₂,agc"))
-    lines!(ax, t, extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agdl[nb_gdl_mid].C_H2);
+    lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.agdl[nb_gdl_mid].C_H2);
            color=palette[2], label=lsub("C", "H₂,agdl"))
-    lines!(ax, t, extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ampl[nb_mpl_mid].C_H2);
+    lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.ampl[nb_mpl_mid].C_H2);
            color=palette[3], label=lsub("C", "H₂,ampl"))
-    lines!(ax, t, extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.acl.C_H2);
+    lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.acl.C_H2);
            color=palette[4], label=lsub("C", "H₂,acl"))
 
-    C_H2_agc_t = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agc.C_H2)
-    C_H2_agdl_t = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agdl[nb_gdl_mid].C_H2)
-    C_H2_ampl_t = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ampl[nb_mpl_mid].C_H2)
-    C_H2_acl_t = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.acl.C_H2)
+    C_H2_agc_t = extract_mid_mea_series(outputs, cfg, mea -> mea.agc.C_H2)
+    C_H2_agdl_t = extract_mid_mea_series(outputs, cfg, mea -> mea.agdl[nb_gdl_mid].C_H2)
+    C_H2_ampl_t = extract_mid_mea_series(outputs, cfg, mea -> mea.ampl[nb_mpl_mid].C_H2)
+    C_H2_acl_t = extract_mid_mea_series(outputs, cfg, mea -> mea.acl.C_H2)
     _set_dense_ticks!(ax, t, [C_H2_agc_t, C_H2_agdl_t, C_H2_ampl_t, C_H2_acl_t])
     _finalize_axis!(ax;
                     xlabel=rich("Time ", lsub("t", ""), " (s)"),
                     ylabel=rich("Hydrogen concentration ", lsub("C", "H₂"), " (mol·m⁻³)"),
                     legend=true,
                     legend_position=:rt)
+    _set_initial_temporal_limits!(ax, t, [C_H2_agc_t, C_H2_agdl_t, C_H2_ampl_t, C_H2_acl_t], initial_time_range(outputs, cd, cfg))
     return nothing
 end
 
@@ -265,20 +270,20 @@ function plot_C_O2_1D_temporal(outputs::SimulationOutputs,
     nb_mpl_mid = middle_mpl_index(cfg)
     nb_gc = cfg.numerical_parameters.nb_gc
     mid_gc = middle_gas_channel_index(cfg)
-    t = masked_time_history(outputs, cd, cfg)
+    t = time_history(outputs)
 
-    C_O2_Pt_t = extract_masked_mid_derived_gc_series(outputs, cfg, cd, x -> x.C_O2_Pt)
+    C_O2_Pt_t = extract_mid_derived_gc_series(outputs, cfg, x -> x.C_O2_Pt)
     lines!(ax, t, C_O2_Pt_t;
            color=palette[10], label=lsub("C", "O₂,Pt"))
-    lines!(ax, t, extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ccl.C_O2);
+    lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.ccl.C_O2);
            color=palette[5], label=lsub("C", "O₂,ccl"))
-    lines!(ax, t, extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cmpl[nb_mpl_mid].C_O2);
+    lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.cmpl[nb_mpl_mid].C_O2);
            color=palette[6], label=lsub("C", "O₂,cmpl"))
-    lines!(ax, t, extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgdl[nb_gdl_mid].C_O2);
+    lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.cgdl[nb_gdl_mid].C_O2);
            color=palette[7], label=lsub("C", "O₂,cgdl"))
-    C_O2_cgc_in_t = extract_masked_mea_series(outputs, 1, cd, cfg, mea -> mea.cgc.C_O2)
-    C_O2_cgc_mid_t = extract_masked_mea_series(outputs, mid_gc, cd, cfg, mea -> mea.cgc.C_O2)
-    C_O2_cgc_out_t = extract_masked_mea_series(outputs, nb_gc, cd, cfg, mea -> mea.cgc.C_O2)
+    C_O2_cgc_in_t = extract_mea_series(outputs, 1, mea -> mea.cgc.C_O2)
+    C_O2_cgc_mid_t = extract_mea_series(outputs, mid_gc, mea -> mea.cgc.C_O2)
+    C_O2_cgc_out_t = extract_mea_series(outputs, nb_gc, mea -> mea.cgc.C_O2)
     lines!(ax, t, C_O2_cgc_in_t;
            color=palette[8], linestyle=:dash, label=lsub("C", "O₂,cgc,in"))
     mid_gc != 1 && mid_gc != nb_gc &&
@@ -288,9 +293,9 @@ function plot_C_O2_1D_temporal(outputs::SimulationOutputs,
         lines!(ax, t, C_O2_cgc_out_t;
                color=palette[8], linestyle=:dot, label=lsub("C", "O₂,cgc,out"))
 
-    C_O2_ccl_t = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ccl.C_O2)
-    C_O2_cmpl_t = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cmpl[nb_mpl_mid].C_O2)
-    C_O2_cgdl_t = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgdl[nb_gdl_mid].C_O2)
+    C_O2_ccl_t = extract_mid_mea_series(outputs, cfg, mea -> mea.ccl.C_O2)
+    C_O2_cmpl_t = extract_mid_mea_series(outputs, cfg, mea -> mea.cmpl[nb_mpl_mid].C_O2)
+    C_O2_cgdl_t = extract_mid_mea_series(outputs, cfg, mea -> mea.cgdl[nb_gdl_mid].C_O2)
     y_series = [C_O2_Pt_t, C_O2_ccl_t, C_O2_cmpl_t, C_O2_cgdl_t, C_O2_cgc_in_t]
     mid_gc != 1 && mid_gc != nb_gc && push!(y_series, C_O2_cgc_mid_t)
     nb_gc != 1 && push!(y_series, C_O2_cgc_out_t)
@@ -300,6 +305,7 @@ function plot_C_O2_1D_temporal(outputs::SimulationOutputs,
                     ylabel=rich("Oxygen concentration ", lsub("C", "O₂"), " (mol·m⁻³)"),
                     legend=true,
                     legend_position=:lt)
+    _set_initial_temporal_limits!(ax, t, y_series, initial_time_range(outputs, cd, cfg))
     return nothing
 end
 
@@ -343,18 +349,18 @@ function plot_T_1D_temporal(outputs::SimulationOutputs,
                         legend=true,
                         legend_position=:lt)
     else
-        t = masked_time_history(outputs, cd, cfg)
+        t = time_history(outputs)
 
         series = [
-            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agc.T) .- 273.15, lsub("T", "agc")),
-            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agdl[nb_gdl_mid].T) .- 273.15, lsub("T", "agdl")),
-            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ampl[nb_mpl_mid].T) .- 273.15, lsub("T", "ampl")),
-            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.acl.T) .- 273.15, lsub("T", "acl")),
-            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.mem.T) .- 273.15, lsub("T", "mem")),
-            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.ccl.T) .- 273.15, lsub("T", "ccl")),
-            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cmpl[nb_mpl_mid].T) .- 273.15, lsub("T", "cmpl")),
-            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgdl[nb_gdl_mid].T) .- 273.15, lsub("T", "cgdl")),
-            (extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgc.T) .- 273.15, lsub("T", "cgc")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.agc.T) .- 273.15, lsub("T", "agc")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.agdl[nb_gdl_mid].T) .- 273.15, lsub("T", "agdl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.ampl[nb_mpl_mid].T) .- 273.15, lsub("T", "ampl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.acl.T) .- 273.15, lsub("T", "acl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.mem.T) .- 273.15, lsub("T", "mem")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.ccl.T) .- 273.15, lsub("T", "ccl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.cmpl[nb_mpl_mid].T) .- 273.15, lsub("T", "cmpl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.cgdl[nb_gdl_mid].T) .- 273.15, lsub("T", "cgdl")),
+            (extract_mid_mea_series(outputs, cfg, mea -> mea.cgc.T) .- 273.15, lsub("T", "cgc")),
         ]
 
         for (i, (y, lbl)) in enumerate(series)
@@ -368,6 +374,7 @@ function plot_T_1D_temporal(outputs::SimulationOutputs,
                         ylabel=rich("Temperature ", lsub("T", ""), " (°C)"),
                         legend=true,
                         legend_position=:lt)
+        _set_initial_temporal_limits!(ax, t, [s[1] for s in series], initial_time_range(outputs, cd, cfg))
     end
     return nothing
 end
@@ -377,8 +384,8 @@ function plot_Ucell(outputs::SimulationOutputs,
                     cd::AbstractCurrent,
                     cfg::SimulationConfig,
                     ax)
-    t = masked_time_history(outputs, cd, cfg)
-    Ucell_t = extract_masked_derived_series(outputs, cd, cfg, x -> x.Ucell)
+    t = time_history(outputs)
+    Ucell_t = extract_derived_series(outputs, x -> x.Ucell)
     lines!(ax, t, Ucell_t; color=:black, label=lsub("U", "cell"))
     _set_dense_ticks!(ax, t, [Ucell_t])
     _finalize_axis!(ax;
@@ -386,6 +393,7 @@ function plot_Ucell(outputs::SimulationOutputs,
                     ylabel=rich("Cell voltage ", lsub("U", "cell"), " (V)"),
                     legend=true,
                     legend_position=:lt)
+    _set_initial_temporal_limits!(ax, t, [Ucell_t], initial_time_range(outputs, cd, cfg))
     return nothing
 end
 
@@ -396,12 +404,12 @@ function plot_C_N2_1D_temporal(outputs::SimulationOutputs,
                                ax)
     palette = _publication_colors()
     nb_gc = cfg.numerical_parameters.nb_gc
-    t = masked_time_history(outputs, cd, cfg)
+    t = time_history(outputs)
 
     C_N2_series = Vector{Vector{Float64}}()
     for i in 1:nb_gc
-        C_N2_agc_i = extract_masked_mea_series(outputs, i, cd, cfg, mea -> mea.agc.C_N2)
-        C_N2_cgc_i = extract_masked_mea_series(outputs, i, cd, cfg, mea -> mea.cgc.C_N2)
+        C_N2_agc_i = extract_mea_series(outputs, i, mea -> mea.agc.C_N2)
+        C_N2_cgc_i = extract_mea_series(outputs, i, mea -> mea.cgc.C_N2)
         push!(C_N2_series, C_N2_agc_i, C_N2_cgc_i)
         lines!(ax, t, C_N2_agc_i; color=palette[mod1(i, length(palette))],
                linestyle=:solid, label=lsub("C", "N₂,agc,$(i)"))
@@ -414,6 +422,7 @@ function plot_C_N2_1D_temporal(outputs::SimulationOutputs,
                     ylabel=rich("Nitrogen concentration ", lsub("C", "N₂"), " (mol·m⁻³)"),
                     legend=true,
                     legend_position=:rt)
+    _set_initial_temporal_limits!(ax, t, C_N2_series, initial_time_range(outputs, cd, cfg))
     return nothing
 end
 
@@ -425,16 +434,16 @@ function plot_Phi_a_1D_temporal(outputs::SimulationOutputs,
     palette = _publication_colors()
     nb_gdl_mid = middle_gdl_index(cfg)
     nb_mpl_mid = middle_mpl_index(cfg)
-    t = masked_time_history(outputs, cd, cfg)
+    t = time_history(outputs)
 
     series = [
-        (extract_masked_mid_mea_series(outputs, cfg, cd,
+        (extract_mid_mea_series(outputs, cfg,
              mea -> mea.agc.C_v / C_v_sat(mea.agc.T)),                                    lsub("Φ", "a,agc")),
-        (extract_masked_mid_mea_series(outputs, cfg, cd,
+        (extract_mid_mea_series(outputs, cfg,
              mea -> mea.agdl[nb_gdl_mid].C_v / C_v_sat(mea.agdl[nb_gdl_mid].T)),          lsub("Φ", "a,agdl")),
-        (extract_masked_mid_mea_series(outputs, cfg, cd,
+        (extract_mid_mea_series(outputs, cfg,
              mea -> mea.ampl[nb_mpl_mid].C_v / C_v_sat(mea.ampl[nb_mpl_mid].T)),          lsub("Φ", "a,ampl")),
-        (extract_masked_mid_mea_series(outputs, cfg, cd,
+        (extract_mid_mea_series(outputs, cfg,
              mea -> mea.acl.C_v / C_v_sat(mea.acl.T)),                                    lsub("Φ", "a,acl")),
     ]
 
@@ -450,6 +459,7 @@ function plot_Phi_a_1D_temporal(outputs::SimulationOutputs,
                     ylabel=rich("Anode relative humidity ", lsub("Φ", "a"), " (–)"),
                     legend=true,
                     legend_position=:rt)
+    _set_initial_temporal_limits!(ax, t, vcat([s[1] for s in series], [ones(length(t))]), initial_time_range(outputs, cd, cfg))
     return nothing
 end
 
@@ -461,16 +471,16 @@ function plot_Phi_c_1D_temporal(outputs::SimulationOutputs,
     palette = _publication_colors()
     nb_gdl_mid = middle_gdl_index(cfg)
     nb_mpl_mid = middle_mpl_index(cfg)
-    t = masked_time_history(outputs, cd, cfg)
+    t = time_history(outputs)
 
     series = [
-        (extract_masked_mid_mea_series(outputs, cfg, cd,
+        (extract_mid_mea_series(outputs, cfg,
              mea -> mea.ccl.C_v / C_v_sat(mea.ccl.T)),                                    lsub("Φ", "c,ccl")),
-        (extract_masked_mid_mea_series(outputs, cfg, cd,
+        (extract_mid_mea_series(outputs, cfg,
              mea -> mea.cmpl[nb_mpl_mid].C_v / C_v_sat(mea.cmpl[nb_mpl_mid].T)),          lsub("Φ", "c,cmpl")),
-        (extract_masked_mid_mea_series(outputs, cfg, cd,
+        (extract_mid_mea_series(outputs, cfg,
              mea -> mea.cgdl[nb_gdl_mid].C_v / C_v_sat(mea.cgdl[nb_gdl_mid].T)),          lsub("Φ", "c,cgdl")),
-        (extract_masked_mid_mea_series(outputs, cfg, cd,
+        (extract_mid_mea_series(outputs, cfg,
              mea -> mea.cgc.C_v / C_v_sat(mea.cgc.T)),                                    lsub("Φ", "c,cgc")),
     ]
 
@@ -486,6 +496,7 @@ function plot_Phi_c_1D_temporal(outputs::SimulationOutputs,
                     ylabel=rich("Cathode relative humidity ", lsub("Φ", "c"), " (–)"),
                     legend=true,
                     legend_position=:rt)
+    _set_initial_temporal_limits!(ax, t, vcat([s[1] for s in series], [ones(length(t))]), initial_time_range(outputs, cd, cfg))
     return nothing
 end
 
@@ -496,12 +507,12 @@ function plot_v_1D_temporal(outputs::SimulationOutputs,
                             ax)
     palette = _publication_colors()
     nb_gc = cfg.numerical_parameters.nb_gc
-    t = masked_time_history(outputs, cd, cfg)
+    t = time_history(outputs)
 
     v_series = Vector{Vector{Float64}}()
     for i in 1:nb_gc
-        v_a_i = extract_masked_derived_gc_series(outputs, i, cd, cfg, x -> x.v_a)
-        v_c_i = extract_masked_derived_gc_series(outputs, i, cd, cfg, x -> x.v_c)
+        v_a_i = extract_derived_gc_series(outputs, i, x -> x.v_a)
+        v_c_i = extract_derived_gc_series(outputs, i, x -> x.v_c)
         push!(v_series, v_a_i, v_c_i)
         lines!(ax, t, v_a_i; color=palette[mod1(i, length(palette))],
                linestyle=:solid, label=lsub("v", "a,$(i)"))
@@ -514,6 +525,7 @@ function plot_v_1D_temporal(outputs::SimulationOutputs,
                     ylabel=rich("Gas velocity ", lsub("v", ""), " (m·s⁻¹)"),
                     legend=true,
                     legend_position=:rt)
+    _set_initial_temporal_limits!(ax, t, v_series, initial_time_range(outputs, cd, cfg))
     return nothing
 end
 
@@ -530,17 +542,15 @@ function plot_Re_nb_1D_temporal(outputs::SimulationOutputs,
                                 ax)
     palette = _publication_colors()
     nb_gc = cfg.numerical_parameters.nb_gc
-    t_full = time_history(outputs)
-    mask = display_time_mask(outputs, cd, cfg)
-    t = t_full[mask]
+    t = time_history(outputs)
 
     # Use the centralized calculation function
     Re_a_full, Re_c_full = calculate_reynolds_numbers(outputs, fc)
 
     Re_series = Vector{Vector{Float64}}()
     for i in 1:nb_gc
-        Re_a_i = Re_a_full[i][mask]
-        Re_c_i = Re_c_full[i][mask]
+        Re_a_i = Re_a_full[i]
+        Re_c_i = Re_c_full[i]
 
         push!(Re_series, Re_a_i, Re_c_i)
         lines!(ax, t, Re_a_i; color=palette[mod1(i, length(palette))],
@@ -554,6 +564,7 @@ function plot_Re_nb_1D_temporal(outputs::SimulationOutputs,
                     ylabel=rich("Reynolds number ", lsub("Re", ""), " (–)"),
                     legend=true,
                     legend_position=:rt)
+    _set_initial_temporal_limits!(ax, t, Re_series, initial_time_range(outputs, cd, cfg))
     return nothing
 end
 
@@ -566,21 +577,21 @@ function plot_P_1D_temporal(outputs::SimulationOutputs,
     palette = _publication_colors()
     Pa_des = fc.operating_conditions.Pa_des
     Pc_des = fc.operating_conditions.Pc_des
-    t = masked_time_history(outputs, cd, cfg)
+    t = time_history(outputs)
 
-    C_v_agc = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agc.C_v)
-    C_H2_agc = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agc.C_H2)
-    C_N2_agc = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agc.C_N2)
-    T_agc = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.agc.T)
-    C_v_cgc = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgc.C_v)
-    C_O2_cgc = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgc.C_O2)
-    C_N2_cgc = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgc.C_N2)
-    T_cgc = extract_masked_mid_mea_series(outputs, cfg, cd, mea -> mea.cgc.T)
+    C_v_agc = extract_mid_mea_series(outputs, cfg, mea -> mea.agc.C_v)
+    C_H2_agc = extract_mid_mea_series(outputs, cfg, mea -> mea.agc.C_H2)
+    C_N2_agc = extract_mid_mea_series(outputs, cfg, mea -> mea.agc.C_N2)
+    T_agc = extract_mid_mea_series(outputs, cfg, mea -> mea.agc.T)
+    C_v_cgc = extract_mid_mea_series(outputs, cfg, mea -> mea.cgc.C_v)
+    C_O2_cgc = extract_mid_mea_series(outputs, cfg, mea -> mea.cgc.C_O2)
+    C_N2_cgc = extract_mid_mea_series(outputs, cfg, mea -> mea.cgc.C_N2)
+    T_cgc = extract_mid_mea_series(outputs, cfg, mea -> mea.cgc.T)
 
     P_agc = (C_v_agc .+ C_H2_agc .+ C_N2_agc) .* R .* T_agc ./ 1e5
     P_cgc = (C_v_cgc .+ C_O2_cgc .+ C_N2_cgc) .* R .* T_cgc ./ 1e5
-    Pa_in = extract_masked_derived_series(outputs, cd, cfg, x -> x.Pa_in) ./ 1e5
-    Pc_in = extract_masked_derived_series(outputs, cd, cfg, x -> x.Pc_in) ./ 1e5
+    Pa_in = extract_derived_series(outputs, x -> x.Pa_in) ./ 1e5
+    Pc_in = extract_derived_series(outputs, x -> x.Pc_in) ./ 1e5
     Pa_out = fill(Pa_des / 1e5, length(t))
     Pc_out = fill(Pc_des / 1e5, length(t))
 
@@ -597,6 +608,7 @@ function plot_P_1D_temporal(outputs::SimulationOutputs,
                     ylabel=rich("Pressure ", lsub("P", ""), " (bar)"),
                     legend=true,
                     legend_position=:lb)
+    _set_initial_temporal_limits!(ax, t, [P_agc, P_cgc, Pa_in, Pa_out, Pc_in, Pc_out], initial_time_range(outputs, cd, cfg))
     return nothing
 end
 

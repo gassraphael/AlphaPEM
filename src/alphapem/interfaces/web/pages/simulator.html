@@ -498,6 +498,31 @@
             line-height: 1.4;
         }
 
+        .btn-modify-params {
+            padding: 8px 16px;
+            background: #ffffff;
+            border: 1px solid #0066cc;
+            border-radius: 4px;
+            color: #0066cc;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-modify-params:hover {
+            background: #0066cc;
+            color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 102, 204, 0.2);
+        }
+
+        .btn-modify-params:active {
+            transform: translateY(1px);
+        }
+
         /* Model Type Indicator Styles */
         .model-type-container {
             grid-column: 1 / -1;
@@ -623,7 +648,15 @@
                 <!-- TAB 2: Physical Parameters -->
                 <div class="tab-content">
                     <h3>Physical Parameters</h3>
-                    <div id="preset-warning" class="alert alert-info" style="display: none;"><strong>Note:</strong> You have selected a pre-configured fuel cell. Modifying these values will impact the simulation results.</div>
+                    
+                    <div id="physical-params-preset-info" class="alert alert-info" style="display: none;">
+                        <strong>Note:</strong> You have selected a pre-configured fuel cell. Physical parameters are already optimized. Modifying them will affect the results.
+                        <div style="margin-top: 12px;">
+                            <button type="button" class="btn-modify-params" onclick="togglePhysicalParametersVisibility()">
+                                ⚙️ Modify physical parameters (optional)
+                            </button>
+                        </div>
+                    </div>
 
                     <div id="undetermined-legend" class="undetermined-info" style="display: none;">
                         <strong>Highlighted parameters:</strong> These are "undetermined" parameters.
@@ -631,8 +664,9 @@
                         Modifying them requires expertise as they significantly impact the model's accuracy.
                     </div>
 
-                    <!-- Cell geometric Parameters -->
-                    <div class="form-section">
+                    <div id="physical-parameters-sections">
+                        <!-- Cell geometric Parameters -->
+                        <div class="form-section">
                         <div class="section-title">Cell geometric parameters</div>
                         <div class="form-grid">
                             <div class="form-group" id="group-Aact">
@@ -813,8 +847,9 @@
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="nav-buttons">
+                <div class="nav-buttons">
                         <button class="btn-nav" onclick="switchTab(0)">← Previous</button>
                         <button class="btn-nav" onclick="switchTab(2)">Next →</button>
                     </div>
@@ -1221,6 +1256,32 @@
         let lastSelectedPresetValues = null; // Store preset values to detect manual changes
         let defaultsLoaded = false; // Flag to track if fuel cell defaults have been loaded
         let simulationTimerInterval = null; // Interval for the simulation timer
+        let physicalParamsVisible = false; // Track visibility of physical parameters
+
+        function togglePhysicalParametersVisibility() {
+            physicalParamsVisible = !physicalParamsVisible;
+            const sections = document.getElementById('physical-parameters-sections');
+            const btn = document.querySelector('.btn-modify-params');
+            const fuelCellTypeEl = document.querySelector('input[name="fuel_cell_type"]:checked');
+            const fuelCellType = fuelCellTypeEl ? fuelCellTypeEl.value : '';
+
+            if (sections) {
+                sections.style.display = physicalParamsVisible ? 'block' : 'none';
+            }
+            
+            if (btn) {
+                btn.innerHTML = physicalParamsVisible ? '✕ Hide physical parameters' : '⚙️ Modify physical parameters (optional)';
+            }
+            
+            // Update legend visibility
+            updateUndeterminedHighlighting(fuelCellType);
+
+            // Re-scroll to top of content if showing
+            if (physicalParamsVisible) {
+                const sectionsEl = document.getElementById('physical-parameters-sections');
+                if (sectionsEl) sectionsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
 
         function switchTab(tabIndex) {
             try {
@@ -1250,17 +1311,22 @@
                     activeTab.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
 
-                // Show/hide preset warning based on tab and config type
+                // Show/hide preset info based on tab and config type
                 const configTypeEl = document.querySelector('input[name="config_type"]:checked');
                 const configType = configTypeEl ? configTypeEl.value : 'pre_selected';
-                const presetWarning = document.getElementById('preset-warning');
+                const physicalParamsPresetInfo = document.getElementById('physical-params-preset-info');
+                const physicalParamsSections = document.getElementById('physical-parameters-sections');
                 
-                if (presetWarning) {
-                    if (tabIndex === 1 && configType === 'pre_selected') { // Physical Params tab
-                        presetWarning.style.display = 'block';
+                if (tabIndex === 1) { // Physical Params tab
+                    if (configType === 'pre_selected') {
+                        if (physicalParamsPresetInfo) physicalParamsPresetInfo.style.display = 'block';
+                        if (physicalParamsSections) physicalParamsSections.style.display = physicalParamsVisible ? 'block' : 'none';
                     } else {
-                        presetWarning.style.display = 'none';
+                        if (physicalParamsPresetInfo) physicalParamsPresetInfo.style.display = 'none';
+                        if (physicalParamsSections) physicalParamsSections.style.display = 'block';
                     }
+                } else {
+                    if (physicalParamsPresetInfo) physicalParamsPresetInfo.style.display = 'none';
                 }
 
                 // Show/hide experimental presets section in Tab 3 (index 2)
@@ -1347,6 +1413,10 @@
 
         function toggleFuelCellSelection() {
             try {
+                physicalParamsVisible = false; // Reset visibility when changing mode
+                const btn = document.querySelector('.btn-modify-params');
+                if (btn) btn.innerHTML = '⚙️ Modify physical parameters (optional)';
+                
                 const configTypeEl = document.querySelector('input[name="config_type"]:checked');
                 const configType = configTypeEl ? configTypeEl.value : 'pre_selected';
                 const preSelectedSection = document.getElementById('pre-selected-section');
@@ -1369,9 +1439,9 @@
                     // Load generic defaults for custom mode to get undetermined highlighting
                     updateFuelCellDefaults('default');
                 }
-                // Hide preset warning if switching to custom
-                const presetWarning = document.getElementById('preset-warning');
-                if (presetWarning) presetWarning.style.display = 'none';
+                // Hide old elements if switching to custom
+                const presetInfo = document.getElementById('physical-params-preset-info');
+                if (presetInfo) presetInfo.style.display = 'none';
             } catch (e) {
                 console.error('Error toggling fuel cell selection:', e);
             }
@@ -1380,6 +1450,9 @@
         function updateUndeterminedHighlighting(fuelCellType, serverUndeterminedList) {
             const legend = document.getElementById('undetermined-legend');
             if (!legend) return;
+
+            const configTypeEl = document.querySelector('input[name="config_type"]:checked');
+            const configType = configTypeEl ? configTypeEl.value : 'pre_selected';
 
             if (!fuelCellType) {
                 legend.style.display = 'none';
@@ -1399,8 +1472,12 @@
                 undeterminedList = undeterminedMap[fuelCellType] || undeterminedMap['custom'];
             }
             
-            // Show legend
-            legend.style.display = 'block';
+            // Show legend only if visible or custom mode
+            if (configType === 'custom') {
+                legend.style.display = 'block';
+            } else {
+                legend.style.display = (physicalParamsVisible) ? 'block' : 'none';
+            }
 
             // Remove all highlights first
             document.querySelectorAll('.form-group').forEach(el => el.classList.remove('undetermined-param'));

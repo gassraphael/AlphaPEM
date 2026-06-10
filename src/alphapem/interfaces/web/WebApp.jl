@@ -133,7 +133,20 @@ try
     )
 
 catch e
-    @error "Failed to start server" exception=e
-    rethrow(e)
+    if e isa Base.IOError && (occursin("EADDRINUSE", string(e)) || (hasproperty(e, :code) && e.code == Base.UV_EADDRINUSE))
+        @error "Failed to start server: Port $PORT is already in use (EADDRINUSE)."
+        println("\n" * "="^60)
+        println("POSSIBLE SOLUTIONS:")
+        println("1. A previous instance of the app is still running. Please close it.")
+        println("2. Another application is using port $PORT.")
+        println("3. Run the app on a different port using:")
+        println("   julia run_web_app.jl 8001")
+        println("\nTo find the process using port $PORT (on Linux):")
+        println("   lsof -i :$PORT")
+        println("="^60 * "\n")
+    else
+        @error "Failed to start server" exception=e
+    end
+    exit(1)
 end
 
