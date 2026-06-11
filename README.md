@@ -19,11 +19,11 @@ Improvements to AlphaPEM are discussed in the [roadmap section](#roadmap).
 online version may contain bugs, and not all features may be available. The current work is detailled in the 
 [work in progress](#work-in-progress) section. Relatively stable versions are listed in the [Major updates](#major-updates) section.
 
-![AlphaPEM graphical user interface](docs/images/demo.png "AlphaPEM graphical user interface (GUI)")
+<img src="docs/images/interface.png" alt="AlphaPEM web-based interface" width="100%" />
 
 # Table of Contents
 
-- [Repository Structure](#repository-structure)
+- [Repository structure](#repository-structure)
 - [Installation](#installation)
 - [Start](#start)
 - [Major updates](#major-updates)
@@ -35,7 +35,7 @@ online version may contain bugs, and not all features may be available. The curr
 - [Contact](#contact)
 
 
-# Repository Structure
+# Repository structure
 
 The repository is organized around a Julia package in `src/`, example scripts in `examples/`, and supporting
 documentation, tests, and generated results. The main folders are:
@@ -79,39 +79,17 @@ The most relevant entry points are:
 
 To install **AlphaPEM**, follow these steps in a shell:
 
-1. Clone the repository:
+1. **Clone and navigate**:
     ```sh
-    git clone https://github.com/gassraphael/AlphaPEM.git
-    ```
-
-2. Navigate to the project directory:
-    ```sh
-    cd AlphaPEM
+    git clone https://github.com/gassraphael/AlphaPEM.git && cd AlphaPEM
     ```
     
-3. Install Julia (using [Flexible Julia](https://plugins.jetbrains.com/plugin/29356-flexible-julia) plugin for
-[PyCharm](https://www.jetbrains.com/pycharm/) or using [VS Code](https://marketplace.visualstudio.com/items?itemName=julialang.language-julia) is suggested):
-    - for Linux or macOS:
-    ```sh
-    curl -fsSL https://install.julialang.org | sh
-    ```
-    - for Windows:
-    ```sh
-    winget install --name Julia --id 9NJNWW8PVKMN -e -s msstore
-    ```
+2. **Install Julia**: (using [Flexible Julia](https://plugins.jetbrains.com/plugin/29356-flexible-julia) for PyCharm or [VS Code](https://marketplace.visualstudio.com/items?itemName=julialang.language-julia) is recommended)
+    - **Linux/macOS**: `curl -fsSL https://install.julialang.org | sh`
+    - **Windows**: `winget install Julia -s msstore`
 
-4. Update the package manager, Pkg, to the latest available version:
-     ```sh
-    julia -e 'using Pkg; Pkg.update()'
-     ```
-
-5. Activate the project environment defined by the existing Project.toml file:
-     ```sh
-     export JULIA_PROJECT=@.
-     ```
- 
-6. Install the required Julia dependencies:
-     ```sh
+3. **Instantiate the project**:
+    ```sh
     julia --project=. -e 'using Pkg; Pkg.instantiate()'
     ```
 
@@ -121,29 +99,16 @@ AlphaPEM can be integrated into other projects, whether written in **Julia** or 
 
 ### From a Julia project
 
-Install AlphaPEM directly from GitHub using Julia's package manager:
-
 ```julia
-using Pkg
-Pkg.add(url="https://github.com/gassraphael/AlphaPEM.git")
-```
-
-Then, import the AlphaPEM module in your code:
-
-```julia
+using Pkg; Pkg.add(url="https://github.com/gassraphael/AlphaPEM.git")
 using AlphaPEM
 ```
 
 ### From a Python project
 
-Install the [`juliacall`](https://github.com/JuliaPy/PythonCall.jl) bridge library and AlphaPEM:
-
 ```sh
 pip install juliacall
 ```
-
-Then, call AlphaPEM from Python:
-
 ```python
 from juliacall import Main as jl
 jl.Pkg.add(url="https://github.com/gassraphael/AlphaPEM.git")
@@ -156,9 +121,7 @@ This allows you to integrate AlphaPEM into your own applications without cloning
 
 You have two main ways to run AlphaPEM:
 
-## Using the graphical user interface (GUI)
-
-### Web-Based Interface (V2.0+)
+## Using the web-based interface (V2.0+)
 
 AlphaPEM now includes a modern, web-based graphical interface built entirely in Julia.
 The interface is accessible through your local browser and requires no dependencies other than Julia.
@@ -166,7 +129,7 @@ The interface is accessible through your local browser and requires no dependenc
 **To launch the simulator:**
 
 ```sh
-julia run_web_app.jl
+julia --project=. run_web_app.jl
 ```
 
 The simulator will:
@@ -187,12 +150,7 @@ The simulator will:
 3. **Simulation Tab**: Select simulation type and launch
 4. **Results Tab**: View outputs and download data
 
-**Network Security:**
-
-- The server runs on `localhost:8000` (local machine only)
-- No data is sent to external servers
-- Results are stored locally in the `/results` directory
-- Automatic browser access without network exposure
+**Security Note:** The server runs on `localhost:8000`. No data is sent externally; results are stored locally in `/results`.
 
 ## Using the command line (programmers)
 
@@ -212,46 +170,30 @@ and configuration, beyond what the GUI offers.
 
 ### Steps to run a simulation
 
-> The following steps are **configuration choices to make inside the example script you select** in `examples/`.
+1. **Configure**: Select an example script in `examples/` (`run_step.jl`, `run_polarization.jl`, etc.) and edit its `SimulationConfig`:
 
-1. **Choose an example script** in `examples/` according to your objective (`run_step.jl`, `run_polarization.jl`,
-   `run_EIS.jl`, etc.).
-
-2. **Open this script and edit its configuration blocks** (`current_params = ...` and `cfg = SimulationConfig(...)`).
-
-3. **Set the fuel cell and model options in this script** via `SimulationConfig`:
-
-   | Field | Allowed values |
+   | Field | Description / Allowed values |
    |---|---|
-   | `type_fuel_cell` | Fuel cell model symbol implemented in `src/alphapem/fuelcell/` (e.g., `:ZSW_GenStack`, `:EH31`, `:default`) |
+   | `type_fuel_cell` | Symbol (e.g., `:ZSW_GenStack`, `:EH31`, `:default`) |
    | `type_current` | `StepParams(...)`, `PolarizationParams(...)`, `EISParams(...)` |
    | `voltage_zone` | `:before_voltage_drop`, `:full` |
-   | `type_auxiliary` | `:no_auxiliary`, `:forced_convective_cathode_with_anodic_recirculation`, `:forced_convective_cathode_with_flow_through_anode` |
+   | `type_auxiliary` | `:no_auxiliary`, `:forced_convective_cathode_...` |
    | `type_purge` | `:no_purge`, `:constant_purge`, `:periodic_purge` |
    | `type_display` | `:synthetic`, `:multiple`, `:no_display` |
    | `display_timing` | `:postrun`, `:live` |
 
-4. **Run the edited script** to generate results (internal states and voltage dynamics) in the `/results` directory:
-
+2. **Run**:
    ```sh
    julia --project=. examples/run_step.jl
    ```
 
 ### Automated parameter calibration (advanced)
 
-To adapt AlphaPEM to a new, specific fuel cell, you must calibrate the undetermined physical parameters (e.g., 
-GDL porosity) using experimental polarization curves. The calibration relies on a genetic algorithm (PyGAD) and 
-is computationally intensive — running it on a computing cluster is strongly recommended.
+Calibration adapts AlphaPEM to specific fuel cells using genetic algorithms.
 
-> ⚠️ The calibration entrypoint is in Julia, but it still depends on Python packages through `PyCall`. It is also currently broken.
+1. **Prepare**: Place experimental curves in `src/alphapem/fuelcell` and set parameters in `src/alphapem/parametrisation/calibration_modules.jl`.
 
-1. **Input experimental data:** place at least three experimental polarization curves into your fuel cell description
-   in `src/alphapem/fuelcell`.
-
-2. **Configure parameters:** set the operating conditions and accessible physical parameters of your fuel cell 
-system in `src/alphapem/parametrisation/calibration_modules.jl`.
-
-3. **Run the calibration:**
+2. **Run**:
    ```sh
    julia --project=. src/alphapem/parametrisation/calibration.jl
    ```
@@ -286,7 +228,7 @@ system in `src/alphapem/parametrisation/calibration_modules.jl`.
 
 # Work in progress
 
-- GUI and calibration are currently under development.
+- Calibration is currently under maintenance.
 - Sensitivity analysis and calibration of the model using pre-selected data from ZSW-GenStack or EH-31 is currently 
 underway.
 - Auxiliaries are temporarily removed, as they require reconstruction.
@@ -296,9 +238,9 @@ underway.
 
 - Spatial extension to 1D+1D for modeling the thermal evolution.
 - Spatial extension to 1D+1D+1D: a 1D channel will be added to each manifold, enabling full-stack modeling.
+- Support for PEM electrolyzers.
 - Integration of more accurate physical models for the auxiliaries.
 - Inclusion of ECSA degradation in the simulation framework.
-- Enhancement of the GUI to allow seamless addition of new fuel cell configurations without modifying the source code.
 
 # Related publications
 
@@ -352,11 +294,9 @@ It also includes components licensed under the [BSD-3-Clause license](src/alphap
 
 Contributions from the community are welcome! If you would like to contribute to **AlphaPEM**, please follow these steps:
 
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/YourFeature`).
-3. Commit your changes (`git commit -am 'Add some feature'`).
-4. Push to the branch (`git push origin feature/YourFeature`).
-5. Create a new Pull Request.
+1. **Fork and branch**: `git checkout -b feature/YourFeature` after forking.
+2. **Commit and push**: `git commit -am 'Add feature' && git push origin feature/YourFeature`
+3. **Pull Request**: Open a new PR on GitHub.
 
 
 # Contact

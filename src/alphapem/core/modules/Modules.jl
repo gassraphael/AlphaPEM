@@ -17,13 +17,17 @@ using FFTW
 using Statistics
 
 # Include in dependency order
-include("cell_voltage_modules.jl")
-include("flows_MEA_1D_modules.jl")
-include("heat_modules.jl")
-include("flows_GC_manifold_1D_modules.jl")
-include("dif_eq_modules.jl")
-include("outputs_accessors.jl")
-include("plot_postprocess.jl")
+# Fuel Cell specific modules
+include("fuelcell/cell_voltage_modules.jl")
+include("fuelcell/flows_MEA_1D_modules.jl")
+include("fuelcell/heat_modules.jl")
+include("fuelcell/flows_GC_manifold_1D_modules.jl")
+include("fuelcell/dif_eq_modules.jl")
+include("fuelcell/outputs_accessors.jl")
+include("fuelcell/plot_postprocess.jl")
+
+# Electrolyzer specific modules (to be added)
+# include("electrolyzer/...")
 
 end  # module Modules
 
