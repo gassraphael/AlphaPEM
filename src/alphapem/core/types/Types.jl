@@ -16,13 +16,17 @@ Structs are grouped by physical role:
 module Types
 
 # ── Type definition files (no imports required – Base types only) ────────────
-include("cell_state.jl")
-include("cell_derivative.jl")
-include("cell_intermediates.jl")
-include("cell_balance.jl")
-include("auxiliary.jl")
-include("cell_flows.jl")
-include("simulation_outputs.jl")
+# Fuel Cell specific types
+include("fuelcell/cell_state.jl")
+include("fuelcell/cell_derivative.jl")
+include("fuelcell/cell_intermediates.jl")
+include("fuelcell/cell_balance.jl")
+include("fuelcell/auxiliary.jl")
+include("fuelcell/cell_flows.jl")
+include("fuelcell/simulation_outputs.jl")
+
+# Electrolyzer specific types (to be added)
+# include("electrolyzer/...")
 
 # ── Public API ────────────────────────────────────────────────────────────────
 
