@@ -17,7 +17,7 @@ The model is one-dimensional, dynamic, biphasic, and isothermal. It has been pub
 using DifferentialEquations
 using SparseArrays: sparse, SparseMatrixCSC, rowvals, nzrange, nonzeros, nnz
 using SciMLBase: DAEFunction, NoInit, successful_retcode, ReturnCode
-using Sundials: IDA
+using Sundials: IDA, IDASetMaxStep
 using .PlotHelpers: _clear_dynamic_axes!, _clear_dynamic_legends!, saving_instructions!
 
 
@@ -139,10 +139,12 @@ function simulate_model!(simu::AlphaPEM,
     jacobian!, jac_prototype = _build_jacobian_closure(residual!, packed, simu, dims,
                                                         initial_scaled_variable_values)
 
-    # ── 9. Safety callback ─────────────────────────────────────────────────────
+    # ── 9. Callbacks ───────────────────────────────────────────────────────────
     n_diff    = np.nb_gc * dims.n_vars_cell_1D + dims.n_vars_manifold + dims.n_vars_auxiliary
     safety_cb = _build_physical_safety_callback(n_diff, np.nb_gc, solver_state_scaling,
                                                 safety_triggered)
+    dtmax_cb  = _build_dtmax_callback(simu)
+    callbacks = dtmax_cb === nothing ? safety_cb : CallbackSet(safety_cb, dtmax_cb)
 
     # ── 10. DAE problem and solve ──────────────────────────────────────────────
     dae_fun  = DAEFunction(residual!; jac=jacobian!, jac_prototype=jac_prototype)
@@ -150,13 +152,15 @@ function simulate_model!(simu::AlphaPEM,
                           initial_scaled_variable_values, simu.time_interval, packed;
                           differential_vars=dims.differential_vars)
     init_alg = has_solver_restart_state ? NoInit() : BrownFullBasicInit()
+    tstops   = solver_tstops(simu.current_density, simu.time_interval)
     simu.sol = solve(prob, IDA(linear_solver=:KLU);
                      reltol        = np.rtol,
                      abstol        = atol_scaled,
-                     tstops        = solver_tstops(simu.current_density, simu.time_interval),
+                     tstops        = tstops,
+                     dtmax         = solver_dtmax(simu.current_density, simu.time_interval[1]),
                      initializealg = init_alg,
                      maxiters      = np.maxiters,
-                     callback      = safety_cb)
+                     callback      = callbacks)
 
     # ── 11. Convergence check ──────────────────────────────────────────────────
     # ReturnCode.Terminated is accepted: the safety callback stopped the solver
@@ -514,6 +518,23 @@ function _build_physical_safety_callback(n_diff::Int, nb_gc::Int,
         terminate!(integrator)
     end
     return DiscreteCallback(condition, affect!; save_positions=(false, true))
+end
+
+
+"""
+    _build_dtmax_callback(simu::AlphaPEM)
+
+Create a callback to update `dtmax` at specific time points (frequency changes).
+"""
+function _build_dtmax_callback(simu::AlphaPEM)
+    tstops = solver_tstops(simu.current_density, simu.time_interval)
+    if isempty(tstops)
+        return nothing
+    end
+
+    affect!(integrator) = IDASetMaxStep(integrator.mem, solver_dtmax(simu.current_density, integrator.t))
+
+    return PresetTimeCallback(tstops, affect!)
 end
 
 

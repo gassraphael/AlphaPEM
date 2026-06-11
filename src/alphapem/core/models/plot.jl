@@ -872,12 +872,23 @@ end
 
 """Plot EIS Nyquist diagram with unified style conventions."""
 function plot_EIS_curve_Nyquist(cd::AbstractCurrent,
-                                Fourier_results::FourierOutputs,
+                                Fourier_results::AbstractVector{FourierOutputs},
                                 ax)
-    Z_real, minus_Z_imag, _f, _abs_Z, _phi = _eis_point(cd, Fourier_results)
-    isfinite(Z_real) && isfinite(minus_Z_imag) || return nothing
+    
+    Z_reals = Float64[]
+    minus_Z_imags = Float64[]
+    
+    for res in Fourier_results
+        Z_real, minus_Z_imag, _, _, _ = _eis_point(cd, res)
+        if isfinite(Z_real) && isfinite(minus_Z_imag)
+            push!(Z_reals, Z_real)
+            push!(minus_Z_imags, minus_Z_imag)
+        end
+    end
+    
+    isempty(Z_reals) && return nothing
 
-    scatter!(ax, [Z_real], [minus_Z_imag];
+    scatter!(ax, Z_reals, minus_Z_imags;
              color=_publication_colors()[1], markersize=7,
              strokecolor=:white, strokewidth=0.4)
 
@@ -894,12 +905,23 @@ end
 
 """Plot EIS Bode amplitude diagram with unified style conventions."""
 function plot_EIS_curve_Bode_amplitude(cd::AbstractCurrent,
-                                       Fourier_results::FourierOutputs,
+                                       Fourier_results::AbstractVector{FourierOutputs},
                                        ax)
-    _Z_real, _minus_Z_imag, f, abs_Z, _phi = _eis_point(cd, Fourier_results)
-    isfinite(f) && isfinite(abs_Z) || return nothing
+    
+    fs = Float64[]
+    abs_Zs = Float64[]
+    
+    for res in Fourier_results
+        _, _, f, abs_Z, _ = _eis_point(cd, res)
+        if isfinite(f) && isfinite(abs_Z)
+            push!(fs, f)
+            push!(abs_Zs, abs_Z)
+        end
+    end
+    
+    isempty(fs) && return nothing
 
-    scatter!(ax, [f], [abs_Z];
+    scatter!(ax, fs, abs_Zs;
              color=_publication_colors()[2], markersize=7,
              strokecolor=:white, strokewidth=0.4)
 
@@ -915,12 +937,23 @@ end
 
 """Plot EIS Bode phase diagram with unified style conventions."""
 function plot_EIS_curve_Bode_angle(cd::AbstractCurrent,
-                                   Fourier_results::FourierOutputs,
+                                   Fourier_results::AbstractVector{FourierOutputs},
                                    ax)
-    _Z_real, _minus_Z_imag, f, _abs_Z, phi_deg = _eis_point(cd, Fourier_results)
-    isfinite(f) && isfinite(phi_deg) || return nothing
+    
+    fs = Float64[]
+    phi_degs = Float64[]
+    
+    for res in Fourier_results
+        _, _, f, _, phi_deg = _eis_point(cd, res)
+        if isfinite(f) && isfinite(phi_deg)
+            push!(fs, f)
+            push!(phi_degs, phi_deg)
+        end
+    end
+    
+    isempty(fs) && return nothing
 
-    scatter!(ax, [f], [phi_deg];
+    scatter!(ax, fs, phi_degs;
              color=_publication_colors()[3], markersize=7,
              strokecolor=:white, strokewidth=0.4)
 

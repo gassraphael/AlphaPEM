@@ -33,10 +33,11 @@ import AlphaPEM.Core.Models: middle_gdl_index, middle_mpl_index,
                              time_history, derived_outputs,
                              make_Fourier_transformation, C_v_sat, extract_mea_series, 
                              extract_mid_mea_series, extract_derived_series,
-                             extract_derived_gc_series, extract_mid_derived_gc_series
+                             extract_derived_gc_series, extract_mid_derived_gc_series,
+                             polarisation_sampling_indices
 import AlphaPEM.Core.Modules: _eis_point, calculate_reynolds_numbers, final_temperature_matrix_celsius
 import AlphaPEM.Application: _web_plot_specs
-import AlphaPEM.Currents: current
+import AlphaPEM.Currents: current, EISCurrent, PolarizationCurrent, PolarizationCalibrationCurrent
 import AlphaPEM.Utils: R
 
 const RESULTS_DIR = joinpath(pwd(), "results")
@@ -909,7 +910,6 @@ function run_eis_simulation(config::SimulationConfig; params=nothing)::Dict
     end
 
     try
-        # EIS requires :live display_timing for frequency-by-frequency stepping.
         eis_config = SimulationConfig(
             type_fuel_cell     = config.type_fuel_cell,
             type_current       = config.type_current,
@@ -919,7 +919,7 @@ function run_eis_simulation(config::SimulationConfig; params=nothing)::Dict
             type_flow          = config.type_flow,
             type_purge         = config.type_purge,
             type_display       = :no_display,
-            display_timing     = :live,
+            display_timing     = :postrun,
         )
         # Capture the actual output from the simulation
         output = run_simulation(eis_config)
@@ -1202,14 +1202,39 @@ function extract_simulation_data(output::Any, sim_type::String)::Dict
             return result
 
         elseif sim_type == "eis"
-            # For EIS, we have impedance data
-            # The structure might be different, so we try to extract what's available
+            # Extract frequency/impedance points via the unified post-processing
+            f_results = make_Fourier_transformation(sim_outputs, output.current_density, output.cfg)
+
+            # Map points for structured JSON response
+            freqs = Float64[]
+            Z_real = Float64[]
+            Z_imag = Float64[]
+            abs_Z = Float64[]
+            phi_deg = Float64[]
+
+            for res in f_results
+                p = _eis_point(output.current_density, res)
+                if isfinite(p[3])
+                    # p = (Z_real, minus_Z_imag, f, abs_Z, phi)
+                    push!(freqs,   p[3])
+                    push!(Z_real,  p[1])
+                    push!(Z_imag, -p[2])
+                    push!(abs_Z,   p[4])
+                    push!(phi_deg, p[5])
+                end
+            end
+
             result = Dict(
-                :voltage => voltage_vec,
-                :current => current_vec,
-                :Pa_in => derived.Pa_in,
-                :Pc_in => derived.Pc_in,
-                :data_points => length(time_vec),
+                :voltage             => voltage_vec,
+                :current             => current_vec,
+                :Pa_in               => derived.Pa_in,
+                :Pc_in               => derived.Pc_in,
+                :frequency           => freqs,
+                :impedance_real      => Z_real,
+                :impedance_imag      => Z_imag,
+                :impedance_amplitude => abs_Z,
+                :phase               => phi_deg,
+                :data_points         => length(freqs)
             )
 
             return result
@@ -1522,83 +1547,71 @@ function _get_plot_data(simu, key, config)
         return headers, data
 
     # ── Performance curves ───────────────────────────────────────────────────
-    elseif key in ["polarization_curve", "polarization_curve_cali"]
-        t = time_history(outputs)
-        headers = ["Current Density (A/cm²)", "Cell Voltage (V)"]
-        i_fc = current(cd, t) ./ 1e4
-        Ucell = extract_derived_series(outputs, x -> x.Ucell)
-        return headers, hcat(i_fc, Ucell)
-
-    elseif key in ["power_density_curve", "power_density_curve_cali"]
-        t = time_history(outputs)
-        headers = ["Current Density (A/cm²)", "Power Density (W/cm²)"]
-        i_fc = current(cd, t) ./ 1e4
-        Ucell = extract_derived_series(outputs, x -> x.Ucell)
-        return headers, hcat(i_fc, Ucell .* i_fc)
-
-    elseif key in ["efficiency_curve", "efficiency_curve_cali"]
-        t = time_history(outputs)
-        headers = ["Current Density (A/cm²)", "Efficiency (%)"]
-        i_fc = current(cd, t) ./ 1e4
-        Ucell = extract_derived_series(outputs, x -> x.Ucell)
-        # Efficiency approx: Ucell / 1.25 * 100
-        return headers, hcat(i_fc, (Ucell ./ 1.25) .* 100)
+    elseif key in ["polarization_curve", "polarization_curve_cali", 
+                   "power_density_curve", "power_density_curve_cali",
+                   "efficiency_curve", "efficiency_curve_cali"]
+        
+        t_all = time_history(outputs)
+        if cd isa Union{PolarizationCurrent, PolarizationCalibrationCurrent}
+            # Only export stationary points for polarization curves as requested
+            indices = polarisation_sampling_indices(outputs, cd)
+            t = t_all[indices]
+            Ucell = extract_derived_series(outputs, x -> x.Ucell)[indices]
+        else
+            t = t_all
+            Ucell = extract_derived_series(outputs, x -> x.Ucell)
+        end
+        i_fc = [current(cd, tt) for tt in t] ./ 1e4
+        
+        if key in ["polarization_curve", "polarization_curve_cali"]
+            headers = ["Current Density (A/cm²)", "Cell Voltage (V)"]
+            return headers, hcat(i_fc, Ucell)
+        elseif key in ["power_density_curve", "power_density_curve_cali"]
+            headers = ["Current Density (A/cm²)", "Power Density (W/cm²)"]
+            return headers, hcat(i_fc, Ucell .* i_fc)
+        else # efficiency_curve
+            headers = ["Current Density (A/cm²)", "Efficiency (%)"]
+            return headers, hcat(i_fc, (Ucell ./ 1.25) .* 100)
+        end
 
     # ── EIS ──────────────────────────────────────────────────────────────────
     elseif key in ["Nyquist_plot", "Bode_amplitude_curve", "Bode_angle_curve"]
-        if cd isa EISParams
-            headers = ["Frequency (Hz)", "Z_real (mΩ·cm²)", "Z_imag (mΩ·cm²)", "|Z| (mΩ·cm²)", "Phase (°)"]
+        if cd isa EISCurrent
+            # Select headers and data extraction based on the plot type
+            # p from _eis_point is (Z_real, minus_Z_imag, f, abs_Z, phi)
+            
+            # Use our unified post-processing to get all analyzed points.
+            # (Note: make_Fourier_transformation is called for each sheet, but it's 
+            # consistent with how other plots are handled here).
+            fourier_results = make_Fourier_transformation(outputs, cd, config)
             rows = []
-            # For EIS, we need to process each frequency segment
-            t_full = time_history(outputs)
-            U_full = derived_outputs(outputs).Ucell
-            for i in 1:length(cd.f)
-                # Filter outputs for this segment
-                t_start = cd.t_new_start[i]
-                t_end = t_start + cd.delta_t_break[i] + cd.delta_t_measurement[i]
-                
-                # We can't easily filter SimulationOutputs, but make_Fourier_transformation
-                # uses cd.t_new_start to find the segment based on t[1].
-                # So we can "fake" the start time by passing a view of the data.
-                idx_start = searchsortedfirst(t_full, t_start)
-                idx_end = searchsortedlast(t_full, t_end)
-                if idx_start < idx_end
-                    # Creating a temporary sub-output is hard, let's just use the logic
-                    # Identify measurement window
-                    t_meas_start = t_start + cd.delta_t_break[i]
-                    t_meas_end = t_end
-                    mask = (t_full .>= t_meas_start) .& (t_full .<= t_meas_end)
-                    if any(mask)
-                        # We use the internal _eis_point logic
-                        # But we need FourierResults. For simplicity, let's just call
-                        # make_Fourier_transformation if we can trick it.
-                        # Actually, let's just use the point if it's already computed?
-                        # No, it's not stored.
-                        
-                        # Just call it and it will find segment 'i' if we give it the right t[1]
-                        # Actually it finds 'n_inf = searchsortedlast(cd.t_new_start, t[1])'
-                        # So if we give it a view starting at t_start, it will find 'i'.
-                        try
-                            # This is a bit hacky but should work if we can pass a sliced solver
-                            # Since we can't easily, let's just use the segment index 'i' logic
-                            # We'll skip for now and return empty if not easily done, 
-                            # but let's try a simpler way: the web interface only shows ONE point at a time.
-                            # But the user wants ALL.
-                            
-                            # Re-implementing simplified _eis_point logic for all i
-                            # (This would be too long here, let's just provide the current frequency if available)
-                            res = make_Fourier_transformation(outputs, cd, config)
-                            Z_real, minus_Z_imag, f, abs_Z, phi = _eis_point(cd, res)
-                            if isfinite(f)
-                                push!(rows, [f, Z_real, -minus_Z_imag, abs_Z, phi])
-                            end
-                        catch
-                        end
+            
+            for res in fourier_results
+                p = _eis_point(cd, res)
+                if isfinite(p[3])
+                    if key == "Nyquist_plot"
+                        # Only Z_real and -Z_imag as displayed on screen
+                        push!(rows, [p[1], p[2]])
+                    elseif key == "Bode_amplitude_curve"
+                        # Frequency and Amplitude
+                        push!(rows, [p[3], p[4]])
+                    else # Bode_angle_curve
+                        # Frequency and Phase
+                        push!(rows, [p[3], p[5]])
                     end
                 end
             end
+
+            if key == "Nyquist_plot"
+                headers = ["Z_real (mΩ·cm²)", "-Z_imag (mΩ·cm²)"]
+            elseif key == "Bode_amplitude_curve"
+                headers = ["Frequency (Hz)", "|Z| (mΩ·cm²)"]
+            else
+                headers = ["Frequency (Hz)", "Phase (°)"]
+            end
+            
             if isempty(rows)
-                return headers, zeros(0, 5)
+                return headers, zeros(0, 2)
             end
             return headers, vcat([r' for r in rows]...)
         end

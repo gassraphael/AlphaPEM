@@ -69,6 +69,15 @@ solver_tstops(::AbstractCurrent, ::Tuple{<:Real, <:Real}) = Float64[]
 
 
 """
+    solver_dtmax(c::AbstractCurrent, t::Real)
+
+Return the maximum time step allowed for the solver at time `t`.
+Returns `Inf` by default (no constraint).
+"""
+solver_dtmax(::AbstractCurrent, ::Real) = Inf
+
+
+"""
     _solver_tstops_in_range(times, tspan)
 
 Filter a collection of candidate stop times.

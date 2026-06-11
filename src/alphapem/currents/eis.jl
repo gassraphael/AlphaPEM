@@ -131,3 +131,34 @@ function current(c::EISCurrent, t::Real)
 
     return c.i_EIS + i_disruption
 end
+
+
+# --- Solver Guidance -------------------------------------------------------
+
+function solver_tstops(c::EISCurrent, tspan::Tuple{<:Real, <:Real})
+    # Initial stabilization boundary
+    stops = Float64[c.t0]
+
+    # Boundaries for each frequency segment
+    for i in 1:length(c.f)
+        push!(stops, c.t_new_start[i])                  # Start of stabilization
+        push!(stops, c.t_new_start[i] + c.delta_t_break[i]) # Start of measurement
+    end
+
+    # Final boundary
+    push!(stops, c.tf)
+
+    return _solver_tstops_in_range(stops, tspan)
+end
+
+function solver_dtmax(c::EISCurrent, t::Real)
+    if t < c.t0
+        return Inf
+    end
+    n_inf = searchsortedlast(c.t_new_start, t)
+    n_inf = max(1, n_inf)
+    
+    # We want at least nb_points per period.
+    # dtmax = T / nb_points = 1 / (f * nb_points)
+    return 1.0 / (c.f[n_inf] * c.nb_points)
+end
