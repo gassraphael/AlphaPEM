@@ -223,53 +223,60 @@ end
 """
     launch_AlphaPEM_for_EIS_current(simu) -> AlphaPEM
 
-Run an EIS simulation.  One ODE segment is solved per frequency point.
+Run an EIS simulation.
+- In `:live` mode: one ODE segment is solved per frequency point with intermediate displays.
+- In `:postrun` mode: the entire signal is solved in one pass, followed by a single display.
 """
 function launch_AlphaPEM_for_EIS_current(simu::AlphaPEM)::AlphaPEM
-    # Check if `display_timing` is valid for EIS.
-    simu.cfg.display_timing == :live ||
-        throw(ArgumentError(
-            "EIS requires `display_timing = :live` so that `max_step` can be " *
-            "adjusted at each frequency."))
-
     # Figures preparation
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(simu.cfg)
 
-    # Initialization
-    cd = simu.current_density   # ::EISCurrent
-    n  = length(cd.t_new_start)
-    initial_variable_values = nothing
-    initial_derivative_values = nothing
+    if simu.cfg.display_timing == :live
+        # Initialization
+        cd = simu.current_density   # ::EISCurrent
+        n  = length(cd.t_new_start)
+        initial_variable_values = nothing
+        initial_derivative_values = nothing
 
-    # A preliminary simulation run is necessary to equilibrate internal variables at i_EIS.
-    simulate_model!(simu, initial_variable_values, initial_derivative_values, (0.0, cd.t0))
-    # Recovery of the internal states from the end of the preceding simulation.
-    initial_variable_values, initial_derivative_values = _extract_last_internal_state(simu)
-
-    if simu.cfg.type_display == :multiple
-        @warn "Dynamic graph refresh is not available with `:multiple` display " *
-              "due to the volume of data involved.  Data are computed correctly " *
-              "and saved to the 'results' folder.  Use `:synthetic` to avoid this."
-    end
-
-    # Dynamic simulation: one segment per frequency.
-    for i in 1:n
-        # Time interval actualization
-        t0 = simu.outputs.solver.t[end]
-        tf = cd.t_new_start[i] + cd.delta_t_break[i] + cd.delta_t_measurement[i]
-
-        simulate_model!(simu, initial_variable_values, initial_derivative_values, (t0, tf))
-
+        # A preliminary simulation run is necessary to equilibrate internal variables at i_EIS.
+        simulate_model!(simu, initial_variable_values, initial_derivative_values, (0.0, cd.t0))
         # Recovery of the internal states from the end of the preceding simulation.
         initial_variable_values, initial_derivative_values = _extract_last_internal_state(simu)
 
-        # Display
+        if simu.cfg.type_display == :multiple
+            @warn "Dynamic graph refresh is not available with `:multiple` display " *
+                  "due to the volume of data involved.  Data are computed correctly " *
+                  "and saved to the 'results' folder.  Use `:synthetic` to avoid this."
+        end
+
+        # Dynamic simulation: one segment per frequency.
+        for i in 1:n
+            # Time interval actualization
+            t0 = simu.outputs.solver.t[end]
+            tf = cd.t_new_start[i] + cd.delta_t_break[i] + cd.delta_t_measurement[i]
+
+            simulate_model!(simu, initial_variable_values, initial_derivative_values, (t0, tf))
+
+            # Recovery of the internal states from the end of the preceding simulation.
+            initial_variable_values, initial_derivative_values = _extract_last_internal_state(simu)
+
+            # Display
+            if simu.cfg.type_display != :no_display
+                display!(simu, ax1, ax2, ax3)
+                if _active_display_backend[] == :gl
+                    _open_interactive_figures!(fig1, fig2, fig3)
+                    sleep(0.001)
+                end
+            end
+        end
+    else
+        # :postrun mode: perform a single continuous solve.
+        # Adaptive step guidance (tstops, dtmax) is handled by the core solver callbacks.
+        simulate_model!(simu)
+
+        # Trigger a single display! call at the end.
         if simu.cfg.type_display != :no_display
             display!(simu, ax1, ax2, ax3)
-            if _active_display_backend[] == :gl
-                _open_interactive_figures!(fig1, fig2, fig3)
-                sleep(0.001)
-            end
         end
     end
 

@@ -27,6 +27,7 @@ include("factory.jl")
 
 export AbstractCurrent, StepCurrent, PolarizationCurrent, PolarizationCalibrationCurrent, EISCurrent, create_current
 export AbstractCurrentParams, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
+export solver_tstops, solver_dtmax
 
 end  # module Currents
 

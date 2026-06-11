@@ -28,7 +28,7 @@ cfg = SimulationConfig(
     type_auxiliary = :no_auxiliary, # :forced_convective_cathode_with_anodic_recirculation, :forced_convective_cathode_with_flow_through_anode, :no_auxiliary.
     type_purge = :no_purge, # :constant_purge, :periodic_purge, :no_purge.
     type_display = :synthetic, # :multiple, :synthetic, :no_display.
-    display_timing = :live # :live, :postrun.
+    display_timing = :postrun # :live, :postrun.
 )
 
 start_time = time() # Starting time

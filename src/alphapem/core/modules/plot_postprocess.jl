@@ -30,42 +30,70 @@ delta_t_measurement_EIS time is needed to record the cell voltage and the curren
 - `cfg::SimulationConfig`: Simulation configuration.
 
 # Returns
-- `FourierOutputs`: Structured Fourier post-processing outputs.
+- `Vector{FourierOutputs}`: List of structured Fourier post-processing outputs.
 """
 function make_Fourier_transformation(outputs::SimulationOutputs,
                                      cd::AbstractCurrent,
-                                     cfg::SimulationConfig)::FourierOutputs
+                                     cfg::SimulationConfig)::Vector{FourierOutputs}
 
     # Extraction of the variables
     t = time_history(outputs)
     Ucell_t = derived_outputs(outputs).Ucell
+
     # EIS timing is only available for EIS current profiles.
     cfg.type_current isa EISParams ||
         throw(ArgumentError("make_Fourier_transformation requires type_current isa EISParams."))
 
-    # Creation of the current density vector at the same time points as the cell voltage.
-    ifc_t = current(cd, t)
+    if isempty(t)
+        return [FourierOutputs(ComplexF64[], ComplexF64[], Float64[], NaN, Float64[], NaN, 0)]
+    end
 
-    isempty(t) && return FourierOutputs(ComplexF64[], ComplexF64[], Float64[], NaN, Float64[], NaN, 0)
+    if cfg.display_timing == :live
+        # Identify the active EIS segment for the current live run (latest point in history).
+        n_inf = searchsortedlast(cd.t_new_start, t[end])
+        n_inf = clamp(n_inf, 1, length(cd.f))
+        return [_compute_fourier_for_segment(t, Ucell_t, cd, n_inf)]
+    else
+        # :postrun mode: Iterate through all frequency segments and extract all points.
+        results = FourierOutputs[]
+        for i in 1:length(cd.f)
+            res = _compute_fourier_for_segment(t, Ucell_t, cd, i)
+            # Only include segments that have been fully simulated and processed.
+            if !isnan(res.f)
+                push!(results, res)
+            end
+        end
+        return results
+    end
+end
 
-    # Identify the active EIS segment for the current live run and keep only its measurement window.
-    n_inf = searchsortedlast(cd.t_new_start, t[1])
-    n_inf = clamp(n_inf, 1, length(cd.f))
-    t_start = cd.t_new_start[n_inf]
-    t_measure_start = t_start + cd.delta_t_break[n_inf]
+
+"""
+    _compute_fourier_for_segment(t, Ucell_t, cd, n_inf)
+
+Helper function to calculate the Fourier transform for a specific EIS frequency segment.
+"""
+function _compute_fourier_for_segment(t::AbstractVector{Float64},
+                                      Ucell_t::AbstractVector{Float64},
+                                      cd::AbstractCurrent,
+                                      n_inf::Int)::FourierOutputs
+
+    # Identify measurement window for this frequency segment.
+    t_measure_start = cd.t_new_start[n_inf] + cd.delta_t_break[n_inf]
     t_measure_end = t_measure_start + cd.delta_t_measurement[n_inf]
 
     mask_EIS = (t .>= t_measure_start) .& (t .<= t_measure_end)
     t_measured = t[mask_EIS]
     Ucell_measured = Ucell_t[mask_EIS]
-    ifc_measured = ifc_t[mask_EIS]
 
-    # Not enough raw samples yet to reconstruct one period at the target EIS resolution:
-    # return NaNs so dynamic plotting can safely skip this update.
+    # Check if we have enough points for reconstruction.
     min_raw_points = max(2, cd.nb_points)
     if length(t_measured) < min_raw_points
         return FourierOutputs(ComplexF64[], ComplexF64[], Float64[], NaN, Float64[], NaN, 0)
     end
+
+    # Current density computed only on the measurement window.
+    ifc_measured = current(cd, t_measured)
 
     # FFT requires uniformly sampled data. Re-sample each segment using nb_points per period.
     dt = 1.0 / (cd.f[n_inf] * cd.nb_points)
@@ -73,6 +101,7 @@ function make_Fourier_transformation(outputs::SimulationOutputs,
     n_uniform = max(n_uniform, cd.nb_points + 1)
     t_uniform = collect(range(t_measure_start, stop=t_measure_end, length=n_uniform))
 
+    # Interpolation to uniform grid.
     t_meas = copy(t_measured)
     deduplicate_knots!(t_meas)
     itp_U = linear_interpolation(t_meas, Ucell_measured; extrapolation_bc=Line())
@@ -87,7 +116,6 @@ function make_Fourier_transformation(outputs::SimulationOutputs,
     A_period_t    = vcat([abs(Ucell_Fourier[1]) / N],       # Recovery of all amplitude values calculated by fft
                           abs.(Ucell_Fourier[2:N÷2]) .* 2 ./ N)
 
-    # Ignore the DC component when searching the perturbation amplitude.
     if length(A_period_t) <= 1
         return FourierOutputs(ComplexF64.(Ucell_Fourier), ComplexF64.(ifc_Fourier), Float64.(A_period_t), NaN, Float64[], NaN, N)
     end
