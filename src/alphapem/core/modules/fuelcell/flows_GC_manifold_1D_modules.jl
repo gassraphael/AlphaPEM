@@ -73,10 +73,11 @@ Tuple
       M_ext, M_H2_N2_in, rho_agc, rho_cgc, k_purge, Abp_a, Abp_c,
       mu_gaz_agc, mu_gaz_cgc)`
 """
-function flow_1D_GC_manifold_int_values(sv_1D_cell::AbstractVector{<:CellState1D},
-                                        sv_auxiliary,
-                                        fc::AbstractFuelCell,
-                                        cfg::SimulationConfig)
+function calculate_flow_1D_GC_manifold_int_values!(gc_manifold_work::GCManifoldWorkspace,
+                                                   sv_1D_cell::AbstractVector{<:CellState1D},
+                                                   sv_auxiliary,
+                                                   fc::AbstractFuelCell,
+                                                   cfg::SimulationConfig)
     # Extract parameters
     oc = fc.operating_conditions
     pp = fc.physical_parameters
@@ -86,22 +87,22 @@ function flow_1D_GC_manifold_int_values(sv_1D_cell::AbstractVector{<:CellState1D
     nb_gc, purge_time, delta_purge = np.nb_gc, np.purge_time, np.delta_purge
     nb_gc = np.nb_gc
 
-    # Initialise variables
+    # Reuse workspace buffers (no allocation)
     k_purge = nothing
     Abp_a = sv_auxiliary === nothing ? nothing : getproperty(sv_auxiliary, :Abp_a)
     Abp_c = sv_auxiliary === nothing ? nothing : getproperty(sv_auxiliary, :Abp_c)
-    P_agc = Vector{Float64}(undef, nb_gc)
-    P_cgc = Vector{Float64}(undef, nb_gc)
-    Phi_agc = Vector{Float64}(undef, nb_gc)
-    Phi_cgc = Vector{Float64}(undef, nb_gc)
-    y_H2_agc = Vector{Float64}(undef, nb_gc)
-    y_O2_cgc = Vector{Float64}(undef, nb_gc)
-    M_agc = Vector{Float64}(undef, nb_gc)
-    M_cgc = Vector{Float64}(undef, nb_gc)
-    rho_agc = Vector{Float64}(undef, nb_gc)
-    rho_cgc = Vector{Float64}(undef, nb_gc)
-    mu_gaz_agc = Vector{Float64}(undef, nb_gc)
-    mu_gaz_cgc = Vector{Float64}(undef, nb_gc)
+    P_agc = gc_manifold_work.P_agc
+    P_cgc = gc_manifold_work.P_cgc
+    Phi_agc = gc_manifold_work.Phi_agc
+    Phi_cgc = gc_manifold_work.Phi_cgc
+    y_H2_agc = gc_manifold_work.y_H2_agc
+    y_O2_cgc = gc_manifold_work.y_O2_cgc
+    M_agc = gc_manifold_work.M_agc
+    M_cgc = gc_manifold_work.M_cgc
+    rho_agc = gc_manifold_work.rho_agc
+    rho_cgc = gc_manifold_work.rho_cgc
+    mu_gaz_agc = gc_manifold_work.mu_gaz_agc
+    mu_gaz_cgc = gc_manifold_work.mu_gaz_cgc
 
     # Physical quantities outside the stack
     #       Molar masses

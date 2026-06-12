@@ -6,10 +6,14 @@ It is a component of the fuel cell model.
 
 # ____________________________________________________Heat transfers____________________________________________________
 
-"""In-place heat-transfer computation with reusable workspace.
+"""In-place heat-transfer computation with reusable workspaces.
 
 Parameters
 ----------
+heat_work : MEAHeatWorkspace
+    Pre-allocated workspace for thermal flux vectors.
+heat_int_work : MEAHeatIntWorkspace
+    Pre-allocated workspace for intermediate thermal conductivity values.
 sv_1D : CellState1D{NB_GDL, NB_MPL}
     Typed 1D internal state for one gas-channel column.
 i_fc : Float64
@@ -27,7 +31,8 @@ MEAHeatFlows1D{NB_GDL, NB_MPL}
     Typed heat transfer outputs (conductive fluxes and volumetric heat sources)
     for one gas-channel column.
 """
-function calculate_heat_transfers!(work::MEAHeatWorkspace,
+function calculate_heat_transfers!(heat_work::MEAHeatWorkspace,
+                                   heat_int_work::MEAHeatIntWorkspace,
                                    sv_1D::CellState1D{NB_GDL, NB_MPL},
                                    i_fc::Float64,
                                    fc::AbstractFuelCell,
@@ -39,9 +44,19 @@ function calculate_heat_transfers!(work::MEAHeatWorkspace,
     # ___________________________________________________Preliminaries__________________________________________________
 
     # Extraction of the variables (typed access via CellState1D struct fields)
-    T_acl, T_mem, T_ccl = sv_1D.acl.T, sv_1D.mem.T, sv_1D.ccl.T
+    T_agc, T_agdl = sv_1D.agc.T, getproperty.(sv_1D.agdl, :T)
+    T_ampl, T_acl = getproperty.(sv_1D.ampl, :T), sv_1D.acl.T
+    T_mem = sv_1D.mem.T
+    T_ccl, T_cmpl = sv_1D.ccl.T, getproperty.(sv_1D.cmpl, :T)
+    T_cgdl, T_cgc = getproperty.(sv_1D.cgdl, :T), sv_1D.cgc.T
+
+    s_agc, s_agdl = sv_1D.agc.s, getproperty.(sv_1D.agdl, :s)
+    s_ampl, s_acl = getproperty.(sv_1D.ampl, :s), sv_1D.acl.s
+    s_ccl, s_cmpl = sv_1D.ccl.s, getproperty.(sv_1D.cmpl, :s)
+    s_cgdl, s_cgc = getproperty.(sv_1D.cgdl, :s), sv_1D.cgc.s
+
     lambda_acl, lambda_mem, lambda_ccl = sv_1D.acl.lambda, sv_1D.mem.lambda, sv_1D.ccl.lambda
-    s_acl, s_ccl, eta_c = sv_1D.acl.s, sv_1D.ccl.s, sv_1D.ccl.eta_c
+    eta_c = sv_1D.ccl.eta_c
 
     # Extraction of the parameters
     pp = fc.physical_parameters
@@ -51,42 +66,42 @@ function calculate_heat_transfers!(work::MEAHeatWorkspace,
 
     # Intermediate values
     (Hgdl_node, Hmpl_node, k_th_eff_agc_agdl, k_th_eff_agdl_agdl, k_th_eff_agdl_ampl, k_th_eff_ampl_ampl,
-     k_th_eff_ampl_acl, k_th_eff_acl_mem, k_th_eff_mem_ccl, k_th_eff_ccl_cmpl, k_th_eff_cmpl_cmpl,
-     k_th_eff_cmpl_cgdl, k_th_eff_cgdl_cgdl, k_th_eff_cgdl_cgc) = heat_transfer_int_values(sv_1D, fc, cfg)
+    k_th_eff_ampl_acl, k_th_eff_acl_mem, k_th_eff_mem_ccl, k_th_eff_ccl_cmpl, k_th_eff_cmpl_cmpl,
+    k_th_eff_cmpl_cgdl, k_th_eff_cgdl_cgdl, k_th_eff_cgdl_cgc) = calculate_heat_int_values!(heat_int_work, sv_1D, fc, cfg)
 
     # ______________________________________________Heat flows (J.m-2.s-1)______________________________________________
 
     # Anode side
     T_agc_mean = T_des
     T_cgc_mean = T_des
-    Jt_agc_agdl = -k_th_eff_agc_agdl * d_dx(T_agc_mean, sv_1D.agdl[1].T, Hgdl_node / 2)
-    Jt_agdl_agdl = work.Jt_agdl_agdl
+    Jt_agc_agdl = -k_th_eff_agc_agdl * d_dx(T_agc_mean, T_agdl[1], Hgdl_node / 2)
+    Jt_agdl_agdl = heat_work.Jt_agdl_agdl
     @inbounds for i in 1:(NB_GDL - 1)
-        Jt_agdl_agdl[i] = -k_th_eff_agdl_agdl[i] * d_dx(sv_1D.agdl[i].T, sv_1D.agdl[i + 1].T, Hgdl_node / 2)
+        Jt_agdl_agdl[i] = -k_th_eff_agdl_agdl[i] * d_dx(T_agdl[i], T_agdl[i + 1], Hgdl_node / 2)
     end
-    Jt_agdl_ampl = -k_th_eff_agdl_ampl * d_dx(sv_1D.agdl[NB_GDL].T, sv_1D.ampl[1].T, Hgdl_node / 2, Hmpl_node / 2)
-    Jt_ampl_ampl = work.Jt_ampl_ampl
+    Jt_agdl_ampl = -k_th_eff_agdl_ampl * d_dx(T_agdl[NB_GDL], T_ampl[1], Hgdl_node / 2, Hmpl_node / 2)
+    Jt_ampl_ampl = heat_work.Jt_ampl_ampl
     @inbounds for i in 1:(NB_MPL - 1)
-        Jt_ampl_ampl[i] = -k_th_eff_ampl_ampl[i] * d_dx(sv_1D.ampl[i].T, sv_1D.ampl[i + 1].T, Hmpl_node / 2)
+        Jt_ampl_ampl[i] = -k_th_eff_ampl_ampl[i] * d_dx(T_ampl[i], T_ampl[i + 1], Hmpl_node / 2)
     end
-    Jt_ampl_acl = -k_th_eff_ampl_acl * d_dx(sv_1D.ampl[NB_MPL].T, T_acl, Hmpl_node / 2, Hacl / 2)
+    Jt_ampl_acl = -k_th_eff_ampl_acl * d_dx(T_ampl[NB_MPL], T_acl, Hmpl_node / 2, Hacl / 2)
 
     # Membrane side
     Jt_acl_mem = -k_th_eff_acl_mem * d_dx(T_acl, T_mem, Hacl / 2, Hmem / 2)
     Jt_mem_ccl = -k_th_eff_mem_ccl * d_dx(T_mem, T_ccl, Hmem / 2, Hccl / 2)
 
     # Cathode side
-    Jt_ccl_cmpl = -k_th_eff_ccl_cmpl * d_dx(T_ccl, sv_1D.cmpl[1].T, Hccl / 2, Hmpl_node / 2)
-    Jt_cmpl_cmpl = work.Jt_cmpl_cmpl
+    Jt_ccl_cmpl = -k_th_eff_ccl_cmpl * d_dx(T_ccl, T_cmpl[1], Hccl / 2, Hmpl_node / 2)
+    Jt_cmpl_cmpl = heat_work.Jt_cmpl_cmpl
     @inbounds for i in 1:(NB_MPL - 1)
-        Jt_cmpl_cmpl[i] = -k_th_eff_cmpl_cmpl[i] * d_dx(sv_1D.cmpl[i].T, sv_1D.cmpl[i + 1].T, Hmpl_node / 2)
+        Jt_cmpl_cmpl[i] = -k_th_eff_cmpl_cmpl[i] * d_dx(T_cmpl[i], T_cmpl[i + 1], Hmpl_node / 2)
     end
-    Jt_cmpl_cgdl = -k_th_eff_cmpl_cgdl * d_dx(sv_1D.cmpl[NB_MPL].T, sv_1D.cgdl[1].T, Hmpl_node, Hgdl_node)
-    Jt_cgdl_cgdl = work.Jt_cgdl_cgdl
+    Jt_cmpl_cgdl = -k_th_eff_cmpl_cgdl * d_dx(T_cmpl[NB_MPL], T_cgdl[1], Hmpl_node, Hgdl_node)
+    Jt_cgdl_cgdl = heat_work.Jt_cgdl_cgdl
     @inbounds for i in 1:(NB_GDL - 1)
-        Jt_cgdl_cgdl[i] = -k_th_eff_cgdl_cgdl[i] * d_dx(sv_1D.cgdl[i].T, sv_1D.cgdl[i + 1].T, Hgdl_node / 2)
+        Jt_cgdl_cgdl[i] = -k_th_eff_cgdl_cgdl[i] * d_dx(T_cgdl[i], T_cgdl[i + 1], Hgdl_node / 2)
     end
-    Jt_cgdl_cgc = -k_th_eff_cgdl_cgc * d_dx(sv_1D.cgdl[NB_GDL].T, T_cgc_mean, Hgdl_node / 2)
+    Jt_cgdl_cgc = -k_th_eff_cgdl_cgc * d_dx(T_cgdl[NB_GDL], T_cgc_mean, Hgdl_node / 2)
 
     Jt = MEAThermalFluxes{NB_GDL, NB_MPL}(
         Jt_agc_agdl, Jt_agdl_agdl, Jt_agdl_ampl, Jt_ampl_ampl, Jt_ampl_acl,
@@ -115,12 +130,12 @@ function calculate_heat_transfers!(work::MEAHeatWorkspace,
 
     # The heat dissipated by the liquefaction of vapor water, in J.m-3.s-1.
     Q_liq = MEALiquidHeat{NB_GDL, NB_MPL}(
-        ntuple(i -> Sl.agdl[i] * (-delta_h_liq(sv_1D.agdl[i].T)), NB_GDL), # Q_liq_agdl
-        ntuple(i -> Sl.ampl[i] * (-delta_h_liq(sv_1D.ampl[i].T)), NB_MPL), # Q_liq_ampl
+        ntuple(i -> Sl.agdl[i] * (-delta_h_liq(T_agdl[i])), NB_GDL), # Q_liq_agdl
+        ntuple(i -> Sl.ampl[i] * (-delta_h_liq(T_ampl[i])), NB_MPL), # Q_liq_ampl
         Sl.acl * (-delta_h_liq(T_acl)), # Q_liq_acl
         Sl.ccl * (-delta_h_liq(T_ccl)), # Q_liq_ccl
-        ntuple(i -> Sl.cmpl[i] * (-delta_h_liq(sv_1D.cmpl[i].T)), NB_MPL), # Q_liq_cmpl
-        ntuple(i -> Sl.cgdl[i] * (-delta_h_liq(sv_1D.cgdl[i].T)), NB_GDL) # Q_liq_cgdl
+        ntuple(i -> Sl.cmpl[i] * (-delta_h_liq(T_cmpl[i])), NB_MPL), # Q_liq_cmpl
+        ntuple(i -> Sl.cgdl[i] * (-delta_h_liq(T_cgdl[i])), NB_GDL) # Q_liq_cgdl
     )
 
     # The heat dissipated by the ionic currents (Joule heating + Ohm's law), in J.m-3.s-1.

@@ -77,12 +77,12 @@ function calculate_dyn_throttle_area_controler(dif_eq::Dict, sv::Dict, Pa_des, P
     Abp_a, Abp_c = sv["Abp_a"], sv["Abp_c"]
 
     # Calculation of the pressure derivative inside the gas channels
-    dPagcdt = (dif_eq["dC_v_agc / dt"] + dif_eq["dC_H2_agc / dt"] + dif_eq["dC_N2_agc / dt"]) * R * T_agc
-    dPcgcdt = (dif_eq["dC_v_cgc / dt"] + dif_eq["dC_O2_cgc / dt"] + dif_eq["dC_N2_cgc / dt"]) * R * T_cgc
+    d_P_agc_dt = (dif_eq["dC_v_agc / dt"] + dif_eq["dC_H2_agc / dt"] + dif_eq["dC_N2_agc / dt"]) * R * T_agc
+    d_P_cgc_dt = (dif_eq["dC_v_cgc / dt"] + dif_eq["dC_O2_cgc / dt"] + dif_eq["dC_N2_cgc / dt"]) * R * T_cgc
 
     # Throttle area evolution inside the anode auxiliaries
     if type_auxiliary == :forced_convective_cathode_with_flow_through_anode
-        dif_eq["dAbp_a / dt"] = -Kp_T * (Pa_des - Pagc) + Kd_T * dPagcdt  # PD controller
+        dif_eq["dAbp_a / dt"] = -Kp_T * (Pa_des - Pagc) + Kd_T * d_P_agc_dt  # PD controller
         if Abp_a > A_T_a && dif_eq["dAbp_a / dt"] > 0.0  # The throttle area cannot be higher than the maximum value
             dif_eq["dAbp_a / dt"] = 0.0
         elseif Abp_a < 0.0 && dif_eq["dAbp_a / dt"] < 0.0  # The throttle area cannot be lower than 0
@@ -91,7 +91,7 @@ function calculate_dyn_throttle_area_controler(dif_eq::Dict, sv::Dict, Pa_des, P
     end
 
     # Throttle area evolution inside the cathode auxiliaries
-    dif_eq["dAbp_c / dt"] = -Kp_T * (Pc_des - Pcgc) + Kd_T * dPcgcdt  # PD controller
+    dif_eq["dAbp_c / dt"] = -Kp_T * (Pc_des - Pcgc) + Kd_T * d_P_cgc_dt  # PD controller
     if Abp_c > A_T_c && dif_eq["dAbp_c / dt"] > 0.0  # The throttle area cannot be higher than the maximum value
         dif_eq["dAbp_c / dt"] = 0.0
     elseif Abp_c < 0.0 && dif_eq["dAbp_c / dt"] < 0.0  # The throttle area cannot be lower than 0

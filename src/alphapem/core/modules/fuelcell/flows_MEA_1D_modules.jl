@@ -31,7 +31,8 @@ Tuple(29 elements)
     Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl, Dc_eff_cmpl_cgdl,
     Dc_eff_cgdl_cgdl, T_acl_mem_ccl)
 """
-function flows_1D_MEA_int_values(sv::CellState1D, i_fc::Float64, fc::AbstractFuelCell, cfg::SimulationConfig)::Tuple
+function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace, sv::CellState1D, i_fc::Float64,
+                                            fc::AbstractFuelCell, cfg::SimulationConfig)::Tuple
 
     # Extraction of the parameters
     pp = fc.physical_parameters
@@ -42,28 +43,31 @@ function flows_1D_MEA_int_values(sv::CellState1D, i_fc::Float64, fc::AbstractFue
     nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl
 
     # Extraction of the variables
-    C_v_agc, C_v_acl, C_v_ccl, C_v_cgc = sv.agc.C_v, sv.acl.C_v, sv.ccl.C_v, sv.cgc.C_v
-    C_v_agdl = [sv.agdl[i].C_v for i in 1:nb_gdl]
-    C_v_ampl = [sv.ampl[i].C_v for i in 1:nb_mpl]
-    C_v_cmpl = [sv.cmpl[i].C_v for i in 1:nb_mpl]
-    C_v_cgdl = [sv.cgdl[i].C_v for i in 1:nb_gdl]
-    s_acl, s_ccl = sv.acl.s, sv.ccl.s
-    s_agdl = [sv.agdl[i].s for i in 1:nb_gdl]
-    s_ampl = [sv.ampl[i].s for i in 1:nb_mpl]
-    s_cmpl = [sv.cmpl[i].s for i in 1:nb_mpl]
-    s_cgdl = [sv.cgdl[i].s for i in 1:nb_gdl]
-    lambda_acl, lambda_mem, lambda_ccl = sv.acl.lambda, sv.mem.lambda, sv.ccl.lambda
-    C_H2_agc, C_H2_acl, C_O2_ccl, C_O2_cgc = sv.agc.C_H2, sv.acl.C_H2, sv.ccl.C_O2, sv.cgc.C_O2
-    C_H2_agdl = [sv.agdl[i].C_H2 for i in 1:nb_gdl]
-    C_H2_ampl = [sv.ampl[i].C_H2 for i in 1:nb_mpl]
-    C_O2_cmpl = [sv.cmpl[i].C_O2 for i in 1:nb_mpl]
-    C_O2_cgdl = [sv.cgdl[i].C_O2 for i in 1:nb_gdl]
+    C_v_agc, C_v_agdl = sv.agc.C_v, getproperty.(sv.agdl, :C_v)
+    C_v_ampl, C_v_acl = getproperty.(sv.ampl, :C_v), sv.acl.C_v
+    C_v_ccl, C_v_cmpl,  = sv.ccl.C_v, getproperty.(sv.cmpl, :C_v)
+    C_v_cgdl, C_v_cgc = getproperty.(sv.cgdl, :C_v), sv.cgc.C_v
+
+    s_agc, s_agdl = sv.agc.s, getproperty.(sv.agdl, :s)
+    s_ampl, s_acl = getproperty.(sv.ampl, :s), sv.acl.s
+    s_ccl, s_cmpl = sv.ccl.s, getproperty.(sv.cmpl, :s)
+    s_cgdl, s_cgc = getproperty.(sv.cgdl, :s), sv.cgc.s
+
+    T_agc, T_agdl = sv.agc.T, getproperty.(sv.agdl, :T)
+    T_ampl, T_acl = getproperty.(sv.ampl, :T), sv.acl.T
+    T_mem = sv.mem.T
+    T_ccl, T_cmpl = sv.ccl.T, getproperty.(sv.cmpl, :T)
+    T_cgdl, T_cgc = getproperty.(sv.cgdl, :T), sv.cgc.T
+
+    C_H2_agc, C_H2_agdl = sv.agc.C_H2, getproperty.(sv.agdl, :C_H2)
+    C_H2_ampl, C_H2_acl = getproperty.(sv.ampl, :C_H2), sv.acl.C_H2
+
+    C_O2_ccl, C_O2_cmpl = sv.ccl.C_O2, getproperty.(sv.cmpl, :C_O2)
+    C_O2_cgdl, C_O2_cgc = getproperty.(sv.cgdl, :C_O2), sv.cgc.C_O2
+
     C_N2_agc, C_N2_cgc = sv.agc.C_N2, sv.cgc.C_N2
-    T_agc, T_acl, T_mem, T_ccl, T_cgc = sv.agc.T, sv.acl.T, sv.mem.T, sv.ccl.T, sv.cgc.T
-    T_agdl = [sv.agdl[i].T for i in 1:nb_gdl]
-    T_ampl = [sv.ampl[i].T for i in 1:nb_mpl]
-    T_cmpl = [sv.cmpl[i].T for i in 1:nb_mpl]
-    T_cgdl = [sv.cgdl[i].T for i in 1:nb_gdl]
+
+    lambda_acl, lambda_mem, lambda_ccl = sv.acl.lambda, sv.mem.lambda, sv.ccl.lambda
 
     # Transitory parameter
     H_gdl_node = Hgdl / nb_gdl
@@ -114,17 +118,17 @@ function flows_1D_MEA_int_values(sv::CellState1D, i_fc::Float64, fc::AbstractFue
     w_mpl_ccl  = H_mpl_node / H_ccl_mpl                   # MPL-side weight at CCL/MPL interface.
 
     #       ... of the capillary coefficient
-    D_cap_agdl_agdl = Vector(undef, nb_gdl - 1)
+    D_cap_agdl_agdl = flows_int_work.D_cap_agdl_agdl
     @inbounds for i in 1:(nb_gdl - 1)
         D_cap_agdl_agdl[i] = hmean([Dcap("gdl", s_agdl[i],     T_agdl[i],     epsilon_gdl, e, epsilon_c),
-                         Dcap("gdl", s_agdl[i + 1], T_agdl[i + 1], epsilon_gdl, e, epsilon_c)])
+                                     Dcap("gdl", s_agdl[i + 1], T_agdl[i + 1], epsilon_gdl, e, epsilon_c)])
     end
 
     D_cap_agdl_ampl = hmean([Dcap("gdl", s_agdl[nb_gdl], T_agdl[nb_gdl], epsilon_gdl, e, epsilon_c),
                              Dcap("mpl", s_ampl[1],      T_ampl[1],      epsilon_mpl, e)],
                             [w_gdl_mpl, w_mpl_gdl])
 
-    D_cap_ampl_ampl = Vector(undef, nb_mpl - 1)
+    D_cap_ampl_ampl = flows_int_work.D_cap_ampl_ampl
     @inbounds for i in 1:(nb_mpl - 1)
         D_cap_ampl_ampl[i] = hmean([Dcap("mpl", s_ampl[i],     T_ampl[i],     epsilon_mpl, e),
                                      Dcap("mpl", s_ampl[i + 1], T_ampl[i + 1], epsilon_mpl, e)])
@@ -138,7 +142,7 @@ function flows_1D_MEA_int_values(sv::CellState1D, i_fc::Float64, fc::AbstractFue
                             Dcap("mpl", s_cmpl[1], T_cmpl[1], epsilon_mpl, e)],
                            [w_ccl_mpl, w_mpl_ccl])
 
-    D_cap_cmpl_cmpl = Vector(undef, nb_mpl - 1)
+    D_cap_cmpl_cmpl = flows_int_work.D_cap_cmpl_cmpl
     @inbounds for i in 1:(nb_mpl - 1)
         D_cap_cmpl_cmpl[i] = hmean([Dcap("mpl", s_cmpl[i],     T_cmpl[i],     epsilon_mpl, e),
                                      Dcap("mpl", s_cmpl[i + 1], T_cmpl[i + 1], epsilon_mpl, e)])
@@ -146,28 +150,28 @@ function flows_1D_MEA_int_values(sv::CellState1D, i_fc::Float64, fc::AbstractFue
 
     D_cap_cmpl_cgdl = hmean([Dcap("mpl", s_cmpl[nb_mpl], T_cmpl[nb_mpl], epsilon_mpl, e),
                              Dcap("gdl", s_cgdl[1],      T_cgdl[1],      epsilon_gdl, e, epsilon_c)],
-                            [w_mpl_gdl, w_gdl_mpl])
+                           [w_mpl_gdl, w_gdl_mpl])
 
-    D_cap_cgdl_cgdl = Vector(undef, nb_gdl - 1)
+    D_cap_cgdl_cgdl = flows_int_work.D_cap_cgdl_cgdl
     @inbounds for i in 1:(nb_gdl - 1)
         D_cap_cgdl_cgdl[i] = hmean([Dcap("gdl", s_cgdl[i],     T_cgdl[i],     epsilon_gdl, e, epsilon_c),
-                         Dcap("gdl", s_cgdl[i + 1], T_cgdl[i + 1], epsilon_gdl, e, epsilon_c)])
+                                     Dcap("gdl", s_cgdl[i + 1], T_cgdl[i + 1], epsilon_gdl, e, epsilon_c)])
     end
 
     #       ... of the effective diffusion coefficient
-    Da_eff_agdl_agdl = Vector(undef, nb_gdl - 1)
+    Da_eff_agdl_agdl = flows_int_work.Da_eff_agdl_agdl
     @inbounds for i in 1:(nb_gdl - 1)
         Da_eff_agdl_agdl[i] = hmean([Da_eff("gdl", s_agdl[i],     T_agdl[i],     Pagdl[i],     epsilon_gdl, epsilon_c),
-                          Da_eff("gdl", s_agdl[i + 1], T_agdl[i + 1], Pagdl[i + 1], epsilon_gdl, epsilon_c)])
+                                     Da_eff("gdl", s_agdl[i + 1], T_agdl[i + 1], Pagdl[i + 1], epsilon_gdl, epsilon_c)])
     end
 
     Da_eff_agdl_ampl = hmean([Da_eff("gdl", s_agdl[nb_gdl], T_agdl[nb_gdl], Pagdl[nb_gdl], epsilon_gdl, epsilon_c),
                               Da_eff("mpl", s_ampl[1],      T_ampl[1],      Pampl[1],      epsilon_mpl)],
                              [w_gdl_mpl, w_mpl_gdl])
 
-    Da_eff_ampl_ampl = Vector(undef, nb_mpl - 1)
+    Da_eff_ampl_ampl = flows_int_work.Da_eff_ampl_ampl
     @inbounds for i in 1:(nb_mpl - 1)
-        Da_eff_ampl_ampl[i] = hmean([Da_eff("mpl", s_ampl[i],     T_ampl[i],     Pampl[i],     epsilon_mpl),
+        Da_eff_ampl_ampl[i] = hmean([Da_eff("mpl",  s_ampl[i],     T_ampl[i],     Pampl[i],     epsilon_mpl),
                                       Da_eff("mpl", s_ampl[i + 1], T_ampl[i + 1], Pampl[i + 1], epsilon_mpl)])
     end
 
@@ -179,7 +183,7 @@ function flows_1D_MEA_int_values(sv::CellState1D, i_fc::Float64, fc::AbstractFue
                              Dc_eff("mpl", s_cmpl[1], T_cmpl[1], Pcmpl[1], epsilon_mpl)],
                             [w_ccl_mpl, w_mpl_ccl])
 
-    Dc_eff_cmpl_cmpl = Vector(undef, nb_mpl - 1)
+    Dc_eff_cmpl_cmpl = flows_int_work.Dc_eff_cmpl_cmpl
     @inbounds for i in 1:(nb_mpl - 1)
         Dc_eff_cmpl_cmpl[i] = hmean([Dc_eff("mpl", s_cmpl[i],     T_cmpl[i],     Pcmpl[i],     epsilon_mpl),
                                       Dc_eff("mpl", s_cmpl[i + 1], T_cmpl[i + 1], Pcmpl[i + 1], epsilon_mpl)])
@@ -189,10 +193,10 @@ function flows_1D_MEA_int_values(sv::CellState1D, i_fc::Float64, fc::AbstractFue
                               Dc_eff("gdl", s_cgdl[1],      T_cgdl[1],      Pcgdl[1],      epsilon_gdl, epsilon_c)],
                              [w_mpl_gdl, w_gdl_mpl])
 
-    Dc_eff_cgdl_cgdl = Vector(undef, nb_gdl - 1)
+    Dc_eff_cgdl_cgdl = flows_int_work.Dc_eff_cgdl_cgdl
     @inbounds for i in 1:(nb_gdl - 1)
         Dc_eff_cgdl_cgdl[i] = hmean([Dc_eff("gdl", s_cgdl[i],     T_cgdl[i],     Pcgdl[i],     epsilon_gdl, epsilon_c),
-                          Dc_eff("gdl", s_cgdl[i + 1], T_cgdl[i + 1], Pcgdl[i + 1], epsilon_gdl, epsilon_c)])
+                                     Dc_eff("gdl", s_cgdl[i + 1], T_cgdl[i + 1], Pcgdl[i + 1], epsilon_gdl, epsilon_c)])
     end
 
     #       ... of the temperature

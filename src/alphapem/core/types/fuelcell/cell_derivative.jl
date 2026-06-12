@@ -204,3 +204,53 @@ struct FuelCellDerivativeP2D{nb_gdl, nb_mpl, nb_gc}
 end
 
 
+
+
+# ────────────────────────────────────────────────────────────────────────────────
+# Assembly functions
+# ────────────────────────────────────────────────────────────────────────────────
+
+"""Assemble one complete MEA derivative from per-physics derivative contributions."""
+function assemble_mea_derivative_1D(dw::MEADissolvedWaterDerivative,
+                                    lw::MEALiquidWaterDerivative{NB_GDL, NB_MPL},
+                                    vw::MEAVaporDerivative{NB_GDL, NB_MPL},
+                                    sd::MEAH2O2SpeciesDerivative{NB_GDL, NB_MPL},
+                                    vd::MEAVoltageDerivative,
+                                    td::MEATemperatureDerivative{NB_GDL, NB_MPL}) where {NB_GDL, NB_MPL}
+
+    # Gas-channel derivatives are still filled by gas-channel equations later.
+    agc = AnodeGCDerivative(NaN, NaN, NaN, NaN, NaN)
+    cgc = CathodeGCDerivative(NaN, NaN, NaN, NaN, NaN)
+
+    agdl = ntuple(NB_GDL) do j
+        AnodeGDLDerivative(vw.agdl_C_v[j], lw.agdl_s[j], sd.agdl_C_H2[j], td.agdl_T[j])
+    end
+    ampl = ntuple(NB_MPL) do j
+        AnodeMPLDerivative(vw.ampl_C_v[j], lw.ampl_s[j], sd.ampl_C_H2[j], td.ampl_T[j])
+    end
+    acl = AnodeCLDerivative(vw.acl_C_v, lw.acl_s, sd.acl_C_H2, dw.acl_lambda, td.acl_T)
+    mem = MembraneDerivative(dw.mem_lambda, td.mem_T)
+    ccl = CathodeCLDerivative(vw.ccl_C_v, lw.ccl_s, sd.ccl_C_O2, dw.ccl_lambda, td.ccl_T, vd.ccl_eta_c)
+    cmpl = ntuple(NB_MPL) do j
+        CathodeMPLDerivative(vw.cmpl_C_v[j], lw.cmpl_s[j], sd.cmpl_C_O2[j], td.cmpl_T[j])
+    end
+    cgdl = ntuple(NB_GDL) do j
+        CathodeGDLDerivative(vw.cgdl_C_v[j], lw.cgdl_s[j], sd.cgdl_C_O2[j], td.cgdl_T[j])
+    end
+
+    return CellDerivative1D{NB_GDL, NB_MPL}(agc, agdl, ampl, acl, mem, ccl, cmpl, cgdl, cgc)
+end
+
+"""Assemble complete MEA derivatives by injecting GC contributions into existing MEA derivatives."""
+function assemble_gc_derivative_1D(mea::AbstractVector{<:CellDerivative1D{NB_GDL, NB_MPL}},
+                                   gas::GCGasDerivative{NB_GC},
+                                   liq::GCLiquidWaterDerivative{NB_GC},
+                                   temp::GCTemperatureDerivative{NB_GC}) where {NB_GDL, NB_MPL, NB_GC}
+    return [begin
+                agc = AnodeGCDerivative(gas.agc_C_v[i], liq.agc_s[i], gas.agc_C_H2[i], gas.agc_C_N2[i], temp.agc_T[i])
+                cgc = CathodeGCDerivative(gas.cgc_C_v[i], liq.cgc_s[i], gas.cgc_C_O2[i], gas.cgc_C_N2[i], temp.cgc_T[i])
+                node = mea[i]
+                CellDerivative1D{NB_GDL, NB_MPL}(agc, node.agdl, node.ampl, node.acl, node.mem,
+                                                    node.ccl, node.cmpl, node.cgdl, cgc)
+            end for i in 1:NB_GC]
+end

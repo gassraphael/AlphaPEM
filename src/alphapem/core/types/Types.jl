@@ -51,6 +51,7 @@ export FuelCellDerivativeP2D
 export MEADissolvedWaterDerivative, MEALiquidWaterDerivative, MEAVaporDerivative
 export MEAH2O2SpeciesDerivative, MEAVoltageDerivative, MEATemperatureDerivative
 export GCGasDerivative, GCLiquidWaterDerivative, GCTemperatureDerivative
+export assemble_mea_derivative_1D, assemble_gc_derivative_1D
 
 # --- cell_intermediates.jl ---
 export AbstractCellIntermediate
@@ -59,6 +60,8 @@ export MEAThermalIntermediates, CellIntermediates1D
 export ManifoldNodeIntermediates, ManifoldIntermediates
 export AuxiliaryIntermediates
 export FuelCellIntermediatesP2D
+export MEAFlowsIntWorkspace, MEAHeatIntWorkspace,
+       GCManifoldWorkspace
 
 # --- cell_balance.jl ---
 export NodeBalance

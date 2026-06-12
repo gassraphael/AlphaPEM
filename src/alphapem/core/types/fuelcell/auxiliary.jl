@@ -37,9 +37,9 @@ end
 Mirrors the structure of Auxiliary0DState for consistency with the ODE solver interface.
 """
 struct Auxiliary0DDerivative
-    Wcp::Float64
-    Wa_inj::Float64
-    Wc_inj::Float64
-    Abp_a::Float64
-    Abp_c::Float64
+    d_Wcp_dt::Float64
+    d_Wa_inj_dt::Float64
+    d_Wc_inj_dt::Float64
+    d_Abp_a_dt::Float64
+    d_Abp_c_dt::Float64
 end

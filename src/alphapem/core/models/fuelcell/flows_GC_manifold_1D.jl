@@ -9,6 +9,8 @@
 
 Parameters
 ----------
+gc_manifold_work : GCManifoldWorkspace
+    Workspace for the calculation of the flows in the GC manifold (stores intermediate values and pre-allocations).
 sv_1D_cell : AbstractVector{<:CellState1D}
     Typed variables calculated by the solver (cell internal states).
 sv_auxiliary
@@ -33,7 +35,8 @@ Returns
 GCManifoldFlows1D{NB_GC}
     Typed global and species-specific flows in the gas channels and auxiliaries.
 """
-function calculate_flows_1D_GC_manifold(sv_1D_cell::AbstractVector{<:CellState1D},
+function calculate_flows_1D_GC_manifold(gc_manifold_work::GCManifoldWorkspace,
+                                        sv_1D_cell::AbstractVector{<:CellState1D},
                                         sv_auxiliary,
                                         i_fc_cell::Float64,
                                         v_a::Vector{Float64},
@@ -68,7 +71,7 @@ function calculate_flows_1D_GC_manifold(sv_1D_cell::AbstractVector{<:CellState1D
 
     # Intermediate values
     (P_agc, P_cgc, Phi_agc, Phi_cgc, y_H2_agc, y_O2_cgc, M_agc, M_cgc, M_ext, M_H2_N2_in, rho_agc, rho_cgc, k_purge,
-     Abp_a, Abp_c, mu_gaz_agc, mu_gaz_cgc) = flow_1D_GC_manifold_int_values(sv_1D_cell, sv_auxiliary, fc, cfg)
+     Abp_a, Abp_c, mu_gaz_agc, mu_gaz_cgc) = calculate_flow_1D_GC_manifold_int_values!(gc_manifold_work, sv_1D_cell, sv_auxiliary, fc, cfg)
     W_des = desired_flows(sv_1D_cell, i_fc_cell, Pa_in, Pc_in, fc, cfg)
 
     # _________________________________________Inlet and outlet global flows____________________________________________

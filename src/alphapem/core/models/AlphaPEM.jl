@@ -415,7 +415,10 @@ function _build_dae_residual(simu::AlphaPEM, dims,
     np = simu.cfg.numerical_parameters
     y_phys_work           = similar(initial_scaled_variable_values)
     flows_work            = [MEAFlowsWorkspace(np.nb_gdl, np.nb_mpl) for _ in 1:np.nb_gc]
+    flows_int_work        = MEAFlowsIntWorkspace(np.nb_gdl, np.nb_mpl)
     heat_work             = MEAHeatWorkspace(np.nb_gdl, np.nb_mpl)
+    heat_int_work         = MEAHeatIntWorkspace(np.nb_gdl, np.nb_mpl)
+    gc_manifold_work      = GCManifoldWorkspace(np.nb_gc)
     _, current_res_scales = _build_gc_current_density_scaling(simu.cfg)
     j_in_scale            = StateScaling().dae_algebraic.J_in
     packed = (fuel_cell           = simu.fuel_cell,
@@ -428,7 +431,10 @@ function _build_dae_residual(simu::AlphaPEM, dims,
               differential_vars   = dims.differential_vars,
               y_phys_work         = y_phys_work,
               flows_work          = flows_work,
+              flows_int_work      = flows_int_work,
               heat_work           = heat_work,
+              heat_int_work       = heat_int_work,
+              gc_manifold_work    = gc_manifold_work,
               current_res_scales  = current_res_scales,
               j_in_scale          = j_in_scale)
     residual! = (res, dydt_IDA, y, p, t) -> begin
@@ -441,7 +447,9 @@ function _build_dae_residual(simu::AlphaPEM, dims,
                       p.fuel_cell, p.current_density, p.cfg,
                       p.n_vars_cell_1D, p.n_vars_manifold, p.n_vars_auxiliary,
                       p.solver_state_scaling, p.y_phys_work,
-                      p.flows_work, p.heat_work,
+                      p.flows_work, p.flows_int_work,
+                      p.heat_work, p.heat_int_work,
+                      p.gc_manifold_work,
                       p.current_res_scales, p.j_in_scale)
     end
     return packed, residual!

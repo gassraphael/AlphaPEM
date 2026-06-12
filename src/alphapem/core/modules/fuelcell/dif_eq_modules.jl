@@ -6,7 +6,7 @@ and to implement integration events.
 
 # ____________________________________________Differential equations modules____________________________________________
 
-"""Calculate typed intermediate values used by differential equations."""
+"""Calculate typed intermediate values used by differential equations (in-place, zero allocation)."""
 function calculate_dif_eq_int_values(t::Float64,
                                      sv,
                                      fc::AbstractFuelCell,
@@ -16,12 +16,31 @@ function calculate_dif_eq_int_values(t::Float64,
                                      Ware=nothing)
 
     # Extraction of the variables
-    C_v_agc, C_v_acl, C_v_ccl, C_v_cgc = sv.agc.C_v, sv.acl.C_v, sv.ccl.C_v, sv.cgc.C_v
-    s_acl, s_ccl = sv.acl.s, sv.ccl.s
-    lambda_acl, lambda_mem, lambda_ccl = sv.acl.lambda, sv.mem.lambda, sv.ccl.lambda
-    C_H2_agc, C_H2_acl, C_O2_ccl, C_O2_cgc = sv.agc.C_H2, sv.acl.C_H2, sv.ccl.C_O2, sv.cgc.C_O2
+    C_v_agc, C_v_agdl = sv.agc.C_v, getproperty.(sv.agdl, :C_v)
+    C_v_ampl, C_v_acl = getproperty.(sv.ampl, :C_v), sv.acl.C_v
+    C_v_ccl, C_v_cmpl,  = sv.ccl.C_v, getproperty.(sv.cmpl, :C_v)
+    C_v_cgdl, C_v_cgc = getproperty.(sv.cgdl, :C_v), sv.cgc.C_v
+
+    s_agc, s_agdl = sv.agc.s, getproperty.(sv.agdl, :s)
+    s_ampl, s_acl = getproperty.(sv.ampl, :s), sv.acl.s
+    s_ccl, s_cmpl = sv.ccl.s, getproperty.(sv.cmpl, :s)
+    s_cgdl, s_cgc = getproperty.(sv.cgdl, :s), sv.cgc.s
+
+    T_agc, T_agdl = sv.agc.T, getproperty.(sv.agdl, :T)
+    T_ampl, T_acl = getproperty.(sv.ampl, :T), sv.acl.T
+    T_mem = sv.mem.T
+    T_ccl, T_cmpl = sv.ccl.T, getproperty.(sv.cmpl, :T)
+    T_cgdl, T_cgc = getproperty.(sv.cgdl, :T), sv.cgc.T
+
+    C_H2_agc, C_H2_agdl = sv.agc.C_H2, getproperty.(sv.agdl, :C_H2)
+    C_H2_ampl, C_H2_acl = getproperty.(sv.ampl, :C_H2), sv.acl.C_H2
+
+    C_O2_ccl, C_O2_cmpl = sv.ccl.C_O2, getproperty.(sv.cmpl, :C_O2)
+    C_O2_cgdl, C_O2_cgc = getproperty.(sv.cgdl, :C_O2), sv.cgc.C_O2
+
     C_N2_agc, C_N2_cgc = sv.agc.C_N2, sv.cgc.C_N2
-    T_agc, T_acl, T_mem, T_ccl, T_cgc = sv.agc.T, sv.acl.T, sv.mem.T, sv.ccl.T, sv.cgc.T
+
+    lambda_acl, lambda_mem, lambda_ccl = sv.acl.lambda, sv.mem.lambda, sv.ccl.lambda
 
     # Extraction of the parameters
     oc = fc.operating_conditions
@@ -69,25 +88,25 @@ function calculate_dif_eq_int_values(t::Float64,
                                   T_cgc)
 
     #       Volumetric heat capacity (J.m-3.K-1)
-    rho_Cp0_agdl = ntuple(i -> calculate_rho_Cp0("agdl", sv.agdl[i].T, sv.agdl[i].C_v,
-                                                 sv.agdl[i].s, nothing, sv.agdl[i].C_H2, nothing, C_N2_agc,
+    rho_Cp0_agdl = ntuple(i -> calculate_rho_Cp0("agdl", T_agdl[i], C_v_agdl[i],
+                                                 s_agdl[i], nothing, C_H2_agdl[i], nothing, C_N2_agc,
                                                  epsilon_gdl), nb_gdl)
-    rho_Cp0_ampl = ntuple(i -> calculate_rho_Cp0("ampl", sv.ampl[i].T, sv.ampl[i].C_v,
-                                                 sv.ampl[i].s, nothing, sv.ampl[i].C_H2, nothing, C_N2_agc,
+    rho_Cp0_ampl = ntuple(i -> calculate_rho_Cp0("ampl", T_ampl[i], C_v_ampl[i],
+                                                 s_ampl[i], nothing, C_H2_ampl[i], nothing, C_N2_agc,
                                                  epsilon_mpl), nb_mpl)
     rho_Cp0_acl = calculate_rho_Cp0("acl", T_acl, C_v_acl, s_acl, lambda_acl, C_H2_acl, nothing, C_N2_agc,
                                     nothing, Hacl)
     rho_Cp0_mem = calculate_rho_Cp0("mem", T_mem, nothing, nothing, lambda_mem)
     rho_Cp0_ccl = calculate_rho_Cp0("ccl", T_ccl, C_v_ccl, s_ccl, lambda_ccl, nothing, C_O2_ccl,
                                     C_N2_cgc, nothing, Hccl)
-    rho_Cp0_cmpl = ntuple(i -> calculate_rho_Cp0("cmpl", sv.cmpl[i].T, sv.cmpl[i].C_v,
-                                                 sv.cmpl[i].s, nothing, nothing, sv.cmpl[i].C_O2, C_N2_cgc,
+    rho_Cp0_cmpl = ntuple(i -> calculate_rho_Cp0("cmpl", T_cmpl[i], C_v_cmpl[i],
+                                                 s_cmpl[i], nothing, nothing, C_O2_cmpl[i], C_N2_cgc,
                                                  epsilon_mpl), nb_mpl)
-    rho_Cp0_cgdl = ntuple(i -> calculate_rho_Cp0("cgdl", sv.cgdl[i].T, sv.cgdl[i].C_v,
-                                                 sv.cgdl[i].s, nothing, nothing, sv.cgdl[i].C_O2, C_N2_cgc,
+    rho_Cp0_cgdl = ntuple(i -> calculate_rho_Cp0("cgdl", T_cgdl[i], C_v_cgdl[i],
+                                                 s_cgdl[i], nothing, nothing, C_O2_cgdl[i], C_N2_cgc,
                                                  epsilon_gdl), nb_gdl)
     rho_Cp0 = MEAThermalIntermediates{nb_gdl, nb_mpl}(rho_Cp0_agdl, rho_Cp0_ampl, rho_Cp0_acl,
-                                                       rho_Cp0_mem, rho_Cp0_ccl, rho_Cp0_cmpl, rho_Cp0_cgdl)
+                                                      rho_Cp0_mem, rho_Cp0_ccl, rho_Cp0_cmpl, rho_Cp0_cgdl)
 
     #       Crossover current density
     T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
