@@ -43,10 +43,18 @@ flows_work : Vector{MEAFlowsWorkspace}
     One pre-allocated workspace per GC node.  Passed to `calculate_flows_1D_MEA!`
     so that the in-place variant can reuse its internal arrays without allocating
     new memory at each residual evaluation.
+flows_int_work : MEAFlowsIntWorkspace
+    Single pre-allocated workspace shared across all GC nodes for
+    `calculate_flows_1D_MEA_int_values!`.  Computed sequentially, so one workspace is sufficient.
 heat_work : MEAHeatWorkspace
     Single pre-allocated workspace shared across all GC nodes for
     `calculate_heat_transfers!`.  Heat flows for each node are computed
     sequentially, so one workspace is sufficient.
+heat_int_work : MEAHeatIntWorkspace
+    Single pre-allocated workspace shared across all GC nodes for
+    `calculate_heat_int_values!`.  Computed sequentially, so one workspace is sufficient.
+gc_manifold_work : GCManifoldWorkspace
+    Pre-allocated workspace for `calculate_flow_1D_GC_manifold_int_values!`.
 current_res_scales : Vector{Float64}
     Reference magnitudes used to non-dimensionalise the current-distribution
     residuals.  Built once by `build_current_residual_scaling` and reused at every residual call.
@@ -60,7 +68,10 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
                        n_vars_auxiliary::Int, solver_state_scaling::Vector{Float64},
                        y_phys::Vector{Float64},
                        flows_work::Vector{MEAFlowsWorkspace},
+                       flows_int_work::MEAFlowsIntWorkspace,
                        heat_work::MEAHeatWorkspace,
+                       heat_int_work::MEAHeatIntWorkspace,
+                       gc_manifold_work::GCManifoldWorkspace,
                        current_res_scales::Vector{Float64},
                        j_in_scale::Float64)
 
@@ -148,21 +159,14 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
     v_a, v_c, Pa_in, Pc_in = velocity_profiles_from_inlet_flows(sv_cell_1D, J_a_in, J_c_in, fc, cfg)
 
     # Calculation of the flows for each GC node.
-    # The in-place variant reuses the pre-allocated workspace to avoid allocations inside the solver loop.
-    first_flow = calculate_flows_1D_MEA!(flows_work[1], sv_cell_1D[1], i_fc[1], v_a[1], v_c[1], fc, cfg)
-    flows_1D_MEA = Vector{typeof(first_flow)}(undef, nb_gc)
-    flows_1D_MEA[1] = first_flow
-    @inbounds for i in 2:nb_gc
-        flows_1D_MEA[i] = calculate_flows_1D_MEA!(flows_work[i], sv_cell_1D[i], i_fc[i], v_a[i], v_c[i], fc, cfg)
-    end
-    flows_1D_GC_manifold = calculate_flows_1D_GC_manifold(sv_cell_1D, sv_auxiliary, i_fc_cell,
+    flows_1D_MEA = [calculate_flows_1D_MEA!(flows_work[i], flows_int_work, sv_cell_1D[i], i_fc[i], v_a[i], v_c[i], fc, cfg) for i in 1:nb_gc]
+    flows_1D_GC_manifold = calculate_flows_1D_GC_manifold(gc_manifold_work, sv_cell_1D, sv_auxiliary, i_fc_cell,
                                                            v_a, v_c, Pa_in, Pc_in, fc, cfg)
     # Calculation of the dynamic evolutions inside the MEA.
     @inbounds for i in 1:nb_gc
         dif_eq_int_values_i = calculate_dif_eq_int_values(t, sv_cell_1D[i], fc, cfg, sv_manifold_1D, sv_auxiliary)
-        # heat_work is shared across iterations (sequential loop) — one workspace is sufficient.
-        heat_flows_i = calculate_heat_transfers!(heat_work, sv_cell_1D[i], i_fc[i], fc, cfg, flows_1D_MEA[i].S_abs,
-                                                 flows_1D_MEA[i].Sl)
+        heat_flows_i = calculate_heat_transfers!(heat_work, heat_int_work, sv_cell_1D[i], i_fc[i], fc, cfg, flows_1D_MEA[i].S_abs,
+                                                flows_1D_MEA[i].Sl)
 
         dif_eq_mea_diss_water_i = calculate_dyn_dissoved_water_evolution_inside_MEA(sv_cell_1D[i], pp,
                                                                                       flows_1D_MEA[i].S_abs,

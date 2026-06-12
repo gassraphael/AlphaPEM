@@ -6,19 +6,6 @@
 
 # ____________________________________________________Main functions____________________________________________________
 
-"""Assemble complete MEA derivatives by injecting GC contributions into existing MEA derivatives."""
-function assemble_gc_derivative_1D(mea::AbstractVector{<:CellDerivative1D{NB_GDL, NB_MPL}},
-                                   gas::GCGasDerivative{NB_GC},
-                                   liq::GCLiquidWaterDerivative{NB_GC},
-                                   temp::GCTemperatureDerivative{NB_GC}) where {NB_GDL, NB_MPL, NB_GC}
-    return [begin
-                agc = AnodeGCDerivative(gas.agc_C_v[i], liq.agc_s[i], gas.agc_C_H2[i], gas.agc_C_N2[i], temp.agc_T[i])
-                cgc = CathodeGCDerivative(gas.cgc_C_v[i], liq.cgc_s[i], gas.cgc_C_O2[i], gas.cgc_C_N2[i], temp.cgc_T[i])
-                node = mea[i]
-                CellDerivative1D{NB_GDL, NB_MPL}(agc, node.agdl, node.ampl, node.acl, node.mem,
-                                                    node.ccl, node.cmpl, node.cgdl, cgc)
-            end for i in 1:NB_GC]
-end
 
 """Calculate dynamic gas-species (vapour, H₂, O₂, N₂) evolution in the gas channels.
 
@@ -59,7 +46,7 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
     agc_pos = anode_gc_pos_map(NB_GC, cfg.type_flow)
 
     # Anode GC: water vapour
-    agc_C_v = ntuple(NB_GC) do i
+    d_C_v_agc_dt = ntuple(NB_GC) do i
         fac_a = 1.0 / (1.0 - sv[i].agc.s)
         if NB_GC == 1
             J_in = Jv.agc_in
@@ -74,7 +61,7 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
     end
 
     # Anode GC: hydrogen
-    agc_C_H2 = ntuple(NB_GC) do i
+    d_C_H2_agc_dt = ntuple(NB_GC) do i
         fac_a = 1.0 / (1.0 - sv[i].agc.s)
         if NB_GC == 1
             J_in = JH2.agc_in
@@ -89,7 +76,7 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
     end
 
     # Anode GC: nitrogen
-    agc_C_N2 = ntuple(NB_GC) do i
+    d_C_N2_agc_dt = ntuple(NB_GC) do i
         fac_a = 1.0 / (1.0 - sv[i].agc.s)
         if type_auxiliary != :forced_convective_cathode_with_flow_through_anode
             0.0
@@ -106,7 +93,7 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
     end
 
     # Cathode GC: water vapour
-    cgc_C_v = ntuple(NB_GC) do i
+    d_C_v_cgc_dt = ntuple(NB_GC) do i
         fac_c = 1.0 / (1.0 - sv[i].cgc.s)
         if NB_GC == 1
             J_in = Jv.cgc_in
@@ -120,7 +107,7 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
     end
 
     # Cathode GC: oxygen
-    cgc_C_O2 = ntuple(NB_GC) do i
+    d_C_O2_cgc_dt = ntuple(NB_GC) do i
         fac_c = 1.0 / (1.0 - sv[i].cgc.s)
         if NB_GC == 1
             J_in = JO2.cgc_in
@@ -134,7 +121,7 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
     end
 
     # Cathode GC: nitrogen
-    cgc_C_N2 = ntuple(NB_GC) do i
+    d_C_N2_cgc_dt = ntuple(NB_GC) do i
         fac_c = 1.0 / (1.0 - sv[i].cgc.s)
         if NB_GC == 1
             J_in = JN2.cgc_in
@@ -147,7 +134,7 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
         end
     end
 
-    return GCGasDerivative{NB_GC}(agc_C_v, agc_C_H2, agc_C_N2, cgc_C_v, cgc_C_O2, cgc_C_N2)
+    return GCGasDerivative{NB_GC}(d_C_v_agc_dt, d_C_H2_agc_dt, d_C_N2_agc_dt, d_C_v_cgc_dt, d_C_O2_cgc_dt, d_C_N2_cgc_dt)
 end
 
 
@@ -185,7 +172,7 @@ function calculate_dyn_liq_evolution_inside_gas_channel(
     agc_pos = anode_gc_pos_map(NB_GC, cfg.type_flow)
 
     # Anode GC: liquid water
-    agc_s = ntuple(NB_GC) do i
+    d_s_agc_dt = ntuple(NB_GC) do i
         if NB_GC == 1
             J_in = 0.0
             J_out = Jl.agc_out
@@ -199,7 +186,7 @@ function calculate_dyn_liq_evolution_inside_gas_channel(
     end
 
     # Cathode GC: liquid water
-    cgc_s = ntuple(NB_GC) do i
+    d_s_cgc_dt = ntuple(NB_GC) do i
         if NB_GC == 1
             J_in = 0.0
             J_out = Jl.cgc_out
@@ -211,7 +198,7 @@ function calculate_dyn_liq_evolution_inside_gas_channel(
         end
     end
 
-    return GCLiquidWaterDerivative{NB_GC}(agc_s, cgc_s)
+    return GCLiquidWaterDerivative{NB_GC}(d_s_agc_dt, d_s_cgc_dt)
 end
 
 

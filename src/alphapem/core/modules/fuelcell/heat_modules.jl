@@ -5,13 +5,14 @@
 
 # _________________________________________________Heat transfer modules________________________________________________
 
-"""Calculate intermediate values for the heat transfer calculation.
+"""Calculate intermediate values for the heat transfer calculation (in-place, zero allocation).
 
 Parameters
 ----------
-sv : Dict
+heat_int_work : MEAHeatIntWorkspace
+    Pre-allocated workspace. Results are written into `work` fields.
+sv : CellState1D
     Variables calculated by the solver. They correspond to the fuel cell internal states.
-    `sv` is a contraction of solver_variables for enhanced readability.
 fc : AbstractFuelCell
     The fuel cell instance providing model parameters.
 cfg : SimulationConfig
@@ -20,11 +21,16 @@ cfg : SimulationConfig
 Returns
 -------
 Tuple
-    Tuple containing the intermediate values used by the heat calculation.
+    `(Hgdl_node, Hmpl_node, k_th_eff_agc_agdl, k_th_eff_agdl_agdl, k_th_eff_agdl_ampl,
+      k_th_eff_ampl_ampl, k_th_eff_ampl_acl, k_th_eff_acl_mem, k_th_eff_mem_ccl, k_th_eff_ccl_cmpl,
+      k_th_eff_cmpl_cmpl, k_th_eff_cmpl_cgdl, k_th_eff_cgdl_cgdl, k_th_eff_cgdl_cgc)`
+    Scalar and vector intermediates.
 """
-function heat_transfer_int_values(sv::CellState1D,
-                                  fc::AbstractFuelCell,
-                                  cfg::SimulationConfig)::Tuple
+function calculate_heat_int_values!(heat_int_work::MEAHeatIntWorkspace,
+                                    sv::CellState1D{NB_GDL, NB_MPL},
+                                    fc::AbstractFuelCell,
+                                    cfg::SimulationConfig
+                                    ) where {NB_GDL, NB_MPL}
 
     # Extraction of the parameters
     pp = fc.physical_parameters
@@ -33,21 +39,32 @@ function heat_transfer_int_values(sv::CellState1D,
     Hmem, epsilon_gdl, epsilon_mpl, epsilon_c = pp.Hmem, pp.epsilon_gdl, pp.epsilon_mpl, pp.epsilon_c
     nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl
 
-    # Extraction of the variables (typed access via CellState1D struct fields)
-    C_v_acl, C_v_ccl = sv.acl.C_v, sv.ccl.C_v
-    C_v_agdl, C_v_ampl = [sv.agdl[i].C_v for i in 1:nb_gdl], [sv.ampl[i].C_v for i in 1:nb_mpl]
-    C_v_cmpl, C_v_cgdl = [sv.cmpl[i].C_v for i in 1:nb_mpl], [sv.cgdl[i].C_v for i in 1:nb_gdl]
-    s_acl, s_ccl = sv.acl.s, sv.ccl.s
-    s_agdl, s_ampl = [sv.agdl[i].s for i in 1:nb_gdl], [sv.ampl[i].s for i in 1:nb_mpl]
-    s_cmpl, s_cgdl = [sv.cmpl[i].s for i in 1:nb_mpl], [sv.cgdl[i].s for i in 1:nb_gdl]
-    lambda_acl, lambda_mem, lambda_ccl = sv.acl.lambda, sv.mem.lambda, sv.ccl.lambda
-    C_H2_acl, C_O2_ccl = sv.acl.C_H2, sv.ccl.C_O2
-    C_H2_agdl, C_H2_ampl = [sv.agdl[i].C_H2 for i in 1:nb_gdl], [sv.ampl[i].C_H2 for i in 1:nb_mpl]
-    C_O2_cmpl, C_O2_cgdl = [sv.cmpl[i].C_O2 for i in 1:nb_mpl], [sv.cgdl[i].C_O2 for i in 1:nb_gdl]
+    # Extraction of the variables
+    C_v_agc, C_v_agdl = sv.agc.C_v, getproperty.(sv.agdl, :C_v)
+    C_v_ampl, C_v_acl = getproperty.(sv.ampl, :C_v), sv.acl.C_v
+    C_v_ccl, C_v_cmpl,  = sv.ccl.C_v, getproperty.(sv.cmpl, :C_v)
+    C_v_cgdl, C_v_cgc = getproperty.(sv.cgdl, :C_v), sv.cgc.C_v
+
+    s_agc, s_agdl = sv.agc.s, getproperty.(sv.agdl, :s)
+    s_ampl, s_acl = getproperty.(sv.ampl, :s), sv.acl.s
+    s_ccl, s_cmpl = sv.ccl.s, getproperty.(sv.cmpl, :s)
+    s_cgdl, s_cgc = getproperty.(sv.cgdl, :s), sv.cgc.s
+
+    T_agc, T_agdl = sv.agc.T, getproperty.(sv.agdl, :T)
+    T_ampl, T_acl = getproperty.(sv.ampl, :T), sv.acl.T
+    T_mem = sv.mem.T
+    T_ccl, T_cmpl = sv.ccl.T, getproperty.(sv.cmpl, :T)
+    T_cgdl, T_cgc = getproperty.(sv.cgdl, :T), sv.cgc.T
+
+    C_H2_agc, C_H2_agdl = sv.agc.C_H2, getproperty.(sv.agdl, :C_H2)
+    C_H2_ampl, C_H2_acl = getproperty.(sv.ampl, :C_H2), sv.acl.C_H2
+
+    C_O2_ccl, C_O2_cmpl = sv.ccl.C_O2, getproperty.(sv.cmpl, :C_O2)
+    C_O2_cgdl, C_O2_cgc = getproperty.(sv.cgdl, :C_O2), sv.cgc.C_O2
+
     C_N2_agc, C_N2_cgc = sv.agc.C_N2, sv.cgc.C_N2
-    T_acl, T_mem, T_ccl = sv.acl.T, sv.mem.T, sv.ccl.T
-    T_agdl, T_ampl = [sv.agdl[i].T for i in 1:nb_gdl], [sv.ampl[i].T for i in 1:nb_mpl]
-    T_cmpl, T_cgdl = [sv.cmpl[i].T for i in 1:nb_mpl], [sv.cgdl[i].T for i in 1:nb_gdl]
+
+    lambda_acl, lambda_mem, lambda_ccl = sv.acl.lambda, sv.mem.lambda, sv.ccl.lambda
 
     # Calculation of intermediate values
     Hgdl_node = Hgdl / nb_gdl
@@ -57,14 +74,13 @@ function heat_transfer_int_values(sv::CellState1D,
     k_th_eff_agc_agdl = k_th_eff("agdl", T_agdl[1], C_v_agdl[1], s_agdl[1], nothing,
                                  C_H2_agdl[1], nothing, C_N2_agc, epsilon_gdl, nothing, epsilon_c)
 
-    T_k_th = typeof(k_th_eff_agc_agdl)
-    k_th_eff_agdl_agdl = Vector{T_k_th}(undef, max(nb_gdl - 1, 0))
+    k_th_eff_agdl_agdl = heat_int_work.k_th_eff_agdl_agdl
     @inbounds for i in 1:(nb_gdl - 1)
         k_th_eff_agdl_agdl[i] = hmean([
             k_th_eff("agdl", T_agdl[i], C_v_agdl[i], s_agdl[i], nothing,
                      C_H2_agdl[i], nothing, C_N2_agc, epsilon_gdl, nothing, epsilon_c),
-            k_th_eff("agdl", T_agdl[i + 1], C_v_agdl[i + 1], s_agdl[i + 1], nothing,
-                     C_H2_agdl[i + 1], nothing, C_N2_agc, epsilon_gdl, nothing, epsilon_c)
+            k_th_eff("agdl", T_agdl[i+1], C_v_agdl[i+1], s_agdl[i+1], nothing,
+                     C_H2_agdl[i+1], nothing, C_N2_agc, epsilon_gdl, nothing, epsilon_c)
         ])
     end
 
@@ -75,13 +91,13 @@ function heat_transfer_int_values(sv::CellState1D,
              nothing, C_N2_agc, epsilon_mpl)
     ], [Hgdl_node / 2, Hmpl_node / 2])
 
-    k_th_eff_ampl_ampl = Vector{T_k_th}(undef, max(nb_mpl - 1, 0))
+    k_th_eff_ampl_ampl = heat_int_work.k_th_eff_ampl_ampl
     @inbounds for i in 1:(nb_mpl - 1)
         k_th_eff_ampl_ampl[i] = hmean([
             k_th_eff("ampl", T_ampl[i], C_v_ampl[i], s_ampl[i], nothing,
                      C_H2_ampl[i], nothing, C_N2_agc, epsilon_mpl),
-            k_th_eff("ampl", T_ampl[i + 1], C_v_ampl[i + 1], s_ampl[i + 1], nothing,
-                     C_H2_ampl[i + 1], nothing, C_N2_agc, epsilon_mpl)
+            k_th_eff("ampl", T_ampl[i+1], C_v_ampl[i+1], s_ampl[i+1], nothing,
+                     C_H2_ampl[i+1], nothing, C_N2_agc, epsilon_mpl)
         ])
     end
 
@@ -107,13 +123,13 @@ function heat_transfer_int_values(sv::CellState1D,
              C_N2_cgc, epsilon_mpl)
     ], [Hccl / 2, Hmpl_node / 2])
 
-    k_th_eff_cmpl_cmpl = Vector{T_k_th}(undef, max(nb_mpl - 1, 0))
+    k_th_eff_cmpl_cmpl = heat_int_work.k_th_eff_cmpl_cmpl
     @inbounds for i in 1:(nb_mpl - 1)
         k_th_eff_cmpl_cmpl[i] = hmean([
             k_th_eff("cmpl", T_cmpl[i], C_v_cmpl[i], s_cmpl[i], nothing,
                      nothing, C_O2_cmpl[i], C_N2_cgc, epsilon_mpl),
-            k_th_eff("cmpl", T_cmpl[i + 1], C_v_cmpl[i + 1], s_cmpl[i + 1], nothing,
-                     nothing, C_O2_cmpl[i + 1], C_N2_cgc, epsilon_mpl)
+            k_th_eff("cmpl", T_cmpl[i+1], C_v_cmpl[i+1], s_cmpl[i+1], nothing,
+                     nothing, C_O2_cmpl[i+1], C_N2_cgc, epsilon_mpl)
         ])
     end
 
@@ -124,13 +140,13 @@ function heat_transfer_int_values(sv::CellState1D,
              C_N2_cgc, epsilon_gdl, nothing, epsilon_c)
     ], [Hmpl_node / 2, Hgdl_node / 2])
 
-    k_th_eff_cgdl_cgdl = Vector{T_k_th}(undef, max(nb_gdl - 1, 0))
+    k_th_eff_cgdl_cgdl = heat_int_work.k_th_eff_cgdl_cgdl
     @inbounds for i in 1:(nb_gdl - 1)
         k_th_eff_cgdl_cgdl[i] = hmean([
             k_th_eff("cgdl", T_cgdl[i], C_v_cgdl[i], s_cgdl[i], nothing,
                      nothing, C_O2_cgdl[i], C_N2_cgc, epsilon_gdl, nothing, epsilon_c),
-            k_th_eff("cgdl", T_cgdl[i + 1], C_v_cgdl[i + 1], s_cgdl[i + 1], nothing,
-                     nothing, C_O2_cgdl[i + 1], C_N2_cgc, epsilon_gdl, nothing, epsilon_c)
+            k_th_eff("cgdl", T_cgdl[i+1], C_v_cgdl[i+1], s_cgdl[i+1], nothing,
+                     nothing, C_O2_cgdl[i+1], C_N2_cgc, epsilon_gdl, nothing, epsilon_c)
         ])
     end
 
@@ -138,9 +154,12 @@ function heat_transfer_int_values(sv::CellState1D,
                                  s_cgdl[nb_gdl], nothing, nothing, C_O2_cgdl[nb_gdl], C_N2_cgc,
                                  epsilon_gdl, nothing, epsilon_c)
 
-    return (Hgdl_node, Hmpl_node, k_th_eff_agc_agdl, k_th_eff_agdl_agdl, k_th_eff_agdl_ampl, k_th_eff_ampl_ampl,
-            k_th_eff_ampl_acl, k_th_eff_acl_mem, k_th_eff_mem_ccl, k_th_eff_ccl_cmpl, k_th_eff_cmpl_cmpl,
-            k_th_eff_cmpl_cgdl, k_th_eff_cgdl_cgdl, k_th_eff_cgdl_cgc)
+    return (Hgdl_node, Hmpl_node, k_th_eff_agc_agdl, 
+            k_th_eff_agdl_agdl, k_th_eff_agdl_ampl,
+            k_th_eff_ampl_ampl, k_th_eff_ampl_acl,
+            k_th_eff_acl_mem, k_th_eff_mem_ccl, k_th_eff_ccl_cmpl,
+            k_th_eff_cmpl_cmpl, k_th_eff_cmpl_cgdl,
+            k_th_eff_cgdl_cgdl, k_th_eff_cgdl_cgc)
 end
 
 

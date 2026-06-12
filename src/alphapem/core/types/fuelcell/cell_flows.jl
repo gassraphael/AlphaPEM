@@ -14,22 +14,6 @@
 Holds all per-layer vectors that are otherwise reallocated every call.
 """
 mutable struct MEAFlowsWorkspace
-    C_v_agdl::Vector{Float64}
-    C_v_ampl::Vector{Float64}
-    C_v_cmpl::Vector{Float64}
-    C_v_cgdl::Vector{Float64}
-    s_agdl::Vector{Float64}
-    s_ampl::Vector{Float64}
-    s_cmpl::Vector{Float64}
-    s_cgdl::Vector{Float64}
-    C_H2_agdl::Vector{Float64}
-    C_H2_ampl::Vector{Float64}
-    C_O2_cmpl::Vector{Float64}
-    C_O2_cgdl::Vector{Float64}
-    T_agdl::Vector{Float64}
-    T_ampl::Vector{Float64}
-    T_cmpl::Vector{Float64}
-    T_cgdl::Vector{Float64}
     Jl_agdl_agdl::Vector{Float64}
     Jl_ampl_ampl::Vector{Float64}
     Jl_cmpl_cmpl::Vector{Float64}
@@ -54,14 +38,6 @@ end
 
 function MEAFlowsWorkspace(nb_gdl::Int, nb_mpl::Int)
     return MEAFlowsWorkspace(
-        Vector{Float64}(undef, nb_gdl), Vector{Float64}(undef, nb_mpl),
-        Vector{Float64}(undef, nb_mpl), Vector{Float64}(undef, nb_gdl),
-        Vector{Float64}(undef, nb_gdl), Vector{Float64}(undef, nb_mpl),
-        Vector{Float64}(undef, nb_mpl), Vector{Float64}(undef, nb_gdl),
-        Vector{Float64}(undef, nb_gdl), Vector{Float64}(undef, nb_mpl),
-        Vector{Float64}(undef, nb_mpl), Vector{Float64}(undef, nb_gdl),
-        Vector{Float64}(undef, nb_gdl), Vector{Float64}(undef, nb_mpl),
-        Vector{Float64}(undef, nb_mpl), Vector{Float64}(undef, nb_gdl),
         Vector{Float64}(undef, max(nb_gdl - 1, 0)), Vector{Float64}(undef, max(nb_mpl - 1, 0)),
         Vector{Float64}(undef, max(nb_mpl - 1, 0)), Vector{Float64}(undef, max(nb_gdl - 1, 0)),
         Vector{Float64}(undef, max(nb_gdl - 1, 0)), Vector{Float64}(undef, max(nb_mpl - 1, 0)),

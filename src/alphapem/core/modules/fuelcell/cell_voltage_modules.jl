@@ -32,10 +32,10 @@ function calculate_C_O2_Pt(i_fc::Real,
                            fc::AbstractFuelCell)
 
     # Extraction of the variables (typed access via CellState1D struct fields)
-    s_ccl      = sv.ccl.s
+    C_O2_ccl, C_O2_cmpl = sv.ccl.C_O2, getproperty.(sv.cmpl, :C_O2)
+    s_ccl, s_cmpl = sv.ccl.s, getproperty.(sv.cmpl, :s)
+    T_ccl, T_cmpl = sv.ccl.T, getproperty.(sv.cmpl, :T)
     lambda_ccl = sv.ccl.lambda
-    C_O2_ccl   = sv.ccl.C_O2
-    T_ccl      = sv.ccl.T
 
     return calculate_C_O2_Pt(i_fc, s_ccl, lambda_ccl, C_O2_ccl, T_ccl, fc)
 end

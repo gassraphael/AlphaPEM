@@ -26,13 +26,18 @@ Float64
 function calculate_cell_voltage(i_fc::Real, C_O2_Pt::Real, sv::CellState1D, fc::AbstractFuelCell)
 
     # Extraction of the variables
-    lambda_mem, lambda_ccl = sv.mem.lambda, sv.ccl.lambda
-    C_H2_acl, C_O2_ccl = _nonnegative_value(sv.acl.C_H2), sv.ccl.C_O2
-    eta_c = sv.ccl.eta_c
-    T_acl = _positive_temperature_value(sv.acl.T)
+    T_ampl, T_acl = getproperty.(sv.ampl, :T), _positive_temperature_value(sv.acl.T)
     T_mem = _positive_temperature_value(sv.mem.T)
-    T_ccl = _positive_temperature_value(sv.ccl.T)
+    T_ccl, T_cmpl = _positive_temperature_value(sv.ccl.T), getproperty.(sv.cmpl, :T)
+
+    lambda_mem, lambda_ccl = sv.mem.lambda, sv.ccl.lambda
+
+    C_H2_ampl, C_H2_acl = getproperty.(sv.ampl, :C_H2), _nonnegative_value(sv.acl.C_H2)
+    C_O2_ccl, C_O2_cmpl = sv.ccl.C_O2, getproperty.(sv.cmpl, :C_O2)
+
+    eta_c = sv.ccl.eta_c
     C_O2_Pt_safe = _positive_concentration_value(C_O2_Pt)
+
     # Extraction of the parameters
     pp = fc.physical_parameters
     Hmem, Hacl, Hccl = pp.Hmem, pp.Hacl, pp.Hccl
