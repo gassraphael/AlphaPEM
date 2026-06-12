@@ -15,9 +15,9 @@ available.
 
 Improvements to AlphaPEM are discussed in the [roadmap section](#roadmap).
 
-**Important note:** AlphaPEM is an ongoing research project and is not a commercial product. Therefore, the latest 
-online version may contain bugs, and not all features may be available. The current work is detailled in the 
-[work in progress](#work-in-progress) section. Relatively stable versions are listed in the [Major updates](#major-updates) section.
+**Important note:** AlphaPEM is an ongoing research project. It is likely that a more recent version exists but has not 
+yet been publicly released, pending scientific publication. If you wish to collaborate with us, please contact us by 
+email so that we may potentially share these latest advancements.
 
 <img src="docs/images/interface.png" alt="AlphaPEM web-based interface" width="100%" />
 
