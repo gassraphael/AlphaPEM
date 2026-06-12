@@ -823,13 +823,10 @@ function save_plot!(simu::AlphaPEM, _fig1=nothing, _fig2=nothing, _fig3=nothing)
     elseif simu.cfg.type_current isa PolarizationParams
         if simu.cfg.type_display == :multiple
             if _fig1 isa AbstractVector && length(_fig1) >= 5
-                saving_instructions!(simu, "results", subfolder_name, "ifc_1D_temporal_1.pdf",     _fig1[1])
-                saving_instructions!(simu, "results", subfolder_name, "Ucell_temporal_1.pdf",      _fig1[2])
-                saving_instructions!(simu, "results", subfolder_name, "T_1D_temporal_1.pdf",       _fig1[3])
-                saving_instructions!(simu, "results", subfolder_name, "power_density_curve_1.pdf", _fig1[4])
-                saving_instructions!(simu, "results", subfolder_name, "efficiency_curve_1.pdf",    _fig1[5])
+                saving_instructions!(simu, "results", subfolder_name, "pola_curve_1.pdf",     _fig1[1])
+                saving_instructions!(simu, "results", subfolder_name, "power_density_1.pdf",      _fig1[2])
+                saving_instructions!(simu, "results", subfolder_name, "cell_efficiency_1.pdf",       _fig1[3])
             end
-            saving_instructions!(simu, "results", subfolder_name, "pola_curve_1.pdf", _fig2)
         elseif simu.cfg.type_display == :synthetic
             saving_instructions!(simu, "results", subfolder_name, "pola_curve_1.pdf", _fig1)
         end

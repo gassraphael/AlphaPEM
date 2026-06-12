@@ -1411,7 +1411,7 @@
 
         // ===== FUEL CELL SELECTION =====
 
-        function toggleFuelCellSelection() {
+        function toggleFuelCellSelection(skipDefaultsUpdate = false) {
             try {
                 physicalParamsVisible = false; // Reset visibility when changing mode
                 const btn = document.querySelector('.btn-modify-params');
@@ -1427,7 +1427,7 @@
                     if (preSelectedSection) preSelectedSection.style.display = 'block';
                     if (customSection) customSection.style.display = 'none';
                     if (fuelCellTypeEl && fuelCellTypeEl.value) {
-                        updateFuelCellDefaults();
+                        if (!skipDefaultsUpdate) updateFuelCellDefaults();
                     } else {
                         updateTabStatus(0, false);
                         updateUndeterminedHighlighting(null);
@@ -1437,7 +1437,7 @@
                     if (customSection) customSection.style.display = 'block';
                     updateTabStatus(0, true);
                     // Load generic defaults for custom mode to get undetermined highlighting
-                    updateFuelCellDefaults('default');
+                    if (!skipDefaultsUpdate) updateFuelCellDefaults('default');
                 }
                 // Hide old elements if switching to custom
                 const presetInfo = document.getElementById('physical-params-preset-info');
@@ -1499,7 +1499,7 @@
             }
         }
 
-        function updateFuelCellDefaults(forcedType) {
+        function updateFuelCellDefaults(forcedType, skipPopulate = false) {
             try {
                 let fuelCellType = forcedType;
                 if (!fuelCellType) {
@@ -1511,18 +1511,28 @@
                     updateTabStatus(0, false);
                     const expSection = document.getElementById('experimental-presets-section');
                     if (expSection) expSection.style.display = 'none';
-                    return;
+                    return Promise.resolve();
                 }
 
                 // Update the experimental presets list
                 updateExperimentalPresetsList(fuelCellType);
 
                 defaultsLoaded = false;
-                fetch(`/api/fuel_cell_defaults/${fuelCellType}`)
+                return fetch(`/api/fuel_cell_defaults/${fuelCellType}`)
                     .then(r => r.json())
                     .then(data => {
                         if (!data || data.error) {
                             throw new Error((data && data.error) ? data.error : 'Invalid defaults payload');
+                        }
+
+                        const meta = data.param_metadata || {};
+                        globalParamMetadata = meta;
+
+                        if (skipPopulate) {
+                            // Update highlighting and status even if skipping population
+                            updateUndeterminedHighlighting(fuelCellType, data.undetermined_list);
+                            defaultsLoaded = true;
+                            return data;
                         }
 
                         const oc = data.operating_conditions || {};
@@ -1533,8 +1543,6 @@
                         const pp = data.polarization_parameters || {};
                         const ep = data.eis_parameters || {};
                         const mc = data.model_config || {};
-                        const meta = data.param_metadata || {};
-                        globalParamMetadata = meta;
 
                         // Helper for safe setting
                         const setVal = (id, val) => {
@@ -1639,7 +1647,12 @@
                 presetSelect.remove(1);
             }
 
-            if (fuelCellType === 'ZSW_GenStack') {
+            // Identify base type if fuelCellType is actually a preset
+            let baseType = fuelCellType;
+            if (fuelCellType && fuelCellType.startsWith('ZSW_GenStack')) baseType = 'ZSW_GenStack';
+            else if (fuelCellType && (fuelCellType.startsWith('EH_31') || fuelCellType.startsWith('EH31'))) baseType = 'EH31_2022';
+
+            if (baseType === 'ZSW_GenStack') {
                 const presets = [
                     { value: 'ZSW_GenStack', label: 'Nominal' },
                     { value: 'ZSW_GenStack_Pa_1_61_Pc_1_41', label: 'P<sub>a,des</sub> = 1.61, P<sub>c,des</sub> = 1.41' },
@@ -2132,11 +2145,25 @@
             fetch(`/api/results/${resultId}`)
                 .then(r => r.json())
                 .then(data => {
-                    hideProgress();
                     if (data && data.input_params) {
-                        applyInputParams(data.input_params, data.simulation_type);
-                        showInfo("Parameters loaded from previous run.");
+                        let fuelCellType = data.input_params.fuel_cell_type || 'ZSW_GenStack';
+                        if (fuelCellType.startsWith('custom_')) fuelCellType = fuelCellType.replace('custom_', '');
+                        
+                        // Load metadata first to ensure correct units conversion in applyInputParams
+                        updateFuelCellDefaults(fuelCellType, true)
+                            .then(() => {
+                                hideProgress();
+                                applyInputParams(data.input_params, data.simulation_type);
+                                showInfo("Parameters loaded from previous run.");
+                            })
+                            .catch(e => {
+                                console.warn('Failed to load metadata, applying params anyway:', e);
+                                hideProgress();
+                                applyInputParams(data.input_params, data.simulation_type);
+                                showInfo("Parameters loaded (warning: metadata missing).");
+                            });
                     } else {
+                        hideProgress();
                         showError("Could not find parameters for this result.");
                         toggleFuelCellSelection();
                         const fuelCellTypeEl = document.querySelector('input[name="fuel_cell_type"]:checked');
@@ -2156,7 +2183,7 @@
         function applyInputParams(params, simType) {
             const setVal = (id, val) => {
                 const el = document.getElementById(id);
-                if (el) el.value = val ?? '';
+                if (el) el.value = (val !== null && val !== undefined) ? val : '';
             };
 
             const populateUIParams = (p, prefix = '') => {
@@ -2179,33 +2206,39 @@
                 if (radio) radio.checked = true;
             }
 
-            let baseFuelCellType = params.fuel_cell_type;
-            if (baseFuelCellType && baseFuelCellType.startsWith('custom_')) {
+            let baseFuelCellType = params.fuel_cell_type || '';
+            if (baseFuelCellType.startsWith('custom_')) {
                 baseFuelCellType = baseFuelCellType.replace('custom_', '');
-            } else if (baseFuelCellType === 'default') {
-                // Keep default or try to find which one it was
             }
 
-            if (baseFuelCellType) {
-                const radio = document.querySelector(`input[name="fuel_cell_type"][value="${baseFuelCellType}"]`);
+            // Normalize for radio buttons (presets belong to a base stack)
+            let radioType = baseFuelCellType;
+            if (radioType.startsWith('ZSW_GenStack')) radioType = 'ZSW_GenStack';
+            else if (radioType.startsWith('EH_31') || radioType.startsWith('EH31')) radioType = 'EH31_2022';
+
+            if (radioType && radioType !== 'default') {
+                const radio = document.querySelector(`input[name="fuel_cell_type"][value="${radioType}"]`);
                 if (radio) radio.checked = true;
             }
 
-            toggleFuelCellSelection();
+            toggleFuelCellSelection(true);
 
+            // 2. Model Configuration
+            const mc = params.model_config || {};
             ['voltage_zone', 'type_auxiliary', 'type_flow', 'type_purge'].forEach(name => {
-                const val = params[name] || (params.model_config ? params.model_config[name] : null);
+                const val = params[name] || mc[name];
                 if (val) {
                     const radio = document.querySelector(`input[name="${name}"][value="${val}"]`);
                     if (radio) radio.checked = true;
                 }
             });
 
-            // 2. Parameters
+            // 3. Physical & Numerical Parameters
             populateUIParams(params.accessible_parameters);
             populateUIParams(params.undetermined_parameters);
             populateUIParams(params.computing_parameters);
             
+            // 4. Operating Conditions
             if (params.operating_conditions) {
                 const oc = params.operating_conditions;
                 setVal('T_fc', oc.T_fc);
@@ -2216,16 +2249,36 @@
                 setVal('Phi_a', oc.Phi_a);
                 setVal('Phi_c', oc.Phi_c);
                 setVal('y_H2_in', oc.y_H2_in);
+
+                // Restore preset selection if it matches one of the options
+                const fuelCellType = params.fuel_cell_type || '';
+                const presetSelect = document.getElementById('operating_conditions_preset');
+                if (presetSelect) {
+                    let found = false;
+                    for (let i = 0; i < presetSelect.options.length; i++) {
+                        if (presetSelect.options[i].value === fuelCellType) {
+                            presetSelect.selectedIndex = i;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found) {
+                        lastSelectedPresetValues = { ...oc };
+                    } else {
+                        presetSelect.value = 'none';
+                        lastSelectedPresetValues = null;
+                    }
+                }
             }
 
-            // 3. Simulation specific
+            // 5. Simulation specific parameters
             populateUIParams(params.step_parameters, 'step');
             populateUIParams(params.polarization_parameters, 'pola');
             
             const ep = params.eis_parameters;
             if (ep) {
                 const m = globalParamMetadata;
-                if (ep.i_static !== undefined) setVal('eis_i_static', (ep.i_static * m.i_EIS.factor).toFixed(m.i_EIS.precision));
+                if (ep.i_static !== undefined && m.i_EIS) setVal('eis_i_static', (ep.i_static * m.i_EIS.factor).toFixed(m.i_EIS.precision));
                 if (ep.ratio !== undefined) setVal('eis_ratio', (ep.ratio * 100).toFixed(1));
                 setVal('eis_f_power_min', ep.f_power_min);
                 setVal('eis_f_power_max', ep.f_power_max);
@@ -2239,7 +2292,10 @@
             }
 
             defaultsLoaded = true;
+            
+            // Refresh UI components
             if (typeof updateModelType === 'function') updateModelType();
+            if (typeof checkOCModification === 'function') checkOCModification();
 
             // Navigate directly to the Run tab so the user can launch immediately
             updateTabStatus(0, true);
