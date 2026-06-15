@@ -12,9 +12,9 @@ using AlphaPEM.Config: SimulationConfig, PolarizationCalibrationParams
 using AlphaPEM.Application: run_simulation
 
 current_params = PolarizationCalibrationParams(
-    delta_t_ini= 120.0 * 60.0,    # (s). Initial time at zero current density for the stabilisation of the internal states.
+    delta_t_ini= 30 * 60.0,    # (s). Initial time at zero current density for the stabilisation of the internal states.
     v_load = 0.01e4,              # (A.m-2.s-1). Loading rate for one step current of the polarisation current density function.
-    delta_t_break = 10.0 * 60.0,  # (s). Breaking time for one step current, for the stabilisation of the internal states.
+    delta_t_break = 5 * 60.0,  # (s). Breaking time for one step current, for the stabilisation of the internal states.
     i_exp = Float64[]             # Experimental current density values (A/m²) for calibration
 )
 

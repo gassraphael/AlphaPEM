@@ -632,7 +632,6 @@ function plot_polarization_curve(outputs::SimulationOutputs,
                                  cd::AbstractCurrent,
                                  cfg::SimulationConfig,
                                  ax)
-    palette = _publication_colors()
     model_color = _cell_voltage_color()
     exp_color = RGBf(0.10, 0.10, 0.10)
     model_label_base = _polarization_legend_base(cfg.type_fuel_cell;
@@ -643,7 +642,7 @@ function plot_polarization_curve(outputs::SimulationOutputs,
                                           calibration=false)
 
     if cfg.display_timing == :postrun
-        ifc_discretized, Ucell_discretized = _polarization_points(outputs, cd)
+        ifc_discretized, Ucell_discretized = _polarization_points(outputs, cd; average=true)
 
         y_series = [Ucell_discretized]
         sim_error = nothing
@@ -689,7 +688,7 @@ function plot_polarization_curve(outputs::SimulationOutputs,
         _finalize_axis!(ax;
                         xlabel=rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"),
                         ylabel=rich("Cell voltage ", lsub("U", "cell"), " (V)"),
-                        title="Polarization points",
+                        title="Polarization curve",
                         legend=false)   # skip auto-legend (would create N entries)
         # Single legend entry representing the model curve style.
         axislegend(ax, [sc], [model_label_base];
@@ -701,13 +700,41 @@ function plot_polarization_curve(outputs::SimulationOutputs,
 end
 
 
+"""Plot polarization hysteresis curve (no averaging)."""
+function plot_polarization_hysteresis(outputs::SimulationOutputs,
+                                      cd::AbstractCurrent,
+                                      cfg::SimulationConfig,
+                                      ax)
+    model_color = _cell_voltage_color()
+    model_label_base = _polarization_legend_base(cfg.type_fuel_cell;
+                                                 simulation=true,
+                                                 calibration=false)
+
+    if cfg.display_timing == :postrun
+        ifc_full, Ucell_full = _polarization_points(outputs, cd; average=false)
+
+        lines!(ax, ifc_full, Ucell_full;
+               color=model_color, linewidth=2.5, label=model_label_base)
+
+        _set_polarization_axis_limits!(ax)
+        _set_polarization_fixed_ticks!(ax)
+        _finalize_axis!(ax;
+                        xlabel=rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"),
+                        ylabel=rich("Cell voltage ", lsub("U", "cell"), " (V)"),
+                        title="Polarization curve with hysteresis",
+                        legend=true,
+                        legend_position=:rt)
+    end
+    return nothing
+end
+
+
 """Plot calibration polarization curve with unified CairoMakie style conventions."""
 function plot_polarization_curve_for_cali(outputs::SimulationOutputs,
                                           fc::AbstractFuelCell,
                                           cd::AbstractCurrent,
                                           cfg::SimulationConfig,
                                           ax)
-    palette = _publication_colors()
     model_color = _cell_voltage_color()
     exp_color = RGBf(0.10, 0.10, 0.10)
     model_label_base = _polarization_legend_base(cfg.type_fuel_cell;

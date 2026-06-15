@@ -12,7 +12,14 @@ This file intentionally contains only secondary support functions:
 #  Figure-preparation helpers (Makie backends)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-using CairoMakie, GLMakie, WGLMakie
+using CairoMakie
+import GLMakie
+import WGLMakie
+
+# Ensure CairoMakie is the default backend when the module is loaded.
+function __init__()
+    CairoMakie.activate!()
+end
 
 const _interactive_screens = Any[]
 const _interactive_fig_to_screen = IdDict{Any, Any}()
@@ -185,10 +192,10 @@ end
 function _create_figures(cfg::SimulationConfig{<:PolarizationParams})
     if cfg.type_display == :multiple
         # Multiple mode: internal states + derived curves in individual figures,
-        # plus a dedicated polarization curve figure.
+        # plus a dedicated polarization curve figure and an hysteresis plot.
         fig1 = Figure[]
         ax1 = Axis[]
-        for _ in 1:5
+        for _ in 1:6
             f, a = _make_single_axis(size=(760, 600))
             push!(fig1, f)
             push!(ax1, a)

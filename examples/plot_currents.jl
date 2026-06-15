@@ -6,8 +6,9 @@ Pkg.activate(joinpath(@__DIR__, ".."))
 # --- Load AlphaPEM from the project environment ---
 using AlphaPEM.Config: StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
 using AlphaPEM.Currents: StepCurrent, PolarizationCurrent, PolarizationCalibrationCurrent, EISCurrent, current
-using AlphaPEM.Core.Models.PlotHelpers: _publication_colors, _cell_current_color, _finalize_axis!, lsub
-using CairoMakie
+using AlphaPEM.Core.Models.PlotHelpers: _publication_colors, _cell_current_color, _finalize_axis!, lsub, saving_instructions!
+using GLMakie
+GLMakie.activate!()  # Enable interactive window
 
 # --- Time resolution ---
 n_points = 1000  # points for plotting
@@ -28,10 +29,10 @@ i_step_vals = [current(step_c, t) for t in t_step] ./ 1e4
 
 # === Polarization Current ===
 pola_p = PolarizationParams(
-    delta_t_ini = 120*60.0,  # delta_t_ini = 120 min
+    delta_t_ini = 30*60.0,  # delta_t_ini = 120 min
     v_load = 0.01e4,         # v_load = 0.01 A.cm-2.s-1
-    delta_t_break = 15*60.0, # delta_t_break = 15 min
-    delta_i = 0.05e4,        # delta_i = 0.05 A/cm²
+    delta_t_break = 5*60.0, # delta_t_break = 15 min
+    di_step = 0.05e4,        # di_step = 0.05 A/cm²
     i_max = 3.0e4            # i_max = 3.0 A/cm²
 )
 pola_c = PolarizationCurrent(pola_p)
@@ -112,4 +113,11 @@ _finalize_axis!(ax4;
     xlabel = rich("Time ", lsub("t", ""), " (s)"),
     ylabel = rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"))
 
-display(fig)
+# === Display and Save ===
+# Open an interactive window (GLMakie)
+DataInspector(fig) # Add hover inspection
+screen = GLMakie.Screen()
+display(screen, fig)
+
+# Save to the results directory (CairoMakie PDF)
+saving_instructions!(nothing, "results", "currents", "plot_currents.pdf", fig)

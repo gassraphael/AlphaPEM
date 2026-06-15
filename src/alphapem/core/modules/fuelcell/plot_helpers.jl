@@ -198,9 +198,10 @@ function _finalize_axis!(ax;
                          title="",
                          legend::Bool=false,
                          legend_position=:rb)
-    # Always convert labels to rich text for consistent bold rendering.
-    ax.xlabel = rich(xlabel; font=:bold)
-    ax.ylabel = rich(ylabel; font=:bold)
+    # Apply labels: avoid wrapping already-rich text in another rich() call,
+    # as deep nesting of RichText objects can cause SVG rendering failures.
+    ax.xlabel = (xlabel isa Makie.RichText) ? xlabel : rich(xlabel; font=:bold)
+    ax.ylabel = (ylabel isa Makie.RichText) ? ylabel : rich(ylabel; font=:bold)
     isempty(title) || (ax.title = title)
 
     # Dense major/minor ticks with differentiated sizes for publication readability.
@@ -503,7 +504,10 @@ end
 
 
 """Create a visual subscript label, e.g. lsub("T", "agc") -> T_agc (rendered with subscript)."""
-lsub(base::AbstractString, idx::AbstractString) = rich(base, subscript(idx))
+function lsub(base::AbstractString, idx::AbstractString)
+    # Avoid creating subscript("") which can cause SVG rendering issues.
+    return isempty(idx) ? base : rich(base, subscript(idx))
+end
 
 """Plot one final profile along the gas channel with the publication GC style."""
 function _plot_final_profile_along_gc!(ax,

@@ -15,7 +15,7 @@ using ...Utils   # AlphaPEM.Utils: constants + maths/physics functions
 using ...Config  # AlphaPEM.Config: experimental data (pola_exp_values, ...)
 using ...Config: SimulationConfig, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
 using ...Fuelcell: AbstractFuelCell
-using ...Currents: AbstractCurrent, current, delta_t_load, solver_tstops, solver_dtmax
+using ...Currents: AbstractCurrent, current, solver_tstops, solver_dtmax
 using ..Types    # AlphaPEM.Core.Types: all domain structs (cell_state, cell_derivative, …)
 
 # Explicit aliases for utility constants that may clash with Base exports.

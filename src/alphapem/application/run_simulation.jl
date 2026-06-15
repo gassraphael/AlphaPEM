@@ -113,17 +113,17 @@ function launch_AlphaPEM_for_polarization_current(simu::AlphaPEM)::AlphaPEM
     # Dynamic display requires a dedicated segmented simulation flow.
     if simu.cfg.display_timing == :live
         # Initialization
-        p            = simu.current_density            # ::PolarizationCurrent
-        delta_t_step = step_duration(p)
-        _, tf_full   = p.time_interval
-        n            = round(Int, (tf_full - p.delta_t_ini) / delta_t_step)
-        t0           = 0.0
-        tf           = p.delta_t_ini + delta_t_step
+        p          = simu.current_density            # ::PolarizationCurrent
+        dt_steps = step_duration(p)                  # Vector{Float64}: one duration per transition
+        n          = length(dt_steps)
+        tf_steps = cumsum(dt_steps)                # absolute end-time of each step
+        t0         = 0.0
         initial_variable_values = nothing
         initial_derivative_values = nothing
 
         # Dynamic simulation
         for i in 1:n
+            tf = tf_steps[i]
             simulate_model!(simu, initial_variable_values, initial_derivative_values, (t0, tf))
 
             # Safety stop: cell voltage or O2 concentration became non-positive.
@@ -145,7 +145,6 @@ function launch_AlphaPEM_for_polarization_current(simu::AlphaPEM)::AlphaPEM
             initial_variable_values, initial_derivative_values = _extract_last_internal_state(simu)
             # Time interval actualization.
             t0 = simu.outputs.solver.t[end]
-            tf = p.delta_t_ini + (i + 1) * delta_t_step
         end
 
     else  # :postrun

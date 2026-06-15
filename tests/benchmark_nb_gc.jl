@@ -63,9 +63,9 @@ end
 function make_pola_cfg(nb_gc::Int)
     pola = PolarizationParams(
         delta_t_ini = 30.0 * 60.0,
-        delta_i = 0.05e4,
+        di_step = 0.05e4,
         v_load = 0.01e4,
-        delta_t_break = 15.0 * 60.0,
+        delta_t_break = 5 * 60.0,
         i_max = 3.0e4,
     )
     return SimulationConfig(
