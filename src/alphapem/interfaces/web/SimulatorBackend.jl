@@ -241,7 +241,7 @@ const PARAM_UI_CONVERSION = Dict(
     :delta_t_break => (factor=1/60, unit="min", precision=1),
     :i_ini => (factor=1e-4, unit="A/cm²", precision=2),
     :i_step => (factor=1e-4, unit="A/cm²", precision=2),
-    :delta_i => (factor=1e-4, unit="A/cm²", precision=2),
+    :di_step => (factor=1e-4, unit="A/cm²", precision=2),
     :i_max => (factor=1e-4, unit="A/cm²", precision=2),
     :i_EIS => (factor=1e-4, unit="A/cm²", precision=2),
     :i_static => (factor=1e-4, unit="A/cm²", precision=2),
@@ -383,7 +383,7 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
         ),
         :polarization_parameters => Dict(
             :delta_t_ini => 7200.0,
-            :delta_i => 500.0,
+            :di_step => 500.0,
             :v_load => 100.0,
             :delta_t_break => 900.0,
             :i_max => 25000.0,
@@ -459,7 +459,7 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
             :delta_t_ini => 30.0 * 60.0, # s
             :delta_t_load => 30.0,       # s
             :delta_t_break => 2.0 * 60.0,# s
-            :delta_i => 0.5e4,           # A/m² - Step size
+            :di_step => 0.5e4,           # A/m² - Step size
             :i_max => 2.0e4,             # A/m² - Max current
         ),
         :eis_parameters => Dict(
@@ -641,7 +641,7 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
         end
         PolarizationParams(
             delta_t_ini = pp[:delta_t_ini],
-            delta_i = pp[:delta_i],
+            di_step = pp[:di_step],
             v_load = pp[:v_load],
             delta_t_break = pp[:delta_t_break],
             i_max = pp[:i_max],

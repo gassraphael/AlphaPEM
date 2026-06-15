@@ -24,10 +24,10 @@ end
     PolarizationParams
 """
 Base.@kwdef struct PolarizationParams <: AbstractCurrentParams
-    delta_t_ini::Float64 = 120.0 * 60.0 # (s). Initial time at zero current density for the stabilisation of the internal states.
-    delta_i::Float64 = 0.05e4  # (A.m-2). Current density step for the polarisation current density function.
+    delta_t_ini::Float64 = 30 * 60.0 # (s). Initial time at zero current density for the stabilisation of the internal states.
+    di_step::Float64 = 0.05e4  # (A.m-2). Nominal current density step for the polarisation current density function.
     v_load::Float64 = 0.01e4  # (A.m-2.s-1). Loading rate for one step current of the polarisation current density function.
-    delta_t_break::Float64 = 15.0 * 60.0 # (s). Breaking time for one step current, for the stabilisation of the internal states.
+    delta_t_break::Float64 = 5 * 60.0 # (s). Breaking time for one step current, for the stabilisation of the internal states.
     i_max::Float64 = 2.5e4 # Maximum current (default value, can be overridden by experimental current values if provided).
 end
 
@@ -36,9 +36,9 @@ end
     PolarizationCalibrationParams
 """
 Base.@kwdef struct PolarizationCalibrationParams <: AbstractCurrentParams
-    delta_t_ini::Float64 = 120.0 * 60.0 # (s). Initial time at zero current density for the stabilisation of the internal states.
+    delta_t_ini::Float64 = 30 * 60.0 # (s). Initial time at zero current density for the stabilisation of the internal states.
     v_load::Float64 = 0.01e4  # (A.m-2.s-1). Loading rate for one step current of the polarisation current density function.
-    delta_t_break::Float64 = 10.0 * 60.0  # (s). Breaking time for one step current, for the stabilisation of the internal states.
+    delta_t_break::Float64 = 5 * 60.0  # (s). Breaking time for one step current, for the stabilisation of the internal states.
     i_exp::Vector{Float64} = Float64[]  # Experimental current density values (A/m²) for calibration
 end
 

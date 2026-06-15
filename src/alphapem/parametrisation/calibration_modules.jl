@@ -184,9 +184,9 @@ function parameters_for_calibration(type_fuel_cell::String, voltage_zone::String
     delta_t_ini_pola = 30 * 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
     delta_t_load_pola = 30  # (s). Loading time for one step current of the polarisation current density function.
     delta_t_break_pola = 15 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.
-    delta_i_pola = 0.05e4  # (A.m-2). Current density step for the polarisation current density function.
+    di_step_pola = 0.05e4  # (A.m-2). Nominal current density step for the polarisation current density function.
     pola_current_parameters = Dict("delta_t_ini_pola" => delta_t_ini_pola, "delta_t_load_pola" => delta_t_load_pola,
-                                   "delta_t_break_pola" => delta_t_break_pola, "delta_i_pola" => delta_i_pola)
+                                   "delta_t_break_pola" => delta_t_break_pola, "di_step_pola" => di_step_pola)
     delta_t_ini_pola_cali = 30 * 60  # (s). Initial time at zero current density for the stabilisation of the internal states.
     delta_t_load_pola_cali = 30  # (s). Loading time for one step current of the polarisation current density function.
     delta_t_break_pola_cali = 15 * 60  # (s). Breaking time for one step current, for the stabilisation of the internal states.

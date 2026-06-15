@@ -209,7 +209,7 @@ end
 # Request body: Same structure as step simulation
 #
 # Additional parameters:
-# - delta_i_pola: Current density step size
+# - di_step_pola: Current density step size
 # - i_max_pola: Maximum current density to reach
 #
 # Response:

@@ -712,13 +712,14 @@ function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing)
     elseif simu.cfg.type_current isa PolarizationParams
         if simu.cfg.type_display == :synthetic && _ax1 !== nothing
             plot_polarization_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1)
-        elseif simu.cfg.type_display == :multiple && _ax1 isa AbstractVector && length(_ax1) >= 5 && _ax2 !== nothing
-            # Multiple mode: Performance curves (Polarization, Power, Efficiency) followed by Internal states.
+        elseif simu.cfg.type_display == :multiple && _ax1 isa AbstractVector && length(_ax1) >= 6 && _ax2 !== nothing
+            # Multiple mode: Performance curves (Polarization, Power, Efficiency, Hysteresis) followed by Internal states.
             plot_polarization_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[1])
             plot_power_density_curve(outputs, simu.current_density, simu.cfg, _ax1[2])
             plot_cell_efficiency(outputs, simu.current_density, simu.cfg, _ax1[3])
-            plot_ifc_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[4])
-            plot_Ucell(outputs, simu.current_density, simu.cfg, _ax1[5])
+            plot_polarization_hysteresis(outputs, simu.current_density, simu.cfg, _ax1[4])
+            plot_ifc_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[5])
+            plot_Ucell(outputs, simu.current_density, simu.cfg, _ax1[6])
             if !(_ax2 isa AbstractVector)
                 plot_T_1D_temporal(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax2)
             end
@@ -822,10 +823,13 @@ function save_plot!(simu::AlphaPEM, _fig1=nothing, _fig2=nothing, _fig3=nothing)
     # For the polarization curve.
     elseif simu.cfg.type_current isa PolarizationParams
         if simu.cfg.type_display == :multiple
-            if _fig1 isa AbstractVector && length(_fig1) >= 5
-                saving_instructions!(simu, "results", subfolder_name, "pola_curve_1.pdf",     _fig1[1])
-                saving_instructions!(simu, "results", subfolder_name, "power_density_1.pdf",      _fig1[2])
-                saving_instructions!(simu, "results", subfolder_name, "cell_efficiency_1.pdf",       _fig1[3])
+            if _fig1 isa AbstractVector && length(_fig1) >= 6
+                saving_instructions!(simu, "results", subfolder_name, "pola_curve_1.pdf",      _fig1[1])
+                saving_instructions!(simu, "results", subfolder_name, "power_density_1.pdf",   _fig1[2])
+                saving_instructions!(simu, "results", subfolder_name, "cell_efficiency_1.pdf",  _fig1[3])
+                saving_instructions!(simu, "results", subfolder_name, "pola_hysteresis_1.pdf", _fig1[4])
+                saving_instructions!(simu, "results", subfolder_name, "ifc_1D_temporal_1.pdf", _fig1[5])
+                saving_instructions!(simu, "results", subfolder_name, "Ucell_temporal_1.pdf",  _fig1[6])
             end
         elseif simu.cfg.type_display == :synthetic
             saving_instructions!(simu, "results", subfolder_name, "pola_curve_1.pdf", _fig1)

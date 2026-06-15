@@ -116,20 +116,13 @@ function polarisation_sampling_times(cd::AbstractCurrent)::Vector{Float64}
     delta_t_ini = getproperty(cd, :delta_t_ini)
     delta_t_break = getproperty(cd, :delta_t_break)
 
-    if hasproperty(cd, :delta_i) && hasproperty(cd, :i_max) && hasproperty(cd, :v_load)
-        delta_i = getproperty(cd, :delta_i)
-        delta_t_load = delta_i / getproperty(cd, :v_load)
-        nb_loads = floor(Int, getproperty(cd, :i_max) / delta_i)
-        # Include i = 0 to capture the OCV point before the first load.
-        return [delta_t_ini + i * (delta_t_load + delta_t_break) for i in 0:nb_loads]
-    elseif hasproperty(cd, :i_exp) && hasproperty(cd, :v_load)
-        i_exp = getproperty(cd, :i_exp)
-        delta_t_load = abs(i_exp[1]) / getproperty(cd, :v_load)
-        delta_t_cali = delta_t_load + delta_t_break
-        return [delta_t_ini + i * delta_t_cali for i in 1:length(i_exp)]
+    # k=1 is the initial stabilization at 1.0 A/cm^2.
+    times = Float64[]
+    for k in eachindex(cd.t_starts)
+        t_end_stab = cd.t_starts[k] + cd.dt_loads[k] + (k == 1 ? delta_t_ini : delta_t_break)
+        push!(times, t_end_stab)
     end
-
-    throw(ArgumentError("Unsupported current profile for polarisation sampling."))
+    return times
 end
 
 

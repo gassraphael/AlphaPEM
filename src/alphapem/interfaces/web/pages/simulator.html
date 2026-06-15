@@ -1119,8 +1119,8 @@
                                     <p class="help-text">Time to hold each current step</p>
                                 </div>
                                 <div class="form-group">
-                                    <label for="pola_delta_i">Current Step (A/cm²)</label>
-                                    <input type="number" id="pola_delta_i" value="0.05" step="0.01">
+                                    <label for="pola_di_step">Current Step (A/cm²)</label>
+                                    <input type="number" id="pola_di_step" value="0.05" step="0.01">
                                     <p class="help-text">Increment between points</p>
                                 </div>
                                 <div class="form-group">
@@ -1236,7 +1236,7 @@
             'delta_t_break': { factor: 1/60, unit: 'min', precision: 1 },
             'i_ini': { factor: 1e-4, unit: 'A/cm²', precision: 2 },
             'i_step': { factor: 1e-4, unit: 'A/cm²', precision: 2 },
-            'delta_i': { factor: 1e-4, unit: 'A/cm²', precision: 2 },
+            'di_step': { factor: 1e-4, unit: 'A/cm²', precision: 2 },
             'i_max': { factor: 1e-4, unit: 'A/cm²', precision: 2 },
             'i_EIS': { factor: 1e-4, unit: 'A/cm²', precision: 2 },
             'i_static': { factor: 1e-4, unit: 'A/cm²', precision: 2 },
@@ -1855,7 +1855,7 @@
                     delta_t_ini: getVal('pola_delta_t_ini', 'delta_t_ini'),
                     v_load: getVal('pola_v_load', 'v_load'),
                     delta_t_break: getVal('pola_delta_t_break', 'delta_t_break'),
-                    delta_i: getVal('pola_delta_i', 'delta_i'),
+                    di_step: getVal('pola_di_step', 'di_step'),
                     i_max: getVal('pola_i_max', 'i_max'),
                 },
                 eis_parameters: {
@@ -1889,7 +1889,7 @@
             if (params.step_parameters.i_ini >= params.step_parameters.i_step)
                 errors.push('Step: Initial current must be < Step current');
 
-            if (params.polarization_parameters.delta_i > params.polarization_parameters.i_max)
+            if (params.polarization_parameters.di_step > params.polarization_parameters.i_max)
                 errors.push('Pola: Current step must be < Max current');
 
             return errors;

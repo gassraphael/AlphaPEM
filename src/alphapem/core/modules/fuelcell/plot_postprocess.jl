@@ -164,14 +164,44 @@ end
 
 """Return polarization points sampled at stabilization times (fixed mode).
 
-The returned current density is in A.cm^-2 to match plotting conventions."""
+The returned current density is in A.cm^-2 to match plotting conventions.
+If `average` is true, multiple points at the same current are averaged.
+"""
 function _polarization_points(outputs::SimulationOutputs,
-                              cd::AbstractCurrent)
+                              cd::AbstractCurrent;
+                              average::Bool=true)
+    # Extract time history and cell voltage
     t_hist = time_history(outputs)
     Ucell_t = derived_outputs(outputs).Ucell
+
+    # Calculate current density and convert to A/cm² for display
     ifc_t = [current(cd, t) / 1e4 for t in t_hist]
+
+    # Identify indices corresponding to stabilized points (end of step)
     sample_indices = polarisation_sampling_indices(outputs, cd)
-    return ifc_t[sample_indices], Ucell_t[sample_indices]
+    
+    ifc_samples = ifc_t[sample_indices]
+    Ucell_samples = Ucell_t[sample_indices]
+
+    # If requested, group and average voltages for each current level (e.g., multiple cycles)
+    if average
+        seen_i = Dict{Float64, Vector{Float64}}()
+        for (i, u) in zip(ifc_samples, Ucell_samples)
+            # Round to group points despite potential numerical micro-variations
+            i_key = round(i, digits=3)
+            if haskey(seen_i, i_key)
+                push!(seen_i[i_key], u)
+            else
+                seen_i[i_key] = [u]
+            end
+        end
+        
+        # Sort by current density to ensure a monotonic curve for display
+        sorted_i = sort(collect(keys(seen_i)))
+        return sorted_i, [mean(seen_i[i]) for i in sorted_i]
+    end
+
+    return ifc_samples, Ucell_samples
 end
 
 """Return true when legacy RMSE comparison against experiments is enabled."""
