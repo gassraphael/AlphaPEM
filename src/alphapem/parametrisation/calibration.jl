@@ -108,7 +108,7 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
         push!(history, current_best_rmse) # Log current RMSE to history
 
         generation = record.iteration # Get current generation index
-        @info @sprintf("Generation %d/%d: Best RMSE = %.4f %%", generation, ga_config.num_generations, current_best_rmse) # Log progress
+        @info @sprintf("Generation %d/%d: Best RMSE = %.4f %%", generation, ga_config.num_generations, best_fitness_ever) # Log progress
 
         if (cfg.save_frequency > 0 && generation % cfg.save_frequency == 0) || (time() - last_save_time > 300) # Check for save triggers
             CalibrationHelpers._save_intermediate(best_parameters_ever, best_fitness_ever, generation, parameter_bounds, base_params, cfg.output_dir) # Save checkpoint
@@ -152,8 +152,8 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
                      parallelization = parallelization # Set evaluation mode
                  ))
 
-    optimized_genes = Evolutionary.minimizer(optimization_result) # Extract best individual found
-    best_fitness = Evolutionary.minimum(optimization_result) # Extract best fitness achieved
+    optimized_genes = best_parameters_ever # Extract best individual found (global best, not just last generation)
+    best_fitness = best_fitness_ever # Extract best fitness achieved (global best)
     best_params = new_PhysicalParams_from_sample(optimized_genes, parameter_bounds, base_params) # Convert genes to physical parameters
 
     # 7. Save results

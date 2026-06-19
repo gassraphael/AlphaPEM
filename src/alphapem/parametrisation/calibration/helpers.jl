@@ -168,8 +168,8 @@ Save the comprehensive calibration report and the final population gene vectors 
 function _save_final_results(result, output_dir::String, final_population, final_fitness)
     report = Dict( # Construct the final report dictionary
         "metadata" => Dict(
-            "fuel_cell_type" => string(result.config.simulation_config.type_fuel_cell), # Log the type of fuel cell model
-            "voltage_zone" => string(result.config.simulation_config.voltage_zone), # Log the investigated voltage zone
+            "fuel_cell_types" => unique([string(sc.type_fuel_cell) for sc in result.config.simulation_configs]), # Log all unique fuel cell types
+            "voltage_zones" => unique([string(sc.voltage_zone) for sc in result.config.simulation_configs]), # Log all unique voltage zones
             "date" => Dates.format(now(), "yyyy-mm-dd HH:MM:SS"), # Timestamp the calibration completion
             "execution_time_seconds" => result.execution_time, # Record total execution duration in seconds
             "execution_time_formatted" => @sprintf("%.2f hours", result.execution_time / 3600) # Formatted execution time for readability
