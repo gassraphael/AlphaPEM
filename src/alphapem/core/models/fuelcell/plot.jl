@@ -747,23 +747,21 @@ function plot_polarization_curve_for_cali(outputs::SimulationOutputs,
     if cfg.display_timing == :postrun
         ifc_discretized, Ucell_discretized = _polarization_points(outputs, cd)
 
-        y_series = [Ucell_discretized]
         sim_error = nothing
         if hasproperty(fc, :pola_exp_data_cali)
             exp_data = getproperty(fc, :pola_exp_data_cali)
             if hasproperty(exp_data, :i_exp) && hasproperty(exp_data, :U_exp)
-                i_exp = getproperty(exp_data, :i_exp) ./ 1e4
+                i_exp_m2 = getproperty(exp_data, :i_exp)
+                i_exp = i_exp_m2 ./ 1e4
                 U_exp = getproperty(exp_data, :U_exp)
+                ifc_discretized, Ucell_discretized = _polarization_points_cali(outputs, cd, i_exp_m2)
                 scatter!(ax, i_exp, U_exp;
                          color=exp_color, marker=_experimental_marker(cfg.type_fuel_cell), markersize=12,
                          strokecolor=:white, strokewidth=0.5,
                          label=exp_label)
-                push!(y_series, U_exp)
-                # Legacy calibration logic: RMSE is computed directly point-to-point.
                 _pola_rmse_enabled(cfg) && (sim_error = _calculate_rmse(Ucell_discretized, U_exp))
             end
         end
-
         model_label = _label_with_rmse(model_label_base, sim_error)
         lines!(ax, ifc_discretized, Ucell_discretized;
                color=model_color, linewidth=3.0, label=model_label)

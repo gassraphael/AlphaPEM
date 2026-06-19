@@ -151,7 +151,7 @@ function simulate_model!(simu::AlphaPEM,
     prob     = DAEProblem(dae_fun, simu.initial_derivative_values,
                           initial_scaled_variable_values, simu.time_interval, packed;
                           differential_vars=dims.differential_vars)
-    init_alg = has_solver_restart_state ? NoInit() : BrownFullBasicInit()
+    init_alg = NoInit()
     tstops   = solver_tstops(simu.current_density, simu.time_interval)
     simu.sol = solve(prob, IDA(linear_solver=:KLU);
                      reltol        = np.rtol,

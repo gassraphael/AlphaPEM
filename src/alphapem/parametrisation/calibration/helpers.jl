@@ -12,7 +12,7 @@ using Dates
 using Printf
 using YAML
 
-import AlphaPEM.Core.Models: AlphaPEM, simulate_model!, _polarization_points, _calculate_rmse
+import AlphaPEM.Core.Models: AlphaPEM, simulate_model!, _polarization_points_cali, _calculate_rmse
 import AlphaPEM.Config: PolaExperimentalData
 using ...Calibration: CalibrationConfig
 using ...ValidParameterRegion.ResultsExport: export_parameter_bounds
@@ -76,7 +76,7 @@ infrastructure. No interpolation needed: the simulation exactly follows the expe
 so averaged simulation points correspond directly to experimental measurements.
 """
 function calculate_simulation_error(simulation::AlphaPEM, experimental_data::PolaExperimentalData)::Float64
-    _, Ucell_sim = _polarization_points(simulation.outputs, simulation.current_density; average=true)
+    _, Ucell_sim = _polarization_points_cali(simulation.outputs, simulation.current_density, experimental_data.i_exp)
     return _calculate_rmse(Ucell_sim, experimental_data.U_exp)
 end
 
