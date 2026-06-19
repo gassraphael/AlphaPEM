@@ -4,7 +4,7 @@
 #
 # Example script: parameter calibration for AlphaPEM using Genetic Algorithms.
 #
-# This script demonstrates how to set up and launch a calibration process
+# This script set up and launch a calibration process
 # to identify the best undetermined physical parameters for a given fuel cell
 # stack by matching experimental polarization curves.
 #
@@ -63,8 +63,8 @@ calibration_conditions = [
 # ── Genetic Algorithm settings ────────────────────────────────────────────────
 
 ga_cfg = GAConfig(
-    num_generations = 2,                     # 1000+ recommended for high precision
-    pop_size        = 10,                      # 128+ recommended
+    num_generations = 10,                     # 1000+ recommended for high precision
+    pop_size        = 128,                      # 128+ recommended
     target_error    = 0.5/100,                  # Stop if RMSE < 0.5%
 )
 
@@ -74,7 +74,7 @@ calib_cfg = CalibrationConfig(
     simulation_configs = calibration_conditions,
     ga_config          = ga_cfg,
     parallel           = PARALLEL,
-    output_dir         = "results/calibration/ZSW_GenStack_demo",
+    output_dir         = "results/calibration/ZSW_GenStack",
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
