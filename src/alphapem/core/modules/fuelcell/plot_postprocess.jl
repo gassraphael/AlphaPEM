@@ -182,6 +182,22 @@ function _polarization_points(outputs::SimulationOutputs,
     return ifc_samples, Ucell_samples
 end
 
+"""Return polarization points filtered to the experimental current densities (calibration mode).
+
+The calibration cycle contains extra stabilization steps (at i=0 and i=i_start) that are not
+part of the experimental sweep. This function keeps only the sampled points whose current
+matches a value in `i_exp` (A·m⁻²). The returned current density is in A·cm⁻².
+"""
+function _polarization_points_cali(outputs::SimulationOutputs,
+                                   cd::AbstractCurrent,
+                                   i_exp::AbstractVector{<:Real})
+    ifc_discretized, Ucell_discretized = _polarization_points(outputs, cd)
+    i_exp_rounded = round.(i_exp ./ 1e4, digits=3)
+    mask = [any(abs.(ifc .- i_exp_rounded) .< 1e-6) for ifc in ifc_discretized]
+    return ifc_discretized[mask], Ucell_discretized[mask]
+end
+
+
 """Return true when legacy RMSE comparison against experiments is enabled."""
 function _pola_rmse_enabled(cfg::SimulationConfig)::Bool
     return cfg.type_fuel_cell != :manual_setup &&

@@ -185,7 +185,7 @@ function launch_AlphaPEM_for_polarization_current_for_calibration(simu::AlphaPEM
 
         # Dynamic simulation
         for i in 1:n
-            tf = p.delta_t_ini + boundaries[i]
+            tf = boundaries[i]
             simulate_model!(simu, initial_variable_values, initial_derivative_values, (t0, tf))
 
             # Safety stop: cell voltage or O2 concentration became non-positive.
