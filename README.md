@@ -66,11 +66,11 @@ documentation, tests, and generated results. The main folders are:
 
 The most relevant entry points are:
 
+- `run_web_app.jl` for the web user interface.
 - `examples/run_step.jl` for a step-current simulation.
 - `examples/run_polarization.jl` for a polarization curve.
 - `examples/run_EIS.jl` for impedance simulations.
-- `src/alphapem/interfaces/GUI.jl` for the graphical user interface *(currently work in progress)*.
-- `src/alphapem/parametrisation/calibration.jl` for parameter calibration *(currently work in progress)*.
+- `examples/run_calibration.jl` for parameter calibration.
 
 
 # Installation
@@ -195,6 +195,7 @@ and configuration, beyond what the GUI offers.
 | `run_polarization.jl` | Generates a polarization curve                                                                 |
 | `run_polarization_for_cali.jl` | Generates polarization curves for calibration purposes |
 | `run_EIS.jl` | Generates an EIS curve <br/>                               |
+| `run_calibration.jl` | Calibrates the undetermined physical parameters of the model via Genetic Algorithms. |
 | `run_parameter_validity.jl` | Identifies the valid parameter region via LHS sampling, batch simulation and IRD methods (PRIM, MaxBox) — *requires R + IRD package ([installation step 7](#installation-from-source))* |
 | `plot_currents.jl` | Plots the current density profiles                                                            |
 
@@ -221,11 +222,11 @@ and configuration, beyond what the GUI offers.
 
 Calibration adapts AlphaPEM to specific fuel cells using genetic algorithms.
 
-1. **Prepare**: Place experimental curves in `src/alphapem/fuelcell` and set parameters in `src/alphapem/parametrisation/calibration_modules.jl`.
+1. **Configure**: Edit `examples/run_calibration.jl` to set the fuel cell type and GA parameters.
 
 2. **Run**:
    ```sh
-   julia --project=. src/alphapem/parametrisation/calibration.jl
+   julia --project=. examples/run_calibration.jl
    ```
 
 # Major updates
@@ -235,8 +236,7 @@ Calibration adapts AlphaPEM to specific fuel cells using genetic algorithms.
       maintaining a high-level language framework.
     - the abandonment of dictionary usage in favor of increased reliance on object-oriented programming.
     - the redesign of the AlphaPEM architecture so that the code is closer to industry standards.
-    - progressive migration of the `interfaces` (GUI) module to Julia using Genie.jl and Stipple.jl.
-    - progressive migration of the `parametrisation` (calibration) module.
+    - the previous GUI has been replaced by a web-based interface.
 - [V1.3](https://github.com/gassraphael/AlphaPEM/tree/65dd73ed306a054c80018447f7943b9d9f973ffb) - 2026.02.16 - This version of AlphaPEM includes: 
 	- the addition of O2 flow to Pt particules which improves the modeling of overvoltage due to flooding at high curent densities.
 		- the limiting liquid water saturation coefficient ($s_{lim}$) has been definitively removed, as this model replaces it.
@@ -258,7 +258,6 @@ Calibration adapts AlphaPEM to specific fuel cells using genetic algorithms.
 
 # Work in progress
 
-- Calibration is currently under maintenance.
 - Sensitivity analysis and calibration of the model using pre-selected data from ZSW-GenStack or EH-31 is currently 
 underway.
 - Auxiliaries are temporarily removed, as they require reconstruction.

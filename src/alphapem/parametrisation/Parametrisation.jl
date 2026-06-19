@@ -44,9 +44,9 @@ calibration, focusing the search on the high-validity region:
 
 ```julia
 using AlphaPEM.Parametrisation.ValidParameterRegion: load_restricted_bounds
-bounds = load_restricted_bounds("results/model_validity/restricted_bounds_PRIM.yaml")
+    bounds = load_restricted_bounds("results/model_validity/restricted_bounds_PRIM.yaml")
 # → Dict(:Hacl => (7.0e-6, 1.2e-5), :Re => (2.0e-7, 1.8e-6), ...)
-# Pass `bounds` to the calibration configuration once that module is re-integrated.
+# Pass `bounds` to the calibration configuration.
 ```
 
 ## Sub-systems
@@ -56,25 +56,20 @@ Identifies the region of the undetermined-parameter space where AlphaPEM produce
 physically meaningful polarization curves, using Latin Hypercube Sampling, batch
 simulation, and the PRIM/IRD method.  See `examples/run_parameter_validity.jl`.
 
-### Calibration *(work in progress)*
-⚠ `calibration_modules.jl` and `calibration.jl` are currently being refactored
-and are not yet included here.  They will be re-integrated once the PyCall /
-PyGAD dependency is resolved.
+### Calibration (`Calibration`)
+GA-based parameter calibration system in pure Julia.
 
 ## Exports
 
-- `ValidParameterRegion` — main module (contains `ValidityCriteria`,
-  `ConfigurationSampling`, `PRIMInterface`, `ResultsExport`)
+- `ValidParameterRegion` — validity analysis module
+- `Calibration` — genetic algorithm calibration module
 """
 module Parametrisation
 
-# NOTE: calibration_modules.jl is currently broken (depends on PyCall / PyGAD
-# which are not yet ported to pure Julia) and is intentionally excluded until
-# the calibration sub-system is refactored.
-# include("calibration_modules.jl")
-
 include("valid_parameter_region.jl")
+include("calibration.jl")
 
-export ValidParameterRegion
+export ValidParameterRegion,
+       Calibration
 
 end  # module Parametrisation

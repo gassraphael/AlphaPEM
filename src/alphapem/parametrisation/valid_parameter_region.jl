@@ -111,7 +111,7 @@ using .ValidityCriteria:      ValidityCriteriaConfig, ValidationResult,
                                classify_polarization_curve
 using .ConfigurationSampling: ParameterBound, ParameterBounds, SamplingConfig,
                                bounds_for_fuel_cell, generate_lhs_samples,
-                               apply_bounds_to_params, get_reference_config
+                               new_PhysicalParams_from_sample, get_reference_config
 using .IRDInterface:          IRDConfig, IRDResult,
                                run_ird_analysis
 using .ResultsExport:         ExportConfig, ValidationSummary,
@@ -149,7 +149,7 @@ export ValidityCriteria,
        SamplingConfig,
        bounds_for_fuel_cell,
        generate_lhs_samples,
-       apply_bounds_to_params,
+       new_PhysicalParams_from_sample,
         get_reference_config,
         # IRDInterface types & functions
         IRDConfig,
@@ -646,7 +646,7 @@ Step 2 of the pipeline: simulate all sampled configurations with AlphaPEM and
 classify each polarization curve.
 
 Each row in `samples` is mapped to a `PhysicalParams` struct via
-`apply_bounds_to_params`, injected into the reference fuel cell, and simulated
+`new_PhysicalParams_from_sample`, injected into the reference fuel cell, and simulated
 with a fast polarization profile.  The resulting curve is classified by
 `ValidityCriteria.classify_polarization_curve`.
 
@@ -887,7 +887,7 @@ function _simulate_one_configuration(sample::Vector{Float64},
                                       val_cfg::ValidityCriteriaConfig)
     try
         # Map the sample to PhysicalParams (applies bounds clamping + EH-31 constraint).
-        modified_params = apply_bounds_to_params(sample, bounds, base_params)
+        modified_params = new_PhysicalParams_from_sample(sample, bounds, base_params)
 
         # Build a fuel-cell object and inject the modified physical parameters.
         fc = create_fuelcell(bounds.fuel_cell_type, bounds.voltage_zone)

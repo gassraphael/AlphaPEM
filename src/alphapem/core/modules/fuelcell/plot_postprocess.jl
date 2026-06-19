@@ -140,28 +140,6 @@ function _compute_fourier_for_segment(t::AbstractVector{Float64},
 end
 
 
-"""
-    calculate_simulation_error(Ucell, U_exp_t)
-
-This function calculates the simulation error between the simulated cell voltage and the experimental cell
-voltage. It is calculated as the RMSE (root-mean-square error) of the relative differences (in %).
-
-# Arguments
-- `Ucell::Vector`: Simulated cell voltage, interpolated at the experimental measurement points.
-- `U_exp_t::Vector`: Experimental cell voltage.
-
-# Returns
-- RMSE between the simulated cell voltage and the experimental cell voltage (in %).
-"""
-function calculate_simulation_error(Ucell::Vector,
-                                    U_exp_t::Vector)
-
-    # Distance between the simulated and the experimental polarization curves (RMSE: root-mean-square error).
-    res1 = (Ucell .- U_exp_t) ./ U_exp_t .* 100  # in %.
-    return round(sqrt(mean(res1 .^ 2)), digits=2)
-end
-
-
 """Return polarization points sampled at stabilization times (fixed mode).
 
 The returned current density is in A.cm^-2 to match plotting conventions.
@@ -210,8 +188,8 @@ function _pola_rmse_enabled(cfg::SimulationConfig)::Bool
            cfg.type_auxiliary in (:forced_convective_cathode_with_flow_through_anode, :no_auxiliary)
 end
 
-"""Compute polarization RMSE using legacy logic (interpolate model voltage on experimental currents)."""
-function _polarization_rmse(ifc_discretized::AbstractVector{<:Real},
+"""Compute polarization RMSE with interpolation (interpolate model voltage on experimental currents)."""
+function _interpolated_rmse(ifc_discretized::AbstractVector{<:Real},
                             Ucell_discretized::AbstractVector{<:Real},
                             i_exp::AbstractVector{<:Real},
                             U_exp::AbstractVector{<:Real})
@@ -220,7 +198,7 @@ function _polarization_rmse(ifc_discretized::AbstractVector{<:Real},
     deduplicate_knots!(ifc_vec)
     itp = linear_interpolation(ifc_vec, ucell_vec; extrapolation_bc=Line())
     Ucell_interpolated = itp.(collect(i_exp))
-    return calculate_simulation_error(Ucell_interpolated, collect(U_exp))
+    return _calculate_rmse(Ucell_interpolated, collect(U_exp))
 end
 
 """Compute one EIS impedance point from Fourier outputs."""

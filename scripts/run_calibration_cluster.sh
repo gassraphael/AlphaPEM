@@ -97,53 +97,37 @@ echo ""
 cd "$PBS_TMPDIR/$PROJECT_NAME"
 
 
-# **Python Environment Configuration:**
+# **Julia Environment Configuration:**
 echo "================================================================================"
-echo "              Python Environment Configuration"
+echo "              Julia Environment Configuration"
 echo "================================================================================"
 
 # Load cluster modules
 # Note: Adapt these versions to match your cluster's available modules
 module purge
-module load mpi/intel/2019_update2
-module load tools/python/3.7.2
-echo "[INFO] Modules loaded: MPI Intel 2019, Python 3.7.2"
+module load tools/julia/1.11.0
+echo "[INFO] Modules loaded: Julia 1.11.0"
 
-# Clean PYTHONPATH to avoid conflicts
-unset PYTHONPATH
-echo "[INFO] PYTHONPATH cleared"
-
-# Create Python virtual environment
-echo "[INFO] Creating virtual environment..."
-python3 -m venv env
-source env/bin/activate
-echo "[INFO] Virtual environment activated"
-
-# Install dependencies
-echo "[INFO] Installing Python dependencies..."
-python3 -m pip install --upgrade --force-reinstall --no-cache-dir pip setuptools wheel
-python3 -m pip install --upgrade --force-reinstall --no-cache-dir -e .
-echo "[INFO] Dependencies installed successfully"
+# Setup Julia environment
+echo "[INFO] Instantiating Julia project..."
+julia --project -e 'using Pkg; Pkg.instantiate()'
+echo "[INFO] Project instantiated successfully"
 echo ""
-
-# Add project root to PYTHONPATH for imports
-export PYTHONPATH="$PBS_TMPDIR/$PROJECT_NAME:$PYTHONPATH"
-echo "[INFO] PYTHONPATH configured: $PYTHONPATH"
-echo ""
-
 
 # **Calibration Execution:**
 echo "================================================================================"
 echo "              Launching AlphaPEM Calibration"
 echo "================================================================================"
-echo "[INFO] Module: alphapem.parametrisation.calibration"
+echo "[INFO] Script: examples/run_calibration.jl"
 echo "[INFO] Execution start: $(date)"
 echo "--------------------------------------------------------------------------------"
 echo ""
 
-# Launch calibration module with MPI
-# Note: Use -np 1 for serial execution, or adjust according to your needs
-mpiexec -np 1 python3 -m alphapem.parametrisation.calibration
+# Launch calibration script
+# Note: Threads count is handled by the script itself if configured,
+# but we can also set JULIA_NUM_THREADS here.
+export JULIA_NUM_THREADS=$PBS_NUM_PPN
+julia --project examples/run_calibration.jl
 
 echo ""
 echo "--------------------------------------------------------------------------------"

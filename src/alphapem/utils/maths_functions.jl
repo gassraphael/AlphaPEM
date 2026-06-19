@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+using Statistics: mean
+
 """This module contains mathematical functions which are used for modeling the PEM fuel cell."""
 
 # ________________________________________________Mathematical functions________________________________________________
@@ -154,4 +156,29 @@ function d_dx(y_minus,
     y_0 = interpolate([y_minus, y_plus], [dx_minus, dx_plus])
     return (y_plus * dx_minus^2 + y_0 * (dx_plus^2 - dx_minus^2) - y_minus * dx_plus^2) /
            (dx_minus * dx_plus * (dx_minus + dx_plus))
+end
+
+
+"""
+    _calculate_rmse(Ucell, U_exp_t; digits=2)
+
+Calculate the RMSE (root-mean-square error) of the relative differences (in %) between 
+the simulated and experimental data.
+
+# Arguments
+- `Ucell::Vector`: Simulated cell voltage.
+- `U_exp_t::Vector`: Experimental cell voltage.
+- `digits::Union{Int, Nothing}`: Rounding precision. If nothing, return full precision.
+
+# Returns
+- RMSE between the simulated and experimental voltage (in %).
+"""
+function _calculate_rmse(Ucell::Vector,
+                         U_exp_t::Vector;
+                         digits::Union{Int, Nothing}=2)
+
+    # Distance between the simulated and the experimental polarization curves (RMSE: root-mean-square error).
+    res1 = (Ucell .- U_exp_t) ./ U_exp_t .* 100  # in %.
+    rmse = sqrt(mean(res1 .^ 2))
+    return digits === nothing ? rmse : round(rmse, digits=digits)
 end

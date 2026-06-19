@@ -39,7 +39,7 @@ giving better space-filling properties than simple random sampling for the same 
 - `SamplingConfig`       — Sampling options (n, method, seed)
 - `bounds_for_fuel_cell` — Build `ParameterBounds` for a supported fuel-cell type
 - `generate_lhs_samples` — Draw samples within given bounds
-- `apply_bounds_to_params` — Map a sample vector onto a `PhysicalParams` struct
+- `new_PhysicalParams_from_sample` — Map a sample vector onto a `PhysicalParams` struct
 - `get_reference_config` — Return the nominal reference configuration
 """
 module ConfigurationSampling
@@ -57,7 +57,7 @@ export ParameterBound,
        SamplingConfig,
        bounds_for_fuel_cell,
        generate_lhs_samples,
-       apply_bounds_to_params,
+       new_PhysicalParams_from_sample,
        get_reference_config
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -93,7 +93,7 @@ end
 Complete set of bounds for all undetermined parameters of a given fuel-cell type.
 
 Built by `bounds_for_fuel_cell` and consumed by `generate_lhs_samples` and
-`apply_bounds_to_params`.
+`new_PhysicalParams_from_sample`.
 
 # Fields
 - `bounds::Vector{ParameterBound}`: Bound specifications in calibration order.
@@ -296,9 +296,9 @@ end
 
 
 """
-    apply_bounds_to_params(sample, pb, base_params) -> PhysicalParams
+    new_PhysicalParams_from_sample(sample, pb, base_params) -> PhysicalParams
 
-Return a new `PhysicalParams` with undetermined parameters replaced by `sample`.
+Return a new `PhysicalParams` object with undetermined parameters replaced by `sample`.
 
 All parameters not listed in `pb` (e.g. `Aact`, `nb_cell`, channel geometry) are
 copied unchanged from `base_params`.
@@ -308,7 +308,7 @@ copied unchanged from `base_params`.
 - `pb::ParameterBounds`: Column-to-name mapping.
 - `base_params::PhysicalParams`: Reference struct supplying all fixed parameters.
 """
-function apply_bounds_to_params(sample::Vector{Float64},
+function new_PhysicalParams_from_sample(sample::Vector{Float64},
                                 pb::ParameterBounds,
                                 base_params)::Any    # ::PhysicalParams
     length(sample) == pb.n_params ||
