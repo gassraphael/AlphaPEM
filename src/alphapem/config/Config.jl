@@ -10,11 +10,13 @@ Modules:
     - current_parameters: Structures for current density parameters
     - fuel_cell_parameters: Structures for physical, operating, numerical, and experimental parameters
     - simulation_config: Structure and validation for simulation configuration parameters
+    - calibration_config: Structures for Genetic Algorithm calibration configuration
 
 Exports:
     - AbstractCurrentParams, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
     - AbstractFuelCellParams, PhysicalParams, OperatingConditions, PolaExperimentalData, NumericalParams
     - SimulationConfig, validate_config
+    - GAConfig, CalibrationConfig, CalibrationResult
 """
 module Config
 
@@ -23,9 +25,12 @@ include("fuel_cell_parameters.jl")
 include("numerical_parameters.jl")
 include("state_scaling.jl")
 include("simulation_config.jl")
+
 using .StateScalingModule: CellStateScaling, ManifoldStateScaling, AuxiliaryStateScaling,
                            CurrentDistributionScaling, DAEAlgebraicScaling, StateScaling
 using .SimulationConfigModule: SimulationConfig, validate_config
+
+include("calibration_config.jl")
 
 export AbstractCurrentParams, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
 export AbstractFuelCellParams, PhysicalParams, OperatingConditions, PolaExperimentalData, NumericalParams,
@@ -33,6 +38,7 @@ export AbstractFuelCellParams, PhysicalParams, OperatingConditions, PolaExperime
 export CellStateScaling, ManifoldStateScaling, AuxiliaryStateScaling,
        CurrentDistributionScaling, DAEAlgebraicScaling, StateScaling
 export SimulationConfig, validate_config
+export GAConfig, CalibrationConfig, CalibrationResult
 
 end  # module Config
 

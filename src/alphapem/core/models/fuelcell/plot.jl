@@ -656,7 +656,7 @@ function plot_polarization_curve(outputs::SimulationOutputs,
                          strokecolor=:white, strokewidth=0.5,
                          label=exp_label)
                 push!(y_series, U_exp)
-                _pola_rmse_enabled(cfg) && (sim_error = _polarization_rmse(ifc_discretized, Ucell_discretized, i_exp, U_exp))
+                _pola_rmse_enabled(cfg) && (sim_error = _interpolated_rmse(ifc_discretized, Ucell_discretized, i_exp, U_exp))
             end
         end
 
@@ -760,7 +760,7 @@ function plot_polarization_curve_for_cali(outputs::SimulationOutputs,
                          label=exp_label)
                 push!(y_series, U_exp)
                 # Legacy calibration logic: RMSE is computed directly point-to-point.
-                _pola_rmse_enabled(cfg) && (sim_error = calculate_simulation_error(Ucell_discretized, U_exp))
+                _pola_rmse_enabled(cfg) && (sim_error = _calculate_rmse(Ucell_discretized, U_exp))
             end
         end
 
