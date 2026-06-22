@@ -22,6 +22,7 @@ include("alphapem/currents/Currents.jl")
 include("alphapem/core/Core.jl")
 include("alphapem/application/Application.jl")
 include("alphapem/interfaces/Interfaces.jl")
+include("alphapem/parametrisation/Parametrisation.jl")
 
 export VERSION,
 	   AUTHOR,
@@ -33,7 +34,8 @@ export VERSION,
 	   Currents,
 	   Core,
 	   Application,
-	   Interfaces
+	   Interfaces,
+	   Parametrisation
 
 end  # module AlphaPEM
 

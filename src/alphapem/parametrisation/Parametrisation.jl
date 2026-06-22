@@ -43,8 +43,9 @@ GA-based parameter calibration system in pure Julia.
 """
 module Parametrisation
 
+include("common/ParametrisationCommon.jl")
 include("calibration.jl")
 
-export Calibration
+export ParametrisationCommon, Calibration
 
 end  # module Parametrisation
