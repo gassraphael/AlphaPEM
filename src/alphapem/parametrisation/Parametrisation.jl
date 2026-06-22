@@ -14,28 +14,7 @@ The recommended approach is therefore:
 
 **Stage 1 — Restrict the space (ValidParameterRegion)**
 
-Run `run_validity_analysis` to identify a compact hyperbox where AlphaPEM
-consistently produces physically meaningful curves.  Results are saved as a
-YAML file that can be reused in Stage 2:
-
-```julia
-using AlphaPEM.Parametrisation.ValidParameterRegion
-
-cfg = ValidityAnalysisConfig(
-    fuel_cell_type = :ZSW_GenStack,
-    n_samples      = 2000,
-    output_dir     = "results/model_validity",
-)
-result = run_validity_analysis(cfg)   # generates original_bounds.yaml + classified_configurations.csv
-
-# With PRIM (requires R + IRD package):
-prim_cfg = PRIMConfig(
-    ird_package_dir       = "external/IRD_method_2023/irdpackage",
-    reference_config_path = "results/model_validity/reference_config.yaml",
-    output_dir            = "results/model_validity",
-)
-result = run_validity_analysis(cfg, prim_cfg)  # also generates restricted_bounds_PRIM.yaml
-```
+ - in construction.
 
 **Stage 2 — Calibrate within the restricted space** *(calibration module, work in progress)*
 
@@ -52,9 +31,7 @@ using AlphaPEM.Parametrisation.ValidParameterRegion: load_restricted_bounds
 ## Sub-systems
 
 ### Valid Parameter Region (`ValidParameterRegion`)
-Identifies the region of the undetermined-parameter space where AlphaPEM produces
-physically meaningful polarization curves, using Latin Hypercube Sampling, batch
-simulation, and the PRIM/IRD method.  See `examples/run_parameter_validity.jl`.
+ - in construction
 
 ### Calibration (`Calibration`)
 GA-based parameter calibration system in pure Julia.
@@ -66,10 +43,8 @@ GA-based parameter calibration system in pure Julia.
 """
 module Parametrisation
 
-include("valid_parameter_region.jl")
 include("calibration.jl")
 
-export ValidParameterRegion,
-       Calibration
+export Calibration
 
 end  # module Parametrisation
