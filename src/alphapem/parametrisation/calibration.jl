@@ -18,9 +18,9 @@ using AlphaPEM.Fuelcell: create_fuelcell
 using AlphaPEM.Currents: create_current
 import AlphaPEM.Core.Models: AlphaPEM, simulate_model!
 
-# Import sampling helpers
-using ..ValidParameterRegion.ConfigurationSampling: bounds_for_fuel_cell, new_PhysicalParams_from_sample, get_reference_config
-using ..ValidParameterRegion.ResultsExport: export_parameter_bounds
+# Import common parametrisation helpers
+using ..ParametrisationCommon: bounds_for_fuel_cell, new_PhysicalParams_from_sample,
+                               get_reference_config, export_parameter_bounds
 
 export CalibrationConfig,
        CalibrationResult,
@@ -174,6 +174,7 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
     result = CalibrationResult(cfg, best_params, best_fitness, best_fitness, history, elapsed_time) # Construct result object
 
     CalibrationHelpers._save_final_results(result, cfg.output_dir, [optimized_genes], [best_fitness]) # Persist final data to disk
+    CalibrationHelpers._plot_calibration_results(result, cfg.output_dir) # Generate results figure
 
     checkpoint_path = joinpath(cfg.output_dir, "calibration_checkpoint.yaml") # Define path to temporary checkpoint
     if isfile(checkpoint_path) # Check if checkpoint exists
