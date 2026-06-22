@@ -93,9 +93,11 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
 
     genetic_algorithm_options = GA( # Instantiate the Genetic Algorithm operator
         populationSize = ga_config.pop_size, # Set population size
+        crossoverRate = ga_config.crossoverRate, # Set crossover rate
         selection = roulette, # Use roulette wheel selection
         crossover = singlepoint, # Use single-point crossover
         mutation = uniform_fixed_gene_mutation, # Use the custom fixed-gene mutation
+        mutationRate = 1.0, # Probability of applying mutation per individual (imposing 1.0 blocks this feature to permit the use of mutation_genes)
         epsilon = ga_config.elitism # Apply elitism to preserve best individuals
     )
 
