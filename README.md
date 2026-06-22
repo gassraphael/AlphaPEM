@@ -58,7 +58,7 @@ documentation, tests, and generated results. The main folders are:
 │       ├── interfaces      # GUI entry point and user-facing interfaces
 │       ├── parametrisation # Parameter calibration and identification routines
 │       └── utils           # Shared utility functions
-├── tests                   # Benchmark and profiling scripts used for validation and performance checks
+├── test                    # Benchmark and profiling scripts used for validation and performance checks
 ├── Manifest.toml           # Locked dependency versions for reproducible environments
 ├── Project.toml            # Julia package definition and dependencies
 └── README.md               # Project overview, installation, and usage guide

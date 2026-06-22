@@ -27,6 +27,7 @@ using DataFrames
 using Dates
 using Printf
 using YAML
+using ...ParametrisationCommon: export_parameter_bounds
 
 export ExportConfig,
        ValidationSummary,
@@ -124,63 +125,6 @@ function export_classified_configurations(data::DataFrame,
 
     CSV.write(fpath, data)
     return fpath
-end
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# YAML EXPORT
-# ─────────────────────────────────────────────────────────────────────────────
-
-"""
-    export_parameter_bounds(bounds, filepath; method = :PRIM, metadata = Dict())::Nothing
-
-Write parameter bounds to a YAML file.
-
-Generated structure:
-
-```yaml
-metadata:
-  method: PRIM
-  timestamp: 2026-05-22T14:30:00
-  fuel_cell_type: ZSW_GenStack
-parameters:
-  Hacl: {min: 5.0e-6, max: 1.2e-5, unit: m}
-  Re:   {min: 1.0e-7, max: 3.0e-6, unit: "Ω·m²"}
-  # ...
-```
-
-This format is compatible with downstream YAML readers and can be passed directly to
-future sampling / calibration workflows.
-"""
-function export_parameter_bounds(bounds::Dict{Symbol, Tuple{Float64, Float64}},
-                                 filepath::String;
-                                 method::Symbol = :PRIM,
-                                 metadata::Dict = Dict())::Nothing
-    mkpath(dirname(filepath))
-
-    # Build the YAML structure metadata (used only for comments below)
-    ts = Dates.format(Dates.now(), "yyyy-mm-ddTHH:MM:SS")
-    meta_block = merge(
-        Dict("method" => string(method), "timestamp" => ts),
-        Dict(string(k) => v for (k, v) in metadata)
-    )
-
-     # Write YAML manually for deterministic key ordering and consistent float format
-     open(filepath, "w") do io
-         println(io, "metadata:")
-         for k in sort(collect(keys(meta_block)))
-             v = meta_block[k]
-             println(io, "  $(k): $(v)")
-         end
-        println(io, "parameters:")
-        for name in sort(collect(keys(bounds)))
-            lo, hi = bounds[Symbol(name)]
-            println(io, "  $(name):")
-            println(io, "    min: $(lo)")
-            println(io, "    max: $(hi)")
-        end
-    end
-    return nothing
 end
 
 

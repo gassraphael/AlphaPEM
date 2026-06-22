@@ -32,7 +32,7 @@ Steps 1–2–4 always run; Step 3 is enabled by passing a `PRIMConfig`.
 | Sub-module               | Responsibility                                         |
 |--------------------------|--------------------------------------------------------|
 | `ValidityCriteria`       | Per-curve validity checks (voltage range, monotonicity)|
-| `ConfigurationSampling`  | LHS sample generation and parameter-struct mapping     |
+| `ParametrisationCommon`| LHS sample generation and parameter-struct mapping     |
 | `PRIMInterface`          | Julia ↔ R bridge for `irdpackage` (PRIM, MaxBox)      |
 | `ResultsExport`          | CSV / YAML / text-report export                        |
 
@@ -79,6 +79,7 @@ using CSV
 using ProgressMeter: Progress, next!, finish!
 
 # ─── AlphaPEM simulation components ──────────────────────────────────────────
+using ..ParametrisationCommon
 using AlphaPEM.Config:  SimulationConfig, PolarizationParams, NumericalParams
 using AlphaPEM.Fuelcell: create_fuelcell
 using AlphaPEM.Currents: create_current
@@ -97,21 +98,16 @@ const VALIDITY_OUTPUT_DIR = abspath(joinpath(@__DIR__, "..", "..", "..", "result
 
 # ─── Sub-modules ─────────────────────────────────────────────────────────────
 include(joinpath(@__DIR__, "validity/validity_criteria.jl"))
-include(joinpath(@__DIR__, "validity/configuration_sampling.jl"))
 include(joinpath(@__DIR__, "validity/ird_interface.jl"))
 include(joinpath(@__DIR__, "validity/results_export.jl"))
 
 using .ValidityCriteria
-using .ConfigurationSampling
 using .IRDInterface
 using .ResultsExport
 
 # Re-export sub-module types into this namespace for convenient access
 using .ValidityCriteria:      ValidityCriteriaConfig, ValidationResult,
                                classify_polarization_curve
-using .ConfigurationSampling: ParameterBound, ParameterBounds, SamplingConfig,
-                               bounds_for_fuel_cell, generate_lhs_samples,
-                               new_PhysicalParams_from_sample, get_reference_config
 using .IRDInterface:          IRDConfig, IRDResult,
                                run_ird_analysis
 using .ResultsExport:         ExportConfig, ValidationSummary,
@@ -124,7 +120,6 @@ using .ResultsExport:         ExportConfig, ValidationSummary,
 
 # Public API
 export ValidityCriteria,
-       ConfigurationSampling,
        IRDInterface,
        ResultsExport,
        # Fixed output path
@@ -143,7 +138,7 @@ export ValidityCriteria,
        check_start_voltage_range,
        check_monotonicity,
        check_positive_voltages,
-       # ConfigurationSampling types & functions
+       # ParametrisationCommon types & functions
        ParameterBound,
        ParameterBounds,
        SamplingConfig,

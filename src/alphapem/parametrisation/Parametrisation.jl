@@ -66,10 +66,12 @@ GA-based parameter calibration system in pure Julia.
 """
 module Parametrisation
 
+include("common/ParametrisationCommon.jl")
 include("valid_parameter_region.jl")
 include("calibration.jl")
 
 export ValidParameterRegion,
-       Calibration
+       Calibration,
+       ParametrisationCommon
 
 end  # module Parametrisation
