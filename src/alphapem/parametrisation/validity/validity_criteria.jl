@@ -199,7 +199,7 @@ then delegates to the vector-based overload.
 
 **Important**: This function only accepts polarization-type current profiles (standard or calibration).
 If the current profile does not expose the required properties (`delta_t_ini`, `delta_t_break`,
-and either `delta_i`/`i_max`/`v_load` or `i_exp`/`v_load`), the result will be `:invalid`.
+and either `di_step`/`i_max`/`v_load` or `i_exp`/`v_load`), the result will be `:invalid`.
 
 For polarization-type current profiles, this function samples the curve at characteristic times:
 - At `delta_t_ini` for the OCV point (i=0)
@@ -322,18 +322,18 @@ function _extract_polarization_sampling_indices(t_hist::AbstractVector{<:Real},
     delta_t_break = Float64(getproperty(cd, :delta_t_break))
 
     # ── Standard polarization profile ─────────────────────────────────────────
-    if hasproperty(cd, :delta_i) && hasproperty(cd, :i_max) && hasproperty(cd, :v_load)
-        delta_i = Float64(getproperty(cd, :delta_i))
+    if hasproperty(cd, :di_step) && hasproperty(cd, :i_max) && hasproperty(cd, :v_load)
+        di_step = Float64(getproperty(cd, :di_step))
         v_load  = Float64(getproperty(cd, :v_load))
         i_max   = Float64(getproperty(cd, :i_max))
 
-        delta_t_load = delta_i / v_load
-        nb_loads     = floor(Int, i_max / delta_i)
+        delta_t_load = di_step / v_load
+        nb_loads     = floor(Int, i_max / di_step)
 
         # k = 0 → OCV point (i=0);  k = 1..nb_loads → successive load steps
         sample_times = [delta_t_ini + k * (delta_t_load + delta_t_break)
                         for k in 0:nb_loads]
-        ifc_values   = Float64[k * delta_i for k in 0:nb_loads]
+        ifc_values   = Float64[k * di_step for k in 0:nb_loads]
 
         indices = [argmin(abs.(t_hist .- t)) for t in sample_times]
         return indices, ifc_values, sample_times
