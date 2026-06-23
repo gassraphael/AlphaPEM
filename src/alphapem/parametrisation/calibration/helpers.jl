@@ -62,7 +62,7 @@ function _fitness_function(solution,
             end
         end
 
-        return -mean(rmse_values) # Return the negative average RMSE (PyGAD maximizes)
+        return 1.0 / (mean(rmse_values) + 1e-6) # Return 1/RMSE (PyGAD maximizes, RWS requires positive fitness)
 
     catch e # Catch any simulation or numerical errors
         println("\nAn error occurred during the evaluation of the solution.")
@@ -70,7 +70,7 @@ function _fitness_function(solution,
         println("Attempted parameters: " * join(params, " | "))
         println("Exception : ", e)
         println("Refusing this solution and continuing the optimization.\n")
-        return -1e6 # Return a large negative penalty value on failure
+        return 1e-6 # Return a near-zero fitness value on failure (RWS-compatible)
     end
 end
 
@@ -105,9 +105,9 @@ Callback function executed after each generation of the Genetic Algorithm.
 Handles progress logging and periodic checkpoint saving.
 """
 function _on_generation(ga_instance, history, ga_config, cfg, last_save_time, parameter_bounds, base_params)
-    # PyGAD maximizes fitness, so fitness = -RMSE
+    # PyGAD maximizes fitness, so fitness = 1/RMSE (positive, compatible with RWS)
     best_sol, best_fitness_py, _ = ga_instance.best_solution()
-    current_best_rmse = -best_fitness_py
+    current_best_rmse =  1.0 / best_fitness_py # Convert 1/RMSE back to RMSE
     push!(history, current_best_rmse) # Log current RMSE to history
 
     generation = ga_instance.generations_completed # Get current generation index

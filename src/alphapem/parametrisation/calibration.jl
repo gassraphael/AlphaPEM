@@ -119,20 +119,20 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
     gene_space = [Dict("low" => lower_bounds[i], "high" => upper_bounds[i]) for i in 1:num_params]
 
     ga_instance = pygad.GA(
-        num_generations        = ga_config.num_generations,          # Maximum number of generations
-        sol_per_pop            = ga_config.pop_size,                 # Population size
-        num_parents_mating     = ga_config.num_parents_mating,       # Parents selected per generation
-        mutation_num_genes     = ga_config.mutation_num_genes,       # Number of genes to mutate.
-        keep_parents           = ga_config.elitism,                  # Keep the best solution of the previous generation. 1 elite should be enough.
-        parent_selection_type  = "rws",                              # Parent selection type. "rws" means roulette wheel selection. Best found.
-        crossover_type         = "single_point",                     # Crossover type. "single_point" means single point crossover. Best found.
-        mutation_type          = "random",                           # Uniform random mutation
-        fitness_func           = fitness_func,                       # Fitness function (maximized)
-        num_genes              = num_params,                         # Number of parameters to optimize
-        gene_space             = gene_space,                         # Per-gene bounds
-        initial_population     = initial_population_py,              # Warm-start or random initial population
-        on_generation          = on_generation,                      # Callback called after each generation
-        stop_criteria          = "reach_$(-ga_config.target_error)", # Stop if target error (fitness) is reached
+        num_generations        = ga_config.num_generations,    # Maximum number of generations
+        sol_per_pop            = ga_config.pop_size,           # Population size
+        num_parents_mating     = ga_config.num_parents_mating, # Parents selected per generation
+        mutation_num_genes     = ga_config.mutation_num_genes, # Number of genes to mutate.
+        keep_parents           = ga_config.elitism,            # Keep the best solution of the previous generation. 1 elite should be enough.
+        parent_selection_type  = "rws",                        # Parent selection type. "rws" means roulette wheel selection. Best found.
+        crossover_type         = "single_point",               # Crossover type. "single_point" means single point crossover. Best found.
+        mutation_type          = "random",                     # Uniform random mutation
+        fitness_func           = fitness_func,                 # Fitness function (maximized)
+        num_genes              = num_params,                   # Number of parameters to optimize
+        gene_space             = gene_space,                   # Per-gene bounds
+        initial_population     = initial_population_py,        # Warm-start or random initial population
+        on_generation          = on_generation,                # Callback called after each generation
+        stop_criteria          = "reach_$(1.0 / ga_config.target_error)", # Stop if fitness = 1/RMSE exceeds 1/target_error
         random_seed            = ga_config.seed === nothing ? nothing : ga_config.seed, # Reproducibility seed
         fitness_batch_size     = cfg.parallel ? ga_config.pop_size : nothing # Batch mode: whole population sent at once for Julia-side threading
     )
@@ -141,7 +141,7 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
     println() # Finalize progress line
 
     best_sol, best_fitness_py, _ = ga_instance.best_solution()
-    best_fitness = -best_fitness_py
+    best_fitness = 1.0 / best_fitness_py # Convert 1/RMSE back to RMSE
     optimized_genes = Float64.(best_sol) # Extract best individual found (global best)
     best_params = new_PhysicalParams_from_sample(optimized_genes, parameter_bounds, base_params) # Convert genes to physical parameters
 
@@ -161,7 +161,7 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
     final_population_matrix = Float64.(ga_instance.population) # Shape: (pop_size, num_genes)
     final_fitness_values    = Float64.(ga_instance.last_generation_fitness) # Shape: (pop_size,)
     final_population_list   = [collect(final_population_matrix[i, :]) for i in 1:size(final_population_matrix, 1)]
-    final_fitness_list      = [-final_fitness_values[i] for i in 1:length(final_fitness_values)] # Convert back to RMSE
+    final_fitness_list      = [1.0 / v for v in final_fitness_values] # Convert 1/RMSE back to RMSE
 
     CalibrationHelpers._save_final_results(result, cfg.output_dir, final_population_list, final_fitness_list) # Persist final data to disk
     CalibrationHelpers._plot_calibration_results(result, cfg.output_dir) # Generate results figure
