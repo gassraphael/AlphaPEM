@@ -124,10 +124,9 @@ echo "--------------------------------------------------------------------------
 echo ""
 
 # Launch calibration script
-# Note: Threads count is handled by the script itself if configured,
-# but we can also set JULIA_NUM_THREADS here.
-export JULIA_NUM_THREADS=$PBS_NUM_PPN
-julia --project examples/run_calibration.jl
+# Count CPUs from PBS node file and explicitly set threads
+NCPUS=$(wc -l < $PBS_NODEFILE)
+julia --threads=$NCPUS --project examples/run_calibration.jl
 
 echo ""
 echo "--------------------------------------------------------------------------------"
