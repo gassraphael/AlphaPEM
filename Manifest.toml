@@ -2,7 +2,7 @@
 
 julia_version = "1.12.5"
 manifest_format = "2.0"
-project_hash = "4ea82c33413fdde090b7cea94bbfb047c5c841c6"
+project_hash = "b644dc740d78b511e21e50e0871d7d2307e071c9"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "bbc22a9a08a0ef6460041086d8a7b27940ed4ffd"
@@ -90,7 +90,7 @@ uuid = "a95523ee-d6da-40b5-98cc-27bc505739d5"
 version = "0.1.10"
 
 [[deps.AlphaPEM]]
-deps = ["CSV", "CairoMakie", "DataFrames", "Dates", "DifferentialEquations", "DualNumbers", "Evolutionary", "FFTW", "ForwardDiff", "GLMakie", "Genie", "HTTP", "Interpolations", "JSON", "JuliaInterpreter", "LatinHypercubeSampling", "LineSearches", "LinearAlgebra", "NaNMath", "NonlinearSolve", "Preferences", "Printf", "ProgressMeter", "RCall", "Random", "SciMLBase", "SparseArrays", "SparseMatrixColorings", "Statistics", "Stipple", "StippleUI", "Sundials", "WGLMakie", "XLSX", "YAML"]
+deps = ["CSV", "CairoMakie", "DataFrames", "Dates", "DifferentialEquations", "DualNumbers", "FFTW", "ForwardDiff", "GLMakie", "Genie", "HTTP", "Interpolations", "JSON", "JuliaInterpreter", "LatinHypercubeSampling", "LineSearches", "LinearAlgebra", "NaNMath", "NonlinearSolve", "Preferences", "Printf", "ProgressMeter", "PyCall", "RCall", "Random", "SciMLBase", "SparseArrays", "SparseMatrixColorings", "Statistics", "Stipple", "StippleUI", "Sundials", "WGLMakie", "XLSX", "YAML"]
 path = "."
 uuid = "5b79a72d-1548-47c5-a674-b96c56ecabf8"
 version = "1.4.0"
@@ -854,12 +854,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl"]
 git-tree-sha1 = "8a4be429317c42cfae6a7fc03c31bad1970c310d"
 uuid = "2702e6a9-849d-5ed8-8c21-79e8b8f9ee43"
 version = "0.0.20230411+1"
-
-[[deps.Evolutionary]]
-deps = ["LinearAlgebra", "NLSolversBase", "Random", "StackViews", "Statistics", "UnPack"]
-git-tree-sha1 = "c9a4c0be80d63acb337246b1861f2fdc95fad2f1"
-uuid = "86b6b26d-c046-49b6-aa0b-5f0f74682bd6"
-version = "0.11.2"
 
 [[deps.ExactPredicates]]
 deps = ["IntervalArithmetic", "Random", "StaticArrays"]
@@ -2605,6 +2599,12 @@ deps = ["LinearAlgebra", "MuladdMacro", "PrecompileTools", "SparseArrays"]
 git-tree-sha1 = "02d7809d74834e7b04ac8858704c4efc34283f8a"
 uuid = "0c0d3e7f-3a8b-4f7e-b6f1-9a4d2e7c1f01"
 version = "1.0.1"
+
+[[deps.PyCall]]
+deps = ["Conda", "Dates", "Libdl", "LinearAlgebra", "MacroTools", "Serialization", "VersionParsing"]
+git-tree-sha1 = "9816a3826b0ebf49ab4926e2b18842ad8b5c8f04"
+uuid = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
+version = "1.96.4"
 
 [[deps.QOI]]
 deps = ["ColorTypes", "FileIO", "FixedPointNumbers"]

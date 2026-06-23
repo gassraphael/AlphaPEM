@@ -93,7 +93,7 @@ To install **AlphaPEM**, follow these steps in a shell:
     julia --project=. -e 'using Pkg; Pkg.instantiate()'
     ```
 
-7. *(Optional)* **PRIM-based valid parameter region analysis** — only required if you intend to use
+4. *(Optional)* **PRIM-based valid parameter region analysis** — only required if you intend to use
    `examples/run_parameter_validity.jl` and the `Parametrisation.ValidParameterRegion` module.
 
     a. Install **R**, a **C++ compiler**, and the required **system libraries** for R packages:
