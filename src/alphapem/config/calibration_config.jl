@@ -14,8 +14,8 @@ Genetic Algorithm hyperparameters.
 # Fields
 - `num_generations::Int`: Number of generations. Default `1000`.
 - `pop_size::Int`: Population size. Default `128`.
-- `crossoverRate::Float64`: Probability of crossover between parents. Default `0.8`.
-- `mutation_genes::Int`: Number of genes mutated per individual (exactly). Default `1`.
+- `num_parents_mating::Float64`: Number of parents selected for mating. Default `0.2 * pop_size`.
+- `mutation_num_genes::Int`: Number of chromosomes to mutate. Default `1` (best found).
 - `elitism::Int`: Number of best individuals carried to next generation. Default `1`.
 - `target_error::Float64`: Stop if RMSE < this value (%). Default `0.005` (0.5%).
 - `seed::Union{Int, Nothing}`: Random seed for reproducibility. Set to an `Int` to fix results, or `nothing` for stochastic runs. Default `nothing`.
@@ -23,8 +23,8 @@ Genetic Algorithm hyperparameters.
 Base.@kwdef struct GAConfig
     num_generations::Int              = 1000
     pop_size::Int                     = 128
-    crossoverRate::Float64            = 0.8
-    mutation_genes::Int               = 1
+    num_parents_mating::Int           = Int(floor(0.2 * pop_size))
+    mutation_num_genes::Int           = 1
     elitism::Int                      = 1
     target_error::Float64             = 0.5/100
     seed::Union{Int, Nothing}         = nothing  # nothing = stochastic

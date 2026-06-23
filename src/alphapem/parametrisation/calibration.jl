@@ -7,7 +7,7 @@ Core calibration engine for AlphaPEM undetermined parameters using Genetic Algor
 """
 module Calibration
 
-using Evolutionary
+using PyCall
 using Random
 using Dates
 using Printf
@@ -44,7 +44,6 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
     # 0. Initialisation
     start_time = time() # Record the initial time for performance measurement
     mkpath(cfg.output_dir) # Initialize the output directory for logs and results
-
     ga_config = cfg.ga_config # Extract GA hyperparameter settings
 
     # 1. Setup bounds and reference configuration
@@ -61,69 +60,34 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
     current_profiles = [create_current(PolarizationCalibrationParams(), fc) for fc in fuel_cells]
 
     # 3. Define fitness function
-    best_parameters_ever = copy(lower_bounds) # Initialize tracker for the best discovered parameters
-    best_fitness_ever = Inf # Initialize best fitness tracker with infinity
-    lock_capture = ReentrantLock() # Define lock for thread-safe updates to shared best results
-
-    function objective(gene_values::Vector{Float64}) # Objective function to minimize RMSE
-        fit = CalibrationHelpers._fitness_function(gene_values, parameter_bounds, base_params, fuel_cells, current_profiles, cfg.simulation_configs) # Compute simulation error
-
-        lock(lock_capture) do # Safely update the global best individual
-            if fit < best_fitness_ever
-                best_fitness_ever = fit
-                best_parameters_ever .= gene_values
-            end
-        end
-
-        return fit # Return the computed fitness value
+    # When parallel=true, we use a batch fitness function evaluated with Threads.@threads in Julia.
+    # PyGAD's parallel_processing uses Python threads which cannot parallelize Julia code (GIL-equivalent);
+    # instead, fitness_batch_size=pop_size sends the whole population at once to a Julia batch function.
+    if cfg.parallel
+        jl_fitness_func_batch = (ga_instance, population, population_idx) -> CalibrationHelpers._fitness_function_batch(
+            ga_instance, population, population_idx, parameter_bounds, base_params, fuel_cells, current_profiles, cfg.simulation_configs
+        )
+        fitness_func = py"lambda f: lambda ga_instance, population, population_idx: list(f(ga_instance, population, population_idx))"(jl_fitness_func_batch)
+    else
+        jl_fitness_func = (ga_instance, solution, solution_idx) -> CalibrationHelpers._fitness_function(
+            solution, parameter_bounds, base_params, fuel_cells, current_profiles, cfg.simulation_configs
+        )
+        # Wrap Julia function in a Python lambda to provide __code__ attribute for PyGAD inspection.
+        fitness_func = py"lambda f: lambda ga_instance, solution, solution_idx: f(ga_instance, solution, solution_idx)"(jl_fitness_func)
     end
 
-    # 4. Configure GA
-    # Custom mutation: mutates exactly `mutation_genes` genes per individual with uniform random resampling
-    num_genes = length(lower_bounds) # Determine the number of genes in the individual
-    num_mutated_genes = clamp(ga_config.mutation_genes, 1, num_genes) # Restrict mutations within valid bounds
+    # 4. Setup callback (on_generation)
+    history = Float64[] # Initialize history buffer for RMSE tracking
+    last_save_time = Ref(time()) # Track the last checkpoint save time
 
-    function uniform_fixed_gene_mutation(recombinant::Vector{Float64}; rng=Random.default_rng()) # Custom mutation operator
-        mutation_indices = randperm(rng, num_genes)[1:num_mutated_genes] # Select random genes to mutate
-        for i in mutation_indices
-            recombinant[i] = lower_bounds[i] + rand(rng) * (upper_bounds[i] - lower_bounds[i]) # Apply uniform random resampling
-        end
-        return recombinant # Return the mutated recombinant
-    end
-
-    genetic_algorithm_options = GA( # Instantiate the Genetic Algorithm operator
-        populationSize = ga_config.pop_size, # Set population size
-        crossoverRate = ga_config.crossoverRate, # Set crossover rate
-        selection = roulette, # Use roulette wheel selection
-        crossover = singlepoint, # Use single-point crossover
-        mutation = uniform_fixed_gene_mutation, # Use the custom fixed-gene mutation
-        mutationRate = 1.0, # Probability of applying mutation per individual (imposing 1.0 blocks this feature to permit the use of mutation_genes)
-        epsilon = ga_config.elitism # Apply elitism to preserve best individuals
+    # Wrap Julia callback in a Python lambda to provide __code__ attribute for PyGAD inspection.
+    on_generation = py"lambda f: lambda ga_instance: f(ga_instance)"(
+        ga -> CalibrationHelpers._on_generation(ga, history, ga_config, cfg, last_save_time, parameter_bounds, base_params)
     )
 
-    # 5. Setup callback
-    history = Float64[] # Initialize history buffer for RMSE tracking
-    last_save_time = time() # Track the last checkpoint save time
-
-    callback = (record) -> begin # Callback triggered at each GA generation
-        current_best_rmse = record.value # Extract current best RMSE from record
-        push!(history, current_best_rmse) # Log current RMSE to history
-
-        generation = record.iteration # Get current generation index
-        @info @sprintf("Generation %d/%d: Best RMSE = %.4f %%", generation, ga_config.num_generations, best_fitness_ever) # Log progress
-
-        if (cfg.save_frequency > 0 && generation % cfg.save_frequency == 0) || (time() - last_save_time > 300) # Check for save triggers
-            CalibrationHelpers._save_intermediate(best_parameters_ever, best_fitness_ever, generation, parameter_bounds, base_params, cfg.output_dir) # Save checkpoint
-            last_save_time = time() # Reset last save timer
-        end
-
-        return current_best_rmse <= ga_config.target_error # Return true if target error is reached
-    end
-
-    # 6. Run optimization
+    # 5. Build initial population
+    num_params = length(lower_bounds)
     rng = ga_config.seed === nothing ? Random.default_rng() : MersenneTwister(ga_config.seed) # Initialize random number generator
-
-    constraints = Evolutionary.BoxConstraints(lower_bounds, upper_bounds) # Define search space constraints
 
     initial_population = if cfg.initial_population_file !== nothing # Handle warm-start population loading
         loaded = CalibrationHelpers._load_warm_start_population(
@@ -133,29 +97,52 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
             loaded # Use loaded population
         else
             @warn "Failed to load warm-start, using random population" # Issue warning on failure
-            [lower_bounds .+ rand(rng, length(lower_bounds)) .* (upper_bounds .- lower_bounds) for _ in 1:ga_config.pop_size] # Fallback to random
+            [lower_bounds .+ rand(rng, num_params) .* (upper_bounds .- lower_bounds) for _ in 1:ga_config.pop_size] # Fallback to random
         end
     else
-        [lower_bounds .+ rand(rng, length(lower_bounds)) .* (upper_bounds .- lower_bounds) for _ in 1:ga_config.pop_size] # Initialize random population
+        [lower_bounds .+ rand(rng, num_params) .* (upper_bounds .- lower_bounds) for _ in 1:ga_config.pop_size] # Initialize random population
     end
 
-    parallelization = cfg.parallel ? :thread : :serial # Determine parallelization mode
+    # Convert initial population to Python-compatible matrix (list of lists)
+    initial_population_py = [collect(ind) for ind in initial_population]
+
     if cfg.parallel
         @info "Calibration: parallel population evaluation enabled ($(Threads.nthreads()) threads)." # Log threading status
     else
         @info "Calibration: sequential population evaluation." # Log serial status
     end
 
-    optimization_result = Evolutionary.optimize(objective, constraints, genetic_algorithm_options, initial_population, # Execute optimization
-                 Evolutionary.Options(
-                     iterations = ga_config.num_generations, # Set maximum iterations
-                     callback = callback, # Set progress callback
-                     rng = rng, # Set random number generator
-                     parallelization = parallelization # Set evaluation mode
-                 ))
+    # 6. Run optimization with PyGAD
+    pygad = pyimport("pygad") # Import PyGAD
 
-    optimized_genes = best_parameters_ever # Extract best individual found (global best, not just last generation)
-    best_fitness = best_fitness_ever # Extract best fitness achieved (global best)
+    # Gene space: list of dicts with 'low' and 'high' for each gene
+    gene_space = [Dict("low" => lower_bounds[i], "high" => upper_bounds[i]) for i in 1:num_params]
+
+    ga_instance = pygad.GA(
+        num_generations        = ga_config.num_generations,          # Maximum number of generations
+        sol_per_pop            = ga_config.pop_size,                 # Population size
+        num_parents_mating     = ga_config.num_parents_mating,       # Parents selected per generation
+        mutation_num_genes     = ga_config.mutation_num_genes,       # Number of genes to mutate.
+        keep_parents           = ga_config.elitism,                  # Keep the best solution of the previous generation. 1 elite should be enough.
+        parent_selection_type  = "rws",                              # Parent selection type. "rws" means roulette wheel selection. Best found.
+        crossover_type         = "single_point",                     # Crossover type. "single_point" means single point crossover. Best found.
+        mutation_type          = "random",                           # Uniform random mutation
+        fitness_func           = fitness_func,                       # Fitness function (maximized)
+        num_genes              = num_params,                         # Number of parameters to optimize
+        gene_space             = gene_space,                         # Per-gene bounds
+        initial_population     = initial_population_py,              # Warm-start or random initial population
+        on_generation          = on_generation,                      # Callback called after each generation
+        stop_criteria          = "reach_$(-ga_config.target_error)", # Stop if target error (fitness) is reached
+        random_seed            = ga_config.seed === nothing ? nothing : ga_config.seed, # Reproducibility seed
+        fitness_batch_size     = cfg.parallel ? ga_config.pop_size : nothing # Batch mode: whole population sent at once for Julia-side threading
+    )
+
+    ga_instance.run() # Execute the genetic algorithm
+    println() # Finalize progress line
+
+    best_sol, best_fitness_py, _ = ga_instance.best_solution()
+    best_fitness = -best_fitness_py
+    optimized_genes = Float64.(best_sol) # Extract best individual found (global best)
     best_params = new_PhysicalParams_from_sample(optimized_genes, parameter_bounds, base_params) # Convert genes to physical parameters
 
     # 7. Save results
@@ -168,9 +155,6 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
                                             "rmse_percent" => best_fitness))
 
     elapsed_time = time() - start_time # Compute total execution time
-    @info "Calibration complete in $(round(elapsed_time/3600, digits=2)) hours." # Log total time
-    @info "Final RMSE: $(round(best_fitness, digits=4)) %" # Log final accuracy
-
     result = CalibrationResult(cfg, best_params, best_fitness, best_fitness, history, elapsed_time) # Construct result object
 
     CalibrationHelpers._save_final_results(result, cfg.output_dir, [optimized_genes], [best_fitness]) # Persist final data to disk
@@ -179,7 +163,6 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
     checkpoint_path = joinpath(cfg.output_dir, "calibration_checkpoint.yaml") # Define path to temporary checkpoint
     if isfile(checkpoint_path) # Check if checkpoint exists
         rm(checkpoint_path) # Remove temporary checkpoint file
-        @info "Temporary checkpoint file removed." # Log removal
     end
 
     return result # Return the final calibration results
