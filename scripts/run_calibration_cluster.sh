@@ -90,9 +90,9 @@ export PBS_TMPDIR=/gpfs/scratch/$USER/$PBS_JOBID
 mkdir -p "$PBS_TMPDIR"
 echo "[INFO] Temporary workspace created: $PBS_TMPDIR"
 
-# Copy entire project to temporary directory (exclude .git to avoid permission issues)
+# Copy entire project to temporary directory (avoid .git permission issues)
 echo "[INFO] Copying project to temporary workspace..."
-cp -r --no-preserve=mode "$PROJECT_ROOT" "$PBS_TMPDIR" --exclude=.git
+cp -r "$PROJECT_ROOT" "$PBS_TMPDIR" 2>/dev/null || true
 echo "[INFO] Copy completed."
 echo ""
 
