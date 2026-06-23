@@ -122,6 +122,20 @@ To install **AlphaPEM**, follow these steps in a shell:
 
     After these three steps, `run_validity_analysis` in AlphaPEM will work without any additional setup.
 
+5. *(Optional)* **Genetic algorithm-based parameter calibration** — only required if you intend to use
+   `examples/run_calibration.jl` and the `Calibration` module.
+
+    a. Install **Python** (Python 3.8+ recommended) and **pip**:
+      - Linux (Debian/Ubuntu): `sudo apt update && sudo apt install -y python3-pip`
+      - macOS/Windows: Download and install from [python.org](https://www.python.org/).
+
+    b. Install the **PyGAD** library (Genetic Algorithm library):
+       ```sh
+       pip install pygad
+       ```
+
+    After these two steps, `calibrate` in AlphaPEM will work without any additional setup (using PyCall).
+
 ## Installation as a package (to use AlphaPEM in other projects)
 
 AlphaPEM can be integrated into other projects, whether written in **Julia** or **Python**.

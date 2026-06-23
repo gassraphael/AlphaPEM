@@ -22,6 +22,8 @@ using ...Calibration: CalibrationConfig
 using ...ParametrisationCommon: export_parameter_bounds, new_PhysicalParams_from_sample
 
 export _fitness_function,
+       _fitness_function_batch,
+       _on_generation,
        calculate_simulation_error,
        _save_intermediate,
        _load_warm_start_population,
@@ -29,16 +31,18 @@ export _fitness_function,
        _plot_calibration_results
 
 """
-    _fitness_function(gene_values, parameter_bounds, base_params, fuel_cells, current_profiles, simulation_configs) -> Float64
+    _fitness_function(solution, parameter_bounds, base_params, fuel_cells, current_profiles, simulation_configs) -> Float64
 
-Evaluate the Root Mean Square Error (RMSE) for a given parameter gene vector across all operating conditions.
+Evaluate the negative Root Mean Square Error (RMSE) for a given parameter gene vector across all operating conditions.
+PyGAD maximizes fitness, so we return -RMSE.
 """
-function _fitness_function(gene_values::Vector{Float64},
+function _fitness_function(solution,
                            parameter_bounds,
                            base_params,
                            fuel_cells,
                            current_profiles,
                            simulation_configs)::Float64
+    gene_values = Float64.(solution) # Convert PyObject to Julia Float64 vector
     try
         physical_params = new_PhysicalParams_from_sample(gene_values, parameter_bounds, base_params) # Map normalized genes to physical parameters
         rmse_values = zeros(Float64, length(fuel_cells)) # Initialize array for individual condition RMSEs
@@ -58,7 +62,7 @@ function _fitness_function(gene_values::Vector{Float64},
             end
         end
 
-        return mean(rmse_values) # Return the average RMSE across all conditions
+        return -mean(rmse_values) # Return the negative average RMSE (PyGAD maximizes)
 
     catch e # Catch any simulation or numerical errors
         println("\nAn error occurred during the evaluation of the solution.")
@@ -66,7 +70,55 @@ function _fitness_function(gene_values::Vector{Float64},
         println("Attempted parameters: " * join(params, " | "))
         println("Exception : ", e)
         println("Refusing this solution and continuing the optimization.\n")
-        return 1e6 # Return a large penalty value on failure
+        return -1e6 # Return a large negative penalty value on failure
+    end
+end
+
+"""
+    _fitness_function_batch(ga_instance, population, population_idx, parameter_bounds, base_params, fuel_cells, current_profiles, simulation_configs) -> Vector{Float64}
+
+Batch version of the fitness function for parallel evaluation of the entire population.
+Uses Threads.@threads to distribute individual evaluations.
+"""
+function _fitness_function_batch(ga_instance,
+                                 population,
+                                 population_idx,
+                                 parameter_bounds,
+                                 base_params,
+                                 fuel_cells,
+                                 current_profiles,
+                                 simulation_configs)::Vector{Float64}
+    n = size(population, 1)
+    fitness_values = Vector{Float64}(undef, n)
+    Threads.@threads for i in 1:n
+        fitness_values[i] = _fitness_function(
+            population[i, :], parameter_bounds, base_params, fuel_cells, current_profiles, simulation_configs
+        )
+    end
+    return fitness_values
+end
+
+"""
+    _on_generation(ga_instance, history, ga_config, cfg, last_save_time, parameter_bounds, base_params)
+
+Callback function executed after each generation of the Genetic Algorithm.
+Handles progress logging and periodic checkpoint saving.
+"""
+function _on_generation(ga_instance, history, ga_config, cfg, last_save_time, parameter_bounds, base_params)
+    # PyGAD maximizes fitness, so fitness = -RMSE
+    best_sol, best_fitness_py, _ = ga_instance.best_solution()
+    current_best_rmse = -best_fitness_py
+    push!(history, current_best_rmse) # Log current RMSE to history
+
+    generation = ga_instance.generations_completed # Get current generation index
+    msg = @sprintf("Generation %d/%d: Best RMSE = %.4f %%", generation, ga_config.num_generations, current_best_rmse)
+    print("\r[ Info: ", msg) # Log progress in-place
+    flush(stdout)
+
+    if (cfg.save_frequency > 0 && generation % cfg.save_frequency == 0) || (time() - last_save_time[] > 300) # Check for save triggers
+        best_parameters = Float64.(best_sol)
+        _save_intermediate(best_parameters, current_best_rmse, generation, parameter_bounds, base_params, cfg.output_dir) # Save checkpoint
+        last_save_time[] = time() # Reset last save timer
     end
 end
 
@@ -186,9 +238,10 @@ function _save_final_results(result, output_dir::String, final_population, final
         "config" => Dict(
             "pop_size" => result.config.ga_config.pop_size, # Log the population size hyperparameter
             "num_generations" => result.config.ga_config.num_generations, # Log the generation limit hyperparameter
-            "mating_rate" => result.config.ga_config.mating_rate, # Log the mating rate hyperparameter
-            "mutation_genes" => result.config.ga_config.mutation_genes, # Log the number of mutated genes hyperparameter
+            "num_parents_mating" => result.config.ga_config.num_parents_mating, # Log parents selected for mating
+            "mutation_num_genes" => result.config.ga_config.mutation_num_genes, # Log number of genes to mutate
             "elitism" => result.config.ga_config.elitism, # Log the elitism count hyperparameter
+            "target_error" => result.config.ga_config.target_error, # Log the target error hyperparameter
             "seed" => result.config.ga_config.seed # Record the random seed used for reproducibility
         ),
         "history" => result.history # Include the full RMSE history vector
@@ -196,7 +249,6 @@ function _save_final_results(result, output_dir::String, final_population, final
 
     try
         YAML.write_file(joinpath(output_dir, "calibration_report.yaml"), report) # Write the report to disk
-        @info "Calibration report saved to $(joinpath(output_dir, "calibration_report.yaml"))" # Log successful save
     catch e # Handle reporting write errors
         @warn "Failed to save calibration report: $e" # Log failure warning
     end
@@ -208,7 +260,6 @@ function _save_final_results(result, output_dir::String, final_population, final
         ]
         try
             YAML.write_file(joinpath(output_dir, "final_population.yaml"), population_data) # Write population data to disk
-            @info "Final population saved to $(joinpath(output_dir, "final_population.yaml"))" # Log successful save
         catch e # Handle population write errors
             @warn "Failed to save final population: $e" # Log failure warning
         end
@@ -265,8 +316,6 @@ function _plot_calibration_results(result, output_dir::String)
         # 4. Save the figure
         out_path = joinpath(output_dir, "calibration_polarization_curves.png")
         save(out_path, fig)
-        @info "Calibration results figure saved to $out_path"
-
     catch e
         @warn "Failed to generate calibration plots: $e"
         # Don't rethrow, as this is a post-processing step that shouldn't crash the calibration
