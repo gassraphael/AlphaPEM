@@ -109,12 +109,18 @@ echo "==========================================================================
 # Note: Adapt these versions to match your cluster's available modules
 module purge
 module load tools/julia/1.12.6
-echo "[INFO] Modules loaded: Julia 1.11.0"
+echo "[INFO] Modules loaded: Julia 1.12.6"
 
 # Setup Julia environment
 echo "[INFO] Instantiating Julia project..."
 julia --project -e 'using Pkg; Pkg.instantiate()'
 echo "[INFO] Project instantiated successfully"
+
+# Precompile packages, ignoring display-dependent packages (GLMakie/WGLMakie)
+# that fail on headless servers without an X11 display.
+echo "[INFO] Precompiling packages (non-strict, headless-safe)..."
+julia --project -e 'using Pkg; Pkg.precompile(strict=false)'
+echo "[INFO] Precompilation completed"
 echo ""
 
 # **Calibration Execution:**
