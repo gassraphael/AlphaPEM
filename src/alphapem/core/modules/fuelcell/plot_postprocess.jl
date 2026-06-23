@@ -192,7 +192,7 @@ function _polarization_points_cali(outputs::SimulationOutputs,
                                    cd::AbstractCurrent,
                                    i_exp::AbstractVector{<:Real})
     ifc_discretized, Ucell_discretized = _polarization_points(outputs, cd)
-    mask = [any(abs(ifc .- i_exp ./ 1e4) .< 1e-6) for ifc in ifc_discretized]
+    mask = [any(abs.(ifc .- i_exp ./ 1e4) .< 1e-6) for ifc in ifc_discretized]
     return ifc_discretized[mask], Ucell_discretized[mask]
 end
 
