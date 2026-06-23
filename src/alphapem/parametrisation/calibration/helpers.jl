@@ -19,7 +19,7 @@ import AlphaPEM.Config: PolaExperimentalData, PolarizationCalibrationParams, Pol
 import AlphaPEM.Fuelcell: create_fuelcell
 import AlphaPEM.Currents: create_current
 using ...Calibration: CalibrationConfig
-using ...ParametrisationCommon: export_parameter_bounds, new_PhysicalParams_from_sample
+using ...ParametrisationCommon: export_parameter_bounds, export_calibrated_params, new_PhysicalParams_from_sample
 
 export _fitness_function,
        _fitness_function_batch,
@@ -117,7 +117,7 @@ function _on_generation(ga_instance, history, ga_config, cfg, last_save_time, pa
 
     if (cfg.save_frequency > 0 && generation % cfg.save_frequency == 0) || (time() - last_save_time[] > 300) # Check for save triggers
         best_parameters = Float64.(best_sol)
-        _save_intermediate(best_parameters, current_best_rmse, generation, parameter_bounds, base_params, cfg.output_dir) # Save checkpoint
+        _save_intermediate(ga_instance, best_parameters, current_best_rmse, generation, parameter_bounds, base_params, cfg.output_dir) # Save checkpoint
         last_save_time[] = time() # Reset last save timer
     end
 end
@@ -137,22 +137,35 @@ function calculate_simulation_error(simulation::AlphaPEM, experimental_data::Pol
 end
 
 """
-    _save_intermediate(best_gene_values, best_fitness, generation, parameter_bounds, base_params, output_dir)
+    _save_intermediate(ga_instance, best_gene_values, best_fitness, generation, parameter_bounds, base_params, output_dir)
 
-Save the current best individual's gene values as a checkpoint for potential warm-start recovery.
+Save the current best individual's calibrated parameter values and the full population as checkpoints for potential warm-start recovery.
 """
-function _save_intermediate(best_gene_values, best_fitness, generation, parameter_bounds, base_params, output_dir)
-    intermediate_bounds = Dict{Symbol, Tuple{Float64, Float64}}( # Prepare temporary bounds dictionary for export
-        bound.name => (best_gene_values[i], best_gene_values[i]) for (i, bound) in enumerate(parameter_bounds.bounds)
+function _save_intermediate(ga_instance, best_gene_values, best_fitness, generation, parameter_bounds, base_params, output_dir)
+    best_params_dict = Dict{Symbol, Float64}( # Prepare calibrated parameters dictionary for export
+        bound.name => best_gene_values[i] for (i, bound) in enumerate(parameter_bounds.bounds)
     )
 
     try
-        export_parameter_bounds(intermediate_bounds, joinpath(output_dir, "calibration_checkpoint.yaml"); # Export checkpoint to YAML
-                                method = :checkpoint, # Mark as an intermediate checkpoint
-                                metadata = Dict("generation" => generation, # Log the current generation index
-                                                "rmse_percent" => best_fitness)) # Log the current best accuracy
+        export_calibrated_params(best_params_dict, joinpath(output_dir, "calibration_checkpoint.yaml"); # Export checkpoint to YAML
+                                 method = :checkpoint, # Mark as an intermediate checkpoint
+                                 metadata = Dict("generation" => generation, # Log the current generation index
+                                                 "rmse_percent" => best_fitness)) # Log the current best accuracy
     catch e # Handle filesystem or export errors
         @warn "Failed to save checkpoint: $e" # Log warning message
+    end
+
+    # Save the full current population for warm-start recovery
+    try
+        population = Float64.(ga_instance.population) # Extract current population matrix from PyGAD
+        fitness_values = Float64.(ga_instance.last_generation_fitness) # Extract last generation fitness values
+        population_data = [
+            Dict("individual" => i, "params" => collect(population[i, :]), "rmse" => -fitness_values[i])
+            for i in 1:size(population, 1)
+        ]
+        YAML.write_file(joinpath(output_dir, "calibration_checkpoint_population.yaml"), population_data) # Write full population
+    catch e
+        @warn "Failed to save checkpoint population: $e"
     end
 end
 
@@ -174,7 +187,12 @@ function _load_warm_start_population(file::String, parameter_bounds, pop_size::I
             for (param_name, param_data) in params_dict # Iterate through each parameter entry
                 if haskey(param_index_map, param_name) # Check if parameter exists in current model
                     idx = param_index_map[param_name] # Retrieve the target index
-                    individual[idx] = param_data["min"] # Set gene value from minimum field
+                    # Support both new single-value format and legacy min/max format
+                    if isa(param_data, Dict)
+                        individual[idx] = Float64(param_data["min"]) # Legacy format: use min field
+                    else
+                        individual[idx] = Float64(param_data) # New format: direct scalar value
+                    end
                 else
                     @warn "Parameter $param_name from checkpoint not found in current bounds" # Warn if model mismatch
                 end

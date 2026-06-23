@@ -20,7 +20,7 @@ import AlphaPEM.Core.Models: AlphaPEM, simulate_model!
 
 # Import common parametrisation helpers
 using ..ParametrisationCommon: bounds_for_fuel_cell, new_PhysicalParams_from_sample,
-                               get_reference_config, export_parameter_bounds
+                               get_reference_config, export_parameter_bounds, export_calibrated_params
 
 export CalibrationConfig,
        CalibrationResult,
@@ -146,23 +146,31 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
     best_params = new_PhysicalParams_from_sample(optimized_genes, parameter_bounds, base_params) # Convert genes to physical parameters
 
     # 7. Save results
-    final_bounds = Dict{Symbol, Tuple{Float64, Float64}}( # Prepare final results dictionary
-        bound.name => (optimized_genes[i], optimized_genes[i]) for (i, bound) in enumerate(parameter_bounds.bounds)
+    final_params = Dict{Symbol, Float64}( # Prepare final calibrated parameters dictionary
+        bound.name => optimized_genes[i] for (i, bound) in enumerate(parameter_bounds.bounds)
     )
-    export_parameter_bounds(final_bounds, joinpath(cfg.output_dir, "calibrated_bounds.yaml"); # Export calibrated parameters
-                            method = :calibration,
-                            metadata = Dict("fuel_cell_type" => string(ref_cfg.type_fuel_cell),
-                                            "rmse_percent" => best_fitness))
+    export_calibrated_params(final_params, joinpath(cfg.output_dir, "calibrated_bounds.yaml"); # Export calibrated parameters
+                             method = :calibration,
+                             metadata = Dict("fuel_cell_type" => string(ref_cfg.type_fuel_cell),
+                                             "rmse_percent" => best_fitness))
 
     elapsed_time = time() - start_time # Compute total execution time
     result = CalibrationResult(cfg, best_params, best_fitness, best_fitness, history, elapsed_time) # Construct result object
 
-    CalibrationHelpers._save_final_results(result, cfg.output_dir, [optimized_genes], [best_fitness]) # Persist final data to disk
+    # Extract full final population and fitness values from PyGAD
+    final_population_matrix = Float64.(ga_instance.population) # Shape: (pop_size, num_genes)
+    final_fitness_values    = Float64.(ga_instance.last_generation_fitness) # Shape: (pop_size,)
+    final_population_list   = [collect(final_population_matrix[i, :]) for i in 1:size(final_population_matrix, 1)]
+    final_fitness_list      = [-final_fitness_values[i] for i in 1:length(final_fitness_values)] # Convert back to RMSE
+
+    CalibrationHelpers._save_final_results(result, cfg.output_dir, final_population_list, final_fitness_list) # Persist final data to disk
     CalibrationHelpers._plot_calibration_results(result, cfg.output_dir) # Generate results figure
 
-    checkpoint_path = joinpath(cfg.output_dir, "calibration_checkpoint.yaml") # Define path to temporary checkpoint
-    if isfile(checkpoint_path) # Check if checkpoint exists
-        rm(checkpoint_path) # Remove temporary checkpoint file
+    for checkpoint_file in ("calibration_checkpoint.yaml", "calibration_checkpoint_population.yaml") # Clean up temporary checkpoint files
+        checkpoint_path = joinpath(cfg.output_dir, checkpoint_file)
+        if isfile(checkpoint_path) # Check if checkpoint exists
+            rm(checkpoint_path) # Remove temporary checkpoint file
+        end
     end
 
     return result # Return the final calibration results

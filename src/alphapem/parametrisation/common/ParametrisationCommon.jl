@@ -27,7 +27,8 @@ export ParameterBound,
        generate_lhs_samples,
        new_PhysicalParams_from_sample,
        get_reference_config,
-       export_parameter_bounds
+       export_parameter_bounds,
+       export_calibrated_params
 
 include("types.jl")
 include("bounds.jl")
