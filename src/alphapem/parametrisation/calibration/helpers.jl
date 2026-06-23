@@ -90,10 +90,12 @@ function _fitness_function_batch(ga_instance,
                                  simulation_configs)::Vector{Float64}
     n = size(population, 1)
     fitness_values = Vector{Float64}(undef, n)
-    Threads.@threads for i in 1:n
-        fitness_values[i] = _fitness_function(
-            population[i, :], parameter_bounds, base_params, fuel_cells, current_profiles, simulation_configs
-        )
+    @sync for i in 1:n
+        Threads.@spawn begin
+            fitness_values[i] = _fitness_function(
+                population[i, :], parameter_bounds, base_params, fuel_cells, current_profiles, simulation_configs
+            )
+        end
     end
     return fitness_values
 end
@@ -111,7 +113,7 @@ function _on_generation(ga_instance, history, ga_config, cfg, last_save_time, pa
     push!(history, current_best_rmse) # Log current RMSE to history
 
     generation = ga_instance.generations_completed # Get current generation index
-    msg = @sprintf("Generation %d/%d: Best RMSE = %.4f %%", generation, ga_config.num_generations, current_best_rmse)
+    msg = @sprintf("Generation %d/%d: Best RMSE = %.2f %%", generation, ga_config.num_generations, current_best_rmse)
     print("\r[ Info: ", msg) # Log progress in-place
     flush(stdout)
 
