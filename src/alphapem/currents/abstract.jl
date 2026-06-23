@@ -86,16 +86,23 @@ Filter a collection of candidate stop times.
 - `tspan`: global solver interval `(t0, tf)`.
 
 Only times strictly inside `tspan` are kept, then they are sorted and
-deduplicated.
+deduplicated. This is particularly useful for the :live display mode,
+where the solver may be called with a time interval that is shorter
+than the full simulation time interval.
 """
 function _solver_tstops_in_range(times::AbstractVector{<:Real}, tspan::Tuple{<:Real, <:Real})::Vector{Float64}
     t0 = Float64(tspan[1])
     tf = Float64(tspan[2])
     stops = Float64[]
 
+    # We use a small absolute tolerance to avoid stop times that are too close
+    # to the interval boundaries. SUNDIALS IDA may fail if a tstop is
+    # practically identical to the initial time t0.
+    tol = 1e-9
+
     for t in times
         t_ft = Float64(t)
-        if t0 < t_ft < tf
+        if t0 + tol < t_ft < tf - tol
             push!(stops, t_ft)
         end
     end
