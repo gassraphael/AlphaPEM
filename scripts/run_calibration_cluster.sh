@@ -41,6 +41,9 @@
 # Export environment variables to job
 #PBS -V
 
+# Queue name
+#PBS -q longq
+
 # Email address for notifications
 #PBS -M raphael.gass@univ-reunion.fr
 
@@ -105,7 +108,7 @@ echo "==========================================================================
 # Load cluster modules
 # Note: Adapt these versions to match your cluster's available modules
 module purge
-module load tools/julia/1.11.0
+module load tools/julia/1.12.6
 echo "[INFO] Modules loaded: Julia 1.11.0"
 
 # Setup Julia environment
