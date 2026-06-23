@@ -162,7 +162,7 @@ function _save_intermediate(ga_instance, best_gene_values, best_fitness, generat
         population = Float64.(ga_instance.population) # Extract current population matrix from PyGAD
         fitness_values = Float64.(ga_instance.last_generation_fitness) # Extract last generation fitness values
         population_data = [
-            Dict("individual" => i, "params" => collect(population[i, :]), "rmse" => -fitness_values[i])
+            Dict("individual" => i, "params" => collect(population[i, :]), "rmse" => 1.0 / fitness_values[i])
             for i in 1:size(population, 1)
         ]
         YAML.write_file(joinpath(output_dir, "calibration_checkpoint_population.yaml"), population_data) # Write full population

@@ -51,19 +51,23 @@ end
 
 calibration_conditions = [
     SimulationConfig(
-        type_fuel_cell = :ZSW_GenStack,
+        type_fuel_cell = :ZSW_GenStack_Pa_1_61_Pc_1_41,
         voltage_zone   = :before_voltage_drop,                # :full or :before_voltage_drop
     ),
-    # SimulationConfig(
-    #     type_fuel_cell = :ZSW_GenStack_Pa_1_61_Pc_1_41,
-    #     voltage_zone   = :before_voltage_drop,
-    # ),
+     SimulationConfig(
+         type_fuel_cell = :ZSW_GenStack_Pa_2_8_Pc_2_6,
+         voltage_zone   = :before_voltage_drop,
+     ),
+    SimulationConfig(
+         type_fuel_cell = :ZSW_GenStack_T_84,
+         voltage_zone   = :before_voltage_drop,
+     ),
 ]
 
 # ── Genetic Algorithm settings ────────────────────────────────────────────────
 
 ga_cfg = GAConfig(
-    num_generations = 10_000,                   # 1000+ recommended for high precision
+    num_generations = 500,                      # 1000+ recommended for high precision
     pop_size        = 128,                      # 128+ recommended
     target_error    = 1/100,                    # Stop if RMSE < 1%
 )
