@@ -90,9 +90,9 @@ export PBS_TMPDIR=/gpfs/scratch/$USER/$PBS_JOBID
 mkdir -p "$PBS_TMPDIR"
 echo "[INFO] Temporary workspace created: $PBS_TMPDIR"
 
-# Copy entire project to temporary directory
+# Copy entire project to temporary directory (exclude .git to avoid permission issues)
 echo "[INFO] Copying project to temporary workspace..."
-cp -r "$PROJECT_ROOT" "$PBS_TMPDIR"
+cp -r --no-preserve=mode "$PROJECT_ROOT" "$PBS_TMPDIR" --exclude=.git
 echo "[INFO] Copy completed."
 echo ""
 
@@ -105,11 +105,9 @@ echo "==========================================================================
 echo "              Julia Environment Configuration"
 echo "================================================================================"
 
-# Load cluster modules
-# Note: Adapt these versions to match your cluster's available modules
-module purge
-module load tools/julia/1.12.6
-echo "[INFO] Modules loaded: Julia 1.12.6"
+# Use Julia directly from PATH
+julia_version=$(julia --version)
+echo "[INFO] Using: $julia_version"
 
 # Setup Julia environment
 echo "[INFO] Instantiating Julia project..."
