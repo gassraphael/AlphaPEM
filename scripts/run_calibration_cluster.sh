@@ -130,18 +130,18 @@ julia --project << 'JULIA_EOF'
     pyver = VersionNumber(PyCall.pyversion.major, PyCall.pyversion.minor)
     if pyver >= v"3.13"
         println(stderr, "[ERROR] Python $(pyver) detected. PyCall requires Python <= 3.12.")
-        println(stderr, "Re-run the setup on the login node with:")
-        println(stderr, "  julia --project=. -e 'ENV[\"PYTHON\"] = \"\"; import Pkg; Pkg.build(\"PyCall\")'")        
+        println(stderr, "Re-run the setup on the login node IN THIS ORDER:")
         println(stderr, "  julia --project=. -e 'using Conda; Conda.add(\"python=3.12\"; channel=\"conda-forge\"); Conda.add(\"pygad\"; channel=\"conda-forge\")'")        
+        println(stderr, "  julia --project=. -e 'ENV[\"PYTHON\"] = \"\"; import Pkg; Pkg.build(\"PyCall\")'")        
         exit(1)
     end
     try
         pyimport("pygad")
         println("[INFO] pygad OK (Python: ", PyCall.python, " v$(pyver))")
     catch e
-        println(stderr, "[ERROR] pygad not found. Run the following commands once on the login node:")
-        println(stderr, "  julia --project=. -e 'ENV[\"PYTHON\"] = \"\"; import Pkg; Pkg.build(\"PyCall\")'")        
+        println(stderr, "[ERROR] pygad not found. Run the following commands once on the login node IN THIS ORDER:")
         println(stderr, "  julia --project=. -e 'using Conda; Conda.add(\"python=3.12\"; channel=\"conda-forge\"); Conda.add(\"pygad\"; channel=\"conda-forge\")'")        
+        println(stderr, "  julia --project=. -e 'ENV[\"PYTHON\"] = \"\"; import Pkg; Pkg.build(\"PyCall\")'")        
         exit(1)
     end
 JULIA_EOF
