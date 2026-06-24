@@ -12,6 +12,7 @@ using Dates
 using Printf
 using YAML
 using CairoMakie
+using PythonCall
 
 import AlphaPEM.Core.Models: AlphaPEM, simulate_model!, _polarization_points_cali, _calculate_rmse,
                              plot_polarization_curve_for_cali, plot_polarization_curve
@@ -42,7 +43,7 @@ function _fitness_function(solution,
                            fuel_cells,
                            current_profiles,
                            simulation_configs)::Float64
-    gene_values = Float64.(solution) # Convert PyObject to Julia Float64 vector
+    gene_values = solution isa Py ? pyconvert(Vector{Float64}, solution) : Float64.(solution) # Convert PyObject to Julia Float64 vector
     try
         physical_params = new_PhysicalParams_from_sample(gene_values, parameter_bounds, base_params) # Map normalized genes to physical parameters
         rmse_values = zeros(Float64, length(fuel_cells)) # Initialize array for individual condition RMSEs
@@ -88,7 +89,7 @@ function _fitness_function_batch(ga_instance,
                                  fuel_cells,
                                  current_profiles,
                                  simulation_configs)::Vector{Float64}
-    jl_population = Float64.(population)  # copy Python array to Julia before threading (avoids pydecref/GIL race)
+    jl_population = pyconvert(Matrix{Float64}, population)  # copy Python array to Julia before threading
     n = size(jl_population, 1)
     fitness_values = Vector{Float64}(undef, n)
     @sync for i in 1:n
@@ -110,16 +111,16 @@ Handles progress logging and periodic checkpoint saving.
 function _on_generation(ga_instance, history, ga_config, cfg, last_save_time, parameter_bounds, base_params)
     # PyGAD maximizes fitness, so fitness = 1/RMSE (positive, compatible with RWS)
     best_sol, best_fitness_py, _ = ga_instance.best_solution()
-    current_best_rmse =  1.0 / best_fitness_py # Convert 1/RMSE back to RMSE
+    current_best_rmse = 1.0 / pyconvert(Float64, best_fitness_py) # Convert 1/RMSE back to RMSE
     push!(history, current_best_rmse) # Log current RMSE to history
 
-    generation = ga_instance.generations_completed # Get current generation index
+    generation = pyconvert(Int, ga_instance.generations_completed) # Get current generation index
     msg = @sprintf("Generation %d/%d: Best RMSE = %.2f %%", generation, ga_config.num_generations, current_best_rmse)
     print("\r[ Info: ", msg) # Log progress in-place
     flush(stdout)
 
     if (cfg.save_frequency > 0 && generation % cfg.save_frequency == 0) || (time() - last_save_time[] > 300) # Check for save triggers
-        best_parameters = Float64.(best_sol)
+        best_parameters = pyconvert(Vector{Float64}, best_sol)
         _save_intermediate(ga_instance, best_parameters, current_best_rmse, generation, parameter_bounds, base_params, cfg.output_dir) # Save checkpoint
         last_save_time[] = time() # Reset last save timer
     end

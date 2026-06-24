@@ -8,6 +8,9 @@ You can modify any SimulationConfig parameter below.
 import Pkg
 Pkg.activate(joinpath(@__DIR__, ".."))
 
+# Must be loaded before AlphaPEM for interactive display (skipped silently on headless servers).
+try; import GLMakie; catch; end
+
 using AlphaPEM.Config: SimulationConfig, PolarizationCalibrationParams
 using AlphaPEM.Application: run_simulation
 
