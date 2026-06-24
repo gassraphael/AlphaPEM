@@ -3,6 +3,7 @@ external
 src/alphapem/parametrisation/results
 site
 env
+.CondaPkg
 __pycache__
 __pycache__/
 */__pycache__/*
