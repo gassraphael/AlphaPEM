@@ -92,16 +92,15 @@ To install **AlphaPEM**, follow these steps in a shell:
     ```sh
     julia --project=. -e 'using Pkg; Pkg.instantiate()'
     ```
+   > **Note on HPC Clusters:** You may see a precompilation error for `GLMakie`
+     (e.g., `GLFWError (API_UNAVAILABLE)`). This is expected on headless cluster nodes without a graphics
+     card and can be safely ignored; AlphaPEM will automatically fall back to `CairoMakie` for non-interactive plots.
 
 5. *(Optional)* **Genetic algorithm-based parameter calibration** — only required if you intend to use
    `examples/run_calibration.jl` and the `Calibration` module.
    ```sh
    julia --project=. -e 'using CondaPkg; CondaPkg.resolve()'
    ```
-
-   > **Note on HPC Clusters:** You may see a precompilation error for `GLMakie`
-     (e.g., `GLFWError (API_UNAVAILABLE)`). This is expected on headless cluster nodes without a graphics
-     card and can be safely ignored; AlphaPEM will automatically fall back to `CairoMakie` for non-interactive plots.
 
 ## Installation as a package (to use AlphaPEM in other projects)
 
