@@ -62,7 +62,7 @@ function calculate_heat_transfers!(heat_work::MEAHeatWorkspace,
     pp = fc.physical_parameters
     T_des = fc.operating_conditions.T_des
     Hmem, Hgdl, Hmpl, Hacl, Hccl = pp.Hmem, pp.Hgdl, pp.Hmpl, pp.Hacl, pp.Hccl
-    epsilon_gdl, epsilon_mpl, epsilon_c = pp.epsilon_gdl, pp.epsilon_mpl, pp.epsilon_c
+    epsilon_gdl, epsilon_mpl = pp.epsilon_gdl, pp.epsilon_mpl
 
     # Intermediate values
     (Hgdl_node, Hmpl_node, k_th_eff_agc_agdl, k_th_eff_agdl_agdl, k_th_eff_agdl_ampl, k_th_eff_ampl_ampl,

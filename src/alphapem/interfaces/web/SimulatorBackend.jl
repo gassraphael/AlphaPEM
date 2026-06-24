@@ -428,7 +428,6 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
             :Hmem => 15e-6,             # m - Membrane thickness
             :epsilon_gdl => 0.7,        # GDL porosity
             :epsilon_mpl => 0.5,        # MPL porosity
-            :epsilon_c => 0.2,          # Compression ratio
             :e => 4,                    # Capillary exponent
             :gamma_sorp_l => 0.5,       # Sorption rate
             :K_O2_ad_Pt => 5.4,         # O2 adsorption coefficient

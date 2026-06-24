@@ -48,7 +48,6 @@ function physical_parameters(fc::ZSWFuelCell)::PhysicalParams
         # Gas diffusion layer
         Hgdl = 121.28496643671034e-6,        # Thickness of the gas diffusion layer in meters
         epsilon_gdl = 0.8436478459989776,    # Anode/cathode GDL porosity
-        epsilon_c = 0.2,                     # Compression ratio of the GDL
         #   Microporous layer
         Hmpl = 43.98306893354156e-6,         # Thickness of the microporous layer in meters
         epsilon_mpl = 0.425,                 # Porosity of the microporous layer

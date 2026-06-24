@@ -59,7 +59,6 @@ function physical_parameters(fc::EH31FuelCell)::PhysicalParams
         # Gas diffusion layer
         Hgdl = 200e-6,                       # Thickness of the gas diffusion layer in meters
         epsilon_gdl = 0.5002,                # Anode/cathode GDL porosity
-        epsilon_c = 0.2,                     # Compression ratio of the GDL
         #   Microporous layer
         Hmpl = 30e-6,                        # Thickness of the microporous layer in meters
         epsilon_mpl = 0.4,                   # Porosity of the microporous layer
