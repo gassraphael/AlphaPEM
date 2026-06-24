@@ -300,9 +300,10 @@ function _web_plot_specs(cfg::SimulationConfig, nb_gc::Integer)::Vector{Dict{Str
         add_spec!("01_polarization_curve.html",  "Polarization curve",                         "Performance curves",   "polarization_curve")
         add_spec!("02_power_density_curve.html", "Power-density curve",                        "Performance curves",   "power_density_curve")
         add_spec!("03_efficiency_curve.html",    "Cell efficiency",                            "Performance curves",   "efficiency_curve")
-        add_spec!("04_ifc_1d_temporal.html",     "Current density evolution along the MEA",   "Internal states",      "ifc_1d_temporal")
-        add_spec!("05_ucell_temporal.html",      "Cell voltage",                               "Internal states",      "Ucell_temporal")
-        add_spec!("06_t_1d_temporal.html",       "Temperature evolution",                      "Internal states",      "T_1D_temporal")
+        add_spec!("04_hysteresis_curve.html",    "Polarization hysteresis",                    "Performance curves",   "hysteresis_curve")
+        add_spec!("05_ifc_1d_temporal.html",     "Current density evolution along the MEA",   "Internal states",      "ifc_1d_temporal")
+        add_spec!("06_ucell_temporal.html",      "Cell voltage",                               "Internal states",      "Ucell_temporal")
+        add_spec!("07_t_1d_temporal.html",       "Temperature evolution",                      "Internal states",      "T_1D_temporal")
     elseif cfg.type_current isa PolarizationCalibrationParams
         add_spec!("01_polarization_curve_cali.html",  "Calibration polarization curve",             "Performance curves",   "polarization_curve_cali")
         add_spec!("02_power_density_curve_cali.html", "Power-density curve",                        "Performance curves",   "power_density_curve_cali")

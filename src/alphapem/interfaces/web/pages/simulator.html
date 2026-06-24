@@ -875,9 +875,9 @@
 
                     <div class="form-grid">
                         <div class="form-group">
-                            <label for="T_fc">T (°C)</label>
+                            <label for="T_fc"><span id="T_fc_label">T (°C)</span></label>
                             <input type="number" id="T_fc" min="-273.15" max="200" step="0.1" oninput="checkOCModification()">
-                            <p class="help-text">Cell temperature</p>
+                            <p class="help-text" id="T_fc_help">Cell temperature</p>
                         </div>
                         <div class="form-group">
                             <label for="Pa">P<sub>a</sub> (bar)</label>
@@ -1499,6 +1499,21 @@
             }
         }
 
+        function updateTemperatureLabel(fuelCellType) {
+            const labelEl = document.getElementById('T_fc_label');
+            const helpEl = document.getElementById('T_fc_help');
+
+            if (!labelEl || !helpEl) return;
+
+            if (fuelCellType && fuelCellType.startsWith('ZSW')) {
+                labelEl.innerHTML = 'T<sub>bp</sub> (°C)';
+                helpEl.textContent = 'Bipolar plate temperature. It is increased by 3°C to match the cooling circuit temperature, as cooling circuit is not modeled yet';
+            } else {
+                labelEl.innerHTML = 'T (°C)';
+                helpEl.textContent = 'Cell temperature';
+            }
+        }
+
         function updateFuelCellDefaults(forcedType, skipPopulate = false) {
             try {
                 let fuelCellType = forcedType;
@@ -1516,6 +1531,9 @@
 
                 // Update the experimental presets list
                 updateExperimentalPresetsList(fuelCellType);
+
+                // Update temperature label and help text based on fuel cell type
+                updateTemperatureLabel(fuelCellType);
 
                 defaultsLoaded = false;
                 return fetch(`/api/fuel_cell_defaults/${fuelCellType}`)
@@ -1659,9 +1677,9 @@
                     { value: 'ZSW_GenStack_Pa_2_01_Pc_1_81', label: 'P<sub>a,des</sub> = 2.01, P<sub>c,des</sub> = 1.81' },
                     { value: 'ZSW_GenStack_Pa_2_4_Pc_2_2', label: 'P<sub>a,des</sub> = 2.4, P<sub>c,des</sub> = 2.2' },
                     { value: 'ZSW_GenStack_Pa_2_8_Pc_2_6', label: 'P<sub>a,des</sub> = 2.8, P<sub>c,des</sub> = 2.6' },
-                    { value: 'ZSW_GenStack_T_62', label: 'T = 62°C' },
-                    { value: 'ZSW_GenStack_T_76', label: 'T = 76°C' },
-                    { value: 'ZSW_GenStack_T_84', label: 'T = 84°C' }
+                    { value: 'ZSW_GenStack_T_62', label: 'T<sub>coolant</sub> = 62°C' },
+                    { value: 'ZSW_GenStack_T_76', label: 'T<sub>coolant</sub> = 76°C' },
+                    { value: 'ZSW_GenStack_T_84', label: 'T<sub>coolant</sub> = 84°C' }
                 ];
                 presets.forEach(p => {
                     const opt = document.createElement('option');

@@ -19,10 +19,21 @@ function string_keys_to_symbols(dict::Dict)
     result = Dict()
     for (k, v) in dict
         key = isa(k, String) ? Symbol(k) : k
-        value = isa(v, Dict) ? string_keys_to_symbols(v) : v
+        if isa(v, Dict)
+            value = string_keys_to_symbols(v)
+        elseif isa(v, JSON.Object)
+            value = string_keys_to_symbols(v)
+        else
+            value = v
+        end
         result[key] = value
     end
     return result
+end
+
+# Overload for JSON.Object (returned by JSON.parse)
+function string_keys_to_symbols(obj::JSON.Object)
+    string_keys_to_symbols(Dict(obj))
 end
 
 include("../SimulatorBackend.jl")
