@@ -86,6 +86,6 @@ NaNMath = "1.1"                     # Minimal version (stable)
 PyCall = "1.96 - 1"                 # 1.96.x to 1.999...
 SparseMatrixColorings = "0.4, 0.5"  # 0.4.x or 0.5.x
 RCall = "0.14, 0.15"                # 0.14.x or 0.15.x
-SparseMatrixColorings = "0.4, 0.5" # 0.4.x or 0.5.x
+SparseMatrixColorings = "0.4, 0.5"  # 0.4.x or 0.5.x
 Stipple = "0.31, 0.32"              # 0.31.x or 0.32.x
 StippleUI = "0.24, 0.25"            # 0.24.x or 0.25.x
