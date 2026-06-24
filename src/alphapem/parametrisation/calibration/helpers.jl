@@ -88,12 +88,13 @@ function _fitness_function_batch(ga_instance,
                                  fuel_cells,
                                  current_profiles,
                                  simulation_configs)::Vector{Float64}
-    n = size(population, 1)
+    jl_population = Float64.(population)  # copy Python array to Julia before threading (avoids pydecref/GIL race)
+    n = size(jl_population, 1)
     fitness_values = Vector{Float64}(undef, n)
     @sync for i in 1:n
         Threads.@spawn begin
             fitness_values[i] = _fitness_function(
-                population[i, :], parameter_bounds, base_params, fuel_cells, current_profiles, simulation_configs
+                jl_population[i, :], parameter_bounds, base_params, fuel_cells, current_profiles, simulation_configs
             )
         end
     end
