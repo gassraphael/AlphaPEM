@@ -49,7 +49,7 @@ function _setup_makie_theme!(cfg::SimulationConfig; backend::Symbol=:auto)
         _active_display_backend[] = :cairo
     elseif backend == :gl
         try
-            _glmakie().activate!()
+            Base.invokelatest(_glmakie().activate!)
             _active_display_backend[] = :gl
         catch err
             @warn "GLMakie could not be activated; falling back to CairoMakie non-interactive display." exception=(err, catch_backtrace())
@@ -58,7 +58,7 @@ function _setup_makie_theme!(cfg::SimulationConfig; backend::Symbol=:auto)
         end
     elseif _use_interactive_display(cfg)
         try
-            _glmakie().activate!()
+            Base.invokelatest(_glmakie().activate!)
             _active_display_backend[] = :gl
         catch err
             @warn "GLMakie could not be activated; falling back to CairoMakie non-interactive display." exception=(err, catch_backtrace())
@@ -104,7 +104,7 @@ function _open_interactive_figures!(figs...)
         end
 
         DataInspector(fig)
-        screen = _glmakie().Screen()
+        screen = Base.invokelatest(_glmakie().Screen)
         display(screen, fig)
         _interactive_fig_to_screen[fig] = screen
         screen in _interactive_screens || push!(_interactive_screens, screen)
