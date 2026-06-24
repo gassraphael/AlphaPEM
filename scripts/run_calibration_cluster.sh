@@ -121,6 +121,22 @@ julia --project -e 'using Pkg; Pkg.precompile(strict=false)'
 echo "[INFO] Precompilation completed"
 echo ""
 
+# Check that pygad is available before launching (must be configured once on the login node,
+# see README step 5 / Option A for instructions).
+echo "[INFO] Checking Python/pygad availability..."
+julia --project -e '
+    try
+        using PyCall; pyimport("pygad")
+        println("[INFO] pygad OK (Python: ", PyCall.python, ")")
+    catch e
+        println(stderr, "[ERROR] pygad not found. Run the following commands once on the login node:")
+        println(stderr, "  julia --project=. -e '\''ENV[\"PYTHON\"] = \"\"; import Pkg; Pkg.build(\"PyCall\")'\''")
+        println(stderr, "  julia --project=. -e '\''using Conda; Conda.add(\"pygad\"; channel=\"conda-forge\")'\''")
+        exit(1)
+    end
+'
+echo ""
+
 # **Calibration Execution:**
 echo "================================================================================"
 echo "              Launching AlphaPEM Calibration"

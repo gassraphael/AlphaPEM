@@ -125,16 +125,15 @@ To install **AlphaPEM**, follow these steps in a shell:
 5. *(Optional)* **Genetic algorithm-based parameter calibration** — only required if you intend to use
    `examples/run_calibration.jl` and the `Calibration` module.
 
-    a. Install **Python** (Python 3.8+ recommended) and **pip**:
-      - Linux (Debian/Ubuntu): `sudo apt update && sudo apt install -y python3-pip`
-      - macOS/Windows: Download and install from [python.org](https://www.python.org/).
+    **Option A (Recommended on HPC clusters or without sudo):** Use Julia's bundled Conda (self-contained, no system dependencies):
+    ```sh
+    julia --project=. -e 'ENV["PYTHON"] = ""; import Pkg; Pkg.build("PyCall")'
+    julia --project=. -e 'using Conda; Conda.add("pygad"; channel="conda-forge")'
+    ```
 
-    b. Install the **PyGAD** library (Genetic Algorithm library):
-       ```sh
-       pip install pygad
-       ```
-
-    After these two steps, `calibrate` in AlphaPEM will work without any additional setup (using PyCall).
+    **Option B (Local machine with admin rights):** Install system Python and PyGAD:
+    - Linux (Debian/Ubuntu): `sudo apt update && sudo apt install -y python3-pip && pip install pygad`
+    - macOS/Windows: Download Python from [python.org](https://www.python.org/), then `pip install pygad`
 
 ## Installation as a package (to use AlphaPEM in other projects)
 
