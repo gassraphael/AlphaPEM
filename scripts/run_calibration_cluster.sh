@@ -90,9 +90,9 @@ export PBS_TMPDIR=/gpfs/scratch/$USER/$PBS_JOBID
 mkdir -p "$PBS_TMPDIR"
 echo "[INFO] Temporary workspace created: $PBS_TMPDIR"
 
-# Copy entire project to temporary directory (avoid .git permission issues)
+# Copy entire project to temporary directory, excluding .git (read-only objects cause cp errors)
 echo "[INFO] Copying project to temporary workspace..."
-cp -r "$PROJECT_ROOT" "$PBS_TMPDIR" 2>/dev/null || true
+rsync -a --exclude='.git' "$PROJECT_ROOT/" "$PBS_TMPDIR/$PROJECT_NAME/"
 echo "[INFO] Copy completed."
 echo ""
 
@@ -124,17 +124,27 @@ echo ""
 # Check that pygad is available before launching (must be configured once on the login node,
 # see README step 5 / Option A for instructions).
 echo "[INFO] Checking Python/pygad availability..."
-julia --project -e '
-    try
-        using PyCall; pyimport("pygad")
-        println("[INFO] pygad OK (Python: ", PyCall.python, ")")
-    catch e
-        println(stderr, "[ERROR] pygad not found. Run the following commands once on the login node:")
-        println(stderr, "  julia --project=. -e '\''ENV[\"PYTHON\"] = \"\"; import Pkg; Pkg.build(\"PyCall\")'\''")
-        println(stderr, "  julia --project=. -e '\''using Conda; Conda.add(\"pygad\"; channel=\"conda-forge\")'\''")
+julia --project << 'JULIA_EOF'
+    using PyCall
+    # Python 3.13 is incompatible with PyCall and causes a segfault at runtime.
+    pyver = VersionNumber(PyCall.pyversion.major, PyCall.pyversion.minor)
+    if pyver >= v"3.13"
+        println(stderr, "[ERROR] Python $(pyver) detected. PyCall requires Python <= 3.12.")
+        println(stderr, "Re-run the setup on the login node with:")
+        println(stderr, "  julia --project=. -e 'ENV[\"PYTHON\"] = \"\"; import Pkg; Pkg.build(\"PyCall\")'")
+        println(stderr, "  julia --project=. -e 'using Conda; Conda.add(\"python=3.12\"; channel=\"conda-forge\"); Conda.add(\"pygad\"; channel=\"conda-forge\")'")
         exit(1)
     end
-'
+    try
+        pyimport("pygad")
+        println("[INFO] pygad OK (Python: ", PyCall.python, " v$(pyver))")
+    catch e
+        println(stderr, "[ERROR] pygad not found. Run the following commands once on the login node:")
+        println(stderr, "  julia --project=. -e 'ENV[\"PYTHON\"] = \"\"; import Pkg; Pkg.build(\"PyCall\")'")
+        println(stderr, "  julia --project=. -e 'using Conda; Conda.add(\"python=3.12\"; channel=\"conda-forge\"); Conda.add(\"pygad\"; channel=\"conda-forge\")'")
+        exit(1)
+    end
+JULIA_EOF
 echo ""
 
 # **Calibration Execution:**
@@ -163,10 +173,10 @@ echo "==========================================================================
 echo "              Results Backup"
 echo "================================================================================"
 
-# Copy results back to original directory
+# Copy results back to original directory (exclude .git to avoid permission errors)
 echo "[INFO] Copying results to original directory..."
 cd "$PBS_TMPDIR/$PROJECT_NAME"
-cp -ru . "$PROJECT_ROOT"
+rsync -a --exclude='.git' . "$PROJECT_ROOT/"
 echo "[INFO] Results copied successfully"
 
 # Return to original directory
