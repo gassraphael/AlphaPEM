@@ -1547,10 +1547,18 @@ function _get_plot_data(simu, key, config)
         return headers, data
 
     # ── Performance curves ───────────────────────────────────────────────────
-    elseif key in ["polarization_curve", "polarization_curve_cali", 
+    elseif key == "hysteresis_curve"
+        # Hysteresis curve shows all points (not just stationary points)
+        t_all = time_history(outputs)
+        Ucell = extract_derived_series(outputs, x -> x.Ucell)
+        i_fc = [current(cd, tt) for tt in t_all] ./ 1e4
+        headers = ["Current Density (A/cm²)", "Cell Voltage (V)"]
+        return headers, hcat(i_fc, Ucell)
+
+    elseif key in ["polarization_curve", "polarization_curve_cali",
                    "power_density_curve", "power_density_curve_cali",
                    "efficiency_curve", "efficiency_curve_cali"]
-        
+
         t_all = time_history(outputs)
         if cd isa Union{PolarizationCurrent, PolarizationCalibrationCurrent}
             # Only export stationary points for polarization curves as requested
@@ -1562,7 +1570,7 @@ function _get_plot_data(simu, key, config)
             Ucell = extract_derived_series(outputs, x -> x.Ucell)
         end
         i_fc = [current(cd, tt) for tt in t] ./ 1e4
-        
+
         if key in ["polarization_curve", "polarization_curve_cali"]
             headers = ["Current Density (A/cm²)", "Cell Voltage (V)"]
             return headers, hcat(i_fc, Ucell)
