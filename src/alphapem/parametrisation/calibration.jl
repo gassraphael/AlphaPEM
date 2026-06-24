@@ -137,6 +137,19 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
         fitness_batch_size     = cfg.parallel ? ga_config.pop_size : nothing # Batch mode: whole population sent at once for Julia-side threading
     )
 
+    # Pre-warm JIT on the main thread before spawning parallel workers,
+    # so no JIT compilation occurs inside worker threads.
+    if cfg.parallel
+        _prewarm_sol = lower_bounds .+ 0.5 .* (upper_bounds .- lower_bounds)
+        CalibrationHelpers._fitness_function(  # compile the function and all callees
+            _prewarm_sol, parameter_bounds, base_params, fuel_cells, current_profiles, cfg.simulation_configs
+        )
+        let sol = _prewarm_sol, pb = parameter_bounds, bp = base_params,
+                fc = fuel_cells, cp = current_profiles, sc = cfg.simulation_configs
+            @sync Threads.@spawn CalibrationHelpers._fitness_function(sol, pb, bp, fc, cp, sc)
+        end  # compile the @spawn closure type used by _fitness_function_batch
+    end
+
     ga_instance.run() # Execute the genetic algorithm
     println() # Finalize progress line
 
