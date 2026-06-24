@@ -2,7 +2,7 @@
 
 julia_version = "1.12.5"
 manifest_format = "2.0"
-project_hash = "d36ce6777373c80abca7b3d30dcf0a8043b3cb77"
+project_hash = "85230f024dfd9ae50c2978a9e33f5abf87e7e30d"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "bbc22a9a08a0ef6460041086d8a7b27940ed4ffd"
@@ -90,7 +90,7 @@ uuid = "a95523ee-d6da-40b5-98cc-27bc505739d5"
 version = "0.1.10"
 
 [[deps.AlphaPEM]]
-deps = ["CairoMakie", "Dates", "DifferentialEquations", "DualNumbers", "FFTW", "ForwardDiff", "GLMakie", "Genie", "HTTP", "Interpolations", "JSON", "JuliaInterpreter", "LineSearches", "NaNMath", "NonlinearSolve", "Printf", "PyCall", "Random", "SciMLBase", "SparseArrays", "SparseMatrixColorings", "Statistics", "Stipple", "StippleUI", "Sundials", "WGLMakie", "XLSX", "YAML"]
+deps = ["CairoMakie", "Conda", "Dates", "DifferentialEquations", "DualNumbers", "FFTW", "ForwardDiff", "GLMakie", "Genie", "HTTP", "Interpolations", "JSON", "JuliaInterpreter", "LineSearches", "NaNMath", "NonlinearSolve", "Printf", "PyCall", "Random", "SciMLBase", "SparseArrays", "SparseMatrixColorings", "Statistics", "Stipple", "StippleUI", "Sundials", "WGLMakie", "XLSX", "YAML"]
 path = "."
 uuid = "5b79a72d-1548-47c5-a674-b96c56ecabf8"
 version = "1.4.0"
