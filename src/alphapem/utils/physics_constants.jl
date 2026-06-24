@@ -41,6 +41,7 @@ const D_liq_dif::Float64 = 1e-5  # kg.m-1.s-1. It is the diffusion coefficient o
 const gamma_cond::Float64 = 1e8  # s-1. It is the overall condensation rate constant for water [Ansys Fluent value from their User Guide].
 const gamma_evap::Float64 = 1e8  # s-1. It is the overall evaporation rate constant for water [Ansys Fluent value from their User Guide].
 const epsilon_p::Float64 = 0.11  # . It is the percolation threshold porosity of the GDL.
+const epsilon_c::Float64 = 0.2   # . It is the compression ratio of the GDL.
 const alpha_p::Float64 = 0.785  # . It is a fitted value for the effective matter transfer in the GDL, for through plane direction.
 const Tref_cross::Float64 = 303.15  # K. It is the reference temperature for crossover.
 const Eact_H2_cros_v::Float64 = 2.1e4  # J.mol-1. It is the activation energy of H2 for crossover in the under saturated membrane.

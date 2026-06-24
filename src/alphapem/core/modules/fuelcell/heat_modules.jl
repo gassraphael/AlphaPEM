@@ -36,7 +36,7 @@ function calculate_heat_int_values!(heat_int_work::MEAHeatIntWorkspace,
     pp = fc.physical_parameters
     np = cfg.numerical_parameters
     Hgdl, Hmpl, Hacl, Hccl = pp.Hgdl, pp.Hmpl, pp.Hacl, pp.Hccl
-    Hmem, epsilon_gdl, epsilon_mpl, epsilon_c = pp.Hmem, pp.epsilon_gdl, pp.epsilon_mpl, pp.epsilon_c
+    Hmem, epsilon_gdl, epsilon_mpl = pp.Hmem, pp.epsilon_gdl, pp.epsilon_mpl
     nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl
 
     # Extraction of the variables

@@ -33,7 +33,6 @@ Base.@kwdef struct PhysicalParams <: AbstractFuelCellParams
     #   Gas diffusion layer
     Hgdl::Float64 = 200e-6          # Thickness of the gas diffusion layer in meters
     epsilon_gdl::Float64 = 0.7      # Anode/cathode GDL porosity
-    epsilon_c::Float64 = 0.2        # Compression ratio of the GDL
     #   Microporous layer
     Hmpl::Float64 = 30e-6           # Thickness of the microporous layer in meters
     epsilon_mpl::Float64 = 0.4      # Porosity of the microporous layer

@@ -39,7 +39,7 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
     np = cfg.numerical_parameters
     Hacl, Hccl, Hmem, Hgdl, Hmpl = pp.Hacl, pp.Hccl, pp.Hmem, pp.Hgdl, pp.Hmpl
     Wagc, Wcgc = pp.Wagc, pp.Wcgc
-    epsilon_gdl, epsilon_mpl, epsilon_c, e = pp.epsilon_gdl, pp.epsilon_mpl, pp.epsilon_c, pp.e
+    epsilon_gdl, epsilon_mpl, e = pp.epsilon_gdl, pp.epsilon_mpl, pp.e
     nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl
 
     # Extraction of the variables
