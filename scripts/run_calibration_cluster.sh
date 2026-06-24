@@ -100,6 +100,13 @@ echo ""
 cd "$PBS_TMPDIR/$PROJECT_NAME"
 
 
+# **Conda/glibc Compatibility Workaround:**
+# This cluster runs glibc 2.17 (CentOS 7), but conda-forge packages now require glibc >= 2.28.
+# Setting CONDA_OVERRIDE_GLIBC=2.28 bypasses the virtual package version check so pixi can
+# install modern Python and PyGAD (both are pure-Python at runtime and do not call glibc 2.28 APIs).
+export CONDA_OVERRIDE_GLIBC=2.28
+
+
 # **Julia Environment Configuration:**
 echo "================================================================================"
 echo "              Julia Environment Configuration"
