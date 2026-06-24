@@ -111,7 +111,7 @@ echo "[INFO] Using: $julia_version"
 
 # Setup Julia environment
 echo "[INFO] Instantiating Julia project..."
-julia --project -e 'using Pkg; Pkg.instantiate()'
+julia --project -e 'using Pkg; Pkg.resolve(); Pkg.instantiate()'
 echo "[INFO] Project instantiated successfully"
 
 # Precompile packages, ignoring display-dependent packages (GLMakie/WGLMakie)
@@ -131,8 +131,8 @@ julia --project << 'JULIA_EOF'
     if pyver >= v"3.13"
         println(stderr, "[ERROR] Python $(pyver) detected. PyCall requires Python <= 3.12.")
         println(stderr, "Re-run the setup on the login node with:")
-        println(stderr, "  julia --project=. -e 'ENV[\"PYTHON\"] = \"\"; import Pkg; Pkg.build(\"PyCall\")'")
-        println(stderr, "  julia --project=. -e 'using Conda; Conda.add(\"python=3.12\"; channel=\"conda-forge\"); Conda.add(\"pygad\"; channel=\"conda-forge\")'")
+        println(stderr, "  julia --project=. -e 'ENV[\"PYTHON\"] = \"\"; import Pkg; Pkg.build(\"PyCall\")'")        
+        println(stderr, "  julia --project=. -e 'using Conda; Conda.add(\"python=3.12\"; channel=\"conda-forge\"); Conda.add(\"pygad\"; channel=\"conda-forge\")'")        
         exit(1)
     end
     try
@@ -140,11 +140,16 @@ julia --project << 'JULIA_EOF'
         println("[INFO] pygad OK (Python: ", PyCall.python, " v$(pyver))")
     catch e
         println(stderr, "[ERROR] pygad not found. Run the following commands once on the login node:")
-        println(stderr, "  julia --project=. -e 'ENV[\"PYTHON\"] = \"\"; import Pkg; Pkg.build(\"PyCall\")'")
-        println(stderr, "  julia --project=. -e 'using Conda; Conda.add(\"python=3.12\"; channel=\"conda-forge\"); Conda.add(\"pygad\"; channel=\"conda-forge\")'")
+        println(stderr, "  julia --project=. -e 'ENV[\"PYTHON\"] = \"\"; import Pkg; Pkg.build(\"PyCall\")'")        
+        println(stderr, "  julia --project=. -e 'using Conda; Conda.add(\"python=3.12\"; channel=\"conda-forge\"); Conda.add(\"pygad\"; channel=\"conda-forge\")'")        
         exit(1)
     end
 JULIA_EOF
+PYGAD_STATUS=$?
+if [ $PYGAD_STATUS -ne 0 ]; then
+    echo "[ERROR] Python/pygad check failed. Aborting job."
+    exit $PYGAD_STATUS
+fi
 echo ""
 
 # **Calibration Execution:**
