@@ -12,7 +12,6 @@ File responsibilities:
 module Application
 
 using CairoMakie
-import GLMakie
 import WGLMakie
 
 include("run_simulation.jl")
