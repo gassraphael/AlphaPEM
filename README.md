@@ -126,10 +126,10 @@ To install **AlphaPEM**, follow these steps in a shell:
    `examples/run_calibration.jl` and the `Calibration` module.
 
     **Option A (Recommended on HPC clusters or without sudo):** Use Julia's bundled Conda (self-contained, 
-    no system dependencies). 
+    no system dependencies). Run these two commands **in this exact order** on the login node:
     ```sh
-    julia --project=. -e 'ENV["PYTHON"] = ""; import Pkg; Pkg.build("PyCall")'
     julia --project=. -e 'using Conda; Conda.add("python=3.12"; channel="conda-forge"); Conda.add("pygad"; channel="conda-forge")'
+    julia --project=. -e 'ENV["PYTHON"] = ""; import Pkg; Pkg.build("PyCall")'
     ```
     > **Note on HPC Clusters:** You may see a precompilation error for `GLMakie`
       (e.g., `GLFWError (API_UNAVAILABLE)`). This is expected on headless cluster nodes without a graphics 
