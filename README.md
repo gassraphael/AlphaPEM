@@ -95,20 +95,13 @@ To install **AlphaPEM**, follow these steps in a shell:
 
 5. *(Optional)* **Genetic algorithm-based parameter calibration** — only required if you intend to use
    `examples/run_calibration.jl` and the `Calibration` module.
+   ```sh
+   julia --project=. -e 'using CondaPkg; CondaPkg.resolve()'
+   ```
 
-    **Option A (Recommended on HPC clusters or without sudo):** Use Julia's bundled Conda (self-contained, 
-    no system dependencies). Run these two commands **in this exact order** on the login node:
-    ```sh
-    julia --project=. -e 'using Conda; Conda.add("python=3.12"; channel="conda-forge"); Conda.add("pygad"; channel="conda-forge")'
-    julia --project=. -e 'ENV["PYTHON"] = ""; import Pkg; Pkg.build("PyCall")'
-    ```
-    > **Note on HPC Clusters:** You may see a precompilation error for `GLMakie`
-      (e.g., `GLFWError (API_UNAVAILABLE)`). This is expected on headless cluster nodes without a graphics 
-      card and can be safely ignored; AlphaPEM will automatically fall back to `CairoMakie` for non-interactive plots.
-
-    **Option B (Local machine with admin rights):** Install system Python and PyGAD:
-    - Linux (Debian/Ubuntu): `sudo apt update && sudo apt install -y python3-pip && pip install pygad`
-    - macOS/Windows: Download Python from [python.org](https://www.python.org/), then `pip install pygad`
+   > **Note on HPC Clusters:** You may see a precompilation error for `GLMakie`
+     (e.g., `GLFWError (API_UNAVAILABLE)`). This is expected on headless cluster nodes without a graphics
+     card and can be safely ignored; AlphaPEM will automatically fall back to `CairoMakie` for non-interactive plots.
 
 ## Installation as a package (to use AlphaPEM in other projects)
 

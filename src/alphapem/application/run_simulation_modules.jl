@@ -16,9 +16,7 @@ using CairoMakie
 import WGLMakie
 
 # GLMakie requires X11/OpenGL and is unavailable on headless servers (e.g. HPC clusters).
-# Load it lazily so the package precompiles without a display — it will only be required
-# at runtime when an interactive window is actually requested.
-_glmakie() = Base.require(Base.PkgId(Base.UUID("e9467ef8-e4e7-5192-8a1a-b1aee30e663a"), "GLMakie"))
+_glmakie() = Base.loaded_modules[Base.PkgId(Base.UUID("e9467ef8-e4e7-5192-8a1a-b1aee30e663a"), "GLMakie")]
 
 # Ensure CairoMakie is the default backend when the module is loaded.
 function __init__()
@@ -49,7 +47,7 @@ function _setup_makie_theme!(cfg::SimulationConfig; backend::Symbol=:auto)
         _active_display_backend[] = :cairo
     elseif backend == :gl
         try
-            Base.invokelatest(_glmakie().activate!)
+            _glmakie().activate!()
             _active_display_backend[] = :gl
         catch err
             @warn "GLMakie could not be activated; falling back to CairoMakie non-interactive display." exception=(err, catch_backtrace())
@@ -58,7 +56,7 @@ function _setup_makie_theme!(cfg::SimulationConfig; backend::Symbol=:auto)
         end
     elseif _use_interactive_display(cfg)
         try
-            Base.invokelatest(_glmakie().activate!)
+            _glmakie().activate!()
             _active_display_backend[] = :gl
         catch err
             @warn "GLMakie could not be activated; falling back to CairoMakie non-interactive display." exception=(err, catch_backtrace())
@@ -104,7 +102,7 @@ function _open_interactive_figures!(figs...)
         end
 
         DataInspector(fig)
-        screen = Base.invokelatest(_glmakie().Screen)
+        screen = _glmakie().Screen()
         display(screen, fig)
         _interactive_fig_to_screen[fig] = screen
         screen in _interactive_screens || push!(_interactive_screens, screen)

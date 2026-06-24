@@ -1,5 +1,8 @@
 # src/alphapem/fuelcell/zsw.jl
 
+# Track if T_des correction message has been shown (avoid spamming in batch/calibration)
+const _zsw_correction_logged = Ref{Bool}(false)
+
 """
     ZSW
 
@@ -155,8 +158,10 @@ function operating_conditions(fc::ZSWFuelCell, type_fuel_cell::Symbol)::Operatin
 
     # ZSW_GenStack correction: +3°C to match cooling circuit temperature at bipolar plates
     if startswith(string(type_fuel_cell), "ZSW_GenStack")
-        @info "T_des is temporary increased by 3°C, as cooling circuit is not modeled yet.
-        This is a temporary correction to match the cooling circuit temperature at the bipolar plates."
+        if !_zsw_correction_logged[]
+            @info "T_des for ZSW fuel cell is temporary increased by 3°C, as cooling circuit is not modeled yet. This is a temporary correction to match the cooling circuit temperature at the bipolar plates."
+            _zsw_correction_logged[] = true
+        end
         T_des += 3.0
     end
 
