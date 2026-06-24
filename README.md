@@ -100,7 +100,7 @@ To install **AlphaPEM**, follow these steps in a shell:
     no system dependencies). 
     ```sh
     julia --project=. -e 'ENV["PYTHON"] = ""; import Pkg; Pkg.build("PyCall")'
-    julia --project=. -e 'using Conda; Conda.add("pygad"; channel="conda-forge")'
+    julia --project=. -e 'using Conda; Conda.add("python=3.12"; channel="conda-forge"); Conda.add("pygad"; channel="conda-forge")'
     ```
     > **Note on HPC Clusters:** You may see a precompilation error for `GLMakie`
       (e.g., `GLFWError (API_UNAVAILABLE)`). This is expected on headless cluster nodes without a graphics 
