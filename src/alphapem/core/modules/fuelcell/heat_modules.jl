@@ -341,24 +341,16 @@ function k_th_gaz_mixture(k_th_g::Vector,
     epsilon_TS = 0.85  # Value suggested by Tandon and Saxena in 1965.
 
     # Calculation of A_W using the Maxon and Saxena suggestion.
-    A_W = Matrix{Float64}(undef, n, n)
-    @inbounds for i in 1:n
-        for j in 1:n
-            if i == j
-                A_W[i, j] = 1.0
-            else
-                A_W[i, j] = (epsilon_TS * (1 + NaNMath.sqrt(mu_g[i] / mu_g[j]) * (M[j] / M[i])^0.25)^2) /
-                            NaNMath.sqrt(8 * (1 + M[i] / M[j]))
-            end
-        end
-    end
-
-    # Calculation of the thermal conductivity of the gas mixture.
+    # A_W is computed on-the-fly to avoid allocating an n×n matrix.
+    # The diagonal A_W[i,i] = 1 is handled by initialising prod_x_A_w = x[i].
     k_th_gaz_mixture = 0.0
     @inbounds for i in 1:n
-        prod_x_A_w = 0.0
+        prod_x_A_w = x[i]   # diagonal contribution: x[i] * A_W[i,i] = x[i] * 1
         for j in 1:n
-            prod_x_A_w += x[j] * A_W[i, j]
+            i == j && continue
+            A_W_ij = (epsilon_TS * (1 + NaNMath.sqrt(mu_g[i] / mu_g[j]) * (M[j] / M[i])^0.25)^2) /
+                     NaNMath.sqrt(8 * (1 + M[i] / M[j]))
+            prod_x_A_w += x[j] * A_W_ij
         end
         k_th_gaz_mixture += x[i] * k_th_g[i] / prod_x_A_w
     end
