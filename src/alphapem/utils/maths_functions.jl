@@ -19,6 +19,22 @@ It is more efficient to express this function in the code than calling hmean fro
 # Returns
 - The weighted harmonic mean.
 """
+function hmean(a::Real, b::Real)
+    da = a == 0 ? 0.0 : 1.0 / a
+    db = b == 0 ? 0.0 : 1.0 / b
+    denom = da + db
+    denom == 0 && throw(ArgumentError("All weights are zero in hmean calculation"))
+    return 2.0 / denom
+end
+
+function hmean(a::Real, b::Real, wa::Real, wb::Real)
+    da = a == 0 ? 0.0 : wa / a
+    db = b == 0 ? 0.0 : wb / b
+    denom = da + db
+    denom == 0 && throw(ArgumentError("All weights are zero in hmean calculation"))
+    return (wa + wb) / denom
+end
+
 function hmean(terms::AbstractVector, weights::Union{AbstractVector, Nothing}=nothing)
 
     n = length(terms)

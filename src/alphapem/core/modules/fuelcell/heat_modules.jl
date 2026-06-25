@@ -76,78 +76,84 @@ function calculate_heat_int_values!(heat_int_work::MEAHeatIntWorkspace,
 
     k_th_eff_agdl_agdl = heat_int_work.k_th_eff_agdl_agdl
     @inbounds for i in 1:(nb_gdl - 1)
-        k_th_eff_agdl_agdl[i] = hmean([
+        k_th_eff_agdl_agdl[i] = hmean(
             k_th_eff("agdl", T_agdl[i], C_v_agdl[i], s_agdl[i], nothing,
                      C_H2_agdl[i], nothing, C_N2_agc, epsilon_gdl, nothing, epsilon_c),
             k_th_eff("agdl", T_agdl[i+1], C_v_agdl[i+1], s_agdl[i+1], nothing,
                      C_H2_agdl[i+1], nothing, C_N2_agc, epsilon_gdl, nothing, epsilon_c)
-        ])
+        )
     end
 
-    k_th_eff_agdl_ampl = hmean([
+    k_th_eff_agdl_ampl = hmean(
         k_th_eff("agdl", T_agdl[nb_gdl], C_v_agdl[nb_gdl], s_agdl[nb_gdl], nothing,
              C_H2_agdl[nb_gdl], nothing, C_N2_agc, epsilon_gdl, nothing, epsilon_c),
         k_th_eff("ampl", T_ampl[1], C_v_ampl[1], s_ampl[1], nothing, C_H2_ampl[1],
-             nothing, C_N2_agc, epsilon_mpl)
-    ], [Hgdl_node / 2, Hmpl_node / 2])
+             nothing, C_N2_agc, epsilon_mpl),
+        Hgdl_node / 2, Hmpl_node / 2
+    )
 
     k_th_eff_ampl_ampl = heat_int_work.k_th_eff_ampl_ampl
     @inbounds for i in 1:(nb_mpl - 1)
-        k_th_eff_ampl_ampl[i] = hmean([
+        k_th_eff_ampl_ampl[i] = hmean(
             k_th_eff("ampl", T_ampl[i], C_v_ampl[i], s_ampl[i], nothing,
                      C_H2_ampl[i], nothing, C_N2_agc, epsilon_mpl),
             k_th_eff("ampl", T_ampl[i+1], C_v_ampl[i+1], s_ampl[i+1], nothing,
                      C_H2_ampl[i+1], nothing, C_N2_agc, epsilon_mpl)
-        ])
+        )
     end
 
-    k_th_eff_ampl_acl = hmean([
+    k_th_eff_ampl_acl = hmean(
         k_th_eff("ampl", T_ampl[nb_mpl], C_v_ampl[nb_mpl], s_ampl[nb_mpl], nothing,
              C_H2_ampl[nb_mpl], nothing, C_N2_agc, epsilon_mpl),
-        k_th_eff("acl", T_acl, C_v_acl, s_acl, lambda_acl, C_H2_acl, nothing, C_N2_agc, nothing, Hacl)
-    ], [Hmpl_node / 2, Hacl / 2])
-
-    k_th_eff_acl_mem = hmean([
         k_th_eff("acl", T_acl, C_v_acl, s_acl, lambda_acl, C_H2_acl, nothing, C_N2_agc, nothing, Hacl),
-        k_th_eff("mem", T_mem, nothing, nothing, lambda_mem)
-    ], [Hacl / 2, Hmem / 2])
+        Hmpl_node / 2, Hacl / 2
+    )
 
-    k_th_eff_mem_ccl = hmean([
+    k_th_eff_acl_mem = hmean(
+        k_th_eff("acl", T_acl, C_v_acl, s_acl, lambda_acl, C_H2_acl, nothing, C_N2_agc, nothing, Hacl),
         k_th_eff("mem", T_mem, nothing, nothing, lambda_mem),
-        k_th_eff("ccl", T_ccl, C_v_ccl, s_ccl, lambda_ccl, nothing, C_O2_ccl, C_N2_cgc, nothing, Hccl)
-    ], [Hmem / 2, Hccl / 2])
+        Hacl / 2, Hmem / 2
+    )
 
-    k_th_eff_ccl_cmpl = hmean([
+    k_th_eff_mem_ccl = hmean(
+        k_th_eff("mem", T_mem, nothing, nothing, lambda_mem),
+        k_th_eff("ccl", T_ccl, C_v_ccl, s_ccl, lambda_ccl, nothing, C_O2_ccl, C_N2_cgc, nothing, Hccl),
+        Hmem / 2, Hccl / 2
+    )
+
+    k_th_eff_ccl_cmpl = hmean(
         k_th_eff("ccl", T_ccl, C_v_ccl, s_ccl, lambda_ccl, nothing, C_O2_ccl, C_N2_cgc, nothing, Hccl),
         k_th_eff("cmpl", T_cmpl[1], C_v_cmpl[1], s_cmpl[1], nothing, nothing, C_O2_cmpl[1],
-             C_N2_cgc, epsilon_mpl)
-    ], [Hccl / 2, Hmpl_node / 2])
+             C_N2_cgc, epsilon_mpl),
+        Hccl / 2, Hmpl_node / 2
+    )
 
     k_th_eff_cmpl_cmpl = heat_int_work.k_th_eff_cmpl_cmpl
     @inbounds for i in 1:(nb_mpl - 1)
-        k_th_eff_cmpl_cmpl[i] = hmean([
+        k_th_eff_cmpl_cmpl[i] = hmean(
             k_th_eff("cmpl", T_cmpl[i], C_v_cmpl[i], s_cmpl[i], nothing,
                      nothing, C_O2_cmpl[i], C_N2_cgc, epsilon_mpl),
             k_th_eff("cmpl", T_cmpl[i+1], C_v_cmpl[i+1], s_cmpl[i+1], nothing,
                      nothing, C_O2_cmpl[i+1], C_N2_cgc, epsilon_mpl)
-        ])
+        )
     end
 
-    k_th_eff_cmpl_cgdl = hmean([
+    k_th_eff_cmpl_cgdl = hmean(
         k_th_eff("cmpl", T_cmpl[nb_mpl], C_v_cmpl[nb_mpl], s_cmpl[nb_mpl], nothing,
              nothing, C_O2_cmpl[nb_mpl], C_N2_cgc, epsilon_mpl),
         k_th_eff("cgdl", T_cgdl[1], C_v_cgdl[1], s_cgdl[1], nothing, nothing, C_O2_cgdl[1],
-             C_N2_cgc, epsilon_gdl, nothing, epsilon_c)
-    ], [Hmpl_node / 2, Hgdl_node / 2])
+             C_N2_cgc, epsilon_gdl, nothing, epsilon_c),
+        Hmpl_node / 2, Hgdl_node / 2
+    )
 
     k_th_eff_cgdl_cgdl = heat_int_work.k_th_eff_cgdl_cgdl
     @inbounds for i in 1:(nb_gdl - 1)
-        k_th_eff_cgdl_cgdl[i] = hmean([
+        k_th_eff_cgdl_cgdl[i] = hmean(
             k_th_eff("cgdl", T_cgdl[i], C_v_cgdl[i], s_cgdl[i], nothing,
                      nothing, C_O2_cgdl[i], C_N2_cgc, epsilon_gdl, nothing, epsilon_c),
             k_th_eff("cgdl", T_cgdl[i+1], C_v_cgdl[i+1], s_cgdl[i+1], nothing,
                      nothing, C_O2_cgdl[i+1], C_N2_cgc, epsilon_gdl, nothing, epsilon_c)
-        ])
+        )
     end
 
     k_th_eff_cgdl_cgc = k_th_eff("cgdl", T_cgdl[nb_gdl], C_v_cgdl[nb_gdl],
@@ -469,7 +475,7 @@ function k_th_eff(element::String,
         fv_val = fv(lambdaa, T)
         epsilon_mc_val = epsilon_mc(lambdaa, T, Hcl)
         epsilon_cl_val = epsilon_cl(lambdaa, T, Hcl)
-        k_th_eff_mem = hmean([k_th_mem, k_th("H2O_l", T)], [1 - fv_val, fv_val])
+        k_th_eff_mem = hmean(k_th_mem, k_th("H2O_l", T), 1 - fv_val, fv_val)
 
         if element == "acl"  # The thermal conductivity of the gas mixture in the ACL.
             if C_H2 === nothing
@@ -501,7 +507,7 @@ function k_th_eff(element::String,
             throw(ArgumentError("lambdaa must be provided for 'mem'."))
         end
         fv_val = fv(lambdaa, T)
-        return hmean([k_th_mem, k_th("H2O_l", T)], [1 - fv_val, fv_val])
+        return hmean(k_th_mem, k_th("H2O_l", T), 1 - fv_val, fv_val)
 
     else
         throw(ArgumentError("The element should be either 'agdl', 'cgdl', 'ampl', 'cmpl', 'acl', 'ccl' or 'mem'."))
