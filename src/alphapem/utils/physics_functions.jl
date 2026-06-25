@@ -160,22 +160,17 @@ A simple mixture law is used here to calculate the dynamic viscosity of the gas 
 """
 function mu_mixture_gases(components::Vector, x::Vector, T)
 
-    # Calculate the dynamic viscosities of each gas component in Pa.s.
-    mu_values = [mu_gaz(comp, T) for comp in components]
-
-    # Calculate the molar mass of the gas mixture in kg/mol.
+    # Compute molar mass of the mixture in kg/mol.
     M_mix = 0.0
     @inbounds for j in eachindex(components)
-        M_j = molar_mass(components[j])
-        M_mix += M_j * x[j]
+        M_mix += molar_mass(components[j]) * x[j]
     end
 
+    # Compute mixture viscosity.
     inv_mu_mix = 0.0
-    @inbounds for j in eachindex(mu_values)
-        mu_j = mu_values[j]
-        M_j = molar_mass(components[j])
-        c_j = M_j * x[j] / M_mix
-        inv_mu_mix += c_j / mu_j
+    @inbounds for j in eachindex(components)
+        M_j  = molar_mass(components[j])
+        inv_mu_mix += (M_j * x[j] / M_mix) / mu_gaz(components[j], T)
     end
 
     return 1 / inv_mu_mix
