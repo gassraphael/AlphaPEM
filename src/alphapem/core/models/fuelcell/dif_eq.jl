@@ -73,7 +73,8 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
                        heat_int_work::MEAHeatIntWorkspace,
                        gc_manifold_work::GCManifoldWorkspace,
                        current_res_scales::Vector{Float64},
-                       j_in_scale::Float64)
+                       j_in_scale::Float64,
+                       flows_1D_mea_buf::AbstractVector)
 
     # Extraction of frequently used parameters
     oc = fc.operating_conditions
@@ -158,8 +159,11 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
     # Rebuild flow-dependent fields from algebraic states.
     v_a, v_c, Pa_in, Pc_in = velocity_profiles_from_inlet_flows(sv_cell_1D, J_a_in, J_c_in, fc, cfg)
 
-    # Calculation of the flows for each GC node.
-    flows_1D_MEA = [calculate_flows_1D_MEA!(flows_work[i], flows_int_work, sv_cell_1D[i], i_fc[i], v_a[i], v_c[i], fc, cfg) for i in 1:nb_gc]
+    # Calculation of the flows for each GC node — pre-allocated container reused across calls.
+    @inbounds for i in 1:nb_gc
+        flows_1D_mea_buf[i] = calculate_flows_1D_MEA!(flows_work[i], flows_int_work, sv_cell_1D[i], i_fc[i], v_a[i], v_c[i], fc, cfg)
+    end
+    flows_1D_MEA = flows_1D_mea_buf
     flows_1D_GC_manifold = calculate_flows_1D_GC_manifold(gc_manifold_work, sv_cell_1D, sv_auxiliary, i_fc_cell,
                                                            v_a, v_c, Pa_in, Pc_in, fc, cfg)
     # Calculation of the dynamic evolutions inside the MEA.
