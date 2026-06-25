@@ -36,7 +36,7 @@ Detailed model development and validation focusing on overvoltage prediction and
 - Novel coefficient for voltage-drop relationship at high currents
 - Equation adjustments for specific model implementation
 
-![1D modeling of matter transport phenomena in a PEM single cell divided into several nodes.](docs/images/nodal_model.png "1D modeling of matter transport phenomena in a PEM single cell divided into several nodes")
+![1D modeling of matter transport phenomena in a PEM single cell divided into several nodes.](../images/nodal_model.png "1D modeling of matter transport phenomena in a PEM single cell divided into several nodes")
 
 
 ---
