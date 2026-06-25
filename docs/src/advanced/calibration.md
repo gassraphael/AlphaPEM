@@ -204,7 +204,6 @@ More points provide better constraint but increase computation time.
 Before calibration, the code selects bounds from `fuel_cell_parameters.jl` based on `type_fuel_cell`. 
 Bounds define the search space for the GA.
 
-**Strategy:** First run the [parameter validity analysis](validity_analysis.md) to identify feasible ranges, 
 then set bounds accordingly.
 
 ### Tuning GA Hyperparameters
@@ -231,7 +230,6 @@ Typical runs are 2-3 days on clusters.
 
 ## References
 
-- [Valid Parameter Region Analysis](validity_analysis.md) — Identify valid parameter space before calibration
 - [Command Line Usage](../user_guide/cli_usage.md) — Running `run_calibration.jl`
 
 ---

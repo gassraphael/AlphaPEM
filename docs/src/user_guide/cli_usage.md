@@ -105,7 +105,7 @@ julia --project=. examples/run_parameter_validity.jl
 - Valid parameter region bounds (YAML file)
 - Report (TXT file)
 
-See [Validity Analysis Guide](../advanced/validity_analysis.md) for details.
+
 
 ## Parameter calibration (Genetic Algorithm)
 
@@ -243,7 +243,6 @@ result analysis).
 
 ## Next steps
 
-- [Valid Parameter Region Analysis](validity_analysis.md) — Identify valid parameter space before calibration
 - **Advanced calibration**: Read [Calibration guide](../advanced/calibration.md)
 
 ---

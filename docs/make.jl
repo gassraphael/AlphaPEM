@@ -48,7 +48,6 @@ makedocs(
         ],
         "Advanced" => [
             "Parameter Calibration" => "advanced/calibration.md",
-            "Valid Parameter Region Analysis" => "advanced/validity_analysis.md",
         ],
         "About" => [
             "Roadmap" => "about/roadmap.md",
