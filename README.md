@@ -10,8 +10,7 @@ step current density or use current profiles to generate polarization curves or 
 fuel cell system.
 
 A detailed [presentation](https://doi.org/10.48550/arXiv.2407.12373) of this program has been published in the peer-reviewed journal SoftwareX (limited to 
-[version V1.0](#major-updates)). Furthermore, comprehensive [documentation](https://gassraphael.github.io/AlphaPEM/) in Numpy style for the software functions is
-available.
+[version V1.0](#major-updates)). Furthermore, comprehensive [documentation](https://gassraphael.github.io/AlphaPEM/) is available.
 
 Improvements to AlphaPEM are discussed in the [roadmap section](#roadmap).
 
@@ -329,8 +328,7 @@ The detailed model description and simulation results can be found in the follow
 		- In the [International Journal of Hydrogen Energy](https://doi.org/10.1016/j.ijhydene.2024.11.374), in [arXiv](https://doi.org/10.48550/arXiv.2404.07508), in [HAL](https://hal.science/hal-04530852) or in [SSRN](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4812343) (postprint).
 		- The aim of this study was to introduce the dynamic 1D model developed during 2021-2024, emphasizing the adjustment of the equations for this specific model and their numerical resolution. Furthermore, a novel coefficient is proposed to establish a physical relationship between the voltage drop at high currents, the quantity of liquid water in the cell, and operating conditions.
 		- ![1D modeling of matter transport phenomena in a PEM single cell divided into several nodes.](docs/images/nodal_model.png "1D modeling of matter transport phenomena in a PEM single cell divided into several nodes")
-		
-	
+
 	- **A Critical Review of Proton Exchange Membrane Fuel Cells Matter Transports and Voltage Polarisation for Modelling** (2024, 1st author)
 		- In the [Journal of the Electrochemical Society](https://doi.org/10.1149/1945-7111/ad305a) or in [HAL](https://hal.science/hal-04493419) (postprint).
 		- The aim of this work was to compile, within a single article, all the equations required for the physical modeling of a fuel cell. Each equation is complemented with explanations, critical analysis, and suggestions for potential enhancements.
@@ -383,6 +381,6 @@ Contributions from the community are welcome! If you would like to contribute to
 
 # Contact
 
-For any questions or support, please contact me at [gassraphael@proton.me](mailto:gassraphael@proton.me).
+For any questions or support, please contact me at [raphael.gass@univ-reunion.fr](mailto:raphael.gass@univ-reunion.fr).
 
 Thank you for using **AlphaPEM**!

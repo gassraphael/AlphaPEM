@@ -70,7 +70,6 @@ function _bonito_server()
         Bonito = WGLMakie.Bonito
         lock(BONITO_LOCK) do
             if BONITO_SERVER[] === nothing
-                @info "    Starting interactive plot server on http://$(BONITO_HOST):$(BONITO_PORT)/"
                 BONITO_SERVER[] = Bonito.Server(BONITO_HOST, BONITO_PORT)
             end
         end
@@ -1323,19 +1322,18 @@ function export_results(result_id::String, format::String="json"; index=nothing)
     end
 
     format_lower = lowercase(format)
-    
+    filename = get_export_filename(result_id, format_lower, index=index)
+
     data = if format_lower == "json"
         JSON.json(SIMULATION_RESULTS[result_id])
     elseif format_lower == "csv" || format_lower == "xlsx" || format_lower == "excel" || format_lower == "xls"
-        export_results_xlsx(result_id)
+        export_results_xlsx(result_id, filename)
     elseif format_lower == "pdf"
-        export_results_pdf(result_id, index)
+        export_results_pdf(result_id, filename, index)
     else
         error("Unsupported export format: $format")
     end
-    
-    filename = get_export_filename(result_id, format_lower, index=index)
-    
+
     return (data=data, filename=filename)
 end
 
@@ -1659,8 +1657,9 @@ end
 
 """
 Export a specific simulation plot as PDF.
+Saves the file to results/web_plots/[result_id]/ and returns the file data.
 """
-function export_results_pdf(result_id::String, index::Any)::Vector{UInt8}
+function export_results_pdf(result_id::String, filename::String, index::Any)::Vector{UInt8}
     if !haskey(SIMULATION_RESULTS, result_id)
         error("Result not found: $result_id")
     end
@@ -1669,26 +1668,26 @@ function export_results_pdf(result_id::String, index::Any)::Vector{UInt8}
     if output === nothing
         error("Simulation output not available for $result_id")
     end
-    
+
     config = result[:config]
     nb_gc = config.numerical_parameters.nb_gc
-    
+
     # Temporarily switch to :multiple / :postrun for rendering.
     orig_display = config.type_display
     orig_timing  = config.display_timing
     config.type_display   = :multiple
     config.display_timing = :postrun
-    
+
     try
         # Activate CairoMakie for PDF generation
         CairoMakie.activate!()
-        
+
         # Prepare figures (identical to how they are prepared for the web)
         fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(config, nb_gc; backend=:cairo)
-        
+
         # Populate with data
         display!(output, ax1, ax2, ax3)
-        
+
         # Collect all figures
         figures = Any[]
         for fig in (fig1, fig2, fig3)
@@ -1699,11 +1698,11 @@ function export_results_pdf(result_id::String, index::Any)::Vector{UInt8}
                 push!(figures, fig)
             end
         end
-        
+
         if isempty(figures)
             error("No figures generated for export (check if display is enabled in config)")
         end
-        
+
         # Determine which figure to export
         idx = 1
         if index !== nothing
@@ -1714,26 +1713,28 @@ function export_results_pdf(result_id::String, index::Any)::Vector{UInt8}
                 idx = 1
             end
         end
-        
+
         if idx < 1 || idx > length(figures)
             idx = 1
         end
-        
+
         target_fig = figures[idx]
-        
-        # Export to PDF via temporary file
-        data = mktempdir() do tmpdir
-            path = joinpath(tmpdir, "plot.pdf")
-            save(path, target_fig)
-            return read(path)
-        end
-        
+
+        # Create results directory if it doesn't exist
+        result_dir = joinpath(PLOTS_DIR, result_id)
+        mkpath(result_dir)
+
+        # Save PDF to disk and read back
+        plot_path = joinpath(result_dir, filename)
+        save(plot_path, target_fig)
+        data = read(plot_path)
+
         return data
     finally
         # Restore original config
         config.type_display   = orig_display
         config.display_timing = orig_timing
-        
+
         # Restore WGLMakie for the web interface
         WGLMakie.activate!()
     end
@@ -1741,8 +1742,9 @@ end
 
 """
 Export simulation results as XLSX with multiple sheets.
+Saves the file to results/web_plots/[result_id]/ and returns the file data.
 """
-function export_results_xlsx(result_id::String)::Vector{UInt8}
+function export_results_xlsx(result_id::String, filename::String)::Vector{UInt8}
     if !haskey(SIMULATION_RESULTS, result_id)
         error("Result not found: $result_id")
     end
@@ -1751,69 +1753,70 @@ function export_results_xlsx(result_id::String)::Vector{UInt8}
     output = result[:output]
     config = result[:config]
     nb_gc = config.numerical_parameters.nb_gc
-    
+
     # Save original timing mode
     orig_timing = config.display_timing
-    
+
     # Use full history for XLSX export
     config.display_timing = :full_history
-    
+
     try
         # Get the same plot list as shown in the UI
         plot_specs = _web_plot_specs(config, nb_gc)
-        
-        # Create a temporary file to save the XLSX
-        xl_data = mktempdir() do tmpdir
-            xl_path = joinpath(tmpdir, "results.xlsx")
-            
-            XLSX.openxlsx(xl_path, mode="w") do xf
-                # The 'w' mode creates one sheet named "Sheet1" by default
-                sheet = xf[1]
-                first_sheet = true
-                
-                for spec in plot_specs
-                    key = spec["key"]
-                    title = spec["title"]
-                    
-                    headers, data = _get_plot_data(output, key, config)
-                    
-                    if !isempty(headers)
-                        # Sanitize title for sheet name (max 31 chars, no special chars)
-                        sheet_name = replace(title, r"[\\/*?:\[\]]" => "_")
-                        if length(sheet_name) > 31
-                            sheet_name = sheet_name[1:31]
-                        end
-                        
-                        if first_sheet
-                            XLSX.rename!(sheet, sheet_name)
-                            first_sheet = false
-                        else
-                            sheet = XLSX.addsheet!(xf, sheet_name)
-                        end
-                        
-                        # Write headers in the first row
-                        for (c, h) in enumerate(headers)
-                            sheet[1, c] = h
-                        end
-                        
-                        # Write data starting from second row
-                        if !isempty(data)
-                            # data is a Matrix{Float64}
-                            # XLSX can write the whole matrix at once
-                            sheet[2, 1] = data
-                        end
+
+        # Create results directory if it doesn't exist
+        result_dir = joinpath(PLOTS_DIR, result_id)
+        mkpath(result_dir)
+
+        # Save XLSX file to disk
+        xl_path = joinpath(result_dir, filename)
+
+        XLSX.openxlsx(xl_path, mode="w") do xf
+            # The 'w' mode creates one sheet named "Sheet1" by default
+            sheet = xf[1]
+            first_sheet = true
+
+            for spec in plot_specs
+                key = spec["key"]
+                title = spec["title"]
+
+                headers, data = _get_plot_data(output, key, config)
+
+                if !isempty(headers)
+                    # Sanitize title for sheet name (max 31 chars, no special chars)
+                    sheet_name = replace(title, r"[\\/*?:\[\]]" => "_")
+                    if length(sheet_name) > 31
+                        sheet_name = sheet_name[1:31]
+                    end
+
+                    if first_sheet
+                        XLSX.rename!(sheet, sheet_name)
+                        first_sheet = false
+                    else
+                        sheet = XLSX.addsheet!(xf, sheet_name)
+                    end
+
+                    # Write headers in the first row
+                    for (c, h) in enumerate(headers)
+                        sheet[1, c] = h
+                    end
+
+                    # Write data starting from second row
+                    if !isempty(data)
+                        # data is a Matrix{Float64}
+                        # XLSX can write the whole matrix at once
+                        sheet[2, 1] = data
                     end
                 end
-                
-                # If no sheets were written (unlikely), keep at least one
-                if first_sheet
-                    XLSX.rename!(sheet, "No Data")
-                end
             end
-            return read(xl_path)
+
+            # If no sheets were written (unlikely), keep at least one
+            if first_sheet
+                XLSX.rename!(sheet, "No Data")
+            end
         end
-        
-        return xl_data
+
+        return read(xl_path)
     finally
         # Restore original timing mode
         config.display_timing = orig_timing

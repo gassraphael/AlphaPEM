@@ -15,6 +15,18 @@ const AUTHOR = "Raphael Gass"
 const EMAIL = "gassraphael@proton.me"
 const LICENSE = "GPLv3"
 
+# Suppress CondaPkg verbose initialization messages
+ENV["PIXI_DISABLE_PROGRESS_BAR"] = "1"
+let
+    original_stdout = stdout
+    redirect_stdout(devnull)
+    try
+        import CondaPkg
+    finally
+        redirect_stdout(original_stdout)
+    end
+end
+
 include("alphapem/utils/Utils.jl")
 include("alphapem/config/Config.jl")
 include("alphapem/fuelcell/Fuelcell.jl")
