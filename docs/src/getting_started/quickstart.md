@@ -33,7 +33,7 @@ The web interface will automatically open at `http://localhost:8000`.
 3. **Results Tab**: Visualize dynamic plots and click **"Download CSV"** to export raw data.
 
 
-<img src="docs/images/interface.png" alt="AlphaPEM web-based interface" width="100%" />
+<img src="docs/src/images/interface.png" alt="AlphaPEM web-based interface" width="100%" />
 
 ## 3. Run your first simulation (command line)
 

@@ -18,7 +18,7 @@ Improvements to AlphaPEM are discussed in the [roadmap section](#roadmap).
 yet been publicly released, pending scientific publication. If you wish to collaborate with us, please contact us by 
 email so that we may potentially share these latest advancements.
 
-<img src="docs/images/interface.png" alt="AlphaPEM web-based interface" width="100%" />
+<img src="docs/src/images/interface.png" alt="AlphaPEM web-based interface" width="100%" />
 
 # Table of Contents
 
@@ -260,7 +260,7 @@ The detailed model description and simulation results can be found in the follow
 	- **An Advanced 1D Physics-Based Model for PEM Hydrogen Fuel Cells With Enhanced Overvoltage Prediction** (2025, 1st author)
 		- In the [International Journal of Hydrogen Energy](https://doi.org/10.1016/j.ijhydene.2024.11.374), in [arXiv](https://doi.org/10.48550/arXiv.2404.07508), in [HAL](https://hal.science/hal-04530852) or in [SSRN](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4812343) (postprint).
 		- The aim of this study was to introduce the dynamic 1D model developed during 2021-2024, emphasizing the adjustment of the equations for this specific model and their numerical resolution. Furthermore, a novel coefficient is proposed to establish a physical relationship between the voltage drop at high currents, the quantity of liquid water in the cell, and operating conditions.
-		- ![1D modeling of matter transport phenomena in a PEM single cell divided into several nodes.](docs/images/nodal_model.png "1D modeling of matter transport phenomena in a PEM single cell divided into several nodes")
+		- ![1D modeling of matter transport phenomena in a PEM single cell divided into several nodes.](docs/src/images/nodal_model.png "1D modeling of matter transport phenomena in a PEM single cell divided into several nodes")
 
 	- **A Critical Review of Proton Exchange Membrane Fuel Cells Matter Transports and Voltage Polarisation for Modelling** (2024, 1st author)
 		- In the [Journal of the Electrochemical Society](https://doi.org/10.1149/1945-7111/ad305a) or in [HAL](https://hal.science/hal-04493419) (postprint).
