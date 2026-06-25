@@ -1,3 +1,0 @@
-# AlphaPEM
-
-::: model.AlphaPEM

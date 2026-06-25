@@ -1,3 +1,0 @@
-# Auxiliaries
-
-::: model.auxiliaries

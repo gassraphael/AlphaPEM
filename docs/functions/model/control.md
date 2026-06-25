@@ -1,3 +1,0 @@
-# Control
-
-::: model.control
