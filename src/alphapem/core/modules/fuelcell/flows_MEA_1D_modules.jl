@@ -93,16 +93,16 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
 
     # Weighted mean values ...
     #       ... of the EOD flow of water in the membrane
-    D_eff_EOD_acl_mem = hmean([D_EOD_eff(i_fc, lambda_acl, T_acl, Hacl), D_EOD(lambda_mem)],
-                              [Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem)])
-    D_eff_EOD_mem_ccl = hmean([D_EOD(lambda_mem), D_EOD_eff(i_fc, lambda_ccl, T_ccl, Hccl)],
-                              [Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl)])
+    D_eff_EOD_acl_mem = hmean(D_EOD_eff(i_fc, lambda_acl, T_acl, Hacl), D_EOD(lambda_mem),
+                              Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem))
+    D_eff_EOD_mem_ccl = hmean(D_EOD(lambda_mem), D_EOD_eff(i_fc, lambda_ccl, T_ccl, Hccl),
+                              Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl))
 
     #       ... of the diffusion coefficient of water in the membrane
-    D_lambda_eff_acl_mem = hmean([D_lambda_eff(lambda_acl, T_acl, Hacl), D_lambda(lambda_mem)],
-                                 [Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem)])
-    D_lambda_eff_mem_ccl = hmean([D_lambda(lambda_mem), D_lambda_eff(lambda_ccl, T_ccl, Hccl)],
-                                 [Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl)])
+    D_lambda_eff_acl_mem = hmean(D_lambda_eff(lambda_acl, T_acl, Hacl), D_lambda(lambda_mem),
+                                 Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem))
+    D_lambda_eff_mem_ccl = hmean(D_lambda(lambda_mem), D_lambda_eff(lambda_ccl, T_ccl, Hccl),
+                                 Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl))
 
     # Pre-computed inter-layer CL porosities and weight factors (avoid repeated calls and divisions)
     epsilon_acl = epsilon_cl(lambda_acl, T_acl, Hacl)  # CL porosity at the anode side.
@@ -120,83 +120,83 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
     #       ... of the capillary coefficient
     D_cap_agdl_agdl = flows_int_work.D_cap_agdl_agdl
     @inbounds for i in 1:(nb_gdl - 1)
-        D_cap_agdl_agdl[i] = hmean([Dcap("gdl", s_agdl[i],     T_agdl[i],     epsilon_gdl, e, epsilon_c),
-                                     Dcap("gdl", s_agdl[i + 1], T_agdl[i + 1], epsilon_gdl, e, epsilon_c)])
+        D_cap_agdl_agdl[i] = hmean(Dcap("gdl", s_agdl[i],     T_agdl[i],     epsilon_gdl, e, epsilon_c),
+                                    Dcap("gdl", s_agdl[i + 1], T_agdl[i + 1], epsilon_gdl, e, epsilon_c))
     end
 
-    D_cap_agdl_ampl = hmean([Dcap("gdl", s_agdl[nb_gdl], T_agdl[nb_gdl], epsilon_gdl, e, epsilon_c),
-                             Dcap("mpl", s_ampl[1],      T_ampl[1],      epsilon_mpl, e)],
-                            [w_gdl_mpl, w_mpl_gdl])
+    D_cap_agdl_ampl = hmean(Dcap("gdl", s_agdl[nb_gdl], T_agdl[nb_gdl], epsilon_gdl, e, epsilon_c),
+                             Dcap("mpl", s_ampl[1],      T_ampl[1],      epsilon_mpl, e),
+                             w_gdl_mpl, w_mpl_gdl)
 
     D_cap_ampl_ampl = flows_int_work.D_cap_ampl_ampl
     @inbounds for i in 1:(nb_mpl - 1)
-        D_cap_ampl_ampl[i] = hmean([Dcap("mpl", s_ampl[i],     T_ampl[i],     epsilon_mpl, e),
-                                     Dcap("mpl", s_ampl[i + 1], T_ampl[i + 1], epsilon_mpl, e)])
+        D_cap_ampl_ampl[i] = hmean(Dcap("mpl", s_ampl[i],     T_ampl[i],     epsilon_mpl, e),
+                                    Dcap("mpl", s_ampl[i + 1], T_ampl[i + 1], epsilon_mpl, e))
     end
 
-    D_cap_ampl_acl = hmean([Dcap("mpl", s_ampl[nb_mpl], T_ampl[nb_mpl], epsilon_mpl, e),
-                            Dcap("cl",  s_acl,          T_acl,          epsilon_acl, e)],
-                           [w_mpl_acl, w_acl_mpl])
+    D_cap_ampl_acl = hmean(Dcap("mpl", s_ampl[nb_mpl], T_ampl[nb_mpl], epsilon_mpl, e),
+                           Dcap("cl",  s_acl,          T_acl,          epsilon_acl, e),
+                           w_mpl_acl, w_acl_mpl)
 
-    D_cap_ccl_cmpl = hmean([Dcap("cl",  s_ccl,    T_ccl,    epsilon_ccl, e),
-                            Dcap("mpl", s_cmpl[1], T_cmpl[1], epsilon_mpl, e)],
-                           [w_ccl_mpl, w_mpl_ccl])
+    D_cap_ccl_cmpl = hmean(Dcap("cl",  s_ccl,    T_ccl,    epsilon_ccl, e),
+                           Dcap("mpl", s_cmpl[1], T_cmpl[1], epsilon_mpl, e),
+                           w_ccl_mpl, w_mpl_ccl)
 
     D_cap_cmpl_cmpl = flows_int_work.D_cap_cmpl_cmpl
     @inbounds for i in 1:(nb_mpl - 1)
-        D_cap_cmpl_cmpl[i] = hmean([Dcap("mpl", s_cmpl[i],     T_cmpl[i],     epsilon_mpl, e),
-                                     Dcap("mpl", s_cmpl[i + 1], T_cmpl[i + 1], epsilon_mpl, e)])
+        D_cap_cmpl_cmpl[i] = hmean(Dcap("mpl", s_cmpl[i],     T_cmpl[i],     epsilon_mpl, e),
+                                    Dcap("mpl", s_cmpl[i + 1], T_cmpl[i + 1], epsilon_mpl, e))
     end
 
-    D_cap_cmpl_cgdl = hmean([Dcap("mpl", s_cmpl[nb_mpl], T_cmpl[nb_mpl], epsilon_mpl, e),
-                             Dcap("gdl", s_cgdl[1],      T_cgdl[1],      epsilon_gdl, e, epsilon_c)],
-                           [w_mpl_gdl, w_gdl_mpl])
+    D_cap_cmpl_cgdl = hmean(Dcap("mpl", s_cmpl[nb_mpl], T_cmpl[nb_mpl], epsilon_mpl, e),
+                             Dcap("gdl", s_cgdl[1],      T_cgdl[1],      epsilon_gdl, e, epsilon_c),
+                             w_mpl_gdl, w_gdl_mpl)
 
     D_cap_cgdl_cgdl = flows_int_work.D_cap_cgdl_cgdl
     @inbounds for i in 1:(nb_gdl - 1)
-        D_cap_cgdl_cgdl[i] = hmean([Dcap("gdl", s_cgdl[i],     T_cgdl[i],     epsilon_gdl, e, epsilon_c),
-                                     Dcap("gdl", s_cgdl[i + 1], T_cgdl[i + 1], epsilon_gdl, e, epsilon_c)])
+        D_cap_cgdl_cgdl[i] = hmean(Dcap("gdl", s_cgdl[i],     T_cgdl[i],     epsilon_gdl, e, epsilon_c),
+                                    Dcap("gdl", s_cgdl[i + 1], T_cgdl[i + 1], epsilon_gdl, e, epsilon_c))
     end
 
     #       ... of the effective diffusion coefficient
     Da_eff_agdl_agdl = flows_int_work.Da_eff_agdl_agdl
     @inbounds for i in 1:(nb_gdl - 1)
-        Da_eff_agdl_agdl[i] = hmean([Da_eff("gdl", s_agdl[i],     T_agdl[i],     Pagdl[i],     epsilon_gdl, epsilon_c),
-                                     Da_eff("gdl", s_agdl[i + 1], T_agdl[i + 1], Pagdl[i + 1], epsilon_gdl, epsilon_c)])
+        Da_eff_agdl_agdl[i] = hmean(Da_eff("gdl", s_agdl[i],     T_agdl[i],     Pagdl[i],     epsilon_gdl, epsilon_c),
+                                     Da_eff("gdl", s_agdl[i + 1], T_agdl[i + 1], Pagdl[i + 1], epsilon_gdl, epsilon_c))
     end
 
-    Da_eff_agdl_ampl = hmean([Da_eff("gdl", s_agdl[nb_gdl], T_agdl[nb_gdl], Pagdl[nb_gdl], epsilon_gdl, epsilon_c),
-                              Da_eff("mpl", s_ampl[1],      T_ampl[1],      Pampl[1],      epsilon_mpl)],
-                             [w_gdl_mpl, w_mpl_gdl])
+    Da_eff_agdl_ampl = hmean(Da_eff("gdl", s_agdl[nb_gdl], T_agdl[nb_gdl], Pagdl[nb_gdl], epsilon_gdl, epsilon_c),
+                              Da_eff("mpl", s_ampl[1],      T_ampl[1],      Pampl[1],      epsilon_mpl),
+                              w_gdl_mpl, w_mpl_gdl)
 
     Da_eff_ampl_ampl = flows_int_work.Da_eff_ampl_ampl
     @inbounds for i in 1:(nb_mpl - 1)
-        Da_eff_ampl_ampl[i] = hmean([Da_eff("mpl",  s_ampl[i],     T_ampl[i],     Pampl[i],     epsilon_mpl),
-                                      Da_eff("mpl", s_ampl[i + 1], T_ampl[i + 1], Pampl[i + 1], epsilon_mpl)])
+        Da_eff_ampl_ampl[i] = hmean(Da_eff("mpl", s_ampl[i],     T_ampl[i],     Pampl[i],     epsilon_mpl),
+                                     Da_eff("mpl", s_ampl[i + 1], T_ampl[i + 1], Pampl[i + 1], epsilon_mpl))
     end
 
-    Da_eff_ampl_acl = hmean([Da_eff("mpl", s_ampl[nb_mpl], T_ampl[nb_mpl], Pampl[nb_mpl], epsilon_mpl),
-                             Da_eff("cl",  s_acl,          T_acl,          Pacl,          epsilon_acl)],
-                            [w_mpl_acl, w_acl_mpl])
+    Da_eff_ampl_acl = hmean(Da_eff("mpl", s_ampl[nb_mpl], T_ampl[nb_mpl], Pampl[nb_mpl], epsilon_mpl),
+                             Da_eff("cl",  s_acl,          T_acl,          Pacl,          epsilon_acl),
+                             w_mpl_acl, w_acl_mpl)
 
-    Dc_eff_ccl_cmpl = hmean([Dc_eff("cl",  s_ccl,    T_ccl,    Pccl,    epsilon_ccl),
-                             Dc_eff("mpl", s_cmpl[1], T_cmpl[1], Pcmpl[1], epsilon_mpl)],
-                            [w_ccl_mpl, w_mpl_ccl])
+    Dc_eff_ccl_cmpl = hmean(Dc_eff("cl",  s_ccl,    T_ccl,    Pccl,    epsilon_ccl),
+                             Dc_eff("mpl", s_cmpl[1], T_cmpl[1], Pcmpl[1], epsilon_mpl),
+                             w_ccl_mpl, w_mpl_ccl)
 
     Dc_eff_cmpl_cmpl = flows_int_work.Dc_eff_cmpl_cmpl
     @inbounds for i in 1:(nb_mpl - 1)
-        Dc_eff_cmpl_cmpl[i] = hmean([Dc_eff("mpl", s_cmpl[i],     T_cmpl[i],     Pcmpl[i],     epsilon_mpl),
-                                      Dc_eff("mpl", s_cmpl[i + 1], T_cmpl[i + 1], Pcmpl[i + 1], epsilon_mpl)])
+        Dc_eff_cmpl_cmpl[i] = hmean(Dc_eff("mpl", s_cmpl[i],     T_cmpl[i],     Pcmpl[i],     epsilon_mpl),
+                                     Dc_eff("mpl", s_cmpl[i + 1], T_cmpl[i + 1], Pcmpl[i + 1], epsilon_mpl))
     end
 
-    Dc_eff_cmpl_cgdl = hmean([Dc_eff("mpl", s_cmpl[nb_mpl], T_cmpl[nb_mpl], Pcmpl[nb_mpl], epsilon_mpl),
-                              Dc_eff("gdl", s_cgdl[1],      T_cgdl[1],      Pcgdl[1],      epsilon_gdl, epsilon_c)],
-                             [w_mpl_gdl, w_gdl_mpl])
+    Dc_eff_cmpl_cgdl = hmean(Dc_eff("mpl", s_cmpl[nb_mpl], T_cmpl[nb_mpl], Pcmpl[nb_mpl], epsilon_mpl),
+                              Dc_eff("gdl", s_cgdl[1],      T_cgdl[1],      Pcgdl[1],      epsilon_gdl, epsilon_c),
+                              w_mpl_gdl, w_gdl_mpl)
 
     Dc_eff_cgdl_cgdl = flows_int_work.Dc_eff_cgdl_cgdl
     @inbounds for i in 1:(nb_gdl - 1)
-        Dc_eff_cgdl_cgdl[i] = hmean([Dc_eff("gdl", s_cgdl[i],     T_cgdl[i],     Pcgdl[i],     epsilon_gdl, epsilon_c),
-                                     Dc_eff("gdl", s_cgdl[i + 1], T_cgdl[i + 1], Pcgdl[i + 1], epsilon_gdl, epsilon_c)])
+        Dc_eff_cgdl_cgdl[i] = hmean(Dc_eff("gdl", s_cgdl[i],     T_cgdl[i],     Pcgdl[i],     epsilon_gdl, epsilon_c),
+                                     Dc_eff("gdl", s_cgdl[i + 1], T_cgdl[i + 1], Pcgdl[i + 1], epsilon_gdl, epsilon_c))
     end
 
     #       ... of the temperature
