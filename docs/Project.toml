@@ -1,0 +1,7 @@
+[deps]
+AlphaPEM = "5b79a72d-1548-47c5-a674-b96c56ecabf8"
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+
+[compat]
+AlphaPEM = "2.0 - 2"
+Documenter = "1.17 - 1"

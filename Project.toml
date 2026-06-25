@@ -1,8 +1,8 @@
 name = "AlphaPEM"
 uuid = "5b79a72d-1548-47c5-a674-b96c56ecabf8"
 license = "GPL-3.0-only"
-version = "1.4.0"
-authors = ["Raphael Gass <gassraphael@proton.me>"]
+version = "2.0"
+authors = ["Raphael Gass <raphael.gass@univ-reunion.fr>"]
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
