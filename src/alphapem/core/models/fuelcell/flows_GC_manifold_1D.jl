@@ -65,6 +65,7 @@ function calculate_flows_1D_GC_manifold(work::GCManifoldWorkspace,
     s_agc = [sv_1D_cell[i].agc.s for i in agc_order]
     s_cgc = [sv_1D_cell[i].cgc.s for i in 1:nb_gc]
     C_H2_agc = [sv_1D_cell[i].agc.C_H2 for i in agc_order]
+    C_N2_agc = [sv_1D_cell[i].agc.C_N2 for i in agc_order]
     C_O2_cgc = [sv_1D_cell[i].cgc.C_O2 for i in 1:nb_gc]
     C_N2_cgc = [sv_1D_cell[i].cgc.C_N2 for i in 1:nb_gc]
     v_a_o = [v_a[i] for i in agc_order] # velocity oriented in the anode flow direction
@@ -184,7 +185,7 @@ function calculate_flows_1D_GC_manifold(work::GCManifoldWorkspace,
         # J_H2_agc_in = y_H2["asm_out"] * (1 - Phi_asm_out_to_agc * Psat(T_des) / Pasm_out_to_agc) * Ja_in
         # J_H2_agc_out = y_H2_agc * (1 - Phi_agc_to_aem_in * Psat(T_des) / Pagc_to_aem_in) * Ja_out
     else  # type_auxiliary == :forced_convective_cathode_with_anodic_recirculation or type_auxiliary == :no_auxiliary
-        J_H2_agc_in = (1 - Phi_a_des * Psat(T_des) / Pa_in) * Ja_in
+        J_H2_agc_in = y_H2_in * (1 - Phi_a_des * Psat(T_des) / Pa_in) * Ja_in
         J_H2_agc_agc = [C_H2_agc[i] * v_a_o[i] for i in 1:(nb_gc - 1)]
         J_H2_agc_out = C_H2_agc[end] * R * T_des / P_agc[agc_order[end]] * Ja_out
     end
@@ -209,9 +210,9 @@ function calculate_flows_1D_GC_manifold(work::GCManifoldWorkspace,
         # J_N2_cgc_in = (1 - y_O2_csm_out_to_cgc) * (1 - Phi_csm_out_to_cgc * Psat(T_des) / Pcsm_out_to_cgc) * Jc_in
         # J_N2_cgc_out = (1 - y_O2_cgc_to_cem_in) * (1 - Phi_cgc_to_cem_in * Psat(T_des) / Pcgc_to_cem_in) * Jc_out
     else  # type_auxiliary == :no_auxiliary
-        J_N2_agc_in = 0.0
-        J_N2_agc_agc = fill(0.0, max(nb_gc - 1, 0))
-        J_N2_agc_out = 0.0
+        J_N2_agc_in = (1 - y_H2_in) * (1 - Phi_a_des * Psat(T_des) / Pa_in) * Ja_in
+        J_N2_agc_agc = [C_N2_agc[i] * v_a_o[i] for i in 1:(nb_gc - 1)]
+        J_N2_agc_out = C_N2_agc[end] * R * T_des / P_agc[agc_order[end]] * Ja_out
         J_N2_cgc_in = (1 - y_O2_ext) * (1 - Phi_c_des * Psat(T_des) / Pc_in) * Jc_in
         J_N2_cgc_cgc = [C_N2_cgc[i] * v_c[i] for i in 1:(nb_gc - 1)]
         J_N2_cgc_out = C_N2_cgc[nb_gc] * R * T_des / P_cgc[nb_gc] * Jc_out
