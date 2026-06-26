@@ -50,44 +50,105 @@ function velocity_profiles_from_inlet_flows!(work::GCManifoldWorkspace,
     # ── Pass 1: Calculate GC thermodynamics, viscosities, and GC/GDL interface fluxes ────
     calculate_velocity_int_values!(work, sv, T_des, fc, cfg)
 
-    # ── Pass 2: integrate molar flows from inlet to outlet ──────────────────────
-    @inbounds for i in 1:nb_gc
-        J_a_prev = i == 1 ? J_a_in : work.J_a[i - 1]
-        J_c_prev = i == 1 ? J_c_in : work.J_c[i - 1]
-        work.J_a[i] = J_a_prev - work.J_tot_agc_agdl[i] * L_node_gc / Hagc
-        work.J_c[i] = J_c_prev + work.J_tot_cgdl_cgc[i] * L_node_gc / Hcgc
+    local P_a_in::Float64, P_c_in::Float64
+
+    if nb_gc == 1 # Single-node accuracy enhancement: virtual NB_GC_VIRT-node pressure integration
+        NB_GC_VIRT  = 5
+        MID         = round(Int, (NB_GC_VIRT + 1) ÷ 2)   # channel midpoint
+        L_node_virt = Lgc / NB_GC_VIRT
+
+        J_a_virt = Vector{Float64}(undef, NB_GC_VIRT)
+        J_c_virt = Vector{Float64}(undef, NB_GC_VIRT)
+        P_a_virt = Vector{Float64}(undef, NB_GC_VIRT)
+        P_c_virt = Vector{Float64}(undef, NB_GC_VIRT)
+        v_a_virt = Vector{Float64}(undef, NB_GC_VIRT)
+        v_c_virt = Vector{Float64}(undef, NB_GC_VIRT)
+
+        # ── Pass 2 (virtual): integrate molar flows from inlet to outlet ──────────────────
+        @inbounds for i in 1:NB_GC_VIRT
+            J_a_prev    = i == 1 ? J_a_in : J_a_virt[i - 1]
+            J_c_prev    = i == 1 ? J_c_in : J_c_virt[i - 1]
+            J_a_virt[i] = J_a_prev - work.J_tot_agc_agdl[1] * L_node_virt / Hagc
+            J_c_virt[i] = J_c_prev + work.J_tot_cgdl_cgc[1] * L_node_virt / Hcgc
+        end
+
+        # ── Pass 3 (virtual): back-propagate pressure and velocity from outlet to inlet ───
+        # Outlet pressures and velocities.
+        # Without GDL in the outlets, the stationary outlet flow is equal to the last GC node flow.
+        J_a_out, J_c_out = J_a_virt[end], J_c_virt[end]
+        P_a_out, P_c_out = Pa_ext, Pc_ext
+        v_a_out, v_c_out = J_a_out / P_a_out * R * T_des, J_c_out / P_c_out * R * T_des
+
+        # Last GC node pressure and velocity (with viscous drop along the last GC segment)
+        P_a_virt[end] = P_a_out + 8 * π * work.mu_gaz_agc[1] * Ldist / (Hagc * Wagc) * v_a_out
+        v_a_virt[end] = J_a_virt[end] / P_a_virt[end] * R * T_des
+        P_c_virt[end] = P_c_out + 8 * π * work.mu_gaz_cgc[1] * Ldist / (Hcgc * Wcgc) * v_c_out
+        v_c_virt[end] = J_c_virt[end] / P_c_virt[end] * R * T_des
+
+        # Back-propagate the pressure and velocity profiles from the last GC node to the first GC node.
+        @inbounds for i in NB_GC_VIRT:-1:2
+            P_a_virt[i - 1] = P_a_virt[i] + 8 * π * work.mu_gaz_agc[1] * L_node_virt / (Hagc * Wagc) *
+                              (v_a_virt[i] + work.J_tot_agc_agdl[1] / work.C_tot_agdl[1])
+            v_a_virt[i - 1] = J_a_virt[i - 1] / P_a_virt[i - 1] * R * T_des
+
+            P_c_virt[i - 1] = P_c_virt[i] + 8 * π * work.mu_gaz_cgc[1] * L_node_virt / (Hcgc * Wcgc) *
+                              (v_c_virt[i] - work.J_tot_cgdl_cgc[1] / work.C_tot_cgdl[1])
+            v_c_virt[i - 1] = J_c_virt[i - 1] / P_c_virt[i - 1] * R * T_des
+        end
+
+        P_a_in = P_a_virt[1] + 8 * π * work.mu_gaz_agc[1] * L_node_virt / (Hagc * Wagc) *
+                 (v_a_virt[1] + work.J_tot_agc_agdl[1] / work.C_tot_agdl[1])
+        P_c_in = P_c_virt[1] + 8 * π * work.mu_gaz_cgc[1] * L_node_virt / (Hcgc * Wcgc) *
+                 (v_c_virt[1] - work.J_tot_cgdl_cgc[1] / work.C_tot_cgdl[1])
+
+        # Store only the midpoint values in the workspace (node MID, position x = Lgc / 2)
+        work.J_a[1]     = J_a_virt[MID]
+        work.J_c[1]     = J_c_virt[MID]
+        work.P_a_chan[1] = P_a_virt[MID]
+        work.v_a[1]     = v_a_virt[MID]
+        work.P_c_chan[1] = P_c_virt[MID]
+        work.v_c[1]     = v_c_virt[MID]
+
+    else
+        # ── Pass 2: integrate molar flows from inlet to outlet ──────────────────────
+        @inbounds for i in 1:nb_gc
+            J_a_prev = i == 1 ? J_a_in : work.J_a[i - 1]
+            J_c_prev = i == 1 ? J_c_in : work.J_c[i - 1]
+            work.J_a[i] = J_a_prev - work.J_tot_agc_agdl[i] * L_node_gc / Hagc
+            work.J_c[i] = J_c_prev + work.J_tot_cgdl_cgc[i] * L_node_gc / Hcgc
+        end
+
+        # ── Pass 3: back-propagate pressure and velocity from outlet to inlet ────────
+        # Outlet pressures and velocities.
+        # Without GDL in the outlets, the stationary outlet flow is equal to the last GC node flow.
+        J_a_out, J_c_out = work.J_a[end], work.J_c[end]
+        P_a_out, P_c_out = Pa_ext, Pc_ext
+        v_a_out, v_c_out = J_a_out / P_a_out * R * T_des, J_c_out / P_c_out * R * T_des
+
+        # Last GC node pressure and velocity (with viscous drop along the last GC segment)
+        work.P_a_chan[end] = P_a_out + 8 * π * work.mu_gaz_agc[end] * Ldist / (Hagc * Wagc) * v_a_out
+        work.v_a[end]      = work.J_a[end] / work.P_a_chan[end] * R * T_des
+        work.P_c_chan[end] = P_c_out + 8 * π * work.mu_gaz_cgc[end] * Ldist / (Hcgc * Wcgc) * v_c_out
+        work.v_c[end]      = work.J_c[end] / work.P_c_chan[end] * R * T_des
+
+        # Back-propagate the pressure and velocity profiles from the last GC node to the first GC node.
+        @inbounds for i in nb_gc:-1:2
+            work.P_a_chan[i - 1] = work.P_a_chan[i] + 8 * π * work.mu_gaz_agc[i] * L_node_gc / (Hagc * Wagc) *
+                                   (work.v_a[i] + work.J_tot_agc_agdl[i] / work.C_tot_agdl[i])
+            work.v_a[i - 1] = work.J_a[i - 1] / work.P_a_chan[i - 1] * R * T_des
+
+            work.P_c_chan[i - 1] = work.P_c_chan[i] + 8 * π * work.mu_gaz_cgc[i] * L_node_gc / (Hcgc * Wcgc) *
+                                   (work.v_c[i] - work.J_tot_cgdl_cgc[i] / work.C_tot_cgdl[i])
+            work.v_c[i - 1] = work.J_c[i - 1] / work.P_c_chan[i - 1] * R * T_des
+        end
+
+        P_a_in = work.P_a_chan[1] + 8 * π * work.mu_gaz_agc[1] * L_node_gc / (Hagc * Wagc) *
+                 (work.v_a[1] + work.J_tot_agc_agdl[1] / work.C_tot_agdl[1])
+        P_c_in = work.P_c_chan[1] + 8 * π * work.mu_gaz_cgc[1] * L_node_gc / (Hcgc * Wcgc) *
+                 (work.v_c[1] - work.J_tot_cgdl_cgc[1] / work.C_tot_cgdl[1])
     end
 
-    # ── Pass 3: back-propagate pressure and velocity from outlet to inlet ────────
-    # Outlet pressures and velocities.
-    # Without GDL in the outlets, the stationary outlet flow is equal to the last GC node flow.
-    J_a_out, J_c_out = work.J_a[end], work.J_c[end]
-    P_a_out, P_c_out = Pa_ext, Pc_ext
-    v_a_out, v_c_out = J_a_out / P_a_out * R * T_des, J_c_out / P_c_out * R * T_des
-
-    # Last GC node pressure and velocity (with viscous drop along the last GC segment)
-    work.P_a_chan[end] = P_a_out + 8 * π * work.mu_gaz_agc[end] * Ldist / (Hagc * Wagc) * v_a_out
-    work.v_a[end]      = work.J_a[end] / work.P_a_chan[end] * R * T_des
-    work.P_c_chan[end] = P_c_out + 8 * π * work.mu_gaz_cgc[end] * Ldist / (Hcgc * Wcgc) * v_c_out
-    work.v_c[end]      = work.J_c[end] / work.P_c_chan[end] * R * T_des
-
-    # Back-propagate the pressure and velocity profiles from the last GC node to the first GC node.
-    @inbounds for i in nb_gc:-1:2
-        work.P_a_chan[i - 1] = work.P_a_chan[i] + 8 * π * work.mu_gaz_agc[i] * L_node_gc / (Hagc * Wagc) *
-                               (work.v_a[i] + work.J_tot_agc_agdl[i] / work.C_tot_agdl[i])
-        work.v_a[i - 1] = work.J_a[i - 1] / work.P_a_chan[i - 1] * R * T_des
-
-        work.P_c_chan[i - 1] = work.P_c_chan[i] + 8 * π * work.mu_gaz_cgc[i] * L_node_gc / (Hcgc * Wcgc) *
-                               (work.v_c[i] - work.J_tot_cgdl_cgc[i] / work.C_tot_cgdl[i])
-        work.v_c[i - 1] = work.J_c[i - 1] / work.P_c_chan[i - 1] * R * T_des
-    end
-
-    P_a_in = work.P_a_chan[1] + 8 * π * work.mu_gaz_agc[1] * L_node_gc / (Hagc * Wagc) *
-             (work.v_a[1] + work.J_tot_agc_agdl[1] / work.C_tot_agdl[1])
-    P_c_in = work.P_c_chan[1] + 8 * π * work.mu_gaz_cgc[1] * L_node_gc / (Hcgc * Wcgc) *
-             (work.v_c[1] - work.J_tot_cgdl_cgc[1] / work.C_tot_cgdl[1])
-
-    # Reorder anode velocity for counter-flow (no allocation)
+    # ── Pass 4: Reorder anode velocity for counter-flow ──────────────────────────────
     if is_counter_flow
         @inbounds for i in 1:nb_gc
             work.v_a_nominal[i] = work.v_a[nb_gc - i + 1]
