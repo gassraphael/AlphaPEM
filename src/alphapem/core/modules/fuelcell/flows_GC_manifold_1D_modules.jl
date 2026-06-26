@@ -57,6 +57,8 @@ Calculate intermediate values used for GC/manifold flow computations.
 
 Arguments
 ---------
+work : GCManifoldWorkspace
+    Pre-allocated workspace. Results are written into `work` fields.
 sv_1D_cell : AbstractVector{<:CellState1D}
     Typed variables computed by the solver (internal stack states).
 sv_auxiliary
@@ -73,7 +75,7 @@ Tuple
       M_ext, M_H2_N2_in, rho_agc, rho_cgc, k_purge, Abp_a, Abp_c,
       mu_gaz_agc, mu_gaz_cgc)`
 """
-function calculate_flow_1D_GC_manifold_int_values!(gc_manifold_work::GCManifoldWorkspace,
+function calculate_flow_1D_GC_manifold_int_values!(work::GCManifoldWorkspace,
                                                    sv_1D_cell::AbstractVector{<:CellState1D},
                                                    sv_auxiliary,
                                                    fc::AbstractFuelCell,
@@ -91,23 +93,15 @@ function calculate_flow_1D_GC_manifold_int_values!(gc_manifold_work::GCManifoldW
     k_purge = nothing
     Abp_a = sv_auxiliary === nothing ? nothing : getproperty(sv_auxiliary, :Abp_a)
     Abp_c = sv_auxiliary === nothing ? nothing : getproperty(sv_auxiliary, :Abp_c)
-    P_agc = gc_manifold_work.P_agc
-    P_cgc = gc_manifold_work.P_cgc
-    Phi_agc = gc_manifold_work.Phi_agc
-    Phi_cgc = gc_manifold_work.Phi_cgc
-    y_H2_agc = gc_manifold_work.y_H2_agc
-    y_O2_cgc = gc_manifold_work.y_O2_cgc
-    M_agc = gc_manifold_work.M_agc
-    M_cgc = gc_manifold_work.M_cgc
-    rho_agc = gc_manifold_work.rho_agc
-    rho_cgc = gc_manifold_work.rho_cgc
-    mu_gaz_agc = gc_manifold_work.mu_gaz_agc
-    mu_gaz_cgc = gc_manifold_work.mu_gaz_cgc
+    P_agc, P_cgc, Phi_agc, Phi_cgc = work.P_agc, work.P_cgc, work.Phi_agc, work.Phi_cgc
+    y_H2_agc, y_O2_cgc = work.y_H2_agc, work.y_O2_cgc
+    M_agc, M_cgc = work.M_agc, work.M_cgc
+    rho_agc, rho_cgc = work.rho_agc, work.rho_cgc
+    mu_gaz_agc, mu_gaz_cgc = work.mu_gaz_agc, work.mu_gaz_cgc
 
     # Physical quantities outside the stack
     #       Molar masses
-    Psat_Text = Psat(Text)
-    Psat_Tdes = Psat(T_des)
+    Psat_Text, Psat_Tdes = Psat(Text), Psat(T_des)
     M_ext = Phi_ext * Psat_Text / Pext * M_H2O +
             y_O2_ext * (1 - Phi_ext * Psat_Text / Pext) * M_O2 +
             (1 - y_O2_ext) * (1 - Phi_ext * Psat_Text / Pext) * M_N2
@@ -116,51 +110,36 @@ function calculate_flow_1D_GC_manifold_int_values!(gc_manifold_work::GCManifoldW
     # Physical quantities inside the stack
     #       Pressures, humidity ratios, dry-gas composition ratios,
     #       molar masses, densities, and dynamic viscosities
-    for i in 1:nb_gc
+    @inbounds for i in 1:nb_gc
         sv_i = sv_1D_cell[i]
-        C_v_agc_i = sv_i.agc.C_v
-        C_v_cgc_i = sv_i.cgc.C_v
-        C_H2_agc_i = sv_i.agc.C_H2
-        C_O2_cgc_i = sv_i.cgc.C_O2
-        C_N2_agc_i = sv_i.agc.C_N2
-        C_N2_cgc_i = sv_i.cgc.C_N2
-        T_agc_i = sv_i.agc.T
-        T_cgc_i = sv_i.cgc.T
+        C_v_agc, C_v_cgc, C_H2_agc, C_O2_cgc = sv_i.agc.C_v, sv_i.cgc.C_v, sv_i.agc.C_H2, sv_i.cgc.C_O2
+        C_N2_agc, C_N2_cgc, T_agc, T_cgc     = sv_i.agc.C_N2, sv_i.cgc.C_N2, sv_i.agc.T, sv_i.cgc.T
 
-        P_agc_i = (C_v_agc_i + C_H2_agc_i + C_N2_agc_i) * R * T_agc_i
-        P_cgc_i = (C_v_cgc_i + C_O2_cgc_i + C_N2_cgc_i) * R * T_cgc_i
-        P_agc[i] = P_agc_i
-        P_cgc[i] = P_cgc_i
+        P_agc[i] = (C_v_agc + C_H2_agc + C_N2_agc) * R * T_agc
+        P_cgc[i] = (C_v_cgc + C_O2_cgc + C_N2_cgc) * R * T_cgc
 
-        Phi_agc_i = C_v_agc_i / C_v_sat(T_agc_i)
-        Phi_cgc_i = C_v_cgc_i / C_v_sat(T_cgc_i)
-        Phi_agc[i] = Phi_agc_i
-        Phi_cgc[i] = Phi_cgc_i
+        Phi_agc[i], Phi_cgc[i] = C_v_agc / C_v_sat(T_agc), C_v_cgc / C_v_sat(T_cgc)
 
-        y_H2_agc_i = C_H2_agc_i / (C_H2_agc_i + C_N2_agc_i)
-        y_O2_cgc_i = C_O2_cgc_i / (C_O2_cgc_i + C_N2_cgc_i)
-        y_H2_agc[i] = y_H2_agc_i
-        y_O2_cgc[i] = y_O2_cgc_i
+        y_H2_agc[i], y_O2_cgc[i]  = C_H2_agc / (C_H2_agc + C_N2_agc), C_O2_cgc / (C_O2_cgc + C_N2_cgc)
 
-        M_agc_i = C_v_agc_i * R * T_des / P_agc_i * M_H2O +
-                  C_H2_agc_i * R * T_des / P_agc_i * M_H2 +
-                  C_N2_agc_i * R * T_des / P_agc_i * M_N2
-        vapor_share_cgc_i = Phi_cgc_i * Psat_Tdes / P_cgc_i
-        M_cgc_i = vapor_share_cgc_i * M_H2O +
-                  y_O2_cgc_i * (1 - vapor_share_cgc_i) * M_O2 +
-                  (1 - y_O2_cgc_i) * (1 - vapor_share_cgc_i) * M_N2
-        M_agc[i] = M_agc_i
-        M_cgc[i] = M_cgc_i
+        M_agc[i] = C_v_agc * R * T_des / P_agc[i] * M_H2O +
+                  C_H2_agc * R * T_des / P_agc[i] * M_H2 +
+                  C_N2_agc * R * T_des / P_agc[i] * M_N2
+        M_cgc[i] = C_v_cgc * R * T_des / P_cgc[i] * M_H2O +
+                  C_O2_cgc * R * T_des / P_cgc[i] * M_O2 +
+                  C_N2_cgc * R * T_des / P_cgc[i] * M_N2
 
-        rho_agc[i] = P_agc_i / (R * T_agc_i) * M_agc_i
-        rho_cgc[i] = P_cgc_i / (R * T_cgc_i) * M_cgc_i
+        rho_agc[i], rho_cgc[i] = P_agc[i] / (R * T_agc) * M_agc[i], P_cgc[i] / (R * T_cgc) * M_cgc[i]
 
-        x_H2O_v_agc_i = C_v_agc_i / (C_v_agc_i + C_H2_agc_i + C_N2_agc_i)
-        x_H2O_v_cgc_i = C_v_cgc_i / (C_v_cgc_i + C_O2_cgc_i + C_N2_cgc_i)
-        mu_gaz_agc[i] = mu_mixture_gases(["H2O_v", "H2"], [x_H2O_v_agc_i, 1 - x_H2O_v_agc_i], T_agc_i)
-        mu_gaz_cgc[i] = mu_mixture_gases(["H2O_v", "O2", "N2"],
-                                         [x_H2O_v_cgc_i, y_O2_cgc_i * (1 - x_H2O_v_cgc_i),
-                                          (1 - y_O2_cgc_i) * (1 - x_H2O_v_cgc_i)], T_cgc_i)
+        C_tot_agc = C_v_agc + C_H2_agc + C_N2_agc
+        x_H2O_v_agc, x_H2_agc, x_N2_agc = C_v_agc / C_tot_agc, C_H2_agc / C_tot_agc, C_N2_agc / C_tot_agc
+        work.x_H2O_v_agc[i], work.x_H2_agc[i], work.x_N2_agc[i] = x_H2O_v_agc, x_H2_agc, x_N2_agc
+        mu_gaz_agc[i] = mu_mixture_gases("H2O_v", x_H2O_v_agc, "H2", x_H2_agc, "N2", x_N2_agc, T_agc)
+
+        C_tot_cgc = C_v_cgc + C_O2_cgc + C_N2_cgc
+        x_H2O_v_cgc, x_O2_cgc, x_N2_cgc = C_v_cgc / C_tot_cgc, C_O2_cgc / C_tot_cgc, C_N2_cgc / C_tot_cgc
+        work.x_H2O_v_cgc[i], work.x_O2_cgc[i], work.x_N2_cgc[i] = x_H2O_v_cgc, x_O2_cgc, x_N2_cgc
+        mu_gaz_cgc[i] = mu_mixture_gases("H2O_v", x_H2O_v_cgc, "O2", x_O2_cgc, "N2", x_N2_cgc, T_cgc)
     end
 
     # Physical quantities in the auxiliary system

@@ -126,32 +126,54 @@ function MEAFlowsIntWorkspace(nb_gdl::Int, nb_mpl::Int)
     )
 end
 
-"""Reusable vector workspace for `calculate_flow_1D_GC_manifold_int_values!`.
-Holds the per-GC-node vectors that are otherwise reallocated every call.
+"""Reusable vector workspace shared by `calculate_flow_1D_GC_manifold_int_values!`
+and `velocity_profiles_from_inlet_flows!`.
+
+Both functions compute the same GC thermodynamic quantities (pressures, mole
+fractions, viscosities), so a single pre-allocated workspace covers both call
+sites and prevents any heap allocation.  Fields specific to one function are
+documented inline.
 """
 mutable struct GCManifoldWorkspace
-    P_agc::Vector{Float64}
-    P_cgc::Vector{Float64}
-    Phi_agc::Vector{Float64}
-    Phi_cgc::Vector{Float64}
-    y_H2_agc::Vector{Float64}
-    y_O2_cgc::Vector{Float64}
-    M_agc::Vector{Float64}
-    M_cgc::Vector{Float64}
-    rho_agc::Vector{Float64}
-    rho_cgc::Vector{Float64}
-    mu_gaz_agc::Vector{Float64}
-    mu_gaz_cgc::Vector{Float64}
+    # ── Shared: GC thermodynamics (filled by both velocity and manifold functions) ──
+    P_agc       :: Vector{Float64}   # Anode GC ideal-gas pressure (Pa)
+    P_cgc       :: Vector{Float64}   # Cathode GC ideal-gas pressure (Pa)
+    Phi_agc     :: Vector{Float64}   # Anode GC relative humidity (–)
+    Phi_cgc     :: Vector{Float64}   # Cathode GC relative humidity (–)
+    M_agc       :: Vector{Float64}   # Anode GC mixture molar mass (kg·mol⁻¹)
+    M_cgc       :: Vector{Float64}   # Cathode GC mixture molar mass (kg·mol⁻¹)
+    rho_agc     :: Vector{Float64}   # Anode GC mixture density (kg·m⁻³)
+    rho_cgc     :: Vector{Float64}   # Cathode GC mixture density (kg·m⁻³)
+    y_H2_agc    :: Vector{Float64}   # Dry H₂ mole fraction in anode GC
+    y_O2_cgc    :: Vector{Float64}   # Dry O₂ mole fraction in cathode GC
+    x_H2O_v_agc :: Vector{Float64}   # H₂O vapour mole fraction in anode GC
+    x_H2_agc    :: Vector{Float64}   # H₂ mole fraction in anode GC
+    x_N2_agc    :: Vector{Float64}   # N₂ mole fraction in anode GC
+    x_H2O_v_cgc :: Vector{Float64}   # H₂O vapour mole fraction in cathode GC
+    x_O2_cgc    :: Vector{Float64}   # O₂ mole fraction in cathode GC
+    x_N2_cgc    :: Vector{Float64}   # N₂ mole fraction in cathode GC
+    mu_gaz_agc  :: Vector{Float64}   # Anode GC dynamic viscosity (Pa·s)
+    mu_gaz_cgc  :: Vector{Float64}   # Cathode GC dynamic viscosity (Pa·s)
+    # ── Velocity-specific: interface fluxes and flow/pressure profiles ───────────
+    C_tot_agdl     :: Vector{Float64}   # Total molar concentration at AGC/AGDL interface
+    C_tot_cgdl     :: Vector{Float64}   # Total molar concentration at CGDL/CGC interface
+    J_tot_agc_agdl :: Vector{Float64}   # Net molar flux AGC→AGDL (mol·m⁻²·s⁻¹)
+    J_tot_cgdl_cgc :: Vector{Float64}   # Net molar flux CGDL→CGC (mol·m⁻²·s⁻¹)
+    J_a         :: Vector{Float64}   # Anode channel molar flow along the GC (mol·m⁻²·s⁻¹)
+    J_c         :: Vector{Float64}   # Cathode channel molar flow along the GC (mol·m⁻²·s⁻¹)
+    P_a_chan    :: Vector{Float64}   # Anode channel pressure profile with viscous drop (Pa)
+    P_c_chan    :: Vector{Float64}   # Cathode channel pressure profile with viscous drop (Pa)
+    v_a         :: Vector{Float64}   # Anode gas velocity (m·s⁻¹)
+    v_c         :: Vector{Float64}   # Cathode gas velocity (m·s⁻¹)
+    v_a_nominal :: Vector{Float64}   # Anode velocity reordered for counter-flow
 end
 
 function GCManifoldWorkspace(nb_gc::Int)
+    z = () -> Vector{Float64}(undef, nb_gc)
     return GCManifoldWorkspace(
-        Vector{Float64}(undef, nb_gc), Vector{Float64}(undef, nb_gc),
-        Vector{Float64}(undef, nb_gc), Vector{Float64}(undef, nb_gc),
-        Vector{Float64}(undef, nb_gc), Vector{Float64}(undef, nb_gc),
-        Vector{Float64}(undef, nb_gc), Vector{Float64}(undef, nb_gc),
-        Vector{Float64}(undef, nb_gc), Vector{Float64}(undef, nb_gc),
-        Vector{Float64}(undef, nb_gc), Vector{Float64}(undef, nb_gc)
+        z(), z(), z(), z(), z(), z(), z(), z(), z(), z(), z(), z(),  # shared GC thermodynamics (12)
+        z(), z(), z(), z(), z(), z(),                                 # mole fractions (x_H2O_v_agc … x_N2_cgc)
+        z(), z(), z(), z(), z(), z(), z(), z(), z(), z(), z(),       # velocity-specific (11)
     )
 end
 

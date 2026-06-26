@@ -158,6 +158,15 @@ This function calculates the dynamic viscosity of a gas mixture, in Pa.s, as a f
 # Notes
 A simple mixture law is used here to calculate the dynamic viscosity of the gas mixture.
 """
+function mu_mixture_gases(comp1::String, x1::Real, comp2::String, x2::Real,
+                          comp3::String, x3::Real, T)
+    M_mix = molar_mass(comp1) * x1 + molar_mass(comp2) * x2 + molar_mass(comp3) * x3
+    inv_mu_mix = (molar_mass(comp1) * x1 / M_mix) / mu_gaz(comp1, T) +
+                 (molar_mass(comp2) * x2 / M_mix) / mu_gaz(comp2, T) +
+                 (molar_mass(comp3) * x3 / M_mix) / mu_gaz(comp3, T)
+    return 1.0 / inv_mu_mix
+end
+
 function mu_mixture_gases(components::Vector, x::Vector, T)
 
     # Compute molar mass of the mixture in kg/mol.
