@@ -5,7 +5,7 @@ Performance benchmark for AlphaPEM using an EIS signal.
 
 What is measured:
 - 1 first run including JIT compilation time (warm-up)
-- N subsequent equal measured runs without compilation overhead (N=5 by default,
+- N subsequent equal measured runs without compilation overhead (N=10 by default,
   configurable via the BENCHMARK_RUNS environment variable)
 
 For each run, the following metrics are recorded:
@@ -90,7 +90,7 @@ function print_benchmark_report(rows, out_csv)
 end
 
 function main()
-    runs = parse(Int, get(ENV, "BENCHMARK_RUNS", "5"))
+    runs = parse(Int, get(ENV, "BENCHMARK_RUNS", "10"))
     out_dir = joinpath(@__DIR__, "..", "results", "benchmark")
     mkpath(out_dir)
     out_csv = joinpath(out_dir, "benchmark_eis.csv")

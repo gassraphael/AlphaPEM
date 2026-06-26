@@ -614,8 +614,8 @@ function recovery!(simu::AlphaPEM)
         end
 
         # Recover velocity profiles and inlet pressures from the algebraic inlet flow densities.
-        v_a, v_c, Pa_in, Pc_in = velocity_profiles_from_inlet_flows(sv_cell_1D, J_a_in, J_c_in,
-                                                                     simu.fuel_cell, simu.cfg)
+        v_a, v_c, Pa_in, Pc_in = velocity_profiles_from_inlet_flows!(GCManifoldWorkspace(nb_gc), sv_cell_1D,
+                                                                     J_a_in, J_c_in, simu.fuel_cell, simu.cfg)
         # Store anode and cathode velocity profiles for each gas channel node.
         for k in 1:nb_gc
             push!(v_a_hist[k], v_a[k])

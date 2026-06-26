@@ -153,11 +153,11 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
     alg_flow_start = alg_current_end + 1
     alg_flow_end = alg_flow_start + 1
     res_flow = @view(res[alg_flow_start:alg_flow_end])
-    velocity_inlet_flow_residuals!(res_flow, J_a_in, J_c_in, sv_cell_1D, i_fc_cell, fc, cfg)
+    velocity_inlet_flow_residuals!(gc_manifold_work, res_flow, J_a_in, J_c_in, sv_cell_1D, i_fc_cell, fc, cfg)
     res_flow ./= j_in_scale
 
     # Rebuild flow-dependent fields from algebraic states.
-    v_a, v_c, Pa_in, Pc_in = velocity_profiles_from_inlet_flows(sv_cell_1D, J_a_in, J_c_in, fc, cfg)
+    v_a, v_c, Pa_in, Pc_in = velocity_profiles_from_inlet_flows!(gc_manifold_work, sv_cell_1D, J_a_in, J_c_in, fc, cfg)
 
     # Calculation of the flows for each GC node — pre-allocated container reused across calls.
     @inbounds for i in 1:nb_gc

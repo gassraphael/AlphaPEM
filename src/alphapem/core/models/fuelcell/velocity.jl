@@ -5,17 +5,29 @@
 
 # ________________________________________________________Velocity______________________________________________________
 
-"""Build GC velocity/pressure profiles from inlet molar flows.
+"""Build GC velocity/pressure profiles from inlet molar flows (in-place, zero allocation).
 
-This deterministic kernel is shared by the DAE algebraic residual and can also
-be reused by standalone nonlinear solves. Inputs/outputs are in physical units.
+Parameters
+----------
+work : GCManifoldWorkspace
+    Pre-allocated workspace.
+sv : AbstractVector{<:CellState1D}
+    Per-GC-node solver state.
+J_a_in, J_c_in : Float64
+    Inlet molar fluxes at the anode and cathode (mol·m⁻²·s⁻¹).
+fc : AbstractFuelCell
+    Fuel-cell instance providing geometric and operating parameters.
+cfg : SimulationConfig
+    Simulation configuration.
 """
-function velocity_profiles_from_inlet_flows(sv::AbstractVector{<:CellState1D},
-                                            J_a_in::Float64,
-                                            J_c_in::Float64,
-                                            fc::AbstractFuelCell,
-                                            cfg::SimulationConfig)::Tuple{Vector{Float64}, Vector{Float64}, Float64, Float64}
+function velocity_profiles_from_inlet_flows!(work::GCManifoldWorkspace,
+                                             sv::AbstractVector{<:CellState1D},
+                                             J_a_in::Float64,
+                                             J_c_in::Float64,
+                                             fc::AbstractFuelCell,
+                                             cfg::SimulationConfig)
 
+    # Extract parameters
     oc = fc.operating_conditions
     pp = fc.physical_parameters
     np = cfg.numerical_parameters
@@ -23,24 +35,9 @@ function velocity_profiles_from_inlet_flows(sv::AbstractVector{<:CellState1D},
     Hagc, Hcgc, Wagc, Wcgc = pp.Hagc, pp.Hcgc, pp.Wagc, pp.Wcgc
     Lgc, Ldist = pp.Lgc, pp.Ldist
     nb_gc, nb_gdl = np.nb_gc, np.nb_gdl
-
     is_counter_flow = cfg.type_flow == :counter_flow
-    agc_order = anode_gc_order(nb_gc, cfg.type_flow)
-
-    C_v_agc = [sv[i].agc.C_v for i in agc_order]
-    C_v_agdl_1 = [sv[i].agdl[1].C_v for i in agc_order]
-    C_v_cgdl_nb_gdl = [sv[i].cgdl[nb_gdl].C_v for i in 1:nb_gc]
-    C_v_cgc = [sv[i].cgc.C_v for i in 1:nb_gc]
-    C_H2_agc = [sv[i].agc.C_H2 for i in agc_order]
-    C_H2_agdl_1 = [sv[i].agdl[1].C_H2 for i in agc_order]
-    C_O2_cgdl_nb_gdl = [sv[i].cgdl[nb_gdl].C_O2 for i in 1:nb_gc]
-    C_O2_cgc = [sv[i].cgc.C_O2 for i in 1:nb_gc]
-    C_N2_agc = [sv[i].agc.C_N2 for i in agc_order]
-    C_N2_cgc = [sv[i].cgc.C_N2 for i in 1:nb_gc]
-    T_agc = [sv[i].agc.T for i in agc_order]
-    T_cgc = [sv[i].cgc.T for i in 1:nb_gc]
-
     L_node_gc = Lgc / nb_gc
+
     if cfg.type_auxiliary in (:forced_convective_cathode_with_anodic_recirculation,
                               :forced_convective_cathode_with_flow_through_anode)
         Pa_ext = Pext
@@ -50,83 +47,61 @@ function velocity_profiles_from_inlet_flows(sv::AbstractVector{<:CellState1D},
         Pc_ext = Pc_des
     end
 
-    Pagc = [(C_v_agc[i] + C_H2_agc[i] + C_N2_agc[i]) * R * T_agc[i] for i in 1:nb_gc]
-    Pcgc = [(C_v_cgc[i] + C_O2_cgc[i] + C_N2_cgc[i]) * R * T_cgc[i] for i in 1:nb_gc]
+    # ── Pass 1: Calculate GC thermodynamics, viscosities, and GC/GDL interface fluxes ────
+    calculate_velocity_int_values!(work, sv, T_des, fc, cfg)
 
-    y_H2_agc = [C_H2_agc[i] / (C_H2_agc[i] + C_N2_agc[i]) for i in 1:nb_gc]
-    y_O2_cgc = [C_O2_cgc[i] / (C_O2_cgc[i] + C_N2_cgc[i]) for i in 1:nb_gc]
-    x_H2O_v_agc = [C_v_agc[i] / (C_v_agc[i] + C_H2_agc[i] + C_N2_agc[i]) for i in 1:nb_gc]
-    x_H2O_v_cgc = [C_v_cgc[i] / (C_v_cgc[i] + C_O2_cgc[i] + C_N2_cgc[i]) for i in 1:nb_gc]
-
-    mu_gaz_agc = [mu_mixture_gases(["H2O_v", "H2"], [x_H2O_v_agc[i], 1 - x_H2O_v_agc[i]], T_agc[i])
-                  for i in 1:nb_gc]
-    mu_gaz_cgc = [mu_mixture_gases(["H2O_v", "O2", "N2"],
-                                   [x_H2O_v_cgc[i],
-                                    y_O2_cgc[i] * (1 - x_H2O_v_cgc[i]),
-                                    (1 - y_O2_cgc[i]) * (1 - x_H2O_v_cgc[i])],
-                                   T_cgc[i]) for i in 1:nb_gc]
-
-    C_tot_agdl = [C_v_agdl_1[i] + C_H2_agdl_1[i] + C_N2_agc[i] for i in 1:nb_gc]
-    C_tot_cgdl = [C_v_cgdl_nb_gdl[i] + C_O2_cgdl_nb_gdl[i] + C_N2_cgc[i] for i in 1:nb_gc]
-    J_tot_agc_agdl = zeros(Float64, nb_gc)
-    J_tot_cgdl_cgc = zeros(Float64, nb_gc)
+    # ── Pass 2: integrate molar flows from inlet to outlet ──────────────────────
     @inbounds for i in 1:nb_gc
-        Jv_agc_agdl = h_a(Pagc[i], T_des, Wagc, Hagc) * (C_v_agc[i] - C_v_agdl_1[i])
-        J_H2_agc_agdl = h_a(Pagc[i], T_des, Wagc, Hagc) * (C_H2_agc[i] - C_H2_agdl_1[i])
-        Jv_cgdl_cgc = h_c(Pcgc[i], T_des, Wcgc, Hcgc) * (C_v_cgdl_nb_gdl[i] - C_v_cgc[i])
-        J_O2_cgdl_cgc = h_c(Pcgc[i], T_des, Wcgc, Hcgc) * (C_O2_cgdl_nb_gdl[i] - C_O2_cgc[i])
-        J_tot_agc_agdl[i] = Jv_agc_agdl + J_H2_agc_agdl
-        J_tot_cgdl_cgc[i] = Jv_cgdl_cgc + J_O2_cgdl_cgc
+        J_a_prev = i == 1 ? J_a_in : work.J_a[i - 1]
+        J_c_prev = i == 1 ? J_c_in : work.J_c[i - 1]
+        work.J_a[i] = J_a_prev - work.J_tot_agc_agdl[i] * L_node_gc / Hagc
+        work.J_c[i] = J_c_prev + work.J_tot_cgdl_cgc[i] * L_node_gc / Hcgc
     end
 
-    J_a = Vector{Float64}(undef, nb_gc)
-    J_c = Vector{Float64}(undef, nb_gc)
-    P_a = Vector{Float64}(undef, nb_gc)
-    P_c = Vector{Float64}(undef, nb_gc)
-    v_a = Vector{Float64}(undef, nb_gc)
-    v_c = Vector{Float64}(undef, nb_gc)
+    # ── Pass 3: back-propagate pressure and velocity from outlet to inlet ────────
+    # Outlet pressures and velocities.
+    # Without GDL in the outlets, the stationary outlet flow is equal to the last GC node flow.
+    J_a_out, J_c_out = work.J_a[end], work.J_c[end]
+    P_a_out, P_c_out = Pa_ext, Pc_ext
+    v_a_out, v_c_out = J_a_out / P_a_out * R * T_des, J_c_out / P_c_out * R * T_des
 
-    @inbounds for i in 1:nb_gc
-        J_a_previous = i == 1 ? J_a_in : J_a[i - 1]
-        J_c_previous = i == 1 ? J_c_in : J_c[i - 1]
-        J_a[i] = J_a_previous - J_tot_agc_agdl[i] * L_node_gc / Hagc
-        J_c[i] = J_c_previous + J_tot_cgdl_cgc[i] * L_node_gc / Hcgc
-    end
+    # Last GC node pressure and velocity (with viscous drop along the last GC segment)
+    work.P_a_chan[end] = P_a_out + 8 * π * work.mu_gaz_agc[end] * Ldist / (Hagc * Wagc) * v_a_out
+    work.v_a[end]      = work.J_a[end] / work.P_a_chan[end] * R * T_des
+    work.P_c_chan[end] = P_c_out + 8 * π * work.mu_gaz_cgc[end] * Ldist / (Hcgc * Wcgc) * v_c_out
+    work.v_c[end]      = work.J_c[end] / work.P_c_chan[end] * R * T_des
 
-    J_a_out = J_a[end]
-    J_c_out = J_c[end]
-    P_a_out = Pa_ext
-    P_c_out = Pc_ext
-    v_a_out = J_a_out / P_a_out * R * T_des
-    v_c_out = J_c_out / P_c_out * R * T_des
-
-    P_a[end] = P_a_out + 8 * π * mu_gaz_agc[end] * Ldist / (Hagc * Wagc) * v_a_out
-    v_a[end] = J_a[end] / P_a[end] * R * T_des
-    P_c[end] = P_c_out + 8 * π * mu_gaz_cgc[end] * Ldist / (Hcgc * Wcgc) * v_c_out
-    v_c[end] = J_c[end] / P_c[end] * R * T_des
-
+    # Back-propagate the pressure and velocity profiles from the last GC node to the first GC node.
     @inbounds for i in nb_gc:-1:2
-        P_a[i - 1] = P_a[i] + 8 * π * mu_gaz_agc[i] * L_node_gc / (Hagc * Wagc) *
-                     (v_a[i] + J_tot_agc_agdl[i] / C_tot_agdl[i])
-        v_a[i - 1] = J_a[i - 1] / P_a[i - 1] * R * T_des
+        work.P_a_chan[i - 1] = work.P_a_chan[i] + 8 * π * work.mu_gaz_agc[i] * L_node_gc / (Hagc * Wagc) *
+                               (work.v_a[i] + work.J_tot_agc_agdl[i] / work.C_tot_agdl[i])
+        work.v_a[i - 1] = work.J_a[i - 1] / work.P_a_chan[i - 1] * R * T_des
 
-        P_c[i - 1] = P_c[i] + 8 * π * mu_gaz_cgc[i] * L_node_gc / (Hcgc * Wcgc) *
-                     (v_c[i] - J_tot_cgdl_cgc[i] / C_tot_cgdl[i])
-        v_c[i - 1] = J_c[i - 1] / P_c[i - 1] * R * T_des
+        work.P_c_chan[i - 1] = work.P_c_chan[i] + 8 * π * work.mu_gaz_cgc[i] * L_node_gc / (Hcgc * Wcgc) *
+                               (work.v_c[i] - work.J_tot_cgdl_cgc[i] / work.C_tot_cgdl[i])
+        work.v_c[i - 1] = work.J_c[i - 1] / work.P_c_chan[i - 1] * R * T_des
     end
 
-    P_a_in = P_a[1] + 8 * π * mu_gaz_agc[1] * L_node_gc / (Hagc * Wagc) *
-             (v_a[1] + J_tot_agc_agdl[1] / C_tot_agdl[1])
-    P_c_in = P_c[1] + 8 * π * mu_gaz_cgc[1] * L_node_gc / (Hcgc * Wcgc) *
-             (v_c[1] - J_tot_cgdl_cgc[1] / C_tot_cgdl[1])
+    P_a_in = work.P_a_chan[1] + 8 * π * work.mu_gaz_agc[1] * L_node_gc / (Hagc * Wagc) *
+             (work.v_a[1] + work.J_tot_agc_agdl[1] / work.C_tot_agdl[1])
+    P_c_in = work.P_c_chan[1] + 8 * π * work.mu_gaz_cgc[1] * L_node_gc / (Hcgc * Wcgc) *
+             (work.v_c[1] - work.J_tot_cgdl_cgc[1] / work.C_tot_cgdl[1])
 
-    v_a_nominal = is_counter_flow ? reverse(v_a) : v_a
-    return v_a_nominal, v_c, P_a_in, P_c_in
+    # Reorder anode velocity for counter-flow (no allocation)
+    if is_counter_flow
+        @inbounds for i in 1:nb_gc
+            work.v_a_nominal[i] = work.v_a[nb_gc - i + 1]
+        end
+        return work.v_a_nominal, work.v_c, P_a_in, P_c_in
+    else
+        return work.v_a, work.v_c, P_a_in, P_c_in
+    end
 end
 
 
 """Compute inlet-flow algebraic residuals for the DAE block in physical units."""
-function velocity_inlet_flow_residuals!(res::AbstractVector,
+function velocity_inlet_flow_residuals!(gc_manifold_work::GCManifoldWorkspace,
+                                        res::AbstractVector,
                                         J_a_in::Float64,
                                         J_c_in::Float64,
                                         sv::AbstractVector{<:CellState1D},
@@ -137,7 +112,7 @@ function velocity_inlet_flow_residuals!(res::AbstractVector,
     cfg.type_auxiliary == :no_auxiliary ||
         throw(ArgumentError("velocity_inlet_flow_residuals! currently supports only :no_auxiliary."))
 
-    _, _, P_a_in, P_c_in = velocity_profiles_from_inlet_flows(sv, J_a_in, J_c_in, fc, cfg)
+    _, _, P_a_in, P_c_in = velocity_profiles_from_inlet_flows!(gc_manifold_work, sv, J_a_in, J_c_in, fc, cfg)
 
     pp = fc.physical_parameters
     Hagc, Hcgc, Wagc, Wcgc = pp.Hagc, pp.Hcgc, pp.Wagc, pp.Wcgc
@@ -260,40 +235,5 @@ DesiredInletFlows
     end
 
     return DesiredInletFlows(W_H2_des, W_dry_air_des, W_H2O_inj_a_des, W_H2O_inj_c_des)
-end
-
-
-"""
-    adjust_compressor_flow_with_minimum(i_fc_cell, Wcp_des)
-
-Adjust the desired compressor flow rate to ensure a minimum flow is maintained, based on the current density.
-
-Parameters
-----------
-i_fc_cell : Real
-    Actual fuel cell current density (A.m-2).
-Wcp_des : Real
-    Desired compressor flow rate (mol.s-1).
-
-Returns
--------
-Real
-    Adjusted compressor flow rate (mol.s-1) ensuring the minimum flow.
-"""
-@inline function adjust_compressor_flow_with_minimum(i_fc_cell::Float64, Wcp_des::Float64)::Float64
-
-    # Parameters for minimum current density adjustment
-    i_cp_min = 0.3e4  # (A/m²) Minimum current density for compressor flow.
-    delta_i_load_step = 0.01e4  # (A/m²) Minimum current density step for reaching the minimum compressor flow.
-
-    if i_fc_cell <= i_cp_min + 3 * delta_i_load_step
-        Wcp_des_adjusted = (
-            Wcp_des * i_cp_min / i_fc_cell * (1.0 + tanh(4 * (i_fc_cell - (delta_i_load_step / 2)) / (delta_i_load_step / 2))) / 2 +
-            Wcp_des * (1 - i_cp_min / i_fc_cell) * (1.0 + tanh(4 * (i_fc_cell - i_cp_min - (delta_i_load_step / 2)) / (delta_i_load_step / 2))) / 2
-        )
-        return Wcp_des_adjusted
-    else  # For higher current densities, the compressor flow is not adjusted, and so it is faster to return the original value.
-        return Wcp_des
-    end
 end
 
