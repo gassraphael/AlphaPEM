@@ -50,6 +50,7 @@ function velocity_profiles_from_inlet_flows!(work::GCManifoldWorkspace,
     # ── Pass 1: Calculate GC thermodynamics, viscosities, and GC/GDL interface fluxes ────
     calculate_velocity_int_values!(work, sv, T_des, fc, cfg)
 
+    # ── Pass 2 and 3: integrate molar flows from inlet to outlet, then back-propagate pressure and velocity from outlet to inlet ────
     local P_a_in::Float64, P_c_in::Float64
 
     if nb_gc == 1 # Single-node accuracy enhancement: virtual NB_GC_VIRT-node pressure integration
@@ -101,7 +102,11 @@ function velocity_profiles_from_inlet_flows!(work::GCManifoldWorkspace,
         P_c_in = P_c_virt[1] + 8 * π * work.mu_gaz_cgc[1] * L_node_virt / (Hcgc * Wcgc) *
                  (v_c_virt[1] - work.J_tot_cgdl_cgc[1] / work.C_tot_cgdl[1])
 
-        # Store only the midpoint values in the workspace (node MID, position x = Lgc / 2)
+        # Outlet velocity stored in the dedicated workspace fields (used by Wa_out / Wc_out)
+        work.v_a_outlet = v_a_virt[end]
+        work.v_c_outlet = v_c_virt[end]
+
+        # Midpoint-node values stored as the GC node state (consistent with solver-state position x = Lgc / 2)
         work.J_a[1]     = J_a_virt[MID]
         work.J_c[1]     = J_c_virt[MID]
         work.P_a_chan[1] = P_a_virt[MID]
@@ -146,6 +151,10 @@ function velocity_profiles_from_inlet_flows!(work::GCManifoldWorkspace,
                  (work.v_a[1] + work.J_tot_agc_agdl[1] / work.C_tot_agdl[1])
         P_c_in = work.P_c_chan[1] + 8 * π * work.mu_gaz_cgc[1] * L_node_gc / (Hcgc * Wcgc) *
                  (work.v_c[1] - work.J_tot_cgdl_cgc[1] / work.C_tot_cgdl[1])
+
+        # Outlet velocity stored in the dedicated workspace fields (used by Wa_out / Wc_out)
+        work.v_a_outlet = work.v_a[end]
+        work.v_c_outlet = work.v_c[end]
     end
 
     # ── Pass 4: Reorder anode velocity for counter-flow ──────────────────────────────
