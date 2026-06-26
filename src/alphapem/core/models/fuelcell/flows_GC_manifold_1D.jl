@@ -9,7 +9,7 @@
 
 Parameters
 ----------
-gc_manifold_work : GCManifoldWorkspace
+work : GCManifoldWorkspace
     Workspace for the calculation of the flows in the GC manifold (stores intermediate values and pre-allocations).
 sv_1D_cell : AbstractVector{<:CellState1D}
     Typed variables calculated by the solver (cell internal states).
@@ -35,7 +35,7 @@ Returns
 GCManifoldFlows1D{NB_GC}
     Typed global and species-specific flows in the gas channels and auxiliaries.
 """
-function calculate_flows_1D_GC_manifold(gc_manifold_work::GCManifoldWorkspace,
+function calculate_flows_1D_GC_manifold(work::GCManifoldWorkspace,
                                         sv_1D_cell::AbstractVector{<:CellState1D},
                                         sv_auxiliary,
                                         i_fc_cell::Float64,
@@ -71,7 +71,7 @@ function calculate_flows_1D_GC_manifold(gc_manifold_work::GCManifoldWorkspace,
 
     # Intermediate values
     (P_agc, P_cgc, Phi_agc, Phi_cgc, y_H2_agc, y_O2_cgc, M_agc, M_cgc, M_ext, M_H2_N2_in, rho_agc, rho_cgc, k_purge,
-     Abp_a, Abp_c, mu_gaz_agc, mu_gaz_cgc) = calculate_flow_1D_GC_manifold_int_values!(gc_manifold_work, sv_1D_cell, sv_auxiliary, fc, cfg)
+     Abp_a, Abp_c, mu_gaz_agc, mu_gaz_cgc) = calculate_flow_1D_GC_manifold_int_values!(work, sv_1D_cell, sv_auxiliary, fc, cfg)
     W_des = desired_flows(sv_1D_cell, i_fc_cell, Pa_in, Pc_in, fc, cfg)
 
     # _________________________________________Inlet and outlet global flows____________________________________________
@@ -100,7 +100,7 @@ function calculate_flows_1D_GC_manifold(gc_manifold_work::GCManifoldWorkspace,
         #     Wa_out = rho_aem_out_to_ext * v_a * Abp_a
     else  # type_auxiliary == :no_auxiliary (only 1 cell)
         Wa_in = W_des.H2 + W_des.H2O_inj_a  # This expression is also present in calculate_velocity_evolution.
-        Wa_out = P_agc[agc_order[end]] / (R * T_des) * v_a_o[end] * Hagc * Wagc * nb_cell * nb_channel_in_gc
+        Wa_out = P_agc[agc_order[end]] / (R * T_des) * work.v_a_outlet * Hagc * Wagc * nb_cell * nb_channel_in_gc
     end
 
     # Anode flow entering/leaving the stack in mol.m-2.s-1
@@ -127,7 +127,7 @@ function calculate_flows_1D_GC_manifold(gc_manifold_work::GCManifoldWorkspace,
         # Wc_out = rho_cem_out_to_ext * v_c * Abp_c
     else  # type_auxiliary == :no_auxiliary (only 1 cell)
         Wc_in = W_des.dry_air + W_des.H2O_inj_c  # This expression is also present in calculate_velocity_evolution.
-        Wc_out = P_cgc[nb_gc] / (R * T_des) * v_c[nb_gc] * Hcgc * Wcgc * nb_cell * nb_channel_in_gc
+        Wc_out = P_cgc[nb_gc] / (R * T_des) * work.v_c_outlet * Hcgc * Wcgc * nb_cell * nb_channel_in_gc
     end
 
     # Cathode flow entering/leaving the stack in mol.m-2.s-1
@@ -164,7 +164,7 @@ function calculate_flows_1D_GC_manifold(gc_manifold_work::GCManifoldWorkspace,
     Jl_agc_agc_dif = [-D_liq_dif * d_dx(s_agc[i], i == nb_gc ? s_agc_outlet : s_agc[i + 1], (Lgc / nb_gc) / 2)
                       for i in 1:(nb_gc - 1)]
     Jl_agc_agc = [Jl_agc_agc_conv[i] + Jl_agc_agc_dif[i] for i in 1:(nb_gc - 1)]
-    Jl_agc_agc_conv_out = rho_H2O_l(T_des) * K_v_liq_gas * v_a_o[end] * s_agc[end]
+    Jl_agc_agc_conv_out = rho_H2O_l(T_des) * K_v_liq_gas * work.v_a_outlet * s_agc[end]
     Jl_agc_agc_dif_out = -D_liq_dif * d_dx(s_agc[end], s_agc_outlet, (Lgc / nb_gc) / 2)
     Jl_agc_out = Jl_agc_agc_conv_out + Jl_agc_agc_dif_out
 

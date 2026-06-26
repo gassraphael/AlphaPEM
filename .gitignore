@@ -1,8 +1,6 @@
 results
 external
-src/alphapem/parametrisation/results
-site
-env
+docs/build
 .CondaPkg
 __pycache__
 __pycache__/
