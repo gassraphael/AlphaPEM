@@ -78,9 +78,7 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
     # Anode GC: nitrogen
     d_C_N2_agc_dt = ntuple(NB_GC) do i
         fac_a = 1.0 / (1.0 - sv[i].agc.s)
-        if type_auxiliary != :forced_convective_cathode_with_flow_through_anode
-            0.0
-        elseif NB_GC == 1
+        if NB_GC == 1
             J_in = JN2.agc_in
             J_out = JN2.agc_out
             fac_a * (J_in - J_out) / Lgc

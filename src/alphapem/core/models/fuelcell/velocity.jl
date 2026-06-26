@@ -276,7 +276,7 @@ DesiredInletFlows
         if cfg.type_auxiliary == :forced_convective_cathode_with_flow_through_anode
              Pasm = NaN
              Prd = Pasm
-             W_H2_des = 1 / y_H2_in * Sa * i_fc_cell / (2 * F) * (nb_cell * Aact)
+             W_H2_des        = 1 / y_H2_in * Sa * i_fc_cell / (2 * F) * (nb_cell * Aact)
              W_H2O_inj_a_des = Phi_a_des * Psat(T_des) / (Prd + Phi_a_des * Psat(T_des)) /
                                (1 - Phi_a_des * Psat(T_des) / (Prd + Phi_a_des * Psat(T_des))) * W_H2_des
         else  # type_auxiliary == "forced-convective_cathode_with_anodic_recirculation"
@@ -285,10 +285,10 @@ DesiredInletFlows
 
          # The desired humidifier volume flow rate at the cathode side Wc_v_inj_des (mol.s-1). Warning: consider the minimum compressor flow!
          Pcsm = NaN
-         Wcp = NaN
-         Pcp = Pcsm
-         Wv_hum_in = Phi_ext * Psat(Text) / Pext * Wcp  # Vapor flow rate from the outside.
-         W_H20_c_des = Phi_c_des * Psat(T_des) / Pcp * Wcp  # Desired vapor flow rate.
+         Wcp  = NaN
+         Pcp  = Pcsm
+         Wv_hum_in       = Phi_ext * Psat(Text) / Pext * Wcp  # Vapor flow rate from the outside.
+         W_H20_c_des     = Phi_c_des * Psat(T_des) / Pcp * Wcp  # Desired vapor flow rate.
          W_H2O_inj_c_des = W_H20_c_des - Wv_hum_in  # Desired humidifier flow rate.
 
         _ = Wacp_des_adjusted
@@ -296,11 +296,11 @@ DesiredInletFlows
         throw(ErrorException("desired_flows is not yet implemented in Julia for the forced-convective auxiliary branches because the translated Python source still depends on unavailable variables such as Pasm, Pcsm, and Wcp."))
     else  # cfg.type_auxiliary == :no_auxiliary
         # At the anode side
-        W_H2_des = Sa * (i_fc_cell + max_i_n) / (2 * F) * (nb_cell * Aact)
+        W_H2_des        = 1 / y_H2_in * Sa * (i_fc_cell + max_i_n) / (2 * F) * (nb_cell * Aact)
         W_H2O_inj_a_des = (Phi_a_des * Psat(T_des) / (Pa_in - Phi_a_des * Psat(T_des))) * W_H2_des
 
         # At the cathode side
-        W_dry_air_des = 1 / y_O2_ext * Sc * (i_fc_cell + max_i_n) / (4 * F) * (nb_cell * Aact)
+        W_dry_air_des   = 1 / y_O2_ext * Sc * (i_fc_cell + max_i_n) / (4 * F) * (nb_cell * Aact)
         W_H2O_inj_c_des = (Phi_c_des * Psat(T_des) / (Pc_in - Phi_c_des * Psat(T_des))) * W_dry_air_des
     end
 

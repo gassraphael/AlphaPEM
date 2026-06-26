@@ -236,16 +236,10 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector{Float64}
     #   Initial fuel cell states.
     C_v_a_ini = Phi_a_ini * Psat_ini / (R * T_ini)
     C_v_c_ini = Phi_c_ini * Psat_ini / (R * T_ini)
+    C_H2_ini = y_H2_in * (Pa_ini - Phi_a_ini * Psat_ini) / (R * T_ini)
     C_O2_ini = y_O2_ext * (Pc_ini - Phi_c_ini * Psat_ini) / (R * T_ini)
+    C_N2_agc_ini = (1 - y_H2_in) * (Pa_ini - Phi_a_ini * Psat_ini) / (R * T_ini)
     C_N2_cgc_ini = (1 - y_O2_ext) * (Pc_ini - Phi_c_ini * Psat_ini) / (R * T_ini)
-
-    if simu.cfg.type_auxiliary == :forced_convective_cathode_with_flow_through_anode
-        C_H2_ini = y_H2_in * (Pa_ini - Phi_a_ini * Psat_ini) / (R * T_ini)
-        C_N2_agc_ini = (1 - y_H2_in) * (Pa_ini - Phi_a_ini * Psat_ini) / (R * T_ini)
-    else
-        C_H2_ini = (Pa_ini - Phi_a_ini * Psat_ini) / (R * T_ini)
-        C_N2_agc_ini = 0.0
-    end
 
     s_ini = 0.0
     # Ionomer water content: each CL equilibrates with its own local humidity at rest.
@@ -278,11 +272,7 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector{Float64}
     lambda_acl, lambda_mem, lambda_ccl = lambda_acl_ini, lambda_mem_ini, lambda_ccl_ini
     C_H2_agc, C_H2_agdl, C_H2_ampl, C_H2_acl = (C_H2_ini, C_H2_ini, C_H2_ini, C_H2_ini)
     C_O2_ccl, C_O2_cmpl, C_O2_cgdl, C_O2_cgc = (C_O2_ini, C_O2_ini, C_O2_ini, C_O2_ini)
-    if simu.cfg.type_auxiliary == :forced_convective_cathode_with_flow_through_anode
-        C_N2_agc, C_N2_cgc = C_N2_agc_ini, C_N2_cgc_ini
-    else
-        C_N2_agc, C_N2_cgc = 0.0, C_N2_cgc_ini
-    end
+    C_N2_agc, C_N2_cgc = C_N2_agc_ini, C_N2_cgc_ini
     T_agc, T_agdl, T_ampl, T_acl, T_mem, T_ccl, T_cmpl, T_cgdl, T_cgc = (T_ini, T_ini, T_ini, T_ini, T_ini, T_ini, T_ini, T_ini, T_ini)
     eta_c = eta_c_ini
     Pasm, Paem = Pa_ini, Pa_ini
