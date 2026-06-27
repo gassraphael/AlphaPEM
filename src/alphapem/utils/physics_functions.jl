@@ -88,19 +88,19 @@ This function returns the molar mass of a given gas component, in kg.mol-1.
 
 # Arguments
 - `component::String`: Specifies the gas for which the molar mass is returned.
-  Must be either `"H2O_v"` (vapor), `"H2"` (hydrogen), `"O2"` (oxygen), or `"N2"` (nitrogen).
+  Must be either `:H2O_v` (vapor), `:H2` (hydrogen), `:O2` (oxygen), or `:N2` (nitrogen).
 
 # Returns
 - `M_gas`: Molar mass of the selected gas component in kg.mol-1.
 """
-function molar_mass(component::String)
-    if component == "H2O_v"
+function molar_mass(component::Symbol)
+    if component == :H2O_v
         return M_H2O
-    elseif component == "H2"
+    elseif component == :H2
         return M_H2
-    elseif component == "O2"
+    elseif component == :O2
         return M_O2
-    elseif component == "N2"
+    elseif component == :N2
         return M_N2
     else
         throw(ArgumentError("The element should be either 'H2O_v', 'H2', 'O2' or 'N2'."))
@@ -115,7 +115,7 @@ This function calculates the dynamic viscosity of different gases, in Pa.s, as a
 
 # Arguments
 - `component::String`: Specifies the gas for which the dynamic viscosity is calculated.
-  Must be either `"H2O_v"` (vapor), `"H2"` (hydrogen), `"O2"` (oxygen), or `"N2"` (nitrogen).
+  Must be either `:H2O_v` (vapor), `:H2` (hydrogen), `:O2` (oxygen), or `:N2` (nitrogen).
 - `T`: Temperature in K.
 
 # Returns
@@ -125,15 +125,15 @@ This function calculates the dynamic viscosity of different gases, in Pa.s, as a
 Source : Carl L. Yaws - Manuel 2014 - Transport properties of chemicals and hydrocarbons
 (https://www.sciencedirect.com/book/9780323286589/transport-properties-of-chemicals-and-hydrocarbons)
 """
-function mu_gaz(component::String, T)
+function mu_gaz(component::Symbol, T)
 
-    if component == "H2O_v"  # For T >= 150 K and T <= 1500 k.
+    if component == :H2O_v  # For T >= 150 K and T <= 1500 k.
         return (22.8211 + 1.7387e-1 * T + 3.2465e-4 * T^2 - 1.4334e-7 * T^3) * 1e-7
-    elseif component == "H2"  # For T >= 15 K and T <= 1500 K.
+    elseif component == :H2  # For T >= 15 K and T <= 1500 K.
         return (1.7611 + 3.4165e-1 * T - 1.8368e-4 * T^2 + 5.1147e-8 * T^3) * 1e-7
-    elseif component == "O2"  # For T >= 54 K and T <= 1500 K.
+    elseif component == :O2  # For T >= 54 K and T <= 1500 K.
         return (-4.9433 + 8.0673e-1 * T - 4.0416e-4 * T^2 + 1.0111e-7 * T^3) * 1e-7
-    elseif component == "N2"  # For T >= 63 K and T <= 1970 K.
+    elseif component == :N2  # For T >= 63 K and T <= 1970 K.
         return (4.4656 + 6.3814e-1 * T - 2.6596e-4 * T^2 + 5.4113e-8 * T^3) * 1e-7
     else
         throw(ArgumentError("The element should be either 'H2O_v', 'H2', 'O2' or 'N2'."))
@@ -147,8 +147,8 @@ end
 This function calculates the dynamic viscosity of a gas mixture, in Pa.s, as a function of the temperature.
 
 # Arguments
-- `components::Vector{String}`: List of gas components in the mixture. Each component must be either `"H2O_v"`
-  (vapor), `"H2"` (hydrogen), `"O2"` (oxygen), or `"N2"` (nitrogen).
+- `components::Vector{String}`: List of gas components in the mixture. Each component must be either `:H2O_v`
+  (vapor), `:H2` (hydrogen), `:O2` (oxygen), or `:N2` (nitrogen).
 - `x::Vector`: List of mole fractions corresponding to each gas component in the mixture.
 - `T`: Temperature in K.
 
@@ -158,8 +158,8 @@ This function calculates the dynamic viscosity of a gas mixture, in Pa.s, as a f
 # Notes
 A simple mixture law is used here to calculate the dynamic viscosity of the gas mixture.
 """
-function mu_mixture_gases(comp1::String, x1::Real, comp2::String, x2::Real,
-                          comp3::String, x3::Real, T)
+function mu_mixture_gases(comp1::Symbol, x1::Real, comp2::Symbol, x2::Real,
+                          comp3::Symbol, x3::Real, T)
     M_mix = molar_mass(comp1) * x1 + molar_mass(comp2) * x2 + molar_mass(comp3) * x3
     inv_mu_mix = (molar_mass(comp1) * x1 / M_mix) / mu_gaz(comp1, T) +
                  (molar_mass(comp2) * x2 / M_mix) / mu_gaz(comp2, T) +

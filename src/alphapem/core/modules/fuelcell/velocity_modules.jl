@@ -52,7 +52,7 @@ function calculate_velocity_int_values!(work::GCManifoldWorkspace,
         # Calculate the mole fractions and viscosities, then store them in natural order (not counter-flow order)
         x_H2O_v_agc, x_H2_agc, x_N2_agc = C_v_agc  / C_tot_agc, C_H2_agc / C_tot_agc, C_N2_agc / C_tot_agc
         work.x_H2O_v_agc[k], work.x_H2_agc[k], work.x_N2_agc[k] = x_H2O_v_agc, x_H2_agc, x_N2_agc
-        work.mu_gaz_agc[k]  = mu_mixture_gases("H2O_v", x_H2O_v_agc, "H2", x_H2_agc, "N2", x_N2_agc, T_agc)
+        work.mu_gaz_agc[k]  = mu_mixture_gases(:H2O_v, x_H2O_v_agc, :H2, x_H2_agc, :N2, x_N2_agc, T_agc)
 
         # Calculate the total molar concentration at the AGC/AGDL interface and the net molar flux from AGC to AGDL,
         # then store them in natural order (not counter-flow order)
@@ -77,7 +77,7 @@ function calculate_velocity_int_values!(work::GCManifoldWorkspace,
         # Calculate the mole fractions and viscosities
         x_H2O_v_cgc, x_O2_cgc, x_N2_cgc = C_v_cgc / C_tot_cgc, C_O2_cgc / C_tot_cgc, C_N2_cgc / C_tot_cgc
         work.x_H2O_v_cgc[i], work.x_O2_cgc[i], work.x_N2_cgc[i] = x_H2O_v_cgc, x_O2_cgc, x_N2_cgc
-        work.mu_gaz_cgc[i]  = mu_mixture_gases("H2O_v", x_H2O_v_cgc, "O2", x_O2_cgc, "N2", x_N2_cgc, T_cgc)
+        work.mu_gaz_cgc[i]  = mu_mixture_gases(:H2O_v, x_H2O_v_cgc, :O2, x_O2_cgc, :N2, x_N2_cgc, T_cgc)
 
         # Calculate the total molar concentration at the CGDL/CGC interface and the net molar flux from CGDL to CGC
         C_v_cgdl_last, C_O2_cgdl_last, C_N2_cgdl_last = sv_i.cgdl[nb_gdl].C_v, sv_i.cgdl[nb_gdl].C_O2, sv_i.cgdl[nb_gdl].C_N2

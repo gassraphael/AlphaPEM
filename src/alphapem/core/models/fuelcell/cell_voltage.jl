@@ -57,9 +57,9 @@ function calculate_cell_voltage(i_fc::Real, C_O2_Pt::Real, sv::CellState1D, fc::
 
     # The proton resistance
     #       The proton resistance at the membrane : Rmem
-    Rmem = Hmem / sigma_p_eff("mem", lambda_mem, T_mem)
+    Rmem = Hmem / sigma_p_eff(:mem, lambda_mem, T_mem)
     #       The proton resistance at the cathode catalyst layer : Rccl
-    Rccl = Hccl / sigma_p_eff("ccl", lambda_ccl, T_ccl, Hccl)
+    Rccl = Hccl / sigma_p_eff(:ccl, lambda_ccl, T_ccl, Hccl)
     #       The total proton resistance
     Rp = Rmem + Rccl  # Its value is around [4-7]e-6 ohm.m².
 

@@ -140,18 +140,18 @@ function calculate_heat_transfers!(heat_work::MEAHeatWorkspace,
 
     # The heat dissipated by the ionic currents (Joule heating + Ohm's law), in J.m-3.s-1.
     Q_p = MEAProtonHeat(
-        i_fc^2 / sigma_p_eff("mem", lambda_mem, T_mem), # Q_p_mem
-        i_fc^2 / (3 * sigma_p_eff("ccl", lambda_ccl, T_ccl, Hccl)) # Q_p_ccl
+        i_fc^2 / sigma_p_eff(:mem, lambda_mem, T_mem), # Q_p_mem
+        i_fc^2 / (3 * sigma_p_eff(:ccl, lambda_ccl, T_ccl, Hccl)) # Q_p_ccl
     )
 
     # The heat dissipated by the electric currents (Joule heating + Ohm's law), in J.m-3.s-1.
-    sigma_e_eff_gdl = sigma_e_eff("gdl", epsilon_gdl, epsilon_c)
-    sigma_e_eff_mpl = sigma_e_eff("mpl", epsilon_mpl)
+    sigma_e_eff_gdl = sigma_e_eff(:gdl, epsilon_gdl, epsilon_c)
+    sigma_e_eff_mpl = sigma_e_eff(:mpl, epsilon_mpl)
     Q_e = MEAElectricHeat{NB_GDL, NB_MPL}(
         ntuple(_ -> i_fc^2 / sigma_e_eff_gdl, NB_GDL), # Q_e_agdl
         ntuple(_ -> i_fc^2 / sigma_e_eff_mpl, NB_MPL), # Q_e_ampl
-        i_fc^2 / sigma_e_eff("cl", nothing, nothing, lambda_acl, T_acl, Hacl), # Q_e_acl
-        i_fc^2 / (3 * sigma_e_eff("cl", nothing, nothing, lambda_ccl, T_ccl, Hccl)), # Q_e_ccl
+        i_fc^2 / sigma_e_eff(:cl, nothing, nothing, lambda_acl, T_acl, Hacl), # Q_e_acl
+        i_fc^2 / (3 * sigma_e_eff(:cl, nothing, nothing, lambda_ccl, T_ccl, Hccl)), # Q_e_ccl
         ntuple(_ -> i_fc^2 / sigma_e_eff_mpl, NB_MPL), # Q_e_cmpl
         ntuple(_ -> i_fc^2 / sigma_e_eff_gdl, NB_GDL) # Q_e_cgdl
     )

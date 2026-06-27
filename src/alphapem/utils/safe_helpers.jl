@@ -32,17 +32,17 @@ Use this when the concentration appears inside a logarithm to avoid Newton/Jacob
 """
 @inline _positive_concentration_value(x::Real) = max(Float64(x), 1e-4)
 
-function _safe_porous_phase_weights(epsilon::Float64, s)
+@inline function _safe_porous_phase_weights(epsilon::Float64, s)
     s_eff = _bounded_saturation_value(s)
-    return [max(1 - epsilon, 0.0), max(epsilon * s_eff, 0.0), max(epsilon * (1 - s_eff), 0.0)]
+    return (max(1 - epsilon, 0.0), max(epsilon * s_eff, 0.0), max(epsilon * (1 - s_eff), 0.0))
 end
 
-function _safe_cl_phase_weights(epsilon_cl_val::Float64, epsilon_mc_val::Float64, s)
+@inline function _safe_cl_phase_weights(epsilon_cl_val::Float64, epsilon_mc_val::Float64, s)
     s_eff = _bounded_saturation_value(s)
-    return [
+    return (
         max(1 - epsilon_cl_val - epsilon_mc_val, 0.0),
         max(epsilon_mc_val, 0.0),
         max(epsilon_cl_val * s_eff, 0.0),
         max(epsilon_cl_val * (1 - s_eff), 0.0),
-    ]
+    )
 end

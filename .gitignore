@@ -1,7 +1,6 @@
 results
 external
 docs/build
-Manifest.toml
 .CondaPkg
 __pycache__
 __pycache__/
