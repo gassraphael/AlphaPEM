@@ -238,7 +238,11 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector{Float64}
     C_v_c_ini = Phi_c_ini * Psat_ini / (R * T_ini)
     C_H2_ini = y_H2_in * (Pa_ini - Phi_a_ini * Psat_ini) / (R * T_ini)
     C_O2_ini = y_O2_ext * (Pc_ini - Phi_c_ini * Psat_ini) / (R * T_ini)
-    C_N2_agc_ini = (1 - y_H2_in) * (Pa_ini - Phi_a_ini * Psat_ini) / (R * T_ini)
+    if simu.cfg.type_auxiliary == :forced_convective_cathode_with_anodic_recirculation
+        C_N2_agc_ini = 0.0 # natural behavior, no N2 at anode inlet (pure H2).
+    else
+        C_N2_agc_ini = (1 - y_H2_in) * (Pa_ini - Phi_a_ini * Psat_ini) / (R * T_ini) # artificial behavior to mimic N2 accumulation due to anodic recirculation.
+    end
     C_N2_cgc_ini = (1 - y_O2_ext) * (Pc_ini - Phi_c_ini * Psat_ini) / (R * T_ini)
 
     s_ini = 0.0

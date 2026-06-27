@@ -62,9 +62,6 @@ function calculate_dif_eq_int_values(t::Float64,
     C_tot_agc = C_v_agc + C_H2_agc + C_N2_agc
     C_tot_cgc = C_v_cgc + C_O2_cgc + C_N2_cgc
 
-    #     H2/O2 ratio in the dry anode/cathode gas mixture (H2/N2 or O2/N2).
-    y_O2_cgc = C_O2_cgc / (C_O2_cgc + C_N2_cgc)
-
     #       Molar masses
     M_agc = C_v_agc * R * T_des / P_agc * M_H2O +
             C_H2_agc * R * T_des / P_agc * M_H2 +
@@ -78,14 +75,12 @@ function calculate_dif_eq_int_values(t::Float64,
     rho_cgc = P_cgc / (R * T_cgc) * M_cgc
 
     #       Vapor ratio over the gas mixture.
-    x_H2O_v_agc = C_v_agc / C_tot_agc
-    x_H2O_v_cgc = C_v_cgc / C_tot_cgc
+    x_H2O_v_agc, x_H2_agc, x_N2_agc = C_v_agc  / C_tot_agc, C_H2_agc / C_tot_agc, C_N2_agc / C_tot_agc
+    x_H2O_v_cgc, x_O2_cgc, x_N2_cgc = C_v_cgc / C_tot_cgc, C_O2_cgc / C_tot_cgc, C_N2_cgc / C_tot_cgc
 
     #       Dynamic viscosity of the gas mixture.
-    mu_gaz_agc = mu_mixture_gases(["H2O_v", "H2"], [x_H2O_v_agc, 1 - x_H2O_v_agc], T_agc)
-    mu_gaz_cgc = mu_mixture_gases(["H2O_v", "O2", "N2"],
-                                  [x_H2O_v_cgc, y_O2_cgc * (1 - x_H2O_v_cgc), (1 - y_O2_cgc) * (1 - x_H2O_v_cgc)],
-                                  T_cgc)
+    mu_gaz_agc = mu_mixture_gases("H2O_v", x_H2O_v_agc, "H2", x_H2_agc, "N2", x_N2_agc, T_agc)
+    mu_gaz_cgc = mu_mixture_gases("H2O_v", x_H2O_v_cgc, "O2", x_O2_cgc, "N2", x_N2_cgc, T_cgc)
 
     #       Volumetric heat capacity (J.m-3.K-1)
     rho_Cp0_agdl = ntuple(i -> calculate_rho_Cp0("agdl", T_agdl[i], C_v_agdl[i],
@@ -121,7 +116,7 @@ function calculate_dif_eq_int_values(t::Float64,
     if cfg.type_auxiliary in (:forced_convective_cathode_with_anodic_recirculation,
                               :forced_convective_cathode_with_flow_through_anode) &&
        sv_manifold !== nothing && sv_auxiliary !== nothing
-
+        # NOTE: For :forced_convective_cathode_with_anodic_recirculation, anode N2 inlet must be 0 (pure H2 recirculation).
         # Extraction of the variables
         Pasm, Paem = sv_manifold.asm.nodes[1].P, sv_manifold.aem.nodes[1].P
         Pcsm, Pcem = sv_manifold.csm.nodes[1].P, sv_manifold.cem.nodes[1].P
