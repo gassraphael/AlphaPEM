@@ -245,6 +245,7 @@ Calibration adapts AlphaPEM to specific fuel cells using genetic algorithms.
     - the abandonment of dictionary usage in favor of increased reliance on object-oriented programming.
     - the redesign of the AlphaPEM architecture so that the code is closer to industry standards.
     - the previous GUI has been replaced by a web-based interface.
+    - the addition of N2 flow inside MEA.
 - [V1.3](https://github.com/gassraphael/AlphaPEM/tree/65dd73ed306a054c80018447f7943b9d9f973ffb) - 2026.02.16 - This version of AlphaPEM includes: 
 	- the addition of O2 flow to Pt particules which improves the modeling of overvoltage due to flooding at high curent densities.
 		- the limiting liquid water saturation coefficient ($s_{lim}$) has been definitively removed, as this model replaces it.
