@@ -22,13 +22,13 @@ ENV["JULIA_PKG_VERBOSE"] = "false"
 import Logging
 let
     original_stdout = stdout
-    original_level = Logging.disable_logging(Logging.Info)
+    original_logger = Logging.global_logger(Logging.NullLogger())
     redirect_stdout(devnull)
     try
         import CondaPkg
     finally
         redirect_stdout(original_stdout)
-        Logging.disable_logging(original_level)
+        Logging.global_logger(original_logger)
     end
 end
 
