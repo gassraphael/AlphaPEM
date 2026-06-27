@@ -38,7 +38,10 @@ function calculate_dif_eq_int_values(t::Float64,
     C_O2_ccl, C_O2_cmpl = sv.ccl.C_O2, getproperty.(sv.cmpl, :C_O2)
     C_O2_cgdl, C_O2_cgc = getproperty.(sv.cgdl, :C_O2), sv.cgc.C_O2
 
-    C_N2_agc, C_N2_cgc = sv.agc.C_N2, sv.cgc.C_N2
+    C_N2_agc, C_N2_agdl = sv.agc.C_N2, getproperty.(sv.agdl, :C_N2)
+    C_N2_ampl, C_N2_acl = getproperty.(sv.ampl, :C_N2), sv.acl.C_N2
+    C_N2_ccl, C_N2_cmpl = sv.ccl.C_N2, getproperty.(sv.cmpl, :C_N2)
+    C_N2_cgdl, C_N2_cgc = getproperty.(sv.cgdl, :C_N2), sv.cgc.C_N2
 
     lambda_acl, lambda_mem, lambda_ccl = sv.acl.lambda, sv.mem.lambda, sv.ccl.lambda
 
@@ -84,21 +87,21 @@ function calculate_dif_eq_int_values(t::Float64,
 
     #       Volumetric heat capacity (J.m-3.K-1)
     rho_Cp0_agdl = ntuple(i -> calculate_rho_Cp0("agdl", T_agdl[i], C_v_agdl[i],
-                                                 s_agdl[i], nothing, C_H2_agdl[i], nothing, C_N2_agc,
+                                                 s_agdl[i], nothing, C_H2_agdl[i], nothing, C_N2_agdl[i],
                                                  epsilon_gdl), nb_gdl)
     rho_Cp0_ampl = ntuple(i -> calculate_rho_Cp0("ampl", T_ampl[i], C_v_ampl[i],
-                                                 s_ampl[i], nothing, C_H2_ampl[i], nothing, C_N2_agc,
+                                                 s_ampl[i], nothing, C_H2_ampl[i], nothing, C_N2_ampl[i],
                                                  epsilon_mpl), nb_mpl)
-    rho_Cp0_acl = calculate_rho_Cp0("acl", T_acl, C_v_acl, s_acl, lambda_acl, C_H2_acl, nothing, C_N2_agc,
+    rho_Cp0_acl = calculate_rho_Cp0("acl", T_acl, C_v_acl, s_acl, lambda_acl, C_H2_acl, nothing, C_N2_acl,
                                     nothing, Hacl)
     rho_Cp0_mem = calculate_rho_Cp0("mem", T_mem, nothing, nothing, lambda_mem)
     rho_Cp0_ccl = calculate_rho_Cp0("ccl", T_ccl, C_v_ccl, s_ccl, lambda_ccl, nothing, C_O2_ccl,
-                                    C_N2_cgc, nothing, Hccl)
+                                    C_N2_ccl, nothing, Hccl)
     rho_Cp0_cmpl = ntuple(i -> calculate_rho_Cp0("cmpl", T_cmpl[i], C_v_cmpl[i],
-                                                 s_cmpl[i], nothing, nothing, C_O2_cmpl[i], C_N2_cgc,
+                                                 s_cmpl[i], nothing, nothing, C_O2_cmpl[i], C_N2_cmpl[i],
                                                  epsilon_mpl), nb_mpl)
     rho_Cp0_cgdl = ntuple(i -> calculate_rho_Cp0("cgdl", T_cgdl[i], C_v_cgdl[i],
-                                                 s_cgdl[i], nothing, nothing, C_O2_cgdl[i], C_N2_cgc,
+                                                 s_cgdl[i], nothing, nothing, C_O2_cgdl[i], C_N2_cgdl[i],
                                                  epsilon_gdl), nb_gdl)
     rho_Cp0 = MEAThermalIntermediates{nb_gdl, nb_mpl}(rho_Cp0_agdl, rho_Cp0_ampl, rho_Cp0_acl,
                                                       rho_Cp0_mem, rho_Cp0_ccl, rho_Cp0_cmpl, rho_Cp0_cgdl)
@@ -245,8 +248,10 @@ function canonical_cell_solver_variable_names_1D(nb_gdl::Int, nb_mpl::Int)::Vect
 
         ["lambda_acl", "lambda_mem", "lambda_ccl"],
 
-        ["C_H2_agc"], ["C_H2_agdl_$(i)" for i in 1:nb_gdl], ["C_H2_ampl_$(i)" for i in 1:nb_mpl], ["C_H2_acl", "C_O2_ccl"],
-        ["C_O2_cmpl_$(i)" for i in 1:nb_mpl], ["C_O2_cgdl_$(i)" for i in 1:nb_gdl], ["C_O2_cgc", "C_N2_agc", "C_N2_cgc"],
+        ["C_H2_agc"], ["C_H2_agdl_$(i)" for i in 1:nb_gdl], ["C_H2_ampl_$(i)" for i in 1:nb_mpl], ["C_H2_acl"],
+        ["C_O2_ccl"], ["C_O2_cmpl_$(i)" for i in 1:nb_mpl], ["C_O2_cgdl_$(i)" for i in 1:nb_gdl], ["C_O2_cgc"],
+        ["C_N2_agc"], ["C_N2_agdl_$(i)" for i in 1:nb_gdl], ["C_N2_ampl_$(i)" for i in 1:nb_mpl], ["C_N2_acl"],
+        ["C_N2_ccl"], ["C_N2_cmpl_$(i)" for i in 1:nb_mpl], ["C_N2_cgdl_$(i)" for i in 1:nb_gdl], ["C_N2_cgc"],
 
         ["T_agc"], ["T_agdl_$(i)" for i in 1:nb_gdl], ["T_ampl_$(i)" for i in 1:nb_mpl],
         ["T_acl", "T_mem", "T_ccl"], ["T_cmpl_$(i)" for i in 1:nb_mpl], ["T_cgdl_$(i)" for i in 1:nb_gdl], ["T_cgc"],
@@ -615,6 +620,12 @@ end
     C_O2_cgdl = read_block!(Val(N_GDL))
     C_O2_cgc = read_scalar!()
     C_N2_agc = read_scalar!()
+    C_N2_agdl = read_block!(Val(N_GDL))
+    C_N2_ampl = read_block!(Val(N_MPL))
+    C_N2_acl = read_scalar!()
+    C_N2_ccl = read_scalar!()
+    C_N2_cmpl = read_block!(Val(N_MPL))
+    C_N2_cgdl = read_block!(Val(N_GDL))
     C_N2_cgc = read_scalar!()
 
     T_agc = read_scalar!()
@@ -632,13 +643,13 @@ end
         throw(ArgumentError("Invalid 1D state segment length while unpacking solver vector."))
 
     agc = AnodeGCState(T_agc, C_v_agc, s_agc, C_H2_agc, C_N2_agc)
-    agdl = ntuple(i -> AnodeGDLState(T_agdl[i], C_v_agdl[i], s_agdl[i], C_H2_agdl[i]), Val(N_GDL))
-    ampl = ntuple(i -> AnodeMPLState(T_ampl[i], C_v_ampl[i], s_ampl[i], C_H2_ampl[i]), Val(N_MPL))
-    acl = AnodeCLState(T_acl, C_v_acl, s_acl, lambda_acl, C_H2_acl)
+    agdl = ntuple(i -> AnodeGDLState(T_agdl[i], C_v_agdl[i], s_agdl[i], C_H2_agdl[i], C_N2_agdl[i]), Val(N_GDL))
+    ampl = ntuple(i -> AnodeMPLState(T_ampl[i], C_v_ampl[i], s_ampl[i], C_H2_ampl[i], C_N2_ampl[i]), Val(N_MPL))
+    acl = AnodeCLState(T_acl, C_v_acl, s_acl, lambda_acl, C_H2_acl, C_N2_acl)
     mem = MembraneState(T_mem, lambda_mem)
-    ccl = CathodeCLState(T_ccl, C_v_ccl, s_ccl, lambda_ccl, C_O2_ccl, eta_c)
-    cmpl = ntuple(i -> CathodeMPLState(T_cmpl[i], C_v_cmpl[i], s_cmpl[i], C_O2_cmpl[i]), Val(N_MPL))
-    cgdl = ntuple(i -> CathodeGDLState(T_cgdl[i], C_v_cgdl[i], s_cgdl[i], C_O2_cgdl[i]), Val(N_GDL))
+    ccl = CathodeCLState(T_ccl, C_v_ccl, s_ccl, lambda_ccl, C_O2_ccl, C_N2_ccl, eta_c)
+    cmpl = ntuple(i -> CathodeMPLState(T_cmpl[i], C_v_cmpl[i], s_cmpl[i], C_O2_cmpl[i], C_N2_cmpl[i]), Val(N_MPL))
+    cgdl = ntuple(i -> CathodeGDLState(T_cgdl[i], C_v_cgdl[i], s_cgdl[i], C_O2_cgdl[i], C_N2_cgdl[i]), Val(N_GDL))
     cgc = CathodeGCState(T_cgc, C_v_cgc, s_cgc, C_O2_cgc, C_N2_cgc)
 
     return CellState1D{N_GDL, N_MPL}(agc, agdl, ampl, acl, mem, ccl, cmpl, cgdl, cgc)
@@ -648,13 +659,13 @@ end
 function _nan_cell_derivative_1D(nb_gdl::Int, nb_mpl::Int)
     z = NaN
     agc = AnodeGCDerivative(z, z, z, z, z)
-    agdl = ntuple(_ -> AnodeGDLDerivative(z, z, z, z), nb_gdl)
-    ampl = ntuple(_ -> AnodeMPLDerivative(z, z, z, z), nb_mpl)
-    acl = AnodeCLDerivative(z, z, z, z, z)
+    agdl = ntuple(_ -> AnodeGDLDerivative(z, z, z, z, z), nb_gdl)
+    ampl = ntuple(_ -> AnodeMPLDerivative(z, z, z, z, z), nb_mpl)
+    acl = AnodeCLDerivative(z, z, z, z, z, z)
     mem = MembraneDerivative(z, z)
-    ccl = CathodeCLDerivative(z, z, z, z, z, z)
-    cmpl = ntuple(_ -> CathodeMPLDerivative(z, z, z, z), nb_mpl)
-    cgdl = ntuple(_ -> CathodeGDLDerivative(z, z, z, z), nb_gdl)
+    ccl = CathodeCLDerivative(z, z, z, z, z, z, z)
+    cmpl = ntuple(_ -> CathodeMPLDerivative(z, z, z, z, z), nb_mpl)
+    cgdl = ntuple(_ -> CathodeGDLDerivative(z, z, z, z, z), nb_gdl)
     cgc = CathodeGCDerivative(z, z, z, z, z)
     return CellDerivative1D{nb_gdl, nb_mpl}(agc, agdl, ampl, acl, mem, ccl, cmpl, cgdl, cgc)
 end
@@ -673,10 +684,12 @@ function _assert_cell_derivative_complete!(d::CellDerivative1D{nb_gdl, nb_mpl}) 
         isnan(d.agdl[i].C_v) && fail()
         isnan(d.agdl[i].s) && fail()
         isnan(d.agdl[i].C_H2) && fail()
+        isnan(d.agdl[i].C_N2) && fail()
         isnan(d.agdl[i].T) && fail()
         isnan(d.cgdl[i].C_v) && fail()
         isnan(d.cgdl[i].s) && fail()
         isnan(d.cgdl[i].C_O2) && fail()
+        isnan(d.cgdl[i].C_N2) && fail()
         isnan(d.cgdl[i].T) && fail()
     end
 
@@ -684,10 +697,12 @@ function _assert_cell_derivative_complete!(d::CellDerivative1D{nb_gdl, nb_mpl}) 
         isnan(d.ampl[i].C_v) && fail()
         isnan(d.ampl[i].s) && fail()
         isnan(d.ampl[i].C_H2) && fail()
+        isnan(d.ampl[i].C_N2) && fail()
         isnan(d.ampl[i].T) && fail()
         isnan(d.cmpl[i].C_v) && fail()
         isnan(d.cmpl[i].s) && fail()
         isnan(d.cmpl[i].C_O2) && fail()
+        isnan(d.cmpl[i].C_N2) && fail()
         isnan(d.cmpl[i].T) && fail()
     end
 
@@ -695,6 +710,7 @@ function _assert_cell_derivative_complete!(d::CellDerivative1D{nb_gdl, nb_mpl}) 
     isnan(d.acl.s) && fail()
     isnan(d.acl.lambda) && fail()
     isnan(d.acl.C_H2) && fail()
+    isnan(d.acl.C_N2) && fail()
     isnan(d.acl.T) && fail()
 
     isnan(d.mem.lambda) && fail()
@@ -704,6 +720,7 @@ function _assert_cell_derivative_complete!(d::CellDerivative1D{nb_gdl, nb_mpl}) 
     isnan(d.ccl.s) && fail()
     isnan(d.ccl.lambda) && fail()
     isnan(d.ccl.C_O2) && fail()
+    isnan(d.ccl.C_N2) && fail()
     isnan(d.ccl.T) && fail()
     isnan(d.ccl.eta_c) && fail()
 
@@ -759,6 +776,12 @@ function _pack_cell_derivative_1D!(dy::AbstractVector{Float64}, offset::Int,
     for i in 1:nb_gdl; dy[idx] = d.cgdl[i].C_O2; idx += 1; end
     dy[idx] = d.cgc.C_O2; idx += 1
     dy[idx] = d.agc.C_N2; idx += 1
+    for i in 1:nb_gdl; dy[idx] = d.agdl[i].C_N2; idx += 1; end
+    for i in 1:nb_mpl; dy[idx] = d.ampl[i].C_N2; idx += 1; end
+    dy[idx] = d.acl.C_N2; idx += 1
+    dy[idx] = d.ccl.C_N2; idx += 1
+    for i in 1:nb_mpl; dy[idx] = d.cmpl[i].C_N2; idx += 1; end
+    for i in 1:nb_gdl; dy[idx] = d.cgdl[i].C_N2; idx += 1; end
     dy[idx] = d.cgc.C_N2; idx += 1
     # T block + eta_c
     dy[idx] = d.agc.T; idx += 1

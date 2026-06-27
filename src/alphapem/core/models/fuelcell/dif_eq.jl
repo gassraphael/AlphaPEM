@@ -187,11 +187,12 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
                                                                              flows_1D_MEA[i].Sv,
                                                                              flows_1D_MEA[i].S_abs)
         dif_eq_mea_species_i = calculate_dyn_H2_O2_N2_evolution_inside_MEA(sv_cell_1D[i],
-                                                                            pp,
-                                                                            flows_1D_MEA[i].J_H2,
-                                                                            flows_1D_MEA[i].J_O2,
-                                                                            flows_1D_MEA[i].S_H2,
-                                                                            flows_1D_MEA[i].S_O2)
+                                                                           pp,
+                                                                           flows_1D_MEA[i].J_H2,
+                                                                           flows_1D_MEA[i].J_O2,
+                                                                           flows_1D_MEA[i].J_N2,
+                                                                           flows_1D_MEA[i].S_H2,
+                                                                           flows_1D_MEA[i].S_O2)
         dif_eq_voltage_i = calculate_dyn_voltage_evolution(i_fc[i], C_O2_Pt[i],
                                                             sv_cell_1D[i].ccl.T,
                                                             sv_cell_1D[i].ccl.eta_c,

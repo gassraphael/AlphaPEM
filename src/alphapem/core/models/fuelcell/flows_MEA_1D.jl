@@ -70,7 +70,10 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
     C_O2_ccl, C_O2_cmpl = sv_1D.ccl.C_O2, getproperty.(sv_1D.cmpl, :C_O2)
     C_O2_cgdl, C_O2_cgc = getproperty.(sv_1D.cgdl, :C_O2), sv_1D.cgc.C_O2
 
-    C_N2_agc, C_N2_cgc = sv_1D.agc.C_N2, sv_1D.cgc.C_N2
+    C_N2_agc, C_N2_agdl = sv_1D.agc.C_N2, getproperty.(sv_1D.agdl, :C_N2)
+    C_N2_ampl, C_N2_acl = getproperty.(sv_1D.ampl, :C_N2), sv_1D.acl.C_N2
+    C_N2_ccl, C_N2_cmpl = sv_1D.ccl.C_N2, getproperty.(sv_1D.cmpl, :C_N2)
+    C_N2_cgdl, C_N2_cgc = getproperty.(sv_1D.cgdl, :C_N2), sv_1D.cgc.C_N2
 
     lambda_acl, lambda_mem, lambda_ccl = sv_1D.acl.lambda, sv_1D.mem.lambda, sv_1D.ccl.lambda
 
@@ -149,7 +152,7 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
         Jv_cgdl_cgdl[i] = -Dc_eff_cgdl_cgdl[i] * d_dx(C_v_cgdl[i], C_v_cgdl[i + 1], H_gdl_node / 2)
     end
 
-    # ______________________________H2 and O2 flows (mol.m-2.s-1 for J, mol.m-3.s-1 for S)______________________________
+    # __________________________________H2, O2 and N2 flows (mol.m-2.s-1)____________________________________
 
     # Hydrogen and oxygen consumption
     #   Anode side
@@ -161,33 +164,47 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
     S_O2_cros = R * T_acl_mem_ccl / (Hmem * Hccl) * (k_O2(lambda_mem, T_mem, kappa_co) * C_O2_ccl +
                                                      1 / 2 * k_H2(lambda_mem, T_mem, kappa_co) * C_H2_acl)
 
-    # Conductive-convective H2 and O2 flows
+    # Conductive-convective H2, O2 and N2 flows
     J_H2_agc_agdl = h_a(Pagc, T_des, Wagc, Hagc) * (C_H2_agc - C_H2_agdl[1])  # Also calculated in velocity.jl
     J_O2_cgdl_cgc = h_c(Pcgc, T_des, Wcgc, Hcgc) * (C_O2_cgdl[nb_gdl] - C_O2_cgc)  # Also calculated in velocity.jl
+    J_N2_agc_agdl = h_a(Pagc, T_des, Wagc, Hagc) * (C_N2_agc - C_N2_agdl[1])
+    J_N2_cgdl_cgc = h_c(Pcgc, T_des, Wcgc, Hcgc) * (C_N2_cgdl[nb_gdl] - C_N2_cgc)
 
-    # Conductive H2 and O2 flows
+    # Conductive H2, O2 and N2 flows
     #   Anode side
     J_H2_agdl_agdl = flows_work.J_H2_agdl_agdl
+    J_N2_agdl_agdl = flows_work.J_N2_agdl_agdl
     @inbounds for i in 1:(nb_gdl - 1)
         J_H2_agdl_agdl[i] = -Da_eff_agdl_agdl[i] * d_dx(C_H2_agdl[i], C_H2_agdl[i + 1], H_gdl_node / 2)
+        J_N2_agdl_agdl[i] = -Da_eff_agdl_agdl[i] * d_dx(C_N2_agdl[i], C_N2_agdl[i + 1], H_gdl_node / 2)
     end
     J_H2_agdl_ampl = -Da_eff_agdl_ampl * d_dx(C_H2_agdl[nb_gdl], C_H2_ampl[1], H_gdl_node / 2, H_mpl_node / 2)
+    J_N2_agdl_ampl = -Da_eff_agdl_ampl * d_dx(C_N2_agdl[nb_gdl], C_N2_ampl[1], H_gdl_node / 2, H_mpl_node / 2)
     J_H2_ampl_ampl = flows_work.J_H2_ampl_ampl
+    J_N2_ampl_ampl = flows_work.J_N2_ampl_ampl
     @inbounds for i in 1:(nb_mpl - 1)
         J_H2_ampl_ampl[i] = -Da_eff_ampl_ampl[i] * d_dx(C_H2_ampl[i], C_H2_ampl[i + 1], H_mpl_node / 2)
+        J_N2_ampl_ampl[i] = -Da_eff_ampl_ampl[i] * d_dx(C_N2_ampl[i], C_N2_ampl[i + 1], H_mpl_node / 2)
     end
     J_H2_ampl_acl = -Da_eff_ampl_acl * d_dx(C_H2_ampl[nb_mpl], C_H2_acl, H_mpl_node / 2, Hacl / 2)
+    J_N2_ampl_acl = -Da_eff_ampl_acl * d_dx(C_N2_ampl[nb_mpl], C_N2_acl, H_mpl_node / 2, Hacl / 2)
 
     #   Cathode side
     J_O2_ccl_cmpl = -Dc_eff_ccl_cmpl * d_dx(C_O2_ccl, C_O2_cmpl[1], Hccl / 2, H_mpl_node / 2)
+    J_N2_ccl_cmpl = -Dc_eff_ccl_cmpl * d_dx(C_N2_ccl, C_N2_cmpl[1], Hccl / 2, H_mpl_node / 2)
     J_O2_cmpl_cmpl = flows_work.J_O2_cmpl_cmpl
+    J_N2_cmpl_cmpl = flows_work.J_N2_cmpl_cmpl
     @inbounds for i in 1:(nb_mpl - 1)
         J_O2_cmpl_cmpl[i] = -Dc_eff_cmpl_cmpl[i] * d_dx(C_O2_cmpl[i], C_O2_cmpl[i + 1], H_mpl_node / 2)
+        J_N2_cmpl_cmpl[i] = -Dc_eff_cmpl_cmpl[i] * d_dx(C_N2_cmpl[i], C_N2_cmpl[i + 1], H_mpl_node / 2)
     end
     J_O2_cmpl_cgdl = -Dc_eff_cmpl_cgdl * d_dx(C_O2_cmpl[nb_mpl], C_O2_cgdl[1], H_mpl_node / 2, H_gdl_node / 2)
+    J_N2_cmpl_cgdl = -Dc_eff_cmpl_cgdl * d_dx(C_N2_cmpl[nb_mpl], C_N2_cgdl[1], H_mpl_node / 2, H_gdl_node / 2)
     J_O2_cgdl_cgdl = flows_work.J_O2_cgdl_cgdl
+    J_N2_cgdl_cgdl = flows_work.J_N2_cgdl_cgdl
     @inbounds for i in 1:(nb_gdl - 1)
         J_O2_cgdl_cgdl[i] = -Dc_eff_cgdl_cgdl[i] * d_dx(C_O2_cgdl[i], C_O2_cgdl[i + 1], H_gdl_node / 2)
+        J_N2_cgdl_cgdl[i] = -Dc_eff_cgdl_cgdl[i] * d_dx(C_N2_cgdl[i], C_N2_cgdl[i + 1], H_gdl_node / 2)
     end
 
     # __________________________________________Water generated (mol.m-3.s-1)___________________________________________
@@ -222,31 +239,31 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
     Sl_agdl = flows_work.Sl_agdl
     @inbounds for i in 1:nb_gdl
         Sl_agdl[i] = Svl("anode", s_agdl[i], C_v_agdl[i],
-                         C_v_agdl[i] + C_H2_agdl[i] + C_N2_agc,
+                         C_v_agdl[i] + C_H2_agdl[i] + C_N2_agdl[i],
                          T_agdl[i], epsilon_gdl)
     end
     Sl_ampl = flows_work.Sl_ampl
     @inbounds for i in 1:nb_mpl
         Sl_ampl[i] = Svl("anode", s_ampl[i], C_v_ampl[i],
-                         C_v_ampl[i] + C_H2_ampl[i] + C_N2_agc,
+                         C_v_ampl[i] + C_H2_ampl[i] + C_N2_ampl[i],
                          T_ampl[i], epsilon_mpl)
     end
-    Sl_acl = Svl("anode", s_acl, C_v_acl, C_v_acl + C_H2_acl + C_N2_agc, T_acl,
+    Sl_acl = Svl("anode", s_acl, C_v_acl, C_v_acl + C_H2_acl + C_N2_acl, T_acl,
                  epsilon_cl(lambda_acl, T_acl, Hacl))
 
     #   Cathode side
-    Sl_ccl = Svl("cathode", s_ccl, C_v_ccl, C_v_ccl + C_O2_ccl + C_N2_cgc, T_ccl,
+    Sl_ccl = Svl("cathode", s_ccl, C_v_ccl, C_v_ccl + C_O2_ccl + C_N2_ccl, T_ccl,
                  epsilon_cl(lambda_ccl, T_ccl, Hccl))
     Sl_cmpl = flows_work.Sl_cmpl
     @inbounds for i in 1:nb_mpl
         Sl_cmpl[i] = Svl("cathode", s_cmpl[i], C_v_cmpl[i],
-                         C_v_cmpl[i] + C_O2_cmpl[i] + C_N2_cgc,
+                         C_v_cmpl[i] + C_O2_cmpl[i] + C_N2_cmpl[i],
                          T_cmpl[i], epsilon_mpl)
     end
     Sl_cgdl = flows_work.Sl_cgdl
     @inbounds for i in 1:nb_gdl
         Sl_cgdl[i] = Svl("cathode", s_cgdl[i], C_v_cgdl[i],
-                         C_v_cgdl[i] + C_O2_cgdl[i] + C_N2_cgc,
+                         C_v_cgdl[i] + C_O2_cgdl[i] + C_N2_cgdl[i],
                          T_cgdl[i], epsilon_gdl)
     end
 
@@ -287,6 +304,10 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
                                              J_H2_ampl_ampl, J_H2_ampl_acl)
     J_O2 = MEAOxygenFluxes{NB_GDL, NB_MPL}(J_O2_ccl_cmpl, J_O2_cmpl_cmpl, J_O2_cmpl_cgdl,
                                            J_O2_cgdl_cgdl, J_O2_cgdl_cgc)
+    J_N2 = MEANitrogenFluxes{NB_GDL, NB_MPL}(J_N2_agc_agdl, J_N2_agdl_agdl, J_N2_agdl_ampl,
+                                             J_N2_ampl_ampl, J_N2_ampl_acl,
+                                             J_N2_ccl_cmpl, J_N2_cmpl_cmpl, J_N2_cmpl_cgdl,
+                                             J_N2_cgdl_cgdl, J_N2_cgdl_cgc)
     S_abs = MEASorptionSources(Sv_abs_acl, Sl_abs_acl, Sv_abs_ccl, Sl_abs_ccl)
     Sp = MEAWaterProductionSources(Sp_acl, Sp_ccl)
     S_H2 = MEAGasReactionSources(S_H2_reac, S_H2_cros)
@@ -294,7 +315,7 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
     Sv = MEAVaporSources{NB_GDL, NB_MPL}(Sv_agdl, Sv_ampl, Sv_acl, Sv_ccl, Sv_cmpl, Sv_cgdl)
     Sl = MEALiquidSources{NB_GDL, NB_MPL}(Sl_agdl, Sl_ampl, Sl_acl, Sl_ccl, Sl_cmpl, Sl_cgdl)
 
-    return MEAFlows1D{NB_GDL, NB_MPL}(Jv, Jl, J_lambda, J_H2, J_O2, S_abs, Sp, S_H2, S_O2, Sv, Sl)
+    return MEAFlows1D{NB_GDL, NB_MPL}(Jv, Jl, J_lambda, J_H2, J_O2, J_N2, S_abs, Sp, S_H2, S_O2, Sv, Sl)
 end
 
 

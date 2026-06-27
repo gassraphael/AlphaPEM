@@ -65,7 +65,10 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
     C_O2_ccl, C_O2_cmpl = sv.ccl.C_O2, getproperty.(sv.cmpl, :C_O2)
     C_O2_cgdl, C_O2_cgc = getproperty.(sv.cgdl, :C_O2), sv.cgc.C_O2
 
-    C_N2_agc, C_N2_cgc = sv.agc.C_N2, sv.cgc.C_N2
+    C_N2_agc, C_N2_agdl = sv.agc.C_N2, getproperty.(sv.agdl, :C_N2)
+    C_N2_ampl, C_N2_acl = getproperty.(sv.ampl, :C_N2), sv.acl.C_N2
+    C_N2_ccl, C_N2_cmpl = sv.ccl.C_N2, getproperty.(sv.cmpl, :C_N2)
+    C_N2_cgdl, C_N2_cgc = getproperty.(sv.cgdl, :C_N2), sv.cgc.C_N2
 
     lambda_acl, lambda_mem, lambda_ccl = sv.acl.lambda, sv.mem.lambda, sv.ccl.lambda
 
@@ -75,12 +78,12 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
 
     # Pressures in the stack
     Pagc  = (C_v_agc + C_H2_agc + C_N2_agc) * R * T_agc
-    Pagdl = [(C_v_agdl[i] + C_H2_agdl[i] + C_N2_agc) * R * T_agdl[i] for i in 1:nb_gdl]
-    Pampl = [(C_v_ampl[i] + C_H2_ampl[i] + C_N2_agc) * R * T_ampl[i] for i in 1:nb_mpl]
-    Pacl  = (C_v_acl + C_H2_acl + C_N2_agc) * R * T_acl
-    Pccl  = (C_v_ccl + C_O2_ccl + C_N2_cgc) * R * T_ccl
-    Pcmpl = [(C_v_cmpl[i] + C_O2_cmpl[i] + C_N2_cgc) * R * T_cmpl[i] for i in 1:nb_mpl]
-    Pcgdl = [(C_v_cgdl[i] + C_O2_cgdl[i] + C_N2_cgc) * R * T_cgdl[i] for i in 1:nb_gdl]
+    Pagdl = [(C_v_agdl[i] + C_H2_agdl[i] + C_N2_agdl[i]) * R * T_agdl[i] for i in 1:nb_gdl]
+    Pampl = [(C_v_ampl[i] + C_H2_ampl[i] + C_N2_ampl[i]) * R * T_ampl[i] for i in 1:nb_mpl]
+    Pacl  = (C_v_acl + C_H2_acl + C_N2_acl) * R * T_acl
+    Pccl  = (C_v_ccl + C_O2_ccl + C_N2_ccl) * R * T_ccl
+    Pcmpl = [(C_v_cmpl[i] + C_O2_cmpl[i] + C_N2_cmpl[i]) * R * T_cmpl[i] for i in 1:nb_mpl]
+    Pcgdl = [(C_v_cgdl[i] + C_O2_cgdl[i] + C_N2_cgdl[i]) * R * T_cgdl[i] for i in 1:nb_gdl]
     Pcgc  = (C_v_cgc + C_O2_cgc + C_N2_cgc) * R * T_cgc
 
     # Capillary pressures in the stack
