@@ -44,6 +44,7 @@ struct AnodeGDLState <: AbstractCellState
     C_v  :: Float64   # Water vapour concentration        (mol·m⁻³)
     s    :: Float64   # Liquid water saturation           (–)
     C_H2 :: Float64   # Hydrogen concentration            (mol·m⁻³)
+    C_N2 :: Float64   # Nitrogen concentration            (mol·m⁻³)
 end
 
 """Internal state at one anode microporous-layer location."""
@@ -52,6 +53,7 @@ struct AnodeMPLState <: AbstractCellState
     C_v  :: Float64   # Water vapour concentration        (mol·m⁻³)
     s    :: Float64   # Liquid water saturation           (–)
     C_H2 :: Float64   # Hydrogen concentration            (mol·m⁻³)
+    C_N2 :: Float64   # Nitrogen concentration            (mol·m⁻³)
 end
 
 """Internal state at the anode catalyst-layer location.
@@ -62,6 +64,7 @@ struct AnodeCLState <: AbstractCellState
     s      :: Float64   # Liquid water saturation         (–)
     lambda :: Float64   # Ionomer water content           (–)
     C_H2   :: Float64   # Hydrogen concentration          (mol·m⁻³)
+    C_N2   :: Float64   # Nitrogen concentration          (mol·m⁻³)
 end
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -88,6 +91,7 @@ struct CathodeCLState <: AbstractCellState
     s      :: Float64   # Liquid water saturation         (–)
     lambda :: Float64   # Ionomer water content           (–)
     C_O2   :: Float64   # Oxygen concentration            (mol·m⁻³)
+    C_N2   :: Float64   # Nitrogen concentration          (mol·m⁻³)
     eta_c  :: Float64   # Cathode overpotential           (V)
 end
 
@@ -97,6 +101,7 @@ struct CathodeMPLState <: AbstractCellState
     C_v  :: Float64   # Water vapour concentration        (mol·m⁻³)
     s    :: Float64   # Liquid water saturation           (–)
     C_O2 :: Float64   # Oxygen concentration              (mol·m⁻³)
+    C_N2 :: Float64   # Nitrogen concentration            (mol·m⁻³)
 end
 
 """Internal state at one cathode gas-diffusion-layer location."""
@@ -105,6 +110,7 @@ struct CathodeGDLState <: AbstractCellState
     C_v  :: Float64   # Water vapour concentration        (mol·m⁻³)
     s    :: Float64   # Liquid water saturation           (–)
     C_O2 :: Float64   # Oxygen concentration              (mol·m⁻³)
+    C_N2 :: Float64   # Nitrogen concentration            (mol·m⁻³)
 end
 
 """Internal state at one cathode gas-channel location."""

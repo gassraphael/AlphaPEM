@@ -241,26 +241,24 @@ function calculate_dyn_H2_O2_N2_evolution_inside_MEA(
         pp::PhysicalParams,
         J_H2::MEAHydrogenFluxes{NB_GDL, NB_MPL},
         J_O2::MEAOxygenFluxes{NB_GDL, NB_MPL},
+        J_N2::MEANitrogenFluxes{NB_GDL, NB_MPL},
         S_H2::MEAGasReactionSources,
         S_O2::MEAGasReactionSources
-)::MEAH2O2SpeciesDerivative{NB_GDL, NB_MPL} where {NB_GDL, NB_MPL}
+)::MEAGasSpeciesDerivative{NB_GDL, NB_MPL} where {NB_GDL, NB_MPL}
 
     # Extraction of the variables
-    s_agc, s_agdl = sv.agc.s, getproperty.(sv.agdl, :s)
-    s_ampl, s_acl = getproperty.(sv.ampl, :s), sv.acl.s
-    s_ccl, s_cmpl = sv.ccl.s, getproperty.(sv.cmpl, :s)
-    s_cgdl, s_cgc = getproperty.(sv.cgdl, :s), sv.cgc.s
+    s_agdl, s_ampl, s_acl = getproperty.(sv.ampl, :s), sv.acl.s, getproperty.(sv.agdl, :s)
+    s_ccl, s_cmpl, s_cgdl = sv.ccl.s, getproperty.(sv.cmpl, :s), getproperty.(sv.cgdl, :s)
 
-    T_agc, T_agdl = sv.agc.T, getproperty.(sv.agdl, :T)
-    T_ampl, T_acl = getproperty.(sv.ampl, :T), sv.acl.T
-    T_ccl, T_cmpl = sv.ccl.T, getproperty.(sv.cmpl, :T)
-    T_cgdl, T_cgc = getproperty.(sv.cgdl, :T), sv.cgc.T
-
-    lambda_acl, lambda_mem, lambda_ccl = sv.acl.lambda, sv.mem.lambda, sv.ccl.lambda
+    T_acl, T_ccl = sv.acl.T, sv.ccl.T
+    lambda_acl, lambda_ccl = sv.acl.lambda, sv.ccl.lambda
 
     # Surface-area reduction factors due to the ribs between the GC and GDL.
     J_H2_agc_agdl_red = J_H2.agc_agdl * (pp.Wagc * pp.Lgc) / (pp.Aact / pp.nb_channel_in_gc)
     J_O2_cgdl_cgc_red = J_O2.cgdl_cgc * (pp.Wcgc * pp.Lgc) / (pp.Aact / pp.nb_channel_in_gc)
+    J_N2_agc_agdl_red = J_N2.agc_agdl * (pp.Wagc * pp.Lgc) / (pp.Aact / pp.nb_channel_in_gc)
+    J_N2_cgdl_cgc_red = J_N2.cgdl_cgc * (pp.Wcgc * pp.Lgc) / (pp.Aact / pp.nb_channel_in_gc)
+
     H_gdl_node = pp.Hgdl / NB_GDL
     H_mpl_node = pp.Hmpl / NB_MPL
 
@@ -271,6 +269,11 @@ function calculate_dyn_H2_O2_N2_evolution_inside_MEA(
         J_out = j == NB_GDL ? J_H2.agdl_ampl : J_H2.agdl_agdl[j]
         1 / (pp.epsilon_gdl * (1 - s_agdl[j])) * (J_in - J_out) / H_gdl_node
     end
+    d_C_N2_agdl_dt = ntuple(NB_GDL) do j
+        J_in = j == 1 ? J_N2_agc_agdl_red : J_N2.agdl_agdl[j - 1]
+        J_out = j == NB_GDL ? J_N2.agdl_ampl : J_N2.agdl_agdl[j]
+        1 / (pp.epsilon_gdl * (1 - s_agdl[j])) * (J_in - J_out) / H_gdl_node
+    end
 
     #   Anode MPL
     d_C_H2_ampl_dt = ntuple(NB_MPL) do j
@@ -278,19 +281,33 @@ function calculate_dyn_H2_O2_N2_evolution_inside_MEA(
         J_out = j == NB_MPL ? J_H2.ampl_acl : J_H2.ampl_ampl[j]
         1 / (pp.epsilon_mpl * (1 - s_ampl[j])) * (J_in - J_out) / H_mpl_node
     end
+    d_C_N2_ampl_dt = ntuple(NB_MPL) do j
+        J_in = j == 1 ? J_N2.agdl_ampl : J_N2.ampl_ampl[j - 1]
+        J_out = j == NB_MPL ? J_N2.ampl_acl : J_N2.ampl_ampl[j]
+        1 / (pp.epsilon_mpl * (1 - s_ampl[j])) * (J_in - J_out) / H_mpl_node
+    end
 
     #   Anode CL
     d_C_H2_acl_dt = 1 / (epsilon_cl(lambda_acl, T_acl, pp.Hacl) * (1 - s_acl)) *
                (J_H2.ampl_acl / pp.Hacl - S_H2.reac - S_H2.cros)
+    d_C_N2_acl_dt = 1 / (epsilon_cl(lambda_acl, T_acl, pp.Hacl) * (1 - s_acl)) *
+               (J_N2.ampl_acl / pp.Hacl)
 
     #   Cathode CL
     d_C_O2_ccl_dt = 1 / (epsilon_cl(lambda_ccl, T_ccl, pp.Hccl) * (1 - s_ccl)) *
                (-J_O2.ccl_cmpl / pp.Hccl - S_O2.reac - S_O2.cros)
+    d_C_N2_ccl_dt = 1 / (epsilon_cl(lambda_ccl, T_ccl, pp.Hccl) * (1 - s_ccl)) *
+               (-J_N2.ccl_cmpl / pp.Hccl)
 
     #   Cathode MPL
     d_C_O2_cmpl_dt = ntuple(NB_MPL) do j
         J_in = j == 1 ? J_O2.ccl_cmpl : J_O2.cmpl_cmpl[j - 1]
         J_out = j == NB_MPL ? J_O2.cmpl_cgdl : J_O2.cmpl_cmpl[j]
+        1 / (pp.epsilon_mpl * (1 - s_cmpl[j])) * (J_in - J_out) / H_mpl_node
+    end
+    d_C_N2_cmpl_dt = ntuple(NB_MPL) do j
+        J_in = j == 1 ? J_N2.ccl_cmpl : J_N2.cmpl_cmpl[j - 1]
+        J_out = j == NB_MPL ? J_N2.cmpl_cgdl : J_N2.cmpl_cmpl[j]
         1 / (pp.epsilon_mpl * (1 - s_cmpl[j])) * (J_in - J_out) / H_mpl_node
     end
 
@@ -300,8 +317,18 @@ function calculate_dyn_H2_O2_N2_evolution_inside_MEA(
         J_out = j == NB_GDL ? J_O2_cgdl_cgc_red : J_O2.cgdl_cgdl[j]
         1 / (pp.epsilon_gdl * (1 - s_cgdl[j])) * (J_in - J_out) / H_gdl_node
     end
+    d_C_N2_cgdl_dt = ntuple(NB_GDL) do j
+        J_in = j == 1 ? J_N2.cmpl_cgdl : J_N2.cgdl_cgdl[j - 1]
+        J_out = j == NB_GDL ? J_N2_cgdl_cgc_red : J_N2.cgdl_cgdl[j]
+        1 / (pp.epsilon_gdl * (1 - s_cgdl[j])) * (J_in - J_out) / H_gdl_node
+    end
 
-    return MEAH2O2SpeciesDerivative{NB_GDL, NB_MPL}(d_C_H2_agdl_dt, d_C_H2_ampl_dt, d_C_H2_acl_dt, d_C_O2_ccl_dt, d_C_O2_cmpl_dt, d_C_O2_cgdl_dt)
+    return MEAGasSpeciesDerivative{NB_GDL, NB_MPL}(
+        d_C_H2_agdl_dt, d_C_H2_ampl_dt, d_C_H2_acl_dt,
+        d_C_N2_agdl_dt, d_C_N2_ampl_dt, d_C_N2_acl_dt,
+        d_C_O2_ccl_dt, d_C_O2_cmpl_dt, d_C_O2_cgdl_dt,
+        d_C_N2_ccl_dt, d_C_N2_cmpl_dt, d_C_N2_cgdl_dt
+    )
 end
 
 

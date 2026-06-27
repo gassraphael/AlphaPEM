@@ -26,6 +26,10 @@ mutable struct MEAFlowsWorkspace
     J_H2_ampl_ampl::Vector{Float64}
     J_O2_cmpl_cmpl::Vector{Float64}
     J_O2_cgdl_cgdl::Vector{Float64}
+    J_N2_agdl_agdl::Vector{Float64}
+    J_N2_ampl_ampl::Vector{Float64}
+    J_N2_cmpl_cmpl::Vector{Float64}
+    J_N2_cgdl_cgdl::Vector{Float64}
     Sl_agdl::Vector{Float64}
     Sl_ampl::Vector{Float64}
     Sl_cmpl::Vector{Float64}
@@ -38,6 +42,8 @@ end
 
 function MEAFlowsWorkspace(nb_gdl::Int, nb_mpl::Int)
     return MEAFlowsWorkspace(
+        Vector{Float64}(undef, max(nb_gdl - 1, 0)), Vector{Float64}(undef, max(nb_mpl - 1, 0)),
+        Vector{Float64}(undef, max(nb_mpl - 1, 0)), Vector{Float64}(undef, max(nb_gdl - 1, 0)),
         Vector{Float64}(undef, max(nb_gdl - 1, 0)), Vector{Float64}(undef, max(nb_mpl - 1, 0)),
         Vector{Float64}(undef, max(nb_mpl - 1, 0)), Vector{Float64}(undef, max(nb_gdl - 1, 0)),
         Vector{Float64}(undef, max(nb_gdl - 1, 0)), Vector{Float64}(undef, max(nb_mpl - 1, 0)),
@@ -240,6 +246,36 @@ struct MEAOxygenFluxes{NB_GDL, NB_MPL} # J_O2
         length(cmpl_cmpl) == NB_MPL - 1 || throw(ArgumentError("cmpl_cmpl length must be NB_MPL - 1."))
         length(cgdl_cgdl) == NB_GDL - 1 || throw(ArgumentError("cgdl_cgdl length must be NB_GDL - 1."))
         return new{NB_GDL, NB_MPL}(ccl_cmpl, _as_f64_vec(cmpl_cmpl), cmpl_cgdl,
+                                   _as_f64_vec(cgdl_cgdl), cgdl_cgc)
+    end
+end
+
+"""Nitrogen inter-layer fluxes (anode + cathode side). Units: mol·m⁻²·s⁻¹
+"""
+struct MEANitrogenFluxes{NB_GDL, NB_MPL} # J_N2
+    agc_agdl  :: Float64
+    agdl_agdl :: Vector{Float64}   # nb_gdl - 1 inter-node flows
+    agdl_ampl :: Float64
+    ampl_ampl :: Vector{Float64}   # nb_mpl - 1 inter-node flows
+    ampl_acl  :: Float64
+    ccl_cmpl  :: Float64
+    cmpl_cmpl :: Vector{Float64}
+    cmpl_cgdl :: Float64
+    cgdl_cgdl :: Vector{Float64}
+    cgdl_cgc  :: Float64
+
+    # Constructor checks mesh-size invariants for inter-node arrays (NB_* - 1).
+    # Inputs are normalized to Vector{Float64} for predictable downstream typing.
+    function MEANitrogenFluxes{NB_GDL, NB_MPL}(agc_agdl, agdl_agdl, agdl_ampl, ampl_ampl,
+                                               ampl_acl, ccl_cmpl, cmpl_cmpl, cmpl_cgdl,
+                                               cgdl_cgdl, cgdl_cgc) where {NB_GDL, NB_MPL}
+        length(agdl_agdl) == NB_GDL - 1 || throw(ArgumentError("agdl_agdl length must be NB_GDL - 1."))
+        length(ampl_ampl) == NB_MPL - 1 || throw(ArgumentError("ampl_ampl length must be NB_MPL - 1."))
+        length(cmpl_cmpl) == NB_MPL - 1 || throw(ArgumentError("cmpl_cmpl length must be NB_MPL - 1."))
+        length(cgdl_cgdl) == NB_GDL - 1 || throw(ArgumentError("cgdl_cgdl length must be NB_GDL - 1."))
+        return new{NB_GDL, NB_MPL}(agc_agdl, _as_f64_vec(agdl_agdl), agdl_ampl,
+                                   _as_f64_vec(ampl_ampl), ampl_acl, ccl_cmpl,
+                                   _as_f64_vec(cmpl_cmpl), cmpl_cgdl,
                                    _as_f64_vec(cgdl_cgdl), cgdl_cgc)
     end
 end
@@ -478,6 +514,7 @@ struct MEAFlows1D{NB_GDL, NB_MPL}
     J_lambda :: MEADissolvedWaterFlux
     J_H2     :: MEAHydrogenFluxes{NB_GDL, NB_MPL}
     J_O2     :: MEAOxygenFluxes{NB_GDL, NB_MPL}
+    J_N2     :: MEANitrogenFluxes{NB_GDL, NB_MPL}
     S_abs    :: MEASorptionSources
     Sp       :: MEAWaterProductionSources
     S_H2     :: MEAGasReactionSources

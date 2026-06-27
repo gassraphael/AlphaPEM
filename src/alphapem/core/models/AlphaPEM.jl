@@ -276,7 +276,8 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector{Float64}
     lambda_acl, lambda_mem, lambda_ccl = lambda_acl_ini, lambda_mem_ini, lambda_ccl_ini
     C_H2_agc, C_H2_agdl, C_H2_ampl, C_H2_acl = (C_H2_ini, C_H2_ini, C_H2_ini, C_H2_ini)
     C_O2_ccl, C_O2_cmpl, C_O2_cgdl, C_O2_cgc = (C_O2_ini, C_O2_ini, C_O2_ini, C_O2_ini)
-    C_N2_agc, C_N2_cgc = C_N2_agc_ini, C_N2_cgc_ini
+    C_N2_agc, C_N2_agdl, C_N2_ampl, C_N2_acl = (C_N2_agc_ini, C_N2_agc_ini, C_N2_agc_ini, C_N2_agc_ini)
+    C_N2_ccl, C_N2_cmpl, C_N2_cgdl, C_N2_cgc = (C_N2_cgc_ini, C_N2_cgc_ini, C_N2_cgc_ini, C_N2_cgc_ini)
     T_agc, T_agdl, T_ampl, T_acl, T_mem, T_ccl, T_cmpl, T_cgdl, T_cgc = (T_ini, T_ini, T_ini, T_ini, T_ini, T_ini, T_ini, T_ini, T_ini)
     eta_c = eta_c_ini
     Pasm, Paem = Pa_ini, Pa_ini
@@ -293,7 +294,7 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector{Float64}
         "lambda_acl" => lambda_acl, "lambda_mem" => lambda_mem, "lambda_ccl" => lambda_ccl,
         "C_H2_agc" => C_H2_agc, "C_H2_acl" => C_H2_acl,
         "C_O2_ccl" => C_O2_ccl, "C_O2_cgc" => C_O2_cgc,
-        "C_N2_agc" => C_N2_agc, "C_N2_cgc" => C_N2_cgc,
+        "C_N2_agc" => C_N2_agc, "C_N2_acl" => C_N2_acl, "C_N2_ccl" => C_N2_ccl, "C_N2_cgc" => C_N2_cgc,
         "T_agc" => T_agc, "T_acl" => T_acl, "T_mem" => T_mem, "T_ccl" => T_ccl, "T_cgc" => T_cgc,
         "eta_c" => eta_c,
     )
@@ -304,6 +305,8 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector{Float64}
         values_1D["s_cgdl_$(i)"] = s_cgdl
         values_1D["C_H2_agdl_$(i)"] = C_H2_agdl
         values_1D["C_O2_cgdl_$(i)"] = C_O2_cgdl
+        values_1D["C_N2_agdl_$(i)"] = C_N2_agdl
+        values_1D["C_N2_cgdl_$(i)"] = C_N2_cgdl
         values_1D["T_agdl_$(i)"] = T_agdl
         values_1D["T_cgdl_$(i)"] = T_cgdl
     end
@@ -314,6 +317,8 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector{Float64}
         values_1D["s_cmpl_$(i)"] = s_cmpl
         values_1D["C_H2_ampl_$(i)"] = C_H2_ampl
         values_1D["C_O2_cmpl_$(i)"] = C_O2_cmpl
+        values_1D["C_N2_ampl_$(i)"] = C_N2_ampl
+        values_1D["C_N2_cmpl_$(i)"] = C_N2_cmpl
         values_1D["T_ampl_$(i)"] = T_ampl
         values_1D["T_cmpl_$(i)"] = T_cmpl
     end

@@ -18,6 +18,7 @@ struct AnodeGDLDerivative <: AbstractCellDerivative
     C_v::Float64
     s::Float64
     C_H2::Float64
+    C_N2::Float64
     T::Float64
 end
 
@@ -25,6 +26,7 @@ struct AnodeMPLDerivative <: AbstractCellDerivative
     C_v::Float64
     s::Float64
     C_H2::Float64
+    C_N2::Float64
     T::Float64
 end
 
@@ -32,6 +34,7 @@ struct AnodeCLDerivative <: AbstractCellDerivative
     C_v::Float64
     s::Float64
     C_H2::Float64
+    C_N2::Float64
     lambda::Float64
     T::Float64
 end
@@ -47,6 +50,7 @@ struct CathodeCLDerivative <: AbstractCellDerivative
     C_v::Float64
     s::Float64
     C_O2::Float64
+    C_N2::Float64
     lambda::Float64
     T::Float64
     eta_c::Float64
@@ -56,6 +60,7 @@ struct CathodeMPLDerivative <: AbstractCellDerivative
     C_v::Float64
     s::Float64
     C_O2::Float64
+    C_N2::Float64
     T::Float64
 end
 
@@ -63,6 +68,7 @@ struct CathodeGDLDerivative <: AbstractCellDerivative
     C_v::Float64
     s::Float64
     C_O2::Float64
+    C_N2::Float64
     T::Float64
 end
 
@@ -132,14 +138,20 @@ struct MEAVaporDerivative{nb_gdl, nb_mpl}
     cgdl_C_v::NTuple{nb_gdl, Float64}
 end
 
-"""H2/O2 species derivative contribution for porous layers and CLs."""
-struct MEAH2O2SpeciesDerivative{nb_gdl, nb_mpl}
+"""H2/O2/N2 species derivative contribution for porous layers and CLs."""
+struct MEAGasSpeciesDerivative{nb_gdl, nb_mpl}
     agdl_C_H2::NTuple{nb_gdl, Float64}
     ampl_C_H2::NTuple{nb_mpl, Float64}
     acl_C_H2::Float64
+    agdl_C_N2::NTuple{nb_gdl, Float64}
+    ampl_C_N2::NTuple{nb_mpl, Float64}
+    acl_C_N2::Float64
     ccl_C_O2::Float64
     cmpl_C_O2::NTuple{nb_mpl, Float64}
     cgdl_C_O2::NTuple{nb_gdl, Float64}
+    ccl_C_N2::Float64
+    cmpl_C_N2::NTuple{nb_mpl, Float64}
+    cgdl_C_N2::NTuple{nb_gdl, Float64}
 end
 
 """Voltage contribution (eta_c derivative in the CCL)."""
@@ -214,7 +226,7 @@ end
 function assemble_mea_derivative_1D(dw::MEADissolvedWaterDerivative,
                                     lw::MEALiquidWaterDerivative{NB_GDL, NB_MPL},
                                     vw::MEAVaporDerivative{NB_GDL, NB_MPL},
-                                    sd::MEAH2O2SpeciesDerivative{NB_GDL, NB_MPL},
+                                    sd::MEAGasSpeciesDerivative{NB_GDL, NB_MPL},
                                     vd::MEAVoltageDerivative,
                                     td::MEATemperatureDerivative{NB_GDL, NB_MPL}) where {NB_GDL, NB_MPL}
 
@@ -223,19 +235,19 @@ function assemble_mea_derivative_1D(dw::MEADissolvedWaterDerivative,
     cgc = CathodeGCDerivative(NaN, NaN, NaN, NaN, NaN)
 
     agdl = ntuple(NB_GDL) do j
-        AnodeGDLDerivative(vw.agdl_C_v[j], lw.agdl_s[j], sd.agdl_C_H2[j], td.agdl_T[j])
+        AnodeGDLDerivative(vw.agdl_C_v[j], lw.agdl_s[j], sd.agdl_C_H2[j], sd.agdl_C_N2[j], td.agdl_T[j])
     end
     ampl = ntuple(NB_MPL) do j
-        AnodeMPLDerivative(vw.ampl_C_v[j], lw.ampl_s[j], sd.ampl_C_H2[j], td.ampl_T[j])
+        AnodeMPLDerivative(vw.ampl_C_v[j], lw.ampl_s[j], sd.ampl_C_H2[j], sd.ampl_C_N2[j], td.ampl_T[j])
     end
-    acl = AnodeCLDerivative(vw.acl_C_v, lw.acl_s, sd.acl_C_H2, dw.acl_lambda, td.acl_T)
+    acl = AnodeCLDerivative(vw.acl_C_v, lw.acl_s, sd.acl_C_H2, sd.acl_C_N2, dw.acl_lambda, td.acl_T)
     mem = MembraneDerivative(dw.mem_lambda, td.mem_T)
-    ccl = CathodeCLDerivative(vw.ccl_C_v, lw.ccl_s, sd.ccl_C_O2, dw.ccl_lambda, td.ccl_T, vd.ccl_eta_c)
+    ccl = CathodeCLDerivative(vw.ccl_C_v, lw.ccl_s, sd.ccl_C_O2, sd.ccl_C_N2, dw.ccl_lambda, td.ccl_T, vd.ccl_eta_c)
     cmpl = ntuple(NB_MPL) do j
-        CathodeMPLDerivative(vw.cmpl_C_v[j], lw.cmpl_s[j], sd.cmpl_C_O2[j], td.cmpl_T[j])
+        CathodeMPLDerivative(vw.cmpl_C_v[j], lw.cmpl_s[j], sd.cmpl_C_O2[j], sd.cmpl_C_N2[j], td.cmpl_T[j])
     end
     cgdl = ntuple(NB_GDL) do j
-        CathodeGDLDerivative(vw.cgdl_C_v[j], lw.cgdl_s[j], sd.cgdl_C_O2[j], td.cgdl_T[j])
+        CathodeGDLDerivative(vw.cgdl_C_v[j], lw.cgdl_s[j], sd.cgdl_C_O2[j], sd.cgdl_C_N2[j], td.cgdl_T[j])
     end
 
     return CellDerivative1D{NB_GDL, NB_MPL}(agc, agdl, ampl, acl, mem, ccl, cmpl, cgdl, cgc)

@@ -49,7 +49,7 @@ export ManifoldDerivative
 export CellDerivative1D, ManifoldLineDerivative
 export FuelCellDerivativeP2D
 export MEADissolvedWaterDerivative, MEALiquidWaterDerivative, MEAVaporDerivative
-export MEAH2O2SpeciesDerivative, MEAVoltageDerivative, MEATemperatureDerivative
+export MEAGasSpeciesDerivative, MEAVoltageDerivative, MEATemperatureDerivative
 export GCGasDerivative, GCLiquidWaterDerivative, GCTemperatureDerivative
 export assemble_mea_derivative_1D, assemble_gc_derivative_1D
 
@@ -82,7 +82,7 @@ export MEASorptionSources, MEADissolvedWaterFlux, MEAWaterProductionSources
 export MEAGasReactionSources
 export MEAReactionHeat, MEASorptionHeat, MEAProtonHeat
 # dimension-dependent MEA flux types
-export MEALiquidFluxes, MEAVaporFluxes, MEAHydrogenFluxes, MEAOxygenFluxes
+export MEALiquidFluxes, MEAVaporFluxes, MEAHydrogenFluxes, MEAOxygenFluxes, MEANitrogenFluxes
 export MEALiquidSources, MEAVaporSources
 export MEAThermalFluxes, MEALiquidHeat, MEAElectricHeat
 # MEA top-level containers

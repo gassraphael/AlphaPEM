@@ -15,22 +15,10 @@ const AUTHOR = "Raphael Gass"
 const EMAIL = "gassraphael@proton.me"
 const LICENSE = "GPLv3"
 
-# Suppress verbose output from dependency resolvers and loggers
-ENV["PIXI_DISABLE_PROGRESS_BAR"] = "1"
-ENV["JULIA_PKG_VERBOSE"] = "false"
+# Suppress verbose output from CondaPkg
+ENV["JULIA_CONDAPKG_VERBOSITY"] = "0"
 
-import Logging
-let
-    original_stdout = stdout
-    original_logger = Logging.global_logger(Logging.NullLogger())
-    redirect_stdout(devnull)
-    try
-        import CondaPkg
-    finally
-        redirect_stdout(original_stdout)
-        Logging.global_logger(original_logger)
-    end
-end
+import CondaPkg
 
 include("alphapem/utils/Utils.jl")
 include("alphapem/config/Config.jl")

@@ -56,11 +56,12 @@ function calculate_velocity_int_values!(work::GCManifoldWorkspace,
 
         # Calculate the total molar concentration at the AGC/AGDL interface and the net molar flux from AGC to AGDL,
         # then store them in natural order (not counter-flow order)
-        C_v_agdl_1, C_H2_agdl_1  = sv_i.agdl[1].C_v, sv_i.agdl[1].C_H2
+        C_v_agdl_1, C_H2_agdl_1, C_N2_agdl_1 = sv_i.agdl[1].C_v, sv_i.agdl[1].C_H2, sv_i.agdl[1].C_N2
         h_agc                    = h_a(P_agc, T_des, Wagc, Hagc)
-        work.C_tot_agdl[k]       = C_v_agdl_1 + C_H2_agdl_1 + C_N2_agc
+        work.C_tot_agdl[k]       = C_v_agdl_1 + C_H2_agdl_1 + C_N2_agdl_1
         work.J_tot_agc_agdl[k]   = h_agc * (C_v_agc - C_v_agdl_1) +
-                                   h_agc * (C_H2_agc - C_H2_agdl_1)
+                                   h_agc * (C_H2_agc - C_H2_agdl_1) +
+                                   h_agc * (C_N2_agc - C_N2_agdl_1)
     end
 
     @inbounds for i in 1:nb_gc # In the cathode
@@ -79,11 +80,12 @@ function calculate_velocity_int_values!(work::GCManifoldWorkspace,
         work.mu_gaz_cgc[i]  = mu_mixture_gases("H2O_v", x_H2O_v_cgc, "O2", x_O2_cgc, "N2", x_N2_cgc, T_cgc)
 
         # Calculate the total molar concentration at the CGDL/CGC interface and the net molar flux from CGDL to CGC
-        C_v_cgdl_last, C_O2_cgdl_last  = sv_i.cgdl[nb_gdl].C_v, sv_i.cgdl[nb_gdl].C_O2
+        C_v_cgdl_last, C_O2_cgdl_last, C_N2_cgdl_last = sv_i.cgdl[nb_gdl].C_v, sv_i.cgdl[nb_gdl].C_O2, sv_i.cgdl[nb_gdl].C_N2
         h_cgc                          = h_c(P_cgc, T_des, Wcgc, Hcgc)
-        work.C_tot_cgdl[i]             = C_v_cgdl_last + C_O2_cgdl_last + C_N2_cgc
+        work.C_tot_cgdl[i]             = C_v_cgdl_last + C_O2_cgdl_last + C_N2_cgdl_last
         work.J_tot_cgdl_cgc[i]         = h_cgc * (C_v_cgdl_last - C_v_cgc) +
-                                         h_cgc * (C_O2_cgdl_last - C_O2_cgc)
+                                         h_cgc * (C_O2_cgdl_last - C_O2_cgc) +
+                                         h_cgc * (C_N2_cgdl_last - C_N2_cgc)
     end
 
     return nothing
