@@ -293,6 +293,8 @@ DesiredInletFlows
 
         _ = Wacp_des_adjusted
         _ = Wccp_des_adjusted
+        # NOTE: When implementing desired_flows for auxiliary cases, remember that
+        # :forced_convective_cathode_with_anodic_recirculation has no N2 at anode (pure H2 recirculation).
         throw(ErrorException("desired_flows is not yet implemented in Julia for the forced-convective auxiliary branches because the translated Python source still depends on unavailable variables such as Pasm, Pcsm, and Wcp."))
     else  # cfg.type_auxiliary == :no_auxiliary
         # At the anode side

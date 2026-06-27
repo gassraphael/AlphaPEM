@@ -202,6 +202,7 @@ function calculate_flows_1D_GC_manifold(work::GCManifoldWorkspace,
     J_O2_cgc_out = C_O2_cgc[nb_gc] * R * T_des / P_cgc[nb_gc] * Jc_out
 
     # N2 flows at the GC (mol.m-2.s-1)
+    # NOTE: For :forced_convective_cathode_with_anodic_recirculation, anode N2 inlet must be 0 (pure H2 recirculation).
     if type_auxiliary == :forced_convective_cathode_with_anodic_recirculation ||
        type_auxiliary == :forced_convective_cathode_with_flow_through_anode
         # pass
@@ -259,5 +260,8 @@ function calculate_flows_1D_GC_manifold(work::GCManifoldWorkspace,
                                       J_N2_cgc_in, J_N2_cgc_cgc, J_N2_cgc_out)
         W = GCMassFlows(Wa_in, Wa_out, Wc_in, Wc_out)
         return GCManifoldFlows1D{nb_gc}(Jv, Jl, J_H2, J_O2, J_N2, W)
+    else
+        # TODO: Implement full return statement for auxiliary cases. Ensure N2 anode inlet is 0 for
+        # :forced_convective_cathode_with_anodic_recirculation and respects y_H2_in for others.
     end
 end

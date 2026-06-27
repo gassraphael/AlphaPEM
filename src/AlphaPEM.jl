@@ -15,15 +15,20 @@ const AUTHOR = "Raphael Gass"
 const EMAIL = "gassraphael@proton.me"
 const LICENSE = "GPLv3"
 
-# Suppress CondaPkg verbose initialization messages
+# Suppress verbose output from dependency resolvers and loggers
 ENV["PIXI_DISABLE_PROGRESS_BAR"] = "1"
+ENV["JULIA_PKG_VERBOSE"] = "false"
+
+import Logging
 let
     original_stdout = stdout
+    original_level = Logging.disable_logging(Logging.Info)
     redirect_stdout(devnull)
     try
         import CondaPkg
     finally
         redirect_stdout(original_stdout)
+        Logging.disable_logging(original_level)
     end
 end
 

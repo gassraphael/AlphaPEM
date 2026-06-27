@@ -76,6 +76,7 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
     end
 
     # Anode GC: nitrogen
+    # NOTE: d_C_N2_agc_dt must be 0 for :forced_convective_cathode_with_anodic_recirculation
     d_C_N2_agc_dt = ntuple(NB_GC) do i
         fac_a = 1.0 / (1.0 - sv[i].agc.s)
         if NB_GC == 1
