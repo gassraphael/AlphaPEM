@@ -87,8 +87,8 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
     Pcgc  = (C_v_cgc + C_O2_cgc + C_N2_cgc) * R * T_cgc
 
     # Capillary pressures in the stack
-    Pcap_agdl = Pcap("gdl", s_agdl[1],      T_agdl[1],      epsilon_gdl, epsilon_c)
-    Pcap_cgdl = Pcap("gdl", s_cgdl[nb_gdl], T_cgdl[nb_gdl], epsilon_gdl, epsilon_c)
+    Pcap_agdl = Pcap(:gdl, s_agdl[1],      T_agdl[1],      epsilon_gdl, epsilon_c)
+    Pcap_cgdl = Pcap(:gdl, s_cgdl[nb_gdl], T_cgdl[nb_gdl], epsilon_gdl, epsilon_c)
 
     # Densities in the GC
     rho_agc = C_H2_agc * M_H2 + C_v_agc * M_H2O + C_N2_agc * M_N2
@@ -123,83 +123,83 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
     #       ... of the capillary coefficient
     D_cap_agdl_agdl = flows_int_work.D_cap_agdl_agdl
     @inbounds for i in 1:(nb_gdl - 1)
-        D_cap_agdl_agdl[i] = hmean(Dcap("gdl", s_agdl[i],     T_agdl[i],     epsilon_gdl, e, epsilon_c),
-                                    Dcap("gdl", s_agdl[i + 1], T_agdl[i + 1], epsilon_gdl, e, epsilon_c))
+        D_cap_agdl_agdl[i] = hmean(Dcap(:gdl, s_agdl[i],     T_agdl[i],     epsilon_gdl, e, epsilon_c),
+                                    Dcap(:gdl, s_agdl[i + 1], T_agdl[i + 1], epsilon_gdl, e, epsilon_c))
     end
 
-    D_cap_agdl_ampl = hmean(Dcap("gdl", s_agdl[nb_gdl], T_agdl[nb_gdl], epsilon_gdl, e, epsilon_c),
-                             Dcap("mpl", s_ampl[1],      T_ampl[1],      epsilon_mpl, e),
+    D_cap_agdl_ampl = hmean(Dcap(:gdl, s_agdl[nb_gdl], T_agdl[nb_gdl], epsilon_gdl, e, epsilon_c),
+                             Dcap(:mpl, s_ampl[1],      T_ampl[1],      epsilon_mpl, e),
                              w_gdl_mpl, w_mpl_gdl)
 
     D_cap_ampl_ampl = flows_int_work.D_cap_ampl_ampl
     @inbounds for i in 1:(nb_mpl - 1)
-        D_cap_ampl_ampl[i] = hmean(Dcap("mpl", s_ampl[i],     T_ampl[i],     epsilon_mpl, e),
-                                    Dcap("mpl", s_ampl[i + 1], T_ampl[i + 1], epsilon_mpl, e))
+        D_cap_ampl_ampl[i] = hmean(Dcap(:mpl, s_ampl[i],     T_ampl[i],     epsilon_mpl, e),
+                                    Dcap(:mpl, s_ampl[i + 1], T_ampl[i + 1], epsilon_mpl, e))
     end
 
-    D_cap_ampl_acl = hmean(Dcap("mpl", s_ampl[nb_mpl], T_ampl[nb_mpl], epsilon_mpl, e),
-                           Dcap("cl",  s_acl,          T_acl,          epsilon_acl, e),
+    D_cap_ampl_acl = hmean(Dcap(:mpl, s_ampl[nb_mpl], T_ampl[nb_mpl], epsilon_mpl, e),
+                           Dcap(:cl,  s_acl,          T_acl,          epsilon_acl, e),
                            w_mpl_acl, w_acl_mpl)
 
-    D_cap_ccl_cmpl = hmean(Dcap("cl",  s_ccl,    T_ccl,    epsilon_ccl, e),
-                           Dcap("mpl", s_cmpl[1], T_cmpl[1], epsilon_mpl, e),
+    D_cap_ccl_cmpl = hmean(Dcap(:cl,  s_ccl,    T_ccl,    epsilon_ccl, e),
+                           Dcap(:mpl, s_cmpl[1], T_cmpl[1], epsilon_mpl, e),
                            w_ccl_mpl, w_mpl_ccl)
 
     D_cap_cmpl_cmpl = flows_int_work.D_cap_cmpl_cmpl
     @inbounds for i in 1:(nb_mpl - 1)
-        D_cap_cmpl_cmpl[i] = hmean(Dcap("mpl", s_cmpl[i],     T_cmpl[i],     epsilon_mpl, e),
-                                    Dcap("mpl", s_cmpl[i + 1], T_cmpl[i + 1], epsilon_mpl, e))
+        D_cap_cmpl_cmpl[i] = hmean(Dcap(:mpl, s_cmpl[i],     T_cmpl[i],     epsilon_mpl, e),
+                                    Dcap(:mpl, s_cmpl[i + 1], T_cmpl[i + 1], epsilon_mpl, e))
     end
 
-    D_cap_cmpl_cgdl = hmean(Dcap("mpl", s_cmpl[nb_mpl], T_cmpl[nb_mpl], epsilon_mpl, e),
-                             Dcap("gdl", s_cgdl[1],      T_cgdl[1],      epsilon_gdl, e, epsilon_c),
+    D_cap_cmpl_cgdl = hmean(Dcap(:mpl, s_cmpl[nb_mpl], T_cmpl[nb_mpl], epsilon_mpl, e),
+                             Dcap(:gdl, s_cgdl[1],      T_cgdl[1],      epsilon_gdl, e, epsilon_c),
                              w_mpl_gdl, w_gdl_mpl)
 
     D_cap_cgdl_cgdl = flows_int_work.D_cap_cgdl_cgdl
     @inbounds for i in 1:(nb_gdl - 1)
-        D_cap_cgdl_cgdl[i] = hmean(Dcap("gdl", s_cgdl[i],     T_cgdl[i],     epsilon_gdl, e, epsilon_c),
-                                    Dcap("gdl", s_cgdl[i + 1], T_cgdl[i + 1], epsilon_gdl, e, epsilon_c))
+        D_cap_cgdl_cgdl[i] = hmean(Dcap(:gdl, s_cgdl[i],     T_cgdl[i],     epsilon_gdl, e, epsilon_c),
+                                    Dcap(:gdl, s_cgdl[i + 1], T_cgdl[i + 1], epsilon_gdl, e, epsilon_c))
     end
 
     #       ... of the effective diffusion coefficient
     Da_eff_agdl_agdl = flows_int_work.Da_eff_agdl_agdl
     @inbounds for i in 1:(nb_gdl - 1)
-        Da_eff_agdl_agdl[i] = hmean(Da_eff("gdl", s_agdl[i],     T_agdl[i],     Pagdl[i],     epsilon_gdl, epsilon_c),
-                                     Da_eff("gdl", s_agdl[i + 1], T_agdl[i + 1], Pagdl[i + 1], epsilon_gdl, epsilon_c))
+        Da_eff_agdl_agdl[i] = hmean(Da_eff(:gdl, s_agdl[i],     T_agdl[i],     Pagdl[i],     epsilon_gdl, epsilon_c),
+                                     Da_eff(:gdl, s_agdl[i + 1], T_agdl[i + 1], Pagdl[i + 1], epsilon_gdl, epsilon_c))
     end
 
-    Da_eff_agdl_ampl = hmean(Da_eff("gdl", s_agdl[nb_gdl], T_agdl[nb_gdl], Pagdl[nb_gdl], epsilon_gdl, epsilon_c),
-                              Da_eff("mpl", s_ampl[1],      T_ampl[1],      Pampl[1],      epsilon_mpl),
+    Da_eff_agdl_ampl = hmean(Da_eff(:gdl, s_agdl[nb_gdl], T_agdl[nb_gdl], Pagdl[nb_gdl], epsilon_gdl, epsilon_c),
+                              Da_eff(:mpl, s_ampl[1],      T_ampl[1],      Pampl[1],      epsilon_mpl),
                               w_gdl_mpl, w_mpl_gdl)
 
     Da_eff_ampl_ampl = flows_int_work.Da_eff_ampl_ampl
     @inbounds for i in 1:(nb_mpl - 1)
-        Da_eff_ampl_ampl[i] = hmean(Da_eff("mpl", s_ampl[i],     T_ampl[i],     Pampl[i],     epsilon_mpl),
-                                     Da_eff("mpl", s_ampl[i + 1], T_ampl[i + 1], Pampl[i + 1], epsilon_mpl))
+        Da_eff_ampl_ampl[i] = hmean(Da_eff(:mpl, s_ampl[i],     T_ampl[i],     Pampl[i],     epsilon_mpl),
+                                     Da_eff(:mpl, s_ampl[i + 1], T_ampl[i + 1], Pampl[i + 1], epsilon_mpl))
     end
 
-    Da_eff_ampl_acl = hmean(Da_eff("mpl", s_ampl[nb_mpl], T_ampl[nb_mpl], Pampl[nb_mpl], epsilon_mpl),
-                             Da_eff("cl",  s_acl,          T_acl,          Pacl,          epsilon_acl),
+    Da_eff_ampl_acl = hmean(Da_eff(:mpl, s_ampl[nb_mpl], T_ampl[nb_mpl], Pampl[nb_mpl], epsilon_mpl),
+                             Da_eff(:cl,  s_acl,          T_acl,          Pacl,          epsilon_acl),
                              w_mpl_acl, w_acl_mpl)
 
-    Dc_eff_ccl_cmpl = hmean(Dc_eff("cl",  s_ccl,    T_ccl,    Pccl,    epsilon_ccl),
-                             Dc_eff("mpl", s_cmpl[1], T_cmpl[1], Pcmpl[1], epsilon_mpl),
+    Dc_eff_ccl_cmpl = hmean(Dc_eff(:cl,  s_ccl,    T_ccl,    Pccl,    epsilon_ccl),
+                             Dc_eff(:mpl, s_cmpl[1], T_cmpl[1], Pcmpl[1], epsilon_mpl),
                              w_ccl_mpl, w_mpl_ccl)
 
     Dc_eff_cmpl_cmpl = flows_int_work.Dc_eff_cmpl_cmpl
     @inbounds for i in 1:(nb_mpl - 1)
-        Dc_eff_cmpl_cmpl[i] = hmean(Dc_eff("mpl", s_cmpl[i],     T_cmpl[i],     Pcmpl[i],     epsilon_mpl),
-                                     Dc_eff("mpl", s_cmpl[i + 1], T_cmpl[i + 1], Pcmpl[i + 1], epsilon_mpl))
+        Dc_eff_cmpl_cmpl[i] = hmean(Dc_eff(:mpl, s_cmpl[i],     T_cmpl[i],     Pcmpl[i],     epsilon_mpl),
+                                     Dc_eff(:mpl, s_cmpl[i + 1], T_cmpl[i + 1], Pcmpl[i + 1], epsilon_mpl))
     end
 
-    Dc_eff_cmpl_cgdl = hmean(Dc_eff("mpl", s_cmpl[nb_mpl], T_cmpl[nb_mpl], Pcmpl[nb_mpl], epsilon_mpl),
-                              Dc_eff("gdl", s_cgdl[1],      T_cgdl[1],      Pcgdl[1],      epsilon_gdl, epsilon_c),
+    Dc_eff_cmpl_cgdl = hmean(Dc_eff(:mpl, s_cmpl[nb_mpl], T_cmpl[nb_mpl], Pcmpl[nb_mpl], epsilon_mpl),
+                              Dc_eff(:gdl, s_cgdl[1],      T_cgdl[1],      Pcgdl[1],      epsilon_gdl, epsilon_c),
                               w_mpl_gdl, w_gdl_mpl)
 
     Dc_eff_cgdl_cgdl = flows_int_work.Dc_eff_cgdl_cgdl
     @inbounds for i in 1:(nb_gdl - 1)
-        Dc_eff_cgdl_cgdl[i] = hmean(Dc_eff("gdl", s_cgdl[i],     T_cgdl[i],     Pcgdl[i],     epsilon_gdl, epsilon_c),
-                                     Dc_eff("gdl", s_cgdl[i + 1], T_cgdl[i + 1], Pcgdl[i + 1], epsilon_gdl, epsilon_c))
+        Dc_eff_cgdl_cgdl[i] = hmean(Dc_eff(:gdl, s_cgdl[i],     T_cgdl[i],     Pcgdl[i],     epsilon_gdl, epsilon_c),
+                                     Dc_eff(:gdl, s_cgdl[i + 1], T_cgdl[i + 1], Pcgdl[i + 1], epsilon_gdl, epsilon_c))
     end
 
     #       ... of the temperature
@@ -219,7 +219,7 @@ GDL compression.
 
 Parameters
 ----------
-element : String
+element : Symbol
     Specifies the element for which the capillary coefficient is calculated.
     Must be either "gdl" (gas diffusion layer), "mpl" (micro-porous layer) or "cl" (catalyst layer).
 s :
@@ -238,7 +238,7 @@ Returns
 Real
     Capillary coefficient at the GDL, MPL or CL in kg.m.s-1.
 """
-function Dcap(element::String,
+function Dcap(element::Symbol,
               s,
               T,
               epsilon::Float64,
@@ -247,11 +247,11 @@ function Dcap(element::String,
 
     K0_value = K0(element, epsilon, epsilon_c)
     s_eff = _bounded_saturation_value(s)
-    if element == "gdl"
+    if element == :gdl
         theta_c_value = theta_c_gdl
-    elseif element == "mpl"
+    elseif element == :mpl
         theta_c_value = theta_c_mpl
-    elseif element == "cl"
+    elseif element == :cl
         theta_c_value = theta_c_cl
     else
         throw(ArgumentError("The element should be either 'gdl', 'mpl' or 'cl'."))
@@ -267,7 +267,7 @@ end
 
 Parameters
 ----------
-element : String
+element : Symbol
     Specifies the element for which the capillary pressure is calculated.
     Must be either "gdl" (gas diffusion layer), "mpl" (micro-porous layer) or "cl" (catalyst layer).
 s :
@@ -284,7 +284,7 @@ Returns
 Real
     Capillary pressure at the selected element.
 """
-function Pcap(element::String,
+function Pcap(element::Symbol,
               s,
               T,
               epsilon::Float64,
@@ -292,11 +292,11 @@ function Pcap(element::String,
 
     K0_value = K0(element, epsilon, epsilon_c)
     s_eff = _bounded_saturation_value(s)
-    if element == "gdl"
+    if element == :gdl
         theta_c_value = theta_c_gdl
-    elseif element == "mpl"
+    elseif element == :mpl
         theta_c_value = theta_c_mpl
-    elseif element == "cl"
+    elseif element == :cl
         theta_c_value = theta_c_cl
     else
         throw(ArgumentError("The element should be either 'gdl', 'mpl' or 'cl'."))
@@ -354,7 +354,7 @@ in m².s-1, considering GDL compression.
 
 Parameters
 ----------
-element : String
+element : Symbol
     Specifies the element for which the effective diffusion coefficient is calculated.
     Must be either "gdl" (gas diffusion layer), "mpl" (micro-porous layer) or "cl" (catalyst layer).
 s :
@@ -373,7 +373,7 @@ Returns
 Da_eff
     Effective diffusion coefficient at the anode in m².s-1.
 """
-function Da_eff(element::String,
+function Da_eff(element::Symbol,
                 s,
                 T,
                 P,
@@ -381,7 +381,7 @@ function Da_eff(element::String,
                 epsilon_c::Union{Float64, Nothing}=nothing)
 
     s_eff = _bounded_saturation_value(s)
-    if element == "gdl" # The effective diffusion coefficient at the GDL using Tomadakis and Sotirchos model.
+    if element == :gdl # The effective diffusion coefficient at the GDL using Tomadakis and Sotirchos model.
         # According to the GDL porosity, the GDL compression effect is different.
         if epsilon < 0.67
             beta2 = -1.59
@@ -391,10 +391,10 @@ function Da_eff(element::String,
         tau_gdl = 1 / (((epsilon - epsilon_p) / (1 - epsilon_p))^alpha_p)
         return epsilon / tau_gdl * exp(beta2 * epsilon_c) * (1 - s_eff)^r_s_gdl * Da(P, T)
 
-    elseif element == "mpl" # The effective diffusion coefficient at the MPL using Bruggeman model.
+    elseif element == :mpl # The effective diffusion coefficient at the MPL using Bruggeman model.
         return epsilon / tau_mpl * (1 - s_eff)^r_s_mpl * Da(P, T)
 
-    elseif element == "cl" # The effective diffusion coefficient at the CL using Bruggeman model.
+    elseif element == :cl # The effective diffusion coefficient at the CL using Bruggeman model.
         return epsilon / tau_cl * (1 - s_eff)^r_s_cl * Da(P, T)
 
     else
@@ -408,7 +408,7 @@ in m².s-1, considering GDL compression.
 
 Parameters
 ----------
-element : String
+element : Symbol
     Specifies the element for which the effective diffusion coefficient is calculated.
     Must be either "gdl" (gas diffusion layer), "mpl" (micro-porous layer) or "cl" (catalyst layer).
 s :
@@ -427,7 +427,7 @@ Returns
 Dc_eff
     Effective diffusion coefficient at the cathode in m².s-1.
 """
-function Dc_eff(element::String,
+function Dc_eff(element::Symbol,
                 s,
                 T,
                 P,
@@ -435,7 +435,7 @@ function Dc_eff(element::String,
                 epsilon_c::Union{Float64, Nothing}=nothing)
 
     s_eff = _bounded_saturation_value(s)
-    if element == "gdl" # The effective diffusion coefficient at the GDL using Tomadakis and Sotirchos model.
+    if element == :gdl # The effective diffusion coefficient at the GDL using Tomadakis and Sotirchos model.
         # According to the GDL porosity, the GDL compression effect is different.
         if epsilon < 0.67
             beta2 = -1.59
@@ -445,10 +445,10 @@ function Dc_eff(element::String,
         tau_gdl = 1 / (((epsilon - epsilon_p) / (1 - epsilon_p))^alpha_p)
         return epsilon / tau_gdl * exp(beta2 * epsilon_c) * (1 - s_eff)^r_s_gdl * Dc(P, T)
 
-    elseif element == "mpl" # The effective diffusion coefficient at the MPL using Bruggeman model.
+    elseif element == :mpl # The effective diffusion coefficient at the MPL using Bruggeman model.
         return epsilon / tau_mpl * (1 - s_eff)^r_s_mpl * Dc(P, T)
 
-    elseif element == "cl" # The effective diffusion coefficient at the CL using Bruggeman model.
+    elseif element == :cl # The effective diffusion coefficient at the CL using Bruggeman model.
         return epsilon / tau_cl * (1 - s_eff)^r_s_cl * Dc(P, T)
 
     else
@@ -706,7 +706,7 @@ It is positive for condensation and negative for evaporation.
 
 Parameters
 ----------
-element : String
+element : Symbol
     Specifies the element for which the phase transfer rate is calculated.
 s :
     Liquid water saturation variable.
@@ -724,7 +724,7 @@ Returns
 Svl :
     Phase transfer rate of water condensation or evaporation in mol.m-3.s-1.
 """
-function Svl(element::String,
+function Svl(element::Symbol,
              s,
              C_v,
              Ctot,
@@ -740,9 +740,9 @@ function Svl(element::String,
     Psat_eff = min(Psat(T_eff), prevfloat(Ptot))
 
     # Determination of the diffusion coefficient at the anode or the cathode
-    if element == "anode"
+    if element == :anode
         D_value = Da(Ptot, T_eff)  # Diffusion coefficient at the anode.
-    else  # element == "cathode"
+    else  # element == :cathode
         D_value = Dc(Ptot, T_eff)  # Diffusion coefficient at the cathode.
     end
 
@@ -779,7 +779,7 @@ end
 
 Parameters
 ----------
-element : String
+element : Symbol
     Specifies the element for which the intrinsic permeability is calculated.
     Must be either "gdl" (gas diffusion layer), "mpl" (micro-porous layer) or "cl" (catalyst layer).
 epsilon : Float64
@@ -799,11 +799,11 @@ Sources
 2. M.L. Stewart 2005 - A study of pore geometry effects on anisotropy in hydraulic permeability using the
    lattice-Boltzmann method - for the Blake-Kozeny equation.
 """
-function K0(element::String,
+function K0(element::Symbol,
             epsilon::Float64,
             epsilon_c::Union{Float64, Nothing}=nothing)::Float64
 
-    if element == "gdl"
+    if element == :gdl
         # According to the GDL porosity, the GDL compression effect is different.
         if epsilon < 0.67
             beta1 = -3.60
@@ -813,10 +813,10 @@ function K0(element::String,
         return epsilon / (8 * log(epsilon)^2) * (epsilon - epsilon_p)^(alpha_p + 2) *
                4.6e-6^2 / ((1 - epsilon_p)^alpha_p * ((alpha_p + 1) * epsilon - epsilon_p)^2) * exp(beta1 * epsilon_c)
 
-    elseif element == "mpl"
+    elseif element == :mpl
         return (Dp_mpl^2 / 150) * (epsilon^3 / ((1 - epsilon)^2)) # Using the Blake-Kozeny equation.
 
-    elseif element == "cl"
+    elseif element == :cl
         return (Dp_cl^2 / 150) * (epsilon^3 / ((1 - epsilon)^2)) # Using the Blake-Kozeny equation.
 
     else

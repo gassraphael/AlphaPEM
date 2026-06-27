@@ -35,7 +35,7 @@ function hmean(a::Real, b::Real, wa::Real, wb::Real)
     return (wa + wb) / denom
 end
 
-function hmean(terms::AbstractVector, weights::Union{AbstractVector, Nothing}=nothing)
+function hmean(terms, weights=nothing)
 
     n = length(terms)
     # Calculate the weighted harmonic mean.
@@ -83,7 +83,7 @@ It is more efficient to express this function in the code than calling average f
 # Returns
 - The weighted arithmetic mean.
 """
-function average(terms::AbstractVector, weights::Union{AbstractVector, Nothing}=nothing)
+function average(terms, weights=nothing)
 
     n = length(terms)
     if weights === nothing

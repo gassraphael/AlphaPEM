@@ -134,12 +134,12 @@ function calculate_flow_1D_GC_manifold_int_values!(work::GCManifoldWorkspace,
         C_tot_agc = C_v_agc + C_H2_agc + C_N2_agc
         x_H2O_v_agc, x_H2_agc, x_N2_agc = C_v_agc / C_tot_agc, C_H2_agc / C_tot_agc, C_N2_agc / C_tot_agc
         work.x_H2O_v_agc[i], work.x_H2_agc[i], work.x_N2_agc[i] = x_H2O_v_agc, x_H2_agc, x_N2_agc
-        mu_gaz_agc[i] = mu_mixture_gases("H2O_v", x_H2O_v_agc, "H2", x_H2_agc, "N2", x_N2_agc, T_agc)
+        mu_gaz_agc[i] = mu_mixture_gases(:H2O_v, x_H2O_v_agc, :H2, x_H2_agc, :N2, x_N2_agc, T_agc)
 
         C_tot_cgc = C_v_cgc + C_O2_cgc + C_N2_cgc
         x_H2O_v_cgc, x_O2_cgc, x_N2_cgc = C_v_cgc / C_tot_cgc, C_O2_cgc / C_tot_cgc, C_N2_cgc / C_tot_cgc
         work.x_H2O_v_cgc[i], work.x_O2_cgc[i], work.x_N2_cgc[i] = x_H2O_v_cgc, x_O2_cgc, x_N2_cgc
-        mu_gaz_cgc[i] = mu_mixture_gases("H2O_v", x_H2O_v_cgc, "O2", x_O2_cgc, "N2", x_N2_cgc, T_cgc)
+        mu_gaz_cgc[i] = mu_mixture_gases(:H2O_v, x_H2O_v_cgc, :O2, x_O2_cgc, :N2, x_N2_cgc, T_cgc)
     end
 
     # Physical quantities in the auxiliary system

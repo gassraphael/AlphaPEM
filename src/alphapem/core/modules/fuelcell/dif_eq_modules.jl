@@ -82,33 +82,33 @@ function calculate_dif_eq_int_values(t::Float64,
     x_H2O_v_cgc, x_O2_cgc, x_N2_cgc = C_v_cgc / C_tot_cgc, C_O2_cgc / C_tot_cgc, C_N2_cgc / C_tot_cgc
 
     #       Dynamic viscosity of the gas mixture.
-    mu_gaz_agc = mu_mixture_gases("H2O_v", x_H2O_v_agc, "H2", x_H2_agc, "N2", x_N2_agc, T_agc)
-    mu_gaz_cgc = mu_mixture_gases("H2O_v", x_H2O_v_cgc, "O2", x_O2_cgc, "N2", x_N2_cgc, T_cgc)
+    mu_gaz_agc = mu_mixture_gases(:H2O_v, x_H2O_v_agc, :H2, x_H2_agc, :N2, x_N2_agc, T_agc)
+    mu_gaz_cgc = mu_mixture_gases(:H2O_v, x_H2O_v_cgc, :O2, x_O2_cgc, :N2, x_N2_cgc, T_cgc)
 
     #       Volumetric heat capacity (J.m-3.K-1)
-    rho_Cp0_agdl = ntuple(i -> calculate_rho_Cp0("agdl", T_agdl[i], C_v_agdl[i],
+    rho_Cp0_agdl = ntuple(i -> calculate_rho_Cp0(:agdl, T_agdl[i], C_v_agdl[i],
                                                  s_agdl[i], nothing, C_H2_agdl[i], nothing, C_N2_agdl[i],
                                                  epsilon_gdl), nb_gdl)
-    rho_Cp0_ampl = ntuple(i -> calculate_rho_Cp0("ampl", T_ampl[i], C_v_ampl[i],
+    rho_Cp0_ampl = ntuple(i -> calculate_rho_Cp0(:ampl, T_ampl[i], C_v_ampl[i],
                                                  s_ampl[i], nothing, C_H2_ampl[i], nothing, C_N2_ampl[i],
                                                  epsilon_mpl), nb_mpl)
-    rho_Cp0_acl = calculate_rho_Cp0("acl", T_acl, C_v_acl, s_acl, lambda_acl, C_H2_acl, nothing, C_N2_acl,
+    rho_Cp0_acl = calculate_rho_Cp0(:acl, T_acl, C_v_acl, s_acl, lambda_acl, C_H2_acl, nothing, C_N2_acl,
                                     nothing, Hacl)
-    rho_Cp0_mem = calculate_rho_Cp0("mem", T_mem, nothing, nothing, lambda_mem)
-    rho_Cp0_ccl = calculate_rho_Cp0("ccl", T_ccl, C_v_ccl, s_ccl, lambda_ccl, nothing, C_O2_ccl,
+    rho_Cp0_mem = calculate_rho_Cp0(:mem, T_mem, nothing, nothing, lambda_mem)
+    rho_Cp0_ccl = calculate_rho_Cp0(:ccl, T_ccl, C_v_ccl, s_ccl, lambda_ccl, nothing, C_O2_ccl,
                                     C_N2_ccl, nothing, Hccl)
-    rho_Cp0_cmpl = ntuple(i -> calculate_rho_Cp0("cmpl", T_cmpl[i], C_v_cmpl[i],
+    rho_Cp0_cmpl = ntuple(i -> calculate_rho_Cp0(:cmpl, T_cmpl[i], C_v_cmpl[i],
                                                  s_cmpl[i], nothing, nothing, C_O2_cmpl[i], C_N2_cmpl[i],
                                                  epsilon_mpl), nb_mpl)
-    rho_Cp0_cgdl = ntuple(i -> calculate_rho_Cp0("cgdl", T_cgdl[i], C_v_cgdl[i],
+    rho_Cp0_cgdl = ntuple(i -> calculate_rho_Cp0(:cgdl, T_cgdl[i], C_v_cgdl[i],
                                                  s_cgdl[i], nothing, nothing, C_O2_cgdl[i], C_N2_cgdl[i],
                                                  epsilon_gdl), nb_gdl)
     rho_Cp0 = MEAThermalIntermediates{nb_gdl, nb_mpl}(rho_Cp0_agdl, rho_Cp0_ampl, rho_Cp0_acl,
                                                       rho_Cp0_mem, rho_Cp0_ccl, rho_Cp0_cmpl, rho_Cp0_cgdl)
 
     #       Crossover current density
-    T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
-                            [Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl), Hccl / (Hacl + Hmem + Hccl)])
+    T_acl_mem_ccl = average((T_acl, T_mem, T_ccl),
+                            (Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl), Hccl / (Hacl + Hmem + Hccl)))
     i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
     i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
     i_n = i_H2 + i_O2
@@ -195,23 +195,23 @@ function calculate_dif_eq_int_values(t::Float64,
         mu_asm = if cfg.type_auxiliary == :forced_convective_cathode_with_anodic_recirculation
             mu_mixture_gases(["H2O_v", "H2"], [x_H2O_v_asm, 1 - x_H2O_v_asm], T_des)
         else
-            mu_mixture_gases(["H2O_v", "H2", "N2"],
+            mu_mixture_gases(["H2O_v", :H2, "N2"],
                              [x_H2O_v_asm, y_H2_in * (1 - x_H2O_v_asm), (1 - y_H2_in) * (1 - x_H2O_v_asm)],
                              T_des)
         end
         mu_aem = if cfg.type_auxiliary == :forced_convective_cathode_with_anodic_recirculation
             mu_mixture_gases(["H2O_v", "H2"], [x_H2O_v_aem, 1 - x_H2O_v_aem], T_des)
         else
-            mu_mixture_gases(["H2O_v", "H2", "N2"],
+            mu_mixture_gases(["H2O_v", :H2, "N2"],
                              [x_H2O_v_aem, y_H2_aem * (1 - x_H2O_v_aem), (1 - y_H2_aem) * (1 - x_H2O_v_aem)],
                              T_des)
         end
 
         # Dynamic viscosity of the gas mixture at the cathode side.
-        mu_csm = mu_mixture_gases(["H2O_v", "O2", "N2"],
+        mu_csm = mu_mixture_gases(["H2O_v", :O2, "N2"],
                                   [x_H2O_v_csm, y_O2_ext * (1 - x_H2O_v_csm), (1 - y_O2_ext) * (1 - x_H2O_v_csm)],
                                   T_des)
-        mu_cem = mu_mixture_gases(["H2O_v", "O2", "N2"],
+        mu_cem = mu_mixture_gases(["H2O_v", :O2, "N2"],
                                   [x_H2O_v_cem, y_O2_cem * (1 - x_H2O_v_cem), (1 - y_O2_cem) * (1 - x_H2O_v_cem)],
                                   T_des)
 
@@ -489,10 +489,13 @@ function _nb_solver_vars_cell_1D(nb_gdl::Int, nb_mpl::Int)::Int
     return length(canonical_cell_solver_variable_names_1D(nb_gdl, nb_mpl))
 end
 
-"""Count algebraic variables appended in the DAE solver vector."""
-function _nb_solver_vars_algebraic(nb_gc::Int)::Int
-    return length(canonical_algebraic_solver_variable_names(nb_gc))
-end
+"""Count algebraic variables appended in the DAE solver vector.
+
+The algebraic block is `[U_cell, i_fc[1:nb_gc], C_O2_Pt[1:nb_gc], J_a_in, J_c_in]`,
+i.e. `1 + nb_gc + nb_gc + 2 = 2*nb_gc + 3` entries. Kept in sync with
+`canonical_algebraic_solver_variable_names`.
+"""
+@inline _nb_solver_vars_algebraic(nb_gc::Int)::Int = 2 * nb_gc + 3
 
 """Build the solver differential/algebraic mask for DAEProblem construction.
 

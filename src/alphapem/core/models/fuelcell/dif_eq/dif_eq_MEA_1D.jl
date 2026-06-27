@@ -247,7 +247,7 @@ function calculate_dyn_H2_O2_N2_evolution_inside_MEA(
 )::MEAGasSpeciesDerivative{NB_GDL, NB_MPL} where {NB_GDL, NB_MPL}
 
     # Extraction of the variables
-    s_agdl, s_ampl, s_acl = getproperty.(sv.ampl, :s), sv.acl.s, getproperty.(sv.agdl, :s)
+    s_agdl, s_ampl, s_acl = getproperty.(sv.agdl, :s), getproperty.(sv.ampl, :s), sv.acl.s
     s_ccl, s_cmpl, s_cgdl = sv.ccl.s, getproperty.(sv.cmpl, :s), getproperty.(sv.cgdl, :s)
 
     T_acl, T_ccl = sv.acl.T, sv.ccl.T
