@@ -39,97 +39,106 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
     Hagc = pp.Hagc
     Hcgc = pp.Hcgc
     Lgc = pp.Lgc
-    type_auxiliary = cfg.type_auxiliary
     L_node = Lgc / NB_GC
-
-    # Map each physical anode GC index to its position along the flow direction.
-    agc_pos = anode_gc_pos_map(NB_GC, cfg.type_flow)
+    counter_flow = cfg.type_flow == :counter_flow
 
     # Anode GC: water vapour
-    d_C_v_agc_dt = ntuple(NB_GC) do i
-        fac_a = 1.0 / (1.0 - sv[i].agc.s)
+    d_C_v_agc_dt = ntuple(NB_GC) do k
+        fac_a = 1.0 / (1.0 - sv[k].agc.s)
         if NB_GC == 1
             J_in = Jv.agc_in
             J_out = Jv.agc_out
-            fac_a * (J_in - J_out) / Lgc - flows_mea[i].Jv.agc_agdl / Hagc
+            fac_a * (J_in - J_out) / Lgc - flows_mea[k].Jv.agc_agdl / Hagc
         else
-            p = agc_pos[i]
-            J_in = p == 1 ? Jv.agc_in : Jv.agc_agc[p - 1]
-            J_out = p == NB_GC ? Jv.agc_out : Jv.agc_agc[p]
-            fac_a * (J_in - J_out) / L_node - flows_mea[i].Jv.agc_agdl / Hagc
+            if counter_flow
+                J_in = k == NB_GC ? Jv.agc_in : Jv.agc_agc[k + 1]
+                J_out = k == 1 ? Jv.agc_out : Jv.agc_agc[k]
+            else
+                J_in = k == 1 ? Jv.agc_in : Jv.agc_agc[k - 1]
+                J_out = k == NB_GC ? Jv.agc_out : Jv.agc_agc[k]
+            end
+            fac_a * (J_in - J_out) / L_node - flows_mea[k].Jv.agc_agdl / Hagc
         end
     end
 
     # Anode GC: hydrogen
-    d_C_H2_agc_dt = ntuple(NB_GC) do i
-        fac_a = 1.0 / (1.0 - sv[i].agc.s)
+    d_C_H2_agc_dt = ntuple(NB_GC) do k
+        fac_a = 1.0 / (1.0 - sv[k].agc.s)
         if NB_GC == 1
             J_in = JH2.agc_in
             J_out = JH2.agc_out
-            fac_a * (J_in - J_out) / Lgc - flows_mea[i].J_H2.agc_agdl / Hagc
+            fac_a * (J_in - J_out) / Lgc - flows_mea[k].J_H2.agc_agdl / Hagc
         else
-            p = agc_pos[i]
-            J_in = p == 1 ? JH2.agc_in : JH2.agc_agc[p - 1]
-            J_out = p == NB_GC ? JH2.agc_out : JH2.agc_agc[p]
-            fac_a * (J_in - J_out) / L_node - flows_mea[i].J_H2.agc_agdl / Hagc
+            if counter_flow
+                J_in = k == NB_GC ? JH2.agc_in : JH2.agc_agc[k + 1]
+                J_out = k == 1 ? JH2.agc_out : JH2.agc_agc[k]
+            else
+                J_in = k == 1 ? JH2.agc_in : JH2.agc_agc[k - 1]
+                J_out = k == NB_GC ? JH2.agc_out : JH2.agc_agc[k]
+            end
+            fac_a * (J_in - J_out) / L_node - flows_mea[k].J_H2.agc_agdl / Hagc
         end
     end
 
     # Anode GC: nitrogen
     # NOTE: d_C_N2_agc_dt must be 0 for :forced_convective_cathode_with_anodic_recirculation
-    d_C_N2_agc_dt = ntuple(NB_GC) do i
-        fac_a = 1.0 / (1.0 - sv[i].agc.s)
+    d_C_N2_agc_dt = ntuple(NB_GC) do k
+        fac_a = 1.0 / (1.0 - sv[k].agc.s)
         if NB_GC == 1
             J_in = JN2.agc_in
             J_out = JN2.agc_out
-            fac_a * (J_in - J_out) / Lgc - flows_mea[i].J_N2.agc_agdl / Hagc
+            fac_a * (J_in - J_out) / Lgc - flows_mea[k].J_N2.agc_agdl / Hagc
         else
-            p = agc_pos[i]
-            J_in = p == 1 ? JN2.agc_in : JN2.agc_agc[p - 1]
-            J_out = p == NB_GC ? JN2.agc_out : JN2.agc_agc[p]
-            fac_a * (J_in - J_out) / L_node - flows_mea[i].J_N2.agc_agdl / Hagc
+            if counter_flow
+                J_in = k == NB_GC ? JN2.agc_in : JN2.agc_agc[k + 1]
+                J_out = k == 1 ? JN2.agc_out : JN2.agc_agc[k]
+            else
+                J_in = k == 1 ? JN2.agc_in : JN2.agc_agc[k - 1]
+                J_out = k == NB_GC ? JN2.agc_out : JN2.agc_agc[k]
+            end
+            fac_a * (J_in - J_out) / L_node - flows_mea[k].J_N2.agc_agdl / Hagc
         end
     end
 
     # Cathode GC: water vapour
-    d_C_v_cgc_dt = ntuple(NB_GC) do i
-        fac_c = 1.0 / (1.0 - sv[i].cgc.s)
+    d_C_v_cgc_dt = ntuple(NB_GC) do k
+        fac_c = 1.0 / (1.0 - sv[k].cgc.s)
         if NB_GC == 1
             J_in = Jv.cgc_in
             J_out = Jv.cgc_out
-            fac_c * (J_in - J_out) / Lgc + flows_mea[i].Jv.cgdl_cgc / Hcgc
+            fac_c * (J_in - J_out) / Lgc + flows_mea[k].Jv.cgdl_cgc / Hcgc
         else
-            J_in = i == 1 ? Jv.cgc_in : Jv.cgc_cgc[i - 1]
-            J_out = i == NB_GC ? Jv.cgc_out : Jv.cgc_cgc[i]
-            fac_c * (J_in - J_out) / L_node + flows_mea[i].Jv.cgdl_cgc / Hcgc
+            J_in = k == 1 ? Jv.cgc_in : Jv.cgc_cgc[k - 1]
+            J_out = k == NB_GC ? Jv.cgc_out : Jv.cgc_cgc[k]
+            fac_c * (J_in - J_out) / L_node + flows_mea[k].Jv.cgdl_cgc / Hcgc
         end
     end
 
     # Cathode GC: oxygen
-    d_C_O2_cgc_dt = ntuple(NB_GC) do i
-        fac_c = 1.0 / (1.0 - sv[i].cgc.s)
+    d_C_O2_cgc_dt = ntuple(NB_GC) do k
+        fac_c = 1.0 / (1.0 - sv[k].cgc.s)
         if NB_GC == 1
             J_in = JO2.cgc_in
             J_out = JO2.cgc_out
-            fac_c * (J_in - J_out) / Lgc + flows_mea[i].J_O2.cgdl_cgc / Hcgc
+            fac_c * (J_in - J_out) / Lgc + flows_mea[k].J_O2.cgdl_cgc / Hcgc
         else
-            J_in = i == 1 ? JO2.cgc_in : JO2.cgc_cgc[i - 1]
-            J_out = i == NB_GC ? JO2.cgc_out : JO2.cgc_cgc[i]
-            fac_c * (J_in - J_out) / L_node + flows_mea[i].J_O2.cgdl_cgc / Hcgc
+            J_in = k == 1 ? JO2.cgc_in : JO2.cgc_cgc[k - 1]
+            J_out = k == NB_GC ? JO2.cgc_out : JO2.cgc_cgc[k]
+            fac_c * (J_in - J_out) / L_node + flows_mea[k].J_O2.cgdl_cgc / Hcgc
         end
     end
 
     # Cathode GC: nitrogen
-    d_C_N2_cgc_dt = ntuple(NB_GC) do i
-        fac_c = 1.0 / (1.0 - sv[i].cgc.s)
+    d_C_N2_cgc_dt = ntuple(NB_GC) do k
+        fac_c = 1.0 / (1.0 - sv[k].cgc.s)
         if NB_GC == 1
             J_in = JN2.cgc_in
             J_out = JN2.cgc_out
-            fac_c * (J_in - J_out) / Lgc + flows_mea[i].J_N2.cgdl_cgc / Hcgc
+            fac_c * (J_in - J_out) / Lgc + flows_mea[k].J_N2.cgdl_cgc / Hcgc
         else
-            J_in = i == 1 ? JN2.cgc_in : JN2.cgc_cgc[i - 1]
-            J_out = i == NB_GC ? JN2.cgc_out : JN2.cgc_cgc[i]
-            fac_c * (J_in - J_out) / L_node + flows_mea[i].J_N2.cgdl_cgc / Hcgc
+            J_in = k == 1 ? JN2.cgc_in : JN2.cgc_cgc[k - 1]
+            J_out = k == NB_GC ? JN2.cgc_out : JN2.cgc_cgc[k]
+            fac_c * (J_in - J_out) / L_node + flows_mea[k].J_N2.cgdl_cgc / Hcgc
         end
     end
 
@@ -166,34 +175,36 @@ function calculate_dyn_liq_evolution_inside_gas_channel(
     Hcgc = pp.Hcgc
     Lgc = pp.Lgc
     L_node = Lgc / NB_GC
-
-    # Map each physical anode GC index to its position along the flow direction.
-    agc_pos = anode_gc_pos_map(NB_GC, cfg.type_flow)
+    counter_flow = cfg.type_flow == :counter_flow
 
     # Anode GC: liquid water
-    d_s_agc_dt = ntuple(NB_GC) do i
+    d_s_agc_dt = ntuple(NB_GC) do k
         if NB_GC == 1
             J_in = 0.0
             J_out = Jl.agc_out
-            inv_rho * ((J_in - J_out) / Lgc - flows_mea[i].Jl.agc_agdl / Hagc)
+            inv_rho * ((J_in - J_out) / Lgc - flows_mea[k].Jl.agc_agdl / Hagc)
         else
-            p = agc_pos[i]
-            J_in = p == 1 ? 0.0 : Jl.agc_agc[p - 1]
-            J_out = p == NB_GC ? Jl.agc_out : Jl.agc_agc[p]
-            inv_rho * ((J_in - J_out) / L_node - flows_mea[i].Jl.agc_agdl / Hagc)
+            if counter_flow
+                J_in = k == NB_GC ? 0.0 : Jl.agc_agc[k + 1]
+                J_out = k == 1 ? Jl.agc_out : Jl.agc_agc[k]
+            else
+                J_in = k == 1 ? 0.0 : Jl.agc_agc[k - 1]
+                J_out = k == NB_GC ? Jl.agc_out : Jl.agc_agc[k]
+            end
+            inv_rho * ((J_in - J_out) / L_node - flows_mea[k].Jl.agc_agdl / Hagc)
         end
     end
 
     # Cathode GC: liquid water
-    d_s_cgc_dt = ntuple(NB_GC) do i
+    d_s_cgc_dt = ntuple(NB_GC) do k
         if NB_GC == 1
             J_in = 0.0
             J_out = Jl.cgc_out
-            inv_rho * ((J_in - J_out) / Lgc + flows_mea[i].Jl.cgdl_cgc / Hcgc)
+            inv_rho * ((J_in - J_out) / Lgc + flows_mea[k].Jl.cgdl_cgc / Hcgc)
         else
-            J_in = i == 1 ? 0.0 : Jl.cgc_cgc[i - 1]
-            J_out = i == NB_GC ? Jl.cgc_out : Jl.cgc_cgc[i]
-            inv_rho * ((J_in - J_out) / L_node + flows_mea[i].Jl.cgdl_cgc / Hcgc)
+            J_in = k == 1 ? 0.0 : Jl.cgc_cgc[k - 1]
+            J_out = k == NB_GC ? Jl.cgc_out : Jl.cgc_cgc[k]
+            inv_rho * ((J_in - J_out) / L_node + flows_mea[k].Jl.cgdl_cgc / Hcgc)
         end
     end
 

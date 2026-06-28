@@ -76,7 +76,7 @@ mutable struct GCManifoldFlowsWorkspace
 end
 
 function GCManifoldFlowsWorkspace(nb_gc::Int)
-    zn = () -> Vector{Float64}(undef, max(nb_gc - 1, 0))
+    zn = () -> Vector{Float64}(undef, max(nb_gc, 0))
     return GCManifoldFlowsWorkspace(zn(), zn(), zn(), zn(), zn(), zn(),
                                     zn(), zn(), zn(), zn(), zn(), zn())
 end
@@ -423,8 +423,8 @@ struct GCVaporFlows{NB_GC}
 
     function GCVaporFlows{NB_GC}(agc_in, agc_agc, agc_out,
                                   cgc_in, cgc_cgc, cgc_out) where {NB_GC}
-        length(agc_agc) == NB_GC - 1 || throw(ArgumentError("agc_agc length must be NB_GC - 1 = $(NB_GC - 1)."))
-        length(cgc_cgc) == NB_GC - 1 || throw(ArgumentError("cgc_cgc length must be NB_GC - 1 = $(NB_GC - 1)."))
+        length(agc_agc) == NB_GC || throw(ArgumentError("agc_agc length must be NB_GC = $(NB_GC)."))
+        length(cgc_cgc) == NB_GC || throw(ArgumentError("cgc_cgc length must be NB_GC = $(NB_GC)."))
         return new{NB_GC}(Float64(agc_in), _as_f64_vec(agc_agc), Float64(agc_out),
                           Float64(cgc_in), _as_f64_vec(cgc_cgc), Float64(cgc_out))
     end
@@ -442,8 +442,8 @@ struct GCLiquidFlows{NB_GC}
     cgc_out :: Float64          # Outlet liquid flux at the cathode GC exit
 
     function GCLiquidFlows{NB_GC}(agc_agc, agc_out, cgc_cgc, cgc_out) where {NB_GC}
-        length(agc_agc) == NB_GC - 1 || throw(ArgumentError("agc_agc length must be NB_GC - 1 = $(NB_GC - 1)."))
-        length(cgc_cgc) == NB_GC - 1 || throw(ArgumentError("cgc_cgc length must be NB_GC - 1 = $(NB_GC - 1)."))
+        length(agc_agc) == NB_GC || throw(ArgumentError("agc_agc length must be NB_GC = $(NB_GC)."))
+        length(cgc_cgc) == NB_GC || throw(ArgumentError("cgc_cgc length must be NB_GC = $(NB_GC)."))
         return new{NB_GC}(_as_f64_vec(agc_agc), Float64(agc_out),
                           _as_f64_vec(cgc_cgc), Float64(cgc_out))
     end
@@ -459,7 +459,7 @@ struct GCHydrogenFlows{NB_GC}
     agc_out :: Float64          # Outlet H₂ flux at the anode GC exit
 
     function GCHydrogenFlows{NB_GC}(agc_in, agc_agc, agc_out) where {NB_GC}
-        length(agc_agc) == NB_GC - 1 || throw(ArgumentError("agc_agc length must be NB_GC - 1 = $(NB_GC - 1)."))
+        length(agc_agc) == NB_GC || throw(ArgumentError("agc_agc length must be NB_GC = $(NB_GC)."))
         return new{NB_GC}(Float64(agc_in), _as_f64_vec(agc_agc), Float64(agc_out))
     end
 end
@@ -474,7 +474,7 @@ struct GCOxygenFlows{NB_GC}
     cgc_out :: Float64          # Outlet O₂ flux at the cathode GC exit
 
     function GCOxygenFlows{NB_GC}(cgc_in, cgc_cgc, cgc_out) where {NB_GC}
-        length(cgc_cgc) == NB_GC - 1 || throw(ArgumentError("cgc_cgc length must be NB_GC - 1 = $(NB_GC - 1)."))
+        length(cgc_cgc) == NB_GC || throw(ArgumentError("cgc_cgc length must be NB_GC = $(NB_GC)."))
         return new{NB_GC}(Float64(cgc_in), _as_f64_vec(cgc_cgc), Float64(cgc_out))
     end
 end
@@ -493,8 +493,8 @@ struct GCNitrogenFlows{NB_GC}
 
     function GCNitrogenFlows{NB_GC}(agc_in, agc_agc, agc_out,
                                      cgc_in, cgc_cgc, cgc_out) where {NB_GC}
-        length(agc_agc) == NB_GC - 1 || throw(ArgumentError("agc_agc length must be NB_GC - 1 = $(NB_GC - 1)."))
-        length(cgc_cgc) == NB_GC - 1 || throw(ArgumentError("cgc_cgc length must be NB_GC - 1 = $(NB_GC - 1)."))
+        length(agc_agc) == NB_GC || throw(ArgumentError("agc_agc length must be NB_GC = $(NB_GC)."))
+        length(cgc_cgc) == NB_GC || throw(ArgumentError("cgc_cgc length must be NB_GC = $(NB_GC)."))
         return new{NB_GC}(Float64(agc_in), _as_f64_vec(agc_agc), Float64(agc_out),
                           Float64(cgc_in), _as_f64_vec(cgc_cgc), Float64(cgc_out))
     end

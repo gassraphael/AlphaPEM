@@ -61,12 +61,15 @@ function calculate_flows_1D_GC_manifold!(flows_work::GCManifoldFlowsWorkspace,
     Wagc, Wcgc, Lgc, nb_channel_in_gc, A_T_a, A_T_c = pp.Wagc, pp.Wcgc, pp.Lgc, pp.nb_channel_in_gc, pp.A_T_a, pp.A_T_c
     nb_gc = np.nb_gc
     type_auxiliary = cfg.type_auxiliary
+    counter_flow = cfg.type_flow == :counter_flow
     agc_order = anode_gc_order(nb_gc, cfg.type_flow)
+    i_end = agc_order[end]                             # physical index of the last GC node
 
-    # Extraction of the variables
-    C_v_agc, C_v_cgc = [sv_1D_cell[i].agc.C_v for i in agc_order], [sv_1D_cell[i].cgc.C_v for i in 1:nb_gc]
-    s_agc, s_cgc = [sv_1D_cell[i].agc.s for i in agc_order], [sv_1D_cell[i].cgc.s for i in 1:nb_gc]
-    C_H2_agc, C_N2_agc = [sv_1D_cell[i].agc.C_H2 for i in agc_order], [sv_1D_cell[i].agc.C_N2 for i in agc_order]
+    # Extraction of the variables — all arrays indexed by physical GC position i.
+    # Flow direction is applied via agc_order when computing inter-node fluxes.
+    C_v_agc, C_v_cgc = [sv_1D_cell[i].agc.C_v for i in 1:nb_gc], [sv_1D_cell[i].cgc.C_v for i in 1:nb_gc]
+    s_agc, s_cgc = [sv_1D_cell[i].agc.s for i in 1:nb_gc], [sv_1D_cell[i].cgc.s for i in 1:nb_gc]
+    C_H2_agc, C_N2_agc = [sv_1D_cell[i].agc.C_H2 for i in 1:nb_gc], [sv_1D_cell[i].agc.C_N2 for i in 1:nb_gc]
     C_O2_cgc, C_N2_cgc = [sv_1D_cell[i].cgc.C_O2 for i in 1:nb_gc], [sv_1D_cell[i].cgc.C_N2 for i in 1:nb_gc]
 
     # Intermediate values
@@ -100,7 +103,7 @@ function calculate_flows_1D_GC_manifold!(flows_work::GCManifoldFlowsWorkspace,
         #     Wa_out = rho_aem_out_to_ext * v_a * Abp_a
     else  # type_auxiliary == :no_auxiliary (only 1 cell)
         Wa_in = W_des.H2 + W_des.H2O_inj_a  # This expression is also present in calculate_velocity_evolution.
-        Wa_out = P_agc[agc_order[end]] / (R * T_des) * flows_int_work.v_a_outlet * Hagc * Wagc * nb_cell * nb_channel_in_gc
+        Wa_out = P_agc[i_end] / (R * T_des) * v_a[i_end] * Hagc * Wagc * nb_cell * nb_channel_in_gc
     end
 
     # Anode flow entering/leaving the stack in mol.m-2.s-1
@@ -127,7 +130,7 @@ function calculate_flows_1D_GC_manifold!(flows_work::GCManifoldFlowsWorkspace,
         # Wc_out = rho_cem_out_to_ext * v_c * Abp_c
     else  # type_auxiliary == :no_auxiliary (only 1 cell)
         Wc_in = W_des.dry_air + W_des.H2O_inj_c  # This expression is also present in calculate_velocity_evolution.
-        Wc_out = P_cgc[nb_gc] / (R * T_des) * flows_int_work.v_c_outlet * Hcgc * Wcgc * nb_cell * nb_channel_in_gc
+        Wc_out = P_cgc[end] / (R * T_des) * v_c[end] * Hcgc * Wcgc * nb_cell * nb_channel_in_gc
     end
 
     # Cathode flow entering/leaving the stack in mol.m-2.s-1
@@ -146,10 +149,10 @@ function calculate_flows_1D_GC_manifold!(flows_work::GCManifoldFlowsWorkspace,
         Jv_agc_in = Phi_a_des * Psat(T_des) / Pa_in * Ja_in
     end
     Jv_agc_agc = flows_work.Jv_agc_agc
-    @inbounds for i in 1:(nb_gc - 1)
-        Jv_agc_agc[i] = C_v_agc[i] * v_a[i]
+    @inbounds for k in 1:nb_gc
+        Jv_agc_agc[k] = C_v_agc[k] * v_a[k]
     end
-    Jv_agc_out = C_v_agc[end] * R * T_des / P_agc[agc_order[end]] * Ja_out
+    Jv_agc_out = Jv_agc_agc[i_end]
 
     if type_auxiliary == :forced_convective_cathode_with_anodic_recirculation ||
        type_auxiliary == :forced_convective_cathode_with_flow_through_anode
@@ -158,10 +161,10 @@ function calculate_flows_1D_GC_manifold!(flows_work::GCManifoldFlowsWorkspace,
         Jv_cgc_in = Phi_c_des * Psat(T_des) / Pc_in * Jc_in
     end
     Jv_cgc_cgc = flows_work.Jv_cgc_cgc
-    @inbounds for i in 1:(nb_gc - 1)
+    @inbounds for i in 1:nb_gc
         Jv_cgc_cgc[i] = C_v_cgc[i] * v_c[i]
     end
-    Jv_cgc_out = C_v_cgc[nb_gc] * R * T_des / P_cgc[nb_gc] * Jc_out
+    Jv_cgc_out = Jv_cgc_cgc[end]
 
     # Liquid water flows at the GC (kg.m-2.s-1)
     #   At the anode side
@@ -169,13 +172,14 @@ function calculate_flows_1D_GC_manifold!(flows_work::GCManifoldFlowsWorkspace,
     Jl_agc_agc_conv = flows_work.Jl_agc_agc_conv
     Jl_agc_agc_dif  = flows_work.Jl_agc_agc_dif
     Jl_agc_agc      = flows_work.Jl_agc_agc
-    @inbounds for i in 1:(nb_gc - 1)
-        Jl_agc_agc_conv[i] = rho_H2O_l(T_des) * K_v_liq_gas * v_a[i] * s_agc[i]
-        Jl_agc_agc_dif[i]  = -D_liq_dif * d_dx(s_agc[i], s_agc[i + 1], (Lgc / nb_gc) / 2)
-        Jl_agc_agc[i]      = Jl_agc_agc_conv[i] + Jl_agc_agc_dif[i]
+    @inbounds for k in 1:nb_gc
+        Jl_agc_agc_conv[k] = rho_H2O_l(T_des) * K_v_liq_gas * v_a[k] * s_agc[k]
+        s_next = counter_flow ? (k == 1 ? s_agc_outlet : s_agc[k - 1]) : (k == nb_gc ? s_agc_outlet : s_agc[k + 1])
+        Jl_agc_agc_dif[k]  = -D_liq_dif * d_dx(s_agc[k], s_next, (Lgc / nb_gc) / 2)
+        Jl_agc_agc[k]      = Jl_agc_agc_conv[k] + Jl_agc_agc_dif[k]
     end
-    Jl_agc_agc_conv_out = rho_H2O_l(T_des) * K_v_liq_gas * flows_int_work.v_a_outlet * s_agc[end]
-    Jl_agc_agc_dif_out = -D_liq_dif * d_dx(s_agc[end], s_agc_outlet, (Lgc / nb_gc) / 2)
+    Jl_agc_agc_conv_out = Jl_agc_agc_conv[i_end]
+    Jl_agc_agc_dif_out = Jl_agc_agc_dif[i_end]
     Jl_agc_out = Jl_agc_agc_conv_out + Jl_agc_agc_dif_out
 
     #   At the cathode side
@@ -183,13 +187,13 @@ function calculate_flows_1D_GC_manifold!(flows_work::GCManifoldFlowsWorkspace,
     Jl_cgc_cgc_conv = flows_work.Jl_cgc_cgc_conv
     Jl_cgc_cgc_dif  = flows_work.Jl_cgc_cgc_dif
     Jl_cgc_cgc      = flows_work.Jl_cgc_cgc
-    @inbounds for i in 1:(nb_gc - 1)
-        Jl_cgc_cgc_conv[i] = rho_H2O_l(T_des) * K_v_liq_gas * v_c[i] * s_cgc[i]
-        Jl_cgc_cgc_dif[i]  = -D_liq_dif * d_dx(s_cgc[i], s_cgc[i + 1], (Lgc / nb_gc) / 2)
-        Jl_cgc_cgc[i]      = Jl_cgc_cgc_conv[i] + Jl_cgc_cgc_dif[i]
+    @inbounds for k in 1:nb_gc
+        Jl_cgc_cgc_conv[k] = rho_H2O_l(T_des) * K_v_liq_gas * v_c[k] * s_cgc[k]
+        Jl_cgc_cgc_dif[k]  = -D_liq_dif * d_dx(s_cgc[k], k == nb_gc ? s_cgc_outlet : s_cgc[k + 1], (Lgc / nb_gc) / 2)
+        Jl_cgc_cgc[k]      = Jl_cgc_cgc_conv[k] + Jl_cgc_cgc_dif[k]
     end
-    Jl_cgc_cgc_conv_out = rho_H2O_l(T_des) * K_v_liq_gas * v_c[nb_gc] * s_cgc[nb_gc]
-    Jl_cgc_cgc_dif_out = -D_liq_dif * d_dx(s_cgc[nb_gc], s_cgc_outlet, (Lgc / nb_gc) / 2)
+    Jl_cgc_cgc_conv_out = Jl_cgc_cgc_conv[end]
+    Jl_cgc_cgc_dif_out = Jl_cgc_cgc_dif[end]
     Jl_cgc_out = Jl_cgc_cgc_conv_out + Jl_cgc_cgc_dif_out
 
     # H2 flows at the GC (mol.m-2.s-1)
@@ -200,10 +204,10 @@ function calculate_flows_1D_GC_manifold!(flows_work::GCManifoldFlowsWorkspace,
     else  # type_auxiliary == :forced_convective_cathode_with_anodic_recirculation or type_auxiliary == :no_auxiliary
         J_H2_agc_in = y_H2_in * (1 - Phi_a_des * Psat(T_des) / Pa_in) * Ja_in
         J_H2_agc_agc = flows_work.J_H2_agc_agc
-        @inbounds for i in 1:(nb_gc - 1)
-            J_H2_agc_agc[i] = C_H2_agc[i] * v_a[i]
+        @inbounds for k in 1:nb_gc
+            J_H2_agc_agc[k] = C_H2_agc[k] * v_a[k]
         end
-        J_H2_agc_out = C_H2_agc[end] * R * T_des / P_agc[agc_order[end]] * Ja_out
+        J_H2_agc_out = J_H2_agc_agc[i_end]
     end
 
     # O2 flows at the GC (mol.m-2.s-1)
@@ -215,10 +219,10 @@ function calculate_flows_1D_GC_manifold!(flows_work::GCManifoldFlowsWorkspace,
         J_O2_cgc_in = y_O2_ext * (1 - Phi_c_des * Psat(T_des) / Pc_in) * Jc_in
     end
     J_O2_cgc_cgc = flows_work.J_O2_cgc_cgc
-    @inbounds for i in 1:(nb_gc - 1)
-        J_O2_cgc_cgc[i] = C_O2_cgc[i] * v_c[i]
+    @inbounds for k in 1:nb_gc
+        J_O2_cgc_cgc[k] = C_O2_cgc[k] * v_c[k]
     end
-    J_O2_cgc_out = C_O2_cgc[nb_gc] * R * T_des / P_cgc[nb_gc] * Jc_out
+    J_O2_cgc_out = J_O2_cgc_cgc[end]
 
     # N2 flows at the GC (mol.m-2.s-1)
     # NOTE: For :forced_convective_cathode_with_anodic_recirculation, anode N2 inlet must be 0 (pure H2 recirculation).
@@ -232,16 +236,17 @@ function calculate_flows_1D_GC_manifold!(flows_work::GCManifoldFlowsWorkspace,
     else  # type_auxiliary == :no_auxiliary
         J_N2_agc_in = (1 - y_H2_in) * (1 - Phi_a_des * Psat(T_des) / Pa_in) * Ja_in
         J_N2_agc_agc = flows_work.J_N2_agc_agc
-        @inbounds for i in 1:(nb_gc - 1)
-            J_N2_agc_agc[i] = C_N2_agc[i] * v_a[i]
+        @inbounds for k in 1:nb_gc
+            J_N2_agc_agc[k] = C_N2_agc[k] * v_a[k]
         end
-        J_N2_agc_out = C_N2_agc[end] * R * T_des / P_agc[agc_order[end]] * Ja_out
+        J_N2_agc_out = J_N2_agc_agc[i_end]
+
         J_N2_cgc_in = (1 - y_O2_ext) * (1 - Phi_c_des * Psat(T_des) / Pc_in) * Jc_in
         J_N2_cgc_cgc = flows_work.J_N2_cgc_cgc
-        @inbounds for i in 1:(nb_gc - 1)
-            J_N2_cgc_cgc[i] = C_N2_cgc[i] * v_c[i]
+        @inbounds for k in 1:nb_gc
+            J_N2_cgc_cgc[k] = C_N2_cgc[k] * v_c[k]
         end
-        J_N2_cgc_out = C_N2_cgc[nb_gc] * R * T_des / P_cgc[nb_gc] * Jc_out
+        J_N2_cgc_out = J_N2_cgc_cgc[end]
     end
 
     # Vapor flows at the manifold (mol.s-1)
