@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 """
-Benchmark `run_step` and `run_pola` across configurable `nb_gc` values.
+Benchmark `run_step`, `run_pola` and `run_eis` across configurable `nb_gc` values.
 
 Defaults:
 - nb_gc values: 1, 5, 10
-- one measured run per scenario/nb_gc (BENCHMARK_RUNS=1)
+- 10 measured run per scenario/nb_gc (BENCHMARK_RUNS=10)
 
 Mandatory warm-up sequence (not measured):
 1) run_step with nb_gc = 1
@@ -96,6 +96,7 @@ function make_eis_cfg(nb_gc::Int)
         numerical_parameters = NumericalParams(nb_gc = nb_gc),
         voltage_zone = :full,
         type_auxiliary = :no_auxiliary,
+        type_flow = :counter_flow, # :co_flow, :counter_flow.
         type_purge = :no_purge,
         type_display = :no_display,
         display_timing = :live
@@ -154,7 +155,7 @@ function print_summary(rows)
 end
 
 function main()
-    runs = parse(Int, get(ENV, "BENCHMARK_RUNS", "1"))
+    runs = parse(Int, get(ENV, "BENCHMARK_RUNS", "10"))
     nb_gc_values = parse_nb_gc_values()
 
     out_dir = joinpath(@__DIR__, "..", "results", "benchmark")
@@ -193,23 +194,22 @@ function main()
         err = warm_pola.err,
     ))
 
-#    println("Warm-up #3: run_eis with nb_gc = 1")
-#    warm_eis = timed_run(make_eis_cfg(1))
-#    push!(rows, (
-#        timestamp = Dates.format(now(), dateformat"yyyy-mm-ddTHH:MM:SS"),
-#        phase = "warmup",
-#        scenario = "eis",
-#        nb_gc = 1,
-#        run_index = 0,
-#        status = warm_eis.status,
-#        time_s = warm_eis.time_s,
-#        alloc_gb = warm_eis.alloc_gb,
-#        gc_s = warm_eis.gc_s,
-#        err = warm_eis.err,
-#    ))
+    println("Warm-up #3: run_eis with nb_gc = 1")
+    warm_eis = timed_run(make_eis_cfg(1))
+    push!(rows, (
+        timestamp = Dates.format(now(), dateformat"yyyy-mm-ddTHH:MM:SS"),
+        phase = "warmup",
+        scenario = "eis",
+        nb_gc = 1,
+        run_index = 0,
+        status = warm_eis.status,
+        time_s = warm_eis.time_s,
+        alloc_gb = warm_eis.alloc_gb,
+        gc_s = warm_eis.gc_s,
+        err = warm_eis.err,
+    ))
 
-    for scenario in ("step", "pola")
-#    for scenario in ("step", "pola", "eis")
+    for scenario in ("step", "pola", "eis")
         for nb_gc in nb_gc_values
             for i in 1:runs
                 println("Measured run ", i, "/", runs, " | scenario=", scenario, " nb_gc=", nb_gc)

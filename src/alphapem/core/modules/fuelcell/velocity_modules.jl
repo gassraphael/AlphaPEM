@@ -39,33 +39,33 @@ function calculate_velocity_int_values!(work::GCManifoldWorkspace,
     Hagc, Hcgc, Wagc, Wcgc = pp.Hagc, pp.Hcgc, pp.Wagc, pp.Wcgc
     nb_gc, nb_gdl = np.nb_gc, np.nb_gdl
 
-    @inbounds for (k, i) in enumerate(anode_gc_order(nb_gc, cfg.type_flow)) # In the anode, the flow is reversed for counter-flow.
-        # Extract the GC state variables in the good order (counter-flow or co-flow)
+    # Extract variables
+    @inbounds for i in 1:nb_gc # In the anode
+        # Extract the AGC state variables
         sv_i = sv[i]
         C_v_agc, C_H2_agc, C_N2_agc, T_agc = sv_i.agc.C_v, sv_i.agc.C_H2, sv_i.agc.C_N2, sv_i.agc.T
 
-        # Calculate the AGC pressure and store it in natural order (not counter-flow order)
+        # Calculate the AGC pressure
         C_tot_agc     = C_v_agc + C_H2_agc + C_N2_agc
         P_agc         = C_tot_agc * R * T_agc
-        work.P_agc[k] = P_agc
+        work.P_agc[i] = P_agc
 
-        # Calculate the mole fractions and viscosities, then store them in natural order (not counter-flow order)
+        # Calculate the mole fractions and viscosities
         x_H2O_v_agc, x_H2_agc, x_N2_agc = C_v_agc  / C_tot_agc, C_H2_agc / C_tot_agc, C_N2_agc / C_tot_agc
-        work.x_H2O_v_agc[k], work.x_H2_agc[k], work.x_N2_agc[k] = x_H2O_v_agc, x_H2_agc, x_N2_agc
-        work.mu_gaz_agc[k]  = mu_mixture_gases(:H2O_v, x_H2O_v_agc, :H2, x_H2_agc, :N2, x_N2_agc, T_agc)
+        work.x_H2O_v_agc[i], work.x_H2_agc[i], work.x_N2_agc[i] = x_H2O_v_agc, x_H2_agc, x_N2_agc
+        work.mu_gaz_agc[i]  = mu_mixture_gases(:H2O_v, x_H2O_v_agc, :H2, x_H2_agc, :N2, x_N2_agc, T_agc)
 
-        # Calculate the total molar concentration at the AGC/AGDL interface and the net molar flux from AGC to AGDL,
-        # then store them in natural order (not counter-flow order)
+        # Calculate the total molar concentration at the AGDL/AGC interface and the net molar flux from AGC to AGDL
         C_v_agdl_1, C_H2_agdl_1, C_N2_agdl_1 = sv_i.agdl[1].C_v, sv_i.agdl[1].C_H2, sv_i.agdl[1].C_N2
         h_agc                    = h_a(P_agc, T_des, Wagc, Hagc)
-        work.C_tot_agdl[k]       = C_v_agdl_1 + C_H2_agdl_1 + C_N2_agdl_1
-        work.J_tot_agc_agdl[k]   = h_agc * (C_v_agc - C_v_agdl_1) +
+        work.C_tot_agdl[i]       = C_v_agdl_1 + C_H2_agdl_1 + C_N2_agdl_1
+        work.J_tot_agc_agdl[i]   = h_agc * (C_v_agc - C_v_agdl_1) +
                                    h_agc * (C_H2_agc - C_H2_agdl_1) +
                                    h_agc * (C_N2_agc - C_N2_agdl_1)
     end
 
     @inbounds for i in 1:nb_gc # In the cathode
-        # Extract the GC state variables
+        # Extract the CGC state variables
         sv_i   = sv[i]
         C_v_cgc, C_O2_cgc, C_N2_cgc, T_cgc = sv_i.cgc.C_v, sv_i.cgc.C_O2, sv_i.cgc.C_N2, sv_i.cgc.T
 
