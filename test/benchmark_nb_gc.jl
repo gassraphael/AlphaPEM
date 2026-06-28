@@ -54,6 +54,7 @@ function make_step_cfg(nb_gc::Int)
         numerical_parameters = NumericalParams(nb_gc = nb_gc),
         voltage_zone = :full,
         type_auxiliary = :no_auxiliary,
+        type_flow = :counter_flow, # :co_flow, :counter_flow.
         type_purge = :no_purge,
         type_display = :no_display,
         display_timing = :postrun,
@@ -74,6 +75,7 @@ function make_pola_cfg(nb_gc::Int)
         numerical_parameters = NumericalParams(nb_gc = nb_gc),
         voltage_zone = :full,
         type_auxiliary = :no_auxiliary,
+        type_flow = :counter_flow, # :co_flow, :counter_flow.
         type_purge = :no_purge,
         type_display = :no_display,
         display_timing = :postrun,

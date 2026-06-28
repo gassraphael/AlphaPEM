@@ -50,7 +50,7 @@ function velocity_profiles_from_inlet_flows!(work::GCManifoldWorkspace,
     calculate_velocity_int_values!(work, sv, T_des, fc, cfg)
 
     # ── Pass 2 and 3: integrate molar flows from inlet to outlet, then back-propagate pressure and velocity from outlet to inlet ────
-    local P_a_in::Float64, P_c_in::Float64
+    local Pa_in::Float64, Pc_in::Float64
 
     if nb_gc == 1 # Single-node accuracy enhancement: virtual NB_GC_VIRT-node pressure integration
         NB_GC_VIRT  = 5
@@ -96,9 +96,9 @@ function velocity_profiles_from_inlet_flows!(work::GCManifoldWorkspace,
             v_c_virt[i - 1] = J_c_virt[i - 1] / P_c_virt[i - 1] * R * T_des
         end
 
-        P_a_in = P_a_virt[1] + 8 * π * work.mu_gaz_agc[1] * L_node_virt / (Hagc * Wagc) *
+        Pa_in = P_a_virt[1] + 8 * π * work.mu_gaz_agc[1] * L_node_virt / (Hagc * Wagc) *
                  (v_a_virt[1] + work.J_tot_agc_agdl[1] / work.C_tot_agdl[1])
-        P_c_in = P_c_virt[1] + 8 * π * work.mu_gaz_cgc[1] * L_node_virt / (Hcgc * Wcgc) *
+        Pc_in = P_c_virt[1] + 8 * π * work.mu_gaz_cgc[1] * L_node_virt / (Hcgc * Wcgc) *
                  (v_c_virt[1] - work.J_tot_cgdl_cgc[1] / work.C_tot_cgdl[1])
 
         # Outlet velocity stored in the dedicated workspace fields (used by Wa_out / Wc_out)
