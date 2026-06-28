@@ -5,7 +5,7 @@ Benchmark `run_step`, `run_pola` and `run_eis` across configurable `nb_gc` value
 
 Defaults:
 - nb_gc values: 1, 5, 10
-- 10 measured run per scenario/nb_gc (BENCHMARK_RUNS=10)
+- 5 measured run per scenario/nb_gc (BENCHMARK_RUNS=5)
 
 Mandatory warm-up sequence (not measured):
 1) run_step with nb_gc = 1
@@ -54,7 +54,7 @@ function make_step_cfg(nb_gc::Int)
         numerical_parameters = NumericalParams(nb_gc = nb_gc),
         voltage_zone = :full,
         type_auxiliary = :no_auxiliary,
-        type_flow = :counter_flow, # :co_flow, :counter_flow.
+        type_flow = :co_flow, # :co_flow, :counter_flow.
         type_purge = :no_purge,
         type_display = :no_display,
         display_timing = :postrun,
@@ -75,7 +75,7 @@ function make_pola_cfg(nb_gc::Int)
         numerical_parameters = NumericalParams(nb_gc = nb_gc),
         voltage_zone = :full,
         type_auxiliary = :no_auxiliary,
-        type_flow = :counter_flow, # :co_flow, :counter_flow.
+        type_flow = :co_flow, # :co_flow, :counter_flow.
         type_purge = :no_purge,
         type_display = :no_display,
         display_timing = :postrun,
@@ -98,7 +98,7 @@ function make_eis_cfg(nb_gc::Int)
         numerical_parameters = NumericalParams(nb_gc = nb_gc),
         voltage_zone = :full,
         type_auxiliary = :no_auxiliary,
-        type_flow = :counter_flow, # :co_flow, :counter_flow.
+        type_flow = :co_flow, # :co_flow, :counter_flow.
         type_purge = :no_purge,
         type_display = :no_display,
         display_timing = :live
@@ -157,7 +157,7 @@ function print_summary(rows)
 end
 
 function main()
-    runs = parse(Int, get(ENV, "BENCHMARK_RUNS", "10"))
+    runs = parse(Int, get(ENV, "BENCHMARK_RUNS", "5"))
     nb_gc_values = parse_nb_gc_values()
 
     out_dir = joinpath(@__DIR__, "..", "results", "benchmark")

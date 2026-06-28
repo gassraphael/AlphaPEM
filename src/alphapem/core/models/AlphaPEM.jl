@@ -184,10 +184,10 @@ function _check_simulation_preconditions!(simu::AlphaPEM)
         simu.cfg.type_auxiliary = :no_auxiliary
         println("Warning: auxiliaries were temporarily removed; \"no_auxiliary\" is automatically used.\n")
     end
-    if contains(string(typeof(simu.fuel_cell)), "ZSWFuelCell") && simu.cfg.type_flow == :co_flow
-        @warn "ZSWFuelCell with standard operating conditions typically requires counter-flow " *
-              "configuration for optimal performance. " *
-              "Consider setting type_flow = :counter_flow in SimulationConfig."
+    if simu.cfg.type_flow == :counter_flow
+        println("⚠ Warning: counter-flow configuration significantly increases problem stiffness, " *
+                "which dramatically increases computation time compared to co-flow. " *
+                "No solution to this issue has been found yet.\n")
     end
     if simu.fuel_cell.operating_conditions.Pa_des < Pext ||
        simu.fuel_cell.operating_conditions.Pc_des < Pext

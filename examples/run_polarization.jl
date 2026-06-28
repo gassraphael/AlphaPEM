@@ -37,9 +37,9 @@ if length(type_fuel_cell_list) == 1
         type_fuel_cell = type_fuel_cell_list[1],
         type_current = current_params,
         numerical_parameters = NumericalParams(nb_gc = nb_gc_pola),
-        voltage_zone = :full, # :before_voltage_drop, :full.
+        voltage_zone = :before_voltage_drop, # :before_voltage_drop, :full.
         type_auxiliary = :no_auxiliary, # :forced_convective_cathode_with_anodic_recirculation, :forced_convective_cathode_with_flow_through_anode, :no_auxiliary.
-        type_flow = :counter_flow, # :co_flow, :counter_flow.
+        type_flow = :co_flow, # :co_flow, :counter_flow.
         type_purge = :no_purge, # :constant_purge, :periodic_purge, :no_purge.
         type_display = :synthetic, # :multiple, :synthetic, :no_display.
         display_timing = :postrun # :live, :postrun.
@@ -54,9 +54,9 @@ else
             type_fuel_cell = type_fuel_cell_list[i],
             type_current = current_params,
             numerical_parameters = NumericalParams(nb_gc = nb_gc_pola),
-            voltage_zone = :full, # :before_voltage_drop, :full.
+            voltage_zone = :before_voltage_drop, # :before_voltage_drop, :full.
             type_auxiliary = :no_auxiliary, # :forced_convective_cathode_with_anodic_recirculation, :forced_convective_cathode_with_flow_through_anode, :no_auxiliary.
-            type_flow = :counter_flow, # :co_flow, :counter_flow.
+            type_flow = :co_flow, # :co_flow, :counter_flow.
             type_purge = :no_purge, # :constant_purge, :periodic_purge, :no_purge.
             type_display = :synthetic, # :multiple, :synthetic, :no_display.
             display_timing = :postrun # :live, :postrun.

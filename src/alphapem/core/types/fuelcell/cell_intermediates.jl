@@ -165,8 +165,6 @@ mutable struct GCManifoldWorkspace
     P_c_chan    :: Vector{Float64}   # Cathode channel pressure profile with viscous drop (Pa)
     v_a         :: Vector{Float64}   # Anode gas velocity (m·s⁻¹), indexed by physical GC position
     v_c         :: Vector{Float64}   # Cathode gas velocity (m·s⁻¹)
-    v_a_outlet  :: Float64           # Anode outlet velocity for Wa_out (m·s⁻¹)
-    v_c_outlet  :: Float64           # Cathode outlet velocity for Wc_out (m·s⁻¹)
 end
 
 function GCManifoldWorkspace(nb_gc::Int)
@@ -175,7 +173,6 @@ function GCManifoldWorkspace(nb_gc::Int)
         z(), z(), z(), z(), z(), z(), z(), z(), z(), z(), z(), z(),  # shared GC thermodynamics (12)
         z(), z(), z(), z(), z(), z(),                                 # mole fractions (x_H2O_v_agc … x_N2_cgc)
         z(), z(), z(), z(), z(), z(), z(), z(), z(), z(),             # velocity-specific (10)
-        0.0, 0.0,                                                     # outlet velocities (2)
     )
 end
 
