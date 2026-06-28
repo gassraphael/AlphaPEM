@@ -37,7 +37,7 @@ Base.@kwdef mutable struct SimulationConfig{T<:AbstractCurrentParams}
     numerical_parameters::NumericalParams = NumericalParams()
     voltage_zone::Symbol = :full
     type_auxiliary::Symbol = :no_auxiliary
-    type_flow::Symbol = :counter_flow
+    type_flow::Symbol = :co_flow
     type_purge::Symbol = :no_purge
     type_display::Symbol = :synthetic
     display_timing::Symbol=:postrun

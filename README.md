@@ -248,6 +248,8 @@ underway.
 - Support for PEM electrolyzers.
 - Integration of more accurate physical models for the auxiliaries.
 - Inclusion of ECSA degradation in the simulation framework.
+- Counter-flow problem stiffness: this configuration significantly increases the problem stiffness of the DAE system, 
+which dramatically increases computation time compared to co-flow. 
 
 # Related publications
 
