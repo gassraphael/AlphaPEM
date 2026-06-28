@@ -417,27 +417,29 @@ function _build_dae_residual(simu::AlphaPEM, dims,
     flows_int_work        = MEAFlowsIntWorkspace(np.nb_gdl, np.nb_mpl)
     heat_work             = MEAHeatWorkspace(np.nb_gdl, np.nb_mpl)
     heat_int_work         = MEAHeatIntWorkspace(np.nb_gdl, np.nb_mpl)
-    gc_manifold_work      = GCManifoldWorkspace(np.nb_gc)
+    gc_manifold_work       = GCManifoldWorkspace(np.nb_gc)
+    gc_manifold_flows_work = GCManifoldFlowsWorkspace(np.nb_gc)
     _, current_res_scales = _build_gc_current_density_scaling(simu.cfg)
     j_in_scale            = StateScaling().dae_algebraic.J_in
     flows_1D_mea_buf      = Vector{MEAFlows1D{np.nb_gdl, np.nb_mpl}}(undef, np.nb_gc)
-    packed = (fuel_cell           = simu.fuel_cell,
-              current_density     = simu.current_density,
-              cfg                 = simu.cfg,
-              n_vars_cell_1D      = dims.n_vars_cell_1D,
-              n_vars_manifold     = dims.n_vars_manifold,
-              n_vars_auxiliary    = dims.n_vars_auxiliary,
-              solver_state_scaling = solver_state_scaling,
-              differential_vars   = dims.differential_vars,
-              y_phys_work         = y_phys_work,
-              flows_work          = flows_work,
-              flows_int_work      = flows_int_work,
-              heat_work           = heat_work,
-              heat_int_work       = heat_int_work,
-              gc_manifold_work    = gc_manifold_work,
-              current_res_scales  = current_res_scales,
-              j_in_scale          = j_in_scale,
-              flows_1D_mea_buf    = flows_1D_mea_buf)
+    packed = (fuel_cell               = simu.fuel_cell,
+              current_density         = simu.current_density,
+              cfg                     = simu.cfg,
+              n_vars_cell_1D          = dims.n_vars_cell_1D,
+              n_vars_manifold         = dims.n_vars_manifold,
+              n_vars_auxiliary        = dims.n_vars_auxiliary,
+              solver_state_scaling    = solver_state_scaling,
+              differential_vars       = dims.differential_vars,
+              y_phys_work             = y_phys_work,
+              flows_work              = flows_work,
+              flows_int_work          = flows_int_work,
+              heat_work               = heat_work,
+              heat_int_work           = heat_int_work,
+              gc_manifold_work        = gc_manifold_work,
+              gc_manifold_flows_work  = gc_manifold_flows_work,
+              current_res_scales      = current_res_scales,
+              j_in_scale              = j_in_scale,
+              flows_1D_mea_buf        = flows_1D_mea_buf)
     residual! = (res, dydt_IDA, y, p, t) -> begin
         # After the safety callback fires, IDA can still request a few
         # residual evaluations before honouring terminate!.  The physical
@@ -450,7 +452,7 @@ function _build_dae_residual(simu::AlphaPEM, dims,
                       p.solver_state_scaling, p.y_phys_work,
                       p.flows_work, p.flows_int_work,
                       p.heat_work, p.heat_int_work,
-                      p.gc_manifold_work,
+                      p.gc_manifold_work, p.gc_manifold_flows_work,
                       p.current_res_scales, p.j_in_scale,
                       p.flows_1D_mea_buf)
     end

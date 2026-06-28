@@ -57,6 +57,30 @@ function MEAFlowsWorkspace(nb_gdl::Int, nb_mpl::Int)
     )
 end
 
+"""Reusable vector workspace for `calculate_flows_1D_GC_manifold!`.
+Holds all inter-node GC flux vectors (length nb_gc - 1) that would otherwise be
+reallocated at every residual evaluation."""
+mutable struct GCManifoldFlowsWorkspace
+    Jv_agc_agc      :: Vector{Float64}
+    Jv_cgc_cgc      :: Vector{Float64}
+    Jl_agc_agc_conv :: Vector{Float64}
+    Jl_agc_agc_dif  :: Vector{Float64}
+    Jl_agc_agc      :: Vector{Float64}
+    Jl_cgc_cgc_conv :: Vector{Float64}
+    Jl_cgc_cgc_dif  :: Vector{Float64}
+    Jl_cgc_cgc      :: Vector{Float64}
+    J_H2_agc_agc    :: Vector{Float64}
+    J_O2_cgc_cgc    :: Vector{Float64}
+    J_N2_agc_agc    :: Vector{Float64}
+    J_N2_cgc_cgc    :: Vector{Float64}
+end
+
+function GCManifoldFlowsWorkspace(nb_gc::Int)
+    zn = () -> Vector{Float64}(undef, max(nb_gc - 1, 0))
+    return GCManifoldFlowsWorkspace(zn(), zn(), zn(), zn(), zn(), zn(),
+                                    zn(), zn(), zn(), zn(), zn(), zn())
+end
+
 """Reusable vector workspace for `calculate_heat_transfers!`."""
 mutable struct MEAHeatWorkspace
     Jt_agdl_agdl::Vector{Float64}
