@@ -21,6 +21,7 @@ Pkg.activate(joinpath(@__DIR__, ".."))
 
 using Dates
 using Printf
+using Statistics
 using AlphaPEM.Config: SimulationConfig, StepParams, PolarizationParams, EISParams, NumericalParams
 using AlphaPEM.Application: run_simulation
 
@@ -118,8 +119,65 @@ function timed_run(cfg::SimulationConfig)
     return (status = status, err = err_msg, time_s = m.time, alloc_gb = m.bytes / 1e9, gc_s = m.gctime)
 end
 
+function compute_statistics(rows)
+    measured = filter(r -> r.phase == "measured", rows)
+    stats = Dict()
+
+    for scenario in ("step", "pola", "eis")
+        scenario_rows = filter(r -> r.scenario == scenario, measured)
+        isempty(scenario_rows) && continue
+        for nb_gc in sort(unique(r.nb_gc for r in scenario_rows))
+            subset = filter(r -> r.scenario == scenario && r.nb_gc == nb_gc, measured)
+            if !isempty(subset)
+                stats[(scenario, nb_gc)] = (
+                    avg_time = mean(r.time_s for r in subset),
+                    avg_alloc = mean(r.alloc_gb for r in subset),
+                    avg_gc = mean(r.gc_s for r in subset),
+                    runs = length(subset),
+                )
+            end
+        end
+    end
+    return stats
+end
+
+function print_statistics_table(rows)
+    stats = compute_statistics(rows)
+    isempty(stats) && return
+
+    println("\n=== Summary Statistics (Average across all runs) ===")
+    @printf("%-8s | %-6s | %-8s | %-10s | %-10s | %-10s\n", "Scenario", "nb_gc", "Runs", "Time (s)", "Alloc (GB)", "GC (s)")
+    println("-----------------------------------------------------------")
+
+    for scenario in ("step", "pola", "eis")
+        for nb_gc in sort(collect(Set(r.nb_gc for r in rows if r.scenario == scenario && r.phase == "measured")))
+            if haskey(stats, (scenario, nb_gc))
+                s = stats[(scenario, nb_gc)]
+                @printf("%-8s | %-6d | %-8d | %-10.4f | %-10.4f | %-10.4f\n",
+                    scenario, nb_gc, s.runs, s.avg_time, s.avg_alloc, s.avg_gc)
+            end
+        end
+    end
+end
+
 function write_csv(path, rows)
+    stats = compute_statistics(rows)
+
     open(path, "w") do io
+        if !isempty(stats)
+            println(io, "# SUMMARY STATISTICS (Average across all runs)")
+            println(io, "scenario,nb_gc,avg_time_s,avg_alloc_gb,avg_gc_s")
+            for scenario in ("step", "pola", "eis")
+                for nb_gc in sort(collect(Set(r.nb_gc for r in rows if r.scenario == scenario && r.phase == "measured")))
+                    if haskey(stats, (scenario, nb_gc))
+                        s = stats[(scenario, nb_gc)]
+                        println(io, "$(scenario),$(nb_gc),$(s.avg_time),$(s.avg_alloc),$(s.avg_gc)")
+                    end
+                end
+            end
+            println(io, "")
+        end
+
         println(io, "timestamp,phase,scenario,nb_gc,run_index,status,time_s,alloc_gb,gc_s,error")
         for r in rows
             println(io, string(
@@ -154,6 +212,8 @@ function print_summary(rows)
             @printf("%-6d | %-6d | %-8s | %-10.4f | %-10.4f | %-10.4f\n", r.nb_gc, r.run_index, r.status, r.time_s, r.alloc_gb, r.gc_s)
         end
     end
+
+    print_statistics_table(rows)
 end
 
 function main()
@@ -217,11 +277,10 @@ function main()
                 println("Measured run ", i, "/", runs, " | scenario=", scenario, " nb_gc=", nb_gc)
                 result = if scenario == "step"
                     timed_run(make_step_cfg(nb_gc))
-                else
-#                elseif scenario == "pola"
+                elseif scenario == "pola"
                     timed_run(make_pola_cfg(nb_gc))
-#                else
-#                    timed_run(make_eis_cfg(nb_gc))
+                else
+                    timed_run(make_eis_cfg(nb_gc))
                 end
                 push!(rows, (
                     timestamp = Dates.format(now(), dateformat"yyyy-mm-ddTHH:MM:SS"),
