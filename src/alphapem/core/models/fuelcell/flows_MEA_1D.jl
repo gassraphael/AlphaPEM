@@ -9,6 +9,10 @@
 
 Parameters
 ----------
+flows_work : MEAFlowsWorkspace
+    Workspace for the flows. It is used to avoid memory reallocation.
+flows_int_work : MEAFlowsIntWorkspace
+    Workspace for the intermediate flows. It is used to avoid memory reallocation.
 sv_1D : Dict
     Variables calculated by the solver. They correspond to the fuel cell internal states.
     `sv` is a contraction of solver_variables for enhanced readability.

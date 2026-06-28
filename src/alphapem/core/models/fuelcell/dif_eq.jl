@@ -72,6 +72,7 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
                        heat_work::MEAHeatWorkspace,
                        heat_int_work::MEAHeatIntWorkspace,
                        gc_manifold_work::GCManifoldWorkspace,
+                       gc_manifold_flows_work::GCManifoldFlowsWorkspace,
                        current_res_scales::Vector{Float64},
                        j_in_scale::Float64,
                        flows_1D_mea_buf::AbstractVector)
@@ -164,8 +165,8 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
         flows_1D_mea_buf[i] = calculate_flows_1D_MEA!(flows_work[i], flows_int_work, sv_cell_1D[i], i_fc[i], v_a[i], v_c[i], fc, cfg)
     end
     flows_1D_MEA = flows_1D_mea_buf
-    flows_1D_GC_manifold = calculate_flows_1D_GC_manifold(gc_manifold_work, sv_cell_1D, sv_auxiliary, i_fc_cell,
-                                                           v_a, v_c, Pa_in, Pc_in, fc, cfg)
+    flows_1D_GC_manifold = calculate_flows_1D_GC_manifold!(gc_manifold_flows_work, gc_manifold_work, sv_cell_1D, sv_auxiliary, i_fc_cell,
+                                                            v_a, v_c, Pa_in, Pc_in, fc, cfg)
     # Calculation of the dynamic evolutions inside the MEA.
     @inbounds for i in 1:nb_gc
         dif_eq_int_values_i = calculate_dif_eq_int_values(t, sv_cell_1D[i], fc, cfg, sv_manifold_1D, sv_auxiliary)
