@@ -141,10 +141,20 @@ function simulate_model!(simu::AlphaPEM,
 
     # ── 9. Callbacks ───────────────────────────────────────────────────────────
     n_diff    = np.nb_gc * dims.n_vars_cell_1D + dims.n_vars_manifold + dims.n_vars_auxiliary
-    safety_cb = _build_physical_safety_callback(n_diff, np.nb_gc, solver_state_scaling,
-                                                safety_triggered)
+    safety_cb = _build_physical_safety_callback(n_diff, np.nb_gc, solver_state_scaling, safety_triggered)
     dtmax_cb  = _build_dtmax_callback(simu)
-    callbacks = dtmax_cb === nothing ? safety_cb : CallbackSet(safety_cb, dtmax_cb)
+    timeout_cb = _build_timeout_callback(np.max_run_time_s)
+
+    # Combine all callbacks
+    if dtmax_cb === nothing && timeout_cb === nothing
+        callbacks = safety_cb
+    elseif dtmax_cb === nothing && timeout_cb !== nothing
+        callbacks = CallbackSet(safety_cb, timeout_cb)
+    elseif dtmax_cb !== nothing && timeout_cb === nothing
+        callbacks = CallbackSet(safety_cb, dtmax_cb)
+    else
+        callbacks = CallbackSet(safety_cb, dtmax_cb, timeout_cb)
+    end
 
     # ── 10. DAE problem and solve ──────────────────────────────────────────────
     dae_fun  = DAEFunction(residual!; jac=jacobian!, jac_prototype=jac_prototype)
@@ -164,7 +174,8 @@ function simulate_model!(simu::AlphaPEM,
 
     # ── 11. Convergence check ──────────────────────────────────────────────────
     # ReturnCode.Terminated is accepted: the safety callback stopped the solver
-    # gracefully due to non-physical operating conditions (U_cell ≤ 0 or C_O2_Pt ≤ 0).
+    # gracefully due to non-physical operating conditions (U_cell ≤ 0 or C_O2_Pt ≤ 0),
+    # or due to a timeout.
     (successful_retcode(simu.sol.retcode) || simu.sol.retcode === ReturnCode.Terminated) ||
         throw(ErrorException("IDA solve failed in simulate_model!: retcode = $(simu.sol.retcode)"))
 
@@ -547,6 +558,46 @@ function _build_dtmax_callback(simu::AlphaPEM)
     affect!(integrator) = IDASetMaxStep(integrator.mem, solver_dtmax(simu.current_density, integrator.t))
 
     return PresetTimeCallback(tstops, affect!)
+end
+
+
+"""
+    _build_timeout_callback(max_run_time_s::Float64)
+
+Create a callback to check if the simulation has exceeded the maximum runtime.
+Terminates the simulation gracefully if the time limit is exceeded.
+
+# Arguments
+- `max_run_time_s::Float64`: Maximum runtime in seconds (0 or negative = no limit)
+
+# Returns
+- `DiscreteCallback` or `nothing`: Callback that monitors wall-clock time, or nothing if no limit
+"""
+function _build_timeout_callback(max_run_time_s::Float64)
+    if max_run_time_s <= 0
+        return nothing
+    end
+
+    start_time = Base.time()
+    last_check = Ref(0.0)
+
+    condition(u, t, integrator) = begin
+        elapsed = Base.time() - start_time
+        if elapsed - last_check[] > max(0.1, max_run_time_s / 20)
+            last_check[] = elapsed
+            return elapsed > max_run_time_s
+        end
+        return false
+    end
+
+    affect!(integrator) = begin
+        elapsed = Base.time() - start_time
+        @error "Simulation exceeded maximum runtime of $(max_run_time_s)s (elapsed: $(round(elapsed, digits=2))s).
+        The simulation has been stopped to prevent indefinite execution."
+        terminate!(integrator)
+    end
+
+    return DiscreteCallback(condition, affect!)
 end
 
 

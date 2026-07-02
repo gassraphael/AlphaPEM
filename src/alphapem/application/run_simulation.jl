@@ -449,7 +449,7 @@ simu = run_simulation(cfg)
 function run_simulation(cfg::SimulationConfig)::AlphaPEM
     # Build a Fuelcell object with the given configuration.
     fuel_cell       = create_fuelcell(cfg.type_fuel_cell, cfg.voltage_zone)
-    
+
     # Override with custom parameters if provided
     if cfg.physical_parameters !== nothing
         fuel_cell.physical_parameters = cfg.physical_parameters

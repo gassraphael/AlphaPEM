@@ -14,7 +14,7 @@
 import Pkg
 Pkg.activate(joinpath(@__DIR__, ".."))
 
-using AlphaPEM.Config: SimulationConfig, PolarizationCalibrationParams, GAConfig
+using AlphaPEM.Config: SimulationConfig, PolarizationCalibrationParams, NumericalParams, GAConfig
 using AlphaPEM.Parametrisation
 using AlphaPEM.Parametrisation.Calibration
 using Logging
@@ -24,8 +24,9 @@ using Printf
 # THREADING
 # ─────────────────────────────────────────────────────────────────────────────
 
-const PARALLEL  = true   # true  → multi-threaded population evaluation
-const N_THREADS = 0      # 0 → use all available cores
+const PARALLEL       = true   # true  → multi-threaded population evaluation
+const N_THREADS      = 0      # 0 → use all available cores
+const MAX_RUN_TIME_S = 60     # Maximum simulation runtime (seconds)
 
 if PARALLEL
     n_desired = N_THREADS == 0 ? Sys.CPU_THREADS : min(N_THREADS, Sys.CPU_THREADS)
@@ -52,16 +53,19 @@ end
 calibration_conditions = [
     SimulationConfig(
         type_fuel_cell = :ZSW_GenStack_Pa_1_61_Pc_1_41,
-        voltage_zone   = :before_voltage_drop,                # :full or :before_voltage_drop
+        voltage_zone   = :before_voltage_drop,
+        numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S),
     ),
-     SimulationConfig(
-         type_fuel_cell = :ZSW_GenStack_Pa_2_8_Pc_2_6,
-         voltage_zone   = :before_voltage_drop,
-     ),
     SimulationConfig(
-         type_fuel_cell = :ZSW_GenStack_T_84,
-         voltage_zone   = :before_voltage_drop,
-     ),
+        type_fuel_cell = :ZSW_GenStack_Pa_2_8_Pc_2_6,
+        voltage_zone   = :before_voltage_drop,
+        numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S),
+    ),
+    SimulationConfig(
+        type_fuel_cell = :ZSW_GenStack_T_84,
+        voltage_zone   = :before_voltage_drop,
+        numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S),
+    ),
 ]
 
 # ── Genetic Algorithm settings ────────────────────────────────────────────────
