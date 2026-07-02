@@ -61,6 +61,7 @@ end
 # IMPORTS  (after the restart check — only reached with the correct thread count)
 # ─────────────────────────────────────────────────────────────────────────────
 
+using AlphaPEM.Config: NumericalParams
 using AlphaPEM.Parametrisation.ValidParameterRegion
 using Logging
 using Printf
@@ -108,6 +109,7 @@ analysis_cfg = ValidityAnalysisConfig(
     save_curves            = true,                  # Set to true to save polarization curves
     reuse_from             = "results/model_validity/2026.06.02 - 10000 samples - before voltage drop - V1",               # Set to "path/to/previous/run" to reuse curves. ex: "results/model_validity/2026.06.02 - 10000 samples - before voltage drop - V1"
     hyperbox_finder_method = [:PRIM, :MaxBox],                 # Vector of IRD methods: :PRIM, :MaxBox
+    max_run_time_s         = 30.0,       # Maximum simulation runtime (seconds)
 )
 
 # IRD configuration (required — STEP 3 is no longer optional)

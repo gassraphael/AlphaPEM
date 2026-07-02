@@ -210,11 +210,12 @@ Base.@kwdef struct ValidityAnalysisConfig
     sampling_seed::Int                  = 42
     validation_criteria::ValidityCriteriaConfig = ValidityCriteriaConfig()
     polarization_params::PolarizationParams = PolarizationParams(di_step = 0.1e4)
-    nb_gc::Int                          = 1   # Minimum spatial resolution for speed
+    nb_gc::Int                          = 1        # Minimum spatial resolution for speed
     parallel::Bool                      = true
-    save_curves::Bool                   = true   # Save polarization curves to curves.csv
+    save_curves::Bool                   = true     # Save polarization curves to curves.csv
     reuse_from::Union{String, Nothing}  = nothing  # Path to previous run directory to reuse curves
     hyperbox_finder_method::Union{Symbol, Vector{Symbol}, Nothing} = :PRIM # e.g. :PRIM, :MaxBox, [:PRIM, :MaxBox]; set to `nothing` to skip
+    max_run_time_s::Float64             = 5*60     # Maximum simulation runtime (seconds)
 end
 
 
@@ -677,7 +678,7 @@ function classify_batch_simulations(samples::Matrix{Float64},
     base_params = get_reference_config(bounds.fuel_cell_type)
 
     # Numerical setup for batch runs: minimum spatial resolution for speed.
-    num_params = NumericalParams(nb_gc = cfg.nb_gc)
+    num_params = NumericalParams(nb_gc = cfg.nb_gc, max_run_time_s = cfg.max_run_time_s)
 
     # If reusing curves, skip simulation and just re-classify
     if curves_df !== nothing
