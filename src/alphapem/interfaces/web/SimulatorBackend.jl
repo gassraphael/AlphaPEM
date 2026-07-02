@@ -345,6 +345,7 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
                 :rtol => 1e-3,
                 :atol => 1e-6,
                 :maxiters => 100000,
+                :max_run_time_s => 300.0,
             ),
             :model_config => Dict(
                 :voltage_zone => "before_voltage_drop",
@@ -445,6 +446,7 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
             :delta_t_purge => 15.0,     # s - Time between purges
             :rtol => 1e-3,              # Solver relative tolerance
             :atol => 1e-6,              # Solver absolute tolerance
+            :max_run_time_s => 300.0,   # Maximum simulation runtime in seconds
         ),
         :step_parameters => Dict(
             :delta_t_ini => 30.0 * 60.0, # s - Initial stabilization
@@ -680,6 +682,7 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
         rtol = cp[:rtol],
         atol = cp[:atol],
         maxiters = get(cp, :maxiters, 100000), # Increased default to match NumericalParams
+        max_run_time_s = get(cp, :max_run_time_s, 300.0),
     )
 
     # Build custom physical parameters
