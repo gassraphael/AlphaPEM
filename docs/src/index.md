@@ -42,6 +42,7 @@ julia --project=. examples/run_step.jl
 - **[Getting Started](getting_started/installation.md)** — Complete installation guide and initial setup.
 - **[User Guide](user_guide/web_interface.md)** — How to use the web interface, CLI examples, and workflows.
 - **[Advanced Topics](advanced/calibration.md)** — Parameter calibration and validity analysis.
+- **[API Reference](api.md)** — Complete API documentation with all functions and types.
 - **[About](about/roadmap.md)** — Project roadmap and publications.
 
 ## Features by version
