@@ -10,10 +10,10 @@ application entry points, calibration helpers, and interfaces.
 """
 module AlphaPEM
 
-const VERSION = "1.4.0"
-const AUTHOR = "Raphael Gass"
+const VERSION = "2.0.0"
+const AUTHOR = "Raphaël Gass"
 const EMAIL = "gassraphael@proton.me"
-const LICENSE = "GPLv3"
+const LICENSE = "BSD-3-Clause"
 
 # Suppress verbose output from CondaPkg
 ENV["JULIA_CONDAPKG_VERBOSITY"] = "0"
