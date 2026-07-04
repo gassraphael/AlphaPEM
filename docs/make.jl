@@ -50,7 +50,16 @@ makedocs(
             "Parameter Calibration" => "advanced/calibration.md",
             "Valid Parameter Region Analysis" => "advanced/validity_analysis.md",
         ],
-        "API Reference" => "api.md",
+        "API Reference" => [
+            "Configuration" => "api/configuration.md",
+            "Fuel Cell Models" => "api/fuelcell.md",
+            "Current Profiles" => "api/currents.md",
+            "Core Simulator" => "api/core-simulator.md",
+            "Application & Execution" => "api/application.md",
+            "Interfaces" => "api/interfaces.md",
+            "Parametrisation & Calibration" => "api/parametrisation.md",
+            "Utilities" => "api/utilities.md",
+        ],
         "About" => [
             "Roadmap" => "about/roadmap.md",
             "Publications" => "about/publications.md",
