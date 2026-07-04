@@ -197,15 +197,15 @@ and configuration, beyond what the GUI offers.
 
 ### Available example scripts
 
-| Script | Description                                                                                   |
-|---|-----------------------------------------------------------------------------------------------|
-| `run_step.jl` | Simulates a step current density                                                              |
-| `run_polarization.jl` | Generates a polarization curve                                                                 |
-| `run_polarization_for_cali.jl` | Generates polarization curves for calibration purposes |
-| `run_EIS.jl` | Generates an EIS curve <br/>                               |
-| `run_calibration.jl` | Calibrates the undetermined physical parameters of the model via Genetic Algorithms. |
-| `run_parameter_validity.jl` | Identifies the valid parameter region via LHS sampling, batch simulation and IRD methods (PRIM, MaxBox) — *requires R + IRD package ([installation step 7](#installation-from-source))* |
-| `plot_currents.jl` | Plots the current density profiles                                                            |
+| Script | Description                                                                                                                                                                             |
+|---|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `run_step.jl` | Simulates a step current density                                                                                                                                                        |
+| `run_polarization.jl` | Generates a polarization curve                                                                                                                                                          |
+| `run_polarization_for_cali.jl` | Generates polarization curves for calibration purposes                                                                                                                                  |
+| `run_EIS.jl` | Generates an EIS curve <br/>                                                                                                                                                            |
+| `run_calibration.jl` | Calibrates the undetermined physical parameters of the model via Genetic Algorithms.                                                                                                    |
+| `run_parameter_validity.jl` | Identifies the valid parameter region via LHS sampling, batch simulation and IRD methods (PRIM, MaxBox) — *requires R + IRD package ([installation step 4](#installation-from-source))* |
+| `plot_currents.jl` | Plots the current density profiles                                                                                                                                                      |
 
 ### Steps to run a simulation
 
@@ -359,16 +359,17 @@ This work has been supported:
 
 ## Licenses
 
-**AlphaPEM** is licensed under the BSD 3-Clause. See the [LICENSE](LICENSE) file for more details. 
+**AlphaPEM** is licensed under the **BSD 3-Clause**. See the [LICENSE](LICENSE) file for more details. 
 
 It also includes components licensed under the [BSD-3-Clause license](src/alphapem/parametrisation/LICENSE-BSD-3-CLAUSE):
 
 - parametrisation/LICENSE-BSD-3-CLAUSE from [PyGAD](https://github.com/ahmedfgad/GeneticAlgorithmPython). 
 
-It optionally uses the following external tool, which is **not distributed with AlphaPEM** but must be
-cloned separately by the user (see [installation step 8](#installation-from-source)):
+It optionally uses the following external tool, which is not distributed with AlphaPEM but must be
+cloned separately by the user (see [installation step 4](#installation-from-source)):
 
 - **IRD package** (`irdpackage`) from [supplementary_2023_ird](https://github.com/slds-lmu/supplementary_2023_ird),
+  by Susanne Dandl, Giuseppe Casalicchio, Bernd Bischl & Ludwig Bothmann (Department of Statistics in the University of Munich),
   licensed under the **GNU Lesser General Public License v3 (LGPL-3.0)**.
   AlphaPEM invokes it as an independent subprocess via `Rscript`; no source code from this package
   is incorporated into AlphaPEM.
