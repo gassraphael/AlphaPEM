@@ -49,6 +49,7 @@ makedocs(
         "Advanced" => [
             "Parameter Calibration" => "advanced/calibration.md",
         ],
+        "API Reference" => "api.md",
         "About" => [
             "Roadmap" => "about/roadmap.md",
             "Publications" => "about/publications.md",
