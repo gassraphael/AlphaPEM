@@ -292,11 +292,11 @@ This work has been supported:
 
 ## Licenses
 
-**AlphaPEM** is licensed under the GNU GPL 3.0. See the [LICENSE](LICENSE) file for more details. 
+**AlphaPEM** is licensed under the BSD 3-Clause. See the [LICENSE](LICENSE) file for more details. 
 
 It also includes components licensed under the [BSD-3-Clause license](src/alphapem/parametrisation/LICENSE-BSD-3-CLAUSE):
 
-- calibration/parameter_calibration.py from [PyGAD](https://github.com/ahmedfgad/GeneticAlgorithmPython). 
+- parametrisation/LICENSE-BSD-3-CLAUSE from [PyGAD](https://github.com/ahmedfgad/GeneticAlgorithmPython). 
 
 ## New contributors
 
