@@ -6,7 +6,8 @@ const _zsw_correction_logged = Ref{Bool}(false)
 """
     ZSW
 
-ZSW fuel cell model with parameters and experimental data.
+ZSW fuel cell model with parameters and experimental data,
+extracted from this zenodo files: https://zenodo.org/records/14223364.
 
 Contains:
 - physical, operating, numerical parameters (inherited from FuelCell)

@@ -3,7 +3,8 @@
 """
     EH31
 
-EH31 fuel cell model with parameters and experimental data.
+EH31 fuel cell model with parameters and experimental data,
+extracted from their 2022 technical data: https://ehgroup.ch/.
 
 Contains:
 - physical, operating, numerical parameters (inherited from FuelCell)
