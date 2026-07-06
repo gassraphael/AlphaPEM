@@ -766,7 +766,11 @@ function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing)
         end
     elseif simu.cfg.type_current isa PolarizationParams
         if simu.cfg.type_display == :synthetic && _ax1 !== nothing
-            plot_polarization_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1)
+            if simu.cfg.display_timing == :live
+                plot_polarization_hysteresis(outputs, simu.current_density, simu.cfg, _ax1)
+            else
+                plot_polarization_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1)
+            end
         elseif simu.cfg.type_display == :multiple && _ax1 isa AbstractVector && length(_ax1) >= 6 && _ax2 !== nothing
             # Multiple mode: Performance curves (Polarization, Power, Efficiency, Hysteresis) followed by Internal states.
             plot_polarization_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[1])

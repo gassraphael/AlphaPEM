@@ -724,6 +724,26 @@ function plot_polarization_hysteresis(outputs::SimulationOutputs,
                         title="Polarization curve with hysteresis",
                         legend=true,
                         legend_position=:rt)
+    else
+        ifc_full, Ucell_full = _polarization_points(outputs, cd; average=false)
+
+        if !isempty(ifc_full)
+            sc = scatter!(ax, ifc_full, Ucell_full;
+                         color=model_color, markersize=8,
+                         strokecolor=:white, strokewidth=0.5)
+
+            _set_polarization_axis_limits!(ax)
+            _set_polarization_fixed_ticks!(ax)
+            _finalize_axis!(ax;
+                            xlabel=rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"),
+                            ylabel=rich("Cell voltage ", lsub("U", "cell"), " (V)"),
+                            title="Polarization curve with hysteresis",
+                            legend=false)
+            axislegend(ax, [sc], [model_label_base];
+                       position=:rt, framevisible=true,
+                       framewidth=0.8, framecolor=(:black, 0.35),
+                       backgroundcolor=(:white, 0.88), padding=(6, 6, 6, 6))
+        end
     end
     return nothing
 end
