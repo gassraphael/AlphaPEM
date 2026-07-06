@@ -15,8 +15,9 @@ const AUTHOR = "Raphaël Gass"
 const EMAIL = "gassraphael@proton.me"
 const LICENSE = "BSD-3-Clause"
 
-# Suppress verbose output from CondaPkg
-ENV["JULIA_CONDAPKG_VERBOSITY"] = "0"
+# Suppress verbose output from CondaPkg and dependencies
+ENV["JULIA_CONDAPKG_VERBOSITY"] = "-1"
+ENV["PYTHONCALL_EXE_PATH"] = "" # Suppress PythonCall startup messages
 
 import CondaPkg
 

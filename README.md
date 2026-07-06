@@ -95,7 +95,7 @@ To install **AlphaPEM**, follow these steps in a shell:
      (e.g., `GLFWError (API_UNAVAILABLE)`). This is expected on headless cluster nodes without a graphics
      card and can be safely ignored; AlphaPEM will automatically fall back to `CairoMakie` for non-interactive plots.
 
-5. *(Optional)* **Genetic algorithm-based parameter calibration** — only required if you intend to use
+4*(Optional)* **Genetic algorithm-based parameter calibration** — only required if you intend to use
    `examples/run_calibration.jl` and the `Calibration` module.
    ```sh
    julia --project=. -e 'using CondaPkg; CondaPkg.resolve()'
