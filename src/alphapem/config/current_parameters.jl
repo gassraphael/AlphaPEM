@@ -22,13 +22,19 @@ end
 
 """
     PolarizationParams
+
+Parameters for polarization curve simulation.
+Priority for i_max (all values are rounded to nearest di_step multiple):
+1. If user provides i_max explicitly (not NaN), use that value
+2. Else if fuel_cell has experimental data, use max(i_exp)
+3. Else default to 2.5 A/cm²
 """
 Base.@kwdef struct PolarizationParams <: AbstractCurrentParams
     delta_t_ini::Float64 = 30 * 60.0 # (s). Initial time at zero current density for the stabilisation of the internal states.
     di_step::Float64 = 0.05e4  # (A.m-2). Nominal current density step for the polarisation current density function.
     v_load::Float64 = 0.01e4  # (A.m-2.s-1). Loading rate for one step current of the polarisation current density function.
     delta_t_break::Float64 = 5 * 60.0 # (s). Breaking time for one step current, for the stabilisation of the internal states.
-    i_max::Float64 = 2.5e4 # Maximum current (default value, can be overridden by experimental current values if provided).
+    i_max::Float64 = NaN  # User-provided maximum current (A/m²). NaN means use experimental or default.
 end
 
 

@@ -639,12 +639,19 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
                 @warn "Could not merge polarization parameter defaults: $e"
             end
         end
+        # Convert null (from empty HTML input) to NaN for automatic i_max selection
+        i_max_val = get(pp, :i_max, NaN)
+        if i_max_val === nothing || isnan(convert(Float64, something(i_max_val, NaN)))
+            i_max_val = NaN
+        else
+            i_max_val = convert(Float64, i_max_val)
+        end
         PolarizationParams(
             delta_t_ini = pp[:delta_t_ini],
             di_step = pp[:di_step],
             v_load = pp[:v_load],
             delta_t_break = pp[:delta_t_break],
-            i_max = pp[:i_max],
+            i_max = i_max_val,
         )
     elseif sim_type == :eis
         ep = get(params, :eis_parameters, Dict())
