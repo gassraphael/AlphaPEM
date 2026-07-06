@@ -50,14 +50,14 @@ struct PolarizationCurrent <: AbstractCurrent
         p.di_step > 0 || throw(ArgumentError("di_step must be > 0"))
         p.i_max ≥ 0 || throw(ArgumentError("i_max must be ≥ 0"))
 
-        di_transitions, t_starts, dt_loads, tf = _polarization_transitions(p)
+        di_transitions, t_starts, dt_loads, tf, i_max_rounded = _polarization_transitions(p)
 
         return new(
             Float64(p.delta_t_ini),
             Float64(p.v_load),
             Float64(p.delta_t_break),
             Float64(p.di_step),
-            Float64(p.i_max),
+            Float64(i_max_rounded),
             di_transitions,
             t_starts,
             dt_loads,
@@ -71,11 +71,23 @@ end
 # --- Internal utilities ----------------------------------------------------
 
 """
+    _round_i_max_to_di_step(i_max, di_step)
+
+Round i_max up to the nearest multiple of di_step to ensure symmetric ramp steps.
+"""
+function _round_i_max_to_di_step(i_max::Real, di_step::Real)::Float64
+    n_steps = ceil(i_max / di_step)
+    return n_steps * di_step
+end
+
+"""
 Generate the sequence of current transitions for the polarization cycle:
 0 -> i_start (stabilization) -> i_max -> 0 -> i_start.
+Returns (transitions, t_starts, dt_loads, tf, i_max_rounded) to ensure symmetric stepping.
 """
 function _polarization_transitions(p::PolarizationParams)
     i_start = 1.0e4 # 1.0 A/cm²
+    i_max = _round_i_max_to_di_step(p.i_max, p.di_step)
 
     di_transitions = Float64[]
     t_starts = Float64[]
@@ -93,8 +105,8 @@ function _polarization_transitions(p::PolarizationParams)
     i_curr = i_start
 
     # 2. Ramp up: i_start -> i_max
-    while i_curr < p.i_max - 1e-6
-        di = min(p.di_step, p.i_max - i_curr)
+    while i_curr < i_max - 1e-6
+        di = min(p.di_step, i_max - i_curr)
         push!(di_transitions, di)
         push!(t_starts, t_curr)
         dt = di / p.v_load
@@ -125,14 +137,14 @@ function _polarization_transitions(p::PolarizationParams)
         i_curr += di
     end
 
-    return di_transitions, t_starts, dt_loads, t_curr
+    return di_transitions, t_starts, dt_loads, t_curr, i_max
 end
 
 
 """
 Number of current increments required to reach `i_max`.
 """
-n_steps(p::PolarizationParams) = length(_polarization_transitions(p)[1])
+n_steps(p::PolarizationParams) = length(_polarization_transitions(p)[1])  # Returns transitions as first element
 n_steps(c::PolarizationCurrent) = length(c.di_transitions)
 
 
@@ -149,7 +161,7 @@ function step_duration(c::PolarizationCurrent)
     return dts
 end
 function step_duration(p::PolarizationParams)
-    di_transitions, t_starts, dt_loads, tf = _polarization_transitions(p)
+    di_transitions, t_starts, dt_loads, tf, _ = _polarization_transitions(p)
     dts = Vector{Float64}(undef, length(di_transitions))
     for k in eachindex(di_transitions)
         dts[k] = dt_loads[k] + (k == 1 ? p.delta_t_ini : p.delta_t_break)
@@ -200,6 +212,6 @@ end
 Return the default simulation time interval `(t0, tf)`.
 """
 function time_interval(p::PolarizationParams)
-    _, _, _, tf = _polarization_transitions(p)
+    _, _, _, tf, _ = _polarization_transitions(p)
     return (0.0, tf)
 end

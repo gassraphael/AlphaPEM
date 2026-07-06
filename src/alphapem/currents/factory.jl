@@ -18,19 +18,26 @@ end
 
 
 function create_current(p::PolarizationParams, fuel_cell=nothing)::AbstractCurrent
-    # If a FuelCell object is provided and contains experimental current data,
-    # use the maximum value as i_max for the polarization profile.
-    if fuel_cell !== nothing && hasproperty(fuel_cell, :pola_exp_data) &&
-           hasproperty(fuel_cell.pola_exp_data, :i_exp) && !isempty(fuel_cell.pola_exp_data.i_exp)
+    # Polarization i_max priority logic (all values rounded to di_step by constructor):
+    # 1. If user explicitly provided i_max (not NaN), use that value
+    # 2. Else if fuel_cell has experimental data, use max(i_exp)
+    # 3. Else use default 2.5 A/cm² (2.5e4 A/m²)
+    i_max_val = p.i_max
+    if isnan(i_max_val)
+        if fuel_cell !== nothing && hasproperty(fuel_cell, :pola_exp_data) &&
+               hasproperty(fuel_cell.pola_exp_data, :i_exp) && !isempty(fuel_cell.pola_exp_data.i_exp)
             i_max_val = maximum(fuel_cell.pola_exp_data.i_exp)
-            p = PolarizationParams(
-                delta_t_ini = p.delta_t_ini,
-                di_step = p.di_step,
-                v_load = p.v_load,
-                delta_t_break = p.delta_t_break,
-                i_max = i_max_val,
-            )
+        else
+            i_max_val = 2.5e4  # Default: 2.5 A/cm²
+        end
     end
+    p = PolarizationParams(
+        delta_t_ini = p.delta_t_ini,
+        di_step = p.di_step,
+        v_load = p.v_load,
+        delta_t_break = p.delta_t_break,
+        i_max = i_max_val,
+    )
     return PolarizationCurrent(p)
 end
 
