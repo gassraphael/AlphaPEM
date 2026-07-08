@@ -54,7 +54,6 @@ Base.@kwdef struct PhysicalParams <: AbstractFuelCellParams
     Vaem::Float64 = 2.4e-3          # Exhaust manifold volume at the anode in m³
     Vcem::Float64 = 2.4e-3          # Exhaust manifold volume at the cathode in m³
     #   Interaction parameters between fluids and PEMFC structure
-    e::Int64 = 5                    # Capillary exponent
     gamma_sorp_l::Float64 = 0.5     # Sorption rate of liquid water in the membrane
     K_O2_ad_Pt::Float64 = 5.4       # Interfacial resistance coefficient of O2 adsorption on the Pt sites
     #   Voltage polarization
@@ -80,13 +79,12 @@ Each parameter is mapped to a tuple: (min::Float64, max::Float64, type::Symbol)
 where type is either :real or :int.
 """
 const UNDETERMINED_PARAMETER_BOUNDS = Dict{Symbol, Tuple{Float64, Float64, Symbol}}(
-    :Hacl          => (5e-6, 20e-6, :real),           # Anode catalyst-layer thickness
+    :Hacl          => (1e-6, 15e-6, :real),           # Anode catalyst-layer thickness
     :Hccl          => (5e-6, 20e-6, :real),           # Cathode catalyst-layer thickness
     :Hmem          => (5e-6, 50e-6, :real),           # Membrane thickness
-    :Hgdl          => (100e-6, 150e-6, :real),        # Gas-diffusion-layer thickness
+    :Hgdl          => (70e-6, 150e-6, :real),        # Gas-diffusion-layer thickness
     :Hmpl          => (40e-6, 100e-6, :real),         # Microporous-layer thickness
-    :epsilon_gdl   => (0.5, 0.95, :real),             # GDL porosity
-    :e             => (3.0, 5.0, :int),               # Capillary exponent
+    :epsilon_gdl   => (0.5, 0.9, :real),             # GDL porosity
     :K_O2_ad_Pt    => (0.1, 10.0, :real),             # Resistance coefficient of O₂ adsorption on the Pt sites
     :Re            => (5e-8, 5e-6, :real),            # Electron-conduction resistance
     :i0_c_ref      => (0.1, 80.0, :real),             # Reference cathode exchange current density
@@ -108,7 +106,6 @@ const PARAMETER_METADATA = Dict{Symbol, Tuple{String, String}}(
     :Hgdl          => ("m", "Gas-diffusion-layer thickness"),
     :Hmpl          => ("m", "Microporous-layer thickness"),
     :epsilon_gdl   => ("—", "GDL porosity"),
-    :e             => ("—", "Capillary exponent"),
     :K_O2_ad_Pt    => ("—", "O₂ adsorption resistance coefficient"),
     :Re            => ("Ω·m²", "Electron-conduction resistance"),
     :i0_c_ref      => ("A·m⁻²", "Reference cathode exchange current density"),

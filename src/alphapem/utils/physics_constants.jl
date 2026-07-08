@@ -49,6 +49,8 @@ const Eact_H2_cros_l::Float64 = 1.8e4  # J.mol-1. It is the activation energy of
 const Eact_O2_cros_v::Float64 = 2.2e4  # J.mol-1. It is the activation energy of oxygen for crossover in the under saturated membrane.
 const Eact_O2_cros_l::Float64 = 2.0e4  # J.mol-1. It is the activation energy of oxygen for crossover in the liquid-equilibrated membrane.
 const Kshape::Int64 = 2  # . Mathematical factor governing lambda_eq smoothing.
+# Interaction parameters between fluids and PEMFC structure
+const e::Int64 = 3 # . Capillary exponent
 #   Volumic flow of O2 inside the CCL to the Pt sites
 const K_O2_dis_ion::Float64 = 8.5  # . It is the interfacial resistance coefficient of O2 dissolution inside the ionomer [haoModelingExperimentalValidation2015].
 const K_O2_dis_l::Float64 = 1.0  # . It is the interfacial resistance coefficient of O2 dissolution inside the CL liquid water.

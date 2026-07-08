@@ -428,7 +428,6 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
             :Hmem => 15e-6,             # m - Membrane thickness
             :epsilon_gdl => 0.7,        # GDL porosity
             :epsilon_mpl => 0.5,        # MPL porosity
-            :e => 4,                    # Capillary exponent
             :gamma_sorp_l => 0.5,       # Sorption rate
             :K_O2_ad_Pt => 5.4,         # O2 adsorption coefficient
             :Re => 1.5e-7,              # Ω.m² - Electron resistance
@@ -437,7 +436,7 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
             :kappa_c => 1.0,            # Overpotential exponent
             :C_scl => 2e7,              # F/m³ - Double layer capacitance
         ),
-        :undetermined_list => [:Hacl, :Hccl, :Hmem, :Hgdl, :Hmpl, :epsilon_gdl, :e, :Re, :i0_c_ref, :kappa_co, :kappa_c, :K_O2_ad_Pt, :C_scl],
+        :undetermined_list => [:Hacl, :Hccl, :Hmem, :Hgdl, :Hmpl, :epsilon_gdl, :Re, :i0_c_ref, :kappa_co, :kappa_c, :K_O2_ad_Pt, :C_scl],
         :computing_parameters => Dict(
             :nb_gc => 1,                # GC nodes
             :nb_gdl => 5,               # GDL nodes

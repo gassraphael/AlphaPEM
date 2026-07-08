@@ -43,28 +43,21 @@ end
 Return the list of undetermined parameters for the fuel cell.
 """
 function undetermined_parameters(fc::AbstractFuelCell, voltage_zone::Symbol = :full)::Vector{Tuple{Symbol, Float64, Float64}}
-    # Generic implementation using default bounds from Config
-    # This can be overridden by specific fuel cell types
-    
-    # We use a standard set of parameters that are typically undetermined in PEMFC models
-    params = [
-        (:Hacl,          5e-6, 20e-6),
-        (:Hccl,          5e-6, 20e-6),
-        (:Hmem,          5e-6, 50e-6),
-        (:Hgdl,        100e-6, 150e-6),
-        (:Hmpl,         40e-6, 100e-6),
-        (:epsilon_gdl,    0.5, 0.9),
-        (:e,              3.0, 5.0),
-        (:Re,            5e-8, 5e-6),
-        (:i0_c_ref,       0.1, 80.0),
-        (:kappa_co,      0.01, 40.0),
-        (:kappa_c,       0.25, 4.0),
-    ]
-    
-    if voltage_zone == :full
-        push!(params, (:K_O2_ad_Pt, 0.1, 10.0))
+    # Generic implementation: delegate to the canonical bounds defined in
+    # `fuel_cell_parameters.jl` (UNDETERMINED_PARAMETER_BOUNDS).
+    # Concrete fuel cell models may still override this method if they need
+    # a specific subset/order of params.
+
+    params = Tuple{Symbol, Float64, Float64}[]
+    for (name, (minv, maxv, _kind)) in AlphaPEM.Config.UNDETERMINED_PARAMETER_BOUNDS
+        # Preserve historical behaviour: `:K_O2_ad_Pt` was only present in the
+        # undetermined list for the full voltage zone.
+        if voltage_zone != :full && name == :K_O2_ad_Pt
+            continue
+        end
+        push!(params, (name, minv, maxv))
     end
-    
+
     return params
 end
 

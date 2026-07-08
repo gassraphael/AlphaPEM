@@ -22,7 +22,7 @@ function bounds_for_fuel_cell(fuel_cell_type::Symbol,
             throw(ArgumentError("No metadata found for parameter $param_name"))
         end
         unit, description = PARAMETER_METADATA[param_name]
-        param_type = param_name == :e ? :int : :real
+        param_type = :real
         push!(bounds, ParameterBound(param_name, Float64(min_val), Float64(max_val),
                                      param_type, unit, description))
     end
