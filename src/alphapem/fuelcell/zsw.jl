@@ -45,7 +45,7 @@ function physical_parameters(fc::ZSWFuelCell)::PhysicalParams
         Hacl = 3e-6,                         # Thickness of the anode catalyst layer in meters
         Hccl = 15e-6,                        # Thickness of the cathode catalyst layer in meters
         # Membrane
-        Hmem = 13.646579963107156e-6,        # Thickness of the membrane in meters
+        Hmem = 15e-6,                        # Thickness of the membrane in meters
         # Gas diffusion layer
         Hgdl = 121.28496643671034e-6,        # Thickness of the gas diffusion layer in meters
         epsilon_gdl = 0.8436478459989776,    # Anode/cathode GDL porosity
@@ -412,7 +412,6 @@ function undetermined_parameters(fc::ZSWFuelCell, voltage_zone::Symbol = :full):
 
     params = [
         (:Hccl,         10e-6, 15.5e-6),    # Cathode catalyst-layer thickness
-        (:Hmem,         10e-6, 30e-6),      # Membrane thickness
         (:Hgdl,         70e-6, 90e-6),      # Gas-diffusion-layer thickness
         (:Hmpl,         60e-6, 80e-6),      # Microporous-layer thickness
         (:epsilon_gdl,  0.7, 0.9),          # GDL porosity
