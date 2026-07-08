@@ -304,6 +304,9 @@ function launch_AlphaPEM_for_polarization_current(
         simulate_model!(simu)
         # Display
         simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
+        # Release the solver solution before starting the next simulation.
+        simu.sol = nothing
+        GC.gc(true)
     end
     # Plot saving
     save_plot!(first(simulators), fig1, fig2, fig3)
@@ -326,6 +329,9 @@ function launch_AlphaPEM_for_polarization_current_for_calibration(
         simulate_model!(simu)
         # Display
         simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
+        # Release the solver solution before starting the next simulation.
+        simu.sol = nothing
+        GC.gc(true)
     end
     # Plot saving
     save_plot!(first(simulators), fig1, fig2, fig3)
