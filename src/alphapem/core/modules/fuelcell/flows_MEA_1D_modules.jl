@@ -6,6 +6,8 @@
 # _____________________________________________________Flow modules_____________________________________________________
 
 
+using AlphaPEM.Utils: e
+
 """Calculate intermediate values for the flows calculation.
 
 Parameters
@@ -39,7 +41,7 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
     np = cfg.numerical_parameters
     Hacl, Hccl, Hmem, Hgdl, Hmpl = pp.Hacl, pp.Hccl, pp.Hmem, pp.Hgdl, pp.Hmpl
     Wagc, Wcgc = pp.Wagc, pp.Wcgc
-    epsilon_gdl, epsilon_mpl, e = pp.epsilon_gdl, pp.epsilon_mpl, pp.e
+    epsilon_gdl, epsilon_mpl = pp.epsilon_gdl, pp.epsilon_mpl
     nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl
 
     # Extraction of the variables
@@ -123,42 +125,42 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
     #       ... of the capillary coefficient
     D_cap_agdl_agdl = flows_int_work.D_cap_agdl_agdl
     @inbounds for i in 1:(nb_gdl - 1)
-        D_cap_agdl_agdl[i] = hmean(Dcap(:gdl, s_agdl[i],     T_agdl[i],     epsilon_gdl, e, epsilon_c),
-                                    Dcap(:gdl, s_agdl[i + 1], T_agdl[i + 1], epsilon_gdl, e, epsilon_c))
+        D_cap_agdl_agdl[i] = hmean(Dcap(:gdl, s_agdl[i],     T_agdl[i],     epsilon_gdl, epsilon_c),
+                                    Dcap(:gdl, s_agdl[i + 1], T_agdl[i + 1], epsilon_gdl, epsilon_c))
     end
 
-    D_cap_agdl_ampl = hmean(Dcap(:gdl, s_agdl[nb_gdl], T_agdl[nb_gdl], epsilon_gdl, e, epsilon_c),
-                             Dcap(:mpl, s_ampl[1],      T_ampl[1],      epsilon_mpl, e),
+    D_cap_agdl_ampl = hmean(Dcap(:gdl, s_agdl[nb_gdl], T_agdl[nb_gdl], epsilon_gdl, epsilon_c),
+                             Dcap(:mpl, s_ampl[1],      T_ampl[1],      epsilon_mpl),
                              w_gdl_mpl, w_mpl_gdl)
 
     D_cap_ampl_ampl = flows_int_work.D_cap_ampl_ampl
     @inbounds for i in 1:(nb_mpl - 1)
-        D_cap_ampl_ampl[i] = hmean(Dcap(:mpl, s_ampl[i],     T_ampl[i],     epsilon_mpl, e),
-                                    Dcap(:mpl, s_ampl[i + 1], T_ampl[i + 1], epsilon_mpl, e))
+        D_cap_ampl_ampl[i] = hmean(Dcap(:mpl, s_ampl[i],     T_ampl[i],     epsilon_mpl),
+                                    Dcap(:mpl, s_ampl[i + 1], T_ampl[i + 1], epsilon_mpl))
     end
 
-    D_cap_ampl_acl = hmean(Dcap(:mpl, s_ampl[nb_mpl], T_ampl[nb_mpl], epsilon_mpl, e),
-                           Dcap(:cl,  s_acl,          T_acl,          epsilon_acl, e),
+    D_cap_ampl_acl = hmean(Dcap(:mpl, s_ampl[nb_mpl], T_ampl[nb_mpl], epsilon_mpl),
+                           Dcap(:cl,  s_acl,          T_acl,          epsilon_acl),
                            w_mpl_acl, w_acl_mpl)
 
-    D_cap_ccl_cmpl = hmean(Dcap(:cl,  s_ccl,    T_ccl,    epsilon_ccl, e),
-                           Dcap(:mpl, s_cmpl[1], T_cmpl[1], epsilon_mpl, e),
+    D_cap_ccl_cmpl = hmean(Dcap(:cl,  s_ccl,    T_ccl,    epsilon_ccl),
+                           Dcap(:mpl, s_cmpl[1], T_cmpl[1], epsilon_mpl),
                            w_ccl_mpl, w_mpl_ccl)
 
     D_cap_cmpl_cmpl = flows_int_work.D_cap_cmpl_cmpl
     @inbounds for i in 1:(nb_mpl - 1)
-        D_cap_cmpl_cmpl[i] = hmean(Dcap(:mpl, s_cmpl[i],     T_cmpl[i],     epsilon_mpl, e),
-                                    Dcap(:mpl, s_cmpl[i + 1], T_cmpl[i + 1], epsilon_mpl, e))
+        D_cap_cmpl_cmpl[i] = hmean(Dcap(:mpl, s_cmpl[i],     T_cmpl[i],     epsilon_mpl),
+                                    Dcap(:mpl, s_cmpl[i + 1], T_cmpl[i + 1], epsilon_mpl))
     end
 
-    D_cap_cmpl_cgdl = hmean(Dcap(:mpl, s_cmpl[nb_mpl], T_cmpl[nb_mpl], epsilon_mpl, e),
-                             Dcap(:gdl, s_cgdl[1],      T_cgdl[1],      epsilon_gdl, e, epsilon_c),
+    D_cap_cmpl_cgdl = hmean(Dcap(:mpl, s_cmpl[nb_mpl], T_cmpl[nb_mpl], epsilon_mpl),
+                             Dcap(:gdl, s_cgdl[1],      T_cgdl[1],      epsilon_gdl, epsilon_c),
                              w_mpl_gdl, w_gdl_mpl)
 
     D_cap_cgdl_cgdl = flows_int_work.D_cap_cgdl_cgdl
     @inbounds for i in 1:(nb_gdl - 1)
-        D_cap_cgdl_cgdl[i] = hmean(Dcap(:gdl, s_cgdl[i],     T_cgdl[i],     epsilon_gdl, e, epsilon_c),
-                                    Dcap(:gdl, s_cgdl[i + 1], T_cgdl[i + 1], epsilon_gdl, e, epsilon_c))
+        D_cap_cgdl_cgdl[i] = hmean(Dcap(:gdl, s_cgdl[i],     T_cgdl[i],     epsilon_gdl, epsilon_c),
+                                    Dcap(:gdl, s_cgdl[i + 1], T_cgdl[i + 1], epsilon_gdl, epsilon_c))
     end
 
     #       ... of the effective diffusion coefficient
@@ -228,8 +230,6 @@ T :
     Temperature in K.
 epsilon : Float64
     Porosity.
-e : Int64
-    Capillary exponent.
 epsilon_c : Union{Float64, Nothing}, optional
     Compression ratio of the GDL.
 
@@ -242,7 +242,6 @@ function Dcap(element::Symbol,
               s,
               T,
               epsilon::Float64,
-              e::Int64,
               epsilon_c::Union{Float64, Nothing}=nothing)
 
     K0_value = K0(element, epsilon, epsilon_c)

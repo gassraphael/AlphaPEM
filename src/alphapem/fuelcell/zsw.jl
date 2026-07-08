@@ -42,8 +42,8 @@ function physical_parameters(fc::ZSWFuelCell)::PhysicalParams
         Aact = 283.87e-4,                    # Active area of the catalyst layer in m²
         nb_cell = 26,                        # Number of cells in the stack
         # Catalyst layer
-        Hacl = 8.112569325675836e-6,         # Thickness of the anode catalyst layer in meters
-        Hccl = 7.605652607044295e-6,         # Thickness of the cathode catalyst layer in meters
+        Hacl = 3e-6,                         # Thickness of the anode catalyst layer in meters
+        Hccl = 15e-6,                        # Thickness of the cathode catalyst layer in meters
         # Membrane
         Hmem = 13.646579963107156e-6,        # Thickness of the membrane in meters
         # Gas diffusion layer
@@ -69,7 +69,6 @@ function physical_parameters(fc::ZSWFuelCell)::PhysicalParams
         Vaem = 25.8e-3 * 9.01e-4,            # Exhaust manifold volume at the anode in m³
         Vcem = 25.8e-3 * 22.61e-4,           # Exhaust manifold volume at the cathode in m³
         # Interaction parameters between fluids and PEMFC structure
-        e = 3,                               # Capillary exponent
         K_O2_ad_Pt = 7.346634385810734,      # Interfacial resistance coefficient of O2 adsorption on the Pt sites
         # Voltage polarization
         Re = 1.545654084145453e-7,           # Electron conduction resistance of the circuit in Ω·m²
@@ -412,16 +411,15 @@ function undetermined_parameters(fc::ZSWFuelCell, voltage_zone::Symbol = :full):
         throw(ArgumentError("voltage_zone must be :full or :before_voltage_drop (got $voltage_zone)"))
 
     params = [
-        (:Hacl,     5.045e-6, 15e-6),     # Anode catalyst-layer thickness
-        (:Hccl,         5e-6, 15.44e-6),  # Cathode catalyst-layer thickness
-        (:Hmem,        10e-6, 30e-6),     # Membrane thickness
-        (:Hgdl,       100e-6, 149.6e-6),  # Gas-diffusion-layer thickness
-        (:Hmpl,        40e-6, 91.37e-6),  # Microporous-layer thickness
-        (:epsilon_gdl,   0.7, 0.9),       # GDL porosity
-        (:Re,           5e-8, 5e-6),      # Electron-conduction resistance
-        (:i0_c_ref,    5.634, 100.0),     # Reference cathode exchange current density
-        (:kappa_co,     4.48, 37.67),     # Crossover correction coefficient
-        (:kappa_c,      0.25, 3.293),     # Overpotential correction exponent
+        (:Hccl,         10e-6, 15.5e-6),    # Cathode catalyst-layer thickness
+        (:Hmem,         10e-6, 30e-6),      # Membrane thickness
+        (:Hgdl,         70e-6, 90e-6),      # Gas-diffusion-layer thickness
+        (:Hmpl,         60e-6, 80e-6),      # Microporous-layer thickness
+        (:epsilon_gdl,  0.7, 0.9),          # GDL porosity
+        (:Re,           5e-8, 5e-6),        # Electron-conduction resistance
+        (:i0_c_ref,     5.634, 100.0),      # Reference cathode exchange current density
+        (:kappa_co,     4.48, 37.67),       # Crossover correction coefficient
+        (:kappa_c,      0.25, 3.293),       # Overpotential correction exponent
     ]
 
     if voltage_zone == :full

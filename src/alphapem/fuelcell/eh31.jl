@@ -80,7 +80,6 @@ function physical_parameters(fc::EH31FuelCell)::PhysicalParams
         Vaem = Vaem,                         # Exhaust manifold volume at the anode in m³
         Vcem = Vcem,                         # Exhaust manifold volume at the cathode in m³
         # Interaction parameters between fluids and PEMFC structure
-        e = 4,                               # Capillary exponent
         K_O2_ad_Pt = 5.4,                    # Interfacial resistance coefficient of O2 adsorption on the Pt sites
         # Voltage polarization
         Re = 1e-6,                           # Electron conduction resistance of the circuit in Ω·m²
@@ -331,14 +330,13 @@ function undetermined_parameters(fc::EH31FuelCell, voltage_zone::Symbol = :full)
         throw(ArgumentError("voltage_zone must be :full or :before_voltage_drop (got $voltage_zone)"))
 
     params = [
-        (:Hacl,        8e-6, 20e-6),  # Anode/cathode catalyst-layer thickness (Hccl = Hacl)
-        (:Hmem,       15e-6, 50e-6),  # Membrane thickness
+        (:Hacl,        5e-6, 20e-6),  # Anode/cathode catalyst-layer thickness (Hccl = Hacl)
+        (:Hmem,        15e-6, 50e-6),  # Membrane thickness
         (:epsilon_gdl, 0.40, 0.95),   # GDL porosity
-        (:e,           3, 4),         # Capillary exponent
         (:Re,          5e-7, 5e-6),   # Electron-conduction resistance
         (:i0_c_ref,    0.1, 100.0),   # Reference cathode exchange current density
-        (:kappa_co,   0.01, 40.0),    # Crossover correction coefficient
-        (:kappa_c,    0.25, 4.0),     # Overpotential correction exponent
+        (:kappa_co,    0.01, 40.0),    # Crossover correction coefficient
+        (:kappa_c,     0.25, 4.0),     # Overpotential correction exponent
     ]
 
     if voltage_zone == :full
