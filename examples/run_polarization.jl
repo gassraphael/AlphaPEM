@@ -28,7 +28,7 @@ current_params = PolarizationParams(
 # :ZSW_GenStack, :ZSW_GenStack_Pa_1_61_Pc_1_41, :ZSW_GenStack_Pa_2_01_Pc_1_81,
 # :ZSW_GenStack_Pa_2_4_Pc_2_2, :ZSW_GenStack_Pa_2_8_Pc_2_6, :ZSW_GenStack_T_62,
 # :ZSW_GenStack_T_76, :ZSW_GenStack_T_84
-type_fuel_cell_list = [:ZSW_GenStack, :ZSW_GenStack_Pa_1_61_Pc_1_41, :ZSW_GenStack_Pa_2_01_Pc_1_81]
+type_fuel_cell_list = [:ZSW_GenStack_Pa_2_01_Pc_1_81]
 nb_gc_pola = 1
 
 # If only one fuel cell type is selected, run a single simulation. Otherwise, run multiple simulations in parallel.
@@ -39,7 +39,7 @@ if length(type_fuel_cell_list) == 1
         numerical_parameters = NumericalParams(nb_gc = nb_gc_pola),
         voltage_zone = :full, # :before_voltage_drop, :full.
         type_auxiliary = :no_auxiliary, # :forced_convective_cathode_with_anodic_recirculation, :forced_convective_cathode_with_flow_through_anode, :no_auxiliary.
-        type_flow = :co_flow, # :co_flow, :counter_flow.
+        type_flow = :counter_flow, # :co_flow, :counter_flow.
         type_purge = :no_purge, # :constant_purge, :periodic_purge, :no_purge.
         type_display = :synthetic, # :multiple, :synthetic, :no_display.
         display_timing = :live # :live, :postrun.
@@ -56,7 +56,7 @@ else
             numerical_parameters = NumericalParams(nb_gc = nb_gc_pola),
             voltage_zone = :full, # :before_voltage_drop, :full.
             type_auxiliary = :no_auxiliary, # :forced_convective_cathode_with_anodic_recirculation, :forced_convective_cathode_with_flow_through_anode, :no_auxiliary.
-            type_flow = :co_flow, # :co_flow, :counter_flow.
+            type_flow = :counter_flow, # :co_flow, :counter_flow.
             type_purge = :no_purge, # :constant_purge, :periodic_purge, :no_purge.
             type_display = :synthetic, # :multiple, :synthetic, :no_display.
             display_timing = :postrun # :live, :postrun.
