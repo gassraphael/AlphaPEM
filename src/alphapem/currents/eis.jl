@@ -162,3 +162,52 @@ function solver_dtmax(c::EISCurrent, t::Real)
     # dtmax = T / nb_points = 1 / (f * nb_points)
     return 1.0 / (c.f[n_inf] * c.nb_points)
 end
+
+
+"""
+    saveat_times(c::EISCurrent, tspan) -> Vector{Float64}
+
+Sampling strategy for EIS:
+- Initial ramp and pre-frequency stabilisation: 1 pt/s.
+- Per-frequency stabilisation window: `nb_points` per period.
+- Per-frequency measurement window: `nb_points` per period (same density as
+  `solver_dtmax`), required for accurate Fourier reconstruction.
+"""
+function saveat_times(c::EISCurrent, tspan::Tuple{<:Real,<:Real})::Vector{Float64}
+    t0_span = Float64(tspan[1])
+    tf_span = Float64(tspan[2])
+    times = Float64[]
+
+    # Initial ramp + first stabilisation phase (before first frequency segment).
+    t_ramp_end = min(c.t_new_start[1], tf_span)
+    append!(times, t0_span : 1.0 : t_ramp_end)
+
+    for i in eachindex(c.f)
+        t_seg_start  = c.t_new_start[i]
+        t_meas_start = t_seg_start + c.delta_t_break[i]
+        t_seg_end    = t_meas_start + c.delta_t_measurement[i]
+
+        # Skip segments outside tspan entirely.
+        t_seg_start > tf_span && break
+
+        # Stabilisation window: 10 pt per period.
+        t_stab_end = min(t_meas_start, tf_span)
+        if t_seg_start < t_stab_end
+            dt_stab = 1.0 / (c.nb_points * c.f[i])
+            append!(times, t_seg_start : dt_stab : t_stab_end)
+        end
+
+        # Measurement window: nb_points per period = nb_points × f[i] pts/s.
+        t_m_start = min(t_meas_start, tf_span)
+        t_m_end   = min(t_seg_end,    tf_span)
+        if t_m_start < t_m_end
+            dt = 1.0 / (c.nb_points * c.f[i])
+            append!(times, t_m_start : dt : t_m_end)
+        end
+    end
+
+    # Always include the final boundary so recovery! has tf.
+    isempty(times) || push!(times, tf_span)
+
+    return sort!(unique!(filter!(t -> t0_span ≤ t ≤ tf_span, times)))
+end

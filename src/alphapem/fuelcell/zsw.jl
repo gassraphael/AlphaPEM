@@ -72,7 +72,7 @@ function physical_parameters(fc::ZSWFuelCell)::PhysicalParams
         K_O2_ad_Pt = 7.346634385810734,      # Interfacial resistance coefficient of O2 adsorption on the Pt sites
         # Voltage polarization
         Re = 1.545654084145453e-7,           # Electron conduction resistance of the circuit in Ω·m²
-        i0_c_ref = 15.0,                     # Reference exchange current density at the cathode in A·m⁻²
+        i0_c_ref = 200.0,                     # Reference exchange current density at the cathode in A·m⁻²
         kappa_co = 21.423681082096856,       # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
         kappa_c = 0.253020870903792,         # Overpotential correction exponent
         C_scl = 2e7                          # Volumetric space-charge layer capacitance in F·m⁻³
@@ -416,7 +416,7 @@ function undetermined_parameters(fc::ZSWFuelCell, voltage_zone::Symbol = :full):
         (:Hmpl,         60e-6, 80e-6),      # Microporous-layer thickness
         (:epsilon_gdl,  0.7, 0.9),          # GDL porosity
         (:Re,           5e-8, 5e-6),        # Electron-conduction resistance
-        (:i0_c_ref,     5.634, 100.0),      # Reference cathode exchange current density
+        (:i0_c_ref,     0.1, 1000.0),       # Reference cathode exchange current density
         (:kappa_co,     4.48, 37.67),       # Crossover correction coefficient
         (:kappa_c,      0.25, 3.293),       # Overpotential correction exponent
     ]

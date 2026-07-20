@@ -411,15 +411,19 @@ For DAE segmented runs, the restart vector must keep the full canonical solver
 layout (differential + algebraic) so that IDA resumes from the exact end state
 without external algebraic re-solves.
 """
-function _extract_last_internal_state(simu::AlphaPEM)::Tuple{Vector{Float64}, Vector{Float64}}
+function _extract_last_internal_state(simu::AlphaPEM)::Tuple{Vector{Float64}, Union{Nothing, Vector{Float64}}}
     simu.sol === nothing && throw(ArgumentError("Cannot extract internal state before a successful solve."))
 
     solver_state_scaling = build_solver_state_scaling(simu.cfg; include_algebraic=true)
     length(solver_state_scaling) == length(simu.sol.u[end]) ||
         throw(ArgumentError("Internal solver scaling size mismatch in _extract_last_internal_state."))
 
-    # `simu.sol.u[end]` is stored in scaled solver coordinates.
-    # Convert back to physical units because `simulate_model!` expects physical
-    # initial values before applying its internal scaling pipeline.
-    return unscale_values(simu.sol.u[end], solver_state_scaling), copy(simu.sol.du[end])
+    # u[end] is in scaled solver coordinates; convert back to physical units.
+    u_phys = unscale_values(simu.sol.u[end], solver_state_scaling)
+
+    # du/dt at tf was captured by the PresetTimeCallback in simulate_model! and stored in
+    # simu.last_solver_du (scaled solver coordinates, no conversion needed).
+    # It is nothing if the solver stopped early (timeout/safety), in which case the next
+    # segment recomputes consistent initial derivatives from the new state.
+    return u_phys, simu.last_solver_du
 end
