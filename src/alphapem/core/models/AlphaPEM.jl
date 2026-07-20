@@ -19,6 +19,7 @@ using SparseArrays: sparse, SparseMatrixCSC, rowvals, nzrange, nonzeros, nnz
 using SciMLBase: DAEFunction, NoInit, successful_retcode, ReturnCode
 using Sundials: IDA, IDASetMaxStep
 using .PlotHelpers: _clear_dynamic_axes!, _clear_dynamic_legends!, saving_instructions!
+using ...Currents: saveat_times
 
 
 # _______________________________________________________AlphaPEM_______________________________________________________
@@ -33,6 +34,7 @@ mutable struct AlphaPEM
     initial_derivative_values::Union{Nothing, Vector{Float64}}
     outputs::Union{Nothing, SimulationOutputs}
     sol
+    last_solver_du::Union{Nothing, Vector{Float64}}            # du/dt at tf, written by the endpoint callback
 end
 
 """Create an `AlphaPEM` simulator from typed fuel-cell, current-profile, and configuration objects.
@@ -48,14 +50,15 @@ end
 function AlphaPEM(fuel_cell::AbstractFuelCell, current_density::AbstractCurrent, cfg::SimulationConfig)::AlphaPEM
 
     simu = AlphaPEM(
-        fuel_cell, #
-        current_density, #
-        cfg, #
-        (0.0, 0.0), # time_interval::Tuple{Float64, Float64}
-        Float64[], # initial_variable_values::Union{Nothing, Vector{Float64}}
-        Float64[], # initial_derivative_values::Union{Nothing, Vector{Float64}}
-        nothing, # outputs::Union{Nothing, SimulationOutputs}
-        nothing, # sol
+        fuel_cell,
+        current_density,
+        cfg,
+        (0.0, 0.0),  # time_interval
+        Float64[],   # initial_variable_values
+        Float64[],   # initial_derivative_values
+        nothing,     # outputs
+        nothing,     # sol
+        nothing,     # last_solver_du
     )
     return simu
 end
@@ -79,6 +82,10 @@ initial_derivative_values : Union{Nothing, Vector{Float64}}, optional
 time_interval : Union{Nothing, Tuple{Float64, Float64}}, optional
     Time interval for numerical resolution. If `nothing`, it is generated
     according to the chosen current profile.
+saveat : Union{Nothing, AbstractVector{<:Real}}, optional
+    Explicit time points at which to save the solution. If `nothing`, the
+    solver automatically derives a set of save times from the current profile
+    and the time interval.
 
 Returns
 -------
@@ -88,7 +95,8 @@ Nothing
 function simulate_model!(simu::AlphaPEM,
                          initial_variable_values::Union{Nothing, Vector{Float64}}=nothing,
                          initial_derivative_values::Union{Nothing, Vector{Float64}}=nothing,
-                         time_interval::Union{Nothing, Tuple{Float64, Float64}}=nothing)
+                         time_interval::Union{Nothing, Tuple{Float64, Float64}}=nothing;
+                         saveat::Union{Nothing, AbstractVector{<:Real}}=nothing)
 
     # ── 1. Precondition checks ─────────────────────────────────────────────────
     _check_simulation_preconditions!(simu)
@@ -144,17 +152,11 @@ function simulate_model!(simu::AlphaPEM,
     safety_cb = _build_physical_safety_callback(n_diff, np.nb_gc, solver_state_scaling, safety_triggered)
     dtmax_cb  = _build_dtmax_callback(simu)
     timeout_cb = _build_timeout_callback(np.max_run_time_s)
+    endpoint_du_cb = _build_endpoint_du_callback(simu)
 
-    # Combine all callbacks
-    if dtmax_cb === nothing && timeout_cb === nothing
-        callbacks = safety_cb
-    elseif dtmax_cb === nothing && timeout_cb !== nothing
-        callbacks = CallbackSet(safety_cb, timeout_cb)
-    elseif dtmax_cb !== nothing && timeout_cb === nothing
-        callbacks = CallbackSet(safety_cb, dtmax_cb)
-    else
-        callbacks = CallbackSet(safety_cb, dtmax_cb, timeout_cb)
-    end
+    callbacks = CallbackSet(safety_cb, endpoint_du_cb,
+                            (dtmax_cb  === nothing ? () : (dtmax_cb,))...,
+                            (timeout_cb === nothing ? () : (timeout_cb,))...)
 
     # ── 10. DAE problem and solve ──────────────────────────────────────────────
     dae_fun  = DAEFunction(residual!; jac=jacobian!, jac_prototype=jac_prototype)
@@ -163,14 +165,20 @@ function simulate_model!(simu::AlphaPEM,
                           differential_vars=dims.differential_vars)
     init_alg = NoInit()
     tstops   = solver_tstops(simu.current_density, simu.time_interval)
+    saveat_arg        = saveat !== nothing ? collect(Float64, saveat) :
+                                            saveat_times(simu.current_density, simu.time_interval)
+    use_saveat        = !isempty(saveat_arg)
     simu.sol = solve(prob, IDA(linear_solver=:KLU);
-                     reltol        = np.rtol,
-                     abstol        = atol_scaled,
-                     tstops        = tstops,
-                     dtmax         = solver_dtmax(simu.current_density, simu.time_interval[1]),
-                     initializealg = init_alg,
-                     maxiters      = np.maxiters,
-                     callback      = callbacks)
+                     reltol         = np.rtol,
+                     abstol         = atol_scaled,
+                     tstops         = tstops,
+                     dtmax          = solver_dtmax(simu.current_density, simu.time_interval[1]),
+                     initializealg  = init_alg,
+                     maxiters       = np.maxiters,
+                     saveat         = saveat_arg,
+                     save_everystep = !use_saveat,
+                     dense          = false,
+                     callback       = callbacks)
 
     # ── 11. Convergence check ──────────────────────────────────────────────────
     # ReturnCode.Terminated is accepted: the safety callback stopped the solver
@@ -195,10 +203,10 @@ function _check_simulation_preconditions!(simu::AlphaPEM)
         simu.cfg.type_auxiliary = :no_auxiliary
         println("Warning: auxiliaries were temporarily removed; \"no_auxiliary\" is automatically used.\n")
     end
-    if simu.cfg.type_flow == :counter_flow
-        println("⚠ Warning: counter-flow configuration significantly increases problem stiffness, " *
-                "which dramatically increases computation time compared to co-flow. " *
-                "No solution to this issue has been found yet.\n")
+    if contains(string(typeof(simu.fuel_cell)), "ZSWFuelCell") && simu.cfg.type_flow == :co_flow
+        @warn "ZSWFuelCell with standard operating conditions typically requires counter-flow " *
+              "configuration for optimal performance. " *
+              "Consider setting type_flow = :counter_flow in SimulationConfig."
     end
     if simu.fuel_cell.operating_conditions.Pa_des < Pext ||
        simu.fuel_cell.operating_conditions.Pc_des < Pext
@@ -423,16 +431,16 @@ function _build_dae_residual(simu::AlphaPEM, dims,
                                initial_scaled_variable_values::AbstractVector{Float64},
                                safety_triggered::Ref{Bool}=Ref(false))
     np = simu.cfg.numerical_parameters
-    y_phys_work           = similar(initial_scaled_variable_values)
-    flows_work            = [MEAFlowsWorkspace(np.nb_gdl, np.nb_mpl) for _ in 1:np.nb_gc]
-    flows_int_work        = MEAFlowsIntWorkspace(np.nb_gdl, np.nb_mpl)
-    heat_work             = MEAHeatWorkspace(np.nb_gdl, np.nb_mpl)
-    heat_int_work         = MEAHeatIntWorkspace(np.nb_gdl, np.nb_mpl)
+    y_phys_work            = similar(initial_scaled_variable_values)
+    flows_work             = [MEAFlowsWorkspace(np.nb_gdl, np.nb_mpl) for _ in 1:np.nb_gc]
+    flows_int_work         = MEAFlowsIntWorkspace(np.nb_gdl, np.nb_mpl)
+    heat_work              = MEAHeatWorkspace(np.nb_gdl, np.nb_mpl)
+    heat_int_work          = MEAHeatIntWorkspace(np.nb_gdl, np.nb_mpl)
     gc_manifold_work       = GCManifoldWorkspace(np.nb_gc)
     gc_manifold_flows_work = GCManifoldFlowsWorkspace(np.nb_gc)
-    _, current_res_scales = _build_gc_current_density_scaling(simu.cfg)
-    j_in_scale            = StateScaling().dae_algebraic.J_in
-    flows_1D_mea_buf      = Vector{MEAFlows1D{np.nb_gdl, np.nb_mpl}}(undef, np.nb_gc)
+    _, current_res_scales  = _build_gc_current_density_scaling(simu.cfg)
+    j_in_scale             = StateScaling().dae_algebraic.J_in
+    flows_1D_mea_buf       = Vector{MEAFlows1D{np.nb_gdl, np.nb_mpl}}(undef, np.nb_gc)
     packed = (fuel_cell               = simu.fuel_cell,
               current_density         = simu.current_density,
               cfg                     = simu.cfg,
@@ -598,6 +606,29 @@ function _build_timeout_callback(max_run_time_s::Float64)
     end
 
     return DiscreteCallback(condition, affect!)
+end
+
+
+"""Build a PresetTimeCallback that captures du/dt at the endpoint.
+
+Fires when IDA reaches tf exactly (PresetTimeCallback forces a tstop there).
+At that instant integrator.du is the true du/dt(tf) from the BDF polynomial—no interpolation.
+Stored in simu.last_solver_du for warm restart by _extract_last_internal_state
+(sol.du is not populated when save_everystep=false).
+"""
+function _build_endpoint_du_callback(simu::AlphaPEM)
+    simu.last_solver_du = nothing
+    tf = simu.time_interval[2]
+    # filter_tstops=false: PresetTimeCallback would otherwise drop tf because it lies exactly
+    # at the tspan boundary (strict-inequality filter). Without the callback firing,
+    # simu.last_solver_du stays nothing and warm restarts fall back to a poor du guess,
+    # forcing IDA to relearn the derivative at each :live segment start.
+    return PresetTimeCallback(
+        [tf],
+        integrator -> (simu.last_solver_du = copy(integrator.du));
+        save_positions=(false, false),
+        filter_tstops=false,
+    )
 end
 
 

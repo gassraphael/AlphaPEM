@@ -78,6 +78,43 @@ solver_dtmax(::AbstractCurrent, ::Real) = Inf
 
 
 """
+    saveat_times(c::AbstractCurrent, tspan) -> Vector{Float64}
+
+Return the output-save instants for one IDA solve covering `tspan = (t0, tf)`.
+
+These times are passed as `saveat` to `solve()` along with `save_everystep=false`
+and `dense=false`, so that `sol.u` only grows with the number of returned points
+regardless of how many internal IDA steps were taken.  This has two benefits:
+
+1. **Memory** — `sol.u` stays small even for stiff trajectories that require
+   hundreds of thousands of tiny steps.  Each entry of `sol.u` is a full state
+   copy (~400 Float64 for a typical AlphaPEM system); without this bound, a run
+   with 5×10⁵ internal steps accumulates ~1.6 GB and makes Julia's GC quadratically
+   slower as the heap grows.
+
+2. **GC pressure** — every accepted IDA step normally appends a new Julia object to
+   `sol.u`.  With 5×10⁵ such objects the GC must scan them on every minor collection
+   triggered by allocations inside `residual!`.  Limiting `sol.u` to a few thousand
+   points eliminates this feedback loop.
+
+Default implementation: one point per simulated second (1 Hz).
+This is sufficient for smooth profiles (step, polarization, calibration) and gives
+a predictable, bounded output size independent of stiffness or `nb_gc`.
+
+Concrete subtypes should override this method when the dynamics require a different
+sampling rate — for example `EISCurrent`, which needs dense sampling during
+measurement windows to accurately reconstruct the frequency response.
+"""
+function saveat_times(::AbstractCurrent, tspan::Tuple{<:Real,<:Real})::Vector{Float64}
+    t0 = Float64(tspan[1])
+    tf = Float64(tspan[2])
+    # Always include at least the boundary points so recovery! has t0 and tf.
+    tf <= t0 && return Float64[t0]
+    return collect(t0 : 1.0 : tf)
+end
+
+
+"""
     _solver_tstops_in_range(times, tspan)
 
 Filter a collection of candidate stop times.
