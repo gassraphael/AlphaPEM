@@ -25,5 +25,6 @@ Base.@kwdef struct NumericalParams <: AbstractFuelCellParams
     atol::Float64 = 1e-6            # Absolute tolerance for the system of ODEs solver
     maxiters::Int = 5e5             # Maximum number of internal time steps that the IDA solver is allowed to take.
     max_run_time_s::Float64 = 5*60  # Maximum simulation runtime in seconds (0 = no limit)
+    save_freq::Float64 = 10.0       # Output save frequency in Hz (points per second)
 end
 

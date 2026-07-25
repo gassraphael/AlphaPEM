@@ -115,9 +115,10 @@ end
 # JSON object containing all default parameters for the selected fuel cell.
 route("/api/fuel_cell_defaults/:fuel_cell_type"; method="GET") do
     fuel_cell_type::String = Router.params()[:fuel_cell_type]
+    voltage_zone::String = string(get(Router.params(), :voltage_zone, "before_voltage_drop"))
 
     try
-        defaults = SimulatorBackend.get_fuel_cell_defaults(fuel_cell_type)
+        defaults = SimulatorBackend.get_fuel_cell_defaults_safe(fuel_cell_type; voltage_zone=voltage_zone)
         json(defaults)
     catch e
         json(Dict(:error => "Invalid fuel cell type: $(string(e))"))
@@ -368,7 +369,11 @@ route("/api/results/:result_id"; method="GET") do
 
     try
         results = SimulatorBackend.get_detailed_results(result_id)
-        json(results)
+        # Sanitize NaN -> null before serializing: raw simulation/input data can
+        # contain NaN (e.g. an unset i_max), which JSON.json would otherwise emit
+        # as the invalid JSON literal `NaN`, breaking JSON.parse on the client
+        # (silently, via fetch(...).then(r => r.json()) rejecting).
+        json(SimulatorBackend.sanitize_for_json(results))
     catch e
         @error "Result retrieval failed" result_id=result_id exception=e
         json(Dict(:error => "Result retrieval failed: $(string(e))", :status => 500))

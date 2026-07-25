@@ -316,7 +316,7 @@ function calculate_reynolds_numbers(outputs::SimulationOutputs,
             x_H2O_a = C_v_agc[j] + C_H2_agc[j] > 0 ?
                       C_v_agc[j] / (C_v_agc[j] + C_H2_agc[j]) : 0.0
             rho_a   = C_v_agc[j] * M_H2O + C_H2_agc[j] * M_H2
-            mu_a    = mu_mixture_gases(["H2O_v", "H2"], [x_H2O_a, 1 - x_H2O_a], T_agc[j])
+            mu_a    = mu_mixture_gases([:H2O_v, :H2], [x_H2O_a, 1 - x_H2O_a], T_agc[j])
             Re_a[i][j] = mu_a > 0 ? rho_a * abs(v_a_i[j]) * Dh_a / mu_a : 0.0
 
             # Cathode: H₂O + O₂ + N₂ mixture.
@@ -327,7 +327,7 @@ function calculate_reynolds_numbers(outputs::SimulationOutputs,
             x_O2_c   = y_O2_c * (1 - x_H2O_c)
             x_N2_c   = (1 - y_O2_c) * (1 - x_H2O_c)
             rho_c    = C_v_cgc[j] * M_H2O + C_O2_cgc[j] * M_O2 + C_N2_cgc[j] * M_N2
-            mu_c     = mu_mixture_gases(["H2O_v", "O2", "N2"], [x_H2O_c, x_O2_c, x_N2_c], T_cgc[j])
+            mu_c     = mu_mixture_gases([:H2O_v, :O2, :N2], [x_H2O_c, x_O2_c, x_N2_c], T_cgc[j])
             Re_c[i][j] = mu_c > 0 ? rho_c * abs(v_c_i[j]) * Dh_c / mu_c : 0.0
         end
     end
