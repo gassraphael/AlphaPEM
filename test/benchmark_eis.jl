@@ -27,7 +27,7 @@ using AlphaPEM.Application: run_simulation
 
 function make_eis_config()
     current_params = EISParams(
-        i_EIS = 1.0e4,        # (A/m²). Parameters for the EIS curve.
+        i_EIS = 1.5e4,        # (A/m²). Parameters for the EIS curve.
         ratio = 5.0 / 100.0,  # (.). Parameters for the EIS curve.
         f_power_min = -3.0,   # (.). Power of the minimum frequency for the EIS current density function.
         f_power_max = 5.0,    # (.). Power of the maximum frequency for the EIS current density function.
@@ -39,11 +39,10 @@ function make_eis_config()
         type_fuel_cell = :ZSW_GenStack,
         type_current = current_params,
         numerical_parameters = NumericalParams(nb_gc = 1),
-        voltage_zone = :full,
         type_auxiliary = :no_auxiliary,
         type_purge = :no_purge,
         type_display = :no_display,
-        display_timing = :live
+        display_timing = :postrun
     )
 end
 

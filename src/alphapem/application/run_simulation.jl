@@ -23,6 +23,7 @@ using ..Currents: create_current, step_duration
 using SciMLBase: ReturnCode
 using ..Core.Models: AlphaPEM, simulate_model!, display!, save_plot!,
                      build_solver_state_scaling, unscale_values
+using ..Core.Types: SimulationOutputs
 
 include(joinpath(@__DIR__, "run_simulation_modules.jl"))
 
@@ -269,9 +270,45 @@ function launch_AlphaPEM_for_EIS_current(simu::AlphaPEM)::AlphaPEM
             end
         end
     else
-        # :postrun mode: perform a single continuous solve.
-        # Adaptive step guidance (tstops, dtmax) is handled by the core solver callbacks.
-        simulate_model!(simu)
+        # :postrun mode: segment the solve by frequency, exactly like :live, but without
+        # displaying between segments. A single continuous solve over the whole EIS sweep
+        # would need one saveat point every ~1/(nb_points*f) seconds for every frequency,
+        # accumulating sol.t/sol.u to hundreds of thousands of entries in one live array —
+        # risking a max_run_time_s timeout long before the sweep completes. Segmenting keeps
+        # each frequency's sol.t/sol.u small and gives it a fresh maxiters budget, then the
+        # segments are concatenated for a single final display.
+
+        # Initialization
+        cd = simu.current_density   # ::EISCurrent
+        n  = length(cd.t_new_start)
+        initial_variable_values = nothing
+        initial_derivative_values = nothing
+
+
+        # A preliminary simulation run is necessary to equilibrate internal variables at i_EIS.
+        simulate_model!(simu, initial_variable_values, initial_derivative_values, (0.0, cd.t0))
+        # Recovery of the internal states from the end of the preceding simulation.
+        initial_variable_values, initial_derivative_values = _extract_last_internal_state(simu)
+        # Conserving the outputs of the preliminary run for later concatenation.
+        accumulated = simu.outputs
+
+        # Dynamic simulation: one segment per frequency.
+        for i in 1:n
+            # Time interval actualization
+            t0 = accumulated.solver.t[end]
+            tf = cd.t_new_start[i] + cd.delta_t_break[i] + cd.delta_t_measurement[i]
+
+            simulate_model!(simu, initial_variable_values, initial_derivative_values, (t0, tf))
+
+            # Recovery of the internal states from the end of the preceding simulation.
+            initial_variable_values, initial_derivative_values = _extract_last_internal_state(simu)
+
+            # Concatenate the outputs of this segment with the accumulated outputs of previous segments.
+            _append_simulation_segment!(accumulated, simu.outputs)
+        end
+
+        # Replace the simulator's outputs with the accumulated outputs of all segments.
+        simu.outputs = accumulated
 
         # Trigger a single display! call at the end.
         if simu.cfg.type_display != :no_display

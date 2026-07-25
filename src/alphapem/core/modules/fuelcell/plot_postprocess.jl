@@ -50,7 +50,7 @@ function make_Fourier_transformation(outputs::SimulationOutputs,
 
     if cfg.display_timing == :live
         # Identify the active EIS segment for the current live run (latest point in history).
-        n_inf = searchsortedlast(cd.t_new_start, t[end])
+        n_inf = searchsortedlast(cd.t_new_start, t[1])
         n_inf = clamp(n_inf, 1, length(cd.f))
         return [_compute_fourier_for_segment(t, Ucell_t, cd, n_inf)]
     else

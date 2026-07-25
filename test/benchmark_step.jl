@@ -38,7 +38,6 @@ function make_step_config()
         type_fuel_cell = :ZSW_GenStack,
         type_current = current_params,
         numerical_parameters = NumericalParams(nb_gc = 1),
-        voltage_zone = :full,
         type_auxiliary = :no_auxiliary,
         type_purge = :no_purge,
         type_display = :no_display,
