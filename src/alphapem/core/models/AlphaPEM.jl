@@ -195,22 +195,30 @@ end
 
 """Emit configuration warnings and throw on invalid inputs."""
 function _check_simulation_preconditions!(simu::AlphaPEM)
-    if simu.cfg.type_fuel_cell in (:EH_31_1_5, :EH_31_2_0, :E_H31_2_25, :EH_31_2_5)
-        println("Warning: EH-Group fuel cell examples may be outdated. Using ZSW-GenStack is recommended.\n")
-    end
-    if simu.cfg.type_auxiliary in (:forced_convective_cathode_with_anodic_recirculation,
-                                   :forced_convective_cathode_with_flow_through_anode)
-        simu.cfg.type_auxiliary = :no_auxiliary
-        println("Warning: auxiliaries were temporarily removed; \"no_auxiliary\" is automatically used.\n")
-    end
-    if contains(string(typeof(simu.fuel_cell)), "ZSWFuelCell") && simu.cfg.type_flow == :co_flow
-        @warn "ZSW fuel cell with standard operating conditions typically requires counter-flow " *
-              "configuration for optimal performance. " *
-              "Consider setting type_flow = :counter_flow in SimulationConfig."
-    end
-    if simu.fuel_cell.operating_conditions.Pa_des < Pext ||
-       simu.fuel_cell.operating_conditions.Pc_des < Pext
-        throw(ArgumentError("The desired pressure is too low. It cannot be lower than the pressure outside the stack."))
+    is_first_run = simu.outputs === nothing
+
+    if is_first_run
+        if simu.cfg.type_fuel_cell in (:EH_31_1_5, :EH_31_2_0, :E_H31_2_25, :EH_31_2_5)
+            println("Warning: EH-Group fuel cell examples may be outdated. Using ZSW-GenStack is recommended.\n")
+        end
+        if contains(string(typeof(simu.fuel_cell)), "ZSWFuelCell") && simu.cfg.type_flow == :co_flow
+            @warn "ZSW fuel cell with standard operating conditions typically requires counter-flow " *
+                  "configuration for optimal performance. " *
+                  "Consider setting type_flow = :counter_flow in SimulationConfig."
+        end
+
+        if simu.cfg.type_auxiliary in (:forced_convective_cathode_with_anodic_recirculation,
+                                       :forced_convective_cathode_with_flow_through_anode)
+            simu.cfg.type_auxiliary = :no_auxiliary
+            if is_first_run
+                println("Warning: auxiliaries were temporarily removed; \"no_auxiliary\" is automatically used.\n")
+            end
+        end
+
+        if simu.fuel_cell.operating_conditions.Pa_des < Pext ||
+           simu.fuel_cell.operating_conditions.Pc_des < Pext
+            throw(ArgumentError("The desired pressure is too low. It cannot be lower than the pressure outside the stack."))
+        end
     end
     return nothing
 end
