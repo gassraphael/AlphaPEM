@@ -14,7 +14,7 @@ This module manages:
 
 module SimulatorBackend
 
-export PLOTS_DIR, initialize_backend, run_step_simulation, run_polarization_simulation, run_eis_simulation, get_detailed_results
+export PLOTS_DIR, initialize_backend, run_step_simulation, run_polarization_simulation, run_eis_simulation, get_detailed_results, get_fuel_cell_defaults_safe
 
 using AlphaPEM
 using AlphaPEM.Config: SimulationConfig, StepParams, PolarizationParams, EISParams, NumericalParams
@@ -203,6 +203,42 @@ end
 
 # ------ FUEL CELL PRESETS ------
 
+# Sanitize structures for JSON responses: replace Float NaN by nothing (maps to JSON null).
+function sanitize_for_json(x)
+    # Base cases
+    if x === nothing
+        return nothing
+    elseif isa(x, AbstractFloat)
+        return isnan(x) ? nothing : x
+    elseif isa(x, Integer) || isa(x, Bool) || isa(x, String)
+        return x
+    elseif isa(x, Pair)
+        return Pair(sanitize_for_json(x.first), sanitize_for_json(x.second))
+    elseif isa(x, AbstractDict)
+        nd = Dict()
+        for (k, v) in x
+            nd[k] = sanitize_for_json(v)
+        end
+        return nd
+    elseif isa(x, AbstractArray)
+        return [sanitize_for_json(v) for v in x]
+    else
+        # Fallback: try to convert to primitive or stringify
+        try
+            return x
+        catch
+            return string(x)
+        end
+    end
+end
+
+# Wrapper that returns a JSON-safe copy of the defaults (no NaN sentinels)
+function get_fuel_cell_defaults_safe(fuel_cell_type::String; voltage_zone::String="before_voltage_drop")::Dict
+    raw = get_fuel_cell_defaults(fuel_cell_type; voltage_zone=voltage_zone)
+    return sanitize_for_json(raw)
+end
+
+
 """
 Metadata for parameters: factor to convert from SI (m, m², etc.) to UI units,
 and the target unit string.
@@ -272,11 +308,13 @@ Get default parameters for a specific fuel cell type.
 
 # Arguments:
 - fuel_cell_type: Symbol or String identifying the fuel cell
+- voltage_zone: ":before_voltage_drop" or ":full". Determines which experimental
+  polarization dataset is used, and therefore the reported `i_max_exp` maximum.
 
 # Returns:
 Dictionary with all default operating conditions and parameters.
 """
-function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
+function get_fuel_cell_defaults(fuel_cell_type::String; voltage_zone::String="before_voltage_drop")::Dict
     # Handle mapping to internal symbols
     mapped_type = if fuel_cell_type == "ZSW_GenStack"
         :ZSW_GenStack
@@ -286,14 +324,16 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
         Symbol(fuel_cell_type)
     end
 
+    v_zone = Symbol(voltage_zone)
+
     # Load parameters using AlphaPEM functions
     try
         # Use the factory to create a fuel cell instance
         # This ensures we get exactly the parameters defined in fuelcell/*.jl
-        fc = AlphaPEM.Fuelcell.create_fuelcell(mapped_type, :before_voltage_drop)
-        
+        fc = AlphaPEM.Fuelcell.create_fuelcell(mapped_type, v_zone)
+
         # Get undetermined parameters list for this fuel cell
-        und_params_list = AlphaPEM.Fuelcell.undetermined_parameters(fc, :before_voltage_drop)
+        und_params_list = AlphaPEM.Fuelcell.undetermined_parameters(fc, v_zone)
         und_param_keys = [p[1] for p in und_params_list]
 
         ap = fc.physical_parameters
@@ -323,6 +363,12 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
             end
         end
 
+        # Extract experimental i_max if available (for ZSW fuel cells)
+        i_max_exp = nothing
+        if isdefined(fc, :pola_exp_data) && !isempty(fc.pola_exp_data.i_exp)
+            i_max_exp = maximum(fc.pola_exp_data.i_exp)
+        end
+
         return Dict(
             :operating_conditions => Dict(
                 :T_fc => oc.T_des - 273.15,
@@ -346,6 +392,7 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
                 :atol => 1e-6,
                 :maxiters => 100000,
                 :max_run_time_s => 300.0,
+                :save_freq => 10.0,
             ),
             :model_config => Dict(
                 :voltage_zone => "before_voltage_drop",
@@ -354,7 +401,16 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
                 :type_purge => "no_purge",
             ),
             :step_parameters => struct_to_dict(StepParams()),
-            :polarization_parameters => struct_to_dict(PolarizationParams()),
+            # `i_max` is intentionally excluded here: its "no value" sentinel is
+            # NaN (see PolarizationParams), which cannot round-trip through JSON.
+            # The frontend must leave that field empty (for automatic selection)
+            # rather than have it populated from defaults, so we never send it.
+            # `i_max_exp` (the experimental maximum, in SI units A/m², or
+            # `nothing` if unavailable) is sent instead, purely as UI guidance.
+            :polarization_parameters => merge(
+                Dict(k => v for (k, v) in struct_to_dict(PolarizationParams()) if k !== :i_max),
+                Dict(:i_max_exp => i_max_exp)
+            ),
             :eis_parameters => struct_to_dict(EISParams()),
             :param_metadata => PARAM_UI_CONVERSION,
         )
@@ -373,28 +429,6 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
             :Phi_a => 0.6,              # Anode humidity
             :Phi_c => 0.6,              # Cathode humidity
             :y_H2_in => 0.95,           # Anode inlet H2 ratio
-        ),
-        :step_parameters => Dict(
-            :delta_t_ini => 1800.0,
-            :delta_t_load => 30.0,
-            :delta_t_break => 120.0,
-            :i_ini => 10000.0,
-            :i_step => 20000.0,
-        ),
-        :polarization_parameters => Dict(
-            :delta_t_ini => 7200.0,
-            :di_step => 500.0,
-            :v_load => 100.0,
-            :delta_t_break => 900.0,
-            :i_max => 25000.0,
-        ),
-        :eis_parameters => Dict(
-            :i_EIS => 10000.0,
-            :ratio => 0.05,
-            :f_power_min => -3.0,
-            :f_power_max => 5.0,
-            :nb_f => 90,
-            :nb_points => 50,
         ),
         :model_config => Dict(
             :voltage_zone => "before_voltage_drop",
@@ -446,6 +480,7 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
             :rtol => 1e-3,              # Solver relative tolerance
             :atol => 1e-6,              # Solver absolute tolerance
             :max_run_time_s => 300.0,   # Maximum simulation runtime in seconds
+            :save_freq => 10.0,         # Output save frequency in Hz
         ),
         :step_parameters => Dict(
             :delta_t_ini => 30.0 * 60.0, # s - Initial stabilization
@@ -459,7 +494,7 @@ function get_fuel_cell_defaults(fuel_cell_type::String)::Dict
             :delta_t_load => 30.0,       # s
             :delta_t_break => 2.0 * 60.0,# s
             :di_step => 0.5e4,           # A/m² - Step size
-            :i_max => 2.0e4,             # A/m² - Max current
+            :i_max_exp => nothing,       # No experimental data in this generic fallback
         ),
         :eis_parameters => Dict(
             :i_static => 1.0e4,          # A/m² - DC current
@@ -579,6 +614,10 @@ function validate_parameters(params::Dict)::Dict
         push!(errors, "Solver atol out of range: $(cp[:atol])")
     end
 
+    if haskey(cp, :save_freq) && cp[:save_freq] <= 0
+        push!(errors, "Save frequency must be positive: $(cp[:save_freq])")
+    end
+
     if !isempty(errors)
         return Dict(:valid => false, :errors => errors)
     end
@@ -599,6 +638,29 @@ Build SimulationConfig from web parameters.
 AlphaPEM.Config.SimulationConfig object
 """
 function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConfig
+
+    # Resolve the base fuel-cell type and voltage zone up front. This gives us
+    # a real `AlphaPEM.Fuelcell` instance (with its experimental polarization
+    # data, in SI units) that both the polarization i_max auto-selection and
+    # the physical-parameter defaults below rely on. Building it once here
+    # (with the *actual* voltage zone requested by the user) avoids duplicating
+    # this logic and keeps the experimental-data lookup consistent with the
+    # simulation that is about to run.
+    fc_type_str = string(get(params, :fuel_cell_type, "ZSW_GenStack"))
+    v_zone_str = string(get(params, :voltage_zone, "before_voltage_drop"))
+
+    # Strip "custom_" prefix if present to get the base model defaults
+    base_type_str = replace(fc_type_str, "custom_" => "")
+    base_type = Symbol(base_type_str)
+    v_zone = Symbol(v_zone_str)
+
+    base_fc = try
+        AlphaPEM.Fuelcell.create_fuelcell(base_type, v_zone)
+    catch
+        # Fallback to ZSW
+        AlphaPEM.Fuelcell.create_fuelcell(:ZSW_GenStack, :before_voltage_drop)
+    end
+    base_ap = base_fc.physical_parameters
 
     # Build current profile parameters based on simulation type
     current_params = if sim_type == :step
@@ -625,12 +687,17 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
         )
     elseif sim_type == :polarization
         pp = get(params, :polarization_parameters, Dict())
-        # Merge with defaults if available
+
+        # Check if user provided i_max BEFORE merging with defaults
+        user_provided_i_max = haskey(pp, :i_max) && pp[:i_max] !== nothing
+
+        # Merge with defaults if available (i_max is handled separately below)
         if haskey(params, :fuel_cell_type)
             try
                 defaults = get_fuel_cell_defaults(string(params[:fuel_cell_type]))
-                for (key, val) in get(defaults, :polarization_parameters, Dict())
-                    if !haskey(pp, key)
+                pola_defaults = get(defaults, :polarization_parameters, Dict())
+                for (key, val) in pola_defaults
+                    if key !== :i_max_exp && key !== :i_max && !haskey(pp, key)
                         pp[key] = val
                     end
                 end
@@ -638,13 +705,25 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
                 @warn "Could not merge polarization parameter defaults: $e"
             end
         end
-        # Convert null (from empty HTML input) to NaN for automatic i_max selection
-        i_max_val = get(pp, :i_max, NaN)
-        if i_max_val === nothing || isnan(convert(Float64, something(i_max_val, NaN)))
-            i_max_val = NaN
+
+        # Determine i_max value (in SI units, A/m²):
+        # 1. If the user explicitly provided a value, use it.
+        # 2. Else, if an experimental preset is selected and operating conditions
+        #    were not modified (use_experimental_imax flag from the frontend),
+        #    use the maximum experimental current density for this fuel cell.
+        # 3. Else, default to 2.0 A/cm².
+        i_max_val = if user_provided_i_max
+            convert(Float64, pp[:i_max])
         else
-            i_max_val = convert(Float64, i_max_val)
+            use_exp_imax = get(params, :use_experimental_imax, false)
+            exp_i = base_fc.pola_exp_data.i_exp  # already in SI units (A/m²)
+            if use_exp_imax && !isempty(exp_i)
+                maximum(exp_i)
+            else
+                2.0e4  # Default: 2.0 A/cm² (in SI units)
+            end
         end
+
         PolarizationParams(
             delta_t_ini = pp[:delta_t_ini],
             di_step = pp[:di_step],
@@ -689,37 +768,20 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
         atol = cp[:atol],
         maxiters = get(cp, :maxiters, 100000), # Increased default to match NumericalParams
         max_run_time_s = get(cp, :max_run_time_s, 300.0),
+        save_freq = get(cp, :save_freq, 10.0),
     )
 
     # Build custom physical parameters
     ap_data = get(params, :accessible_parameters, Dict())
     up_data = get(params, :undetermined_parameters, Dict())
-    
-    # 1. Determine base fuel cell type for defaults
-    fc_type_str = string(get(params, :fuel_cell_type, "ZSW_GenStack"))
-    v_zone_str = string(get(params, :voltage_zone, "before_voltage_drop"))
-    
-    # Strip "custom_" prefix if present to get the base model defaults
-    base_type_str = replace(fc_type_str, "custom_" => "")
-    base_type = Symbol(base_type_str)
-    v_zone = Symbol(v_zone_str)
 
-    # 2. Get base physical parameters for this fuel cell type
-    base_fc = try
-        AlphaPEM.Fuelcell.create_fuelcell(base_type, v_zone)
-    catch
-        # Fallback to ZSW
-        AlphaPEM.Fuelcell.create_fuelcell(:ZSW_GenStack, :before_voltage_drop)
-    end
-    base_ap = base_fc.physical_parameters
-    
-    # 3. Start with base parameters as a Dict
+    # Start with base parameters as a Dict
     filtered_phys_dict = Dict{Symbol, Any}()
     for field in fieldnames(PhysicalParams)
         filtered_phys_dict[field] = getfield(base_ap, field)
     end
-    
-    # 4. Override with web data (which is already in SI units)
+
+    # Override with web data (which is already in SI units)
     for (k, v) in ap_data
         key = Symbol(k)
         if haskey(filtered_phys_dict, key)

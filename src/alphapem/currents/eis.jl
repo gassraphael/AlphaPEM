@@ -165,22 +165,23 @@ end
 
 
 """
-    saveat_times(c::EISCurrent, tspan) -> Vector{Float64}
+    saveat_times(c::EISCurrent, tspan, save_freq::Float64) -> Vector{Float64}
 
 Sampling strategy for EIS:
-- Initial ramp and pre-frequency stabilisation: 1 pt/s.
+- Initial ramp and pre-frequency stabilisation: sampling at save_freq Hz.
 - Per-frequency stabilisation window: `nb_points` per period.
 - Per-frequency measurement window: `nb_points` per period (same density as
   `solver_dtmax`), required for accurate Fourier reconstruction.
 """
-function saveat_times(c::EISCurrent, tspan::Tuple{<:Real,<:Real})::Vector{Float64}
+function saveat_times(c::EISCurrent, tspan::Tuple{<:Real,<:Real}, save_freq::Float64)::Vector{Float64}
     t0_span = Float64(tspan[1])
     tf_span = Float64(tspan[2])
     times = Float64[]
+    dt_default = 1.0 / save_freq
 
     # Initial ramp + first stabilisation phase (before first frequency segment).
     t_ramp_end = min(c.t_new_start[1], tf_span)
-    append!(times, t0_span : 1.0 : t_ramp_end)
+    append!(times, t0_span : dt_default : t_ramp_end)
 
     for i in eachindex(c.f)
         t_seg_start  = c.t_new_start[i]

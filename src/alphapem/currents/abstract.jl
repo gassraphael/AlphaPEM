@@ -78,7 +78,7 @@ solver_dtmax(::AbstractCurrent, ::Real) = Inf
 
 
 """
-    saveat_times(c::AbstractCurrent, tspan) -> Vector{Float64}
+    saveat_times(c::AbstractCurrent, tspan, save_freq::Float64) -> Vector{Float64}
 
 Return the output-save instants for one IDA solve covering `tspan = (t0, tf)`.
 
@@ -97,20 +97,26 @@ regardless of how many internal IDA steps were taken.  This has two benefits:
    triggered by allocations inside `residual!`.  Limiting `sol.u` to a few thousand
    points eliminates this feedback loop.
 
-Default implementation: one point per simulated second (1 Hz).
+Default implementation: sampling at the rate specified by `save_freq` (Hz).
 This is sufficient for smooth profiles (step, polarization, calibration) and gives
 a predictable, bounded output size independent of stiffness or `nb_gc`.
 
 Concrete subtypes should override this method when the dynamics require a different
 sampling rate — for example `EISCurrent`, which needs dense sampling during
 measurement windows to accurately reconstruct the frequency response.
+
+# Arguments
+- `c::AbstractCurrent`: Current density model
+- `tspan::Tuple{<:Real, <:Real}`: Time interval (t0, tf)
+- `save_freq::Float64`: Output save frequency in Hz (points per second)
 """
-function saveat_times(::AbstractCurrent, tspan::Tuple{<:Real,<:Real})::Vector{Float64}
+function saveat_times(::AbstractCurrent, tspan::Tuple{<:Real,<:Real}, save_freq::Float64)::Vector{Float64}
     t0 = Float64(tspan[1])
     tf = Float64(tspan[2])
+    dt = 1.0 / save_freq
     # Always include at least the boundary points so recovery! has t0 and tf.
     tf <= t0 && return Float64[t0]
-    return collect(t0 : 1.0 : tf)
+    return collect(t0 : dt : tf)
 end
 
 

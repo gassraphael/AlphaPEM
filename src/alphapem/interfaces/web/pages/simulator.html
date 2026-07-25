@@ -961,6 +961,11 @@
                             <input type="number" id="maxiters" value="1e5" min="1" step="1000">
                             <p class="help-text">Maximum number of solver iterations</p>
                         </div>
+                        <div class="form-group">
+                            <label for="save_freq">Save Frequency (Hz)</label>
+                            <input type="number" id="save_freq" value="10.0" min="0.1" step="0.1">
+                            <p class="help-text">Output save frequency in Hz (points per second)</p>
+                        </div>
                     </div>
                     <div class="nav-buttons">
                         <button class="btn-nav" onclick="switchTab(2)">← Previous</button>
@@ -974,8 +979,8 @@
                     <div class="form-section">
                         <label class="section-title">Voltage Zone:</label>
                         <div class="input-row">
-                            <label><input type="radio" name="voltage_zone" value="before_voltage_drop" checked> Before Voltage Drop</label>
-                            <label><input type="radio" name="voltage_zone" value="full"> Full</label>
+                            <label><input type="radio" name="voltage_zone" value="before_voltage_drop" checked onchange="updateImaxForVoltageZone()"> Before Voltage Drop</label>
+                            <label><input type="radio" name="voltage_zone" value="full" onchange="updateImaxForVoltageZone()"> Full</label>
                         </div>
                         <p class="help-text">'Before Voltage Drop' stops the simulation before mass transport losses; 'Full' simulates the entire operating range.</p>
                     </div>
@@ -1001,8 +1006,12 @@
                     <div class="form-section">
                         <label class="section-title">Flow Type:</label>
                         <div class="input-row">
-                            <label><input type="radio" name="type_flow" value="counter_flow" disabled> Counter Flow</label>
+                            <label><input type="radio" name="type_flow" value="counter_flow"> Counter Flow</label>
                             <label><input type="radio" name="type_flow" value="co_flow" checked> Co-flow</label>
+                            <!-- Inline warning placed at end of the row to avoid creating extra vertical space -->
+                            <div id="model-config-warning" class="alert alert-warning" style="display: none; margin-left: auto; align-self: center; white-space: nowrap; padding: 6px 10px; font-size: 13px;">
+                                ZSW fuel cell with standard operating conditions typically requires counter-flow configuration for optimal performance.
+                            </div>
                         </div>
                         <p class="help-text">Defines if reactants flow in opposite directions (Counter Flow) or in the same direction (Co-flow).</p>
                     </div>
@@ -1120,7 +1129,7 @@
                                 <div class="form-group">
                                     <label for="pola_i_max">Max Current (A/cm²)</label>
                                     <input type="number" id="pola_i_max" value="" step="0.1" placeholder="Leave empty for automatic">
-                                    <p class="help-text">Leave empty to use experimental data (if available) or default to 2.5 A/cm².</p>
+                                    <p class="help-text">Uses experimental data maximum value if preset operating conditions is selected, or defaults to 2.0 A/cm².</p>
                                 </div>
                             </div>
                         </div>
@@ -1248,6 +1257,7 @@
 
         let currentSimulationType = null;  // Track selected simulation type
         let lastSelectedPresetValues = null; // Store preset values to detect manual changes
+        let i_max_exp = null; // Experimental max current from fuel cell defaults, in SI units (A/m²)
         let defaultsLoaded = false; // Flag to track if fuel cell defaults have been loaded
         let simulationTimerInterval = null; // Interval for the simulation timer
         let physicalParamsVisible = false; // Track visibility of physical parameters
@@ -1567,7 +1577,11 @@
                             for (const [key, value] of Object.entries(params)) {
                                 const m = meta[key];
                                 const id = prefix ? prefix + '_' + key : key;
-                                if (m) {
+                                if (value === null || value === undefined) {
+                                    // null/undefined (e.g. NaN sanitized to null) means "no value" -
+                                    // leave the field empty rather than computing null * factor = 0.
+                                    setVal(id, '');
+                                } else if (m) {
                                     const prec = m.precision !== undefined ? m.precision : (m.factor >= 1e6 ? 3 : 2);
                                     setVal(id, (value * m.factor).toFixed(prec));
                                 } else {
@@ -1612,11 +1626,16 @@
                         setVal('rtol', formatExp(cp.rtol));
                         setVal('atol', formatExp(cp.atol));
                         setVal('maxiters', formatExp(cp.maxiters));
+                        setVal('save_freq', cp.save_freq);
 
                         // Populate Simulation Parameters
                         populateParams(sp, 'step');
                         populateParams(pp, 'pola');
-                        
+
+                        // Update the automatic i_max placeholder to reflect what will actually be used
+                        i_max_exp = (pp.i_max_exp !== undefined && pp.i_max_exp !== null) ? pp.i_max_exp : null;
+                        updateImaxPlaceholder();
+
                         // Special handling for EIS which has some renamed fields in UI
                         if (ep.i_EIS !== undefined) setVal('eis_i_static', (ep.i_EIS * meta.i_EIS.factor).toFixed(meta.i_EIS.precision));
                         if (ep.ratio !== undefined) setVal('eis_ratio', (ep.ratio * 100).toFixed(1));
@@ -1703,14 +1722,33 @@
 
         function applyOperatingConditionsPreset() {
             const preset = document.getElementById('operating_conditions_preset').value;
-            if (preset === 'none') {
+            const fuelCellTypeEl = document.querySelector('input[name="fuel_cell_type"]:checked');
+            const fuelCellType = fuelCellTypeEl ? fuelCellTypeEl.value : '';
+            const voltageZoneEl = document.querySelector('input[name="voltage_zone"]:checked');
+            const voltageZone = voltageZoneEl ? voltageZoneEl.value : 'before_voltage_drop';
+
+            // 'none' means "keep the base fuel cell's nominal conditions" - re-fetch
+            // the base type (rather than a specific preset) so i_max_exp is reset
+            // to the nominal experimental maximum instead of a stale preset value.
+            const queryType = (preset === 'none') ? fuelCellType : preset;
+            if (!queryType) {
                 checkOCModification();
                 return;
             }
 
-            fetch(`/api/fuel_cell_defaults/${preset}`)
+            fetch(`/api/fuel_cell_defaults/${queryType}?voltage_zone=${voltageZone}`)
                 .then(r => r.json())
                 .then(data => {
+                    const pp = (data && data.polarization_parameters) || {};
+                    i_max_exp = (pp.i_max_exp !== undefined && pp.i_max_exp !== null) ? pp.i_max_exp : null;
+
+                    if (preset === 'none') {
+                        // Just refresh i_max_exp/placeholder; operating condition
+                        // fields already hold the base fuel cell's nominal values.
+                        checkOCModification();
+                        return;
+                    }
+
                     if (data && data.operating_conditions) {
                         const oc = data.operating_conditions;
                         document.getElementById('T_fc').value = oc.T_fc ?? '';
@@ -1721,10 +1759,13 @@
                         document.getElementById('Phi_a').value = oc.Phi_a ?? '';
                         document.getElementById('Phi_c').value = oc.Phi_c ?? '';
                         document.getElementById('y_H2_in').value = oc.y_H2_in ?? '';
-                        
+
                         lastSelectedPresetValues = { ...oc };
                         checkOCModification();
                     }
+                })
+                .catch(e => {
+                    console.error('Failed to apply operating conditions preset:', e);
                 });
         }
 
@@ -1758,6 +1799,71 @@
             }
 
             warning.style.display = modified ? 'block' : 'none';
+            updateImaxPlaceholder();
+        }
+
+        // Update the "Max Current" placeholder to reflect the value that will
+        // automatically be used when the field is left empty: the experimental
+        // maximum current if a preset is selected and operating conditions are
+        // unmodified, otherwise the default of 2.0 A/cm².
+        function updateImaxPlaceholder() {
+            const imaxEl = document.getElementById('pola_i_max');
+            if (!imaxEl) return;
+
+            const warning = document.getElementById('modification-warning');
+            const isModified = warning && warning.style.display === 'block';
+            const configTypeEl = document.querySelector('input[name="config_type"]:checked');
+            const configType = configTypeEl ? configTypeEl.value : 'pre_selected';
+
+            // Mirrors the useExperimentalImax logic in collectFormData(): a
+            // preset explicitly selected, or "none" (nominal conditions kept
+            // as-is), both count as "unmodified" as long as configType isn't
+            // custom and the OC fields haven't been hand-edited.
+            const usesExperimental = configType !== 'custom' && !isModified;
+
+            if (usesExperimental && i_max_exp !== null && !isNaN(i_max_exp)) {
+                // i_max_exp is stored in SI units (A/m²) as sent by the backend; convert to A/cm² for display.
+                const i_max_exp_cm2 = i_max_exp * 1e-4;
+                imaxEl.placeholder = `Auto: ${i_max_exp_cm2.toFixed(2)} A/cm² (experimental)`;
+            } else {
+                imaxEl.placeholder = 'Auto: 2.0 A/cm² (default)';
+            }
+        }
+
+        // Re-fetch the experimental i_max for the currently selected fuel cell
+        // using the voltage zone the user just picked (Model Configuration tab),
+        // since the experimental dataset - and therefore its maximum current -
+        // differs between "before_voltage_drop" and "full". Only i_max_exp is
+        // refreshed here; no other field is touched.
+        function updateImaxForVoltageZone() {
+            const fuelCellTypeEl = document.querySelector('input[name="fuel_cell_type"]:checked');
+            const fuelCellType = fuelCellTypeEl ? fuelCellTypeEl.value : '';
+            const voltageZoneEl = document.querySelector('input[name="voltage_zone"]:checked');
+            const voltageZone = voltageZoneEl ? voltageZoneEl.value : 'before_voltage_drop';
+            const configType = document.querySelector('input[name="config_type"]:checked').value;
+
+            if (configType === 'custom' || !fuelCellType) {
+                i_max_exp = null;
+                updateImaxPlaceholder();
+                return;
+            }
+
+            // Use the currently selected experimental preset (if any) so the
+            // fetched i_max_exp matches what is actually shown/used, not just
+            // the base fuel cell type.
+            const presetValue = document.getElementById('operating_conditions_preset').value;
+            const queryType = (presetValue && presetValue !== 'none') ? presetValue : fuelCellType;
+
+            fetch(`/api/fuel_cell_defaults/${queryType}?voltage_zone=${voltageZone}`)
+                .then(r => r.json())
+                .then(data => {
+                    const pp = (data && data.polarization_parameters) || {};
+                    i_max_exp = (pp.i_max_exp !== undefined && pp.i_max_exp !== null) ? pp.i_max_exp : null;
+                    updateImaxPlaceholder();
+                })
+                .catch(e => {
+                    console.error('Failed to refresh experimental i_max for voltage zone:', e);
+                });
         }
 
 
@@ -1768,24 +1874,35 @@
              const fuelCellType = fuelCellTypeEl ? fuelCellTypeEl.value : '';
              const presetValue = document.getElementById('operating_conditions_preset').value;
              const isModified = document.getElementById('modification-warning').style.display === 'block';
-            
+
              // If modified, use the base type (ZSW_GenStack or EH31_2022) to avoid showing exp data.
              // If NOT modified and a preset is selected, use that preset symbol.
              let finalFuelCellType = fuelCellType;
              const configType = document.querySelector('input[name="config_type"]:checked').value;
-             
+
+             // Determine if OC is unmodified (for i_max logic): this covers both
+             // an explicit preset selection AND the default "none" case, since
+             // "none" simply means the base fuel cell's nominal conditions are
+             // kept as-is - which should also auto-select the experimental i_max.
+             let useExperimentalImax = false;
              if (configType === 'custom') {
                  finalFuelCellType = 'default';
              } else if (isModified) {
                  finalFuelCellType = 'custom_' + fuelCellType;
              } else if (presetValue && presetValue !== 'none') {
                  finalFuelCellType = presetValue;
+                 useExperimentalImax = true;
+             } else {
+                 // presetValue === 'none' and OC unmodified -> nominal conditions
+                 useExperimentalImax = true;
              }
 
              const getVal = (id, baseParamName) => {
                  const el = document.getElementById(id);
                  if (!el) return 0;
                  const val = parseFloat(el.value);
+                 // If the value is empty or NaN, return null (for automatic i_max)
+                 if (isNaN(val)) return null;
                  const meta = globalParamMetadata[baseParamName || id];
                  return meta ? val / meta.factor : val;
              };
@@ -1793,6 +1910,7 @@
              return {
                  config_type: configType,
                  fuel_cell_type: finalFuelCellType,
+                 use_experimental_imax: useExperimentalImax,
                  voltage_zone: document.querySelector('input[name="voltage_zone"]:checked').value,
                  type_auxiliary: document.querySelector('input[name="type_auxiliary"]:checked').value,
                  type_flow: document.querySelector('input[name="type_flow"]:checked').value,
@@ -1854,6 +1972,7 @@
                     rtol: parseFloat(document.getElementById('rtol').value),
                     atol: parseFloat(document.getElementById('atol').value),
                     maxiters: Math.round(parseFloat(document.getElementById('maxiters').value)),
+                    save_freq: parseFloat(document.getElementById('save_freq').value),
                 },
                 step_parameters: {
                     delta_t_ini: getVal('step_delta_t_ini', 'delta_t_ini'),
@@ -1900,7 +2019,9 @@
             if (params.step_parameters.i_ini >= params.step_parameters.i_step)
                 errors.push('Step: Initial current must be < Step current');
 
-            if (params.polarization_parameters.di_step > params.polarization_parameters.i_max)
+            // Only validate i_max if it's not null (null means automatic selection)
+            if (params.polarization_parameters.i_max !== null && 
+                params.polarization_parameters.di_step > params.polarization_parameters.i_max)
                 errors.push('Pola: Current step must be < Max current');
 
             return errors;
@@ -1961,24 +2082,34 @@
         }
 
         function runSelectedSimulation() {
+            console.log('runSelectedSimulation called', { currentSimulationType, defaultsLoaded });
+            
             if (!currentSimulationType) {
+                console.log('No simulation type selected');
                 showError('Please select a simulation type first');
                 return;
             }
 
             if (!defaultsLoaded) {
+                console.log('Defaults not loaded yet');
                 showError('Fuel cell parameters are still loading. Please wait a moment and try again.');
                 return;
             }
 
+            console.log('Calling runSimulation with type:', currentSimulationType);
             runSimulation(currentSimulationType);
         }
 
         // ===== SIMULATION EXECUTION =====
 
         function runSimulation(simType) {
+            console.log('runSimulation called with simType:', simType);
+            
             const params = collectFormData();
+            console.log('Collected params:', params);
+            
             const errors = validateParameters(params);
+            console.log('Validation errors:', errors);
 
             if (errors.length > 0) {
                 showError('Validation Errors:\n' + errors.map(e => '  • ' + e).join('\n'));
@@ -2147,8 +2278,34 @@
                 }
             });
 
+            // Function to update model config warning visibility
+            function updateModelConfigWarning() {
+                const mcWarn = document.getElementById('model-config-warning');
+                if (!mcWarn) return;
+                const fuelCellTypeEl = document.querySelector('input[name="fuel_cell_type"]:checked');
+                const fuelCellType = fuelCellTypeEl ? fuelCellTypeEl.value : '';
+                const flowVal = document.querySelector('input[name="type_flow"]:checked')?.value || '';
+                // Show warning only if ZSW fuel cell AND co-flow is selected
+                mcWarn.style.display = (fuelCellType && fuelCellType.startsWith('ZSW') && flowVal === 'co_flow') ? 'inline-block' : 'none';
+            }
+
             // Initial model type update
             if (typeof updateModelType === 'function') updateModelType();
+
+            // Show model config warning when the user modifies any model configuration radios
+            ['voltage_zone','type_auxiliary','type_flow','type_purge'].forEach(name => {
+                document.querySelectorAll(`input[name="${name}"]`).forEach(el => {
+                    el.addEventListener('change', updateModelConfigWarning);
+                });
+            });
+
+            // Also hide/show the warning when the fuel cell selection changes
+            document.querySelectorAll('input[name="fuel_cell_type"]').forEach(el => {
+                el.addEventListener('change', updateModelConfigWarning);
+            });
+
+            // Don't show warning on initial page load, only after user interaction
+            // Warning will be shown when user changes flow type via event listeners above
         });
 
         function loadParamsFromResult(resultId) {
@@ -2202,7 +2359,12 @@
                 for (const [key, value] of Object.entries(p)) {
                     const m = globalParamMetadata[key];
                     const id = prefix ? prefix + '_' + key : key;
-                    if (m) {
+                    if (value === null || value === undefined) {
+                        // null/undefined (e.g. i_max left empty for automatic
+                        // selection) means "no value" - leave the field empty
+                        // rather than computing null * factor = 0.
+                        setVal(id, '');
+                    } else if (m) {
                         const prec = m.precision !== undefined ? m.precision : (m.factor >= 1e6 ? 3 : 2);
                         setVal(id, (value * m.factor).toFixed(prec));
                     } else {
@@ -2303,10 +2465,19 @@
             }
 
             defaultsLoaded = true;
-            
+
             // Refresh UI components
             if (typeof updateModelType === 'function') updateModelType();
             if (typeof checkOCModification === 'function') checkOCModification();
+
+            // Refresh the experimental i_max hint for the restored fuel cell/
+            // preset/voltage zone combination. updateFuelCellDefaults() was
+            // called earlier with skipPopulate=true (to avoid overwriting the
+            // fields we just restored above), which never touches i_max_exp -
+            // it would otherwise stay at its initial null value, making the
+            // "Max Current" field silently fall back to the generic 2.0 A/cm²
+            // default instead of showing this fuel cell's experimental one.
+            if (typeof updateImaxForVoltageZone === 'function') updateImaxForVoltageZone();
 
             // Navigate directly to the Run tab so the user can launch immediately
             updateTabStatus(0, true);
