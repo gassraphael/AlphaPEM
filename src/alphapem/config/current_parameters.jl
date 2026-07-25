@@ -53,7 +53,7 @@ end
     EISParams
 """
 Base.@kwdef struct EISParams <: AbstractCurrentParams
-    i_EIS::Float64 = 1.0e4  # (A/m²). Parameters for the EIS curve.
+    i_EIS::Float64 = 1.5e4  # (A/m²). Parameters for the EIS curve.
     ratio::Float64 = 5.0 / 100.0  # (.). Parameters for the EIS curve.
     f_power_min::Float64 = -3.0  # (.). Power of the minimum frequency for the EIS current density function.
     f_power_max::Float64 = 5.0 # (.). Power of the maximum frequency for the EIS current density function.

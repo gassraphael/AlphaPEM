@@ -427,3 +427,30 @@ function _extract_last_internal_state(simu::AlphaPEM)::Tuple{Vector{Float64}, Un
     # segment recomputes consistent initial derivatives from the new state.
     return u_phys, simu.last_solver_du
 end
+
+
+"""
+Append one segment's `SimulationOutputs` onto an accumulator, in place.
+
+Used by segmented `:postrun` runs (e.g. EIS) where each frequency is solved
+independently to keep `sol.u`/`sol.t` small and give every segment a fresh
+`maxiters` budget, then the segments' outputs are concatenated for a single
+final display.
+"""
+function _append_simulation_segment!(accumulated::SimulationOutputs{A, B, C},
+                                     segment::SimulationOutputs{A, B, C}) where {A, B, C}
+    append!(accumulated.solver.t, segment.solver.t)
+    append!(accumulated.solver.states, segment.solver.states)
+
+    append!(accumulated.derived.Ucell, segment.derived.Ucell)
+    for k in eachindex(accumulated.derived.i_fc)
+        append!(accumulated.derived.i_fc[k], segment.derived.i_fc[k])
+        append!(accumulated.derived.C_O2_Pt[k], segment.derived.C_O2_Pt[k])
+        append!(accumulated.derived.v_a[k], segment.derived.v_a[k])
+        append!(accumulated.derived.v_c[k], segment.derived.v_c[k])
+    end
+    append!(accumulated.derived.Pa_in, segment.derived.Pa_in)
+    append!(accumulated.derived.Pc_in, segment.derived.Pc_in)
+
+    return accumulated
+end

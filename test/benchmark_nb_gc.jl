@@ -53,7 +53,6 @@ function make_step_cfg(nb_gc::Int)
         type_fuel_cell = :ZSW_GenStack,
         type_current = step,
         numerical_parameters = NumericalParams(nb_gc = nb_gc),
-        voltage_zone = :full,
         type_auxiliary = :no_auxiliary,
         type_purge = :no_purge,
         type_display = :no_display,
@@ -95,11 +94,10 @@ function make_eis_cfg(nb_gc::Int)
         type_fuel_cell = :ZSW_GenStack,
         type_current = current_params,
         numerical_parameters = NumericalParams(nb_gc = nb_gc),
-        voltage_zone = :full,
         type_auxiliary = :no_auxiliary,
         type_purge = :no_purge,
         type_display = :no_display,
-        display_timing = :live
+        display_timing = :postrun
     )
 end
 
