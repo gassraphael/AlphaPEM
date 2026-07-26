@@ -194,10 +194,31 @@ DesiredInletFlows
     # Extraction of the parameters
     oc = fc.operating_conditions
     pp = fc.physical_parameters
+    np = cfg.numerical_parameters
     T_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in = oc.T_des, oc.Sa, oc.Sc, oc.Phi_a_des, oc.Phi_c_des, oc.y_H2_in
-    Aact = pp.Aact
-    nb_cell = pp.nb_cell
+    Hacl, Hmem, Hccl, Aact = pp.Hacl, pp.Hmem, pp.Hccl, pp.Aact
+    kappa_co = pp.kappa_co
+    nb_gc, nb_cell = np.nb_gc, pp.nb_cell
     i_min_stoich = oc.i_min_stoich * 1e4  # Conversion from A.cm-2 to A.m-2, to match i_fc_cell's unit.
+
+    # Physical quantities inside the stack
+    #       The crossover current density i_n
+    max_i_n = -Inf # Initialize the maximum crossover current density
+    @inbounds for i in 1:nb_gc
+        s_i = solver_variables[i]
+        T_acl_i = s_i.acl.T
+        T_mem_i = s_i.mem.T
+        T_ccl_i = s_i.ccl.T
+        lambda_mem_i = s_i.mem.lambda
+        C_H2_acl_i = s_i.acl.C_H2
+        C_O2_ccl_i = s_i.ccl.C_O2
+
+        T_acl_mem_ccl = (T_acl_i * Hacl + T_mem_i * Hmem + T_ccl_i * Hccl) / (Hacl + Hmem + Hccl)
+        i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl_i * k_H2(lambda_mem_i, T_mem_i, kappa_co)
+        i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl_i * k_O2(lambda_mem_i, T_mem_i, kappa_co)
+        i_n_i = i_H2 + i_O2
+        max_i_n = max(max_i_n, i_n_i)
+    end
 
     if cfg.type_auxiliary == :forced_convective_cathode_with_anodic_recirculation ||
        cfg.type_auxiliary == :forced_convective_cathode_with_flow_through_anode
@@ -232,7 +253,10 @@ DesiredInletFlows
         # :forced_convective_cathode_with_anodic_recirculation has no N2 at anode (pure H2 recirculation).
         throw(ErrorException("desired_flows is not yet implemented in Julia for the forced-convective auxiliary branches because the translated Python source still depends on unavailable variables such as Pasm, Pcsm, and Wcp."))
     else  # cfg.type_auxiliary == :no_auxiliary
-        i_eff = effective_stoich_current(i_fc_cell, i_min_stoich)
+        # max_i_n is kept on top of the i_min_stoich floor although it does not affect the results:
+        # without it, the DAE Jacobian's automatic sparsity detection misses couplings between the
+        # inlet-flow residuals and the CL/membrane state, causing severe solver slowdowns.
+        i_eff = effective_stoich_current(i_fc_cell, i_min_stoich) + max_i_n
 
         # At the anode side
         W_H2_des        = 1 / y_H2_in * Sa * i_eff / (2 * F) * (nb_cell * Aact)
