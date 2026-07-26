@@ -167,21 +167,16 @@ end
 """
     saveat_times(c::EISCurrent, tspan, save_freq::Float64) -> Vector{Float64}
 
-Sampling strategy for EIS:
-- Initial ramp and pre-frequency stabilisation: sampling at save_freq Hz.
-- Per-frequency stabilisation window: `nb_points` per period.
-- Per-frequency measurement window: `nb_points` per period (same density as
-  `solver_dtmax`), required for accurate Fourier reconstruction.
+Mandatory dense sampling for each frequency segment's stabilisation and
+measurement windows, at `nb_points` per period (matching `solver_dtmax`),
+required for accurate Fourier reconstruction. The initial ramp and any other
+calm period are left to the generic rate-limited saving driven by `save_freq`
+(see `saveat_times(::AbstractCurrent, ...)`), since they need no exact grid.
 """
-function saveat_times(c::EISCurrent, tspan::Tuple{<:Real,<:Real}, save_freq::Float64)::Vector{Float64}
+function saveat_times(c::EISCurrent, tspan::Tuple{<:Real,<:Real}, ::Float64)::Vector{Float64}
     t0_span = Float64(tspan[1])
     tf_span = Float64(tspan[2])
     times = Float64[]
-    dt_default = 1.0 / save_freq
-
-    # Initial ramp + first stabilisation phase (before first frequency segment).
-    t_ramp_end = min(c.t_new_start[1], tf_span)
-    append!(times, t0_span : dt_default : t_ramp_end)
 
     for i in eachindex(c.f)
         t_seg_start  = c.t_new_start[i]
@@ -191,24 +186,17 @@ function saveat_times(c::EISCurrent, tspan::Tuple{<:Real,<:Real}, save_freq::Flo
         # Skip segments outside tspan entirely.
         t_seg_start > tf_span && break
 
-        # Stabilisation window: 10 pt per period.
-        t_stab_end = min(t_meas_start, tf_span)
-        if t_seg_start < t_stab_end
-            dt_stab = 1.0 / (c.nb_points * c.f[i])
-            append!(times, t_seg_start : dt_stab : t_stab_end)
-        end
+        dt = 1.0 / (c.nb_points * c.f[i]) # nb_points per period, for both windows.
 
-        # Measurement window: nb_points per period = nb_points × f[i] pts/s.
+        # Stabilisation window.
+        t_stab_end = min(t_meas_start, tf_span)
+        t_seg_start < t_stab_end && append!(times, t_seg_start : dt : t_stab_end)
+
+        # Measurement window.
         t_m_start = min(t_meas_start, tf_span)
         t_m_end   = min(t_seg_end,    tf_span)
-        if t_m_start < t_m_end
-            dt = 1.0 / (c.nb_points * c.f[i])
-            append!(times, t_m_start : dt : t_m_end)
-        end
+        t_m_start < t_m_end && append!(times, t_m_start : dt : t_m_end)
     end
-
-    # Always include the final boundary so recovery! has tf.
-    isempty(times) || push!(times, tf_span)
 
     return sort!(unique!(filter!(t -> t0_span ≤ t ≤ tf_span, times)))
 end
