@@ -84,7 +84,7 @@ function physical_parameters(fc::EH31FuelCell)::PhysicalParams
         # Voltage polarization
         Re = 1e-6,                           # Electron conduction resistance of the circuit in Ω·m²
         i0_c_ref = 14.43,                    # Reference exchange current density at the cathode in A·m⁻²
-        kappa_co = 30.42,                    # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
+        kappa_co = 1,                        # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
         kappa_c = 0.4152,                    # Overpotential correction exponent
         C_scl = 2e7                          # Volumetric space-charge layer capacitance in F·m⁻³
     )
@@ -101,6 +101,7 @@ function operating_conditions(fc::EH31FuelCell, type_fuel_cell::Symbol)::Operati
         Phi_a_des               = 0.4            # It is the desired relative humidity at the anode.
         Phi_c_des               = 0.6            # It is the desired relative humidity at the cathode.
         y_H2_in                 = 1.0            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        i_min_stoich            = 0.5            #  It is the minimum current density used to compute the desired flows (A.cm-2)
     elseif type_fuel_cell == :EH_31_2_0
         T_des                   = 74.0 + 273.15  # K.  It is the desired fuel cell temperature.
         Pa_des                  = 2.0e5          # Pa. It is the desired pressures of the fuel gas at the anode.
@@ -110,6 +111,7 @@ function operating_conditions(fc::EH31FuelCell, type_fuel_cell::Symbol)::Operati
         Phi_a_des               = 0.4            # It is the desired relative humidity at the anode.
         Phi_c_des               = 0.6            # It is the desired relative humidity at the cathode.
         y_H2_in                 = 1.0            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        i_min_stoich            = 0.5            #  It is the minimum current density used to compute the desired flows (A.cm-2)
     elseif type_fuel_cell == :EH_31_2_25
         T_des                   = 74.0 + 273.15  # K.  It is the desired fuel cell temperature.
         Pa_des                  = 2.25e5          # Pa. It is the desired pressures of the fuel gas at the anode.
@@ -119,6 +121,7 @@ function operating_conditions(fc::EH31FuelCell, type_fuel_cell::Symbol)::Operati
         Phi_a_des               = 0.4            # It is the desired relative humidity at the anode.
         Phi_c_des               = 0.6            # It is the desired relative humidity at the cathode.
         y_H2_in                 = 1.0            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        i_min_stoich            = 0.5            #  It is the minimum current density used to compute the desired flows (A.cm-2)
     elseif type_fuel_cell == :EH_31_2_5
         T_des                   = 74.0 + 273.15  # K.  It is the desired fuel cell temperature.
         Pa_des                  = 2.5e5          # Pa. It is the desired pressures of the fuel gas at the anode.
@@ -128,6 +131,7 @@ function operating_conditions(fc::EH31FuelCell, type_fuel_cell::Symbol)::Operati
         Phi_a_des               = 0.4            # It is the desired relative humidity at the anode.
         Phi_c_des               = 0.6            # It is the desired relative humidity at the cathode.
         y_H2_in                 = 1.0            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        i_min_stoich            = 0.5            #  It is the minimum current density used to compute the desired flows (A.cm-2)
     else
         # Default nominal conditions for EH-31 (2022)
         T_des                   = 74.0 + 273.15
@@ -138,9 +142,10 @@ function operating_conditions(fc::EH31FuelCell, type_fuel_cell::Symbol)::Operati
         Phi_a_des               = 0.4
         Phi_c_des               = 0.6
         y_H2_in                 = 1.0
+        i_min_stoich            = 0.5            #  It is the minimum current density used to compute the desired flows (A.cm-2)
     end
 
-    return OperatingConditions(T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in)
+    return OperatingConditions(T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_min_stoich)
 end
 
 

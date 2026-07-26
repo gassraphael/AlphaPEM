@@ -133,6 +133,7 @@ Base.@kwdef struct OperatingConditions <: AbstractFuelCellParams
     Phi_a_des::Float64 = 0.4        # Desired anode relative humidity
     Phi_c_des::Float64 = 0.6        # Desired cathode relative humidity
     y_H2_in::Float64 = 1.0          # Molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet
+    i_min_stoich::Float64 = 0.5     # Minimum current density used to compute the desired flows (A.cm-2)
 end
 
 
