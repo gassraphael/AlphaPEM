@@ -136,43 +136,75 @@ function _build_dae_jacobian_prototype(residual!,
     rows = Int[]
     cols = Int[]
 
-    # Always include the diagonal.
+    # 1) Always include the diagonal.
     for i in 1:n
         push!(rows, i)
         push!(cols, i)
     end
 
-    # Detect off-diagonal couplings by central FD at the initial state.
+    # 2) Numerically probe local couplings by central finite differences.
+    # Two probe points are used to capture the complete structural pattern:
+    #
+    # Pass A — initial state `y0`:  detects first-order couplings active at
+    #   the start of the simulation.  Uses a relative threshold scaled by the
+    #   local residual magnitude so that small sensitivities in large-residual
+    #   rows are not falsely included.
+    #
+    # Pass B — activated state `max.(y0, 0.1)`:  forces all state variables
+    #   to at least 0.1 in scaled space.  This reveals dormant higher-order
+    #   couplings (e.g. liquid-water transport) that vanish at y0 but
+    #   become significant once the state evolves away from zero.
+    #   The activated state is far from equilibrium, so residuals are large and
+    #   `local_scale` can reach O(10²–10³).  Using a relative threshold would
+    #   mask genuine couplings of O(0.01–0.1), so Pass B uses an absolute-only
+    #   threshold (local_rtol = 0.0) to avoid missing those entries.
+    #
+    # The union of both passes gives a conservative structural pattern that
+    #   remains valid throughout the entire simulation.
     fd_eps           = cbrt(eps(Float64))
-    sensitivity_atol = 1e-14 # Uses a relative threshold scaled by the local residual magnitude
-    sensitivity_rtol = 1e-8  # so that small sensitivities in large-residual rows are not falsely included.
-    y_work           = copy(initial_solver_values)
-    res_plus         = Vector{Float64}(undef, n)
-    res_minus        = Vector{Float64}(undef, n)
+    sensitivity_atol = 1e-14
+    sensitivity_rtol = 1e-8
 
-    for j in 1:n
-        yj    = initial_solver_values[j]
-        delta = fd_eps * max(abs(yj), 1.0)
+    y_work              = copy(initial_solver_values)
+    res_perturbed_plus  = Vector{Float64}(undef, n)
+    res_perturbed_minus = Vector{Float64}(undef, n)
 
-        copyto!(y_work, initial_solver_values)
-        y_work[j] = yj + delta
-        residual!(res_plus,  initial_solver_derivatives, y_work, packed, t0)
+    # Activated probe state: lift every variable to at least 0.1 in scaled
+    # space so that higher-order terms (e.g. liquid-water transport ∝ s^3)
+    # produce detectable FD sensitivities despite vanishing at y0.
+    y_activated    = max.(initial_solver_values, 0.1)
+    res0_activated = zeros(Float64, n)
+    residual!(res0_activated, initial_solver_derivatives, y_activated, packed, t0)
 
-        y_work[j] = yj - delta
-        residual!(res_minus, initial_solver_derivatives, y_work, packed, t0)
+    for (y_probe, res0_probe, local_rtol) in (
+            (initial_solver_values, res0,           sensitivity_rtol),  # Pass A: relative threshold
+            (y_activated,           res0_activated, 0.0))               # Pass B: absolute threshold only
+        for j in 1:n
+            yj    = y_probe[j]
+            delta = fd_eps * max(abs(yj), 1.0)
 
-        inv_2delta = 0.5 / delta
-        @inbounds for i in 1:n
-            i == j && continue # Diagonal already added; skip.
-            sensitivity = (res_plus[i] - res_minus[i]) * inv_2delta
-            local_scale = max(abs(res0[i]), abs(res_plus[i]), abs(res_minus[i]), 1.0)
-            abs(sensitivity) > (sensitivity_atol + sensitivity_rtol * local_scale) || continue
-            push!(rows, i)
-            push!(cols, j)
+            copyto!(y_work, y_probe)
+            y_work[j] = yj + delta
+            residual!(res_perturbed_plus, initial_solver_derivatives, y_work, packed, t0)
+
+            y_work[j] = yj - delta
+            residual!(res_perturbed_minus, initial_solver_derivatives, y_work, packed, t0)
+
+            inv_2delta = 0.5 / delta
+            @inbounds for i in 1:n
+                i == j && continue  # Diagonal already added; skip.
+                sensitivity  = (res_perturbed_plus[i] - res_perturbed_minus[i]) * inv_2delta
+                local_scale  = max(abs(res0_probe[i]), abs(res_perturbed_plus[i]),
+                                   abs(res_perturbed_minus[i]), 1.0)
+                abs(sensitivity) > (sensitivity_atol + local_rtol * local_scale) || continue
+                push!(rows, i)
+                push!(cols, j)
+            end
         end
     end
 
-    return sparse(rows, cols, ones(Float64, length(rows)), n, n)
+    proto = sparse(rows, cols, ones(Float64, length(rows)), n, n)
+    return proto
 end
 
 
