@@ -155,10 +155,32 @@ function print_statistics_table(rows)
     end
 end
 
+function generate_output_path(base_dir::String, base_filename::String)
+    date_str = Dates.format(Dates.today(), dateformat"yyyy-mm-dd")
+    base_name = split(base_filename, '.')[1]
+    ext = "csv"
+
+    # Try base filename with date
+    path = joinpath(base_dir, "$(base_name)_$(date_str).$(ext)")
+    if !isfile(path)
+        return path
+    end
+
+    # If exists, find next available number
+    counter = 1
+    while isfile(joinpath(base_dir, "$(base_name)_$(date_str)_$(counter).$(ext)"))
+        counter += 1
+    end
+
+    return joinpath(base_dir, "$(base_name)_$(date_str)_$(counter).$(ext)")
+end
+
 function write_csv(path, rows)
     stats = compute_statistics(rows)
 
     open(path, "w") do io
+        date_str = Dates.format(Dates.now(), dateformat"yyyy-mm-dd HH:MM:SS")
+        println(io, "# Generated: $(date_str)")
         if !isempty(stats)
             println(io, "# SUMMARY STATISTICS (Average across all runs)")
             println(io, "scenario,nb_gc,avg_time_s,avg_alloc_gb,avg_gc_s")
@@ -217,7 +239,7 @@ function main()
 
     out_dir = joinpath(@__DIR__, "..", "results", "benchmark")
     mkpath(out_dir)
-    out_csv = joinpath(out_dir, "benchmark_nb_gc.csv")
+    out_csv = generate_output_path(out_dir, "benchmark_nb_gc.csv")
 
     rows = NamedTuple[]
 
