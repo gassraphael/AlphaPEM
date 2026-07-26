@@ -131,6 +131,35 @@ end
 
 
 """
+    effective_stoich_current(i_fc_cell, i_min_stoich)
+
+Effective current density used to compute the desired flows.
+
+Below `i_min_stoich` (including at `i_fc_cell = 0`, i.e. at OCV), the flows are kept at the value they would
+have at `i_min_stoich`, so as to guarantee a minimum purge/humidification flow at all times — a zero flow at
+OCV would otherwise starve the cathode catalyst layer of oxygen during long holds at zero current. The
+transition at `i_fc_cell = i_min_stoich` is smoothed with a small regularization width, instead of the kink of
+the exact max() form, so that the residuals stay smooth and do not perturb the solver.
+
+Parameters
+----------
+i_fc_cell : Real
+    Fuel cell current density (A.m-2).
+i_min_stoich : Real
+    Minimum current density below which the desired flows are floored (A.m-2).
+
+Returns
+-------
+Float64
+    Effective current density to use in the desired-flow formulas (A.m-2).
+"""
+@inline function effective_stoich_current(i_fc_cell::Float64, i_min_stoich::Float64)::Float64
+    i_smooth_width = 1e-3 * i_min_stoich
+    return 0.5 * (i_fc_cell + i_min_stoich + sqrt((i_fc_cell - i_min_stoich)^2 + i_smooth_width^2))
+end
+
+
+"""
     desired_flows(solver_variables, i_fc_cell, Pa_in, Pc_in, fc, cfg)
 
 Calculate the desired flow for the air compressor and the humidifiers.
@@ -165,34 +194,10 @@ DesiredInletFlows
     # Extraction of the parameters
     oc = fc.operating_conditions
     pp = fc.physical_parameters
-    np = cfg.numerical_parameters
     T_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in = oc.T_des, oc.Sa, oc.Sc, oc.Phi_a_des, oc.Phi_c_des, oc.y_H2_in
-    Hacl, Hmem, Hccl, Aact = pp.Hacl, pp.Hmem, pp.Hccl, pp.Aact
-    kappa_co = pp.kappa_co
-    nb_gc, nb_cell = np.nb_gc, pp.nb_cell
-
-    # Physical quantities inside the stack
-    #       The crossover current density i_n
-    inv_H_total = 1.0 / (Hacl + Hmem + Hccl)
-    w_acl = Hacl * inv_H_total
-    w_mem = Hmem * inv_H_total
-    w_ccl = Hccl * inv_H_total
-    max_i_n = -Inf
-    @inbounds for i in 1:nb_gc
-        s_i = solver_variables[i]
-        T_acl_i = s_i.acl.T
-        T_mem_i = s_i.mem.T
-        T_ccl_i = s_i.ccl.T
-        lambda_mem_i = s_i.mem.lambda
-        C_H2_acl_i = s_i.acl.C_H2
-        C_O2_ccl_i = s_i.ccl.C_O2
-
-        T_acl_mem_ccl = w_acl * T_acl_i + w_mem * T_mem_i + w_ccl * T_ccl_i
-        i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl_i * k_H2(lambda_mem_i, T_mem_i, kappa_co)
-        i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl_i * k_O2(lambda_mem_i, T_mem_i, kappa_co)
-        i_n_i = i_H2 + i_O2
-        max_i_n = max(max_i_n, i_n_i)
-    end
+    Aact = pp.Aact
+    nb_cell = pp.nb_cell
+    i_min_stoich = oc.i_min_stoich * 1e4  # Conversion from A.cm-2 to A.m-2, to match i_fc_cell's unit.
 
     if cfg.type_auxiliary == :forced_convective_cathode_with_anodic_recirculation ||
        cfg.type_auxiliary == :forced_convective_cathode_with_flow_through_anode
@@ -227,12 +232,14 @@ DesiredInletFlows
         # :forced_convective_cathode_with_anodic_recirculation has no N2 at anode (pure H2 recirculation).
         throw(ErrorException("desired_flows is not yet implemented in Julia for the forced-convective auxiliary branches because the translated Python source still depends on unavailable variables such as Pasm, Pcsm, and Wcp."))
     else  # cfg.type_auxiliary == :no_auxiliary
+        i_eff = effective_stoich_current(i_fc_cell, i_min_stoich)
+
         # At the anode side
-        W_H2_des        = 1 / y_H2_in * Sa * (i_fc_cell + max_i_n) / (2 * F) * (nb_cell * Aact)
+        W_H2_des        = 1 / y_H2_in * Sa * i_eff / (2 * F) * (nb_cell * Aact)
         W_H2O_inj_a_des = (Phi_a_des * Psat(T_des) / (Pa_in - Phi_a_des * Psat(T_des))) * W_H2_des
 
         # At the cathode side
-        W_dry_air_des   = 1 / y_O2_ext * Sc * (i_fc_cell + max_i_n) / (4 * F) * (nb_cell * Aact)
+        W_dry_air_des   = 1 / y_O2_ext * Sc * i_eff / (4 * F) * (nb_cell * Aact)
         W_H2O_inj_c_des = (Phi_c_des * Psat(T_des) / (Pc_in - Phi_c_des * Psat(T_des))) * W_dry_air_des
     end
 

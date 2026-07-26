@@ -72,8 +72,8 @@ function physical_parameters(fc::ZSWFuelCell)::PhysicalParams
         K_O2_ad_Pt = 7.346634385810734,      # Interfacial resistance coefficient of O2 adsorption on the Pt sites
         # Voltage polarization
         Re = 1.545654084145453e-7,           # Electron conduction resistance of the circuit in Ω·m²
-        i0_c_ref = 200.0,                     # Reference exchange current density at the cathode in A·m⁻²
-        kappa_co = 21.423681082096856,       # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
+        i0_c_ref = 200.0,                    # Reference exchange current density at the cathode in A·m⁻²
+        kappa_co = 1,                        # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
         kappa_c = 0.253020870903792,         # Overpotential correction exponent
         C_scl = 2e7                          # Volumetric space-charge layer capacitance in F·m⁻³
     )
@@ -90,6 +90,7 @@ function operating_conditions(fc::ZSWFuelCell, type_fuel_cell::Symbol)::Operatin
         Phi_a_des               = 0.398          # It is the desired relative humidity at the anode.
         Phi_c_des               = 0.50           # It is the desired relative humidity at the cathode.
         y_H2_in                 = 0.7            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        i_min_stoich            = 0.5            #  It is the minimum current density used to compute the desired flows (A.cm-2)
     elseif type_fuel_cell == :ZSW_GenStack_Pa_2_01_Pc_1_81
         T_des                   = 68.0 + 273.15  # K. It is the desired cooling circuit temperature
         Pa_des                  = 2.01e5         # Pa. It is the desired pressures of the fuel gas at the anode.
@@ -99,6 +100,7 @@ function operating_conditions(fc::ZSWFuelCell, type_fuel_cell::Symbol)::Operatin
         Phi_a_des               = 0.398          # It is the desired relative humidity at the anode.
         Phi_c_des               = 0.50           # It is the desired relative humidity at the cathode.
         y_H2_in                 = 0.7            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        i_min_stoich            = 0.5            #  It is the minimum current density used to compute the desired flows (A.cm-2)
     elseif type_fuel_cell == :ZSW_GenStack_Pa_2_4_Pc_2_2
         T_des                   = 68.0 + 273.15  # K. It is the desired cooling circuit temperature
         Pa_des                  = 2.4e5          # Pa. It is the desired pressures of the fuel gas at the anode.
@@ -108,6 +110,7 @@ function operating_conditions(fc::ZSWFuelCell, type_fuel_cell::Symbol)::Operatin
         Phi_a_des               = 0.398          # It is the desired relative humidity at the anode.
         Phi_c_des               = 0.50           # It is the desired relative humidity at the cathode.
         y_H2_in                 = 0.7            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        i_min_stoich            = 0.5            #  It is the minimum current density used to compute the desired flows (A.cm-2)
     elseif type_fuel_cell == :ZSW_GenStack_Pa_2_8_Pc_2_6
         T_des                   = 68.0 + 273.15  # K. It is the desired cooling circuit temperature
         Pa_des                  = 2.8e5          # Pa. It is the desired pressures of the fuel gas at the anode.
@@ -117,6 +120,7 @@ function operating_conditions(fc::ZSWFuelCell, type_fuel_cell::Symbol)::Operatin
         Phi_a_des               = 0.398          # It is the desired relative humidity at the anode.
         Phi_c_des               = 0.50           # It is the desired relative humidity at the cathode.
         y_H2_in                 = 0.7            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        i_min_stoich            = 0.5            #  It is the minimum current density used to compute the desired flows (A.cm-2)
     elseif type_fuel_cell == :ZSW_GenStack_T_62
         T_des                   = 62.0 + 273.15  # K. It is the desired cooling circuit temperature
         Pa_des                  = 2.2e5          # Pa. It is the desired pressure of the fuel gas at the anode.
@@ -126,6 +130,7 @@ function operating_conditions(fc::ZSWFuelCell, type_fuel_cell::Symbol)::Operatin
         Phi_a_des               = 0.398          # It is the desired relative humidity at the anode.
         Phi_c_des               = 0.50           # It is the desired relative humidity at the cathode.
         y_H2_in                 = 0.7            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        i_min_stoich            = 0.5            #  It is the minimum current density used to compute the desired flows (A.cm-2)
     elseif type_fuel_cell == :ZSW_GenStack_T_76
         T_des                   = 76.0 + 273.15  # K. It is the desired cooling circuit temperature
         Pa_des                  = 2.2e5          # Pa. It is the desired pressure of the fuel gas at the anode.
@@ -135,6 +140,7 @@ function operating_conditions(fc::ZSWFuelCell, type_fuel_cell::Symbol)::Operatin
         Phi_a_des               = 0.398          # It is the desired relative humidity at the anode.
         Phi_c_des               = 0.50           # It is the desired relative humidity at the cathode.
         y_H2_in                 = 0.7            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        i_min_stoich            = 0.5            #  It is the minimum current density used to compute the desired flows (A.cm-2)
     elseif type_fuel_cell == :ZSW_GenStack_T_84
         T_des                   = 84.0 + 273.15  # K. It is the desired cooling circuit temperature
         Pa_des                  = 2.2e5          # Pa. It is the desired pressure of the fuel gas at the anode.
@@ -144,6 +150,7 @@ function operating_conditions(fc::ZSWFuelCell, type_fuel_cell::Symbol)::Operatin
         Phi_a_des               = 0.398          # It is the desired relative humidity at the anode.
         Phi_c_des               = 0.50           # It is the desired relative humidity at the cathode.
         y_H2_in                 = 0.7            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        i_min_stoich            = 0.5            #  It is the minimum current density used to compute the desired flows (A.cm-2)
     else # type_fuel_cell == :ZSW_GenStack - nominal conditions
         T_des                   = 68.0 + 273.15  # K. It is the desired cooling circuit temperature
         Pa_des                  = 2.2e5          # Pa. It is the desired pressures of the fuel gas at the anode.
@@ -153,6 +160,7 @@ function operating_conditions(fc::ZSWFuelCell, type_fuel_cell::Symbol)::Operatin
         Phi_a_des               = 0.398          # It is the desired relative humidity at the anode.
         Phi_c_des               = 0.50           # It is the desired relative humidity at the cathode.
         y_H2_in                 = 0.7            # It is the molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+        i_min_stoich            = 0.5            #  It is the minimum current density used to compute the desired flows (A.cm-2)
     end
 
     # ZSW_GenStack correction: +3°C to match cooling circuit temperature at bipolar plates
@@ -164,7 +172,7 @@ function operating_conditions(fc::ZSWFuelCell, type_fuel_cell::Symbol)::Operatin
         T_des += 3.0
     end
 
-    return OperatingConditions(T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in)
+    return OperatingConditions(T_des, Pa_des, Pc_des, Sa, Sc, Phi_a_des, Phi_c_des, y_H2_in, i_min_stoich)
 end
 
 
@@ -417,8 +425,8 @@ function undetermined_parameters(fc::ZSWFuelCell, voltage_zone::Symbol = :full):
         (:epsilon_gdl,  0.7, 0.9),          # GDL porosity
         (:Re,           5e-8, 5e-6),        # Electron-conduction resistance
         (:i0_c_ref,     0.1, 1000.0),       # Reference cathode exchange current density
-        (:kappa_co,     4.48, 37.67),       # Crossover correction coefficient
-        (:kappa_c,      0.25, 3.293),       # Overpotential correction exponent
+        (:kappa_co,     0.01, 40.0),       # Crossover correction coefficient
+        (:kappa_c,      0.25, 4.0),       # Overpotential correction exponent
     ]
 
     if voltage_zone == :full
