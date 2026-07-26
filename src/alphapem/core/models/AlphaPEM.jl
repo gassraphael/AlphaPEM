@@ -82,10 +82,6 @@ initial_derivative_values : Union{Nothing, Vector{Float64}}, optional
 time_interval : Union{Nothing, Tuple{Float64, Float64}}, optional
     Time interval for numerical resolution. If `nothing`, it is generated
     according to the chosen current profile.
-saveat : Union{Nothing, AbstractVector{<:Real}}, optional
-    Explicit time points at which to save the solution. If `nothing`, the
-    solver automatically derives a set of save times from the current profile
-    and the time interval.
 
 Returns
 -------
@@ -95,8 +91,7 @@ Nothing
 function simulate_model!(simu::AlphaPEM,
                          initial_variable_values::Union{Nothing, Vector{Float64}}=nothing,
                          initial_derivative_values::Union{Nothing, Vector{Float64}}=nothing,
-                         time_interval::Union{Nothing, Tuple{Float64, Float64}}=nothing;
-                         saveat::Union{Nothing, AbstractVector{<:Real}}=nothing)
+                         time_interval::Union{Nothing, Tuple{Float64, Float64}}=nothing)
 
     # ── 1. Precondition checks ─────────────────────────────────────────────────
     _check_simulation_preconditions!(simu)
@@ -153,8 +148,9 @@ function simulate_model!(simu::AlphaPEM,
     dtmax_cb  = _build_dtmax_callback(simu)
     timeout_cb = _build_timeout_callback(np.max_run_time_s)
     endpoint_du_cb = _build_endpoint_du_callback(simu)
+    saving_cb = _build_rate_limited_saving_callback(np.save_freq, simu.time_interval[1])
 
-    callbacks = CallbackSet(safety_cb, endpoint_du_cb,
+    callbacks = CallbackSet(safety_cb, endpoint_du_cb, saving_cb,
                             (dtmax_cb  === nothing ? () : (dtmax_cb,))...,
                             (timeout_cb === nothing ? () : (timeout_cb,))...)
 
@@ -164,10 +160,8 @@ function simulate_model!(simu::AlphaPEM,
                           initial_scaled_variable_values, simu.time_interval, packed;
                           differential_vars=dims.differential_vars)
     init_alg = NoInit()
-    tstops   = solver_tstops(simu.current_density, simu.time_interval)
-    saveat_arg        = saveat !== nothing ? collect(Float64, saveat) :
-                                            saveat_times(simu.current_density, simu.time_interval, np.save_freq)
-    use_saveat        = !isempty(saveat_arg)
+    tstops     = solver_tstops(simu.current_density, simu.time_interval)
+    saveat_arg = saveat_times(simu.current_density, simu.time_interval, np.save_freq)
     simu.sol = solve(prob, IDA(linear_solver=:KLU);
                      reltol         = np.rtol,
                      abstol         = atol_scaled,
@@ -176,7 +170,7 @@ function simulate_model!(simu::AlphaPEM,
                      initializealg  = init_alg,
                      maxiters       = np.maxiters,
                      saveat         = saveat_arg,
-                     save_everystep = !use_saveat,
+                     save_everystep = false,
                      dense          = false,
                      callback       = callbacks)
 
@@ -574,6 +568,33 @@ function _build_dtmax_callback(simu::AlphaPEM)
     affect!(integrator) = IDASetMaxStep(integrator.mem, solver_dtmax(simu.current_density, integrator.t))
 
     return PresetTimeCallback(tstops, affect!)
+end
+
+
+"""
+    _build_rate_limited_saving_callback(save_freq::Float64, t0::Float64)
+
+Record a solution point on IDA's own accepted steps, at most `save_freq` times
+per second. Unlike `saveat`, this never forces IDA to step to a specific
+instant: the condition is only checked after a step IDA already took. In
+fast/stiff regions the natural step is smaller than `1/save_freq`, so saves
+are throttled to that rate; in calm regions the natural step is already
+larger than `1/save_freq`, so every step is kept unmodified.
+
+Without this cap, `save_everystep=true` would append one full state copy to
+`sol.u` per accepted IDA step; a stiff run taking 5×10⁵ tiny steps then
+accumulates ~1.6 GB and makes Julia's GC quadratically slower as the heap
+grows, to the point the solver appears to hang rather than terminate.
+"""
+function _build_rate_limited_saving_callback(save_freq::Float64, t0::Float64)
+    min_dt = 1.0 / save_freq
+    last_saved_t = Ref(t0)
+    condition(u, t, integrator) = (t - last_saved_t[]) >= min_dt
+    affect!(integrator) = begin
+        last_saved_t[] = integrator.t
+        savevalues!(integrator, true)
+    end
+    return DiscreteCallback(condition, affect!; save_positions=(false, false))
 end
 
 

@@ -80,43 +80,24 @@ solver_dtmax(::AbstractCurrent, ::Real) = Inf
 """
     saveat_times(c::AbstractCurrent, tspan, save_freq::Float64) -> Vector{Float64}
 
-Return the output-save instants for one IDA solve covering `tspan = (t0, tf)`.
+Mandatory output-save instants for one IDA solve covering `tspan = (t0, tf)`,
+passed as `saveat` to `solve()` and thus forcing the solver to stop exactly
+there. Use this only when a current profile needs guaranteed samples
+regardless of the solver's natural step size.
 
-These times are passed as `saveat` to `solve()` along with `save_everystep=false`
-and `dense=false`, so that `sol.u` only grows with the number of returned points
-regardless of how many internal IDA steps were taken.  This has two benefits:
+General density control (bounding the size of `sol.t`/`sol.u` to `save_freq`
+points per second) is handled separately and automatically by a rate-limited
+saving callback (see `_build_rate_limited_saving_callback` in `AlphaPEM.jl`),
+which rides along on whatever steps IDA naturally takes instead of forcing
+extra ones. `saveat_times` only adds points on top of that.
 
-1. **Memory** — `sol.u` stays small even for stiff trajectories that require
-   hundreds of thousands of tiny steps.  Each entry of `sol.u` is a full state
-   copy (~400 Float64 for a typical AlphaPEM system); without this bound, a run
-   with 5×10⁵ internal steps accumulates ~1.6 GB and makes Julia's GC quadratically
-   slower as the heap grows.
-
-2. **GC pressure** — every accepted IDA step normally appends a new Julia object to
-   `sol.u`.  With 5×10⁵ such objects the GC must scan them on every minor collection
-   triggered by allocations inside `residual!`.  Limiting `sol.u` to a few thousand
-   points eliminates this feedback loop.
-
-Default implementation: sampling at the rate specified by `save_freq` (Hz).
-This is sufficient for smooth profiles (step, polarization, calibration) and gives
-a predictable, bounded output size independent of stiffness or `nb_gc`.
-
-Concrete subtypes should override this method when the dynamics require a different
-sampling rate — for example `EISCurrent`, which needs dense sampling during
-measurement windows to accurately reconstruct the frequency response.
-
-# Arguments
-- `c::AbstractCurrent`: Current density model
-- `tspan::Tuple{<:Real, <:Real}`: Time interval (t0, tf)
-- `save_freq::Float64`: Output save frequency in Hz (points per second)
+Default: no mandatory points. Override when dense, exact sampling is required
+independent of the solver's step size — for example `EISCurrent`, which needs
+`nb_points` per period during its stabilization/measurement windows for
+accurate Fourier reconstruction.
 """
-function saveat_times(::AbstractCurrent, tspan::Tuple{<:Real,<:Real}, save_freq::Float64)::Vector{Float64}
-    t0 = Float64(tspan[1])
-    tf = Float64(tspan[2])
-    dt = 1.0 / save_freq
-    # Always include at least the boundary points so recovery! has t0 and tf.
-    tf <= t0 && return Float64[t0]
-    return collect(t0 : dt : tf)
+function saveat_times(::AbstractCurrent, ::Tuple{<:Real,<:Real}, ::Float64)::Vector{Float64}
+    return Float64[]
 end
 
 
