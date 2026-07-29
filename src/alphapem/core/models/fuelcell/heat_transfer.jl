@@ -62,7 +62,7 @@ function calculate_heat_transfers!(heat_work::MEAHeatWorkspace,
     pp = fc.physical_parameters
     T_des = fc.operating_conditions.T_des
     Hmem, Hgdl, Hmpl, Hacl, Hccl = pp.Hmem, pp.Hgdl, pp.Hmpl, pp.Hacl, pp.Hccl
-    epsilon_gdl, epsilon_mpl = pp.epsilon_gdl, pp.epsilon_mpl
+    epsilon_gdl, epsilon_mpl, epsilon_c = pp.epsilon_gdl, pp.epsilon_mpl, pp.epsilon_c
 
     # Intermediate values
     (Hgdl_node, Hmpl_node, k_th_eff_agc_agdl, k_th_eff_agdl_agdl, k_th_eff_agdl_ampl, k_th_eff_ampl_ampl,
@@ -140,18 +140,18 @@ function calculate_heat_transfers!(heat_work::MEAHeatWorkspace,
 
     # The heat dissipated by the ionic currents (Joule heating + Ohm's law), in J.m-3.s-1.
     Q_p = MEAProtonHeat(
-        i_fc^2 / sigma_p_eff(:mem, lambda_mem, T_mem), # Q_p_mem
-        i_fc^2 / (3 * sigma_p_eff(:ccl, lambda_ccl, T_ccl, Hccl)) # Q_p_ccl
+        i_fc^2 / sigma_p_eff(:mem, lambda_mem, T_mem, nothing, pp), # Q_p_mem
+        i_fc^2 / (3 * sigma_p_eff(:ccl, lambda_ccl, T_ccl, Hccl, pp)) # Q_p_ccl
     )
 
     # The heat dissipated by the electric currents (Joule heating + Ohm's law), in J.m-3.s-1.
-    sigma_e_eff_gdl = sigma_e_eff(:gdl, epsilon_gdl, epsilon_c)
-    sigma_e_eff_mpl = sigma_e_eff(:mpl, epsilon_mpl)
+    sigma_e_eff_gdl = sigma_e_eff(:gdl, epsilon_gdl, epsilon_c, nothing, nothing, nothing, pp)
+    sigma_e_eff_mpl = sigma_e_eff(:mpl, epsilon_mpl, nothing, nothing, nothing, nothing, pp)
     Q_e = MEAElectricHeat{NB_GDL, NB_MPL}(
         ntuple(_ -> i_fc^2 / sigma_e_eff_gdl, NB_GDL), # Q_e_agdl
         ntuple(_ -> i_fc^2 / sigma_e_eff_mpl, NB_MPL), # Q_e_ampl
-        i_fc^2 / sigma_e_eff(:cl, nothing, nothing, lambda_acl, T_acl, Hacl), # Q_e_acl
-        i_fc^2 / (3 * sigma_e_eff(:cl, nothing, nothing, lambda_ccl, T_ccl, Hccl)), # Q_e_ccl
+        i_fc^2 / sigma_e_eff(:cl, nothing, nothing, lambda_acl, T_acl, Hacl, pp), # Q_e_acl
+        i_fc^2 / (3 * sigma_e_eff(:cl, nothing, nothing, lambda_ccl, T_ccl, Hccl, pp)), # Q_e_ccl
         ntuple(_ -> i_fc^2 / sigma_e_eff_mpl, NB_MPL), # Q_e_cmpl
         ntuple(_ -> i_fc^2 / sigma_e_eff_gdl, NB_GDL) # Q_e_cgdl
     )

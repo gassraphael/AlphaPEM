@@ -59,6 +59,7 @@ function calculate_flows_1D_GC_manifold!(flows_work::GCManifoldFlowsWorkspace,
     T_des, Phi_a_des, Phi_c_des, Sa, Sc, y_H2_in = oc.T_des, oc.Phi_a_des, oc.Phi_c_des, oc.Sa, oc.Sc, oc.y_H2_in
     Aact, nb_cell, Hagc, Hcgc = pp.Aact, pp.nb_cell, pp.Hagc, pp.Hcgc
     Wagc, Wcgc, Lgc, nb_channel_in_gc, A_T_a, A_T_c = pp.Wagc, pp.Wcgc, pp.Lgc, pp.nb_channel_in_gc, pp.A_T_a, pp.A_T_c
+    K_v_liq_gas, D_liq_dif = pp.K_v_liq_gas, pp.D_liq_dif
     nb_gc = np.nb_gc
     type_auxiliary = cfg.type_auxiliary
     counter_flow = cfg.type_flow == :counter_flow

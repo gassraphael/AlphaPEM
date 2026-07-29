@@ -5,9 +5,6 @@
 
 # _____________________________________________________Flow modules_____________________________________________________
 
-
-using AlphaPEM.Utils: e
-
 """Calculate intermediate values for the flows calculation.
 
 Parameters
@@ -41,7 +38,7 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
     np = cfg.numerical_parameters
     Hacl, Hccl, Hmem, Hgdl, Hmpl = pp.Hacl, pp.Hccl, pp.Hmem, pp.Hgdl, pp.Hmpl
     Wagc, Wcgc = pp.Wagc, pp.Wcgc
-    epsilon_gdl, epsilon_mpl = pp.epsilon_gdl, pp.epsilon_mpl
+    epsilon_gdl, epsilon_mpl, epsilon_c = pp.epsilon_gdl, pp.epsilon_mpl, pp.epsilon_c
     nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl
 
     # Extraction of the variables
@@ -89,8 +86,8 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
     Pcgc  = (C_v_cgc + C_O2_cgc + C_N2_cgc) * R * T_cgc
 
     # Capillary pressures in the stack
-    Pcap_agdl = Pcap(:gdl, s_agdl[1],      T_agdl[1],      epsilon_gdl, epsilon_c)
-    Pcap_cgdl = Pcap(:gdl, s_cgdl[nb_gdl], T_cgdl[nb_gdl], epsilon_gdl, epsilon_c)
+    Pcap_agdl = Pcap(:gdl, s_agdl[1],      T_agdl[1],      epsilon_gdl, epsilon_c, pp)
+    Pcap_cgdl = Pcap(:gdl, s_cgdl[nb_gdl], T_cgdl[nb_gdl], epsilon_gdl, epsilon_c, pp)
 
     # Densities in the GC
     rho_agc = C_H2_agc * M_H2 + C_v_agc * M_H2O + C_N2_agc * M_N2
@@ -98,20 +95,20 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
 
     # Weighted mean values ...
     #       ... of the EOD flow of water in the membrane
-    D_eff_EOD_acl_mem = hmean(D_EOD_eff(i_fc, lambda_acl, T_acl, Hacl), D_EOD(lambda_mem),
+    D_eff_EOD_acl_mem = hmean(D_EOD_eff(i_fc, lambda_acl, T_acl, Hacl, pp), D_EOD(lambda_mem),
                               Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem))
-    D_eff_EOD_mem_ccl = hmean(D_EOD(lambda_mem), D_EOD_eff(i_fc, lambda_ccl, T_ccl, Hccl),
+    D_eff_EOD_mem_ccl = hmean(D_EOD(lambda_mem), D_EOD_eff(i_fc, lambda_ccl, T_ccl, Hccl, pp),
                               Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl))
 
     #       ... of the diffusion coefficient of water in the membrane
-    D_lambda_eff_acl_mem = hmean(D_lambda_eff(lambda_acl, T_acl, Hacl), D_lambda(lambda_mem),
+    D_lambda_eff_acl_mem = hmean(D_lambda_eff(lambda_acl, T_acl, Hacl, pp), D_lambda(lambda_mem),
                                  Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem))
-    D_lambda_eff_mem_ccl = hmean(D_lambda(lambda_mem), D_lambda_eff(lambda_ccl, T_ccl, Hccl),
+    D_lambda_eff_mem_ccl = hmean(D_lambda(lambda_mem), D_lambda_eff(lambda_ccl, T_ccl, Hccl, pp),
                                  Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl))
 
     # Pre-computed inter-layer CL porosities and weight factors (avoid repeated calls and divisions)
-    epsilon_acl = epsilon_cl(lambda_acl, T_acl, Hacl)  # CL porosity at the anode side.
-    epsilon_ccl = epsilon_cl(lambda_ccl, T_ccl, Hccl)  # CL porosity at the cathode side.
+    epsilon_acl = epsilon_cl(lambda_acl, T_acl, Hacl, pp)  # CL porosity at the anode side.
+    epsilon_ccl = epsilon_cl(lambda_ccl, T_ccl, Hccl, pp)  # CL porosity at the cathode side.
     H_gdl_mpl  = H_gdl_node + H_mpl_node                  # Sum of GDL and MPL node thicknesses.
     H_mpl_acl  = H_mpl_node + Hacl                        # Sum of MPL and ACL thicknesses.
     H_ccl_mpl  = Hccl + H_mpl_node                        # Sum of CCL and MPL thicknesses.
@@ -125,83 +122,83 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
     #       ... of the capillary coefficient
     D_cap_agdl_agdl = flows_int_work.D_cap_agdl_agdl
     @inbounds for i in 1:(nb_gdl - 1)
-        D_cap_agdl_agdl[i] = hmean(Dcap(:gdl, s_agdl[i],     T_agdl[i],     epsilon_gdl, epsilon_c),
-                                    Dcap(:gdl, s_agdl[i + 1], T_agdl[i + 1], epsilon_gdl, epsilon_c))
+        D_cap_agdl_agdl[i] = hmean(Dcap(:gdl, s_agdl[i],     T_agdl[i],     epsilon_gdl, epsilon_c, pp),
+                                    Dcap(:gdl, s_agdl[i + 1], T_agdl[i + 1], epsilon_gdl, epsilon_c, pp))
     end
 
-    D_cap_agdl_ampl = hmean(Dcap(:gdl, s_agdl[nb_gdl], T_agdl[nb_gdl], epsilon_gdl, epsilon_c),
-                             Dcap(:mpl, s_ampl[1],      T_ampl[1],      epsilon_mpl),
+    D_cap_agdl_ampl = hmean(Dcap(:gdl, s_agdl[nb_gdl], T_agdl[nb_gdl], epsilon_gdl, epsilon_c, pp),
+                             Dcap(:mpl, s_ampl[1],      T_ampl[1],      epsilon_mpl, nothing, pp),
                              w_gdl_mpl, w_mpl_gdl)
 
     D_cap_ampl_ampl = flows_int_work.D_cap_ampl_ampl
     @inbounds for i in 1:(nb_mpl - 1)
-        D_cap_ampl_ampl[i] = hmean(Dcap(:mpl, s_ampl[i],     T_ampl[i],     epsilon_mpl),
-                                    Dcap(:mpl, s_ampl[i + 1], T_ampl[i + 1], epsilon_mpl))
+        D_cap_ampl_ampl[i] = hmean(Dcap(:mpl, s_ampl[i],     T_ampl[i],     epsilon_mpl, nothing, pp),
+                                    Dcap(:mpl, s_ampl[i + 1], T_ampl[i + 1], epsilon_mpl, nothing, pp))
     end
 
-    D_cap_ampl_acl = hmean(Dcap(:mpl, s_ampl[nb_mpl], T_ampl[nb_mpl], epsilon_mpl),
-                           Dcap(:cl,  s_acl,          T_acl,          epsilon_acl),
+    D_cap_ampl_acl = hmean(Dcap(:mpl, s_ampl[nb_mpl], T_ampl[nb_mpl], epsilon_mpl, nothing, pp),
+                           Dcap(:cl,  s_acl,          T_acl,          epsilon_acl, nothing, pp),
                            w_mpl_acl, w_acl_mpl)
 
-    D_cap_ccl_cmpl = hmean(Dcap(:cl,  s_ccl,    T_ccl,    epsilon_ccl),
-                           Dcap(:mpl, s_cmpl[1], T_cmpl[1], epsilon_mpl),
+    D_cap_ccl_cmpl = hmean(Dcap(:cl,  s_ccl,    T_ccl,    epsilon_ccl, nothing, pp),
+                           Dcap(:mpl, s_cmpl[1], T_cmpl[1], epsilon_mpl, nothing, pp),
                            w_ccl_mpl, w_mpl_ccl)
 
     D_cap_cmpl_cmpl = flows_int_work.D_cap_cmpl_cmpl
     @inbounds for i in 1:(nb_mpl - 1)
-        D_cap_cmpl_cmpl[i] = hmean(Dcap(:mpl, s_cmpl[i],     T_cmpl[i],     epsilon_mpl),
-                                    Dcap(:mpl, s_cmpl[i + 1], T_cmpl[i + 1], epsilon_mpl))
+        D_cap_cmpl_cmpl[i] = hmean(Dcap(:mpl, s_cmpl[i],     T_cmpl[i],     epsilon_mpl, nothing, pp),
+                                    Dcap(:mpl, s_cmpl[i + 1], T_cmpl[i + 1], epsilon_mpl, nothing, pp))
     end
 
-    D_cap_cmpl_cgdl = hmean(Dcap(:mpl, s_cmpl[nb_mpl], T_cmpl[nb_mpl], epsilon_mpl),
-                             Dcap(:gdl, s_cgdl[1],      T_cgdl[1],      epsilon_gdl, epsilon_c),
+    D_cap_cmpl_cgdl = hmean(Dcap(:mpl, s_cmpl[nb_mpl], T_cmpl[nb_mpl], epsilon_mpl, nothing, pp),
+                             Dcap(:gdl, s_cgdl[1],      T_cgdl[1],      epsilon_gdl, epsilon_c, pp),
                              w_mpl_gdl, w_gdl_mpl)
 
     D_cap_cgdl_cgdl = flows_int_work.D_cap_cgdl_cgdl
     @inbounds for i in 1:(nb_gdl - 1)
-        D_cap_cgdl_cgdl[i] = hmean(Dcap(:gdl, s_cgdl[i],     T_cgdl[i],     epsilon_gdl, epsilon_c),
-                                    Dcap(:gdl, s_cgdl[i + 1], T_cgdl[i + 1], epsilon_gdl, epsilon_c))
+        D_cap_cgdl_cgdl[i] = hmean(Dcap(:gdl, s_cgdl[i],     T_cgdl[i],     epsilon_gdl, epsilon_c, pp),
+                                    Dcap(:gdl, s_cgdl[i + 1], T_cgdl[i + 1], epsilon_gdl, epsilon_c, pp))
     end
 
     #       ... of the effective diffusion coefficient
     Da_eff_agdl_agdl = flows_int_work.Da_eff_agdl_agdl
     @inbounds for i in 1:(nb_gdl - 1)
-        Da_eff_agdl_agdl[i] = hmean(Da_eff(:gdl, s_agdl[i],     T_agdl[i],     Pagdl[i],     epsilon_gdl, epsilon_c),
-                                     Da_eff(:gdl, s_agdl[i + 1], T_agdl[i + 1], Pagdl[i + 1], epsilon_gdl, epsilon_c))
+        Da_eff_agdl_agdl[i] = hmean(Da_eff(:gdl, s_agdl[i],     T_agdl[i],     Pagdl[i],     epsilon_gdl, epsilon_c, pp),
+                                     Da_eff(:gdl, s_agdl[i + 1], T_agdl[i + 1], Pagdl[i + 1], epsilon_gdl, epsilon_c, pp))
     end
 
-    Da_eff_agdl_ampl = hmean(Da_eff(:gdl, s_agdl[nb_gdl], T_agdl[nb_gdl], Pagdl[nb_gdl], epsilon_gdl, epsilon_c),
-                              Da_eff(:mpl, s_ampl[1],      T_ampl[1],      Pampl[1],      epsilon_mpl),
+    Da_eff_agdl_ampl = hmean(Da_eff(:gdl, s_agdl[nb_gdl], T_agdl[nb_gdl], Pagdl[nb_gdl], epsilon_gdl, epsilon_c, pp),
+                              Da_eff(:mpl, s_ampl[1],      T_ampl[1],      Pampl[1],      epsilon_mpl, nothing, pp),
                               w_gdl_mpl, w_mpl_gdl)
 
     Da_eff_ampl_ampl = flows_int_work.Da_eff_ampl_ampl
     @inbounds for i in 1:(nb_mpl - 1)
-        Da_eff_ampl_ampl[i] = hmean(Da_eff(:mpl, s_ampl[i],     T_ampl[i],     Pampl[i],     epsilon_mpl),
-                                     Da_eff(:mpl, s_ampl[i + 1], T_ampl[i + 1], Pampl[i + 1], epsilon_mpl))
+        Da_eff_ampl_ampl[i] = hmean(Da_eff(:mpl, s_ampl[i],     T_ampl[i],     Pampl[i],     epsilon_mpl, nothing, pp),
+                                     Da_eff(:mpl, s_ampl[i + 1], T_ampl[i + 1], Pampl[i + 1], epsilon_mpl, nothing, pp))
     end
 
-    Da_eff_ampl_acl = hmean(Da_eff(:mpl, s_ampl[nb_mpl], T_ampl[nb_mpl], Pampl[nb_mpl], epsilon_mpl),
-                             Da_eff(:cl,  s_acl,          T_acl,          Pacl,          epsilon_acl),
+    Da_eff_ampl_acl = hmean(Da_eff(:mpl, s_ampl[nb_mpl], T_ampl[nb_mpl], Pampl[nb_mpl], epsilon_mpl, nothing, pp),
+                             Da_eff(:cl,  s_acl,          T_acl,          Pacl,          epsilon_acl, nothing, pp),
                              w_mpl_acl, w_acl_mpl)
 
-    Dc_eff_ccl_cmpl = hmean(Dc_eff(:cl,  s_ccl,    T_ccl,    Pccl,    epsilon_ccl),
-                             Dc_eff(:mpl, s_cmpl[1], T_cmpl[1], Pcmpl[1], epsilon_mpl),
+    Dc_eff_ccl_cmpl = hmean(Dc_eff(:cl,  s_ccl,    T_ccl,    Pccl,    epsilon_ccl, nothing, pp),
+                             Dc_eff(:mpl, s_cmpl[1], T_cmpl[1], Pcmpl[1], epsilon_mpl, nothing, pp),
                              w_ccl_mpl, w_mpl_ccl)
 
     Dc_eff_cmpl_cmpl = flows_int_work.Dc_eff_cmpl_cmpl
     @inbounds for i in 1:(nb_mpl - 1)
-        Dc_eff_cmpl_cmpl[i] = hmean(Dc_eff(:mpl, s_cmpl[i],     T_cmpl[i],     Pcmpl[i],     epsilon_mpl),
-                                     Dc_eff(:mpl, s_cmpl[i + 1], T_cmpl[i + 1], Pcmpl[i + 1], epsilon_mpl))
+        Dc_eff_cmpl_cmpl[i] = hmean(Dc_eff(:mpl, s_cmpl[i],     T_cmpl[i],     Pcmpl[i],     epsilon_mpl, nothing, pp),
+                                     Dc_eff(:mpl, s_cmpl[i + 1], T_cmpl[i + 1], Pcmpl[i + 1], epsilon_mpl, nothing, pp))
     end
 
-    Dc_eff_cmpl_cgdl = hmean(Dc_eff(:mpl, s_cmpl[nb_mpl], T_cmpl[nb_mpl], Pcmpl[nb_mpl], epsilon_mpl),
-                              Dc_eff(:gdl, s_cgdl[1],      T_cgdl[1],      Pcgdl[1],      epsilon_gdl, epsilon_c),
+    Dc_eff_cmpl_cgdl = hmean(Dc_eff(:mpl, s_cmpl[nb_mpl], T_cmpl[nb_mpl], Pcmpl[nb_mpl], epsilon_mpl, nothing, pp),
+                              Dc_eff(:gdl, s_cgdl[1],      T_cgdl[1],      Pcgdl[1],      epsilon_gdl, epsilon_c, pp),
                               w_mpl_gdl, w_gdl_mpl)
 
     Dc_eff_cgdl_cgdl = flows_int_work.Dc_eff_cgdl_cgdl
     @inbounds for i in 1:(nb_gdl - 1)
-        Dc_eff_cgdl_cgdl[i] = hmean(Dc_eff(:gdl, s_cgdl[i],     T_cgdl[i],     Pcgdl[i],     epsilon_gdl, epsilon_c),
-                                     Dc_eff(:gdl, s_cgdl[i + 1], T_cgdl[i + 1], Pcgdl[i + 1], epsilon_gdl, epsilon_c))
+        Dc_eff_cgdl_cgdl[i] = hmean(Dc_eff(:gdl, s_cgdl[i],     T_cgdl[i],     Pcgdl[i],     epsilon_gdl, epsilon_c, pp),
+                                     Dc_eff(:gdl, s_cgdl[i + 1], T_cgdl[i + 1], Pcgdl[i + 1], epsilon_gdl, epsilon_c, pp))
     end
 
     #       ... of the temperature
@@ -230,8 +227,10 @@ T :
     Temperature in K.
 epsilon : Float64
     Porosity.
-epsilon_c : Union{Float64, Nothing}, optional
+epsilon_c : Union{Float64, Nothing}
     Compression ratio of the GDL.
+pp : PhysicalParams
+    Physical parameters of the fuel cell.
 
 Returns
 -------
@@ -242,9 +241,14 @@ function Dcap(element::Symbol,
               s,
               T,
               epsilon::Float64,
-              epsilon_c::Union{Float64, Nothing}=nothing)
+              epsilon_c::Union{Float64, Nothing},
+              pp::PhysicalParams)
 
-    K0_value = K0(element, epsilon, epsilon_c)
+    # Extraction of the parameters
+    e = pp.e  # Capillary exponent.
+    theta_c_gdl, theta_c_mpl, theta_c_cl = pp.theta_c_gdl, pp.theta_c_mpl, pp.theta_c_cl
+
+    K0_value = K0(element, epsilon, epsilon_c, pp)
     s_eff = _bounded_saturation_value(s)
     if element == :gdl
         theta_c_value = theta_c_gdl
@@ -275,8 +279,10 @@ T :
     Temperature in K.
 epsilon : Float64
     Porosity.
-epsilon_c : Union{Float64, Nothing}, optional
+epsilon_c : Union{Float64, Nothing}
     Compression ratio of the GDL.
+pp : PhysicalParams
+    Physical parameters of the fuel cell.
 
 Returns
 -------
@@ -287,9 +293,13 @@ function Pcap(element::Symbol,
               s,
               T,
               epsilon::Float64,
-              epsilon_c::Union{Float64, Nothing}=nothing)
+              epsilon_c::Union{Float64, Nothing},
+              pp::PhysicalParams)
 
-    K0_value = K0(element, epsilon, epsilon_c)
+    # Extraction of the parameters
+    theta_c_gdl, theta_c_mpl, theta_c_cl = pp.theta_c_gdl, pp.theta_c_mpl, pp.theta_c_cl
+
+    K0_value = K0(element, epsilon, epsilon_c, pp)
     s_eff = _bounded_saturation_value(s)
     if element == :gdl
         theta_c_value = theta_c_gdl
@@ -364,8 +374,10 @@ P :
     Pressure in Pa.
 epsilon : Float64
     Porosity.
-epsilon_c : Union{Float64, Nothing}, optional
+epsilon_c : Union{Float64, Nothing}
     Compression ratio of the GDL.
+pp : PhysicalParams
+    Physical parameters of the fuel cell.
 
 Returns
 -------
@@ -377,7 +389,13 @@ function Da_eff(element::Symbol,
                 T,
                 P,
                 epsilon::Float64,
-                epsilon_c::Union{Float64, Nothing}=nothing)
+                epsilon_c::Union{Float64, Nothing},
+                pp::PhysicalParams)
+
+    # Extraction of the parameters
+    epsilon_p, alpha_p = pp.epsilon_p, pp.alpha_p
+    r_s_gdl, r_s_mpl, r_s_cl = pp.r_s_gdl, pp.r_s_mpl, pp.r_s_cl
+    tau_mpl, tau_cl = pp.tau_mpl, pp.tau_cl
 
     s_eff = _bounded_saturation_value(s)
     if element == :gdl # The effective diffusion coefficient at the GDL using Tomadakis and Sotirchos model.
@@ -418,8 +436,10 @@ P :
     Pressure in Pa.
 epsilon : Float64
     Porosity.
-epsilon_c : Union{Float64, Nothing}, optional
+epsilon_c : Union{Float64, Nothing}
     Compression ratio of the GDL.
+pp : PhysicalParams
+    Physical parameters of the fuel cell.
 
 Returns
 -------
@@ -431,7 +451,13 @@ function Dc_eff(element::Symbol,
                 T,
                 P,
                 epsilon::Float64,
-                epsilon_c::Union{Float64, Nothing}=nothing)
+                epsilon_c::Union{Float64, Nothing},
+                pp::PhysicalParams)
+
+    # Extraction of the parameters
+    epsilon_p, alpha_p = pp.epsilon_p, pp.alpha_p
+    r_s_gdl, r_s_mpl, r_s_cl = pp.r_s_gdl, pp.r_s_mpl, pp.r_s_cl
+    tau_mpl, tau_cl = pp.tau_mpl, pp.tau_cl
 
     s_eff = _bounded_saturation_value(s)
     if element == :gdl # The effective diffusion coefficient at the GDL using Tomadakis and Sotirchos model.
@@ -551,13 +577,16 @@ s :
     Liquid water saturation variable.
 T :
     Temperature in K.
+pp : PhysicalParams
+    Physical parameters of the fuel cell.
 
 Returns
 -------
 lambda_eq
     Equilibrium water content in the membrane.
 """
-function lambda_eq(C_v, s, T)
+function lambda_eq(C_v, s, T, pp::PhysicalParams)
+    Kshape = pp.Kshape  # Mathematical factor governing lambda_eq smoothing.
     a_w = C_v / C_v_sat(T) + 2 * s  # Water activity.
     return 0.5 * lambda_v_eq(a_w)                                          * (1 - tanh(100 * (a_w - 1))) +
            0.5 * (lambda_v_eq(1) + ((lambda_l_eq(T) - lambda_v_eq(1)) / 2) * (1 - exp(-Kshape * (a_w - 1)))) *
@@ -594,14 +623,17 @@ T :
     Temperature in K.
 Hcl : Float64
     Thickness of the CL layer.
+pp : PhysicalParams
+    Physical parameters of the fuel cell.
 
 Returns
 -------
 D_lambda_eff
     Effective diffusion coefficient of water in the catalyst layer in m².s-1.
 """
-function D_lambda_eff(lambdaa, T, Hcl::Float64)
-    return epsilon_mc(lambdaa, T, Hcl) / tau_cl * D_lambda(lambdaa)
+function D_lambda_eff(lambdaa, T, Hcl::Float64, pp::PhysicalParams)
+    tau_cl = pp.tau_cl  # Pore structure coefficient in the CL.
+    return epsilon_mc(lambdaa, T, Hcl, pp) / tau_cl * D_lambda(lambdaa)
 end
 
 
@@ -635,14 +667,17 @@ T :
     Temperature in K.
 Hcl : Float64
     Thickness of the CL layer.
+pp : PhysicalParams
+    Physical parameters of the fuel cell.
 
 Returns
 -------
 
     Effective electro-osmotic drag diffusion coefficient of water in the catalyst layer in mol.m-2.s-1.
 """
-function D_EOD_eff(i_fc, lambdaa, T, Hcl::Float64)
-    return epsilon_mc(lambdaa, T, Hcl) / tau_cl * D_EOD(i_fc)
+function D_EOD_eff(i_fc, lambdaa, T, Hcl::Float64, pp::PhysicalParams)
+    tau_cl = pp.tau_cl  # Pore structure coefficient in the CL.
+    return epsilon_mc(lambdaa, T, Hcl, pp) / tau_cl * D_EOD(i_fc)
 end
 
 
@@ -654,13 +689,16 @@ lambdaa :
     Water content in the membrane.
 T :
     Temperature in K.
+pp : PhysicalParams
+    Physical parameters of the fuel cell.
 
 Returns
 -------
 fv
     Water volume fraction of the membrane.
 """
-function fv(lambdaa, T)
+function fv(lambdaa, T, pp::PhysicalParams)
+    M_eq, rho_mem = pp.M_eq, pp.rho_mem  # Equivalent molar mass and density of the dry membrane.
     return (lambdaa * M_H2O / rho_H2O_l(T)) / (M_eq / rho_mem + lambdaa * M_H2O / rho_H2O_l(T))
 end
 
@@ -679,22 +717,24 @@ T :
     Temperature in K.
 Hcl : Float64
     Thickness of the CL layer.
+pp : PhysicalParams
+    Physical parameters of the fuel cell.
 
 Returns
 -------
 gamma_sorp
     Sorption rate of vapor in the membrane in s-1.
 """
-function gamma_sorp_v(C_v, s, lambdaa, T, Hcl::Float64)
+function gamma_sorp_v(C_v, s, lambdaa, T, Hcl::Float64, pp::PhysicalParams)
 
     T_eff = _positive_temperature_value(T)
-    fv_value = fv(lambdaa, T_eff)
+    fv_value = fv(lambdaa, T_eff, pp)
     gamma_abs = (1.14e-5 * fv_value) / Hcl * exp(2416 * (1 / 303 - 1 / T_eff))
     gamma_des = (4.59e-5 * fv_value) / Hcl * exp(2416 * (1 / 303 - 1 / T_eff))
 
     # Transition function between absorption and desorption
     K_transition = 10  # It is a constant that defines the sharpness of the transition between two states.
-    w = 0.5 * (1 + tanh(K_transition * (lambda_eq(C_v, s, T) - lambdaa))) # Transition function.
+    w = 0.5 * (1 + tanh(K_transition * (lambda_eq(C_v, s, T, pp) - lambdaa))) # Transition function.
 
     return w * gamma_abs + (1 - w) * gamma_des # Interpolation between absorption and desorption.
 end
@@ -717,6 +757,8 @@ T :
     Temperature in K.
 epsilon : Float64
     Porosity.
+pp : PhysicalParams
+    Physical parameters of the fuel cell.
 
 Returns
 -------
@@ -728,7 +770,11 @@ function Svl(element::Symbol,
              C_v,
              Ctot,
              T,
-             epsilon::Float64)
+             epsilon::Float64,
+             pp::PhysicalParams)
+
+    # Extraction of the parameters
+    gamma_cond, gamma_evap = pp.gamma_cond, pp.gamma_evap
 
     s_eff = _bounded_saturation_value(s)
     C_v_eff = _nonnegative_value(C_v)
@@ -783,8 +829,10 @@ element : Symbol
     Must be either "gdl" (gas diffusion layer), "mpl" (micro-porous layer) or "cl" (catalyst layer).
 epsilon : Float64
     Porosity.
-epsilon_c : Union{Float64, Nothing}, optional
+epsilon_c : Union{Float64, Nothing}
     Compression ratio of the GDL.
+pp : PhysicalParams
+    Physical parameters of the fuel cell.
 
 Returns
 -------
@@ -800,7 +848,12 @@ Sources
 """
 function K0(element::Symbol,
             epsilon::Float64,
-            epsilon_c::Union{Float64, Nothing}=nothing)::Float64
+            epsilon_c::Union{Float64, Nothing},
+            pp::PhysicalParams)::Float64
+
+    # Extraction of the parameters
+    epsilon_p, alpha_p = pp.epsilon_p, pp.alpha_p
+    Dp_mpl, Dp_cl = pp.Dp_mpl, pp.Dp_cl
 
     if element == :gdl
         # According to the GDL porosity, the GDL compression effect is different.
@@ -834,17 +887,22 @@ T :
     Temperature in K.
 kappa_co : Float64
     Crossover correction coefficient in mol.m-1.s-1.Pa-1.
+pp : PhysicalParams
+    Physical parameters of the fuel cell.
 
 Returns
 -------
 k_H2
     Permeability coefficient of the membrane for hydrogen in mol.m-1.s-1.Pa-1.
 """
-function k_H2(lambdaa, T, kappa_co::Float64)
+function k_H2(lambdaa, T, kappa_co::Float64, pp::PhysicalParams)
+
+    # Extraction of the parameters
+    Eact_H2_cros_v, Eact_H2_cros_l = pp.Eact_H2_cros_v, pp.Eact_H2_cros_l
 
     T_eff = _positive_temperature_value(T)
     # Calculation of the permeability coefficient of the membrane for hydrogen
-    k_H2_d = kappa_co * (0.29 + 2.2 * fv(lambdaa, T)) * 1e-14 * exp(Eact_H2_cros_v / R * (1 / Tref_cross - 1 / T_eff))
+    k_H2_d = kappa_co * (0.29 + 2.2 * fv(lambdaa, T, pp)) * 1e-14 * exp(Eact_H2_cros_v / R * (1 / Tref_cross - 1 / T_eff))
     k_H2_l = kappa_co * 1.8 * 1e-14 * exp(Eact_H2_cros_l / R * (1 / Tref_cross - 1 / T_eff))
 
     # Transition function between under-saturated and liquid-saturated states
@@ -865,17 +923,22 @@ T :
     Temperature in K.
 kappa_co : Float64
     Crossover correction coefficient in mol.m-1.s-1.Pa-1.
+pp : PhysicalParams
+    Physical parameters of the fuel cell.
 
 Returns
 -------
 k_O2
     Permeability coefficient of the membrane for oxygen in mol.m-1.s-1.Pa-1.
 """
-function k_O2(lambdaa, T, kappa_co::Float64)
+function k_O2(lambdaa, T, kappa_co::Float64, pp::PhysicalParams)
+
+    # Extraction of the parameters
+    Eact_O2_cros_v, Eact_O2_cros_l = pp.Eact_O2_cros_v, pp.Eact_O2_cros_l
 
     T_eff = _positive_temperature_value(T)
     # Calculation of the permeability coefficient of the membrane for oxygen
-    k_O2_v = kappa_co * (0.11 + 1.9 * fv(lambdaa, T)) * 1e-14 * exp(Eact_O2_cros_v / R * (1 / Tref_cross - 1 / T_eff))
+    k_O2_v = kappa_co * (0.11 + 1.9 * fv(lambdaa, T, pp)) * 1e-14 * exp(Eact_O2_cros_v / R * (1 / Tref_cross - 1 / T_eff))
     k_O2_l = kappa_co * 1.2 * 1e-14 * exp(Eact_O2_cros_l / R * (1 / Tref_cross - 1 / T_eff))
 
     # Transition function between under-saturated and liquid-saturated states

@@ -214,8 +214,8 @@ DesiredInletFlows
         C_O2_ccl_i = s_i.ccl.C_O2
 
         T_acl_mem_ccl = (T_acl_i * Hacl + T_mem_i * Hmem + T_ccl_i * Hccl) / (Hacl + Hmem + Hccl)
-        i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl_i * k_H2(lambda_mem_i, T_mem_i, kappa_co)
-        i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl_i * k_O2(lambda_mem_i, T_mem_i, kappa_co)
+        i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl_i * k_H2(lambda_mem_i, T_mem_i, kappa_co, pp)
+        i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl_i * k_O2(lambda_mem_i, T_mem_i, kappa_co, pp)
         i_n_i = i_H2 + i_O2
         max_i_n = max(max_i_n, i_n_i)
     end
