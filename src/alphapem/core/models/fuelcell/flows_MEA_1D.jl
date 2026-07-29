@@ -49,6 +49,7 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
     Wagc, Wcgc, Hagc, Hcgc = pp.Wagc, pp.Wcgc, pp.Hagc, pp.Hcgc
     epsilon_gdl, epsilon_mpl = pp.epsilon_gdl, pp.epsilon_mpl
     kappa_co = pp.kappa_co
+    theta_l_rem, gamma_sorp_l, rho_mem, M_eq = pp.theta_l_rem, pp.gamma_sorp_l, pp.rho_mem, pp.M_eq
     nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl
 
     # Extraction of the variables
@@ -161,12 +162,12 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
     # Hydrogen and oxygen consumption
     #   Anode side
     S_H2_reac = i_fc / (2 * F * Hacl)
-    S_H2_cros = R * T_acl_mem_ccl / (Hmem * Hacl) * (k_H2(lambda_mem, T_mem, kappa_co) * C_H2_acl +
-                                                     2 * k_O2(lambda_mem, T_mem, kappa_co) * C_O2_ccl)
+    S_H2_cros = R * T_acl_mem_ccl / (Hmem * Hacl) * (k_H2(lambda_mem, T_mem, kappa_co, pp) * C_H2_acl +
+                                                     2 * k_O2(lambda_mem, T_mem, kappa_co, pp) * C_O2_ccl)
     #   Cathode side
     S_O2_reac = i_fc / (4 * F * Hccl)
-    S_O2_cros = R * T_acl_mem_ccl / (Hmem * Hccl) * (k_O2(lambda_mem, T_mem, kappa_co) * C_O2_ccl +
-                                                     1 / 2 * k_H2(lambda_mem, T_mem, kappa_co) * C_H2_acl)
+    S_O2_cros = R * T_acl_mem_ccl / (Hmem * Hccl) * (k_O2(lambda_mem, T_mem, kappa_co, pp) * C_O2_ccl +
+                                                     1 / 2 * k_H2(lambda_mem, T_mem, kappa_co, pp) * C_H2_acl)
 
     # Conductive-convective H2, O2 and N2 flows
     J_H2_agc_agdl = h_a(Pagc, T_des, Wagc, Hagc) * (C_H2_agc - C_H2_agdl[1])  # Also calculated in velocity.jl
@@ -215,25 +216,25 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
 
     # Water produced in the membrane at the CL through the chemical reaction and crossover
     #   Anode side
-    Sp_acl = 2 * k_O2(lambda_mem, T_mem, kappa_co) * R * T_acl_mem_ccl / (Hmem * Hacl) * C_O2_ccl
+    Sp_acl = 2 * k_O2(lambda_mem, T_mem, kappa_co, pp) * R * T_acl_mem_ccl / (Hmem * Hacl) * C_O2_ccl
     #   Cathode side
-    Sp_ccl = i_fc / (2 * F * Hccl) + k_H2(lambda_mem, T_mem, kappa_co) * R * T_acl_mem_ccl / (Hmem * Hccl) * C_H2_acl
+    Sp_ccl = i_fc / (2 * F * Hccl) + k_H2(lambda_mem, T_mem, kappa_co, pp) * R * T_acl_mem_ccl / (Hmem * Hccl) * C_H2_acl
 
     # Water absorption in the CL due to the contact between the ionomer and vapor or liquid water:
     #   Anode side
-    Sv_abs_acl = (1 - s_acl) * gamma_sorp_v(C_v_acl, s_acl, lambda_acl, T_acl, Hacl) * rho_mem / M_eq *
-                 (lambda_eq(C_v_acl, s_acl, T_acl) - lambda_acl)
+    Sv_abs_acl = (1 - s_acl) * gamma_sorp_v(C_v_acl, s_acl, lambda_acl, T_acl, Hacl, pp) * rho_mem / M_eq *
+                 (lambda_eq(C_v_acl, s_acl, T_acl, pp) - lambda_acl)
     if s_acl > 0
-        Sl_abs_acl = s_acl * gamma_sorp_l * rho_mem / M_eq * (lambda_eq(C_v_acl, s_acl, T_acl) - lambda_acl)
+        Sl_abs_acl = s_acl * gamma_sorp_l * rho_mem / M_eq * (lambda_eq(C_v_acl, s_acl, T_acl, pp) - lambda_acl)
     else
         Sl_abs_acl = 0.0
     end
 
     #   Cathode side
-    Sv_abs_ccl = (1 - s_ccl) * gamma_sorp_v(C_v_ccl, s_ccl, lambda_ccl, T_ccl, Hccl) * rho_mem / M_eq *
-                 (lambda_eq(C_v_ccl, s_ccl, T_ccl) - lambda_ccl)
+    Sv_abs_ccl = (1 - s_ccl) * gamma_sorp_v(C_v_ccl, s_ccl, lambda_ccl, T_ccl, Hccl, pp) * rho_mem / M_eq *
+                 (lambda_eq(C_v_ccl, s_ccl, T_ccl, pp) - lambda_ccl)
     if s_ccl > 0
-        Sl_abs_ccl = s_ccl * gamma_sorp_l * rho_mem / M_eq * (lambda_eq(C_v_ccl, s_ccl, T_ccl) - lambda_ccl)
+        Sl_abs_ccl = s_ccl * gamma_sorp_l * rho_mem / M_eq * (lambda_eq(C_v_ccl, s_ccl, T_ccl, pp) - lambda_ccl)
     else
         Sl_abs_ccl = 0.0
     end
@@ -244,31 +245,31 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
     @inbounds for i in 1:nb_gdl
         Sl_agdl[i] = Svl(:anode, s_agdl[i], C_v_agdl[i],
                          C_v_agdl[i] + C_H2_agdl[i] + C_N2_agdl[i],
-                         T_agdl[i], epsilon_gdl)
+                         T_agdl[i], epsilon_gdl, pp)
     end
     Sl_ampl = flows_work.Sl_ampl
     @inbounds for i in 1:nb_mpl
         Sl_ampl[i] = Svl(:anode, s_ampl[i], C_v_ampl[i],
                          C_v_ampl[i] + C_H2_ampl[i] + C_N2_ampl[i],
-                         T_ampl[i], epsilon_mpl)
+                         T_ampl[i], epsilon_mpl, pp)
     end
     Sl_acl = Svl(:anode, s_acl, C_v_acl, C_v_acl + C_H2_acl + C_N2_acl, T_acl,
-                 epsilon_cl(lambda_acl, T_acl, Hacl))
+                 epsilon_cl(lambda_acl, T_acl, Hacl, pp), pp)
 
     #   Cathode side
     Sl_ccl = Svl(:cathode, s_ccl, C_v_ccl, C_v_ccl + C_O2_ccl + C_N2_ccl, T_ccl,
-                 epsilon_cl(lambda_ccl, T_ccl, Hccl))
+                 epsilon_cl(lambda_ccl, T_ccl, Hccl, pp), pp)
     Sl_cmpl = flows_work.Sl_cmpl
     @inbounds for i in 1:nb_mpl
         Sl_cmpl[i] = Svl(:cathode, s_cmpl[i], C_v_cmpl[i],
                          C_v_cmpl[i] + C_O2_cmpl[i] + C_N2_cmpl[i],
-                         T_cmpl[i], epsilon_mpl)
+                         T_cmpl[i], epsilon_mpl, pp)
     end
     Sl_cgdl = flows_work.Sl_cgdl
     @inbounds for i in 1:nb_gdl
         Sl_cgdl[i] = Svl(:cathode, s_cgdl[i], C_v_cgdl[i],
                          C_v_cgdl[i] + C_O2_cgdl[i] + C_N2_cgdl[i],
-                         T_cgdl[i], epsilon_gdl)
+                         T_cgdl[i], epsilon_gdl, pp)
     end
 
     # Vapor generated through liquid water evaporation or degenerated through condensation

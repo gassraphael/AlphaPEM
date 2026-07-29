@@ -239,6 +239,7 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector{Float64}
     T_des, Pa_des, Pc_des = oc.T_des, oc.Pa_des, oc.Pc_des
     Phi_a_des, Phi_c_des, y_H2_in = oc.Phi_a_des, oc.Phi_c_des, oc.y_H2_in
     Hmem, kappa_co, kappa_c, i0_c_ref = pp.Hmem, pp.kappa_co, pp.kappa_c, pp.i0_c_ref
+    alpha_c = pp.alpha_c
     nb_gc, nb_gdl, nb_mpl = np.nb_gc, np.nb_gdl, np.nb_mpl
 
     # Initial fuel cell states.
@@ -268,14 +269,14 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector{Float64}
 
     s_ini = 0.0
     # Ionomer water content: each CL equilibrates with its own local humidity at rest.
-    lambda_acl_ini = lambda_eq(C_v_a_ini, s_ini, T_ini)   # Anode CL ↔ anode humidity
-    lambda_ccl_ini = lambda_eq(C_v_c_ini, s_ini, T_ini)   # Cathode CL ↔ cathode humidity
+    lambda_acl_ini = lambda_eq(C_v_a_ini, s_ini, T_ini, pp)   # Anode CL ↔ anode humidity
+    lambda_ccl_ini = lambda_eq(C_v_c_ini, s_ini, T_ini, pp)   # Cathode CL ↔ cathode humidity
     lambda_mem_ini = (lambda_acl_ini + lambda_ccl_ini) / 2 # Membrane: linear-profile average
     # Cathode overpotential: quasi-static value consistent with the initial current.
     i_fc_ini = current(simu.current_density, simu.time_interval[1])
     #       Crossover current density (H2 and O2 membrane permeation).
-    i_n_ini = 2 * F * R * T_ini / Hmem * C_H2_ini * k_H2(lambda_mem_ini, T_ini, kappa_co) +
-              4 * F * R * T_ini / Hmem * C_O2_ini * k_O2(lambda_mem_ini, T_ini, kappa_co)
+    i_n_ini = 2 * F * R * T_ini / Hmem * C_H2_ini * k_H2(lambda_mem_ini, T_ini, kappa_co, pp) +
+              4 * F * R * T_ini / Hmem * C_O2_ini * k_O2(lambda_mem_ini, T_ini, kappa_co, pp)
     #       Compute the true oxygen concentration at Pt directly from local CCL variables.
     C_O2_Pt_ini = calculate_C_O2_Pt(i_fc_ini, s_ini, lambda_ccl_ini, C_O2_ini, T_ini, simu.fuel_cell)
     #       Butler-Volmer quasi-static inversion: solve dη_c/dt = 0.

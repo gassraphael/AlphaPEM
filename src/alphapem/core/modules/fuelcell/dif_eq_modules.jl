@@ -88,29 +88,30 @@ function calculate_dif_eq_int_values(t::Float64,
     #       Volumetric heat capacity (J.m-3.K-1)
     rho_Cp0_agdl = ntuple(i -> calculate_rho_Cp0(:agdl, T_agdl[i], C_v_agdl[i],
                                                  s_agdl[i], nothing, C_H2_agdl[i], nothing, C_N2_agdl[i],
-                                                 epsilon_gdl), nb_gdl)
+                                                 epsilon_gdl, nothing, pp), nb_gdl)
     rho_Cp0_ampl = ntuple(i -> calculate_rho_Cp0(:ampl, T_ampl[i], C_v_ampl[i],
                                                  s_ampl[i], nothing, C_H2_ampl[i], nothing, C_N2_ampl[i],
-                                                 epsilon_mpl), nb_mpl)
+                                                 epsilon_mpl, nothing, pp), nb_mpl)
     rho_Cp0_acl = calculate_rho_Cp0(:acl, T_acl, C_v_acl, s_acl, lambda_acl, C_H2_acl, nothing, C_N2_acl,
-                                    nothing, Hacl)
-    rho_Cp0_mem = calculate_rho_Cp0(:mem, T_mem, nothing, nothing, lambda_mem)
+                                    nothing, Hacl, pp)
+    rho_Cp0_mem = calculate_rho_Cp0(:mem, T_mem, nothing, nothing, lambda_mem, nothing, nothing, nothing,
+                                    nothing, nothing, pp)
     rho_Cp0_ccl = calculate_rho_Cp0(:ccl, T_ccl, C_v_ccl, s_ccl, lambda_ccl, nothing, C_O2_ccl,
-                                    C_N2_ccl, nothing, Hccl)
+                                    C_N2_ccl, nothing, Hccl, pp)
     rho_Cp0_cmpl = ntuple(i -> calculate_rho_Cp0(:cmpl, T_cmpl[i], C_v_cmpl[i],
                                                  s_cmpl[i], nothing, nothing, C_O2_cmpl[i], C_N2_cmpl[i],
-                                                 epsilon_mpl), nb_mpl)
+                                                 epsilon_mpl, nothing, pp), nb_mpl)
     rho_Cp0_cgdl = ntuple(i -> calculate_rho_Cp0(:cgdl, T_cgdl[i], C_v_cgdl[i],
                                                  s_cgdl[i], nothing, nothing, C_O2_cgdl[i], C_N2_cgdl[i],
-                                                 epsilon_gdl), nb_gdl)
+                                                 epsilon_gdl, nothing, pp), nb_gdl)
     rho_Cp0 = MEAThermalIntermediates{nb_gdl, nb_mpl}(rho_Cp0_agdl, rho_Cp0_ampl, rho_Cp0_acl,
                                                       rho_Cp0_mem, rho_Cp0_ccl, rho_Cp0_cmpl, rho_Cp0_cgdl)
 
     #       Crossover current density
     T_acl_mem_ccl = average((T_acl, T_mem, T_ccl),
                             (Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl), Hccl / (Hacl + Hmem + Hccl)))
-    i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
-    i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
+    i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co, pp)
+    i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co, pp)
     i_n = i_H2 + i_O2
 
     # Auxiliary/manifold branch now uses typed structures as well.

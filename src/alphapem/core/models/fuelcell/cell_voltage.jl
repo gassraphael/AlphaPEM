@@ -51,15 +51,15 @@ function calculate_cell_voltage(i_fc::Real, C_O2_Pt::Real, sv::CellState1D, fc::
     # The crossover current density
     T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
                             [Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl), Hccl / (Hacl + Hmem + Hccl)])
-    i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co)
-    i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co)
+    i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co, pp)
+    i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co, pp)
     i_n = i_H2 + i_O2
 
     # The proton resistance
     #       The proton resistance at the membrane : Rmem
-    Rmem = Hmem / sigma_p_eff(:mem, lambda_mem, T_mem)
+    Rmem = Hmem / sigma_p_eff(:mem, lambda_mem, T_mem, nothing, pp)
     #       The proton resistance at the cathode catalyst layer : Rccl
-    Rccl = Hccl / sigma_p_eff(:ccl, lambda_ccl, T_ccl, Hccl)
+    Rccl = Hccl / sigma_p_eff(:ccl, lambda_ccl, T_ccl, Hccl, pp)
     #       The total proton resistance
     Rp = Rmem + Rccl  # Its value is around [4-7]e-6 ohm.m².
 

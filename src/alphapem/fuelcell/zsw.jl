@@ -419,18 +419,26 @@ function undetermined_parameters(fc::ZSWFuelCell, voltage_zone::Symbol = :full):
         throw(ArgumentError("voltage_zone must be :full or :before_voltage_drop (got $voltage_zone)"))
 
     params = [
-        (:Hccl,         10e-6, 15.5e-6),    # Cathode catalyst-layer thickness
-        (:Hgdl,         70e-6, 90e-6),      # Gas-diffusion-layer thickness
-        (:Hmpl,         60e-6, 80e-6),      # Microporous-layer thickness
-        (:epsilon_gdl,  0.7, 0.9),          # GDL porosity
-        (:Re,           5e-8, 5e-6),        # Electron-conduction resistance
-        (:i0_c_ref,     0.1, 1000.0),       # Reference cathode exchange current density
-        (:kappa_co,     0.01, 40.0),       # Crossover correction coefficient
-        (:kappa_c,      0.25, 4.0),       # Overpotential correction exponent
+        (:Hccl,         10e-6, 15.5e-6),              # Cathode catalyst-layer thickness
+        (:Hgdl,         70e-6, 90e-6),                # Gas-diffusion-layer thickness
+        (:Hmpl,         60e-6, 80e-6),                # Microporous-layer thickness
+        (:epsilon_gdl,  0.7, 0.9),                    # GDL porosity
+        (:epsilon_mpl,  0.3, 0.7),                    # MPL porosity
+        (:alpha_c,      0.01, 1.0),                   # Cathode transfer coefficient
+        (:e,            3, 5),                        # Capillary exponent
+        (:Re,           5e-8, 5e-6),                  # Electron-conduction resistance
+        (:i0_c_ref,     0.1, 1000.0),                 # Reference cathode exchange current density
+        (:kappa_co,     0.01, 40.0),                  # Crossover correction coefficient
+        (:kappa_c,      0.25, 4.0),                   # Overpotential correction exponent
     ]
 
     if voltage_zone == :full
-        push!(params, (:K_O2_ad_Pt, 0.1, 10.0))    # O₂ adsorption resistance coefficient
+        push!(params, (:theta_c_gdl,  90 * π / 180, 180 * π / 180)) # GDL contact angle
+        push!(params, (:IC, 0.01, 2.0))                             # Ionomer to carbon ratio in the catalyst layer
+        push!(params, (:r_carb, 10e-9, 100e-9))                     # Mean radius of the carbon particles
+        push!(params, (:ECSA_0, 10.0, 200.0))                       # Initial electrochemical surface area of the catalyst
+        push!(params, (:K_O2_dis_ion, 0.1, 20.0))                   # Interfacial resistance coefficient of O₂ dissolution inside the ionomer
+        push!(params, (:K_O2_ad_Pt, 0.1, 20.0))                     # Interfacial resistance coefficient of O₂ adsorption on the Pt sites
     end
 
     return params
