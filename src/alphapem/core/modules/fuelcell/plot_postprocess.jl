@@ -143,7 +143,9 @@ end
 """Return polarization points sampled at stabilization times (fixed mode).
 
 The returned current density is in A.cm^-2 to match plotting conventions.
-If `average` is true, multiple points at the same current are averaged.
+Voltages are averaged over the measurement window (last delta_t_measurement seconds of each stabilization period).
+If `average` is true, multiple points at the same current are averaged (hysteresis is not shown).
+If `average` is false, all sampled points are returned (hysteresis is shown).
 """
 function _polarization_points(outputs::SimulationOutputs,
                               cd::AbstractCurrent;
@@ -152,17 +154,35 @@ function _polarization_points(outputs::SimulationOutputs,
     t_hist = time_history(outputs)
     Ucell_t = derived_outputs(outputs).Ucell
 
-    # Calculate current density and convert to A/cm² for display
-    ifc_t = [current(cd, t) / 1e4 for t in t_hist]
+    # Get measurement windows for voltage averaging
+    measurement_windows = polarisation_measurement_windows(cd)
 
-    # Identify indices corresponding to stabilized points (end of step)
-    sample_indices = polarisation_sampling_indices(outputs, cd)
-    
-    ifc_samples = ifc_t[sample_indices]
-    Ucell_samples = Ucell_t[sample_indices]
+    ifc_samples = Float64[]
+    Ucell_samples = Float64[]
+
+    # For each measurement window, compute the average voltage and current
+    for (t_meas_start, t_meas_end) in measurement_windows
+        # Find indices in the measurement window
+        mask = (t_hist .>= t_meas_start) .& (t_hist .<= t_meas_end)
+        if !any(mask)
+            continue
+        end
+
+        t_in_window = t_hist[mask]
+        Ucell_in_window = Ucell_t[mask]
+
+        # Average voltage over the measurement window
+        Ucell_avg = mean(Ucell_in_window)
+
+        # Use current at the start of the measurement window
+        ifc_at_start = current(cd, t_meas_start) / 1e4
+
+        push!(ifc_samples, ifc_at_start)
+        push!(Ucell_samples, Ucell_avg)
+    end
 
     # If requested, group and average voltages for each current level (e.g., multiple cycles)
-    if average
+    if average && !isempty(ifc_samples)
         seen_i = Dict{Float64, Vector{Float64}}()
         for (i, u) in zip(ifc_samples, Ucell_samples)
             # Round to group points despite potential numerical micro-variations
@@ -173,7 +193,7 @@ function _polarization_points(outputs::SimulationOutputs,
                 seen_i[i_key] = [u]
             end
         end
-        
+
         # Sort by current density to ensure a monotonic curve for display
         sorted_i = sort(collect(keys(seen_i)))
         return sorted_i, [mean(seen_i[i]) for i in sorted_i]

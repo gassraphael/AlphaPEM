@@ -110,19 +110,48 @@ polarisation_sampling_indices(outputs::SimulationOutputs,
 function polarisation_sampling_times(cd::AbstractCurrent)::Vector{Float64}
     hasproperty(cd, :delta_t_ini) ||
         throw(ArgumentError("The current profile does not expose `delta_t_ini` for polarisation sampling."))
-    hasproperty(cd, :delta_t_break) ||
-        throw(ArgumentError("The current profile does not expose `delta_t_break` for polarisation sampling."))
+    hasproperty(cd, :delta_t_breaks) ||
+        throw(ArgumentError("The current profile does not expose `delta_t_breaks` for polarisation sampling."))
 
     delta_t_ini = getproperty(cd, :delta_t_ini)
-    delta_t_break = getproperty(cd, :delta_t_break)
+    delta_t_breaks = getproperty(cd, :delta_t_breaks)
 
     # k=1 is the initial stabilization at 1.0 A/cm^2.
     times = Float64[]
     for k in eachindex(cd.t_starts)
-        t_end_stab = cd.t_starts[k] + cd.dt_loads[k] + (k == 1 ? delta_t_ini : delta_t_break)
+        t_end_stab = cd.t_starts[k] + cd.dt_loads[k] + (k == 1 ? delta_t_ini : delta_t_breaks[k])
         push!(times, t_end_stab)
     end
     return times
+end
+
+
+"""Return measurement windows (start, end times) for voltage averaging during polarisation steps.
+
+The measurement window is the last `delta_t_measurement` seconds of each stabilization period.
+Returns a vector of tuples (t_start, t_end) for each step.
+"""
+function polarisation_measurement_windows(cd::AbstractCurrent)::Vector{Tuple{Float64, Float64}}
+    hasproperty(cd, :delta_t_ini) ||
+        throw(ArgumentError("The current profile does not expose `delta_t_ini` for polarisation sampling."))
+    hasproperty(cd, :delta_t_measurement) ||
+        throw(ArgumentError("The current profile does not expose `delta_t_measurement` for measurement windows."))
+    hasproperty(cd, :delta_t_breaks) ||
+        throw(ArgumentError("The current profile does not expose `delta_t_breaks` for measurement windows."))
+
+    delta_t_ini = getproperty(cd, :delta_t_ini)
+    delta_t_measurement = getproperty(cd, :delta_t_measurement)
+    delta_t_breaks = getproperty(cd, :delta_t_breaks)
+
+    windows = Tuple{Float64, Float64}[]
+    for k in eachindex(cd.t_starts)
+        stab_time = k == 1 ? delta_t_ini : delta_t_breaks[k]
+        t_end_stab = cd.t_starts[k] + cd.dt_loads[k] + stab_time
+        t_meas_start = t_end_stab - delta_t_measurement
+        t_meas_end = t_end_stab
+        push!(windows, (t_meas_start, t_meas_end))
+    end
+    return windows
 end
 
 
