@@ -150,8 +150,8 @@ function calculate_heat_transfers!(heat_work::MEAHeatWorkspace,
     Q_e = MEAElectricHeat{NB_GDL, NB_MPL}(
         ntuple(_ -> i_fc^2 / sigma_e_eff_gdl, NB_GDL), # Q_e_agdl
         ntuple(_ -> i_fc^2 / sigma_e_eff_mpl, NB_MPL), # Q_e_ampl
-        i_fc^2 / sigma_e_eff(:cl, nothing, nothing, lambda_acl, T_acl, Hacl, pp), # Q_e_acl
-        i_fc^2 / (3 * sigma_e_eff(:cl, nothing, nothing, lambda_ccl, T_ccl, Hccl, pp)), # Q_e_ccl
+        i_fc^2 / sigma_e_eff(:acl, nothing, nothing, lambda_acl, T_acl, Hacl, pp), # Q_e_acl
+        i_fc^2 / (3 * sigma_e_eff(:ccl, nothing, nothing, lambda_ccl, T_ccl, Hccl, pp)), # Q_e_ccl
         ntuple(_ -> i_fc^2 / sigma_e_eff_mpl, NB_MPL), # Q_e_cmpl
         ntuple(_ -> i_fc^2 / sigma_e_eff_gdl, NB_GDL) # Q_e_cgdl
     )

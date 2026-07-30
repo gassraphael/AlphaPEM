@@ -72,7 +72,7 @@ function physical_parameters(fc::ZSWFuelCell)::PhysicalParams
         K_O2_ad_Pt = 7.346634385810734,      # Interfacial resistance coefficient of O2 adsorption on the Pt sites
         # Voltage polarization
         Re = 1.545654084145453e-7,           # Electron conduction resistance of the circuit in Ω·m²
-        i0_c_ref = 200.0,                    # Reference exchange current density at the cathode in A·m⁻²
+        i0_c_ref = 20.0,                    # Reference exchange current density at the cathode in A·m⁻²
         kappa_co = 1,                        # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
         kappa_c = 0.253020870903792,         # Overpotential correction exponent
         C_scl = 2e7                          # Volumetric space-charge layer capacitance in F·m⁻³
@@ -427,14 +427,14 @@ function undetermined_parameters(fc::ZSWFuelCell, voltage_zone::Symbol = :full):
         (:alpha_c,      0.01, 1.0),                   # Cathode transfer coefficient
         (:e,            3, 5),                        # Capillary exponent
         (:Re,           5e-8, 5e-6),                  # Electron-conduction resistance
-        (:i0_c_ref,     0.1, 1000.0),                 # Reference cathode exchange current density
+        (:i0_c_ref,     0.1, 100.0),                 # Reference cathode exchange current density
         (:kappa_co,     0.01, 40.0),                  # Crossover correction coefficient
         (:kappa_c,      0.25, 4.0),                   # Overpotential correction exponent
     ]
 
     if voltage_zone == :full
         push!(params, (:theta_c_gdl,  90 * π / 180, 180 * π / 180)) # GDL contact angle
-        push!(params, (:IC, 0.01, 2.0))                             # Ionomer to carbon ratio in the catalyst layer
+        push!(params, (:IC_ccl, 0.1, 3.0))                          # Ionomer to carbon ratio in the cathode catalyst layer
         push!(params, (:r_carb, 10e-9, 100e-9))                     # Mean radius of the carbon particles
         push!(params, (:ECSA_0, 10.0, 200.0))                       # Initial electrochemical surface area of the catalyst
         push!(params, (:K_O2_dis_ion, 0.1, 20.0))                   # Interfacial resistance coefficient of O₂ dissolution inside the ionomer

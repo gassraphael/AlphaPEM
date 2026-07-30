@@ -40,10 +40,10 @@ function calculate_dyn_dissoved_water_evolution_inside_MEA(
     M_eq, rho_mem = pp.M_eq, pp.rho_mem
 
     # Differential equations
-    d_lambda_acl_dt = M_eq / (rho_mem * epsilon_mc(lambda_acl, T_acl, pp.Hacl, pp)) *
+    d_lambda_acl_dt = M_eq / (rho_mem * epsilon_mc(:acl, lambda_acl, T_acl, pp.Hacl, pp)) *
                   (-J_lambda.acl_mem / pp.Hacl + S_abs.v_acl + S_abs.l_acl + Sp.acl)
     d_lambda_mem_dt = M_eq / rho_mem * (J_lambda.acl_mem - J_lambda.mem_ccl) / pp.Hmem
-    d_lambda_ccl_dt = M_eq / (rho_mem * epsilon_mc(lambda_ccl, T_ccl, pp.Hccl, pp)) *
+    d_lambda_ccl_dt = M_eq / (rho_mem * epsilon_mc(:ccl, lambda_ccl, T_ccl, pp.Hccl, pp)) *
                   (J_lambda.mem_ccl / pp.Hccl + S_abs.v_ccl + S_abs.l_ccl + Sp.ccl)
 
     return MEADissolvedWaterDerivative(d_lambda_acl_dt, d_lambda_mem_dt, d_lambda_ccl_dt)
@@ -106,9 +106,9 @@ function calculate_dyn_liquid_water_evolution_inside_MEA(
     end
 
     #   Anode and cathode CLs
-    d_s_acl_dt = 1 / (rho_H2O_l(T_acl) * epsilon_cl(lambda_acl, T_acl, pp.Hacl, pp)) *
+    d_s_acl_dt = 1 / (rho_H2O_l(T_acl) * epsilon_cl(:acl, lambda_acl, T_acl, pp.Hacl, pp)) *
             (Jl.ampl_acl / pp.Hacl - M_H2O * S_abs.l_acl + M_H2O * Sl.acl)
-    d_s_ccl_dt = 1 / (rho_H2O_l(T_ccl) * epsilon_cl(lambda_ccl, T_ccl, pp.Hccl, pp)) *
+    d_s_ccl_dt = 1 / (rho_H2O_l(T_ccl) * epsilon_cl(:ccl, lambda_ccl, T_ccl, pp.Hccl, pp)) *
             (-Jl.ccl_cmpl / pp.Hccl - M_H2O * S_abs.l_ccl + M_H2O * Sl.ccl)
 
     #   Cathode MPL
@@ -192,9 +192,9 @@ function calculate_dyn_vapor_evolution_inside_MEA(
     end
 
     #    Anode and cathode CLs
-    d_C_v_acl_dt = 1 / (epsilon_cl(lambda_acl, T_acl, pp.Hacl, pp) * (1 - s_acl)) *
+    d_C_v_acl_dt = 1 / (epsilon_cl(:acl, lambda_acl, T_acl, pp.Hacl, pp) * (1 - s_acl)) *
               (Jv.ampl_acl / pp.Hacl - S_abs.v_acl + Sv.acl)
-    d_C_v_ccl_dt = 1 / (epsilon_cl(lambda_ccl, T_ccl, pp.Hccl, pp) * (1 - s_ccl)) *
+    d_C_v_ccl_dt = 1 / (epsilon_cl(:ccl, lambda_ccl, T_ccl, pp.Hccl, pp) * (1 - s_ccl)) *
               (-Jv.ccl_cmpl / pp.Hccl - S_abs.v_ccl + Sv.ccl)
 
     #   Cathode MPL
@@ -289,15 +289,15 @@ function calculate_dyn_H2_O2_N2_evolution_inside_MEA(
     end
 
     #   Anode CL
-    d_C_H2_acl_dt = 1 / (epsilon_cl(lambda_acl, T_acl, pp.Hacl, pp) * (1 - s_acl)) *
+    d_C_H2_acl_dt = 1 / (epsilon_cl(:acl, lambda_acl, T_acl, pp.Hacl, pp) * (1 - s_acl)) *
                (J_H2.ampl_acl / pp.Hacl - S_H2.reac - S_H2.cros)
-    d_C_N2_acl_dt = 1 / (epsilon_cl(lambda_acl, T_acl, pp.Hacl, pp) * (1 - s_acl)) *
+    d_C_N2_acl_dt = 1 / (epsilon_cl(:acl, lambda_acl, T_acl, pp.Hacl, pp) * (1 - s_acl)) *
                (J_N2.ampl_acl / pp.Hacl)
 
     #   Cathode CL
-    d_C_O2_ccl_dt = 1 / (epsilon_cl(lambda_ccl, T_ccl, pp.Hccl, pp) * (1 - s_ccl)) *
+    d_C_O2_ccl_dt = 1 / (epsilon_cl(:ccl, lambda_ccl, T_ccl, pp.Hccl, pp) * (1 - s_ccl)) *
                (-J_O2.ccl_cmpl / pp.Hccl - S_O2.reac - S_O2.cros)
-    d_C_N2_ccl_dt = 1 / (epsilon_cl(lambda_ccl, T_ccl, pp.Hccl, pp) * (1 - s_ccl)) *
+    d_C_N2_ccl_dt = 1 / (epsilon_cl(:ccl, lambda_ccl, T_ccl, pp.Hccl, pp) * (1 - s_ccl)) *
                (-J_N2.ccl_cmpl / pp.Hccl)
 
     #   Cathode MPL

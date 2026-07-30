@@ -209,7 +209,7 @@ function sigma_p_eff(element::Symbol,
         if Hcl === nothing
             throw(ArgumentError("Hcl must be provided when element == 'ccl'."))
         end
-        epsilon_mc_eff = epsilon_mc(lambdaa, T_eff, Hcl, pp)
+        epsilon_mc_eff = epsilon_mc(:ccl, lambdaa, T_eff, Hcl, pp)
         sigma_p_eff_low = epsilon_mc_eff * 0.1879 * exp(1268 * (1 / 303.15 - 1 / T_eff))
         sigma_p_eff_high = epsilon_mc_eff * (0.5139 * lambdaa - 0.326) * exp(1268 * (1 / 303.15 - 1 / T_eff))
     else
@@ -273,15 +273,15 @@ function sigma_e_eff(element::Symbol,
         sigma_e_mpl = pp.sigma_e_mpl  # Electrical conductivity of the MPL.
         return (1 - epsilon) * sigma_e_mpl
 
-    elseif element == :cl  # The effective electrical conductivity at the CL.
+    elseif element == :acl || element == :ccl  # The effective electrical conductivity at the CL.
         if lambda_cl === nothing || T_cl === nothing || Hcl === nothing
-            throw(ArgumentError("lambda_cl, T_cl and Hcl must be provided when element == 'cl'."))
+            throw(ArgumentError("lambda_cl, T_cl and Hcl must be provided when element == 'acl' or 'ccl'."))
         end
         sigma_e_cl = pp.sigma_e_cl  # Electrical conductivity of the CL.
-        return max(1 - epsilon_cl(lambda_cl, T_cl, Hcl, pp) - epsilon_mc(lambda_cl, T_cl, Hcl, pp), eps(Float64)) * sigma_e_cl
+        return max(1 - epsilon_cl(element, lambda_cl, T_cl, Hcl, pp) - epsilon_mc(element, lambda_cl, T_cl, Hcl, pp), eps(Float64)) * sigma_e_cl
 
     else
-        throw(ArgumentError("The element should be either 'gdl', 'mpl' or 'cl'."))
+        throw(ArgumentError("The element should be either 'gdl', 'mpl', 'acl' or 'ccl'."))
     end
 end
 
@@ -488,8 +488,8 @@ function k_th_eff(element::Symbol,
 
         k_th_mem = pp.k_th_mem  # Thermal conductivity of the membrane.
         fv_val = fv(lambdaa, T, pp)
-        epsilon_mc_val = epsilon_mc(lambdaa, T, Hcl, pp)
-        epsilon_cl_val = epsilon_cl(lambdaa, T, Hcl, pp)
+        epsilon_mc_val = epsilon_mc(element, lambdaa, T, Hcl, pp)
+        epsilon_cl_val = epsilon_cl(element, lambdaa, T, Hcl, pp)
         k_th_eff_mem = hmean(k_th_mem, k_th(:H2O_l, T), 1 - fv_val, fv_val)
 
         if element == :acl  # The thermal conductivity of the gas mixture in the ACL.
@@ -676,8 +676,8 @@ function calculate_rho_Cp0(element::Symbol,
             throw(ArgumentError("C_v, s, lambdaa, C_N2 and Hcl must be provided for CL elements."))
         end
 
-        epsilon_mc_val = epsilon_mc(lambdaa, T, Hcl, pp)
-        epsilon_cl_val = epsilon_cl(lambdaa, T, Hcl, pp)
+        epsilon_mc_val = epsilon_mc(element, lambdaa, T, Hcl, pp)
+        epsilon_cl_val = epsilon_cl(element, lambdaa, T, Hcl, pp)
 
         if element == :acl  # The heat capacity of the gas mixture in the ACL.
             if C_H2 === nothing
