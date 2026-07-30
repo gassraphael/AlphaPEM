@@ -58,7 +58,7 @@ function calculate_C_O2_Pt(i_fc::Real,
     Hccl, K_O2_ad_Pt = pp.Hccl, pp.K_O2_ad_Pt
     C_O2_Pt_raw = C_O2_ccl - i_fc / (4 * F * Hccl) *
                   R_T_O2_Pt(s_ccl, lambda_ccl, T_ccl, Hccl, K_O2_ad_Pt, pp) /
-                  a_c(lambda_ccl, T_ccl, Hccl, pp)
+                  a_c(:ccl, lambda_ccl, T_ccl, Hccl, pp)
     return _positive_concentration_value(C_O2_Pt_raw) # This avoids an unphysical negative C_O2_Pt and keeps Newton stable.
 end
 
@@ -164,9 +164,9 @@ function R_O2_dif_l(s, lambdaa, T, Hcl::Float64, pp::PhysicalParams)
     r_carb = pp.r_carb  # Mean radius of the carbon particles.
 
     T_eff = _positive_temperature_value(T)
-    delta_ion_val = delta_ion(lambdaa, T_eff, Hcl, pp)
+    delta_ion_val = delta_ion(:ccl, lambdaa, T_eff, Hcl, pp)
     s_num = _nonnegative_value(s)
-    delta_H2O_l = (s_num * epsilon_cl(lambdaa, T_eff, Hcl, pp) * r_carb^3 / epsilon_carb(Hcl, pp) +
+    delta_H2O_l = (s_num * epsilon_cl(:ccl, lambdaa, T_eff, Hcl, pp) * r_carb^3 / epsilon_carb(:ccl, Hcl, pp) +
                   (r_carb + delta_ion_val)^3)^(1 / 3) -
                   (r_carb + delta_ion_val) # The liquid water film thickness in the CL, in m.
 
@@ -236,7 +236,7 @@ function R_O2_dif_ion(lambdaa, T, Hcl::Float64, pp::PhysicalParams)
     T_eff = _positive_temperature_value(T)
     D_O2_dif_ion = 17.45e-10 * exp(-1514 / T_eff) # This is the effective diffusion coefficient of O2 in the ionomer film, in m².s-1.
 
-    return delta_ion(lambdaa, T_eff, Hcl, pp) / D_O2_dif_ion
+    return delta_ion(:ccl, lambdaa, T_eff, Hcl, pp) / D_O2_dif_ion
 end
 
 
@@ -264,12 +264,12 @@ Sources
 in PEM Fuel Cells.
 """
 function R_O2_dif_ion_eff(lambdaa, T, Hcl::Float64, pp::PhysicalParams)
-    r_carb, theta_Pt_0, wt_Pt = pp.r_carb, pp.theta_Pt_0, pp.wt_Pt
+    r_carb, theta_Pt_0, wt_Pt_ccl = pp.r_carb, pp.theta_Pt_0, pp.wt_Pt_ccl
 
-    delta_ion_val = delta_ion(lambdaa, T, Hcl, pp)
+    delta_ion_val = delta_ion(:ccl, lambdaa, T, Hcl, pp)
     r_Pt_val = r_Pt(pp)
     geom_factor = (r_carb + delta_ion_val)^2 / (r_Pt_val^2 * (1 - theta_Pt_0)) *
-                  rho_Pt / rho_carb * (r_Pt_val / r_carb)^3 * (1 - wt_Pt) / wt_Pt
+                  rho_Pt / rho_carb * (r_Pt_val / r_carb)^3 * (1 - wt_Pt_ccl) / wt_Pt_ccl
 
     return geom_factor * R_O2_dif_ion(lambdaa, T, Hcl, pp)
 end
@@ -331,11 +331,11 @@ Sources
 in PEM Fuel Cells.
 """
 function R_O2_ad_Pt_eff(lambdaa, T, Hcl::Float64, K_O2_ad_Pt::Float64, pp::PhysicalParams)
-    r_carb, theta_Pt_0, wt_Pt = pp.r_carb, pp.theta_Pt_0, pp.wt_Pt
-    delta_ion_val = delta_ion(lambdaa, T, Hcl, pp)
+    r_carb, theta_Pt_0, wt_Pt_ccl = pp.r_carb, pp.theta_Pt_0, pp.wt_Pt_ccl
+    delta_ion_val = delta_ion(:ccl, lambdaa, T, Hcl, pp)
     r_Pt_val = r_Pt(pp)
     geom_factor = (r_carb + delta_ion_val)^2 / (r_Pt_val^2 * (1 - theta_Pt_0)) *
-                  rho_Pt / rho_carb * (r_Pt_val / r_carb)^3 * (1 - wt_Pt) / wt_Pt
+                  rho_Pt / rho_carb * (r_Pt_val / r_carb)^3 * (1 - wt_Pt_ccl) / wt_Pt_ccl
 
     return geom_factor * R_O2_ad_Pt(lambdaa, T, Hcl, K_O2_ad_Pt, pp)
 end
@@ -359,8 +359,8 @@ Sources
 in PEM Fuel Cells.
 """
 function r_Pt(pp::PhysicalParams)
-    ECSA_0, L_Pt = pp.ECSA_0, pp.L_Pt  # Initial electrochemical surface area and Pt loading of the catalyst.
-    return 3 / (rho_Pt * ECSA_0 / L_Pt) # This is the platine particle radius, in m.
+    ECSA_0, L_Pt_ccl = pp.ECSA_0, pp.L_Pt_ccl  # Initial electrochemical surface area and Pt loading of the catalyst.
+    return 3 / (rho_Pt * ECSA_0 / L_Pt_ccl) # This is the platine particle radius, in m.
 end
 
 
@@ -368,6 +368,8 @@ end
 
 Parameters
 ----------
+element : Symbol
+    Either `:acl` (anode) or `:ccl` (cathode) — selects the electrode-specific Pt loading and Pt/C weight fraction.
 lambdaa :
     Water content in the CL.
 T :
@@ -389,67 +391,75 @@ in PEM Fuel Cells.
 2. Georg A. Futter - Article 2018 - Physical modeling of polymer-electrolyte membrane fuel cells - Understanding
 water management and impedance spectra.
 """
-function delta_ion(lambdaa, T, Hcl::Float64, pp::PhysicalParams)
+function delta_ion(element::Symbol, lambdaa, T, Hcl::Float64, pp::PhysicalParams)
     r_carb = pp.r_carb  # Mean radius of the carbon particles.
-    return r_carb * ((epsilon_mc(lambdaa, T, Hcl, pp) / epsilon_carb(Hcl, pp) + 1)^(1 / 3) - 1)
+    return r_carb * ((epsilon_mc(element, lambdaa, T, Hcl, pp) / epsilon_carb(element, Hcl, pp) + 1)^(1 / 3) - 1)
 end
 
 
-"""This function calculates the carbon volume fraction in the CCL.
+"""This function calculates the carbon volume fraction in the catalyst layer (ACL or CCL).
 
 Parameters
 ----------
-Hccl : Float64
-    Thickness of the CCL layer.
+element : Symbol
+    Either `:acl` (anode) or `:ccl` (cathode) — selects the electrode-specific Pt loading and Pt/C weight fraction.
+Hcl : Float64
+    Thickness of the CL layer.
 pp : PhysicalParams
     Physical parameters of the fuel cell.
 
 Returns
 -------
 epsilon_carb :
-    Carbon volume fraction in the CCL.
+    Carbon volume fraction in the CL.
 
 Sources
 -------
 1. Liang Hao - Article 2015 - Modeling and Experimental Validation of Pt Loading and Electrode Composition Effects
 in PEM Fuel Cells.
 """
-function epsilon_carb(Hccl::Float64, pp::PhysicalParams)
-    L_Pt, wt_Pt = pp.L_Pt, pp.wt_Pt  # Pt loading and Pt/C weight fraction in the cathode catalyst layer.
-    L_carb = L_Pt * (1 - wt_Pt) / wt_Pt  # This is the carbon loading in the CCL, in kg.m-2.
-    epsilon_carb_val = L_carb / (rho_carb * Hccl) # This is the volume fraction of carbon in the CCL.
+function epsilon_carb(element::Symbol, Hcl::Float64, pp::PhysicalParams)
+    L_Pt, wt_Pt = element == :acl ? (pp.L_Pt_acl, pp.wt_Pt_acl) :
+                  element == :ccl ? (pp.L_Pt_ccl, pp.wt_Pt_ccl) :
+                  throw(ArgumentError("The element should be either 'acl' or 'ccl'."))
+    L_carb = L_Pt * (1 - wt_Pt) / wt_Pt  # This is the carbon loading in the CL, in kg.m-2.
+    epsilon_carb_val = L_carb / (rho_carb * Hcl) # This is the volume fraction of carbon in the CL.
     if epsilon_carb_val >= 1
-        println("epsilon_carb: ", epsilon_carb_val, " Hccl: ", Hccl, " wt_Pt: ", wt_Pt)
-        throw(ArgumentError("The calculated carbon volume fraction in the CCL is greater than or equal to 1. Please check the inputs Hccl and wt_Pt."))
+        println("epsilon_carb: ", epsilon_carb_val, " element: ", element, " Hcl: ", Hcl, " wt_Pt: ", wt_Pt)
+        throw(ArgumentError("The calculated carbon volume fraction in the $(element) is greater than or equal to 1. Please check the inputs Hcl and wt_Pt."))
     end
     return epsilon_carb_val
 end
 
 
-"""This function calculates the Pt volume fraction in the CCL.
+"""This function calculates the Pt volume fraction in the catalyst layer (ACL or CCL).
 
 Parameters
 ----------
-Hccl : Float64
-    Thickness of the CCL layer.
+element : Symbol
+    Either `:acl` (anode) or `:ccl` (cathode) — selects the electrode-specific Pt loading.
+Hcl : Float64
+    Thickness of the CL layer.
 pp : PhysicalParams
     Physical parameters of the fuel cell.
 
 Returns
 -------
 epsilon_Pt :
-    Carbon volume fraction in the CCL.
+    Pt volume fraction in the CL.
 
 Sources
 -------
 1. Alireza Goshtasbi - Article 2020 - A Mathematical Model toward Real-Time Monitoring of Automotive PEM Fuel Cells.
 """
-function epsilon_Pt(Hccl::Float64, pp::PhysicalParams)
-    L_Pt, wt_Pt = pp.L_Pt, pp.wt_Pt  # Pt loading and Pt/C weight fraction in the cathode catalyst layer.
-    epsilon_Pt_val = L_Pt / (rho_Pt * Hccl)  # This is the volume fraction of Pt in the CCL.
+function epsilon_Pt(element::Symbol, Hcl::Float64, pp::PhysicalParams)
+    L_Pt, wt_Pt = element == :acl ? (pp.L_Pt_acl, pp.wt_Pt_acl) :
+                  element == :ccl ? (pp.L_Pt_ccl, pp.wt_Pt_ccl) :
+                  throw(ArgumentError("The element should be either 'acl' or 'ccl'."))
+    epsilon_Pt_val = L_Pt / (rho_Pt * Hcl)  # This is the volume fraction of Pt in the CL.
     if epsilon_Pt_val >= 1
-        println("epsilon_Pt: ", epsilon_Pt_val, " Hccl: ", Hccl, " wt_Pt: ", wt_Pt)
-        throw(ArgumentError("The calculated Pt volume fraction in the CCL is greater than or equal to 1. Please check the inputs Hccl and wt_Pt."))
+        println("epsilon_Pt: ", epsilon_Pt_val, " element: ", element, " Hcl: ", Hcl, " wt_Pt: ", wt_Pt)
+        throw(ArgumentError("The calculated Pt volume fraction in the $(element) is greater than or equal to 1. Please check the inputs Hcl and wt_Pt."))
     end
     return epsilon_Pt_val
 end
@@ -458,6 +468,8 @@ end
 """This function calculates the volumetric surface area of the ionomer in the CL, in m-1.
 Parameters
 ----------
+element : Symbol
+    Either `:acl` (anode) or `:ccl` (cathode).
 lambdaa :
     Water content in the CL.
 T_cl :
@@ -477,9 +489,9 @@ Sources
 1. Liang Hao - Article 2015 - Modeling and Experimental Validation of Pt Loading and Electrode Composition Effects
 in PEM Fuel Cells.
 """
-function a_c(lambdaa, T_cl, Hccl::Float64, pp::PhysicalParams)
+function a_c(element::Symbol, lambdaa, T_cl, Hccl::Float64, pp::PhysicalParams)
     r_carb = pp.r_carb  # Mean radius of the carbon particles.
-    return 3 * epsilon_carb(Hccl, pp) / r_carb^3 * (r_carb + delta_ion(lambdaa, T_cl, Hccl, pp))^2
+    return 3 * epsilon_carb(element, Hccl, pp) / r_carb^3 * (r_carb + delta_ion(element, lambdaa, T_cl, Hccl, pp))^2
 end
 
 
@@ -487,6 +499,8 @@ end
 
 Parameters
 ----------
+element : Symbol
+    Either `:acl` (anode) or `:ccl` (cathode) — selects the electrode-specific Pt loading and Pt/C weight fraction.
 lambda_cl :
     Water content in the CL.
 T_cl :
@@ -506,17 +520,20 @@ Sources
 1. Liang Hao - Article 2015 - Modeling and Experimental Validation of Pt Loading and Electrode Composition Effects
 in PEM Fuel Cells.
 """
-function epsilon_mc(lambda_cl, T_cl, Hcl::Float64, pp::PhysicalParams)
+function epsilon_mc(element::Symbol, lambda_cl, T_cl, Hcl::Float64, pp::PhysicalParams)
 
-    IC, rho_ion, M_eq, wt_Pt = pp.IC, pp.rho_ion, pp.M_eq, pp.wt_Pt
+    IC = element == :acl ? pp.IC_acl :
+         element == :ccl ? pp.IC_ccl :
+         throw(ArgumentError("The element should be either 'acl' or 'ccl'."))
+    rho_ion, M_eq = pp.rho_ion, pp.M_eq
 
     lambda_eff = _nonnegative_value(lambda_cl)
-    epsilon_mc_val = IC * epsilon_carb(Hcl, pp) * rho_carb / rho_ion *
+    epsilon_mc_val = IC * epsilon_carb(element, Hcl, pp) * rho_carb / rho_ion *
                      (1 + (M_H2O * rho_ion) / (rho_H2O_l(T_cl) * M_eq) * lambda_eff)
 
     if epsilon_mc_val >= 1
-        println("epsilon_mc: ", epsilon_mc_val, " Hcl: ", Hcl, " IC: ", IC, " wt_Pt: ", wt_Pt)
-        throw(ArgumentError("The calculated ionomer volume fraction in the CCL is greater than or equal to 1. Please check the inputs Hcl, IC and wt_Pt."))
+        println("epsilon_mc: ", epsilon_mc_val, " element: ", element, " Hcl: ", Hcl, " IC: ", IC)
+        throw(ArgumentError("The calculated ionomer volume fraction in the $(element) is greater than or equal to 1. Please check the inputs Hcl and IC."))
     end
     return epsilon_mc_val
 end
@@ -526,6 +543,8 @@ end
 
 Parameters
 ----------
+element : Symbol
+    Either `:acl` (anode) or `:ccl` (cathode) — selects the electrode-specific Pt loading and Pt/C weight fraction.
 lambda_cl :
     Water content in the CL.
 T_cl :
@@ -544,14 +563,14 @@ Sources
 -------
 1. Alireza Goshtasbi - Article 2020 - A Mathematical Model toward Real-Time Monitoring of Automotive PEM Fuel Cells.
 """
-function epsilon_cl(lambda_cl, T_cl, Hcl::Float64, pp::PhysicalParams)
+function epsilon_cl(element::Symbol, lambda_cl, T_cl, Hcl::Float64, pp::PhysicalParams)
 
-    wt_Pt = pp.wt_Pt
-    epsilon_cl_val = 1 - epsilon_carb(Hcl, pp) - epsilon_Pt(Hcl, pp) - epsilon_mc(lambda_cl, T_cl, Hcl, pp)
+    epsilon_cl_val = 1 - epsilon_carb(element, Hcl, pp) - epsilon_Pt(element, Hcl, pp) -
+                      epsilon_mc(element, lambda_cl, T_cl, Hcl, pp)
 
     if epsilon_cl_val <= 0
-        println("epsilon_cl: ", epsilon_cl_val, " Hcl: ", Hcl, " wt_Pt: ", wt_Pt)
-        throw(ArgumentError("The calculated porosity in the CCL is less than or equal to 0. Please check the inputs Hcl and wt_Pt."))
+        println("epsilon_cl: ", epsilon_cl_val, " element: ", element, " Hcl: ", Hcl)
+        throw(ArgumentError("The calculated porosity in the $(element) is less than or equal to 0. Please check the inputs Hcl and, for the $(element), wt_Pt."))
     end
     return epsilon_cl_val
 end

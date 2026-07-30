@@ -95,20 +95,20 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
 
     # Weighted mean values ...
     #       ... of the EOD flow of water in the membrane
-    D_eff_EOD_acl_mem = hmean(D_EOD_eff(i_fc, lambda_acl, T_acl, Hacl, pp), D_EOD(lambda_mem),
+    D_eff_EOD_acl_mem = hmean(D_EOD_eff(:acl, i_fc, lambda_acl, T_acl, Hacl, pp), D_EOD(lambda_mem),
                               Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem))
-    D_eff_EOD_mem_ccl = hmean(D_EOD(lambda_mem), D_EOD_eff(i_fc, lambda_ccl, T_ccl, Hccl, pp),
+    D_eff_EOD_mem_ccl = hmean(D_EOD(lambda_mem), D_EOD_eff(:ccl, i_fc, lambda_ccl, T_ccl, Hccl, pp),
                               Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl))
 
     #       ... of the diffusion coefficient of water in the membrane
-    D_lambda_eff_acl_mem = hmean(D_lambda_eff(lambda_acl, T_acl, Hacl, pp), D_lambda(lambda_mem),
+    D_lambda_eff_acl_mem = hmean(D_lambda_eff(:acl, lambda_acl, T_acl, Hacl, pp), D_lambda(lambda_mem),
                                  Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem))
-    D_lambda_eff_mem_ccl = hmean(D_lambda(lambda_mem), D_lambda_eff(lambda_ccl, T_ccl, Hccl, pp),
+    D_lambda_eff_mem_ccl = hmean(D_lambda(lambda_mem), D_lambda_eff(:ccl, lambda_ccl, T_ccl, Hccl, pp),
                                  Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl))
 
     # Pre-computed inter-layer CL porosities and weight factors (avoid repeated calls and divisions)
-    epsilon_acl = epsilon_cl(lambda_acl, T_acl, Hacl, pp)  # CL porosity at the anode side.
-    epsilon_ccl = epsilon_cl(lambda_ccl, T_ccl, Hccl, pp)  # CL porosity at the cathode side.
+    epsilon_acl = epsilon_cl(:acl, lambda_acl, T_acl, Hacl, pp)  # CL porosity at the anode side.
+    epsilon_ccl = epsilon_cl(:ccl, lambda_ccl, T_ccl, Hccl, pp)  # CL porosity at the cathode side.
     H_gdl_mpl  = H_gdl_node + H_mpl_node                  # Sum of GDL and MPL node thicknesses.
     H_mpl_acl  = H_mpl_node + Hacl                        # Sum of MPL and ACL thicknesses.
     H_ccl_mpl  = Hccl + H_mpl_node                        # Sum of CCL and MPL thicknesses.
@@ -617,6 +617,8 @@ in m².s-1.
 
 Parameters
 ----------
+element : Symbol
+    Either `:acl` (anode) or `:ccl` (cathode).
 lambdaa :
     Water content in the catalyst layer.
 T :
@@ -631,9 +633,9 @@ Returns
 D_lambda_eff
     Effective diffusion coefficient of water in the catalyst layer in m².s-1.
 """
-function D_lambda_eff(lambdaa, T, Hcl::Float64, pp::PhysicalParams)
+function D_lambda_eff(element::Symbol, lambdaa, T, Hcl::Float64, pp::PhysicalParams)
     tau_cl = pp.tau_cl  # Pore structure coefficient in the CL.
-    return epsilon_mc(lambdaa, T, Hcl, pp) / tau_cl * D_lambda(lambdaa)
+    return epsilon_mc(element, lambdaa, T, Hcl, pp) / tau_cl * D_lambda(lambdaa)
 end
 
 
@@ -659,6 +661,8 @@ catalyst layers, in mol.m-2.s-1.
 
 Parameters
 ----------
+element : Symbol
+    Either `:acl` (anode) or `:ccl` (cathode).
 i_fc :
     Fuel cell current density in A.m-2.
 lambdaa :
@@ -675,9 +679,9 @@ Returns
 
     Effective electro-osmotic drag diffusion coefficient of water in the catalyst layer in mol.m-2.s-1.
 """
-function D_EOD_eff(i_fc, lambdaa, T, Hcl::Float64, pp::PhysicalParams)
+function D_EOD_eff(element::Symbol, i_fc, lambdaa, T, Hcl::Float64, pp::PhysicalParams)
     tau_cl = pp.tau_cl  # Pore structure coefficient in the CL.
-    return epsilon_mc(lambdaa, T, Hcl, pp) / tau_cl * D_EOD(i_fc)
+    return epsilon_mc(element, lambdaa, T, Hcl, pp) / tau_cl * D_EOD(i_fc)
 end
 
 

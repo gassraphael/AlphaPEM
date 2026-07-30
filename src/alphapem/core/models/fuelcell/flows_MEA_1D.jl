@@ -254,11 +254,11 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
                          T_ampl[i], epsilon_mpl, pp)
     end
     Sl_acl = Svl(:anode, s_acl, C_v_acl, C_v_acl + C_H2_acl + C_N2_acl, T_acl,
-                 epsilon_cl(lambda_acl, T_acl, Hacl, pp), pp)
+                 epsilon_cl(:acl, lambda_acl, T_acl, Hacl, pp), pp)
 
     #   Cathode side
     Sl_ccl = Svl(:cathode, s_ccl, C_v_ccl, C_v_ccl + C_O2_ccl + C_N2_ccl, T_ccl,
-                 epsilon_cl(lambda_ccl, T_ccl, Hccl, pp), pp)
+                 epsilon_cl(:ccl, lambda_ccl, T_ccl, Hccl, pp), pp)
     Sl_cmpl = flows_work.Sl_cmpl
     @inbounds for i in 1:nb_mpl
         Sl_cmpl[i] = Svl(:cathode, s_cmpl[i], C_v_cmpl[i],
