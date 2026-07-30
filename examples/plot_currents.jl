@@ -11,15 +11,15 @@ using GLMakie
 GLMakie.activate!()  # Enable interactive window
 
 # --- Time resolution ---
-n_points = 1000  # points for plotting
+n_points = 10000  # points for plotting
 
 # === Step Current ===
 step_p = StepParams(
-    delta_t_ini = 30*60.0,  # delta_t_ini = 30 min
-    delta_t_load = 30.0,    # delta_t_load = 30 s
-    delta_t_break = 2*60.0, # delta_t_break = 2 min
-    i_ini = 1.0e4,          # i_ini = 1.0 A/cm²
-    i_step = 1.5e4          # i_step = 2.0 A/cm²
+    delta_t_ini   = 30*60.0, # delta_t_ini = 30 min
+    delta_t_load  = 30.0,    # delta_t_load = 30 s
+    delta_t_break = 2*60.0,  # delta_t_break = 2 min
+    i_ini         = 1.0e4,   # i_ini = 1.0 A/cm²
+    i_step        = 1.5e4    # i_step = 2.0 A/cm²
 )
 step_c = StepCurrent(step_p)
 
@@ -29,11 +29,11 @@ i_step_vals = [current(step_c, t) for t in t_step] ./ 1e4
 
 # === Polarization Current ===
 pola_p = PolarizationParams(
-    delta_t_ini = 30*60.0,  # delta_t_ini = 120 min
-    v_load = 0.01e4,         # v_load = 0.01 A.cm-2.s-1
-    delta_t_break = 5*60.0, # delta_t_break = 15 min
-    di_step = 0.05e4,        # di_step = 0.05 A/cm²
-    i_max = 3.0e4            # i_max = 3.0 A/cm²
+    delta_t_ini   = 30*60.0,  # delta_t_ini = 120 min
+    v_load        = 0.01e4,   # v_load = 0.01 A.cm-2.s-1
+    delta_t_break = 300,      # delta_t_break = 15 min
+    di_step       = 0.05e4,   # di_step = 0.05 A/cm²
+    i_max         = 2.5e4     # i_max = 2.5 A/cm²
 )
 pola_c = PolarizationCurrent(pola_p)
 
@@ -43,10 +43,10 @@ i_pola = [current(pola_c, t) for t in t_pola] ./ 1e4
 
 # === Polarization Calibration Current (from experimental data) ===
 pola_cali_p = PolarizationCalibrationParams(
-    delta_t_ini = 120*60.0,                                    # delta_t_ini = 120 min
-    v_load = 0.01e4,                                           # v_load = 0.01 A/cm²/s
-    delta_t_break = 15*60.0,                                   # delta_t_break = 15 min
-    i_exp = [0.0, 0.5e4, 1.0e4, 2.0e4, 2.5e4, 3.0e4]          # i_exp = experimental current densities
+    delta_t_ini   = 30*60.0,                                  # delta_t_ini = 120 min
+    v_load        = 0.01e4,                                   # v_load = 0.01 A/cm²/s
+    delta_t_break = 300,                                      # delta_t_break = 15 min
+    i_exp         = [0.0, 0.25e4, 0.5e4, 1.0e4, 2.0e4, 2.5e4] # i_exp = experimental current densities
 )
 pola_cali = PolarizationCalibrationCurrent(pola_cali_p)
 
@@ -56,12 +56,12 @@ i_pola_cali = [current(pola_cali, t) for t in t_pola_cali] ./ 1e4
 
 # === EIS Current ===
 eis_p = EISParams(
-    i_EIS = 1.0e4,      # i_EIS = 1.0 A/cm²
-    ratio = 0.05,       # ratio = 0.05
-    f_power_min = -3.0, # f_power_min = 10^-3 Hz
-    f_power_max = 5.0,  # f_power_max = 10^5 Hz
-    nb_f = 90,          # nb_f = 90 frequencies
-    nb_points = 50      # nb_points = 50 points per frequency
+    i_EIS       = 1.0e4, # i_EIS = 1.0 A/cm²
+    ratio       = 0.05,  # ratio = 0.05
+    f_power_min = -3.0,  # f_power_min = 10^-3 Hz
+    f_power_max = 5.0,   # f_power_max = 10^5 Hz
+    nb_f        = 90,    # nb_f = 90 frequencies
+    nb_points   = 50     # nb_points = 50 points per frequency
 )
 eis_c = EISCurrent(eis_p)
 
