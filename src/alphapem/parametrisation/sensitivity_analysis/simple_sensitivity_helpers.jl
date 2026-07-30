@@ -185,7 +185,7 @@ function print_sensitivity_report(impacts, out_csv)
     println("-" ^ 110)
 
     # Parameters whose average impact exceeds this threshold are highlighted in red.
-    highlight_threshold_pct = 0.05
+    highlight_threshold_pct = 10
     red = "\e[31m"
     reset = "\e[0m"
 

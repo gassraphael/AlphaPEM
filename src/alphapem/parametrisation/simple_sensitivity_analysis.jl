@@ -3,7 +3,7 @@
 """
 Simple sensitivity analysis for AlphaPEM's PhysicalParams
 
-This test performs a sensitivity analysis on the fuel cell's physical parameters by:
+This performs a sensitivity analysis on the fuel cell's physical parameters by:
 1. Running a baseline polarization simulation with the nominal PhysicalParams of :ZSW_GenStack
 2. For each field of PhysicalParams:
    - Modifying it by ±20% (respecting integer/domain constraints, see `modify_physical_param`)
@@ -11,104 +11,94 @@ This test performs a sensitivity analysis on the fuel cell's physical parameters
      directly to SimulationConfig
    - Computing the RMSE vs. the nominal polarization curve
 3. Ranking parameters by impact on the polarization curve
-4. Saving results to results/sensitivity/
+4. Saving results to results/simple_sensitivity/
 
 Parallelization: Uses Distributed.jl with pmap for concurrent simulations. Since parameter
 variations are passed as plain data (PhysicalParams instances) instead of patched source
 files, workers never need to recompile or reload AlphaPEM.
-"""
 
-import Pkg
-Pkg.activate(dirname(dirname(dirname(@__DIR__))))
+This file is meant to be broadcast to every worker process (via `@everywhere include(...)`)
+by the launcher script in examples/run_simple_sensitivity_analysis.jl, which is responsible
+for activating the project and spawning the Distributed workers.
+"""
 
 using Distributed
 using Printf
+using AlphaPEM.Config: SimulationConfig, PolarizationCalibrationParams, NumericalParams, PhysicalParams
+using AlphaPEM.Application: run_simulation
+using AlphaPEM.Core.Models: _polarization_points_cali, _calculate_rmse
+using AlphaPEM.Fuelcell: create_fuelcell
 
-# Start workers if not already initialized
-if nprocs() == 1
-    addprocs(max(1, Sys.CPU_THREADS - 1))
+include(joinpath(@__DIR__, "sensitivity_analysis", "simple_sensitivity_helpers.jl"))
+
+# Integer fields of PhysicalParams that can never go below 1.
+const INTEGER_MIN1_FIELDS = (:nb_cell, :nb_channel_in_gc, :Kshape)
+
+"""
+Create the polarization SimulationConfig used throughout the sensitivity analysis.
+
+Uses `PolarizationCalibrationParams` (an empty `i_exp` gets auto-filled from the fuel
+cell's calibration data by `create_current`) so that every run — nominal and modified —
+is stepped through the exact same, known current densities. This removes the need to
+match points between curves that don't otherwise land on identical current values.
+"""
+function make_pola_config(; physical_parameters::Union{Nothing, PhysicalParams} = nothing)
+    current_params = PolarizationCalibrationParams(
+        delta_t_ini = 30 * 60.0,      # (s). Initial stabilisation time.
+        v_load = 0.01e4,              # (A.m-2.s-1). Loading rate.
+        delta_t_break = 5 * 60.0,     # (s). Breaking time.
+        i_exp = Float64[]             # Auto-filled from the fuel cell's calibration data.
+    )
+
+    return SimulationConfig(
+        type_fuel_cell = :ZSW_GenStack,
+        type_current = current_params,
+        numerical_parameters = NumericalParams(nb_gc = 1),
+        voltage_zone = :full,
+        type_auxiliary = :no_auxiliary,
+        type_flow = :counter_flow,
+        type_purge = :no_purge,
+        type_display = :no_display,
+        display_timing = :postrun,
+        physical_parameters = physical_parameters
+    )
 end
 
-# Broadcast modules, helpers and worker logic to all processes (including the master).
-@everywhere begin
-    import Pkg
-    Pkg.activate(dirname(dirname(dirname(@__DIR__))))
-    using AlphaPEM.Config: SimulationConfig, PolarizationCalibrationParams, NumericalParams, PhysicalParams
-    using AlphaPEM.Application: run_simulation
-    using AlphaPEM.Core.Models: _polarization_points_cali, _calculate_rmse
-    using AlphaPEM.Fuelcell: create_fuelcell
+"""
+    modify_physical_param(params, field, factor)
 
-    include(joinpath(@__DIR__, "sensitivity_analysis", "simple_sensitivity_helpers.jl"))
+Return a copy of `params` with `field` scaled by `factor`, respecting the constraints of
+PhysicalParams: integer fields stay integers, `nb_cell`/`nb_channel_in_gc`/`Kshape` can
+never go below 1, and the capillary exponent `e` can only take the values 3, 4 or 5.
+"""
+function modify_physical_param(params::PhysicalParams, field::Symbol, factor::Float64)::PhysicalParams
+    original_value = getfield(params, field)
+    modified_value = original_value * factor
 
-    # Integer fields of PhysicalParams that can never go below 1.
-    const INTEGER_MIN1_FIELDS = (:nb_cell, :nb_channel_in_gc, :Kshape)
-
-    """
-    Create the polarization SimulationConfig used throughout the sensitivity analysis.
-
-    Uses `PolarizationCalibrationParams` (an empty `i_exp` gets auto-filled from the fuel
-    cell's calibration data by `create_current`) so that every run — nominal and modified —
-    is stepped through the exact same, known current densities. This removes the need to
-    match points between curves that don't otherwise land on identical current values.
-    """
-    function make_pola_config(; physical_parameters::Union{Nothing, PhysicalParams} = nothing)
-        current_params = PolarizationCalibrationParams(
-            delta_t_ini = 30 * 60.0,      # (s). Initial stabilisation time.
-            v_load = 0.01e4,              # (A.m-2.s-1). Loading rate.
-            delta_t_break = 5 * 60.0,     # (s). Breaking time.
-            i_exp = Float64[]             # Auto-filled from the fuel cell's calibration data.
-        )
-
-        return SimulationConfig(
-            type_fuel_cell = :ZSW_GenStack,
-            type_current = current_params,
-            numerical_parameters = NumericalParams(nb_gc = 1),
-            voltage_zone = :full,
-            type_auxiliary = :no_auxiliary,
-            type_flow = :counter_flow,
-            type_purge = :no_purge,
-            type_display = :no_display,
-            display_timing = :postrun,
-            physical_parameters = physical_parameters
-        )
+    if original_value isa Integer
+        modified_value = round(Int64, modified_value)
+        if field in INTEGER_MIN1_FIELDS
+            modified_value = max(1, modified_value)
+        elseif field === :e
+            modified_value = clamp(modified_value, 3, 5)
+        end
     end
 
-    """
-        modify_physical_param(params, field, factor)
+    return PhysicalParams(;
+        (f => (f === field ? modified_value : getfield(params, f)) for f in fieldnames(PhysicalParams))...
+    )
+end
 
-    Return a copy of `params` with `field` scaled by `factor`, respecting the constraints of
-    PhysicalParams: integer fields stay integers, `nb_cell`/`nb_channel_in_gc`/`Kshape` can
-    never go below 1, and the capillary exponent `e` can only take the values 3, 4 or 5.
-    """
-    function modify_physical_param(params::PhysicalParams, field::Symbol, factor::Float64)::PhysicalParams
-        original_value = getfield(params, field)
-        modified_value = original_value * factor
-
-        if original_value isa Integer
-            modified_value = round(Int64, modified_value)
-            if field in INTEGER_MIN1_FIELDS
-                modified_value = max(1, modified_value)
-            elseif field === :e
-                modified_value = clamp(modified_value, 3, 5)
-            end
-        end
-
-        return PhysicalParams(;
-            (f => (f === field ? modified_value : getfield(params, f)) for f in fieldnames(PhysicalParams))...
-        )
-    end
-
-    """Worker task: run one parameter variation and return its RMSE vs. the nominal polarization curve."""
-    function run_parameter_variation_task(nominal_params::PhysicalParams, field::Symbol, factor::Float64,
-                                           i_exp::Vector{Float64}, Ucell_nominal::Vector{Float64})
-        try
-            modified_params = modify_physical_param(nominal_params, field, factor)
-            cfg = make_pola_config(physical_parameters = modified_params)
-            simu = run_simulation(cfg)
-            return compute_rmse_from_nominal(simu, i_exp, Ucell_nominal)
-        catch e
-            return Inf
-        end
+"""Worker task: run one parameter variation and return its RMSE vs. the nominal polarization curve."""
+function run_parameter_variation_task(nominal_params::PhysicalParams, field::Symbol, factor::Float64,
+                                       i_exp::Vector{Float64}, Ucell_nominal::Vector{Float64})
+    try
+        modified_params = modify_physical_param(nominal_params, field, factor)
+        cfg = make_pola_config(physical_parameters = modified_params)
+        simu = run_simulation(cfg)
+        return compute_rmse_from_nominal(simu, i_exp, Ucell_nominal)
+    catch e
+        return Inf
     end
 end
 
@@ -154,13 +144,13 @@ end
 #  Main Execution
 # ═══════════════════════════════════════════════════════════════════════════════
 
-function main()
+function run_simple_sensitivity_analysis()
     println("\n")
     println("╔" * "═" ^ 78 * "╗")
     println("║" * " " ^ 20 * "ALPHAPEM SENSITIVITY ANALYSIS" * " " ^ 28 * "║")
     println("╚" * "═" ^ 78 * "╝")
 
-    out_dir = joinpath(find_project_root(), "results", "sensitivity")
+    out_dir = joinpath(find_project_root(), "results", "simple_sensitivity_analysis")
     mkpath(out_dir)
     out_csv = generate_output_path(out_dir, "sensitivity_analysis.csv")
 
@@ -226,5 +216,3 @@ function main()
 
     println("\n✓ Sensitivity analysis completed successfully!\n")
 end
-
-main()
