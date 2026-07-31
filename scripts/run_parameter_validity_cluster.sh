@@ -24,7 +24,7 @@
 #       bash miniforge.sh -b -p "$HOME/miniforge3"
 #       export PATH="$HOME/miniforge3/bin:$PATH"
 #       conda create -y -n r-env -c conda-forge \
-#           r-base=4.3 cmake compilers \
+#           r-base=4.3.2 cmake compilers \
 #           libcurl openssl libxml2 libwebp libpng libtiff libjpeg-turbo \
 #           freetype fontconfig harfbuzz fribidi
 #     See README.md § Installation, step 4, for full instructions.
@@ -119,31 +119,27 @@ cd "$PBS_TMPDIR/$PROJECT_NAME"
 export CONDA_OVERRIDE_GLIBC=2.28
 
 
-# **Julia Environment Configuration:**
-echo "================================================================================"
-echo "              Julia Environment Configuration"
-echo "================================================================================"
+# **Headless-Node Workarounds:**
+# `#PBS -V` copies the submitting shell's whole environment to the compute node, DISPLAY
+# included (typically DISPLAY=localhost:10.0, left over from an X11-forwarded SSH session).
+# That display does not exist on the node, so GLFW aborts with "X11: Failed to open
+# display". This job never draws on screen, so drop the variable.
+unset DISPLAY
 
-# Use Julia directly from PATH
-julia_version=$(julia --version)
-echo "[INFO] Using: $julia_version"
+# Julia runs an automatic, whole-environment precompilation pass every time a package is
+# loaded from a cold cache — including on `using AlphaPEM` inside the example script. That
+# implicit pass has no error tolerance and dies on GLMakie (OpenGL/X11 unavailable here),
+# which is what aborts the job before any AlphaPEM code runs. Disable it; precompilation
+# is driven explicitly below instead.
+export JULIA_PKG_PRECOMPILE_AUTO=0
 
-# Setup Julia environment
-echo "[INFO] Instantiating Julia project..."
-julia --project -e 'using Pkg; Pkg.resolve(); Pkg.instantiate()'
-echo "[INFO] Project instantiated successfully"
-
-# Precompile packages, ignoring display-dependent packages (GLMakie/WGLMakie)
-# that fail on headless servers without an X11 display.
-echo "[INFO] Precompiling packages (non-strict, headless-safe)..."
-julia --project -e 'using Pkg; Pkg.precompile(strict=false)'
-echo "[INFO] Precompilation completed"
-echo ""
 
 # **R / IRD Environment Setup:**
 # STEP 3 of run_parameter_validity.jl (PRIM/MaxBox restricted-region analysis)
 # shells out to Rscript. Set this up upfront rather than failing after paying
 # for the full batch simulation (STEP 1-2, by far the most expensive part of the job).
+# This must also happen BEFORE the Julia setup below: AlphaPEM loads RCall.jl, which
+# postpones its own precompilation when no R installation is on PATH.
 echo "================================================================================"
 echo "              R / IRD Environment Setup"
 echo "================================================================================"
@@ -156,7 +152,7 @@ conda activate r-env
 if ! command -v Rscript &> /dev/null; then
     echo "[ERROR] Rscript not found in PATH after 'conda activate r-env'."
     echo "[ERROR] Create the environment once on the login node (README.md § Installation, step 4):"
-    echo "[ERROR]   conda create -y -n r-env -c conda-forge r-base=4.3 cmake compilers \\"
+    echo "[ERROR]   conda create -y -n r-env -c conda-forge r-base=4.3.2 cmake compilers \\"
     echo "[ERROR]       libcurl openssl libxml2 libwebp libpng libtiff libjpeg-turbo \\"
     echo "[ERROR]       freetype fontconfig harfbuzz fribidi"
     exit 1
@@ -192,6 +188,61 @@ if [ $? -ne 0 ]; then
         exit $R_INSTALL_STATUS
     fi
 fi
+echo ""
+
+# **Julia Environment Configuration:**
+# Runs after the R setup above so that RCall.jl finds R and precompiles for real.
+echo "================================================================================"
+echo "              Julia Environment Configuration"
+echo "================================================================================"
+
+# Use Julia directly from PATH
+julia_version=$(julia --version)
+echo "[INFO] Using: $julia_version"
+
+# Refresh the package registries before instantiating. The committed Manifest.toml pins
+# versions (e.g. PureKLU 1.1.0) that a stale General clone on the cluster does not know
+# about, which fails with "Unsatisfiable requirements detected".
+echo "[INFO] Updating Julia registries..."
+julia --project -e 'using Pkg; Pkg.Registry.update()'
+
+# Instantiate strictly from the committed Manifest.toml.
+# Do NOT call Pkg.resolve() here: it re-resolves the whole dependency graph against the
+# registry and discards the known-good pinned versions shipped with the project.
+echo "[INFO] Instantiating Julia project..."
+julia --project -e 'using Pkg; Pkg.instantiate()'
+if [ $? -ne 0 ]; then
+    echo "[ERROR] Instantiation failed. Aborting job."
+    exit 1
+fi
+echo "[INFO] Project instantiated successfully"
+
+# Precompile every direct dependency EXCEPT GLMakie, which requires OpenGL/X11 and can
+# never precompile on a compute node.
+# Note: `Pkg.precompile(strict=false)` does NOT help here — `strict` only downgrades
+# failures of *indirect* dependencies to warnings, whereas GLMakie is a direct dependency
+# and still raises. Excluding it by name keeps every genuine failure fatal.
+echo "[INFO] Precompiling packages (headless-safe, GLMakie excluded)..."
+julia --project -e '
+    using Pkg
+    headless_unsafe = ["GLMakie"]
+    pkgs = sort([n for n in keys(Pkg.project().dependencies) if !(n in headless_unsafe)])
+    Pkg.precompile(pkgs)
+'
+if [ $? -ne 0 ]; then
+    echo "[ERROR] Precompilation failed. Aborting job."
+    exit 1
+fi
+
+# Warm AlphaPEM's own cache and check the environment actually loads (RCall included),
+# before paying for the full LHS batch simulation.
+echo "[INFO] Warming AlphaPEM cache..."
+julia --project -e 'using AlphaPEM'
+if [ $? -ne 0 ]; then
+    echo "[ERROR] AlphaPEM failed to load. Aborting job."
+    exit 1
+fi
+echo "[INFO] Precompilation completed"
 echo ""
 
 # **Parameter-Validity Analysis Execution:**

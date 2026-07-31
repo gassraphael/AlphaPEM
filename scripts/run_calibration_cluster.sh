@@ -107,6 +107,21 @@ cd "$PBS_TMPDIR/$PROJECT_NAME"
 export CONDA_OVERRIDE_GLIBC=2.28
 
 
+# **Headless-Node Workarounds:**
+# `#PBS -V` copies the submitting shell's whole environment to the compute node, DISPLAY
+# included (typically DISPLAY=localhost:10.0, left over from an X11-forwarded SSH session).
+# That display does not exist on the node, so GLFW aborts with "X11: Failed to open
+# display". This job never draws on screen, so drop the variable.
+unset DISPLAY
+
+# Julia runs an automatic, whole-environment precompilation pass every time a package is
+# loaded from a cold cache — including on `using AlphaPEM` inside the example script. That
+# implicit pass has no error tolerance and dies on GLMakie (OpenGL/X11 unavailable here),
+# which is what aborts the job at examples/run_calibration.jl. Disable it; precompilation
+# is driven explicitly below instead.
+export JULIA_PKG_PRECOMPILE_AUTO=0
+
+
 # **Julia Environment Configuration:**
 echo "================================================================================"
 echo "              Julia Environment Configuration"
@@ -116,15 +131,48 @@ echo "==========================================================================
 julia_version=$(julia --version)
 echo "[INFO] Using: $julia_version"
 
-# Setup Julia environment
+# Refresh the package registries before instantiating. The committed Manifest.toml pins
+# versions (e.g. PureKLU 1.1.0) that a stale General clone on the cluster does not know
+# about, which fails with "Unsatisfiable requirements detected".
+echo "[INFO] Updating Julia registries..."
+julia --project -e 'using Pkg; Pkg.Registry.update()'
+
+# Instantiate strictly from the committed Manifest.toml.
+# Do NOT call Pkg.resolve() here: it re-resolves the whole dependency graph against the
+# registry and discards the known-good pinned versions shipped with the project.
 echo "[INFO] Instantiating Julia project..."
-julia --project -e 'using Pkg; Pkg.resolve(); Pkg.instantiate()'
+julia --project -e 'using Pkg; Pkg.instantiate()'
+if [ $? -ne 0 ]; then
+    echo "[ERROR] Instantiation failed. Aborting job."
+    exit 1
+fi
 echo "[INFO] Project instantiated successfully"
 
-# Precompile packages, ignoring display-dependent packages (GLMakie/WGLMakie)
-# that fail on headless servers without an X11 display.
-echo "[INFO] Precompiling packages (non-strict, headless-safe)..."
-julia --project -e 'using Pkg; Pkg.precompile(strict=false)'
+# Precompile every direct dependency EXCEPT GLMakie, which requires OpenGL/X11 and can
+# never precompile on a compute node.
+# Note: `Pkg.precompile(strict=false)` does NOT help here — `strict` only downgrades
+# failures of *indirect* dependencies to warnings, whereas GLMakie is a direct dependency
+# and still raises. Excluding it by name keeps every genuine failure fatal.
+echo "[INFO] Precompiling packages (headless-safe, GLMakie excluded)..."
+julia --project -e '
+    using Pkg
+    headless_unsafe = ["GLMakie"]
+    pkgs = sort([n for n in keys(Pkg.project().dependencies) if !(n in headless_unsafe)])
+    Pkg.precompile(pkgs)
+'
+if [ $? -ne 0 ]; then
+    echo "[ERROR] Precompilation failed. Aborting job."
+    exit 1
+fi
+
+# Warm AlphaPEM's own cache and check the environment actually loads, before paying for
+# the real run.
+echo "[INFO] Warming AlphaPEM cache..."
+julia --project -e 'using AlphaPEM'
+if [ $? -ne 0 ]; then
+    echo "[ERROR] AlphaPEM failed to load. Aborting job."
+    exit 1
+fi
 echo "[INFO] Precompilation completed"
 echo ""
 

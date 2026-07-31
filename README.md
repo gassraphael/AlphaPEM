@@ -91,9 +91,6 @@ To install **AlphaPEM**, follow these steps in a shell:
     ```sh
     julia --project=. -e 'using Pkg; Pkg.instantiate()'
     ```
-   > **Note on HPC Clusters:** You may see a precompilation error for `GLMakie`
-     (e.g., `GLFWError (API_UNAVAILABLE)`). This is expected on headless cluster nodes without a graphics
-     card and can be safely ignored; AlphaPEM will automatically fall back to `CairoMakie` for non-interactive plots.
 
 4. *(Optional)* **PRIM-based valid parameter region analysis** — only required if you intend to use
    `examples/run_parameter_validity.jl` and the `Parametrisation.ValidParameterRegion` module.
@@ -102,7 +99,7 @@ To install **AlphaPEM**, follow these steps in a shell:
       - Linux (Debian/Ubuntu):
         ```sh
         sudo apt update && sudo apt install -y \
-            r-base=4.3 build-essential cmake \
+            r-base=4.3.2 build-essential cmake \
             libcurl4-openssl-dev libssl-dev libxml2-dev \
             libwebp-dev libpng-dev libtiff5-dev libjpeg-dev \
             libfreetype6-dev libfontconfig1-dev libharfbuzz-dev libfribidi-dev

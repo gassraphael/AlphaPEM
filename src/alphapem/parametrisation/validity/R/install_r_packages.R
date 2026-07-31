@@ -110,41 +110,49 @@ for (pkg in pkgs) {
 message("\nAll R packages installed successfully.")
 
 # ---- Warm Julia's precompilation cache (headless-safe) ----------------------
-# GLMakie/WGLMakie are direct Julia dependencies of AlphaPEM that require
-# OpenGL/X11. On a fresh or changed Manifest, Julia's automatic precompile
-# hook fails hard the first time GLMakie is precompiled on a headless server
-# (e.g. an HPC cluster), aborting run_parameter_validity.jl before any
-# AlphaPEM code runs. scripts/run_parameter_validity_cluster.sh and
-# scripts/run_calibration_cluster.sh avoid this by calling
-# `Pkg.precompile(strict=false)` before launching Julia on the real script.
+# GLMakie is a direct Julia dependency of AlphaPEM that requires OpenGL/X11 and
+# therefore can never precompile on a headless server (e.g. an HPC cluster). On
+# a fresh or changed Manifest, Julia's automatic precompile pass dies on it and
+# aborts run_parameter_validity.jl before any AlphaPEM code runs.
 #
-# IMPORTANT: `Pkg.instantiate()` triggers its OWN internal automatic
-# precompile pass, which does NOT honor `strict=false` and fails hard on
-# GLMakie before our explicit non-strict call below ever runs. Setting
-# JULIA_PKG_PRECOMPILE_AUTO=0 disables that implicit pass for the whole
-# command, so `Pkg.precompile(strict=false)` is the only precompilation that
-# actually happens, and its non-strict handling of GLMakie applies throughout.
+# Two things are needed to avoid this, and BOTH matter:
 #
-# Running this once, right here, warms the on-disk compile cache so the
-# failure never happens again afterwards — whether Julia is later launched
-# through those cluster scripts OR directly, e.g.:
+#  1. JULIA_PKG_PRECOMPILE_AUTO=0 — `Pkg.instantiate()` and every `using` from a
+#     cold cache trigger their OWN implicit whole-environment precompile pass,
+#     which has no error tolerance at all. This disables it so the explicit call
+#     below is the only precompilation that happens.
+#
+#  2. Excluding GLMakie by name — `Pkg.precompile(strict=false)` does NOT work:
+#     `strict` only downgrades failures of *indirect* dependencies to warnings,
+#     while GLMakie is a *direct* dependency and still raises
+#     "ERROR: The following 1 direct dependency failed to precompile: GLMakie".
+#     Naming the exclusion also keeps any genuine failure fatal.
+#
+# Running this once, right here, warms the on-disk compile cache so the failure
+# never happens again afterwards — whether Julia is later launched through the
+# cluster scripts OR directly, e.g.:
 #   julia --project=. --threads=auto examples/run_parameter_validity.jl
+julia_warm_expr <- paste0(
+  "using Pkg; Pkg.instantiate(); ",
+  "skip = [\"GLMakie\"]; ",
+  "Pkg.precompile(sort([n for n in keys(Pkg.project().dependencies) if !(n in skip)]))"
+)
 message("\n=== Warming Julia precompilation cache (headless-safe) ===")
 if (nzchar(Sys.which("julia"))) {
   julia_status <- system2(
     "julia",
-    c("--project=.", "-e", shQuote("using Pkg; Pkg.instantiate(); Pkg.precompile(strict=false)")),
+    c("--project=.", "-e", shQuote(julia_warm_expr)),
     env = "JULIA_PKG_PRECOMPILE_AUTO=0"
   )
   if (julia_status == 0) {
-    message("  Julia packages precompiled (GLMakie/WGLMakie failures on headless servers are expected and non-fatal).")
+    message("  Julia packages precompiled (GLMakie is deliberately skipped: it needs OpenGL/X11).")
   } else {
     message(sprintf("  [WARNING] Julia precompilation exited with status %d. Rerun manually if needed:", julia_status))
-    message("    JULIA_PKG_PRECOMPILE_AUTO=0 julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile(strict=false)'")
+    message(sprintf("    JULIA_PKG_PRECOMPILE_AUTO=0 julia --project=. -e '%s'", julia_warm_expr))
   }
 } else {
   message("  [INFO] `julia` not found on PATH — skipping. Before running AlphaPEM, precompile manually:")
-  message("    JULIA_PKG_PRECOMPILE_AUTO=0 julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile(strict=false)'")
+  message(sprintf("    JULIA_PKG_PRECOMPILE_AUTO=0 julia --project=. -e '%s'", julia_warm_expr))
 }
 
 message("\nYou can now run:")
