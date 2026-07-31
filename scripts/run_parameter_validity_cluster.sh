@@ -155,11 +155,9 @@ export CONDA_OVERRIDE_GLIBC=2.28
 # display". This job never draws on screen, so drop the variable.
 unset DISPLAY
 
-# Julia runs an automatic, whole-environment precompilation pass every time a package is
-# loaded from a cold cache — including on `using AlphaPEM` inside the example script. That
-# implicit pass has no error tolerance and dies on GLMakie (OpenGL/X11 unavailable here),
-# which is what aborts the job before any AlphaPEM code runs. Disable it; precompilation
-# is driven explicitly below instead.
+# Suppress the implicit precompilation pass that Pkg runs after each of its operations, so
+# the Julia setup below stays explicit and ordered. Note this does NOT cover the pass Base
+# runs at load time — see the GLMakie discussion in "Julia Environment Configuration".
 export JULIA_PKG_PRECOMPILE_AUTO=0
 
 
@@ -264,6 +262,32 @@ echo "[INFO] Using: $julia_version"
 echo "[INFO] Updating Julia registries..."
 julia --project -e 'using Pkg; Pkg.Registry.update()'
 
+# Drop GLMakie from THIS COPY of the project (the scratch copy is disposable, and
+# Project.toml/Manifest.toml are excluded from the results rsync at the end of the job).
+#
+# This is the only thing that actually works. GLMakie needs OpenGL/X11 and can never
+# precompile on a compute node, and in Julia >= 1.12 load-time precompilation is done by
+# Base, not Pkg (loading.jl -> Precompilation.precompilepkgs(...; _from_loading=true)),
+# which:
+#   - ignores JULIA_PKG_PRECOMPILE_AUTO (only Pkg.should_autoprecompile() reads it, for
+#     Pkg operations such as the Pkg.rm below — hence the export is still worth keeping);
+#   - walks the WHOLE environment graph whatever package was requested;
+#   - raises on any failure of a package in `project_deps`, i.e. anything listed in
+#     Project.toml [deps] (precompilation.jl: `if strict || (dep in project_deps)`).
+# So `Pkg.precompile(strict=false)` and excluding GLMakie from an explicit precompile
+# call both fail to protect the eventual `using AlphaPEM`: as long as GLMakie sits in
+# [deps], every load from this environment tries it and dies.
+#
+# AlphaPEM never imports GLMakie (src/alphapem/application/run_simulation_modules.jl
+# resolves it lazily through Base.loaded_modules and falls back to CairoMakie), so
+# removing it changes nothing for a headless batch run.
+echo "[INFO] Removing GLMakie from the scratch project copy (headless node, no OpenGL/X11)..."
+julia --project -e 'using Pkg; haskey(Pkg.project().dependencies, "GLMakie") && Pkg.rm("GLMakie")'
+if [ $? -ne 0 ]; then
+    echo "[ERROR] Could not remove GLMakie from the project copy. Aborting job."
+    exit 1
+fi
+
 # Instantiate strictly from the committed Manifest.toml.
 # Do NOT call Pkg.resolve() here: it re-resolves the whole dependency graph against the
 # registry and discards the known-good pinned versions shipped with the project.
@@ -275,18 +299,25 @@ if [ $? -ne 0 ]; then
 fi
 echo "[INFO] Project instantiated successfully"
 
-# Precompile every direct dependency EXCEPT GLMakie, which requires OpenGL/X11 and can
-# never precompile on a compute node.
-# Note: `Pkg.precompile(strict=false)` does NOT help here — `strict` only downgrades
-# failures of *indirect* dependencies to warnings, whereas GLMakie is a direct dependency
-# and still raises. Excluding it by name keeps every genuine failure fatal.
-echo "[INFO] Precompiling packages (headless-safe, GLMakie excluded)..."
-julia --project -e '
-    using Pkg
-    headless_unsafe = ["GLMakie"]
-    pkgs = sort([n for n in keys(Pkg.project().dependencies) if !(n in headless_unsafe)])
-    Pkg.precompile(pkgs)
-'
+# Rebuild RCall against the R of "r-env".
+# RCall 0.14 resolves R at *build* time and bakes the result into deps/deps.jl; it does
+# NOT read ENV["R_HOME"] when loaded. Having R on PATH is therefore not enough: if RCall
+# was ever built without R, it keeps `Rhome = ""` and declares `__precompile__(false)`
+# ("No R installation found by RCall.jl ... Importing RCall will fail"), which propagates
+# to AlphaPEM since src/.../validity/ird_interface.jl does `using RCall`.
+export R_HOME=$(R RHOME)
+echo "[INFO] R_HOME: $R_HOME"
+echo "[INFO] Building RCall against r-env..."
+julia --project -e 'using Pkg; Pkg.build("RCall")'
+if [ $? -ne 0 ]; then
+    echo "[ERROR] Pkg.build(\"RCall\") failed. Aborting job."
+    exit 1
+fi
+
+# Precompile the whole environment. GLMakie is gone, so this can now be strict: any
+# failure left is a real one and must stop the job.
+echo "[INFO] Precompiling packages..."
+julia --project -e 'using Pkg; Pkg.precompile()'
 if [ $? -ne 0 ]; then
     echo "[ERROR] Precompilation failed. Aborting job."
     exit 1
@@ -331,10 +362,13 @@ echo "==========================================================================
 echo "              Results Backup"
 echo "================================================================================"
 
-# Copy results back to original directory (exclude .git to avoid permission errors)
+# Copy results back to original directory.
+# Excluded: .git (read-only objects cause permission errors) and the root Project.toml /
+# Manifest.toml, which this job mutated on purpose to drop GLMakie — that edit is local to
+# the scratch copy and must not leak back into the repository.
 echo "[INFO] Copying results to original directory..."
 cd "$PBS_TMPDIR/$PROJECT_NAME"
-rsync -a --exclude='.git' . "$PROJECT_ROOT/"
+rsync -a --exclude='.git' --exclude='/Project.toml' --exclude='/Manifest.toml' . "$PROJECT_ROOT/"
 echo "[INFO] Results copied successfully"
 
 # Return to original directory
