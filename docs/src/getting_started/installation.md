@@ -40,10 +40,6 @@ This downloads and precompiles all required dependencies.
 julia --project=. -e 'using Pkg; Pkg.instantiate()'
 ```
 
-> **Note on HPC Clusters:**
-    If you see a `GLFWError (API_UNAVAILABLE)` related to `GLMakie` on headless nodes, this is expected and safe to 
-    ignore. AlphaPEM will automatically fall back to `CairoMakie` for rendering.
-
 ## Optional Features
 
 ### PRIM-Based Valid Parameter Region Analysis
@@ -56,7 +52,7 @@ module for identifying physically valid parameter ranges.
 **Linux (Debian/Ubuntu):**
 ```bash
 sudo apt update && sudo apt install -y \
-    r-base build-essential cmake \
+    r-base=4.3.2 build-essential cmake \
     libcurl4-openssl-dev libssl-dev libxml2-dev \
     libwebp-dev libpng-dev libtiff5-dev libjpeg-dev \
     libfreetype6-dev libfontconfig1-dev libharfbuzz-dev libfribidi-dev

@@ -73,6 +73,34 @@ echo ""
 
 
 # **Environment Preparation:**
+# Pin HOME/USER to the values PBS captured at submission time.
+#
+# WORKAROUND for a cluster misconfiguration: two accounts share UID/GID 1149
+# ("getent passwd 1149" returns both rgass and bthomont). PBS's MoM rebuilds HOME and
+# USER on the compute node via getpwuid(), and which of the two entries wins depends on
+# the node's resolution order — so HOME randomly lands on the *other* account's home
+# directory (and "id" warns "cannot find name for GID 1149" because that GID has no
+# group entry at all). PBS_O_HOME/PBS_O_LOGNAME were resolved on the login node, where
+# the ordering is correct, so they are the trustworthy values.
+#
+# This matters far beyond cosmetics: the Julia depot (~/.julia), the pixi/CondaPkg cache
+# and /gpfs/scratch/$USER all derive from these variables.
+if [ -n "$PBS_O_HOME" ]; then
+    export HOME="$PBS_O_HOME"
+fi
+if [ -n "$PBS_O_LOGNAME" ]; then
+    export USER="$PBS_O_LOGNAME"
+    export LOGNAME="$PBS_O_LOGNAME"
+fi
+echo "[INFO] HOME: $HOME"
+echo "[INFO] USER: $USER"
+
+# Fail fast rather than much further down if HOME is still unusable.
+if [ ! -d "$HOME" ] || [ ! -w "$HOME" ]; then
+    echo "[ERROR] HOME ('$HOME') is not a writable directory. Aborting job."
+    exit 1
+fi
+
 # Change to submission directory
 cd "$PBS_O_WORKDIR"
 
@@ -107,6 +135,19 @@ cd "$PBS_TMPDIR/$PROJECT_NAME"
 export CONDA_OVERRIDE_GLIBC=2.28
 
 
+# **Headless-Node Workarounds:**
+# `#PBS -V` copies the submitting shell's whole environment to the compute node, DISPLAY
+# included (typically DISPLAY=localhost:10.0, left over from an X11-forwarded SSH session).
+# That display does not exist on the node, so GLFW aborts with "X11: Failed to open
+# display". This job never draws on screen, so drop the variable.
+unset DISPLAY
+
+# Suppress the implicit precompilation pass that Pkg runs after each of its operations, so
+# the Julia setup below stays explicit and ordered. Note this does NOT cover the pass Base
+# runs at load time — see the GLMakie discussion in "Julia Environment Configuration".
+export JULIA_PKG_PRECOMPILE_AUTO=0
+
+
 # **Julia Environment Configuration:**
 echo "================================================================================"
 echo "              Julia Environment Configuration"
@@ -116,15 +157,66 @@ echo "==========================================================================
 julia_version=$(julia --version)
 echo "[INFO] Using: $julia_version"
 
-# Setup Julia environment
+# Refresh the package registries before instantiating. The committed Manifest.toml pins
+# versions (e.g. PureKLU 1.1.0) that a stale General clone on the cluster does not know
+# about, which fails with "Unsatisfiable requirements detected".
+echo "[INFO] Updating Julia registries..."
+julia --project -e 'using Pkg; Pkg.Registry.update()'
+
+# Drop GLMakie from THIS COPY of the project (the scratch copy is disposable, and
+# Project.toml/Manifest.toml are excluded from the results rsync at the end of the job).
+#
+# This is the only thing that actually works. GLMakie needs OpenGL/X11 and can never
+# precompile on a compute node, and in Julia >= 1.12 load-time precompilation is done by
+# Base, not Pkg (loading.jl -> Precompilation.precompilepkgs(...; _from_loading=true)),
+# which:
+#   - ignores JULIA_PKG_PRECOMPILE_AUTO (only Pkg.should_autoprecompile() reads it, for
+#     Pkg operations such as the Pkg.rm below — hence the export is still worth keeping);
+#   - walks the WHOLE environment graph whatever package was requested;
+#   - raises on any failure of a package in `project_deps`, i.e. anything listed in
+#     Project.toml [deps] (precompilation.jl: `if strict || (dep in project_deps)`).
+# So `Pkg.precompile(strict=false)` and excluding GLMakie from an explicit precompile
+# call both fail to protect the eventual `using AlphaPEM`: as long as GLMakie sits in
+# [deps], every load from this environment tries it and dies.
+#
+# AlphaPEM never imports GLMakie (src/alphapem/application/run_simulation_modules.jl
+# resolves it lazily through Base.loaded_modules and falls back to CairoMakie), so
+# removing it changes nothing for a headless batch run.
+echo "[INFO] Removing GLMakie from the scratch project copy (headless node, no OpenGL/X11)..."
+julia --project -e 'using Pkg; haskey(Pkg.project().dependencies, "GLMakie") && Pkg.rm("GLMakie")'
+if [ $? -ne 0 ]; then
+    echo "[ERROR] Could not remove GLMakie from the project copy. Aborting job."
+    exit 1
+fi
+
+# Instantiate strictly from the committed Manifest.toml.
+# Do NOT call Pkg.resolve() here: it re-resolves the whole dependency graph against the
+# registry and discards the known-good pinned versions shipped with the project.
 echo "[INFO] Instantiating Julia project..."
-julia --project -e 'using Pkg; Pkg.resolve(); Pkg.instantiate()'
+julia --project -e 'using Pkg; Pkg.instantiate()'
+if [ $? -ne 0 ]; then
+    echo "[ERROR] Instantiation failed. Aborting job."
+    exit 1
+fi
 echo "[INFO] Project instantiated successfully"
 
-# Precompile packages, ignoring display-dependent packages (GLMakie/WGLMakie)
-# that fail on headless servers without an X11 display.
-echo "[INFO] Precompiling packages (non-strict, headless-safe)..."
-julia --project -e 'using Pkg; Pkg.precompile(strict=false)'
+# Precompile the whole environment. GLMakie is gone, so this can now be strict: any
+# failure left is a real one and must stop the job.
+echo "[INFO] Precompiling packages..."
+julia --project -e 'using Pkg; Pkg.precompile()'
+if [ $? -ne 0 ]; then
+    echo "[ERROR] Precompilation failed. Aborting job."
+    exit 1
+fi
+
+# Warm AlphaPEM's own cache and check the environment actually loads, before paying for
+# the real run.
+echo "[INFO] Warming AlphaPEM cache..."
+julia --project -e 'using AlphaPEM'
+if [ $? -ne 0 ]; then
+    echo "[ERROR] AlphaPEM failed to load. Aborting job."
+    exit 1
+fi
 echo "[INFO] Precompilation completed"
 echo ""
 
@@ -176,10 +268,13 @@ echo "==========================================================================
 echo "              Results Backup"
 echo "================================================================================"
 
-# Copy results back to original directory (exclude .git to avoid permission errors)
+# Copy results back to original directory.
+# Excluded: .git (read-only objects cause permission errors) and the root Project.toml /
+# Manifest.toml, which this job mutated on purpose to drop GLMakie — that edit is local to
+# the scratch copy and must not leak back into the repository.
 echo "[INFO] Copying results to original directory..."
 cd "$PBS_TMPDIR/$PROJECT_NAME"
-rsync -a --exclude='.git' . "$PROJECT_ROOT/"
+rsync -a --exclude='.git' --exclude='/Project.toml' --exclude='/Manifest.toml' . "$PROJECT_ROOT/"
 echo "[INFO] Results copied successfully"
 
 # Return to original directory
