@@ -29,15 +29,15 @@ Base.@kwdef struct PhysicalParams <: AbstractFuelCellParams
     Aact::Float64         = 300e-4           # MEA active area in meter squares.
     nb_cell::Int64        = 1                # Number of cells in the stack.
     #   Catalyst layer
-    Hacl::Float64         = 10e-6            # Thickness of the anode catalyst layer in meters
-    Hccl::Float64         = 10e-6            # Thickness of the cathode catalyst layer in meters
+    Hacl::Float64         = 5e-6            # Thickness of the anode catalyst layer in meters
+    Hccl::Float64         = 15e-6            # Thickness of the cathode catalyst layer in meters
     #   Membrane
     Hmem::Float64         = 20e-6            # Thickness of the membrane in meters
     #   Gas diffusion layer
-    Hgdl::Float64         = 200e-6           # Thickness of the gas diffusion layer in meters
+    Hgdl::Float64         = 125e-6           # Thickness of the gas diffusion layer in meters
     epsilon_gdl::Float64  = 0.7              # Anode/cathode GDL porosity
     #   Microporous layer
-    Hmpl::Float64         = 30e-6            # Thickness of the microporous layer in meters
+    Hmpl::Float64         = 75e-6            # Thickness of the microporous layer in meters
     epsilon_mpl::Float64  = 0.4              # Porosity of the microporous layer
     #   Gas channel
     Hagc::Float64         = 500e-6           # Thickness of the anode gas channel in meters
@@ -94,12 +94,12 @@ Base.@kwdef struct PhysicalParams <: AbstractFuelCellParams
     K_O2_ad_Pt::Float64    = 5.4             # Interfacial resistance coefficient of O2 adsorption on the Pt sites
     K_O2_dis_ion::Float64  = 8.5             # . It is the interfacial resistance coefficient of O2 dissolution inside the ionomer [haoModelingExperimentalValidation2015].
     K_O2_dis_l::Float64    = 1.0             # . It is the interfacial resistance coefficient of O2 dissolution inside the CL liquid water.
-    IC_acl::Float64        = 0.6             # . It is the ionomer to carbon ratio in the anode catalyst layer.
-    IC_ccl::Float64        = 0.95            # . It is the ionomer to carbon ratio in the cathode catalyst layer.
+    IC_acl::Float64        = 0.6             # . It is the ionomer to carbon ratio in the anode catalyst layer [haoModelingExperimentalValidation2015].
+    IC_ccl::Float64        = 0.95            # . It is the ionomer to carbon ratio in the cathode catalyst layer [haoModelingExperimentalValidation2015].
     ECSA_0::Float64        = 150             # cm2_Pt.cm-2_active_area. It is the initial electrochemical surface area of the catalyst.
     wt_Pt_acl::Float64     = 0.2             # It is the weight fraction of platinum over carbon covered by platinum (Pt/C) in the anode catalyst layer.
     wt_Pt_ccl::Float64     = 0.5             # It is the weight fraction of platinum over carbon covered by platinum (Pt/C) in the cathode catalyst layer [haoModelingExperimentalValidation2015].
-    L_Pt_acl::Float64      = 0.5e-3          # kg.m-2. It is the platinum loading in the anode catalyst layer.
+    L_Pt_acl::Float64      = 0.5e-3          # kg.m-2. It is the platinum loading in the anode catalyst layer [haoModelingExperimentalValidation2015]..
     L_Pt_ccl::Float64      = 3e-3            # kg.m-2. It is the platinum loading in the cathode catalyst layer.
     r_carb::Float64        = 40e-9           # m. It is the mean radius of the carbon particles.
     theta_Pt_0::Float64    = 0               # This is the initial platine-oxide coverage, assumed to be zero for simplification.
@@ -158,7 +158,7 @@ const UNDETERMINED_PARAMETER_BOUNDS = Dict{Symbol, Tuple{Float64, Float64, Symbo
     :epsilon_mpl   => (0.3, 0.7, :real),                    # MPL porosity
     :IC_ccl        => (0.1, 3.0, :real),                    # Ionomer to carbon ratio in the cathode catalyst layer
     :r_carb        => (10e-9, 100e-9, :real),               # Mean radius of the carbon particles
-    :ECSA_0        => (10.0, 200.0, :real),                 # Initial electrochemical surface area of the catalyst
+    :ECSA_0        => (10.0, 300.0, :real),                 # Initial electrochemical surface area of the catalyst
     :K_O2_dis_ion  => (0.1, 20.0, :real),                   # Interfacial resistance coefficient of O₂ dissolution inside the ionomer
     :K_O2_ad_Pt    => (0.1, 20.0, :real),                   # Interfacial resistance coefficient of O₂ adsorption on the Pt sites
     :alpha_c       => (0.01, 1.0, :real),                   # Cathode transfer coefficient

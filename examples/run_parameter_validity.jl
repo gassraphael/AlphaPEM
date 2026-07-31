@@ -69,24 +69,27 @@ using Printf
 # ─────────────────────────────────────────────────────────────────────────────
 # LOGGING FILTER
 #
-# During batch simulation the IDA solver may trigger "Safety stop" warnings
-# whenever a configuration exceeds the fuel cell's physical operating limit and
-# the simulation is terminated gracefully.  These warnings are expected, already
-# captured in the :invalid classification, and only pollute the progress bar
-# display.  The filter below silences them while keeping all other
-# Info / Warn / Error messages intact.
+# During batch simulation the IDA solver may trigger:
+#   1. "Safety stop" warnings when a configuration exceeds the fuel cell's physical
+#      operating limit and the simulation is terminated gracefully.
+#   2. "Simulation exceeded maximum runtime" errors when max_run_time_s is exceeded.
+# Both are expected, already captured in the :failed/:invalid classification, and
+# only pollute the progress bar display.  The filter below silences them while
+# keeping all other Info / Warn / Error messages intact.
 # ─────────────────────────────────────────────────────────────────────────────
 
-struct _SuppressSafetyWarnings <: AbstractLogger
+struct _SuppressExpectedErrors <: AbstractLogger
     base::AbstractLogger
 end
-Logging.min_enabled_level(l::_SuppressSafetyWarnings) = Logging.min_enabled_level(l.base)
-Logging.shouldlog(l::_SuppressSafetyWarnings, args...)  = Logging.shouldlog(l.base, args...)
-function Logging.handle_message(l::_SuppressSafetyWarnings, level, msg, args...; kwargs...)
-    level == Logging.Warn && startswith(string(msg), "Safety stop") && return
+Logging.min_enabled_level(l::_SuppressExpectedErrors) = Logging.min_enabled_level(l.base)
+Logging.shouldlog(l::_SuppressExpectedErrors, args...)  = Logging.shouldlog(l.base, args...)
+function Logging.handle_message(l::_SuppressExpectedErrors, level, msg, args...; kwargs...)
+    msg_str = string(msg)
+    level == Logging.Warn && startswith(msg_str, "Safety stop") && return
+    level == Logging.Error && startswith(msg_str, "Simulation exceeded maximum runtime") && return
     Logging.handle_message(l.base, level, msg, args...; kwargs...)
 end
-Logging.catch_exceptions(l::_SuppressSafetyWarnings) = Logging.catch_exceptions(l.base)
+Logging.catch_exceptions(l::_SuppressExpectedErrors) = Logging.catch_exceptions(l.base)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # BUILD CONFIGURATION
@@ -102,14 +105,14 @@ criteria_cfg = ValidityCriteriaConfig(
 
 analysis_cfg = ValidityAnalysisConfig(
     fuel_cell_type         = :ZSW_GenStack,
-    voltage_zone           = :before_voltage_drop,  # :before_voltage_drop, :full.
-    n_samples              = 10_000,                # Total number of configurations to simulate (LHS samples).
+    voltage_zone           = :full,                 # :before_voltage_drop, :full.
+    n_samples              = 100,                # Total number of configurations to simulate (LHS samples).
     validation_criteria    = criteria_cfg,
     parallel               = PARALLEL,              # ← driven by the constant above
     save_curves            = true,                  # Set to true to save polarization curves
-    reuse_from             = "results/model_validity/2026.06.02 - 10000 samples - before voltage drop - V1",               # Set to "path/to/previous/run" to reuse curves. ex: "results/model_validity/2026.06.02 - 10000 samples - before voltage drop - V1"
-    hyperbox_finder_method = [:PRIM, :MaxBox],                 # Vector of IRD methods: :PRIM, :MaxBox
-    max_run_time_s         = 30.0,       # Maximum simulation runtime (seconds)
+    reuse_from             = nothing,               # Set to "path/to/previous/run" to reuse curves. ex: "results/model_validity/2026.06.02 - 10000 samples - before voltage drop - V1"
+    hyperbox_finder_method = [:PRIM, :MaxBox],      # Vector of IRD methods: :PRIM, :MaxBox
+    max_run_time_s         = 60.0,                  # Maximum simulation runtime for each polarisation curve (seconds)
 )
 
 # IRD configuration (required — STEP 3 is no longer optional)
@@ -149,7 +152,7 @@ println("  AlphaPEM — Parameter Validity Region Analysis")
 println("="^72)
 println()
 
-result = with_logger(_SuppressSafetyWarnings(current_logger())) do
+result = with_logger(_SuppressExpectedErrors(current_logger())) do
     run_validity_analysis(analysis_cfg, ird_cfg)
 end
 

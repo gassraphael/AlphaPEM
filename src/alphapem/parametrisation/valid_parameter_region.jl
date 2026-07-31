@@ -71,6 +71,7 @@ module ValidParameterRegion
 # ─── Standard library ────────────────────────────────────────────────────────
 using Printf
 using Dates
+using Logging
 using LinearAlgebra: BLAS
 
 # ─── External packages ───────────────────────────────────────────────────────
@@ -743,6 +744,22 @@ function classify_batch_simulations(samples::Matrix{Float64},
     # If saving curves, prepare a vector to collect (sample_id, I, U) tuples
     curves_collection = cfg.save_curves ? Tuple{Int, Vector{Float64}, Vector{Float64}}[] : nothing
 
+    # ── Warm-up: pay Julia's one-time JIT compilation cost up front ────────────
+    @info "  Pre-warming JIT compilation (throwaway simulation, default timeout)…"
+    _prewarm_sample     = [clamp(getfield(base_params, b.name), b.min, b.max) for b in bounds.bounds]
+    _prewarm_num_params = NumericalParams(nb_gc = cfg.nb_gc)
+    _simulate_one_configuration(_prewarm_sample, bounds, base_params,
+                                cfg.polarization_params, _prewarm_num_params, cfg.validation_criteria)
+    if cfg.parallel && Threads.nthreads() > 1
+        # Also compile the Threads.@spawn closure/task machinery used by
+        # Threads.@threads below, so no worker thread pays for it mid-batch.
+        let s = _prewarm_sample, np = _prewarm_num_params
+            @sync Threads.@spawn _simulate_one_configuration(
+                s, bounds, base_params, cfg.polarization_params, np, cfg.validation_criteria
+            )
+        end
+    end
+
     start_time = time()
 
     if cfg.parallel && Threads.nthreads() > 1
@@ -855,6 +872,33 @@ end
 
 
 """
+    _TimeoutDetectingLogger(base, timed_out)
+
+Logger wrapper that watches for the `@error "Simulation exceeded maximum
+runtime..."` message emitted by AlphaPEM's core timeout callback
+(`_build_timeout_callback` in `AlphaPEM.jl`). That callback stops the solver
+gracefully (`terminate!`) rather than throwing, so the resulting truncated
+curve would otherwise be classified normally (often ending up `:invalid`)
+instead of `:failed`. Wrapping the logger lets `_simulate_one_configuration`
+detect the timeout and force the correct classification, without touching
+the core solver code.
+"""
+struct _TimeoutDetectingLogger <: Logging.AbstractLogger
+    base::Logging.AbstractLogger
+    timed_out::Base.RefValue{Bool}
+end
+Logging.min_enabled_level(l::_TimeoutDetectingLogger) = Logging.min_enabled_level(l.base)
+Logging.shouldlog(l::_TimeoutDetectingLogger, args...) = Logging.shouldlog(l.base, args...)
+function Logging.handle_message(l::_TimeoutDetectingLogger, level, msg, args...; kwargs...)
+    if level == Logging.Error && startswith(string(msg), "Simulation exceeded maximum runtime")
+        l.timed_out[] = true
+    end
+    Logging.handle_message(l.base, level, msg, args...; kwargs...)
+end
+Logging.catch_exceptions(l::_TimeoutDetectingLogger) = Logging.catch_exceptions(l.base)
+
+
+"""
     _simulate_one_configuration(sample, bounds, base_params, polar_params, num_params, val_cfg)
       -> (classification, details, start_in_range, is_monotonic, has_positive_v, error_msg,
           I_array, U_array)
@@ -902,7 +946,23 @@ function _simulate_one_configuration(sample::Vector{Float64},
         # Create current profile and simulator, then run.
         cd   = create_current(polar_params, fc)
         simu = AlphaPEMSimulator(fc, cd, sim_cfg)
-        simulate_model!(simu)
+
+        # AlphaPEM's core timeout callback (`_build_timeout_callback` in AlphaPEM.jl)
+        # stops the solver gracefully (`terminate!`) rather than throwing when
+        # `max_run_time_s` is exceeded, so the resulting truncated curve would
+        # otherwise be classified normally (often ending up `:invalid`) instead of
+        # `:failed`. Watch for its `@error "Simulation exceeded maximum runtime..."`
+        # message to detect this case without touching the core solver code.
+        timed_out = Ref(false)
+        with_logger(_TimeoutDetectingLogger(current_logger(), timed_out)) do
+            simulate_model!(simu)
+        end
+
+        if timed_out[]
+            return (:failed, "simulation exceeded maximum runtime ($(num_params.max_run_time_s)s)",
+                    missing, missing, missing,
+                    "Simulation exceeded maximum runtime of $(num_params.max_run_time_s)s", nothing, nothing)
+        end
 
         # Classify the resulting polarization curve.
         vr = classify_polarization_curve(simu, val_cfg)
