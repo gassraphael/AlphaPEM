@@ -137,10 +137,12 @@ function _polarization_transitions(p::PolarizationParams)
     i_curr = p.i_ini
 
     # 2. Single large ramp: i_ini -> i_max (no measurement during ramp)
+    # Note: i_max can be lower than i_ini (e.g. :before_voltage_drop zones), in which
+    # case this is a ramp DOWN. The duration must stay positive in both directions.
     di_to_max = i_max - p.i_ini
     push!(di_transitions, di_to_max)
     push!(t_starts, t_curr)
-    dt = di_to_max / p.v_load
+    dt = abs(di_to_max) / p.v_load
     push!(dt_loads, dt)
     dt_break = _select_break_time(i_max, p)
     push!(delta_t_breaks, dt_break)
