@@ -33,6 +33,12 @@
 
 options(repos = c(CRAN = "https://cloud.r-project.org"))
 
+# Force serial installation (Ncpus = 1): parallel install.packages() runs
+# concurrent `R CMD INSTALL` processes against the same library folder,
+# which can deadlock on file locks. Safe to parallelize later, at runtime
+# (see run_parameter_validity.jl), just not during package installation.
+options(Ncpus = 1)
+
 # ---- Helper: install a specific version from CRAN archive -------------------
 install_version_archive <- function(pkg, version) {
   installed <- tryCatch(packageVersion(pkg), error = function(e) NULL)
