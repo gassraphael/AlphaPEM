@@ -108,6 +108,36 @@ for (pkg in pkgs) {
 }
 
 message("\nAll R packages installed successfully.")
-message("You can now run:")
+
+# ---- Warm Julia's precompilation cache (headless-safe) ----------------------
+# GLMakie/WGLMakie are direct Julia dependencies of AlphaPEM that require
+# OpenGL/X11. On a fresh or changed Manifest, Julia's automatic precompile
+# hook fails hard the first time GLMakie is precompiled on a headless server
+# (e.g. an HPC cluster), aborting run_parameter_validity.jl before any
+# AlphaPEM code runs. scripts/run_parameter_validity_cluster.sh and
+# scripts/run_calibration_cluster.sh avoid this by calling
+# `Pkg.precompile(strict=false)` before launching Julia on the real script.
+# Running that same non-strict precompile once, right here, warms the on-disk
+# compile cache so the failure never happens again afterwards — whether Julia
+# is later launched through those cluster scripts OR directly, e.g.:
+#   julia --project=. --threads=auto examples/run_parameter_validity.jl
+message("\n=== Warming Julia precompilation cache (headless-safe) ===")
+if (nzchar(Sys.which("julia"))) {
+  julia_status <- system2(
+    "julia",
+    c("--project=.", "-e", shQuote("using Pkg; Pkg.instantiate(); Pkg.precompile(strict=false)"))
+  )
+  if (julia_status == 0) {
+    message("  Julia packages precompiled (GLMakie/WGLMakie failures on headless servers are expected and non-fatal).")
+  } else {
+    message(sprintf("  [WARNING] Julia precompilation exited with status %d. Rerun manually if needed:", julia_status))
+    message("    julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile(strict=false)'")
+  }
+} else {
+  message("  [INFO] `julia` not found on PATH — skipping. Before running AlphaPEM, precompile manually:")
+  message("    julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile(strict=false)'")
+}
+
+message("\nYou can now run:")
 message("  RUN_PRIM=true julia --project=. --threads=auto examples/run_parameter_validity.jl")
 
