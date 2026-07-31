@@ -18,9 +18,16 @@
 #   - Adapt PBS parameters according to your cluster (ncpus, mem, walltime)
 #   - Script copies entire project to temporary workspace for execution
 #   - Results are automatically copied back to original directory
-#   - The IRD package must already be cloned once on the login node:
-#       git clone https://github.com/slds-lmu/supplementary_2023_ird.git external/IRD_method_2023
-#     See README.md § Installation for full instructions (R + required packages).
+#   - R + a C++ compiler must already be installed once on the login node in a
+#     "r-env" conda environment (no sudo available on the cluster):
+#       curl -fsSL https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -o miniforge.sh
+#       bash miniforge.sh -b -p "$HOME/miniforge3"
+#       export PATH="$HOME/miniforge3/bin:$PATH"
+#       conda create -y -n r-env -c conda-forge \
+#           r-base cmake compilers \
+#           libcurl openssl libxml2 libwebp libpng libtiff libjpeg-turbo \
+#           freetype fontconfig harfbuzz fribidi
+#     See README.md § Installation, step 4, for full instructions.
 #
 # Author: Raphaël Gass
 # License: GPLv3
@@ -133,46 +140,57 @@ julia --project -e 'using Pkg; Pkg.precompile(strict=false)'
 echo "[INFO] Precompilation completed"
 echo ""
 
-# **R / IRD Environment Check:**
+# **R / IRD Environment Setup:**
 # STEP 3 of run_parameter_validity.jl (PRIM/MaxBox restricted-region analysis)
-# shells out to Rscript. Check upfront rather than failing after paying for the
-# full batch simulation (STEP 1-2, by far the most expensive part of the job).
+# shells out to Rscript. Set this up upfront rather than failing after paying
+# for the full batch simulation (STEP 1-2, by far the most expensive part of the job).
 echo "================================================================================"
-echo "              R / IRD Environment Check"
+echo "              R / IRD Environment Setup"
 echo "================================================================================"
 
-IRD_PKG_DIR="$PBS_TMPDIR/$PROJECT_NAME/external/IRD_method_2023/irdpackage"
+# Activate the "r-env" conda environment (R + C++ compiler), created once on the
+# login node as described in README.md § Installation, step 4.
+source "$HOME/miniforge3/etc/profile.d/conda.sh"
+conda activate r-env
 
 if ! command -v Rscript &> /dev/null; then
-    echo "[ERROR] Rscript not found in PATH. Install R before submitting this job."
+    echo "[ERROR] Rscript not found in PATH after 'conda activate r-env'."
+    echo "[ERROR] Create the environment once on the login node (README.md § Installation, step 4):"
+    echo "[ERROR]   conda create -y -n r-env -c conda-forge r-base cmake compilers \\"
+    echo "[ERROR]       libcurl openssl libxml2 libwebp libpng libtiff libjpeg-turbo \\"
+    echo "[ERROR]       freetype fontconfig harfbuzz fribidi"
     exit 1
 fi
 echo "[INFO] Using: $(Rscript --version 2>&1)"
 
+# Clone the IRD package if not already present (README.md § Installation, step 4.b).
+IRD_PKG_DIR="$PBS_TMPDIR/$PROJECT_NAME/external/IRD_method_2023/irdpackage"
 if [ ! -d "$IRD_PKG_DIR" ]; then
-    echo "[ERROR] IRD package directory not found: $IRD_PKG_DIR"
-    echo "[ERROR] Run once on the login node (inside the repository, not the scratch copy):"
-    echo "[ERROR]   git clone https://github.com/slds-lmu/supplementary_2023_ird.git external/IRD_method_2023"
-    exit 1
+    echo "[INFO] IRD package not found. Cloning it..."
+    git clone https://github.com/slds-lmu/supplementary_2023_ird.git external/IRD_method_2023
 fi
 echo "[INFO] IRD package directory found: $IRD_PKG_DIR"
 
+# Install the required R packages if not already present (README.md § Installation, step 4.c).
 echo "[INFO] Checking required R packages (devtools, mlr3, mlr3learners, mlr3pipelines, iml, ranger, yaml, jsonlite, data.table, optparse)..."
 Rscript -e '
 required <- c("devtools", "mlr3", "mlr3learners", "mlr3pipelines", "iml", "ranger",
               "yaml", "jsonlite", "data.table", "optparse")
 missing  <- required[!vapply(required, requireNamespace, logical(1), quietly = TRUE)]
 if (length(missing) > 0) {
-    cat("[ERROR] Missing R packages:", paste(missing, collapse = ", "), "\n")
+    cat("[INFO] Missing R packages:", paste(missing, collapse = ", "), "-- installing them.\n")
     quit(status = 1)
 } else {
     cat("[INFO] All required R packages are available.\n")
 }
 '
-R_STATUS=$?
-if [ $R_STATUS -ne 0 ]; then
-    echo "[ERROR] R/IRD check failed. Aborting job."
-    exit $R_STATUS
+if [ $? -ne 0 ]; then
+    Rscript src/alphapem/parametrisation/validity/R/install_r_packages.R
+    R_INSTALL_STATUS=$?
+    if [ $R_INSTALL_STATUS -ne 0 ]; then
+        echo "[ERROR] R package installation failed. Aborting job."
+        exit $R_INSTALL_STATUS
+    fi
 fi
 echo ""
 
