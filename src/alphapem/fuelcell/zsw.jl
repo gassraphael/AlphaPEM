@@ -427,7 +427,7 @@ function undetermined_parameters(fc::ZSWFuelCell, voltage_zone::Symbol = :full):
         (:alpha_c,      0.01, 1.0),                   # Cathode transfer coefficient
         (:e,            3, 5),                        # Capillary exponent
         (:Re,           5e-8, 5e-6),                  # Electron-conduction resistance
-        (:i0_c_ref,     0.1, 100.0),                 # Reference cathode exchange current density
+        (:i0_c_ref,     0.1, 100.0),                  # Reference cathode exchange current density
         (:kappa_co,     0.01, 40.0),                  # Crossover correction coefficient
         (:kappa_c,      0.25, 4.0),                   # Overpotential correction exponent
     ]
@@ -436,7 +436,7 @@ function undetermined_parameters(fc::ZSWFuelCell, voltage_zone::Symbol = :full):
         push!(params, (:theta_c_gdl,  90 * π / 180, 180 * π / 180)) # GDL contact angle
         push!(params, (:IC_ccl, 0.1, 3.0))                          # Ionomer to carbon ratio in the cathode catalyst layer
         push!(params, (:r_carb, 10e-9, 100e-9))                     # Mean radius of the carbon particles
-        push!(params, (:ECSA_0, 10.0, 200.0))                       # Initial electrochemical surface area of the catalyst
+        push!(params, (:ECSA_0, 10.0, 300.0))                       # Initial electrochemical surface area of the catalyst
         push!(params, (:K_O2_dis_ion, 0.1, 20.0))                   # Interfacial resistance coefficient of O₂ dissolution inside the ionomer
         push!(params, (:K_O2_ad_Pt, 0.1, 20.0))                     # Interfacial resistance coefficient of O₂ adsorption on the Pt sites
     end
