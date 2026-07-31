@@ -24,7 +24,7 @@
 #       bash miniforge.sh -b -p "$HOME/miniforge3"
 #       export PATH="$HOME/miniforge3/bin:$PATH"
 #       conda create -y -n r-env -c conda-forge \
-#           r-base cmake compilers \
+#           r-base=4.3 cmake compilers \
 #           libcurl openssl libxml2 libwebp libpng libtiff libjpeg-turbo \
 #           freetype fontconfig harfbuzz fribidi
 #     See README.md § Installation, step 4, for full instructions.
@@ -156,7 +156,7 @@ conda activate r-env
 if ! command -v Rscript &> /dev/null; then
     echo "[ERROR] Rscript not found in PATH after 'conda activate r-env'."
     echo "[ERROR] Create the environment once on the login node (README.md § Installation, step 4):"
-    echo "[ERROR]   conda create -y -n r-env -c conda-forge r-base cmake compilers \\"
+    echo "[ERROR]   conda create -y -n r-env -c conda-forge r-base=4.3 cmake compilers \\"
     echo "[ERROR]       libcurl openssl libxml2 libwebp libpng libtiff libjpeg-turbo \\"
     echo "[ERROR]       freetype fontconfig harfbuzz fribidi"
     exit 1

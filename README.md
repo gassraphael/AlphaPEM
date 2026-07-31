@@ -102,7 +102,7 @@ To install **AlphaPEM**, follow these steps in a shell:
       - Linux (Debian/Ubuntu):
         ```sh
         sudo apt update && sudo apt install -y \
-            r-base build-essential cmake \
+            r-base=4.3 build-essential cmake \
             libcurl4-openssl-dev libssl-dev libxml2-dev \
             libwebp-dev libpng-dev libtiff5-dev libjpeg-dev \
             libfreetype6-dev libfontconfig1-dev libharfbuzz-dev libfribidi-dev
