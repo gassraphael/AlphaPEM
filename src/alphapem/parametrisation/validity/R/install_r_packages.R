@@ -87,13 +87,8 @@ latest <- c(
   "RhpcBLASctl"   # BLAS thread control (required by mlr3 0.18.0)
 )
 
-# ---- Install pinned versions first ------------------------------------------
-message("\n=== Installing pinned versions (paradox 0.x ecosystem) ===")
-for (pkg in names(pinned)) {
-  install_version_archive(pkg, pinned[[pkg]])
-}
-
-# ---- Install / update latest-version packages -------------------------------
+# ---- Install / update latest-version packages (do this FIRST: it pulls in
+# most transitive CRAN dependencies normally, via automatic resolution) ------
 message("\n=== Installing/updating remaining packages ===")
 already  <- latest[vapply(latest, requireNamespace, logical(1), quietly = TRUE)]
 to_inst  <- setdiff(latest, already)
@@ -101,6 +96,13 @@ if (length(already)) message("Already installed: ", paste(already, collapse = ",
 if (length(to_inst)) {
   message("Installing: ", paste(to_inst, collapse = ", "))
   install.packages(to_inst)
+}
+
+# ---- Install pinned versions (archives don't resolve deps automatically,
+# so latest/, above, must run first to satisfy them) --------------------------
+message("\n=== Installing pinned versions (paradox 0.x ecosystem) ===")
+for (pkg in names(pinned)) {
+  install_version_archive(pkg, pinned[[pkg]])
 }
 
 # ---- Verify all packages load -----------------------------------------------
