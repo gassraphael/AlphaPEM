@@ -73,6 +73,34 @@ echo ""
 
 
 # **Environment Preparation:**
+# Pin HOME/USER to the values PBS captured at submission time.
+#
+# WORKAROUND for a cluster misconfiguration: two accounts share UID/GID 1149
+# ("getent passwd 1149" returns both rgass and bthomont). PBS's MoM rebuilds HOME and
+# USER on the compute node via getpwuid(), and which of the two entries wins depends on
+# the node's resolution order — so HOME randomly lands on the *other* account's home
+# directory (and "id" warns "cannot find name for GID 1149" because that GID has no
+# group entry at all). PBS_O_HOME/PBS_O_LOGNAME were resolved on the login node, where
+# the ordering is correct, so they are the trustworthy values.
+#
+# This matters far beyond cosmetics: the Julia depot (~/.julia), the pixi/CondaPkg cache
+# and /gpfs/scratch/$USER all derive from these variables.
+if [ -n "$PBS_O_HOME" ]; then
+    export HOME="$PBS_O_HOME"
+fi
+if [ -n "$PBS_O_LOGNAME" ]; then
+    export USER="$PBS_O_LOGNAME"
+    export LOGNAME="$PBS_O_LOGNAME"
+fi
+echo "[INFO] HOME: $HOME"
+echo "[INFO] USER: $USER"
+
+# Fail fast rather than much further down if HOME is still unusable.
+if [ ! -d "$HOME" ] || [ ! -w "$HOME" ]; then
+    echo "[ERROR] HOME ('$HOME') is not a writable directory. Aborting job."
+    exit 1
+fi
+
 # Change to submission directory
 cd "$PBS_O_WORKDIR"
 
