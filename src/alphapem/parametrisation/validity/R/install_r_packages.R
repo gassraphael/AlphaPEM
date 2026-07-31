@@ -5,11 +5,26 @@
 # PRIM-based valid parameter region analysis (run_parameter_validity.jl).
 #
 # This file is the R equivalent of `julia --project=. -e 'using Pkg; Pkg.instantiate()'`.
-# Specific versions are pinned to ensure compatibility with the irdpackage
-# (external/IRD_method_2023/), which uses the paradox 0.x API
-# (ParamDbl$new, ParamInt$new, ParamFct$new, ParamSet$new, SamplerUnif).
-# paradox 1.0+ dropped these classes; mlr3 0.19+ requires paradox >= 1.0.1.
-# Therefore mlr3 must be pinned to 0.18.0 (last version accepting paradox 0.x).
+#
+# WHY A FROZEN CRAN SNAPSHOT INSTEAD OF "LATEST":
+# irdpackage (external/IRD_method_2023/) is unmaintained and hard-pinned to the
+# paradox 0.x API (ParamDbl$new, ParamInt$new, ParamFct$new, ParamSet$new,
+# SamplerUnif). paradox 1.0+ (June 2024) dropped those classes, and mlr3 0.19+
+# requires paradox >= 1.0.1 — so the whole mlr3/paradox ecosystem must resolve
+# to versions that predate that break. Pinning a handful of package *versions*
+# by hand (as this script used to do) doesn't stay correct: every other
+# package installed as "latest" keeps drifting forward, and a future
+# transitive dependency bump can silently break the pinned packages again.
+#
+# Instead, every package below is installed from a single frozen CRAN mirror
+# snapshot (Posit Package Manager, https://packagemanager.posit.co), dated
+# 2024-03-15 — three days after mlr3 0.18.0 (the last release accepting
+# paradox 0.x) and three months before paradox 1.0.0. Because the snapshot is
+# frozen in time, install.packages() always resolves the exact same package
+# versions (mlr3 0.18.0, paradox 0.11.1, and every dependency as it existed
+# that day), no matter what is released on CRAN afterwards. There is nothing
+# left to re-break as time passes: this script's behavior is fixed forever
+# unless SNAPSHOT_DATE below is deliberately changed.
 #
 # PREREQUISITES — Before running this script, install the required system libraries:
 #
@@ -31,7 +46,11 @@
 #   Windows (run as Administrator):
 #     Rscript src\alphapem\parametrisation\validity\R\install_r_packages.R
 
-options(repos = c(CRAN = "https://cloud.r-project.org"))
+# Frozen CRAN snapshot date — see the header comment for why this must not
+# simply track "latest". Change this only after re-validating irdpackage
+# against the new date's paradox/mlr3 versions.
+SNAPSHOT_DATE <- "2024-03-15"
+options(repos = c(CRAN = sprintf("https://packagemanager.posit.co/cran/%s", SNAPSHOT_DATE)))
 
 # Force serial installation (Ncpus = 1): parallel install.packages() runs
 # concurrent `R CMD INSTALL` processes against the same library folder,
@@ -39,76 +58,38 @@ options(repos = c(CRAN = "https://cloud.r-project.org"))
 # (see run_parameter_validity.jl), just not during package installation.
 options(Ncpus = 1)
 
-# ---- Helper: install a specific version from CRAN archive -------------------
-install_version_archive <- function(pkg, version) {
-  installed <- tryCatch(packageVersion(pkg), error = function(e) NULL)
-  if (!is.null(installed) && installed == version) {
-    message(sprintf("  %s %s already installed — skipping.", pkg, version))
-    return(invisible(NULL))
-  }
-  if (!is.null(installed)) {
-    message(sprintf("  Downgrading %s %s → %s …", pkg, installed, version))
-  } else {
-    message(sprintf("  Installing %s %s …", pkg, version))
-  }
-  url <- sprintf(
-    "https://cran.r-project.org/src/contrib/Archive/%s/%s_%s.tar.gz",
-    pkg, pkg, version
-  )
-  install.packages(url, repos = NULL, type = "source")
-}
-
-# ---- Pinned versions (paradox 0.x ecosystem) --------------------------------
-# These versions form a consistent, tested set compatible with the irdpackage.
-pinned <- list(
-  # mlr3misc first (required by paradox and mlr3)
-  # 0.14.0 is the minimum actually enforced at load-time by mlr3 0.18.0
-  mlr3misc     = "0.14.0",
-  # mlr3measures (required by mlr3)
-  mlr3measures = "0.5.0",
-  # paradox 0.11.1: last release with ParamDbl$new / ParamSet$new / SamplerUnif
-  paradox      = "0.11.1",
-  # mlr3 0.18.0: last release that accepts paradox >= 0.10.0 (not 1.0+)
-  mlr3         = "0.18.0",
-  # mlr3learners 0.6.0: last release requiring only mlr3 >= 0.17.1
-  mlr3learners = "0.6.0"
+# ---- Packages required by irdpackage and run_parameter_validity.jl ----------
+# Expected versions resolved from the SNAPSHOT_DATE mirror above (recorded
+# here only so the final report can flag an unexpected mismatch — they are
+# not fetched individually, install.packages() resolves them all at once).
+expected <- list(
+  R6            = "2.5.1",
+  checkmate     = "2.3.1",
+  optparse      = "1.7.4",
+  data.table    = "1.15.2",
+  iml           = "0.11.1",
+  ranger        = "0.16.0",
+  yaml          = "2.3.8",
+  jsonlite      = "1.8.8",
+  RhpcBLASctl   = "0.23.42", # packageVersion() normalizes "0.23-42" to "0.23.42"
+  mlr3misc      = "0.14.0",
+  mlr3measures  = "0.5.0",
+  paradox       = "0.11.1", # last release with ParamDbl$new / ParamSet$new / SamplerUnif
+  mlr3          = "0.18.0", # last release that accepts paradox 0.x (0.19+ requires paradox >= 1.0.1)
+  mlr3learners  = "0.6.0"
 )
+pkgs <- names(expected)
 
-# ---- Latest-version packages (no paradox constraints) -----------------------
-latest <- c(
-  "R6",            # R6 classes used by irdpackage
-  "checkmate",     # fast argument checking
-  "optparse",      # CLI argument parsing
-  "data.table",    # fast CSV reading
-  "iml",           # interpretable ML (Predictor, used as bridge to irdpackage)
-  "ranger",        # fast Random Forest (requires C++ compiler)
-  "yaml",          # YAML read/write
-  "jsonlite",      # JSON read/write
-  "RhpcBLASctl"   # BLAS thread control (required by mlr3 0.18.0)
-)
-
-# ---- Install / update latest-version packages (do this FIRST: it pulls in
-# most transitive CRAN dependencies normally, via automatic resolution) ------
-message("\n=== Installing/updating remaining packages ===")
-already  <- latest[vapply(latest, requireNamespace, logical(1), quietly = TRUE)]
-to_inst  <- setdiff(latest, already)
-if (length(already)) message("Already installed: ", paste(already, collapse = ", "))
-if (length(to_inst)) {
-  message("Installing: ", paste(to_inst, collapse = ", "))
-  install.packages(to_inst)
-}
-
-# ---- Install pinned versions (archives don't resolve deps automatically,
-# so latest/, above, must run first to satisfy them) --------------------------
-message("\n=== Installing pinned versions (paradox 0.x ecosystem) ===")
-for (pkg in names(pinned)) {
-  install_version_archive(pkg, pinned[[pkg]])
-}
+# ---- Install everything from the frozen snapshot in one resolution pass -----
+# Letting install.packages() resolve the whole dependency graph at once (rather
+# than installing package-by-package) is what guarantees a consistent,
+# mutually-compatible set — the snapshot pins every transitive dependency too.
+message("\n=== Installing R packages from CRAN snapshot ", SNAPSHOT_DATE, " ===")
+install.packages(pkgs)
 
 # ---- Verify all packages load -----------------------------------------------
 message("\n=== Verifying installation ===")
-all_pkgs <- c(names(pinned), latest)
-missing  <- all_pkgs[!vapply(all_pkgs, requireNamespace, logical(1), quietly = TRUE)]
+missing <- pkgs[!vapply(pkgs, requireNamespace, logical(1), quietly = TRUE)]
 if (length(missing)) {
   stop(
     "Installation failed for: ", paste(missing, collapse = ", "),
@@ -117,13 +98,13 @@ if (length(missing)) {
 }
 
 # Final version report
-for (pkg in names(pinned)) {
-  v <- as.character(packageVersion(pkg))
-  ok <- v == pinned[[pkg]]
-  message(sprintf("  %-14s %s  %s", pkg, v, if (ok) "[OK]" else paste0("[MISMATCH — expected ", pinned[[pkg]], "]")))
-}
-for (pkg in latest) {
-  message(sprintf("  %-14s %s", pkg, as.character(packageVersion(pkg))))
+for (pkg in pkgs) {
+  v  <- as.character(packageVersion(pkg))
+  ok <- v == expected[[pkg]]
+  message(sprintf(
+    "  %-14s %s  %s", pkg, v,
+    if (ok) "[OK]" else paste0("[UNEXPECTED — snapshot resolved ", v, ", script recorded ", expected[[pkg]], "]")
+  ))
 }
 
 message("\nAll R packages installed successfully.")
