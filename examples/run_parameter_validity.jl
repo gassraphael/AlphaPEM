@@ -105,8 +105,8 @@ criteria_cfg = ValidityCriteriaConfig(
 
 analysis_cfg = ValidityAnalysisConfig(
     fuel_cell_type         = :ZSW_GenStack,
-    voltage_zone           = :full,                 # :before_voltage_drop, :full.
-    n_samples              = 100,                # Total number of configurations to simulate (LHS samples).
+    voltage_zone           = :before_voltage_drop,  # :before_voltage_drop, :full.
+    n_samples              = 100_000,               # Total number of configurations to simulate (LHS samples).
     validation_criteria    = criteria_cfg,
     parallel               = PARALLEL,              # ← driven by the constant above
     save_curves            = true,                  # Set to true to save polarization curves
