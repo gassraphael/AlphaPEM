@@ -148,25 +148,25 @@ Each parameter is mapped to a tuple: (min::Float64, max::Float64, type::Symbol)
 where type is either :real or :int.
 """
 const UNDETERMINED_PARAMETER_BOUNDS = Dict{Symbol, Tuple{Float64, Float64, Symbol}}(
-    :Hacl          => (1e-6, 15e-6, :real),                 # Anode catalyst-layer thickness
-    :Hccl          => (5e-6, 20e-6, :real),                 # Cathode catalyst-layer thickness
-    :Hmem          => (5e-6, 50e-6, :real),                 # Membrane thickness
-    :Hgdl          => (70e-6, 150e-6, :real),               # Gas-diffusion-layer thickness
-    :Hmpl          => (40e-6, 100e-6, :real),               # Microporous-layer thickness
-    :epsilon_gdl   => (0.5, 0.9, :real),                    # GDL porosity
-    :theta_c_gdl   => (90 * π / 180, 180 * π / 180, :real), # GDL contact angle
-    :epsilon_mpl   => (0.3, 0.7, :real),                    # MPL porosity
-    :IC_ccl        => (0.1, 3.0, :real),                    # Ionomer to carbon ratio in the cathode catalyst layer
-    :r_carb        => (10e-9, 100e-9, :real),               # Mean radius of the carbon particles
-    :ECSA_0        => (10.0, 300.0, :real),                 # Initial electrochemical surface area of the catalyst
-    :K_O2_dis_ion  => (0.1, 20.0, :real),                   # Interfacial resistance coefficient of O₂ dissolution inside the ionomer
-    :K_O2_ad_Pt    => (0.1, 20.0, :real),                   # Interfacial resistance coefficient of O₂ adsorption on the Pt sites
-    :alpha_c       => (0.01, 1.0, :real),                   # Cathode transfer coefficient
-    :e             => (3, 5, :int),                         # Capillary exponent
-    :Re            => (5e-8, 5e-6, :real),                  # Electron-conduction resistance
+    :Hacl          => (1e-6, 15e-6, :real),                  # Anode catalyst-layer thickness
+    :Hccl          => (5e-6, 20e-6, :real),                  # Cathode catalyst-layer thickness
+    :Hmem          => (5e-6, 50e-6, :real),                  # Membrane thickness
+    :Hgdl          => (70e-6, 150e-6, :real),                # Gas-diffusion-layer thickness
+    :Hmpl          => (40e-6, 100e-6, :real),                # Microporous-layer thickness
+    :epsilon_gdl   => (0.5, 0.9, :real),                     # GDL porosity
+    :theta_c_gdl   => (100 * π / 180, 160 * π / 180, :real), # GDL contact angle
+    :epsilon_mpl   => (0.3, 0.6, :real),                     # MPL porosity
+    :IC_ccl        => (0.1, 2.0, :real),                     # Ionomer to carbon ratio in the cathode catalyst layer
+    :r_carb        => (10e-9, 100e-9, :real),                # Mean radius of the carbon particles
+    :ECSA_0        => (30.0, 200.0, :real),                  # Initial electrochemical surface area of the catalyst
+    :K_O2_dis_ion  => (0.1, 20.0, :real),                    # Interfacial resistance coefficient of O₂ dissolution inside the ionomer
+    :K_O2_ad_Pt    => (0.1, 20.0, :real),                    # Interfacial resistance coefficient of O₂ adsorption on the Pt sites
+    :alpha_c       => (0.4, 1.0, :real),                     # Cathode transfer coefficient
+    :e             => (3, 5, :int),                          # Capillary exponent
+    :Re            => (5e-8, 5e-6, :real),                   # Electron-conduction resistance
     :i0_c_ref      => (0.1, 100.0, :real),                   # Reference cathode exchange current density
-    :kappa_co      => (0.01, 40.0, :real),                  # Crossover correction coefficient
-    :kappa_c       => (0.25, 4.0, :real),                   # Overpotential correction exponent
+    :kappa_co      => (0.01, 40.0, :real),                   # Crossover correction coefficient
+    :kappa_c       => (0.25, 4.0, :real),                    # Overpotential correction exponent
 )
 
 

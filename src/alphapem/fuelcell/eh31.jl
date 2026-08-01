@@ -335,17 +335,17 @@ function undetermined_parameters(fc::EH31FuelCell, voltage_zone::Symbol = :full)
         throw(ArgumentError("voltage_zone must be :full or :before_voltage_drop (got $voltage_zone)"))
 
     params = [
-        (:Hacl,        5e-6, 20e-6),  # Anode/cathode catalyst-layer thickness (Hccl = Hacl)
-        (:Hmem,        15e-6, 50e-6),  # Membrane thickness
-        (:epsilon_gdl, 0.40, 0.95),   # GDL porosity
-        (:Re,          5e-7, 5e-6),   # Electron-conduction resistance
-        (:i0_c_ref,    0.1, 100.0),   # Reference cathode exchange current density
+        (:Hacl,        1e-6, 15e-6),   # Anode/cathode catalyst-layer thickness (Hccl = Hacl)
+        (:Hmem,        5e-6, 50e-6),   # Membrane thickness
+        (:epsilon_gdl, 0.5, 0.9),      # GDL porosity
+        (:Re,          5e-8, 5e-6),    # Electron-conduction resistance
+        (:i0_c_ref,    0.1, 100.0),    # Reference cathode exchange current density
         (:kappa_co,    0.01, 40.0),    # Crossover correction coefficient
         (:kappa_c,     0.25, 4.0),     # Overpotential correction exponent
     ]
 
     if voltage_zone == :full
-        push!(params, (:K_O2_ad_Pt, 0.1, 10.0))    # O₂ adsorption resistance coefficient
+        push!(params, (:K_O2_ad_Pt, 0.1, 20.0))    # O₂ adsorption resistance coefficient
     end
 
     return params
