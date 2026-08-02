@@ -73,7 +73,7 @@ function physical_parameters(fc::ZSWFuelCell)::PhysicalParams
         # Voltage polarization
         Re = 1.5e-7,                         # Electron conduction resistance of the circuit in Ω·m²
         i0_c_ref = 20.0,                     # Reference exchange current density at the cathode in A·m⁻²
-        kappa_co = 1,                        # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
+        kappa_co = 20,                        # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
         kappa_c = 0.25,                      # Overpotential correction exponent
         C_scl = 2e7                          # Volumetric space-charge layer capacitance in F·m⁻³
     )
