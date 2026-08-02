@@ -47,10 +47,10 @@ function physical_parameters(fc::ZSWFuelCell)::PhysicalParams
         # Membrane
         Hmem = 15e-6,                        # Thickness of the membrane in meters
         # Gas diffusion layer
-        Hgdl = 121.28496643671034e-6,        # Thickness of the gas diffusion layer in meters
-        epsilon_gdl = 0.8436478459989776,    # Anode/cathode GDL porosity
+        Hgdl = 80e-6,                        # Thickness of the gas diffusion layer in meters
+        epsilon_gdl = 0.8,                   # Anode/cathode GDL porosity
         #   Microporous layer
-        Hmpl = 43.98306893354156e-6,         # Thickness of the microporous layer in meters
+        Hmpl = 70e-6,                        # Thickness of the microporous layer in meters
         epsilon_mpl = 0.425,                 # Porosity of the microporous layer
         # Gas channel
         Hagc = 230e-6,                       # Thickness of the anode gas channel in meters
@@ -69,12 +69,12 @@ function physical_parameters(fc::ZSWFuelCell)::PhysicalParams
         Vaem = 25.8e-3 * 9.01e-4,            # Exhaust manifold volume at the anode in m³
         Vcem = 25.8e-3 * 22.61e-4,           # Exhaust manifold volume at the cathode in m³
         # Interaction parameters between fluids and PEMFC structure
-        K_O2_ad_Pt = 7.346634385810734,      # Interfacial resistance coefficient of O2 adsorption on the Pt sites
+        K_O2_ad_Pt = 5.4,                    # Interfacial resistance coefficient of O2 adsorption on the Pt sites
         # Voltage polarization
-        Re = 1.545654084145453e-7,           # Electron conduction resistance of the circuit in Ω·m²
-        i0_c_ref = 20.0,                    # Reference exchange current density at the cathode in A·m⁻²
+        Re = 1.5e-7,                         # Electron conduction resistance of the circuit in Ω·m²
+        i0_c_ref = 20.0,                     # Reference exchange current density at the cathode in A·m⁻²
         kappa_co = 1,                        # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
-        kappa_c = 0.253020870903792,         # Overpotential correction exponent
+        kappa_c = 0.25,                      # Overpotential correction exponent
         C_scl = 2e7                          # Volumetric space-charge layer capacitance in F·m⁻³
     )
 end
@@ -420,9 +420,9 @@ function undetermined_parameters(fc::ZSWFuelCell, voltage_zone::Symbol = :full):
 
     params = [
         (:Hccl,         10e-6, 15.5e-6),              # Cathode catalyst-layer thickness
-        (:Hgdl,         70e-6, 88e-6),                # Gas-diffusion-layer thickness
+        (:Hgdl,         70e-6, 90e-6),                # Gas-diffusion-layer thickness
         (:Hmpl,         60e-6, 80e-6),                # Microporous-layer thickness
-        (:epsilon_gdl,  0.7, 0.9),                    # GDL porosity
+        (:epsilon_gdl,  0.7, 0.88),                    # GDL porosity
         (:epsilon_mpl,  0.3, 0.55),                    # MPL porosity
         (:alpha_c,      0.4, 1.0),                    # Cathode transfer coefficient
         (:e,            3, 5),                        # Capillary exponent
