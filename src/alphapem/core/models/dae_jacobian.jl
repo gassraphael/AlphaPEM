@@ -108,11 +108,119 @@ end
 # Jacobian sparsity prototype
 # ──────────────────────────────────────────────────────────────────────────────
 
+"""Build the set of probe states used for numerical sparsity detection.
+
+Returns a vector of `(y_probe, local_rtol)` pairs.
+
+Why several probes, and why non-uniform ones
+--------------------------------------------
+The pattern is detected by finite differences, so a coupling is only visible at
+a probe state where its partial derivative is *numerically* non-zero. The
+initial state `y0` is a no-flow thermodynamic equilibrium: every field
+(`C_v`, `C_H2`, `C_O2`, `C_N2`, `T`, `s`, `lambda`) is spatially **uniform**
+across the through-plane nodes, so every diffusive/convective flux is exactly
+zero.
+
+That matters because most transport terms have the form `J = -D(s, T, C) · ∇C`.
+At a uniform state `∇C = 0`, hence
+
+    ∂J/∂s = -(∂D/∂s)·∇C = 0,   ∂J/∂T = 0,   ∂J/∂C_other = 0
+
+*identically*, even though these couplings are large as soon as the simulation
+develops gradients. A uniform probe therefore cannot see any
+diffusivity-modulating coupling, no matter how permissive the threshold is.
+Lifting all variables by a constant (`max.(y0, 0.1)`) does not help: the state
+stays uniform.
+
+Missing entries are not benign here. The Jacobian is evaluated with
+*coloring-compressed* finite differences, which assume that same-coloured
+columns share no non-zero row. An entry absent from the pattern lets a second
+column of the same colour write into a row it was assumed not to touch, so the
+recovered value for the *legitimate* entry becomes the sum of two derivatives.
+The Jacobian is then not merely incomplete but wrong, IDA's modified Newton
+stops converging, and the solver collapses to tiny steps with a near-100%
+non-linear-solver failure rate.
+
+The probe set is therefore:
+- Pass A  — `y0`, relative threshold: couplings active at the start.
+- Pass B  — `max.(y0, 0.1)`, absolute threshold: terms that vanish at `s = 0`.
+- Pass C  — several **non-uniform** states obtained by scattering `max.(|y0|, 0.1)`
+  with a deterministic low-discrepancy (golden-ratio) per-index factor. Every
+  node then differs from its neighbours, so all gradients are non-zero and the
+  flux-modulating couplings become visible.
+
+Pass B and Pass C fix two *different* degeneracies
+------------------------------------------------------------------------
+- Pass B stays spatially **uniform** (every node still equals every other node);
+  it only moves state variables away from `0`. It reveals *local*, same-node
+  couplings whose derivative vanishes at `y0` because a variable itself is zero
+  there (e.g. liquid saturation `s = 0` at rest kills `∂(term ∝ s^3)/∂s`, which
+  is present but dormant at equilibrium).
+- Pass C breaks spatial **uniformity**. It reveals *transport*, cross-node
+  couplings whose derivative is proportional to a gradient `∇C`, `∇T`, ...  —
+  these are zero at *any* uniform state, however far from `0` each variable
+  individually sits, so Pass B alone cannot expose them. In practice this is
+  the majority of the entries missed by Pass A/B alone (diffusivity-modulating
+  terms of the form `∂(D(s,T,C)·∇C)/∂s`, `.../∂T`, etc., see above).
+An entry may need either mechanism, both, or neither; hence probing with all
+of Pass A, B and C rather than trying to guess which applies where.
+
+Golden-ratio scattering (Pass C)
+---------------------------------
+Pass C needs a deterministic, reproducible spatial pattern that puts every
+solver index at a *different* value from its neighbours, for any mesh size
+(`nb_gdl`, `nb_mpl` here are small, typically 2-5). This is exactly what a Weyl
+sequence provides:
+
+    spread[k] = 2 * frac(k·α + phase) - 1,     α irrational
+
+By Weyl's equidistribution theorem, `frac(k·α)` never repeats and spreads
+uniformly over `[0,1)` whenever `α` is irrational. The golden ratio
+`α = φ-1 = (√5-1)/2` is the irrational number *hardest to approximate by a
+rational `p/q`* (every term of its continued-fraction expansion is `1`), so
+`frac(k·α)` avoids near-periodicities even for the small, regular mesh sizes
+used here — a generic irrational could resonate with a mesh size such as 3 or
+5 and, by accident, put two neighbouring nodes back at nearly equal values.
+A plain linear ramp does not offer this guarantee (it can create spurious
+cancellations between two physically-coupled variables that happen to vary at
+the same rate along the index), and `rand()` would make the detected pattern —
+hence the coloring, hence the solver's step-by-step behaviour — different on
+every run. The per-pass phase shift `0.37*m` only decorrelates the three
+amplitude levels (`m = 1, 2, 3`) from one another; it carries no special
+meaning beyond "not the same offset twice".
+
+The Pass C states are deterministic, so the pattern is reproducible run to run.
+"""
+function _dae_jacobian_probe_states(initial_solver_values::Vector{Float64};
+                                    amplitudes = (0.10, 0.25, 0.45),
+                                    sensitivity_rtol::Float64 = 1e-8)
+    n = length(initial_solver_values)
+    probes = Vector{Tuple{Vector{Float64}, Float64}}()
+
+    # Pass A — equilibrium state, relative threshold.
+    push!(probes, (copy(initial_solver_values), sensitivity_rtol))
+    # Pass B — activated state, absolute threshold only.
+    push!(probes, (max.(initial_solver_values, 0.1), 0.0))
+
+    # Pass C — non-uniform states. The golden-ratio sequence gives a spread that
+    # never repeats between neighbouring indices, so no gradient stays zero.
+    golden = 0.6180339887498949     # golden ratio:  φ - 1 = (√5 - 1)/2
+    base = max.(abs.(initial_solver_values), 0.1)
+    for (m, amplitude) in enumerate(amplitudes)
+        spread = [2.0 * ((k * golden + 0.37 * m) % 1.0) - 1.0 for k in 1:n] # Weyl sequence
+        push!(probes, (base .* (1.0 .+ amplitude .* spread), 0.0))
+    end
+    return probes
+end
+
+
 """Build a sparse Jacobian prototype for the DAE residual.
 
 The prototype is built once at solve setup time using a conservative strategy:
 - always include the diagonal,
-- add numerically detected couplings around the initial state.
+- add couplings numerically detected over the probe states returned by
+  `_dae_jacobian_probe_states` (see there for why several, non-uniform states
+  are required).
 
 This keeps the setup robust for `IDA(linear_solver=:KLU)` while avoiding a
 fully manual Jacobian implementation.
@@ -129,10 +237,6 @@ function _build_dae_jacobian_prototype(residual!,
     n == length(differential_vars) ||
         throw(ArgumentError("differential_vars size mismatch in _build_dae_jacobian_prototype."))
 
-    # Baseline residual at the initial scaled state.
-    res0 = zeros(Float64, n)
-    residual!(res0, initial_solver_derivatives, initial_solver_values, packed, t0)
-
     rows = Int[]
     cols = Int[]
 
@@ -142,60 +246,76 @@ function _build_dae_jacobian_prototype(residual!,
         push!(cols, i)
     end
 
-    # 2) Numerically probe local couplings by central finite differences.
-    # Two probe points are used to capture the complete structural pattern:
-    #
-    # Pass A — initial state `y0`:  detects first-order couplings active at
-    #   the start of the simulation.  Uses a relative threshold scaled by the
-    #   local residual magnitude so that small sensitivities in large-residual
-    #   rows are not falsely included.
-    #
-    # Pass B — activated state `max.(y0, 0.1)`:  forces all state variables
-    #   to at least 0.1 in scaled space.  This reveals dormant higher-order
-    #   couplings (e.g. liquid-water transport) that vanish at y0 but
-    #   become significant once the state evolves away from zero.
-    #   The activated state is far from equilibrium, so residuals are large and
-    #   `local_scale` can reach O(10²–10³).  Using a relative threshold would
-    #   mask genuine couplings of O(0.01–0.1), so Pass B uses an absolute-only
-    #   threshold (local_rtol = 0.0) to avoid missing those entries.
-    #
-    # The union of both passes gives a conservative structural pattern that
-    #   remains valid throughout the entire simulation.
+    # 2) Numerically probe couplings by central finite differences at every probe state.
+    # `fd_eps = cbrt(eps)` matches the step formula used later by `_dae_jacobian_fd!`
+    # (the actual per-solve evaluator), so a coupling detected here is evaluated
+    # with the same sensitivity there — no entry can be "seen" by the prototype
+    # and then silently fall under the runtime FD noise floor, or vice versa.
     fd_eps           = cbrt(eps(Float64))
     sensitivity_atol = 1e-14
-    sensitivity_rtol = 1e-8
 
-    y_work              = copy(initial_solver_values)
+    y_work              = Vector{Float64}(undef, n)
+    res_probe           = Vector{Float64}(undef, n)
     res_perturbed_plus  = Vector{Float64}(undef, n)
     res_perturbed_minus = Vector{Float64}(undef, n)
 
-    # Activated probe state: lift every variable to at least 0.1 in scaled
-    # space so that higher-order terms (e.g. liquid-water transport ∝ s^3)
-    # produce detectable FD sensitivities despite vanishing at y0.
-    y_activated    = max.(initial_solver_values, 0.1)
-    res0_activated = zeros(Float64, n)
-    residual!(res0_activated, initial_solver_derivatives, y_activated, packed, t0)
+    probe_states = _dae_jacobian_probe_states(initial_solver_values)
+    for (probe_index, (y_probe, local_rtol)) in enumerate(probe_states)
+        # Pass A (probe_index == 1) is y0 itself: if the residual cannot be
+        # evaluated there, the model is broken and must fail loudly rather than
+        # silently degrade to a diagonal-only (hence useless) prototype.
+        # Pass B/C states are synthetic and can wander outside the domain of
+        # validity of a physical correlation (they throw on non-physical
+        # inputs, e.g. a log of a negative concentration); such a probe is
+        # simply skipped — it contributes nothing, the other probes still run.
+        evaluable = if probe_index == 1
+            residual!(res_probe, initial_solver_derivatives, y_probe, packed, t0)
+            all(isfinite, res_probe) ||
+                throw(ArgumentError("Non-finite DAE residual at the initial state in " *
+                                    "_build_dae_jacobian_prototype."))
+            true
+        else
+            try
+                residual!(res_probe, initial_solver_derivatives, y_probe, packed, t0)
+                all(isfinite, res_probe)
+            catch
+                false
+            end
+        end
+        evaluable || continue
 
-    for (y_probe, res0_probe, local_rtol) in (
-            (initial_solver_values, res0,           sensitivity_rtol),  # Pass A: relative threshold
-            (y_activated,           res0_activated, 0.0))               # Pass B: absolute threshold only
+        # Central-FD sweep: perturb one solver variable j at a time and record
+        # every row i with a non-negligible response, for this probe state.
         for j in 1:n
             yj    = y_probe[j]
-            delta = fd_eps * max(abs(yj), 1.0)
+            delta = fd_eps * max(abs(yj), 1.0)  # adaptive step, scale-invariant near yj = 0.
 
             copyto!(y_work, y_probe)
             y_work[j] = yj + delta
-            residual!(res_perturbed_plus, initial_solver_derivatives, y_work, packed, t0)
+            try
+                residual!(res_perturbed_plus, initial_solver_derivatives, y_work, packed, t0)
+            catch
+                continue  # column j non-evaluable at this probe: skip it, keep scanning.
+            end
 
             y_work[j] = yj - delta
-            residual!(res_perturbed_minus, initial_solver_derivatives, y_work, packed, t0)
+            try
+                residual!(res_perturbed_minus, initial_solver_derivatives, y_work, packed, t0)
+            catch
+                continue
+            end
 
             inv_2delta = 0.5 / delta
             @inbounds for i in 1:n
                 i == j && continue  # Diagonal already added; skip.
-                sensitivity  = (res_perturbed_plus[i] - res_perturbed_minus[i]) * inv_2delta
-                local_scale  = max(abs(res0_probe[i]), abs(res_perturbed_plus[i]),
-                                   abs(res_perturbed_minus[i]), 1.0)
+                sensitivity = (res_perturbed_plus[i] - res_perturbed_minus[i]) * inv_2delta
+                isfinite(sensitivity) || continue
+                # Mixed threshold: `local_rtol` is 0 for Pass B/C (absolute-only —
+                # see `_dae_jacobian_probe_states`), non-zero for Pass A. `local_scale`
+                # normalises by the residual's own magnitude so a genuinely small
+                # sensitivity in a large-residual row isn't mistaken for noise.
+                local_scale = max(abs(res_probe[i]), abs(res_perturbed_plus[i]),
+                                  abs(res_perturbed_minus[i]), 1.0)
                 abs(sensitivity) > (sensitivity_atol + local_rtol * local_scale) || continue
                 push!(rows, i)
                 push!(cols, j)
@@ -203,6 +323,9 @@ function _build_dae_jacobian_prototype(residual!,
         end
     end
 
+    # 3) Union of every probe's detections (entries repeated across probes collapse
+    # via `sparse`'s default summing combiner; values themselves are unused, only
+    # the nonzero structure matters downstream).
     proto = sparse(rows, cols, ones(Float64, length(rows)), n, n)
     return proto
 end
