@@ -53,12 +53,12 @@ end
 calibration_conditions = [
     SimulationConfig(
         type_fuel_cell = :ZSW_GenStack_Pa_1_61_Pc_1_41,
-        voltage_zone   = :before_voltage_drop,
+        voltage_zone   = :full,
         numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S),
     ),
     SimulationConfig(
         type_fuel_cell = :ZSW_GenStack_Pa_2_8_Pc_2_6,
-        voltage_zone   = :before_voltage_drop,
+        voltage_zone   = :full,
         numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S),
     ),
 #    SimulationConfig(
