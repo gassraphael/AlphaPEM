@@ -69,9 +69,11 @@ module Parametrisation
 include("common/ParametrisationCommon.jl")
 include("valid_parameter_region.jl")
 include("calibration.jl")
+include("sobol_sensitivity_analysis.jl")
 
 export ValidParameterRegion,
        Calibration,
+       SobolSensitivityAnalysis,
        ParametrisationCommon
 
 end  # module Parametrisation
