@@ -35,14 +35,20 @@ include(joinpath(@__DIR__, "sensitivity_analysis", "simple_sensitivity_helpers.j
 const INTEGER_MIN1_FIELDS = (:nb_cell, :nb_channel_in_gc, :Kshape)
 
 """
+   make_pola_config([base_config]; [physical_parameters])
+
 Create the polarization SimulationConfig used throughout the sensitivity analysis.
+If a `base_config` is provided, all its fields are preserved except `physical_parameters`
+(which is overridden by the sensitivity variation) and `type_current` (which is forced to
+`PolarizationCalibrationParams` so that every run uses the same calibration current points).
 
 Uses `PolarizationCalibrationParams` (an empty `i_exp` gets auto-filled from the fuel
 cell's calibration data by `create_current`) so that every run — nominal and modified —
 is stepped through the exact same, known current densities. This removes the need to
 match points between curves that don't otherwise land on identical current values.
 """
-function make_pola_config(; physical_parameters::Union{Nothing, PhysicalParams} = nothing)
+function make_pola_config(base_config::SimulationConfig = SimulationConfig();
+                          physical_parameters::Union{Nothing, PhysicalParams} = nothing)
     current_params = PolarizationCalibrationParams(
         delta_t_ini = 30 * 60.0,      # (s). Initial stabilisation time.
         v_load = 0.01e4,              # (A.m-2.s-1). Loading rate.
@@ -51,16 +57,18 @@ function make_pola_config(; physical_parameters::Union{Nothing, PhysicalParams} 
     )
 
     return SimulationConfig(
-        type_fuel_cell = :ZSW_GenStack,
+        type_fuel_cell = base_config.type_fuel_cell,
         type_current = current_params,
-        numerical_parameters = NumericalParams(nb_gc = 1),
-        voltage_zone = :full,
-        type_auxiliary = :no_auxiliary,
-        type_flow = :counter_flow,
-        type_purge = :no_purge,
-        type_display = :no_display,
-        display_timing = :postrun,
-        physical_parameters = physical_parameters
+        numerical_parameters = base_config.numerical_parameters,
+        voltage_zone = base_config.voltage_zone,
+        type_auxiliary = base_config.type_auxiliary,
+        type_flow = base_config.type_flow,
+        type_purge = base_config.type_purge,
+        type_display = base_config.type_display,
+        display_timing = base_config.display_timing,
+        state_scaling = base_config.state_scaling,
+        physical_parameters = physical_parameters,
+        operating_conditions = base_config.operating_conditions
     )
 end
 
@@ -91,10 +99,11 @@ end
 
 """Worker task: run one parameter variation and return its RMSE vs. the nominal polarization curve."""
 function run_parameter_variation_task(nominal_params::PhysicalParams, field::Symbol, factor::Float64,
-                                       i_exp::Vector{Float64}, Ucell_nominal::Vector{Float64})
+                                       i_exp::Vector{Float64}, Ucell_nominal::Vector{Float64},
+                                       base_config::SimulationConfig)
     try
         modified_params = modify_physical_param(nominal_params, field, factor)
-        cfg = make_pola_config(physical_parameters = modified_params)
+        cfg = make_pola_config(base_config, physical_parameters = modified_params)
         simu = run_simulation(cfg)
         return compute_rmse_from_nominal(simu, i_exp, Ucell_nominal)
     catch e
@@ -106,12 +115,12 @@ end
 #  Baseline Simulation
 # ═══════════════════════════════════════════════════════════════════════════════
 
-function run_baseline_simulation(i_exp::Vector{Float64})
+function run_baseline_simulation(i_exp::Vector{Float64}, base_config::SimulationConfig)
     println("=" ^ 80)
     println("WARM-UP: Running baseline polarization simulation...")
     println("=" ^ 80)
 
-    cfg = make_pola_config()
+    cfg = make_pola_config(base_config)
     simu = run_simulation(cfg)
 
     pola_points = extract_polarization_points_cali(simu, i_exp)
@@ -144,7 +153,7 @@ end
 #  Main Execution
 # ═══════════════════════════════════════════════════════════════════════════════
 
-function run_simple_sensitivity_analysis()
+function run_simple_sensitivity_analysis(base_config::SimulationConfig = make_pola_config())
     println("\n")
     println("╔" * "═" ^ 78 * "╗")
     println("║" * " " ^ 20 * "ALPHAPEM SENSITIVITY ANALYSIS" * " " ^ 28 * "║")
@@ -154,14 +163,14 @@ function run_simple_sensitivity_analysis()
     mkpath(out_dir)
     out_csv = generate_output_path(out_dir, "sensitivity_analysis.csv")
 
-    # Step 1: Nominal PhysicalParams for :ZSW_GenStack. i_exp is fixed regardless of PhysicalParams,
-    # so it can be shared as-is across the nominal run and every modified run.
-    nominal_fc = create_fuelcell(:ZSW_GenStack, :full)
+    # Step 1: Nominal PhysicalParams for the requested fuel cell. i_exp is fixed regardless
+    # of PhysicalParams, so it can be shared as-is across the nominal run and every modified run.
+    nominal_fc = create_fuelcell(base_config.type_fuel_cell, base_config.voltage_zone)
     nominal_params = nominal_fc.physical_parameters
     i_exp = Float64.(nominal_fc.pola_exp_data_cali.i_exp)
 
     # Step 2: Baseline simulation (warm-up)
-    Ucell_nominal = run_baseline_simulation(i_exp)
+    Ucell_nominal = run_baseline_simulation(i_exp, base_config)
 
     # Step 3: Build the (field, factor) task list over every PhysicalParams field
     tunable_fields = fieldnames(PhysicalParams)
@@ -171,8 +180,8 @@ function run_simple_sensitivity_analysis()
 
     tasks = []
     for field in tunable_fields
-        push!(tasks, (field, 0.80))  # -20%
-        push!(tasks, (field, 1.20))  # +20%
+        push!(tasks, (field, 0.95))  # -5%
+        push!(tasks, (field, 1.05))  # +5%
     end
 
     # Step 4: Run variations in parallel using pmap
@@ -182,10 +191,11 @@ function run_simple_sensitivity_analysis()
         const NOMINAL_PARAMS = $nominal_params
         const I_EXP = $i_exp
         const UCELL_NOMINAL = $Ucell_nominal
+        const BASE_CONFIG = $base_config
     end
 
     results_list = pmap(
-        (task) -> run_parameter_variation_task(NOMINAL_PARAMS, task[1], task[2], I_EXP, UCELL_NOMINAL),
+        (task) -> run_parameter_variation_task(NOMINAL_PARAMS, task[1], task[2], I_EXP, UCELL_NOMINAL, BASE_CONFIG),
         tasks,
         batch_size = 1,
         on_error = (task, e) -> (

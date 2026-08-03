@@ -14,6 +14,7 @@ import Pkg
 Pkg.activate(joinpath(@__DIR__, ".."))
 
 using Distributed
+using AlphaPEM.Config: SimulationConfig
 
 # Start workers if not already initialized
 if nprocs() == 1
@@ -32,4 +33,10 @@ end
 # EXECUTION
 # ─────────────────────────────────────────────────────────────────────────────
 
-run_simple_sensitivity_analysis()
+# Default configuration (can be edited below).
+base_config = SimulationConfig(
+    type_fuel_cell = :ZSW_GenStack,
+    voltage_zone   = :before_voltage_drop
+)
+
+run_simple_sensitivity_analysis(base_config)
