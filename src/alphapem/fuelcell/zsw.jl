@@ -435,7 +435,7 @@ function undetermined_parameters(fc::ZSWFuelCell, voltage_zone::Symbol = :full):
     ]
 
     if voltage_zone == :full
-        push!(params, (:theta_c_gdl,  100 * π / 180, 160 * π / 180)) # GDL contact angle
+        push!(params, (:theta_c_gdl,  90 * π / 180, 160 * π / 180)) # GDL contact angle
         push!(params, (:IC_ccl, 0.1, 2.0))                           # Ionomer to carbon ratio in the cathode catalyst layer
         push!(params, (:r_carb, 10e-9, 100e-9))                      # Mean radius of the carbon particles
         push!(params, (:ECSA_0, 30.0, 200.0))                        # Initial electrochemical surface area of the catalyst
