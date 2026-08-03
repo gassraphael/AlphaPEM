@@ -36,7 +36,7 @@ end
 # Default configuration (can be edited below).
 base_config = SimulationConfig(
     type_fuel_cell = :ZSW_GenStack,
-    voltage_zone   = :before_voltage_drop
+    voltage_zone   = :full
 )
 
 run_simple_sensitivity_analysis(base_config)
