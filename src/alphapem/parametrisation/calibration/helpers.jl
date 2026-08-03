@@ -166,8 +166,8 @@ function _save_intermediate(ga_instance, best_gene_values, best_fitness, generat
 
     # Save the full current population for warm-start recovery
     try
-        population = Float64.(ga_instance.population) # Extract current population matrix from PyGAD
-        fitness_values = Float64.(ga_instance.last_generation_fitness) # Extract last generation fitness values
+        population = pyconvert(Matrix{Float64}, ga_instance.population) # Extract current population matrix from PyGAD
+        fitness_values = pyconvert(Vector{Float64}, ga_instance.last_generation_fitness) # Extract last generation fitness values
         population_data = [
             Dict("individual" => i, "params" => collect(population[i, :]), "rmse" => 1.0 / fitness_values[i])
             for i in 1:size(population, 1)
