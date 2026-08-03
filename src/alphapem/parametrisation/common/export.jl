@@ -36,7 +36,7 @@ end
 
 Write calibrated parameter values (single value per parameter) to a YAML file.
 """
-function export_calibrated_params(params::Dict{Symbol, Float64},
+function export_calibrated_params(params::Dict{Symbol, <:Real},
                                   filepath::String;
                                   method::Symbol = :calibration,
                                   metadata::Dict = Dict())::Nothing

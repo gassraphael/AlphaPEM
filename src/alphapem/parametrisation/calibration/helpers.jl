@@ -29,7 +29,8 @@ export _fitness_function,
        _save_intermediate,
        _load_warm_start_population,
        _save_final_results,
-       _plot_calibration_results
+       _plot_calibration_results,
+       _generate_calibration_output_dir
 
 """
     _fitness_function(solution, parameter_bounds, base_params, fuel_cells, current_profiles, simulation_configs) -> Float64
@@ -137,6 +138,9 @@ so averaged simulation points correspond directly to experimental measurements.
 """
 function calculate_simulation_error(simulation::AlphaPEM, experimental_data::PolaExperimentalData)::Float64
     _, Ucell_sim = _polarization_points_cali(simulation.outputs, simulation.current_density, experimental_data.i_exp)
+    if isempty(Ucell_sim) # If simulation failed to produce valid points, return a high error penalty
+        return 100.0
+    end
     return _calculate_rmse(Ucell_sim, experimental_data.U_exp)
 end
 
@@ -146,8 +150,9 @@ end
 Save the current best individual's calibrated parameter values and the full population as checkpoints for potential warm-start recovery.
 """
 function _save_intermediate(ga_instance, best_gene_values, best_fitness, generation, parameter_bounds, base_params, output_dir)
-    best_params_dict = Dict{Symbol, Float64}( # Prepare calibrated parameters dictionary for export
-        bound.name => best_gene_values[i] for (i, bound) in enumerate(parameter_bounds.bounds)
+    best_params = new_PhysicalParams_from_sample(Float64.(best_gene_values), parameter_bounds, base_params)
+    best_params_dict = Dict{Symbol, Real}( # Prepare calibrated parameters dictionary for export
+        bound.name => getfield(best_params, bound.name) for bound in parameter_bounds.bounds
     )
 
     try
@@ -236,6 +241,38 @@ function _load_warm_start_population(file::String, parameter_bounds, pop_size::I
         @warn "Failed to load warm-start population from $file: $e" # Log failure details
         return nothing # Signal failure
     end
+end
+
+"""
+    _generate_calibration_output_dir(cfg::CalibrationConfig) -> String
+
+Generate a timestamped output directory for a calibration run, mirroring the convention
+used in `run_parameter_validity.jl`.
+
+The directory name includes the run date, fuel-cell type, voltage zone, number of
+experimental conditions, and an auto-incremented version suffix to avoid overwriting
+previous runs.
+"""
+function _generate_calibration_output_dir(cfg::CalibrationConfig)::String
+    ref_cfg = first(cfg.simulation_configs)
+    date_str = Dates.format(Dates.today(), "yyyy.mm.dd")
+    fc_str   = string(ref_cfg.type_fuel_cell)
+    zone_str = string(ref_cfg.voltage_zone)
+    n_cond   = length(cfg.simulation_configs)
+
+    base_dir = cfg.output_dir
+    mkpath(base_dir)
+
+    base_dirname = "$date_str - $fc_str - $zone_str - $n_cond condition$(n_cond > 1 ? "s" : "")"
+
+    version = 1
+    while isdir(joinpath(base_dir, "$base_dirname - V$version"))
+        version += 1
+    end
+
+    run_dir = joinpath(base_dir, "$base_dirname - V$version")
+    mkpath(run_dir)
+    return run_dir
 end
 
 """
