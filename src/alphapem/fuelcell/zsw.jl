@@ -39,43 +39,45 @@ end
 function physical_parameters(fc::ZSWFuelCell)::PhysicalParams
     return PhysicalParams(
         # Global
-        Aact = 283.87e-4,                    # Active area of the catalyst layer in m²
-        nb_cell = 26,                        # Number of cells in the stack
+        Aact             = 283.87e-4,              # Active area of the catalyst layer in m²
+        nb_cell          = 26,                     # Number of cells in the stack
         # Catalyst layer
-        Hacl = 3e-6,                         # Thickness of the anode catalyst layer in meters
-        Hccl = 15e-6,                        # Thickness of the cathode catalyst layer in meters
+        Hacl             = 3e-6,                   # Thickness of the anode catalyst layer in meters
+        Hccl             = 11.522218403903365e-6,  # Thickness of the cathode catalyst layer in meters
         # Membrane
-        Hmem = 15e-6,                        # Thickness of the membrane in meters
+        Hmem             = 15e-6,                  # Thickness of the membrane in meters
         # Gas diffusion layer
-        Hgdl = 80e-6,                        # Thickness of the gas diffusion layer in meters
-        epsilon_gdl = 0.8,                   # Anode/cathode GDL porosity
+        Hgdl             = 70.32739899939504e-6,   # Thickness of the gas diffusion layer in meters
+        epsilon_gdl      = 0.8084884001476703,     # Anode/cathode GDL porosity
         #   Microporous layer
-        Hmpl = 70e-6,                        # Thickness of the microporous layer in meters
-        epsilon_mpl = 0.425,                 # Porosity of the microporous layer
+        Hmpl             = 72.35121726824564e-6,   # Thickness of the microporous layer in meters
+        epsilon_mpl      = 0.41025679024953243,    # Porosity of the microporous layer
         # Gas channel
-        Hagc = 230e-6,                       # Thickness of the anode gas channel in meters
-        Hcgc = 300e-6,                       # Thickness of the cathode gas channel in meters
-        Wagc = 430e-6,                       # Width of the anode gas channel in meters
-        Wcgc = 532e-6,                       # Width of the cathode gas channel in meters
-        Lgc = 246.2e-3,                      # Length of the gas channel in meters
-        nb_channel_in_gc = 105,              # Number of channels in the bipolar plate
-        Ldist = 71.1e-3,                     # Length of the distributor (between gas channel and manifold) in meters
+        Hagc             = 230e-6,                 # Thickness of the anode gas channel in meters
+        Hcgc             = 300e-6,                 # Thickness of the cathode gas channel in meters
+        Wagc             = 430e-6,                 # Width of the anode gas channel in meters
+        Wcgc             = 532e-6,                 # Width of the cathode gas channel in meters
+        Lgc              = 246.2e-3,               # Length of the gas channel in meters
+        nb_channel_in_gc = 105,                    # Number of channels in the bipolar plate
+        Ldist            = 71.1e-3,                # Length of the distributor (between gas channel and manifold) in meters
         #   Auxiliaries
-        Lm = 25.8e-3,                        # Length of the manifold in meters
-        A_T_a = 9.01e-4,                     # Inlet/exhaust anode manifold throttle area in m²
-        A_T_c = 22.61e-4,                    # Inlet/exhaust cathode manifold throttle area in m²
-        Vasm = 25.8e-3 * 9.01e-4,            # Supply manifold volume at the anode in m³
-        Vcsm = 25.8e-3 * 22.61e-4,           # Supply manifold volume at the cathode in m³
-        Vaem = 25.8e-3 * 9.01e-4,            # Exhaust manifold volume at the anode in m³
-        Vcem = 25.8e-3 * 22.61e-4,           # Exhaust manifold volume at the cathode in m³
+        Lm               = 25.8e-3,                # Length of the manifold in meters
+        A_T_a            = 9.01e-4,                # Inlet/exhaust anode manifold throttle area in m²
+        A_T_c            = 22.61e-4,               # Inlet/exhaust cathode manifold throttle area in m²
+        Vasm             = 25.8e-3 * 9.01e-4,      # Supply manifold volume at the anode in m³
+        Vcsm             = 25.8e-3 * 22.61e-4,     # Supply manifold volume at the cathode in m³
+        Vaem             = 25.8e-3 * 9.01e-4,      # Exhaust manifold volume at the anode in m³
+        Vcem             = 25.8e-3 * 22.61e-4,     # Exhaust manifold volume at the cathode in m³
         # Interaction parameters between fluids and PEMFC structure
-        K_O2_ad_Pt = 5.4,                    # Interfacial resistance coefficient of O2 adsorption on the Pt sites
+        e = 4,
+        K_O2_ad_Pt       = 5.4,                    # Interfacial resistance coefficient of O2 adsorption on the Pt sites
         # Voltage polarization
-        Re = 1.5e-7,                         # Electron conduction resistance of the circuit in Ω·m²
-        i0_c_ref = 20.0,                     # Reference exchange current density at the cathode in A·m⁻²
-        kappa_co = 20,                        # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
-        kappa_c = 0.25,                      # Overpotential correction exponent
-        C_scl = 2e7                          # Volumetric space-charge layer capacitance in F·m⁻³
+        Re               = 8.394553392461114e-7,   # Electron conduction resistance of the circuit in Ω·m²
+        i0_c_ref         = 5.560393918693288,      # Reference exchange current density at the cathode in A·m⁻²
+        alpha_c          = 0.5880122368049708,      # It is the transfer coefficient of the cathode.
+        kappa_co         = 28.59316557224625,      # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
+        kappa_c          = 0.6568779276260421,     # Overpotential correction exponent
+        C_scl            = 2e7                     # Volumetric space-charge layer capacitance in F·m⁻³
     )
 end
 

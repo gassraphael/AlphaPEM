@@ -43,7 +43,15 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
 
     # 0. Initialisation
     start_time = time() # Record the initial time for performance measurement
-    mkpath(cfg.output_dir) # Initialize the output directory for logs and results
+    output_dir = CalibrationHelpers._generate_calibration_output_dir(cfg) # Date/type stamped run directory
+    cfg = CalibrationConfig(
+        simulation_configs      = cfg.simulation_configs,
+        ga_config               = cfg.ga_config,
+        parallel                = cfg.parallel,
+        initial_population_file = cfg.initial_population_file,
+        output_dir              = output_dir,
+        save_frequency          = cfg.save_frequency,
+    )
     ga_config = cfg.ga_config # Extract GA hyperparameter settings
 
     # 1. Setup bounds and reference configuration
@@ -163,8 +171,8 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
     best_params = new_PhysicalParams_from_sample(optimized_genes, parameter_bounds, base_params) # Convert genes to physical parameters
 
     # 7. Save results
-    final_params = Dict{Symbol, Float64}( # Prepare final calibrated parameters dictionary
-        bound.name => optimized_genes[i] for (i, bound) in enumerate(parameter_bounds.bounds)
+    final_params = Dict{Symbol, Real}( # Prepare final calibrated parameters dictionary
+        bound.name => getfield(best_params, bound.name) for bound in parameter_bounds.bounds
     )
     export_calibrated_params(final_params, joinpath(cfg.output_dir, "calibrated_bounds.yaml"); # Export calibrated parameters
                              method = :calibration,
