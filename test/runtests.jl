@@ -409,6 +409,30 @@ end
     @test all(b -> b.min < b.max, pb.bounds)
 end
 
+@testset "Parametrisation.CVExtraction" begin
+    using AlphaPEM.Parametrisation.CVExtraction
+
+    cv_file = joinpath(@__DIR__, "..", "data", "experimental", "ZSW", "cv", "genstack1516-010c_2025-01-10_cv_cathode_cell01.txt")
+
+    cfg = CVExtractionConfig(
+        fuel_cell_type = :ZSW_GenStack,
+        area_cm2 = 280.0,
+    )
+
+    result = extract_cv_parameters(cv_file, cfg)
+
+    @test result.fuel_cell_type == :ZSW_GenStack
+    @test result.ecsa_adsorption_cm2 > 0.0
+    @test result.ecsa_desorption_cm2 > 0.0
+    @test result.crossover_a_cm2 > 0.0
+    @test result.dlc_f_cm2 > 0.0
+    @test result.scan_rate_vs > 0.0
+    @test length(result.mean_cycle.U) > 0
+    @test length(result.raw_mean_cycle.U) > 0
+    @test length(result.anodic.U) > 0
+    @test length(result.cathodic.U) > 0
+end
+
 @testset "Utils" begin
     using AlphaPEM.Utils
 

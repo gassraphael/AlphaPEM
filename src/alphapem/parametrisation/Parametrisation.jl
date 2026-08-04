@@ -82,11 +82,16 @@ See `examples/run_sobol_sensitivity_analysis.jl`.
 ### Calibration (`Calibration`)
 GA-based parameter calibration system in pure Julia.
 
+### CV Parameter Extraction (`CVExtraction`)
+Extract physical parameters (ECSA, H₂ crossover, double-layer capacitance,
+ohmic-drop slope) from cyclic voltammetry data. See `examples/run_cv_extraction.jl`.
+
 ## Exports
 
 - `ValidParameterRegion` — validity analysis module
 - `SobolSensitivityAnalysis` — Sobol global sensitivity analysis module
 - `Calibration` — genetic algorithm calibration module
+- `CVExtraction` — CV parameter extraction module
 """
 module Parametrisation
 
@@ -94,10 +99,12 @@ include("common/ParametrisationCommon.jl")
 include("valid_parameter_region.jl")
 include("calibration.jl")
 include("sobol_sensitivity_analysis.jl")
+include("cv_extraction.jl")
 
 export ValidParameterRegion,
        Calibration,
        SobolSensitivityAnalysis,
+       CVExtraction,
        ParametrisationCommon
 
 end  # module Parametrisation
