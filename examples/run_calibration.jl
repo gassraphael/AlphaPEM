@@ -71,7 +71,7 @@ calibration_conditions = [
 # ── Genetic Algorithm settings ────────────────────────────────────────────────
 
 ga_cfg = GAConfig(
-    num_generations = 100,                      # minimum of 500 generation, 1000+ recommended for high precision
+    num_generations = 500,                      # minimum of 500 generation, 1000+ recommended for high precision
     pop_size        = 128,                      # 128+ recommended
     target_error    = 1/100,                    # Stop if RMSE < 1%
 )

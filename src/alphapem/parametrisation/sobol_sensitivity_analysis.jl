@@ -45,7 +45,8 @@ using GlobalSensitivity
 using QuasiMonteCarlo
 using CairoMakie
 
-using AlphaPEM.Config: SimulationConfig, PolarizationParams, NumericalParams, PhysicalParams, PARAMETER_METADATA
+using AlphaPEM.Config: SimulationConfig, PolarizationParams, NumericalParams, PhysicalParams, PARAMETER_METADATA,
+                       OPERATING_CONDITIONS_BOUNDS, OperatingConditionConstraint, default_operating_condition_constraints
 using AlphaPEM.Fuelcell: create_fuelcell
 using AlphaPEM.Currents: create_current
 using AlphaPEM.Application: run_simulation
@@ -62,6 +63,7 @@ export SobolAnalysisConfig,
        region_auc,
        compute_regional_aucs,
        generate_sobol_design_matrices,
+       is_valid_operating_conditions,
        plot_sobol_indices,
        plot_sobol_ranking
 

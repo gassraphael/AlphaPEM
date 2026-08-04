@@ -34,7 +34,9 @@ function plot_sobol_indices(result::SobolAnalysisResult;
               title = "Sobol $(index_type) indices by region",
               xlabel = "Parameter",
               ylabel = "$(index_type)",
-              xticks = (1:n_params, string.(params)))
+              xticks = (1:n_params, string.(params)),
+              xticklabelrotation = π / 4,
+              xticklabelalign = (:right, :center))
 
     bar_width = 0.25
     offsets = range(-bar_width * (n_regions - 1) / 2, bar_width * (n_regions - 1) / 2; length = n_regions)
@@ -81,7 +83,8 @@ function plot_sobol_ranking(result::SobolAnalysisResult;
                   ylabel = "Parameter",
                   xlabel = "$(index_type)",
                   yticks = (1:nrow(df_top), string.(df_top.parameter)),
-                  yreversed = true)
+                  yreversed = true,
+                  yticklabelalign = (:right, :center))
 
         for i in 1:nrow(df_top)
             val = df_top[i, index_type]

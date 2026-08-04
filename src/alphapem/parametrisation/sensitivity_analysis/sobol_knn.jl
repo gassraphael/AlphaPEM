@@ -45,6 +45,7 @@ function impute_missing_curves!(df::DataFrame,
 
     @info "Imputing $(n_missing) missing curves with KNN(k=$(k_eff))..."
 
+    prog = Progress(n_missing; desc = "KNN imputation: ", barlen = 40, color = :magenta)
     for (m_idx, row_idx) in enumerate(missing_idx)
         x = X_missing[m_idx, :]
         distances = [sqrt(sum((x .- X_valid[v, :]).^2)) for v in 1:n_valid]
@@ -59,7 +60,9 @@ function impute_missing_curves!(df::DataFrame,
             df.Ucell[row_idx] = Ucell_imp
             df.status[row_idx] = :imputed
         end
+        next!(prog)
     end
+    finish!(prog)
 
     return n_missing
 end

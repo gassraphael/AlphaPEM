@@ -5,7 +5,7 @@
 
 Parameter identification tools for AlphaPEM.
 
-## Recommended two-stage workflow
+## Recommended workflow
 
 Calibrating AlphaPEM's undetermined parameters (`Hacl`, `Re`, `epsilon_gdl`, …)
 directly over the full prior ranges is expensive and brittle, because a large
@@ -37,7 +37,24 @@ prim_cfg = PRIMConfig(
 result = run_validity_analysis(cfg, prim_cfg)  # also generates restricted_bounds_PRIM.yaml
 ```
 
-**Stage 2 — Calibrate within the restricted space** *(calibration module, work in progress)*
+**Stage 2 — Understand parameter influence (SobolSensitivityAnalysis)**
+
+Run a variance-based global sensitivity analysis directly on AlphaPEM simulations
+to identify which parameters drive the polarization curve in the activation,
+ohmic, and mass-transport regions. See `examples/run_sobol_sensitivity_analysis.jl`:
+
+```julia
+using AlphaPEM.Parametrisation.SobolSensitivityAnalysis
+
+cfg = SobolAnalysisConfig(
+    fuel_cell_type = :ZSW_GenStack,
+    voltage_zone   = :full,
+    N              = 1024,
+)
+result = run_sobol_analysis(cfg)
+```
+
+**Stage 3 — Calibrate within the restricted space** *(calibration module, work in progress)*
 
 Load the restricted bounds produced in Stage 1 and pass them to the genetic-algorithm
 calibration, focusing the search on the high-validity region:
@@ -56,12 +73,19 @@ Identifies the region of the undetermined-parameter space where AlphaPEM produce
 physically meaningful polarization curves, using Latin Hypercube Sampling, batch
 simulation, and the PRIM/IRD method.  See `examples/run_parameter_validity.jl`.
 
+### Sobol Sensitivity Analysis (`SobolSensitivityAnalysis`)
+Variance-based global sensitivity analysis (S1, ST, optional S2) using Sobol
+sampling and direct AlphaPEM simulation. Outputs are aggregated per polarization
+region (activation, ohmic, mass transport) as area-under-the-curve metrics.
+See `examples/run_sobol_sensitivity_analysis.jl`.
+
 ### Calibration (`Calibration`)
 GA-based parameter calibration system in pure Julia.
 
 ## Exports
 
 - `ValidParameterRegion` — validity analysis module
+- `SobolSensitivityAnalysis` — Sobol global sensitivity analysis module
 - `Calibration` — genetic algorithm calibration module
 """
 module Parametrisation

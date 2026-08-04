@@ -33,8 +33,18 @@ function run_sobol_simulations(cfg::SobolAnalysisConfig,
 
     # Numerical params with timeout
     num_params = NumericalParams(
-        cfg.numerical_params;
-        max_run_time_s = cfg.max_run_time_s
+        nb_gc = cfg.numerical_params.nb_gc,
+        nb_gdl = cfg.numerical_params.nb_gdl,
+        nb_mpl = cfg.numerical_params.nb_mpl,
+        nb_man = cfg.numerical_params.nb_man,
+        purge_time = cfg.numerical_params.purge_time,
+        delta_purge = cfg.numerical_params.delta_purge,
+        delta_t_dyn_step = cfg.numerical_params.delta_t_dyn_step,
+        rtol = cfg.numerical_params.rtol,
+        atol = cfg.numerical_params.atol,
+        maxiters = cfg.numerical_params.maxiters,
+        max_run_time_s = cfg.max_run_time_s,
+        save_freq = cfg.numerical_params.save_freq
     )
 
     # Warm-up compilation
@@ -91,7 +101,51 @@ function run_sobol_simulations(cfg::SobolAnalysisConfig,
     df.ifc = ifc_curves
     df.Ucell = Ucell_curves
 
+    # Save raw curves if requested
+    if cfg.save_curves
+        curves_path = joinpath(cfg.output_dir, "raw_curves.csv")
+        mkpath(dirname(curves_path))
+        _save_raw_curves(curves_path, sample_ids, ifc_curves, Ucell_curves, statuses)
+    end
+
     return df
+end
+
+
+"""
+    _save_raw_curves(filepath, sample_ids, ifc_curves, Ucell_curves, statuses)
+
+Save raw polarization curves to a CSV file.
+"""
+function _save_raw_curves(filepath::String,
+                          sample_ids::Vector{Int},
+                          ifc_curves::Vector{Union{Vector{Float64}, Nothing}},
+                          Ucell_curves::Vector{Union{Vector{Float64}, Nothing}},
+                          statuses::Vector{Symbol})
+    rows = []
+    for i in 1:length(sample_ids)
+        ifc = ifc_curves[i]
+        Ucell = Ucell_curves[i]
+        if ifc === nothing || Ucell === nothing
+            push!(rows, (
+                sample_id = sample_ids[i],
+                current_density = missing,
+                voltage = missing,
+                status = string(statuses[i])
+            ))
+        else
+            for (i_val, u_val) in zip(ifc, Ucell)
+                push!(rows, (
+                    sample_id = sample_ids[i],
+                    current_density = i_val,
+                    voltage = u_val,
+                    status = string(statuses[i])
+                ))
+            end
+        end
+    end
+    CSV.write(filepath, DataFrame(rows))
+    return nothing
 end
 
 
@@ -112,12 +166,21 @@ function _run_one_sobol_sample(sample::Vector{Float64},
     try
         # Build modified physical parameters and operating conditions
         physical_params = sample_to_physical_params(sample, params, base_params)
-        operating_conditions = sample_to_operating_conditions(sample, params, base_oc)
+        operating_conditions = sample_to_operating_conditions(
+            sample, params, base_oc,
+            cfg.operating_condition_constraints,
+            cfg.excluded_operating_conditions
+        )
 
         # Build fuel cell
         fc = create_fuelcell(cfg.fuel_cell_type, cfg.voltage_zone)
         fc.physical_parameters = physical_params
         fc.operating_conditions = operating_conditions
+
+        # Validate operating conditions
+        if !is_valid_operating_conditions(operating_conditions)
+            return (:failed, nothing, nothing)
+        end
 
         # Build simulation config
         sim_cfg = SimulationConfig(
@@ -173,7 +236,20 @@ function _warm_up_sobol_simulation(cfg::SobolAnalysisConfig,
                                    base_oc)
     try
         sample = Float64[(p.min + p.max) / 2 for p in params]
-        num_params = NumericalParams(cfg.numerical_params; max_run_time_s = cfg.max_run_time_s)
+        num_params = NumericalParams(
+            nb_gc = cfg.numerical_params.nb_gc,
+            nb_gdl = cfg.numerical_params.nb_gdl,
+            nb_mpl = cfg.numerical_params.nb_mpl,
+            nb_man = cfg.numerical_params.nb_man,
+            purge_time = cfg.numerical_params.purge_time,
+            delta_purge = cfg.numerical_params.delta_purge,
+            delta_t_dyn_step = cfg.numerical_params.delta_t_dyn_step,
+            rtol = cfg.numerical_params.rtol,
+            atol = cfg.numerical_params.atol,
+            maxiters = cfg.numerical_params.maxiters,
+            max_run_time_s = cfg.max_run_time_s,
+            save_freq = cfg.numerical_params.save_freq
+        )
         _run_one_sobol_sample(sample, params, cfg, base_params, base_oc, num_params)
     catch
         # Ignore warm-up errors

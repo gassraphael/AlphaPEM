@@ -16,7 +16,10 @@ using CairoMakie
 import WGLMakie
 
 # GLMakie requires X11/OpenGL and is unavailable on headless servers (e.g. HPC clusters).
-_glmakie() = Base.loaded_modules[Base.PkgId(Base.UUID("e9467ef8-e4e7-5192-8a1a-b1aee30e663a"), "GLMakie")]
+function _glmakie()
+    pkgid = Base.PkgId(Base.UUID("e9467ef8-e4e7-5192-8a1a-b1aee30e663a"), "GLMakie")
+    return get(Base.loaded_modules, pkgid, nothing)
+end
 
 # Ensure CairoMakie is the default backend when the module is loaded.
 function __init__()
@@ -46,20 +49,22 @@ function _setup_makie_theme!(cfg::SimulationConfig; backend::Symbol=:auto)
         CairoMakie.activate!()
         _active_display_backend[] = :cairo
     elseif backend == :gl
-        try
-            _glmakie().activate!()
+        glm = _glmakie()
+        if !isnothing(glm)
+            glm.activate!()
             _active_display_backend[] = :gl
-        catch err
-            @warn "GLMakie could not be activated; falling back to CairoMakie non-interactive display." exception=(err, catch_backtrace())
+        else
+            @warn "GLMakie not available; falling back to CairoMakie non-interactive display."
             CairoMakie.activate!()
             _active_display_backend[] = :cairo
         end
     elseif _use_interactive_display(cfg)
-        try
-            _glmakie().activate!()
+        glm = _glmakie()
+        if !isnothing(glm)
+            glm.activate!()
             _active_display_backend[] = :gl
-        catch err
-            @warn "GLMakie could not be activated; falling back to CairoMakie non-interactive display." exception=(err, catch_backtrace())
+        else
+            @warn "GLMakie not available; falling back to CairoMakie non-interactive display."
             CairoMakie.activate!()
             _active_display_backend[] = :cairo
         end
@@ -101,8 +106,13 @@ function _open_interactive_figures!(figs...)
             end
         end
 
+        glm = _glmakie()
+        if isnothing(glm)
+            @warn "GLMakie not available; skipping interactive figure display."
+            return nothing
+        end
         DataInspector(fig)
-        screen = _glmakie().Screen()
+        screen = glm.Screen()
         display(screen, fig)
         _interactive_fig_to_screen[fig] = screen
         screen in _interactive_screens || push!(_interactive_screens, screen)

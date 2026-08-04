@@ -80,7 +80,8 @@ function _write_sobol_summary_yaml(result::SobolAnalysisResult, filepath::String
             startswith(string(region_name), "S2_") && continue
             top = sort(df, :ST, rev=true)
             top_names = top.parameter[1:min(5, nrow(top))]
-            println(io, "  $(region_name): [$(join(top_names, ", "))]")
+            top_str = join(string.(top_names), ", ")
+            println(io, "  $(region_name): [$(top_str)]")
         end
     end
     return nothing
