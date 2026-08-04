@@ -108,9 +108,10 @@ Julia automatically uses all available CPU cores by default.
 
 ## References
 
-- Credits: [README Parametrisation Section](../../README.md)
+- Credits: [README Parametrisation Section](https://github.com/gassraphael/AlphaPEM/blob/main/README.md)
 - IRD Package: [supplementary_2023_ird](https://github.com/slds-lmu/supplementary_2023_ird)
-- [Calibration Guide](calibration.md) — Next step after identifying valid region
+- [Sobol Sensitivity Analysis Guide](sobol_sensitivity_analysis.md) — Next step after identifying valid region
+- [Calibration Guide](calibration.md) — Final step in the parametrisation workflow
 - [Installation](../getting_started/installation.md) — R + IRD setup
 
 ---

@@ -137,6 +137,48 @@ calibration_config = CalibrationConfig(
 
 See [Calibration Guide](../advanced/calibration.md) for detailed workflows.
 
+## Sobol global sensitivity analysis
+
+Run a variance-based global sensitivity analysis directly on AlphaPEM simulations:
+
+```bash
+julia --project=. examples/run_sobol_sensitivity_analysis.jl
+```
+
+**Configuration in `run_sobol_sensitivity_analysis.jl`:**
+
+```julia
+using AlphaPEM.Parametrisation.SobolSensitivityAnalysis
+using AlphaPEM.Config: OperatingConditionConstraint
+
+cfg = SobolAnalysisConfig(
+    fuel_cell_type = :ZSW_GenStack,
+    voltage_zone   = :full,
+    N              = 1024,          # Start small; increase once validated
+    second_order   = false,         # Set true only if compute budget allows
+    region_thresholds = (0.4, 1.6), # A/cm²: activation / ohmic / mass-transport
+    excluded_operating_conditions = [:Sa], # Keep nominal values
+)
+
+result = run_sobol_analysis(cfg)
+```
+
+**Workflow:**
+1. Define input parameters (physical + optional operating conditions).
+2. Generate Sobol design matrices `A` and `B` and fuse them for the estimator.
+3. Run AlphaPEM for every sample (multi-threaded).
+4. Extract polarization curves and compute AUC per region.
+5. Impute failed simulations with KNN in normalized parameter space.
+6. Compute Sobol S1/ST indices (and optional S2).
+7. Export CSV tables, YAML summary, and plots.
+
+**Output:**
+- `sobol_indices_<region>.csv` — S1/ST indices per parameter and region
+- `sobol_summary.yaml` — Run metadata and top parameters per region
+- `sobol_indices_ST.png` / `sobol_ranking_ST.png` — Visual summaries
+
+See [Sobol Sensitivity Analysis Guide](../advanced/sobol_sensitivity_analysis.md) for details.
+
 ## Programmatic access (Julia)
 
 Use AlphaPEM as a library in your own Julia code:
@@ -220,6 +262,14 @@ results/
 │       ├── bounds_restricted.yaml
 │       ├── parameter_classification.csv
 │       └── generated_curves.csv
+├── sobol_sensitivity/               # Sobol sensitivity analysis
+│   └── [FUEL_CELL_TYPE]/
+│       ├── sobol_indices_activation.csv
+│       ├── sobol_indices_ohmic.csv
+│       ├── sobol_indices_mass_transport.csv
+│       ├── sobol_summary.yaml
+│       ├── sobol_indices_ST.png
+│       └── sobol_ranking_ST.png
 ├── benchmark/                        # Benchmark simulations
 ├── currents/                         # Current profile plots
 └── web_plots/
@@ -243,7 +293,8 @@ result analysis).
 
 ## Next steps
 
-- [Valid Parameter Region Analysis](validity_analysis.md) — Identify valid parameter space before calibration
+- [Valid Parameter Region Analysis](../advanced/validity_analysis.md) — Identify valid parameter space before calibration
+- [Sobol Sensitivity Analysis](../advanced/sobol_sensitivity_analysis.md) — Understand parameter influence per polarization region
 - **Advanced calibration**: Read [Calibration guide](../advanced/calibration.md)
 
 ---

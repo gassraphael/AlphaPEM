@@ -17,3 +17,11 @@ Modules = [AlphaPEM.Parametrisation.Calibration]
 Private = false
 Order = [:function, :type]
 ```
+
+## Sobol Global Sensitivity Analysis
+
+```@autodocs
+Modules = [AlphaPEM.Parametrisation.SobolSensitivityAnalysis]
+Private = false
+Order = [:type, :function]
+```

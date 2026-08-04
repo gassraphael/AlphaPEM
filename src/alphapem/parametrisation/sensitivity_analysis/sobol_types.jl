@@ -23,6 +23,10 @@ Configuration for the Sobol global sensitivity analysis of AlphaPEM.
 - `max_run_time_s::Float64`: Maximum simulation runtime per curve (s). Default `60.0`.
 - `knn_k::Int`: Number of neighbours for KNN imputation. Default `10`.
 - `output_dir::String`: Directory for results. Default `"results/sobol_sensitivity"`.
+- `operating_condition_constraints::Vector{OperatingConditionConstraint}`: Constraints
+  applied after sampling operating conditions. Default: `Pc_des = Pa_des - 0.5e5`.
+- `excluded_operating_conditions::Vector{Symbol}`: Operating conditions that are kept at
+  their nominal value and excluded from the Sobol sampling. Default: `Symbol[]`.
 - `save_curves::Bool`: Save raw polarization curves. Default `true`.
 """
 Base.@kwdef struct SobolAnalysisConfig
@@ -34,6 +38,8 @@ Base.@kwdef struct SobolAnalysisConfig
     region_thresholds::Tuple{Float64, Float64} = (0.4, 1.6)
     include_operating_conditions::Bool  = true
     parameter_bounds::Union{ParameterBounds, Nothing} = nothing
+    operating_condition_constraints::Vector{OperatingConditionConstraint} = default_operating_condition_constraints()
+    excluded_operating_conditions::Vector{Symbol} = Symbol[]
     polarization_params::PolarizationParams = PolarizationParams(di_step = 0.05e4)
     numerical_params::NumericalParams   = NumericalParams(nb_gc = 1)
     parallel::Bool                      = true

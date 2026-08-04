@@ -99,7 +99,7 @@ View and export simulation outputs.
 ## Next steps
 
 - **Batch simulations**: Use [Command Line Interface](cli_usage.md) for automated workflows.
-- [Valid Parameter Region Analysis](validity_analysis.md) — Identify valid parameter space before calibration
+- [Valid Parameter Region Analysis](../advanced/validity_analysis.md) — Identify valid parameter space before calibration
 - **Parameter calibration**: See [Calibration Guide](../advanced/calibration.md).
 
 ---

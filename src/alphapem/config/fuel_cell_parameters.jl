@@ -222,6 +222,78 @@ Base.@kwdef struct OperatingConditions <: AbstractFuelCellParams
 end
 
 
+"""
+    OPERATING_CONDITIONS_BOUNDS
+
+Dictionary of default bounds for operating conditions.
+These bounds serve as fallback values when no fuel-cell-specific bounds are available.
+
+Each parameter is mapped to a tuple: (min::Float64, max::Float64, type::Symbol)
+where type is either :real or :int.
+"""
+const OPERATING_CONDITIONS_BOUNDS = Dict{Symbol, Tuple{Float64, Float64, Symbol}}(
+    :T_des         => (40.0 + 273.15, 90.0 + 273.15, :real), # Desired fuel cell temperature in Kelvin
+    :Pa_des        => (1.5e5, 3.5e5, :real),                 # Desired anode pressure in Pascal
+    :Pc_des        => (1.5e5, 3.5e5, :real),                 # Desired cathode pressure in Pascal
+    :Sa            => (1.5, 2.5, :real),                     # Stoichiometric ratio of hydrogen
+    :Sc            => (1.5, 2.5, :real),                     # Stoichiometric ratio of oxygen
+    :Phi_a_des     => (0.3, 0.9, :real),                     # Desired anode relative humidity
+    :Phi_c_des     => (0.3, 0.9, :real),                     # Desired cathode relative humidity
+    :y_H2_in       => (0.8, 1.0, :real),                     # Molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet
+    :i_min_stoich  => (0.3, 0.5, :real)                      # Minimum current density used to compute the desired flows (A.cm-2)
+)
+
+
+"""
+    OperatingConditionConstraint
+
+A single constraint relating an operating condition `target` to one or more `sources`.
+
+# Fields
+- `target::Symbol`: The operating condition to enforce (e.g. `:Pc_des`).
+- `sources::Vector{Symbol}`: The operating conditions the constraint depends on.
+- `fn::Function`: Function `(sample_dict) -> value` that computes the target value.
+- `active::Bool`: Whether the constraint is applied. Default `true`.
+
+Example:
+```julia
+OperatingConditionConstraint(
+    target = :Pc_des,
+    sources = [:Pa_des],
+    fn = d -> d[:Pa_des] - 0.5e5
+)
+```
+"""
+struct OperatingConditionConstraint
+    target::Symbol
+    sources::Vector{Symbol}
+    fn::Function
+    active::Bool
+end
+
+OperatingConditionConstraint(; target::Symbol, sources::Vector{Symbol}, fn::Function, active::Bool = true) =
+    OperatingConditionConstraint(target, sources, fn, active)
+
+
+"""
+    default_operating_condition_constraints()
+
+Return the default set of operating-condition constraints used during Sobol sampling.
+
+Default constraints:
+- `Pc_des = Pa_des - 0.5e5` (cathode pressure slightly below anode pressure)
+"""
+function default_operating_condition_constraints()::Vector{OperatingConditionConstraint}
+    return [
+        OperatingConditionConstraint(
+            target = :Pc_des,
+            sources = Symbol[:Pa_des],
+            fn = d -> d[:Pa_des] - 0.5e5
+        )
+    ]
+end
+
+
 # ============================================================
 # EXPERIMENTAL DATA
 # ============================================================

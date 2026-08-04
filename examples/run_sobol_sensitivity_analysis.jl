@@ -45,6 +45,7 @@ end
 # ─────────────────────────────────────────────────────────────────────────────
 
 using AlphaPEM.Parametrisation.SobolSensitivityAnalysis
+using AlphaPEM.Config: OperatingConditionConstraint
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CONFIGURATION
@@ -54,6 +55,20 @@ using AlphaPEM.Parametrisation.SobolSensitivityAnalysis
 # and much larger for S2. With the default N = 10_000 and ~20 input parameters,
 # this can be ~220 000 simulations. Adjust N according to available compute time.
 
+# Example: fix some operating conditions to their nominal values so they are not
+# sampled by Sobol. This reduces the number of input parameters and simulations.
+excluded_oc = [:Sa, :Sc, :y_H2_in, :i_min_stoich]
+
+# Example: define custom operating-condition constraints. The default constraint
+# enforces Pc_des = Pa_des - 0.5e5. You can add or replace constraints here.
+my_constraints = [
+    OperatingConditionConstraint(
+        target = :Pc_des,
+        sources = [:Pa_des],
+        fn = d -> d[:Pa_des] - 0.5e5
+    ),
+]
+
 cfg = SobolAnalysisConfig(
     fuel_cell_type              = :ZSW_GenStack,
     voltage_zone                = :full,
@@ -62,6 +77,8 @@ cfg = SobolAnalysisConfig(
     seed                        = 42,
     region_thresholds           = (0.4, 1.6),    # A/cm²: activation / ohmic / mass-transport
     include_operating_conditions = true,
+    operating_condition_constraints = my_constraints,
+    excluded_operating_conditions = excluded_oc,
     parallel                    = PARALLEL,
     max_run_time_s              = 60.0,
     knn_k                       = 10,

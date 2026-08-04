@@ -39,22 +39,11 @@ function build_input_parameters(cfg::SobolAnalysisConfig)::Vector{InputParameter
     end
 
     if cfg.include_operating_conditions
-        # Operating conditions from the reference fuel cell
-        fc = create_fuelcell(cfg.fuel_cell_type, cfg.voltage_zone)
-        oc = fc.operating_conditions
-        for f in fieldnames(typeof(oc))
-            v = getfield(oc, f)
-            if v isa Real
-                # Use ±20% around the nominal value as a sensible range
-                val = Float64(v)
-                delta = abs(val) * 0.2
-                if delta == 0.0
-                    delta = 1.0
-                end
-                lo = val - delta
-                hi = val + delta
-                push!(params, InputParameter(f, lo, hi, :real, :operating))
-            end
+        # Operating conditions from OPERATING_CONDITIONS_BOUNDS
+        excluded = Set(cfg.excluded_operating_conditions)
+        for (name, (lo, hi, ptype)) in OPERATING_CONDITIONS_BOUNDS
+            name in excluded && continue
+            push!(params, InputParameter(name, lo, hi, ptype, :operating))
         end
     end
 
@@ -162,20 +151,44 @@ end
 
 
 """
-    sample_to_operating_conditions(sample, params, base_oc)
+    sample_to_operating_conditions(sample, params, base_oc, constraints, excluded)
 
-Map a Sobol sample vector to an `OperatingConditions` object.
+Map a Sobol sample vector to an `OperatingConditions` object, applying constraints.
+
+Operating conditions listed in `excluded` are not sampled; they keep their nominal
+value from `base_oc`.
 """
 function sample_to_operating_conditions(sample::Vector{Float64},
                                         params::Vector{InputParameter},
-                                        base_oc)::Any
+                                        base_oc,
+                                        constraints::Vector{OperatingConditionConstraint} = OperatingConditionConstraint[],
+                                        excluded::Vector{Symbol} = Symbol[])::Any
     overrides = Dict{Symbol, Any}()
+
+    # Sampled operating conditions
     for (j, p) in enumerate(params)
         if p.source == :operating
             if p.type == :int
                 overrides[p.name] = Int(clamp(round(sample[j]), p.min, p.max))
             else
                 overrides[p.name] = Float64(clamp(sample[j], p.min, p.max))
+            end
+        end
+    end
+
+    # Excluded operating conditions keep their nominal value
+    for name in excluded
+        if hasproperty(base_oc, name)
+            overrides[name] = getfield(base_oc, name)
+        end
+    end
+
+    # Apply active constraints
+    for c in constraints
+        if c.active && haskey(overrides, c.target)
+            # Ensure all source values are present in overrides
+            if all(haskey(overrides, s) for s in c.sources)
+                overrides[c.target] = Float64(c.fn(overrides))
             end
         end
     end
@@ -205,4 +218,43 @@ function _params_to_bounds(params::Vector{InputParameter})::ParameterBounds
         end
     end
     return ParameterBounds(bounds, :unknown, :full, length(bounds))
+end
+
+
+"""
+    is_valid_operating_conditions(oc)
+
+Check that operating conditions are physically consistent.
+
+Current checks:
+- Pressures are positive.
+- Humidities are in [0, 1].
+- Stoichiometric ratios are >= 1.
+- Temperature is positive in °C.
+"""
+function is_valid_operating_conditions(oc)::Bool
+    try
+        # Pressures
+        Pa_des = oc.Pa_des
+        Pc_des = oc.Pc_des
+        Pa_des >= 1.0 && Pc_des >= 1.0 || return false
+
+        # Humidities
+        0.0 <= oc.Phi_a_des <= 1.0 || return false
+        0.0 <= oc.Phi_c_des <= 1.0 || return false
+
+        # Stoichiometric ratios
+        oc.Sa >= 1.0 || return false
+        oc.Sc >= 1.0 || return false
+
+        # Temperature
+        oc.T_des > 273.15 || return false
+
+        # Hydrogen molar fraction
+        0.0 <= oc.y_H2_in <= 1.0 || return false
+
+        return true
+    catch
+        return false
+    end
 end

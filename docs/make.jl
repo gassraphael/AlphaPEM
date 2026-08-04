@@ -49,6 +49,7 @@ makedocs(
         "Advanced" => [
             "Parameter Calibration" => "advanced/calibration.md",
             "Valid Parameter Region Analysis" => "advanced/validity_analysis.md",
+            "Sobol Global Sensitivity Analysis" => "advanced/sobol_sensitivity_analysis.md",
         ],
         "API Reference" => [
             "Configuration" => "api/configuration.md",
