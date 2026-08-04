@@ -86,6 +86,7 @@ function extract_cv_parameters(path::String, cfg::CVExtractionConfig)::CVExtract
             covering_degree = cfg.covering_degree,
             compensate_ohmic_drop = cfg.compensate_ohmic_drop,
             compensate_crossover = cfg.compensate_crossover,
+            cycle_for_extraction = cfg.cycle_for_extraction,
             ignore_cycles_for_mean = cfg.ignore_cycles_for_mean,
             interpolation_factor = cfg.interpolation_factor,
         )
@@ -97,12 +98,21 @@ function extract_cv_parameters(path::String, cfg::CVExtractionConfig)::CVExtract
     end
 
     interpolated = [interpolate_cycle(c, scan_rate, cfg.interpolation_factor) for c in cycles]
-    mean_c = mean_cycle(interpolated, cfg.ignore_cycles_for_mean)
+
+    # Select the cycle to analyse
+    if cfg.cycle_for_extraction == 0
+        selected = mean_cycle(interpolated, cfg.ignore_cycles_for_mean)
+    else
+        if cfg.cycle_for_extraction > length(interpolated)
+            error("Requested cycle $(cfg.cycle_for_extraction) but only $(length(interpolated)) cycle(s) available")
+        end
+        selected = interpolated[cfg.cycle_for_extraction]
+    end
 
     # Convert to current density
-    mean_cycle_density = CVCycle(mean_c.t, mean_c.U, mean_c.I, mean_c.I ./ cfg.area_cm2)
+    selected_density = CVCycle(selected.t, selected.U, selected.I, selected.I ./ cfg.area_cm2)
 
-    return extract_parameters(mean_cycle_density, cfg)
+    return extract_parameters(selected_density, cfg)
 end
 
 end  # module CVExtraction

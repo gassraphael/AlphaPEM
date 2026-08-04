@@ -33,12 +33,15 @@ cv_file = joinpath(@__DIR__, "..", "data", "experimental", "ZSW", "cv", "genstac
 cfg = CVExtractionConfig(
     fuel_cell_type = fuel_cell_type,        # fuel cell identifier
     area_cm2 = area_cm2,                    # geometric electrode area (cm²)
-    double_layer_limit_min = 0.35,          # V vs reference electrode
-    double_layer_limit_max = 0.55,          # V vs reference electrode
+    cycle_for_extraction = 3,               # use the 3rd CV cycle (0 = mean cycle)
+    double_layer_limit_min = 0.42,          # V vs reference electrode
+    double_layer_limit_max = 0.65,          # V vs reference electrode
     ohmic_drop_limit_min = 0.35,            # V vs reference electrode
-    ohmic_drop_limit_max = 0.55,            # V vs reference electrode
+    ohmic_drop_limit_max = 0.50,            # V vs reference electrode
     ecsa_limit_min = 0.05,                  # V vs reference electrode
-    ecsa_limit_max = 0.40,                  # V vs reference electrode
+    ecsa_limit_max = 0.45,                  # V vs reference electrode
+    conversion_factor_uc_cm2 = 218.0,       # μC·cm⁻², H monolayer charge on Pt
+    covering_degree = 0.70,                 # empirical H coverage on Pt (0–1)
 )
 
 # ---------------------------------------------------------------------------

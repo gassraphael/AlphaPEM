@@ -417,6 +417,15 @@ end
     cfg = CVExtractionConfig(
         fuel_cell_type = :ZSW_GenStack,
         area_cm2 = 280.0,
+        cycle_for_extraction = 3,
+        double_layer_limit_min = 0.42,
+        double_layer_limit_max = 0.65,
+        ohmic_drop_limit_min = 0.35,
+        ohmic_drop_limit_max = 0.50,
+        ecsa_limit_min = 0.05,
+        ecsa_limit_max = 0.45,
+        conversion_factor_uc_cm2 = 218.0,
+        covering_degree = 0.70,
     )
 
     result = extract_cv_parameters(cv_file, cfg)

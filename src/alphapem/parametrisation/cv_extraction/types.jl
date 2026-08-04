@@ -59,6 +59,7 @@ Configuration for CV parameter extraction.
 - `covering_degree::Float64`: empirical H coverage on Pt (dimensionless, 0–1)
 - `compensate_ohmic_drop::Bool`: subtract ohmic-drop slope from the curve
 - `compensate_crossover::Bool`: subtract H₂ crossover current from the curve
+- `cycle_for_extraction::Int`: cycle index to use for extraction (0 = mean cycle, n = cycle n)
 - `ignore_cycles_for_mean::Vector{Int}`: cycle indices to exclude from the mean cycle
 - `interpolation_factor::Int`: upsampling factor for cycle interpolation
 """
@@ -76,6 +77,7 @@ Base.@kwdef struct CVExtractionConfig
     covering_degree::Float64 = 0.77
     compensate_ohmic_drop::Bool = true
     compensate_crossover::Bool = true
+    cycle_for_extraction::Int = 0
     ignore_cycles_for_mean::Vector{Int} = Int[]
     interpolation_factor::Int = 20
 end
