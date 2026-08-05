@@ -28,20 +28,20 @@ area_cm2 = 280.0
 cv_file = joinpath(@__DIR__, "..", "data", "experimental", "ZSW", "cv", "genstack1516-010c_2025-01-10_cv_cathode_cell01.txt")
 
 # Extraction configuration
-# The default limits are tuned for low-temperature PEMFC CV curves on Pt.
+# The default limits are taken from the initial file this program was inspired by.
 # All potential limits are in V vs the reference electrode used in the experiment.
 cfg = CVExtractionConfig(
     fuel_cell_type = fuel_cell_type,        # fuel cell identifier
     area_cm2 = area_cm2,                    # geometric electrode area (cm²)
     cycle_for_extraction = 3,               # use the 3rd CV cycle (0 = mean cycle)
-    double_layer_limit_min = 0.42,          # V vs reference electrode
-    double_layer_limit_max = 0.65,          # V vs reference electrode
+    double_layer_limit_min = 0.30,          # V vs reference electrode
+    double_layer_limit_max = 0.50,          # V vs reference electrode
     ohmic_drop_limit_min = 0.35,            # V vs reference electrode
-    ohmic_drop_limit_max = 0.50,            # V vs reference electrode
-    ecsa_limit_min = 0.05,                  # V vs reference electrode
-    ecsa_limit_max = 0.45,                  # V vs reference electrode
-    conversion_factor_uc_cm2 = 218.0,       # μC·cm⁻², H monolayer charge on Pt
-    covering_degree = 0.70,                 # empirical H coverage on Pt (0–1)
+    ohmic_drop_limit_max = 0.45,            # V vs reference electrode
+    ecsa_limit_min = 0.09,                  # V vs reference electrode
+    ecsa_limit_max = 0.50,                  # V vs reference electrode
+    conversion_factor_uc_cm2 = 210.0,       # μC·cm⁻², H monolayer charge on Pt
+    covering_degree = 0.77,                 # empirical H coverage on Pt (0–1)
 )
 
 # ---------------------------------------------------------------------------
