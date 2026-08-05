@@ -195,12 +195,13 @@ function _trapz(x::Vector{Float64}, y::Vector{Float64})::Float64
 end
 
 """
-    extract_parameters(cycle::CVCycle, cfg::CVExtractionConfig) -> CVExtractionResult
+    extract_parameters(cycle::CVCycle, cfg::CVExtractionConfig, cv_file_name::String = "") -> CVExtractionResult
 
 Extract ECSA, H₂ crossover, double-layer capacitance and ohmic-drop slope from
-a single CV cycle.
+a single CV cycle. The optional `cv_file_name` is stored in the result for
+identification.
 """
-function extract_parameters(cycle::CVCycle, cfg::CVExtractionConfig)::CVExtractionResult
+function extract_parameters(cycle::CVCycle, cfg::CVExtractionConfig, cv_file_name::String = "")::CVExtractionResult
     U = cycle.U
     j = cycle.j
 
@@ -289,7 +290,7 @@ function extract_parameters(cycle::CVCycle, cfg::CVExtractionConfig)::CVExtracti
     )
 
     return CVExtractionResult(
-        cfg.fuel_cell_type,
+        cv_file_name,
         ecsa_adsorption,
         ecsa_desorption,
         crossover,

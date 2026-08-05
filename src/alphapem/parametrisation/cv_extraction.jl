@@ -21,12 +21,12 @@ crossover and extracts:
 using AlphaPEM.Parametrisation.CVExtraction
 
 cfg = CVExtractionConfig(
-    fuel_cell_type = :ZSW_GenStack_Pa_1_61_Pc_1_41,
     area_cm2 = 280.0,
 )
 
 result = extract_cv_parameters("data/experimental/ZSW/cv/genstack1516-010c_2025-01-10_cv_cathode_cell01.txt", cfg)
 
+@show result.cv_file_name
 @show result.ecsa_adsorption_cm2
 @show result.ecsa_desorption_cm2
 @show result.crossover_a_cm2
@@ -73,7 +73,6 @@ function extract_cv_parameters(path::String, cfg::CVExtractionConfig)::CVExtract
 
     if cfg.scan_rate_vs <= 0.0
         cfg = CVExtractionConfig(
-            fuel_cell_type = cfg.fuel_cell_type,
             area_cm2 = cfg.area_cm2,
             scan_rate_vs = scan_rate,
             double_layer_limit_min = cfg.double_layer_limit_min,
@@ -112,7 +111,7 @@ function extract_cv_parameters(path::String, cfg::CVExtractionConfig)::CVExtract
     # Convert to current density
     selected_density = CVCycle(selected.t, selected.U, selected.I, selected.I ./ cfg.area_cm2)
 
-    return extract_parameters(selected_density, cfg)
+    return extract_parameters(selected_density, cfg, basename(splitext(path)[1]))
 end
 
 end  # module CVExtraction

@@ -46,7 +46,6 @@ end
 Configuration for CV parameter extraction.
 
 # Fields
-- `fuel_cell_type::Symbol`: fuel cell identifier (e.g. `:ZSW_GenStack_Pa_1_61_Pc_1_41`)
 - `area_cm2::Float64`: geometric electrode area in cm²
 - `scan_rate_vs::Float64`: scan rate in V·s⁻¹ (optional; if ≤ 0, inferred from data)
 - `double_layer_limit_min::Float64`: lower potential bound for double-layer analysis (V vs reference electrode)
@@ -64,7 +63,6 @@ Configuration for CV parameter extraction.
 - `interpolation_factor::Int`: upsampling factor for cycle interpolation
 """
 Base.@kwdef struct CVExtractionConfig
-    fuel_cell_type::Symbol
     area_cm2::Float64
     scan_rate_vs::Float64 = -1.0
     double_layer_limit_min::Float64 = 0.35
@@ -88,7 +86,7 @@ end
 Results of CV parameter extraction.
 
 # Fields
-- `fuel_cell_type::Symbol`: fuel cell identifier
+- `cv_file_name::String`: base name of the analysed CV file (without extension)
 - `ecsa_adsorption_cm2::Float64`: ECSA from H₂ adsorption peak (cm²_Pt·cm⁻²_electrode)
 - `ecsa_desorption_cm2::Float64`: ECSA from H₂ desorption peak (cm²_Pt·cm⁻²_electrode)
 - `crossover_a_cm2::Float64`: H₂ crossover current density (A·cm⁻²)
@@ -101,7 +99,7 @@ Results of CV parameter extraction.
 - `cathodic::CVCycle`: cathodic branch of the corrected mean cycle
 """
 struct CVExtractionResult
-    fuel_cell_type::Symbol
+    cv_file_name::String
     ecsa_adsorption_cm2::Float64
     ecsa_desorption_cm2::Float64
     crossover_a_cm2::Float64

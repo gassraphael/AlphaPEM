@@ -412,11 +412,10 @@ end
 @testset "Parametrisation.CVExtraction" begin
     using AlphaPEM.Parametrisation.CVExtraction
 
-    cv_file = joinpath(@__DIR__, "..", "data", "experimental", "ZSW", "cv", "genstack1516-010c_2025-01-10_cv_cathode_cell01.txt")
+    cv_file = joinpath("data", "experimental", "ZSW", "2026", "cv", "cv_cell_10.txt")
 
     cfg = CVExtractionConfig(
-        fuel_cell_type = :ZSW_GenStack,
-        area_cm2 = 280.0,
+        area_cm2 = 283.87,
         cycle_for_extraction = 3,
         double_layer_limit_min = 0.42,
         double_layer_limit_max = 0.65,
@@ -430,7 +429,7 @@ end
 
     result = extract_cv_parameters(cv_file, cfg)
 
-    @test result.fuel_cell_type == :ZSW_GenStack
+    @test result.cv_file_name == "cv_cell_10"
     @test result.ecsa_adsorption_cm2 > 0.0
     @test result.ecsa_desorption_cm2 > 0.0
     @test result.crossover_a_cm2 > 0.0
