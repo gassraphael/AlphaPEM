@@ -139,22 +139,45 @@ open(report_path, "w") do io
     end
     println(io)
     println(io, "Per-cell values")
-    println(io, "-"^72)
-    @printf(io, "  %-30s", "Cell")
-    for name in param_names
-        @printf(io, "  %-24s", name)
-    end
-    println(io)
+
+    # Build a table whose column widths adapt to the longest header/value so
+    # that long parameter names do not push the numbers out of alignment.
+    short_names = [
+        "Cell",
+        "ECSA ads",
+        "ECSA des",
+        "H2 crossover",
+        "DLC",
+        "Ohmic slope",
+        "Scan rate",
+    ]
+    header = short_names
+    rows = Vector{String}[]
     for file in cv_files
         r = results[file]
-        @printf(io, "  %-30s", r.cv_file_name)
-        @printf(io, "  %-24.4e", r.ecsa_adsorption_cm2)
-        @printf(io, "  %-24.4e", r.ecsa_desorption_cm2)
-        @printf(io, "  %-24.4e", r.crossover_a_cm2)
-        @printf(io, "  %-24.4e", r.dlc_f_cm2)
-        @printf(io, "  %-24.4e", r.ohmic_drop_slope)
-        @printf(io, "  %-24.4e", r.scan_rate_vs)
-        println(io)
+        push!(rows, [
+            r.cv_file_name,
+            @sprintf("%.4e", r.ecsa_adsorption_cm2),
+            @sprintf("%.4e", r.ecsa_desorption_cm2),
+            @sprintf("%.4e", r.crossover_a_cm2),
+            @sprintf("%.4e", r.dlc_f_cm2),
+            @sprintf("%.4e", r.ohmic_drop_slope),
+            @sprintf("%.4e", r.scan_rate_vs),
+        ])
     end
+
+    widths = [max(length(header[j]), maximum((length(r[j]) for r in rows); init = 0))
+              for j in 1:length(header)]
+
+    sep(l, m, r) = l * join((repeat("─", w + 2) for w in widths), m) * r
+    fmt_row(cells) = "│" * join((" " * rpad(cells[j], widths[j]) * " │") for j in 1:length(header))
+
+    println(io, sep("┌", "┬", "┐"))
+    println(io, fmt_row(header))
+    println(io, sep("├", "┼", "┤"))
+    for r in rows
+        println(io, fmt_row(r))
+    end
+    println(io, sep("└", "┴", "┘"))
 end
 @info "CV extraction report saved to: $report_path"

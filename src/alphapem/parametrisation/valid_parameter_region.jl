@@ -280,6 +280,37 @@ end
 
 
 """
+    _format_text_table(header::Vector{String}, rows::Vector{Vector{String}})::String
+
+Return an ASCII table whose column widths are determined by the widest cell in
+each column (header included).  This keeps long column headers from pushing
+numeric rows out of alignment.
+"""
+function _format_text_table(header::Vector{String}, rows::Vector{Vector{String}})::String
+    ncols = length(header)
+    all(rows -> length(rows) == ncols, rows) ||
+        error("All rows must have the same number of columns as the header")
+
+    widths = [max(length(header[j]),
+                  maximum((length(r[j]) for r in rows); init = 0))
+              for j in 1:ncols]
+
+    sep(l, m, r) = l * join((repeat("─", w + 2) for w in widths), m) * r
+    fmt_row(cells) = "│" * join((" " * rpad(cells[j], widths[j]) * " │") for j in 1:ncols)
+
+    buf = IOBuffer()
+    println(buf, sep("┌", "┬", "┐"))
+    println(buf, fmt_row(header))
+    println(buf, sep("├", "┼", "┤"))
+    for r in rows
+        println(buf, fmt_row(r))
+    end
+    println(buf, sep("└", "┴", "┘"))
+    return String(take!(buf))
+end
+
+
+"""
     _export_consolidated_report(ird_results::Vector{IRDResult},
                                  summary::ValidationSummary,
                                  output_path::String,
@@ -314,49 +345,32 @@ function _export_consolidated_report(ird_results::Vector{IRDResult},
 
         if !isempty(ird_results)
             write(f, "RESTRICTED REGION ANALYSIS — METHOD COMPARISON\n")
-            write(f, "─"^82 * "\n")
-            # Updated header with Valid in box metric
-            write(f, @sprintf("  %-10s │ Precision │ Recall │ Box Precision │ Coverage │ Valid Box  │ RF AUC\n", "Method"))
-            write(f, "─"^82 * "\n")
 
+            method_header = ["Method", "Precision", "Recall", "Box Precision", "Coverage", "Valid Box", "RF AUC"]
+            method_rows = Vector{String}[]
             for r in ird_results
                 precision_rf = get(r.rf_metrics, "precision", 0.0)
                 recall_rf    = get(r.rf_metrics, "recall", 0.0)
                 auc          = get(r.rf_metrics, "AUC", 0.0)
-                write(f, @sprintf("  %-10s │   %.3f   │ %.3f  │     %.3f     │  %.3f   │ %4d/%-5d │ %.3f\n",
-                    string(r.method), precision_rf, recall_rf, r.precision, r.coverage, r.n_valid_inside, r.n_inside_box, auc))
+                push!(method_rows, [
+                    string(r.method),
+                    @sprintf("%.3f", precision_rf),
+                    @sprintf("%.3f", recall_rf),
+                    @sprintf("%.3f", r.precision),
+                    @sprintf("%.3f", r.coverage),
+                    @sprintf("%d/%d", r.n_valid_inside, r.n_inside_box),
+                    @sprintf("%.3f", auc)
+                ])
             end
-            write(f, "─"^82 * "\n\n")
+            write(f, _format_text_table(method_header, method_rows))
+            write(f, "\n")
 
             # Detailed bounds table for each method
             for r in ird_results
                 method_str = string(r.method)
                 write(f, "DETAILED BOUNDS — $method_str\n")
-                write(f, "┌─────────────┬───────────┬───────────┬───────────┬───────────┬──────────┐\n")
-                write(f, "│ Parameter   │ Orig Min  │ Orig Max  │ Rest Min  │ Rest Max  │ Shrink % │\n")
-                write(f, "├─────────────┼───────────┼───────────┼───────────┼───────────┼──────────┤\n")
-
-                # Get sorted parameter names
-                param_names = sort(collect(keys(r.restricted_bounds)))
-
-                for name in param_names
-                    orig_lo, orig_hi = r.original_bounds[name]
-                    rest_lo, rest_hi = r.restricted_bounds[name]
-
-                    # Calculate shrinkage percentage
-                    orig_width = orig_hi - orig_lo
-                    rest_width = rest_hi - rest_lo
-                    shrink_pct = if orig_width > 0
-                        (orig_width - rest_width) / orig_width * 100
-                    else
-                        0.0
-                    end
-
-                    write(f, @sprintf("│ %-11s │ %.3e │ %.3e │ %.3e │ %.3e │ %6.1f %% │\n",
-                        String(name), orig_lo, orig_hi, rest_lo, rest_hi, shrink_pct))
-                end
-
-                write(f, "└─────────────┴───────────┴───────────┴───────────┴───────────┴──────────┘\n\n")
+                write(f, generate_comparison_table(r.original_bounds, r.restricted_bounds))
+                write(f, "\n\n")
             end
         end
 
