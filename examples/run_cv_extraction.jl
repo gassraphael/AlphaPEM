@@ -2,8 +2,9 @@
 
 # run_cv_extraction.jl
 #
-# Example script: extract physical parameters from a cyclic voltammetry (CV)
-# curve for a ZSW fuel cell stack.
+# Example script: extract physical parameters from cyclic voltammetry (CV)
+# curves for a ZSW fuel cell stack. All CV files in a directory are processed,
+# a report is written, and the middle cell (by alphabetical order) is plotted.
 #
 # Usage:
 #   julia --project=. examples/run_cv_extraction.jl
@@ -13,16 +14,17 @@ Pkg.activate(joinpath(@__DIR__, ".."))
 
 using AlphaPEM.Parametrisation.CVExtraction
 using Printf
+using Statistics: mean
 
 # ---------------------------------------------------------------------------
 # CONFIGURATION
 # ---------------------------------------------------------------------------
 
-# Geometric electrode area reported in the experimental file (cm^2)
+# Geometric electrode area reported in the experimental files (cm^2)
 area_cm2 = 283.87
 
-# Path to the experimental CV file (absolute path from the current working directory)
-cv_file = abspath(joinpath("data", "experimental", "ZSW", "2026", "cv", "cv_cell_10.txt"))
+# Directory containing the experimental CV files
+cv_dir = abspath(joinpath("data", "experimental", "ZSW", "2026", "cv"))
 
 # Extraction configuration
 # The default limits are taken from the initial file this program was inspired by.
@@ -49,8 +51,26 @@ println("  AlphaPEM - CV Parameter Extraction")
 println("="^72)
 println()
 
-@info "Extracting parameters from: $cv_file"
-result = extract_cv_parameters(cv_file, cfg)
+function _cell_number(filename::String)::Int
+    m = match(r"cell_(\d+)", filename)
+    return m === nothing ? 0 : parse(Int, m.captures[1])
+end
+
+cv_files = sort(
+    filter(f -> endswith(lowercase(f), ".txt"), readdir(cv_dir));
+    by = _cell_number,
+)
+if isempty(cv_files)
+    error("No .txt CV files found in $cv_dir")
+end
+
+results = Dict{String, CVExtractionResult}()
+for file in cv_files
+    path = joinpath(cv_dir, file)
+    @info "Extracting parameters from: $path"
+    results[file] = extract_cv_parameters(path, cfg)
+end
+result_values = collect(values(results))
 
 # ---------------------------------------------------------------------------
 # RESULTS
@@ -58,25 +78,82 @@ result = extract_cv_parameters(cv_file, cfg)
 
 println()
 println("-"^72)
-println("  Extracted parameters for $(result.cv_file_name)")
+println("  Extracted parameters summary")
 println("-"^72)
-@printf("  ECSA (H2 adsorption) : %.2f cm2 Pt / cm2 electrode\n", result.ecsa_adsorption_cm2)
-@printf("  ECSA (H2 desorption) : %.2f cm2 Pt / cm2 electrode\n", result.ecsa_desorption_cm2)
-@printf("  H2 crossover         : %.4e A cm-2\n", result.crossover_a_cm2)
-@printf("  Double-layer cap.    : %.4e F cm-2\n", result.dlc_f_cm2)
-@printf("  Ohmic-drop slope     : %.4e A V-1 cm-2\n", result.ohmic_drop_slope)
-@printf("  Scan rate            : %.4f V s-1\n", result.scan_rate_vs)
+
+param_names = [
+    "ECSA adsorption (cm2 Pt / cm2 electrode)",
+    "ECSA desorption (cm2 Pt / cm2 electrode)",
+    "H2 crossover (A cm-2)",
+    "Double-layer cap. (F cm-2)",
+    "Ohmic-drop slope (A V-1 cm-2)",
+    "Scan rate (V s-1)",
+]
+
+values = [
+    [r.ecsa_adsorption_cm2 for r in result_values],
+    [r.ecsa_desorption_cm2 for r in result_values],
+    [r.crossover_a_cm2 for r in result_values],
+    [r.dlc_f_cm2 for r in result_values],
+    [r.ohmic_drop_slope for r in result_values],
+    [r.scan_rate_vs for r in result_values],
+]
+
+for (name, vals) in zip(param_names, values)
+    @printf("  %-45s : mean = %.4e\n", name, mean(vals))
+end
+
 println()
 println("="^72)
 println("  CV extraction complete.")
 println("="^72)
 
-# Plot original and corrected CV side by side
+# Plot the middle cell (numerical order)
 using CairoMakie
-fig = plot_cv_analysis(result; title = "CV Analysis - $(result.cv_file_name)")
+
+middle_file = cv_files[(length(cv_files) + 1) ÷ 2]
+middle_result = results[middle_file]
+fig = plot_cv_analysis(middle_result; title = "CV Analysis - $(middle_result.cv_file_name)")
 
 plot_dir = joinpath(@__DIR__, "..", "results", "cv_extraction")
 mkpath(plot_dir)
-plot_path = joinpath(plot_dir, "$(result.cv_file_name)_cv_analysis.png")
+plot_path = joinpath(plot_dir, "$(middle_result.cv_file_name)_cv_analysis.png")
 save(plot_path, fig)
 @info "CV analysis plot saved to: $plot_path"
+display(fig)
+
+# Write report
+report_path = joinpath(plot_dir, "$(middle_result.cv_file_name)_cv_analysis_report.txt")
+open(report_path, "w") do io
+    println(io, "AlphaPEM - CV Parameter Extraction Report")
+    println(io, "="^72)
+    println(io)
+    println(io, "Directory: $cv_dir")
+    println(io, "Number of cells: $(length(cv_files))")
+    println(io)
+    println(io, "Mean values")
+    println(io, "-"^72)
+    for (name, vals) in zip(param_names, values)
+        @printf(io, "  %-45s : %.4e\n", name, mean(vals))
+    end
+    println(io)
+    println(io, "Per-cell values")
+    println(io, "-"^72)
+    @printf(io, "  %-30s", "Cell")
+    for name in param_names
+        @printf(io, "  %-24s", name)
+    end
+    println(io)
+    for file in cv_files
+        r = results[file]
+        @printf(io, "  %-30s", r.cv_file_name)
+        @printf(io, "  %-24.4e", r.ecsa_adsorption_cm2)
+        @printf(io, "  %-24.4e", r.ecsa_desorption_cm2)
+        @printf(io, "  %-24.4e", r.crossover_a_cm2)
+        @printf(io, "  %-24.4e", r.dlc_f_cm2)
+        @printf(io, "  %-24.4e", r.ohmic_drop_slope)
+        @printf(io, "  %-24.4e", r.scan_rate_vs)
+        println(io)
+    end
+end
+@info "CV extraction report saved to: $report_path"

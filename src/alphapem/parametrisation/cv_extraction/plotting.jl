@@ -11,22 +11,10 @@ using CairoMakie
 """
     plot_cv_analysis(result::CVExtractionResult; title::String = "CV Analysis") -> Figure
 
-Plot the original (raw) and corrected mean cycles side by side, with the
-extracted parameters displayed above.
+Plot the original (raw) and corrected mean cycles side by side.
 """
 function plot_cv_analysis(result::CVExtractionResult; title::String = "CV Analysis")::Figure
     fig = Figure(size = (1200, 500))
-
-    # Parameter annotation
-    param_text = [
-        @sprintf("ECSA adsorption: %.1f cm² Pt / cm² electrode", result.ecsa_adsorption_cm2),
-        @sprintf("ECSA desorption: %.1f cm² Pt / cm² electrode", result.ecsa_desorption_cm2),
-        @sprintf("H₂ crossover: %.4e A cm⁻²", result.crossover_a_cm2),
-        @sprintf("DLC: %.4e F cm⁻²", result.dlc_f_cm2),
-        @sprintf("Ohmic slope: %.4e A V⁻¹ cm⁻²", result.ohmic_drop_slope),
-        @sprintf("Scan rate: %.4f V s⁻¹", result.scan_rate_vs),
-    ]
-    Label(fig[0, 1:2], join(param_text, "\n"); justification = :left, fontsize = 10)
 
     # Left: original CV
     ax_raw = Axis(
