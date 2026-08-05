@@ -96,16 +96,16 @@ function extract_cv_parameters(path::String, cfg::CVExtractionConfig)::CVExtract
         error("No CV cycles could be detected in $path")
     end
 
-    interpolated = [interpolate_cycle(c, scan_rate, cfg.interpolation_factor) for c in cycles]
-
-    # Select the cycle to analyse
+    # Select the cycle to analyse. Matlab builds the mean cycle from the
+    # resampled cycles and only interpolates the individual cycles afterwards
+    # (`for l = 1:nCycles`), so the mean cycle is never upsampled.
     if cfg.cycle_for_extraction == 0
-        selected = mean_cycle(interpolated, cfg.ignore_cycles_for_mean)
+        selected = mean_cycle(cycles, cfg.ignore_cycles_for_mean)
     else
-        if cfg.cycle_for_extraction > length(interpolated)
-            error("Requested cycle $(cfg.cycle_for_extraction) but only $(length(interpolated)) cycle(s) available")
+        if cfg.cycle_for_extraction > length(cycles)
+            error("Requested cycle $(cfg.cycle_for_extraction) but only $(length(cycles)) cycle(s) available")
         end
-        selected = interpolated[cfg.cycle_for_extraction]
+        selected = interpolate_cycle(cycles[cfg.cycle_for_extraction], scan_rate, cfg.interpolation_factor)
     end
 
     # Convert to current density

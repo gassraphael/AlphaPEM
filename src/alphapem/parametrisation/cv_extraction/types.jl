@@ -59,8 +59,11 @@ Configuration for CV parameter extraction.
 - `compensate_ohmic_drop::Bool`: subtract ohmic-drop slope from the curve
 - `compensate_crossover::Bool`: subtract H₂ crossover current from the curve
 - `cycle_for_extraction::Int`: cycle index to use for extraction (0 = mean cycle, n = cycle n)
-- `ignore_cycles_for_mean::Vector{Int}`: cycle indices to exclude from the mean cycle
-- `interpolation_factor::Int`: upsampling factor for cycle interpolation
+- `ignore_cycles_for_mean::Vector{Int}`: cycle indices to exclude from the mean cycle.
+  The ZSW reference results were produced with `[1]`, i.e. discarding the first,
+  not-yet-conditioned cycle.
+- `interpolation_factor::Int`: upsampling factor for cycle interpolation. Only
+  applies to individual cycles: the mean cycle is not upsampled.
 """
 Base.@kwdef struct CVExtractionConfig
     area_cm2::Float64

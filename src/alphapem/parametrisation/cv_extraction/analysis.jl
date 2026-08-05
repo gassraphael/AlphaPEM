@@ -160,26 +160,21 @@ end
 """
     area_integral(x::Vector{Float64}, y::Vector{Float64}) -> Float64
 
-Compute the area between `y` and the straight line connecting the first and last
-points, using the trapezoidal rule.
+Compute the area enclosed between `y` and its baseline, using the trapezoidal
+rule.
+
+The baseline is the horizontal line at `y[1]`. This matches Matlab's
+`AreaIntegral`, where `polyfit(x(1, end), y(1, end), 1)` degenerates to a single
+sample (the comma indexes a column vector as a 2-D array, so `x(1, end)` is
+`x(1)`) and the rank-deficient fit collapses to the constant `y(1)`. Callers
+prepend the peak's closing sample so that `y[1]` carries the double-layer level.
 """
 function area_integral(x::Vector{Float64}, y::Vector{Float64})::Float64
     if length(x) < 2
         return 0.0
     end
-    baseline = _linear_baseline(x, y)
-    y_abs = abs.(y .- baseline)
+    y_abs = abs.(y .- first(y))
     return _trapz(x, y_abs)
-end
-
-function _linear_baseline(x::Vector{Float64}, y::Vector{Float64})::Vector{Float64}
-    x1, x2 = first(x), last(x)
-    y1, y2 = first(y), last(y)
-    if abs(x2 - x1) < eps()
-        return fill(y1, length(x))
-    end
-    m = (y2 - y1) / (x2 - x1)
-    return y1 .+ m .* (x .- x1)
 end
 
 function _trapz(x::Vector{Float64}, y::Vector{Float64})::Float64
@@ -344,9 +339,11 @@ function _ecsa_from_branch(
     U_peak = U[idx]
     j_peak = j[idx]
 
-    # Close the area with a straight baseline
-    U_closed = [first(U_peak); U_peak; last(U_peak)]
-    j_closed = [dlc_j; j_peak; dlc_j]
+    # Close the peak with the sample at its high-potential end, which sets the
+    # baseline level in `area_integral` (Matlab's `AddLine`). The prepended
+    # sample repeats the first potential, so it adds no area itself.
+    U_closed = [first(U_peak); U_peak]
+    j_closed = [last(j_peak); j_peak]
 
     area = area_integral(U_closed, j_closed)
     q = area / scan_rate

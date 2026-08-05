@@ -27,11 +27,12 @@ area_cm2 = 283.87
 cv_dir = abspath(joinpath("data", "experimental", "ZSW", "2026", "cv"))
 
 # Extraction configuration
-# The default limits are taken from the initial file this program was inspired by.
+# These are the settings of the ZSW Matlab tool this module is ported from.
 # All potential limits are in V vs the reference electrode used in the experiment.
 cfg = CVExtractionConfig(
     area_cm2 = area_cm2,                    # geometric electrode area (cm²)
-    cycle_for_extraction = 3,               # use the 3rd CV cycle (0 = mean cycle)
+    cycle_for_extraction = 0,               # 0 = mean cycle used (what the ZSW tool reports)
+    ignore_cycles_for_mean = [1],           # skip the first, not-yet-conditioned cycle
     double_layer_limit_min = 0.30,          # V vs reference electrode
     double_layer_limit_max = 0.50,          # V vs reference electrode
     ohmic_drop_limit_min = 0.35,            # V vs reference electrode

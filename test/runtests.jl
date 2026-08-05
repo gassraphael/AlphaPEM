@@ -412,24 +412,25 @@ end
 @testset "Parametrisation.CVExtraction" begin
     using AlphaPEM.Parametrisation.CVExtraction
 
-    cv_file = joinpath("data", "experimental", "ZSW", "2026", "cv", "cv_cell_10.txt")
+    cv_file = joinpath("data", "experimental", "ZSW", "2026", "cv", "ZSW_GenStack_cell_10.txt")
 
     cfg = CVExtractionConfig(
         area_cm2 = 283.87,
-        cycle_for_extraction = 3,
-        double_layer_limit_min = 0.42,
-        double_layer_limit_max = 0.65,
+        cycle_for_extraction = 0,
+        ignore_cycles_for_mean = [1],
+        double_layer_limit_min = 0.30,
+        double_layer_limit_max = 0.50,
         ohmic_drop_limit_min = 0.35,
-        ohmic_drop_limit_max = 0.50,
-        ecsa_limit_min = 0.05,
-        ecsa_limit_max = 0.45,
-        conversion_factor_uc_cm2 = 218.0,
-        covering_degree = 0.70,
+        ohmic_drop_limit_max = 0.45,
+        ecsa_limit_min = 0.09,
+        ecsa_limit_max = 0.50,
+        conversion_factor_uc_cm2 = 210.0,
+        covering_degree = 0.77,
     )
 
     result = extract_cv_parameters(cv_file, cfg)
 
-    @test result.cv_file_name == "cv_cell_10"
+    @test result.cv_file_name == "ZSW_GenStack_cell_10"
     @test result.ecsa_adsorption_cm2 > 0.0
     @test result.ecsa_desorption_cm2 > 0.0
     @test result.crossover_a_cm2 > 0.0
@@ -439,6 +440,31 @@ end
     @test length(result.raw_mean_cycle.U) > 0
     @test length(result.anodic.U) > 0
     @test length(result.cathodic.U) > 0
+
+    # Reference case: the values below are those reported by the original ZSW
+    # Matlab tool for this file with the settings above and the 280 cm² area from its header.
+    ref_file = joinpath("data", "experimental", "reference_cv_for_checking_results.txt")
+    ref_cfg = CVExtractionConfig(
+        area_cm2 = 280.0,
+        cycle_for_extraction = 0,
+        ignore_cycles_for_mean = [1],
+        double_layer_limit_min = 0.30,
+        double_layer_limit_max = 0.50,
+        ohmic_drop_limit_min = 0.35,
+        ohmic_drop_limit_max = 0.45,
+        ecsa_limit_min = 0.09,
+        ecsa_limit_max = 0.50,
+        conversion_factor_uc_cm2 = 210.0,
+        covering_degree = 0.77,
+    )
+
+    ref = extract_cv_parameters(ref_file, ref_cfg)
+
+    @test isapprox(ref.scan_rate_vs, 0.019910; rtol = 1e-4)   # 20 mV/s
+    @test isapprox(ref.ecsa_desorption_cm2, 75.0; rtol = 0.01)
+    @test isapprox(ref.ecsa_adsorption_cm2, 117.0; rtol = 0.01)
+    @test isapprox(ref.crossover_a_cm2, 3.407e-3; rtol = 0.01)
+    @test isapprox(ref.dlc_f_cm2, 4.6e-3; rtol = 0.02)
 end
 
 @testset "Utils" begin
