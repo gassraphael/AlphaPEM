@@ -1,0 +1,38 @@
+# ZSW GenStack (2024) Pa_1_61_Pc_1_41 polarization data
+#
+# Current densities are stored in A/cm² and converted to A/m² at load time.
+
+metadata:
+  family: ZSW
+  year: 2024
+  variant: Pa_1_61_Pc_1_41
+  source: https://zenodo.org/records/14223364
+
+operating_conditions:
+  T_des: 68              # °C. Desired cooling circuit temperature.
+  Pa_des: 1.61e5         # Pa. Desired pressure of the fuel gas at the anode.
+  Pc_des: 1.41e5         # Pa. Desired pressure of the fuel gas at the cathode.
+  Sa: 1.6                # Stoichiometric ratio of hydrogen at the anode.
+  Sc: 1.6                # Stoichiometric ratio of oxygen at the cathode.
+  Phi_a_des: 0.398       # Desired relative humidity at the anode.
+  Phi_c_des: 0.50        # Desired relative humidity at the cathode.
+  y_H2_in: 0.7           # Molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+  i_min_stoich: 0.5      # A/cm². Minimum current density used to compute the desired flows.
+
+pola_exp_data:
+  full:
+    i_exp: [0.001, 0.050, 0.099, 0.150, 0.200, 0.300, 0.400, 0.498, 0.700, 0.900,
+            0.999, 1.099, 1.300, 1.500, 1.700, 1.900, 2.000, 2.171]  # A/cm²
+    U_exp: [0.936, 0.835, 0.809, 0.795, 0.783, 0.759, 0.741, 0.725, 0.701, 0.670,
+            0.661, 0.633, 0.587, 0.541, 0.500, 0.457, 0.437, 0.402]  # V
+  before_voltage_drop:
+    i_exp: [0.001, 0.050, 0.099, 0.150, 0.200, 0.300, 0.400, 0.498, 0.700]  # A/cm²
+    U_exp: [0.936, 0.835, 0.809, 0.795, 0.783, 0.759, 0.741, 0.725, 0.701]  # V
+
+pola_exp_data_calibration:
+  full:
+    i_exp: [0.001, 0.050, 0.300, 0.700, 0.900, 1.500, 2.171]  # A/cm²
+    U_exp: [0.936, 0.835, 0.759, 0.701, 0.670, 0.541, 0.402]  # V
+  before_voltage_drop:
+    i_exp: [0.001, 0.050, 0.300, 0.700]  # A/cm²
+    U_exp: [0.936, 0.835, 0.759, 0.701]  # V

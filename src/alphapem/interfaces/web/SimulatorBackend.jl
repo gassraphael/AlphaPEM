@@ -820,8 +820,7 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
     # Resolve base fuel-cell symbol to ensure factory compatibility. Synthetic IDs
     # like "custom_*" or "default" are mapped back to known types (ZSW/EH31)
     # to avoid falling back to DefaultFuelCell (which causes NaN derivatives).
-    resolved_fuel_cell_type = if base_fc isa AlphaPEM.Fuelcell.ZSWFuelCell ||
-                                 base_fc isa AlphaPEM.Fuelcell.EH31FuelCell
+    resolved_fuel_cell_type = if base_fc isa AlphaPEM.Fuelcell.GenericFuelCell
         base_type
     else
         :ZSW_GenStack

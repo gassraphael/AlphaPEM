@@ -22,7 +22,7 @@ function new_PhysicalParams_from_sample(sample::Vector{Float64},
         overrides[b.name] = v
     end
 
-    if pb.fuel_cell_type in (:EH_31_1_5, :EH_31_2_0, :EH_31_2_25, :EH_31_2_5)
+    if pb.fuel_cell_type in (:EH31_1_5, :EH31_2_0, :EH31_2_25, :EH31_2_5)
         if haskey(overrides, :Hacl) && !haskey(overrides, :Hccl)
             overrides[:Hccl] = overrides[:Hacl]
         end

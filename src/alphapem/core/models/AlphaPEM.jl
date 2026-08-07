@@ -192,10 +192,10 @@ function _check_simulation_preconditions!(simu::AlphaPEM)
     is_first_run = simu.outputs === nothing
 
     if is_first_run
-        if simu.cfg.type_fuel_cell in (:EH_31_1_5, :EH_31_2_0, :E_H31_2_25, :EH_31_2_5)
+        if simu.cfg.type_fuel_cell in (:EH31_1_5, :EH31_2_0, :E_H31_2_25, :EH31_2_5)
             println("Warning: EH-Group fuel cell examples may be outdated. Using ZSW-GenStack is recommended.\n")
         end
-        if contains(string(typeof(simu.fuel_cell)), "ZSWFuelCell") && simu.cfg.type_flow == :co_flow
+        if startswith(string(simu.cfg.type_fuel_cell), "ZSW_GenStack") && simu.cfg.type_flow == :co_flow
             @warn "ZSW fuel cell with standard operating conditions typically requires counter-flow " *
                   "configuration for optimal performance. " *
                   "Consider setting type_flow = :counter_flow in SimulationConfig."
