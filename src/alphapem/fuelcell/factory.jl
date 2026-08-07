@@ -33,7 +33,8 @@ function create_fuelcell(type_fuel_cell::Symbol, voltage_zone::Symbol; year::Uni
         data_dir = joinpath(ExperimentalDataLoader.project_root(), "data", string(family))
         year_dirs = [d for d in readdir(data_dir)
                      if isdir(joinpath(data_dir, d)) && all(isdigit, d) &&
-                        isfile(joinpath(data_dir, d, "stack.jl"))]
+                        isfile(joinpath(data_dir, d, "stack.jl")) &&
+                        isdir(joinpath(data_dir, d, "pola"))]
         if !isempty(year_dirs)
             year = parse(Int, maximum(year_dirs))
         end
