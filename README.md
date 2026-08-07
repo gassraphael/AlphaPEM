@@ -40,6 +40,9 @@ The repository is organized around a Julia package in `src/`, example scripts in
 documentation, tests, and generated results. The main folders are:
 
 ```bash
+├── data                    # Fuel-cell-specific experimental data and stack parameters
+│   ├── EH-31               # EH-31 stack data and polarization curves
+│   └── ZSW                 # ZSW stack data and polarization curves (versioned by year)
 ├── docs                    # User documentation
 ├── examples                # Ready-to-run Julia scripts for step, polarization, EIS
 ├── results                 # Output directory for generated simulation results and reference benchmark outputs
@@ -53,7 +56,7 @@ documentation, tests, and generated results. The main folders are:
 │       │   ├── modules     # Physics blocks separated from the models repository for improved comprehensibility
 │       │   └── types       # Shared structs and type definitions across the codebase
 │       ├── currents        # Current profile definitions (step, polarization, EIS)
-│       ├── fuelcell        # Predefined fuel-cell models and cell-specific data
+│       ├── fuelcell        # Fuel-cell model types, abstract interface, and data-driven factory
 │       ├── interfaces      # GUI entry point and user-facing interfaces
 │       ├── parametrisation # Parameter calibration and identification routines
 │       └── utils           # Shared utility functions
@@ -179,7 +182,7 @@ and configuration, beyond what the GUI offers.
 
    | Field | Description / Allowed values |
    |---|---|
-   | `type_fuel_cell` | Symbol (e.g., `:ZSW_GenStack`, `:EH31`, `:default`) |
+   | `type_fuel_cell` | Symbol (e.g., `:ZSW_GenStack`, `:EH31_2022`, `:default`) |
    | `type_current` | `StepParams(...)`, `PolarizationParams(...)`, `EISParams(...)` |
    | `voltage_zone` | `:before_voltage_drop`, `:full` |
    | `type_auxiliary` | `:no_auxiliary`, `:forced_convective_cathode_...` |

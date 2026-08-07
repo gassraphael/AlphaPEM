@@ -21,7 +21,7 @@ The web interface will automatically open at `http://localhost:8000`.
 
 1. **Home Tab**: Review AlphaPEM capabilities.
 2. **Simulator Tab**:
-   - **Model Selection**: Choose your stack (e.g., `ZSW_GenStack`, `EH31`, or `custom`).
+   - **Model Selection**: Choose your stack (e.g., `ZSW_GenStack`, `EH31_2022`, or `custom`).
    - **Physical parameters**: Set the system parameters, such as membrane thickness, electrode properties, and flow field design.
    - **Operating Conditions**: Set the temperature, pressures, stoichiometries, and humidities.
    - **Numerical parameters**: Adjust the number of nodes (allows to switch between 1D and 1D+1D simulations) and solver tolerances.
@@ -65,7 +65,7 @@ Key configuration fields:
 
 | Parameter | Options | Purpose |
 |-----------|---------|---------|
-| `type_fuel_cell` | `:ZSW_GenStack`, `:EH31`, etc. | Select fuel cell model |
+| `type_fuel_cell` | `:ZSW_GenStack`, `:EH31_2022`, etc. | Select fuel cell model |
 | `type_current` | `StepParams(...)`, `PolarizationParams(...)`, `EISParams(...)` | Define current profile |
 | `voltage_zone` | `:before_voltage_drop`, `:full` | Include voltage drop or not |
 | `type_auxiliary` | `:no_auxiliary`, `:forced_convective_cathode_...` | Auxiliary equipment |

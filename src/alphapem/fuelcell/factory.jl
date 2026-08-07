@@ -3,32 +3,72 @@
 """
     FuelCell factory for AlphaPEM
 
-This module provides a factory function to instantiate the correct FuelCell type
-(ZSWFuelCell, EH31FuelCell, or DefaultFuelCell) based on the type_fuel_cell string.
+This module provides a factory function to instantiate a fuel cell from the
+data stored under `data/`. No fuel-cell-specific source code is required:
+adding a new stack only needs a new `data/<family>/<year>/stack.jl` file and
+optional polarization YAML files under `data/<family>/<year>/pola/`.
 """
 
+"""
+    create_fuelcell(type_fuel_cell::Symbol, voltage_zone::Symbol; year::Union{Int,Nothing}=nothing)::AbstractFuelCell
 
-const FUELCELL_TYPE_MAP = Dict(
-    :ZSW_GenStack => ZSWFuelCell,
-    :ZSW_GenStack_Pa_1_61_Pc_1_41 => ZSWFuelCell,
-    :ZSW_GenStack_Pa_2_01_Pc_1_81 => ZSWFuelCell,
-    :ZSW_GenStack_Pa_2_4_Pc_2_2 => ZSWFuelCell,
-    :ZSW_GenStack_Pa_2_8_Pc_2_6 => ZSWFuelCell,
-    :ZSW_GenStack_T_62 => ZSWFuelCell,
-    :ZSW_GenStack_T_76 => ZSWFuelCell,
-    :ZSW_GenStack_T_84 => ZSWFuelCell,
-    :EH31_2022 => EH31FuelCell,
-    :EH_31_1_5 => EH31FuelCell,
-    :EH_31_2_0 => EH31FuelCell,
-    :EH_31_2_25 => EH31FuelCell,
-    :EH_31_2_5 => EH31FuelCell
-)
+Instantiate a fuel cell for `type_fuel_cell` from the data files.
 
-function create_fuelcell(type_fuel_cell::Symbol, voltage_zone::Symbol)::AbstractFuelCell
-    simulator = get(FUELCELL_TYPE_MAP, type_fuel_cell, DefaultFuelCell)
-    if simulator === DefaultFuelCell
-        return DefaultFuelCell()
-    else
-        return simulator(type_fuel_cell, voltage_zone)
+The symbol is parsed to determine the `family` and `variant`. The factory then
+loads `data/<family>/<year>/stack.jl` and, for variants,
+`data/<family>/<year>/pola/<variant>.yml`. The `year` keyword is required when
+the family is versioned by year (e.g. `data/ZSW/<year>/`); it is ignored for
+families that are not versioned (e.g. `data/EH31/`).
+"""
+function create_fuelcell(type_fuel_cell::Symbol, voltage_zone::Symbol; year::Union{Int,Nothing}=nothing)::AbstractFuelCell
+    family, variant = ExperimentalDataLoader.parse_fuel_cell_symbol(type_fuel_cell)
+
+    # Provide a default year for families that are versioned by year.
+    # Families that do not use a year directory ignore this value.
+    if isnothing(year) && family == :ZSW
+        year = 2024
     end
+
+    return _load_fuelcell_from_data(family, variant, voltage_zone, year)
+end
+
+"""
+    _load_fuelcell_from_data(family::Symbol, variant::String, voltage_zone::Symbol,
+                             year::Union{Int,Nothing}=nothing)::AbstractFuelCell
+
+Generic constructor: load the stack file and the requested polarization data,
+then return a `GenericFuelCell` populated with the loaded values.
+"""
+function _load_fuelcell_from_data(family::Symbol, variant::String, voltage_zone::Symbol,
+                                  year::Union{Int,Nothing}=nothing)::AbstractFuelCell
+    stack = ExperimentalDataLoader.load_stack_data(family, year)
+
+    # Operating conditions: nominal from stack.jl, variant-specific from pola YAML.
+    if variant == "nominal"
+        oc = stack.operating_conditions
+    else
+        oc = ExperimentalDataLoader.load_operating_conditions(family, variant, year)
+    end
+
+    # Apply stack-specific corrections (e.g. ZSW +3 °C temperature correction).
+    # `invokelatest` is required because the correction function is defined in a
+    # dynamically loaded module and would otherwise be too new for this world age.
+    oc = Base.invokelatest(stack.apply_operating_conditions_correction, oc)
+
+    # Polarization data: nominal also has a dedicated YAML file.
+    pola_exp, pola_exp_cali = ExperimentalDataLoader.load_pola_experimental_data(
+        family, variant, voltage_zone, year)
+
+    undet = Dict{Symbol, Vector{Tuple{Symbol, Float64, Float64}}}(
+        :full => stack.undetermined_parameters_full,
+        :before_voltage_drop => stack.undetermined_parameters_before_voltage_drop,
+    )
+
+    return GenericFuelCell(
+        physical_parameters = stack.physical_parameters,
+        operating_conditions = oc,
+        pola_exp_data = pola_exp,
+        pola_exp_data_cali = pola_exp_cali,
+        undetermined_parameters = undet
+    )
 end

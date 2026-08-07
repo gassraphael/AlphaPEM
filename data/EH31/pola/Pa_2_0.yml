@@ -1,0 +1,48 @@
+# EH-31 (2022) Pa_2_0 polarization data
+#
+# Current densities are stored in A/cm² and converted to A/m² at load time.
+
+metadata:
+  family: EH-31
+  year: 2024
+  variant: Pa_2_0
+  source: https://ehgroup.ch/
+
+operating_conditions:
+  T_des: 74          # °C. Desired fuel cell temperature.
+  Pa_des: 2.0e5          # Pa. Desired pressure of the fuel gas at the anode.
+  Pc_des: 2.0e5          # Pa. Desired pressure of the fuel gas at the cathode.
+  Sa: 1.2                # Stoichiometric ratio of hydrogen at the anode.
+  Sc: 2.0                # Stoichiometric ratio of oxygen at the cathode.
+  Phi_a_des: 0.4         # Desired relative humidity at the anode.
+  Phi_c_des: 0.6         # Desired relative humidity at the cathode.
+  y_H2_in: 1.0           # Molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
+  i_min_stoich: 0.5      # A/cm². Minimum current density used to compute the desired flows.
+
+pola_exp_data:
+  full:
+    i_exp: [0.050, 0.057, 0.079, 0.106, 0.135, 0.171, 0.206, 0.242, 0.302, 0.346,
+            0.395, 0.434, 0.476, 0.531, 0.570, 0.623, 0.681, 0.731, 0.779, 0.822,
+            0.868, 0.930, 0.976, 1.031, 1.090, 1.134, 1.205, 1.242, 1.312, 1.358,
+            1.403, 1.453, 1.501, 1.569, 1.634, 1.725, 1.786, 1.857, 1.924, 1.979,
+            2.050, 2.125, 2.168, 2.214, 2.258, 2.308, 2.348, 2.413, 2.459]  # A/cm²
+    U_exp: [0.900, 0.889, 0.874, 0.860, 0.853, 0.845, 0.837, 0.830, 0.817, 0.808,
+            0.800, 0.792, 0.786, 0.779, 0.772, 0.765, 0.759, 0.753, 0.747, 0.742,
+            0.737, 0.730, 0.726, 0.720, 0.714, 0.710, 0.702, 0.698, 0.690, 0.684,
+            0.679, 0.673, 0.668, 0.659, 0.651, 0.640, 0.631, 0.620, 0.608, 0.598,
+            0.586, 0.573, 0.565, 0.557, 0.548, 0.537, 0.528, 0.513, 0.502]  # V
+  before_voltage_drop:
+    i_exp: [0.050, 0.057, 0.079, 0.106, 0.135, 0.171, 0.206, 0.242, 0.302, 0.346,
+            0.395, 0.434, 0.476, 0.531, 0.570, 0.623, 0.681, 0.731, 0.779, 0.822,
+            0.868, 0.930, 0.976, 1.031, 1.090, 1.134, 1.205, 1.242]  # A/cm²
+    U_exp: [0.900, 0.889, 0.874, 0.860, 0.853, 0.845, 0.837, 0.830, 0.817, 0.808,
+            0.800, 0.792, 0.786, 0.779, 0.772, 0.765, 0.759, 0.753, 0.747, 0.742,
+            0.737, 0.730, 0.726, 0.720, 0.714, 0.710, 0.702, 0.698]  # V
+
+pola_exp_data_calibration:
+  full:
+    i_exp: [0.050, 0.106, 0.242, 0.681, 1.242, 1.501, 1.979, 2.459]  # A/cm²
+    U_exp: [0.900, 0.860, 0.830, 0.759, 0.698, 0.668, 0.598, 0.502]  # V
+  before_voltage_drop:
+    i_exp: [0.050, 0.106, 0.242, 0.681, 1.242]  # A/cm²
+    U_exp: [0.900, 0.860, 0.830, 0.759, 0.698]  # V

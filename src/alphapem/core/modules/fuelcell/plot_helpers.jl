@@ -261,13 +261,13 @@ function _polarization_legend_base(type_fuel_cell::Symbol;
         return prefix * "T = 76 °C"
     elseif type_fuel_cell == :ZSW_GenStack_T_84
         return prefix * "T = 84 °C"
-    elseif type_fuel_cell == :EH_31_1_5
+    elseif type_fuel_cell == :EH31_1_5
         return prefix * "P = 1.5 bar"
-    elseif type_fuel_cell == :EH_31_2_0
+    elseif type_fuel_cell == :EH31_2_0
         return prefix * "P = 2.0 bar"
-    elseif type_fuel_cell == :EH_31_2_25
+    elseif type_fuel_cell == :EH31_2_25
         return prefix * "P = 2.25 bar"
-    elseif type_fuel_cell == :EH_31_2_5
+    elseif type_fuel_cell == :EH31_2_5
         return prefix * "P = 2.5 bar"
     end
 
@@ -276,13 +276,13 @@ end
 
 """Return an experimental marker style consistent with historical plotting conventions."""
 function _experimental_marker(type_fuel_cell::Symbol)::Symbol
-    if type_fuel_cell in (:ZSW_GenStack, :EH_31_1_5)
+    if type_fuel_cell in (:ZSW_GenStack, :EH31_1_5)
         return :rect
-    elseif type_fuel_cell in (:ZSW_GenStack_Pa_1_61_Pc_1_41, :EH_31_2_0)
+    elseif type_fuel_cell in (:ZSW_GenStack_Pa_1_61_Pc_1_41, :EH31_2_0)
         return :utriangle
-    elseif type_fuel_cell in (:ZSW_GenStack_Pa_2_01_Pc_1_81, :EH_31_2_25)
+    elseif type_fuel_cell in (:ZSW_GenStack_Pa_2_01_Pc_1_81, :EH31_2_25)
         return :dtriangle
-    elseif type_fuel_cell in (:ZSW_GenStack_Pa_2_4_Pc_2_2, :EH_31_2_5)
+    elseif type_fuel_cell in (:ZSW_GenStack_Pa_2_4_Pc_2_2, :EH31_2_5)
         return :pentagon
     elseif type_fuel_cell == :ZSW_GenStack_Pa_2_8_Pc_2_6
         return :diamond
