@@ -53,12 +53,12 @@ end
 
     # SimulationConfig default construction and validation
     cfg = SimulationConfig()
-    @test cfg.type_fuel_cell == :ZSW_GenStack
+    @test cfg.type_fuel_cell == :ZSW_nominal
     @test validate_config(cfg) === cfg
 
     # Custom configuration
     cfg_custom = SimulationConfig(
-        type_fuel_cell = :ZSW_GenStack,
+        type_fuel_cell = :ZSW_nominal,
         type_current = StepParams(),
         numerical_parameters = quick_numerical_params(),
         type_display = :no_display,
@@ -74,18 +74,18 @@ end
     using AlphaPEM.Fuelcell
 
     # Factory for the default ZSW stack
-    fc = create_fuelcell(:ZSW_GenStack, :full)
+    fc = create_fuelcell(:ZSW_nominal, :full)
     @test fc isa AbstractFuelCell
     @test fc.physical_parameters isa AlphaPEM.Config.PhysicalParams
     @test fc.operating_conditions isa AlphaPEM.Config.OperatingConditions
 
     # Other supported fuel cell types
-    @test create_fuelcell(:EH31_2022, :full) isa AbstractFuelCell
-    @test create_fuelcell(:ZSW_GenStack_T_84, :before_voltage_drop) isa AbstractFuelCell
+    @test create_fuelcell(:EH_nominal, :full) isa AbstractFuelCell
+    @test create_fuelcell(:ZSW_T_84, :before_voltage_drop) isa AbstractFuelCell
 
     # Accessor functions
     @test physical_parameters(fc) isa AlphaPEM.Config.PhysicalParams
-    @test operating_conditions(fc, :ZSW_GenStack) isa AlphaPEM.Config.OperatingConditions
+    @test operating_conditions(fc, :ZSW_nominal) isa AlphaPEM.Config.OperatingConditions
     @test undetermined_parameters(fc, :full) isa Vector{Tuple{Symbol, Float64, Float64}}
     @test !isempty(undetermined_parameters(fc, :full))
 end
@@ -94,7 +94,7 @@ end
     using AlphaPEM.Currents
     using AlphaPEM.Fuelcell: create_fuelcell
 
-    fc = create_fuelcell(:ZSW_GenStack, :full)
+    fc = create_fuelcell(:ZSW_nominal, :full)
 
     # Factory for each current profile type
     step_current = create_current(StepParams(), fc)
@@ -118,7 +118,7 @@ end
     using AlphaPEM.Application: run_simulation
 
     cfg = SimulationConfig(
-        type_fuel_cell = :ZSW_GenStack,
+        type_fuel_cell = :ZSW_nominal,
         type_current = StepParams(
             delta_t_ini = 10.0,
             delta_t_load = 1.0,
@@ -143,7 +143,7 @@ end
     using AlphaPEM.Application: run_simulation
 
     cfg = SimulationConfig(
-        type_fuel_cell = :ZSW_GenStack,
+        type_fuel_cell = :ZSW_nominal,
         type_current = PolarizationParams(
             delta_t_ini = 10.0,
             di_step = 0.5e4,
@@ -171,7 +171,7 @@ end
     using AlphaPEM.Application: run_simulation
 
     cfg = SimulationConfig(
-        type_fuel_cell = :ZSW_GenStack,
+        type_fuel_cell = :ZSW_nominal,
         type_current = EISParams(
             i_EIS = 0.5e4,
             ratio = 5.0 / 100.0,
@@ -196,7 +196,7 @@ end
     using AlphaPEM.Application: run_simulation
 
     cfg = SimulationConfig(
-        type_fuel_cell = :ZSW_GenStack,
+        type_fuel_cell = :ZSW_nominal,
         type_current = PolarizationCalibrationParams(
             delta_t_ini = 10.0,
             v_load = 0.01e4,
@@ -235,7 +235,7 @@ end
 
     cfgs = [
         SimulationConfig(
-            type_fuel_cell = :ZSW_GenStack,
+            type_fuel_cell = :ZSW_nominal,
             type_current = pola_params,
             numerical_parameters = num_params,
             voltage_zone = :full,
@@ -243,7 +243,7 @@ end
             display_timing = :postrun,
         ),
         SimulationConfig(
-            type_fuel_cell = :ZSW_GenStack_T_84,
+            type_fuel_cell = :ZSW_T_84,
             type_current = pola_params,
             numerical_parameters = num_params,
             voltage_zone = :before_voltage_drop,
@@ -264,7 +264,8 @@ end
 
     # Sampling and bounds
     cfg = ValidityAnalysisConfig(
-        fuel_cell_type = :ZSW_GenStack,
+        fuel_cell_type = :ZSW_nominal,
+        year = 2024,
         voltage_zone = :full,
         n_samples = 4,
         parallel = false,
@@ -323,7 +324,7 @@ end
 
     # Input parameter construction
     cfg = SobolAnalysisConfig(
-        fuel_cell_type = :ZSW_GenStack,
+        fuel_cell_type = :ZSW_nominal,
         voltage_zone = :before_voltage_drop,
         N = 4,
         include_operating_conditions = true,
@@ -334,7 +335,7 @@ end
 
     # Excluded operating conditions
     cfg_excl = SobolAnalysisConfig(
-        fuel_cell_type = :ZSW_GenStack,
+        fuel_cell_type = :ZSW_nominal,
         voltage_zone = :before_voltage_drop,
         N = 4,
         include_operating_conditions = true,
@@ -357,7 +358,8 @@ end
 
     # Tiny end-to-end Sobol analysis (very few samples, no second order)
     cfg_tiny = SobolAnalysisConfig(
-        fuel_cell_type = :ZSW_GenStack,
+        fuel_cell_type = :ZSW_nominal,
+        year = 2024,
         voltage_zone = :before_voltage_drop,
         N = 2,
         second_order = false,
@@ -388,7 +390,8 @@ end
     @test ga_cfg.pop_size == 4
 
     sim_cfg = SimulationConfig(
-        type_fuel_cell = :ZSW_GenStack,
+        type_fuel_cell = :ZSW_nominal,
+        year = 2024,
         type_current = PolarizationCalibrationParams(),
         numerical_parameters = quick_numerical_params(),
         type_display = :no_display,
@@ -404,7 +407,7 @@ end
 
     # Parameter bounds for the fuel cell type
     using AlphaPEM.Parametrisation: ParametrisationCommon
-    pb = ParametrisationCommon.bounds_for_fuel_cell(:ZSW_GenStack, :full)
+    pb = ParametrisationCommon.bounds_for_fuel_cell(:ZSW_nominal, :full)
     @test !isempty(pb.bounds)
     @test all(b -> b.min < b.max, pb.bounds)
 end
@@ -412,7 +415,7 @@ end
 @testset "Parametrisation.CVExtraction" begin
     using AlphaPEM.Parametrisation.CVExtraction
 
-    cv_file = joinpath("data", "ZSW", "2026", "cv", "ZSW_GenStack_cell_10.txt")
+    cv_file = joinpath(dirname(@__DIR__), "data", "ZSW", "2026", "cv", "cell_10.txt")
 
     cfg = CVExtractionConfig(
         area_cm2 = 283.87,
@@ -430,7 +433,7 @@ end
 
     result = extract_cv_parameters(cv_file, cfg)
 
-    @test result.cv_file_name == "ZSW_GenStack_cell_10"
+    @test result.cv_file_name == "cell_10"
     @test result.ecsa_adsorption_cm2 > 0.0
     @test result.ecsa_desorption_cm2 > 0.0
     @test result.crossover_a_cm2 > 0.0
@@ -443,7 +446,7 @@ end
 
     # Reference case: the values below are those reported by the original ZSW
     # Matlab tool for this file with the settings above and the 280 cm² area from its header.
-    ref_file = joinpath("data", "reference_cv_for_checking_results.txt")
+    ref_file = joinpath(dirname(@__DIR__), "data", "reference_cv_for_checking_results.txt")
     ref_cfg = CVExtractionConfig(
         area_cm2 = 280.0,
         cycle_for_extraction = 0,

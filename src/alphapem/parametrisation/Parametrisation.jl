@@ -22,7 +22,8 @@ YAML file that can be reused in Stage 2:
 using AlphaPEM.Parametrisation.ValidParameterRegion
 
 cfg = ValidityAnalysisConfig(
-    fuel_cell_type = :ZSW_GenStack,
+    fuel_cell_type = :ZSW_nominal,
+    year           = 2024,
     n_samples      = 2000,
     output_dir     = "results/model_validity",
 )
@@ -47,7 +48,8 @@ ohmic, and mass-transport regions. See `examples/run_sobol_sensitivity_analysis.
 using AlphaPEM.Parametrisation.SobolSensitivityAnalysis
 
 cfg = SobolAnalysisConfig(
-    fuel_cell_type = :ZSW_GenStack,
+    fuel_cell_type = :ZSW_nominal,
+    year           = 2024,
     voltage_zone   = :full,
     N              = 1024,
 )

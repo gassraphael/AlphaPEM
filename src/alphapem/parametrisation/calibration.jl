@@ -57,14 +57,14 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
     # 1. Setup bounds and reference configuration
     # All conditions share the same fuel cell type → same parameter bounds
     ref_cfg = first(cfg.simulation_configs)
-    parameter_bounds = bounds_for_fuel_cell(ref_cfg.type_fuel_cell, ref_cfg.voltage_zone) # Retrieve parameter constraints
-    base_params = get_reference_config(ref_cfg.type_fuel_cell) # Load baseline physical parameters
+    parameter_bounds = bounds_for_fuel_cell(ref_cfg.type_fuel_cell, ref_cfg.voltage_zone; year=ref_cfg.year) # Retrieve parameter constraints
+    base_params = get_reference_config(ref_cfg.type_fuel_cell; year=ref_cfg.year) # Load baseline physical parameters
 
     lower_bounds = [bound.min for bound in parameter_bounds.bounds] # Define the lower boundary vector for GA
     upper_bounds = [bound.max for bound in parameter_bounds.bounds] # Define the upper boundary vector for GA
 
     # 2. Prepare fuel cells and current profiles — one entry per experimental condition
-    fuel_cells       = [create_fuelcell(sc.type_fuel_cell, sc.voltage_zone) for sc in cfg.simulation_configs]
+    fuel_cells       = [create_fuelcell(sc.type_fuel_cell, sc.voltage_zone; year=sc.year) for sc in cfg.simulation_configs]
     current_profiles = [create_current(PolarizationCalibrationParams(), fc) for fc in fuel_cells]
 
     # 3. Define fitness function

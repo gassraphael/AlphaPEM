@@ -35,7 +35,7 @@ end
 
 # Default configuration (can be edited below).
 base_config = SimulationConfig(
-    type_fuel_cell = :ZSW_GenStack,
+    type_fuel_cell = :ZSW_nominal,
     voltage_zone   = :full
 )
 

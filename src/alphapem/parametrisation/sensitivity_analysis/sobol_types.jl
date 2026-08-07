@@ -6,7 +6,7 @@
 Configuration for the Sobol global sensitivity analysis of AlphaPEM.
 
 # Fields
-- `fuel_cell_type::Symbol`: Fuel-cell type to analyse. Default `:ZSW_GenStack`.
+- `fuel_cell_type::Symbol`: Fuel-cell type to analyse. Default `:ZSW_nominal`.
 - `voltage_zone::Symbol`: `:before_voltage_drop` or `:full`. Default `:full`.
 - `N::Int`: Base size of the Sobol sequence. Default `10_000`.
 - `second_order::Bool`: Compute second-order indices S2. Default `false`.
@@ -30,7 +30,8 @@ Configuration for the Sobol global sensitivity analysis of AlphaPEM.
 - `save_curves::Bool`: Save raw polarization curves. Default `true`.
 """
 Base.@kwdef struct SobolAnalysisConfig
-    fuel_cell_type::Symbol              = :ZSW_GenStack
+    fuel_cell_type::Symbol              = :ZSW_nominal
+    year::Union{Int,Nothing}            = 2024
     voltage_zone::Symbol                = :full
     N::Int                              = 10_000
     second_order::Bool                  = false

@@ -4,7 +4,7 @@
 Simple sensitivity analysis for AlphaPEM's PhysicalParams
 
 This performs a sensitivity analysis on the fuel cell's physical parameters by:
-1. Running a baseline polarization simulation with the nominal PhysicalParams of :ZSW_GenStack
+1. Running a baseline polarization simulation with the nominal PhysicalParams of :ZSW_nominal
 2. For each field of PhysicalParams:
    - Modifying it by ±20% (respecting integer/domain constraints, see `modify_physical_param`)
    - Running a polarization simulation in parallel, passing the modified PhysicalParams
@@ -58,6 +58,7 @@ function make_pola_config(base_config::SimulationConfig = SimulationConfig();
 
     return SimulationConfig(
         type_fuel_cell = base_config.type_fuel_cell,
+        year = base_config.year,
         type_current = current_params,
         numerical_parameters = base_config.numerical_parameters,
         voltage_zone = base_config.voltage_zone,
@@ -165,7 +166,7 @@ function run_simple_sensitivity_analysis(base_config::SimulationConfig = make_po
 
     # Step 1: Nominal PhysicalParams for the requested fuel cell. i_exp is fixed regardless
     # of PhysicalParams, so it can be shared as-is across the nominal run and every modified run.
-    nominal_fc = create_fuelcell(base_config.type_fuel_cell, base_config.voltage_zone)
+    nominal_fc = create_fuelcell(base_config.type_fuel_cell, base_config.voltage_zone; year=base_config.year)
     nominal_params = nominal_fc.physical_parameters
     i_exp = Float64.(nominal_fc.pola_exp_data_cali.i_exp)
 

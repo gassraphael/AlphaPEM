@@ -34,7 +34,7 @@ i_exp = [0.1e4, 0.5e4, 1.0e4, 1.5e4, 2.0e4, 2.5e4]
 calibration_config = CalibrationConfig(
     simulation_configs=[
         SimulationConfig(
-            type_fuel_cell=:ZSW_GenStack,
+            type_fuel_cell=:ZSW,
             type_current=PolarizationCalibrationParams(i_exp=i_exp),
             voltage_zone=:before_voltage_drop,
         )
@@ -108,7 +108,7 @@ calibration_config = CalibrationConfig(
     simulation_configs=[
         # Condition 1: 70°C, low pressure
         SimulationConfig(
-            type_fuel_cell=:ZSW_GenStack,
+            type_fuel_cell=:ZSW,
             temperature=70.0,
             pressure_anode=1.0,
             pressure_cathode=1.0,
@@ -118,7 +118,7 @@ calibration_config = CalibrationConfig(
         ),
         # Condition 2: 70°C, high pressure (same fuel cell type)
         SimulationConfig(
-            type_fuel_cell=:ZSW_GenStack,
+            type_fuel_cell=:ZSW,
             temperature=70.0,
             pressure_anode=3.0,
             pressure_cathode=3.0,

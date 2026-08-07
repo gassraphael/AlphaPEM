@@ -32,8 +32,8 @@ Configure fuel cell model and operating conditions.
 
 **Fuel cell model selection:**
 - Dropdown menu with predefined models:
-  - `:ZSW_GenStack` — Calibrated ZSW GenStack (open-source hardware stack)
-  - `:EH31_2022` — Calibrated EH-31 fuel cell model
+  - `:ZSW_nominal` — Calibrated ZSW GenStack (open-source hardware stack)
+  - `:EH_nominal` — Calibrated EH fuel cell model
   - Custom configurations
 
 **Physical and undetermined parameters:**

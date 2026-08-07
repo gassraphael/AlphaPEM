@@ -244,30 +244,30 @@ function _polarization_legend_base(type_fuel_cell::Symbol;
                                    calibration::Bool=false)
     prefix = simulation ? "Sim. - " : "Exp. - "
 
-    if type_fuel_cell == :ZSW_GenStack
+    if type_fuel_cell == :ZSW_nominal
         suffix = calibration && simulation ? "nominal operating conditions" : "nominal"
         return prefix * suffix
-    elseif type_fuel_cell == :ZSW_GenStack_Pa_1_61_Pc_1_41
+    elseif type_fuel_cell == :ZSW_Pa_1_61_Pc_1_41
         return rich(prefix, "P", subscript("a"), "/P", subscript("c"), " = 1.61/1.41 bar")
-    elseif type_fuel_cell == :ZSW_GenStack_Pa_2_01_Pc_1_81
+    elseif type_fuel_cell == :ZSW_Pa_2_01_Pc_1_81
         return rich(prefix, "P", subscript("a"), "/P", subscript("c"), " = 2.01/1.81 bar")
-    elseif type_fuel_cell == :ZSW_GenStack_Pa_2_4_Pc_2_2
+    elseif type_fuel_cell == :ZSW_Pa_2_4_Pc_2_2
         return rich(prefix, "P", subscript("a"), "/P", subscript("c"), " = 2.4/2.2 bar")
-    elseif type_fuel_cell == :ZSW_GenStack_Pa_2_8_Pc_2_6
+    elseif type_fuel_cell == :ZSW_Pa_2_8_Pc_2_6
         return rich(prefix, "P", subscript("a"), "/P", subscript("c"), " = 2.8/2.6 bar")
-    elseif type_fuel_cell == :ZSW_GenStack_T_62
+    elseif type_fuel_cell == :ZSW_T_62
         return prefix * "T = 62 °C"
-    elseif type_fuel_cell == :ZSW_GenStack_T_76
+    elseif type_fuel_cell == :ZSW_T_76
         return prefix * "T = 76 °C"
-    elseif type_fuel_cell == :ZSW_GenStack_T_84
+    elseif type_fuel_cell == :ZSW_T_84
         return prefix * "T = 84 °C"
-    elseif type_fuel_cell == :EH31_1_5
+    elseif type_fuel_cell == :EH_nominal
         return prefix * "P = 1.5 bar"
-    elseif type_fuel_cell == :EH31_2_0
+    elseif type_fuel_cell == :EH_Pa_2_0
         return prefix * "P = 2.0 bar"
-    elseif type_fuel_cell == :EH31_2_25
+    elseif type_fuel_cell == :EH_Pa_2_25
         return prefix * "P = 2.25 bar"
-    elseif type_fuel_cell == :EH31_2_5
+    elseif type_fuel_cell == :EH_Pa_2_5
         return prefix * "P = 2.5 bar"
     end
 
@@ -276,21 +276,21 @@ end
 
 """Return an experimental marker style consistent with historical plotting conventions."""
 function _experimental_marker(type_fuel_cell::Symbol)::Symbol
-    if type_fuel_cell in (:ZSW_GenStack, :EH31_1_5)
+    if type_fuel_cell in (:ZSW_nominal, :EH_nominal)
         return :rect
-    elseif type_fuel_cell in (:ZSW_GenStack_Pa_1_61_Pc_1_41, :EH31_2_0)
+    elseif type_fuel_cell in (:ZSW_Pa_1_61_Pc_1_41, :EH_Pa_2_0)
         return :utriangle
-    elseif type_fuel_cell in (:ZSW_GenStack_Pa_2_01_Pc_1_81, :EH31_2_25)
+    elseif type_fuel_cell in (:ZSW_Pa_2_01_Pc_1_81, :EH_Pa_2_25)
         return :dtriangle
-    elseif type_fuel_cell in (:ZSW_GenStack_Pa_2_4_Pc_2_2, :EH31_2_5)
+    elseif type_fuel_cell in (:ZSW_Pa_2_4_Pc_2_2, :EH_Pa_2_5)
         return :pentagon
-    elseif type_fuel_cell == :ZSW_GenStack_Pa_2_8_Pc_2_6
+    elseif type_fuel_cell == :ZSW_Pa_2_8_Pc_2_6
         return :diamond
-    elseif type_fuel_cell == :ZSW_GenStack_T_62
+    elseif type_fuel_cell == :ZSW_T_62
         return :cross
-    elseif type_fuel_cell == :ZSW_GenStack_T_76
+    elseif type_fuel_cell == :ZSW_T_76
         return :xcross
-    elseif type_fuel_cell == :ZSW_GenStack_T_84
+    elseif type_fuel_cell == :ZSW_T_84
         return :star5
     end
     return :rect

@@ -19,7 +19,7 @@ julia --project=. examples/run_step.jl
 
 ```julia
 config = SimulationConfig(
-    type_fuel_cell=:ZSW_GenStack,
+    type_fuel_cell=:ZSW,
     type_current=StepParams(i_ini = 1.0e4, i_step = 1.5e4),
     voltage_zone=:before_voltage_drop,
     # ... additional parameters
@@ -40,7 +40,7 @@ julia --project=. examples/run_polarization.jl
 
 ```julia
 config = SimulationConfig(
-    type_fuel_cell=:ZSW_GenStack,
+    type_fuel_cell=:ZSW,
     type_current=PolarizationParams(
         di_step = 0.05e4,
         v_load = 0.01e4,
@@ -64,7 +64,7 @@ julia --project=. examples/run_EIS.jl
 
 ```julia
 config = SimulationConfig(
-    type_fuel_cell=:ZSW_GenStack,
+    type_fuel_cell=:ZSW,
     type_current=EISParams(
         i_EIS = 1.0e4,
         ratio = 5.0 / 100.0,
@@ -120,7 +120,7 @@ julia --project=. examples/run_calibration.jl
 ```julia
 calibration_config = CalibrationConfig(
     calibration_conditions=[SimulationConfig(
-                                type_fuel_cell = :ZSW_GenStack,
+                                type_fuel_cell = :ZSW,
                                 voltage_zone   = :before_voltage_drop,)],
     ga_config=GAConfig(
         num_generations = 500,
@@ -152,7 +152,7 @@ using AlphaPEM.Parametrisation.SobolSensitivityAnalysis
 using AlphaPEM.Config: OperatingConditionConstraint
 
 cfg = SobolAnalysisConfig(
-    fuel_cell_type = :ZSW_GenStack,
+    fuel_cell_type = :ZSW,
     voltage_zone   = :full,
     N              = 1024,          # Start small; increase once validated
     second_order   = false,         # Set true only if compute budget allows
@@ -190,7 +190,7 @@ using AlphaPEM.Core.Models: extract_mid_mea_series
 
 # Define configuration
 config = SimulationConfig(
-    type_fuel_cell=:ZSW_GenStack,
+    type_fuel_cell=:ZSW,
     type_current=StepParams(i_ini = 1.0e4, i_step = 1.5e4),
 )
 
@@ -221,7 +221,7 @@ jl.seval("using AlphaPEM")
 # Configure simulation (via Julia)
 jl.seval("""
 config = SimulationConfig(
-    type_fuel_cell=:ZSW_GenStack,
+    type_fuel_cell=:ZSW,
     type_current=StepParams(i_ini = 1.0e4, i_step = 1.5e4),
 )
 """)

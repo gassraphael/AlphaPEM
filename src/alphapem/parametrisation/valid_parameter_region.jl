@@ -55,7 +55,8 @@ The IRD/PRIM framework used downstream relies on:
 using AlphaPEM.Parametrisation.ValidParameterRegion
 
 cfg = ValidityAnalysisConfig(
-    fuel_cell_type = :ZSW_GenStack,
+    fuel_cell_type = :ZSW_nominal,
+    year           = 2024,
     n_samples      = 2000,
     voltage_zone   = :full,
     output_dir     = "results/model_validity",
@@ -174,7 +175,7 @@ Consolidates options from all sub-modules so that a full run can be
 launched with a single struct.
 
 # Fields
-- `fuel_cell_type::Symbol`: Fuel-cell type to analyse. Default `:ZSW_GenStack`.
+- `fuel_cell_type::Symbol`: Fuel-cell type to analyse. Default `:ZSW_nominal`.
 - `voltage_zone::Symbol`: `:before_voltage_drop` or `:full`. Default `:full`.
 - `n_samples::Int`: Number of LHS configurations to simulate. Default `10000`.
 - `sampling_seed::Int`: Random seed for reproducible LHS. Default `42`.
@@ -197,7 +198,8 @@ launched with a single struct.
 # Example
 ```julia
 cfg = ValidityAnalysisConfig(
-    fuel_cell_type = :ZSW_GenStack,
+    fuel_cell_type = :ZSW_nominal,
+    year           = 2024,
     n_samples      = 500,       # quick test
     parallel       = false,
     hyperbox_finder_method   = :PRIM,    # or `nothing` to skip, or `:MaxBox` to select MaxBox
@@ -205,7 +207,8 @@ cfg = ValidityAnalysisConfig(
 ```
 """
 Base.@kwdef struct ValidityAnalysisConfig
-    fuel_cell_type::Symbol              = :ZSW_GenStack
+    fuel_cell_type::Symbol              = :ZSW_nominal
+    year::Union{Int,Nothing}            = 2024
     voltage_zone::Symbol                = :full
     n_samples::Int                      = 2000
     sampling_seed::Int                  = 42
@@ -465,7 +468,8 @@ A `ValidityAnalysisResult` with all intermediate outputs and paths to generated 
 
 ## Reuse curves from a previous run with different classification criteria
 cfg = ValidityAnalysisConfig(
-    fuel_cell_type = :ZSW_GenStack,
+    fuel_cell_type = :ZSW_nominal,
+    year           = 2024,
     n_samples      = 500,
     reuse_from     = "results/model_validity/20260601_001_s0500/",
     validation_criteria = ValidityCriteriaConfig(monotonic_threshold=0.01),
@@ -582,7 +586,7 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
 
     if ird_cfg !== nothing
         @info "STEP 3 — Running IRD analysis…"
-        ref_config   = get_reference_config(cfg.fuel_cell_type)
+        ref_config   = get_reference_config(cfg.fuel_cell_type; year=cfg.year)
 
         # Use a temporary directory for intermediate R results (kept clean, not in run_dir)
         temp_ird_dir = mktempdir()
@@ -637,7 +641,7 @@ Step 1 of the pipeline: define parameter bounds and draw LHS samples.
 Returns `(samples::Matrix{Float64}, bounds::ParameterBounds)`.
 """
 function generate_test_samples(cfg::ValidityAnalysisConfig)
-    pb = bounds_for_fuel_cell(cfg.fuel_cell_type, cfg.voltage_zone)
+    pb = bounds_for_fuel_cell(cfg.fuel_cell_type, cfg.voltage_zone; year=cfg.year)
     s_cfg = SamplingConfig(
         n_samples = cfg.n_samples,
         method = :lhs,
@@ -690,7 +694,7 @@ function classify_batch_simulations(samples::Matrix{Float64},
     param_names = [b.name for b in bounds.bounds]
 
     # Reference physical parameters: supply all fixed (non-sampled) fields.
-    base_params = get_reference_config(bounds.fuel_cell_type)
+    base_params = get_reference_config(bounds.fuel_cell_type; year=bounds.year)
 
     # Numerical setup for batch runs: minimum spatial resolution for speed.
     num_params = NumericalParams(nb_gc = cfg.nb_gc, max_run_time_s = cfg.max_run_time_s)
@@ -940,16 +944,17 @@ function _simulate_one_configuration(sample::Vector{Float64},
                                       num_params::NumericalParams,
                                       val_cfg::ValidityCriteriaConfig)
     try
-        # Map the sample to PhysicalParams (applies bounds clamping + EH-31 constraint).
+        # Map the sample to PhysicalParams (applies bounds clamping + EH constraint).
         modified_params = new_PhysicalParams_from_sample(sample, bounds, base_params)
 
         # Build a fuel-cell object and inject the modified physical parameters.
-        fc = create_fuelcell(bounds.fuel_cell_type, bounds.voltage_zone)
+        fc = create_fuelcell(bounds.fuel_cell_type, bounds.voltage_zone; year=bounds.year)
         fc.physical_parameters = modified_params
 
         # Assemble a minimal SimulationConfig (no display, no plots).
         sim_cfg = SimulationConfig(
             type_fuel_cell       = bounds.fuel_cell_type,
+            year                 = bounds.year,
             type_current         = polar_params,
             numerical_parameters = num_params,
             voltage_zone         = bounds.voltage_zone,

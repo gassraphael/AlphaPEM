@@ -631,8 +631,8 @@
                     <div id="pre-selected-section" class="form-section">
                         <label class="section-title">Fuel cell type *</label>
                         <div class="input-row">
-                            <label><input type="radio" name="fuel_cell_type" value="ZSW_GenStack" checked onchange="updateFuelCellDefaults()"> ZSW (2022)</label>
-                            <label><input type="radio" name="fuel_cell_type" value="EH31_2022" onchange="updateFuelCellDefaults()"> EH-31 (2022)</label>
+                            <label><input type="radio" name="fuel_cell_type" value="ZSW_nominal" checked onchange="updateFuelCellDefaults()"> ZSW (2024)</label>
+                            <label><input type="radio" name="fuel_cell_type" value="EH_nominal" onchange="updateFuelCellDefaults()"> EH</label>
                         </div>
                         <p class="help-text">Choose a predefined fuel cell model</p>
                     </div>
@@ -1469,8 +1469,8 @@
             
             if (!undeterminedList) {
                 const undeterminedMap = {
-                    'ZSW_GenStack': ['Hacl', 'Hccl', 'Hmem', 'Hgdl', 'Hmpl', 'epsilon_gdl', 'Re', 'i0_c_ref', 'kappa_co', 'kappa_c', 'K_O2_ad_Pt'],
-                    'EH31_2022': ['Hacl', 'Hccl', 'Hmem', 'epsilon_gdl', 'e', 'Re', 'i0_c_ref', 'kappa_co', 'kappa_c', 'K_O2_ad_Pt'],
+                    'ZSW_nominal': ['Hacl', 'Hccl', 'Hmem', 'Hgdl', 'Hmpl', 'epsilon_gdl', 'Re', 'i0_c_ref', 'kappa_co', 'kappa_c', 'K_O2_ad_Pt'],
+                    'EH_nominal': ['Hacl', 'Hccl', 'Hmem', 'epsilon_gdl', 'e', 'Re', 'i0_c_ref', 'kappa_co', 'kappa_c', 'K_O2_ad_Pt'],
                     'custom': ['Hacl', 'Hccl', 'Hmem', 'Hgdl', 'Hmpl', 'epsilon_gdl', 'epsilon_mpl', 'Re', 'i0_c_ref', 'kappa_co', 'kappa_c', 'K_O2_ad_Pt']
                 };
                 undeterminedList = undeterminedMap[fuelCellType] || undeterminedMap['custom'];
@@ -1680,19 +1680,19 @@
 
             // Identify base type if fuelCellType is actually a preset
             let baseType = fuelCellType;
-            if (fuelCellType && fuelCellType.startsWith('ZSW_GenStack')) baseType = 'ZSW_GenStack';
-            else if (fuelCellType && (fuelCellType.startsWith('EH_31') || fuelCellType.startsWith('EH31'))) baseType = 'EH31_2022';
+            if (fuelCellType && fuelCellType.startsWith('ZSW')) baseType = 'ZSW_nominal';
+            else if (fuelCellType && fuelCellType.startsWith('EH')) baseType = 'EH_nominal';
 
-            if (baseType === 'ZSW_GenStack') {
+            if (baseType === 'ZSW_nominal') {
                 const presets = [
-                    { value: 'ZSW_GenStack', label: 'Nominal' },
-                    { value: 'ZSW_GenStack_Pa_1_61_Pc_1_41', label: 'P<sub>a,des</sub> = 1.61, P<sub>c,des</sub> = 1.41' },
-                    { value: 'ZSW_GenStack_Pa_2_01_Pc_1_81', label: 'P<sub>a,des</sub> = 2.01, P<sub>c,des</sub> = 1.81' },
-                    { value: 'ZSW_GenStack_Pa_2_4_Pc_2_2', label: 'P<sub>a,des</sub> = 2.4, P<sub>c,des</sub> = 2.2' },
-                    { value: 'ZSW_GenStack_Pa_2_8_Pc_2_6', label: 'P<sub>a,des</sub> = 2.8, P<sub>c,des</sub> = 2.6' },
-                    { value: 'ZSW_GenStack_T_62', label: 'T<sub>coolant</sub> = 62°C' },
-                    { value: 'ZSW_GenStack_T_76', label: 'T<sub>coolant</sub> = 76°C' },
-                    { value: 'ZSW_GenStack_T_84', label: 'T<sub>coolant</sub> = 84°C' }
+                    { value: 'ZSW_nominal', label: 'Nominal' },
+                    { value: 'ZSW_Pa_1_61_Pc_1_41', label: 'P<sub>a,des</sub> = 1.61, P<sub>c,des</sub> = 1.41' },
+                    { value: 'ZSW_Pa_2_01_Pc_1_81', label: 'P<sub>a,des</sub> = 2.01, P<sub>c,des</sub> = 1.81' },
+                    { value: 'ZSW_Pa_2_4_Pc_2_2', label: 'P<sub>a,des</sub> = 2.4, P<sub>c,des</sub> = 2.2' },
+                    { value: 'ZSW_Pa_2_8_Pc_2_6', label: 'P<sub>a,des</sub> = 2.8, P<sub>c,des</sub> = 2.6' },
+                    { value: 'ZSW_T_62', label: 'T<sub>coolant</sub> = 62°C' },
+                    { value: 'ZSW_T_76', label: 'T<sub>coolant</sub> = 76°C' },
+                    { value: 'ZSW_T_84', label: 'T<sub>coolant</sub> = 84°C' }
                 ];
                 presets.forEach(p => {
                     const opt = document.createElement('option');
@@ -1701,12 +1701,12 @@
                     presetSelect.add(opt);
                 });
                 expSection.style.display = 'block';
-            } else if (fuelCellType === 'EH31_2022') {
+            } else if (fuelCellType === 'EH_nominal') {
                 const presets = [
-                    { value: 'EH31_1_5', label: 'P = 1.5 bar' },
-                    { value: 'EH31_2_0', label: 'P = 2.0 bar' },
-                    { value: 'EH31_2_25', label: 'P = 2.25 bar' },
-                    { value: 'EH31_2_5', label: 'P = 2.5 bar' }
+                    { value: 'EH_nominal', label: 'P = 1.5 bar' },
+                    { value: 'EH_Pa_2_0', label: 'P = 2.0 bar' },
+                    { value: 'EH_Pa_2_25', label: 'P = 2.25 bar' },
+                    { value: 'EH_Pa_2_5', label: 'P = 2.5 bar' }
                 ];
                 presets.forEach(p => {
                     const opt = document.createElement('option');
@@ -1875,7 +1875,7 @@
              const presetValue = document.getElementById('operating_conditions_preset').value;
              const isModified = document.getElementById('modification-warning').style.display === 'block';
 
-             // If modified, use the base type (ZSW_GenStack or EH31_2022) to avoid showing exp data.
+             // If modified, use the base type (ZSW_nominal or EH_nominal) to avoid showing exp data.
              // If NOT modified and a preset is selected, use that preset symbol.
              let finalFuelCellType = fuelCellType;
              const configType = document.querySelector('input[name="config_type"]:checked').value;
@@ -2314,7 +2314,7 @@
                 .then(r => r.json())
                 .then(data => {
                     if (data && data.input_params) {
-                        let fuelCellType = data.input_params.fuel_cell_type || 'ZSW_GenStack';
+                        let fuelCellType = data.input_params.fuel_cell_type || 'ZSW_nominal';
                         if (fuelCellType.startsWith('custom_')) fuelCellType = fuelCellType.replace('custom_', '');
                         
                         // Load metadata first to ensure correct units conversion in applyInputParams
@@ -2386,8 +2386,8 @@
 
             // Normalize for radio buttons (presets belong to a base stack)
             let radioType = baseFuelCellType;
-            if (radioType.startsWith('ZSW_GenStack')) radioType = 'ZSW_GenStack';
-            else if (radioType.startsWith('EH_31') || radioType.startsWith('EH31')) radioType = 'EH31_2022';
+            if (radioType.startsWith('ZSW')) radioType = 'ZSW_nominal';
+            else if (radioType.startsWith('EH')) radioType = 'EH_nominal';
 
             if (radioType && radioType !== 'default') {
                 const radio = document.querySelector(`input[name="fuel_cell_type"][value="${radioType}"]`);

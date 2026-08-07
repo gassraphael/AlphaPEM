@@ -14,19 +14,29 @@ optional polarization YAML files under `data/<family>/<year>/pola/`.
 
 Instantiate a fuel cell for `type_fuel_cell` from the data files.
 
-The symbol is parsed to determine the `family` and `variant`. The factory then
+The symbol is parsed to determine the `family` and `variant` from directory and
+YAML file names (e.g. `:EH_nominal`, `:ZSW_Pa_1_61_Pc_1_41`). The factory then
 loads `data/<family>/<year>/stack.jl` and, for variants,
 `data/<family>/<year>/pola/<variant>.yml`. The `year` keyword is required when
 the family is versioned by year (e.g. `data/ZSW/<year>/`); it is ignored for
-families that are not versioned (e.g. `data/EH31/`).
+families that are not versioned (e.g. `data/EH/`).
 """
 function create_fuelcell(type_fuel_cell::Symbol, voltage_zone::Symbol; year::Union{Int,Nothing}=nothing)::AbstractFuelCell
     family, variant = ExperimentalDataLoader.parse_fuel_cell_symbol(type_fuel_cell)
 
-    # Provide a default year for families that are versioned by year.
+    # The year is required for families that are versioned by year.
     # Families that do not use a year directory ignore this value.
-    if isnothing(year) && family == :ZSW
-        year = 2024
+    if isnothing(year) && isdir(joinpath(ExperimentalDataLoader.project_root(), "data", string(family)))
+        # Check whether the family has year subdirectories and pick the most
+        # recent one that contains a stack.jl as a default. This keeps the API
+        # generic for future versioned families without hard-coding a year.
+        data_dir = joinpath(ExperimentalDataLoader.project_root(), "data", string(family))
+        year_dirs = [d for d in readdir(data_dir)
+                     if isdir(joinpath(data_dir, d)) && all(isdigit, d) &&
+                        isfile(joinpath(data_dir, d, "stack.jl"))]
+        if !isempty(year_dirs)
+            year = parse(Int, maximum(year_dirs))
+        end
     end
 
     return _load_fuelcell_from_data(family, variant, voltage_zone, year)

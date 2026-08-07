@@ -80,7 +80,7 @@ julia --project=. examples/run_sobol_sensitivity_analysis.jl
 using AlphaPEM.Parametrisation.SobolSensitivityAnalysis
 
 cfg = SobolAnalysisConfig(
-    fuel_cell_type = :ZSW_GenStack,
+    fuel_cell_type = :ZSW,
     voltage_zone   = :full,
     N              = 1024,
 )
@@ -96,7 +96,7 @@ under a fixed experimental condition, e.g. fixed stoichiometries:
 
 ```julia
 cfg = SobolAnalysisConfig(
-    fuel_cell_type = :ZSW_GenStack,
+    fuel_cell_type = :ZSW,
     voltage_zone   = :full,
     N              = 1024,
     excluded_operating_conditions = [:Sa, :Sc],
@@ -120,7 +120,7 @@ my_constraints = [
 ]
 
 cfg = SobolAnalysisConfig(
-    fuel_cell_type = :ZSW_GenStack,
+    fuel_cell_type = :ZSW,
     N              = 1024,
     operating_condition_constraints = my_constraints,
 )
@@ -132,7 +132,7 @@ The thresholds separating activation, ohmic, and mass transport are configurable
 
 ```julia
 cfg = SobolAnalysisConfig(
-    fuel_cell_type    = :ZSW_GenStack,
+    fuel_cell_type    = :ZSW,
     region_thresholds = (0.4, 1.6),  # A/cm²
 )
 ```

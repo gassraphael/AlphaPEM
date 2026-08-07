@@ -37,7 +37,7 @@ function generate_lhs_samples(pb::ParameterBounds,
     end
 
     if cfg.include_reference
-        ref = get_reference_config(pb.fuel_cell_type)
+        ref = get_reference_config(pb.fuel_cell_type; year=pb.year)
         ref_vec = Float64[]
         for b in pb.bounds
             v = getfield(ref, b.name)

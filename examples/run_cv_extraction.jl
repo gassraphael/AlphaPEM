@@ -30,17 +30,17 @@ cv_dir = abspath(joinpath("data", "ZSW", "2026", "cv"))
 # These are the settings of the ZSW Matlab tool this module is ported from.
 # All potential limits are in V vs the reference electrode used in the experiment.
 cfg = CVExtractionConfig(
-    area_cm2 = area_cm2,                    # geometric electrode area (cm²)
-    cycle_for_extraction = 0,               # 0 = mean cycle used (what the ZSW tool reports)
-    ignore_cycles_for_mean = [1],           # skip the first, not-yet-conditioned cycle
-    double_layer_limit_min = 0.30,          # V vs reference electrode
-    double_layer_limit_max = 0.50,          # V vs reference electrode
-    ohmic_drop_limit_min = 0.35,            # V vs reference electrode
-    ohmic_drop_limit_max = 0.45,            # V vs reference electrode
-    ecsa_limit_min = 0.09,                  # V vs reference electrode
-    ecsa_limit_max = 0.50,                  # V vs reference electrode
-    conversion_factor_uc_cm2 = 210.0,       # μC·cm⁻², H monolayer charge on Pt
-    covering_degree = 0.77,                 # empirical H coverage on Pt (0–1)
+    area_cm2                 = area_cm2,  # geometric electrode area (cm²)
+    cycle_for_extraction     = 0,         # 0 = mean cycle used (what the ZSW tool reports)
+    ignore_cycles_for_mean   = [1],       # skip the first, not-yet-conditioned cycle
+    double_layer_limit_min   = 0.30,      # V vs reference electrode
+    double_layer_limit_max   = 0.50,      # V vs reference electrode
+    ohmic_drop_limit_min     = 0.35,      # V vs reference electrode
+    ohmic_drop_limit_max     = 0.45,      # V vs reference electrode
+    ecsa_limit_min           = 0.09,      # V vs reference electrode
+    ecsa_limit_max           = 0.50,      # V vs reference electrode
+    conversion_factor_uc_cm2 = 210.0,     # μC·cm⁻², H monolayer charge on Pt
+    covering_degree          = 0.77,      # empirical H coverage on Pt (0–1)
 )
 
 # ---------------------------------------------------------------------------

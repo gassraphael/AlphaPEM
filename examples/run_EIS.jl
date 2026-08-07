@@ -15,23 +15,23 @@ using AlphaPEM.Config: SimulationConfig, EISParams, NumericalParams
 using AlphaPEM.Application: run_simulation
 
 current_params = EISParams(
-    i_EIS = 1.5e4,        # (A/m²). Parameters for the EIS curve.
-    ratio = 5.0 / 100.0,  # (.). Parameters for the EIS curve.
-    f_power_min = -3.0,   # (.). Power of the minimum frequency for the EIS current density function.
-    f_power_max = 5.0,    # (.). Power of the maximum frequency for the EIS current density function.
-    nb_f = 90,            # (.). Number of frequencies tested for the EIS current density function.
-    nb_points = 50,       # (.). Number of points calculated per specific period for the EIS current density function.
+    i_EIS       = 1.5e4,        # (A/m²). Parameters for the EIS curve.
+    ratio       = 5.0 / 100.0,  # (.). Parameters for the EIS curve.
+    f_power_min = -3.0,         # (.). Power of the minimum frequency for the EIS current density function.
+    f_power_max = 5.0,          # (.). Power of the maximum frequency for the EIS current density function.
+    nb_f        = 90,           # (.). Number of frequencies tested for the EIS current density function.
+    nb_points   = 50,           # (.). Number of points calculated per specific period for the EIS current density function.
 )
 
 cfg = SimulationConfig(
-    type_fuel_cell = :ZSW_GenStack,
-    type_current = current_params,
+    type_fuel_cell       = :ZSW_nominal,
+    type_current         = current_params,
     numerical_parameters = NumericalParams(nb_gc = 1),
-    type_auxiliary = :no_auxiliary, # :forced_convective_cathode_with_anodic_recirculation, :forced_convective_cathode_with_flow_through_anode, :no_auxiliary.
-    type_flow = :counter_flow, # :co_flow, :counter_flow.
-    type_purge = :no_purge, # :constant_purge, :periodic_purge, :no_purge.
-    type_display = :synthetic, # :multiple, :synthetic, :no_display.
-    display_timing = :postrun # :live, :postrun.
+    type_auxiliary       = :no_auxiliary, # :forced_convective_cathode_with_anodic_recirculation, :forced_convective_cathode_with_flow_through_anode, :no_auxiliary.
+    type_flow            = :counter_flow, # :co_flow, :counter_flow.
+    type_purge           = :no_purge,     # :constant_purge, :periodic_purge, :no_purge.
+    type_display         = :synthetic,    # :multiple, :synthetic, :no_display.
+    display_timing       = :postrun       # :live, :postrun.
 )
 
 start_time = time() # Starting time

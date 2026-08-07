@@ -35,7 +35,7 @@ using AlphaPEM.Parametrisation.ValidParameterRegion
 using AlphaPEM.Parametrisation.ValidParameterRegion: IRDConfig
 
 analysis_cfg = ValidityAnalysisConfig(
-    fuel_cell_type=:ZSW_GenStack,
+    fuel_cell_type=:ZSW,
     voltage_zone=:before_voltage_drop,
     n_samples=10_000,
     hyperbox_finder_method = [:PRIM, :MaxBox],

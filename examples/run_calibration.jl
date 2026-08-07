@@ -52,18 +52,18 @@ end
 
 calibration_conditions = [
     SimulationConfig(
-        type_fuel_cell = :ZSW_GenStack_Pa_1_61_Pc_1_41,
-        voltage_zone   = :full,
+        type_fuel_cell       = :ZSW_Pa_1_61_Pc_1_41,
+        voltage_zone         = :full,
         numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S),
     ),
     SimulationConfig(
-        type_fuel_cell = :ZSW_GenStack_Pa_2_8_Pc_2_6,
-        voltage_zone   = :full,
+        type_fuel_cell       = :ZSW_Pa_2_8_Pc_2_6,
+        voltage_zone         = :full,
         numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S),
     ),
 #    SimulationConfig(
-#        type_fuel_cell = :ZSW_GenStack_T_84,
-#        voltage_zone   = :before_voltage_drop,
+#        type_fuel_cell       = :ZSW_T_84,
+#        voltage_zone         = :before_voltage_drop,
 #        numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S),
 #    ),
 ]
@@ -71,9 +71,9 @@ calibration_conditions = [
 # ── Genetic Algorithm settings ────────────────────────────────────────────────
 
 ga_cfg = GAConfig(
-    num_generations = 500,                      # minimum of 500 generation, 1000+ recommended for high precision
-    pop_size        = 128,                      # 128+ recommended
-    target_error    = 1/100,                    # Stop if RMSE < 1%
+    num_generations = 500,    # minimum of 500 generation, 1000+ recommended for high precision
+    pop_size        = 128,    # 128+ recommended
+    target_error    = 1/100,  # Stop if RMSE < 1%
 )
 
 # ── Calibration config ────────────────────────────────────────────────────────
@@ -82,7 +82,7 @@ calib_cfg = CalibrationConfig(
     simulation_configs = calibration_conditions,
     ga_config          = ga_cfg,
     parallel           = PARALLEL,
-    output_dir         = "results/calibration/ZSW_GenStack",
+    output_dir         = "results/calibration/ZSW",
 )
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -481,7 +481,8 @@ using AlphaPEM.Config: SimulationConfig, StepParams
 using AlphaPEM.Application: run_simulation
 
 cfg = SimulationConfig(
-    type_fuel_cell = :ZSW_GenStack,
+    type_fuel_cell = :ZSW_nominal,
+    year           = 2024,
     type_current   = StepParams(),
     type_display   = :synthetic,
     display_timing = :postrun,
@@ -491,7 +492,7 @@ simu = run_simulation(cfg)
 """
 function run_simulation(cfg::SimulationConfig)::AlphaPEM
     # Build a Fuelcell object with the given configuration.
-    fuel_cell       = create_fuelcell(cfg.type_fuel_cell, cfg.voltage_zone)
+    fuel_cell       = create_fuelcell(cfg.type_fuel_cell, cfg.voltage_zone; year=cfg.year)
 
     # Override with custom parameters if provided
     if cfg.physical_parameters !== nothing
@@ -537,7 +538,7 @@ function run_simulation(cfgs::AbstractVector{<:SimulationConfig})::Vector{AlphaP
     # Build Fuelcell objects for each configuration.
     fuel_cells = []
     for i in 1:n
-        fc = create_fuelcell(cfgs[i].type_fuel_cell, cfgs[i].voltage_zone)
+        fc = create_fuelcell(cfgs[i].type_fuel_cell, cfgs[i].voltage_zone; year=cfgs[i].year)
         if cfgs[i].physical_parameters !== nothing
             fc.physical_parameters = cfgs[i].physical_parameters
         end

@@ -33,7 +33,7 @@ function build_input_parameters(cfg::SobolAnalysisConfig)::Vector{InputParameter
     params = InputParameter[]
 
     # Physical undetermined parameters
-    pb = cfg.parameter_bounds !== nothing ? cfg.parameter_bounds : bounds_for_fuel_cell(cfg.fuel_cell_type, cfg.voltage_zone)
+    pb = cfg.parameter_bounds !== nothing ? cfg.parameter_bounds : bounds_for_fuel_cell(cfg.fuel_cell_type, cfg.voltage_zone; year=cfg.year)
     for b in pb.bounds
         push!(params, InputParameter(b.name, b.min, b.max, b.type, :physical))
     end
@@ -139,7 +139,7 @@ function sample_to_physical_params(sample::Vector{Float64},
         end
     end
 
-    # Use ParametrisationCommon mapping for consistency (handles EH-31 constraints)
+    # Use ParametrisationCommon mapping for consistency (handles EH constraints)
     pb = _params_to_bounds(params)
     if isempty(pb.bounds)
         return base_params
@@ -217,7 +217,7 @@ function _params_to_bounds(params::Vector{InputParameter})::ParameterBounds
             push!(bounds, ParameterBound(p.name, p.min, p.max, p.type, unit, description))
         end
     end
-    return ParameterBounds(bounds, :unknown, :full, length(bounds))
+    return ParameterBounds(bounds, :unknown, nothing, :full, length(bounds))
 end
 
 

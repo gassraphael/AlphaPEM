@@ -23,7 +23,8 @@ simulations (no surrogate model). It follows the workflow of the student noteboo
 using AlphaPEM.Parametrisation.SobolSensitivityAnalysis
 
 cfg = SobolAnalysisConfig(
-    fuel_cell_type = :ZSW_GenStack,
+    fuel_cell_type = :ZSW_nominal,
+    year           = 2024,
     voltage_zone   = :full,
     N              = 1024,
     second_order   = false,

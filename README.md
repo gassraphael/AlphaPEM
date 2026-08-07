@@ -42,7 +42,7 @@ documentation, tests, and generated results. The main folders are:
 
 ```bash
 ├── data                    # Fuel-cell-specific experimental data and stack parameters
-│   ├── EH-31               # EH-31 stack data and polarization curves
+│   ├── EH                  # EH stack data and polarization curves
 │   └── ZSW                 # ZSW stack data and polarization curves (versioned by year)
 ├── docs                    # User documentation
 ├── examples                # Ready-to-run Julia scripts for step, polarization, EIS
@@ -215,7 +215,7 @@ and configuration, beyond what the GUI offers.
 
    | Field | Description / Allowed values |
    |---|---|
-   | `type_fuel_cell` | Symbol (e.g., `:ZSW_GenStack`, `:EH31_2022`, `:default`) |
+   | `type_fuel_cell` | Symbol (e.g., `:ZSW_nominal`, `:ZSW_Pa_1_61_Pc_1_41`, `:EH_nominal`, `:default`) |
    | `type_current` | `StepParams(...)`, `PolarizationParams(...)`, `EISParams(...)` |
    | `voltage_zone` | `:before_voltage_drop`, `:full` |
    | `type_auxiliary` | `:no_auxiliary`, `:forced_convective_cathode_...` |
@@ -269,7 +269,7 @@ Calibration adapts AlphaPEM to specific fuel cells using genetic algorithms.
 
 # Work in progress
 
-- Sensitivity analysis and calibration of the model using pre-selected data from ZSW-GenStack or EH-31 is currently 
+- Sensitivity analysis and calibration of the model using pre-selected data from ZSW or EH is currently 
 underway.
 - Auxiliaries are temporarily removed, as they require reconstruction.
 

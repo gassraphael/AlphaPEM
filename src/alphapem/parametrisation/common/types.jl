@@ -20,6 +20,7 @@ Complete set of bounds for all undetermined parameters of a given fuel-cell type
 struct ParameterBounds
     bounds::Vector{ParameterBound}
     fuel_cell_type::Symbol
+    year::Union{Int,Nothing}
     voltage_zone::Symbol
     n_params::Int
 end
