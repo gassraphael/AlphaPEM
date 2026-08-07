@@ -24,7 +24,7 @@ using Statistics: mean
 area_cm2 = 283.87
 
 # Directory containing the experimental CV files
-cv_dir = abspath(joinpath("data", "experimental", "ZSW", "2026", "cv"))
+cv_dir = abspath(joinpath("data", "ZSW", "2026", "cv"))
 
 # Extraction configuration
 # These are the settings of the ZSW Matlab tool this module is ported from.

@@ -412,7 +412,7 @@ end
 @testset "Parametrisation.CVExtraction" begin
     using AlphaPEM.Parametrisation.CVExtraction
 
-    cv_file = joinpath("data", "experimental", "ZSW", "2026", "cv", "ZSW_GenStack_cell_10.txt")
+    cv_file = joinpath("data", "ZSW", "2026", "cv", "ZSW_GenStack_cell_10.txt")
 
     cfg = CVExtractionConfig(
         area_cm2 = 283.87,
@@ -443,7 +443,7 @@ end
 
     # Reference case: the values below are those reported by the original ZSW
     # Matlab tool for this file with the settings above and the 280 cm² area from its header.
-    ref_file = joinpath("data", "experimental", "reference_cv_for_checking_results.txt")
+    ref_file = joinpath("data", "reference_cv_for_checking_results.txt")
     ref_cfg = CVExtractionConfig(
         area_cm2 = 280.0,
         cycle_for_extraction = 0,
