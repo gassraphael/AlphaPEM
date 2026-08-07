@@ -45,7 +45,7 @@ const PHYSICAL_PARAMETERS = PhysicalParams(
     e                = 5,                      # Capillary exponent
     # Volumic flow of O2 inside the CCL to the Pt sites
     IC_ccl           = 0.7463190105271269,     # Ionomer to carbon ratio in the cathode catalyst layer
-    ECSA_0           = 119.48129533899694,     # Initial electrochemical surface area of the catalyst in cm2_Pt.cm-2_active_area
+    ECSA_0           = 113.55,                 # Initial electrochemical surface area of the catalyst in cm2_Pt.cm-2_active_area
     K_O2_ad_Pt       = 3.2988632394563835,     # Interfacial resistance coefficient of O2 adsorption on the Pt sites
     K_O2_dis_ion     = 7.359085442135299,      # Interfacial resistance coefficient of O2 dissolution inside the ionomer
     r_carb           = 10.453480212859218e-9,  # Mean radius of the carbon particles in m
@@ -112,7 +112,6 @@ const UNDETERMINED_PARAMETERS_AFTER_VOLTAGE_DROP = [
     (:theta_c_gdl,  90 * π / 180, 160 * π / 180), # GDL contact angle
     (:IC_ccl,       0.1, 2.0),                     # Ionomer to carbon ratio in the cathode catalyst layer
     (:r_carb,       10e-9, 100e-9),               # Mean radius of the carbon particles
-    (:ECSA_0,       30.0, 200.0),                 # Initial electrochemical surface area of the catalyst
     (:K_O2_dis_ion, 0.1, 20.0),                   # Interfacial resistance coefficient of O₂ dissolution inside the ionomer
     (:K_O2_ad_Pt,   0.1, 20.0),                   # Interfacial resistance coefficient of O₂ adsorption on the Pt sites
 ]
