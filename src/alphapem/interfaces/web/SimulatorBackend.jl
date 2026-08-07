@@ -290,13 +290,13 @@ Returns a dictionary with fuel cell types and their descriptions.
 """
 function get_available_fuel_cells()::Dict
     fuel_cells = Dict(
-        :ZSW_GenStack => Dict(
+        :ZSW_nominal => Dict(
             :name => "ZSW",
             :description => "ZSW GenStack",
         ),
-        :EH31_2022 => Dict(
-            :name => "EH-31 (2022)",
-            :description => "EH-31 fuel cell",
+        :EH_nominal => Dict(
+            :name => "EH",
+            :description => "EH fuel cell",
         ),
     )
 
@@ -316,13 +316,7 @@ Dictionary with all default operating conditions and parameters.
 """
 function get_fuel_cell_defaults(fuel_cell_type::String; voltage_zone::String="before_voltage_drop")::Dict
     # Handle mapping to internal symbols
-    mapped_type = if fuel_cell_type == "ZSW_GenStack"
-        :ZSW_GenStack
-    elseif fuel_cell_type == "EH31_2022"
-        :EH31_2022
-    else
-        Symbol(fuel_cell_type)
-    end
+    mapped_type = Symbol(fuel_cell_type)
 
     v_zone = Symbol(voltage_zone)
 
@@ -330,7 +324,7 @@ function get_fuel_cell_defaults(fuel_cell_type::String; voltage_zone::String="be
     try
         # Use the factory to create a fuel cell instance
         # This ensures we get exactly the parameters defined in fuelcell/*.jl
-        fc = AlphaPEM.Fuelcell.create_fuelcell(mapped_type, v_zone)
+        fc = AlphaPEM.Fuelcell.create_fuelcell(mapped_type, v_zone; year=2024)
 
         # Get undetermined parameters list for this fuel cell
         und_params_list = AlphaPEM.Fuelcell.undetermined_parameters(fc, v_zone)
@@ -646,7 +640,7 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
     # (with the *actual* voltage zone requested by the user) avoids duplicating
     # this logic and keeps the experimental-data lookup consistent with the
     # simulation that is about to run.
-    fc_type_str = string(get(params, :fuel_cell_type, "ZSW_GenStack"))
+    fc_type_str = string(get(params, :fuel_cell_type, "ZSW_nominal"))
     v_zone_str = string(get(params, :voltage_zone, "before_voltage_drop"))
 
     # Strip "custom_" prefix if present to get the base model defaults
@@ -655,10 +649,10 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
     v_zone = Symbol(v_zone_str)
 
     base_fc = try
-        AlphaPEM.Fuelcell.create_fuelcell(base_type, v_zone)
+        AlphaPEM.Fuelcell.create_fuelcell(base_type, v_zone; year=2024)
     catch
         # Fallback to ZSW
-        AlphaPEM.Fuelcell.create_fuelcell(:ZSW_GenStack, :before_voltage_drop)
+        AlphaPEM.Fuelcell.create_fuelcell(:ZSW_nominal, :before_voltage_drop; year=2024)
     end
     base_ap = base_fc.physical_parameters
 
@@ -818,16 +812,17 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
     type_purge = Symbol(get(params, :type_purge, get(model_cfg, :type_purge, "no_purge")))
 
     # Resolve base fuel-cell symbol to ensure factory compatibility. Synthetic IDs
-    # like "custom_*" or "default" are mapped back to known types (ZSW/EH31)
+    # like "custom_*" or "default" are mapped back to known types (ZSW/EH)
     # to avoid falling back to DefaultFuelCell (which causes NaN derivatives).
     resolved_fuel_cell_type = if base_fc isa AlphaPEM.Fuelcell.GenericFuelCell
         base_type
     else
-        :ZSW_GenStack
+        :ZSW_nominal
     end
 
     config = SimulationConfig(
         type_fuel_cell = resolved_fuel_cell_type,
+        year = 2024,
         type_current = current_params,
         numerical_parameters = num_params,
         voltage_zone = voltage_zone,
@@ -980,6 +975,7 @@ function run_eis_simulation(config::SimulationConfig; params=nothing)::Dict
     try
         eis_config = SimulationConfig(
             type_fuel_cell     = config.type_fuel_cell,
+            year               = config.year,
             type_current       = config.type_current,
             numerical_parameters = config.numerical_parameters,
             voltage_zone       = config.voltage_zone,

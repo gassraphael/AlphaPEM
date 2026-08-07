@@ -50,7 +50,7 @@ function make_step_cfg(nb_gc::Int)
         i_step = 1.5e4,
     )
     return SimulationConfig(
-        type_fuel_cell = :ZSW_GenStack,
+        type_fuel_cell = :ZSW_nominal,
         type_current = step,
         numerical_parameters = NumericalParams(nb_gc = nb_gc),
         type_auxiliary = :no_auxiliary,
@@ -69,7 +69,7 @@ function make_pola_cfg(nb_gc::Int)
         i_max = NaN,
     )
     return SimulationConfig(
-        type_fuel_cell = :ZSW_GenStack,
+        type_fuel_cell = :ZSW_nominal,
         type_current = pola,
         numerical_parameters = NumericalParams(nb_gc = nb_gc),
         voltage_zone = :full,
@@ -91,7 +91,7 @@ function make_eis_cfg(nb_gc::Int)
     )
 
     return SimulationConfig(
-        type_fuel_cell = :ZSW_GenStack,
+        type_fuel_cell = :ZSW_nominal,
         type_current = current_params,
         numerical_parameters = NumericalParams(nb_gc = nb_gc),
         type_auxiliary = :no_auxiliary,

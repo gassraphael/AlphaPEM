@@ -22,7 +22,7 @@ function new_PhysicalParams_from_sample(sample::Vector{Float64},
         overrides[b.name] = v
     end
 
-    if pb.fuel_cell_type in (:EH31_1_5, :EH31_2_0, :EH31_2_25, :EH31_2_5)
+    if pb.fuel_cell_type in (:EH_nominal, :EH_Pa_2_0, :EH_Pa_2_25, :EH_Pa_2_5)
         if haskey(overrides, :Hacl) && !haskey(overrides, :Hccl)
             overrides[:Hccl] = overrides[:Hacl]
         end
@@ -33,11 +33,11 @@ function new_PhysicalParams_from_sample(sample::Vector{Float64},
 end
 
 """
-    get_reference_config(fuel_cell_type) -> PhysicalParams
+    get_reference_config(fuel_cell_type; year = nothing) -> PhysicalParams
 
 Return the nominal `PhysicalParams` for `fuel_cell_type`.
 """
-function get_reference_config(fuel_cell_type::Symbol)::Any
-    fc = create_fuelcell(fuel_cell_type, :full)
+function get_reference_config(fuel_cell_type::Symbol; year::Union{Int,Nothing} = nothing)::Any
+    fc = create_fuelcell(fuel_cell_type, :full; year=year)
     return getfield(fc, :physical_parameters)
 end

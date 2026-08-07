@@ -3,8 +3,8 @@
 # Current densities are stored in A/cm² and converted to A/m² at load time.
 
 metadata:
-  family: EH-31
-  year: 2024
+  family: EH
+  year: 2022
   variant: nominal
   source: https://ehgroup.ch/
 

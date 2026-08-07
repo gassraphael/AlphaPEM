@@ -60,17 +60,17 @@ end
 Parse a fuel-cell symbol into a `(family, variant)` pair used to locate data
 files.
 
-The symbol is expected to follow the convention `<FAMILY>_<STACK>[_<VARIANT>]`.
-The family is the first underscore-separated token and is used as the directory
-name under `data/`. The variant is everything after the stack name; if absent,
-it defaults to `"nominal"`.
+The symbol is expected to follow the convention `<FAMILY>[_<VARIANT>]`, where
+`<FAMILY>` matches a directory under `data/` and `<VARIANT>` matches a YAML file
+under `data/<FAMILY>/<year>/pola/`. If the variant is absent, it defaults to
+`"nominal"`.
 
 # Examples
-- `:ZSW_GenStack`              -> `(:ZSW, "nominal")`
-- `:ZSW_GenStack_T_84`         -> `(:ZSW, "T_84")`
-- `:ZSW_GenStack_Pa_2_8_Pc_2_6` -> `(:ZSW, "Pa_2_8_Pc_2_6")`
-- `:EH31_2022` / `:EH31_1_5`  -> `(:EH31, "nominal")`
-- `:EH31_2_0`                 -> `(:EH31, "Pa_2_0")`
+- `:ZSW_nominal`              -> `(:ZSW, "nominal")`
+- `:ZSW_T_84`                 -> `(:ZSW, "T_84")`
+- `:ZSW_Pa_2_8_Pc_2_6`        -> `(:ZSW, "Pa_2_8_Pc_2_6")`
+- `:EH_nominal`               -> `(:EH, "nominal")`
+- `:EH_Pa_2_0`                -> `(:EH, "Pa_2_0")`
 """
 function parse_fuel_cell_symbol(type_fuel_cell::Symbol)::Tuple{Symbol, String}
     s = string(type_fuel_cell)
@@ -81,16 +81,11 @@ function parse_fuel_cell_symbol(type_fuel_cell::Symbol)::Tuple{Symbol, String}
     family = _detect_family_prefix(s)
 
     family_str = string(family)
-    rest = startswith(s, family_str * "_") ? s[length(family_str)+2:end] : s[length(family_str)+1:end]
+    rest = startswith(s, family_str * "_") ? s[length(family_str)+2:end] : ""
 
-    # The stack name is the next token (e.g. "GenStack" in "ZSW_GenStack_T_84").
-    # Everything after the stack name is the variant.
-    stack_tokens = split(rest, '_')
-    if rest == "" || length(stack_tokens) <= 1
-        variant = "nominal"
-    else
-        variant = join(stack_tokens[2:end], "_")
-    end
+    # Everything after the family name is the variant, which must match a YAML
+    # file name under `data/<family>/<year>/pola/`.
+    variant = rest == "" ? "nominal" : rest
 
     return family, variant
 end

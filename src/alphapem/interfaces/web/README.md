@@ -126,7 +126,8 @@ Returns available fuel cell models:
 ```json
 {
   "default": {"name": "Default Model", "description": "..."},
-  "ZSW_GenStack": {...},
+  "ZSW_nominal": {...},
+  "EH_nominal": {...},
   ...
 }
 ```

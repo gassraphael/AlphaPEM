@@ -348,11 +348,12 @@ function _plot_calibration_results(result, output_dir::String)
             # Use the specified voltage zone for the final plot
             full_sc = SimulationConfig(
                 type_fuel_cell = sc.type_fuel_cell,
+                year           = sc.year,
                 voltage_zone   = sc.voltage_zone,
                 display_timing = :postrun # Ensure we get discretized points
             )
 
-            fc = create_fuelcell(full_sc.type_fuel_cell, full_sc.voltage_zone)
+            fc = create_fuelcell(full_sc.type_fuel_cell, full_sc.year, full_sc.voltage_zone)
             fc.physical_parameters = result.best_params # Use calibrated parameters
 
             # Use the complete polarization current profile

@@ -32,7 +32,8 @@ using ..StateScalingModule: StateScaling
 export SimulationConfig, validate_config
 
 Base.@kwdef mutable struct SimulationConfig{T<:AbstractCurrentParams}
-    type_fuel_cell::Symbol = :ZSW_GenStack
+    type_fuel_cell::Symbol = :ZSW_nominal
+    year::Union{Nothing, Int} = 2024
     type_current::T = PolarizationParams()
     numerical_parameters::NumericalParams = NumericalParams()
     voltage_zone::Symbol = :full
@@ -42,7 +43,6 @@ Base.@kwdef mutable struct SimulationConfig{T<:AbstractCurrentParams}
     type_display::Symbol = :synthetic
     display_timing::Symbol=:postrun
     state_scaling::StateScaling = StateScaling()
-    
     # Optional custom parameters to override defaults
     physical_parameters::Union{Nothing, PhysicalParams} = nothing
     operating_conditions::Union{Nothing, OperatingConditions} = nothing
