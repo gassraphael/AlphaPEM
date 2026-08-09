@@ -16,7 +16,12 @@ using CairoMakie
 import WGLMakie
 
 # GLMakie requires X11/OpenGL and is unavailable on headless servers (e.g. HPC clusters).
-_glmakie() = Base.loaded_modules[Base.PkgId(Base.UUID("e9467ef8-e4e7-5192-8a1a-b1aee30e663a"), "GLMakie")]
+# Return the module only when it has actually been loaded; otherwise return nothing so we
+# silently fall back to CairoMakie without emitting a warning on every figure preparation.
+function _glmakie()
+    pkgid = Base.PkgId(Base.UUID("e9467ef8-e4e7-5192-8a1a-b1aee30e663a"), "GLMakie")
+    return get(Base.loaded_modules, pkgid, nothing)
+end
 
 # Ensure CairoMakie is the default backend when the module is loaded.
 function __init__()
@@ -46,20 +51,32 @@ function _setup_makie_theme!(cfg::SimulationConfig; backend::Symbol=:auto)
         CairoMakie.activate!()
         _active_display_backend[] = :cairo
     elseif backend == :gl
-        try
-            _glmakie().activate!()
-            _active_display_backend[] = :gl
-        catch err
-            @warn "GLMakie could not be activated; falling back to CairoMakie non-interactive display." exception=(err, catch_backtrace())
+        gl = _glmakie()
+        if gl !== nothing
+            try
+                gl.activate!()
+                _active_display_backend[] = :gl
+            catch err
+                @warn "GLMakie could not be activated; falling back to CairoMakie non-interactive display." exception=(err, catch_backtrace())
+                CairoMakie.activate!()
+                _active_display_backend[] = :cairo
+            end
+        else
             CairoMakie.activate!()
             _active_display_backend[] = :cairo
         end
     elseif _use_interactive_display(cfg)
-        try
-            _glmakie().activate!()
-            _active_display_backend[] = :gl
-        catch err
-            @warn "GLMakie could not be activated; falling back to CairoMakie non-interactive display." exception=(err, catch_backtrace())
+        gl = _glmakie()
+        if gl !== nothing
+            try
+                gl.activate!()
+                _active_display_backend[] = :gl
+            catch err
+                @warn "GLMakie could not be activated; falling back to CairoMakie non-interactive display." exception=(err, catch_backtrace())
+                CairoMakie.activate!()
+                _active_display_backend[] = :cairo
+            end
+        else
             CairoMakie.activate!()
             _active_display_backend[] = :cairo
         end

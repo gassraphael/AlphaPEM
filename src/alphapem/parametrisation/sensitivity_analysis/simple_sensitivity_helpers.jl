@@ -79,16 +79,17 @@ end
 # ═══════════════════════════════════════════════════════════════════════════════
 
 """
-    compute_parameter_impacts(params_dict, results)
+    compute_parameter_impacts(params_dict, results; variation_pct=5.0)
 
 Compute impact of each parameter modification on RMSE vs baseline.
 """
-function compute_parameter_impacts(params_dict::Dict, results::Dict)
+function compute_parameter_impacts(params_dict::Dict, results::Dict; variation_pct::Float64=5.0)
     impacts = []
+    pct_int = round(Int, variation_pct)
 
     for (param, nominal_value) in params_dict
-        rmse_minus_key = "$(param)_minus20"
-        rmse_plus_key = "$(param)_plus20"
+        rmse_minus_key = "$(param)_minus$(pct_int)"
+        rmse_plus_key = "$(param)_plus$(pct_int)"
 
         if haskey(results, rmse_minus_key) && haskey(results, rmse_plus_key)
             rmse_minus = results[rmse_minus_key]
@@ -101,8 +102,8 @@ function compute_parameter_impacts(params_dict::Dict, results::Dict)
                 push!(impacts, (
                     parameter = param,
                     nominal_value = nominal_value,
-                    rmse_minus20 = rmse_minus,
-                    rmse_plus20 = rmse_plus,
+                    rmse_minus = rmse_minus,
+                    rmse_plus = rmse_plus,
                     avg_impact_pct = avg_impact
                 ))
             end
@@ -137,24 +138,25 @@ function generate_output_path(base_dir::String, base_filename::String)
 end
 
 """
-    write_sensitivity_csv(path, impacts)
+    write_sensitivity_csv(path, impacts; variation_pct=5.0)
 
 Write sensitivity analysis results to CSV.
 """
-function write_sensitivity_csv(path, impacts)
+function write_sensitivity_csv(path, impacts; variation_pct::Float64=5.0)
+    pct_int = round(Int, variation_pct)
     open(path, "w") do io
         date_str = Dates.format(Dates.now(), dateformat"yyyy-mm-dd HH:MM:SS")
         println(io, "# Generated: $(date_str)")
         println(io, "# RMSE values are relative errors (%) between modified and nominal polarization curves")
-        println(io, "Rank,Parameter,Nominal_Value,RMSE_-20%,RMSE_+20%,Avg_Impact_%")
+        println(io, "Rank,Parameter,Nominal_Value,RMSE_-$(pct_int)%,RMSE_+$(pct_int)%,Avg_Impact_%")
 
         for (rank, impact) in enumerate(impacts)
             println(io, string(
                 rank, ",",
                 impact.parameter, ",",
                 impact.nominal_value, ",",
-                round(impact.rmse_minus20, digits=4), ",",
-                round(impact.rmse_plus20, digits=4), ",",
+                round(impact.rmse_minus, digits=4), ",",
+                round(impact.rmse_plus, digits=4), ",",
                 round(impact.avg_impact_pct, digits=4)
             ))
         end
@@ -162,15 +164,17 @@ function write_sensitivity_csv(path, impacts)
 end
 
 """
-    print_sensitivity_report(impacts, out_csv)
+    print_sensitivity_report(impacts, out_csv; variation_pct=5.0)
 
 Print formatted sensitivity analysis report to console.
 """
-function print_sensitivity_report(impacts, out_csv)
+function print_sensitivity_report(impacts, out_csv; variation_pct::Float64=5.0)
+    pct_int = round(Int, variation_pct)
     println("\n" * "=" ^ 110)
     println("SENSITIVITY ANALYSIS REPORT")
     println("=" ^ 110)
     println("RMSE metric: Relative error (%) between modified and nominal polarization curves")
+    println("Variation amplitude: ±$(variation_pct)%")
     println("Successful parameter variations: $(length(impacts))\n")
 
     if isempty(impacts)
@@ -180,8 +184,8 @@ function print_sensitivity_report(impacts, out_csv)
     end
 
     println(lpad("Rank", 5) * " | " * rpad("Parameter", 20) * " | " *
-            rpad("Nominal Value", 15) * " | " * rpad("RMSE -20%", 14) * " | " *
-            rpad("RMSE +20%", 14) * " | " * rpad("Avg Impact %", 14))
+            rpad("Nominal Value", 15) * " | " * rpad("RMSE -$(pct_int)%", 14) * " | " *
+            rpad("RMSE +$(pct_int)%", 14) * " | " * rpad("Avg Impact %", 14))
     println("-" ^ 110)
 
     # Parameters whose average impact exceeds this threshold are highlighted in red.
@@ -192,8 +196,8 @@ function print_sensitivity_report(impacts, out_csv)
     num_display = min(30, length(impacts))
     for (rank, impact) in enumerate(impacts[1:num_display])
         nom_val = string(round(Float64(impact.nominal_value), sigdigits=4))
-        rmse_m = string(round(impact.rmse_minus20, digits=4))
-        rmse_p = string(round(impact.rmse_plus20, digits=4))
+        rmse_m = string(round(impact.rmse_minus, digits=4))
+        rmse_p = string(round(impact.rmse_plus, digits=4))
         avg_imp = string(round(impact.avg_impact_pct, digits=4))
 
         line = lpad(string(rank), 5) * " | " * rpad(impact.parameter, 20) * " | " *

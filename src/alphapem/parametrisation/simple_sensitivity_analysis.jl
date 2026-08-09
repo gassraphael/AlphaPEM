@@ -64,7 +64,7 @@ function make_pola_config(base_config::SimulationConfig = SimulationConfig();
         type_auxiliary = base_config.type_auxiliary,
         type_flow = base_config.type_flow,
         type_purge = base_config.type_purge,
-        type_display = base_config.type_display,
+        type_display = :no_display,  # sensitivity runs do not need figures
         display_timing = base_config.display_timing,
         state_scaling = base_config.state_scaling,
         physical_parameters = physical_parameters,
@@ -153,11 +153,13 @@ end
 #  Main Execution
 # ═══════════════════════════════════════════════════════════════════════════════
 
-function run_simple_sensitivity_analysis(base_config::SimulationConfig = make_pola_config())
+function run_simple_sensitivity_analysis(base_config::SimulationConfig = make_pola_config();
+                                         variation_pct::Float64 = 5.0)
     println("\n")
     println("╔" * "═" ^ 78 * "╗")
     println("║" * " " ^ 20 * "ALPHAPEM SENSITIVITY ANALYSIS" * " " ^ 28 * "║")
     println("╚" * "═" ^ 78 * "╝")
+    println("Variation amplitude: ±$(variation_pct)%")
 
     out_dir = joinpath(find_project_root(), "results", "simple_sensitivity_analysis")
     mkpath(out_dir)
@@ -178,36 +180,36 @@ function run_simple_sensitivity_analysis(base_config::SimulationConfig = make_po
     println("PARAMETER VARIATIONS: Running $(length(tunable_fields)) parameters × 2 variations...")
     println("=" ^ 80)
 
+    factor_minus = 1.0 - variation_pct / 100.0
+    factor_plus  = 1.0 + variation_pct / 100.0
+    pct_int = round(Int, variation_pct)
+
     tasks = []
     for field in tunable_fields
-        push!(tasks, (field, 0.95))  # -5%
-        push!(tasks, (field, 1.05))  # +5%
+        push!(tasks, (field, factor_minus))  # -variation_pct%
+        push!(tasks, (field, factor_plus))   # +variation_pct%
     end
 
     # Step 4: Run variations in parallel using pmap
     println("Initializing $(nprocs() - 1) workers for parallel processing...")
 
-    @everywhere begin
-        const NOMINAL_PARAMS = $nominal_params
-        const I_EXP = $i_exp
-        const UCELL_NOMINAL = $Ucell_nominal
-        const BASE_CONFIG = $base_config
-    end
-
+    # Capture values in a closure so workers do not need pre-defined global constants.
     results_list = pmap(
-        (task) -> run_parameter_variation_task(NOMINAL_PARAMS, task[1], task[2], I_EXP, UCELL_NOMINAL, BASE_CONFIG),
         tasks,
         batch_size = 1,
         on_error = (task, e) -> (
             @warn "Task failed for $(task[1]) with factor $(task[2]): $e";
             Inf
         )
-    )
+    ) do task
+        run_parameter_variation_task(nominal_params, task[1], task[2], i_exp, Ucell_nominal, base_config)
+    end
 
     # Convert results to dictionary format
     results = Dict{String, Float64}()
     for (i, (field, factor)) in enumerate(tasks)
-        key = factor == 0.80 ? "$(field)_minus20" : "$(field)_plus20"
+        suffix = factor < 1.0 ? "minus$(pct_int)" : "plus$(pct_int)"
+        key = "$(field)_$(suffix)"
         results[key] = results_list[i]
 
         @printf("\r[%3d/%3d] %-25s (%+3.0f%%)  RMSE: %.6f",
@@ -218,11 +220,11 @@ function run_simple_sensitivity_analysis(base_config::SimulationConfig = make_po
 
     # Step 5: Compute impacts and rank
     params_dict = Dict{String, Any}(string(f) => getfield(nominal_params, f) for f in tunable_fields)
-    impacts = compute_parameter_impacts(params_dict, results)
+    impacts = compute_parameter_impacts(params_dict, results; variation_pct=variation_pct)
 
     # Step 6: Save results
-    write_sensitivity_csv(out_csv, impacts)
-    print_sensitivity_report(impacts, out_csv)
+    write_sensitivity_csv(out_csv, impacts; variation_pct=variation_pct)
+    print_sensitivity_report(impacts, out_csv; variation_pct=variation_pct)
 
     println("\n✓ Sensitivity analysis completed successfully!\n")
 end
