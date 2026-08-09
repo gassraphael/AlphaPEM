@@ -336,11 +336,11 @@ function launch_AlphaPEM_for_polarization_current(
 )::Vector{<:AlphaPEM}
     # Figures preparation
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(first(simulators).cfg)
-    for simu in simulators
+    for (i, simu) in enumerate(simulators)
         # Simulation
         simulate_model!(simu)
         # Display
-        simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
+        simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3; series_index=i)
         # Release the solver solution before starting the next simulation.
         simu.sol = nothing
         GC.gc(true)
@@ -361,11 +361,11 @@ function launch_AlphaPEM_for_polarization_current_for_calibration(
 )::Vector{<:AlphaPEM}
     # Figures preparation
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(first(simulators).cfg)
-    for simu in simulators
+    for (i, simu) in enumerate(simulators)
         # Simulation
         simulate_model!(simu)
         # Display
-        simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
+        simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3; series_index=i)
         # Release the solver solution before starting the next simulation.
         simu.sol = nothing
         GC.gc(true)

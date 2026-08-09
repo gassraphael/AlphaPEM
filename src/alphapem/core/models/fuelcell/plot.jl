@@ -4,6 +4,7 @@
 
 
 using .PlotHelpers: _publication_colors,
+                    _series_color,
                     _macroscopic_color,
                     _cell_current_color,
                     _cell_voltage_color,
@@ -631,8 +632,9 @@ function plot_polarization_curve(outputs::SimulationOutputs,
                                  fc::AbstractFuelCell,
                                  cd::AbstractCurrent,
                                  cfg::SimulationConfig,
-                                 ax)
-    model_color = _cell_voltage_color()
+                                 ax;
+                                 series_index::Union{Nothing,Integer}=nothing)
+    model_color = series_index === nothing ? _cell_voltage_color() : _series_color(series_index)
     exp_color = RGBf(0.10, 0.10, 0.10)
     model_label_base = _polarization_legend_base(cfg.type_fuel_cell;
                                                  simulation=true,
@@ -704,8 +706,9 @@ end
 function plot_polarization_hysteresis(outputs::SimulationOutputs,
                                       cd::AbstractCurrent,
                                       cfg::SimulationConfig,
-                                      ax)
-    model_color = _cell_voltage_color()
+                                      ax;
+                                      series_index::Union{Nothing,Integer}=nothing)
+    model_color = series_index === nothing ? _cell_voltage_color() : _series_color(series_index)
     model_label_base = _polarization_legend_base(cfg.type_fuel_cell;
                                                  simulation=true,
                                                  calibration=false)
@@ -754,8 +757,9 @@ function plot_polarization_curve_for_cali(outputs::SimulationOutputs,
                                           fc::AbstractFuelCell,
                                           cd::AbstractCurrent,
                                           cfg::SimulationConfig,
-                                          ax)
-    model_color = _cell_voltage_color()
+                                          ax;
+                                          series_index::Union{Nothing,Integer}=nothing)
+    model_color = series_index === nothing ? _cell_voltage_color() : _series_color(series_index)
     exp_color = RGBf(0.10, 0.10, 0.10)
     model_label_base = _polarization_legend_base(cfg.type_fuel_cell;
                                                  simulation=true,
@@ -830,8 +834,9 @@ Power density is defined as P = U_cell × i_fc, expressed in W·cm⁻²."""
 function plot_power_density_curve(outputs::SimulationOutputs,
                                   cd::AbstractCurrent,
                                   cfg::SimulationConfig,
-                                  ax)
-    model_color = _macroscopic_color()
+                                  ax;
+                                  series_index::Union{Nothing,Integer}=nothing)
+    model_color = series_index === nothing ? _macroscopic_color() : _series_color(series_index)
     model_label = "Model ($(String(cfg.type_fuel_cell)))"
 
     if cfg.display_timing == :postrun
@@ -873,9 +878,10 @@ thermoneutral voltage based on the higher heating value (HHV) of hydrogen."""
 function plot_cell_efficiency(outputs::SimulationOutputs,
                               cd::AbstractCurrent,
                               cfg::SimulationConfig,
-                              ax)
+                              ax;
+                              series_index::Union{Nothing,Integer}=nothing)
     E_th = 1.481   # V — HHV-based thermoneutral voltage for H₂/O₂ PEM fuel cell.
-    model_color = _macroscopic_color()
+    model_color = series_index === nothing ? _macroscopic_color() : _series_color(series_index)
     model_label = "Model ($(String(cfg.type_fuel_cell)))"
 
     if cfg.display_timing == :postrun

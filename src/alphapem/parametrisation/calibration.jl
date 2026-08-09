@@ -171,9 +171,7 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
     best_params = new_PhysicalParams_from_sample(optimized_genes, parameter_bounds, base_params) # Convert genes to physical parameters
 
     # 7. Save results
-    final_params = Dict{Symbol, Real}( # Prepare final calibrated parameters dictionary
-        bound.name => getfield(best_params, bound.name) for bound in parameter_bounds.bounds
-    )
+    final_params = CalibrationHelpers._params_dict_for_export(best_params, parameter_bounds)
     export_calibrated_params(final_params, joinpath(cfg.output_dir, "calibrated_bounds.yaml"); # Export calibrated parameters
                              method = :calibration,
                              metadata = Dict("fuel_cell_type" => string(ref_cfg.type_fuel_cell),
