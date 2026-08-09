@@ -15,16 +15,16 @@ const PHYSICAL_PARAMETERS = PhysicalParams(
     nb_cell          = 26,                     # Number of cells in the stack
     # Catalyst layer
     Hacl             = 3e-6,                   # Thickness of the anode catalyst layer in meters
-    Hccl             = 11.287950376337168e-6,  # Thickness of the cathode catalyst layer in meters
+    Hccl             = 10.77501443118853e-6,   # Thickness of the cathode catalyst layer in meters
     # Membrane
     Hmem             = 15e-6,                  # Thickness of the membrane in meters
     # Gas diffusion layer
-    Hgdl             = 88.05912627673723e-6,   # Thickness of the gas diffusion layer in meters
-    epsilon_gdl      = 0.7748445167995911,     # Anode/cathode GDL porosity
-    theta_c_gdl      = 149.924 * π / 180,      # Contact angle of GDL for liquid water in radian
+    Hgdl             = 73.60059187201173e-6,   # Thickness of the gas diffusion layer in meters
+    epsilon_gdl      = 0.8429121513160608,     # Anode/cathode GDL porosity
+    theta_c_gdl      = 113.623 * π / 180,      # Contact angle of GDL for liquid water in radian
     # Microporous layer
-    Hmpl             = 79.28429564508388e-6,   # Thickness of the microporous layer in meters
-    epsilon_mpl      = 0.5459202450014615,     # Porosity of the microporous layer
+    Hmpl             = 60.28515052400096e-6,   # Thickness of the microporous layer in meters
+    epsilon_mpl      = 0.5781336199363625,     # Porosity of the microporous layer
     # Gas channel
     Hagc             = 230e-6,                 # Thickness of the anode gas channel in meters
     Hcgc             = 300e-6,                 # Thickness of the cathode gas channel in meters
@@ -42,19 +42,19 @@ const PHYSICAL_PARAMETERS = PhysicalParams(
     Vaem             = 25.8e-3 * 9.01e-4,      # Exhaust manifold volume at the anode in m³
     Vcem             = 25.8e-3 * 22.61e-4,     # Exhaust manifold volume at the cathode in m³
     # Interaction parameters between fluids and PEMFC structure
-    e                = 5,                      # Capillary exponent
+    e                = 3,                      # Capillary exponent
     # Volumic flow of O2 inside the CCL to the Pt sites
-    IC_ccl           = 0.7463190105271269,     # Ionomer to carbon ratio in the cathode catalyst layer
-    ECSA_0           = 119.48129533899694,     # Initial electrochemical surface area of the catalyst in cm2_Pt.cm-2_active_area
-    K_O2_ad_Pt       = 3.2988632394563835,     # Interfacial resistance coefficient of O2 adsorption on the Pt sites
-    K_O2_dis_ion     = 7.359085442135299,      # Interfacial resistance coefficient of O2 dissolution inside the ionomer
-    r_carb           = 10.453480212859218e-9,  # Mean radius of the carbon particles in m
+    IC_ccl           = 1.7327509737764553,     # Ionomer to carbon ratio in the cathode catalyst layer
+    ECSA_0           = 87.89057173960225,      # Initial electrochemical surface area of the catalyst in cm2_Pt.cm-2_active_area
+    K_O2_ad_Pt       = 4.105211997154777,      # Interfacial resistance coefficient of O2 adsorption on the Pt sites
+    K_O2_dis_ion     = 18.0909083299938,       # Interfacial resistance coefficient of O2 dissolution inside the ionomer
+    r_carb           = 19.406222947185964e-9,  # Mean radius of the carbon particles in m
     # Voltage polarization
-    Re               = 7.30203312606945e-8,    # Electron conduction resistance of the circuit in Ω·m²
-    i0_c_ref         = 1.5295708418305771,     # Reference exchange current density at the cathode in A·m⁻²
-    alpha_c          = 0.6842923194478925,     # Transfer coefficient of the cathode
-    kappa_co         = 18.27607646957141,      # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
-    kappa_c          = 0.5379051883481021,     # Overpotential correction exponent
+    Re               = 2.0506744291577884e-7,  # Electron conduction resistance of the circuit in Ω·m²
+    i0_c_ref         = 2.465315251391336,      # Reference exchange current density at the cathode in A·m⁻²
+    alpha_c          = 0.6045911570226179,     # Transfer coefficient of the cathode
+    kappa_co         = 20.217418381359696,     # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
+    kappa_c          = 0.4712163654762256,     # Overpotential correction exponent
     C_scl            = 2e7                     # Volumetric space-charge layer capacitance in F·m⁻³
 )
 
@@ -98,7 +98,7 @@ const UNDETERMINED_PARAMETERS_BEFORE_VOLTAGE_DROP = [
     (:Hccl,         10e-6, 15.5e-6),  # Cathode catalyst-layer thickness
     (:Hgdl,         70e-6, 90e-6),    # Gas-diffusion-layer thickness
     (:Hmpl,         60e-6, 80e-6),    # Microporous-layer thickness
-    (:epsilon_gdl,  0.76, 0.88),       # GDL porosity
+    (:epsilon_gdl,  0.76, 0.88),      # GDL porosity
     (:epsilon_mpl,  0.4, 0.6),        # MPL porosity
     (:alpha_c,      0.6, 1.0),        # Cathode transfer coefficient
     (:e,            3, 5),            # Capillary exponent
@@ -110,11 +110,11 @@ const UNDETERMINED_PARAMETERS_BEFORE_VOLTAGE_DROP = [
 
 const UNDETERMINED_PARAMETERS_AFTER_VOLTAGE_DROP = [
     (:theta_c_gdl,  98 * π / 180, 160 * π / 180), # GDL contact angle
-    (:IC_ccl,       0.4, 1.9),                     # Ionomer to carbon ratio in the cathode catalyst layer
-    (:r_carb,       10e-9, 21.55e-9),               # Mean radius of the carbon particles
+    (:IC_ccl,       0.4, 1.9),                    # Ionomer to carbon ratio in the cathode catalyst layer
+    (:r_carb,       10e-9, 21.55e-9),             # Mean radius of the carbon particles
     (:ECSA_0,       75.0, 200.0),                 # Initial electrochemical surface area of the catalyst
     (:K_O2_dis_ion, 0.1, 19.0),                   # Interfacial resistance coefficient of O₂ dissolution inside the ionomer
-    (:K_O2_ad_Pt,   0.1, 5.0),                   # Interfacial resistance coefficient of O₂ adsorption on the Pt sites
+    (:K_O2_ad_Pt,   0.1, 5.0),                    # Interfacial resistance coefficient of O₂ adsorption on the Pt sites
 ]
 
 const UNDETERMINED_PARAMETERS_FULL =

@@ -6,6 +6,7 @@ module PlotHelpers
 using CairoMakie
 
 export _publication_colors,
+       _series_color,
        _macroscopic_color,
        _cell_current_color,
        _cell_voltage_color,
@@ -33,12 +34,19 @@ export _publication_colors,
 
 # Internal storage for axis metadata that cannot be attached directly to Makie objects.
 const _axis_initial_limits = WeakKeyDict{Any, Observable{Any}}()
+const _axis_legends = WeakKeyDict{Any, Any}()
 
 """Helper to get or create the initial limits observable for an axis."""
 function _get_initial_limits_obs(ax)
     return get!(_axis_initial_limits, ax) do
         Observable{Any}(nothing)
     end
+end
+
+"""Return a color for a given series index, cycling through the publication palette."""
+function _series_color(index::Integer)
+    palette = _publication_colors()
+    return palette[mod1(index, length(palette))]
 end
 
 """Return a reproducible publication-oriented color set."""
@@ -225,9 +233,18 @@ function _finalize_axis!(ax;
     _add_axis_toolbar!(ax)
 
     if legend
-        axislegend(ax; position=legend_position, framevisible=true,
-                   framewidth=0.8, framecolor=(:black, 0.35),
-                   backgroundcolor=(:white, 0.88), padding=(6, 6, 6, 6))
+        # Remove any previously created legend for this axis to avoid overlapping
+        # legends when the same axis is finalized multiple times (e.g. batch runs).
+        if haskey(_axis_legends, ax)
+            old_legend = _axis_legends[ax]
+            try
+                delete!(old_legend)
+            catch
+            end
+        end
+        _axis_legends[ax] = axislegend(ax; position=legend_position, framevisible=true,
+                                       framewidth=0.8, framecolor=(:black, 0.35),
+                                       backgroundcolor=(:white, 0.88), padding=(6, 6, 6, 6))
     end
     return nothing
 end

@@ -145,15 +145,29 @@ function calculate_simulation_error(simulation::AlphaPEM, experimental_data::Pol
 end
 
 """
+    _params_dict_for_export(best_params, parameter_bounds) -> Dict{Symbol, Real}
+
+Build a dictionary of calibrated parameters for export. Angular parameters such as `theta_c_gdl` are converted from radians to degrees for readability.
+"""
+function _params_dict_for_export(best_params, parameter_bounds)
+    return Dict{Symbol, Real}(
+        bound.name => if bound.name == :theta_c_gdl
+            rad2deg(getfield(best_params, bound.name))
+        else
+            getfield(best_params, bound.name)
+        end
+        for bound in parameter_bounds.bounds
+    )
+end
+
+"""
     _save_intermediate(ga_instance, best_gene_values, best_fitness, generation, parameter_bounds, base_params, output_dir)
 
 Save the current best individual's calibrated parameter values and the full population as checkpoints for potential warm-start recovery.
 """
 function _save_intermediate(ga_instance, best_gene_values, best_fitness, generation, parameter_bounds, base_params, output_dir)
     best_params = new_PhysicalParams_from_sample(Float64.(best_gene_values), parameter_bounds, base_params)
-    best_params_dict = Dict{Symbol, Real}( # Prepare calibrated parameters dictionary for export
-        bound.name => getfield(best_params, bound.name) for bound in parameter_bounds.bounds
-    )
+    best_params_dict = _params_dict_for_export(best_params, parameter_bounds)
 
     try
         export_calibrated_params(best_params_dict, joinpath(output_dir, "calibration_checkpoint.yaml"); # Export checkpoint to YAML
@@ -353,7 +367,7 @@ function _plot_calibration_results(result, output_dir::String)
                 display_timing = :postrun # Ensure we get discretized points
             )
 
-            fc = create_fuelcell(full_sc.type_fuel_cell, full_sc.year, full_sc.voltage_zone)
+            fc = create_fuelcell(full_sc.type_fuel_cell, full_sc.voltage_zone; year=full_sc.year)
             fc.physical_parameters = result.best_params # Use calibrated parameters
 
             # Use the complete polarization current profile
