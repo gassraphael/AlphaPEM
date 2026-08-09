@@ -11,7 +11,6 @@ Contains utility functions for:
 
 using Dates
 using Printf
-using Statistics: mean, median
 using AlphaPEM.Core.Models: _polarization_points_cali, _calculate_rmse
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -215,15 +214,6 @@ function print_sensitivity_report(impacts, out_csv; variation_pct::Float64=5.0)
         println("... ($(length(impacts) - num_display) more parameters)")
     end
     println("-" ^ 110)
-
-    if !isempty(impacts)
-        avg_impacts = [i.avg_impact_pct for i in impacts]
-        println("\nStatistics (Avg Impact %):")
-        @printf("  Mean:          %.4f %%\n", mean(avg_impacts))
-        @printf("  Median:        %.4f %%\n", median(avg_impacts))
-        @printf("  Max:           %.4f %% (parameter: %s)\n", maximum(avg_impacts), impacts[1].parameter)
-        @printf("  Min:           %.4f %%\n", minimum(avg_impacts))
-    end
 
     println("\nCSV written: $(out_csv)")
     println("=" ^ 110)
