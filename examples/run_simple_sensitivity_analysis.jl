@@ -11,7 +11,7 @@
 #   julia --project=. examples/run_simple_sensitivity_analysis.jl
 
 import Pkg
-Pkg.activate(joinpath(@__DIR__, ".."))
+Pkg.activate(joinpath(@__DIR__, ".."); io=devnull)
 
 using Distributed
 using AlphaPEM.Config: SimulationConfig
@@ -25,7 +25,7 @@ end
 # helpers and worker task logic) to all processes, including the master.
 @everywhere begin
     import Pkg
-    Pkg.activate(joinpath(@__DIR__, ".."))
+    Pkg.activate(joinpath(@__DIR__, ".."); io=devnull)
     include(joinpath(@__DIR__, "..", "src", "alphapem", "parametrisation", "simple_sensitivity_analysis.jl"))
 end
 
@@ -39,4 +39,4 @@ base_config = SimulationConfig(
     voltage_zone   = :full
 )
 
-run_simple_sensitivity_analysis(base_config)
+run_simple_sensitivity_analysis(base_config; variation_pct=5.0)
