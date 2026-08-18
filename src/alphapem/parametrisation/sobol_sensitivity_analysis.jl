@@ -46,6 +46,7 @@ using GlobalSensitivity
 using QuasiMonteCarlo
 using Random
 using SHA
+using JLD2
 using CairoMakie
 
 using AlphaPEM.Config: SimulationConfig, PolarizationParams, NumericalParams, PhysicalParams, PARAMETER_METADATA,
@@ -82,9 +83,10 @@ export SobolAnalysisConfig,
 include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_types.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_regions.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_sampling.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_analysis.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_checkpoint.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_simulation.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_knn.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_analysis.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_summary.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_convergence.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_export.jl"))
@@ -116,16 +118,61 @@ function run_sobol_analysis(cfg::SobolAnalysisConfig)::SobolAnalysisResult
     regions = build_regions(cfg.region_thresholds)
     @info "Number of input parameters: $(length(params))"
 
-    # Step 2: generate Sobol design matrices
-    @info "Generating Sobol design matrices..."
-    A, B = generate_sobol_design_matrices(cfg, params)
+    # Step 2: try to resume from an existing checkpoint
+    checkpoint = nothing
+    elapsed_before = 0.0
+    if cfg.resume
+        checkpoint = _load_checkpoint(cfg.output_dir, cfg)
+    end
+
+    if checkpoint !== nothing
+        A = checkpoint.A
+        B = checkpoint.B
+        params = checkpoint.params
+        regions = checkpoint.regions
+        df_existing = checkpoint.df_curves
+        elapsed_before = checkpoint.elapsed_time
+        @info "Resumed from checkpoint; $(nrow(df_existing)) sample(s) already simulated."
+    else
+        # Step 2b: generate fresh Sobol design matrices
+        @info "Generating Sobol design matrices..."
+        A, B = generate_sobol_design_matrices(cfg, params)
+        df_existing = nothing
+    end
+
     all_points = _fuse_designs_bootstrap(A, B; second_order = cfg.second_order, nboot = _sobol_nboot(cfg.N))
     n_evals = size(all_points, 2)
     @info "Total model evaluations required: $(n_evals)"
 
+    # Save the initial checkpoint so that a fresh run can be resumed even if it
+    # is interrupted before the first batch of simulations completes.
+    if cfg.checkpoint_frequency > 0 && df_existing === nothing
+        empty_df = DataFrame(
+            sample_id = Int[],
+            config_hash = String[],
+            status = Symbol[],
+            ifc = Vector{Union{Vector{Float64}, Nothing}}(),
+            Ucell = Vector{Union{Vector{Float64}, Nothing}}(),
+        )
+        for p in params
+            empty_df[!, p.name] = Float64[]
+        end
+        _save_checkpoint(cfg.output_dir, cfg, A, B, params, regions, empty_df, 0.0)
+    end
+
     # Step 3: run simulations
     @info "Running AlphaPEM simulations..."
-    df_curves = run_sobol_simulations(cfg, params, all_points)
+    function _on_checkpoint(df_partial)
+        _save_checkpoint(
+            cfg.output_dir, cfg, A, B, params, regions, df_partial,
+            time() - overall_start + elapsed_before
+        )
+    end
+    df_curves = run_sobol_simulations(
+        cfg, params, all_points;
+        df_existing = df_existing,
+        on_checkpoint = _on_checkpoint
+    )
 
     # Step 4: KNN imputation for failed simulations
     n_total = nrow(df_curves)
@@ -160,15 +207,19 @@ function run_sobol_analysis(cfg::SobolAnalysisConfig)::SobolAnalysisResult
     @info "Computing Sobol indices..."
     sobol_indices = compute_sobol_indices(cfg, params, A, B, Y, regions)
 
+    # Clean up the checkpoint now that the simulations have succeeded
+    _remove_checkpoint(cfg.output_dir)
+
     # Step 6: export results
     @info "Exporting results to $(cfg.output_dir)..."
+    total_execution_time = time() - overall_start + elapsed_before
     result = SobolAnalysisResult(
         cfg,
         regions,
         [p.name for p in params],
         sobol_indices,
         Dict{Symbol, String}(),
-        time() - overall_start,
+        total_execution_time,
         imputation_report
     )
     output_files = export_sobol_results(result, cfg.output_dir; curves_df = df_curves)
@@ -178,7 +229,7 @@ function run_sobol_analysis(cfg::SobolAnalysisConfig)::SobolAnalysisResult
         [p.name for p in params],
         sobol_indices,
         output_files,
-        time() - overall_start,
+        total_execution_time,
         imputation_report
     )
 

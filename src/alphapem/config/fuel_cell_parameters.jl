@@ -273,16 +273,18 @@ struct OperatingConditionConstraint
     fn::Function
     kind::Symbol
     active::Bool
+    name::String
 end
 
 function OperatingConditionConstraint(; target::Symbol,
                                         sources::Vector{Symbol},
                                         fn::Function,
                                         kind::Symbol = :(=),
-                                        active::Bool = true)
+                                        active::Bool = true,
+                                        name::String = "")
     kind in (:(=), :(>=), :(<=)) ||
         throw(ArgumentError("OperatingConditionConstraint kind must be :(=), :(>=) or :(<=), got $kind"))
-    return OperatingConditionConstraint(target, sources, fn, kind, active)
+    return OperatingConditionConstraint(target, sources, fn, kind, active, name)
 end
 
 
@@ -301,13 +303,15 @@ function default_operating_condition_constraints()::Vector{OperatingConditionCon
             target = :Pc_des,
             sources = Symbol[:Pa_des],
             fn = d -> d[:Pa_des] - 0.5e5,
-            kind = :(>=)
+            kind = :(>=),
+            name = "Pc_des_ge_Pa_des_minus_0.5e5"
         ),
         OperatingConditionConstraint(
             target = :Pc_des,
             sources = Symbol[:Pa_des],
             fn = d -> d[:Pa_des] + 0.5e5,
-            kind = :(<=)
+            kind = :(<=),
+            name = "Pc_des_le_Pa_des_plus_0.5e5"
         )
     ]
 end

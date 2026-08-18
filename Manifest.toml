@@ -2,7 +2,7 @@
 
 julia_version = "1.12.5"
 manifest_format = "2.0"
-project_hash = "a7b2e8f74a65b43ceba2a768c64c086627a82756"
+project_hash = "4e1cd38fcdf8e5e946d690f473c24bc4cbba370d"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "0a81a018463de6c3f4f2c9360121c562e5add9e4"
@@ -95,7 +95,7 @@ uuid = "a95523ee-d6da-40b5-98cc-27bc505739d5"
 version = "0.1.10"
 
 [[deps.AlphaPEM]]
-deps = ["CSV", "CairoMakie", "Conda", "CondaPkg", "DataFrames", "Dates", "DifferentialEquations", "Documenter", "DualNumbers", "FFTW", "ForwardDiff", "GLMakie", "Genie", "GlobalSensitivity", "HTTP", "Interpolations", "JSON", "JuliaInterpreter", "LatinHypercubeSampling", "LineSearches", "LinearAlgebra", "Logging", "NaNMath", "NonlinearSolve", "Preferences", "Printf", "ProgressMeter", "PyCall", "PythonCall", "QuasiMonteCarlo", "RCall", "Random", "SciMLBase", "Sobol", "SparseArrays", "SparseMatrixColorings", "Statistics", "Stipple", "StippleUI", "Sundials", "WGLMakie", "XLSX", "YAML"]
+deps = ["CSV", "CairoMakie", "Conda", "CondaPkg", "DataFrames", "Dates", "DifferentialEquations", "Documenter", "DualNumbers", "FFTW", "ForwardDiff", "GLMakie", "Genie", "GlobalSensitivity", "HTTP", "Interpolations", "JLD2", "JSON", "JuliaInterpreter", "LatinHypercubeSampling", "LineSearches", "LinearAlgebra", "Logging", "NaNMath", "NonlinearSolve", "Preferences", "Printf", "ProgressMeter", "PyCall", "PythonCall", "QuasiMonteCarlo", "RCall", "Random", "SHA", "SciMLBase", "Sobol", "SparseArrays", "SparseMatrixColorings", "Statistics", "Stipple", "StippleUI", "Sundials", "WGLMakie", "XLSX", "YAML"]
 path = "."
 uuid = "5b79a72d-1548-47c5-a674-b96c56ecabf8"
 version = "2.0.0"
@@ -395,6 +395,23 @@ weakdeps = ["SparseArrays"]
 
     [deps.ChainRulesCore.extensions]
     ChainRulesCoreSparseArraysExt = "SparseArrays"
+
+[[deps.ChunkCodecCore]]
+git-tree-sha1 = "1a3ad7e16a321667698a19e77362b35a1e94c544"
+uuid = "0b6fb165-00bc-4d37-ab8b-79f91016dbe1"
+version = "1.0.1"
+
+[[deps.ChunkCodecLibZlib]]
+deps = ["ChunkCodecCore", "Zlib_jll"]
+git-tree-sha1 = "d4101e848e8d3f585d61d244c2fe0c80a70e6b3b"
+uuid = "4c0bbee4-addc-4d73-81a0-b6caacae83c8"
+version = "1.1.0"
+
+[[deps.ChunkCodecLibZstd]]
+deps = ["ChunkCodecCore", "Zstd_jll"]
+git-tree-sha1 = "34d9873079e4cb3d0c62926a225136824677073f"
+uuid = "55437552-ac27-4d47-9aa3-63184e8fd398"
+version = "1.0.0"
 
 [[deps.CloseOpenIntervals]]
 deps = ["Static", "StaticArrayInterface"]
@@ -1366,6 +1383,11 @@ git-tree-sha1 = "f923f9a774fcf3f5cb761bfa43aeadd689714813"
 uuid = "2e76f6c2-a576-52d4-95c1-20adfe4de566"
 version = "8.5.1+0"
 
+[[deps.HashArrayMappedTries]]
+git-tree-sha1 = "2eaa69a7cab70a52b9687c8bf950a5a93ec895ae"
+uuid = "076d061b-32b6-4027-95e0-9a2c6f6d7e74"
+version = "0.2.0"
+
 [[deps.HttpCommon]]
 deps = ["Dates", "Nullables", "Test", "URIParser"]
 git-tree-sha1 = "46313284237aa6ca67a6bce6d6fbd323d19cff59"
@@ -1598,6 +1620,16 @@ version = "1.10.0"
 git-tree-sha1 = "a3f24677c21f5bbe9d2a714f95dcd58337fb2856"
 uuid = "82899510-4779-5014-852e-03e436cf321d"
 version = "1.0.0"
+
+[[deps.JLD2]]
+deps = ["ChunkCodecLibZlib", "ChunkCodecLibZstd", "FileIO", "MacroTools", "Mmap", "OrderedCollections", "PrecompileTools", "ScopedValues"]
+git-tree-sha1 = "9ebadf3f8f0de07031359917549bbdadc23f5dc3"
+uuid = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+version = "0.6.5"
+weakdeps = ["UnPack"]
+
+    [deps.JLD2.extensions]
+    UnPackExt = "UnPack"
 
 [[deps.JLLWrappers]]
 deps = ["Artifacts", "Preferences"]
@@ -3151,6 +3183,12 @@ git-tree-sha1 = "53bf620cb2c3763d41495b2a145611c6ca400dcd"
 uuid = "53ae85a6-f571-4167-b2af-e1d143709226"
 version = "1.10.4"
 
+[[deps.ScopedValues]]
+deps = ["HashArrayMappedTries", "Logging"]
+git-tree-sha1 = "67a144433c4ce877ee6d1ada69a124d6b1ecf7be"
+uuid = "7e506255-f358-4e82-b7e4-beb19740aa63"
+version = "1.6.2"
+
 [[deps.Scratch]]
 deps = ["Dates"]
 git-tree-sha1 = "9b81b8393e50b7d4e6d0a9f14e192294d3b7c109"
@@ -3629,18 +3667,13 @@ deps = ["FixedSizeArrays", "LinearAlgebra", "Markdown", "Reexport", "SparseArray
 git-tree-sha1 = "e801e73be4f24e67a675aae94be4404539c71143"
 uuid = "6aa5eb33-94cf-58f4-a9d0-e4b2c4fc25ea"
 version = "0.22.4"
+weakdeps = ["IntervalArithmetic", "JLD2", "RecursiveArrayTools", "StaticArrays"]
 
     [deps.TaylorSeries.extensions]
     TaylorSeriesIAExt = "IntervalArithmetic"
     TaylorSeriesJLD2Ext = "JLD2"
     TaylorSeriesRATExt = "RecursiveArrayTools"
     TaylorSeriesSAExt = "StaticArrays"
-
-    [deps.TaylorSeries.weakdeps]
-    IntervalArithmetic = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
-    JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
-    RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
-    StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [[deps.TensorCore]]
 deps = ["LinearAlgebra"]

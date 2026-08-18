@@ -17,14 +17,34 @@ Returns a `DataFrame` with one row per sample containing:
 """
 function run_sobol_simulations(cfg::SobolAnalysisConfig,
                                params::Vector{InputParameter},
-                               all_points::Matrix{Float64})::DataFrame
+                               all_points::Matrix{Float64};
+                               df_existing::Union{DataFrame, Nothing} = nothing,
+                               on_checkpoint::Union{Function, Nothing} = nothing)::DataFrame
     n_total = size(all_points, 2)
+    missing_ids = _find_missing_sample_ids(df_existing, n_total)
+    n_missing = length(missing_ids)
 
-    # Pre-allocate result containers
+    # Pre-allocate result containers (indexed by sample_id)
     sample_ids = Vector{Int}(undef, n_total)
     ifc_curves = Vector{Union{Vector{Float64}, Nothing}}(undef, n_total)
     Ucell_curves = Vector{Union{Vector{Float64}, Nothing}}(undef, n_total)
     statuses = Vector{Symbol}(undef, n_total)
+
+    # Track which sample_ids are complete to avoid serialising undefined entries
+    completed_ids = Int[]
+
+    # Restore already-completed samples from a previous checkpoint
+    if df_existing !== nothing && nrow(df_existing) > 0
+        sizehint!(completed_ids, n_total)
+        for row in eachrow(df_existing)
+            sid = row.sample_id
+            sample_ids[sid] = sid
+            statuses[sid] = row.status
+            ifc_curves[sid] = row.ifc
+            Ucell_curves[sid] = row.Ucell
+            push!(completed_ids, sid)
+        end
+    end
 
     # Reference fuel cell and parameters
     base_fc = create_fuelcell(cfg.fuel_cell_type, cfg.voltage_zone; year=cfg.year)
@@ -51,56 +71,70 @@ function run_sobol_simulations(cfg::SobolAnalysisConfig,
     @info "Pre-warming AlphaPEM compilation..."
     _warm_up_sobol_simulation(cfg, params, base_params, base_oc)
 
-    @info "Running $(n_total) Sobol simulations..."
-    prog = Progress(n_total; desc = "Sobol simulations: ", barlen = 40, color = :cyan)
+    if n_missing == 0
+        @info "All $(n_total) Sobol simulations already completed in checkpoint."
+    else
+        @info "Running $(n_missing) missing Sobol simulations ($(n_total - n_missing) already done)..."
+    end
+    prog = Progress(n_missing; desc = "Sobol simulations: ", barlen = 40, color = :cyan)
+
+    completed_since_start = 0
+    checkpoint_lock = ReentrantLock()
+
+    function store_result!(sid::Int, status::Symbol, ifc, Ucell)
+        lock(checkpoint_lock) do
+            sample_ids[sid] = sid
+            statuses[sid] = status
+            ifc_curves[sid] = ifc
+            Ucell_curves[sid] = Ucell
+            push!(completed_ids, sid)
+            completed_since_start += 1
+
+            if cfg.checkpoint_frequency > 0 &&
+               completed_since_start % cfg.checkpoint_frequency == 0 &&
+               on_checkpoint !== nothing
+                df_partial = _build_curves_df(
+                    completed_ids, sample_ids, statuses, ifc_curves, Ucell_curves,
+                    all_points, params, n_total
+                )
+                on_checkpoint(df_partial)
+            end
+        end
+    end
 
     if cfg.parallel && Threads.nthreads() > 1
         BLAS.set_num_threads(1)
         prog_lock = ReentrantLock()
-        Threads.@threads for i in 1:n_total
-            sample = all_points[:, i]
+        Threads.@threads for i in 1:n_missing
+            sid = missing_ids[i]
+            sample = all_points[:, sid]
             status, ifc, Ucell = _run_one_sobol_sample(
                 sample, params, cfg, base_params, base_oc, num_params
             )
-
-            sample_ids[i] = i
-            statuses[i] = status
-            ifc_curves[i] = ifc
-            Ucell_curves[i] = Ucell
-
+            store_result!(sid, status, ifc, Ucell)
             lock(prog_lock) do
                 next!(prog)
             end
         end
     else
-        for i in 1:n_total
-            sample = all_points[:, i]
+        for i in 1:n_missing
+            sid = missing_ids[i]
+            sample = all_points[:, sid]
             status, ifc, Ucell = _run_one_sobol_sample(
                 sample, params, cfg, base_params, base_oc, num_params
             )
-
-            sample_ids[i] = i
-            statuses[i] = status
-            ifc_curves[i] = ifc
-            Ucell_curves[i] = Ucell
-
+            store_result!(sid, status, ifc, Ucell)
             next!(prog)
         end
     end
     finish!(prog)
 
-    # Build DataFrame
-    df = DataFrame()
-    df.sample_id = sample_ids
-    df.config_hash = [_hash_sample(all_points[:, i]) for i in 1:n_total]
-    df.status = statuses
-
-    for (j, p) in enumerate(params)
-        df[!, p.name] = all_points[j, :]
-    end
-
-    df.ifc = ifc_curves
-    df.Ucell = Ucell_curves
+    # Build full DataFrame from all completed rows
+    sort!(completed_ids)
+    df = _build_curves_df(
+        completed_ids, sample_ids, statuses, ifc_curves, Ucell_curves,
+        all_points, params, n_total
+    )
 
     # Save raw curves if requested
     if cfg.save_curves
@@ -108,6 +142,39 @@ function run_sobol_simulations(cfg::SobolAnalysisConfig,
         mkpath(dirname(curves_path))
         _save_raw_curves(curves_path, sample_ids, ifc_curves, Ucell_curves, statuses)
     end
+
+    return df
+end
+
+
+"""
+    _build_curves_df(completed_ids, sample_ids, statuses, ifc_curves, Ucell_curves, all_points, params, n_total)
+
+Assemble the per-sample result arrays into a DataFrame for the completed sample ids.
+
+`completed_ids` contains the indices that have been simulated; only those rows are
+included in the returned DataFrame, avoiding any undefined entries in the sparse
+arrays.
+"""
+function _build_curves_df(completed_ids::Vector{Int},
+                          sample_ids::Vector{Int},
+                          statuses::Vector{Symbol},
+                          ifc_curves::Vector{Union{Vector{Float64}, Nothing}},
+                          Ucell_curves::Vector{Union{Vector{Float64}, Nothing}},
+                          all_points::Matrix{Float64},
+                          params::Vector{InputParameter},
+                          n_total::Int)::DataFrame
+    df = DataFrame()
+    df.sample_id = sample_ids[completed_ids]
+    df.config_hash = [_hash_sample(all_points[:, sid]) for sid in completed_ids]
+    df.status = statuses[completed_ids]
+
+    for (j, p) in enumerate(params)
+        df[!, p.name] = all_points[j, completed_ids]
+    end
+
+    df.ifc = ifc_curves[completed_ids]
+    df.Ucell = Ucell_curves[completed_ids]
 
     return df
 end

@@ -30,27 +30,33 @@ Configuration for the Sobol global sensitivity analysis of AlphaPEM.
 - `excluded_operating_conditions::Vector{Symbol}`: Operating conditions that are kept at
   their nominal value and excluded from the Sobol sampling. Default: `Symbol[]`.
 - `save_curves::Bool`: Save raw polarization curves. Default `true`.
+- `resume::Bool`: If `true`, try to resume from an existing checkpoint in
+  `output_dir`. Default `false`.
+- `checkpoint_frequency::Int`: Save a checkpoint every `n` completed
+  simulations. Set to `0` to disable checkpoints. Default `10`.
 """
 Base.@kwdef struct SobolAnalysisConfig
-    fuel_cell_type::Symbol              = :ZSW_nominal
-    year::Union{Int,Nothing}            = 2024
-    voltage_zone::Symbol                = :full
-    N::Int                              = 10_000
-    second_order::Bool                  = true
-    seed::Int                           = 42
-    region_thresholds::Tuple{Float64, Float64} = (0.4, 1.6)
-    include_operating_conditions::Bool  = true
-    parameter_bounds::Union{ParameterBounds, Nothing} = nothing
-    operating_condition_constraints::Vector{OperatingConditionConstraint} = default_operating_condition_constraints()
-    excluded_operating_conditions::Vector{Symbol} = Symbol[]
-    polarization_params::PolarizationParams = PolarizationParams(di_step = 0.05e4)
-    numerical_params::NumericalParams   = NumericalParams(nb_gc = 1)
-    parallel::Bool                      = true
-    max_run_time_s::Float64             = 60.0
-    knn_k::Int                          = 10
-    top_k::Int                          = 13
-    output_dir::String                  = abspath(joinpath(@__DIR__, "..", "..", "..", "..", "results", "sobol_sensitivity"))
-    save_curves::Bool                   = true
+fuel_cell_type::Symbol              = :ZSW_nominal
+year::Union{Int,Nothing}            = 2024
+voltage_zone::Symbol                = :full
+N::Int                              = 10_000
+second_order::Bool                  = true
+seed::Int                           = 42
+region_thresholds::Tuple{Float64, Float64} = (0.4, 1.6)
+include_operating_conditions::Bool  = true
+parameter_bounds::Union{ParameterBounds, Nothing} = nothing
+operating_condition_constraints::Vector{OperatingConditionConstraint} = default_operating_condition_constraints()
+excluded_operating_conditions::Vector{Symbol} = Symbol[]
+polarization_params::PolarizationParams = PolarizationParams(di_step = 0.05e4)
+numerical_params::NumericalParams   = NumericalParams(nb_gc = 1)
+parallel::Bool                      = true
+max_run_time_s::Float64             = 60.0
+knn_k::Int                          = 10
+top_k::Int                          = 13
+output_dir::String                  = abspath(joinpath(@__DIR__, "..", "..", "..", "..", "results", "sobol_sensitivity"))
+save_curves::Bool                   = true
+resume::Bool                        = false
+checkpoint_frequency::Int           = 10
 end
 
 

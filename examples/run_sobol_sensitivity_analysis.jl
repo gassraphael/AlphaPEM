@@ -5,8 +5,7 @@
 # Example script: Sobol global sensitivity analysis of AlphaPEM.
 #
 # This script runs a variance-based sensitivity analysis directly on AlphaPEM
-# simulations (no surrogate model). It follows the workflow of the student notebook
-# 03_sobol_analysis_AlphaPEM.ipynb:
+# simulations. It follows the following workflow:
 #   1. Generate Sobol samples for physical + operating parameters.
 #   2. Run AlphaPEM for each sample and extract the polarization curve.
 #   3. Impute missing curves with KNN when simulations fail.
@@ -63,27 +62,29 @@ excluded_oc = [:Sa, :Sc, :y_H2_in, :i_min_stoich]
 # enforces Pc_des = Pa_des - 0.5e5. You can add or replace constraints here.
 my_constraints = [
     OperatingConditionConstraint(
-        target = :Pc_des,
-        sources = [:Pa_des],
-        fn = d -> d[:Pa_des] - 0.5e5
-    ),
+            target = :Pc_des,
+            sources = Symbol[:Pa_des],
+            fn = d -> d[:Pa_des] + 0.5e5,
+            kind = :(<=),
+            name = "Pc_des_le_Pa_des_plus_0.5e5"
+        ),
 ]
 
 cfg = SobolAnalysisConfig(
-    fuel_cell_type              = :ZSW_nominal,
-    voltage_zone                = :full,
-    N                           = 1024,          # Start small; increase once validated
-    second_order                = false,         # Set true only if compute budget allows
-    seed                        = 42,
-    region_thresholds           = (0.4, 1.6),    # A/cm²: activation / ohmic / mass-transport
-    include_operating_conditions = true,
+    fuel_cell_type                  = :ZSW_nominal,
+    voltage_zone                    = :full,
+    N                               = 1024,          # Start small; increase once validated
+    second_order                    = false,         # Set true only if compute budget allows
+    seed                            = 42,
+    region_thresholds               = (0.4, 1.6),    # A/cm²: activation / ohmic / mass-transport
+    include_operating_conditions    = true,
     operating_condition_constraints = my_constraints,
-    excluded_operating_conditions = excluded_oc,
-    parallel                    = PARALLEL,
-    max_run_time_s              = 60.0,
-    knn_k                       = 10,
-    output_dir                  = "results/sobol_sensitivity",
-    save_curves                 = true,
+    excluded_operating_conditions   = excluded_oc,
+    parallel                        = PARALLEL,
+    max_run_time_s                  = 60.0,
+    knn_k                           = 10,
+    output_dir                      = "results/sobol_sensitivity",
+    save_curves                     = true,
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
