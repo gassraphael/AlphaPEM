@@ -15,16 +15,16 @@ const PHYSICAL_PARAMETERS = PhysicalParams(
     nb_cell          = 26,                     # Number of cells in the stack
     # Catalyst layer
     Hacl             = 3e-6,                   # Thickness of the anode catalyst layer in meters
-    Hccl             = 10.77501443118853e-6,   # Thickness of the cathode catalyst layer in meters
+    Hccl             = 10.179819442673712e-6,  # Thickness of the cathode catalyst layer in meters
     # Membrane
     Hmem             = 15e-6,                  # Thickness of the membrane in meters
     # Gas diffusion layer
-    Hgdl             = 73.60059187201173e-6,   # Thickness of the gas diffusion layer in meters
-    epsilon_gdl      = 0.8429121513160608,     # Anode/cathode GDL porosity
-    theta_c_gdl      = 113.623 * π / 180,      # Contact angle of GDL for liquid water in radian
+    Hgdl             = 75.88436374521656e-6,   # Thickness of the gas diffusion layer in meters
+    epsilon_gdl      = 0.8717693694526278,     # Anode/cathode GDL porosity
+    theta_c_gdl      = 123.64873420007795 * π / 180, # Contact angle of GDL for liquid water in radian
     # Microporous layer
-    Hmpl             = 60.28515052400096e-6,   # Thickness of the microporous layer in meters
-    epsilon_mpl      = 0.5781336199363625,     # Porosity of the microporous layer
+    Hmpl             = 64.17561409938712e-6,   # Thickness of the microporous layer in meters
+    epsilon_mpl      = 0.5163119718049662,     # Porosity of the microporous layer
     # Gas channel
     Hagc             = 230e-6,                 # Thickness of the anode gas channel in meters
     Hcgc             = 300e-6,                 # Thickness of the cathode gas channel in meters
@@ -44,17 +44,17 @@ const PHYSICAL_PARAMETERS = PhysicalParams(
     # Interaction parameters between fluids and PEMFC structure
     e                = 3,                      # Capillary exponent
     # Volumic flow of O2 inside the CCL to the Pt sites
-    IC_ccl           = 1.7327509737764553,     # Ionomer to carbon ratio in the cathode catalyst layer
-    ECSA_0           = 87.89057173960225,      # Initial electrochemical surface area of the catalyst in cm2_Pt.cm-2_active_area
-    K_O2_ad_Pt       = 4.105211997154777,      # Interfacial resistance coefficient of O2 adsorption on the Pt sites
-    K_O2_dis_ion     = 18.0909083299938,       # Interfacial resistance coefficient of O2 dissolution inside the ionomer
-    r_carb           = 19.406222947185964e-9,  # Mean radius of the carbon particles in m
+    IC_ccl           = 1.8766573409239173,     # Ionomer to carbon ratio in the cathode catalyst layer
+    ECSA_0           = 90.18946251019264,      # Initial electrochemical surface area of the catalyst in cm2_Pt.cm-2_active_area
+    K_O2_ad_Pt       = 4.381467625011741,      # Interfacial resistance coefficient of O2 adsorption on the Pt sites
+    K_O2_dis_ion     = 18.649344685182076,     # Interfacial resistance coefficient of O2 dissolution inside the ionomer
+    r_carb           = 20.17782731935742e-9,   # Mean radius of the carbon particles in m
     # Voltage polarization
-    Re               = 2.0506744291577884e-7,  # Electron conduction resistance of the circuit in Ω·m²
-    i0_c_ref         = 2.465315251391336,      # Reference exchange current density at the cathode in A·m⁻²
-    alpha_c          = 0.6045911570226179,     # Transfer coefficient of the cathode
-    kappa_co         = 20.217418381359696,     # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
-    kappa_c          = 0.4712163654762256,     # Overpotential correction exponent
+    Re               = 6.134413955881647e-7,   # Electron conduction resistance of the circuit in Ω·m²
+    i0_c_ref         = 1.1319658074709191,     # Reference exchange current density at the cathode in A·m⁻²
+    alpha_c          = 0.6552890241967357,     # Transfer coefficient of the cathode
+    kappa_co         = 15.3655148859884,       # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
+    kappa_c          = 0.25862840985329477,    # Overpotential correction exponent
     C_scl            = 2e7                     # Volumetric space-charge layer capacitance in F·m⁻³
 )
 

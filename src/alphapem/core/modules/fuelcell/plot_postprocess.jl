@@ -230,6 +230,10 @@ function _interpolated_rmse(ifc_discretized::AbstractVector{<:Real},
                             U_exp::AbstractVector{<:Real})
     ifc_vec = collect(ifc_discretized)
     ucell_vec = collect(Ucell_discretized)
+    if length(ifc_vec) < 2
+        @warn "Polarization RMSE skipped: need at least two simulated current points, got $(length(ifc_vec))."
+        return nothing
+    end
     deduplicate_knots!(ifc_vec)
     itp = linear_interpolation(ifc_vec, ucell_vec; extrapolation_bc=Line())
     Ucell_interpolated = itp.(collect(i_exp))
