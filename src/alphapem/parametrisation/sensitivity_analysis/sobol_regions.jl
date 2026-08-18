@@ -5,7 +5,7 @@
 
 Build the three characteristic polarization regions from current-density thresholds.
 
-`thresholds` is a tuple `(t1, t2)` in A/cm². The regions are:
+`thresholds` is a tuple `(t1, t2)` in A/cm². The regions are closed on both sides:
 - activation:      [0, t1]
 - ohmic:           [t1, t2]
 - mass_transport:  [t2, ∞)
@@ -34,14 +34,14 @@ Arguments:
 - `region::PolarizationRegion`: Region of interest.
 - `clip_negative::Bool`: If `true`, negative voltages are clipped to 0 before integration.
 
-Returns the AUC in V·A/cm². If no point falls inside the region, returns `0.0`.
+Returns the AUC in V·A/cm². If no point falls inside the region, returns `NaN`.
 """
 function region_auc(ifc::Vector{Float64},
                     Ucell::Vector{Float64},
                     region::PolarizationRegion;
                     clip_negative::Bool = true)::Float64
     length(ifc) == length(Ucell) || throw(ArgumentError("ifc and Ucell must have the same length"))
-    isempty(ifc) && return 0.0
+    isempty(ifc) && return NaN
 
     U = clip_negative ? max.(Ucell, 0.0) : Ucell
 
@@ -53,38 +53,14 @@ function region_auc(ifc::Vector{Float64},
     i_min = region.i_min
     i_max = region.i_max
 
-    # Select points inside the region, including boundary interpolation
+    # Select points strictly inside the closed region (no boundary interpolation)
     mask = (i_sorted .>= i_min) .& (i_sorted .<= i_max)
     if !any(mask)
-        return 0.0
+        return NaN
     end
 
     i_in = i_sorted[mask]
     U_in = U_sorted[mask]
-
-    # Add interpolated boundaries if needed
-    if i_in[1] > i_min
-        # Linear interpolation at i_min
-        k = findfirst(i_sorted .> i_min)
-        if k !== nothing && k > 1
-            U_min = _linear_interp(i_min, i_sorted[k-1], i_sorted[k], U_sorted[k-1], U_sorted[k])
-            if !isnan(U_min)
-                i_in = vcat(i_min, i_in)
-                U_in = vcat(U_min, U_in)
-            end
-        end
-    end
-
-    if isfinite(i_max) && i_in[end] < i_max
-        k = findlast(i_sorted .< i_max)
-        if k !== nothing && k < length(i_sorted)
-            U_max = _linear_interp(i_max, i_sorted[k], i_sorted[k+1], U_sorted[k], U_sorted[k+1])
-            if !isnan(U_max)
-                i_in = vcat(i_in, i_max)
-                U_in = vcat(U_in, U_max)
-            end
-        end
-    end
 
     # Trapezoidal integration
     auc = 0.0

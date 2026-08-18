@@ -68,19 +68,28 @@ Generate the Sobol design matrices required by `GlobalSensitivity.Sobol`.
 
 Returns `(A, B)` where each column is one sample and rows correspond to parameters.
 The matrices are scaled to the parameter ranges and integer parameters are rounded.
+
+This implementation follows the Saltelli scheme used by SALib: a single scrambled
+Sobol sequence of length `2N` is generated, then split into matrix `A` (first `N`
+points) and matrix `B` (next `N` points). The random seed is taken from `cfg.seed`
+to ensure reproducibility.
 """
 function generate_sobol_design_matrices(cfg::SobolAnalysisConfig,
                                         params::Vector{InputParameter})
     ranges = parameter_ranges(params)
     lb = [r[1] for r in ranges]
     ub = [r[2] for r in ranges]
-
-    sampler = QuasiMonteCarlo.SobolSample()
-    R = QuasiMonteCarlo.Shift()
-
-    # Generate A and B matrices: each column is a sample
     n_params = length(lb)
-    A, B = QuasiMonteCarlo.generate_design_matrices(cfg.N, n_params, sampler, R, 2)
+
+    # Scrambled Sobol sequence with a reproducible RNG.
+    rng = Random.MersenneTwister(cfg.seed)
+    scramble = QuasiMonteCarlo.OwenScramble(; base = 2, rng = rng)
+    sampler = QuasiMonteCarlo.SobolSample(scramble)
+
+    # Generate 2N points and split into the Saltelli A/B matrices.
+    all_points = QuasiMonteCarlo.sample(2 * cfg.N, n_params, sampler)
+    A = all_points[:, 1:cfg.N]
+    B = all_points[:, (cfg.N + 1):(2 * cfg.N)]
 
     # Scale to parameter ranges
     for j in 1:n_params
@@ -128,17 +137,6 @@ Only physical parameters are overridden; operating conditions are handled separa
 function sample_to_physical_params(sample::Vector{Float64},
                                    params::Vector{InputParameter},
                                    base_params)::PhysicalParams
-    physical_overrides = Dict{Symbol, Any}()
-    for (j, p) in enumerate(params)
-        if p.source == :physical
-            if p.type == :int
-                physical_overrides[p.name] = Int(clamp(round(sample[j]), p.min, p.max))
-            else
-                physical_overrides[p.name] = Float64(clamp(sample[j], p.min, p.max))
-            end
-        end
-    end
-
     # Use ParametrisationCommon mapping for consistency (handles EH constraints)
     pb = _params_to_bounds(params)
     if isempty(pb.bounds)
@@ -157,6 +155,13 @@ Map a Sobol sample vector to an `OperatingConditions` object, applying constrain
 
 Operating conditions listed in `excluded` are not sampled; they keep their nominal
 value from `base_oc`.
+
+Constraints are applied according to their `kind`:
+- `:(=)`: `target = fn(overrides)`.
+- `:(>=)`: `target = max(target_sampled, fn(overrides))`, then clamped to the
+  declared bounds of `target`.
+- `:(<=)`: `target = min(target_sampled, fn(overrides))`, then clamped to the
+  declared bounds of `target`.
 """
 function sample_to_operating_conditions(sample::Vector{Float64},
                                         params::Vector{InputParameter},
@@ -188,7 +193,25 @@ function sample_to_operating_conditions(sample::Vector{Float64},
         if c.active && haskey(overrides, c.target)
             # Ensure all source values are present in overrides
             if all(haskey(overrides, s) for s in c.sources)
-                overrides[c.target] = Float64(c.fn(overrides))
+                target_bounds = get(OPERATING_CONDITIONS_BOUNDS, c.target, nothing)
+                current = Float64(overrides[c.target])
+                bound_value = Float64(c.fn(overrides))
+
+                if c.kind == :(=)
+                    current = bound_value
+                elseif c.kind == :(>=)
+                    current = max(current, bound_value)
+                elseif c.kind == :(<=)
+                    current = min(current, bound_value)
+                end
+
+                # Clamp to declared bounds if they exist
+                if target_bounds !== nothing
+                    lo, hi, _ = target_bounds
+                    current = clamp(current, lo, hi)
+                end
+
+                overrides[c.target] = current
             end
         end
     end
@@ -222,17 +245,20 @@ end
 
 
 """
-    is_valid_operating_conditions(oc)
+    is_valid_operating_conditions(oc, constraints=OperatingConditionConstraint[])
 
-Check that operating conditions are physically consistent.
+Check that operating conditions are physically consistent and that all active
+operating-condition constraints are satisfied.
 
 Current checks:
 - Pressures are positive.
 - Humidities are in [0, 1].
 - Stoichiometric ratios are >= 1.
 - Temperature is positive in °C.
+- Active operating-condition constraints are respected (with tolerance).
 """
-function is_valid_operating_conditions(oc)::Bool
+function is_valid_operating_conditions(oc,
+                                       constraints::Vector{OperatingConditionConstraint} = OperatingConditionConstraint[])::Bool
     try
         # Pressures
         Pa_des = oc.Pa_des
@@ -252,6 +278,30 @@ function is_valid_operating_conditions(oc)::Bool
 
         # Hydrogen molar fraction
         0.0 <= oc.y_H2_in <= 1.0 || return false
+
+        # Active operating-condition constraints
+        oc_dict = Dict{Symbol, Float64}()
+        for f in fieldnames(typeof(oc))
+            v = getfield(oc, f)
+            if v isa Real
+                oc_dict[f] = Float64(v)
+            end
+        end
+        tol = 1e-9
+        for c in constraints
+            c.active || continue
+            if all(haskey(oc_dict, s) for s in c.sources) && haskey(oc_dict, c.target)
+                bound_value = Float64(c.fn(oc_dict))
+                target_value = oc_dict[c.target]
+                if c.kind == :(=)
+                    abs(target_value - bound_value) <= tol || return false
+                elseif c.kind == :(>=)
+                    target_value + tol >= bound_value || return false
+                elseif c.kind == :(<=)
+                    target_value - tol <= bound_value || return false
+                end
+            end
+        end
 
         return true
     catch

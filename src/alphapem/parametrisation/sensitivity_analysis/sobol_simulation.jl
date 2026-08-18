@@ -92,6 +92,7 @@ function run_sobol_simulations(cfg::SobolAnalysisConfig,
     # Build DataFrame
     df = DataFrame()
     df.sample_id = sample_ids
+    df.config_hash = [_hash_sample(all_points[:, i]) for i in 1:n_total]
     df.status = statuses
 
     for (j, p) in enumerate(params)
@@ -178,7 +179,7 @@ function _run_one_sobol_sample(sample::Vector{Float64},
         fc.operating_conditions = operating_conditions
 
         # Validate operating conditions
-        if !is_valid_operating_conditions(operating_conditions)
+        if !is_valid_operating_conditions(operating_conditions, cfg.operating_condition_constraints)
             return (:failed, nothing, nothing)
         end
 
@@ -210,8 +211,8 @@ function _run_one_sobol_sample(sample::Vector{Float64},
             return (:invalid, nothing, nothing)
         end
 
-        # Convert current density from A/m² to A/cm²
-        ifc_cm2 = ifc_raw ./ 1e4
+        # _polarization_points already returns current densities in A/cm²
+        ifc_cm2 = ifc_raw
 
         # Basic validity check
         if any(!isfinite, Ucell_raw) || any(!isfinite, ifc_cm2)
@@ -256,4 +257,19 @@ function _warm_up_sobol_simulation(cfg::SobolAnalysisConfig,
         # Ignore warm-up errors
     end
     return nothing
+end
+
+
+"""
+    _hash_sample(sample)
+
+Return a SHA-256 hex digest of a sample vector.
+
+This provides a reproducible, content-based identifier for each row of the Sobol
+design matrix, enabling traceability and deduplication across plan, simulations
+and outputs.
+"""
+function _hash_sample(sample::AbstractVector{<:Real})::String
+    bytes = Vector{UInt8}(join(string.(sample), ","))
+    return bytes2hex(sha256(bytes))
 end

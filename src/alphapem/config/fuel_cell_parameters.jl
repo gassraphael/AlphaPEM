@@ -217,7 +217,7 @@ Base.@kwdef struct OperatingConditions <: AbstractFuelCellParams
     Sc::Float64 = 2.0               # Stoichiometric ratio of oxygen
     Phi_a_des::Float64 = 0.4        # Desired anode relative humidity
     Phi_c_des::Float64 = 0.6        # Desired cathode relative humidity
-    y_H2_in::Float64 = 1.0          # Molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet
+    y_H2_in::Float64 = 0.8          # Molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet
     i_min_stoich::Float64 = 0.5     # Minimum current density used to compute the desired flows (A.cm-2)
 end
 
@@ -239,8 +239,6 @@ const OPERATING_CONDITIONS_BOUNDS = Dict{Symbol, Tuple{Float64, Float64, Symbol}
     :Sc            => (1.5, 2.5, :real),                     # Stoichiometric ratio of oxygen
     :Phi_a_des     => (0.3, 0.9, :real),                     # Desired anode relative humidity
     :Phi_c_des     => (0.3, 0.9, :real),                     # Desired cathode relative humidity
-    :y_H2_in       => (0.8, 1.0, :real),                     # Molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet
-    :i_min_stoich  => (0.3, 0.5, :real)                      # Minimum current density used to compute the desired flows (A.cm-2)
 )
 
 
@@ -252,7 +250,11 @@ A single constraint relating an operating condition `target` to one or more `sou
 # Fields
 - `target::Symbol`: The operating condition to enforce (e.g. `:Pc_des`).
 - `sources::Vector{Symbol}`: The operating conditions the constraint depends on.
-- `fn::Function`: Function `(sample_dict) -> value` that computes the target value.
+- `fn::Function`: Function `(sample_dict) -> value` that computes the bound or fixed value.
+- `kind::Symbol`: Kind of constraint. One of:
+  - `:(=)`: `target = fn(overrides)` (default).
+  - `:(>=)`: `target >= fn(overrides)`; the sampled value is clamped from below.
+  - `:(<=)`: `target <= fn(overrides)`; the sampled value is clamped from above.
 - `active::Bool`: Whether the constraint is applied. Default `true`.
 
 Example:
@@ -260,7 +262,8 @@ Example:
 OperatingConditionConstraint(
     target = :Pc_des,
     sources = [:Pa_des],
-    fn = d -> d[:Pa_des] - 0.5e5
+    fn = d -> d[:Pa_des] - 0.5e5,
+    kind = :(>=)
 )
 ```
 """
@@ -268,11 +271,19 @@ struct OperatingConditionConstraint
     target::Symbol
     sources::Vector{Symbol}
     fn::Function
+    kind::Symbol
     active::Bool
 end
 
-OperatingConditionConstraint(; target::Symbol, sources::Vector{Symbol}, fn::Function, active::Bool = true) =
-    OperatingConditionConstraint(target, sources, fn, active)
+function OperatingConditionConstraint(; target::Symbol,
+                                        sources::Vector{Symbol},
+                                        fn::Function,
+                                        kind::Symbol = :(=),
+                                        active::Bool = true)
+    kind in (:(=), :(>=), :(<=)) ||
+        throw(ArgumentError("OperatingConditionConstraint kind must be :(=), :(>=) or :(<=), got $kind"))
+    return OperatingConditionConstraint(target, sources, fn, kind, active)
+end
 
 
 """
@@ -281,14 +292,22 @@ OperatingConditionConstraint(; target::Symbol, sources::Vector{Symbol}, fn::Func
 Return the default set of operating-condition constraints used during Sobol sampling.
 
 Default constraints:
-- `Pc_des = Pa_des - 0.5e5` (cathode pressure slightly below anode pressure)
+- `Pc_des >= Pa_des - 0.5e5` (cathode pressure is at most 0.5e5 Pa below anode pressure)
+- `Pc_des <= Pa_des + 0.5e5` (cathode pressure is at least 0.5e5 Pa above anode pressure)
 """
 function default_operating_condition_constraints()::Vector{OperatingConditionConstraint}
     return [
         OperatingConditionConstraint(
             target = :Pc_des,
             sources = Symbol[:Pa_des],
-            fn = d -> d[:Pa_des] - 0.5e5
+            fn = d -> d[:Pa_des] - 0.5e5,
+            kind = :(>=)
+        ),
+        OperatingConditionConstraint(
+            target = :Pc_des,
+            sources = Symbol[:Pa_des],
+            fn = d -> d[:Pa_des] + 0.5e5,
+            kind = :(<=)
         )
     ]
 end
