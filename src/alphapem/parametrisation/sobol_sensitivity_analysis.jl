@@ -39,6 +39,7 @@ using Printf
 using Dates
 using Statistics
 using LinearAlgebra: BLAS
+using Logging
 using DataFrames
 using CSV
 using ProgressMeter

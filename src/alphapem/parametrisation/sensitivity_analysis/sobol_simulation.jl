@@ -1,6 +1,59 @@
 # -*- coding: utf-8 -*-
 
 """
+    _SimulationWarningLogger
+
+Custom logger that counts known AlphaPEM safety-stop and timeout messages during
+Sobol simulations instead of printing them to the console.
+
+Matched messages are silently counted; all other messages are forwarded to the
+base logger. The counters are thread-safe so they can be incremented from
+parallel simulation tasks.
+"""
+struct _SimulationWarningLogger <: AbstractLogger
+    counters::Dict{Symbol, Threads.Atomic{Int}}
+    base_logger::AbstractLogger
+end
+
+Logging.handle_message(logger::_SimulationWarningLogger, level, message, _module, group, id, file, line; kwargs...) = begin
+    msg = string(message)
+    if level == Logging.Warn && occursin("Safety stop: oxygen concentration", msg)
+        Threads.atomic_add!(logger.counters[:oxygen_starvation], 1)
+        return nothing
+    elseif level == Logging.Warn && occursin("Safety stop: cell voltage", msg)
+        Threads.atomic_add!(logger.counters[:voltage_limit], 1)
+        return nothing
+    elseif level == Logging.Error && occursin("Simulation exceeded maximum runtime", msg)
+        Threads.atomic_add!(logger.counters[:max_runtime], 1)
+        return nothing
+    end
+    Logging.handle_message(logger.base_logger, level, message, _module, group, id, file, line; kwargs...)
+end
+
+Logging.shouldlog(logger::_SimulationWarningLogger, level, _module, group, id) = true
+Logging.min_enabled_level(logger::_SimulationWarningLogger) = Logging.min_enabled_level(logger.base_logger)
+Logging.catch_exceptions(logger::_SimulationWarningLogger) = Logging.catch_exceptions(logger.base_logger)
+
+
+"""
+    _print_warning_summary(counters)
+
+Print a single summary line for each warning type that occurred during the
+simulation loop.
+"""
+function _print_warning_summary(counters::Dict{Symbol, Threads.Atomic{Int}})
+    total = sum(c -> c[], values(counters))
+    total == 0 && return nothing
+    @info "Simulation warnings summary:" [
+        "oxygen_starvation" => counters[:oxygen_starvation][],
+        "voltage_limit" => counters[:voltage_limit][],
+        "max_runtime" => counters[:max_runtime][],
+    ]
+    return nothing
+end
+
+
+"""
     run_sobol_simulations(cfg, params, all_points)
 
 Run AlphaPEM for all columns of `all_points` and return the resulting polarization curves.
@@ -80,6 +133,11 @@ function run_sobol_simulations(cfg::SobolAnalysisConfig,
 
     completed_since_start = 0
     checkpoint_lock = ReentrantLock()
+    warning_counters = Dict{Symbol, Threads.Atomic{Int}}(
+        :oxygen_starvation => Threads.Atomic{Int}(0),
+        :voltage_limit => Threads.Atomic{Int}(0),
+        :max_runtime => Threads.Atomic{Int}(0),
+    )
 
     function store_result!(sid::Int, status::Symbol, ifc, Ucell)
         lock(checkpoint_lock) do
@@ -102,32 +160,40 @@ function run_sobol_simulations(cfg::SobolAnalysisConfig,
         end
     end
 
-    if cfg.parallel && Threads.nthreads() > 1
-        BLAS.set_num_threads(1)
-        prog_lock = ReentrantLock()
-        Threads.@threads for i in 1:n_missing
-            sid = missing_ids[i]
-            sample = all_points[:, sid]
-            status, ifc, Ucell = _run_one_sobol_sample(
-                sample, params, cfg, base_params, base_oc, num_params
-            )
-            store_result!(sid, status, ifc, Ucell)
-            lock(prog_lock) do
+    # Run the simulations with a custom logger that counts known warnings instead
+    # of printing them, so the console stays readable.
+    with_logger(_SimulationWarningLogger(warning_counters, current_logger())) do
+        if cfg.parallel && Threads.nthreads() > 1
+            BLAS.set_num_threads(1)
+            prog_lock = ReentrantLock()
+            @sync for i in 1:n_missing
+                Threads.@spawn begin
+                    sid = missing_ids[i]
+                    sample = all_points[:, sid]
+                    status, ifc, Ucell = _run_one_sobol_sample(
+                        sample, params, cfg, base_params, base_oc, num_params
+                    )
+                    store_result!(sid, status, ifc, Ucell)
+                    lock(prog_lock) do
+                        next!(prog)
+                    end
+                end
+            end
+        else
+            for i in 1:n_missing
+                sid = missing_ids[i]
+                sample = all_points[:, sid]
+                status, ifc, Ucell = _run_one_sobol_sample(
+                    sample, params, cfg, base_params, base_oc, num_params
+                )
+                store_result!(sid, status, ifc, Ucell)
                 next!(prog)
             end
         end
-    else
-        for i in 1:n_missing
-            sid = missing_ids[i]
-            sample = all_points[:, sid]
-            status, ifc, Ucell = _run_one_sobol_sample(
-                sample, params, cfg, base_params, base_oc, num_params
-            )
-            store_result!(sid, status, ifc, Ucell)
-            next!(prog)
-        end
     end
     finish!(prog)
+
+    _print_warning_summary(warning_counters)
 
     # Build full DataFrame from all completed rows
     sort!(completed_ids)
