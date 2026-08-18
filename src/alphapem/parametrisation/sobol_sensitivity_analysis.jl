@@ -81,17 +81,17 @@ export SobolAnalysisConfig,
        plot_top_k_rankings_across_regions,
        plot_sobol_heatmap
 
-include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_types.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_regions.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_sampling.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_analysis.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_checkpoint.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_simulation.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_knn.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_summary.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_convergence.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_export.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "sobol_plots.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "sobol", "types.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "sobol", "regions.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "sobol", "sampling.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "sobol", "analysis.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "sobol", "checkpoint.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "sobol", "simulation.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "sobol", "knn.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "sobol", "summary.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "sobol", "convergence.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "sobol", "export.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "sobol", "plots.jl"))
 
 
 """
