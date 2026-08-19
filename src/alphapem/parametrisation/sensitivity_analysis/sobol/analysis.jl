@@ -81,14 +81,20 @@ function compute_sobol_indices(cfg::SobolAnalysisConfig,
     expected_cols = size(Y, 2)
     sobol_result = gsa((X) -> _model_for_gsa(X, Y, expected_cols), method, A, B; batch = true)
 
+    # Confidence intervals are only computed when nboot > 1. When bootstrapping is
+    # disabled, GlobalSensitivity returns `nothing` for the interval fields.
+    n_params = length(param_names)
+    conf_slice(ci, r_idx) = ci === nothing ? fill(NaN, n_params) : ci[r_idx, :]
+    s2_conf_slice(ci, r_idx) = ci === nothing ? fill(NaN, n_params, n_params) : ci[:, :, r_idx]
+
     # Assemble results per region
     results = Dict{Symbol, DataFrame}()
     for (r_idx, region) in enumerate(regions)
         df_region = DataFrame(parameter = param_names)
         df_region.S1 = sobol_result.S1[r_idx, :]
-        df_region.S1_conf = sobol_result.S1_Conf_Int[r_idx, :]
+        df_region.S1_conf = conf_slice(sobol_result.S1_Conf_Int, r_idx)
         df_region.ST = sobol_result.ST[r_idx, :]
-        df_region.ST_conf = sobol_result.ST_Conf_Int[r_idx, :]
+        df_region.ST_conf = conf_slice(sobol_result.ST_Conf_Int, r_idx)
 
         results[region.name] = df_region
 
@@ -96,7 +102,7 @@ function compute_sobol_indices(cfg::SobolAnalysisConfig,
             # GlobalSensitivity stores S2 as (param_i, param_j, output);
             # select the slice for the current output (region).
             S2 = sobol_result.S2[:, :, r_idx]
-            S2_conf = sobol_result.S2_Conf_Int[:, :, r_idx]
+            S2_conf = s2_conf_slice(sobol_result.S2_Conf_Int, r_idx)
             results[Symbol(:S2_, region.name)] = _build_s2_dataframe(param_names, S2, S2_conf)
         end
     end

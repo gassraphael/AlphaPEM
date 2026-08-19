@@ -32,7 +32,7 @@ Steps 1–2–4 always run; Step 3 is enabled by passing a `PRIMConfig`.
 | Sub-module               | Responsibility                                         |
 |--------------------------|--------------------------------------------------------|
 | `ValidityCriteria`       | Per-curve validity checks (voltage range, monotonicity)|
-| `ParametrisationCommon`| LHS sample generation and parameter-struct mapping     |
+| `Calibration`           | LHS sample generation and parameter-struct mapping     |
 | `PRIMInterface`          | Julia ↔ R bridge for `irdpackage` (PRIM, MaxBox)      |
 | `ResultsExport`          | CSV / YAML / text-report export                        |
 
@@ -81,7 +81,10 @@ using CSV
 using ProgressMeter: Progress, next!, finish!
 
 # ─── AlphaPEM simulation components ──────────────────────────────────────────
-using ..ParametrisationCommon
+using ..Calibration: ParameterBound, ParameterBounds, SamplingConfig,
+                      bounds_for_fuel_cell, generate_lhs_samples,
+                      new_PhysicalParams_from_sample, get_reference_config,
+                      export_parameter_bounds
 using AlphaPEM.Config:  SimulationConfig, PolarizationParams, NumericalParams
 using AlphaPEM.Fuelcell: create_fuelcell
 using AlphaPEM.Currents: create_current
@@ -140,14 +143,14 @@ export ValidityCriteria,
        check_start_voltage_range,
        check_monotonicity,
        check_positive_voltages,
-       # ParametrisationCommon types & functions
+       # Calibration shared types & functions
        ParameterBound,
        ParameterBounds,
        SamplingConfig,
        bounds_for_fuel_cell,
        generate_lhs_samples,
        new_PhysicalParams_from_sample,
-        get_reference_config,
+       get_reference_config,
         # IRDInterface types & functions
         IRDConfig,
         IRDResult,

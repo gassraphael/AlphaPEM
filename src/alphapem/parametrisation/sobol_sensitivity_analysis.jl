@@ -57,7 +57,7 @@ using AlphaPEM.Currents: create_current
 using AlphaPEM.Application: run_simulation
 import AlphaPEM.Core.Models: AlphaPEM as AlphaPEMSimulator, simulate_model!, _polarization_points
 
-using ..ParametrisationCommon: ParameterBound, ParameterBounds, bounds_for_fuel_cell, new_PhysicalParams_from_sample
+using ..Calibration: ParameterBound, ParameterBounds, bounds_for_fuel_cell, new_PhysicalParams_from_sample
 using ..ValidParameterRegion: ValidityCriteria
 
 export SobolAnalysisConfig,

@@ -407,8 +407,8 @@ end
     @test length(calib_cfg.simulation_configs) == 1
 
     # Parameter bounds for the fuel cell type
-    using AlphaPEM.Parametrisation: ParametrisationCommon
-    pb = ParametrisationCommon.bounds_for_fuel_cell(:ZSW_nominal, :full)
+    using AlphaPEM.Parametrisation: Calibration
+    pb = Calibration.bounds_for_fuel_cell(:ZSW_nominal, :full)
     @test !isempty(pb.bounds)
     @test all(b -> b.min < b.max, pb.bounds)
 end

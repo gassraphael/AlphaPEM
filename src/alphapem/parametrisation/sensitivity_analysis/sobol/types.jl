@@ -18,7 +18,8 @@ Configuration for the Sobol global sensitivity analysis of AlphaPEM.
 - `parameter_bounds::Union{ParameterBounds, Nothing}`: Optional custom bounds.
   If `nothing`, bounds are inferred from the fuel cell.
 - `polarization_params::PolarizationParams`: Current profile used for simulations.
-- `numerical_params::NumericalParams`: Numerical settings for batch runs.
+- `nb_gc::Int`: Number of gas-channel nodes used for batch runs. Default `5`.
+- `numerical_params::NumericalParams`: Other numerical settings for batch runs.
 - `parallel::Bool`: Use multi-threading. Default `true`.
 - `max_run_time_s::Float64`: Maximum simulation runtime per curve (s). Default `60.0`.
 - `knn_k::Int`: Number of neighbours for KNN imputation. Default `10`.
@@ -48,7 +49,8 @@ parameter_bounds::Union{ParameterBounds, Nothing} = nothing
 operating_condition_constraints::Vector{OperatingConditionConstraint} = default_operating_condition_constraints()
 excluded_operating_conditions::Vector{Symbol} = Symbol[]
 polarization_params::PolarizationParams = PolarizationParams(di_step = 0.05e4)
-numerical_params::NumericalParams   = NumericalParams(nb_gc = 1)
+nb_gc::Int                          = 5
+numerical_params::NumericalParams   = NumericalParams(nb_gc = nb_gc)
 parallel::Bool                      = true
 max_run_time_s::Float64             = 60.0
 knn_k::Int                          = 10

@@ -145,11 +145,12 @@ function build_sobol_summary_table(result::SobolAnalysisResult;
         value_col = Symbol(r.name, :_value)
         ci_col = Symbol(r.name, :_CI)
         rank_col = Symbol(r.name, :_rank)
-        sum_row[value_col] = sum(skipmissing(replace(summary[!, value_col], NaN => missing)))
+        sum_row[value_col] = sum(skipmissing(replace(summary[!, value_col], NaN => missing)); init = 0.0)
         sum_row[ci_col] = NaN
         sum_row[rank_col] = NaN
         avg_conf_row[value_col] = NaN
-        avg_conf_row[ci_col] = mean(skipmissing(replace(summary[!, ci_col], NaN => missing)))
+        conf_vals = collect(skipmissing(replace(summary[!, ci_col], NaN => missing)))
+        avg_conf_row[ci_col] = isempty(conf_vals) ? NaN : mean(conf_vals)
         avg_conf_row[rank_col] = NaN
     end
     push!(summary, sum_row)

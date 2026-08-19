@@ -137,7 +137,7 @@ Only physical parameters are overridden; operating conditions are handled separa
 function sample_to_physical_params(sample::Vector{Float64},
                                    params::Vector{InputParameter},
                                    base_params)::PhysicalParams
-    # Use ParametrisationCommon mapping for consistency (handles EH constraints)
+    # Use Calibration mapping for consistency (handles EH constraints)
     pb = _params_to_bounds(params)
     if isempty(pb.bounds)
         return base_params

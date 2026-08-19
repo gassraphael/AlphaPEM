@@ -11,24 +11,45 @@ using PythonCall
 using Random
 using Dates
 using Printf
+using Statistics: mean
+using YAML
+using CairoMakie
+using LatinHypercubeSampling: randomLHC, scaleLHC
 
-using AlphaPEM.Config: PolarizationCalibrationParams, PhysicalParams
+using AlphaPEM.Config: PolarizationCalibrationParams, PhysicalParams, PARAMETER_METADATA
 using AlphaPEM.Config: CalibrationConfig, CalibrationResult, GAConfig
-using AlphaPEM.Fuelcell: create_fuelcell
+using AlphaPEM.Config: PolaExperimentalData, PolarizationParams, SimulationConfig
+using AlphaPEM.Fuelcell: create_fuelcell, DefaultFuelCell, undetermined_parameters
 using AlphaPEM.Currents: create_current
-import AlphaPEM.Core.Models: AlphaPEM, simulate_model!
-
-# Import common parametrisation helpers
-using ..ParametrisationCommon: bounds_for_fuel_cell, new_PhysicalParams_from_sample,
-                               get_reference_config, export_parameter_bounds, export_calibrated_params
+import AlphaPEM.Core.Models: AlphaPEM, simulate_model!, _polarization_points_cali, _calculate_rmse,
+                             plot_polarization_curve_for_cali, plot_polarization_curve
 
 export CalibrationConfig,
        CalibrationResult,
-       calibrate
+       calibrate,
+       # Shared parametrisation utilities used by ValidParameterRegion and SobolSensitivityAnalysis
+       ParameterBound,
+       ParameterBounds,
+       SamplingConfig,
+       bounds_for_fuel_cell,
+       generate_lhs_samples,
+       new_PhysicalParams_from_sample,
+       get_reference_config,
+       export_parameter_bounds,
+       export_calibrated_params
 
-# Include helper module for internal functions
-include("calibration/helpers.jl")
-using .CalibrationHelpers
+# Shared parametrisation utilities (moved from the former common/ submodule)
+include("calibration/types.jl")
+include("calibration/bounds.jl")
+include("calibration/sampling.jl")
+include("calibration/mapping.jl")
+include("calibration/export.jl")
+
+# Calibration-specific internal helpers (split from the former helpers.jl)
+include("calibration/fitness.jl")
+include("calibration/checkpoint.jl")
+include("calibration/io.jl")
+include("calibration/plotting.jl")
 
 # ________________________________________________________________─────────────
 # CORE CALIBRATION
@@ -43,7 +64,7 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
 
     # 0. Initialisation
     start_time = time() # Record the initial time for performance measurement
-    output_dir = CalibrationHelpers._generate_calibration_output_dir(cfg) # Date/type stamped run directory
+    output_dir = _generate_calibration_output_dir(cfg) # Date/type stamped run directory
     cfg = CalibrationConfig(
         simulation_configs      = cfg.simulation_configs,
         ga_config               = cfg.ga_config,
@@ -78,12 +99,12 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
     _py_eval    = pyimport("builtins").eval
     _py_globals = pyimport("builtins").__dict__  # provides `list`, `dict`, etc. to the evaluated lambdas
     if cfg.parallel
-        jl_fitness_func_batch = (ga_instance, population, population_idx) -> CalibrationHelpers._fitness_function_batch(
+        jl_fitness_func_batch = (ga_instance, population, population_idx) -> _fitness_function_batch(
             ga_instance, population, population_idx, parameter_bounds, base_params, fuel_cells, current_profiles, cfg.simulation_configs
         )
         fitness_func = _py_eval("lambda f: lambda ga_instance, population, population_idx: list(f(ga_instance, population, population_idx))", _py_globals)(jl_fitness_func_batch)
     else
-        jl_fitness_func = (ga_instance, solution, solution_idx) -> CalibrationHelpers._fitness_function(
+        jl_fitness_func = (ga_instance, solution, solution_idx) -> _fitness_function(
             solution, parameter_bounds, base_params, fuel_cells, current_profiles, cfg.simulation_configs
         )
         fitness_func = _py_eval("lambda f: lambda ga_instance, solution, solution_idx: f(ga_instance, solution, solution_idx)", _py_globals)(jl_fitness_func)
@@ -94,7 +115,7 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
     last_save_time = Ref(time()) # Track the last checkpoint save time
 
     on_generation = _py_eval("lambda f: lambda ga_instance: f(ga_instance)", _py_globals)(
-        ga -> CalibrationHelpers._on_generation(ga, history, ga_config, cfg, last_save_time, parameter_bounds, base_params)
+        ga -> _on_generation(ga, history, ga_config, cfg, last_save_time, parameter_bounds, base_params)
     )
 
     # 5. Build initial population
@@ -102,7 +123,7 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
     rng = ga_config.seed === nothing ? Random.default_rng() : MersenneTwister(ga_config.seed) # Initialize random number generator
 
     initial_population = if cfg.initial_population_file !== nothing # Handle warm-start population loading
-        loaded = CalibrationHelpers._load_warm_start_population(
+        loaded = _load_warm_start_population(
             cfg.initial_population_file, parameter_bounds, ga_config.pop_size, lower_bounds, upper_bounds, rng) # Attempt to load file
         if loaded !== nothing
             @info "Warm-start: loaded $(length(loaded)) individuals from $(cfg.initial_population_file)" # Confirm loading
@@ -153,12 +174,12 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
     # so no JIT compilation occurs inside worker threads.
     if cfg.parallel
         _prewarm_sol = lower_bounds .+ 0.5 .* (upper_bounds .- lower_bounds)
-        CalibrationHelpers._fitness_function(  # compile the function and all callees
+        _fitness_function(  # compile the function and all callees
             _prewarm_sol, parameter_bounds, base_params, fuel_cells, current_profiles, cfg.simulation_configs
         )
         let sol = _prewarm_sol, pb = parameter_bounds, bp = base_params,
                 fc = fuel_cells, cp = current_profiles, sc = cfg.simulation_configs
-            @sync Threads.@spawn CalibrationHelpers._fitness_function(sol, pb, bp, fc, cp, sc)
+            @sync Threads.@spawn _fitness_function(sol, pb, bp, fc, cp, sc)
         end  # compile the @spawn closure type used by _fitness_function_batch
     end
 
@@ -171,7 +192,7 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
     best_params = new_PhysicalParams_from_sample(optimized_genes, parameter_bounds, base_params) # Convert genes to physical parameters
 
     # 7. Save results
-    final_params = CalibrationHelpers._params_dict_for_export(best_params, parameter_bounds)
+    final_params = _params_dict_for_export(best_params, parameter_bounds)
     export_calibrated_params(final_params, joinpath(cfg.output_dir, "calibrated_bounds.yaml"); # Export calibrated parameters
                              method = :calibration,
                              metadata = Dict("fuel_cell_type" => string(ref_cfg.type_fuel_cell),
@@ -186,8 +207,8 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
     final_population_list   = [collect(final_population_matrix[i, :]) for i in 1:size(final_population_matrix, 1)]
     final_fitness_list      = [1.0 / v for v in final_fitness_values] # Convert 1/RMSE back to RMSE
 
-    CalibrationHelpers._save_final_results(result, cfg.output_dir, final_population_list, final_fitness_list) # Persist final data to disk
-    CalibrationHelpers._plot_calibration_results(result, cfg.output_dir) # Generate results figure
+    _save_final_results(result, cfg.output_dir, final_population_list, final_fitness_list) # Persist final data to disk
+    _plot_calibration_results(result, cfg.output_dir) # Generate results figure
 
     for checkpoint_file in ("calibration_checkpoint.yaml", "calibration_checkpoint_population.yaml") # Clean up temporary checkpoint files
         checkpoint_path = joinpath(cfg.output_dir, checkpoint_file)

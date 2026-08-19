@@ -97,16 +97,14 @@ ohmic-drop slope) from cyclic voltammetry data. See `examples/run_cv_extraction.
 """
 module Parametrisation
 
-include("common/ParametrisationCommon.jl")
-include("valid_parameter_region.jl")
 include("calibration.jl")
+include("valid_parameter_region.jl")
 include("sobol_sensitivity_analysis.jl")
 include("cv_extraction.jl")
 
 export ValidParameterRegion,
        Calibration,
        SobolSensitivityAnalysis,
-       CVExtraction,
-       ParametrisationCommon
+       CVExtraction
 
 end  # module Parametrisation
