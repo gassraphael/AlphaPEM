@@ -154,13 +154,15 @@ const UNDETERMINED_PARAMETER_BOUNDS = Dict{Symbol, Tuple{Float64, Float64, Symbo
     :Hgdl          => (70e-6, 150e-6, :real),                # Gas-diffusion-layer thickness
     :Hmpl          => (40e-6, 100e-6, :real),                # Microporous-layer thickness
     :epsilon_gdl   => (0.5, 0.9, :real),                     # GDL porosity
-    :theta_c_gdl   => (90 * π / 180, 160 * π / 180, :real), # GDL contact angle
+    :theta_c_gdl   => (90 * π / 180, 160 * π / 180, :real),  # GDL contact angle
+    :theta_c_cl    => (90 * π / 180, 140 * π / 180, :real),  # CL contact angle
     :epsilon_mpl   => (0.3, 0.6, :real),                     # MPL porosity
     :IC_ccl        => (0.1, 2.0, :real),                     # Ionomer to carbon ratio in the cathode catalyst layer
+    :k_th_gdl      => (0.1, 1.0, :real),                     # Thermal conductivity of the GDL
+    :wt_Pt_ccl     => (0.1, 0.7, :real),                     # Weight fraction of platinum over carbon in the cathode catalyst layer
+    :L_Pt_ccl      => (1e-3, 5e-3, :real),                   # Platinum loading in the cathode catalyst layer
     :r_carb        => (10e-9, 100e-9, :real),                # Mean radius of the carbon particles
     :ECSA_0        => (30.0, 200.0, :real),                  # Initial electrochemical surface area of the catalyst
-    :K_O2_dis_ion  => (0.1, 20.0, :real),                    # Interfacial resistance coefficient of O₂ dissolution inside the ionomer
-    :K_O2_ad_Pt    => (0.1, 20.0, :real),                    # Interfacial resistance coefficient of O₂ adsorption on the Pt sites
     :alpha_c       => (0.5, 1.0, :real),                     # Cathode transfer coefficient
     :e             => (3, 5, :int),                          # Capillary exponent
     :Re            => (5e-8, 5e-6, :real),                   # Electron-conduction resistance
@@ -184,12 +186,14 @@ const PARAMETER_METADATA = Dict{Symbol, Tuple{String, String}}(
     :Hmpl          => ("m", "Microporous-layer thickness"),
     :epsilon_gdl   => ("—", "GDL porosity"),
     :theta_c_gdl   => ("rad", "GDL contact angle"),
+    :theta_c_cl    => ("rad", "CL contact angle"),
     :epsilon_mpl   => ("—", "MPL porosity"),
     :IC_ccl        => ("—", "Ionomer to carbon ratio in the cathode catalyst layer"),
+    :k_th_gdl      => ("W·m⁻¹·K⁻¹", "Thermal conductivity of the GDL"),
+    :wt_Pt_ccl     => ("—", "Weight fraction of platinum over carbon in the cathode catalyst layer"),
+    :L_Pt_ccl      => ("kg·m⁻²", "Platinum loading in the cathode catalyst layer"),
     :r_carb        => ("m", "Mean radius of the carbon particles"),
     :ECSA_0        => ("cm²_Pt.cm⁻²_active_area", "Initial electrochemical surface area of the catalyst"),
-    :K_O2_dis_ion  => ("—", "O₂ dissolution interfacial resistance coefficient inside the ionomer"),
-    :K_O2_ad_Pt    => ("—", "O₂ adsorption interfacial resistance coefficient on the Pt sites"),
     :alpha_c       => ("—", "Cathode transfer coefficient"),
     :e             => ("—", "Capillary exponent"),
     :Re            => ("Ω·m²", "Electron-conduction resistance"),
@@ -217,8 +221,103 @@ Base.@kwdef struct OperatingConditions <: AbstractFuelCellParams
     Sc::Float64 = 2.0               # Stoichiometric ratio of oxygen
     Phi_a_des::Float64 = 0.4        # Desired anode relative humidity
     Phi_c_des::Float64 = 0.6        # Desired cathode relative humidity
-    y_H2_in::Float64 = 1.0          # Molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet
+    y_H2_in::Float64 = 0.8          # Molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet
     i_min_stoich::Float64 = 0.5     # Minimum current density used to compute the desired flows (A.cm-2)
+end
+
+
+"""
+    OPERATING_CONDITIONS_BOUNDS
+
+Dictionary of default bounds for operating conditions.
+These bounds serve as fallback values when no fuel-cell-specific bounds are available.
+
+Each parameter is mapped to a tuple: (min::Float64, max::Float64, type::Symbol)
+where type is either :real or :int.
+"""
+const OPERATING_CONDITIONS_BOUNDS = Dict{Symbol, Tuple{Float64, Float64, Symbol}}(
+    :T_des         => (40.0 + 273.15, 90.0 + 273.15, :real), # Desired fuel cell temperature in Kelvin
+    :Pa_des        => (1.5e5, 3.5e5, :real),                 # Desired anode pressure in Pascal
+    :Pc_des        => (1.5e5, 3.5e5, :real),                 # Desired cathode pressure in Pascal
+    :Sa            => (1.5, 2.5, :real),                     # Stoichiometric ratio of hydrogen
+    :Sc            => (1.5, 2.5, :real),                     # Stoichiometric ratio of oxygen
+    :Phi_a_des     => (0.3, 0.9, :real),                     # Desired anode relative humidity
+    :Phi_c_des     => (0.3, 0.9, :real),                     # Desired cathode relative humidity
+)
+
+
+"""
+    OperatingConditionConstraint
+
+A single constraint relating an operating condition `target` to one or more `sources`.
+
+# Fields
+- `target::Symbol`: The operating condition to enforce (e.g. `:Pc_des`).
+- `sources::Vector{Symbol}`: The operating conditions the constraint depends on.
+- `fn::Function`: Function `(sample_dict) -> value` that computes the bound or fixed value.
+- `kind::Symbol`: Kind of constraint. One of:
+  - `:(=)`: `target = fn(overrides)` (default).
+  - `:(>=)`: `target >= fn(overrides)`; the sampled value is clamped from below.
+  - `:(<=)`: `target <= fn(overrides)`; the sampled value is clamped from above.
+- `active::Bool`: Whether the constraint is applied. Default `true`.
+
+Example:
+```julia
+OperatingConditionConstraint(
+    target = :Pc_des,
+    sources = [:Pa_des],
+    fn = d -> d[:Pa_des] - 0.5e5,
+    kind = :(>=)
+)
+```
+"""
+struct OperatingConditionConstraint
+    target::Symbol
+    sources::Vector{Symbol}
+    fn::Function
+    kind::Symbol
+    active::Bool
+    name::String
+end
+
+function OperatingConditionConstraint(; target::Symbol,
+                                        sources::Vector{Symbol},
+                                        fn::Function,
+                                        kind::Symbol = :(=),
+                                        active::Bool = true,
+                                        name::String = "")
+    kind in (:(=), :(>=), :(<=)) ||
+        throw(ArgumentError("OperatingConditionConstraint kind must be :(=), :(>=) or :(<=), got $kind"))
+    return OperatingConditionConstraint(target, sources, fn, kind, active, name)
+end
+
+
+"""
+    default_operating_condition_constraints()
+
+Return the default set of operating-condition constraints used during Sobol sampling.
+
+Default constraints:
+- `Pc_des >= Pa_des - 0.5e5` (cathode pressure is at most 0.5e5 Pa below anode pressure)
+- `Pc_des <= Pa_des + 0.5e5` (cathode pressure is at least 0.5e5 Pa above anode pressure)
+"""
+function default_operating_condition_constraints()::Vector{OperatingConditionConstraint}
+    return [
+        OperatingConditionConstraint(
+            target = :Pc_des,
+            sources = Symbol[:Pa_des],
+            fn = d -> d[:Pa_des] - 0.5e5,
+            kind = :(>=),
+            name = "Pc_des_ge_Pa_des_minus_0.5e5"
+        ),
+        OperatingConditionConstraint(
+            target = :Pc_des,
+            sources = Symbol[:Pa_des],
+            fn = d -> d[:Pa_des] + 0.5e5,
+            kind = :(<=),
+            name = "Pc_des_le_Pa_des_plus_0.5e5"
+        )
+    ]
 end
 
 
