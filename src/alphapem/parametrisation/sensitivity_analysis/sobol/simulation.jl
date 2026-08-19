@@ -106,7 +106,7 @@ function run_sobol_simulations(cfg::SobolAnalysisConfig,
 
     # Numerical params with timeout
     num_params = NumericalParams(
-        nb_gc = cfg.numerical_params.nb_gc,
+        nb_gc = cfg.nb_gc,
         nb_gdl = cfg.numerical_params.nb_gdl,
         nb_mpl = cfg.numerical_params.nb_mpl,
         nb_man = cfg.numerical_params.nb_man,
@@ -372,7 +372,7 @@ function _warm_up_sobol_simulation(cfg::SobolAnalysisConfig,
     try
         sample = Float64[(p.min + p.max) / 2 for p in params]
         num_params = NumericalParams(
-            nb_gc = cfg.numerical_params.nb_gc,
+            nb_gc = cfg.nb_gc,
             nb_gdl = cfg.numerical_params.nb_gdl,
             nb_mpl = cfg.numerical_params.nb_mpl,
             nb_man = cfg.numerical_params.nb_man,

@@ -36,7 +36,8 @@ end
 # Default configuration (can be edited below).
 base_config = SimulationConfig(
     type_fuel_cell = :ZSW_nominal,
-    voltage_zone   = :full
+    voltage_zone   = :full,
+    numerical_parameters = NumericalParams(nb_gc = 5)
 )
 
 run_simple_sensitivity_analysis(base_config; variation_pct=5.0)

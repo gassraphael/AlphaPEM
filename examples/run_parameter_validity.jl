@@ -106,6 +106,7 @@ criteria_cfg = ValidityCriteriaConfig(
 analysis_cfg = ValidityAnalysisConfig(
     fuel_cell_type         = :ZSW_nominal,
     voltage_zone           = :full,                 # :before_voltage_drop, :full.
+    nb_gc                  = 5,                     # Number of GC nodes to simulate.
     n_samples              = 100_000,               # Total number of configurations to simulate (LHS samples).
     validation_criteria    = criteria_cfg,
     parallel               = PARALLEL,              # ← driven by the constant above

@@ -364,6 +364,7 @@ end
         N = 2,
         second_order = false,
         include_operating_conditions = false,
+        nb_gc = 1,
         parallel = false,
         max_run_time_s = 30.0,
         output_dir = mktempdir(),

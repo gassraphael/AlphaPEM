@@ -214,7 +214,7 @@ Base.@kwdef struct ValidityAnalysisConfig
     sampling_seed::Int                  = 42
     validation_criteria::ValidityCriteriaConfig = ValidityCriteriaConfig()
     polarization_params::PolarizationParams = PolarizationParams(di_step = 0.1e4)
-    nb_gc::Int                          = 1        # Minimum spatial resolution for speed
+    nb_gc::Int                          = 1
     parallel::Bool                      = true
     save_curves::Bool                   = true     # Save polarization curves to curves.csv
     reuse_from::Union{String, Nothing}  = nothing  # Path to previous run directory to reuse curves

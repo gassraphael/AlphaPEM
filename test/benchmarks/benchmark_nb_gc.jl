@@ -4,7 +4,7 @@
 Benchmark `run_step`, `run_pola` and `run_eis` across configurable `nb_gc` values.
 
 Defaults:
-- nb_gc values: 1, 5, 10
+- nb_gc values: 1, 5
 - 5 measured run per scenario/nb_gc (BENCHMARK_RUNS=5)
 
 Mandatory warm-up sequence (not measured):
@@ -25,7 +25,7 @@ using Statistics
 using AlphaPEM.Config: SimulationConfig, StepParams, PolarizationParams, EISParams, NumericalParams
 using AlphaPEM.Application: run_simulation
 
-const DEFAULT_NB_GC_VALUES = [1, 5, 10]
+const DEFAULT_NB_GC_VALUES = [1, 5]
 
 function parse_nb_gc_values()
     raw = strip(get(ENV, "BENCHMARK_NB_GC", ""))

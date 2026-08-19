@@ -73,6 +73,7 @@ my_constraints = [
 cfg = SobolAnalysisConfig(
     fuel_cell_type                  = :ZSW_nominal,
     voltage_zone                    = :full,
+    nb_gc                           = 5,
     N                               = 1024,          # Start small; increase once validated
     second_order                    = false,         # Set true only if compute budget allows
     seed                            = 42,

@@ -28,7 +28,7 @@ current_params = PolarizationParams(
 # :ZSW_nominal, :ZSW_Pa_1_61_Pc_1_41, :ZSW_Pa_2_01_Pc_1_81,
 # :ZSW_Pa_2_4_Pc_2_2, :ZSW_Pa_2_8_Pc_2_6, :ZSW_T_62,
 # :ZSW_T_76, :ZSW_T_84
-type_fuel_cell_list = [:ZSW_nominal, :ZSW_Pa_2_01_Pc_1_81,
+type_fuel_cell_list = [:ZSW_nominal, :ZSW_Pa_1_61_Pc_1_41, :ZSW_Pa_2_01_Pc_1_81,
                        :ZSW_Pa_2_4_Pc_2_2, :ZSW_Pa_2_8_Pc_2_6]
 year_pola = 2024
 nb_gc_pola = 5

@@ -88,6 +88,7 @@ function _config_hash_for_checkpoint(cfg::SobolAnalysisConfig)::String
 
     print(buf, join(string.(cfg.excluded_operating_conditions), ","))
     print(buf, _struct_to_string(cfg.polarization_params))
+    print(buf, cfg.nb_gc)
     print(buf, _struct_to_string(cfg.numerical_params))
 
     return bytes2hex(sha256(take!(buf)))

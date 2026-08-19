@@ -27,6 +27,7 @@ using Printf
 const PARALLEL       = true   # true  → multi-threaded population evaluation
 const N_THREADS      = 0      # 0 → use all available cores
 const MAX_RUN_TIME_S = 60     # Maximum simulation runtime (seconds)
+const NB_GC_POLA     = 5      # Number of GC nodes for polarization simulation
 
 if PARALLEL
     n_desired = N_THREADS == 0 ? Sys.CPU_THREADS : min(N_THREADS, Sys.CPU_THREADS)
@@ -54,17 +55,20 @@ calibration_conditions = [
     SimulationConfig(
         type_fuel_cell = :ZSW_nominal,
         voltage_zone   = :full,
-        numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S),
+        numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S,
+                                               nb_gc = NB_GC_POLA),
     ),
     SimulationConfig(
         type_fuel_cell = :ZSW_Pa_2_8_Pc_2_6,
         voltage_zone   = :full,
-        numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S),
+        numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S,
+                                               nb_gc = NB_GC_POLA),
     ),
     SimulationConfig(
         type_fuel_cell = :ZSW_Pa_2_01_Pc_1_81,
         voltage_zone   = :full,
-        numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S),
+        numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S,
+                                               nb_gc = NB_GC_POLA),
     ),
 ]
 
