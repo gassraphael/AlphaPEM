@@ -4,14 +4,15 @@
 Simple sensitivity analysis for AlphaPEM's PhysicalParams
 
 This performs a sensitivity analysis on the fuel cell's physical parameters by:
-1. Running a baseline polarization simulation with the nominal PhysicalParams of :ZSW_nominal
+1. Running a baseline polarization simulation with the nominal PhysicalParams
 2. For each field of PhysicalParams:
-   - Modifying it by ±20% (respecting integer/domain constraints, see `modify_physical_param`)
+   - Modifying it by ±variation_pct% (respecting integer/domain constraints, see `modify_physical_param`)
    - Running a polarization simulation in parallel, passing the modified PhysicalParams
      directly to SimulationConfig
-   - Computing the RMSE vs. the nominal polarization curve
-3. Ranking parameters by impact on the polarization curve
-4. Saving results to results/simple_sensitivity/
+   - Computing the RMSE vs. the nominal polarization curve globally and in each
+     characteristic region (activation, ohmic, mass transport)
+3. Ranking parameters by impact on the polarization curve for each region and globally
+4. Saving a formatted report to results/simple_sensitivity_analysis/
 
 Parallelization: Uses Distributed.jl with pmap for concurrent simulations. Since parameter
 variations are passed as plain data (PhysicalParams instances) instead of patched source
@@ -98,17 +99,22 @@ function modify_physical_param(params::PhysicalParams, field::Symbol, factor::Fl
     )
 end
 
-"""Worker task: run one parameter variation and return its RMSE vs. the nominal polarization curve."""
+"""Worker task: run one parameter variation and return its regional RMSEs vs. the nominal polarization curve."""
 function run_parameter_variation_task(nominal_params::PhysicalParams, field::Symbol, factor::Float64,
                                        i_exp::Vector{Float64}, Ucell_nominal::Vector{Float64},
-                                       base_config::SimulationConfig)
+                                       base_config::SimulationConfig,
+                                       regions::Vector{PolarizationRegion})
     try
         modified_params = modify_physical_param(nominal_params, field, factor)
         cfg = make_pola_config(base_config, physical_parameters = modified_params)
         simu = run_simulation(cfg)
-        return compute_rmse_from_nominal(simu, i_exp, Ucell_nominal)
+        return compute_regional_rmse_from_nominal(simu, i_exp, Ucell_nominal, regions)
     catch e
-        return Inf
+        rmse_dict = Dict{Symbol, Float64}(:global => Inf)
+        for r in regions
+            rmse_dict[r.name] = Inf
+        end
+        return rmse_dict
     end
 end
 
@@ -155,16 +161,20 @@ end
 # ═══════════════════════════════════════════════════════════════════════════════
 
 function run_simple_sensitivity_analysis(base_config::SimulationConfig = make_pola_config();
-                                         variation_pct::Float64 = 5.0)
+                                         variation_pct::Float64 = 5.0,
+                                         region_thresholds::Tuple{Float64, Float64} = (0.4, 1.6))
     println("\n")
     println("╔" * "═" ^ 78 * "╗")
     println("║" * " " ^ 20 * "ALPHAPEM SENSITIVITY ANALYSIS" * " " ^ 28 * "║")
     println("╚" * "═" ^ 78 * "╝")
     println("Variation amplitude: ±$(variation_pct)%")
+    println("Region thresholds:   $(region_thresholds) A/cm²")
+
+    regions = build_regions(region_thresholds)
 
     out_dir = joinpath(find_project_root(), "results", "simple_sensitivity_analysis")
     mkpath(out_dir)
-    out_csv = generate_output_path(out_dir, "sensitivity_analysis.csv")
+    out_txt = generate_output_path(out_dir, "sensitivity_analysis.txt")
 
     # Step 1: Nominal PhysicalParams for the requested fuel cell. i_exp is fixed regardless
     # of PhysicalParams, so it can be shared as-is across the nominal run and every modified run.
@@ -200,21 +210,23 @@ function run_simple_sensitivity_analysis(base_config::SimulationConfig = make_po
         batch_size = 1,
         on_error = (task, e) -> (
             @warn "Task failed for $(task[1]) with factor $(task[2]): $e";
-            Inf
+            Dict{Symbol, Float64}(:global => Inf, (r.name => Inf for r in regions)...)
         )
     ) do task
-        run_parameter_variation_task(nominal_params, task[1], task[2], i_exp, Ucell_nominal, base_config)
+        run_parameter_variation_task(nominal_params, task[1], task[2], i_exp, Ucell_nominal, base_config, regions)
     end
 
     # Convert results to dictionary format
-    results = Dict{String, Float64}()
+    results = Dict{String, Dict{Symbol, Float64}}()
     for (i, (field, factor)) in enumerate(tasks)
         suffix = factor < 1.0 ? "minus$(pct_int)" : "plus$(pct_int)"
         key = "$(field)_$(suffix)"
-        results[key] = results_list[i]
+        rmse_dict = results_list[i]
+        results[key] = rmse_dict
 
-        @printf("\r[%3d/%3d] %-25s (%+3.0f%%)  RMSE: %.6f",
-            i, length(tasks), string(field), (factor - 1) * 100, results_list[i])
+        global_rmse = get(rmse_dict, :global, Inf)
+        @printf("\r[%3d/%3d] %-25s (%+3.0f%%)  Global RMSE: %.6f",
+            i, length(tasks), string(field), (factor - 1) * 100, global_rmse)
         flush(stdout)
     end
     println("\r✓ All variations completed" * " " ^ 50)
@@ -224,8 +236,8 @@ function run_simple_sensitivity_analysis(base_config::SimulationConfig = make_po
     impacts = compute_parameter_impacts(params_dict, results; variation_pct=variation_pct)
 
     # Step 6: Save results
-    write_sensitivity_csv(out_csv, impacts; variation_pct=variation_pct)
-    print_sensitivity_report(impacts, out_csv; variation_pct=variation_pct)
+    write_sensitivity_txt(out_txt, impacts, regions; variation_pct=variation_pct)
+    print_sensitivity_report(impacts, out_txt, regions; variation_pct=variation_pct)
 
     println("\n✓ Sensitivity analysis completed successfully!\n")
 end

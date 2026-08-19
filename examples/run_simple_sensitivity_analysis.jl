@@ -40,4 +40,8 @@ base_config = SimulationConfig(
     numerical_parameters = NumericalParams(nb_gc = 5)
 )
 
-run_simple_sensitivity_analysis(base_config; variation_pct=5.0)
+run_simple_sensitivity_analysis(
+    base_config;
+    variation_pct      = 5.0,
+    region_thresholds  = (0.5, 1.5),   # A/cm²: activation / ohmic / mass-transport
+)
