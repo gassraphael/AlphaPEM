@@ -121,6 +121,21 @@ export PBS_TMPDIR=/gpfs/scratch/$USER/$PBS_JOBID
 mkdir -p "$PBS_TMPDIR"
 echo "[INFO] Temporary workspace created: $PBS_TMPDIR"
 
+# Ensure the temporary workspace is removed even if the job fails or is killed.
+trap 'echo "[INFO] Cleaning temporary workspace (trap)..."; rm -rf "$PBS_TMPDIR"' EXIT
+
+# Clean up stale scratch directories left behind by previous (failed) jobs.
+# Project copies can be large; without this they accumulate and fill scratch.
+echo "[INFO] Removing scratch job directories older than 7 days..."
+find "/gpfs/scratch/$USER" -maxdepth 1 -type d -name '[0-9]*.admin' -mtime +7 -print -exec rm -rf {} + 2>/dev/null || true
+echo "[INFO] Stale scratch cleanup completed"
+
+# Move the Julia depot to scratch as well. Package downloads, artifacts and
+# precompiled caches go here instead of filling /gpfs/labos/le2p/rgass/.julia.
+export JULIA_DEPOT_PATH="/gpfs/scratch/$USER/julia_depot"
+mkdir -p "$JULIA_DEPOT_PATH"
+echo "[INFO] Julia depot: $JULIA_DEPOT_PATH"
+
 # Copy entire project to temporary directory, excluding .git (read-only objects cause cp errors)
 echo "[INFO] Copying project to temporary workspace..."
 rsync -a --exclude='.git' "$PROJECT_ROOT/" "$PBS_TMPDIR/$PROJECT_NAME/"
@@ -159,6 +174,16 @@ echo "==========================================================================
 # Use Julia directly from PATH
 julia_version=$(julia --version)
 echo "[INFO] Using: $julia_version"
+
+# Sanity check: the Julia depot filesystem must have enough free space for
+# downloads, artifacts and precompiled caches (Makie/DifferentialEquations
+# caches alone can be several GB).
+available_gb=$(df -BG "$JULIA_DEPOT_PATH" | awk 'NR==2 {gsub(/G/,""); print $4}')
+echo "[INFO] Free space in Julia depot filesystem: ${available_gb} GB"
+if [ "${available_gb:-0}" -lt 10 ]; then
+    echo "[ERROR] Less than 10 GB free in Julia depot filesystem (${available_gb} GB). Aborting."
+    exit 1
+fi
 
 # Refresh the package registries before instantiating. The committed Manifest.toml pins
 # versions (e.g. PureKLU 1.1.0) that a stale General clone on the cluster does not know
@@ -262,8 +287,10 @@ echo "[INFO] Results copied successfully"
 # Return to original directory
 cd "$PBS_O_WORKDIR"
 
-# Clean up temporary directory
+# Clean up temporary directory (trap already provides a safety net earlier in
+# the script, so disable it here to avoid a duplicate cleanup pass on exit).
 echo "[INFO] Cleaning temporary workspace..."
+trap - EXIT
 rm -rf "$PBS_TMPDIR"
 echo "[INFO] Cleanup completed"
 
