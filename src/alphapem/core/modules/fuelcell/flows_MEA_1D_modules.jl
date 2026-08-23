@@ -549,7 +549,7 @@ end
 
 
 """This function calculates the equilibrium water content in the membrane from the liquid phase.
-Hinatsu's expression has been selected. It is valid for N-form membranes for 25 to 100 degC.
+Hinatsu's expression has been selected. It is valid for Nafion®117 S-form membranes for 25 to 130 degC.
 
 Parameters
 ----------
@@ -562,7 +562,7 @@ lambda_l_eq
     Equilibrium water content in the membrane from the liquid phase.
 """
 function lambda_l_eq(T)
-    return 10.0 * 1.84e-2 * (T - 273.15) + 9.90e-4 * (T - 273.15)^2
+    return 10.0 + 1.84e-2 * (T - 273.15) + 9.90e-4 * (T - 273.15)^2
 end
 
 
@@ -589,7 +589,7 @@ function lambda_eq(C_v, s, T, pp::PhysicalParams)
     Kshape = pp.Kshape  # Mathematical factor governing lambda_eq smoothing.
     a_w = C_v / C_v_sat(T) + 2 * s  # Water activity.
     return 0.5 * lambda_v_eq(a_w)                                          * (1 - tanh(100 * (a_w - 1))) +
-           0.5 * (lambda_v_eq(1) + ((lambda_l_eq(T) - lambda_v_eq(1)) / 2) * (1 - exp(-Kshape * (a_w - 1)))) *
+           0.5 * (lambda_v_eq(1) + (lambda_l_eq(T) - lambda_v_eq(1)) * (1 - exp(-Kshape * (a_w - 1)))) *
                                                                              (1 + tanh(100 * (a_w - 1)))
 end
 
