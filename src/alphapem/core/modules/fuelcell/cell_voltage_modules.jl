@@ -570,7 +570,7 @@ function epsilon_cl(element::Symbol, lambda_cl, T_cl, Hcl::Float64, pp::Physical
 
     if epsilon_cl_val <= 0
         println("epsilon_cl: ", epsilon_cl_val, " element: ", element, " Hcl: ", Hcl)
-        throw(ArgumentError("The calculated porosity in the $(element) is less than or equal to 0. Please check the inputs Hcl and, for the $(element), wt_Pt."))
+        throw(ArgumentError("The calculated porosity in the $(element) is less than or equal to 0. Please check the inputs Hcl, IC and, for the $(element), wt_Pt."))
     end
     return epsilon_cl_val
 end
