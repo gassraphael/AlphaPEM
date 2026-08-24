@@ -375,7 +375,7 @@ function calculate_dyn_voltage_evolution(
     # Differential equation
     d_eta_c_ccl_dt = 1 / (pp.C_scl * pp.Hccl) * ((i_fc + i_n) -
              pp.i0_c_ref * (C_O2_Pt_safe / C_O2ref_red)^pp.kappa_c *
-             exp(-Eact_O2_red / (R * T_ccl) * (1 / T_ccl - 1 / Tref_O2_red)) *
+             exp(-Eact_O2_red / R * (1 / T_ccl - 1 / Tref_O2_red)) *
              exp(alpha_c * F / (R * T_ccl) * eta_c))
 
     return MEAVoltageDerivative(d_eta_c_ccl_dt)

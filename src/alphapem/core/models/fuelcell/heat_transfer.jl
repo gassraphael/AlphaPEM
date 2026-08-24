@@ -96,7 +96,7 @@ function calculate_heat_transfers!(heat_work::MEAHeatWorkspace,
     @inbounds for i in 1:(NB_MPL - 1)
         Jt_cmpl_cmpl[i] = -k_th_eff_cmpl_cmpl[i] * d_dx(T_cmpl[i], T_cmpl[i + 1], Hmpl_node / 2)
     end
-    Jt_cmpl_cgdl = -k_th_eff_cmpl_cgdl * d_dx(T_cmpl[NB_MPL], T_cgdl[1], Hmpl_node, Hgdl_node)
+    Jt_cmpl_cgdl = -k_th_eff_cmpl_cgdl * d_dx(T_cmpl[NB_MPL], T_cgdl[1], Hmpl_node / 2, Hgdl_node / 2)
     Jt_cgdl_cgdl = heat_work.Jt_cgdl_cgdl
     @inbounds for i in 1:(NB_GDL - 1)
         Jt_cgdl_cgdl[i] = -k_th_eff_cgdl_cgdl[i] * d_dx(T_cgdl[i], T_cgdl[i + 1], Hgdl_node / 2)
