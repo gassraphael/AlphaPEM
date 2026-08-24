@@ -281,7 +281,7 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector{Float64}
     C_O2_Pt_ini = calculate_C_O2_Pt(i_fc_ini, s_ini, lambda_ccl_ini, C_O2_ini, T_ini, simu.fuel_cell)
     #       Butler-Volmer quasi-static inversion: solve dη_c/dt = 0.
     eta_c_ini = R * T_ini / (alpha_c * F) * log((i_fc_ini + i_n_ini) / i0_c_ref *
-                                                 1 / exp(-Eact_O2_red / (R * T_ini) * (1 / T_ini - 1 / Tref_O2_red)) *
+                                                 1 / exp(-Eact_O2_red / R * (1 / T_ini - 1 / Tref_O2_red)) *
                                                  (C_O2ref_red / C_O2_Pt_ini)^kappa_c)
 
     # Initial auxiliary system state.
