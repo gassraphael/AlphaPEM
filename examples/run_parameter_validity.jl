@@ -113,7 +113,7 @@ analysis_cfg = ValidityAnalysisConfig(
     save_curves            = true,                  # Set to true to save polarization curves
     reuse_from             = nothing,               # Set to "path/to/previous/run" to reuse curves. ex: "results/model_validity/2026.06.02 - 10000 samples - before voltage drop - V1"
     hyperbox_finder_method = [:PRIM, :MaxBox],      # Vector of IRD methods: :PRIM, :MaxBox
-    max_run_time_s         = 60.0,                  # Maximum simulation runtime for each polarisation curve (seconds)
+    max_run_time_s         = 120.0,                 # Maximum simulation runtime for each polarisation curve (seconds)
 )
 
 # IRD configuration (required — STEP 3 is no longer optional)
