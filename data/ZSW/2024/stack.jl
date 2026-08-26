@@ -101,7 +101,7 @@ const UNDETERMINED_PARAMETERS_BEFORE_VOLTAGE_DROP = [
     (:e,            3, 5),            # Capillary exponent
     (:IC_ccl,       0.4, 1.9),        # Ionomer to carbon ratio in the cathode catalyst layer
     (:k_th_gdl,     0.1, 1.0),        # Thermal conductivity of the GDL
-    (:wt_Pt_ccl,    0.2, 0.5),        # Weight fraction of platinum over carbon in the cathode catalyst layer
+    (:wt_Pt_ccl,    0.1, 0.7),        # Weight fraction of platinum over carbon in the cathode catalyst layer
     (:L_Pt_ccl,     1e-3, 5e-3),      # Platinum loading in the cathode catalyst layer
     (:i0_c_ref,     1, 40.0),         # Reference cathode exchange current density
     (:kappa_co,     15, 40.0),        # Crossover correction coefficient

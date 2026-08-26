@@ -26,7 +26,7 @@ using Printf
 
 const PARALLEL       = true   # true  → multi-threaded population evaluation
 const N_THREADS      = 0      # 0 → use all available cores
-const MAX_RUN_TIME_S = 60     # Maximum simulation runtime (seconds)
+const MAX_RUN_TIME_S = 90     # Maximum simulation runtime (seconds)
 
 if PARALLEL
     n_desired = N_THREADS == 0 ? Sys.CPU_THREADS : min(N_THREADS, Sys.CPU_THREADS)
