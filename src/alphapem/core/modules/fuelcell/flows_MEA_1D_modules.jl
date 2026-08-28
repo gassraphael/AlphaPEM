@@ -95,9 +95,9 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
 
     # Weighted mean values ...
     #       ... of the EOD flow of water in the membrane
-    D_eff_EOD_acl_mem = hmean(D_EOD_eff(:acl, i_fc, lambda_acl, T_acl, Hacl, pp), D_EOD(lambda_mem),
+    D_eff_EOD_acl_mem = hmean(D_EOD_eff(:acl, i_fc, lambda_acl, T_acl, Hacl, pp), D_EOD(i_fc),
                               Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem))
-    D_eff_EOD_mem_ccl = hmean(D_EOD(lambda_mem), D_EOD_eff(:ccl, i_fc, lambda_ccl, T_ccl, Hccl, pp),
+    D_eff_EOD_mem_ccl = hmean(D_EOD(i_fc), D_EOD_eff(:ccl, i_fc, lambda_ccl, T_ccl, Hccl, pp),
                               Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl))
 
     #       ... of the diffusion coefficient of water in the membrane
