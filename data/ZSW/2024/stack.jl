@@ -92,26 +92,26 @@ end
 
 # Undetermined parameters for calibration: (name, min_bound, max_bound)
 const UNDETERMINED_PARAMETERS_BEFORE_VOLTAGE_DROP = [
-    (:Hccl,         10e-6, 15.5e-6),  # Cathode catalyst-layer thickness
-    (:Hgdl,         70e-6, 90e-6),    # Gas-diffusion-layer thickness
-    (:Hmpl,         60e-6, 80e-6),    # Microporous-layer thickness
+    (:Hccl,         10e-6, 15e-6),    # Cathode catalyst-layer thickness
+    (:Hgdl,         70e-6, 88e-6),    # Gas-diffusion-layer thickness
+    (:Hmpl,         60e-6, 79e-6),    # Microporous-layer thickness
     (:epsilon_gdl,  0.76, 0.88),      # GDL porosity
-    (:epsilon_mpl,  0.4, 0.6),        # MPL porosity
-    (:alpha_c,      0.6, 1.0),        # Cathode transfer coefficient
+    (:epsilon_mpl,  0.41, 0.59),      # MPL porosity
+    (:alpha_c,      0.62, 9.5),       # Cathode transfer coefficient
     (:e,            3, 5),            # Capillary exponent
-    (:IC_ccl,       0.4, 1.9),        # Ionomer to carbon ratio in the cathode catalyst layer
-    (:k_th_gdl,     0.1, 1.0),        # Thermal conductivity of the GDL
-    (:wt_Pt_ccl,    0.1, 0.7),        # Weight fraction of platinum over carbon in the cathode catalyst layer
-    (:L_Pt_ccl,     1e-3, 5e-3),      # Platinum loading in the cathode catalyst layer
-    (:i0_c_ref,     1, 40.0),         # Reference cathode exchange current density
-    (:kappa_co,     15, 40.0),        # Crossover correction coefficient
-    (:kappa_c,      0.25, 3.4),       # Overpotential correction exponent
+    (:IC_ccl,       1.4, 1.9),        # Ionomer to carbon ratio in the cathode catalyst layer
+    (:k_th_gdl,     0.15, 0.9),       # Thermal conductivity of the GDL
+    (:wt_Pt_ccl,    0.5, 0.63),       # Weight fraction of platinum over carbon in the cathode catalyst layer
+    (:L_Pt_ccl,     2.6e-3, 3.5e-3),  # Platinum loading in the cathode catalyst layer
+    (:i0_c_ref,     1, 34.0),         # Reference cathode exchange current density
+    (:kappa_co,     10, 20.0),        # Crossover correction coefficient
+    (:kappa_c,      0.25, 1.3),       # Overpotential correction exponent
 ]
 
 const UNDETERMINED_PARAMETERS_AFTER_VOLTAGE_DROP = [
     (:theta_c_cl,   90 * π / 180, 140 * π / 180), # CL contact angle
     (:r_carb,       10e-9, 21.55e-9),             # Mean radius of the carbon particles
-    (:ECSA_0,       75.0, 200.0),                 # Initial electrochemical surface area of the catalyst
+    (:ECSA_0,       80.0, 190.0),                 # Initial electrochemical surface area of the catalyst
 ]
 
 const UNDETERMINED_PARAMETERS_FULL =
