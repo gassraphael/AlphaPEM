@@ -97,20 +97,20 @@ const UNDETERMINED_PARAMETERS_BEFORE_VOLTAGE_DROP = [
     (:Hmpl,         60e-6, 79e-6),    # Microporous-layer thickness
     (:epsilon_gdl,  0.76, 0.88),      # GDL porosity
     (:epsilon_mpl,  0.41, 0.59),      # MPL porosity
-    (:alpha_c,      0.62, 9.5),       # Cathode transfer coefficient
+    (:alpha_c,      0.62, 0.95),       # Cathode transfer coefficient
     (:e,            3, 5),            # Capillary exponent
     (:IC_ccl,       1.4, 1.9),        # Ionomer to carbon ratio in the cathode catalyst layer
     (:k_th_gdl,     0.15, 0.9),       # Thermal conductivity of the GDL
     (:wt_Pt_ccl,    0.5, 0.63),       # Weight fraction of platinum over carbon in the cathode catalyst layer
     (:L_Pt_ccl,     2.6e-3, 3.5e-3),  # Platinum loading in the cathode catalyst layer
     (:i0_c_ref,     1, 34.0),         # Reference cathode exchange current density
-    (:kappa_co,     10, 20.0),        # Crossover correction coefficient
+    (:kappa_co,     1, 20.0),        # Crossover correction coefficient
     (:kappa_c,      0.25, 1.3),       # Overpotential correction exponent
 ]
 
 const UNDETERMINED_PARAMETERS_AFTER_VOLTAGE_DROP = [
     (:theta_c_cl,   90 * π / 180, 140 * π / 180), # CL contact angle
-    (:r_carb,       10e-9, 21.55e-9),             # Mean radius of the carbon particles
+    (:r_carb,       11e-9, 21.5e-9),             # Mean radius of the carbon particles
     (:ECSA_0,       80.0, 190.0),                 # Initial electrochemical surface area of the catalyst
 ]
 
