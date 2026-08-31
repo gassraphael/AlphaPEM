@@ -62,7 +62,7 @@ calibration_conditions = [
         numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S),
     ),
     SimulationConfig(
-        type_fuel_cell = :ZSW_Pa_2_01_Pc_1_81,
+        type_fuel_cell = :ZSW_Pa_1_61_Pc_1_41,
         voltage_zone   = :full,
         numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S),
     ),
