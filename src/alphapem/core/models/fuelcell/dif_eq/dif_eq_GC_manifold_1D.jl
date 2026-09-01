@@ -48,7 +48,7 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
         if NB_GC == 1
             J_in = Jv.agc_in
             J_out = Jv.agc_out
-            fac_a * (J_in - J_out) / Lgc - flows_mea[k].Jv.agc_agdl / Hagc
+            fac_a * ((J_in - J_out) / Lgc - flows_mea[k].Jv.agc_agdl / Hagc)
         else
             if counter_flow
                 J_in = k == NB_GC ? Jv.agc_in : Jv.agc_agc[k + 1]
@@ -57,7 +57,7 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
                 J_in = k == 1 ? Jv.agc_in : Jv.agc_agc[k - 1]
                 J_out = k == NB_GC ? Jv.agc_out : Jv.agc_agc[k]
             end
-            fac_a * (J_in - J_out) / L_node - flows_mea[k].Jv.agc_agdl / Hagc
+            fac_a * ((J_in - J_out) / L_node - flows_mea[k].Jv.agc_agdl / Hagc)
         end
     end
 
@@ -67,7 +67,7 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
         if NB_GC == 1
             J_in = JH2.agc_in
             J_out = JH2.agc_out
-            fac_a * (J_in - J_out) / Lgc - flows_mea[k].J_H2.agc_agdl / Hagc
+            fac_a * ((J_in - J_out) / Lgc - flows_mea[k].J_H2.agc_agdl / Hagc)
         else
             if counter_flow
                 J_in = k == NB_GC ? JH2.agc_in : JH2.agc_agc[k + 1]
@@ -76,7 +76,7 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
                 J_in = k == 1 ? JH2.agc_in : JH2.agc_agc[k - 1]
                 J_out = k == NB_GC ? JH2.agc_out : JH2.agc_agc[k]
             end
-            fac_a * (J_in - J_out) / L_node - flows_mea[k].J_H2.agc_agdl / Hagc
+            fac_a * ((J_in - J_out) / L_node - flows_mea[k].J_H2.agc_agdl / Hagc)
         end
     end
 
@@ -87,7 +87,7 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
         if NB_GC == 1
             J_in = JN2.agc_in
             J_out = JN2.agc_out
-            fac_a * (J_in - J_out) / Lgc - flows_mea[k].J_N2.agc_agdl / Hagc
+            fac_a * ((J_in - J_out) / Lgc - flows_mea[k].J_N2.agc_agdl / Hagc)
         else
             if counter_flow
                 J_in = k == NB_GC ? JN2.agc_in : JN2.agc_agc[k + 1]
@@ -96,7 +96,7 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
                 J_in = k == 1 ? JN2.agc_in : JN2.agc_agc[k - 1]
                 J_out = k == NB_GC ? JN2.agc_out : JN2.agc_agc[k]
             end
-            fac_a * (J_in - J_out) / L_node - flows_mea[k].J_N2.agc_agdl / Hagc
+            fac_a * ((J_in - J_out) / L_node - flows_mea[k].J_N2.agc_agdl / Hagc)
         end
     end
 
@@ -106,11 +106,11 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
         if NB_GC == 1
             J_in = Jv.cgc_in
             J_out = Jv.cgc_out
-            fac_c * (J_in - J_out) / Lgc + flows_mea[k].Jv.cgdl_cgc / Hcgc
+            fac_c * ((J_in - J_out) / Lgc + flows_mea[k].Jv.cgdl_cgc / Hcgc)
         else
             J_in = k == 1 ? Jv.cgc_in : Jv.cgc_cgc[k - 1]
             J_out = k == NB_GC ? Jv.cgc_out : Jv.cgc_cgc[k]
-            fac_c * (J_in - J_out) / L_node + flows_mea[k].Jv.cgdl_cgc / Hcgc
+            fac_c * ((J_in - J_out) / L_node + flows_mea[k].Jv.cgdl_cgc / Hcgc)
         end
     end
 
@@ -120,11 +120,11 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
         if NB_GC == 1
             J_in = JO2.cgc_in
             J_out = JO2.cgc_out
-            fac_c * (J_in - J_out) / Lgc + flows_mea[k].J_O2.cgdl_cgc / Hcgc
+            fac_c * ((J_in - J_out) / Lgc + flows_mea[k].J_O2.cgdl_cgc / Hcgc)
         else
             J_in = k == 1 ? JO2.cgc_in : JO2.cgc_cgc[k - 1]
             J_out = k == NB_GC ? JO2.cgc_out : JO2.cgc_cgc[k]
-            fac_c * (J_in - J_out) / L_node + flows_mea[k].J_O2.cgdl_cgc / Hcgc
+            fac_c * ((J_in - J_out) / L_node + flows_mea[k].J_O2.cgdl_cgc / Hcgc)
         end
     end
 
@@ -134,11 +134,11 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
         if NB_GC == 1
             J_in = JN2.cgc_in
             J_out = JN2.cgc_out
-            fac_c * (J_in - J_out) / Lgc + flows_mea[k].J_N2.cgdl_cgc / Hcgc
+            fac_c * ((J_in - J_out) / Lgc + flows_mea[k].J_N2.cgdl_cgc / Hcgc)
         else
             J_in = k == 1 ? JN2.cgc_in : JN2.cgc_cgc[k - 1]
             J_out = k == NB_GC ? JN2.cgc_out : JN2.cgc_cgc[k]
-            fac_c * (J_in - J_out) / L_node + flows_mea[k].J_N2.cgdl_cgc / Hcgc
+            fac_c * ((J_in - J_out) / L_node + flows_mea[k].J_N2.cgdl_cgc / Hcgc)
         end
     end
 
