@@ -795,8 +795,8 @@ function Svl(element::Symbol,
         D_value = Dc(Ptot, T_eff)  # Diffusion coefficient at the cathode.
     end
 
-    Svl_cond = gamma_cond * M_H2O / (R * T_eff) * epsilon * (1 - s_eff) * D_value * Ptot * log((Ptot - Psat_eff) / (Ptot - P_v))
-    Svl_evap = gamma_evap * M_H2O / (R * T_eff) * epsilon * s_eff * D_value * Ptot * log((Ptot - Psat_eff) / (Ptot - P_v))
+    Svl_cond = gamma_cond / (R * T_eff) * epsilon * (1 - s_eff) * D_value * Ptot * log((Ptot - Psat_eff) / (Ptot - P_v))
+    Svl_evap = gamma_evap / (R * T_eff) * epsilon * s_eff * D_value * Ptot * log((Ptot - Psat_eff) / (Ptot - P_v))
 
     # Transition function between condensation and evaporation
     K_transition = 3e-3 # This is a constant that defines the sharpness of the transition between two states.
