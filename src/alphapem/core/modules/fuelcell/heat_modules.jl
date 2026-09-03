@@ -649,16 +649,20 @@ function calculate_rho_Cp0(element::Symbol,
             if C_H2 === nothing
                 throw(ArgumentError("C_H2 must be provided for anode elements."))
             end
-            sum_C = C_v + C_H2 + C_N2
-            rho_Cp0_gaz = average((M_H2O * C_v * Cp0(:H2O_v, T), M_H2 * C_H2 * Cp0(:H2, T), M_N2 * C_N2 * Cp0(:N2, T)),
-                                  (C_v / sum_C, C_H2 / sum_C, C_N2 / sum_C))
+            rho_Cp0_gaz = (
+                    M_H2O * C_v * Cp0(:H2O_v, T) +
+                    M_H2 * C_H2 * Cp0(:H2, T) +
+                    M_N2 * C_N2 * Cp0(:N2, T)
+            )
         else  # In the cathode.
             if C_O2 === nothing
                 throw(ArgumentError("C_O2 must be provided for cathode elements."))
             end
-            sum_C = C_v + C_O2 + C_N2
-            rho_Cp0_gaz = average((M_H2O * C_v * Cp0(:H2O_v, T), M_O2 * C_O2 * Cp0(:O2, T), M_N2 * C_N2 * Cp0(:N2, T)),
-                                  (C_v / sum_C, C_O2 / sum_C, C_N2 / sum_C))
+            rho_Cp0_gaz = (
+                    M_H2O * C_v * Cp0(:H2O_v, T) +
+                    M_O2 * C_O2 * Cp0(:O2, T) +
+                    M_N2 * C_N2 * Cp0(:N2, T)
+            )
         end
 
         if element == :agdl || element == :cgdl  # In the GDLs.
@@ -683,16 +687,20 @@ function calculate_rho_Cp0(element::Symbol,
             if C_H2 === nothing
                 throw(ArgumentError("C_H2 must be provided for 'acl'."))
             end
-            sum_C = C_v + C_H2 + C_N2
-            rho_Cp0_gaz = average((M_H2O * C_v * Cp0(:H2O_v, T), M_H2 * C_H2 * Cp0(:H2, T), M_N2 * C_N2 * Cp0(:N2, T)),
-                                  (C_v / sum_C, C_H2 / sum_C, C_N2 / sum_C))
+            rho_Cp0_gaz = (
+                    M_H2O * C_v * Cp0(:H2O_v, T) +
+                    M_H2 * C_H2 * Cp0(:H2, T) +
+                    M_N2 * C_N2 * Cp0(:N2, T)
+            )
         else  # The heat capacity of the gas mixture in the CCL.
             if C_O2 === nothing
                 throw(ArgumentError("C_O2 must be provided for 'ccl'."))
             end
-            sum_C = C_v + C_O2 + C_N2
-            rho_Cp0_gaz = average((M_H2O * C_v * Cp0(:H2O_v, T), M_O2 * C_O2 * Cp0(:O2, T), M_N2 * C_N2 * Cp0(:N2, T)),
-                                  (C_v / sum_C, C_O2 / sum_C, C_N2 / sum_C))
+            rho_Cp0_gaz = (
+                    M_H2O * C_v * Cp0(:H2O_v, T) +
+                    M_O2 * C_O2 * Cp0(:O2, T) +
+                    M_N2 * C_N2 * Cp0(:N2, T)
+            )
         end
 
         rho_cl, Cp_cl, rho_mem, Cp_mem = pp.rho_cl, pp.Cp_cl, pp.rho_mem, pp.Cp_mem
