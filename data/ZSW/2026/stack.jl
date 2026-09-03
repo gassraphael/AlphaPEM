@@ -5,26 +5,30 @@
 #   - nominal operating conditions,
 #   - undetermined parameter bounds used for calibration.
 #
+# Two discretisations are supported:
+#   :1D   -> single GC node (nb_gc = 1)
+#   :1D1D -> multiple GC nodes (in pratice nb_gc >=2, but you should rather use nb_gc >= 5)
+#
+# The known physical parameters are defined once in KNOWN_PHYSICAL_PARAMETERS.
+# Only the undetermined parameter bounds may differ between the two discretisations
+# (one set per discretisation).
+#
 # Experimental polarization curves are stored separately under pola/.
 
 using AlphaPEM.Config: PhysicalParams, OperatingConditions
 
-const PHYSICAL_PARAMETERS = PhysicalParams(
+# ═════════════════════════════════════════════════════════════════════════════
+# PHYSICAL PARAMETERS
+# ═════════════════════════════════════════════════════════════════════════════
+
+const KNOWN_PHYSICAL_PARAMETERS = PhysicalParams(
     # Global
     Aact             = 283.87e-4,              # Active area of the catalyst layer in m²
     nb_cell          = 26,                     # Number of cells in the stack
     # Catalyst layer
     Hacl             = 3e-6,                   # Thickness of the anode catalyst layer in meters
-    Hccl             = 11.287950376337168e-6,  # Thickness of the cathode catalyst layer in meters
     # Membrane
     Hmem             = 15e-6,                  # Thickness of the membrane in meters
-    # Gas diffusion layer
-    Hgdl             = 88.05912627673723e-6,   # Thickness of the gas diffusion layer in meters
-    epsilon_gdl      = 0.7748445167995911,     # Anode/cathode GDL porosity
-    theta_c_gdl      = 149.924 * π / 180,      # Contact angle of GDL for liquid water in radian
-    # Microporous layer
-    Hmpl             = 79.28429564508388e-6,   # Thickness of the microporous layer in meters
-    epsilon_mpl      = 0.5459202450014615,     # Porosity of the microporous layer
     # Gas channel
     Hagc             = 230e-6,                 # Thickness of the anode gas channel in meters
     Hcgc             = 300e-6,                 # Thickness of the cathode gas channel in meters
@@ -41,22 +45,89 @@ const PHYSICAL_PARAMETERS = PhysicalParams(
     Vcsm             = 25.8e-3 * 22.61e-4,     # Supply manifold volume at the cathode in m³
     Vaem             = 25.8e-3 * 9.01e-4,      # Exhaust manifold volume at the anode in m³
     Vcem             = 25.8e-3 * 22.61e-4,     # Exhaust manifold volume at the cathode in m³
-    # Interaction parameters between fluids and PEMFC structure
-    e                = 5,                      # Capillary exponent
-    # Volumic flow of O2 inside the CCL to the Pt sites
-    IC_ccl           = 0.7463190105271269,     # Ionomer to carbon ratio in the cathode catalyst layer
     ECSA_0           = 113.55,                 # Initial electrochemical surface area of the catalyst in cm2_Pt.cm-2_active_area
     K_O2_ad_Pt       = 3.2988632394563835,     # Interfacial resistance coefficient of O2 adsorption on the Pt sites
     K_O2_dis_ion     = 7.359085442135299,      # Interfacial resistance coefficient of O2 dissolution inside the ionomer
-    r_carb           = 10.453480212859218e-9,  # Mean radius of the carbon particles in m
     # Voltage polarization
-    Re               = 7.30203312606945e-8,    # Electron conduction resistance of the circuit in Ω·m²
-    i0_c_ref         = 1.5295708418305771,     # Reference exchange current density at the cathode in A·m⁻²
-    alpha_c          = 0.6842923194478925,     # Transfer coefficient of the cathode
-    kappa_co         = 18.27607646957141,      # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
-    kappa_c          = 0.5379051883481021,     # Overpotential correction exponent
     C_scl            = 2e7                     # Volumetric space-charge layer capacitance in F·m⁻³
 )
+
+# ═════════════════════════════════════════════════════════════════════════════
+# UNDETERMINED PHYSICAL PARAMETERS
+# ═════════════════════════════════════════════════════════════════════════════
+
+# Default physical values of the parameters that are optimised for the 1D
+# discretisation (nb_gc = 1).
+const UNDETERMINED_PHYSICAL_PARAMETERS_1D = (;
+    # Catalyst layer
+    Hccl             = 10.179819442673712e-6,  # Thickness of the cathode catalyst layer in meters
+    # Gas diffusion layer
+    Hgdl             = 75.88436374521656e-6,   # Thickness of the gas diffusion layer in meters
+    epsilon_gdl      = 0.8717693694526278,     # Anode/cathode GDL porosity
+    # Microporous layer
+    Hmpl             = 64.17561409938712e-6,   # Thickness of the microporous layer in meters
+    epsilon_mpl      = 0.5163119718049662,     # Porosity of the microporous layer
+    # Interaction parameters between fluids and PEMFC structure
+    theta_c_cl       = 95 * π / 180,           # CL contact angle
+    e                = 3,                      # Capillary exponent
+    # Volumic flow of O2 inside the CCL to the Pt sites
+    IC_ccl           = 1.8766573409239173,     # Ionomer to carbon ratio in the cathode catalyst layer
+    ECSA_0           = 90.18946251019264,      # Initial electrochemical surface area of the catalyst in cm2_Pt.cm-2_active_area
+    wt_Pt_ccl        = 0.5,                    # Weight fraction of platinum over carbon in the cathode catalyst layer
+    L_Pt_ccl         = 3e-3,                   # Platinum loading in the cathode catalyst layer in kg.m-2
+    r_carb           = 20.17782731935742e-9,   # Mean radius of the carbon particles in m
+    # Thermal conductivities
+    k_th_gdl         = 0.3,                    # Thermal conductivity of the GDL in J.m-1.s-1.K-1
+    # Voltage polarization
+    i0_c_ref         = 1.1319658074709191,     # Reference exchange current density at the cathode in A·m⁻²
+    alpha_c          = 0.6552890241967357,     # Transfer coefficient of the cathode
+    kappa_co         = 15.3655148859884,       # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
+    kappa_c          = 0.25862840985329477,    # Overpotential correction exponent
+)
+
+# Default physical values of the parameters that are optimised for the 1D+1D
+# discretisation (nb_gc >= 5).
+const UNDETERMINED_PHYSICAL_PARAMETERS_1D1D = (;
+    # Catalyst layer
+    Hccl             = 10.179819442673712e-6,  # Thickness of the cathode catalyst layer in meters
+    # Gas diffusion layer
+    Hgdl             = 75.88436374521656e-6,   # Thickness of the gas diffusion layer in meters
+    epsilon_gdl      = 0.8717693694526278,     # Anode/cathode GDL porosity
+    # Microporous layer
+    Hmpl             = 64.17561409938712e-6,   # Thickness of the microporous layer in meters
+    epsilon_mpl      = 0.5163119718049662,     # Porosity of the microporous layer
+    # Interaction parameters between fluids and PEMFC structure
+    theta_c_cl       = 95 * π / 180,           # CL contact angle
+    e                = 3,                      # Capillary exponent
+    # Volumic flow of O2 inside the CCL to the Pt sites
+    IC_ccl           = 1.8766573409239173,     # Ionomer to carbon ratio in the cathode catalyst layer
+    ECSA_0           = 90.18946251019264,      # Initial electrochemical surface area of the catalyst in cm2_Pt.cm-2_active_area
+    wt_Pt_ccl        = 0.5,                    # Weight fraction of platinum over carbon in the cathode catalyst layer
+    L_Pt_ccl         = 3e-3,                   # Platinum loading in the cathode catalyst layer in kg.m-2
+    r_carb           = 20.17782731935742e-9,   # Mean radius of the carbon particles in m
+    # Thermal conductivities
+    k_th_gdl         = 0.3,                    # Thermal conductivity of the GDL in J.m-1.s-1.K-1
+    # Voltage polarization
+    i0_c_ref         = 1.1319658074709191,     # Reference exchange current density at the cathode in A·m⁻²
+    alpha_c          = 0.6552890241967357,     # Transfer coefficient of the cathode
+    kappa_co         = 15.3655148859884,       # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
+    kappa_c          = 0.25862840985329477,    # Overpotential correction exponent
+)
+
+# Final physical-parameter sets used by the model, obtained by merging the
+# known (determined) parameters with the undetermined ones for each discretisation.
+const PHYSICAL_PARAMETERS_1D   = PhysicalParams(; Dict(f => getfield(KNOWN_PHYSICAL_PARAMETERS, f) for f in fieldnames(PhysicalParams))..., UNDETERMINED_PHYSICAL_PARAMETERS_1D...)
+const PHYSICAL_PARAMETERS_1D1D = PhysicalParams(; Dict(f => getfield(KNOWN_PHYSICAL_PARAMETERS, f) for f in fieldnames(PhysicalParams))..., UNDETERMINED_PHYSICAL_PARAMETERS_1D1D...)
+
+const PHYSICAL_PARAMETERS = Dict(
+    Symbol("1D")   => PHYSICAL_PARAMETERS_1D,
+    Symbol("1D1D") => PHYSICAL_PARAMETERS_1D1D,
+)
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# OPERATING CONDITIONS
+# ═════════════════════════════════════════════════════════════════════════════
 
 const OPERATING_CONDITIONS = OperatingConditions(
     T_des        = 70.0 + 273.15,  # K. Desired cooling circuit temperature.
@@ -64,7 +135,7 @@ const OPERATING_CONDITIONS = OperatingConditions(
     Pc_des       = 2.5e5,          # Pa. Desired pressure of the fuel gas at the cathode.
     Sa           = 1.5,            # Stoichiometric ratio of hydrogen at the anode.
     Sc           = 1.7,            # Stoichiometric ratio of oxygen at the cathode.
-    Phi_a_des    = 0.50,          # Desired relative humidity at the anode.
+    Phi_a_des    = 0.50,           # Desired relative humidity at the anode.
     Phi_c_des    = 0.35,           # Desired relative humidity at the cathode.
     y_H2_in      = 0.8,            # Molar fraction of H2 in the dry anode gas mixture (H2/N2) injected at the inlet.
     i_min_stoich = 0.5             # A/cm². Minimum current density used to compute the desired flows.
@@ -93,8 +164,11 @@ function apply_operating_conditions_correction(oc::OperatingConditions)::Operati
     )
 end
 
-# Undetermined parameters for calibration: (name, min_bound, max_bound)
-const UNDETERMINED_PARAMETERS_BEFORE_VOLTAGE_DROP = [
+# ═════════════════════════════════════════════════════════════════════════════
+# UNDETERMINED PARAMETER BOUNDS
+# ═════════════════════════════════════════════════════════════════════════════
+
+const UNDETERMINED_PARAMETER_BOUNDS_BEFORE_VOLTAGE_DROP_1D = [
     (:Hccl,         10e-6, 15.5e-6),  # Cathode catalyst-layer thickness
     (:Hgdl,         70e-6, 90e-6),    # Gas-diffusion-layer thickness
     (:Hmpl,         60e-6, 80e-6),    # Microporous-layer thickness
@@ -103,18 +177,46 @@ const UNDETERMINED_PARAMETERS_BEFORE_VOLTAGE_DROP = [
     (:alpha_c,      0.5, 1.0),        # Cathode transfer coefficient
     (:e,            3, 5),            # Capillary exponent
     (:Re,           5e-8, 5e-6),      # Electron-conduction resistance
-    (:i0_c_ref,     0.1, 100.0),         # Reference cathode exchange current density
-    (:kappa_co,     0.01, 40.0),        # Crossover correction coefficient
+    (:i0_c_ref,     0.1, 100.0),      # Reference cathode exchange current density
+    (:kappa_co,     0.01, 40.0),      # Crossover correction coefficient
     (:kappa_c,      0.25, 4.0),       # Overpotential correction exponent
 ]
 
-const UNDETERMINED_PARAMETERS_AFTER_VOLTAGE_DROP = [
+const UNDETERMINED_PARAMETER_BOUNDS_AFTER_VOLTAGE_DROP_1D = [
     (:theta_c_gdl,  90 * π / 180, 160 * π / 180), # GDL contact angle
     (:IC_ccl,       0.1, 2.0),                     # Ionomer to carbon ratio in the cathode catalyst layer
-    (:r_carb,       10e-9, 100e-9),               # Mean radius of the carbon particles
-    (:K_O2_dis_ion, 0.1, 20.0),                   # Interfacial resistance coefficient of O₂ dissolution inside the ionomer
-    (:K_O2_ad_Pt,   0.1, 20.0),                   # Interfacial resistance coefficient of O₂ adsorption on the Pt sites
+    (:r_carb,       10e-9, 100e-9),                # Mean radius of the carbon particles
 ]
 
-const UNDETERMINED_PARAMETERS_FULL =
-    vcat(UNDETERMINED_PARAMETERS_BEFORE_VOLTAGE_DROP, UNDETERMINED_PARAMETERS_AFTER_VOLTAGE_DROP)
+const UNDETERMINED_PARAMETER_BOUNDS_BEFORE_VOLTAGE_DROP_1D1D = [
+    (:Hccl,         10e-6, 15.5e-6),  # Cathode catalyst-layer thickness
+    (:Hgdl,         70e-6, 90e-6),    # Gas-diffusion-layer thickness
+    (:Hmpl,         60e-6, 80e-6),    # Microporous-layer thickness
+    (:epsilon_gdl,  0.7, 0.88),       # GDL porosity
+    (:epsilon_mpl,  0.3, 0.6),        # MPL porosity
+    (:alpha_c,      0.5, 1.0),        # Cathode transfer coefficient
+    (:e,            3, 5),            # Capillary exponent
+    (:Re,           5e-8, 5e-6),      # Electron-conduction resistance
+    (:i0_c_ref,     0.1, 100.0),      # Reference cathode exchange current density
+    (:kappa_co,     0.01, 40.0),      # Crossover correction coefficient
+    (:kappa_c,      0.25, 4.0),       # Overpotential correction exponent
+]
+
+const UNDETERMINED_PARAMETER_BOUNDS_AFTER_VOLTAGE_DROP_1D1D = [
+    (:theta_c_gdl,  90 * π / 180, 160 * π / 180), # GDL contact angle
+    (:IC_ccl,       0.1, 2.0),                     # Ionomer to carbon ratio in the cathode catalyst layer
+    (:r_carb,       10e-9, 100e-9),                # Mean radius of the carbon particles
+]
+
+const UNDETERMINED_PARAMETERS_BOUNDS = Dict(
+    Symbol("1D") => Dict(
+        :full                => vcat(UNDETERMINED_PARAMETER_BOUNDS_BEFORE_VOLTAGE_DROP_1D,
+                                     UNDETERMINED_PARAMETER_BOUNDS_AFTER_VOLTAGE_DROP_1D),
+        :before_voltage_drop => UNDETERMINED_PARAMETER_BOUNDS_BEFORE_VOLTAGE_DROP_1D,
+    ),
+    Symbol("1D1D") => Dict(
+        :full                => vcat(UNDETERMINED_PARAMETER_BOUNDS_BEFORE_VOLTAGE_DROP_1D1D,
+                                     UNDETERMINED_PARAMETER_BOUNDS_AFTER_VOLTAGE_DROP_1D1D),
+        :before_voltage_drop => UNDETERMINED_PARAMETER_BOUNDS_BEFORE_VOLTAGE_DROP_1D1D,
+    ),
+)

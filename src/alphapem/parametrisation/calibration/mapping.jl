@@ -33,11 +33,12 @@ function new_PhysicalParams_from_sample(sample::Vector{Float64},
 end
 
 """
-    get_reference_config(fuel_cell_type; year = nothing) -> PhysicalParams
+    get_reference_config(fuel_cell_type; year = nothing, nb_gc = 5) -> PhysicalParams
 
-Return the nominal `PhysicalParams` for `fuel_cell_type`.
+Return the nominal `PhysicalParams` for `fuel_cell_type` and GC spatial
+resolution `nb_gc`.
 """
-function get_reference_config(fuel_cell_type::Symbol; year::Union{Int,Nothing} = nothing)::Any
-    fc = create_fuelcell(fuel_cell_type, :full; year=year)
-    return getfield(fc, :physical_parameters)
+function get_reference_config(fuel_cell_type::Symbol; year::Union{Int,Nothing} = nothing, nb_gc::Int = 5)::PhysicalParams
+    fc = create_fuelcell(fuel_cell_type, :full; year=year, nb_gc=nb_gc)
+    return fc.physical_parameters
 end

@@ -178,7 +178,7 @@ function run_simple_sensitivity_analysis(base_config::SimulationConfig = make_po
 
     # Step 1: Nominal PhysicalParams for the requested fuel cell. i_exp is fixed regardless
     # of PhysicalParams, so it can be shared as-is across the nominal run and every modified run.
-    nominal_fc = create_fuelcell(base_config.type_fuel_cell, base_config.voltage_zone; year=base_config.year)
+    nominal_fc = create_fuelcell(base_config.type_fuel_cell, base_config.voltage_zone; year=base_config.year, nb_gc=base_config.numerical_parameters.nb_gc)
     nominal_params = nominal_fc.physical_parameters
     i_exp = Float64.(nominal_fc.pola_exp_data_cali.i_exp)
 

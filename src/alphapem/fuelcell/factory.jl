@@ -10,7 +10,7 @@ optional polarization YAML files under `data/<family>/<year>/pola/`.
 """
 
 """
-    create_fuelcell(type_fuel_cell::Symbol, voltage_zone::Symbol; year::Union{Int,Nothing}=nothing)::AbstractFuelCell
+    create_fuelcell(type_fuel_cell::Symbol, voltage_zone::Symbol; year::Union{Int,Nothing}=nothing, nb_gc::Int=5)::AbstractFuelCell
 
 Instantiate a fuel cell for `type_fuel_cell` from the data files.
 
@@ -20,9 +20,16 @@ loads `data/<family>/<year>/stack.jl` and, for variants,
 `data/<family>/<year>/pola/<variant>.yml`. The `year` keyword is required when
 the family is versioned by year (e.g. `data/ZSW/<year>/`); it is ignored for
 families that are not versioned (e.g. `data/EH/`).
+
+The `nb_gc` keyword selects the physical-parameter set and undetermined-parameter
+bounds stored in the returned fuel cell (`:1D` for `nb_gc = 1`, `:1D1D` otherwise).
 """
-function create_fuelcell(type_fuel_cell::Symbol, voltage_zone::Symbol; year::Union{Int,Nothing}=nothing)::AbstractFuelCell
+function create_fuelcell(type_fuel_cell::Symbol, voltage_zone::Symbol; year::Union{Int,Nothing}=nothing, nb_gc::Int=5)::AbstractFuelCell
     family, variant = ExperimentalDataLoader.parse_fuel_cell_symbol(type_fuel_cell)
+
+    if !isdir(joinpath(ExperimentalDataLoader.project_root(), "data", string(family)))
+        throw(ArgumentError("Unsupported fuel_cell_type: $type_fuel_cell"))
+    end
 
     # The year is required for families that are versioned by year.
     # Families that do not use a year directory ignore this value.
@@ -40,22 +47,25 @@ function create_fuelcell(type_fuel_cell::Symbol, voltage_zone::Symbol; year::Uni
         end
     end
 
-    return _load_fuelcell_from_data(family, variant, voltage_zone, year)
+    return _load_fuelcell_from_data(family, variant, voltage_zone, year; nb_gc=nb_gc)
 end
 
 """
     _load_fuelcell_from_data(family::Symbol, variant::String, voltage_zone::Symbol,
-                             year::Union{Int,Nothing}=nothing)::AbstractFuelCell
+                             year::Union{Int,Nothing}=nothing; nb_gc::Int=5)::AbstractFuelCell
 
 Generic constructor: load the stack file and the requested polarization data,
-then return a `GenericFuelCell` populated with the loaded values.
+then return a `GenericFuelCell` populated with the loaded values for the
+requested GC spatial resolution.
 """
 function _load_fuelcell_from_data(family::Symbol, variant::String, voltage_zone::Symbol,
-                                  year::Union{Int,Nothing}=nothing)::AbstractFuelCell
+                                  year::Union{Int,Nothing}=nothing; nb_gc::Int=5)::AbstractFuelCell
     stack = ExperimentalDataLoader.load_stack_data(family, year)
 
-    # Operating conditions: nominal from stack.jl, variant-specific from pola YAML.
-    if variant == "nominal"
+    # Operating conditions: nominal from stack.jl, variant-specific from pola YAML
+    # if the polarization file exists.
+    path = ExperimentalDataLoader.pola_file(family, variant, year)
+    if variant == "nominal" || !isfile(path)
         oc = stack.operating_conditions
     else
         oc = ExperimentalDataLoader.load_operating_conditions(family, variant, year)
@@ -70,16 +80,15 @@ function _load_fuelcell_from_data(family::Symbol, variant::String, voltage_zone:
     pola_exp, pola_exp_cali = ExperimentalDataLoader.load_pola_experimental_data(
         family, variant, voltage_zone, year)
 
-    undet = Dict{Symbol, Vector{Tuple{Symbol, Float64, Float64}}}(
-        :full => stack.undetermined_parameters_full,
-        :before_voltage_drop => stack.undetermined_parameters_before_voltage_drop,
-    )
+    discr = nb_gc == 1 ? Symbol("1D") : Symbol("1D1D")
+    pp = stack.physical_parameters[discr]
+    undet = stack.undetermined_parameter_bounds[discr]
 
     return GenericFuelCell(
-        physical_parameters = stack.physical_parameters,
+        physical_parameters = pp,
         operating_conditions = oc,
         pola_exp_data = pola_exp,
         pola_exp_data_cali = pola_exp_cali,
-        undetermined_parameters = undet
+        undetermined_parameter_bounds = undet
     )
 end

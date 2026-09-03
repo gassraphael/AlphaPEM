@@ -207,10 +207,12 @@ end
 Load the master stack file (`stack.jl`) for the requested fuel-cell family.
 
 The stack file must define:
-  - `PHYSICAL_PARAMETERS::PhysicalParams`
+  - `PHYSICAL_PARAMETERS::Dict{Symbol, PhysicalParams}` with keys `:1D` (single
+    GC node) and `:1D1D` (multiple GC nodes)
   - `OPERATING_CONDITIONS::OperatingConditions`
-  - `UNDETERMINED_PARAMETERS_FULL::Vector{Tuple{Symbol, Float64, Float64}}`
-  - `UNDETERMINED_PARAMETERS_BEFORE_VOLTAGE_DROP::Vector{Tuple{Symbol, Float64, Float64}}`
+  - `UNDETERMINED_PARAMETERS_BOUNDS::Dict{Symbol, Dict{Symbol, Vector{Tuple{Symbol, Float64, Float64}}}}`
+    with keys `:1D` and `:1D1D`; each value maps `:full` and `:before_voltage_drop`
+    to a list of `(name, min, max)` tuples.
 
 Returns a `NamedTuple` with the same fields.
 """
@@ -227,11 +229,22 @@ function load_stack_data(family::Symbol, year::Union{Int,Nothing}=nothing)
         identity
     end
 
+    physical_parameters = Core.eval(mod, :PHYSICAL_PARAMETERS)
+    undetermined_parameter_bounds = Core.eval(mod, :UNDETERMINED_PARAMETERS_BOUNDS)
+
+    # Normalise tuples to (Symbol, Float64, Float64) for type stability.
+    undetermined_parameter_bounds = Dict(
+        discr => Dict(
+            zone => Tuple{Symbol, Float64, Float64}[(p[1], Float64(p[2]), Float64(p[3])) for p in params]
+            for (zone, params) in zones
+        )
+        for (discr, zones) in undetermined_parameter_bounds
+    )
+
     return (
-        physical_parameters       = Core.eval(mod, :PHYSICAL_PARAMETERS),
-        operating_conditions      = Core.eval(mod, :OPERATING_CONDITIONS),
-        undetermined_parameters_full = Core.eval(mod, :UNDETERMINED_PARAMETERS_FULL),
-        undetermined_parameters_before_voltage_drop = Core.eval(mod, :UNDETERMINED_PARAMETERS_BEFORE_VOLTAGE_DROP),
+        physical_parameters           = physical_parameters,
+        operating_conditions          = Core.eval(mod, :OPERATING_CONDITIONS),
+        undetermined_parameter_bounds = undetermined_parameter_bounds,
         apply_operating_conditions_correction = correction,
     )
 end
@@ -254,13 +267,22 @@ Load the polarization YAML file for `variant` and return the full and calibratio
 experimental data for the requested `voltage_zone`.
 
 `voltage_zone` must be `:full` or `:before_voltage_drop`.
+
+If the YAML file does not exist, return empty `PolaExperimentalData()` instances.
+This allows a fuel cell to be instantiated from its stack file only, without any
+experimental polarization data.
 """
 function load_pola_experimental_data(family::Symbol, variant::String, voltage_zone::Symbol,
                                      year::Union{Int,Nothing}=nothing)::Tuple{PolaExperimentalData, PolaExperimentalData}
     voltage_zone in (:full, :before_voltage_drop) ||
         throw(ArgumentError("voltage_zone must be :full or :before_voltage_drop (got $voltage_zone)"))
 
-    data = load_pola_data(family, variant, year)
+    path = pola_file(family, variant, year)
+    if !isfile(path)
+        return PolaExperimentalData(), PolaExperimentalData()
+    end
+
+    data = load_yaml(path)
     zone_key = string(voltage_zone)
 
     pola_exp = build_pola_experimental_data(data["pola_exp_data"][zone_key])

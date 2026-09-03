@@ -492,7 +492,7 @@ simu = run_simulation(cfg)
 """
 function run_simulation(cfg::SimulationConfig)::AlphaPEM
     # Build a Fuelcell object with the given configuration.
-    fuel_cell       = create_fuelcell(cfg.type_fuel_cell, cfg.voltage_zone; year=cfg.year)
+    fuel_cell       = create_fuelcell(cfg.type_fuel_cell, cfg.voltage_zone; year=cfg.year, nb_gc=cfg.numerical_parameters.nb_gc)
 
     # Override with custom parameters if provided
     if cfg.physical_parameters !== nothing
@@ -538,7 +538,7 @@ function run_simulation(cfgs::AbstractVector{<:SimulationConfig})::Vector{AlphaP
     # Build Fuelcell objects for each configuration.
     fuel_cells = []
     for i in 1:n
-        fc = create_fuelcell(cfgs[i].type_fuel_cell, cfgs[i].voltage_zone; year=cfgs[i].year)
+        fc = create_fuelcell(cfgs[i].type_fuel_cell, cfgs[i].voltage_zone; year=cfgs[i].year, nb_gc=cfgs[i].numerical_parameters.nb_gc)
         if cfgs[i].physical_parameters !== nothing
             fc.physical_parameters = cfgs[i].physical_parameters
         end

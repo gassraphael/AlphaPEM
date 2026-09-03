@@ -324,10 +324,10 @@ function get_fuel_cell_defaults(fuel_cell_type::String; voltage_zone::String="be
     try
         # Use the factory to create a fuel cell instance
         # This ensures we get exactly the parameters defined in fuelcell/*.jl
-        fc = AlphaPEM.Fuelcell.create_fuelcell(mapped_type, v_zone; year=2024)
+        fc = AlphaPEM.Fuelcell.create_fuelcell(mapped_type, v_zone; year=2024, nb_gc=5)
 
         # Get undetermined parameters list for this fuel cell
-        und_params_list = AlphaPEM.Fuelcell.undetermined_parameters(fc, v_zone)
+        und_params_list = AlphaPEM.Fuelcell.undetermined_parameter_bounds(fc, v_zone)
         und_param_keys = [p[1] for p in und_params_list]
 
         ap = fc.physical_parameters
@@ -649,10 +649,10 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
     v_zone = Symbol(v_zone_str)
 
     base_fc = try
-        AlphaPEM.Fuelcell.create_fuelcell(base_type, v_zone; year=2024)
+        AlphaPEM.Fuelcell.create_fuelcell(base_type, v_zone; year=2024, nb_gc=5)
     catch
         # Fallback to ZSW
-        AlphaPEM.Fuelcell.create_fuelcell(:ZSW_nominal, :before_voltage_drop; year=2024)
+        AlphaPEM.Fuelcell.create_fuelcell(:ZSW_nominal, :before_voltage_drop; year=2024, nb_gc=5)
     end
     base_ap = base_fc.physical_parameters
 
