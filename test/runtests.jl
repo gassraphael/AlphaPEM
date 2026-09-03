@@ -4,7 +4,7 @@ using Test
 # Helper: minimal numerical parameters for fast smoke tests.
 function quick_numerical_params()
     return AlphaPEM.Config.NumericalParams(
-        nb_gc = 1,
+        nb_gc = 5,
         nb_gdl = 2,
         nb_mpl = 1,
         nb_man = 1,

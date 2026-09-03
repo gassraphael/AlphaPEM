@@ -951,7 +951,7 @@ function _simulate_one_configuration(sample::Vector{Float64},
         modified_params = new_PhysicalParams_from_sample(sample, bounds, base_params)
 
         # Build a fuel-cell object and inject the modified physical parameters.
-        fc = create_fuelcell(bounds.fuel_cell_type, bounds.voltage_zone; year=bounds.year)
+        fc = create_fuelcell(bounds.fuel_cell_type, bounds.voltage_zone; year=bounds.year, nb_gc=num_params.nb_gc)
         fc.physical_parameters = modified_params
 
         # Assemble a minimal SimulationConfig (no display, no plots).

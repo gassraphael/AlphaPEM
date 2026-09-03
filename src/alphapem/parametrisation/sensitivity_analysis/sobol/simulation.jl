@@ -100,7 +100,7 @@ function run_sobol_simulations(cfg::SobolAnalysisConfig,
     end
 
     # Reference fuel cell and parameters
-    base_fc = create_fuelcell(cfg.fuel_cell_type, cfg.voltage_zone; year=cfg.year)
+    base_fc = create_fuelcell(cfg.fuel_cell_type, cfg.voltage_zone; year=cfg.year, nb_gc=cfg.nb_gc)
     base_params = base_fc.physical_parameters
     base_oc = base_fc.operating_conditions
 
@@ -307,7 +307,7 @@ function _run_one_sobol_sample(sample::Vector{Float64},
         )
 
         # Build fuel cell
-        fc = create_fuelcell(cfg.fuel_cell_type, cfg.voltage_zone; year=cfg.year)
+        fc = create_fuelcell(cfg.fuel_cell_type, cfg.voltage_zone; year=cfg.year, nb_gc=cfg.nb_gc)
         fc.physical_parameters = physical_params
         fc.operating_conditions = operating_conditions
 

@@ -19,7 +19,7 @@ using LatinHypercubeSampling: randomLHC, scaleLHC
 using AlphaPEM.Config: PolarizationCalibrationParams, PhysicalParams, PARAMETER_METADATA
 using AlphaPEM.Config: CalibrationConfig, CalibrationResult, GAConfig
 using AlphaPEM.Config: PolaExperimentalData, PolarizationParams, SimulationConfig
-using AlphaPEM.Fuelcell: create_fuelcell, DefaultFuelCell, undetermined_parameters
+using AlphaPEM.Fuelcell: create_fuelcell, undetermined_parameter_bounds
 using AlphaPEM.Currents: create_current
 import AlphaPEM.Core.Models: AlphaPEM, simulate_model!, _polarization_points_cali, _calculate_rmse,
                              plot_polarization_curve_for_cali, plot_polarization_curve
