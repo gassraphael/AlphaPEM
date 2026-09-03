@@ -76,7 +76,7 @@ end
     # Factory for the default ZSW stack
     fc = create_fuelcell(:ZSW_nominal, :full; year=2024)
     @test fc isa AbstractFuelCell
-    @test fc.physical_parameters isa AlphaPEM.Config.PhysicalParams
+    @test physical_parameters(fc) isa AlphaPEM.Config.PhysicalParams
     @test fc.operating_conditions isa AlphaPEM.Config.OperatingConditions
 
     # Other supported fuel cell types
@@ -86,8 +86,8 @@ end
     # Accessor functions
     @test physical_parameters(fc) isa AlphaPEM.Config.PhysicalParams
     @test operating_conditions(fc, :ZSW_nominal) isa AlphaPEM.Config.OperatingConditions
-    @test undetermined_parameters(fc, :full) isa Vector{Tuple{Symbol, Float64, Float64}}
-    @test !isempty(undetermined_parameters(fc, :full))
+    @test undetermined_parameter_bounds(fc, :full) isa Vector{Tuple{Symbol, Float64, Float64}}
+    @test !isempty(undetermined_parameter_bounds(fc, :full))
 end
 
 @testset "Currents" begin

@@ -26,9 +26,9 @@ include("abstract.jl")
 include("default.jl")
 include("factory.jl")
 
-export create_fuelcell, DefaultFuelCell, GenericFuelCell, AbstractFuelCell,
-       undetermined_parameters, physical_parameters, operating_conditions,
-       pola_exp_data, pola_exp_data_calibration
+export create_fuelcell, GenericFuelCell, AbstractFuelCell,
+       undetermined_parameter_bounds, physical_parameters, set_physical_parameters!,
+       operating_conditions, pola_exp_data, pola_exp_data_calibration
 
 end  # module Fuelcell
 

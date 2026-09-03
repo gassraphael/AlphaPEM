@@ -367,7 +367,7 @@ function _plot_calibration_results(result, output_dir::String)
                 display_timing = :postrun # Ensure we get discretized points
             )
 
-            fc = create_fuelcell(full_sc.type_fuel_cell, full_sc.voltage_zone; year=full_sc.year)
+            fc = create_fuelcell(full_sc.type_fuel_cell, full_sc.voltage_zone; year=full_sc.year, nb_gc=full_sc.numerical_parameters.nb_gc)
             fc.physical_parameters = result.best_params # Use calibrated parameters
 
             # Use the complete polarization current profile

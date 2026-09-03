@@ -105,6 +105,9 @@ julia --project=. examples/run_parameter_validity.jl
 - Valid parameter region bounds (YAML file)
 - Report (TXT file)
 
+!!! note "`nb_gc` matters"
+    Valid bounds depend on the GC resolution (`nb_gc`). Use the same `nb_gc` for validity analysis and calibration.
+
 
 
 ## Parameter calibration (Genetic Algorithm)

@@ -17,7 +17,7 @@ using Printf
 using YAML
 
 using AlphaPEM.Config: PhysicalParams, PARAMETER_METADATA
-using AlphaPEM.Fuelcell: create_fuelcell, DefaultFuelCell, undetermined_parameters
+using AlphaPEM.Fuelcell: create_fuelcell, undetermined_parameter_bounds, physical_parameters
 
 export ParameterBound,
        ParameterBounds,

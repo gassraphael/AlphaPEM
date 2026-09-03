@@ -204,7 +204,14 @@ More points provide better constraint but increase computation time.
 Before calibration, the code selects bounds from `fuel_cell_parameters.jl` based on `type_fuel_cell`. 
 Bounds define the search space for the GA.
 
-then set bounds accordingly.
+#### Effect of GC spatial resolution (`nb_gc`)
+
+The valid/optimised undetermined parameter intervals depend on the gas-channel spatial resolution:
+
+- **`nb_gc = 1`** (single-node GC, 1D model): current distribution is not resolved along the channel.
+- **`nb_gc ≥ 5`** (multi-node GC, 1D+1D model): current and oxygen distributions are resolved along the channel. 
+
+Use the same `nb_gc` for validity analysis, calibration, and any follow-up prediction. The example scripts default to `nb_gc = 5`.
 
 ### Tuning GA Hyperparameters
 
