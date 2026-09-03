@@ -19,7 +19,7 @@ julia --project=. examples/run_step.jl
 
 ```julia
 config = SimulationConfig(
-    type_fuel_cell=:ZSW_GenStack,
+    type_fuel_cell=:ZSW_nominal,
     type_current=StepParams(i_ini = 1.0e4, i_step = 1.5e4),
     voltage_zone=:before_voltage_drop,
     # ... additional parameters
@@ -40,7 +40,7 @@ julia --project=. examples/run_polarization.jl
 
 ```julia
 config = SimulationConfig(
-    type_fuel_cell=:ZSW_GenStack,
+    type_fuel_cell=:ZSW_nominal,
     type_current=PolarizationParams(
         di_step = 0.05e4,
         v_load = 0.01e4,
@@ -64,7 +64,7 @@ julia --project=. examples/run_EIS.jl
 
 ```julia
 config = SimulationConfig(
-    type_fuel_cell=:ZSW_GenStack,
+    type_fuel_cell=:ZSW_nominal,
     type_current=EISParams(
         i_EIS = 1.0e4,
         ratio = 5.0 / 100.0,
@@ -194,7 +194,7 @@ using AlphaPEM.Core.Models: extract_mid_mea_series
 
 # Define configuration
 config = SimulationConfig(
-    type_fuel_cell=:ZSW_GenStack,
+    type_fuel_cell=:ZSW_nominal,
     type_current=StepParams(i_ini = 1.0e4, i_step = 1.5e4),
 )
 
