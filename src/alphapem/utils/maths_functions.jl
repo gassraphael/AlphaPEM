@@ -20,25 +20,26 @@ It is more efficient to express this function in the code than calling hmean fro
 - The weighted harmonic mean.
 """
 function hmean(a::Real, b::Real)
+    a == 0 && b == 0 && return 0.0
     da = a == 0 ? 0.0 : 1.0 / a
     db = b == 0 ? 0.0 : 1.0 / b
     denom = da + db
-    denom == 0 && throw(ArgumentError("All weights are zero in hmean calculation"))
+    denom == 0 && throw(ArgumentError("A zero division occurred in hmean calculation"))
     return 2.0 / denom
 end
 
 function hmean(a::Real, b::Real, wa::Real, wb::Real)
+    a == 0 && b == 0 && return 0.0
     da = a == 0 ? 0.0 : wa / a
     db = b == 0 ? 0.0 : wb / b
     denom = da + db
-    denom == 0 && throw(ArgumentError("All weights are zero in hmean calculation"))
+    denom == 0 && throw(ArgumentError("A zero division occurred in hmean calculation"))
     return (wa + wb) / denom
 end
 
 function hmean(terms, weights=nothing)
-
     n = length(terms)
-    # Calculate the weighted harmonic mean.
+    n == 0 && throw(ArgumentError("The terms vector cannot be empty."))
     weighted_sum = 0.0
     total_weight = 0.0
     if weights === nothing
@@ -63,7 +64,7 @@ function hmean(terms, weights=nothing)
     end
 
     if weighted_sum == 0
-        throw(ArgumentError("All weights are zero in hmean calculation"))
+        throw(ArgumentError("A zero division occurred in hmean calculation"))
     end
 
     return total_weight / weighted_sum
@@ -106,7 +107,7 @@ function average(terms, weights=nothing)
     end
 
     if total_weight == 0
-        return NaN
+        throw(ArgumentError("A zero division occurred in average calculation"))
     end
     return weighted_sum / total_weight
 end

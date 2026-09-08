@@ -14,7 +14,7 @@ import Pkg
 Pkg.activate(joinpath(@__DIR__, ".."); io=devnull)
 
 using Distributed
-using AlphaPEM.Config: SimulationConfig
+using AlphaPEM.Config: SimulationConfig, NumericalParams
 
 # Start workers if not already initialized
 if nprocs() == 1
