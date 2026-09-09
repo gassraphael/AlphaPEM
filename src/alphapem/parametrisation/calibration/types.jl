@@ -8,9 +8,14 @@ struct ParameterBound
     min::Float64
     max::Float64
     type::Symbol          # :real or :int
+    scale::Symbol         # :linear or :log
     unit::String
     description::String
 end
+
+# Backward-compatible constructor: parameters with no explicit scale are linear.
+ParameterBound(name, min, max, type, unit, description) =
+    ParameterBound(name, min, max, type, :linear, unit, description)
 
 """
     ParameterBounds

@@ -1,4 +1,19 @@
 """
+    _default_parameter_scale(min, max, type)
+
+Choose the sampling scale for a parameter.  Parameters that span at least two
+orders of magnitude (`max / min >= 100`) and have strictly positive bounds are
+sampled in log-space so that every decade receives the same LHS density.
+Integer parameters are always sampled linearly.
+"""
+function _default_parameter_scale(min_val::Float64, max_val::Float64, param_type::Symbol)::Symbol
+    param_type == :int && return :linear
+    min_val > 0.0 || return :linear
+    max_val / min_val >= 100.0 && return :log
+    return :linear
+end
+
+"""
     bounds_for_fuel_cell(fuel_cell_type, voltage_zone = :full; year = nothing, nb_gc = 5) -> ParameterBounds
 
 Return the undetermined-parameter bounds for a given fuel-cell type, voltage zone,
@@ -22,8 +37,9 @@ function bounds_for_fuel_cell(fuel_cell_type::Symbol,
         end
         unit, description = PARAMETER_METADATA[param_name]
         param_type = param_name == :e ? :int : :real
+        scale = _default_parameter_scale(Float64(min_val), Float64(max_val), param_type)
         push!(bounds, ParameterBound(param_name, Float64(min_val), Float64(max_val),
-                                     param_type, unit, description))
+                                     param_type, scale, unit, description))
     end
 
     for b in bounds

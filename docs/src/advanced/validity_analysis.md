@@ -18,7 +18,7 @@ Skip if:
 
 ## Workflow
 
-1. **Latin Hypercube Sampling (LHS):** Draw N configurations uniformly from parameter space
+1. **Latin Hypercube Sampling (LHS):** Draw N configurations from parameter space. Parameters whose bounds span at least two orders of magnitude (`max/min >= 100`) are sampled in log-space so that every decade is explored equally.
 2. **Batch Simulation:** Run all configurations in parallel
 3. **Validation:** Check each result against physical criteria:
    - Voltage monotonically decreases with current
