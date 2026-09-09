@@ -703,7 +703,10 @@ fv
 """
 function fv(lambdaa, T, pp::PhysicalParams)
     M_eq, rho_mem = pp.M_eq, pp.rho_mem  # Equivalent molar mass and density of the dry membrane.
-    return (lambdaa * M_H2O / rho_H2O_l(T)) / (M_eq / rho_mem + lambdaa * M_H2O / rho_H2O_l(T))
+    lambda_eff = _nonnegative_value(lambdaa)
+    T_eff = _positive_temperature_value(T)
+    return _clamped_fraction_value( (lambda_eff * M_H2O / rho_H2O_l(T_eff)) /
+                                    (M_eq / rho_mem + lambda_eff * M_H2O / rho_H2O_l(T_eff)) )
 end
 
 

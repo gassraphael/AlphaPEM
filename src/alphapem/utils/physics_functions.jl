@@ -127,17 +127,19 @@ Source : Carl L. Yaws - Manuel 2014 - Transport properties of chemicals and hydr
 """
 function mu_gaz(component::Symbol, T)
 
+    T_eff = _positive_temperature_value(T)
     if component == :H2O_v  # For T >= 150 K and T <= 1500 k.
-        return (22.8211 + 1.7387e-1 * T + 3.2465e-4 * T^2 - 1.4334e-7 * T^3) * 1e-7
+        mu = (22.8211 + 1.7387e-1 * T_eff + 3.2465e-4 * T_eff^2 - 1.4334e-7 * T_eff^3) * 1e-7
     elseif component == :H2  # For T >= 15 K and T <= 1500 K.
-        return (1.7611 + 3.4165e-1 * T - 1.8368e-4 * T^2 + 5.1147e-8 * T^3) * 1e-7
+        mu = (1.7611 + 3.4165e-1 * T_eff - 1.8368e-4 * T_eff^2 + 5.1147e-8 * T_eff^3) * 1e-7
     elseif component == :O2  # For T >= 54 K and T <= 1500 K.
-        return (-4.9433 + 8.0673e-1 * T - 4.0416e-4 * T^2 + 1.0111e-7 * T^3) * 1e-7
+        mu = (-4.9433 + 8.0673e-1 * T_eff - 4.0416e-4 * T_eff^2 + 1.0111e-7 * T_eff^3) * 1e-7
     elseif component == :N2  # For T >= 63 K and T <= 1970 K.
-        return (4.4656 + 6.3814e-1 * T - 2.6596e-4 * T^2 + 5.4113e-8 * T^3) * 1e-7
+        mu = (4.4656 + 6.3814e-1 * T_eff - 2.6596e-4 * T_eff^2 + 5.4113e-8 * T_eff^3) * 1e-7
     else
         throw(ArgumentError("The element should be either 'H2O_v', 'H2', 'O2' or 'N2'."))
     end
+    return _nonnegative_value(mu)
 end
 
 

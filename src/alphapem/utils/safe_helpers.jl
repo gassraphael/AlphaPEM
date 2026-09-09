@@ -32,6 +32,15 @@ Use this when the concentration appears inside a logarithm to avoid Newton/Jacob
 """
 @inline _positive_concentration_value(x::Real) = max(Float64(x), 1e-4)
 
+"""
+    _clamped_fraction_value(x)
+
+Clamp a volume or mass fraction to the physical range [0, 1].
+Use this when a fractional quantity may briefly step outside its domain during
+nonlinear iterations.
+"""
+@inline _clamped_fraction_value(x::Real) = clamp(Float64(x), 0.0, 1.0)
+
 @inline function _safe_porous_phase_weights(epsilon::Float64, s)
     s_eff = _bounded_saturation_value(s)
     return (max(1 - epsilon, 0.0), max(epsilon * s_eff, 0.0), max(epsilon * (1 - s_eff), 0.0))
