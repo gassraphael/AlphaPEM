@@ -303,19 +303,21 @@ k_th
 """
 function k_th(component::Symbol, T)
 
+    T_eff = _positive_temperature_value(T)
     if component == :H2O_l  # For T >= 273.16 and T <= 633.15 K.
-        return -0.2987 + 4.7054e-3 * T - 5.6209e-6 * T^2
+        k = -0.2987 + 4.7054e-3 * T_eff - 5.6209e-6 * T_eff^2
     elseif component == :H2O_v  # For T >= 150 K and T <= 1500 K.
-        return 5.6199e-3 + 1.5699e-5 * T + 1.0106e-7 * T^2 - 2.4282e-11 * T^3
+        k = 5.6199e-3 + 1.5699e-5 * T_eff + 1.0106e-7 * T_eff^2 - 2.4282e-11 * T_eff^3
     elseif component == :H2  # For T >= 14 K and T <= 1500 K.
-        return 1.0979e-2 + 6.6411e-4 * T - 3.4378e-7 * T^2 + 9.7283e-11 * T^3
+        k = 1.0979e-2 + 6.6411e-4 * T_eff - 3.4378e-7 * T_eff^2 + 9.7283e-11 * T_eff^3
     elseif component == :O2  # For T >= 80 K and T <= 2000 K.
-        return 1.5475e-4 + 9.4153e-5 * T - 2.7529e-8 * T^2 + 5.2069e-12 * T^3
+        k = 1.5475e-4 + 9.4153e-5 * T_eff - 2.7529e-8 * T_eff^2 + 5.2069e-12 * T_eff^3
     elseif component == :N2  # For T >= 63 K and T <= 1500 K.
-        return -2.2678e-4 + 1.0275e-4 * T - 6.0151e-8 * T^2 + 2.2332e-11 * T^3
+        k = -2.2678e-4 + 1.0275e-4 * T_eff - 6.0151e-8 * T_eff^2 + 2.2332e-11 * T_eff^3
     else
         throw(ArgumentError("The element should be either 'H2O_l', 'H2O_v', 'H2', 'O2' or 'N2'."))
     end
+    return _nonnegative_value(k)
 end
 
 
@@ -548,23 +550,25 @@ Cp0
 """
 function Cp0(component::Symbol, T)
 
+    T_eff = _positive_temperature_value(T)
     if component == :H2O_l  # For T >= 298 and T <= 500 K.
-        return 1 / M_H2O * (-203.6060 + 1523.290 * (T / 1000) - 3196.413 * (T / 1000)^2 + 2474.455 * (T / 1000)^3 +
-                            3.855326 / (T / 1000)^2)
+        cp = 1 / M_H2O * (-203.6060 + 1523.290 * (T_eff / 1000) - 3196.413 * (T_eff / 1000)^2 +
+                          2474.455 * (T_eff / 1000)^3 + 3.855326 / (T_eff / 1000)^2)
     elseif component == :H2O_v  # For T = 350 K.
-        return 1880
+        cp = 1880
     elseif component == :H2  # For T >= 298 K and T <= 1000 K.
-        return 1 / M_H2 * (33.066178 - 11.363417 * (T / 1000) + 11.432816 * (T / 1000)^2 - 2.772874 * (T / 1000)^3 -
-                           0.158558 / (T / 1000)^2)
+        cp = 1 / M_H2 * (33.066178 - 11.363417 * (T_eff / 1000) + 11.432816 * (T_eff / 1000)^2 -
+                         2.772874 * (T_eff / 1000)^3 - 0.158558 / (T_eff / 1000)^2)
     elseif component == :O2  # For T >= 100 K and T <= 700 K.
-        return 1 / M_O2 * (31.32234 - 20.23531 * (T / 1000) + 57.86644 * (T / 1000)^2 - 36.50624 * (T / 1000)^3 -
-                           0.007374 / (T / 1000)^2)
+        cp = 1 / M_O2 * (31.32234 - 20.23531 * (T_eff / 1000) + 57.86644 * (T_eff / 1000)^2 -
+                         36.50624 * (T_eff / 1000)^3 - 0.007374 / (T_eff / 1000)^2)
     elseif component == :N2  # For T >= 100 K and T <= 500 K.
-        return 1 / M_N2 * (28.98641 + 1.853978 * (T / 1000) - 9.647459 * (T / 1000)^2 + 16.63537 * (T / 1000)^3 +
-                           0.000117 / (T / 1000)^2)
+        cp = 1 / M_N2 * (28.98641 + 1.853978 * (T_eff / 1000) - 9.647459 * (T_eff / 1000)^2 +
+                         16.63537 * (T_eff / 1000)^3 + 0.000117 / (T_eff / 1000)^2)
     else
         throw(ArgumentError("The element should be either 'H2O_l', 'H2O_v', 'H2', 'O2' or 'N2'."))
     end
+    return _nonnegative_value(cp)
 end
 
 
@@ -584,11 +588,13 @@ h0
 """
 function h0(component::Symbol, T)
 
+    T_eff = _positive_temperature_value(T)
     if component == :H2O_l  # For T >= 298 and T <= 500 K.
-        return (-285.83 - 203.6060 * (T / 1000) + 1523.290 * (T / 1000)^2 / 2 - 3196.413 * (T / 1000)^3 / 3 +
-                2474.455 * (T / 1000)^4 / 4 - 3.855326 / (T / 1000) - 256.5478 + 285.8304) * 1e3
+        return (-285.83 - 203.6060 * (T_eff / 1000) + 1523.290 * (T_eff / 1000)^2 / 2 -
+                3196.413 * (T_eff / 1000)^3 / 3 + 2474.455 * (T_eff / 1000)^4 / 4 -
+                3.855326 / (T_eff / 1000) - 256.5478 + 285.8304) * 1e3
     elseif component == :H2O_v  # For T = 298.15 K.
-        return -241.83 * 1e3 + Cp0(:H2O_v, T) * M_H2O * (T - 298.15)
+        return -241.83 * 1e3 + Cp0(:H2O_v, T_eff) * M_H2O * (T_eff - 298.15)
     else
         throw(ArgumentError("The element should be either 'H2O_l' or 'H2O_v'."))
     end
