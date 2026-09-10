@@ -239,6 +239,24 @@ fi
 echo "[INFO] IRD package directory found: $IRD_PKG_DIR"
 
 # Install the required R packages if not already present (README.md § Installation, step 4.c).
+#
+# SAFETY: all jobs share the same r-env R library. Concurrent install.packages()
+# calls corrupt it (race on 00LOCK-* directories). Use a cross-job file lock so
+# only one job installs at a time; the others wait and then recheck.
+R_INSTALL_LOCK="/gpfs/scratch/$USER/alphapem_r_install.lock"
+mkdir -p "$(dirname "$R_INSTALL_LOCK")"
+exec 200>"$R_INSTALL_LOCK"
+
+acquired_lock=false
+if flock -n 200; then
+    acquired_lock=true
+    echo "[INFO] Acquired R package installation lock."
+else
+    echo "[INFO] Another job is installing R packages. Waiting for lock release..."
+    flock 200
+    echo "[INFO] Lock released. Rechecking R packages..."
+fi
+
 echo "[INFO] Checking required R packages (devtools, mlr3, mlr3learners, mlr3pipelines, iml, ranger, yaml, jsonlite, data.table, optparse)..."
 Rscript -e '
 required <- c("devtools", "mlr3", "mlr3learners", "mlr3pipelines", "iml", "ranger",
@@ -252,13 +270,27 @@ if (length(missing) > 0) {
 }
 '
 if [ $? -ne 0 ]; then
-    Rscript src/alphapem/parametrisation/validity/R/install_r_packages.R
-    R_INSTALL_STATUS=$?
-    if [ $R_INSTALL_STATUS -ne 0 ]; then
-        echo "[ERROR] R package installation failed. Aborting job."
-        exit $R_INSTALL_STATUS
+    if [ "$acquired_lock" = true ]; then
+        echo "[INFO] Installing R packages under lock..."
+        Rscript src/alphapem/parametrisation/validity/R/install_r_packages.R
+        R_INSTALL_STATUS=$?
+        if [ $R_INSTALL_STATUS -ne 0 ]; then
+            echo "[ERROR] R package installation failed. Aborting job."
+            exit $R_INSTALL_STATUS
+        fi
+    else
+        echo "[ERROR] R packages are still missing after waiting for the installing job."
+        echo "[ERROR] The other job may have failed. Rerun once or install manually:"
+        echo "[ERROR]   conda activate r-env"
+        echo "[ERROR]   Rscript src/alphapem/parametrisation/validity/R/install_r_packages.R"
+        exit 1
     fi
 fi
+
+# Release the lock before the long Julia setup.
+flock -u 200
+exec 200>&-
+echo "[INFO] R package installation lock released."
 echo ""
 
 # **Julia Environment Configuration:**
