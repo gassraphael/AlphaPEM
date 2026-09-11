@@ -1,9 +1,13 @@
 # AlphaPEM
 
-AlphaPEM is an open-source software package for simulating proton exchange membrane fuel cell (PEMFC) systems for 
-embedded applications written in Julia. It is based on a physics-based, finite-volume, pseudo-two-dimensional (1D+1D),
-dynamic, two-phase, and non-isothermal model, supporting both co-flow and counter-flow gas channel configurations.
-It quickly simulates the internal states and voltage dynamics of PEMFC
+<p align="center">
+  <img src="docs/src/images/logo.png" alt="AlphaPEM logo" width="650">
+</p>
+
+AlphaPEM is a collaborative open-source software package for simulating proton exchange membrane fuel cell (PEMFC) 
+systems for embedded applications written in Julia. It is based on a physics-based, finite-volume, 
+pseudo-two-dimensional (1D+1D), dynamic, two-phase, and non-isothermal model, supporting both co-flow and counter-flow 
+gas channel configurations. It quickly simulates the internal states and voltage dynamics of PEMFC
 systems for all current densities and operating conditions imposed on it. In particular, it is possible to apply a 
 step current density or use current profiles to generate polarization curves or electrochemical impedance spectroscopy
 (EIS) curves. It can also automatically calibrate the undetermined parameters of the model to simulate a given real 

@@ -1,5 +1,9 @@
 # AlphaPEM
 
+<p align="center">
+  <img src="images/logo.png" alt="AlphaPEM logo" width="650">
+</p>
+
 *Advanced Fuel Cell Model for Embedded Applications*
 
 ## Overview

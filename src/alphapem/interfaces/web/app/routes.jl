@@ -97,6 +97,21 @@ route("/css/style.css"; method="GET") do
     end
 end
 
+# ------ LOGO IMAGE ------
+
+# Serve the AlphaPEM logo from the documentation assets.
+# Keeping the image in docs/src/images/logo.png avoids duplicating the asset.
+const LOGO_PATH = joinpath(@__DIR__, "..", "..", "..", "..", "..", "docs", "src", "images", "logo.png")
+
+route("/images/logo.png"; method="GET") do
+    if isfile(LOGO_PATH)
+        logo_content = read(LOGO_PATH)
+        HTTP.Response(200, ["Content-Type" => "image/png"], logo_content)
+    else
+        HTTP.Response(404, "Logo not found")
+    end
+end
+
 # ------ API ENDPOINTS FOR SIMULATION ------
 
 # API endpoint: Get available fuel cell presets.
