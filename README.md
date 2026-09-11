@@ -1,8 +1,8 @@
-# AlphaPEM
-
 <p align="center">
   <img src="docs/src/images/logo.png" alt="AlphaPEM logo" width="650">
 </p>
+
+# AlphaPEM
 
 AlphaPEM is a collaborative open-source software package for simulating proton exchange membrane fuel cell (PEMFC) 
 systems for embedded applications written in Julia. It is based on a physics-based, finite-volume, 
