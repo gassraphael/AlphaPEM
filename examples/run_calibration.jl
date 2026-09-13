@@ -51,21 +51,26 @@ end
 # All conditions must share the same fuel cell type (same parameters to identify).
 # Add or remove blocks below to calibrate on more or fewer datasets.
 
+const YEAR = 2024
+
 calibration_conditions = [
     SimulationConfig(
         type_fuel_cell = :ZSW_nominal,
+        year           = YEAR,
         voltage_zone   = :full,
         numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S,
                                                nb_gc = NB_GC_POLA),
     ),
     SimulationConfig(
         type_fuel_cell = :ZSW_Pa_2_8_Pc_2_6,
+        year           = YEAR,
         voltage_zone   = :full,
         numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S,
                                                nb_gc = NB_GC_POLA),
     ),
     SimulationConfig(
         type_fuel_cell = :ZSW_Pa_1_61_Pc_1_41,
+        year           = YEAR,
         voltage_zone   = :full,
         numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S,
                                                nb_gc = NB_GC_POLA),

@@ -23,6 +23,7 @@ current_params = PolarizationCalibrationParams(
 
 cfg = SimulationConfig(
     type_fuel_cell = :ZSW_nominal,
+    year           = 2024,
     type_current   = current_params,
     voltage_zone   = :full,         # :before_voltage_drop, :full.
     type_auxiliary = :no_auxiliary, # :forced_convective_cathode_with_anodic_recirculation, :forced_convective_cathode_with_flow_through_anode, :no_auxiliary.
