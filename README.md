@@ -209,7 +209,7 @@ and configuration, beyond what the GUI offers.
 | `run_polarization_for_cali.jl` | Generates polarization curves for calibration purposes                                                                                                                                  |
 | `run_EIS.jl` | Generates an EIS curve <br/>                                                                                                                                                            |
 | `run_calibration.jl` | Calibrates the undetermined physical parameters of the model via Genetic Algorithms.                                                                                                    |
-| `run_parameter_validity.jl` | Identifies the valid parameter region via LHS sampling, batch simulation and IRD methods (PRIM, MaxBox) — *requires R + IRD package ([installation step 4](#installation-from-source))* |
+| `run_parameter_validity.jl` | Identifies the valid parameter region via LHS sampling, batch simulation and IRD methods (PRIM, MaxBox). A conservative epsilon pre-restriction is applied automatically to keep `epsilon_carb`, `epsilon_mc` and `epsilon_cl` in `[0,1]`; IRD requires the R + IRD package ([installation step 4](#installation-from-source))* |
 | `run_sobol_sensitivity_analysis.jl` | Runs a variance-based global sensitivity analysis (Sobol S1/ST/S2) directly on AlphaPEM simulations, per polarization region.                                                            |
 | `plot_currents.jl` | Plots the current density profiles                                                                                                                                                      |
 

@@ -36,6 +36,7 @@ end
 # Default configuration (can be edited below).
 base_config = SimulationConfig(
     type_fuel_cell = :ZSW_nominal,
+    year           = 2024,
     voltage_zone   = :full,
     numerical_parameters = NumericalParams(nb_gc = 5)
 )

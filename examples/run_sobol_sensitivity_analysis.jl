@@ -72,6 +72,7 @@ my_constraints = [
 
 cfg = SobolAnalysisConfig(
     fuel_cell_type                  = :ZSW_nominal,
+    year                            = 2024,
     voltage_zone                    = :full,
     nb_gc                           = 5,
     N                               = 1024,          # Start small; increase once validated

@@ -104,16 +104,18 @@ criteria_cfg = ValidityCriteriaConfig(
 )
 
 analysis_cfg = ValidityAnalysisConfig(
-    fuel_cell_type         = :ZSW_nominal,
-    voltage_zone           = :full,                 # :before_voltage_drop, :full.
-    nb_gc                  = 5,                     # Number of GC nodes to simulate.
-    n_samples              = 100_000,               # Total number of configurations to simulate (LHS samples).
-    validation_criteria    = criteria_cfg,
-    parallel               = PARALLEL,              # ← driven by the constant above
-    save_curves            = true,                  # Set to true to save polarization curves
-    reuse_from             = nothing,               # Set to "path/to/previous/run" to reuse curves. ex: "results/model_validity/2026.06.02 - 10000 samples - before voltage drop - V1"
-    hyperbox_finder_method = [:PRIM, :MaxBox],      # Vector of IRD methods: :PRIM, :MaxBox
-    max_run_time_s         = 120.0,                 # Maximum simulation runtime for each polarisation curve (seconds)
+    fuel_cell_type              = :ZSW_nominal,
+    year                        = 2024,
+    voltage_zone                = :full,                 # :before_voltage_drop, :full.
+    nb_gc                       = 1,                     # Number of GC nodes to simulate.
+    n_samples                   = 100_000,               # Total number of configurations to simulate (LHS samples).
+    validation_criteria         = criteria_cfg,
+    parallel                    = PARALLEL,              # ← driven by the constant above
+    save_curves                 = true,                  # Set to true to save polarization curves
+    reuse_from                  = nothing,               # Set to "path/to/previous/run" to reuse curves. ex: "results/model_validity/2026.06.02 - 10000 samples - before voltage drop - V1"
+    pre_restrict_epsilon_bounds = true,                  # Pre-restrict CL bounds to keep epsilon_* in [0,1]
+    hyperbox_finder_method      = [:PRIM, :MaxBox],      # Vector of IRD methods: :PRIM, :MaxBox
+    max_run_time_s              = 120.0,                 # Maximum simulation runtime for each polarisation curve (seconds)
 )
 
 # IRD configuration (required — STEP 3 is no longer optional)
@@ -206,6 +208,7 @@ println()
 println("="^72)
 println("  Pipeline steps")
 println("="^72)
+println("    ✅  STEP 0 — Epsilon bound pre-restriction         (complete)")
 println("    ✅  STEP 1 — LHS sampling                         (complete)")
 println("    ✅  STEP 2 — Batch simulation & classification    (complete)")
 println("    ✅  STEP 3 — IRD methods analysis (PRIM/MaxBox)   (complete)")

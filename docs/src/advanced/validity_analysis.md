@@ -18,11 +18,12 @@ Skip if:
 
 ## Workflow
 
+0. **Epsilon Bound Pre-Restriction (optional, enabled by default):** Before sampling, the catalyst-layer parameter bounds are conservatively restricted so that `epsilon_carb`, `epsilon_mc` and `epsilon_cl` remain in `[0, 1]` for every LHS sample. This avoids solver aborts caused by locally unphysical volume fractions. Controlled by `pre_restrict_epsilon_bounds` in `ValidityAnalysisConfig`.
 1. **Latin Hypercube Sampling (LHS):** Draw N configurations from parameter space. Parameters whose bounds span at least two orders of magnitude (`max/min >= 100`) are sampled in log-space so that every decade is explored equally.
 2. **Batch Simulation:** Run all configurations in parallel
 3. **Validation:** Check each result against physical criteria:
    - Voltage monotonically decreases with current
-   - Voltage stays within realistic range 
+   - Voltage stays within realistic range
 4. **PRIM/MaxBox:** Identify compact hyperboxes with ≥80% valid configurations
 5. **Export:** Save restricted bounds for calibration
 
@@ -38,6 +39,7 @@ analysis_cfg = ValidityAnalysisConfig(
     fuel_cell_type=:ZSW,
     voltage_zone=:before_voltage_drop,
     n_samples=10_000,
+    pre_restrict_epsilon_bounds = true,  # keep epsilon_carb/epsilon_mc/epsilon_cl in [0,1]
     hyperbox_finder_method = [:PRIM, :MaxBox],
 )
 ird_cfg = IRDConfig(
@@ -53,11 +55,12 @@ Results are saved to `results/model_validity/[FUEL_CELL]/`:
 
 ```
 results/model_validity/ZSW/
-├── bounds_initial.yaml          # Original parameter ranges
-├── bounds_restricted.yaml       # Tightened ranges (valid region)
-├── parameter_classification.csv # Each sample: valid/invalid flag
-├── generated_curves.csv         # Simulated polarization curves
-└── final_report.txt             # Summary 
+├── bounds_initial.yaml           # Parameter ranges used for LHS (after epsilon pre-restriction if enabled)
+├── bounds_pre_restricted.yaml    # Ranges after epsilon pre-restriction (only if Step 0 changed bounds)
+├── bounds_restricted.yaml        # Tightened ranges (valid region from PRIM/MaxBox)
+├── parameter_classification.csv  # Each sample: valid/invalid flag
+├── generated_curves.csv          # Simulated polarization curves
+└── final_report.txt              # Summary 
 ```
 
 ### Example: bounds_restricted.yaml
@@ -74,6 +77,20 @@ i0_c_ref:
     max: 100.0
 ```
 
+
+## Epsilon Pre-Restriction
+
+Before LHS sampling, AlphaPEM can tighten the catalyst-layer bounds (`Hccl`, `IC_ccl`, `wt_Pt_ccl`, `L_Pt_ccl`, and their anode counterparts if present) so that the catalyst-layer volume fractions stay physical:
+
+```
+0 <= epsilon_carb <= 1
+0 <= epsilon_mc   <= 1
+0 <= epsilon_cl   <= 1
+```
+
+The restriction is conservative: it scales the relevant half-intervals toward their nominal stack values by a common factor until the worst-case total solid + ionomer fraction equals `1`. This prevents the Newton/IDA solver from encountering locally unphysical states during batch simulation.
+
+To disable it, set `pre_restrict_epsilon_bounds = false` in `ValidityAnalysisConfig`.
 
 ## Understanding Validity Criteria
 

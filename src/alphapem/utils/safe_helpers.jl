@@ -7,10 +7,30 @@ models, so they live in the shared utility layer.
 """
 
 @inline _positive_temperature_value(T::Real) = max(Float64(T), 1.0)
-@inline _liquid_water_temperature_value(T::Real) = clamp(Float64(T), 140.0 + 1e-6, 647.15 - 1e-6)
 @inline _bounded_saturation_value(s::Real) = clamp(Float64(s), 1e-9, 1.0 - 1e-9)
 @inline _positive_pressure_value(P::Real) = max(Float64(P), 1.0)
 @inline _nonnegative_value(x::Real) = max(Float64(x), eps(Float64))
+
+"""
+    _liquid_water_temperature_value(T)
+
+Clamp `T` (in K) to the open interval `(140, 647.15)` so that liquid-water
+property correlations stay finite and physically meaningful when the nonlinear
+solver probes unphysical hot or cold states.
+
+- **Upper bound — 647.15 K**: the critical temperature of water. Above it no
+  liquid phase exists, and correlations fitted on the liquid range break down:
+  for instance the rho_H2O_l correlation extrapolates to a *negative* density
+  for T ≳ 600 °C, which would silently propagate into volume-fraction ratios
+  (e.g. `fv`, `epsilon_mc`) and produce division-by-zero or NaN downstream.
+- **Lower bound — 140 K**: the singularity of the liquid-water dynamic
+  viscosity correlation `mu_l = 2.414e-5 * 10^(247.8 / (T - 140))` used by
+  `nu_l`. As `T → 140⁺`, the exponent `247.8 / (T - 140) → +∞` and the
+  viscosity overflows. The `+1e-6` offset keeps the denominator strictly
+  positive. (The actual freezing point of water is irrelevant here: the solver
+  must merely stay away from the correlation's mathematical singularity.)
+"""
+@inline _liquid_water_temperature_value(T::Real) = clamp(Float64(T), 140.0 + 1e-6, 647.15 - 1e-6)
 
 """
     _bounded_vapor_pressure_value(P_v, Ptot)

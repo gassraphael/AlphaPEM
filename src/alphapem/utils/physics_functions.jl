@@ -23,7 +23,11 @@ This function calculates the water density, in kg.m-3, as a function of the temp
 - `rho_H2O_l`: Water density in kg.m-3.
 """
 function rho_H2O_l(T)
-    T_Celsius = _positive_temperature_value(T - 273.15)
+    # Clamp to the liquid-water validity range: the correlation returns a
+    # negative density for T ≳ 600 °C, which would silently propagate into
+    # epsilon_mc and cause division-by-zero in the dissolved-water equations
+    # when the solver probes unphysical (very hot) states.
+    T_Celsius = _liquid_water_temperature_value(T) - 273.15
     return ((999.83952 + 16.945176 * T_Celsius - 7.9870401e-3 * T_Celsius^2 - 46.170461e-6 * T_Celsius^3 +
              105.56302e-9 * T_Celsius^4 - 280.54253e-12 * T_Celsius^5) / (1 + 16.879850e-3 * T_Celsius))
 end
@@ -41,8 +45,9 @@ This function calculates the liquid water kinematic viscosity, in m².s-1, as a 
 - `nu_l`: Liquid water kinematic viscosity in m².s-1.
 """
 function nu_l(T)
-    mu_l = 2.414 * 10^(-5 + 247.8 / (T - 140.0))  # Pa.s. It is the liquid water dynamic viscosity.
-    return mu_l / rho_H2O_l(T)
+    T_eff = _liquid_water_temperature_value(T)  # K — keeps 247.8/(T-140) finite and positive.
+    mu_l = 2.414 * 10^(-5 + 247.8 / (T_eff - 140.0))  # Pa.s. It is the liquid water dynamic viscosity.
+    return mu_l / rho_H2O_l(T_eff)
 end
 
 

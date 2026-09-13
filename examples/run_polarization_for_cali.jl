@@ -23,6 +23,7 @@ current_params = PolarizationCalibrationParams(
 
 cfg = SimulationConfig(
     type_fuel_cell = :ZSW_nominal,
+    year           = 2024,
     type_current   = current_params,
     voltage_zone   = :full,         # :before_voltage_drop, :full.
     numerical_parameters = NumericalParams(nb_gc = 5),

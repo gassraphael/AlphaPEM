@@ -19,13 +19,16 @@ When the user calls `run_validity_analysis`, the following steps are executed:
 
 | Step | Action                                                                               |
 |------|--------------------------------------------------------------------------------------|
+| 0    | *(optional)* Pre-restrict catalyst-layer bounds so that `epsilon_carb`, `epsilon_mc` |
+|      | and `epsilon_cl` stay in `[0,1]` for every LHS sample                                |
 | 1    | Define parameter bounds and draw configurations by Latin Hypercube Sampling          |
 | 2    | Simulate each configuration with AlphaPEM and classify the polarization curve        |
-| 3    | *(optional)* Restrict the valid region via PRIM/MaxBox (requires R + IRD package)   |
+| 3    | *(optional)* Restrict the valid region via PRIM/MaxBox (requires R + IRD package)    |
 | 4    | Export results: classified CSV, bounds YAML, validation summary, PRIM report         |
 
-`run_validity_analysis` orchestrates all four steps in a single call.
-Steps 1–2–4 always run; Step 3 is enabled by passing a `PRIMConfig`.
+`run_validity_analysis` orchestrates all steps in a single call.
+Step 0 is enabled by default (`pre_restrict_epsilon_bounds = true`);
+Steps 1–2–4 always run; Step 3 is enabled by passing an `IRDConfig`.
 
 ## Sub-modules
 
@@ -105,10 +108,12 @@ const VALIDITY_OUTPUT_DIR = abspath(joinpath(@__DIR__, "..", "..", "..", "result
 include(joinpath(@__DIR__, "validity/validity_criteria.jl"))
 include(joinpath(@__DIR__, "validity/ird_interface.jl"))
 include(joinpath(@__DIR__, "validity/results_export.jl"))
+include(joinpath(@__DIR__, "validity/epsilon_bound_restriction.jl"))
 
 using .ValidityCriteria
 using .IRDInterface
 using .ResultsExport
+using .EpsilonBoundRestriction: restrict_epsilon_bounds
 
 # Re-export sub-module types into this namespace for convenient access
 using .ValidityCriteria:      ValidityCriteriaConfig, ValidationResult,
@@ -193,6 +198,9 @@ launched with a single struct.
   Set to `0` to disable. Default `100`.
 - `save_curves::Bool`: Save polarization curves to CSV. Default `true`.
 - `reuse_from::Union{String, Nothing}": Path to previous run directory to reuse curves.
+- `pre_restrict_epsilon_bounds::Bool`: Apply a conservative pre-restriction to the
+  catalyst-layer parameter bounds so that `epsilon_carb`, `epsilon_mc` and `epsilon_cl`
+  stay in `[0,1]` for every LHS sample. Default `true`.
 - `hyperbox_finder_method::Union{Symbol, Nothing}`: Hyperbox-finder method to run.
   Supported values: `:PRIM` (default) and `:MaxBox`.
   Set to `nothing` to skip the hyperbox-finder step entirely.
@@ -221,6 +229,7 @@ Base.@kwdef struct ValidityAnalysisConfig
     parallel::Bool                      = true
     save_curves::Bool                   = true     # Save polarization curves to curves.csv
     reuse_from::Union{String, Nothing}  = nothing  # Path to previous run directory to reuse curves
+    pre_restrict_epsilon_bounds::Bool   = true     # Pre-restrict CL bounds to keep epsilon_* in [0,1]
     hyperbox_finder_method::Union{Symbol, Vector{Symbol}, Nothing} = :PRIM # e.g. :PRIM, :MaxBox, [:PRIM, :MaxBox]; set to `nothing` to skip
     max_run_time_s::Float64             = 5*60     # Maximum simulation runtime (seconds)
 end
@@ -497,23 +506,53 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
     mkpath(run_dir)
     output_files = Dict{Symbol, String}()
 
-    # ── STEP 1: LHS sampling ──────────────────────────────────────────────────
-    @info "STEP 1 — Generating $(cfg.n_samples) LHS samples…"
+    # ── STEP 0: Pre-restrict catalyst-layer bounds ────────────────────────────
+    if cfg.pre_restrict_epsilon_bounds
+        @info "STEP 0 — Pre-restricting catalyst-layer bounds to keep epsilon_* in [0,1]…"
+    end
     X, pb = generate_test_samples(cfg)
+    @info "STEP 1 — Generating $(cfg.n_samples) LHS samples…"
     @info @sprintf("  → Sample matrix: %d × %d", size(X, 1), size(X, 2))
 
-    # Extract original bounds from ParameterBounds
-    orig_bounds = Dict{Symbol, Tuple{Float64, Float64}}(
+    # Extract bounds used for sampling from ParameterBounds
+    sampled_bounds = Dict{Symbol, Tuple{Float64, Float64}}(
         b.name => (b.min, b.max) for b in pb.bounds
     )
 
-    # Export original bounds to YAML
+    # Export sampled (possibly pre-restricted) bounds to YAML
     bounds_path = abspath(joinpath(run_dir, "bounds_initial.yaml"))
-    export_parameter_bounds(orig_bounds, bounds_path;
+    export_parameter_bounds(sampled_bounds, bounds_path;
                             method   = :initial,
                             metadata = Dict("fuel_cell_type" => string(cfg.fuel_cell_type),
-                                            "voltage_zone"   => string(cfg.voltage_zone)))
+                                            "voltage_zone"   => string(cfg.voltage_zone),
+                                            "pre_restricted" => string(cfg.pre_restrict_epsilon_bounds)))
     output_files[:bounds_initial_yaml] = bounds_path
+
+    # If pre-restriction was applied, also export the original bounds for reference
+    if cfg.pre_restrict_epsilon_bounds
+        orig_pb = bounds_for_fuel_cell(cfg.fuel_cell_type, cfg.voltage_zone; year=cfg.year)
+        orig_bounds = Dict{Symbol, Tuple{Float64, Float64}}(
+            b.name => (b.min, b.max) for b in orig_pb.bounds
+        )
+        pre_path = abspath(joinpath(run_dir, "bounds_pre_restricted.yaml"))
+        export_parameter_bounds(sampled_bounds, pre_path;
+                                method   = :pre_restricted,
+                                metadata = Dict("fuel_cell_type" => string(cfg.fuel_cell_type),
+                                                "voltage_zone"   => string(cfg.voltage_zone),
+                                                "note"           => "bounds after epsilon pre-restriction"))
+        output_files[:bounds_pre_restricted_yaml] = pre_path
+
+        # Log which parameters were actually changed
+        changed = [name for name in keys(orig_bounds)
+                   if haskey(sampled_bounds, name) && sampled_bounds[name] != orig_bounds[name]]
+        if isempty(changed)
+            @info "  → No epsilon pre-restriction was necessary."
+        else
+            @info "  → Pre-restricted parameters: $(join(sort(string.(changed)), ", "))"
+        end
+    else
+        orig_bounds = sampled_bounds
+    end
 
     # ── STEP 2: Batch simulation + classification ─────────────────────────────
     if cfg.reuse_from !== nothing
@@ -640,11 +679,30 @@ end
     generate_test_samples(cfg::ValidityAnalysisConfig)
 
 Step 1 of the pipeline: define parameter bounds and draw LHS samples.
+If `cfg.pre_restrict_epsilon_bounds` is `true`, the catalyst-layer bounds are
+first restricted so that `epsilon_carb`, `epsilon_mc` and `epsilon_cl` remain
+in `[0,1]` for every sample.
 
 Returns `(samples::Matrix{Float64}, bounds::ParameterBounds)`.
 """
 function generate_test_samples(cfg::ValidityAnalysisConfig)
     pb = bounds_for_fuel_cell(cfg.fuel_cell_type, cfg.voltage_zone; year=cfg.year)
+
+    if cfg.pre_restrict_epsilon_bounds
+        fc = create_fuelcell(cfg.fuel_cell_type, cfg.voltage_zone; year=cfg.year, nb_gc=cfg.nb_gc)
+        pp = fc.physical_parameters
+        orig_dict = Dict{Symbol,Tuple{Float64,Float64}}(
+            b.name => (b.min, b.max) for b in pb.bounds
+        )
+        restricted_dict = restrict_epsilon_bounds(pp, orig_dict; verbose=false)
+        new_bounds = ParameterBound[
+            ParameterBound(b.name, restricted_dict[b.name][1], restricted_dict[b.name][2],
+                           b.type, b.scale, b.unit, b.description)
+            for b in pb.bounds
+        ]
+        pb = ParameterBounds(new_bounds, pb.fuel_cell_type, pb.year, pb.voltage_zone, pb.n_params)
+    end
+
     s_cfg = SamplingConfig(
         n_samples = cfg.n_samples,
         method = :lhs,

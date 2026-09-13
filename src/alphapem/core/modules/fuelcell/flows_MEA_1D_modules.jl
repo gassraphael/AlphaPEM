@@ -587,7 +587,14 @@ lambda_eq
 """
 function lambda_eq(C_v, s, T, pp::PhysicalParams)
     Kshape = pp.Kshape  # Mathematical factor governing lambda_eq smoothing.
-    a_w = C_v / C_v_sat(T) + 2 * s  # Water activity.
+    # Sanitise inputs: during nonlinear iterations the solver may probe unphysical
+    # states (C_v < 0, s > 1, T very low).  There, C_v / C_v_sat(T) can diverge to
+    # -Inf, making exp(-Kshape*(a_w-1)) overflow to +Inf and the product with
+    # (1 + tanh(...)) = 0 evaluate to NaN.  Bounding a_w's components keeps the
+    # residual finite so the solver can reject the step instead of crashing.
+    C_v_eff = _nonnegative_value(C_v)
+    s_eff = _bounded_saturation_value(s)
+    a_w = C_v_eff / C_v_sat(T) + 2 * s_eff  # Water activity.
     return 0.5 * lambda_v_eq(a_w)                                          * (1 - tanh(100 * (a_w - 1))) +
            0.5 * (lambda_v_eq(1) + (lambda_l_eq(T) - lambda_v_eq(1)) * (1 - exp(-Kshape * (a_w - 1)))) *
                                                                              (1 + tanh(100 * (a_w - 1)))
