@@ -33,7 +33,7 @@ function build_input_parameters(cfg::SobolAnalysisConfig)::Vector{InputParameter
     params = InputParameter[]
 
     # Physical undetermined parameters
-    pb = cfg.parameter_bounds !== nothing ? cfg.parameter_bounds : bounds_for_fuel_cell(cfg.fuel_cell_type, cfg.voltage_zone; year=cfg.year)
+    pb = cfg.parameter_bounds !== nothing ? cfg.parameter_bounds : bounds_for_fuel_cell(cfg.fuel_cell_type, cfg.voltage_zone; year=cfg.year, nb_gc=cfg.nb_gc)
     for b in pb.bounds
         push!(params, InputParameter(b.name, b.min, b.max, b.type, :physical))
     end

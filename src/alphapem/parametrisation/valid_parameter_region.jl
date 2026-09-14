@@ -530,7 +530,7 @@ function run_validity_analysis(cfg::ValidityAnalysisConfig,
 
     # If pre-restriction was applied, also export the original bounds for reference
     if cfg.pre_restrict_epsilon_bounds
-        orig_pb = bounds_for_fuel_cell(cfg.fuel_cell_type, cfg.voltage_zone; year=cfg.year)
+        orig_pb = bounds_for_fuel_cell(cfg.fuel_cell_type, cfg.voltage_zone; year=cfg.year, nb_gc=cfg.nb_gc)
         orig_bounds = Dict{Symbol, Tuple{Float64, Float64}}(
             b.name => (b.min, b.max) for b in orig_pb.bounds
         )
@@ -686,7 +686,7 @@ in `[0,1]` for every sample.
 Returns `(samples::Matrix{Float64}, bounds::ParameterBounds)`.
 """
 function generate_test_samples(cfg::ValidityAnalysisConfig)
-    pb = bounds_for_fuel_cell(cfg.fuel_cell_type, cfg.voltage_zone; year=cfg.year)
+    pb = bounds_for_fuel_cell(cfg.fuel_cell_type, cfg.voltage_zone; year=cfg.year, nb_gc=cfg.nb_gc)
 
     if cfg.pre_restrict_epsilon_bounds
         fc = create_fuelcell(cfg.fuel_cell_type, cfg.voltage_zone; year=cfg.year, nb_gc=cfg.nb_gc)
