@@ -400,7 +400,7 @@ end
 
 
 """This function calculates the carbon volume fraction in the catalyst layer (ACL or CCL),
-clamped to the physical range [0, 1].
+clamped to the physical range [1e-9, 1 - 1e-9].
 
 Parameters
 ----------
@@ -432,7 +432,7 @@ end
 
 
 """This function calculates the Pt volume fraction in the catalyst layer (ACL or CCL),
-clamped to the physical range [0, 1].
+clamped to the physical range [1e-9, 1 - 1e-9].
 
 Parameters
 ----------
@@ -491,7 +491,7 @@ function a_c(element::Symbol, lambdaa, T_cl, Hccl::Float64, pp::PhysicalParams)
 end
 
 
-"""This function calculates the ionomer volume fraction in the CL, clamped to [0, 1].
+"""This function calculates the ionomer volume fraction in the CL, physical range [1e-9, 1 - 1e-9].
 
 Parameters
 ----------
@@ -531,7 +531,7 @@ function epsilon_mc(element::Symbol, lambda_cl, T_cl, Hcl::Float64, pp::Physical
 end
 
 
-"""This function calculates the CL porosity, clamped to [0, 1].
+"""This function calculates the CL porosity, physical range [1e-9, 1 - 1e-9].
 
 Parameters
 ----------
