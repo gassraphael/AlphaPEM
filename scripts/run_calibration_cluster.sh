@@ -143,6 +143,45 @@ echo ""
 cd "$PBS_TMPDIR/$PROJECT_NAME"
 
 
+# **Live Results Synchronization:**
+# The job runs on a scratch copy; if it hits the PBS walltime, intermediate
+# checkpoints written by Julia would be lost. Synchronize the results directory
+# back to the submission directory periodically and on SIGTERM.
+
+RESULTS_SRC="$PBS_TMPDIR/$PROJECT_NAME/results"
+SYNC_PID=""
+
+sync_results_back() {
+    local reason="$1"
+    if [ -d "$RESULTS_SRC" ]; then
+        echo "[INFO] [$reason] Syncing results to original directory..."
+        mkdir -p "$PROJECT_ROOT/results"
+        rsync -a "$RESULTS_SRC/" "$PROJECT_ROOT/results/"
+        echo "[INFO] [$reason] Results sync completed ($(date))"
+    fi
+}
+
+start_periodic_sync() {
+    (
+        while true; do
+            sleep 1800
+            sync_results_back "periodic"
+        done
+    ) &
+    SYNC_PID=$!
+    echo "[INFO] Periodic results sync started (PID: $SYNC_PID, interval: 30 min)"
+}
+
+stop_periodic_sync() {
+    if [ -n "$SYNC_PID" ] && kill -0 "$SYNC_PID" 2>/dev/null; then
+        echo "[INFO] Stopping periodic results sync..."
+        kill "$SYNC_PID" 2>/dev/null || true
+        wait "$SYNC_PID" 2>/dev/null || true
+    fi
+    SYNC_PID=""
+}
+
+
 # **Conda/glibc Compatibility Workaround:**
 # This cluster runs glibc 2.17 (CentOS 7), but conda-forge packages now require glibc >= 2.28.
 # Setting CONDA_OVERRIDE_GLIBC=2.28 bypasses the virtual package version check so pixi can
@@ -279,9 +318,37 @@ echo ""
 # Launch calibration script
 # Count CPUs from PBS node file and explicitly set threads
 NCPUS=$(wc -l < $PBS_NODEFILE)
-julia --threads=$NCPUS --project examples/run_calibration.jl
+
+# PBS sends SIGTERM a few minutes before SIGKILL when walltime is reached.
+# Intercept it to stop Julia cleanly and perform an emergency backup.
+term_handler() {
+    echo ""
+    echo "[WARNING] SIGTERM received (likely approaching walltime limit)."
+    echo "[WARNING] Initiating emergency results backup..."
+    stop_periodic_sync
+    kill -TERM "$JULIA_PID" 2>/dev/null || true
+    wait "$JULIA_PID" 2>/dev/null || true
+    sync_results_back "emergency"
+    echo "[WARNING] Emergency backup completed. Exiting."
+    exit 143
+}
+trap 'term_handler' TERM
+
+# Start background periodic sync so intermediate checkpoints are preserved
+start_periodic_sync
+
+# Launch Julia in the background so the shell can react to SIGTERM
+echo "[INFO] Launching Julia..."
+julia --threads=$NCPUS --project examples/run_calibration.jl &
+JULIA_PID=$!
+
+wait "$JULIA_PID"
+JULIA_EXIT=$?
+
+stop_periodic_sync
 
 echo ""
+echo "[INFO] Julia exited with code $JULIA_EXIT"
 echo "--------------------------------------------------------------------------------"
 echo "[INFO] Execution end: $(date)"
 echo "================================================================================"
@@ -293,14 +360,18 @@ echo "==========================================================================
 echo "              Results Backup"
 echo "================================================================================"
 
+# One last sync of the results directory to catch any writes since the last
+# periodic sync (especially important if Julia exited very recently).
+sync_results_back "final"
+
 # Copy results back to original directory.
 # Excluded: .git (read-only objects cause permission errors) and the root Project.toml /
 # Manifest.toml, which this job mutated on purpose to drop GLMakie — that edit is local to
 # the scratch copy and must not leak back into the repository.
-echo "[INFO] Copying results to original directory..."
+echo "[INFO] Copying full project tree to original directory..."
 cd "$PBS_TMPDIR/$PROJECT_NAME"
 rsync -a --exclude='.git' --exclude='/Project.toml' --exclude='/Manifest.toml' . "$PROJECT_ROOT/"
-echo "[INFO] Results copied successfully"
+echo "[INFO] Full project copy completed"
 
 # Return to original directory
 cd "$PBS_O_WORKDIR"
