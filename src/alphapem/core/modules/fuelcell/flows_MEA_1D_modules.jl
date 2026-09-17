@@ -249,7 +249,7 @@ function Dcap(element::Symbol,
     theta_c_gdl, theta_c_mpl, theta_c_cl = pp.theta_c_gdl, pp.theta_c_mpl, pp.theta_c_cl
 
     K0_value = K0(element, epsilon, epsilon_c, pp)
-    s_eff = _bounded_saturation_value(s)
+    s_eff = _clamped_fraction_value(s)
     if element == :gdl
         theta_c_value = theta_c_gdl
     elseif element == :mpl
@@ -300,7 +300,7 @@ function Pcap(element::Symbol,
     theta_c_gdl, theta_c_mpl, theta_c_cl = pp.theta_c_gdl, pp.theta_c_mpl, pp.theta_c_cl
 
     K0_value = K0(element, epsilon, epsilon_c, pp)
-    s_eff = _bounded_saturation_value(s)
+    s_eff = _clamped_fraction_value(s)
     if element == :gdl
         theta_c_value = theta_c_gdl
     elseif element == :mpl
@@ -397,7 +397,7 @@ function Da_eff(element::Symbol,
     r_s_gdl, r_s_mpl, r_s_cl = pp.r_s_gdl, pp.r_s_mpl, pp.r_s_cl
     tau_mpl, tau_cl = pp.tau_mpl, pp.tau_cl
 
-    s_eff = _bounded_saturation_value(s)
+    s_eff = _clamped_fraction_value(s)
     if element == :gdl # The effective diffusion coefficient at the GDL using Tomadakis and Sotirchos model.
         # According to the GDL porosity, the GDL compression effect is different.
         if epsilon < 0.67
@@ -459,7 +459,7 @@ function Dc_eff(element::Symbol,
     r_s_gdl, r_s_mpl, r_s_cl = pp.r_s_gdl, pp.r_s_mpl, pp.r_s_cl
     tau_mpl, tau_cl = pp.tau_mpl, pp.tau_cl
 
-    s_eff = _bounded_saturation_value(s)
+    s_eff = _clamped_fraction_value(s)
     if element == :gdl # The effective diffusion coefficient at the GDL using Tomadakis and Sotirchos model.
         # According to the GDL porosity, the GDL compression effect is different.
         if epsilon < 0.67
@@ -593,7 +593,7 @@ function lambda_eq(C_v, s, T, pp::PhysicalParams)
     # (1 + tanh(...)) = 0 evaluate to NaN.  Bounding a_w's components keeps the
     # residual finite so the solver can reject the step instead of crashing.
     C_v_eff = _nonnegative_value(C_v)
-    s_eff = _bounded_saturation_value(s)
+    s_eff = _clamped_fraction_value(s)
     a_w = C_v_eff / C_v_sat(T) + 2 * s_eff  # Water activity.
     return 0.5 * lambda_v_eq(a_w)                                          * (1 - tanh(100 * (a_w - 1))) +
            0.5 * (lambda_v_eq(1) + (lambda_l_eq(T) - lambda_v_eq(1)) * (1 - exp(-Kshape * (a_w - 1)))) *
@@ -790,7 +790,7 @@ function Svl(element::Symbol,
     # Extraction of the parameters
     gamma_cond, gamma_evap = pp.gamma_cond, pp.gamma_evap
 
-    s_eff = _bounded_saturation_value(s)
+    s_eff = _clamped_fraction_value(s)
     C_v_eff = _nonnegative_value(C_v)
     T_eff = _positive_temperature_value(T)
     # Calculation of the total and partial pressures

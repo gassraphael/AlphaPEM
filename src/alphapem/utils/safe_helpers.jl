@@ -7,7 +7,6 @@ models, so they live in the shared utility layer.
 """
 
 @inline _positive_temperature_value(T::Real) = max(Float64(T), 1.0)
-@inline _bounded_saturation_value(s::Real) = clamp(Float64(s), 1e-9, 1.0 - 1e-9)
 @inline _positive_pressure_value(P::Real) = max(Float64(P), 1.0)
 @inline _nonnegative_value(x::Real) = max(Float64(x), eps(Float64))
 
@@ -55,19 +54,19 @@ Use this when the concentration appears inside a logarithm to avoid Newton/Jacob
 """
     _clamped_fraction_value(x)
 
-Clamp a volume or mass fraction to the physical range [0, 1].
+Clamp a volume or mass fraction to the physical range [1e-9, 1 - 1e-9].
 Use this when a fractional quantity may briefly step outside its domain during
-nonlinear iterations.
+nonlinear iterations or appears as a divisor.
 """
-@inline _clamped_fraction_value(x::Real) = clamp(Float64(x), 0.0, 1.0)
+@inline _clamped_fraction_value(x::Real) = clamp(Float64(x), 1e-9, 1.0 - 1e-9)
 
 @inline function _safe_porous_phase_weights(epsilon::Float64, s)
-    s_eff = _bounded_saturation_value(s)
+    s_eff = _clamped_fraction_value(s)
     return (max(1 - epsilon, 0.0), max(epsilon * s_eff, 0.0), max(epsilon * (1 - s_eff), 0.0))
 end
 
 @inline function _safe_cl_phase_weights(epsilon_cl_val::Float64, epsilon_mc_val::Float64, s)
-    s_eff = _bounded_saturation_value(s)
+    s_eff = _clamped_fraction_value(s)
     return (
         max(1 - epsilon_cl_val - epsilon_mc_val, 0.0),
         max(epsilon_mc_val, 0.0),
