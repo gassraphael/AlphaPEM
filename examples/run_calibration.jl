@@ -62,14 +62,14 @@ calibration_conditions = [
                                                nb_gc = NB_GC_POLA),
     ),
     SimulationConfig(
-        type_fuel_cell = :ZSW_Pa_2_8_Pc_2_6,
+        type_fuel_cell = :ZSW_Pa_1_61_Pc_1_41,  # use :ZSW_Pa_2_8_Pc_2_6 for nb_gc = 1
         year           = YEAR,
         voltage_zone   = :full,
         numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S,
                                                nb_gc = NB_GC_POLA),
     ),
     SimulationConfig(
-        type_fuel_cell = :ZSW_Pa_1_61_Pc_1_41,
+        type_fuel_cell = :ZSW_T_62,             # use :ZSW_T_84 for nb_gc = 1
         year           = YEAR,
         voltage_zone   = :full,
         numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S,
