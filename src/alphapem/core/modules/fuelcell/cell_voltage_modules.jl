@@ -432,6 +432,35 @@ function epsilon_carb(element::Symbol, Hcl::Float64, pp::PhysicalParams)
 end
 
 
+"""This function calculates the dry-ionomer fixed-site water storage capacity in the catalyst layer.
+
+Parameters
+----------
+element : Symbol
+    Either `:acl` (anode) or `:ccl` (cathode) -- selects the electrode-specific ionomer-to-carbon ratio and carbon volume fraction.
+Hcl : Float64
+    Thickness of the CL layer.
+pp : PhysicalParams
+    Physical parameters of the fuel cell.
+
+Returns
+-------
+C_fix_cl :
+    Dry-ionomer fixed-site water storage capacity in the CL, in mol.m-3 per lambda unit.
+
+Notes
+-----
+The lambda state is defined as the amount of water per fixed sulfonic-acid site of the dry ionomer.
+Therefore, the storage basis is the dry ionomer inventory, not the current swollen ionomer volume.
+"""
+function cl_dry_ionomer_storage_capacity(element::Symbol, Hcl::Float64, pp::PhysicalParams)
+    IC = element == :acl ? pp.IC_acl :
+         element == :ccl ? pp.IC_ccl :
+         throw(ArgumentError("The element should be either 'acl' or 'ccl'."))
+
+    return IC * epsilon_carb(element, Hcl, pp) * rho_carb / pp.M_eq
+end
+
 """This function calculates the Pt volume fraction in the catalyst layer (ACL or CCL).
 
 Parameters
