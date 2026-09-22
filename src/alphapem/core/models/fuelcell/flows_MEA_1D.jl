@@ -221,20 +221,23 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
     Sp_ccl = i_fc / (2 * F * Hccl) + k_H2(lambda_mem, T_mem, kappa_co, pp) * R * T_acl_mem_ccl / (Hmem * Hccl) * C_H2_acl
 
     # Water absorption in the CL due to the contact between the ionomer and vapor or liquid water:
+    C_fix_acl = cl_dry_ionomer_storage_capacity(:acl, Hacl, pp)
+    C_fix_ccl = cl_dry_ionomer_storage_capacity(:ccl, Hccl, pp)
+
     #   Anode side
-    Sv_abs_acl = (1 - s_acl) * gamma_sorp_v(C_v_acl, s_acl, lambda_acl, T_acl, Hacl, pp) * rho_mem / M_eq *
+    Sv_abs_acl = (1 - s_acl) * gamma_sorp_v(C_v_acl, s_acl, lambda_acl, T_acl, Hacl, pp) * C_fix_acl *
                  (lambda_eq(C_v_acl, s_acl, T_acl, pp) - lambda_acl)
     if s_acl > 0
-        Sl_abs_acl = s_acl * gamma_sorp_l * rho_mem / M_eq * (lambda_eq(C_v_acl, s_acl, T_acl, pp) - lambda_acl)
+        Sl_abs_acl = s_acl * gamma_sorp_l * C_fix_acl * (lambda_eq(C_v_acl, s_acl, T_acl, pp) - lambda_acl)
     else
         Sl_abs_acl = 0.0
     end
 
     #   Cathode side
-    Sv_abs_ccl = (1 - s_ccl) * gamma_sorp_v(C_v_ccl, s_ccl, lambda_ccl, T_ccl, Hccl, pp) * rho_mem / M_eq *
+    Sv_abs_ccl = (1 - s_ccl) * gamma_sorp_v(C_v_ccl, s_ccl, lambda_ccl, T_ccl, Hccl, pp) * C_fix_ccl *
                  (lambda_eq(C_v_ccl, s_ccl, T_ccl, pp) - lambda_ccl)
     if s_ccl > 0
-        Sl_abs_ccl = s_ccl * gamma_sorp_l * rho_mem / M_eq * (lambda_eq(C_v_ccl, s_ccl, T_ccl, pp) - lambda_ccl)
+        Sl_abs_ccl = s_ccl * gamma_sorp_l * C_fix_ccl * (lambda_eq(C_v_ccl, s_ccl, T_ccl, pp) - lambda_ccl)
     else
         Sl_abs_ccl = 0.0
     end
