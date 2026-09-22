@@ -15,7 +15,7 @@ sv : CellState1D{NB_GDL, NB_MPL}
 pp : PhysicalParams
     Fuel-cell physical parameters container (geometry, thicknesses and porous properties).
 S_abs : MEASorptionSources
-    Water absorption rates at the CLs (mol·m⁻³·s⁻¹).
+    Water absorption/desorption rates at the CL ionomer (mol·m⁻³·s⁻¹).
 J_lambda : MEADissolvedWaterFlux
     Dissolved-water inter-layer fluxes (mol·m⁻²·s⁻¹).
 Sp : MEAWaterProductionSources
@@ -66,7 +66,7 @@ pp : PhysicalParams
 Jl : MEALiquidFluxes{NB_GDL, NB_MPL}
     Liquid-water inter-layer fluxes (kg·m⁻²·s⁻¹).
 S_abs : MEASorptionSources
-    Water absorption rates at the CLs (mol·m⁻³·s⁻¹).
+    Water absorption/desorption rates at the CL ionomer (mol·m⁻³·s⁻¹).
 Sl : MEALiquidSources{NB_GDL, NB_MPL}
     Liquid-water phase-change source terms (mol·m⁻³·s⁻¹).
 
@@ -147,7 +147,7 @@ Jv : MEAVaporFluxes{NB_GDL, NB_MPL}
 Sv : MEAVaporSources{NB_GDL, NB_MPL}
     Vapour phase-change source terms (mol·m⁻³·s⁻¹).
 S_abs : MEASorptionSources
-    Water absorption rates at the CLs (mol·m⁻³·s⁻¹).
+    Water absorption/desorption rates at the CL ionomer (mol·m⁻³·s⁻¹).
 
 Returns
 -------
