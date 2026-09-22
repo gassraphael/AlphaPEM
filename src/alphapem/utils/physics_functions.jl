@@ -23,7 +23,11 @@ This function calculates the water density, in kg.m-3, as a function of the temp
 - `rho_H2O_l`: Water density in kg.m-3.
 """
 function rho_H2O_l(T)
-    T_Celsius = T - 273.15
+    # Clamp to the liquid-water validity range: the correlation returns a
+    # negative density for T ≳ 600 °C, which would silently propagate into
+    # epsilon_mc and cause division-by-zero in the dissolved-water equations
+    # when the solver probes unphysical (very hot) states.
+    T_Celsius = _liquid_water_temperature_value(T) - 273.15
     return ((999.83952 + 16.945176 * T_Celsius - 7.9870401e-3 * T_Celsius^2 - 46.170461e-6 * T_Celsius^3 +
              105.56302e-9 * T_Celsius^4 - 280.54253e-12 * T_Celsius^5) / (1 + 16.879850e-3 * T_Celsius))
 end
@@ -41,8 +45,9 @@ This function calculates the liquid water kinematic viscosity, in m².s-1, as a 
 - `nu_l`: Liquid water kinematic viscosity in m².s-1.
 """
 function nu_l(T)
-    mu_l = 2.414 * 10^(-5 + 247.8 / (T - 140.0))  # Pa.s. It is the liquid water dynamic viscosity.
-    return mu_l / rho_H2O_l(T)
+    T_eff = _liquid_water_temperature_value(T)  # K — keeps 247.8/(T-140) finite and positive.
+    mu_l = 2.414 * 10^(-5 + 247.8 / (T_eff - 140.0))  # Pa.s. It is the liquid water dynamic viscosity.
+    return mu_l / rho_H2O_l(T_eff)
 end
 
 
@@ -127,17 +132,19 @@ Source : Carl L. Yaws - Manuel 2014 - Transport properties of chemicals and hydr
 """
 function mu_gaz(component::Symbol, T)
 
+    T_eff = _positive_temperature_value(T)
     if component == :H2O_v  # For T >= 150 K and T <= 1500 k.
-        return (22.8211 + 1.7387e-1 * T + 3.2465e-4 * T^2 - 1.4334e-7 * T^3) * 1e-7
+        mu = (22.8211 + 1.7387e-1 * T_eff + 3.2465e-4 * T_eff^2 - 1.4334e-7 * T_eff^3) * 1e-7
     elseif component == :H2  # For T >= 15 K and T <= 1500 K.
-        return (1.7611 + 3.4165e-1 * T - 1.8368e-4 * T^2 + 5.1147e-8 * T^3) * 1e-7
+        mu = (1.7611 + 3.4165e-1 * T_eff - 1.8368e-4 * T_eff^2 + 5.1147e-8 * T_eff^3) * 1e-7
     elseif component == :O2  # For T >= 54 K and T <= 1500 K.
-        return (-4.9433 + 8.0673e-1 * T - 4.0416e-4 * T^2 + 1.0111e-7 * T^3) * 1e-7
+        mu = (-4.9433 + 8.0673e-1 * T_eff - 4.0416e-4 * T_eff^2 + 1.0111e-7 * T_eff^3) * 1e-7
     elseif component == :N2  # For T >= 63 K and T <= 1970 K.
-        return (4.4656 + 6.3814e-1 * T - 2.6596e-4 * T^2 + 5.4113e-8 * T^3) * 1e-7
+        mu = (4.4656 + 6.3814e-1 * T_eff - 2.6596e-4 * T_eff^2 + 5.4113e-8 * T_eff^3) * 1e-7
     else
         throw(ArgumentError("The element should be either 'H2O_v', 'H2', 'O2' or 'N2'."))
     end
+    return _nonnegative_value(mu)
 end
 
 

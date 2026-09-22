@@ -166,7 +166,8 @@ function R_O2_dif_l(s, lambdaa, T, Hcl::Float64, pp::PhysicalParams)
     T_eff = _positive_temperature_value(T)
     delta_ion_val = delta_ion(:ccl, lambdaa, T_eff, Hcl, pp)
     s_num = _nonnegative_value(s)
-    delta_H2O_l = (s_num * epsilon_cl(:ccl, lambdaa, T_eff, Hcl, pp) * r_carb^3 / epsilon_carb(:ccl, Hcl, pp) +
+    eps_carb_eff = _nonnegative_value(epsilon_carb(:ccl, Hcl, pp))
+    delta_H2O_l = (s_num * epsilon_cl(:ccl, lambdaa, T_eff, Hcl, pp) * r_carb^3 / eps_carb_eff +
                   (r_carb + delta_ion_val)^3)^(1 / 3) -
                   (r_carb + delta_ion_val) # The liquid water film thickness in the CL, in m.
 
@@ -393,11 +394,13 @@ water management and impedance spectra.
 """
 function delta_ion(element::Symbol, lambdaa, T, Hcl::Float64, pp::PhysicalParams)
     r_carb = pp.r_carb  # Mean radius of the carbon particles.
-    return r_carb * ((epsilon_mc(element, lambdaa, T, Hcl, pp) / epsilon_carb(element, Hcl, pp) + 1)^(1 / 3) - 1)
+    eps_carb_eff = _nonnegative_value(epsilon_carb(element, Hcl, pp))
+    return r_carb * ((epsilon_mc(element, lambdaa, T, Hcl, pp) / eps_carb_eff + 1)^(1 / 3) - 1)
 end
 
 
-"""This function calculates the carbon volume fraction in the catalyst layer (ACL or CCL).
+"""This function calculates the carbon volume fraction in the catalyst layer (ACL or CCL),
+clamped to the physical range [1e-9, 1 - 1e-9].
 
 Parameters
 ----------
@@ -422,13 +425,9 @@ function epsilon_carb(element::Symbol, Hcl::Float64, pp::PhysicalParams)
     L_Pt, wt_Pt = element == :acl ? (pp.L_Pt_acl, pp.wt_Pt_acl) :
                   element == :ccl ? (pp.L_Pt_ccl, pp.wt_Pt_ccl) :
                   throw(ArgumentError("The element should be either 'acl' or 'ccl'."))
-    L_carb = L_Pt * (1 - wt_Pt) / wt_Pt  # This is the carbon loading in the CL, in kg.m-2.
+    L_carb = L_Pt * (1 - wt_Pt) / wt_Pt  # Carbon loading in the CL, kg.m-2.
     epsilon_carb_val = L_carb / (rho_carb * Hcl) # This is the volume fraction of carbon in the CL.
-    if epsilon_carb_val >= 1
-        println("epsilon_carb: ", epsilon_carb_val, " element: ", element, " Hcl: ", Hcl, " wt_Pt: ", wt_Pt)
-        throw(ArgumentError("The calculated carbon volume fraction in the $(element) is greater than or equal to 1. Please check the inputs Hcl and wt_Pt."))
-    end
-    return epsilon_carb_val
+    return _clamped_fraction_value(epsilon_carb_val)
 end
 
 
@@ -461,7 +460,8 @@ function cl_dry_ionomer_storage_capacity(element::Symbol, Hcl::Float64, pp::Phys
     return IC * epsilon_carb(element, Hcl, pp) * rho_carb / pp.M_eq
 end
 
-"""This function calculates the Pt volume fraction in the catalyst layer (ACL or CCL).
+"""This function calculates the Pt volume fraction in the catalyst layer (ACL or CCL),
+clamped to the physical range [1e-9, 1 - 1e-9].
 
 Parameters
 ----------
@@ -485,12 +485,8 @@ function epsilon_Pt(element::Symbol, Hcl::Float64, pp::PhysicalParams)
     L_Pt, wt_Pt = element == :acl ? (pp.L_Pt_acl, pp.wt_Pt_acl) :
                   element == :ccl ? (pp.L_Pt_ccl, pp.wt_Pt_ccl) :
                   throw(ArgumentError("The element should be either 'acl' or 'ccl'."))
-    epsilon_Pt_val = L_Pt / (rho_Pt * Hcl)  # This is the volume fraction of Pt in the CL.
-    if epsilon_Pt_val >= 1
-        println("epsilon_Pt: ", epsilon_Pt_val, " element: ", element, " Hcl: ", Hcl, " wt_Pt: ", wt_Pt)
-        throw(ArgumentError("The calculated Pt volume fraction in the $(element) is greater than or equal to 1. Please check the inputs Hcl and wt_Pt."))
-    end
-    return epsilon_Pt_val
+    epsilon_Pt_val = L_Pt / (rho_Pt * Hcl)  # Volume fraction of Pt in the CL.
+    return _clamped_fraction_value(epsilon_Pt_val)
 end
 
 
@@ -524,7 +520,7 @@ function a_c(element::Symbol, lambdaa, T_cl, Hccl::Float64, pp::PhysicalParams)
 end
 
 
-"""This function calculates the ionomer volume fraction in the CL.
+"""This function calculates the ionomer volume fraction in the CL, physical range [1e-9, 1 - 1e-9].
 
 Parameters
 ----------
@@ -560,15 +556,11 @@ function epsilon_mc(element::Symbol, lambda_cl, T_cl, Hcl::Float64, pp::Physical
     epsilon_mc_val = IC * epsilon_carb(element, Hcl, pp) * rho_carb / rho_ion *
                      (1 + (M_H2O * rho_ion) / (rho_H2O_l(T_cl) * M_eq) * lambda_eff)
 
-    if epsilon_mc_val >= 1
-        println("epsilon_mc: ", epsilon_mc_val, " element: ", element, " Hcl: ", Hcl, " IC: ", IC)
-        throw(ArgumentError("The calculated ionomer volume fraction in the $(element) is greater than or equal to 1. Please check the inputs Hcl and IC."))
-    end
-    return epsilon_mc_val
+    return _clamped_fraction_value(epsilon_mc_val)
 end
 
 
-"""This function calculates the CL porosity.
+"""This function calculates the CL porosity, physical range [1e-9, 1 - 1e-9].
 
 Parameters
 ----------
@@ -597,9 +589,5 @@ function epsilon_cl(element::Symbol, lambda_cl, T_cl, Hcl::Float64, pp::Physical
     epsilon_cl_val = 1 - epsilon_carb(element, Hcl, pp) - epsilon_Pt(element, Hcl, pp) -
                       epsilon_mc(element, lambda_cl, T_cl, Hcl, pp)
 
-    if epsilon_cl_val <= 0
-        println("epsilon_cl: ", epsilon_cl_val, " element: ", element, " Hcl: ", Hcl)
-        throw(ArgumentError("The calculated porosity in the $(element) is less than or equal to 0. Please check the inputs Hcl, IC and, for the $(element), wt_Pt."))
-    end
-    return epsilon_cl_val
+    return _clamped_fraction_value(epsilon_cl_val)
 end

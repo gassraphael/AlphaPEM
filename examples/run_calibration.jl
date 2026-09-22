@@ -51,21 +51,26 @@ end
 # All conditions must share the same fuel cell type (same parameters to identify).
 # Add or remove blocks below to calibrate on more or fewer datasets.
 
+const YEAR = 2024
+
 calibration_conditions = [
     SimulationConfig(
         type_fuel_cell = :ZSW_nominal,
+        year           = YEAR,
         voltage_zone   = :full,
         numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S,
                                                nb_gc = NB_GC_POLA),
     ),
     SimulationConfig(
-        type_fuel_cell = :ZSW_Pa_2_8_Pc_2_6,
+        type_fuel_cell = :ZSW_Pa_1_61_Pc_1_41,  # use :ZSW_Pa_2_8_Pc_2_6 for nb_gc = 1
+        year           = YEAR,
         voltage_zone   = :full,
         numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S,
                                                nb_gc = NB_GC_POLA),
     ),
     SimulationConfig(
-        type_fuel_cell = :ZSW_Pa_1_61_Pc_1_41,
+        type_fuel_cell = :ZSW_T_62,             # use :ZSW_T_84 for nb_gc = 1
+        year           = YEAR,
         voltage_zone   = :full,
         numerical_parameters = NumericalParams(max_run_time_s = MAX_RUN_TIME_S,
                                                nb_gc = NB_GC_POLA),
@@ -75,8 +80,8 @@ calibration_conditions = [
 # ── Genetic Algorithm settings ────────────────────────────────────────────────
 
 ga_cfg = GAConfig(
-    num_generations = 2000,                     # minimum of 500 generation, 1000+ recommended for high precision
-    pop_size        = 256,                      # 128+ recommended
+    num_generations = 500,                      # minimum of 500 generation, 1000+ recommended for high precision
+    pop_size        = 128,                      # 128+ recommended
     target_error    = 1/100,                    # Stop if RMSE < 1%
 )
 

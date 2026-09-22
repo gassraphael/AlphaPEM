@@ -18,6 +18,8 @@
     --primary: #0066cc;
     --primary-dark: #0052a3;
     --primary-light: #e6f0ff;
+    --header-bg: #f8fafc;
+    --header-border: #0a3d62;
     --secondary: #009900;
     --success: #00b300;
     --danger: #e60000;
@@ -89,24 +91,32 @@ body {
 }
 
 header.header {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--header-bg) 0%, #eef2f7 100%);
+    color: var(--dark);
     padding: var(--spacing-lg) var(--spacing-md);
     text-align: center;
-    border-bottom: 4px solid var(--secondary);
+    border-bottom: 4px solid var(--primary);
 }
 
-.logo h1 {
-    font-size: var(--font-size-2xl);
-    font-weight: 700;
-    margin-bottom: var(--spacing-xs);
-    letter-spacing: -0.5px;
+.logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.logo-img {
+    max-height: 80px;
+    width: auto;
+    max-width: 90%;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
 }
 
 .logo .subtitle {
     font-size: var(--font-size-base);
-    font-weight: 300;
-    opacity: 0.9;
+    font-weight: 400;
+    color: var(--primary-dark);
+    margin: 0;
 }
 
 main.main-content {
