@@ -17,7 +17,7 @@ pp : PhysicalParams
 S_abs : MEASorptionSources
     Water absorption rates at the CLs (mol·m⁻³·s⁻¹).
 J_lambda : MEADissolvedWaterFlux
-    Dissolved-water inter-layer fluxes (kg·m⁻²·s⁻¹).
+    Dissolved-water inter-layer fluxes (mol·m⁻²·s⁻¹).
 Sp : MEAWaterProductionSources
     Water production rates at the CLs (mol·m⁻³·s⁻
 
