@@ -94,11 +94,9 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
     rho_cgc = C_O2_cgc * M_O2 + C_v_cgc * M_H2O + C_N2_cgc * M_N2
 
     # Weighted mean values ...
-    #       ... of the EOD flow of water in the membrane
-    D_eff_EOD_acl_mem = hmean(D_EOD_eff(:acl, i_fc, lambda_acl, T_acl, Hacl, pp), D_EOD(i_fc),
-                              Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem))
-    D_eff_EOD_mem_ccl = hmean(D_EOD(i_fc), D_EOD_eff(:ccl, i_fc, lambda_ccl, T_ccl, Hccl, pp),
-                              Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl))
+    #       ... of the EOD flux coefficient per lambda unit between the ACL and the membrane, and between the membrane and the CCL.
+    D_eff_EOD_acl_mem = D_EOD_eff(:acl, i_fc, lambda_acl, T_acl, Hacl, pp)
+    D_eff_EOD_mem_ccl = D_EOD_eff(:ccl, i_fc, lambda_ccl, T_ccl, Hccl, pp)
 
     #       ... of the dissolved-water back-diffusion conductance per lambda gradient
     K_lambda_acl = cl_dry_ionomer_storage_capacity(:acl, Hacl, pp) * D_lambda_eff(:acl, lambda_acl, T_acl, Hacl, pp)
@@ -671,8 +669,10 @@ function D_EOD(i_fc)
 end
 
 
-"""This function calculates the effective electro-osmotic drag diffusion coefficient of water in the ionomer of the
-catalyst layers, in mol.m-2.s-1.
+"""This function calculates the CL electro-osmotic drag flux coefficient per lambda unit, in mol.m-2.s-1.
+
+The CL coefficient applies a lumped mean-current factor to the membrane EOD coefficient. It does not use the pore-space
+tortuosity or the wet ionomer volume fraction.
 
 Parameters
 ----------
@@ -681,22 +681,71 @@ element : Symbol
 i_fc :
     Fuel cell current density in A.m-2.
 lambdaa :
-    Water content in the catalyst layer.
+    Water content in the catalyst layer ionomer, defined as the number of water molecules per fixed sulfonic-acid site.
 T :
     Temperature in K.
 Hcl : Float64
-    Thickness of the CL layer.
+    Thickness of the CL layer in m.
 pp : PhysicalParams
     Physical parameters of the fuel cell.
 
 Returns
 -------
-
-    Effective electro-osmotic drag diffusion coefficient of water in the catalyst layer in mol.m-2.s-1.
+D_EOD_eff
+    CL electro-osmotic drag flux coefficient per lambda unit in mol.m-2.s-1.
 """
 function D_EOD_eff(element::Symbol, i_fc, lambdaa, T, Hcl::Float64, pp::PhysicalParams)
-    tau_cl = pp.tau_cl  # Pore structure coefficient in the CL.
-    return epsilon_mc(element, lambdaa, T, Hcl, pp) / tau_cl * D_EOD(i_fc)
+    return f_EOD_cl(element, lambdaa, T, Hcl, pp) * D_EOD(i_fc)
+end
+
+
+"""This function calculates the effective lumped-CL factor for electro-osmotic drag.
+
+This factor is a lumped mean-current closure for the unresolved through-plane CL proton-current profile, not a material
+tortuosity.
+
+Kulikovsky 2011 discusses the low-current catalyst layer regime with an approximately uniform reaction rate and a nearly
+linearly decaying proton current. The same profile assumption is already used numerically in selected CL Joule-heat
+terms in `core/models/fuelcell/heat_transfer.jl`, where the squared current gives a 1/3 factor.
+
+For a lumped CL of thickness Hcl and coordinate x from the membrane side to the MPL/GDL side, this profile can be
+written as
+
+    i_p(x) = i_fc * (1 - x / Hcl).
+
+For Joule heat, the source scales with i_p(x)^2. Therefore
+
+    (1 / Hcl) * integral_0^Hcl (i_p(x) / i_fc)^2 dx = 1/3,
+
+which explains the 1/3 factor in the lumped CL Joule-heat terms.
+
+For electro-osmotic drag, the flux scales with the proton current itself, not with its square. Therefore
+
+    (1 / Hcl) * integral_0^Hcl (i_p(x) / i_fc) dx = 1/2.
+
+The active value f_EOD_cl = 0.5 applies this mean-current factor to the CL EOD flux coefficient. This is a transfer of
+the same unresolved CL current-profile assumption to EOD, not a direct EOD correlation from Kulikovsky.
+
+Parameters
+----------
+element : Symbol
+    Either `:acl` (anode) or `:ccl` (cathode).
+lambdaa :
+    Water content in the catalyst layer ionomer, defined as the number of water molecules per fixed sulfonic-acid site.
+T :
+    Temperature in K.
+Hcl : Float64
+    Thickness of the CL layer in m.
+pp : PhysicalParams
+    Physical parameters of the fuel cell.
+
+Returns
+-------
+f_EOD_cl
+    Effective EOD scaling factor in the catalyst layer.
+"""
+function f_EOD_cl(element::Symbol, lambdaa, T, Hcl::Float64, pp::PhysicalParams)
+    return 0.5
 end
 
 
