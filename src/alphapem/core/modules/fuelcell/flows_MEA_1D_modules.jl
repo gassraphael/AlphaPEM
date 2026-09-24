@@ -749,6 +749,94 @@ function f_EOD_cl(element::Symbol, lambdaa, T, Hcl::Float64, pp::PhysicalParams)
 end
 
 
+const DEFAULT_LAMBDA_CONSTITUTIVE_EPS = 1.0e-8
+const DEFAULT_NEGATIVE_EVENT_FLOOR = 1.0e-5
+const DEFAULT_LAMBDA_INVENTORY_EPS = 1.0e-4
+const DEFAULT_EOD_DONOR_LAMBDA_SCALE = 0.25
+
+
+"""This function returns a smooth non-negative continuation of max(value, 0).
+
+This helper is used only for dissolved-water constitutive factors. It does not clamp the ODE state itself.
+The default smoothing width follows a previous implementation based on the AlphaPEM V1.3 version in Python, where it has been robust for the previous model formulation. It still needs to be re-verified in the integrated (V2.0) Julia-model.
+"""
+function _lambda_smooth_positive_part(value, eps_value=DEFAULT_LAMBDA_CONSTITUTIVE_EPS)
+    return 0.5 * (value + sqrt(value * value + eps_value * eps_value))
+end
+
+
+"""This function returns a smooth donor-inventory availability factor. The factor is 0 when the donor-side dissolved-water inventory is depleted, 1 when sufficient donor inventory is available, and changes smoothly between both limits to avoid a kink in the model equations.
+
+The limiter is applied only to water-removing dissolved-water fluxes. It preserves the raw lambda states and smoothly
+reduces additional removal when the donor inventory approaches the lower model floor.
+
+The default floor and ramp width follow the implementation based on the AlphaPEM V1.3 version in Python (`1e-5` and `1e-4`).
+They are not newly validated (V2.0) Julia-model parameters; they have been robust in the previous model and must be checked again in the new integrated model.
+"""
+function _dissolved_inventory_limiter(lambdaa,
+                                      inventory_floor=DEFAULT_NEGATIVE_EVENT_FLOOR,
+                                      inventory_eps=DEFAULT_LAMBDA_INVENTORY_EPS)
+    if inventory_eps <= 0.0
+        throw(ArgumentError("The dissolved-water inventory epsilon must be positive."))
+    end
+
+    lambda_available = lambdaa - inventory_floor
+    if lambda_available <= 0.0
+        return 0.0
+    elseif lambda_available >= inventory_eps
+        return 1.0
+    end
+
+    normalized_availability = lambda_available / inventory_eps
+    return normalized_availability^2 * (3.0 - 2.0 * normalized_availability)
+end
+
+
+"""This function limits a dissolved-water flux with the inventory of the donor side.
+
+Positive flux follows the local minus-to-plus convention. Negative flux is a return flux and is therefore limited by the plus-side dissolved-water inventory.
+The default limiter parameters follow the implementation based on the AlphaPEM V1.3 version in Python and must be re-verified in the new integrated (V2.0) Julia-model.
+"""
+function _limit_directed_dissolved_flux(flux,
+                                        lambda_minus,
+                                        lambda_plus,
+                                        inventory_floor=DEFAULT_NEGATIVE_EVENT_FLOOR,
+                                        inventory_eps=DEFAULT_LAMBDA_INVENTORY_EPS)
+    if flux > 0.0
+        return flux * _dissolved_inventory_limiter(lambda_minus, inventory_floor, inventory_eps)
+    elseif flux < 0.0
+        return flux * _dissolved_inventory_limiter(lambda_plus, inventory_floor, inventory_eps)
+    else
+        return flux
+    end
+end
+
+
+"""This function returns a smooth EOD lambda factor limited by the donor-side dissolved-water inventory.
+
+The interface lambda is first evaluated from the adjacent finite-volume states.
+For the EOD gross term, this value is then smoothly limited by the donor-side lambda inventory so that electro-osmotic drag cannot remove more dissolved water than is locally available in the donor ionomer.
+
+The default smoothing scale (`0.25` in lambda units) follows the implementation based on the AlphaPEM V1.3 version in Python, where it has been robust for the previous model.
+This parameterization is a numerical closure for the inventory limiter and still needs to be verified for the new integrated (V2.0) Julia-model.
+"""
+function _donor_limited_eod_lambda(lambda_interface,
+                                   lambda_donor,
+                                   smoothing_scale=DEFAULT_EOD_DONOR_LAMBDA_SCALE)
+    if smoothing_scale <= 0.0
+        throw(ArgumentError("The EOD donor lambda smoothing scale must be positive."))
+    end
+
+    lambda_interface_pos = _lambda_smooth_positive_part(lambda_interface)
+    lambda_donor_pos = _lambda_smooth_positive_part(lambda_donor)
+    lambda_eff_raw = 0.5 * (
+        lambda_interface_pos + lambda_donor_pos -
+        sqrt((lambda_interface_pos - lambda_donor_pos)^2 + smoothing_scale^2)
+    )
+    return _lambda_smooth_positive_part(lambda_eff_raw)
+end
+
+
 """This function calculates the water volume fraction of the membrane.
 
 Parameters
