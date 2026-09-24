@@ -24,7 +24,7 @@ Returns
 Tuple(29 elements)
     Tuple containing all intermediate values used by the flows calculation.
     Elements: (H_gdl_node, H_mpl_node, Pagc, Pcgc, Pcap_agdl, Pcap_cgdl, rho_agc, rho_cgc,
-    D_eff_EOD_acl_mem, D_eff_EOD_mem_ccl, D_lambda_eff_acl_mem, D_lambda_eff_mem_ccl,
+    D_eff_EOD_acl_mem, D_eff_EOD_mem_ccl, K_lambda_eff_acl_mem, K_lambda_eff_mem_ccl,
     D_cap_agdl_agdl, D_cap_agdl_ampl, D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_ccl_cmpl,
     D_cap_cmpl_cmpl, D_cap_cmpl_cgdl, D_cap_cgdl_cgdl, Da_eff_agdl_agdl, Da_eff_agdl_ampl,
     Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl, Dc_eff_cmpl_cgdl,
@@ -100,10 +100,13 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
     D_eff_EOD_mem_ccl = hmean(D_EOD(i_fc), D_EOD_eff(:ccl, i_fc, lambda_ccl, T_ccl, Hccl, pp),
                               Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl))
 
-    #       ... of the diffusion coefficient of water in the membrane
-    D_lambda_eff_acl_mem = hmean(D_lambda_eff(:acl, lambda_acl, T_acl, Hacl, pp), D_lambda(lambda_mem),
+    #       ... of the dissolved-water back-diffusion conductance per lambda gradient
+    K_lambda_acl = cl_dry_ionomer_storage_capacity(:acl, Hacl, pp) * D_lambda_eff(:acl, lambda_acl, T_acl, Hacl, pp)
+    K_lambda_mem = pp.rho_mem / pp.M_eq * D_lambda(lambda_mem)
+    K_lambda_ccl = cl_dry_ionomer_storage_capacity(:ccl, Hccl, pp) * D_lambda_eff(:ccl, lambda_ccl, T_ccl, Hccl, pp)
+    K_lambda_eff_acl_mem = hmean(K_lambda_acl, K_lambda_mem,
                                  Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem))
-    D_lambda_eff_mem_ccl = hmean(D_lambda(lambda_mem), D_lambda_eff(:ccl, lambda_ccl, T_ccl, Hccl, pp),
+    K_lambda_eff_mem_ccl = hmean(K_lambda_mem, K_lambda_ccl,
                                  Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl))
 
     # Pre-computed inter-layer CL porosities and weight factors (avoid repeated calls and divisions)
@@ -206,7 +209,7 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
                             [Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl), Hccl / (Hacl + Hmem + Hccl)])
 
     return (H_gdl_node, H_mpl_node, Pagc, Pcgc, Pcap_agdl, Pcap_cgdl, rho_agc, rho_cgc, D_eff_EOD_acl_mem,
-            D_eff_EOD_mem_ccl, D_lambda_eff_acl_mem, D_lambda_eff_mem_ccl, D_cap_agdl_agdl, D_cap_agdl_ampl,
+            D_eff_EOD_mem_ccl, K_lambda_eff_acl_mem, K_lambda_eff_mem_ccl, D_cap_agdl_agdl, D_cap_agdl_ampl,
             D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_ccl_cmpl, D_cap_cmpl_cmpl, D_cap_cmpl_cgdl, D_cap_cgdl_cgdl,
             Da_eff_agdl_agdl, Da_eff_agdl_ampl, Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl,
             Dc_eff_cmpl_cgdl, Dc_eff_cgdl_cgdl, T_acl_mem_ccl)
@@ -619,7 +622,7 @@ function D_lambda(lambdaa)
 end
 
 
-"""This function calculates the effective diffusion coefficient of water in the ionomer of the catalyst layers,
+"""This function calculates the effective diffusion coefficient of dissolved water in the catalyst layer ionomer phase,
 in m².s-1.
 
 Parameters
@@ -627,22 +630,27 @@ Parameters
 element : Symbol
     Either `:acl` (anode) or `:ccl` (cathode).
 lambdaa :
-    Water content in the catalyst layer.
+    Water content in the catalyst layer ionomer, defined as the number of water molecules per fixed sulfonic-acid site.
 T :
     Temperature in K.
 Hcl : Float64
-    Thickness of the CL layer.
+    Thickness of the CL layer in m.
 pp : PhysicalParams
     Physical parameters of the fuel cell.
 
 Returns
 -------
 D_lambda_eff
-    Effective diffusion coefficient of water in the catalyst layer in m².s-1.
+    Effective diffusion coefficient of dissolved water in the catalyst layer ionomer phase in m².s-1.
+
+Notes
+-----
+The fixed-site storage capacity of the CL ionomer is handled separately through K_lambda = C_fix * D_lambda_eff on a bulk CL-volume basis. Therefore this coefficient applies only the ionomer-phase tortuosity tau_ion_cl to the material diffusion coefficient and does not multiply by the wet ionomer volume fraction epsilon_mc.
+
+tau_cl is not used here because it is the pore-structure coefficient for gas transport through the CL pore space, whereas tau_ion_cl describes transport through the CL ionomer network.
 """
 function D_lambda_eff(element::Symbol, lambdaa, T, Hcl::Float64, pp::PhysicalParams)
-    tau_cl = pp.tau_cl  # Pore structure coefficient in the CL.
-    return epsilon_mc(element, lambdaa, T, Hcl, pp) / tau_cl * D_lambda(lambdaa)
+    return D_lambda(lambdaa) / tau_ion_cl(element, lambdaa, T, Hcl, pp)
 end
 
 

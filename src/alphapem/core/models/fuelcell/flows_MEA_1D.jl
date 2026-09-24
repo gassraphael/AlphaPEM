@@ -49,7 +49,7 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
     Wagc, Wcgc, Hagc, Hcgc = pp.Wagc, pp.Wcgc, pp.Hagc, pp.Hcgc
     epsilon_gdl, epsilon_mpl = pp.epsilon_gdl, pp.epsilon_mpl
     kappa_co = pp.kappa_co
-    theta_l_rem, gamma_sorp_l, rho_mem, M_eq = pp.theta_l_rem, pp.gamma_sorp_l, pp.rho_mem, pp.M_eq
+    theta_l_rem, gamma_sorp_l = pp.theta_l_rem, pp.gamma_sorp_l
     nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl
 
     # Extraction of the variables
@@ -84,7 +84,7 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
 
     # Intermediate values
     (H_gdl_node, H_mpl_node, Pagc, Pcgc, Pcap_agdl, Pcap_cgdl, rho_agc, rho_cgc, D_eff_EOD_acl_mem,
-     D_eff_EOD_mem_ccl, D_lambda_eff_acl_mem, D_lambda_eff_mem_ccl, D_cap_agdl_agdl, D_cap_agdl_ampl,
+     D_eff_EOD_mem_ccl, K_lambda_eff_acl_mem, K_lambda_eff_mem_ccl, D_cap_agdl_agdl, D_cap_agdl_ampl,
      D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_ccl_cmpl, D_cap_cmpl_cmpl, D_cap_cmpl_cgdl, D_cap_cgdl_cgdl,
      Da_eff_agdl_agdl, Da_eff_agdl_ampl, Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl,
      Dc_eff_cmpl_cgdl, Dc_eff_cgdl_cgdl, T_acl_mem_ccl) = calculate_flows_1D_MEA_int_values!(flows_int_work, sv_1D, i_fc, fc, cfg)
@@ -93,10 +93,10 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
 
     # Anode side
     J_lambda_acl_mem = D_eff_EOD_acl_mem * interpolate([lambda_acl, lambda_mem], [Hacl, Hmem]) -
-                       rho_mem / M_eq * D_lambda_eff_acl_mem * d_dx(lambda_acl, lambda_mem, Hacl / 2, Hmem / 2)
+                       K_lambda_eff_acl_mem * d_dx(lambda_acl, lambda_mem, Hacl / 2, Hmem / 2)
     # Cathode side
     J_lambda_mem_ccl = D_eff_EOD_mem_ccl * interpolate([lambda_mem, lambda_ccl], [Hmem, Hccl]) -
-                       rho_mem / M_eq * D_lambda_eff_mem_ccl * d_dx(lambda_mem, lambda_ccl, Hmem / 2, Hccl / 2)
+                       K_lambda_eff_mem_ccl * d_dx(lambda_mem, lambda_ccl, Hmem / 2, Hccl / 2)
 
     # _________________________________________Liquid water flows (kg.m-2.s-1)__________________________________________
 
