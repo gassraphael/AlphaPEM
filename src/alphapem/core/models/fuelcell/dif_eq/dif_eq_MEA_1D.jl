@@ -15,9 +15,9 @@ sv : CellState1D{NB_GDL, NB_MPL}
 pp : PhysicalParams
     Fuel-cell physical parameters container (geometry, thicknesses and porous properties).
 S_abs : MEASorptionSources
-    Water absorption rates at the CLs (mol·m⁻³·s⁻¹).
+    Water absorption/desorption rates at the CL ionomer (mol·m⁻³·s⁻¹).
 J_lambda : MEADissolvedWaterFlux
-    Dissolved-water inter-layer fluxes (kg·m⁻²·s⁻¹).
+    Dissolved-water inter-layer fluxes (mol·m⁻²·s⁻¹).
 Sp : MEAWaterProductionSources
     Water production rates at the CLs (mol·m⁻³·s⁻
 
@@ -40,11 +40,16 @@ function calculate_dyn_dissoved_water_evolution_inside_MEA(
     M_eq, rho_mem = pp.M_eq, pp.rho_mem
 
     # Differential equations
-    d_lambda_acl_dt = M_eq / (rho_mem * epsilon_mc(:acl, lambda_acl, T_acl, pp.Hacl, pp)) *
-                  (-J_lambda.acl_mem / pp.Hacl + S_abs.v_acl + S_abs.l_acl + Sp.acl)
-    d_lambda_mem_dt = M_eq / rho_mem * (J_lambda.acl_mem - J_lambda.mem_ccl) / pp.Hmem
-    d_lambda_ccl_dt = M_eq / (rho_mem * epsilon_mc(:ccl, lambda_ccl, T_ccl, pp.Hccl, pp)) *
-                  (J_lambda.mem_ccl / pp.Hccl + S_abs.v_ccl + S_abs.l_ccl + Sp.ccl)
+    rhs_lambda_acl = -J_lambda.acl_mem / pp.Hacl + S_abs.v_acl + S_abs.l_acl + Sp.acl
+    rhs_lambda_mem = (J_lambda.acl_mem - J_lambda.mem_ccl) / pp.Hmem
+    rhs_lambda_ccl = J_lambda.mem_ccl / pp.Hccl + S_abs.v_ccl + S_abs.l_ccl + Sp.ccl
+
+    C_fix_acl = cl_dry_ionomer_storage_capacity(:acl, pp.Hacl, pp)
+    C_fix_ccl = cl_dry_ionomer_storage_capacity(:ccl, pp.Hccl, pp)
+
+    d_lambda_acl_dt = rhs_lambda_acl / C_fix_acl
+    d_lambda_mem_dt = M_eq / rho_mem * rhs_lambda_mem
+    d_lambda_ccl_dt = rhs_lambda_ccl / C_fix_ccl
 
     return MEADissolvedWaterDerivative(d_lambda_acl_dt, d_lambda_mem_dt, d_lambda_ccl_dt)
 end
@@ -61,7 +66,7 @@ pp : PhysicalParams
 Jl : MEALiquidFluxes{NB_GDL, NB_MPL}
     Liquid-water inter-layer fluxes (kg·m⁻²·s⁻¹).
 S_abs : MEASorptionSources
-    Water absorption rates at the CLs (mol·m⁻³·s⁻¹).
+    Water absorption/desorption rates at the CL ionomer (mol·m⁻³·s⁻¹).
 Sl : MEALiquidSources{NB_GDL, NB_MPL}
     Liquid-water phase-change source terms (mol·m⁻³·s⁻¹).
 
@@ -142,7 +147,7 @@ Jv : MEAVaporFluxes{NB_GDL, NB_MPL}
 Sv : MEAVaporSources{NB_GDL, NB_MPL}
     Vapour phase-change source terms (mol·m⁻³·s⁻¹).
 S_abs : MEASorptionSources
-    Water absorption rates at the CLs (mol·m⁻³·s⁻¹).
+    Water absorption/desorption rates at the CL ionomer (mol·m⁻³·s⁻¹).
 
 Returns
 -------

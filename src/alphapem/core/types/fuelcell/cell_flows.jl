@@ -96,13 +96,13 @@ function MEAHeatWorkspace(nb_gdl::Int, nb_mpl::Int)
                             Vector{Float64}(undef, max(nb_gdl - 1, 0)))
 end
 
-"""Sorption (absorption) source terms for water in the catalyst layers. Units: mol·m⁻³·s⁻¹
+"""Absorption/desorption source terms for water in the catalyst layers. Units: mol·m⁻³·s⁻¹
 """
 struct MEASorptionSources # S_abs
-    v_acl :: Float64   # Vapour absorption at the anode CL
-    l_acl :: Float64   # Liquid absorption at the anode CL
-    v_ccl :: Float64   # Vapour absorption at the cathode CL
-    l_ccl :: Float64   # Liquid absorption at the cathode CL
+    v_acl :: Float64   # Vapour absorption/desorption at the anode CL
+    l_acl :: Float64   # Liquid absorption/desorption at the anode CL
+    v_ccl :: Float64   # Vapour absorption/desorption at the cathode CL
+    l_ccl :: Float64   # Liquid absorption/desorption at the cathode CL
 end
 
 

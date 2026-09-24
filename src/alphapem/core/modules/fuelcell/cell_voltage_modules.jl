@@ -426,10 +426,42 @@ function epsilon_carb(element::Symbol, Hcl::Float64, pp::PhysicalParams)
                   element == :ccl ? (pp.L_Pt_ccl, pp.wt_Pt_ccl) :
                   throw(ArgumentError("The element should be either 'acl' or 'ccl'."))
     L_carb = L_Pt * (1 - wt_Pt) / wt_Pt  # Carbon loading in the CL, kg.m-2.
-    epsilon_carb_val = L_carb / (rho_carb * Hcl)
+    epsilon_carb_val = L_carb / (rho_carb * Hcl) # This is the volume fraction of carbon in the CL.
     return _clamped_fraction_value(epsilon_carb_val)
 end
 
+
+"""This function calculates the dry-ionomer fixed-site water storage capacity in the catalyst layer.
+
+Parameters
+----------
+element : Symbol
+    Either `:acl` (anode) or `:ccl` (cathode) -- selects the electrode-specific ionomer-to-carbon ratio, Pt loading, and Pt weight fraction used to calculate the carbon loading.
+Hcl : Float64
+    Thickness of the CL layer.
+pp : PhysicalParams
+    Physical parameters of the fuel cell.
+
+Returns
+-------
+C_fix_cl :
+    Dry-ionomer fixed-site water storage capacity in the CL, in mol.m-3 per lambda unit.
+
+Notes
+-----
+The lambda state is defined as the amount of water per fixed sulfonic-acid site of the dry ionomer.
+Therefore, the storage basis is the dry ionomer inventory, not the current swollen ionomer volume.
+This capacity is calculated directly from the dry carbon loading rather than from `epsilon_carb`, 
+the potentially clamped carbon volume fraction in the catalyst layer.
+"""
+function cl_dry_ionomer_storage_capacity(element::Symbol, Hcl::Float64, pp::PhysicalParams)
+    IC, L_Pt, wt_Pt = element == :acl ? (pp.IC_acl, pp.L_Pt_acl, pp.wt_Pt_acl) :
+                      element == :ccl ? (pp.IC_ccl, pp.L_Pt_ccl, pp.wt_Pt_ccl) :
+                      throw(ArgumentError("The element should be either 'acl' or 'ccl'."))
+
+    L_carb = L_Pt * (1 - wt_Pt) / wt_Pt  # Carbon loading in the CL, kg.m-2.
+    return IC * L_carb / (Hcl * pp.M_eq)
+end
 
 """This function calculates the Pt volume fraction in the catalyst layer (ACL or CCL),
 clamped to the physical range [1e-9, 1 - 1e-9].
