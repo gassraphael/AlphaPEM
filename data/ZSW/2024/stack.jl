@@ -190,26 +190,26 @@ const UNDETERMINED_PARAMETER_BOUNDS_AFTER_VOLTAGE_DROP_1D = [
 ]
 
 const UNDETERMINED_PARAMETER_BOUNDS_BEFORE_VOLTAGE_DROP_1D1D = [
-    (:Hccl,         10e-6, 20e-6),    # Cathode catalyst-layer thickness
-    (:Hgdl,         70e-6, 90e-6),    # Gas-diffusion-layer thickness
-    (:Hmpl,         60e-6, 80e-6),    # Microporous-layer thickness
-    (:epsilon_gdl,  0.69, 0.88),      # GDL porosity
+    (:Hccl,         10.15e-6, 14.58e-6), # Cathode catalyst-layer thickness
+    (:Hgdl,         70e-6, 90e-6),       # Gas-diffusion-layer thickness
+    (:Hmpl,         60e-6, 80e-6),       # Microporous-layer thickness
+    (:epsilon_gdl,  0.69, 0.88),         # GDL porosity
     (:theta_c_cl,   90 * π / 180, 140 * π / 180), # CL contact angle
-    (:epsilon_mpl,  0.3, 0.6),        # MPL porosity
-    (:gamma_cond,   1e5, 1e9),       # Effective gas-liquid phase-change geometry/closure factor for overall condensation rate of water
-    (:tau_mpl,      1.0, 4.0),        # Pore structure coefficient in the MPL
-    (:alpha_c,      0.5, 1.0),        # Cathode transfer coefficient
-    (:e,            3, 5),            # Capillary exponent
-    (:IC_ccl,       1.0, 2.0),        # Ionomer to carbon ratio in the cathode catalyst layer
-    (:wt_Pt_ccl,    0.1, 0.7),        # Weight fraction of platinum over carbon in the cathode catalyst layer
-    (:L_Pt_ccl,     1e-3, 5e-3),      # Platinum loading in the cathode catalyst layer
-    (:i0_c_ref,     0.1, 100.0),      # Reference cathode exchange current density
-    (:kappa_co,     0.4, 40.0),       # Crossover correction coefficient
+    (:epsilon_mpl,  0.3184, 0.6),        # MPL porosity
+    (:gamma_cond,   1e5, 8.499e8),       # Effective gas-liquid phase-change geometry/closure factor for overall condensation rate of water
+    (:tau_mpl,      1.0, 2.6),           # Pore structure coefficient in the MPL
+    (:alpha_c,      0.525, 0.9649),      # Cathode transfer coefficient
+    (:e,            3, 5),               # Capillary exponent
+    (:IC_ccl,       1.1, 1.899),         # Ionomer to carbon ratio in the cathode catalyst layer
+    (:wt_Pt_ccl,    0.4278, 0.5597),     # Weight fraction of platinum over carbon in the cathode catalyst layer
+    (:L_Pt_ccl,     1.989e-3, 3.361e-3), # Platinum loading in the cathode catalyst layer
+    (:i0_c_ref,     0.1, 16.12),         # Reference cathode exchange current density
+    (:kappa_co,     0.4, 35.67),         # Crossover correction coefficient
 ]
 
 const UNDETERMINED_PARAMETER_BOUNDS_AFTER_VOLTAGE_DROP_1D1D = [
-    (:r_carb,       11e-9, 21.5e-9),  # Mean radius of the carbon particles
-    (:ECSA_0,       80.0, 190.0),     # Initial electrochemical surface area of the catalyst
+    (:r_carb,       11e-9, 21.5e-9),     # Mean radius of the carbon particles
+    (:ECSA_0,       80.0, 190.0),        # Initial electrochemical surface area of the catalyst
 ]
 
 const UNDETERMINED_PARAMETERS_BOUNDS = Dict(
