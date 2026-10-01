@@ -21,7 +21,7 @@ i_fc : Float64
 fc : AbstractFuelCell
     Fuel cell instance providing model parameters.
 S_abs : MEASorptionSources
-    Typed water absorption rates from the CL to the membrane (mol.m-3.s-1).
+    Typed water absorption/desorption rates between the CL pores and the CL ionomer (mol.m-3.s-1).
 Sl : MEALiquidSources{NB_GDL, NB_MPL}
     Typed liquid water phase-change source terms at each porous-layer node (mol.m-3.s-1).
 
@@ -120,7 +120,7 @@ function calculate_heat_transfers!(heat_work::MEAHeatWorkspace,
         S_r_ccl * T_ccl * (-delta_s_ORR) + i_fc * eta_c / Hccl # Q_r_ccl (Peltier + activation heat)
     )
 
-    # The heat dissipated by the absorption of water from the CL to the membrane, in J.m-3.s-1.
+    # The heat source/sink by the absorption/desorption of water in the CL ionomer, in J.m-3.s-1.
     Q_sorp = MEASorptionHeat(
         S_abs.v_acl * (-delta_h_abs(T_acl)), # Q_sorp_v_acl
         S_abs.l_acl * (-delta_h_abs(T_acl)), # Q_sorp_l_acl

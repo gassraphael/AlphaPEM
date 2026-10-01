@@ -756,7 +756,7 @@ T :
 Returns
 -------
 delta_h_abs
-    Molar enthalpy of absorption in the CL in J.mol-1.
+    Molar enthalpy of absorption in the CL ionomer in J.mol-1.
 """
 function delta_h_abs(T)
     return delta_h_liq(T)

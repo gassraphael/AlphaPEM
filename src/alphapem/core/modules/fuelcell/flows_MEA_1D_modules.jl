@@ -717,7 +717,7 @@ function fv(lambdaa, T, pp::PhysicalParams)
 end
 
 
-"""This function calculates the sorption rate of vapor in the membrane, in s-1.
+"""This function calculates the absorption/desorption rate of vapor in the ionomer, in s-1.
 
 Parameters
 ----------
@@ -726,7 +726,7 @@ C_v :
 s :
     Liquid water saturation variable.
 lambdaa :
-    Water content in the membrane.
+    Water content in the ionomer.
 T :
     Temperature in K.
 Hcl : Float64
@@ -737,7 +737,7 @@ pp : PhysicalParams
 Returns
 -------
 gamma_sorp
-    Sorption rate of vapor in the membrane in s-1.
+    Absorption/desorption rate of vapor in the ionomer in s-1.
 """
 function gamma_sorp_v(C_v, s, lambdaa, T, Hcl::Float64, pp::PhysicalParams)
 
