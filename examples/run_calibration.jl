@@ -26,7 +26,7 @@ using Printf
 
 const PARALLEL       = true   # true  → multi-threaded population evaluation
 const N_THREADS      = 0      # 0 → use all available cores
-const MAX_RUN_TIME_S = 90     # Maximum simulation runtime (seconds)
+const MAX_RUN_TIME_S = 180    # Maximum simulation runtime (seconds)
 const NB_GC_POLA     = 5      # Number of GC nodes for polarization simulation
 
 if PARALLEL
@@ -92,6 +92,8 @@ calib_cfg = CalibrationConfig(
     ga_config          = ga_cfg,
     parallel           = PARALLEL,
     output_dir         = "results/calibration/ZSW_GenStack",
+    # Initialize the population with a pre-existing one
+    # initial_population_file = "results/calibration/ZSW_GenStack/2026.09.24 - ZSW_nominal - full - 3 conditions - V1/calibration_checkpoint_population.yaml",
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
