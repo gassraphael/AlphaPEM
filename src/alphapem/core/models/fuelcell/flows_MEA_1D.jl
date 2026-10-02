@@ -49,7 +49,7 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
     Wagc, Wcgc, Hagc, Hcgc = pp.Wagc, pp.Wcgc, pp.Hagc, pp.Hcgc
     epsilon_gdl, epsilon_mpl = pp.epsilon_gdl, pp.epsilon_mpl
     kappa_co = pp.kappa_co
-    theta_l_rem, gamma_sorp_l, rho_mem, M_eq = pp.theta_l_rem, pp.gamma_sorp_l, pp.rho_mem, pp.M_eq
+    theta_l_rem, gamma_sorp_l = pp.theta_l_rem, pp.gamma_sorp_l
     nb_gdl, nb_mpl = np.nb_gdl, np.nb_mpl
 
     # Extraction of the variables
@@ -84,19 +84,31 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
 
     # Intermediate values
     (H_gdl_node, H_mpl_node, Pagc, Pcgc, Pcap_agdl, Pcap_cgdl, rho_agc, rho_cgc, D_eff_EOD_acl_mem,
-     D_eff_EOD_mem_ccl, D_lambda_eff_acl_mem, D_lambda_eff_mem_ccl, D_cap_agdl_agdl, D_cap_agdl_ampl,
+     D_eff_EOD_mem_ccl, K_lambda_eff_acl_mem, K_lambda_eff_mem_ccl, D_cap_agdl_agdl, D_cap_agdl_ampl,
      D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_ccl_cmpl, D_cap_cmpl_cmpl, D_cap_cmpl_cgdl, D_cap_cgdl_cgdl,
      Da_eff_agdl_agdl, Da_eff_agdl_ampl, Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl,
      Dc_eff_cmpl_cgdl, Dc_eff_cgdl_cgdl, T_acl_mem_ccl) = calculate_flows_1D_MEA_int_values!(flows_int_work, sv_1D, i_fc, fc, cfg)
 
     # ________________________________________Dissolved water flows (mol.m-2.s-1)_______________________________________
 
+    lambda_acl_mem = interpolate([lambda_acl, lambda_mem], [Hacl / 2, Hmem / 2])
+    lambda_mem_ccl = interpolate([lambda_mem, lambda_ccl], [Hmem / 2, Hccl / 2])
+    # Use smooth donor-limited lambdas only for EOD; raw lambda gradients for diffusion remain unchanged.
+    lambda_acl_mem_eod = _donor_limited_eod_lambda(lambda_acl_mem, lambda_acl)
+    lambda_mem_ccl_eod = _donor_limited_eod_lambda(lambda_mem_ccl, lambda_mem)
+
     # Anode side
-    J_lambda_acl_mem = D_eff_EOD_acl_mem * interpolate([lambda_acl, lambda_mem], [Hacl, Hmem]) -
-                       rho_mem / M_eq * D_lambda_eff_acl_mem * d_dx(lambda_acl, lambda_mem, Hacl / 2, Hmem / 2)
+    dlambda_dx_acl_mem = d_dx(lambda_acl, lambda_mem, Hacl / 2, Hmem / 2)
+    J_lambda_acl_mem_eod = D_eff_EOD_acl_mem * lambda_acl_mem_eod
+    J_lambda_acl_mem_diff = -K_lambda_eff_acl_mem * dlambda_dx_acl_mem
+    J_lambda_acl_mem_raw = J_lambda_acl_mem_eod + J_lambda_acl_mem_diff
+    J_lambda_acl_mem = _limit_directed_dissolved_flux(J_lambda_acl_mem_raw, lambda_acl, lambda_mem)
     # Cathode side
-    J_lambda_mem_ccl = D_eff_EOD_mem_ccl * interpolate([lambda_mem, lambda_ccl], [Hmem, Hccl]) -
-                       rho_mem / M_eq * D_lambda_eff_mem_ccl * d_dx(lambda_mem, lambda_ccl, Hmem / 2, Hccl / 2)
+    dlambda_dx_mem_ccl = d_dx(lambda_mem, lambda_ccl, Hmem / 2, Hccl / 2)
+    J_lambda_mem_ccl_eod = D_eff_EOD_mem_ccl * lambda_mem_ccl_eod
+    J_lambda_mem_ccl_diff = -K_lambda_eff_mem_ccl * dlambda_dx_mem_ccl
+    J_lambda_mem_ccl_raw = J_lambda_mem_ccl_eod + J_lambda_mem_ccl_diff
+    J_lambda_mem_ccl = _limit_directed_dissolved_flux(J_lambda_mem_ccl_raw, lambda_mem, lambda_ccl)
 
     # _________________________________________Liquid water flows (kg.m-2.s-1)__________________________________________
 

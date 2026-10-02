@@ -562,6 +562,50 @@ function epsilon_mc(element::Symbol, lambda_cl, T_cl, Hcl::Float64, pp::Physical
     return _clamped_fraction_value(epsilon_mc_val)
 end
 
+"""This function calculates the tortuosity of the ionomer phase in the catalyst layer.
+
+Parameters
+----------
+element : Symbol
+    Either `:acl` (anode) or `:ccl` (cathode).
+lambda_cl :
+    Water content in the CL ionomer, defined as the number of water molecules per fixed sulfonic-acid site.
+T_cl :
+    Temperature inside the CL in K.
+Hcl : Float64
+    Thickness of the CL layer in m.
+pp : PhysicalParams
+    Physical parameters of the fuel cell.
+
+Returns
+-------
+tau_ion_cl :
+    Tortuosity of the ionomer phase in the CL, without units.
+
+Notes
+-----
+Hao et al. (2015) define the wet ionomer volume fraction in the catalyst layer as epsilon_e and use it to evaluate the measured tortuosity tau_e of the ionomer phase. In this code, epsilon_mc is the corresponding wet ionomer volume fraction.
+
+Caution / to be verified:
+In Hao et al., this tortuosity is introduced in the context of effective proton transport in the catalyst-layer ionomer phase. Here it is introduced as an ionomer-phase tortuosity helper so that effective CL ionomer transport can be distinguished from gas-pore transport through tau_cl.
+Follow-up changes use this helper for the effective dissolved-water back-diffusion coefficient in the CL ionomer phase. That use applies the same ionomer-network tortuosity to another transport process in the same phase; it is a model-consistent transfer, not a separate water-transport law explicitly validated by Hao et al.
+
+The lower bound is applied only to evaluate the Hao correlation away from its singularity at epsilon_e = 0.04; it does not redefine the physical CL state.
+
+Sources
+-------
+1. Liang Hao - 2015 - Modeling and Experimental Validation of Pt Loading and Electrode Composition Effects in PEM Fuel Cells, Eq. 36, Eq. 37 and Eq. 54.
+"""
+function tau_ion_cl(element::Symbol, lambda_cl, T_cl, Hcl::Float64, pp::PhysicalParams)
+    epsilon_e = max(epsilon_mc(element, lambda_cl, T_cl, Hcl, pp), 0.040001)
+
+    if epsilon_e < 0.16
+        return 0.0845 * (epsilon_e - 0.04)^(-1.17)
+    end
+
+    return 1.0
+end
+
 
 """This function calculates the CL porosity, physical range [1e-9, 1 - 1e-9].
 
