@@ -24,7 +24,7 @@ Returns
 Tuple(29 elements)
     Tuple containing all intermediate values used by the flows calculation.
     Elements: (H_gdl_node, H_mpl_node, Pagc, Pcgc, Pcap_agdl, Pcap_cgdl, rho_agc, rho_cgc,
-    D_eff_EOD_acl_mem, D_eff_EOD_mem_ccl, D_lambda_eff_acl_mem, D_lambda_eff_mem_ccl,
+    D_eff_EOD_acl_mem, D_eff_EOD_mem_ccl, K_lambda_eff_acl_mem, K_lambda_eff_mem_ccl,
     D_cap_agdl_agdl, D_cap_agdl_ampl, D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_ccl_cmpl,
     D_cap_cmpl_cmpl, D_cap_cmpl_cgdl, D_cap_cgdl_cgdl, Da_eff_agdl_agdl, Da_eff_agdl_ampl,
     Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl, Dc_eff_cmpl_cgdl,
@@ -94,16 +94,17 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
     rho_cgc = C_O2_cgc * M_O2 + C_v_cgc * M_H2O + C_N2_cgc * M_N2
 
     # Weighted mean values ...
-    #       ... of the EOD flow of water in the membrane
-    D_eff_EOD_acl_mem = hmean(D_EOD_eff(:acl, i_fc, lambda_acl, T_acl, Hacl, pp), D_EOD(i_fc),
-                              Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem))
-    D_eff_EOD_mem_ccl = hmean(D_EOD(i_fc), D_EOD_eff(:ccl, i_fc, lambda_ccl, T_ccl, Hccl, pp),
-                              Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl))
+    #       ... of the EOD flux coefficient per lambda unit between the ACL and the membrane, and between the membrane and the CCL.
+    D_eff_EOD_acl_mem = D_EOD_eff(:acl, i_fc, lambda_acl, T_acl, Hacl, pp)
+    D_eff_EOD_mem_ccl = D_EOD_eff(:ccl, i_fc, lambda_ccl, T_ccl, Hccl, pp)
 
-    #       ... of the diffusion coefficient of water in the membrane
-    D_lambda_eff_acl_mem = hmean(D_lambda_eff(:acl, lambda_acl, T_acl, Hacl, pp), D_lambda(lambda_mem),
+    #       ... of the dissolved-water back-diffusion conductance per lambda gradient
+    K_lambda_acl = cl_dry_ionomer_storage_capacity(:acl, Hacl, pp) * D_lambda_eff(:acl, lambda_acl, T_acl, Hacl, pp)
+    K_lambda_mem = pp.rho_mem / pp.M_eq * D_lambda(lambda_mem)
+    K_lambda_ccl = cl_dry_ionomer_storage_capacity(:ccl, Hccl, pp) * D_lambda_eff(:ccl, lambda_ccl, T_ccl, Hccl, pp)
+    K_lambda_eff_acl_mem = hmean(K_lambda_acl, K_lambda_mem,
                                  Hacl / (Hacl + Hmem), Hmem / (Hacl + Hmem))
-    D_lambda_eff_mem_ccl = hmean(D_lambda(lambda_mem), D_lambda_eff(:ccl, lambda_ccl, T_ccl, Hccl, pp),
+    K_lambda_eff_mem_ccl = hmean(K_lambda_mem, K_lambda_ccl,
                                  Hmem / (Hmem + Hccl), Hccl / (Hmem + Hccl))
 
     # Pre-computed inter-layer CL porosities and weight factors (avoid repeated calls and divisions)
@@ -206,7 +207,7 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
                             [Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl), Hccl / (Hacl + Hmem + Hccl)])
 
     return (H_gdl_node, H_mpl_node, Pagc, Pcgc, Pcap_agdl, Pcap_cgdl, rho_agc, rho_cgc, D_eff_EOD_acl_mem,
-            D_eff_EOD_mem_ccl, D_lambda_eff_acl_mem, D_lambda_eff_mem_ccl, D_cap_agdl_agdl, D_cap_agdl_ampl,
+            D_eff_EOD_mem_ccl, K_lambda_eff_acl_mem, K_lambda_eff_mem_ccl, D_cap_agdl_agdl, D_cap_agdl_ampl,
             D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_ccl_cmpl, D_cap_cmpl_cmpl, D_cap_cmpl_cgdl, D_cap_cgdl_cgdl,
             Da_eff_agdl_agdl, Da_eff_agdl_ampl, Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl,
             Dc_eff_cmpl_cgdl, Dc_eff_cgdl_cgdl, T_acl_mem_ccl)
@@ -619,7 +620,7 @@ function D_lambda(lambdaa)
 end
 
 
-"""This function calculates the effective diffusion coefficient of water in the ionomer of the catalyst layers,
+"""This function calculates the effective diffusion coefficient of dissolved water in the catalyst layer ionomer phase,
 in m².s-1.
 
 Parameters
@@ -627,22 +628,27 @@ Parameters
 element : Symbol
     Either `:acl` (anode) or `:ccl` (cathode).
 lambdaa :
-    Water content in the catalyst layer.
+    Water content in the catalyst layer ionomer, defined as the number of water molecules per fixed sulfonic-acid site.
 T :
     Temperature in K.
 Hcl : Float64
-    Thickness of the CL layer.
+    Thickness of the CL layer in m.
 pp : PhysicalParams
     Physical parameters of the fuel cell.
 
 Returns
 -------
 D_lambda_eff
-    Effective diffusion coefficient of water in the catalyst layer in m².s-1.
+    Effective diffusion coefficient of dissolved water in the catalyst layer ionomer phase in m².s-1.
+
+Notes
+-----
+The fixed-site storage capacity of the CL ionomer is handled separately through K_lambda = C_fix * D_lambda_eff on a bulk CL-volume basis. Therefore this coefficient applies only the ionomer-phase tortuosity tau_ion_cl to the material diffusion coefficient and does not multiply by the wet ionomer volume fraction epsilon_mc.
+
+tau_cl is not used here because it is the pore-structure coefficient for gas transport through the CL pore space, whereas tau_ion_cl describes transport through the CL ionomer network.
 """
 function D_lambda_eff(element::Symbol, lambdaa, T, Hcl::Float64, pp::PhysicalParams)
-    tau_cl = pp.tau_cl  # Pore structure coefficient in the CL.
-    return epsilon_mc(element, lambdaa, T, Hcl, pp) / tau_cl * D_lambda(lambdaa)
+    return D_lambda(lambdaa) / tau_ion_cl(element, lambdaa, T, Hcl, pp)
 end
 
 
@@ -663,8 +669,10 @@ function D_EOD(i_fc)
 end
 
 
-"""This function calculates the effective electro-osmotic drag diffusion coefficient of water in the ionomer of the
-catalyst layers, in mol.m-2.s-1.
+"""This function calculates the CL electro-osmotic drag flux coefficient per lambda unit, in mol.m-2.s-1.
+
+The CL coefficient applies a lumped mean-current factor to the membrane EOD coefficient. It does not use the pore-space
+tortuosity or the wet ionomer volume fraction.
 
 Parameters
 ----------
@@ -673,22 +681,159 @@ element : Symbol
 i_fc :
     Fuel cell current density in A.m-2.
 lambdaa :
-    Water content in the catalyst layer.
+    Water content in the catalyst layer ionomer, defined as the number of water molecules per fixed sulfonic-acid site.
 T :
     Temperature in K.
 Hcl : Float64
-    Thickness of the CL layer.
+    Thickness of the CL layer in m.
 pp : PhysicalParams
     Physical parameters of the fuel cell.
 
 Returns
 -------
-
-    Effective electro-osmotic drag diffusion coefficient of water in the catalyst layer in mol.m-2.s-1.
+D_EOD_eff
+    CL electro-osmotic drag flux coefficient per lambda unit in mol.m-2.s-1.
 """
 function D_EOD_eff(element::Symbol, i_fc, lambdaa, T, Hcl::Float64, pp::PhysicalParams)
-    tau_cl = pp.tau_cl  # Pore structure coefficient in the CL.
-    return epsilon_mc(element, lambdaa, T, Hcl, pp) / tau_cl * D_EOD(i_fc)
+    return f_EOD_cl(element, lambdaa, T, Hcl, pp) * D_EOD(i_fc)
+end
+
+
+"""This function calculates the effective lumped-CL factor for electro-osmotic drag.
+
+This factor is a lumped mean-current closure for the unresolved through-plane CL proton-current profile, not a material
+tortuosity.
+
+Kulikovsky 2011 discusses the low-current catalyst layer regime with an approximately uniform reaction rate and a nearly
+linearly decaying proton current. The same profile assumption is already used numerically in selected CL Joule-heat
+terms in `core/models/fuelcell/heat_transfer.jl`, where the squared current gives a 1/3 factor.
+
+For a lumped CL of thickness Hcl and coordinate x from the membrane side to the MPL/GDL side, this profile can be
+written as
+
+    i_p(x) = i_fc * (1 - x / Hcl).
+
+For Joule heat, the source scales with i_p(x)^2. Therefore
+
+    (1 / Hcl) * integral_0^Hcl (i_p(x) / i_fc)^2 dx = 1/3,
+
+which explains the 1/3 factor in the lumped CL Joule-heat terms.
+
+For electro-osmotic drag, the flux scales with the proton current itself, not with its square. Therefore
+
+    (1 / Hcl) * integral_0^Hcl (i_p(x) / i_fc) dx = 1/2.
+
+The active value f_EOD_cl = 0.5 applies this mean-current factor to the CL EOD flux coefficient. This is a transfer of
+the same unresolved CL current-profile assumption to EOD, not a direct EOD correlation from Kulikovsky.
+
+Parameters
+----------
+element : Symbol
+    Either `:acl` (anode) or `:ccl` (cathode).
+lambdaa :
+    Water content in the catalyst layer ionomer, defined as the number of water molecules per fixed sulfonic-acid site.
+T :
+    Temperature in K.
+Hcl : Float64
+    Thickness of the CL layer in m.
+pp : PhysicalParams
+    Physical parameters of the fuel cell.
+
+Returns
+-------
+f_EOD_cl
+    Effective EOD scaling factor in the catalyst layer.
+"""
+function f_EOD_cl(element::Symbol, lambdaa, T, Hcl::Float64, pp::PhysicalParams)
+    return 0.5
+end
+
+
+const DEFAULT_LAMBDA_CONSTITUTIVE_EPS = 1.0e-8
+const DEFAULT_NEGATIVE_EVENT_FLOOR = 1.0e-5
+const DEFAULT_LAMBDA_INVENTORY_EPS = 1.0e-4
+const DEFAULT_EOD_DONOR_LAMBDA_SCALE = 0.25
+
+
+"""This function returns a smooth non-negative continuation of max(value, 0).
+
+This helper is used only for dissolved-water constitutive factors. It does not clamp the ODE state itself.
+The default smoothing width follows a previous implementation based on the AlphaPEM V1.3 version in Python, where it has been robust for the previous model formulation. It still needs to be re-verified in the integrated (V2.0) Julia-model.
+"""
+function _lambda_smooth_positive_part(value, eps_value=DEFAULT_LAMBDA_CONSTITUTIVE_EPS)
+    return 0.5 * (value + sqrt(value * value + eps_value * eps_value))
+end
+
+
+"""This function returns a smooth donor-inventory availability factor. The factor is 0 when the donor-side dissolved-water inventory is depleted, 1 when sufficient donor inventory is available, and changes smoothly between both limits to avoid a kink in the model equations.
+
+The limiter is applied only to water-removing dissolved-water fluxes. It preserves the raw lambda states and smoothly
+reduces additional removal when the donor inventory approaches the lower model floor.
+
+The default floor and ramp width follow the implementation based on the AlphaPEM V1.3 version in Python (`1e-5` and `1e-4`).
+They are not newly validated (V2.0) Julia-model parameters; they have been robust in the previous model and must be checked again in the new integrated model.
+"""
+function _dissolved_inventory_limiter(lambdaa,
+                                      inventory_floor=DEFAULT_NEGATIVE_EVENT_FLOOR,
+                                      inventory_eps=DEFAULT_LAMBDA_INVENTORY_EPS)
+    if inventory_eps <= 0.0
+        throw(ArgumentError("The dissolved-water inventory epsilon must be positive."))
+    end
+
+    lambda_available = lambdaa - inventory_floor
+    if lambda_available <= 0.0
+        return 0.0
+    elseif lambda_available >= inventory_eps
+        return 1.0
+    end
+
+    normalized_availability = lambda_available / inventory_eps
+    return normalized_availability^2 * (3.0 - 2.0 * normalized_availability)
+end
+
+
+"""This function limits a dissolved-water flux with the inventory of the donor side.
+
+Positive flux follows the local minus-to-plus convention. Negative flux is a return flux and is therefore limited by the plus-side dissolved-water inventory.
+The default limiter parameters follow the implementation based on the AlphaPEM V1.3 version in Python and must be re-verified in the new integrated (V2.0) Julia-model.
+"""
+function _limit_directed_dissolved_flux(flux,
+                                        lambda_minus,
+                                        lambda_plus,
+                                        inventory_floor=DEFAULT_NEGATIVE_EVENT_FLOOR,
+                                        inventory_eps=DEFAULT_LAMBDA_INVENTORY_EPS)
+    if flux > 0.0
+        return flux * _dissolved_inventory_limiter(lambda_minus, inventory_floor, inventory_eps)
+    elseif flux < 0.0
+        return flux * _dissolved_inventory_limiter(lambda_plus, inventory_floor, inventory_eps)
+    else
+        return flux
+    end
+end
+
+
+"""This function returns a smooth EOD lambda factor limited by the donor-side dissolved-water inventory.
+
+The interface lambda is first evaluated from the adjacent finite-volume states.
+For the EOD gross term, this value is then smoothly limited by the donor-side lambda inventory so that electro-osmotic drag cannot remove more dissolved water than is locally available in the donor ionomer.
+
+The default smoothing scale (`0.25` in lambda units) follows the implementation based on the AlphaPEM V1.3 version in Python, where it has been robust for the previous model.
+This parameterization is a numerical closure for the inventory limiter and still needs to be verified for the new integrated (V2.0) Julia-model.
+"""
+function _donor_limited_eod_lambda(lambda_interface,
+                                   lambda_donor,
+                                   smoothing_scale=DEFAULT_EOD_DONOR_LAMBDA_SCALE)
+    if smoothing_scale <= 0.0
+        throw(ArgumentError("The EOD donor lambda smoothing scale must be positive."))
+    end
+
+    lambda_interface_pos = _lambda_smooth_positive_part(lambda_interface)
+    lambda_donor_pos = _lambda_smooth_positive_part(lambda_donor)
+    lambda_eff_raw = 0.5 * (
+        lambda_interface_pos + lambda_donor_pos -
+        sqrt((lambda_interface_pos - lambda_donor_pos)^2 + smoothing_scale^2)
+    )
+    return _lambda_smooth_positive_part(lambda_eff_raw)
 end
 
 
