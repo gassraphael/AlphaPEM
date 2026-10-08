@@ -579,28 +579,31 @@ pp : PhysicalParams
 
 Returns
 -------
-tau_ion_cl :
+tau_ion :
     Tortuosity of the ionomer phase in the CL, without units.
 
 Notes
 -----
-Hao et al. (2015) define the wet ionomer volume fraction in the catalyst layer as epsilon_e and use it to evaluate the measured tortuosity tau_e of the ionomer phase. In this code, epsilon_mc is the corresponding wet ionomer volume fraction.
+Hao et al. (2015) denote the wet CL ionomer volume fraction by epsilon_e and the ionomer-phase tortuosity by tau_e. In this code, epsilon_mc is the corresponding wet ionomer volume fraction, and tau_ion evaluates the CL correlation in Hao's Eq. 54. This correlation is not a membrane tortuosity law.
+
+Liu et al. (2009) use epsilon_i and tau(epsilon_i), respectively. Their effective ionomer tortuosity is inferred from proton-resistivity measurements, including the effect of ionomer-network connectivity; it is not a directly measured geometrical path-length ratio. Hao cites these measurements as the basis for the correlation used here.
 
 Caution / to be verified:
-In Hao et al., this tortuosity is introduced in the context of effective proton transport in the catalyst-layer ionomer phase. Here it is introduced as an ionomer-phase tortuosity helper so that effective CL ionomer transport can be distinguished from gas-pore transport through tau_cl.
-Follow-up changes use this helper for the effective dissolved-water back-diffusion coefficient in the CL ionomer phase. That use applies the same ionomer-network tortuosity to another transport process in the same phase; it is a model-consistent transfer, not a separate water-transport law explicitly validated by Hao et al.
+This helper distinguishes the effective CL ionomer transport factor from the gas-pore structure coefficient tau_void_cl. Its use for dissolved-water back diffusion assumes that the same ionomer-network factor applies to water transport. That transfer is a modeling assumption, not an independent experimental validation of water diffusivity by the cited proton-conduction measurements.
 
-The lower bound is applied only to evaluate the Hao correlation away from its singularity at epsilon_e = 0.04; it does not redefine the physical CL state.
+epsilon_mc_clamped_0_04 is a local evaluation value with an actual lower bound of 0.040001, strictly above the correlation's singularity at 0.04. This numerical regularization is not an experimentally established minimum ionomer volume fraction and does not redefine the physical CL state.
 
 Sources
 -------
-1. Liang Hao - 2015 - Modeling and Experimental Validation of Pt Loading and Electrode Composition Effects in PEM Fuel Cells, Eq. 36, Eq. 37 and Eq. 54.
+1. Hao et al. (2015), Modeling and Experimental Validation of Pt Loading and Electrode Composition Effects in PEM Fuel Cells, J. Electrochem. Soc. 162, F854-F867, Eqs. 36, 37 and 54. DOI: 10.1149/2.0221508jes.
+2. Liu et al. (2009), Proton Conduction and Oxygen Reduction Kinetics in PEM Fuel Cell Cathodes: Effects of Ionomer-to-Carbon Ratio and Relative Humidity, J. Electrochem. Soc. 156, B970-B980, Eqs. 11 and 12, Fig. 9 and Appendix Eq. A-5. DOI: 10.1149/1.3143965.
+3. Yuxiu Liu, Proton Conduction and Kinetics Studies in Proton Exchange Membrane Fuel Cell Cathodes, Ph.D. dissertation, University of Rochester, Chapter 2, Eqs. 2.11-2.13 and Fig. 2.9. https://hdl.handle.net/1802/9592.
 """
-function tau_ion_cl(element::Symbol, lambda_cl, T_cl, Hcl::Float64, pp::PhysicalParams)
-    epsilon_e = max(epsilon_mc(element, lambda_cl, T_cl, Hcl, pp), 0.040001)
+function tau_ion(element::Symbol, lambda_cl, T_cl, Hcl::Float64, pp::PhysicalParams)
+    epsilon_mc_clamped_0_04 = max(epsilon_mc(element, lambda_cl, T_cl, Hcl, pp), 0.040001)
 
-    if epsilon_e < 0.16
-        return 0.0845 * (epsilon_e - 0.04)^(-1.17)
+    if epsilon_mc_clamped_0_04 < 0.16
+        return 0.0845 * (epsilon_mc_clamped_0_04 - 0.04)^(-1.17)
     end
 
     return 1.0

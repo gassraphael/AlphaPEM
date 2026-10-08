@@ -396,7 +396,7 @@ function Da_eff(element::Symbol,
     # Extraction of the parameters
     epsilon_p, alpha_p = pp.epsilon_p, pp.alpha_p
     r_s_gdl, r_s_mpl, r_s_cl = pp.r_s_gdl, pp.r_s_mpl, pp.r_s_cl
-    tau_mpl, tau_cl = pp.tau_mpl, pp.tau_cl
+    tau_mpl, tau_void_cl = pp.tau_mpl, pp.tau_void_cl
 
     s_eff = _clamped_fraction_value(s)
     if element == :gdl # The effective diffusion coefficient at the GDL using Tomadakis and Sotirchos model.
@@ -413,7 +413,7 @@ function Da_eff(element::Symbol,
         return epsilon / tau_mpl * (1 - s_eff)^r_s_mpl * Da(P, T)
 
     elseif element == :cl # The effective diffusion coefficient at the CL using Bruggeman model.
-        return epsilon / tau_cl * (1 - s_eff)^r_s_cl * Da(P, T)
+        return epsilon / tau_void_cl * (1 - s_eff)^r_s_cl * Da(P, T)
 
     else
         throw(ArgumentError("The element should be either 'gdl', 'mpl' or 'cl'."))
@@ -458,7 +458,7 @@ function Dc_eff(element::Symbol,
     # Extraction of the parameters
     epsilon_p, alpha_p = pp.epsilon_p, pp.alpha_p
     r_s_gdl, r_s_mpl, r_s_cl = pp.r_s_gdl, pp.r_s_mpl, pp.r_s_cl
-    tau_mpl, tau_cl = pp.tau_mpl, pp.tau_cl
+    tau_mpl, tau_void_cl = pp.tau_mpl, pp.tau_void_cl
 
     s_eff = _clamped_fraction_value(s)
     if element == :gdl # The effective diffusion coefficient at the GDL using Tomadakis and Sotirchos model.
@@ -475,7 +475,7 @@ function Dc_eff(element::Symbol,
         return epsilon / tau_mpl * (1 - s_eff)^r_s_mpl * Dc(P, T)
 
     elseif element == :cl # The effective diffusion coefficient at the CL using Bruggeman model.
-        return epsilon / tau_cl * (1 - s_eff)^r_s_cl * Dc(P, T)
+        return epsilon / tau_void_cl * (1 - s_eff)^r_s_cl * Dc(P, T)
 
     else
         throw(ArgumentError("The element should be either 'gdl', 'mpl' or 'cl'."))
@@ -643,12 +643,12 @@ D_lambda_eff
 
 Notes
 -----
-The fixed-site storage capacity of the CL ionomer is handled separately through K_lambda = C_fix * D_lambda_eff on a bulk CL-volume basis. Therefore this coefficient applies only the ionomer-phase tortuosity tau_ion_cl to the material diffusion coefficient and does not multiply by the wet ionomer volume fraction epsilon_mc.
+The fixed-site storage capacity of the CL ionomer is handled separately through K_lambda = C_fix * D_lambda_eff on a bulk CL-volume basis. Therefore this coefficient applies only the ionomer-phase tortuosity tau_ion to the material diffusion coefficient and does not multiply by the wet ionomer volume fraction epsilon_mc.
 
-tau_cl is not used here because it is the pore-structure coefficient for gas transport through the CL pore space, whereas tau_ion_cl describes transport through the CL ionomer network.
+tau_void_cl is not used here because it is the pore-structure coefficient for gas transport through the CL pore space, whereas tau_ion describes the effective CL ionomer-network factor. Applying this proton-conduction-derived factor to water diffusion is a modeling assumption documented in tau_ion.
 """
 function D_lambda_eff(element::Symbol, lambdaa, T, Hcl::Float64, pp::PhysicalParams)
-    return D_lambda(lambdaa) / tau_ion_cl(element, lambdaa, T, Hcl, pp)
+    return D_lambda(lambdaa) / tau_ion(element, lambdaa, T, Hcl, pp)
 end
 
 
