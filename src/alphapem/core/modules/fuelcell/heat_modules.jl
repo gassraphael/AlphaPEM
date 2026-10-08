@@ -220,7 +220,7 @@ function sigma_p_eff(element::Symbol,
     K_transition = 10.0  # The higher it is, the sharper the transition between two states.
     w = 0.5 * (1 + tanh(K_transition * (lambda_transition - lambdaa)))
 
-    return w * sigma_p_eff_low + (1 - w) * sigma_p_eff_high
+    return _nonnegative_value(w * sigma_p_eff_low + (1 - w) * sigma_p_eff_high) # Avoids 1/0 in Rmem, Rccl, Q_p when exp underflows.
 end
 
 
