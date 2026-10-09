@@ -24,7 +24,7 @@ Returns
 Tuple(29 elements)
     Tuple containing all intermediate values used by the flows calculation.
     Elements: (H_gdl_node, H_mpl_node, Pagc, Pcgc, Pcap_agdl, Pcap_cgdl, rho_agc, rho_cgc,
-    D_eff_EOD_acl_mem, D_eff_EOD_mem_ccl, K_lambda_eff_acl_mem, K_lambda_eff_mem_ccl,
+    D_EOD_acl_mem, D_EOD_mem_ccl, K_lambda_eff_acl_mem, K_lambda_eff_mem_ccl,
     D_cap_agdl_agdl, D_cap_agdl_ampl, D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_ccl_cmpl,
     D_cap_cmpl_cmpl, D_cap_cmpl_cgdl, D_cap_cgdl_cgdl, Da_eff_agdl_agdl, Da_eff_agdl_ampl,
     Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl, Dc_eff_cmpl_cgdl,
@@ -93,12 +93,14 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
     rho_agc = C_H2_agc * M_H2 + C_v_agc * M_H2O + C_N2_agc * M_N2
     rho_cgc = C_O2_cgc * M_O2 + C_v_cgc * M_H2O + C_N2_cgc * M_N2
 
-    # Weighted mean values ...
-    #       ... of the EOD flux coefficient per lambda unit between the ACL and the membrane, and between the membrane and the CCL.
-    D_eff_EOD_acl_mem = D_EOD_eff(:acl, i_fc, lambda_acl, T_acl, Hacl, pp)
-    D_eff_EOD_mem_ccl = D_EOD_eff(:ccl, i_fc, lambda_ccl, T_ccl, Hccl, pp)
+    # EOD interface flux coefficients per lambda unit.
+    # The local segment current density i_fc, defined per geometric active area, is assigned to the proton current
+    # density at both CL/membrane interfaces in this formulation.
+    D_EOD_acl_mem = D_EOD(i_fc)
+    D_EOD_mem_ccl = D_EOD(i_fc)
 
-    #       ... of the dissolved-water back-diffusion conductance per lambda gradient
+    # Weighted harmonic means of the dissolved-water back-diffusion conductance per lambda gradient.
+
     K_lambda_acl = cl_dry_ionomer_storage_capacity(:acl, Hacl, pp) * D_lambda_eff(:acl, lambda_acl, T_acl, Hacl, pp)
     K_lambda_mem = pp.rho_mem / pp.M_eq * D_lambda(lambda_mem)
     K_lambda_ccl = cl_dry_ionomer_storage_capacity(:ccl, Hccl, pp) * D_lambda_eff(:ccl, lambda_ccl, T_ccl, Hccl, pp)
@@ -206,8 +208,8 @@ function calculate_flows_1D_MEA_int_values!(flows_int_work::MEAFlowsIntWorkspace
     T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
                             [Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl), Hccl / (Hacl + Hmem + Hccl)])
 
-    return (H_gdl_node, H_mpl_node, Pagc, Pcgc, Pcap_agdl, Pcap_cgdl, rho_agc, rho_cgc, D_eff_EOD_acl_mem,
-            D_eff_EOD_mem_ccl, K_lambda_eff_acl_mem, K_lambda_eff_mem_ccl, D_cap_agdl_agdl, D_cap_agdl_ampl,
+    return (H_gdl_node, H_mpl_node, Pagc, Pcgc, Pcap_agdl, Pcap_cgdl, rho_agc, rho_cgc, D_EOD_acl_mem,
+            D_EOD_mem_ccl, K_lambda_eff_acl_mem, K_lambda_eff_mem_ccl, D_cap_agdl_agdl, D_cap_agdl_ampl,
             D_cap_ampl_ampl, D_cap_ampl_acl, D_cap_ccl_cmpl, D_cap_cmpl_cmpl, D_cap_cmpl_cgdl, D_cap_cgdl_cgdl,
             Da_eff_agdl_agdl, Da_eff_agdl_ampl, Da_eff_ampl_ampl, Da_eff_ampl_acl, Dc_eff_ccl_cmpl, Dc_eff_cmpl_cmpl,
             Dc_eff_cmpl_cgdl, Dc_eff_cgdl_cgdl, T_acl_mem_ccl)
@@ -652,100 +654,71 @@ function D_lambda_eff(element::Symbol, lambdaa, T, Hcl::Float64, pp::PhysicalPar
 end
 
 
-"""This function calculates the electro-osmotic drag diffusion coefficient of water in the membrane, in mol.m-2.s-1.
+"""Calculate the signed electro-osmotic drag flux coefficient per lambda unit, in mol.m-2.s-1.
 
 Parameters
 ----------
 i_fc :
-    Fuel cell current density in A.m-2.
+    Local segment current density per geometric active area in A.m-2.
+    In this formulation, it is assigned to the proton current density at both CL/membrane interfaces.
 
 Returns
 -------
 D_EOD
-    Electro-osmotic drag diffusion coefficient of water in the membrane in mol.m-2.s-1.
+    Flux coefficient in mol.m-2.s-1.
+    Multiplication by the reconstructed interface lambda gives the unprotected EOD flux.
+
+The caller assigns this coefficient to D_EOD_acl_mem and D_EOD_mem_ccl. These are coefficients per lambda unit,
+not water fluxes. Multiplication by lambda_acl_mem_eod and lambda_mem_ccl_eod gives the respective protected EOD
+contributions; equal coefficients therefore do not imply equal EOD fluxes. The final net fluxes additionally include
+their respective back-diffusion contributions and net-flux protections.
+
+Notes
+-----
+The local transport law is J_EOD = n_d(lambda) * i_p / F, with n_d(lambda) = 2.5 * lambda / 22.
+This is a current-driven flux law, not a diffusion coefficient. The harmonic averaging of back-diffusion conductances
+does not by itself justify harmonic averaging of this EOD coefficient.
+
+The dissolved-water inventory balance uses fluxes at the CL/membrane interfaces.
+With i_p(interface) = i_fc, the unprotected EOD contributions follow Gass et al., Table 1:
+ACL/membrane: (2.5 / 22) * i_fc / F * lambda_acl_mem.
+Membrane/CCL: (2.5 / 22) * i_fc / F * lambda_mem_ccl.
+
+With this current basis and the adopted drag law, no additional CL ionomer volume-fraction or tortuosity factor
+multiplies the EOD coefficient. Such factors affect transport properties used to calculate currents from potential
+gradients; they do not independently reduce the prescribed proton current in the water-per-proton flux relation.
+
+This interface-current assignment is consistent with the layer-integrated protonic
+Joule heating for the same linear CL current profile: the interface current is
+i_fc, whereas the layer average of i_p^2 is i_fc^2 / 3.
+
+lambda_acl_mem and lambda_mem_ccl denote the interface water contents corresponding to the paper's lambda_acl,mem
+and lambda_mem,ccl. They are reconstructed by distance-weighted linear interpolation of the adjacent layer states.
+The paper describes arithmetic averaging between nodes but does not explicitly prescribe these distance weights
+for interface hydration; this reconstruction follows the later repository implementation. It is an approximation,
+not an exact solution of the coupled through-plane EOD/back-diffusion problem. Hydration is a state variable,
+not a transport conductance, so the harmonic resistance average used for back diffusion is not applied to hydration.
+
+The implementation additionally applies donor-hydration protections, yielding lambda_acl_mem_eod and
+lambda_mem_ccl_eod, and then limits the combined EOD/back-diffusion flux according to its donor direction.
+These protections are additional numerical closures, not part of the cited published EOD expressions.
+Consequently, the protected flux is not identical to the unprotected expression published by Gass et al.
+
+Sources
+-------
+1. Gass et al. (2024), An advanced 1D physics-based model for PEM hydrogen fuel cells with enhanced overvoltage
+   prediction, Table 1 (ACL/membrane and membrane/CCL dissolved-water fluxes).
+   Version-specific preprint: https://arxiv.org/pdf/2404.07508v1.
+2. Gass et al. (2024), A critical review of proton exchange membrane fuel cells matter transports and voltage
+   polarisation for modelling, Section 2.3 and Eq. 3 (drag law and current density per active area).
+   Version-specific preprint: https://arxiv.org/pdf/2410.13323v1.
+3. Vetter and Schumacher (2019; preprint 2018), Free open reference implementation of a two-phase PEM fuel cell model,
+   Computer Physics Communications, Table 1, Table 3 and Eq. 23. DOI: 10.1016/j.cpc.2018.07.023.
+4. Kulikovsky and McIntyre (2011), Heat flux from the catalyst layer of a fuel cell,
+   Electrochimica Acta 56, 9172-9179 (CL heat-transport reference). DOI: 10.1016/j.electacta.2011.07.113.
 """
 function D_EOD(i_fc)
     return 2.5 / 22 * i_fc / F
-end
-
-
-"""This function calculates the CL electro-osmotic drag flux coefficient per lambda unit, in mol.m-2.s-1.
-
-The CL coefficient applies a lumped mean-current factor to the membrane EOD coefficient. It does not use the pore-space
-tortuosity or the wet ionomer volume fraction.
-
-Parameters
-----------
-element : Symbol
-    Either `:acl` (anode) or `:ccl` (cathode).
-i_fc :
-    Fuel cell current density in A.m-2.
-lambdaa :
-    Water content in the catalyst layer ionomer, defined as the number of water molecules per fixed sulfonic-acid site.
-T :
-    Temperature in K.
-Hcl : Float64
-    Thickness of the CL layer in m.
-pp : PhysicalParams
-    Physical parameters of the fuel cell.
-
-Returns
--------
-D_EOD_eff
-    CL electro-osmotic drag flux coefficient per lambda unit in mol.m-2.s-1.
-"""
-function D_EOD_eff(element::Symbol, i_fc, lambdaa, T, Hcl::Float64, pp::PhysicalParams)
-    return f_EOD_cl(element, lambdaa, T, Hcl, pp) * D_EOD(i_fc)
-end
-
-
-"""This function calculates the effective lumped-CL factor for electro-osmotic drag.
-
-This factor is a lumped mean-current closure for the unresolved through-plane CL proton-current profile, not a material
-tortuosity.
-
-Kulikovsky 2011 discusses the low-current catalyst layer regime with an approximately uniform reaction rate and a nearly
-linearly decaying proton current. The same profile assumption is already used numerically in selected CL Joule-heat
-terms in `core/models/fuelcell/heat_transfer.jl`, where the squared current gives a 1/3 factor.
-
-For a lumped CL of thickness Hcl and coordinate x from the membrane side to the MPL/GDL side, this profile can be
-written as
-
-    i_p(x) = i_fc * (1 - x / Hcl).
-
-For Joule heat, the source scales with i_p(x)^2. Therefore
-
-    (1 / Hcl) * integral_0^Hcl (i_p(x) / i_fc)^2 dx = 1/3,
-
-which explains the 1/3 factor in the lumped CL Joule-heat terms.
-
-For electro-osmotic drag, the flux scales with the proton current itself, not with its square. Therefore
-
-    (1 / Hcl) * integral_0^Hcl (i_p(x) / i_fc) dx = 1/2.
-
-The active value f_EOD_cl = 0.5 applies this mean-current factor to the CL EOD flux coefficient. This is a transfer of
-the same unresolved CL current-profile assumption to EOD, not a direct EOD correlation from Kulikovsky.
-
-Parameters
-----------
-element : Symbol
-    Either `:acl` (anode) or `:ccl` (cathode).
-lambdaa :
-    Water content in the catalyst layer ionomer, defined as the number of water molecules per fixed sulfonic-acid site.
-T :
-    Temperature in K.
-Hcl : Float64
-    Thickness of the CL layer in m.
-pp : PhysicalParams
-    Physical parameters of the fuel cell.
-
-Returns
--------
-f_EOD_cl
-    Effective EOD scaling factor in the catalyst layer.
-"""
-function f_EOD_cl(element::Symbol, lambdaa, T, Hcl::Float64, pp::PhysicalParams)
-    return 0.5
 end
 
 
@@ -812,10 +785,13 @@ function _limit_directed_dissolved_flux(flux,
 end
 
 
-"""This function returns a smooth EOD lambda factor limited by the donor-side dissolved-water inventory.
+"""This function returns a smooth EOD lambda factor limited by the donor-side hydration.
 
-The interface lambda is first evaluated from the adjacent finite-volume states.
-For the EOD gross term, this value is then smoothly limited by the donor-side lambda inventory so that electro-osmotic drag cannot remove more dissolved water than is locally available in the donor ionomer.
+The interface lambda is first reconstructed geometrically from the adjacent finite-volume states. The caller selects
+the donor according to the EOD current direction. This helper applies a smooth minimum with the donor hydration to
+reduce the gross EOD term when the donor is less hydrated than the reconstructed interface.
+It is a state-dependent hydration factor, not an inventory-per-time-step bound; by itself it does not guarantee
+nonnegative inventories after a numerical time step. The final net flux is also subject to the directed inventory ramp.
 
 The default smoothing scale (`0.25` in lambda units) follows the implementation based on the AlphaPEM V1.3 version in Python, where it has been robust for the previous model.
 This parameterization is a numerical closure for the inventory limiter and still needs to be verified for the new integrated (V2.0) Julia-model.
