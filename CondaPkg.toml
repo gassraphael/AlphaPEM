@@ -2,3 +2,4 @@ channels = ["conda-forge"]
 
 [deps]
 pygad = ""
+python = "==3.14.8"
