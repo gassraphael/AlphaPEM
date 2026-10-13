@@ -157,7 +157,6 @@ SYNC_PID=""
 sync_results_back() {
     local reason="$1"
     if [ -d "$RESULTS_SRC" ]; then
-        echo "[INFO] [$reason] Syncing results to original directory..."
         mkdir -p "$PROJECT_ROOT/results"
         rsync -a "$RESULTS_SRC/" "$PROJECT_ROOT/results/"
         echo "[INFO] [$reason] Results sync completed ($(date))"

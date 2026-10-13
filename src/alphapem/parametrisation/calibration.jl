@@ -69,7 +69,7 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
         simulation_configs      = cfg.simulation_configs,
         ga_config               = cfg.ga_config,
         parallel                = cfg.parallel,
-        initial_population_file = cfg.initial_population_file,
+        initial_population_folder = cfg.initial_population_folder,
         output_dir              = output_dir,
         save_frequency          = cfg.save_frequency,
     )
@@ -114,27 +114,28 @@ function calibrate(cfg::CalibrationConfig)::CalibrationResult
 
     # 4. Setup callback (on_generation)
     history = Float64[] # Initialize history buffer for RMSE tracking
-    last_save_time = Ref(time()) # Track the last checkpoint save time
 
     on_generation = _py_eval("lambda f: lambda ga_instance: f(ga_instance)", _py_globals)(
-        ga -> _on_generation(ga, history, ga_config, cfg, last_save_time, parameter_bounds, base_params)
+        ga -> _on_generation(ga, history, ga_config, cfg, parameter_bounds, base_params)
     )
 
     # 5. Build initial population
     num_params = length(lower_bounds)
     rng = ga_config.seed === nothing ? Random.default_rng() : MersenneTwister(ga_config.seed) # Initialize random number generator
 
-    initial_population = if cfg.initial_population_file !== nothing # Handle warm-start population loading
+    warm_start_file = cfg.initial_population_folder === nothing ? nothing : _find_warm_start_file(cfg.initial_population_folder)
+    initial_population = if warm_start_file !== nothing # Handle warm-start population loading
         loaded = _load_warm_start_population(
-            cfg.initial_population_file, parameter_bounds, ga_config.pop_size, lower_bounds, upper_bounds, rng) # Attempt to load file
+            warm_start_file, parameter_bounds, ga_config.pop_size, lower_bounds, upper_bounds, rng) # Attempt to load file
         if loaded !== nothing
-            @info "Warm-start: loaded $(length(loaded)) individuals from $(cfg.initial_population_file)" # Confirm loading
+            @info "Warm-start: loaded $(length(loaded)) individuals from $(warm_start_file)" # Confirm loading
             loaded # Use loaded population
         else
             @warn "Failed to load warm-start, using random population" # Issue warning on failure
             [lower_bounds .+ rand(rng, num_params) .* (upper_bounds .- lower_bounds) for _ in 1:ga_config.pop_size] # Fallback to random
         end
     else
+        cfg.initial_population_folder !== nothing && @warn "No population file found in $(cfg.initial_population_folder), using random population"
         [lower_bounds .+ rand(rng, num_params) .* (upper_bounds .- lower_bounds) for _ in 1:ga_config.pop_size] # Initialize random population
     end
 

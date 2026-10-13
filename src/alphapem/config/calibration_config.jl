@@ -45,7 +45,7 @@ calibrate the same physical parameter set.
   the parameter bounds for all conditions.
 - `ga_config::GAConfig`: Genetic algorithm hyperparameters. Default `GAConfig()`.
 - `parallel::Bool`: Use multi-threading for population evaluation. Default `true`.
-- `initial_population_file::Union{String, Nothing}`: Path to YAML file for warm-start
+- `initial_population_folder::Union{String, Nothing}`: Path to a previous calibration run folder for warm-start (`final_population.yaml` is used if present, otherwise `calibration_checkpoint_population.yaml`)
   (checkpoint, calibrated_bounds, or final_population). Default `nothing`.
 - `output_dir::String`: Directory for results and logs. Default `"results/calibration"`.
 - `save_frequency::Int`: Frequency (generations) to save checkpoints. Default `1`.
@@ -56,9 +56,9 @@ Base.@kwdef struct CalibrationConfig
                                                             type_display   = :no_display)]
     ga_config::GAConfig                            = GAConfig()
     parallel::Bool                                 = true
-    initial_population_file::Union{String,Nothing} = nothing
+    initial_population_folder::Union{String,Nothing} = nothing
     output_dir::String                             = "results/calibration"
-    save_frequency::Int                            = 1
+    save_frequency::Int                            = 10
 end
 
 

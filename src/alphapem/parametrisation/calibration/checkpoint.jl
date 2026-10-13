@@ -1,10 +1,10 @@
 """
-    _on_generation(ga_instance, history, ga_config, cfg, last_save_time, parameter_bounds, base_params)
+    _on_generation(ga_instance, history, ga_config, cfg, parameter_bounds, base_params)
 
 Callback function executed after each generation of the Genetic Algorithm.
 Handles progress logging and periodic checkpoint saving.
 """
-function _on_generation(ga_instance, history, ga_config, cfg, last_save_time, parameter_bounds, base_params)
+function _on_generation(ga_instance, history, ga_config, cfg, parameter_bounds, base_params)
     # PyGAD maximizes fitness, so fitness = 1/RMSE (positive, compatible with RWS)
     best_sol, best_fitness_py, _ = ga_instance.best_solution()
     current_best_rmse = 1.0 / pyconvert(Float64, best_fitness_py) # Convert 1/RMSE back to RMSE
@@ -15,10 +15,9 @@ function _on_generation(ga_instance, history, ga_config, cfg, last_save_time, pa
     print("\r[ Info: ", msg) # Log progress in-place
     flush(stdout)
 
-    if (cfg.save_frequency > 0 && generation % cfg.save_frequency == 0) || (time() - last_save_time[] > 300) # Check for save triggers
+    if cfg.save_frequency > 0 && generation % cfg.save_frequency == 0 # Check for save trigger
         best_parameters = pyconvert(Vector{Float64}, best_sol)
         _save_intermediate(ga_instance, best_parameters, current_best_rmse, generation, parameter_bounds, base_params, cfg.output_dir) # Save checkpoint
-        last_save_time[] = time() # Reset last save timer
     end
 end
 

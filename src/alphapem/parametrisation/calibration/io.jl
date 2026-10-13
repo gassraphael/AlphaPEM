@@ -15,6 +15,20 @@ function _params_dict_for_export(best_params, parameter_bounds)
 end
 
 """
+    _find_warm_start_file(folder) -> Union{String, Nothing}
+
+Locate the population file to resume from in a previous calibration run folder:
+`final_population.yaml` if it exists, otherwise `calibration_checkpoint_population.yaml`.
+"""
+function _find_warm_start_file(folder::String)
+    for name in ("final_population.yaml", "calibration_checkpoint_population.yaml")
+        path = joinpath(folder, name)
+        isfile(path) && return path
+    end
+    return nothing
+end
+
+"""
     _load_warm_start_population(file, parameter_bounds, pop_size, lower_bounds, upper_bounds, rng) -> Union{Vector{Vector{Float64}}, Nothing}
 
 Load a warm-start population from a YAML checkpoint or a final population file.

@@ -56,25 +56,25 @@ run_calibration(calibration_config)
 
 Top-level configuration combining simulation and GA settings.
 
-| Field                     | Type                       | Default                 | Purpose                                                                                                                |
-|---------------------------|----------------------------|-------------------------|------------------------------------------------------------------------------------------------------------------------|
-| `simulation_configs`      | `Vector{SimulationConfig}` | One default config      | Experimental conditions (fuel cell, operating conditions) and experimental current data |
-| `ga_config`               | `GAConfig`                 | Default GA settings     | Genetic algorithm hyperparameters                                                                                      |
-| `parallel`                | `Bool`                     | `true`                  | Use multi-threading for population evaluation                                                                          |
-| `initial_population_file` | `String or Nothing`        | `nothing`               | Warm-start from previous calibration checkpoint                                                                        |
-| `output_dir`              | `String`                   | `"results/calibration"` | Where to save results and logs                                                                                         |
-| `save_frequency`          | `Int`                      | `1`                     | Save checkpoint every N generations                                                                                    |
+| Field                       | Type                       | Default                 | Purpose                                                                                                                |
+|-----------------------------|----------------------------|-------------------------|------------------------------------------------------------------------------------------------------------------------|
+| `simulation_configs`        | `Vector{SimulationConfig}` | One default config      | Experimental conditions (fuel cell, operating conditions) and experimental current data |
+| `ga_config`                 | `GAConfig`                 | Default GA settings     | Genetic algorithm hyperparameters                                                                                      |
+| `parallel`                  | `Bool`                     | `true`                  | Use multi-threading for population evaluation                                                                          |
+| `initial_population_folder` | `String or Nothing`        | `nothing`               | Previous run folder to resume from (`final_population.yaml`, else `calibration_checkpoint_population.yaml`)            |
+| `output_dir`                | `String`                   | `"results/calibration"` | Where to save results and logs                                                                                         |
+| `save_frequency`            | `Int`                      | `1`                     | Save checkpoint every N generations                                                                                    |
 
 ### PolarizationCalibrationParams
 
 Current profile for calibration (experimental V-I curve).
 
-| Field           | Type              | Default       | Purpose                               |
-|-----------------|-------------------|---------------|---------------------------------------|
+| Field           | Type              | Default       | Purpose                                   |
+|-----------------|-------------------|---------------|-------------------------------------------|
 | `delta_t_ini`   | `Float64`         | 1800.0 s      | Initial stabilization time (zero current) |
-| `v_load`        | `Float64`         | 0.01e4 A/m²/s | Loading rate (ramp current smoothly)  |
-| `delta_t_break` | `Float64`         | 300.0 s       | Hold time at each current step        |
-| `i_exp`         | `Vector{Float64}` | `[]`          | Experimental current densities (A/m²) |
+| `v_load`        | `Float64`         | 0.01e4 A/m²/s | Loading rate (ramp current smoothly)      |
+| `delta_t_break` | `Float64`         | 300.0 s       | Hold time at each current step            |
+| `i_exp`         | `Vector{Float64}` | `[]`          | Experimental current densities (A/m²)     |
 
 Example with real experimental points:
 
@@ -142,7 +142,7 @@ Resume a previous calibration run:
 calibration_config = CalibrationConfig(
     simulation_configs=[...],
     ga_config=GAConfig(num_generations=500),  # Run 500 more generations
-    initial_population_file="results/calibration/checkpoint_gen_200.yaml"
+    initial_population_folder="results/calibration/ZSW_GenStack/<previous run folder>"
 )
 
 run_calibration(calibration_config)

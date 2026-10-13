@@ -92,8 +92,8 @@ calib_cfg = CalibrationConfig(
     ga_config          = ga_cfg,
     parallel           = PARALLEL,
     output_dir         = "results/calibration/ZSW_GenStack",
-    # Initialize the population with a pre-existing one
-    # initial_population_file = "results/calibration/ZSW_GenStack/2026.09.24 - ZSW_nominal - full - 3 conditions - V1/calibration_checkpoint_population.yaml",
+    # Resume from a previous run folder (final_population.yaml, else calibration_checkpoint_population.yaml)
+    # initial_population_folder = "results/calibration/ZSW_GenStack/2026.09.24 - ZSW_nominal - full - 3 conditions - V1",
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
