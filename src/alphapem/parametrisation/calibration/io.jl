@@ -36,7 +36,7 @@ Load a warm-start population from a YAML checkpoint or a final population file.
 function _load_warm_start_population(file::String, parameter_bounds, pop_size::Int, lower_bounds, upper_bounds, rng)
     try
         data = YAML.load_file(file) # Parse the YAML source file
-        individuals = Float64[][] # Initialize container for loaded individuals
+        individuals = Vector{Vector{Float64}}() # Initialize container for loaded individuals
 
         if isa(data, Dict) && haskey(data, "parameters") # Handle checkpoint/calibrated_bounds format
             params_dict = data["parameters"] # Extract the parameter data dictionary
@@ -61,7 +61,7 @@ function _load_warm_start_population(file::String, parameter_bounds, pop_size::I
         elseif isa(data, Vector) # Handle final_population list format
             for entry in data # Iterate through list entries
                 if isa(entry, Dict) && haskey(entry, "params") # Check for expected parameter key
-                    push!(individuals, copy(entry["params"])) # Load the gene vector copy
+                    push!(individuals, Float64.(entry["params"])) # Load the gene vector copy
                 end
             end
         else # Handle unsupported formats
