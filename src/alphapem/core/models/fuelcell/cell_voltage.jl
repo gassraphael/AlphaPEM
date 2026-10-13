@@ -26,34 +26,26 @@ Float64
 function calculate_cell_voltage(i_fc::Real, C_O2_Pt::Real, sv::CellState1D, fc::AbstractFuelCell)
 
     # Extraction of the variables
-    T_ampl, T_acl = getproperty.(sv.ampl, :T), _positive_temperature_value(sv.acl.T)
+    T_acl = _positive_temperature_value(sv.acl.T)
     T_mem = _positive_temperature_value(sv.mem.T)
-    T_ccl, T_cmpl = _positive_temperature_value(sv.ccl.T), getproperty.(sv.cmpl, :T)
+    T_ccl = _positive_temperature_value(sv.ccl.T)
 
     lambda_mem, lambda_ccl = sv.mem.lambda, sv.ccl.lambda
 
-    C_H2_ampl, C_H2_acl = getproperty.(sv.ampl, :C_H2), _nonnegative_value(sv.acl.C_H2)
-    C_O2_ccl, C_O2_cmpl = sv.ccl.C_O2, getproperty.(sv.cmpl, :C_O2)
+    C_H2_acl = _nonnegative_value(sv.acl.C_H2)
 
     eta_c = sv.ccl.eta_c
     C_O2_Pt_safe = _positive_concentration_value(C_O2_Pt)
 
     # Extraction of the parameters
     pp = fc.physical_parameters
-    Hmem, Hacl, Hccl = pp.Hmem, pp.Hacl, pp.Hccl
-    Re, kappa_co = pp.Re, pp.kappa_co
+    Hmem, Hccl = pp.Hmem, pp.Hccl
+    Re = pp.Re
 
     # The equilibrium potential
     Ueq = E0 - 8.5e-4 * (T_ccl - 298.15) + R * T_ccl / (2 * F) *
           (log(R * T_acl * C_H2_acl / Pref_eq) +
            0.5 * log(R * T_ccl * C_O2_Pt_safe / Pref_eq))
-
-    # The crossover current density
-    T_acl_mem_ccl = average([T_acl, T_mem, T_ccl],
-                            [Hacl / (Hacl + Hmem + Hccl), Hmem / (Hacl + Hmem + Hccl), Hccl / (Hacl + Hmem + Hccl)])
-    i_H2 = 2 * F * R * T_acl_mem_ccl / Hmem * C_H2_acl * k_H2(lambda_mem, T_mem, kappa_co, pp)
-    i_O2 = 4 * F * R * T_acl_mem_ccl / Hmem * C_O2_ccl * k_O2(lambda_mem, T_mem, kappa_co, pp)
-    i_n = i_H2 + i_O2
 
     # The proton resistance
     #       The proton resistance at the membrane : Rmem
@@ -63,8 +55,20 @@ function calculate_cell_voltage(i_fc::Real, C_O2_Pt::Real, sv::CellState1D, fc::
     #       The total proton resistance
     Rp = Rmem + Rccl  # Its value is around [4-7]e-6 ohm.m².
 
-    # The cell voltage
-    Ucell = Ueq - eta_c - (i_fc + i_n) * (Rp + Re)
+    # Ohmic voltage losses use the external current density only.
+    # Gass et al., IJHE (2025), Eq. (49), doi:10.1016/j.ijhydene.2024.11.374.
+    # The critical review, Eq. (64) and Sec. 8.3.3, arXiv:2410.13323v1
+    # (doi:10.1149/1945-7111/ad305a), explicitly follows O'Hayre and argues
+    # against adding the crossover-equivalent current to the ohmic term
+    # as in the combined voltage formulation of Dicks and Rand.
+    # Primary sources:
+    # - O'Hayre, Cha, Colella and Prinz, Fuel Cell Fundamentals, 3rd ed.,
+    #   Wiley, 2016, Sec. 6.1, p. 206, Eqs. (6.3)-(6.4):
+    #   activation/concentration losses use j + j_leak; ohmic losses use j.
+    # - Dicks and Rand, Fuel Cell Systems Explained, 3rd ed., Wiley, 2018,
+    #   Sec. 3.8, p. 57, Eq. (3.22): the combined equation uses (i + i_n) * r.
+    # Gas crossover remains in the overpotential dynamics and species balances.
+    Ucell = Ueq - eta_c - i_fc * (Rp + Re)
 
     return Ucell
 end
