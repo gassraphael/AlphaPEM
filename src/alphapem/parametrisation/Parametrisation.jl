@@ -99,11 +99,13 @@ module Parametrisation
 
 include("calibration.jl")
 include("valid_parameter_region.jl")
+include("extended_local_sensitivity_analysis.jl")
 include("sobol_sensitivity_analysis.jl")
 include("cv_extraction.jl")
 
 export ValidParameterRegion,
        Calibration,
+       ExtendedLocalSensitivityAnalysis,
        SobolSensitivityAnalysis,
        CVExtraction
 

@@ -59,6 +59,9 @@ import AlphaPEM.Core.Models: AlphaPEM as AlphaPEMSimulator, simulate_model!, _po
 
 using ..Calibration: ParameterBound, ParameterBounds, bounds_for_fuel_cell, new_PhysicalParams_from_sample
 using ..ValidParameterRegion: ValidityCriteria
+using ..ExtendedLocalSensitivityAnalysis: _SimulationWarningLogger, _new_warning_counters, _print_warning_summary,
+                                          _struct_to_string, _hash_sample,
+                                          _save_jld2_atomic, _load_jld2_checked, _find_missing_sample_ids, _remove_checkpoint
 
 export SobolAnalysisConfig,
        PolarizationRegion,
@@ -209,7 +212,7 @@ function run_sobol_analysis(cfg::SobolAnalysisConfig)::SobolAnalysisResult
     sobol_indices = compute_sobol_indices(cfg, params, A, B, Y, regions)
 
     # Clean up the checkpoint now that the simulations have succeeded
-    _remove_checkpoint(cfg.output_dir)
+    _remove_checkpoint(_sobol_checkpoint_path(cfg.output_dir))
 
     # Step 6: export results
     @info "Exporting results to $(cfg.output_dir)..."

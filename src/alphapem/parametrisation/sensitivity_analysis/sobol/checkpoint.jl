@@ -17,38 +17,6 @@ _sobol_checkpoint_path(output_dir::String)::String = joinpath(output_dir, SOBOL_
 
 
 """
-    _struct_to_string(x)
-
-Return a deterministic string representation of a composite type for hashing.
-
-Only scalar fields are serialised; this is sufficient for the configuration
-objects used by the Sobol analysis (`PolarizationParams`, `NumericalParams`,
-`ParameterBounds`, `OperatingConditionConstraint`).
-"""
-function _struct_to_string(x)::String
-    buf = IOBuffer()
-    print(buf, typeof(x), "(")
-    for (i, fn) in enumerate(fieldnames(typeof(x)))
-        i > 1 && print(buf, ",")
-        val = getfield(x, fn)
-        if isa(val, AbstractString) || isa(val, Symbol)
-            print(buf, val)
-        elseif isa(val, Number) || isa(val, Bool)
-            print(buf, Float64(val))
-        elseif isa(val, Tuple)
-            print(buf, join(string.(val), ","))
-        elseif isa(val, AbstractVector)
-            print(buf, join(string.(val), ","))
-        else
-            print(buf, string(val))
-        end
-    end
-    print(buf, ")")
-    return String(take!(buf))
-end
-
-
-"""
     _config_hash_for_checkpoint(cfg)
 
 Return a stable SHA-256 digest of the configuration fields that affect the
@@ -111,25 +79,16 @@ function _save_checkpoint(output_dir::String,
                           regions::Vector{PolarizationRegion},
                           df_curves::DataFrame,
                           elapsed_time::Float64)
-    mkpath(output_dir)
-    checkpoint_path = _sobol_checkpoint_path(output_dir)
-    tmp_path = checkpoint_path * ".tmp"
-
-    try
-        JLD2.jldsave(
-            tmp_path;
-            config_hash = _config_hash_for_checkpoint(cfg),
-            A = A,
-            B = B,
-            params = params,
-            regions = regions,
-            df_curves = df_curves,
-            elapsed_time = elapsed_time,
-        )
-        mv(tmp_path, checkpoint_path; force = true)
-    catch e
-        @warn "Failed to save Sobol checkpoint: $e"
-    end
+    _save_jld2_atomic(
+        _sobol_checkpoint_path(output_dir), "Sobol";
+        config_hash = _config_hash_for_checkpoint(cfg),
+        A = A,
+        B = B,
+        params = params,
+        regions = regions,
+        df_curves = df_curves,
+        elapsed_time = elapsed_time,
+    )
     return nothing
 end
 
@@ -144,17 +103,11 @@ success, or `nothing` if no usable checkpoint is found. If a checkpoint exists
 but is incompatible, a warning is emitted and `nothing` is returned.
 """
 function _load_checkpoint(output_dir::String, cfg::SobolAnalysisConfig)
-    checkpoint_path = _sobol_checkpoint_path(output_dir)
-    isfile(checkpoint_path) || return nothing
-
     try
-        data = JLD2.load(checkpoint_path)
-
-        expected_hash = _config_hash_for_checkpoint(cfg)
-        if data["config_hash"] != expected_hash
-            @warn "Sobol checkpoint config hash mismatch. Ignoring checkpoint and starting fresh."
-            return nothing
-        end
+        data = _load_jld2_checked(
+            _sobol_checkpoint_path(output_dir), _config_hash_for_checkpoint(cfg), "Sobol"
+        )
+        data === nothing && return nothing
 
         A = data["A"]::Matrix{Float64}
         B = data["B"]::Matrix{Float64}
@@ -178,38 +131,4 @@ function _load_checkpoint(output_dir::String, cfg::SobolAnalysisConfig)
         @warn "Failed to load Sobol checkpoint: $e. Starting fresh."
         return nothing
     end
-end
-
-
-"""
-    _find_missing_sample_ids(df_curves, n_total)
-
-Return the list of `sample_id` values that have not yet been completed.
-
-A sample is considered complete if its status is `:ok`, `:failed`, or `:imputed`
-(i.e. the simulation was attempted). Missing rows are those that must still be
-run.
-"""
-function _find_missing_sample_ids(df_curves::DataFrame, n_total::Int)::Vector{Int}
-    completed = Set{Int}()
-    if nrow(df_curves) > 0
-        for sid in df_curves.sample_id
-            push!(completed, sid)
-        end
-    end
-    return Int[i for i in 1:n_total if !(i in completed)]
-end
-
-_find_missing_sample_ids(::Nothing, n_total::Int)::Vector{Int} = collect(1:n_total)
-
-
-"""
-    _remove_checkpoint(output_dir)
-
-Delete the checkpoint file if it exists. Called after a successful run.
-"""
-function _remove_checkpoint(output_dir::String)
-    checkpoint_path = _sobol_checkpoint_path(output_dir)
-    isfile(checkpoint_path) && rm(checkpoint_path)
-    return nothing
 end

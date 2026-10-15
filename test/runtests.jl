@@ -305,6 +305,40 @@ end
     @test haskey(result.output_files, :bounds_initial_yaml)
 end
 
+@testset "Parametrisation.ExtendedLocalSensitivityAnalysis - shared helpers" begin
+    using DataFrames, Logging
+    ELSA = AlphaPEM.Parametrisation.ExtendedLocalSensitivityAnalysis
+
+    # Hashing is deterministic and sensitive to the content
+    @test ELSA._hash_sample([1.0, 2.0]) == ELSA._hash_sample([1.0, 2.0])
+    @test ELSA._hash_sample([1.0, 2.0]) != ELSA._hash_sample([1.0, 2.1])
+
+    # Missing-sample bookkeeping
+    @test ELSA._find_missing_sample_ids(nothing, 3) == [1, 2, 3]
+    @test ELSA._find_missing_sample_ids(DataFrame(sample_id = [1, 3]), 4) == [2, 4]
+
+    # Atomic checkpoint round trip, hash mismatch and removal
+    path = joinpath(mktempdir(), "ckpt.jld2")
+    ELSA._save_jld2_atomic(path, "Test"; config_hash = "abc", value = 42)
+    @test isfile(path) && !isfile(path * ".tmp")
+    @test ELSA._load_jld2_checked(path, "abc", "Test")["value"] == 42
+    @test ELSA._load_jld2_checked(path, "other", "Test") === nothing
+    ELSA._remove_checkpoint(path)
+    @test !isfile(path)
+    @test ELSA._load_jld2_checked(path, "abc", "Test") === nothing
+
+    # The warning logger counts known messages and forwards the others
+    counters = ELSA._new_warning_counters()
+    with_logger(ELSA._SimulationWarningLogger(counters, Logging.SimpleLogger(devnull))) do
+        @warn "Safety stop: oxygen concentration is too low"
+        @warn "Safety stop: cell voltage is too low"
+        @error "Simulation exceeded maximum runtime"
+    end
+    @test counters[:oxygen_starvation][] == 1
+    @test counters[:voltage_limit][] == 1
+    @test counters[:max_runtime][] == 1
+end
+
 @testset "Parametrisation.SobolSensitivityAnalysis" begin
     using AlphaPEM.Parametrisation.SobolSensitivityAnalysis
 

@@ -29,7 +29,7 @@ Base.@kwdef struct PhysicalParams <: AbstractFuelCellParams
     Aact::Float64         = 300e-4           # MEA active area in meter squares.
     nb_cell::Int64        = 1                # Number of cells in the stack.
     #   Catalyst layer
-    Hacl::Float64         = 5e-6            # Thickness of the anode catalyst layer in meters
+    Hacl::Float64         = 5e-6             # Thickness of the anode catalyst layer in meters
     Hccl::Float64         = 15e-6            # Thickness of the cathode catalyst layer in meters
     #   Membrane
     Hmem::Float64         = 20e-6            # Thickness of the membrane in meters
