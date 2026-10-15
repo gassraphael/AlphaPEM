@@ -9,6 +9,12 @@ Local sensitivities (normalised finite differences) are evaluated at many points
 sampled globally in the parameter space with a Sobol sequence, then analysed through
 their magnitude, collinearity and Hessian-based identifiability.
 
+The analysis is a **practical** (data-driven), sensitivity-based identifiability analysis, as
+opposed to a *structural* one: a parameter is deemed identifiable if it (1) has an observable
+effect on the predicted outputs and (2) that effect cannot be reproduced by other parameters.
+The conclusions depend on the model structure, the parameter bounds and the chosen measurements,
+and do not by themselves establish the physical importance of a parameter.
+
 # References
 - A. Goshtasbi, J. Chen, J. R. Waldecker, S. Hirano and T. Ersal, "Effective Parameterization of
   PEM Fuel Cell Models – Part I: Sensitivity Analysis and Parameter Identifiability",
@@ -26,8 +32,18 @@ using JLD2
 using Logging
 using SHA
 
+using AlphaPEM.Config: NumericalParams
+using ..Calibration: ParameterBounds
+
 include(joinpath(@__DIR__, "sensitivity_analysis", "shared", "warning_logger.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "shared", "hashing.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "shared", "checkpoint_io.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "types.jl"))
+
+export ExtendedLocalSensitivityConfig,
+       ExtendedLocalSensitivityResult,
+       OutputSpec,
+       SUPPORTED_OUTPUTS,
+       validate_config
 
 end  # module ExtendedLocalSensitivityAnalysis
