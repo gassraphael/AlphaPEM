@@ -29,7 +29,6 @@ const rho_Pt::Float64      = 21450             # kg.m-3. It is the density of th
 const C_O2ref_red::Float64 = 3.39              # mol.m-3. It is the reference concentration of oxygen for the reduction reaction.
 const E0::Float64          = 1.229             # V. It is the standard-state reversible voltage.
 const Pref_eq::Float64     = 1e5               # Pa. It is the reference pressure for the equilibrium potential calculation.
-const Eact_O2_red::Float64 = 27.7e3            # J.mol-1. It is the activation energy of oxygen reduction [futterPhysicalModelingPolymerelectrolyte2018].
 const Tref_O2_red::Float64 = 323               # K. It is the reference temperature for the activation energy of oxygen reduction [futterPhysicalModelingPolymerelectrolyte2018].
 
 # Model parameters for the heat transfer calculation
@@ -43,4 +42,3 @@ const tau_cp::Float64      = 1                 # s. It is the air compressor tim
 const tau_hum::Float64     = 5                 # s. It is the humidifier time constant.
 const Kp_T::Float64        = 5e-8              # m².s-1.Pa-1. It is the proportional constant of the PD controller at the back pressure valve.
 const Kd_T::Float64        = 1e-8              # m².Pa-1. It is the derivative constant of the PD controller at the back pressure valve.
-

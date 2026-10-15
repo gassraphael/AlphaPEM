@@ -109,6 +109,7 @@ Base.@kwdef struct PhysicalParams <: AbstractFuelCellParams
     i0_c_ref::Float64      = 14.43           # Reference exchange current density at the cathode in A·m⁻²
     kappa_co::Float64      = 30.0            # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
     kappa_c::Float64       = 1.0             # Overpotential correction exponent
+    Eact_O2_red::Float64   = 27.7e3          # J.mol-1. Activation energy of oxygen reduction [futterPhysicalModelingPolymerelectrolyte2018].
     C_scl::Float64         = 2e7             # Volumetric space-charge layer capacitance in F·m⁻³
     alpha_c::Float64       = 0.5             # It is the transfer coefficient of the cathode.
 
@@ -341,5 +342,4 @@ Base.@kwdef struct PolaExperimentalData <: AbstractFuelCellParams
     i_exp::Vector{Float64} = Float64[] # Experimental current density values (A/m²)
     U_exp::Vector{Float64} = Float64[] # Experimental cell voltage values (V)
 end
-
 

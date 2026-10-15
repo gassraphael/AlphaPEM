@@ -239,7 +239,7 @@ function create_initial_variable_values(simu::AlphaPEM)::Vector{Float64}
     T_des, Pa_des, Pc_des = oc.T_des, oc.Pa_des, oc.Pc_des
     Phi_a_des, Phi_c_des, y_H2_in = oc.Phi_a_des, oc.Phi_c_des, oc.y_H2_in
     Hmem, kappa_co, kappa_c, i0_c_ref = pp.Hmem, pp.kappa_co, pp.kappa_c, pp.i0_c_ref
-    alpha_c = pp.alpha_c
+    Eact_O2_red, alpha_c = pp.Eact_O2_red, pp.alpha_c
     nb_gc, nb_gdl, nb_mpl = np.nb_gc, np.nb_gdl, np.nb_mpl
 
     # Initial fuel cell states.
