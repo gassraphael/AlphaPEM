@@ -4,7 +4,7 @@ Abstract type for all fuel cell models.
 
 abstract type AbstractFuelCell end
 
-using ...Config: PhysicalParams, OperatingConditions, PolaExperimentalData, UNDETERMINED_PARAMETER_BOUNDS
+using ...Config: PhysicalParams, OperatingConditions, PolaExperimentalData
 
 # Abstract interface: all concrete fuel cell models must implement these methods
 
@@ -45,13 +45,9 @@ end
 Return the list of undetermined parameter bounds for the fuel cell.
 """
 function undetermined_parameter_bounds(fc::AbstractFuelCell, voltage_zone::Symbol = :full)::Vector{Tuple{Symbol, Float64, Float64}}
-    # Generic implementation: delegate to the canonical bounds defined in
-    # `fuel_cell_parameters.jl` (UNDETERMINED_PARAMETER_BOUNDS).
-    params = Tuple{Symbol, Float64, Float64}[]
-    for (name, (minv, maxv, _kind)) in UNDETERMINED_PARAMETER_BOUNDS
-        push!(params, (name, minv, maxv))
-    end
-    return params
+    # PARAMETER_BOUNDS lists every parameter that may fluctuate, not the ones left undetermined:
+    # the selection is made per fuel cell in the `data` directory.
+    error("undetermined_parameter_bounds is not implemented for $(typeof(fc)).")
 end
 
 

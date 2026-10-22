@@ -34,7 +34,7 @@ include("calibration_config.jl")
 
 export AbstractCurrentParams, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
 export AbstractFuelCellParams, PhysicalParams, OperatingConditions, PolaExperimentalData, NumericalParams,
-       PARAMETER_METADATA, UNDETERMINED_PARAMETER_BOUNDS, OPERATING_CONDITIONS_BOUNDS,
+       PARAMETER_METADATA, PARAMETER_BOUNDS, OPERATING_CONDITIONS_BOUNDS,
        OperatingConditionConstraint, default_operating_condition_constraints
 export CellStateScaling, ManifoldStateScaling, AuxiliaryStateScaling,
        CurrentDistributionScaling, DAEAlgebraicScaling, StateScaling
