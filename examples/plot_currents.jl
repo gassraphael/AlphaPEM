@@ -12,6 +12,7 @@ GLMakie.activate!()  # Enable interactive window
 
 # --- Time resolution ---
 n_points = 10000  # points for plotting
+show_polarization_calibration = false
 
 # === Step Current ===
 step_p = StepParams(
@@ -25,6 +26,7 @@ step_c = StepCurrent(step_p)
 
 t0_step, tf_step = step_c.time_interval
 t_step = range(t0_step, tf_step, length=n_points)
+t_step_min = t_step ./ 60
 i_step_vals = [current(step_c, t) for t in t_step] ./ 1e4
 
 # === Polarization Current ===
@@ -39,6 +41,7 @@ pola_c = PolarizationCurrent(pola_p)
 
 t0_pola, tf_pola = pola_c.time_interval
 t_pola = range(t0_pola, tf_pola, length=n_points)
+t_pola_h = t_pola ./ 3600
 i_pola = [current(pola_c, t) for t in t_pola] ./ 1e4
 
 # === Polarization Calibration Current (from experimental data) ===
@@ -52,6 +55,7 @@ pola_cali = PolarizationCalibrationCurrent(pola_cali_p)
 
 t0_pola_cali, tf_pola_cali = pola_cali.time_interval
 t_pola_cali = range(t0_pola_cali, tf_pola_cali, length=n_points)
+t_pola_cali_min = t_pola_cali ./ 60
 i_pola_cali = [current(pola_cali, t) for t in t_pola_cali] ./ 1e4
 
 # === EIS Current ===
@@ -83,35 +87,104 @@ for k in eachindex(eis_c.f)
     append!(t_eis, t_segment)
 end
 
+t_eis_h = t_eis ./ 3600
 i_eis = [current(eis_c, t) for t in t_eis] ./ 1e4
 
-# === Plot: all current profiles on a 2×2 figure ===
+if show_polarization_calibration || length(eis_c.f) < 2
+    n_zoom_periods = 3
+    zoom_start = eis_c.t_new_start[1]
+    zoom_stop = zoom_start + n_zoom_periods / eis_c.f[1]
+    zoom_title = "First $n_zoom_periods oscillations"
+else
+    n_zoom_periods = 5
+    frequency_change = eis_c.t_new_start[2]
+    zoom_start = frequency_change - n_zoom_periods / eis_c.f[1]
+    zoom_stop = frequency_change + n_zoom_periods / eis_c.f[2]
+    zoom_title = "$n_zoom_periods oscillations before and after one frequency change"
+end
+zoom_indices = findall(t -> zoom_start <= t <= zoom_stop, t_eis)
+t_eis_zoom_h = t_eis[zoom_indices] ./ 3600
+i_eis_zoom = i_eis[zoom_indices]
+
+_one_decimal_tick_labels(values) = [string(round(value; digits=1)) for value in values]
+
+# === Plot: all current profiles on a 2×2 figure (EIS with a zoom inset) ===
 fig = Figure(size = (1200, 800))
 palette = _publication_colors()
 
 ax1 = Axis(fig[1, 1], title = "Step current")
-lines!(ax1, collect(t_step), i_step_vals, color=_cell_current_color(1), linewidth=2.8)
+lines!(ax1, t_step_min, i_step_vals, color=_cell_current_color(1), linewidth=2.8)
 _finalize_axis!(ax1;
-    xlabel = rich("Time ", lsub("t", ""), " (s)"),
+    xlabel = rich("Time ", lsub("t", ""), " (min)"),
     ylabel = rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"))
+ax1.xticks = range(first(t_step_min), last(t_step_min); length=6)
+ax1.xtickformat = _one_decimal_tick_labels
 
 ax2 = Axis(fig[1, 2], title = "Polarization current")
-lines!(ax2, collect(t_pola), i_pola, color=palette[1], linewidth=2.8)
+lines!(ax2, t_pola_h, i_pola, color=palette[1], linewidth=2.8)
 _finalize_axis!(ax2;
-    xlabel = rich("Time ", lsub("t", ""), " (s)"),
+    xlabel = rich("Time ", lsub("t", ""), " (h)"),
     ylabel = rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"))
+ax2.xticks = range(first(t_pola_h), last(t_pola_h); length=6)
+ax2.xtickformat = _one_decimal_tick_labels
 
-ax3 = Axis(fig[2, 1], title = "Polarization calibration current")
-lines!(ax3, collect(t_pola_cali), i_pola_cali, color=palette[2], linewidth=2.8)
-_finalize_axis!(ax3;
-    xlabel = rich("Time ", lsub("t", ""), " (s)"),
-    ylabel = rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"))
+if show_polarization_calibration
+    ax3 = Axis(fig[2, 1], title = "Polarization calibration current")
+    lines!(ax3, t_pola_cali_min, i_pola_cali, color=palette[2], linewidth=2.8)
+    _finalize_axis!(ax3;
+        xlabel = rich("Time ", lsub("t", ""), " (min)"),
+        ylabel = rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"))
+    ax3.xticks = range(first(t_pola_cali_min), last(t_pola_cali_min); length=6)
+    ax3.xtickformat = _one_decimal_tick_labels
+end
 
-ax4 = Axis(fig[2, 2], title = "EIS current")
-lines!(ax4, t_eis, i_eis, color=palette[3], linewidth=2.8)
+eis_position = show_polarization_calibration ? fig[2, 2] : fig[2, 1:2]
+ax4 = Axis(eis_position, title = "EIS current")
+lines!(ax4, t_eis_h, i_eis, color=palette[3], linewidth=2.8)
 _finalize_axis!(ax4;
-    xlabel = rich("Time ", lsub("t", ""), " (s)"),
+    xlabel = rich("Time ", lsub("t", ""), " (h)"),
     ylabel = rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"))
+ax4.xticks = range(first(t_eis_h), last(t_eis_h); length=6)
+ax4.xtickformat = _one_decimal_tick_labels
+
+# Frame around the zoomed region on the main EIS curve
+zoom_x = [zoom_start, zoom_stop, zoom_stop, zoom_start, zoom_start] ./ 3600
+zoom_y = [minimum(i_eis_zoom), minimum(i_eis_zoom), maximum(i_eis_zoom), maximum(i_eis_zoom), minimum(i_eis_zoom)]
+lines!(ax4, zoom_x, zoom_y; color=:orange, linewidth=1.5)
+
+# Inset axis showing the first oscillations or the first frequency change
+ax_zoom = Axis(eis_position,
+    width=Relative(show_polarization_calibration ? 0.5 : 0.42),
+    height=Relative(show_polarization_calibration ? 0.4 : 0.5),
+    halign=0.95, valign=0.4, tellwidth=false, tellheight=false,
+    backgroundcolor=:white, title = zoom_title, titlesize=13)
+translate!(ax_zoom.blockscene, 0, 0, 100)
+lines!(ax_zoom, t_eis_zoom_h, i_eis_zoom, color=palette[3], linewidth=2.0)
+ax_zoom.xticks = range(first(t_eis_zoom_h), last(t_eis_zoom_h); length=4)
+ax_zoom.xtickformat = _one_decimal_tick_labels
+ax_zoom.xminorticks = IntervalsBetween(5)
+ax_zoom.xminorticksvisible = true
+ax_zoom.yminorticks = IntervalsBetween(5)
+ax_zoom.yminorticksvisible = true
+ax_zoom.xgridvisible = false
+ax_zoom.ygridvisible = false
+
+# Connectors from the zoom frame to the inset corners (pixel space, kept in sync with the layout)
+connector_points = lift(ax4.scene.viewport, ax_zoom.scene.viewport, ax4.finallimits) do vp4, vpz, lims
+    to_px(x, y) = Point2f((x - lims.origin[1]) / lims.widths[1] * vp4.widths[1],
+                          (y - lims.origin[2]) / lims.widths[2] * vp4.widths[2])
+    inset_left   = vpz.origin[1] - vp4.origin[1]
+    inset_bottom = vpz.origin[2] - vp4.origin[2]
+    inset_top    = inset_bottom + vpz.widths[2]
+    return [to_px(zoom_x[2], zoom_y[3]), Point2f(inset_left, inset_top),
+            Point2f(NaN, NaN),
+            to_px(zoom_x[2], zoom_y[1]), Point2f(inset_left, inset_bottom)]
+end
+lines!(ax4, connector_points; space=:pixel, color=:orange, linestyle=:dash, linewidth=1.2)
+
+for spine in (:leftspinecolor, :rightspinecolor, :topspinecolor, :bottomspinecolor)
+    setproperty!(ax_zoom, spine, :orange)
+end
 
 # === Display and Save ===
 # Open an interactive window (GLMakie)
