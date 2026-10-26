@@ -27,7 +27,7 @@ using Printf
 const PARALLEL       = true   # true  → multi-threaded population evaluation
 const N_THREADS      = 0      # 0 → use all available cores
 const MAX_RUN_TIME_S = 180    # Maximum simulation runtime (seconds)
-const NB_GC_POLA     = 5      # Number of GC nodes for polarization simulation
+const NB_GC_POLA     = 1      # Number of GC nodes for polarization simulation
 
 if PARALLEL
     n_desired = N_THREADS == 0 ? Sys.CPU_THREADS : min(N_THREADS, Sys.CPU_THREADS)
