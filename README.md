@@ -212,7 +212,7 @@ Calibration adapts AlphaPEM to specific fuel cells using genetic algorithms.
 
 # Major updates
 
-- V2.0 - under construction - This version of AlphaPEM includes:
+- [V2.0](https://github.com/gassraphael/AlphaPEM/tree/e894a9219a093d8ded70c103d01931ea028e933a) - 2026.10.26 - This version of AlphaPEM includes:
     - the transition from the original programming language to Julia, leveraging its high execution speed while
       maintaining a high-level language framework.
     - the abandonment of dictionary usage in favor of increased reliance on object-oriented programming.
