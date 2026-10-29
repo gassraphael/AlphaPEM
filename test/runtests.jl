@@ -131,6 +131,7 @@ end
         display_timing = :postrun,
     )
 
+    @test_throws ArgumentError run_simulation(cfg; linestyle=:dot)
     simu = run_simulation(cfg)
     @test simu isa AlphaPEM.Core.Models.AlphaPEM
     @test simu.outputs !== nothing
@@ -160,7 +161,8 @@ end
         display_timing = :postrun,
     )
 
-    simu = run_simulation(cfg)
+    @test_throws ArgumentError run_simulation(cfg; linestyle=:dash)
+    simu = run_simulation(cfg; linestyle=:dot)
     @test simu isa AlphaPEM.Core.Models.AlphaPEM
     @test simu.outputs !== nothing
     @test !isempty(simu.outputs.solver.t)
@@ -252,7 +254,9 @@ end
         ),
     ]
 
-    simus = run_simulation(cfgs)
+    @test_throws ArgumentError run_simulation(cfgs; linestyles=[:solid])
+    @test_throws ArgumentError run_simulation(cfgs; linestyles=[:dash, :solid])
+    simus = run_simulation(cfgs; linestyles=[:solid, :dot])
     @test length(simus) == 2
     @test all(s -> s isa AlphaPEM.Core.Models.AlphaPEM, simus)
     @test all(s -> s.outputs !== nothing, simus)

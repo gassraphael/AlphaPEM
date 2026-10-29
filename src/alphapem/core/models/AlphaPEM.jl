@@ -760,7 +760,8 @@ end
 """
 
 function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing;
-                  series_index::Union{Nothing,Integer}=nothing)
+                  series_index::Union{Nothing,Integer}=nothing,
+                  linestyle::Symbol=:solid)
     outputs = simu.outputs
     outputs === nothing && throw(ArgumentError("display! requires available simulation outputs. Run simulate_model! first."))
     simu.cfg.type_display == :no_display && return nothing
@@ -829,16 +830,20 @@ function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing;
     elseif simu.cfg.type_current isa PolarizationParams
         if simu.cfg.type_display == :synthetic && _ax1 !== nothing
             if simu.cfg.display_timing == :live
-                plot_polarization_hysteresis(outputs, simu.current_density, simu.cfg, _ax1; series_index=series_index)
+                plot_polarization_hysteresis(outputs, simu.current_density, simu.cfg, _ax1;
+                                             series_index=series_index, linestyle=linestyle)
             else
-                plot_polarization_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1; series_index=series_index)
+                plot_polarization_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1;
+                                        series_index=series_index, linestyle=linestyle)
             end
         elseif simu.cfg.type_display == :multiple && _ax1 isa AbstractVector && length(_ax1) >= 6 && _ax2 !== nothing
             # Multiple mode: Performance curves (Polarization, Power, Efficiency, Hysteresis) followed by Internal states.
-            plot_polarization_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[1]; series_index=series_index)
+            plot_polarization_curve(outputs, simu.fuel_cell, simu.current_density, simu.cfg, _ax1[1];
+                                    series_index=series_index, linestyle=linestyle)
             plot_power_density_curve(outputs, simu.current_density, simu.cfg, _ax1[2]; series_index=series_index)
             plot_cell_efficiency(outputs, simu.current_density, simu.cfg, _ax1[3]; series_index=series_index)
-            plot_polarization_hysteresis(outputs, simu.current_density, simu.cfg, _ax1[4]; series_index=series_index)
+            plot_polarization_hysteresis(outputs, simu.current_density, simu.cfg, _ax1[4];
+                                         series_index=series_index, linestyle=linestyle)
             plot_ifc_1D_temporal(outputs, simu.current_density, simu.cfg, _ax1[5])
             plot_Ucell(outputs, simu.current_density, simu.cfg, _ax1[6])
             if !(_ax2 isa AbstractVector)

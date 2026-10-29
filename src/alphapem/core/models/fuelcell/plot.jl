@@ -633,7 +633,8 @@ function plot_polarization_curve(outputs::SimulationOutputs,
                                  cd::AbstractCurrent,
                                  cfg::SimulationConfig,
                                  ax;
-                                 series_index::Union{Nothing,Integer}=nothing)
+                                 series_index::Union{Nothing,Integer}=nothing,
+                                 linestyle::Symbol=:solid)
     model_color = series_index === nothing ? _cell_voltage_color() : _series_color(series_index)
     exp_color = RGBf(0.10, 0.10, 0.10)
     model_label_base = _polarization_legend_base(cfg.type_fuel_cell;
@@ -664,7 +665,7 @@ function plot_polarization_curve(outputs::SimulationOutputs,
 
         model_label = _label_with_rmse(model_label_base, sim_error)
         lines!(ax, ifc_discretized, Ucell_discretized;
-               color=model_color, linewidth=3.0, label=model_label)
+               color=model_color, linewidth=3.0, linestyle=linestyle, label=model_label)
 
         _set_polarization_axis_limits!(ax)
         _set_polarization_fixed_ticks!(ax)
@@ -707,7 +708,8 @@ function plot_polarization_hysteresis(outputs::SimulationOutputs,
                                       cd::AbstractCurrent,
                                       cfg::SimulationConfig,
                                       ax;
-                                      series_index::Union{Nothing,Integer}=nothing)
+                                      series_index::Union{Nothing,Integer}=nothing,
+                                      linestyle::Symbol=:solid)
     model_color = series_index === nothing ? _cell_voltage_color() : _series_color(series_index)
     model_label_base = _polarization_legend_base(cfg.type_fuel_cell;
                                                  simulation=true,
@@ -717,7 +719,7 @@ function plot_polarization_hysteresis(outputs::SimulationOutputs,
         ifc_full, Ucell_full = _polarization_points(outputs, cd; average=false)
 
         lines!(ax, ifc_full, Ucell_full;
-               color=model_color, linewidth=2.5, label=model_label_base)
+               color=model_color, linewidth=2.5, linestyle=linestyle, label=model_label_base)
 
         _set_polarization_axis_limits!(ax)
         _set_polarization_fixed_ticks!(ax)
@@ -1185,4 +1187,3 @@ function plot_T_pseudo_2D_final(outputs::SimulationOutputs,
            align=(:left, :center), space=:relative, color=:black)
     return nothing
 end
-

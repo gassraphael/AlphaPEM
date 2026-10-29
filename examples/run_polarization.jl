@@ -22,21 +22,26 @@ current_params = PolarizationParams(
     i_max         = NaN          # Maximum current density.
 )
 
-# List of fuel cell types to simulate. You can add more fuel cell types to the list,
-# but make sure they are implemented in the create_fuelcell factory function.
+# Fuel-cell types and line styles to simulate. Add types implemented by create_fuelcell
+# and choose either :solid or :dot for each curve.
 # Examples:
 # :ZSW_nominal, :ZSW_Pa_1_61_Pc_1_41, :ZSW_Pa_2_01_Pc_1_81,
 # :ZSW_Pa_2_4_Pc_2_2, :ZSW_Pa_2_8_Pc_2_6, :ZSW_T_62,
 # :ZSW_T_76, :ZSW_T_84
-type_fuel_cell_list = [:ZSW_nominal, :ZSW_Pa_1_61_Pc_1_41, :ZSW_Pa_2_01_Pc_1_81,
-                       :ZSW_Pa_2_4_Pc_2_2, :ZSW_Pa_2_8_Pc_2_6]
+fuel_cell_cases = [
+    (type = :ZSW_nominal,         linestyle = :dot),
+    (type = :ZSW_Pa_1_61_Pc_1_41, linestyle = :dot),
+    (type = :ZSW_Pa_2_01_Pc_1_81, linestyle = :solid),
+    (type = :ZSW_Pa_2_4_Pc_2_2,   linestyle = :solid),
+    (type = :ZSW_Pa_2_8_Pc_2_6,   linestyle = :solid),
+]
 year_pola = 2024
 nb_gc_pola = 5
 
 # If only one fuel cell type is selected, run a single simulation. Otherwise, run multiple simulations in parallel.
-if length(type_fuel_cell_list) == 1
+if length(fuel_cell_cases) == 1
     cfg = SimulationConfig(
-        type_fuel_cell       = type_fuel_cell_list[1],
+        type_fuel_cell       = fuel_cell_cases[1].type,
         year                 = year_pola,
         type_current         = current_params,
         numerical_parameters = NumericalParams(nb_gc = nb_gc_pola),
@@ -48,13 +53,13 @@ if length(type_fuel_cell_list) == 1
         display_timing       = :postrun       # :live, :postrun.
     )
     start_time = time() # Starting time
-    run_simulation(cfg)
+    run_simulation(cfg; linestyle=fuel_cell_cases[1].linestyle)
     algo_time = time() - start_time # Ending time
     println("Time of the algorithm in second : ", algo_time)
 else
     cfgs = [
         SimulationConfig(
-            type_fuel_cell       = type_fuel_cell_list[i],
+            type_fuel_cell       = case.type,
             type_current         = current_params,
             numerical_parameters = NumericalParams(nb_gc = nb_gc_pola),
             voltage_zone         = :full,                # :before_voltage_drop, :full.
@@ -64,10 +69,10 @@ else
             type_display         = :synthetic,           # :multiple, :synthetic, :no_display.
             display_timing       = :postrun              # :live, :postrun.
         )
-        for i in 1:length(type_fuel_cell_list)
+        for case in fuel_cell_cases
     ]
     start_time = time() # Starting time
-    run_simulation(cfgs)
+    run_simulation(cfgs; linestyles=[case.linestyle for case in fuel_cell_cases])
     algo_time = time() - start_time # Ending time
     println("Time of the algorithm in second : ", algo_time)
 end

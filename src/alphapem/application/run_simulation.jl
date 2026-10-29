@@ -9,8 +9,8 @@ helpers are kept in `run_simulation_modules.jl`.
 
 Public API
 ----------
-- `run_simulation(cfg::SimulationConfig)  -> AlphaPEM`
-- `run_simulation(cfgs::AbstractVector{<:SimulationConfig}) -> Vector{AlphaPEM}`
+- `run_simulation(cfg::SimulationConfig; linestyle=:solid) -> AlphaPEM`
+- `run_simulation(cfgs::AbstractVector{<:SimulationConfig}; linestyles=nothing) -> Vector{AlphaPEM}`
 """
 
 # ─────────────────────────────────────── Imports ─────────────────────────────
@@ -107,7 +107,10 @@ Run a polarization-curve simulation.
 - `:postrun` display timing : one full solve.
 - `:live` display timing    : one solve per current step, with display refresh after each.
 """
-function launch_AlphaPEM_for_polarization_current(simu::AlphaPEM)::AlphaPEM
+function launch_AlphaPEM_for_polarization_current(
+    simu::AlphaPEM;
+    linestyle::Symbol=:solid,
+)::AlphaPEM
     # Figures preparation
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(simu.cfg)
 
@@ -132,7 +135,7 @@ function launch_AlphaPEM_for_polarization_current(simu::AlphaPEM)::AlphaPEM
 
             # Display
             if simu.cfg.type_display != :no_display
-                display!(simu, ax1, ax2, ax3)
+                display!(simu, ax1, ax2, ax3; linestyle=linestyle)
                 # On the first iteration, open the figure window now that it has content.
                 # On subsequent iterations the call is a no-op (window already open).
                 if _active_display_backend[] == :gl
@@ -152,7 +155,7 @@ function launch_AlphaPEM_for_polarization_current(simu::AlphaPEM)::AlphaPEM
         # Simulation
         simulate_model!(simu)
         # Display
-        simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3)
+        simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3; linestyle=linestyle)
     end
 
     # Plot saving
@@ -332,15 +335,19 @@ end
 Run a batch of polarization-curve simulations sequentially, sharing one set of axes.
 """
 function launch_AlphaPEM_for_polarization_current(
-    simulators::AbstractVector{<:AlphaPEM},
+    simulators::AbstractVector{<:AlphaPEM};
+    linestyles::AbstractVector{Symbol}=fill(:solid, length(simulators)),
 )::Vector{<:AlphaPEM}
+    length(linestyles) == length(simulators) ||
+        throw(ArgumentError("`linestyles` must have one entry per simulator."))
     # Figures preparation
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(first(simulators).cfg)
-    for (i, simu) in enumerate(simulators)
+    for (i, (simu, linestyle)) in enumerate(zip(simulators, linestyles))
         # Simulation
         simulate_model!(simu)
         # Display
-        simu.cfg.type_display != :no_display && display!(simu, ax1, ax2, ax3; series_index=i)
+        simu.cfg.type_display != :no_display &&
+            display!(simu, ax1, ax2, ax3; series_index=i, linestyle=linestyle)
         # Release the solver solution before starting the next simulation.
         simu.sol = nothing
         GC.gc(true)
@@ -464,13 +471,14 @@ end
 # ═══════════════════════════════════════════════════════════════════════════════
 
 """
-    run_simulation(cfg::SimulationConfig) -> AlphaPEM
+    run_simulation(cfg::SimulationConfig; linestyle=:solid) -> AlphaPEM
 
 Run a single PEM fuel cell simulation according to `cfg`.
 
 # Arguments
 - `cfg::SimulationConfig`: Configuration object specifying the fuel-cell type,
-  current profile, display mode, and plot style.
+  current profile, and display mode.
+- `linestyle`: `:solid` or `:dot` for polarization curves.
 
 # Returns
 - `AlphaPEM`: The completed simulator instance with all outputs populated.
@@ -490,7 +498,11 @@ cfg = SimulationConfig(
 simu = run_simulation(cfg)
 ```
 """
-function run_simulation(cfg::SimulationConfig)::AlphaPEM
+function run_simulation(cfg::SimulationConfig; linestyle::Symbol=:solid)::AlphaPEM
+    _validate_polarization_linestyle(linestyle)
+    !(cfg.type_current isa PolarizationParams) && linestyle != :solid &&
+        throw(ArgumentError("`linestyle` can only be customized for polarization simulations."))
+
     # Build a Fuelcell object with the given configuration.
     fuel_cell       = create_fuelcell(cfg.type_fuel_cell, cfg.voltage_zone; year=cfg.year, nb_gc=cfg.numerical_parameters.nb_gc)
 
@@ -508,7 +520,11 @@ function run_simulation(cfg::SimulationConfig)::AlphaPEM
     simu            = AlphaPEM(fuel_cell, current_density, cfg)
 
     # Launch the simulation.
-    _dispatch_launch!(simu)
+    if cfg.type_current isa PolarizationParams
+        launch_AlphaPEM_for_polarization_current(simu; linestyle=linestyle)
+    else
+        _dispatch_launch!(simu)
+    end
     _finalize_display!(cfg)
 
     return simu
@@ -516,7 +532,7 @@ end
 
 
 """
-    run_simulation(cfgs::AbstractVector{<:SimulationConfig}) -> Vector{AlphaPEM}
+    run_simulation(cfgs::AbstractVector{<:SimulationConfig}; linestyles=nothing) -> Vector{AlphaPEM}
 
 Run a batch of PEM fuel cell simulations.
 
@@ -526,12 +542,24 @@ a single set of figure axes so that their results can be compared on the same pl
 
 # Arguments
 - `cfgs::AbstractVector{<:SimulationConfig}`: Vector of configuration objects.
+- `linestyles`: Optional per-simulation `:solid` or `:dot` styles. Its order must
+  match `cfgs`, and it is only supported for polarization simulations.
 
 # Returns
 - `Vector{AlphaPEM}`: Completed simulator instances in the same order as `cfgs`.
 """
-function run_simulation(cfgs::AbstractVector{<:SimulationConfig})::Vector{AlphaPEM}
+function run_simulation(
+    cfgs::AbstractVector{<:SimulationConfig};
+    linestyles::Union{Nothing, AbstractVector{Symbol}}=nothing,
+)::Vector{AlphaPEM}
     isempty(cfgs) && throw(ArgumentError("`cfgs` must contain at least one SimulationConfig."))
+    if linestyles !== nothing
+        length(linestyles) == length(cfgs) ||
+            throw(ArgumentError("`linestyles` must have one entry per SimulationConfig."))
+        foreach(_validate_polarization_linestyle, linestyles)
+        all(cfg -> cfg.type_current isa PolarizationParams, cfgs) ||
+            throw(ArgumentError("`linestyles` can only be customized for polarization simulations."))
+    end
 
     # Determine the number of simulators to create.
     n                 = length(cfgs)
@@ -553,8 +581,18 @@ function run_simulation(cfgs::AbstractVector{<:SimulationConfig})::Vector{AlphaP
     simulators        = [AlphaPEM(fuel_cells[i], current_densities[i], cfgs[i])        for i in 1:n]
 
     # Launch the simulations.
-    _dispatch_launch!(simulators)
+    if linestyles === nothing
+        _dispatch_launch!(simulators)
+    else
+        launch_AlphaPEM_for_polarization_current(simulators; linestyles=linestyles)
+    end
     _finalize_display!(cfgs)
 
     return simulators
+end
+
+function _validate_polarization_linestyle(linestyle::Symbol)
+    linestyle in (:solid, :dot) ||
+        throw(ArgumentError("Polarization `linestyle` must be either `:solid` or `:dot` (got `:$linestyle`)."))
+    return nothing
 end
