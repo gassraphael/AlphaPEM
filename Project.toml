@@ -1,6 +1,6 @@
 name = "AlphaPEM"
 uuid = "5b79a72d-1548-47c5-a674-b96c56ecabf8"
-license = "GPL-3.0-only"
+license = "BSD-3-Clause"
 version = "2.0.0"
 authors = ["Raphael Gass <raphael.gass@univ-reunion.fr>"]
 

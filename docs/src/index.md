@@ -88,4 +88,4 @@ publication; contact us to discuss collaboration opportunities.
 
 ---
 
-**License**: [GNU GPL 3.0](https://github.com/gassraphael/AlphaPEM/blob/main/LICENSE)
+**License**: [BSD 3-Clause](https://github.com/gassraphael/AlphaPEM/blob/main/LICENSE)

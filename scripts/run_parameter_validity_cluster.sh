@@ -30,7 +30,7 @@
 #     See README.md § Installation, step 4, for full instructions.
 #
 # Author: Raphaël Gass
-# License: GPLv3
+# License: BSD-3-Clause
 #################################################################################
 
 

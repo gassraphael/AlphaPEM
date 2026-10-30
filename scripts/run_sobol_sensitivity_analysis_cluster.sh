@@ -21,7 +21,7 @@
 #     examples/run_sobol_sensitivity_analysis.jl).
 #
 # Author: Raphaël Gass
-# License: GPLv3
+# License: BSD-3-Clause
 #################################################################################
 
 
