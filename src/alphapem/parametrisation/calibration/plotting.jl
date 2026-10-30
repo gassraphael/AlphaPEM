@@ -23,6 +23,10 @@ function _plot_calibration_results(result, output_dir::String)
                 type_fuel_cell = sc.type_fuel_cell,
                 year           = sc.year,
                 voltage_zone   = sc.voltage_zone,
+                numerical_parameters = sc.numerical_parameters,
+                type_auxiliary = sc.type_auxiliary,
+                type_flow      = sc.type_flow,
+                type_purge     = sc.type_purge,
                 display_timing = :postrun # Ensure we get discretized points
             )
 
