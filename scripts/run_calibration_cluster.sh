@@ -18,7 +18,7 @@
 #   - Results are automatically copied back to original directory
 #
 # Author: Raphaël Gass
-# License: GPLv3
+# License: BSD-3-Clause
 #################################################################################
 
 
@@ -386,4 +386,3 @@ echo "[INFO] Cleanup completed"
 echo "================================================================================"
 echo "              Job completed successfully"
 echo "================================================================================"
-
