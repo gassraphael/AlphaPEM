@@ -22,6 +22,12 @@ Returns
 -------
 Float64
     The cell voltage in volt.
+
+Sources
+-------
+1. Neyerlin et al. (2007) - Cathode Catalyst Utilization for the ORR in a PEMFC: Analytical Model and Experimental
+Validation (https://iopscience.iop.org/article/10.1149/1.2400626/pdf) - establishes the effective proton resistance at
+the cathode catalyst layer, using a 1/3 coefficient.
 """
 function calculate_cell_voltage(i_fc::Real, C_O2_Pt::Real, sv::CellState1D, fc::AbstractFuelCell)
 
@@ -49,11 +55,11 @@ function calculate_cell_voltage(i_fc::Real, C_O2_Pt::Real, sv::CellState1D, fc::
 
     # The proton resistance
     #       The proton resistance at the membrane : Rmem
-    Rmem = Hmem / sigma_p_eff(:mem, lambda_mem, T_mem, nothing, pp)
-    #       The proton resistance at the cathode catalyst layer : Rccl
-    Rccl = Hccl / sigma_p_eff(:ccl, lambda_ccl, T_ccl, Hccl, pp)
+    Rmem = Hmem / sigma_p(lambda_mem, T_mem)
+    #       The effective proton resistance at the cathode catalyst layer : Rccl_eff
+    Rccl_eff = Hccl / (3 * sigma_p_eff(lambda_ccl, T_ccl, Hccl, pp))
     #       The total proton resistance
-    Rp = Rmem + Rccl  # Its value is around [4-7]e-6 ohm.m².
+    Rp = Rmem + Rccl_eff # Its value is around [4-7]e-6 ohm.m².
 
     # Ohmic voltage losses use the external current density only.
     # Gass et al., IJHE (2025), Eq. (49), doi:10.1016/j.ijhydene.2024.11.374.

@@ -6,6 +6,133 @@
 # _________________________________________________Cell voltage modules_________________________________________________
 
 
+"""This function calculates the proton conductivity of the membrane, in Ω-1.m-1.
+
+Parameters
+----------
+lambdaa :
+    Water content in the membrane.
+T :
+    Temperature in K.
+
+Returns
+-------
+sigma_p :
+    Proton conductivity of the membrane in Ω-1.m-1.
+"""
+function sigma_p(lambdaa, T)
+
+    T_eff = _positive_temperature_value(T)
+    lambda_transition = 1.0
+
+    sigma_p_low = 0.1879 * exp(1268 * (1 / 303.15 - 1 / T_eff))
+    sigma_p_high = (0.5139 * lambdaa - 0.326) * exp(1268 * (1 / 303.15 - 1 / T_eff))
+
+    # Transition function between low and high lambda.
+    K_transition = 10.0  # The higher it is, the sharper the transition between two states.
+    w = 0.5 * (1 + tanh(K_transition * (lambda_transition - lambdaa)))
+
+    return _nonnegative_value(w * sigma_p_low + (1 - w) * sigma_p_high) # Avoids 1/0 in Rmem, Rccl, Q_p when exp underflows.
+end
+
+
+"""This function calculates the effective proton conductivity of the cathode catalyst layer, in Ω-1.m-1.
+It is the membrane proton conductivity corrected by the ionomer volume fraction and the ionomer pore structure
+coefficient: sigma_p_eff = epsilon_mc / tau_ion * sigma_p.
+
+Parameters
+----------
+lambdaa :
+    Water content in the CCL.
+T :
+    Temperature in K.
+Hcl : Float64
+    Thickness of the CL layer.
+pp : PhysicalParams
+    Physical parameters of the fuel cell.
+
+Returns
+-------
+sigma_p_eff :
+    Effective proton conductivity of the CCL in Ω-1.m-1.
+
+Warning
+-------
+The form taken by the effective conductivity, and in particular its tortuosity (pore structure coefficient tau_ion),
+is not well known. The form chosen here mirrors the effective matter diffusion equations, but it may be wrong.
+
+Sources
+-------
+1. Pharoah et al. (2006) - On effective transport coefficients in PEM fuel cell electrodes: Anisotropy of the porous
+transport layers (doi.org/10.1016/j.jpowsour.2006.03.093) - discusses the different effective quantities.
+"""
+function sigma_p_eff(lambdaa, T, Hcl::Float64, pp::PhysicalParams)
+    return epsilon_mc(:ccl, lambdaa, T, Hcl, pp) / pp.tau_ion * sigma_p(lambdaa, T)
+end
+
+
+"""This function calculates the effective electrical conductivity, in Ω-1.m-1, in either the GDL, the MPL or the CL,
+considering GDL compression.
+
+Parameters
+----------
+element : Symbol
+    Specifies the element for which the electrical conductivity is calculated.
+    Must be either `:gdl`, `:mpl`, or `:cl`.
+epsilon : Union{Float64, Nothing}
+    Porosity.
+epsilon_c : Union{Float64, Nothing}
+    Compression ratio of the GDL.
+lambda_cl :
+    Water content in the CL.
+T_cl :
+    Temperature inside the CL in K.
+Hcl : Union{Real, Nothing}
+    Thickness of the CL layer.
+pp : PhysicalParams
+    Physical parameters of the fuel cell.
+
+Returns
+-------
+sigma_e_eff
+    Effective electrical conductivity in Ω-1.m-1.
+"""
+function sigma_e_eff(element::Symbol,
+                     epsilon::Union{Float64, Nothing}=nothing,
+                     epsilon_c::Union{Float64, Nothing}=nothing,
+                     lambda_cl=nothing,
+                     T_cl=nothing,
+                     Hcl::Union{Float64, Nothing}=nothing,
+                     pp::Union{PhysicalParams, Nothing}=nothing)
+
+    if element == :gdl  # The effective electrical conductivity at the GDL.
+        if epsilon === nothing || epsilon_c === nothing
+            throw(ArgumentError("epsilon and epsilon_c must be provided when element == 'gdl'."))
+        end
+        sigma_e_gdl = pp.sigma_e_gdl  # Electrical conductivity of the GDL.
+        beta3 = epsilon < 0.67 ? 4.04 : 4.40
+        return (1 - epsilon) * sigma_e_gdl * exp(beta3 * epsilon_c)
+
+    elseif element == :mpl  # The effective electrical conductivity at the MPL.
+        if epsilon === nothing
+            throw(ArgumentError("epsilon must be provided when element == 'mpl'."))
+        end
+        sigma_e_mpl = pp.sigma_e_mpl  # Electrical conductivity of the MPL.
+        return (1 - epsilon) * sigma_e_mpl
+
+    elseif element == :acl || element == :ccl  # The effective electrical conductivity at the CL.
+        if lambda_cl === nothing || T_cl === nothing || Hcl === nothing
+            throw(ArgumentError("lambda_cl, T_cl and Hcl must be provided when element == 'acl' or 'ccl'."))
+        end
+        sigma_e_cl = pp.sigma_e_cl  # Electrical conductivity of the CL.
+        return max(1 - epsilon_cl(element, lambda_cl, T_cl, Hcl, pp) - epsilon_mc(element, lambda_cl, T_cl, Hcl, pp), eps(Float64)) * sigma_e_cl
+
+    else
+        throw(ArgumentError("The element should be either 'gdl', 'mpl', 'acl' or 'ccl'."))
+    end
+end
+
+
 """Calculate the oxygen concentration at the platinum surface in the cathode catalyst layer.
 
 Parameters
