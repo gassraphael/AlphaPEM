@@ -63,6 +63,7 @@ Base.@kwdef struct PhysicalParams <: AbstractFuelCellParams
     # ── Model parameters for fluidic calculation ──
     rho_mem::Float64        = 1980           # kg.m-3. It is the density of the dry membrane.
     M_eq::Float64           = 1.1            # kg.mol-1. It is the equivalent molar mass of ionomer.
+    tau_ion::Float64        = 1              # It is the pore structure coefficient in the ionomer, without units. This value is not well known, so as the effective equations which use it, it is then safer to keep it at 1.
     tau_mpl::Float64        = 2              # It is the pore structure coefficient in the MPL, without units [Gen Inoue 2016 Journal Power Sources].
     tau_cl::Float64         = 4              # It is the pore structure coefficient in the CL, without units [Gen Inoue 2016 Journal Power Sources].
     r_s_gdl::Float64        = 2.0            # It is the exponent pore blockage in the GDL.

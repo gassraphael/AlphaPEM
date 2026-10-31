@@ -139,9 +139,9 @@ function calculate_heat_transfers!(heat_work::MEAHeatWorkspace,
     )
 
     # The heat dissipated by the ionic currents (Joule heating + Ohm's law), in J.m-3.s-1.
-    Q_p = MEAProtonHeat(
-        i_fc^2 / sigma_p_eff(:mem, lambda_mem, T_mem, nothing, pp), # Q_p_mem
-        i_fc^2 / (3 * sigma_p_eff(:ccl, lambda_ccl, T_ccl, Hccl, pp)) # Q_p_ccl
+    Q_p_eff = MEAProtonHeat(
+        i_fc^2 / sigma_p(lambda_mem, T_mem), # Q_p_mem
+        i_fc^2 / (3 * sigma_p_eff(lambda_ccl, T_ccl, Hccl, pp)) # Q_p_ccl_eff
     )
 
     # The heat dissipated by the electric currents (Joule heating + Ohm's law), in J.m-3.s-1.
@@ -156,6 +156,6 @@ function calculate_heat_transfers!(heat_work::MEAHeatWorkspace,
         ntuple(_ -> i_fc^2 / sigma_e_eff_gdl, NB_GDL) # Q_e_cgdl
     )
 
-    return MEAHeatFlows1D{NB_GDL, NB_MPL}(Jt, Q_r, Q_sorp, Q_liq, Q_p, Q_e)
+    return MEAHeatFlows1D{NB_GDL, NB_MPL}(Jt, Q_r, Q_sorp, Q_liq, Q_p_eff, Q_e)
 end
 
