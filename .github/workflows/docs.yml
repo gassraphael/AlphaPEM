@@ -17,6 +17,10 @@ on:
       - 'docs/**'
       - 'src/**'
 
+env:
+  JULIA_CONDAPKG_BACKEND: Null
+  JULIA_PYTHONCALL_EXE: python3
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -31,6 +35,13 @@ jobs:
           version: '1'
 
       - uses: julia-actions/cache@v1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        run: python -m pip install pygad
 
       - name: Install dependencies
         run: julia --project=docs -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
