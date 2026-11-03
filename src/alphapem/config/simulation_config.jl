@@ -115,6 +115,14 @@ function validate_config(cfg::SimulationConfig)
     cfg.display_timing in ALLOWED_DISPLAY_TIMING ||
         error("Invalid display_timing: $(cfg.display_timing)")
 
+    phase_width = cfg.numerical_parameters.phase_change_pressure_width
+    isfinite(phase_width) && phase_width >= 0.0 ||
+        throw(ArgumentError("numerical_parameters.phase_change_pressure_width must be finite and >= 0 Pa."))
+
+    sorption_width = cfg.numerical_parameters.sorption_vapor_concentration_width
+    isfinite(sorption_width) && sorption_width > 0.0 ||
+        throw(ArgumentError("numerical_parameters.sorption_vapor_concentration_width must be finite and > 0 mol.m-3."))
+
     cell_scaling = cfg.state_scaling.cell
     manifold_scaling = cfg.state_scaling.manifold
     auxiliary_scaling = cfg.state_scaling.auxiliary

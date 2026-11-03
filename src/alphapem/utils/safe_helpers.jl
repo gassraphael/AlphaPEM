@@ -6,9 +6,26 @@ These helpers only sanitize or bound inputs before they are passed to the actual
 models, so they live in the shared utility layer.
 """
 
-@inline _positive_temperature_value(T::Real) = max(Float64(T), 1.0)
-@inline _positive_pressure_value(P::Real) = max(Float64(P), 1.0)
 @inline _nonnegative_value(x::Real) = max(Float64(x), eps(Float64))
+
+"""
+    _positive_temperature_value(T)
+
+Clamp `T` (in K) to the open interval `(200, ∞)` so that property correlations
+stay finite and physically meaningful when the nonlinear solver probes unphysical cold states.
+The value of 200 K is chosen arbitrarily because it is very unlikely to be reached in any practical PEMFC simulation,
+while lower values such as 1 K could still reach to solver unstability and cause numerical issues.
+"""
+@inline _positive_temperature_value(T::Real) = max(Float64(T), 200.0)
+
+"""
+    _positive_pressure_value(P)
+Clamp `P` (in Pa) to the open interval `(0.01e5, ∞)` so that property correlations
+stay finite and physically meaningful when the nonlinear solver probes unphysical negative pressures.
+The value of 0.01e5 Pa is chosen arbitrarily because it is very unlikely to be reached in any practical PEMFC simulation,
+while lower values such as 1 Pa could still reach to solver unstability and cause numerical issues.
+"""
+@inline _positive_pressure_value(P::Real) = max(Float64(P), 0.01e5)
 
 """
     _liquid_water_temperature_value(T)

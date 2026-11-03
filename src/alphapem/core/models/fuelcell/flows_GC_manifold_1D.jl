@@ -168,15 +168,16 @@ function calculate_flows_1D_GC_manifold!(flows_work::GCManifoldFlowsWorkspace,
     Jv_cgc_out = Jv_cgc_cgc[end]
 
     # Liquid water flows at the GC (kg.m-2.s-1)
+    # Preserve the existing flow-direction convention and shared interface fluxes.
     #   At the anode side
     s_agc_outlet = 0.0  # Boundary condition at the outlet of the anode GC: no liquid water at the outlet.
     Jl_agc_agc_conv = flows_work.Jl_agc_agc_conv
     Jl_agc_agc_dif  = flows_work.Jl_agc_agc_dif
     Jl_agc_agc      = flows_work.Jl_agc_agc
     @inbounds for k in 1:nb_gc
-        Jl_agc_agc_conv[k] = rho_H2O_l(T_des) * K_v_liq_gas * v_a[k] * s_agc[k]
+        Jl_agc_agc_conv[k] = rho_H2O_l(T_des) * K_v_liq_gas * v_a[k] * _liquid_transport_saturation(s_agc[k])
         s_next = counter_flow ? (k == 1 ? s_agc_outlet : s_agc[k - 1]) : (k == nb_gc ? s_agc_outlet : s_agc[k + 1])
-        Jl_agc_agc_dif[k]  = -D_liq_dif * d_dx(s_agc[k], s_next, (Lgc / nb_gc) / 2)
+        Jl_agc_agc_dif[k]  = -D_liq_dif * d_dx(_liquid_transport_saturation(s_agc[k]), _liquid_transport_saturation(s_next), (Lgc / nb_gc) / 2)
         Jl_agc_agc[k]      = Jl_agc_agc_conv[k] + Jl_agc_agc_dif[k]
     end
     Jl_agc_agc_conv_out = Jl_agc_agc_conv[i_end]
@@ -189,8 +190,8 @@ function calculate_flows_1D_GC_manifold!(flows_work::GCManifoldFlowsWorkspace,
     Jl_cgc_cgc_dif  = flows_work.Jl_cgc_cgc_dif
     Jl_cgc_cgc      = flows_work.Jl_cgc_cgc
     @inbounds for k in 1:nb_gc
-        Jl_cgc_cgc_conv[k] = rho_H2O_l(T_des) * K_v_liq_gas * v_c[k] * s_cgc[k]
-        Jl_cgc_cgc_dif[k]  = -D_liq_dif * d_dx(s_cgc[k], k == nb_gc ? s_cgc_outlet : s_cgc[k + 1], (Lgc / nb_gc) / 2)
+        Jl_cgc_cgc_conv[k] = rho_H2O_l(T_des) * K_v_liq_gas * v_c[k] * _liquid_transport_saturation(s_cgc[k])
+        Jl_cgc_cgc_dif[k]  = -D_liq_dif * d_dx(_liquid_transport_saturation(s_cgc[k]), _liquid_transport_saturation(k == nb_gc ? s_cgc_outlet : s_cgc[k + 1]), (Lgc / nb_gc) / 2)
         Jl_cgc_cgc[k]      = Jl_cgc_cgc_conv[k] + Jl_cgc_cgc_dif[k]
     end
     Jl_cgc_cgc_conv_out = Jl_cgc_cgc_conv[end]

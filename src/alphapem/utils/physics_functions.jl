@@ -32,6 +32,20 @@ function rho_H2O_l(T)
              105.56302e-9 * T_Celsius^4 - 280.54253e-12 * T_Celsius^5) / (1 + 16.879850e-3 * T_Celsius))
 end
 
+"""Temperature derivative of `rho_H2O_l`, including its temperature clamp."""
+function drho_H2O_l_dT(T)
+    T_eff = _liquid_water_temperature_value(T)
+    T_eff == T || return 0.0
+
+    x = T_eff - 273.15
+    numerator = 999.83952 + 16.945176 * x - 7.9870401e-3 * x^2 - 46.170461e-6 * x^3 +
+                105.56302e-9 * x^4 - 280.54253e-12 * x^5
+    d_numerator = 16.945176 - 2 * 7.9870401e-3 * x - 3 * 46.170461e-6 * x^2 +
+                  4 * 105.56302e-9 * x^3 - 5 * 280.54253e-12 * x^4
+    denominator = 1 + 16.879850e-3 * x
+    return (d_numerator * denominator - numerator * 16.879850e-3) / denominator^2
+end
+
 
 """
     nu_l(T)

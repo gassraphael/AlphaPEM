@@ -177,37 +177,44 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
                                                                                       flows_1D_MEA[i].S_abs,
                                                                                       flows_1D_MEA[i].J_lambda,
                                                                                       flows_1D_MEA[i].Sp)
+        dif_eq_mea_temperature_i = calculate_dyn_temperature_evolution_inside_MEA(dif_eq_int_values_i.rho_Cp0,
+                                                                                    pp,
+                                                                                    heat_flows_i.Jt,
+                                                                                    heat_flows_i.Q_r,
+                                                                                    heat_flows_i.Q_sorp,
+                                                                                    heat_flows_i.Q_liq,
+                                                                                    heat_flows_i.Q_p,
+                                                                                    heat_flows_i.Q_e)
         dif_eq_mea_liq_water_i = calculate_dyn_liquid_water_evolution_inside_MEA(sv_cell_1D[i],
                                                                                    pp,
                                                                                    flows_1D_MEA[i].Jl,
                                                                                    flows_1D_MEA[i].S_abs,
-                                                                                   flows_1D_MEA[i].Sl)
+                                                                                    flows_1D_MEA[i].Sl,
+                                                                                    dif_eq_mea_diss_water_i,
+                                                                                    dif_eq_mea_temperature_i)
         dif_eq_mea_vapor_water_i = calculate_dyn_vapor_evolution_inside_MEA(sv_cell_1D[i],
                                                                              pp,
                                                                              flows_1D_MEA[i].Jv,
                                                                              flows_1D_MEA[i].Sv,
-                                                                             flows_1D_MEA[i].S_abs)
+                                                                             flows_1D_MEA[i].S_abs,
+                                                                             dif_eq_mea_liq_water_i,
+                                                                             dif_eq_mea_diss_water_i,
+                                                                             dif_eq_mea_temperature_i)
         dif_eq_mea_species_i = calculate_dyn_H2_O2_N2_evolution_inside_MEA(sv_cell_1D[i],
                                                                            pp,
                                                                            flows_1D_MEA[i].J_H2,
                                                                            flows_1D_MEA[i].J_O2,
                                                                            flows_1D_MEA[i].J_N2,
                                                                            flows_1D_MEA[i].S_H2,
-                                                                           flows_1D_MEA[i].S_O2)
+                                                                           flows_1D_MEA[i].S_O2,
+                                                                           dif_eq_mea_liq_water_i,
+                                                                           dif_eq_mea_diss_water_i,
+                                                                           dif_eq_mea_temperature_i)
         dif_eq_voltage_i = calculate_dyn_voltage_evolution(i_fc[i], C_O2_Pt[i],
                                                             sv_cell_1D[i].ccl.T,
                                                             sv_cell_1D[i].ccl.eta_c,
                                                             pp,
                                                             dif_eq_int_values_i.i_n)
-        dif_eq_mea_temperature_i = calculate_dyn_temperature_evolution_inside_MEA(dif_eq_int_values_i.rho_Cp0,
-                                                                                   pp,
-                                                                                   heat_flows_i.Jt,
-                                                                                   heat_flows_i.Q_r,
-                                                                                   heat_flows_i.Q_sorp,
-                                                                                   heat_flows_i.Q_liq,
-                                                                                   heat_flows_i.Q_p,
-                                                                                   heat_flows_i.Q_e)
-
         dif_eq_cell_1D[i] = assemble_mea_derivative_1D(dif_eq_mea_diss_water_i,
                                                        dif_eq_mea_liq_water_i,
                                                        dif_eq_mea_vapor_water_i,
@@ -216,17 +223,18 @@ function dae_residual!(res::Vector{Float64}, dydt_IDA::Vector{Float64}, y::Vecto
                                                        dif_eq_mea_temperature_i)
     end
 
-    #       Inside the gas channels: compute independent GC contributions, then assemble once.
-    dif_eq_gc_gas = calculate_dyn_gas_evolution_inside_gas_channel(sv_cell_1D,
-                                                                    pp,
-                                                                    cfg,
-                                                                    flows_1D_GC_manifold,
-                                                                    flows_1D_MEA)
+    #       Inside the gas channels: liquid saturation rates enter the gas-inventory product rule.
     dif_eq_gc_liq = calculate_dyn_liq_evolution_inside_gas_channel(T_des,
                                                                     pp,
                                                                     cfg,
                                                                     flows_1D_GC_manifold,
                                                                     flows_1D_MEA)
+    dif_eq_gc_gas = calculate_dyn_gas_evolution_inside_gas_channel(sv_cell_1D,
+                                                                    pp,
+                                                                    cfg,
+                                                                    flows_1D_GC_manifold,
+                                                                    flows_1D_MEA,
+                                                                    dif_eq_gc_liq)
     dif_eq_gc_temperature = calculate_dyn_temperature_evolution_inside_gas_channel(nb_gc)
     dif_eq_cell_1D = assemble_gc_derivative_1D(dif_eq_cell_1D,
                                                dif_eq_gc_gas,
