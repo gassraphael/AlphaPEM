@@ -60,6 +60,7 @@ include("fuelcell/dif_eq.jl")
 
 # Common components
 include("dae_jacobian.jl")
+include("dae_nonlinear_solver.jl")
 include("AlphaPEM.jl")
 
 # Public API

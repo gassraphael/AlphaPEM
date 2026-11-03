@@ -88,28 +88,29 @@ const UNDETERMINED_PHYSICAL_PARAMETERS_1D = (;
 # discretisation (nb_gc >= 5).
 const UNDETERMINED_PHYSICAL_PARAMETERS_1D1D = (;
     # Catalyst layer
-    Hccl             = 10.179819442673712e-6,  # Thickness of the cathode catalyst layer in meters
+    Hccl             = 14.128824891859074e-6,  # Thickness of the cathode catalyst layer in meters
     # Gas diffusion layer
-    Hgdl             = 75.88436374521656e-6,   # Thickness of the gas diffusion layer in meters
-    epsilon_gdl      = 0.8717693694526278,     # Anode/cathode GDL porosity
+    Hgdl             = 88.201327580072e-6,     # Thickness of the gas diffusion layer in meters
+    epsilon_gdl      = 0.7188945753932386,     # Anode/cathode GDL porosity
     # Microporous layer
-    Hmpl             = 64.17561409938712e-6,   # Thickness of the microporous layer in meters
-    epsilon_mpl      = 0.5163119718049662,     # Porosity of the microporous layer
+    Hmpl             = 64.46202926200384e-6,   # Thickness of the microporous layer in meters
+    epsilon_mpl      = 0.38487259085996994,    # Porosity of the microporous layer
     # Interaction parameters between fluids and PEMFC structure
-    theta_c_cl       = 95 * π / 180,           # CL contact angle
-    e                = 3,                      # Capillary exponent
+    theta_c_cl       = 90.127 * π / 180,       # CL contact angle
+    e                = 5,                      # Capillary exponent
+    # Fluidic calculation
+    tau_mpl          = 2.1485376877449056,     # Pore structure coefficient in the MPL
+    gamma_cond       = 2.400077585301015e6,    # Effective gas-liquid phase-change geometry/closure factor for overall condensation rate of water
     # Volumic flow of O2 inside the CCL to the Pt sites
-    IC_ccl           = 1.8766573409239173,     # Ionomer to carbon ratio in the cathode catalyst layer
-    ECSA_0           = 90.18946251019264,      # Initial electrochemical surface area of the catalyst in cm2_Pt.cm-2_active_area
-    wt_Pt_ccl        = 0.5,                    # Weight fraction of platinum over carbon in the cathode catalyst layer
-    L_Pt_ccl         = 3e-3,                   # Platinum loading in the cathode catalyst layer in kg.m-2
-    r_carb           = 20.17782731935742e-9,   # Mean radius of the carbon particles in m
-    # Thermal conductivities
-    k_th_gdl         = 0.3,                    # Thermal conductivity of the GDL in J.m-1.s-1.K-1
+    IC_ccl           = 1.393269776282318,      # Ionomer to carbon ratio in the cathode catalyst layer
+    ECSA_0           = 168.13051545795835,     # Initial electrochemical surface area of the catalyst in cm2_Pt.cm-2_active_area
+    wt_Pt_ccl        = 0.4659066262385126,     # Weight fraction of platinum over carbon in the cathode catalyst layer
+    L_Pt_ccl         = 2.7372719815243743e-3,  # Platinum loading in the cathode catalyst layer in kg.m-2
+    r_carb           = 11.546621227104529e-9,  # Mean radius of the carbon particles in m
     # Voltage polarization
-    i0_c_ref         = 1.1319658074709191,     # Reference exchange current density at the cathode in A·m⁻²
-    alpha_c          = 0.6552890241967357,     # Transfer coefficient of the cathode
-    kappa_co         = 15.3655148859884,       # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
+    i0_c_ref         = 2.3630603177290883,     # Reference exchange current density at the cathode in A·m⁻²
+    alpha_c          = 0.5492750120246119,     # Transfer coefficient of the cathode
+    kappa_co         = 17.558209554439074,     # Crossover correction coefficient in mol·m⁻¹·s⁻¹·Pa⁻¹
     kappa_c          = 0.25862840985329477,    # Overpotential correction exponent
 )
 
