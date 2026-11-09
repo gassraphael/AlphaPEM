@@ -37,17 +37,20 @@ end
 
 
 """This function calculates the effective proton conductivity of the cathode catalyst layer, in Ω-1.m-1.
-It is the membrane proton conductivity corrected by the ionomer volume fraction and the ionomer pore structure
-coefficient: sigma_p_eff = epsilon_mc / tau_ion * sigma_p.
+
+It is the intrinsic ionomer proton conductivity corrected by the wet ionomer volume fraction epsilon_mc
+and the state-dependent ionomer-network factor tau_ion:
+
+    sigma_p_eff = epsilon_mc / tau_ion(:ccl, lambdaa, T, Hcl, pp) * sigma_p(lambdaa, T)
 
 Parameters
 ----------
 lambdaa :
-    Water content in the CCL.
+    Water content in the CCL ionomer, in water molecules per fixed sulfonic-acid site.
 T :
     Temperature in K.
 Hcl : Float64
-    Thickness of the CL layer.
+    Thickness of the CCL layer in m.
 pp : PhysicalParams
     Physical parameters of the fuel cell.
 
@@ -56,18 +59,45 @@ Returns
 sigma_p_eff :
     Effective proton conductivity of the CCL in Ω-1.m-1.
 
-Warning
--------
-The form taken by the effective conductivity, and in particular its tortuosity (pore structure coefficient tau_ion),
-is not well known. The form chosen here mirrors the effective matter diffusion equations, but it may be wrong.
+Notes and Warning
+-----------------
+The form taken by the effective conductivity, and in particular its ionomer-network
+factor tau_ion, remains dependent on the electrode material and structure. Pharoah
+et al. (2006) discuss uncertainties in effective transport coefficients and their
+structural corrections, suggesting caution when transferring such expressions
+between different materials or transport processes.
+
+Liu et al., Eqs. 11 and 12, distinguish the electrode proton resistivity from the
+intrinsic resistivity of the same ionomer in film form:
+
+    rho_H_cath = R_H_cath / Hccl = 1 / (sigma_ion * epsilon_i / tau(epsilon_i))
+    tau(epsilon_i) = rho_H_cath * epsilon_i / rho_i_film
+
+The inferred factor includes ionomer-network connectivity, not only geometrical
+path length. Here epsilon_mc represents the wet ionomer volume fraction, and the
+existing tau_ion helper evaluates Hao's Eq. 54. Its use for proton conduction is
+the original context of the correlation; its separate use for dissolved-water
+back diffusion remains an additional modeling assumption, which may be wrong.
+
+For epsilon_mc >= 0.16, tau_ion returns 1 and this expression reduces to
+sigma_p_eff = epsilon_mc * sigma_p. Below that threshold, the correlation reduces
+the conductivity further.
 
 Sources
 -------
-1. Pharoah et al. (2006) - On effective transport coefficients in PEM fuel cell electrodes: Anisotropy of the porous
-transport layers (doi.org/10.1016/j.jpowsour.2006.03.093) - discusses the different effective quantities.
+1. Liu et al. (2009), Proton Conduction and Oxygen Reduction Kinetics in PEM Fuel
+   Cell Cathodes: Effects of Ionomer-to-Carbon Ratio and Relative Humidity,
+   J. Electrochem. Soc. 156, B970-B980, Eqs. 11 and 12 and Fig. 9.
+   DOI: 10.1149/1.3143965.
+2. Hao et al. (2015), Modeling and Experimental Validation of Pt Loading and
+   Electrode Composition Effects in PEM Fuel Cells, J. Electrochem. Soc. 162,
+   F854-F867, Eqs. 36, 37 and 54. DOI: 10.1149/2.0221508jes.
+3. Pharoah et al. (2006) - On effective transport coefficients in PEM fuel cell electrodes: Anisotropy of the porous
+   transport layers (doi.org/10.1016/j.jpowsour.2006.03.093) - discusses the different effective quantities.
 """
 function sigma_p_eff(lambdaa, T, Hcl::Float64, pp::PhysicalParams)
-    return epsilon_mc(:ccl, lambdaa, T, Hcl, pp) / pp.tau_ion * sigma_p(lambdaa, T)
+    return epsilon_mc(:ccl, lambdaa, T, Hcl, pp) /
+           tau_ion(:ccl, lambdaa, T, Hcl, pp) * sigma_p(lambdaa, T)
 end
 
 
@@ -714,6 +744,27 @@ Notes
 Hao et al. (2015) denote the wet CL ionomer volume fraction by epsilon_e and the ionomer-phase tortuosity by tau_e. In this code, epsilon_mc is the corresponding wet ionomer volume fraction, and tau_ion evaluates the CL correlation in Hao's Eq. 54. This correlation is not a membrane tortuosity law.
 
 Liu et al. (2009) use epsilon_i and tau(epsilon_i), respectively. Their effective ionomer tortuosity is inferred from proton-resistivity measurements, including the effect of ionomer-network connectivity; it is not a directly measured geometrical path-length ratio. Hao cites these measurements as the basis for the correlation used here.
+
+The correlation returns 1 for epsilon_mc >= 0.16 and values greater than 1 below
+that threshold. Its low-volume-fraction branch tends to about 1.010 immediately
+below 0.16, so the empirical piecewise law has a small jump at the threshold.
+
+In epsilon_mc, water uptake expands the dry ionomer volume fraction by
+1 + M_H2O * pp.rho_ion * lambda_eff / (rho_H2O_l(T_cl) * pp.M_eq). Thus hydration
+changes the network factor only if the wet volume fraction crosses or remains
+below 0.16. Temperature enters this factor through the liquid-water density.
+If the dry fraction is already >= 0.16, tau_ion remains 1 for all nonnegative
+hydrations. Negative hydration inputs also do not lower epsilon_mc below its
+dry value because epsilon_mc uses _nonnegative_value(lambda_cl) for evaluation;
+this does not modify the stored state or make negative hydration physical.
+
+The dry fraction depends on the I/C ratio, Pt loading, Pt/C weight fraction,
+ionomer density and CL thickness. These are fixed parameters during the present
+simulation as long as the electrode composition and geometry remain unchanged
+(degradation modelling). Another composition or geometry can give a dry fraction
+below 0.16, allowing hydration-dependent tau_ion > 1 without requiring any negative
+state. The numerical behavior at very low hydration is not an experimental validation
+of the correlation under fully dry conditions.
 
 Caution / to be verified:
 This helper distinguishes the effective CL ionomer transport factor from the gas-pore structure coefficient tau_void_cl. Its use for dissolved-water back diffusion assumes that the same ionomer-network factor applies to water transport. That transfer is a modeling assumption, not an independent experimental validation of water diffusivity by the cited proton-conduction measurements.
