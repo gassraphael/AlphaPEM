@@ -111,10 +111,12 @@ function calculate_heat_transfers!(heat_work::MEAHeatWorkspace,
 
     # ____________________________________________Heat generated (J.m-3.s-1)____________________________________________
 
-    # The heat dissipated by the electrochemical reaction 2*H2 + O2 -> 2*H2O, in J.m-3.s-1.
+    # Reaction heat for H2 + 1/2 O2 -> H2O(l), in J.m-3.s-1.
     #    It is given by the sum of Peltier and activation heats [vetterFreeOpenReference2019].
     S_r_acl = i_fc / (2 * F * Hacl)  # mol.m-3.s-1. It is the amount of hydrogen consumed at the ACL.
-    S_r_ccl = i_fc / (4 * F * Hccl)  # mol.m-3.s-1. It is the amount of oxygen consumed at the CCL.
+    # delta_s_ORR is per mol H2O formed, so its heat extent uses 2F.
+    # Oxygen consumption elsewhere retains the four-electron O2 basis.
+    S_r_ccl = i_fc / (2 * F * Hccl)  # mol H2O formed / (m3 s).
     Q_r = MEAReactionHeat(
         S_r_acl * T_acl * (-delta_s_HOR), # Q_r_acl
         S_r_ccl * T_ccl * (-delta_s_ORR) + i_fc * eta_c / Hccl # Q_r_ccl (Peltier + activation heat)

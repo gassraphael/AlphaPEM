@@ -34,8 +34,9 @@ const Tref_O2_red::Float64 = 323               # K. It is the reference temperat
 
 # Model parameters for the heat transfer calculation
 #   Molar entropy of reactions
-const delta_s_HOR::Float64 = 0.104             # J.mol-1.K-1. It is the HOR molar reaction entropy [vetterFreeOpenReference2019].
-const delta_s_ORR::Float64 = -163.3            # J.mol-1.K-1. It is the ORR molar reaction entropy [vetterFreeOpenReference2019].
+# Both entropies use the two-electron extent of Eq. (5).
+const delta_s_HOR::Float64 = 0.104             # J/(mol H2 oxidized K): H2 -> 2H+ + 2e- [vetterFreeOpenReference2019].
+const delta_s_ORR::Float64 = -163.3            # J/(mol H2O formed K): 1/2 O2 + 2H+ + 2e- -> H2O(l) [vetterFreeOpenReference2019].
 
 # Model parameters for the balance of plant
 const i_min_inlet_flows::Float64 = 0.5e4       # A.m-2. Minimum current density at which inlet mass flows are regulated to supply reactant flow.
