@@ -114,9 +114,7 @@ function calculate_heat_transfers!(heat_work::MEAHeatWorkspace,
     # Reaction heat for H2 + 1/2 O2 -> H2O(l), in J.m-3.s-1.
     #    It is given by the sum of Peltier and activation heats [vetterFreeOpenReference2019].
     S_r_acl = i_fc / (2 * F * Hacl)  # mol.m-3.s-1. It is the amount of hydrogen consumed at the ACL.
-    # delta_s_ORR is per mol H2O formed, so its heat extent uses 2F.
-    # Oxygen consumption elsewhere retains the four-electron O2 basis.
-    S_r_ccl = i_fc / (2 * F * Hccl)  # mol H2O formed / (m3 s).
+    S_r_ccl = i_fc / (2 * F * Hccl)  # mol.m-3.s-1. It is the amount of H2O formed at the ACL (delta_s_ORR is per mol H2O formed, so its heat extent uses 2F).
     Q_r = MEAReactionHeat(
         S_r_acl * T_acl * (-delta_s_HOR), # Q_r_acl
         S_r_ccl * T_ccl * (-delta_s_ORR) + i_fc * eta_c / Hccl # Q_r_ccl (Peltier + activation heat)
