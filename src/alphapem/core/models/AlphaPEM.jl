@@ -871,10 +871,17 @@ function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing;
             plot_EIS_curve_Nyquist(simu.current_density, Fourier_results, _ax1[1])
             plot_EIS_curve_Bode_amplitude(simu.current_density, Fourier_results, _ax1[2])
             plot_EIS_curve_Bode_angle(simu.current_density, Fourier_results, _ax1[3])
-        elseif simu.cfg.type_display == :multiple && _ax1 !== nothing && _ax2 !== nothing && _ax3 !== nothing
-            plot_EIS_curve_Nyquist(simu.current_density, Fourier_results, _ax1)
-            plot_EIS_curve_Bode_amplitude(simu.current_density, Fourier_results, _ax2)
-            plot_EIS_curve_Bode_angle(simu.current_density, Fourier_results, _ax3)
+        elseif simu.cfg.type_display == :multiple && _ax1 isa AbstractVector &&
+               length(_ax1) >= 3 + length(EIS_STATE_RESPONSES)
+            plot_EIS_curve_Nyquist(simu.current_density, Fourier_results, _ax1[1])
+            plot_EIS_curve_Bode_amplitude(simu.current_density, Fourier_results, _ax1[2])
+            plot_EIS_curve_Bode_angle(simu.current_density, Fourier_results, _ax1[3])
+            # One figure per internal state: Nyquist, Bode gain and Bode phase.
+            for (k, state) in enumerate(EIS_STATE_RESPONSES)
+                ax_nyquist, ax_gain, ax_phase = _ax1[3 + k]
+                plot_internal_state_EIS_response(state.key, outputs, simu.fuel_cell, simu.current_density,
+                                                 simu.cfg, ax_nyquist, ax_gain, ax_phase)
+            end
         end
     else
         @warn "display!: plotting migration to CairoMakie is in progress; this simulation/display mode is not ported yet." maxlog=1
@@ -963,9 +970,13 @@ function save_plot!(simu::AlphaPEM, _fig1=nothing, _fig2=nothing, _fig3=nothing)
     # For the EIS curve.
     elseif simu.cfg.type_current isa EISParams
         if simu.cfg.type_display == :multiple
-            saving_instructions!(simu, "results", subfolder_name, "Nyquist_plot_1.pdf", _fig1)
-            saving_instructions!(simu, "results", subfolder_name, "Bode_amplitude_curve_1.pdf", _fig2)
-            saving_instructions!(simu, "results", subfolder_name, "Bode_angle_curve_1.pdf", _fig3)
+            eis_files = vcat(
+                ["Nyquist_plot_1.pdf", "Bode_amplitude_curve_1.pdf", "Bode_angle_curve_1.pdf"],
+                [string(state.key, "_EIS_1.pdf") for state in EIS_STATE_RESPONSES],
+            )
+            for (fig_i, filename) in zip(_fig1, eis_files)
+                saving_instructions!(simu, "results", subfolder_name, filename, fig_i)
+            end
         elseif simu.cfg.type_display == :synthetic
             saving_instructions!(simu, "results", subfolder_name, "Nyquist_plot_syn_1.pdf", _fig1)
         end

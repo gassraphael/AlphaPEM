@@ -247,10 +247,25 @@ end
 """Return figure/axes layout for EIS runs."""
 function _create_figures(cfg::SimulationConfig{<:EISParams})
     if cfg.type_display == :multiple
-        fig1, ax1 = _make_single_axis(size=(760, 620))
-        fig2, ax2 = _make_single_axis(size=(760, 620))
-        fig3, ax3 = _make_single_axis(size=(760, 620))
-        return (fig1, ax1, fig2, ax2, fig3, ax3)
+        fig1 = Figure[]
+        ax1 = Any[]
+        for _ in 1:3
+            f, a = _make_single_axis(size=(760, 620))
+            push!(fig1, f)
+            push!(ax1, a)
+        end
+        # One figure per internal state, laid out as in the synthetic display:
+        # Nyquist, Bode gain and Bode phase on one row (the Bode axes share the frequency axis).
+        for _ in EIS_STATE_RESPONSES
+            f = Figure(; size=(1420, 480))
+            a_nyquist = Axis(f[1, 1])
+            a_gain = Axis(f[1, 2]; xscale=log10)
+            a_phase = Axis(f[1, 3]; xscale=log10)
+            linkxaxes!(a_gain, a_phase)
+            push!(fig1, f)
+            push!(ax1, (a_nyquist, a_gain, a_phase))
+        end
+        return (fig1, ax1, nothing, nothing, nothing, nothing)
     elseif cfg.type_display == :synthetic
         fig1, ax1 = _make_row_axes(3; size=(1420, 480))
         return (fig1, ax1, nothing, nothing, nothing, nothing)
@@ -325,6 +340,13 @@ function _web_plot_specs(cfg::SimulationConfig, nb_gc::Integer)::Vector{Dict{Str
         add_spec!("01_nyquist_plot.html",        "Nyquist plot",                                "EIS",                  "Nyquist_plot")
         add_spec!("02_bode_amplitude_plot.html", "Bode amplitude plot",                         "EIS",                  "Bode_amplitude_curve")
         add_spec!("03_bode_angle_plot.html",     "Bode angle plot",                             "EIS",                  "Bode_angle_curve")
+        for (k, state) in enumerate(EIS_STATE_RESPONSES)
+            key = string(state.key)
+            add_spec!(string(lpad(3 + k, 2, '0'), "_", lowercase(key), "_eis.html"),
+                      "$(state.title) - Nyquist, gain and phase of the oscillation",
+                      "Internal states",
+                      string(key, "_EIS"))
+        end
     end
 
     return specs

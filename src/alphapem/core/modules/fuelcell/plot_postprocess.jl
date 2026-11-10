@@ -17,28 +17,39 @@ using Statistics
 """
     make_Fourier_transformation(outputs, cd, cfg)
 
-This function calculates the Fourier transformation of both cell voltage and current density. It will be used to
-display the Nyquist and Bode diagrams.
-To generate it at each frequency change, the cell voltage and the current density are recorded. The time for which
+Fourier transformation of the cell voltage. Shortcut for
+`make_Fourier_transformation(t, Ucell, cd, cfg)` on the simulation history of `outputs`.
+"""
+function make_Fourier_transformation(outputs::SimulationOutputs,
+                                     cd::AbstractCurrent,
+                                     cfg::SimulationConfig)::Vector{FourierOutputs}
+    return make_Fourier_transformation(time_history(outputs), derived_outputs(outputs).Ucell, cd, cfg)
+end
+
+
+"""
+    make_Fourier_transformation(t, y, cd, cfg)
+
+This function calculates the Fourier transformation of a signal `y(t)` (cell voltage or any internal state) and of
+the current density. It will be used to display the Nyquist and Bode diagrams.
+To generate it at each frequency change, the signal and the current density are recorded. The time for which
 these points are captured is determined using the following approach: at the beginning of each frequency change, a
 delta_t_break_EIS time is observed to ensure the dynamic stability of the stack's variables. Subsequently, a
-delta_t_measurement_EIS time is needed to record the cell voltage and the current density.
+delta_t_measurement_EIS time is needed to record the signal and the current density.
 
 # Arguments
-- `outputs::SimulationOutputs`: Typed simulation outputs used by post-processing.
+- `t::AbstractVector{Float64}`: Simulation time history.
+- `y::AbstractVector{Float64}`: Signal sampled on `t`.
 - `cd::AbstractCurrent`: Current profile used by the simulation.
 - `cfg::SimulationConfig`: Simulation configuration.
 
 # Returns
 - `Vector{FourierOutputs}`: List of structured Fourier post-processing outputs.
 """
-function make_Fourier_transformation(outputs::SimulationOutputs,
+function make_Fourier_transformation(t::AbstractVector{Float64},
+                                     y::AbstractVector{Float64},
                                      cd::AbstractCurrent,
                                      cfg::SimulationConfig)::Vector{FourierOutputs}
-
-    # Extraction of the variables
-    t = time_history(outputs)
-    Ucell_t = derived_outputs(outputs).Ucell
 
     # EIS timing is only available for EIS current profiles.
     cfg.type_current isa EISParams ||
@@ -52,12 +63,12 @@ function make_Fourier_transformation(outputs::SimulationOutputs,
         # Identify the active EIS segment for the current live run (latest point in history).
         n_inf = searchsortedlast(cd.t_new_start, t[1])
         n_inf = clamp(n_inf, 1, length(cd.f))
-        return [_compute_fourier_for_segment(t, Ucell_t, cd, n_inf)]
+        return [_compute_fourier_for_segment(t, y, cd, n_inf)]
     else
         # :postrun mode: Iterate through all frequency segments and extract all points.
         results = FourierOutputs[]
         for i in 1:length(cd.f)
-            res = _compute_fourier_for_segment(t, Ucell_t, cd, i)
+            res = _compute_fourier_for_segment(t, y, cd, i)
             # Only include segments that have been fully simulated and processed.
             if !isnan(res.f)
                 push!(results, res)
@@ -69,12 +80,12 @@ end
 
 
 """
-    _compute_fourier_for_segment(t, Ucell_t, cd, n_inf)
+    _compute_fourier_for_segment(t, y, cd, n_inf)
 
 Helper function to calculate the Fourier transform for a specific EIS frequency segment.
 """
 function _compute_fourier_for_segment(t::AbstractVector{Float64},
-                                      Ucell_t::AbstractVector{Float64},
+                                      y_t::AbstractVector{Float64},
                                       cd::AbstractCurrent,
                                       n_inf::Int)::FourierOutputs
 
@@ -84,7 +95,7 @@ function _compute_fourier_for_segment(t::AbstractVector{Float64},
 
     mask_EIS = (t .>= t_measure_start) .& (t .<= t_measure_end)
     t_measured = t[mask_EIS]
-    Ucell_measured = Ucell_t[mask_EIS]
+    y_measured = y_t[mask_EIS]
 
     # Check if we have enough points for reconstruction.
     min_raw_points = max(2, cd.nb_points)
@@ -96,28 +107,29 @@ function _compute_fourier_for_segment(t::AbstractVector{Float64},
     ifc_measured = current(cd, t_measured)
 
     # FFT requires uniformly sampled data. Re-sample each segment using nb_points per period.
+    # The closing sample is excluded so that the grid spans a whole number of periods (no spectral leakage).
     dt = 1.0 / (cd.f[n_inf] * cd.nb_points)
-    n_uniform = floor(Int, (t_measure_end - t_measure_start) / dt) + 1
-    n_uniform = max(n_uniform, cd.nb_points + 1)
-    t_uniform = collect(range(t_measure_start, stop=t_measure_end, length=n_uniform))
+    n_uniform = round(Int, (t_measure_end - t_measure_start) / dt)
+    n_uniform = max(n_uniform, cd.nb_points)
+    t_uniform = collect(range(t_measure_start, step=dt, length=n_uniform))
 
     # Interpolation to uniform grid.
     t_meas = copy(t_measured)
     deduplicate_knots!(t_meas)
-    itp_U = linear_interpolation(t_meas, Ucell_measured; extrapolation_bc=Line())
+    itp_y = linear_interpolation(t_meas, y_measured; extrapolation_bc=Line())
     itp_i = linear_interpolation(t_meas, ifc_measured; extrapolation_bc=Line())
-    Ucell_EIS_measured = itp_U.(t_uniform)
+    y_EIS_measured = itp_y.(t_uniform)
     ifc_EIS_measured = itp_i.(t_uniform)
 
     # Determination of the Fourier transformation
-    N             = length(Ucell_EIS_measured)              # Number of points used for the Fourier transformation
-    Ucell_Fourier = fft(Ucell_EIS_measured)                 # Ucell Fourier transformation
+    N             = length(y_EIS_measured)                  # Number of points used for the Fourier transformation
+    y_Fourier = fft(y_EIS_measured)                         # Signal Fourier transformation
     ifc_Fourier   = fft(ifc_EIS_measured)                   # ifc Fourier transformation
-    A_period_t    = vcat([abs(Ucell_Fourier[1]) / N],       # Recovery of all amplitude values calculated by fft
-                          abs.(Ucell_Fourier[2:N÷2]) .* 2 ./ N)
+    A_period_t    = vcat([abs(y_Fourier[1]) / N],           # Recovery of all amplitude values calculated by fft
+                          abs.(y_Fourier[2:N÷2]) .* 2 ./ N)
 
     if length(A_period_t) <= 1
-        return FourierOutputs(ComplexF64.(Ucell_Fourier), ComplexF64.(ifc_Fourier), Float64.(A_period_t), NaN, Float64[], NaN, N)
+        return FourierOutputs(ComplexF64.(y_Fourier), ComplexF64.(ifc_Fourier), Float64.(A_period_t), NaN, Float64[], NaN, N)
     end
 
     idx_A_local = argmax(@view A_period_t[2:end])
@@ -129,7 +141,7 @@ function _compute_fourier_for_segment(t::AbstractVector{Float64},
     f = freq_t[idx_A]
 
     return FourierOutputs(
-        ComplexF64.(Ucell_Fourier),
+        ComplexF64.(y_Fourier),
         ComplexF64.(ifc_Fourier),
         Float64.(A_period_t),
         Float64(A),
@@ -240,15 +252,31 @@ function _interpolated_rmse(ifc_discretized::AbstractVector{<:Real},
     return _calculate_rmse(Ucell_interpolated, collect(U_exp))
 end
 
-"""Compute one EIS impedance point from Fourier outputs."""
-function _eis_point(cd::AbstractCurrent,
-                    Fourier_results::FourierOutputs)
+"""
+    _eis_voltage_point(cd, Fourier_results) -> (Z_real, minus_Z_imag, f, abs_Z, phi_deg)
+
+Compute one EIS impedance point of the cell voltage from the Fourier outputs of one frequency.
+
+Conventions (kept from the original implementation):
+- `Z0 = A / (ratio·(-i_EIS))` is the impedance modulus **with its sign**, in mΩ·cm² (`1e7` = `1e4` A/m² per A/cm² × `1e3` mV/V).
+  The minus sign accounts for the current being drawn from the cell; `Z0` is therefore negative for `i_EIS > 0`.
+- `A` is the amplitude of the oscillation at the excitation bin (argmax of the spectrum).
+  `θ_U` and `θ_i` are the phases of the voltage and of the imposed current at this bin.
+- Nyquist: `Z_real = Z0·cos(θ_U - θ_i)` and `Z_imag = Z0·sin(θ_U - θ_i)`; the curve is drawn as `-Z_imag` versus `Z_real`
+  (returned as `minus_Z_imag`).
+- Bode amplitude: `|Z0|`.
+- Bode phase: `phi_deg = θ_U - (θ_i + π)` in degrees, wrapped into ]-180, 180].
+
+Returns `(NaN, NaN, NaN, NaN, NaN)` when the excitation bin cannot be located.
+"""
+function _eis_voltage_point(cd::AbstractCurrent,
+                            Fourier_results::FourierOutputs)
     i_EIS = cd.i_EIS
     ratio_EIS = cd.ratio
 
     Z0 = Fourier_results.A / (ratio_EIS * (-i_EIS)) * 1e7
 
-    theta_U_t = angle.(Fourier_results.Ucell_Fourier[1:Fourier_results.N÷2])
+    theta_U_t = angle.(Fourier_results.y_Fourier[1:Fourier_results.N÷2])
     theta_i_t = angle.(Fourier_results.ifc_Fourier[1:Fourier_results.N÷2])
     idx_A = findfirst(Fourier_results.A_period_t .== Fourier_results.A)
     idx_A === nothing && return (NaN, NaN, NaN, NaN, NaN)
@@ -264,6 +292,42 @@ function _eis_point(cd::AbstractCurrent,
     phi_deg > 180 && (phi_deg -= 360)
 
     return (Z_real, -Z_imag, Fourier_results.f, abs(Z0), phi_deg)
+end
+
+
+"""
+    _eis_state_point(cd, Fourier_results) -> (f, gain, phi_deg)
+
+Compute one EIS point of an internal state from the Fourier outputs of one frequency.
+Same computation as [`_eis_voltage_point`](@ref); the differences are:
+- the quantity is a transfer function `Δstate/Δi_fc` and not an impedance: `G0` is in (state unit)/(A·cm⁻²)
+  (no conversion to mV);
+- only the modulus `|G0|` is kept (the sign of `G0` is not turned into a phase),
+- **no `π` offset** is applied to the phase: `phi_deg = θ_s - θ_i`, positive when the state leads the current;
+- no Nyquist coordinates are returned (the plots derive them from gain and phase: `(gain·cos φ, -gain·sin φ)`);
+- the return order is `(f, gain, phi_deg)`.
+
+Returns `(NaN, NaN, NaN)` when the excitation bin cannot be located.
+"""
+function _eis_state_point(cd::AbstractCurrent,
+                          Fourier_results::FourierOutputs)
+    i_EIS = cd.i_EIS
+    ratio_EIS = cd.ratio
+
+    G0 = Fourier_results.A / (ratio_EIS * (-i_EIS)) * 1e4
+
+    theta_s_t = angle.(Fourier_results.y_Fourier[1:Fourier_results.N÷2])
+    theta_i_t = angle.(Fourier_results.ifc_Fourier[1:Fourier_results.N÷2])
+    idx_A = findfirst(Fourier_results.A_period_t .== Fourier_results.A)
+    idx_A === nothing && return (NaN, NaN, NaN)
+
+    theta_s = theta_s_t[idx_A]
+    theta_i = theta_i_t[idx_A]
+
+    phi_deg = mod((theta_s - theta_i) * 180 / π, 360)
+    phi_deg > 180 && (phi_deg -= 360)
+
+    return (Fourier_results.f, abs(G0), phi_deg)
 end
 
 

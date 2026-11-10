@@ -22,7 +22,7 @@ using ..Fuelcell: create_fuelcell
 using ..Currents: create_current, step_duration
 using SciMLBase: ReturnCode
 using ..Core.Models: AlphaPEM, simulate_model!, display!, save_plot!,
-                     build_solver_state_scaling, unscale_values
+                     build_solver_state_scaling, unscale_values, EIS_STATE_RESPONSES
 using ..Core.Types: SimulationOutputs
 
 include(joinpath(@__DIR__, "run_simulation_modules.jl"))
