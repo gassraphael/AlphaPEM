@@ -34,8 +34,9 @@ import AlphaPEM.Core.Models: middle_gdl_index, middle_mpl_index,
                              make_Fourier_transformation, C_v_sat, extract_mea_series, 
                              extract_mid_mea_series, extract_derived_series,
                              extract_derived_gc_series, extract_mid_derived_gc_series,
-                             polarisation_sampling_indices
-import AlphaPEM.Core.Modules: _eis_point, calculate_reynolds_numbers, final_temperature_matrix_celsius
+                             polarisation_sampling_indices,
+                             eis_state_spec, eis_state_response_table
+import AlphaPEM.Core.Modules: _eis_voltage_point, calculate_reynolds_numbers, final_temperature_matrix_celsius
 import AlphaPEM.Application: _web_plot_specs
 import AlphaPEM.Currents: current, EISCurrent, PolarizationCurrent, PolarizationCalibrationCurrent
 import AlphaPEM.Utils: R
@@ -1277,7 +1278,7 @@ function extract_simulation_data(output::Any, sim_type::String)::Dict
             phi_deg = Float64[]
 
             for res in f_results
-                p = _eis_point(output.current_density, res)
+                p = _eis_voltage_point(output.current_density, res)
                 if isfinite(p[3])
                     # p = (Z_real, minus_Z_imag, f, abs_Z, phi)
                     push!(freqs,   p[3])
@@ -1649,7 +1650,7 @@ function _get_plot_data(simu, key, config)
     elseif key in ["Nyquist_plot", "Bode_amplitude_curve", "Bode_angle_curve"]
         if cd isa EISCurrent
             # Select headers and data extraction based on the plot type
-            # p from _eis_point is (Z_real, minus_Z_imag, f, abs_Z, phi)
+            # p from _eis_voltage_point is (Z_real, minus_Z_imag, f, abs_Z, phi)
             
             # Use our unified post-processing to get all analyzed points.
             # (Note: make_Fourier_transformation is called for each sheet, but it's 
@@ -1658,7 +1659,7 @@ function _get_plot_data(simu, key, config)
             rows = []
             
             for res in fourier_results
-                p = _eis_point(cd, res)
+                p = _eis_voltage_point(cd, res)
                 if isfinite(p[3])
                     if key == "Nyquist_plot"
                         # Only Z_real and -Z_imag as displayed on screen
@@ -1686,6 +1687,11 @@ function _get_plot_data(simu, key, config)
             end
             return headers, vcat([r' for r in rows]...)
         end
+
+    # ── EIS internal-state frequency responses ───────────────────────────────
+    elseif (m = match(r"^(.+)_EIS$", key)) !== nothing && cd isa EISCurrent
+        spec = eis_state_spec(String(m.captures[1]))
+        return eis_state_response_table(spec.key, outputs, simu.fuel_cell, cd, config)
 
     # ── Final profiles ───────────────────────────────────────────────────────
     elseif key == "ifc_GC_final"

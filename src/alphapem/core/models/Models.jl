@@ -44,6 +44,7 @@ include("../modules/fuelcell/plot_helpers.jl")
 # Fuel Cell specific models
 include("../modules/fuelcell/dif_eq_modules.jl")
 include("fuelcell/plot.jl")
+include("fuelcell/plot_eis.jl")
 include("fuelcell/velocity.jl")
 include("fuelcell/cell_voltage.jl")
 include("fuelcell/current_distribution_GC_1D.jl")

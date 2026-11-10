@@ -40,9 +40,11 @@ struct SimulationOutputs{nb_gdl, nb_mpl, nb_gc}
     derived :: DerivedOutputs{nb_gc}
 end
 
-"""Structured Fourier post-processing outputs used by EIS displays."""
+"""Structured Fourier post-processing outputs used by EIS displays.
+
+`y_Fourier` is the Fourier transformation of the analysed signal (cell voltage or internal state)."""
 struct FourierOutputs
-    Ucell_Fourier :: Vector{ComplexF64}
+    y_Fourier     :: Vector{ComplexF64}
     ifc_Fourier   :: Vector{ComplexF64}
     A_period_t    :: Vector{Float64}
     A             :: Float64
