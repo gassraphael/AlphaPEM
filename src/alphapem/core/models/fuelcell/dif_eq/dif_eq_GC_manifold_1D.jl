@@ -46,7 +46,7 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
 
     # Anode GC: water vapour
     d_C_v_agc_dt = ntuple(NB_GC) do k
-        R_g = if NB_GC == 1
+        R_g = if NB_GC == 1   # net molar source in mol.m-3.s-1
             J_in = Jv.agc_in
             J_out = Jv.agc_out
             (J_in - J_out) / Lgc - flows_mea[k].Jv.agc_agdl / Hagc
@@ -60,12 +60,12 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
             end
             (J_in - J_out) / L_node - flows_mea[k].Jv.agc_agdl / Hagc
         end
-        _gas_concentration_rate(R_g, sv[k].agc.C_v, sv[k].agc.s, 1.0, liq.agc_s[k])
+        _gas_concentration_rate(R_g, sv[k].agc.C_v, sv[k].agc.s, epsilon = 1.0, ds_dt = liq.agc_s[k])
     end
 
     # Anode GC: hydrogen
     d_C_H2_agc_dt = ntuple(NB_GC) do k
-        R_g = if NB_GC == 1
+        R_g = if NB_GC == 1   # net molar source in mol.m-3.s-1
             J_in = JH2.agc_in
             J_out = JH2.agc_out
             (J_in - J_out) / Lgc - flows_mea[k].J_H2.agc_agdl / Hagc
@@ -79,13 +79,13 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
             end
             (J_in - J_out) / L_node - flows_mea[k].J_H2.agc_agdl / Hagc
         end
-        _gas_concentration_rate(R_g, sv[k].agc.C_H2, sv[k].agc.s, 1.0, liq.agc_s[k])
+        _gas_concentration_rate(R_g, sv[k].agc.C_H2, sv[k].agc.s, epsilon = 1.0, ds_dt = liq.agc_s[k])
     end
 
     # Anode GC: nitrogen
     # NOTE: d_C_N2_agc_dt must be 0 for :forced_convective_cathode_with_anodic_recirculation
     d_C_N2_agc_dt = ntuple(NB_GC) do k
-        R_g = if NB_GC == 1
+        R_g = if NB_GC == 1   # net molar source in mol.m-3.s-1
             J_in = JN2.agc_in
             J_out = JN2.agc_out
             (J_in - J_out) / Lgc - flows_mea[k].J_N2.agc_agdl / Hagc
@@ -99,12 +99,12 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
             end
             (J_in - J_out) / L_node - flows_mea[k].J_N2.agc_agdl / Hagc
         end
-        _gas_concentration_rate(R_g, sv[k].agc.C_N2, sv[k].agc.s, 1.0, liq.agc_s[k])
+        _gas_concentration_rate(R_g, sv[k].agc.C_N2, sv[k].agc.s, epsilon = 1.0, ds_dt = liq.agc_s[k])
     end
 
     # Cathode GC: water vapour
     d_C_v_cgc_dt = ntuple(NB_GC) do k
-        R_g = if NB_GC == 1
+        R_g = if NB_GC == 1   # net molar source in mol.m-3.s-1
             J_in = Jv.cgc_in
             J_out = Jv.cgc_out
             (J_in - J_out) / Lgc + flows_mea[k].Jv.cgdl_cgc / Hcgc
@@ -113,12 +113,12 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
             J_out = k == NB_GC ? Jv.cgc_out : Jv.cgc_cgc[k]
             (J_in - J_out) / L_node + flows_mea[k].Jv.cgdl_cgc / Hcgc
         end
-        _gas_concentration_rate(R_g, sv[k].cgc.C_v, sv[k].cgc.s, 1.0, liq.cgc_s[k])
+        _gas_concentration_rate(R_g, sv[k].cgc.C_v, sv[k].cgc.s, epsilon = 1.0, ds_dt = liq.cgc_s[k])
     end
 
     # Cathode GC: oxygen
     d_C_O2_cgc_dt = ntuple(NB_GC) do k
-        R_g = if NB_GC == 1
+        R_g = if NB_GC == 1   # net molar source in mol.m-3.s-1
             J_in = JO2.cgc_in
             J_out = JO2.cgc_out
             (J_in - J_out) / Lgc + flows_mea[k].J_O2.cgdl_cgc / Hcgc
@@ -127,12 +127,12 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
             J_out = k == NB_GC ? JO2.cgc_out : JO2.cgc_cgc[k]
             (J_in - J_out) / L_node + flows_mea[k].J_O2.cgdl_cgc / Hcgc
         end
-        _gas_concentration_rate(R_g, sv[k].cgc.C_O2, sv[k].cgc.s, 1.0, liq.cgc_s[k])
+        _gas_concentration_rate(R_g, sv[k].cgc.C_O2, sv[k].cgc.s, epsilon = 1.0, ds_dt = liq.cgc_s[k])
     end
 
     # Cathode GC: nitrogen
     d_C_N2_cgc_dt = ntuple(NB_GC) do k
-        R_g = if NB_GC == 1
+        R_g = if NB_GC == 1   # net molar source in mol.m-3.s-1
             J_in = JN2.cgc_in
             J_out = JN2.cgc_out
             (J_in - J_out) / Lgc + flows_mea[k].J_N2.cgdl_cgc / Hcgc
@@ -141,7 +141,7 @@ function calculate_dyn_gas_evolution_inside_gas_channel(
             J_out = k == NB_GC ? JN2.cgc_out : JN2.cgc_cgc[k]
             (J_in - J_out) / L_node + flows_mea[k].J_N2.cgdl_cgc / Hcgc
         end
-        _gas_concentration_rate(R_g, sv[k].cgc.C_N2, sv[k].cgc.s, 1.0, liq.cgc_s[k])
+        _gas_concentration_rate(R_g, sv[k].cgc.C_N2, sv[k].cgc.s, epsilon = 1.0, ds_dt = liq.cgc_s[k])
     end
 
     return GCGasDerivative{NB_GC}(d_C_v_agc_dt, d_C_H2_agc_dt, d_C_N2_agc_dt, d_C_v_cgc_dt, d_C_O2_cgc_dt, d_C_N2_cgc_dt)
