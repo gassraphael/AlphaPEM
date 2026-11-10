@@ -67,8 +67,10 @@ layers with fixed porosity.
            s * (drho_H2O_l_dT(T) * dT_dt / rho_l + d_epsilon_dt / epsilon)
 end
 
-"""Concentration rate from the gas inventory epsilon * (1 - s) * C."""
-@inline function _gas_concentration_rate(R_g, C, s, epsilon, ds_dt, d_epsilon_dt=0.0)
+"""Concentration rate from the gas inventory epsilon * (1 - s) * C.
+`R_g` is its net molar source in mol.m-3.s-1 and `d_epsilon_dt` is zero in
+layers with fixed porosity."""
+@inline function _gas_concentration_rate(R_g, C, s; epsilon, ds_dt, d_epsilon_dt=0.0)
     return R_g / (epsilon * (1 - s)) + C * ds_dt / (1 - s) - C * d_epsilon_dt / epsilon
 end
 
