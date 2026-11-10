@@ -941,12 +941,18 @@ the evaporation branch if x < 0. Their availability factors are respectively
 1-s_phase and s_phase, where s_phase=clamp(s,0,1) extends coefficients to
 nonphysical Newton trials without altering the solver state.
 
+Numerical transition
+----------
+
 phase_change_pressure_width is a numerical transition width in Pa. With width
 zero, the separate logarithmic branches apply directly. For positive width,
 the active branch is multiplied by 2u-u^2 within 0 < abs(x) < width,
 u=abs(x)/width; outside it the branch is unchanged. The rate is C1 in the
 pressure transition, but this does not claim global smoothness at other clamps.
 The default 10 Pa is provisional and requires width/tolerance convergence tests.
+
+Relation to Gass et al. (2024)
+----------
 
 Gass et al., J. Electrochem. Soc. (2024), section 3.7, Eq. (32),
 https://doi.org/10.1149/1945-7111/ad305a, uses directional branches with
@@ -957,10 +963,31 @@ stability. The present bounded transition preserves that smoothing intent
 while avoiding evaporation weighted by gas availability, and vice versa.
 It changes the previous blended kinetics and is not yet a validated closure.
 
+Boundary properties and guarantees
+----------
+
 The returned rate is shared by liquid/vapor balances and phase-change heat.
 No time-step-based rate cap or state projection is applied. These source
 boundary properties alone do not guarantee nonnegative discrete inventories
 or protect other transport/sorption mechanisms.
+
+Open issue: K_transition sharpness
+----------
+
+K_transition (= 3e-3, selected by hand) controls the sharpness of the tanh
+transition between condensation and evaporation regimes. When it is too low,
+w can remain insufficiently close to 1 when P_v is slightly below Psat_eff:
+a strong Svl_cond is then only weakly suppressed through (1 - w) * Svl_cond,
+which can drive Svl_value strongly negative and deplete a small liquid
+saturation s left over from a brief earlier supersaturation, pushing s
+negative in the phase balances. The _evaporation_inventory_limiter guards
+against this, but it may unnecessarily reduce legitimate evaporation rates.
+
+Choosing a better (larger) K_transition would be cleaner, but no principled
+value is known; it would require trial and error or a deeper mathematical
+analysis, and increasing sharpness stiffens the problem. Increasing
+K_transition is therefore left open as a tuning decision, and the inventory
+limiter is kept as the safety net.
 """
 function Svl(element::Symbol,
              s,
