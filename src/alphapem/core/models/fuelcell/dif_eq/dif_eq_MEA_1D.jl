@@ -238,7 +238,7 @@ function calculate_dyn_vapor_evolution_inside_MEA(
         Jv_in = j == 1 ? Jv_agc_agdl_red : Jv.agdl_agdl[j - 1]
         Jv_out = j == NB_GDL ? Jv.agdl_ampl : Jv.agdl_agdl[j]
         R_g = (Jv_in - Jv_out) / H_gdl_node + Sv.agdl[j]
-        _gas_concentration_rate(R_g, C_v_agdl[j], s_agdl[j], pp.epsilon_gdl, ld.agdl_s[j])
+        _gas_concentration_rate(R_g, C_v_agdl[j], s_agdl[j]; epsilon=pp.epsilon_gdl, ds_dt=ld.agdl_s[j])
     end
 
     #   Anode MPL
@@ -246,23 +246,25 @@ function calculate_dyn_vapor_evolution_inside_MEA(
         Jv_in = j == 1 ? Jv.agdl_ampl : Jv.ampl_ampl[j - 1]
         Jv_out = j == NB_MPL ? Jv.ampl_acl : Jv.ampl_ampl[j]
         R_g = (Jv_in - Jv_out) / H_mpl_node + Sv.ampl[j]
-        _gas_concentration_rate(R_g, C_v_ampl[j], s_ampl[j], pp.epsilon_mpl, ld.ampl_s[j])
+        _gas_concentration_rate(R_g, C_v_ampl[j], s_ampl[j]; epsilon=pp.epsilon_mpl, ds_dt=ld.ampl_s[j])
     end
 
     #    Anode and cathode CLs
     R_g_acl = Jv.ampl_acl / pp.Hacl - S_abs.v_acl + Sv.acl
     R_g_ccl = -Jv.ccl_cmpl / pp.Hccl - S_abs.v_ccl + Sv.ccl
-    d_C_v_acl_dt = _gas_concentration_rate(R_g_acl, sv.acl.C_v, s_acl, epsilon_acl,
-                                           ld.acl_s, d_epsilon_acl_dt)
-    d_C_v_ccl_dt = _gas_concentration_rate(R_g_ccl, sv.ccl.C_v, s_ccl, epsilon_ccl,
-                                           ld.ccl_s, d_epsilon_ccl_dt)
+    d_C_v_acl_dt = _gas_concentration_rate(R_g_acl, sv.acl.C_v, s_acl;
+                                           epsilon=epsilon_acl, ds_dt=ld.acl_s,
+                                           d_epsilon_dt=d_epsilon_acl_dt)
+    d_C_v_ccl_dt = _gas_concentration_rate(R_g_ccl, sv.ccl.C_v, s_ccl;
+                                           epsilon=epsilon_ccl, ds_dt=ld.ccl_s,
+                                           d_epsilon_dt=d_epsilon_ccl_dt)
 
     #   Cathode MPL
     d_C_v_cmpl_dt = ntuple(NB_MPL) do j
         Jv_in = j == 1 ? Jv.ccl_cmpl : Jv.cmpl_cmpl[j - 1]
         Jv_out = j == NB_MPL ? Jv.cmpl_cgdl : Jv.cmpl_cmpl[j]
         R_g = (Jv_in - Jv_out) / H_mpl_node + Sv.cmpl[j]
-        _gas_concentration_rate(R_g, C_v_cmpl[j], s_cmpl[j], pp.epsilon_mpl, ld.cmpl_s[j])
+        _gas_concentration_rate(R_g, C_v_cmpl[j], s_cmpl[j]; epsilon=pp.epsilon_mpl, ds_dt=ld.cmpl_s[j])
     end
 
     #   Cathode GDL
@@ -270,7 +272,7 @@ function calculate_dyn_vapor_evolution_inside_MEA(
         Jv_in = j == 1 ? Jv.cmpl_cgdl : Jv.cgdl_cgdl[j - 1]
         Jv_out = j == NB_GDL ? Jv_cgdl_cgc_red : Jv.cgdl_cgdl[j]
         R_g = (Jv_in - Jv_out) / H_gdl_node + Sv.cgdl[j]
-        _gas_concentration_rate(R_g, C_v_cgdl[j], s_cgdl[j], pp.epsilon_gdl, ld.cgdl_s[j])
+        _gas_concentration_rate(R_g, C_v_cgdl[j], s_cgdl[j]; epsilon=pp.epsilon_gdl, ds_dt=ld.cgdl_s[j])
     end
 
     return MEAVaporDerivative{NB_GDL, NB_MPL}(d_C_v_agdl_dt, d_C_v_ampl_dt, d_C_v_acl_dt, d_C_v_ccl_dt, d_C_v_cmpl_dt, d_C_v_cgdl_dt)
@@ -344,13 +346,13 @@ function calculate_dyn_H2_O2_N2_evolution_inside_MEA(
         J_in = j == 1 ? J_H2_agc_agdl_red : J_H2.agdl_agdl[j - 1]
         J_out = j == NB_GDL ? J_H2.agdl_ampl : J_H2.agdl_agdl[j]
         R_g = (J_in - J_out) / H_gdl_node
-        _gas_concentration_rate(R_g, C_H2_agdl[j], s_agdl[j], pp.epsilon_gdl, ld.agdl_s[j])
+        _gas_concentration_rate(R_g, C_H2_agdl[j], s_agdl[j]; epsilon=pp.epsilon_gdl, ds_dt=ld.agdl_s[j])
     end
     d_C_N2_agdl_dt = ntuple(NB_GDL) do j
         J_in = j == 1 ? J_N2_agc_agdl_red : J_N2.agdl_agdl[j - 1]
         J_out = j == NB_GDL ? J_N2.agdl_ampl : J_N2.agdl_agdl[j]
         R_g = (J_in - J_out) / H_gdl_node
-        _gas_concentration_rate(R_g, C_N2_agdl[j], s_agdl[j], pp.epsilon_gdl, ld.agdl_s[j])
+        _gas_concentration_rate(R_g, C_N2_agdl[j], s_agdl[j]; epsilon=pp.epsilon_gdl, ds_dt=ld.agdl_s[j])
     end
 
     #   Anode MPL
@@ -358,43 +360,47 @@ function calculate_dyn_H2_O2_N2_evolution_inside_MEA(
         J_in = j == 1 ? J_H2.agdl_ampl : J_H2.ampl_ampl[j - 1]
         J_out = j == NB_MPL ? J_H2.ampl_acl : J_H2.ampl_ampl[j]
         R_g = (J_in - J_out) / H_mpl_node
-        _gas_concentration_rate(R_g, C_H2_ampl[j], s_ampl[j], pp.epsilon_mpl, ld.ampl_s[j])
+        _gas_concentration_rate(R_g, C_H2_ampl[j], s_ampl[j]; epsilon=pp.epsilon_mpl, ds_dt=ld.ampl_s[j])
     end
     d_C_N2_ampl_dt = ntuple(NB_MPL) do j
         J_in = j == 1 ? J_N2.agdl_ampl : J_N2.ampl_ampl[j - 1]
         J_out = j == NB_MPL ? J_N2.ampl_acl : J_N2.ampl_ampl[j]
         R_g = (J_in - J_out) / H_mpl_node
-        _gas_concentration_rate(R_g, C_N2_ampl[j], s_ampl[j], pp.epsilon_mpl, ld.ampl_s[j])
+        _gas_concentration_rate(R_g, C_N2_ampl[j], s_ampl[j]; epsilon=pp.epsilon_mpl, ds_dt=ld.ampl_s[j])
     end
 
     #   Anode CL
     R_g_H2_acl = J_H2.ampl_acl / pp.Hacl - S_H2.reac - S_H2.cros
     R_g_N2_acl = J_N2.ampl_acl / pp.Hacl
-    d_C_H2_acl_dt = _gas_concentration_rate(R_g_H2_acl, sv.acl.C_H2, s_acl, epsilon_acl,
-                                            ld.acl_s, d_epsilon_acl_dt)
-    d_C_N2_acl_dt = _gas_concentration_rate(R_g_N2_acl, sv.acl.C_N2, s_acl, epsilon_acl,
-                                            ld.acl_s, d_epsilon_acl_dt)
+    d_C_H2_acl_dt = _gas_concentration_rate(R_g_H2_acl, sv.acl.C_H2, s_acl;
+                                            epsilon=epsilon_acl, ds_dt=ld.acl_s,
+                                            d_epsilon_dt=d_epsilon_acl_dt)
+    d_C_N2_acl_dt = _gas_concentration_rate(R_g_N2_acl, sv.acl.C_N2, s_acl;
+                                            epsilon=epsilon_acl, ds_dt=ld.acl_s,
+                                            d_epsilon_dt=d_epsilon_acl_dt)
 
     #   Cathode CL
     R_g_O2_ccl = -J_O2.ccl_cmpl / pp.Hccl - S_O2.reac - S_O2.cros
     R_g_N2_ccl = -J_N2.ccl_cmpl / pp.Hccl
-    d_C_O2_ccl_dt = _gas_concentration_rate(R_g_O2_ccl, sv.ccl.C_O2, s_ccl, epsilon_ccl,
-                                            ld.ccl_s, d_epsilon_ccl_dt)
-    d_C_N2_ccl_dt = _gas_concentration_rate(R_g_N2_ccl, sv.ccl.C_N2, s_ccl, epsilon_ccl,
-                                            ld.ccl_s, d_epsilon_ccl_dt)
+    d_C_O2_ccl_dt = _gas_concentration_rate(R_g_O2_ccl, sv.ccl.C_O2, s_ccl;
+                                            epsilon=epsilon_ccl, ds_dt=ld.ccl_s,
+                                            d_epsilon_dt=d_epsilon_ccl_dt)
+    d_C_N2_ccl_dt = _gas_concentration_rate(R_g_N2_ccl, sv.ccl.C_N2, s_ccl;
+                                            epsilon=epsilon_ccl, ds_dt=ld.ccl_s,
+                                            d_epsilon_dt=d_epsilon_ccl_dt)
 
     #   Cathode MPL
     d_C_O2_cmpl_dt = ntuple(NB_MPL) do j
         J_in = j == 1 ? J_O2.ccl_cmpl : J_O2.cmpl_cmpl[j - 1]
         J_out = j == NB_MPL ? J_O2.cmpl_cgdl : J_O2.cmpl_cmpl[j]
         R_g = (J_in - J_out) / H_mpl_node
-        _gas_concentration_rate(R_g, C_O2_cmpl[j], s_cmpl[j], pp.epsilon_mpl, ld.cmpl_s[j])
+        _gas_concentration_rate(R_g, C_O2_cmpl[j], s_cmpl[j]; epsilon=pp.epsilon_mpl, ds_dt=ld.cmpl_s[j])
     end
     d_C_N2_cmpl_dt = ntuple(NB_MPL) do j
         J_in = j == 1 ? J_N2.ccl_cmpl : J_N2.cmpl_cmpl[j - 1]
         J_out = j == NB_MPL ? J_N2.cmpl_cgdl : J_N2.cmpl_cmpl[j]
         R_g = (J_in - J_out) / H_mpl_node
-        _gas_concentration_rate(R_g, C_N2_cmpl[j], s_cmpl[j], pp.epsilon_mpl, ld.cmpl_s[j])
+        _gas_concentration_rate(R_g, C_N2_cmpl[j], s_cmpl[j]; epsilon=pp.epsilon_mpl, ds_dt=ld.cmpl_s[j])
     end
 
     #   Cathode GDL
@@ -402,13 +408,13 @@ function calculate_dyn_H2_O2_N2_evolution_inside_MEA(
         J_in = j == 1 ? J_O2.cmpl_cgdl : J_O2.cgdl_cgdl[j - 1]
         J_out = j == NB_GDL ? J_O2_cgdl_cgc_red : J_O2.cgdl_cgdl[j]
         R_g = (J_in - J_out) / H_gdl_node
-        _gas_concentration_rate(R_g, C_O2_cgdl[j], s_cgdl[j], pp.epsilon_gdl, ld.cgdl_s[j])
+        _gas_concentration_rate(R_g, C_O2_cgdl[j], s_cgdl[j]; epsilon=pp.epsilon_gdl, ds_dt=ld.cgdl_s[j])
     end
     d_C_N2_cgdl_dt = ntuple(NB_GDL) do j
         J_in = j == 1 ? J_N2.cmpl_cgdl : J_N2.cgdl_cgdl[j - 1]
         J_out = j == NB_GDL ? J_N2_cgdl_cgc_red : J_N2.cgdl_cgdl[j]
         R_g = (J_in - J_out) / H_gdl_node
-        _gas_concentration_rate(R_g, C_N2_cgdl[j], s_cgdl[j], pp.epsilon_gdl, ld.cgdl_s[j])
+        _gas_concentration_rate(R_g, C_N2_cgdl[j], s_cgdl[j]; epsilon=pp.epsilon_gdl, ds_dt=ld.cgdl_s[j])
     end
 
     return MEAGasSpeciesDerivative{NB_GDL, NB_MPL}(
