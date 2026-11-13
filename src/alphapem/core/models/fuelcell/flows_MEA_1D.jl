@@ -116,31 +116,32 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
 
     # _________________________________________Liquid water flows (kg.m-2.s-1)__________________________________________
 
+    # Extend liquid transport to negative solver trials; preserve raw states and inventories.
     # Anode side
-    Jl_agc_agdl = -theta_l_rem * epsilon_gdl * s_agdl[1] * max(Pcap_agdl + rho_agc * v_a^2 / 2, 0.0)
+    Jl_agc_agdl = -theta_l_rem * epsilon_gdl * _liquid_transport_saturation(s_agdl[1]) * max(Pcap_agdl + rho_agc * v_a^2 / 2, 0.0)
     Jl_agdl_agdl = flows_work.Jl_agdl_agdl
     @inbounds for i in 1:(nb_gdl - 1)
-        Jl_agdl_agdl[i] = -D_cap_agdl_agdl[i] * d_dx(s_agdl[i], s_agdl[i + 1], H_gdl_node / 2)
+        Jl_agdl_agdl[i] = -D_cap_agdl_agdl[i] * d_dx(_liquid_transport_saturation(s_agdl[i]), _liquid_transport_saturation(s_agdl[i + 1]), H_gdl_node / 2)
     end
-    Jl_agdl_ampl = -D_cap_agdl_ampl * d_dx(s_agdl[nb_gdl], s_ampl[1], H_gdl_node / 2, H_mpl_node / 2)
+    Jl_agdl_ampl = -D_cap_agdl_ampl * d_dx(_liquid_transport_saturation(s_agdl[nb_gdl]), _liquid_transport_saturation(s_ampl[1]), H_gdl_node / 2, H_mpl_node / 2)
     Jl_ampl_ampl = flows_work.Jl_ampl_ampl
     @inbounds for i in 1:(nb_mpl - 1)
-        Jl_ampl_ampl[i] = -D_cap_ampl_ampl[i] * d_dx(s_ampl[i], s_ampl[i + 1], H_mpl_node / 2)
+        Jl_ampl_ampl[i] = -D_cap_ampl_ampl[i] * d_dx(_liquid_transport_saturation(s_ampl[i]), _liquid_transport_saturation(s_ampl[i + 1]), H_mpl_node / 2)
     end
-    Jl_ampl_acl = -D_cap_ampl_acl * d_dx(s_ampl[nb_mpl], s_acl, H_mpl_node / 2, Hacl / 2)
+    Jl_ampl_acl = -D_cap_ampl_acl * d_dx(_liquid_transport_saturation(s_ampl[nb_mpl]), _liquid_transport_saturation(s_acl), H_mpl_node / 2, Hacl / 2)
 
     # Cathode side
-    Jl_ccl_cmpl = -D_cap_ccl_cmpl * d_dx(s_ccl, s_cmpl[1], Hccl / 2, H_mpl_node / 2)
+    Jl_ccl_cmpl = -D_cap_ccl_cmpl * d_dx(_liquid_transport_saturation(s_ccl), _liquid_transport_saturation(s_cmpl[1]), Hccl / 2, H_mpl_node / 2)
     Jl_cmpl_cmpl = flows_work.Jl_cmpl_cmpl
     @inbounds for i in 1:(nb_mpl - 1)
-        Jl_cmpl_cmpl[i] = -D_cap_cmpl_cmpl[i] * d_dx(s_cmpl[i], s_cmpl[i + 1], H_mpl_node / 2)
+        Jl_cmpl_cmpl[i] = -D_cap_cmpl_cmpl[i] * d_dx(_liquid_transport_saturation(s_cmpl[i]), _liquid_transport_saturation(s_cmpl[i + 1]), H_mpl_node / 2)
     end
-    Jl_cmpl_cgdl = -D_cap_cmpl_cgdl * d_dx(s_cmpl[nb_mpl], s_cgdl[1], H_mpl_node / 2, H_gdl_node / 2)
+    Jl_cmpl_cgdl = -D_cap_cmpl_cgdl * d_dx(_liquid_transport_saturation(s_cmpl[nb_mpl]), _liquid_transport_saturation(s_cgdl[1]), H_mpl_node / 2, H_gdl_node / 2)
     Jl_cgdl_cgdl = flows_work.Jl_cgdl_cgdl
     @inbounds for i in 1:(nb_gdl - 1)
-        Jl_cgdl_cgdl[i] = -D_cap_cgdl_cgdl[i] * d_dx(s_cgdl[i], s_cgdl[i + 1], H_gdl_node / 2)
+        Jl_cgdl_cgdl[i] = -D_cap_cgdl_cgdl[i] * d_dx(_liquid_transport_saturation(s_cgdl[i]), _liquid_transport_saturation(s_cgdl[i + 1]), H_gdl_node / 2)
     end
-    Jl_cgdl_cgc = theta_l_rem * epsilon_gdl * s_cgdl[nb_gdl] * max(Pcap_cgdl + rho_cgc * v_c^2 / 2, 0.0)
+    Jl_cgdl_cgc = theta_l_rem * epsilon_gdl * _liquid_transport_saturation(s_cgdl[nb_gdl]) * max(Pcap_cgdl + rho_cgc * v_c^2 / 2, 0.0)
 
     # _____________________________________________Vapor flows (mol.m-2.s-1)____________________________________________
 
@@ -241,8 +242,11 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
     C_fix_ccl = cl_dry_ionomer_storage_capacity(:ccl, Hccl, pp)
 
     #   Anode side
-    Sv_abs_acl = (1 - s_acl) * gamma_sorp_v(C_v_acl, s_acl, lambda_acl, T_acl, Hacl, pp) * C_fix_acl *
-                 (lambda_eq(C_v_acl, s_acl, T_acl, pp) - lambda_acl)
+    Sv_abs_acl_raw = (1 - s_acl) * gamma_sorp_v(C_v_acl, s_acl, lambda_acl, T_acl, Hacl, pp) * C_fix_acl *
+                     (lambda_eq(C_v_acl, s_acl, T_acl, pp) - lambda_acl)
+    # Share the donor-protected rate between vapor, ionomer and sorption heat.
+    Sv_abs_acl = _limit_directed_vapor_sorption(Sv_abs_acl_raw, C_v_acl,
+                                                np.sorption_vapor_concentration_width)
     if s_acl > 0
         Sl_abs_acl = s_acl * gamma_sorp_l * C_fix_acl * (lambda_eq(C_v_acl, s_acl, T_acl, pp) - lambda_acl)
     else
@@ -250,8 +254,11 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
     end
 
     #   Cathode side
-    Sv_abs_ccl = (1 - s_ccl) * gamma_sorp_v(C_v_ccl, s_ccl, lambda_ccl, T_ccl, Hccl, pp) * C_fix_ccl *
-                 (lambda_eq(C_v_ccl, s_ccl, T_ccl, pp) - lambda_ccl)
+    Sv_abs_ccl_raw = (1 - s_ccl) * gamma_sorp_v(C_v_ccl, s_ccl, lambda_ccl, T_ccl, Hccl, pp) * C_fix_ccl *
+                     (lambda_eq(C_v_ccl, s_ccl, T_ccl, pp) - lambda_ccl)
+    # Share the donor-protected rate between vapor, ionomer and sorption heat.
+    Sv_abs_ccl = _limit_directed_vapor_sorption(Sv_abs_ccl_raw, C_v_ccl,
+                                                np.sorption_vapor_concentration_width)
     if s_ccl > 0
         Sl_abs_ccl = s_ccl * gamma_sorp_l * C_fix_ccl * (lambda_eq(C_v_ccl, s_ccl, T_ccl, pp) - lambda_ccl)
     else
@@ -264,31 +271,31 @@ function calculate_flows_1D_MEA!(flows_work::MEAFlowsWorkspace,
     @inbounds for i in 1:nb_gdl
         Sl_agdl[i] = Svl(:anode, s_agdl[i], C_v_agdl[i],
                          C_v_agdl[i] + C_H2_agdl[i] + C_N2_agdl[i],
-                         T_agdl[i], epsilon_gdl, pp)
+                         T_agdl[i], epsilon_gdl, pp; phase_change_pressure_width=np.phase_change_pressure_width)
     end
     Sl_ampl = flows_work.Sl_ampl
     @inbounds for i in 1:nb_mpl
         Sl_ampl[i] = Svl(:anode, s_ampl[i], C_v_ampl[i],
                          C_v_ampl[i] + C_H2_ampl[i] + C_N2_ampl[i],
-                         T_ampl[i], epsilon_mpl, pp)
+                         T_ampl[i], epsilon_mpl, pp; phase_change_pressure_width=np.phase_change_pressure_width)
     end
     Sl_acl = Svl(:anode, s_acl, C_v_acl, C_v_acl + C_H2_acl + C_N2_acl, T_acl,
-                 epsilon_cl(:acl, lambda_acl, T_acl, Hacl, pp), pp)
+                 epsilon_cl(:acl, lambda_acl, T_acl, Hacl, pp), pp; phase_change_pressure_width=np.phase_change_pressure_width)
 
     #   Cathode side
     Sl_ccl = Svl(:cathode, s_ccl, C_v_ccl, C_v_ccl + C_O2_ccl + C_N2_ccl, T_ccl,
-                 epsilon_cl(:ccl, lambda_ccl, T_ccl, Hccl, pp), pp)
+                 epsilon_cl(:ccl, lambda_ccl, T_ccl, Hccl, pp), pp; phase_change_pressure_width=np.phase_change_pressure_width)
     Sl_cmpl = flows_work.Sl_cmpl
     @inbounds for i in 1:nb_mpl
         Sl_cmpl[i] = Svl(:cathode, s_cmpl[i], C_v_cmpl[i],
                          C_v_cmpl[i] + C_O2_cmpl[i] + C_N2_cmpl[i],
-                         T_cmpl[i], epsilon_mpl, pp)
+                         T_cmpl[i], epsilon_mpl, pp; phase_change_pressure_width=np.phase_change_pressure_width)
     end
     Sl_cgdl = flows_work.Sl_cgdl
     @inbounds for i in 1:nb_gdl
         Sl_cgdl[i] = Svl(:cathode, s_cgdl[i], C_v_cgdl[i],
                          C_v_cgdl[i] + C_O2_cgdl[i] + C_N2_cgdl[i],
-                         T_cgdl[i], epsilon_gdl, pp)
+                         T_cgdl[i], epsilon_gdl, pp; phase_change_pressure_width=np.phase_change_pressure_width)
     end
 
     # Vapor generated through liquid water evaporation or degenerated through condensation

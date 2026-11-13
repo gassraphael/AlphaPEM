@@ -8,6 +8,12 @@ when creating an instance of the structure."""
 # NUMERICAL PARAMETERS
 # ============================================================
 
+# Pa. Development default for a numerical regularization, not a material constant.
+const DEFAULT_PHASE_CHANGE_PRESSURE_WIDTH = 10.0
+
+# mol.m-3. Provisional donor regularization; independent of atol and time step.
+const DEFAULT_SORPTION_VAPOR_CONCENTRATION_WIDTH = 1.0e-6
+
 """
     NumericalParams
 
@@ -23,6 +29,8 @@ Base.@kwdef struct NumericalParams <: AbstractFuelCellParams
     delta_t_dyn_step::Float64 = 0.1 # Time for dynamic display of the step current density function in seconds
     rtol::Float64 = 1e-3            # Relative tolerance for the system of ODEs solver
     atol::Float64 = 1e-6            # Absolute tolerance for the system of ODEs solver
+    phase_change_pressure_width::Float64 = DEFAULT_PHASE_CHANGE_PRESSURE_WIDTH # Pa; 0 selects piecewise phase transfer.
+    sorption_vapor_concentration_width::Float64 = DEFAULT_SORPTION_VAPOR_CONCENTRATION_WIDTH # mol.m-3; positive uptake ramp near an empty vapor donor.
     maxiters::Int = 5e5             # Maximum number of internal time steps that the IDA solver is allowed to take.
     max_run_time_s::Float64 = 5*60  # Maximum simulation runtime in seconds (0 = no limit)
     save_freq::Float64 = 10.0       # Maximum output save frequency in Hz (caps save density, does not force a sampling grid)

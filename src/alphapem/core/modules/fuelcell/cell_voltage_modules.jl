@@ -819,3 +819,45 @@ function epsilon_cl(element::Symbol, lambda_cl, T_cl, Hcl::Float64, pp::Physical
 
     return _clamped_fraction_value(epsilon_cl_val)
 end
+
+"""Partial derivatives of the evaluated CL porosity with respect to lambda and temperature.
+
+The lambda partial vanishes where the nonnegative-lambda clamp is active.
+Both partials vanish where the ionomer-fraction or porosity clamp is active.
+At a clamp boundary the derivative is not unique; the zero branch is used
+there. Carbon and Pt fractions and CL geometry are constant in this model.
+"""
+function epsilon_cl_partials(element::Symbol, lambda_cl, T_cl, Hcl::Float64, pp::PhysicalParams)
+    IC = element == :acl ? pp.IC_acl :
+         element == :ccl ? pp.IC_ccl :
+         throw(ArgumentError("The element should be either 'acl' or 'ccl'."))
+
+    epsilon_carb_val = epsilon_carb(element, Hcl, pp)
+    rho_l = rho_H2O_l(T_cl)
+    lambda_eff = _nonnegative_value(lambda_cl)
+    dry_ionomer_fraction = IC * epsilon_carb_val * rho_carb / pp.rho_ion
+    water_volume_factor = M_H2O * pp.rho_ion / pp.M_eq
+    epsilon_mc_raw = dry_ionomer_fraction * (1 + water_volume_factor / rho_l * lambda_eff)
+    lower, upper = 1e-9, 1.0 - 1e-9
+    if epsilon_mc_raw <= lower || epsilon_mc_raw >= upper
+        return (0.0, 0.0)
+    end
+
+    epsilon_cl_raw = 1 - epsilon_carb_val - epsilon_Pt(element, Hcl, pp) - epsilon_mc_raw
+    if epsilon_cl_raw <= lower || epsilon_cl_raw >= upper
+        return (0.0, 0.0)
+    end
+
+    d_epsilon_dlambda = lambda_cl > eps(Float64) ?
+                        -dry_ionomer_fraction * water_volume_factor / rho_l : 0.0
+    d_epsilon_dT = dry_ionomer_fraction * water_volume_factor * lambda_eff *
+                   drho_H2O_l_dT(T_cl) / rho_l^2
+    return (d_epsilon_dlambda, d_epsilon_dT)
+end
+
+"""Time derivative of the evaluated CL porosity for local lambda and temperature rates."""
+function epsilon_cl_time_derivative(element::Symbol, lambda_cl, T_cl, Hcl::Float64,
+                                    pp::PhysicalParams, dlambda_dt, dT_dt)
+    d_epsilon_dlambda, d_epsilon_dT = epsilon_cl_partials(element, lambda_cl, T_cl, Hcl, pp)
+    return d_epsilon_dlambda * dlambda_dt + d_epsilon_dT * dT_dt
+end
