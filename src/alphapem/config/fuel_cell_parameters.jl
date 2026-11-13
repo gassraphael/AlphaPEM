@@ -69,24 +69,24 @@ Base.@kwdef struct PhysicalParams <: AbstractFuelCellParams
     r_s_mpl::Float64        = 2.5            # It is the exponent pore blockage in the MPL.
     r_s_cl::Float64         = 2.5            # It is the exponent pore blockage in the CL.
     Dp_gdl::Float64         = 33.2e-6        # m. It is the pore diameter of the GDL [ZSW GenStack].
-    Dp_mpl::Float64         = 17.4e-6        # m. It is the pore diameter of the MPL [morganUnderstandingGasDiffusion2014].
-    Dp_cl::Float64          = 0.15e-6        # m. It is the pore diameter of the CL [Ali Malekian 2019 International Journal of Hydrogen Energy].
+    Dp_mpl::Float64         = 500e-9        # m. It is the pore diameter of the MPL.
+    Dp_cl::Float64          = 150e-9         # m. It is the pore diameter of the CL [Ali Malekian 2019 International Journal of Hydrogen Energy].
     theta_c_gdl::Float64    = 120 * π / 180  # radian. It is the contact angle of GDL for liquid water.
     theta_c_mpl::Float64    = 135 * π / 180  # radian. It is the contact angle of MPL for liquid water.
     theta_c_cl::Float64     = 95 * π / 180   # radian. It is the contact angle of CL for liquid water.
     theta_l_rem::Float64    = 5e-5           # s/m. It is the coefficient of liquid water removal from the GDL to the GC [Ansys Fluent value from their User Guide].
     K_v_liq_gas::Float64    = 0.02           # . It is the liquid to gas velocity ratio in the GC [Ansys Fluent value from their User Guide].
-    gamma_sorp_l::Float64   = 0.5            # s-1. Sorption rate of liquid water in the membrane [Ansys Fluent value from their User Guide].
+    gamma_sorp_l::Float64   = 20             # s-1. Sorption rate of liquid water in the membrane.
     D_liq_dif::Float64      = 1e-5           # kg.m-1.s-1. It is the diffusion coefficient of liquid water in the GC [Ansys Fluent value from their User Guide].
     gamma_cond::Float64     = 1e8            # m-2. It is the effective gas-liquid phase-change geometry/closure factor for overall condensation rate of water [Ansys Fluent value from their User Guide https://de.scribd.com/document/344930548/ANSYS-Fluent-Advanced-Add-On-Modules (2016 version, page 238) / https://www.sciencedirect.com/science/article/pii/S0196890419303863 173 pp.].
     gamma_evap::Float64     = 1e8            # m-2. It is the effective gas-liquid phase-change geometry/closure factor for overall evaporation rate of water [Ansys Fluent value from their User Guide https://de.scribd.com/document/344930548/ANSYS-Fluent-Advanced-Add-On-Modules (2016 version, page 238) / https://www.sciencedirect.com/science/article/pii/S0196890419303863 173 pp.].
     epsilon_p::Float64      = 0.11           # . It is the percolation threshold porosity of the GDL.
     epsilon_c::Float64      = 0.2            # . It is the compression ratio of the GDL.
     alpha_p::Float64        = 0.785          # . It is a fitted value for the effective matter transfer in the GDL, for through plane direction.
-    Eact_H2_cros_v::Float64 = 2.1e4          # J.mol-1. It is the activation energy of H2 for crossover in the under saturated membrane.
-    Eact_H2_cros_l::Float64 = 1.8e4          # J.mol-1. It is the activation energy of H2 for crossover in the liquid-equilibrated membrane.
-    Eact_O2_cros_v::Float64 = 2.2e4          # J.mol-1. It is the activation energy of oxygen for crossover in the under saturated membrane.
-    Eact_O2_cros_l::Float64 = 2.0e4          # J.mol-1. It is the activation energy of oxygen for crossover in the liquid-equilibrated membrane.
+    Eact_H2_cros_v::Float64 = 21e3           # J.mol-1. It is the activation energy of H2 for crossover in the under saturated membrane.
+    Eact_H2_cros_l::Float64 = 18e3           # J.mol-1. It is the activation energy of H2 for crossover in the liquid-equilibrated membrane.
+    Eact_O2_cros_v::Float64 = 22e3           # J.mol-1. It is the activation energy of oxygen for crossover in the under saturated membrane.
+    Eact_O2_cros_l::Float64 = 20e3           # J.mol-1. It is the activation energy of oxygen for crossover in the liquid-equilibrated membrane.
     Kshape::Int64           = 2              # . Mathematical factor governing lambda_eq smoothing.
     # ── Interaction parameters between fluids and PEMFC structure ──
     e::Int64                = 3              # . Capillary exponent
@@ -132,8 +132,8 @@ Base.@kwdef struct PhysicalParams <: AbstractFuelCellParams
     rho_cl::Float64        = 1000            # kg.m-3. It is the density of the CLs [wangQuasi2DTransientModel2018].
     # ── Electrical conductivities ──
     sigma_e_gdl::Float64   = 1250            # Ω-1.m-1. It is the electrical conductivity of the GDL (non-effective ?) [vetterFreeOpenReference2019].
-    sigma_e_mpl::Float64   = 5000            # Ω-1.m-1. It is the electrical conductivity of the GDL (non-effective ?) [yangEffectsOperatingConditions2019].
-    sigma_e_cl::Float64    = 350             # Ω-1.m-1. It is the electrical conductivity of the GDL (non-effective ?) [vetterFreeOpenReference2019].
+    sigma_e_mpl::Float64   = 5000            # Ω-1.m-1. It is the electrical conductivity of the MPL (non-effective ?) [yangEffectsOperatingConditions2019].
+    sigma_e_cl::Float64    = 350             # Ω-1.m-1. It is the electrical conductivity of the CL (non-effective ?) [vetterFreeOpenReference2019].
 end
 
 
@@ -160,98 +160,97 @@ const PARAMETER_BOUNDS = Dict{Symbol, Tuple{Float64, Float64, Symbol}}(
     # Geometrical parameters of the fuel cell
     # ════════════════════════════════════════════════════════════════════════════
     # ── Catalyst layer ──
-    :Hacl          => (1e-6, 15e-6, :real),                  # Anode catalyst-layer thickness
-    :Hccl          => (5e-6, 20e-6, :real),                  # Cathode catalyst-layer thickness
+    :Hacl           => (1e-6, 15e-6, :real),                  # Anode catalyst-layer thickness
+    :Hccl           => (5e-6, 20e-6, :real),                  # Cathode catalyst-layer thickness
     # ── Membrane ──
-    :Hmem          => (5e-6, 50e-6, :real),                  # Membrane thickness
+    :Hmem           => (5e-6, 50e-6, :real),                  # Membrane thickness
     # ── Gas diffusion layer ──
-    :Hgdl          => (70e-6, 150e-6, :real),                # Gas-diffusion-layer thickness
-    :epsilon_gdl   => (0.5, 0.9, :real),                     # GDL porosity
+    :Hgdl           => (70e-6, 150e-6, :real),                # Gas-diffusion-layer thickness
+    :epsilon_gdl    => (0.5, 0.9, :real),                     # GDL porosity
     # ── Microporous layer ──
-    :Hmpl          => (40e-6, 100e-6, :real),                # Microporous-layer thickness
-    :epsilon_mpl   => (0.3, 0.6, :real),                     # MPL porosity
+    :Hmpl           => (40e-6, 100e-6, :real),                # Microporous-layer thickness
+    :epsilon_mpl    => (0.3, 0.6, :real),                     # MPL porosity
     # ── Gas channel ──
-    # :Hagc          => (1e-4, 1e-3, :real),                   # Anode gas-channel height. [Goshtasbi 2020] h_ch [0.01, 0.1] cm.
-    # :Hcgc          => (1e-4, 1e-3, :real),                   # Cathode gas-channel height. [Goshtasbi 2020] h_ch [0.01, 0.1] cm.
-    # :Wagc          => (1e-3, 4e-3, :real),                   # Anode gas-channel width. [Goshtasbi 2020] w_ch [0.1, 0.4] cm. NB: default value (450e-6) is below this range.
-    # :Wcgc          => (1e-3, 4e-3, :real),                   # Cathode gas-channel width. [Goshtasbi 2020] w_ch [0.1, 0.4] cm. NB: default value (450e-6) is below this range.
-    # :Lgc           => (0.15, 0.40, :real),                   # Gas-channel length. [Goshtasbi 2020] L_ch [15, 40] cm. NB: default value (0.144) is just below this range.
+    :Hagc           => (1e-4, 1e-3, :real),                   # Anode gas-channel height. [Goshtasbi 2020]
+    :Hcgc           => (1e-4, 1e-3, :real),                   # Cathode gas-channel height. [Goshtasbi 2020]
+    :Wagc           => (1e-4, 5e-3, :real),                   # Anode gas-channel width.
+    :Wcgc           => (1e-4, 5e-3, :real),                   # Cathode gas-channel width. [Goshtasbi 2020]
+    :Lgc            => (0.5, 0.40, :real),                    # Gas-channel length.
 
     # ════════════════════════════════════════════════════════════════════════════
     # Physical parameters of the model
     # ════════════════════════════════════════════════════════════════════════════
     # ── Model parameters for fluidic calculation ──
-    # :rho_mem          => (?, ?, :real),   # ⚠️ A COMPLÉTER. Dry membrane density. No source.
-    # :M_eq          => (0.6, 1.2, :real),                     # Equivalent molar mass of the ionomer. [Goshtasbi 2020] EW_mb [600, 1200] g/mol (wider than [Nobrega 2026] [700, 1100]).
-    :tau_mpl       => (1.0, 4.0, :real),                     # Pore structure coefficient in the MPL
-    # :tau_cl           => (?, ?, :real),   # ⚠️ A COMPLÉTER. Pore structure coefficient in the CL. Doubt: Goshtasbi n_Brugg (CL Bruggeman coefficient) [1, 3] may be related, but not the same definition.
-    # :r_s_gdl          => (?, ?, :real),   # ⚠️ A COMPLÉTER. Pore-blockage exponent in the GDL. Doubt: Goshtasbi n_v [1, 3] / Nobrega n_s (1.5, 3) "saturation correction exponent" may correspond.
-    # :r_s_mpl          => (?, ?, :real),   # ⚠️ A COMPLÉTER. Pore-blockage exponent in the MPL. Same doubt as r_s_gdl.
-    # :r_s_cl           => (?, ?, :real),   # ⚠️ A COMPLÉTER. Pore-blockage exponent in the CL. Same doubt as r_s_gdl.
-    # :Dp_gdl           => (?, ?, :real),   # ⚠️ A COMPLÉTER. GDL pore diameter. No source.
-    # :Dp_mpl           => (?, ?, :real),   # ⚠️ A COMPLÉTER. MPL pore diameter. No source.
-    # :Dp_cl         => (10e-9, 70e-9, :real),                 # CL pore diameter. [Nobrega 2026] d_p,CL (10, 70) nm. NB: default value (0.15e-6) is above this range.
-    # :theta_c_gdl   => (90 * π / 180, 160 * π / 180, :real),  # GDL contact angle
-    # :theta_c_mpl   => (110 * π / 180, 150 * π / 180, :real), # MPL contact angle. [Goshtasbi 2020] θ_MPL [110, 150]°.
-    # :theta_c_cl    => (90 * π / 180, 140 * π / 180, :real),  # CL contact angle
-    # :theta_l_rem      => (?, ?, :real),   # ⚠️ A COMPLÉTER. Liquid-water removal coefficient from the GDL to the GC. No source.
-    # :K_v_liq_gas      => (?, ?, :real),   # ⚠️ A COMPLÉTER. Liquid-to-gas velocity ratio in the GC. No source.
-    # :gamma_sorp_l     => (?, ?, :real),   # ⚠️ A COMPLÉTER. Sorption rate of liquid water in the membrane. No source (Nobrega k_abs is a different formulation).
-    # :D_liq_dif        => (?, ?, :real),   # ⚠️ A COMPLÉTER. Diffusion coefficient of liquid water in the GC. No source.
-    :gamma_cond    => (1e5, 1e9, :real),                     # Effective gas-liquid phase-change geometry/closure factor for overall condensation rate of water
-    # :gamma_evap       => (?, ?, :real),   # ⚠️ A COMPLÉTER. Phase-change factor for evaporation (gamma_cond has bounds). No source.
-    # :epsilon_p        => (?, ?, :real),   # ⚠️ A COMPLÉTER. Percolation threshold porosity of the GDL. No source.
-    # :epsilon_c        => (?, ?, :real),   # ⚠️ A COMPLÉTER. Compression ratio of the GDL. No source.
-    # :alpha_p          => (?, ?, :real),   # ⚠️ A COMPLÉTER. Fitted effective matter-transfer value in the GDL. No source.
-    # :Eact_H2_cros_v   => (?, ?, :real),   # ⚠️ A COMPLÉTER. H2 crossover activation energy, vapor-equilibrated membrane. No source.
-    # :Eact_H2_cros_l   => (?, ?, :real),   # ⚠️ A COMPLÉTER. H2 crossover activation energy, liquid-equilibrated membrane. No source.
-    # :Eact_O2_cros_v   => (?, ?, :real),   # ⚠️ A COMPLÉTER. O2 crossover activation energy, vapor-equilibrated membrane. No source.
-    # :Eact_O2_cros_l   => (?, ?, :real),   # ⚠️ A COMPLÉTER. O2 crossover activation energy, liquid-equilibrated membrane. No source.
+    :rho_mem        => (1800, 2200, :real),                   # Dry membrane density.
+    :M_eq           => (0.6, 1.2, :real),                     # Equivalent molar mass of the ionomer. [Goshtasbi 2020]
+    :tau_mpl        => (1.0, 8.0, :real),                     # Pore structure coefficient in the MPL
+    :tau_cl         => (2, 10, :real),                        # Pore structure coefficient in the CL.
+    :r_s_gdl        => (1.5, 4, :real),                       # Pore-blockage exponent in the GDL.
+    :r_s_mpl        => (1.5, 4, :real),                       # Pore-blockage exponent in the MPL.
+    :r_s_cl         => (1.5, 4, :real),                       # Pore-blockage exponent in the CL.
+    :Dp_gdl         => (10e-6, 60e-6, :real),                 # GDL pore diameter.
+    :Dp_mpl         => (30e-9, 500e-9, :real),                # MPL pore diameter.
+    :Dp_cl          => (10e-9, 200e-9, :real),                # CL pore diameter.
+    :theta_c_gdl    => (100 * π / 180, 150 * π / 180, :real), # GDL contact angle. [Nobrega 2026]
+    :theta_c_mpl    => (110 * π / 180, 150 * π / 180, :real), # MPL contact angle. [Goshtasbi 2020]
+    :theta_c_cl     => (90  * π / 180, 140 * π / 180, :real), # CL contact angle
+    :theta_l_rem    => (1e-6, 5e-4, :real),                   # Liquid-water removal coefficient from the GDL to the GC.
+    :K_v_liq_gas    => (0.01, 1, :real),                      # Liquid-to-gas velocity ratio in the GC.
+    :gamma_sorp_l   => (2, 100, :real),                       # Sorption rate of liquid water in the membrane.
+    :gamma_cond     => (1e5, 1e9, :real),                     # Effective gas-liquid phase-change geometry/closure factor for overall condensation rate of water
+    :gamma_evap     => (1e5, 1e9, :real),                     # Effective gas-liquid phase-change geometry/closure factor for overall evaporation rate of water
+    :epsilon_p      => (0.03, 0.2, :real),                    # Percolation threshold porosity of the GDL.
+    :epsilon_c      => (0.05, 0.4, :real),                    # Compression ratio of the GDL.
+    :alpha_p        => (0.4, 1.0, :real),                     # Fitted effective matter-transfer value in the GDL.
+    :Eact_H2_cros_v => (15e3, 35e3, :real),                   # H2 crossover activation energy, vapor-equilibrated membrane.
+    :Eact_H2_cros_l => (15e3, 35e3, :real),                   # H2 crossover activation energy, liquid-equilibrated membrane.
+    :Eact_O2_cros_v => (15e3, 35e3, :real),                   # O2 crossover activation energy, vapor-equilibrated membrane.
+    :Eact_O2_cros_l => (15e3, 35e3, :real),                   # O2 crossover activation energy, liquid-equilibrated membrane.
     # ── Interaction parameters between fluids and PEMFC structure ──
-    :e             => (3, 5, :int),                          # Capillary exponent
+    :e              => (3, 5, :int),                          # Capillary exponent
     # ── Volumic flow of O2 inside the CCL to the Pt sites ──
-    # :K_O2_ad_Pt       => (?, ?, :real),   # ⚠️ A COMPLÉTER. O2 adsorption interfacial coefficient on Pt. Doubt: Nobrega k1, k2, k3 (2, 10) are interfacial resistance coefficients, but the mapping to K_O2_* is unclear.
-    # :K_O2_dis_ion     => (?, ?, :real),   # ⚠️ A COMPLÉTER. O2 dissolution interfacial coefficient in the ionomer. Same doubt (Nobrega k1..k3 (2, 10)).
-    # :K_O2_dis_l       => (?, ?, :real),   # ⚠️ A COMPLÉTER. O2 dissolution interfacial coefficient in liquid water. Same doubt (default 1.0 is outside (2, 10)).
-    # :IC_acl        => (0.6, 1.3, :real),                     # Ionomer to carbon ratio in the anode catalyst layer. [Goshtasbi 2020] IC_Pt,an [0.6, 1.3].
-    :IC_ccl        => (0.1, 2.0, :real),                     # Ionomer to carbon ratio in the cathode catalyst layer
-    :ECSA_0        => (30.0, 200.0, :real),                  # Initial electrochemical surface area of the catalyst
-    # :wt_Pt_acl     => (0.2, 0.7, :real),                     # Weight fraction of platinum over carbon in the anode catalyst layer. [Goshtasbi 2020] wt%Pt,an [0.2, 0.7].
-    :wt_Pt_ccl     => (0.1, 0.7, :real),                     # Weight fraction of platinum over carbon in the cathode catalyst layer
-    # :L_Pt_acl      => (5e-4, 3e-3, :real),                   # Platinum loading in the anode catalyst layer. [Goshtasbi 2020] L_Pt,an [0.05, 0.3] mg/cm² (1 mg/cm² = 1e-2 kg/m²).
-    :L_Pt_ccl      => (1e-3, 5e-3, :real),                   # Platinum loading in the cathode catalyst layer
-    :r_carb        => (10e-9, 100e-9, :real),                # Mean radius of the carbon particles
-    # :rho_ion          => (?, ?, :real),   # ⚠️ A COMPLÉTER. Ionomer density. No source.
+    :K_O2_ad_Pt     => (0.1, 10, :real),                      # O2 adsorption interfacial coefficient on Pt.
+    :K_O2_dis_ion   => (0.1, 10, :real),                      # O2 dissolution interfacial coefficient in the ionomer.
+    :K_O2_dis_l     => (0.1, 10, :real),                      # O2 dissolution interfacial coefficient in liquid water.
+    :IC_acl         => (0.6, 1.3, :real),                     # Ionomer to carbon ratio in the anode catalyst layer. [Goshtasbi 2020]
+    :IC_ccl         => (0.1, 2.0, :real),                     # Ionomer to carbon ratio in the cathode catalyst layer
+    :ECSA_0         => (30.0, 200.0, :real),                  # Initial electrochemical surface area of the catalyst
+    :wt_Pt_acl      => (0.2, 0.7, :real),                     # Weight fraction of platinum over carbon in the anode catalyst layer. [Goshtasbi 2020]
+    :wt_Pt_ccl      => (0.2, 0.7, :real),                     # Weight fraction of platinum over carbon in the cathode catalyst layer. [Goshtasbi 2020]
+    :L_Pt_acl       => (5e-4, 3e-3, :real),                   # Platinum loading in the anode catalyst layer. [Goshtasbi 2020]
+    :L_Pt_ccl       => (5e-4, 5e-3, :real),                   # Platinum loading in the cathode catalyst layer
+    :r_carb         => (10e-9, 100e-9, :real),                # Mean radius of the carbon particles
+    :rho_ion        => (1600, 2100, :real),                   # Ionomer density.
     # ── Voltage calculation ──
-    :Re            => (5e-8, 5e-6, :real),                   # Electron-conduction resistance
-    :i0_c_ref      => (0.1, 100.0, :real),                   # Reference cathode exchange current density
-    :kappa_co      => (0.01, 40.0, :real),                   # Crossover correction coefficient
-    :kappa_c       => (0.25, 4.0, :real),                    # Overpotential correction exponent
-    # :Eact_O2_red   => (30e3, 80e3, :real),                   # Activation energy of oxygen reduction. [Goshtasbi 2020] and [Nobrega 2026] E_act,ca [30, 80] kJ/mol. NB: default value (27.7e3) is below this range.
-    # :C_scl            => (?, ?, :real),   # ⚠️ A COMPLÉTER. Space-charge layer capacitance. No source.
-    :alpha_c       => (0.5, 1.0, :real),                     # Cathode transfer coefficient
+    :Re             => (5e-8, 5e-6, :real),                   # Electron-conduction resistance
+    :i0_c_ref       => (0.1, 100.0, :real),                   # Reference cathode exchange current density
+    :kappa_co       => (0.01, 40.0, :real),                   # Crossover correction coefficient
+    :kappa_c        => (0.25, 4.0, :real),                    # Overpotential correction exponent
+    :Eact_O2_red    => (20e3, 80e3, :real),                   # Activation energy of oxygen reduction.
+    :C_scl          => (3e6, 1e8, :real),                     # Space-charge layer capacitance.
+    :alpha_c        => (0.5, 1.0, :real),                     # Cathode transfer coefficient
 
     # ════════════════════════════════════════════════════════════════════════════
     # Model parameters for the heat transfer calculation
     # ════════════════════════════════════════════════════════════════════════════
     # ── Thermal conductivities ──
-    :k_th_gdl      => (0.1, 1.0, :real),                     # Thermal conductivity of the GDL
-    # :k_th_mpl         => (?, ?, :real),   # ⚠️ A COMPLÉTER. MPL thermal conductivity. No source (k_th_gdl bounds exist; Goshtasbi k_T is a scaling factor).
-    # :k_th_cl          => (?, ?, :real),   # ⚠️ A COMPLÉTER. CL thermal conductivity. No source.
-    # :k_th_mem         => (?, ?, :real),   # ⚠️ A COMPLÉTER. Membrane thermal conductivity. No source.
+    :k_th_gdl       => (0.1, 1.0, :real),                     # Thermal conductivity of the GDL
+    :k_th_mpl       => (0.1, 1.0, :real),                     # MPL thermal conductivity.
+    :k_th_cl        => (0.1, 1.0,:real),                      # CL thermal conductivity.
+    :k_th_mem       => (0.1, 1.0, :real),                     # Membrane thermal conductivity.
     # ── Specific heat capacities ──
-    # :Cp_gdl           => (?, ?, :real),   # ⚠️ A COMPLÉTER. GDL specific heat capacity. No source.
-    # :Cp_mpl           => (?, ?, :real),   # ⚠️ A COMPLÉTER. MPL specific heat capacity. No source.
-    # :Cp_cl            => (?, ?, :real),   # ⚠️ A COMPLÉTER. CL specific heat capacity. No source.
-    # :Cp_mem           => (?, ?, :real),   # ⚠️ A COMPLÉTER. Membrane specific heat capacity. No source.
+    :Cp_gdl         => (500, 1100, :real),                    # GDL specific heat capacity.
+    :Cp_mpl         => (500, 1100, :real),                    # MPL specific heat capacity.
+    :Cp_cl          => (500, 4000, :real),                    # CL specific heat capacity.
+    :Cp_mem         => (500, 1500, :real),                    # Membrane specific heat capacity.
     # ── Densities ──
-    # :rho_gdl          => (?, ?, :real),   # ⚠️ A COMPLÉTER. GDL density. No source.
-    # :rho_mpl          => (?, ?, :real),   # ⚠️ A COMPLÉTER. MPL density. No source.
-    # :rho_cl           => (?, ?, :real),   # ⚠️ A COMPLÉTER. CL density. No source.
+    :rho_gdl        => (300, 1200, :real),                    # GDL density.
+    :rho_mpl        => (400, 1200, :real),                    # MPL density.
+    :rho_cl         => (600, 1600, :real),                    # CL density.
     # ── Electrical conductivities ──
-    # :sigma_e_gdl      => (?, ?, :real),   # ⚠️ A COMPLÉTER. GDL electrical conductivity. No source (Re already covers the total electronic resistance).
-    # :sigma_e_mpl      => (?, ?, :real),   # ⚠️ A COMPLÉTER. MPL electrical conductivity. No source.
-    # :sigma_e_cl       => (?, ?, :real),   # ⚠️ A COMPLÉTER. CL electrical conductivity. No source.
+    :sigma_e_gdl    => (300, 3000, :real),                    # GDL electrical conductivity.
+    :sigma_e_mpl    => (50, 10000, :real),                    # MPL electrical conductivity.
+    :sigma_e_cl     => (10, 1000, :real),                     # CL electrical conductivity.
 )
 
 
@@ -303,7 +302,6 @@ const PARAMETER_METADATA = Dict{Symbol, Tuple{String, String}}(
     :theta_l_rem   => ("s·m⁻¹", "Liquid-water removal coefficient from the GDL to the GC"),
     :K_v_liq_gas   => ("—", "Liquid-to-gas velocity ratio in the GC"),
     :gamma_sorp_l  => ("s⁻¹", "Sorption rate of liquid water in the membrane"),
-    :D_liq_dif     => ("kg·m⁻¹·s⁻¹", "Diffusion coefficient of liquid water in the GC"),
     :gamma_cond    => ("m⁻²", "Effective gas-liquid phase-change geometry/closure factor for overall condensation rate of water"),
     :gamma_evap    => ("m⁻²", "Effective gas-liquid phase-change geometry/closure factor for overall evaporation rate of water"),
     :epsilon_p     => ("—", "Percolation threshold porosity of the GDL"),
