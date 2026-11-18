@@ -1,7 +1,7 @@
 """
     ParameterBound
 
-Bounds and metadata for a single undetermined parameter.
+Bounds and metadata for a single parameter. `latex` is the display symbol (empty if unknown).
 """
 struct ParameterBound
     name::Symbol
@@ -11,11 +11,14 @@ struct ParameterBound
     scale::Symbol         # :linear or :log
     unit::String
     description::String
+    latex::String
 end
 
-# Backward-compatible constructor: parameters with no explicit scale are linear.
-ParameterBound(name, min, max, type, unit, description) =
-    ParameterBound(name, min, max, type, :linear, unit, description)
+# Backward-compatible constructors: no explicit scale means linear, no symbol means empty.
+ParameterBound(name, min, max, type, scale::Symbol, unit, description) =
+    ParameterBound(name, min, max, type, scale, unit, description, "")
+ParameterBound(name, min, max, type, unit::AbstractString, description) =
+    ParameterBound(name, min, max, type, :linear, unit, description, "")
 
 """
     ParameterBounds

@@ -175,7 +175,7 @@ const PARAMETER_BOUNDS = Dict{Symbol, Tuple{Float64, Float64, Symbol}}(
     :Hcgc           => (1e-4, 1e-3, :real),                   # Cathode gas-channel height. [Goshtasbi 2020]
     :Wagc           => (1e-4, 5e-3, :real),                   # Anode gas-channel width.
     :Wcgc           => (1e-4, 5e-3, :real),                   # Cathode gas-channel width. [Goshtasbi 2020]
-    :Lgc            => (0.5, 0.40, :real),                    # Gas-channel length.
+    :Lgc            => (0.05, 0.40, :real),                    # Gas-channel length.
 
     # ════════════════════════════════════════════════════════════════════════════
     # Physical parameters of the model

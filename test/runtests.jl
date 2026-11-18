@@ -522,3 +522,8 @@ end
     @test C_v_sat(300.0) > 0.0
     @test nu_l(300.0) > 0.0
 end
+
+include("test_extended_local_parameters.jl")
+include("test_extended_local_sensitivity.jl")
+include("test_extended_local_statistics.jl")
+include("test_extended_local_sampling.jl")

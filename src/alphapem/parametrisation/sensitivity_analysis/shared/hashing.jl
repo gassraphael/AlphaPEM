@@ -3,15 +3,28 @@
 """
     _struct_to_string(x)
 
-Return a deterministic string representation of a composite type for hashing.
+Serialize a composite value to a deterministic string representation.
 
-Only scalar fields are serialised; this is sufficient for the configuration
-objects used by the sensitivity analyses (`PolarizationParams`, `NumericalParams`,
-`ParameterBounds`, `OperatingConditionConstraint`).
+Only scalar fields are serialized; this is sufficient for the configuration objects used by the
+sensitivity analyses (`PolarizationParams`, `NumericalParams`, `ParameterBounds`, and
+`OperatingConditionConstraint`).
+
+Parameters
+----------
+x : Any
+    Composite value whose fields are serialized.
+
+Returns
+-------
+String
+    Deterministic representation of the type and its field values.
 """
 function _struct_to_string(x)::String
+    # Initialize the serialized type representation
     buf = IOBuffer()
     print(buf, typeof(x), "(")
+
+    # Append each field using a stable scalar representation
     for (i, fn) in enumerate(fieldnames(typeof(x)))
         i > 1 && print(buf, ",")
         val = getfield(x, fn)
@@ -27,6 +40,8 @@ function _struct_to_string(x)::String
             print(buf, string(val))
         end
     end
+
+    # Close and return the serialized value
     print(buf, ")")
     return String(take!(buf))
 end
@@ -35,10 +50,17 @@ end
 """
     _hash_sample(sample)
 
-Return a SHA-256 hex digest of a sample vector.
+Compute a SHA-256 digest of a sample vector.
 
-This provides a reproducible, content-based identifier for each sample of a
-design, enabling traceability and deduplication across plan, simulations and outputs.
+Parameters
+----------
+sample : AbstractVector{<:Real}
+    Sample values to identify.
+
+Returns
+-------
+String
+    Lowercase hexadecimal SHA-256 digest of the sample representation.
 """
 function _hash_sample(sample::AbstractVector{<:Real})::String
     bytes = Vector{UInt8}(join(string.(sample), ","))

@@ -697,7 +697,7 @@ function generate_test_samples(cfg::ValidityAnalysisConfig)
         restricted_dict = restrict_epsilon_bounds(pp, orig_dict; verbose=false)
         new_bounds = ParameterBound[
             ParameterBound(b.name, restricted_dict[b.name][1], restricted_dict[b.name][2],
-                           b.type, b.scale, b.unit, b.description)
+                           b.type, b.scale, b.unit, b.description, b.latex)
             for b in pb.bounds
         ]
         pb = ParameterBounds(new_bounds, pb.fuel_cell_type, pb.year, pb.voltage_zone, pb.n_params)
