@@ -35,11 +35,11 @@ include("calibration_config.jl")
 export AbstractCurrentParams, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
 export AbstractFuelCellParams, PhysicalParams, OperatingConditions, PolaExperimentalData, NumericalParams,
        PARAMETER_METADATA, PARAMETER_BOUNDS, OPERATING_CONDITIONS_BOUNDS,
-       OperatingConditionConstraint, default_operating_condition_constraints
+       OperatingConditionConstraint, default_operating_condition_constraints,
+       exact_pressure_gap_constraint
 export CellStateScaling, ManifoldStateScaling, AuxiliaryStateScaling,
        CurrentDistributionScaling, DAEAlgebraicScaling, StateScaling
 export SimulationConfig, validate_config
 export GAConfig, CalibrationConfig, CalibrationResult
 
 end  # module Config
-

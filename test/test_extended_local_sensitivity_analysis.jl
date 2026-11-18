@@ -205,3 +205,61 @@ end
             ELSA.ExtendedLocalSensitivityConfig(screening_datasets = ELSA.ScreeningDataset[]))
     end
 end
+
+@testset "ExtendedLocalSensitivityAnalysis operating cases (step 5)" begin
+    default_bounds = copy(AlphaPEM.Config.OPERATING_CONDITIONS_BOUNDS)
+    cfg = ELSA.ExtendedLocalSensitivityConfig()
+    cases = ELSA.generate_operating_case_library(cfg)
+
+    @test length(cases) == 3^length(ELSA.OPERATING_CONDITIONS_NAMES_FOR_PARAMETRISATION) == 729
+    @test first(cases).label == "factorial_001"
+    @test last(cases).label == "factorial_729"
+    @test length(Set(case.label for case in cases)) == 729
+    @test all(case -> case.operating_conditions.Pa_des -
+                      case.operating_conditions.Pc_des ≈ 0.2e5, cases)
+    nominal_base = AlphaPEM.Fuelcell.create_fuelcell(
+        cfg.fuel_cell_type, cfg.voltage_zone; year = cfg.year, nb_gc = cfg.nb_gc).operating_conditions
+    @test all(case -> case.operating_conditions.i_min_stoich == nominal_base.i_min_stoich, cases)
+    @test AlphaPEM.Config.OPERATING_CONDITIONS_BOUNDS == default_bounds
+    @test cfg.current_density_grid == ELSA.DEFAULT_CURRENT_DENSITY_GRID
+
+    # Each parameterized operating condition spans its effective minimum, midpoint, and maximum.
+    for name in ELSA.OPERATING_CONDITIONS_NAMES_FOR_PARAMETRISATION
+        lo, hi, _ = AlphaPEM.Config.OPERATING_CONDITIONS_BOUNDS[name]
+        values = Set(getfield(case.operating_conditions, name) for case in cases)
+        @test values == Set([lo, (lo + hi) / 2.0, hi])
+    end
+
+    # Explicit base values are retained for operating conditions not included in the parameterization.
+    base = AlphaPEM.Config.OperatingConditions(i_min_stoich = 0.7, y_H2_in = 0.9)
+    cfg_custom = ELSA.ExtendedLocalSensitivityConfig(
+        base_operating_conditions = base,
+        pressure_gap = 0.1e5,
+        operating_bounds_overrides = Dict(:T_des => (300.0, 340.0, :real)),
+    )
+    custom_cases = ELSA.generate_operating_case_library(cfg_custom)
+    @test all(case -> case.operating_conditions.i_min_stoich == 0.7, custom_cases)
+    @test all(case -> case.operating_conditions.y_H2_in == 0.9, custom_cases)
+    @test all(case -> case.operating_conditions.Pa_des -
+                      case.operating_conditions.Pc_des ≈ 0.1e5, custom_cases)
+    @test Set(case.operating_conditions.T_des for case in custom_cases) ==
+          Set([300.0, 320.0, 340.0])
+
+    # Invalid pressure-derived values are rejected rather than clamped.
+    cfg_bad_pc_bounds = ELSA.ExtendedLocalSensitivityConfig(
+        operating_bounds_overrides = Dict(:Pc_des => (1.4e5, 3.5e5, :real)),
+    )
+    @test_throws ArgumentError ELSA.generate_operating_case_library(cfg_bad_pc_bounds)
+    @test_throws ArgumentError ELSA.validate_config(
+        ELSA.ExtendedLocalSensitivityConfig(current_density_grid = [0.0, 0.2, 0.1]))
+    @test_throws ArgumentError ELSA.validate_config(
+        ELSA.ExtendedLocalSensitivityConfig(operating_bounds_overrides = Dict(:unknown => (0.0, 1.0, :real))))
+
+    pressure_constraint = AlphaPEM.Config.exact_pressure_gap_constraint(0.2e5)
+    @test pressure_constraint.target == :Pc_des
+    @test pressure_constraint.kind == :(=)
+    @test pressure_constraint.fn(Dict(:Pa_des => 2.0e5)) ≈ 1.8e5
+    @test length(AlphaPEM.Config.default_operating_condition_constraints()) == 2
+    @test_throws ArgumentError AlphaPEM.Config.exact_pressure_gap_constraint(0.0)
+    @test_throws ArgumentError AlphaPEM.Config.exact_pressure_gap_constraint(Inf)
+end

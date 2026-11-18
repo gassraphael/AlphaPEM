@@ -14,6 +14,20 @@ Electrochemical Society, vol. 167, p. 044504, Mar. 2020. https://doi.org/10.1149
 """
 const SUPPORTED_OUTPUTS = (:voltage,)
 
+"""
+    OPERATING_CONDITIONS_NAMES_FOR_PARAMETRISATION
+
+Names of the independent operating conditions varied in the factorial library. Each condition takes its lower
+bound, midpoint, and upper bound, forming the complete `3^6 = 729` combinations. `Pc_des` is
+not included because it is derived from `Pa_des` and the configured pressure gap.
+"""
+const OPERATING_CONDITIONS_NAMES_FOR_PARAMETRISATION = (
+    :T_des, :Pa_des, :Sa, :Sc, :Phi_a_des, :Phi_c_des
+)
+const DEFAULT_CURRENT_DENSITY_GRID = Float64[
+    0.0, 0.03, 0.05, 0.1, 0.2, 0.6, 1.0, 1.2, 1.5, 1.7, 1.9, 2.1, 2.4, 2.7, 3.0
+]
+
 
 """
     ScreeningDataset(fuel_cell_type, year, voltage_zone)
@@ -46,6 +60,16 @@ Configuration of the extended local sensitivity and identifiability analysis.
 - `integer_policy::Symbol`: `:fix` keeps integer parameters at their nominal value (excluded
   from the analysis), `:round` rounds the perturbed levels. Default `:fix`.
 
+# Operating cases
+- `operating_bounds_overrides::Dict{Symbol,Tuple{Float64,Float64,Symbol}}`: Partial overrides
+  for `OPERATING_CONDITIONS_BOUNDS`. Unspecified bounds retain their defaults.
+- `base_operating_conditions::Union{Nothing,OperatingConditions}`: Optional full override for
+  the selected fuel cell's nominal operating conditions. The listed operating conditions are
+  replaced by their design levels; all other fields retain this base.
+- `pressure_gap::Float64`: Exact `Pa_des - Pc_des` difference in pascals. Default `0.2e5`.
+- `current_density_grid::Vector{Float64}`: Shared current-density grid in A/cm². Default is
+  Goshtasbi's 15-point grid.
+
 # Outputs
 - `outputs::Vector{Symbol}`: Predicted outputs, among `SUPPORTED_OUTPUTS`. Default `[:voltage]`.
 
@@ -76,9 +100,6 @@ Configuration of the extended local sensitivity and identifiability analysis.
 # Execution
 - `parallel::Bool`: Use multi-threading. Default `true`.
 - `max_run_time_s::Float64`: Maximum runtime per simulation (s). Default `60.0`.
-- `max_simulations::Int`: Budget guard: the run is refused above this number of simulations
-  unless `force` is `true`. Default `500_000`.
-- `force::Bool`: Bypass the budget guard. Default `false`.
 - `resume::Bool`: Resume from an existing checkpoint in `output_dir`. Default `false`.
 - `checkpoint_frequency::Int`: Save a checkpoint every `n` completed work units (`0` disables). Default `10`.
 - `output_dir::String`: Directory for results. Default `results/extended_local_sensitivity`.
@@ -101,6 +122,12 @@ Base.@kwdef struct ExtendedLocalSensitivityConfig
     parameter_subset::Union{Vector{Symbol},Nothing}  = nothing
     parameter_bounds::Union{ParameterBounds,Nothing} = nothing
     integer_policy::Symbol                 = :fix
+    # Factorial operating-case library
+    operating_bounds_overrides::Dict{Symbol, Tuple{Float64, Float64, Symbol}} =
+        Dict{Symbol, Tuple{Float64, Float64, Symbol}}()
+    base_operating_conditions::Union{Nothing, OperatingConditions} = nothing
+    pressure_gap::Float64                   = 0.2e5
+    current_density_grid::Vector{Float64}   = copy(DEFAULT_CURRENT_DENSITY_GRID)
     # Outputs
     outputs::Vector{Symbol}                = [:voltage]
     # Local sensitivity
@@ -121,8 +148,6 @@ Base.@kwdef struct ExtendedLocalSensitivityConfig
     # Execution
     parallel::Bool                         = true
     max_run_time_s::Float64                = 60.0
-    max_simulations::Int                   = 500_000
-    force::Bool                            = false
     resume::Bool                           = false
     checkpoint_frequency::Int              = 10
     output_dir::String                     = abspath(joinpath(@__DIR__, "..", "..", "..", "..", "..", "results", "extended_local_sensitivity"))
@@ -161,6 +186,26 @@ function validate_config(cfg::ExtendedLocalSensitivityConfig)::ExtendedLocalSens
     _check(!isempty(cfg.outputs) && all(o -> o in SUPPORTED_OUTPUTS, cfg.outputs),
            "outputs must be a non-empty subset of $(SUPPORTED_OUTPUTS)")
 
+    # Validate factorial operating-case settings
+    _check(isfinite(cfg.pressure_gap) && cfg.pressure_gap > 0.0,
+           "pressure_gap must be finite and positive")
+    _check(length(cfg.current_density_grid) >= 2,
+           "current_density_grid must contain at least two points")
+    _check(all(isfinite, cfg.current_density_grid) &&
+           all(i -> i >= 0.0, cfg.current_density_grid),
+           "current_density_grid must contain finite, non-negative values")
+    _check(all(diff(cfg.current_density_grid) .> 0.0),
+           "current_density_grid must be strictly increasing")
+    for (name, bound) in cfg.operating_bounds_overrides
+        _check(haskey(OPERATING_CONDITIONS_BOUNDS, name),
+               "operating_bounds_overrides contains unknown operating condition $name")
+        lo, hi, kind = bound
+        _check(isfinite(lo) && isfinite(hi) && lo < hi,
+               "operating bounds for $name must be finite and have min < max")
+        _check(kind == OPERATING_CONDITIONS_BOUNDS[name][3],
+               "operating bound type for $name must remain $(OPERATING_CONDITIONS_BOUNDS[name][3])")
+    end
+
     # Validate local-sensitivity settings
     _check(cfg.n_levels >= 3, "n_levels must be at least 3")
     _check(cfg.collinearity_floor > 0.0, "collinearity_floor must be positive")
@@ -183,7 +228,6 @@ function validate_config(cfg::ExtendedLocalSensitivityConfig)::ExtendedLocalSens
            "identifiability_matrix must be :single_point, :median or :all_points")
     _check(cfg.lambda_threshold > 0.0, "lambda_threshold must be positive")
     _check(cfg.max_run_time_s > 0.0, "max_run_time_s must be positive")
-    _check(cfg.max_simulations >= 1, "max_simulations must be positive")
     _check(cfg.checkpoint_frequency >= 0, "checkpoint_frequency must be non-negative")
     _check(cfg.top_k >= 1, "top_k must be positive")
 

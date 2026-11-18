@@ -394,7 +394,7 @@ where type is either :real or :int.
 const OPERATING_CONDITIONS_BOUNDS = Dict{Symbol, Tuple{Float64, Float64, Symbol}}(
     :T_des         => (40.0 + 273.15, 90.0 + 273.15, :real), # Desired fuel cell temperature in Kelvin
     :Pa_des        => (1.5e5, 3.5e5, :real),                 # Desired anode pressure in Pascal
-    :Pc_des        => (1.5e5, 3.5e5, :real),                 # Desired cathode pressure in Pascal
+    :Pc_des        => (1.3e5, 3.5e5, :real),                 # Desired cathode pressure in Pascal
     :Sa            => (1.5, 2.5, :real),                     # Stoichiometric ratio of hydrogen
     :Sc            => (1.5, 2.5, :real),                     # Stoichiometric ratio of oxygen
     :Phi_a_des     => (0.3, 0.9, :real),                     # Desired anode relative humidity
@@ -477,6 +477,48 @@ function default_operating_condition_constraints()::Vector{OperatingConditionCon
 end
 
 
+"""
+    exact_pressure_gap_constraint(pressure_gap) -> OperatingConditionConstraint
+
+Create a separate equality constraint requiring the anode pressure to exceed the cathode pressure
+by `pressure_gap`.
+
+Parameters
+----------
+pressure_gap : Real
+    Positive pressure difference `Pa_des - Pc_des`, in pascals.
+
+Returns
+-------
+OperatingConditionConstraint
+    Constraint that sets `Pc_des = Pa_des - pressure_gap`.
+
+Raises
+------
+ArgumentError
+    If `pressure_gap` is non-finite or not positive.
+
+References
+----------
+A. Goshtasbi, J. Chen, J. R. Waldecker, S. Hirano, and T. Ersal, "Effective parameterization of pem
+fuel cell models—part i: Sensitivity analysis and parameter identifiability," Journal of The
+Electrochemical Society, vol. 167, p. 044504, Mar. 2020. https://doi.org/10.1149/1945-7111/ab7091.
+"""
+function exact_pressure_gap_constraint(pressure_gap::Real)::OperatingConditionConstraint
+    gap = Float64(pressure_gap)
+    isfinite(gap) && gap > 0.0 ||
+        throw(ArgumentError("pressure_gap must be finite and positive (got $pressure_gap)"))
+
+    return OperatingConditionConstraint(
+        target = :Pc_des,
+        sources = Symbol[:Pa_des],
+        fn = conditions -> conditions[:Pa_des] - gap,
+        kind = :(=),
+        name = "Pc_des_eq_Pa_des_minus_$(gap)"
+    )
+end
+
+
 # ============================================================
 # EXPERIMENTAL DATA
 # ============================================================
@@ -493,4 +535,3 @@ Base.@kwdef struct PolaExperimentalData <: AbstractFuelCellParams
     i_exp::Vector{Float64} = Float64[] # Experimental current density values (A/m²)
     U_exp::Vector{Float64} = Float64[] # Experimental cell voltage values (V)
 end
-
