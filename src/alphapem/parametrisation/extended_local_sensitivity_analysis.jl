@@ -34,32 +34,39 @@ using Logging
 using Random
 using QuasiMonteCarlo
 using SHA
-using Statistics: median, std
+using Statistics: mean, median, std
 
 using AlphaPEM.Config: NumericalParams, PARAMETER_BOUNDS, PARAMETER_METADATA, PhysicalParams,
-                       SimulationConfig, PolarizationCalibrationParams, OperatingConditions,
+                       SimulationConfig, PolarizationCalibrationParams, AscendingPolarizationParams,
+                       OperatingConditions,
                        OPERATING_CONDITIONS_BOUNDS, OperatingConditionConstraint,
                        exact_pressure_gap_constraint
 using AlphaPEM.Fuelcell: create_fuelcell
 using AlphaPEM.Application: run_simulation
-using AlphaPEM.Core.Models: _polarization_points_cali
+using AlphaPEM.Core.Models: _polarization_points_cali, time_history, derived_outputs
+using AlphaPEM.Currents: AscendingPolarizationCurrent
 using ..Calibration
 using ..Calibration: ParameterBound, ParameterBounds
 
 include(joinpath(@__DIR__, "sensitivity_analysis", "shared", "warning_logger.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "shared", "hashing.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "shared", "checkpoint_io.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "types.jl"))       # step 1: config / result types
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "operating_cases.jl")) # step 5: factorial operating cases
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "parameters.jl"))  # step 2: parameters, lin/log scaling
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sensitivity.jl"))  # step 3.1: normalised sensitivities (eq. 7)
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "statistics.jl"))   # step 3.2: magnitude median / std (eq. 8-9), collinearity (eq. 10)
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sampling.jl"))     # step 4: scrambled Sobol design + screening against the user's datasets
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "types.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "operating_cases.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "outputs.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "parameters.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sensitivity.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "statistics.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sampling.jl"))
 
 export ExtendedLocalSensitivityConfig,
        ExtendedLocalSensitivityResult,
        OperatingCase,
        generate_operating_case_library,
+       ascending_polarization_params,
+       VoltageCurve,
+       voltage_curve_from_history,
+       extract_voltage_curve,
        ScreeningDataset,
        ScreeningRecord,
        OutputSpec,

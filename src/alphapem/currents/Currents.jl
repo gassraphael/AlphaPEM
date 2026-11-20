@@ -11,22 +11,27 @@ Modules:
     - step: Step current profile implementation
     - polarization: Polarization current profile implementation
     - polarization_for_cali: Polarization profile for calibration
+    - polarization_ascending: Single ascending sweep used by the extended local sensitivity analysis
     - eis: Electrochemical Impedance Spectroscopy (EIS) profile implementation
     - factory: Factory functions for current profiles
 """
 module Currents
 
-using ..Config: AbstractCurrentParams, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
+using ..Config: AbstractCurrentParams, StepParams, PolarizationParams, PolarizationCalibrationParams,
+                AscendingPolarizationParams, EISParams
 
 include("abstract.jl")
 include("step.jl")
 include("polarization.jl")
 include("polarization_for_cali.jl")
+include("polarization_ascending.jl")
 include("eis.jl")
 include("factory.jl")
 
-export AbstractCurrent, StepCurrent, PolarizationCurrent, PolarizationCalibrationCurrent, EISCurrent, create_current
-export AbstractCurrentParams, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
+export AbstractCurrent, StepCurrent, PolarizationCurrent, PolarizationCalibrationCurrent,
+       AscendingPolarizationCurrent, EISCurrent, create_current
+export AbstractCurrentParams, StepParams, PolarizationParams, PolarizationCalibrationParams,
+       AscendingPolarizationParams, EISParams
 export solver_tstops, solver_dtmax
 
 end  # module Currents

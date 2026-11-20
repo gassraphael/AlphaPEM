@@ -13,7 +13,8 @@ Modules:
     - calibration_config: Structures for Genetic Algorithm calibration configuration
 
 Exports:
-    - AbstractCurrentParams, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
+    - AbstractCurrentParams, StepParams, PolarizationParams, PolarizationCalibrationParams,
+      AscendingPolarizationParams, EISParams
     - AbstractFuelCellParams, PhysicalParams, OperatingConditions, PolaExperimentalData, NumericalParams
     - SimulationConfig, validate_config
     - GAConfig, CalibrationConfig, CalibrationResult
@@ -32,7 +33,8 @@ using .SimulationConfigModule: SimulationConfig, validate_config
 
 include("calibration_config.jl")
 
-export AbstractCurrentParams, StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
+export AbstractCurrentParams, StepParams, PolarizationParams, PolarizationCalibrationParams,
+       AscendingPolarizationParams, EISParams
 export AbstractFuelCellParams, PhysicalParams, OperatingConditions, PolaExperimentalData, NumericalParams,
        PARAMETER_METADATA, PARAMETER_BOUNDS, OPERATING_CONDITIONS_BOUNDS,
        OperatingConditionConstraint, default_operating_condition_constraints,

@@ -58,6 +58,10 @@ function create_current(p::PolarizationCalibrationParams, fuel_cell=nothing)::Ab
 end
 
 
+function create_current(p::AscendingPolarizationParams, fuel_cell=nothing)::AbstractCurrent
+    return AscendingPolarizationCurrent(p)
+end
+
 
 function create_current(p::EISParams, fuel_cell=nothing)::AbstractCurrent
     return EISCurrent(p)

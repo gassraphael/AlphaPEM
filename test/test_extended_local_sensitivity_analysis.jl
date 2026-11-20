@@ -263,3 +263,161 @@ end
     @test_throws ArgumentError AlphaPEM.Config.exact_pressure_gap_constraint(0.0)
     @test_throws ArgumentError AlphaPEM.Config.exact_pressure_gap_constraint(Inf)
 end
+
+@testset "ExtendedLocalSensitivityAnalysis ascending current profile (step 6.1)" begin
+    AscendingParams = AlphaPEM.Config.AscendingPolarizationParams
+    AscendingCurrent = AlphaPEM.Currents.AscendingPolarizationCurrent
+    current = AlphaPEM.Currents.current
+
+    # Initialize at 1 A/cm², return to OCV, then make one ascending pass.
+    p = AscendingParams(delta_t_ini = 20.0, v_load = 1e4, delta_t_break = 10.0,
+                        delta_t_break_lower_0_3 = 8.0, delta_t_break_OCV = 6.0,
+                        delta_t_measurement = 5.0,
+                        i_grid = [0.0, 0.2e4, 1.0e4, 2.0e4])
+    c = AscendingCurrent(p)
+    @test c.i_targets == p.i_grid
+    @test length(c.di_transitions) == 5
+    @test c.di_transitions[1:2] == [1.0e4, -1.0e4] # initial rise to 1 A/cm², then return to OCV
+    @test all(c.di_transitions[3:end] .> 0.0)       # requested sweep only ascends
+    @test sum(c.di_transitions) ≈ 2.0e4
+    @test c.t_meas_ends[1] ≈ 1.0 + 20.0 + 1.0 + 6.0 # initial hold, return ramp and OCV hold
+    @test c.t_meas_ends[2] - c.t_meas_ends[1] ≈ 0.2 + 8.0    # ramp + stabilisation up to 0.3 A/cm²
+    @test c.t_meas_ends[3] - c.t_meas_ends[2] ≈ 0.8 + 10.0   # ramp + stabilisation above 0.3 A/cm²
+    @test c.time_interval == (0.0, c.t_meas_ends[end])
+    @test all(c.t_meas_ends .- c.t_meas_starts .≈ 5.0)
+    for k in eachindex(c.i_targets)
+        @test current(c, c.t_meas_starts[k]) ≈ c.i_targets[k] atol = 1e-6
+        # The next ramp begins at the window end, with a leading tanh tail below 0.1 % of its step.
+        @test current(c, c.t_meas_ends[k]) ≈ c.i_targets[k] atol = 10.0
+    end
+
+    # Even when OCV is not a requested data point, initialize at 1 A/cm² and return to OCV first.
+    c_ramp = AscendingCurrent(AscendingParams(
+        delta_t_ini = 20.0, v_load = 1e4, delta_t_break = 10.0, delta_t_break_lower_0_3 = 10.0,
+        delta_t_break_OCV = 10.0, delta_t_measurement = 5.0, i_grid = [0.05e4, 1.0e4]))
+    @test length(c_ramp.di_transitions) == 4
+    @test c_ramp.t_starts[1:2] == [0.0, 21.0]
+    @test c_ramp.t_meas_ends[1] ≈ 1.0 + 20.0 + 1.0 + 10.0 + 0.05 + 10.0
+
+    # Invalid profiles are rejected
+    @test_throws ArgumentError AscendingCurrent(AscendingParams())
+    @test_throws ArgumentError AscendingCurrent(AscendingParams(i_grid = [1e4, 5e3]))
+    @test_throws ArgumentError AscendingCurrent(AscendingParams(i_grid = [-1.0, 5e3]))
+    @test_throws ArgumentError AscendingCurrent(AscendingParams(i_grid = [0.0, 1e4], v_load = 0.0))
+    @test_throws ArgumentError AscendingCurrent(AscendingParams(
+        i_grid = [0.0, 1e4], delta_t_break = 2.0, delta_t_measurement = 5.0))
+    @test_throws ArgumentError AscendingCurrent(AscendingParams(
+        i_grid = [0.0, 1e4], delta_t_break_OCV = 2.0, delta_t_measurement = 5.0))
+    @test AlphaPEM.Currents.create_current(p) isa AscendingCurrent
+    sim_cfg = AlphaPEM.Config.SimulationConfig(type_current = p)
+    @test AlphaPEM.Config.validate_config(sim_cfg) === sim_cfg
+
+    # The run configuration keeps AlphaPEM's durations and converts the grid from A/cm² to A/m²
+    cfg = ELSA.ExtendedLocalSensitivityConfig()
+    params = ELSA.ascending_polarization_params(cfg)
+    cali = AlphaPEM.Config.PolarizationCalibrationParams()
+    @test params.i_grid ≈ cfg.current_density_grid .* 1e4
+    @test (params.delta_t_ini, params.v_load, params.delta_t_break,
+           params.delta_t_break_lower_0_3, params.delta_t_break_OCV,
+           params.delta_t_measurement) ==
+          (cali.delta_t_ini, cali.v_load, cali.delta_t_break,
+           cali.delta_t_break_lower_0_3, cali.delta_t_break_OCV,
+           cali.delta_t_measurement)
+    @test length(AscendingCurrent(params).i_targets) == 15
+    @test_throws ArgumentError ELSA.validate_config(ELSA.ExtendedLocalSensitivityConfig(v_load = 0.0))
+    @test_throws ArgumentError ELSA.validate_config(
+        ELSA.ExtendedLocalSensitivityConfig(delta_t_measurement = 400.0))
+    @test_throws ArgumentError ELSA.validate_config(
+        ELSA.ExtendedLocalSensitivityConfig(delta_t_break_OCV = -1.0))
+    @test_throws ArgumentError ELSA.validate_config(
+        ELSA.ExtendedLocalSensitivityConfig(delta_t_ini = NaN))
+end
+
+@testset "ExtendedLocalSensitivityAnalysis voltage curve (step 6.1)" begin
+    AscendingParams = AlphaPEM.Config.AscendingPolarizationParams
+    c = AlphaPEM.Currents.AscendingPolarizationCurrent(AscendingParams(
+        delta_t_ini = 20.0, v_load = 1e4, delta_t_break = 10.0, delta_t_break_lower_0_3 = 8.0,
+        delta_t_break_OCV = 6.0,
+        delta_t_measurement = 5.0, i_grid = [0.0, 0.2e4, 1.0e4, 2.0e4]))
+    t = collect(0.0:0.05:c.time_interval[2])
+    U = 0.95 .- 1e-5 .* AlphaPEM.Currents.current.(Ref(c), t)
+    expected_U = 0.95 .- 1e-5 .* c.i_targets
+
+    # Complete curve: voltages at the requested current densities, without interpolation
+    full = ELSA.voltage_curve_from_history(t, U, c)
+    @test full.status == :complete
+    @test all(full.valid)
+    @test full.current_density == c.i_targets ./ 1e4
+    @test full.voltage ≈ expected_U atol = 1e-5   # the last window sample sees the next ramp's tanh tail
+    @test full.last_reached_current_density == 2.0
+
+    # Solver stopped during the third stabilisation: the first two points are kept
+    stopped = t .<= c.t_meas_starts[3] + 1.0
+    partial = ELSA.voltage_curve_from_history(t[stopped], U[stopped], c)
+    @test partial.status == :partial
+    @test partial.valid == [true, true, false, false]
+    @test partial.voltage[1:2] ≈ expected_U[1:2] atol = 1e-5
+    @test all(isnan, partial.voltage[3:4])
+    @test partial.last_reached_current_density == 0.2
+
+    # Solver stopped before the first measurement window ends, or no output at all
+    early = t .<= c.t_meas_ends[1] - 1.0
+    @test ELSA.voltage_curve_from_history(t[early], U[early], c).status == :invalid
+    no_points = ELSA.voltage_curve_from_history(Float64[], Float64[], c)
+    @test no_points.status == :invalid
+    @test isnan(no_points.last_reached_current_density)
+
+    # A non-finite voltage ends the valid prefix; later points are never recovered
+    U_bad_2 = copy(U)
+    U_bad_2[findfirst(t .>= c.t_meas_starts[2] + 1.0)] = NaN
+    @test ELSA.voltage_curve_from_history(t, U_bad_2, c).valid == [true, false, false, false]
+    U_bad_3 = copy(U)
+    U_bad_3[findfirst(t .>= c.t_meas_starts[3] + 1.0)] = Inf
+    @test ELSA.voltage_curve_from_history(t, U_bad_3, c).valid == [true, true, false, false]
+    U_bad_1 = copy(U)
+    U_bad_1[findfirst(t .>= c.t_meas_starts[1] + 1.0)] = NaN
+    @test ELSA.voltage_curve_from_history(t, U_bad_1, c).status == :invalid
+
+    # Invalid inputs
+    @test_throws ArgumentError ELSA.voltage_curve_from_history(t, U[1:end-1], c)
+    @test_throws ArgumentError ELSA.VoltageCurve([1.0], [1.0, 2.0], trues(1))
+
+    # Simulators without outputs give an invalid curve; other profiles are refused
+    no_outputs = ELSA.extract_voltage_curve((current_density = c, outputs = nothing))
+    @test no_outputs.status == :invalid
+    @test length(no_outputs.voltage) == 4
+    @test_throws ArgumentError ELSA.extract_voltage_curve((current_density = 1.0, outputs = nothing))
+end
+
+@testset "ExtendedLocalSensitivityAnalysis ascending sweep on AlphaPEM (step 6.1)" begin
+    numerical_params = AlphaPEM.Config.NumericalParams(
+        nb_gc = 5, nb_gdl = 2, nb_mpl = 1, nb_man = 1, rtol = 1e-2, atol = 1e-4,
+        maxiters = 1e4, max_run_time_s = 60.0, save_freq = 100.0)
+    run_sweep(grid; v_load) = begin
+        cfg = ELSA.ExtendedLocalSensitivityConfig(
+            current_density_grid = grid, delta_t_ini = 10.0, v_load = v_load, delta_t_break = 10.0,
+            delta_t_break_lower_0_3 = 10.0, delta_t_break_OCV = 10.0, delta_t_measurement = 5.0)
+        sim_cfg = AlphaPEM.Config.SimulationConfig(
+            type_fuel_cell = :ZSW_nominal,
+            type_current = ELSA.ascending_polarization_params(cfg),
+            numerical_parameters = numerical_params,
+            voltage_zone = :full,
+            operating_conditions = AlphaPEM.Config.OperatingConditions(Sa = 3.0, Sc = 4.0),
+            type_display = :no_display)
+        return AlphaPEM.Application.run_simulation(sim_cfg)
+    end
+
+    # Reachable currents: complete curve with a decreasing polarization voltage
+    complete = ELSA.extract_voltage_curve(run_sweep([0.0, 0.05, 0.1]; v_load = 0.01e4))
+    @test complete.status == :complete
+    @test issorted(complete.voltage; rev = true)
+    @test all(0.5 .< complete.voltage .< 1.1)
+
+    # Currents far beyond the cell capability: the solver fails, the reached prefix is kept
+    stopped = ELSA.extract_voltage_curve(run_sweep([0.0, 0.5, 4.0, 8.0]; v_load = 0.1e4))
+    @test stopped.status == :partial
+    @test stopped.valid[1]
+    @test !stopped.valid[end]
+    @test issorted(stopped.valid; rev = true)
+    @test all(isnan, stopped.voltage[.!stopped.valid])
+end

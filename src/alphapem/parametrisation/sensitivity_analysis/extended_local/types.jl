@@ -63,12 +63,20 @@ Configuration of the extended local sensitivity and identifiability analysis.
 # Operating cases
 - `operating_bounds_overrides::Dict{Symbol,Tuple{Float64,Float64,Symbol}}`: Partial overrides
   for `OPERATING_CONDITIONS_BOUNDS`. Unspecified bounds retain their defaults.
-- `base_operating_conditions::Union{Nothing,OperatingConditions}`: Optional full override for
-  the selected fuel cell's nominal operating conditions. The listed operating conditions are
-  replaced by their design levels; all other fields retain this base.
+- `base_operating_conditions::Union{Nothing,OperatingConditions}`: Starting operating conditions
+  for every generated case. If `nothing`, use the selected fuel cell's nominal conditions;
+  otherwise use this value as the base. The six parameterized conditions are replaced by their
+  design levels, while fields not parameterized (e.g. `y_H2_in`, `i_min_stoich`) retain the base
+  values.
 - `pressure_gap::Float64`: Exact `Pa_des - Pc_des` difference in pascals. Default `0.2e5`.
 - `current_density_grid::Vector{Float64}`: Shared current-density grid in A/cm². Default is
   Goshtasbi's 15-point grid.
+- `delta_t_ini::Float64`: Stabilisation time at the initial 1 A/cm² current (s).
+- `v_load::Float64`: Loading rate for initialization and sweep ramps (A/m²/s).
+- `delta_t_break::Float64`: Stabilisation time above 0.3 A/cm² (s).
+- `delta_t_break_lower_0_3::Float64`: Stabilisation time up to 0.3 A/cm², excluding OCV (s).
+- `delta_t_break_OCV::Float64`: Stabilisation time at OCV after returning from 1 A/cm² (s).
+- `delta_t_measurement::Float64`: Trailing voltage averaging-window duration (s).
 
 # Outputs
 - `outputs::Vector{Symbol}`: Predicted outputs, among `SUPPORTED_OUTPUTS`. Default `[:voltage]`.
@@ -114,45 +122,52 @@ Electrochemical Society, vol. 167, p. 044504, Mar. 2020. https://doi.org/10.1149
 """
 Base.@kwdef struct ExtendedLocalSensitivityConfig
     # Fuel cell and parameters
-    fuel_cell_type::Symbol                 = :ZSW_nominal
-    year::Union{Int,Nothing}               = 2024
-    voltage_zone::Symbol                   = :full
-    nb_gc::Int                             = 5
-    numerical_params::NumericalParams      = NumericalParams(nb_gc = nb_gc)
-    parameter_subset::Union{Vector{Symbol},Nothing}  = nothing
-    parameter_bounds::Union{ParameterBounds,Nothing} = nothing
-    integer_policy::Symbol                 = :fix
+    fuel_cell_type::Symbol                 = :ZSW_nominal      # Fuel-cell model used for nominal properties and screening.
+    year::Union{Int,Nothing}               = 2024              # Experimental-data year; `nothing` selects the default year.
+    voltage_zone::Symbol                   = :full             # Polarization-curve region used by the analysis.
+    nb_gc::Int                             = 5                 # Number of gas-channel nodes in each simulation.
+    numerical_params::NumericalParams      = NumericalParams(nb_gc = nb_gc) # Solver tolerances, mesh sizes and runtime settings.
+    parameter_subset::Union{Vector{Symbol},Nothing}  = nothing # Parameter names to analyse; `nothing` selects all eligible parameters.
+    parameter_bounds::Union{ParameterBounds,Nothing} = nothing # Optional analysis bounds; `nothing` uses fuel-cell defaults.
+    integer_policy::Symbol                 = :fix              # Fix integer parameters at nominal (`:fix`) or round perturbations (`:round`).
     # Factorial operating-case library
     operating_bounds_overrides::Dict{Symbol, Tuple{Float64, Float64, Symbol}} =
-        Dict{Symbol, Tuple{Float64, Float64, Symbol}}()
-    base_operating_conditions::Union{Nothing, OperatingConditions} = nothing
-    pressure_gap::Float64                   = 0.2e5
-    current_density_grid::Vector{Float64}   = copy(DEFAULT_CURRENT_DENSITY_GRID)
+        Dict{Symbol, Tuple{Float64, Float64, Symbol}}()        # Per-condition bound overrides; omitted conditions keep default bounds.
+    base_operating_conditions::Union{Nothing, OperatingConditions} = nothing # Base for cases: nominal if `nothing`; swept fields are replaced, others retained.
+    pressure_gap::Float64                   = 0.2e5            # Enforce Pa_des - Pc_des = this pressure difference (Pa).
+    current_density_grid::Vector{Float64}   = copy(DEFAULT_CURRENT_DENSITY_GRID) # Requested current points (A/cm²), shared by every case.
+    # Ascending current profile (defaults: AlphaPEM polarization durations)
+    delta_t_ini::Float64                    = AscendingPolarizationParams().delta_t_ini             # Stabilization duration at the initial 1 A/cm² current (s).
+    v_load::Float64                         = AscendingPolarizationParams().v_load                  # Current ramp rate (A/m²/s).
+    delta_t_break::Float64                  = AscendingPolarizationParams().delta_t_break           # Stabilization duration above 0.3 A/cm² (s).
+    delta_t_break_lower_0_3::Float64        = AscendingPolarizationParams().delta_t_break_lower_0_3 # Stabilization duration at or below 0.3 A/cm² (s).
+    delta_t_break_OCV::Float64              = AscendingPolarizationParams().delta_t_break_OCV       # Stabilization duration at OCV after returning from 1 A/cm² (s).
+    delta_t_measurement::Float64            = AscendingPolarizationParams().delta_t_measurement     # Trailing voltage averaging-window duration (s).
     # Outputs
-    outputs::Vector{Symbol}                = [:voltage]
+    outputs::Vector{Symbol}                = [:voltage]   # Model outputs to extract; currently only voltage is supported.
     # Local sensitivity
-    n_levels::Int                          = 7
-    collinearity_floor::Float64            = 1e-12
-    collinearity_threshold::Float64        = 0.707
-    sensitivity_threshold::Float64         = 0.1
+    n_levels::Int                          = 7             # Equidistant parameter levels used to estimate each local sensitivity.
+    collinearity_floor::Float64            = 1e-12         # Minimum norm product used in collinearity calculations.
+    collinearity_threshold::Float64        = 0.707         # Collinearity threshold for highlighting parameter pairs.
+    sensitivity_threshold::Float64         = 0.1           # Minimum median sensitivity magnitude for an influential parameter.
     # Sampling and screening
-    n_candidates::Int                      = 2^9
-    screening_datasets::Vector{ScreeningDataset} = [ScreeningDataset(:ZSW_nominal, 2024, :full)]
-    include_nominal::Bool                  = false
-    screening_norm::Symbol                 = :linf
-    screening_threshold_V::Float64         = 0.3
-    seed::Int                              = 42
+    n_candidates::Int                      = 2^9           # Sobol candidates generated before experimental screening.
+    screening_datasets::Vector{ScreeningDataset} = [ScreeningDataset(:ZSW_nominal, 2024, :full)] # Experimental curves every candidate must match.
+    include_nominal::Bool                  = false         # Add the nominal parameter set as a screening candidate.
+    screening_norm::Symbol                 = :linf         # Voltage-error metric used during screening (`:linf` or `:rmse`).
+    screening_threshold_V::Float64         = 0.3           # Maximum allowed screening error (V).
+    seed::Int                              = 42            # Seed for repeatable Sobol candidate generation.
     # Identifiability
-    identifiability_matrix::Symbol         = :single_point
-    lambda_threshold::Float64              = 1.0
+    identifiability_matrix::Symbol         = :single_point # Sensitivity matrix assembly mode for identifiability.
+    lambda_threshold::Float64              = 1.0           # Minimum Hessian eigenvalue for an identifiable subset.
     # Execution
-    parallel::Bool                         = true
-    max_run_time_s::Float64                = 60.0
-    resume::Bool                           = false
-    checkpoint_frequency::Int              = 10
-    output_dir::String                     = abspath(joinpath(@__DIR__, "..", "..", "..", "..", "..", "results", "extended_local_sensitivity"))
-    save_raw::Bool                         = false
-    top_k::Int                             = 13
+    parallel::Bool                         = true          # Run independent work units concurrently when multiple Julia threads exist.
+    max_run_time_s::Float64                = 120.0         # Wall-clock limit for one simulation run (s).
+    resume::Bool                           = false         # Resume analysis from a compatible checkpoint in `output_dir`.
+    checkpoint_frequency::Int              = 10            # Save progress every this many work units; 0 disables periodic saves.
+    output_dir::String                     = abspath(joinpath(@__DIR__, "..", "..", "..", "..", "..", "results", "extended_local_sensitivity")) # Directory for checkpoints and analysis outputs.
+    save_raw::Bool                         = false         # Export raw per-point sensitivity blocks in addition to summaries.
+    top_k::Int                             = 13            # Number of leading parameters shown in ranking plots.
 end
 
 
@@ -196,6 +211,21 @@ function validate_config(cfg::ExtendedLocalSensitivityConfig)::ExtendedLocalSens
            "current_density_grid must contain finite, non-negative values")
     _check(all(diff(cfg.current_density_grid) .> 0.0),
            "current_density_grid must be strictly increasing")
+
+    # Validate the ascending current profile
+    _check(all(isfinite, (cfg.delta_t_ini, cfg.v_load, cfg.delta_t_break,
+                          cfg.delta_t_break_lower_0_3, cfg.delta_t_break_OCV,
+                          cfg.delta_t_measurement)),
+           "ascending profile durations and loading rate must be finite")
+    _check(cfg.v_load > 0.0, "v_load must be positive")
+    _check(cfg.delta_t_measurement >= 0.0, "delta_t_measurement must be non-negative")
+    _check(min(cfg.delta_t_break, cfg.delta_t_break_lower_0_3) >= cfg.delta_t_measurement,
+           "stabilisation times must be at least delta_t_measurement")
+    _check(cfg.delta_t_break_OCV >= 0.0,
+           "delta_t_break_OCV must be non-negative")
+    _check(!iszero(first(cfg.current_density_grid)) ||
+           cfg.delta_t_break_OCV >= cfg.delta_t_measurement,
+           "delta_t_break_OCV must be at least delta_t_measurement when OCV is included in current_density_grid")
     for (name, bound) in cfg.operating_bounds_overrides
         _check(haskey(OPERATING_CONDITIONS_BOUNDS, name),
                "operating_bounds_overrides contains unknown operating condition $name")

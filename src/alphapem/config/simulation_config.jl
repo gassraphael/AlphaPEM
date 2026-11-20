@@ -25,7 +25,7 @@ Constants:
 module SimulationConfigModule
 
 using ..Config: AbstractCurrentParams, StepParams, PolarizationParams,
-                 PolarizationCalibrationParams, EISParams, NumericalParams,
+                 PolarizationCalibrationParams, AscendingPolarizationParams, EISParams, NumericalParams,
                  PhysicalParams, OperatingConditions
 using ..StateScalingModule: StateScaling
 
@@ -54,6 +54,7 @@ const ALLOWED_CURRENT_TYPES = (
     StepParams,
     PolarizationParams,
     PolarizationCalibrationParams,
+    AscendingPolarizationParams,
     EISParams
 )
 

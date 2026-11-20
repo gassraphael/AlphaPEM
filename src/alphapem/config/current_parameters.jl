@@ -58,6 +58,28 @@ end
 
 
 """
+    AscendingPolarizationParams
+
+Parameters of a single ascending current sweep, without return pass or hysteresis.
+
+The sweep starts at open-circuit voltage, then reaches each current density of `i_grid` once, in
+increasing order. Before the sweep, the profile stabilises at 1 A/cm² for `delta_t_ini`, then
+returns to OCV for `delta_t_break_OCV`. The requested OCV point, when present in `i_grid`, is
+measured during this OCV hold. Other points use AlphaPEM's low- and high-current stabilisation
+durations. Voltage is measured over the last `delta_t_measurement` seconds of each hold.
+"""
+Base.@kwdef struct AscendingPolarizationParams <: AbstractCurrentParams
+    delta_t_ini::Float64             = 30 * 60.0  # (s). Stabilisation time at the initial 1 A/cm² current.
+    v_load::Float64                  = 0.01e4     # (A.m-2.s-1). Loading rate for initialization and sweep ramps.
+    delta_t_break::Float64           = 300        # (s). Stabilisation time above 0.3 A/cm².
+    delta_t_break_lower_0_3::Float64 = 120.0      # (s). Stabilisation time up to 0.3 A/cm², excluding OCV.
+    delta_t_break_OCV::Float64       = 60.0       # (s). Stabilisation time after returning from 1 A/cm² to OCV.
+    delta_t_measurement::Float64     = 30.0       # (s). Voltage measurement time at each requested current density.
+    i_grid::Vector{Float64}          = Float64[]  # (A.m-2). Ordered current densities measured on the ascending sweep.
+end
+
+
+"""
     EISParams
 """
 Base.@kwdef struct EISParams <: AbstractCurrentParams

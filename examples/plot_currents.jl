@@ -4,8 +4,10 @@ import Pkg
 Pkg.activate(joinpath(@__DIR__, ".."))
 
 # --- Load AlphaPEM from the project environment ---
-using AlphaPEM.Config: StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
-using AlphaPEM.Currents: StepCurrent, PolarizationCurrent, PolarizationCalibrationCurrent, EISCurrent, current
+using AlphaPEM.Config: StepParams, PolarizationParams, PolarizationCalibrationParams,
+                       AscendingPolarizationParams, EISParams
+using AlphaPEM.Currents: StepCurrent, PolarizationCurrent, PolarizationCalibrationCurrent,
+                         AscendingPolarizationCurrent, EISCurrent, current
 using AlphaPEM.Core.Models.PlotHelpers: _publication_colors, _cell_current_color, _finalize_axis!, lsub, saving_instructions!
 using GLMakie
 GLMakie.activate!()  # Enable interactive window
@@ -58,6 +60,27 @@ t_pola_cali = range(t0_pola_cali, tf_pola_cali, length=n_points)
 t_pola_cali_min = t_pola_cali ./ 60
 i_pola_cali = [current(pola_cali, t) for t in t_pola_cali] ./ 1e4
 
+# === Ascending Polarization Current (extended local sensitivity analysis) ===
+# Initialize at 1 A/cm², return to OCV, then reach each requested density once in ascending order.
+ascending_p = AscendingPolarizationParams(
+    delta_t_ini             = 30*60.0,  # delta_t_ini = 30 min at the initial 1 A/cm².
+    v_load                  = 0.01e4,   # v_load = 0.01 A/cm²/s.
+    delta_t_break           = 300,      # delta_t_break = 5 min above 0.3 A/cm².
+    delta_t_break_lower_0_3 = 120.0,    # delta_t_break_lower_0_3 = 2 min up to 0.3 A/cm².
+    delta_t_break_OCV       = 60.0,     # delta_t_break_OCV = 1 min at OCV after returning from 1 A/cm².
+    delta_t_measurement     = 30.0,     # delta_t_measurement = 30 s at the end of each measured hold.
+    i_grid                  = Float64[0.0, 0.03, 0.05, 0.1, 0.2, 0.6, 1.0, 1.2, 1.5, 1.7, 1.9, 2.1, 2.4, 2.7, 3.0] .* 1e4
+)
+ascending_c = AscendingPolarizationCurrent(ascending_p)
+
+t0_ascending, tf_ascending = ascending_c.time_interval
+t_ascending = range(t0_ascending, tf_ascending, length=n_points)
+t_ascending_min = t_ascending ./ 60
+i_ascending = [current(ascending_c, t) for t in t_ascending] ./ 1e4
+# Voltage is averaged over the last seconds of each stabilisation: mark where each window ends.
+t_ascending_meas_min = ascending_c.t_meas_ends ./ 60
+i_ascending_meas = ascending_c.i_targets ./ 1e4
+
 # === EIS Current ===
 eis_p = EISParams(
     i_EIS       = 1.0e4, # i_EIS = 1.0 A/cm²
@@ -108,8 +131,8 @@ i_eis_zoom = i_eis[zoom_indices]
 
 _one_decimal_tick_labels(values) = [string(round(value; digits=1)) for value in values]
 
-# === Plot: all current profiles on a 2×2 figure (EIS with a zoom inset) ===
-fig = Figure(size = (1200, 800))
+# === Plot: all current profiles on a 3-row figure (EIS with a zoom inset) ===
+fig = Figure(size = (1200, 1200))
 palette = _publication_colors()
 
 ax1 = Axis(fig[1, 1], title = "Step current")
@@ -128,8 +151,17 @@ _finalize_axis!(ax2;
 ax2.xticks = range(first(t_pola_h), last(t_pola_h); length=6)
 ax2.xtickformat = _one_decimal_tick_labels
 
+ax_ascending = Axis(fig[2, 1:2], title = "Ascending polarization current (extended local sensitivity analysis)")
+lines!(ax_ascending, t_ascending_min, i_ascending, color=palette[4], linewidth=2.8)
+scatter!(ax_ascending, t_ascending_meas_min, i_ascending_meas, color=:black, markersize=7)
+_finalize_axis!(ax_ascending;
+    xlabel = rich("Time ", lsub("t", ""), " (min)"),
+    ylabel = rich("Current density ", lsub("i", "fc"), " (A·cm⁻²)"))
+ax_ascending.xticks = range(first(t_ascending_min), last(t_ascending_min); length=6)
+ax_ascending.xtickformat = _one_decimal_tick_labels
+
 if show_polarization_calibration
-    ax3 = Axis(fig[2, 1], title = "Polarization calibration current")
+    ax3 = Axis(fig[3, 1], title = "Polarization calibration current")
     lines!(ax3, t_pola_cali_min, i_pola_cali, color=palette[2], linewidth=2.8)
     _finalize_axis!(ax3;
         xlabel = rich("Time ", lsub("t", ""), " (min)"),
@@ -138,7 +170,7 @@ if show_polarization_calibration
     ax3.xtickformat = _one_decimal_tick_labels
 end
 
-eis_position = show_polarization_calibration ? fig[2, 2] : fig[2, 1:2]
+eis_position = show_polarization_calibration ? fig[3, 2] : fig[3, 1:2]
 ax4 = Axis(eis_position, title = "EIS current")
 lines!(ax4, t_eis_h, i_eis, color=palette[3], linewidth=2.8)
 _finalize_axis!(ax4;

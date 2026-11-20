@@ -17,11 +17,12 @@ Public API
 
 using ..Config:   AbstractCurrentParams,
                   SimulationConfig,
-                  StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
+                  StepParams, PolarizationParams, PolarizationCalibrationParams,
+                  AscendingPolarizationParams, EISParams
 using ..Fuelcell: create_fuelcell
 using ..Currents: create_current, step_duration
 using SciMLBase: ReturnCode
-using ..Core.Models: AlphaPEM, simulate_model!, display!, save_plot!,
+using ..Core.Models: AlphaPEM, simulate_model!, recovery!, display!, save_plot!,
                      build_solver_state_scaling, unscale_values, EIS_STATE_RESPONSES
 using ..Core.Types: SimulationOutputs
 
@@ -359,6 +360,31 @@ end
 
 
 """
+    launch_AlphaPEM_for_ascending_polarization_current(simu) -> AlphaPEM
+
+Run one ascending polarization sweep in a single solve.
+
+This profile is dedicated to analyses that read `simu.outputs` directly, so it has no figures:
+`type_display` must be `:no_display`. If the solver fails after solving some points, the outputs of
+those points are kept so that the stabilisations reached before the failure remain measurable.
+"""
+function launch_AlphaPEM_for_ascending_polarization_current(simu::AlphaPEM)::AlphaPEM
+    simu.cfg.type_display == :no_display ||
+        throw(ArgumentError("`AscendingPolarizationParams` has no display; use `type_display = :no_display`."))
+
+    try
+        simulate_model!(simu)
+    catch err
+        # A solver failure (e.g. convergence) keeps the points solved before it. Any other error,
+        # or a failure without a single solved point, is propagated.
+        (err isa ErrorException && simu.sol !== nothing && !isempty(simu.sol.t)) || rethrow()
+        recovery!(simu)
+    end
+    return simu
+end
+
+
+"""
     launch_AlphaPEM_for_polarization_current_for_calibration(simulators) -> Vector{AlphaPEM}
 
 Run a batch of calibration polarization simulations sequentially, sharing one set of axes.
@@ -402,6 +428,9 @@ _dispatch_launch!(simu::AlphaPEM, ::PolarizationParams) =
 
 _dispatch_launch!(simu::AlphaPEM, ::PolarizationCalibrationParams) =
     launch_AlphaPEM_for_polarization_current_for_calibration(simu)
+
+_dispatch_launch!(simu::AlphaPEM, ::AscendingPolarizationParams) =
+    launch_AlphaPEM_for_ascending_polarization_current(simu)
 
 _dispatch_launch!(simu::AlphaPEM, ::EISParams) =
     launch_AlphaPEM_for_EIS_current(simu)
