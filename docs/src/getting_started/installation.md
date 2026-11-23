@@ -139,7 +139,6 @@ Install the official [Julia Language Support](https://marketplace.visualstudio.c
 
 | Issue | Solution |
 |-------|----------|
-| `GLFWError` on cluster nodes | Expected behavior; AlphaPEM falls back to `CairoMakie` |
 | Build fails with dependency errors | Run `julia --project=. -e 'using Pkg; Pkg.update()'` |
 | IRD installation fails | Verify R installation with `Rscript --version` |
 | Slow first run | First-time precompilation is expected; subsequent runs are fast |
