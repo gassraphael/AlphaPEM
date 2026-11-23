@@ -191,13 +191,12 @@ export CONDA_OVERRIDE_GLIBC=2.28
 # **Headless-Node Workarounds:**
 # `#PBS -V` copies the submitting shell's whole environment to the compute node, DISPLAY
 # included (typically DISPLAY=localhost:10.0, left over from an X11-forwarded SSH session).
-# That display does not exist on the node, so GLFW aborts with "X11: Failed to open
-# display". This job never draws on screen, so drop the variable.
+# That display does not exist on the node. This job never draws on screen, so drop the
+# variable.
 unset DISPLAY
 
 # Suppress the implicit precompilation pass that Pkg runs after each of its operations, so
-# the Julia setup below stays explicit and ordered. Note this does NOT cover the pass Base
-# runs at load time — see the GLMakie discussion in "Julia Environment Configuration".
+# the Julia setup below stays explicit and ordered.
 export JULIA_PKG_PRECOMPILE_AUTO=0
 
 
@@ -226,32 +225,6 @@ fi
 echo "[INFO] Updating Julia registries..."
 julia --project -e 'using Pkg; Pkg.Registry.update()'
 
-# Drop GLMakie from THIS COPY of the project (the scratch copy is disposable, and
-# Project.toml/Manifest.toml are excluded from the results rsync at the end of the job).
-#
-# This is the only thing that actually works. GLMakie needs OpenGL/X11 and can never
-# precompile on a compute node, and in Julia >= 1.12 load-time precompilation is done by
-# Base, not Pkg (loading.jl -> Precompilation.precompilepkgs(...; _from_loading=true)),
-# which:
-#   - ignores JULIA_PKG_PRECOMPILE_AUTO (only Pkg.should_autoprecompile() reads it, for
-#     Pkg operations such as the Pkg.rm below — hence the export is still worth keeping);
-#   - walks the WHOLE environment graph whatever package was requested;
-#   - raises on any failure of a package in `project_deps`, i.e. anything listed in
-#     Project.toml [deps] (precompilation.jl: `if strict || (dep in project_deps)`).
-# So `Pkg.precompile(strict=false)` and excluding GLMakie from an explicit precompile
-# call both fail to protect the eventual `using AlphaPEM`: as long as GLMakie sits in
-# [deps], every load from this environment tries it and dies.
-#
-# AlphaPEM never imports GLMakie (src/alphapem/application/run_simulation_modules.jl
-# resolves it lazily through Base.loaded_modules and falls back to CairoMakie), so
-# removing it changes nothing for a headless batch run.
-echo "[INFO] Removing GLMakie from the scratch project copy (headless node, no OpenGL/X11)..."
-julia --project -e 'using Pkg; haskey(Pkg.project().dependencies, "GLMakie") && Pkg.rm("GLMakie")'
-if [ $? -ne 0 ]; then
-    echo "[ERROR] Could not remove GLMakie from the project copy. Aborting job."
-    exit 1
-fi
-
 # Instantiate strictly from the committed Manifest.toml.
 # Do NOT call Pkg.resolve() here: it re-resolves the whole dependency graph against the
 # registry and discards the known-good pinned versions shipped with the project.
@@ -263,8 +236,7 @@ if [ $? -ne 0 ]; then
 fi
 echo "[INFO] Project instantiated successfully"
 
-# Precompile the whole environment. GLMakie is gone, so this can now be strict: any
-# failure left is a real one and must stop the job.
+# Precompile the whole environment: any failure is a real one and must stop the job.
 echo "[INFO] Precompiling packages..."
 julia --project -e 'using Pkg; Pkg.precompile()'
 if [ $? -ne 0 ]; then
@@ -365,8 +337,7 @@ sync_results_back "final"
 
 # Copy results back to original directory.
 # Excluded: .git (read-only objects cause permission errors) and the root Project.toml /
-# Manifest.toml, which this job mutated on purpose to drop GLMakie — that edit is local to
-# the scratch copy and must not leak back into the repository.
+# Manifest.toml, which must not leak back into the repository.
 echo "[INFO] Copying full project tree to original directory..."
 cd "$PBS_TMPDIR/$PROJECT_NAME"
 rsync -a --exclude='.git' --exclude='/Project.toml' --exclude='/Manifest.toml' . "$PROJECT_ROOT/"

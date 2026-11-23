@@ -4,8 +4,11 @@
 Utility helpers used by `run_simulation.jl`.
 
 This file intentionally contains only secondary support functions:
-- native CairoMakie figure preparation
-- internal-state extraction for dynamic segmented runs
+- figure preparation (WGLMakie for interactive display, CairoMakie for static output)
+- internal-state extraction and concatenation for segmented runs
+
+Serving the figures in a browser is in `interactive_display.jl`, and the segmented `:live`
+runs are in `run_simulation_live.jl`.
 """
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -15,63 +18,53 @@ This file intentionally contains only secondary support functions:
 using CairoMakie
 import WGLMakie
 
-# GLMakie requires X11/OpenGL and is unavailable on headless servers (e.g. HPC clusters).
-function _glmakie()
-    pkgid = Base.PkgId(Base.UUID("e9467ef8-e4e7-5192-8a1a-b1aee30e663a"), "GLMakie")
-    return get(Base.loaded_modules, pkgid, nothing)
-end
-
 # Ensure CairoMakie is the default backend when the module is loaded.
 function __init__()
     CairoMakie.activate!()
 end
 
-const _interactive_screens = Any[]
-const _interactive_fig_to_screen = IdDict{Any, Any}()
-const _active_display_backend = Ref{Symbol}(:cairo)
-const _prepared_interactive_figures = Any[]
+const _active_display_backend = Ref{Symbol}(:cairo)   # backend activated by the last `_setup_makie_theme!`.
+const _prepared_interactive_figures = Any[]           # figures prepared for the run being displayed.
 
-"""Return true when the simulation should be shown in a native interactive window."""
+"""Return true when the simulation should be shown in an interactive browser view."""
 _use_interactive_display(cfg::SimulationConfig) =
     cfg.type_display != :no_display
 
-"""Apply a publication-oriented Makie theme and activate the required backend."""
+"""
+    _setup_makie_theme!(cfg; backend=:auto)
+
+Apply a publication-oriented Makie theme and activate the required backend.
+
+Parameters
+----------
+cfg : SimulationConfig
+    Simulation configuration; it decides the backend when `backend` is `:auto`.
+backend : Symbol
+    `:wgl` (interactive, in a browser), `:cairo` (static) or `:auto`, which selects `:wgl`
+    when the configuration requests a display and `:cairo` otherwise.
+
+Returns
+-------
+Nothing
+"""
 function _setup_makie_theme!(cfg::SimulationConfig; backend::Symbol=:auto)
     publication_palette = [
         "#0072B2", "#D55E00", "#009E73", "#CC79A7", "#56B4E9",
         "#E69F00", "#882255", "#44AA99", "#999933", "#332288", "#DDCC77",
     ]
 
+    backend in (:auto, :wgl, :cairo) ||
+        throw(ArgumentError("Unknown Makie backend `$backend`; expected :auto, :wgl or :cairo."))
+    if backend == :auto
+        backend = _use_interactive_display(cfg) ? :wgl : :cairo
+    end
+
     if backend == :wgl
         WGLMakie.activate!()
-        _active_display_backend[] = :wgl
-    elseif backend == :cairo
-        CairoMakie.activate!()
-        _active_display_backend[] = :cairo
-    elseif backend == :gl
-        glm = _glmakie()
-        if !isnothing(glm)
-            Base.invokelatest(glm.activate!)
-            _active_display_backend[] = :gl
-        else
-            @warn "GLMakie not available; falling back to CairoMakie non-interactive display."
-            CairoMakie.activate!()
-            _active_display_backend[] = :cairo
-        end
-    elseif _use_interactive_display(cfg)
-        glm = _glmakie()
-        if !isnothing(glm)
-            Base.invokelatest(glm.activate!)
-            _active_display_backend[] = :gl
-        else
-            @warn "GLMakie not available; falling back to CairoMakie non-interactive display."
-            CairoMakie.activate!()
-            _active_display_backend[] = :cairo
-        end
     else
         CairoMakie.activate!()
-        _active_display_backend[] = :cairo
     end
+    _active_display_backend[] = backend
 
     set_theme!(Theme(
         fontsize=15,
@@ -91,37 +84,16 @@ function _setup_makie_theme!(cfg::SimulationConfig; backend::Symbol=:auto)
 end
 
 
-"""Display figures in native GLMakie windows and enable pointer-based inspection."""
-function _open_interactive_figures!(figs...)
-    for fig in figs
-        fig === nothing && continue
-        fig isa AbstractVector && (foreach(f -> _open_interactive_figures!(f), fig); continue)
+"""
+    _store_prepared_figures!(figs...)
 
-        if haskey(_interactive_fig_to_screen, fig)
-            screen = _interactive_fig_to_screen[fig]
-            if isopen(screen)
-                continue
-            else
-                delete!(_interactive_fig_to_screen, fig)
-            end
-        end
+Store the latest prepared figure handles for the deferred interactive display.
 
-        glm = _glmakie()
-        if isnothing(glm)
-            @warn "GLMakie not available; skipping interactive figure display."
-            return nothing
-        end
-        DataInspector(fig)
-        screen = Base.invokelatest(glm.Screen)
-        display(screen, fig)
-        _interactive_fig_to_screen[fig] = screen
-        screen in _interactive_screens || push!(_interactive_screens, screen)
-    end
-    return nothing
-end
-
-
-"""Store the latest prepared figure handles for deferred interactive display."""
+Parameters
+----------
+figs : Any
+    Figures, or vectors of figures, as returned by `figures_preparation` (`nothing` is ignored).
+"""
 function _store_prepared_figures!(figs...)
     empty!(_prepared_interactive_figures)
     for fig in figs
@@ -280,9 +252,11 @@ function figures_preparation(cfg::SimulationConfig,
                              backend::Symbol=:auto)
     cfg.type_display == :no_display &&
         return (nothing, nothing, nothing, nothing, nothing, nothing)
+    _close_interactive_figures!()   # drop the routes of a previous run
     _setup_makie_theme!(cfg; backend=backend)
     figs = cfg.type_current isa StepParams ? _create_figures(cfg, nb_gc) : _create_figures(cfg)
     _store_prepared_figures!(figs[1], figs[3], figs[5])
+    _store_prepared_specs!(cfg, something(nb_gc, cfg.numerical_parameters.nb_gc))
     return figs
 end
 
@@ -353,10 +327,24 @@ function _web_plot_specs(cfg::SimulationConfig, nb_gc::Integer)::Vector{Dict{Str
 end
 
 
-"""Flatten the `(fig1, fig2, fig3)` layout returned by `figures_preparation` in display order."""
-function _collect_web_figures(fig1, fig2, fig3)::Vector{Any}
+"""
+    _collect_web_figures(figs...) -> Vector{Any}
+
+Flatten the figure layout returned by `figures_preparation` into a list, in display order.
+
+Parameters
+----------
+figs : Any
+    Figures, or vectors of figures (`fig1`, `fig2`, `fig3`); `nothing` is ignored.
+
+Returns
+-------
+Vector{Any}
+    The figures, one entry per figure.
+"""
+function _collect_web_figures(figs...)::Vector{Any}
     figures = Any[]
-    for fig in (fig1, fig2, fig3)
+    for fig in figs
         fig === nothing && continue
         if fig isa AbstractVector
             append!(figures, fig)
@@ -462,27 +450,46 @@ end
 
 
 """
+    _append_simulation_segment!(accumulated, segment; skip_first=false) -> SimulationOutputs
+
 Append one segment's `SimulationOutputs` onto an accumulator, in place.
 
-Used by segmented `:postrun` runs (e.g. EIS) where each frequency is solved
-independently to keep `sol.u`/`sol.t` small and give every segment a fresh
-`maxiters` budget, then the segments' outputs are concatenated for a single
-final display.
+Used by segmented runs: the EIS `:postrun` run (each frequency is solved independently to
+keep `sol.u`/`sol.t` small and give every segment a fresh `maxiters` budget, then the
+outputs are concatenated for a single final display) and the `:live` runs.
+
+Parameters
+----------
+accumulated : SimulationOutputs
+    Outputs of the previous segments; extended in place.
+segment : SimulationOutputs
+    Outputs of the segment just solved.
+skip_first : Bool
+    Drop the first point of `segment`: a restarted segment begins at the end state of the
+    previous one, so that point is a duplicate.
+
+Returns
+-------
+SimulationOutputs
+    `accumulated`.
 """
 function _append_simulation_segment!(accumulated::SimulationOutputs{A, B, C},
-                                     segment::SimulationOutputs{A, B, C}) where {A, B, C}
-    append!(accumulated.solver.t, segment.solver.t)
-    append!(accumulated.solver.states, segment.solver.states)
+                                     segment::SimulationOutputs{A, B, C};
+                                     skip_first::Bool=false) where {A, B, C}
+    r = (skip_first ? 2 : 1):length(segment.solver.t)
 
-    append!(accumulated.derived.Ucell, segment.derived.Ucell)
+    append!(accumulated.solver.t, @view segment.solver.t[r])
+    append!(accumulated.solver.states, @view segment.solver.states[r])
+
+    append!(accumulated.derived.Ucell, @view segment.derived.Ucell[r])
     for k in eachindex(accumulated.derived.i_fc)
-        append!(accumulated.derived.i_fc[k], segment.derived.i_fc[k])
-        append!(accumulated.derived.C_O2_Pt[k], segment.derived.C_O2_Pt[k])
-        append!(accumulated.derived.v_a[k], segment.derived.v_a[k])
-        append!(accumulated.derived.v_c[k], segment.derived.v_c[k])
+        append!(accumulated.derived.i_fc[k], @view segment.derived.i_fc[k][r])
+        append!(accumulated.derived.C_O2_Pt[k], @view segment.derived.C_O2_Pt[k][r])
+        append!(accumulated.derived.v_a[k], @view segment.derived.v_a[k][r])
+        append!(accumulated.derived.v_c[k], @view segment.derived.v_c[k][r])
     end
-    append!(accumulated.derived.Pa_in, segment.derived.Pa_in)
-    append!(accumulated.derived.Pc_in, segment.derived.Pc_in)
+    append!(accumulated.derived.Pa_in, @view segment.derived.Pa_in[r])
+    append!(accumulated.derived.Pc_in, @view segment.derived.Pc_in[r])
 
     return accumulated
 end

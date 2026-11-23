@@ -4,8 +4,10 @@
     AlphaPEM.Application.run_simulation
 
 Main execution module for AlphaPEM.
-Core orchestration logic lives here (launch, dispatch, API), while utility
-helpers are kept in `run_simulation_modules.jl`.
+Core orchestration logic lives here (launch, dispatch, API), while the rest is kept in:
+- `run_simulation_modules.jl`: figure preparation and internal-state helpers
+- `interactive_display.jl`: serving the figures in a web browser
+- `run_simulation_live.jl`: segmented `:live` runs (a debugging aid, read it apart)
 
 Public API
 ----------
@@ -27,6 +29,8 @@ using ..Core.Models: AlphaPEM, simulate_model!, recovery!, display!, save_plot!,
 using ..Core.Types: SimulationOutputs
 
 include(joinpath(@__DIR__, "run_simulation_modules.jl"))
+include(joinpath(@__DIR__, "interactive_display.jl"))
+include(joinpath(@__DIR__, "run_simulation_live.jl"))
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  Section 1 – Launch functions (single simulator)
@@ -38,8 +42,8 @@ include(joinpath(@__DIR__, "run_simulation_modules.jl"))
 Run a step-current simulation.
 
 - `:postrun` display timing : one full ODE solve followed by a display update.
-- `:live` display timing    : incremental solves separated by `delta_t_dyn_step`
-  (from `simu.cfg.numerical_parameters`).
+- `:live` display timing    : incremental solves separated by `_LIVE_STEP_SEGMENT_DURATION`, with a
+  display refresh after each (see `run_simulation_live.jl`).
 """
 function launch_AlphaPEM_for_step_current(simu::AlphaPEM)::AlphaPEM
     # Figures preparation
@@ -48,45 +52,7 @@ function launch_AlphaPEM_for_step_current(simu::AlphaPEM)::AlphaPEM
 
     # Dynamic display requires a dedicated segmented simulation flow.
     if simu.cfg.display_timing == :live
-        # Certain conditions must be met.
-        if simu.cfg.type_display == :multiple
-            throw(ArgumentError("step current cannot be run with `display_timing = :live` and `type_display = :multiple` (too many plots to handle)."))
-        end
-
-        # Extraction of parameters
-        p       = simu.cfg.type_current       # ::StepParams
-        tf_step = p.delta_t_ini + p.delta_t_load + p.delta_t_break
-        delta_t_dyn_step = simu.cfg.numerical_parameters.delta_t_dyn_step
-        delta_t_dyn_step > 0 || throw(ArgumentError("delta_t_dyn_step must be > 0 for dynamic step runs."))
-
-        # Initialization
-        n             = floor(Int, tf_step / delta_t_dyn_step)
-        t0            = 0.0
-        initial_variable_values = nothing
-        initial_derivative_values = nothing
-
-        # Dynamic simulation
-        for i in 1:n
-            tf = i * delta_t_dyn_step
-            simulate_model!(simu, initial_variable_values, initial_derivative_values, (t0, tf))
-
-            # Display
-            if simu.cfg.type_display != :no_display
-                display!(simu, ax1, ax2, ax3)
-                # Open the window after the first data point (lazy), then yield to the
-                # GLMakie render thread so the window updates visually between iterations.
-                if _active_display_backend[] == :gl
-                    _open_interactive_figures!(fig1, fig2, fig3)
-                    sleep(0.001)
-                end
-            end
-
-            # Recovery of the internal states from the end of the preceding simulation.
-            initial_variable_values, initial_derivative_values = _extract_last_internal_state(simu)
-            # Time interval actualization.
-            t0            = simu.outputs.solver.t[end]
-        end
-
+        _simulate_live_step!(simu, ax1, ax2, ax3)
     else  # :postrun
         # Simulation
         simulate_model!(simu)
@@ -117,41 +83,7 @@ function launch_AlphaPEM_for_polarization_current(
 
     # Dynamic display requires a dedicated segmented simulation flow.
     if simu.cfg.display_timing == :live
-        # Initialization
-        p          = simu.current_density            # ::PolarizationCurrent
-        dt_steps = step_duration(p)                  # Vector{Float64}: one duration per transition
-        n          = length(dt_steps)
-        tf_steps = cumsum(dt_steps)                # absolute end-time of each step
-        t0         = 0.0
-        initial_variable_values = nothing
-        initial_derivative_values = nothing
-
-        # Dynamic simulation
-        for i in 1:n
-            tf = tf_steps[i]
-            simulate_model!(simu, initial_variable_values, initial_derivative_values, (t0, tf))
-
-            # Safety stop: cell voltage or O2 concentration became non-positive.
-            simu.sol.retcode === ReturnCode.Terminated && break
-
-            # Display
-            if simu.cfg.type_display != :no_display
-                display!(simu, ax1, ax2, ax3; linestyle=linestyle)
-                # On the first iteration, open the figure window now that it has content.
-                # On subsequent iterations the call is a no-op (window already open).
-                if _active_display_backend[] == :gl
-                    _open_interactive_figures!(fig1, fig2)
-                    # Yield to the GLMakie render thread so the window updates visually.
-                    sleep(0.001)
-                end
-            end
-
-            # Recovery of the internal states from the end of the preceding simulation.
-            initial_variable_values, initial_derivative_values = _extract_last_internal_state(simu)
-            # Time interval actualization.
-            t0 = simu.outputs.solver.t[end]
-        end
-
+        _simulate_live_polarization!(simu, ax1, ax2, ax3)
     else  # :postrun
         # Simulation
         simulate_model!(simu)
@@ -179,38 +111,7 @@ function launch_AlphaPEM_for_polarization_current_for_calibration(simu::AlphaPEM
 
     # Dynamic display requires a dedicated segmented simulation flow.
     if simu.cfg.display_timing == :live
-        # Initialization
-        p          = simu.current_density           # ::PolarizationCalibrationCurrent
-        step_dts   = step_duration(p)               # Vector{Float64}: one duration per exp. step
-        n          = length(step_dts)
-        boundaries = cumsum(step_dts)               # absolute end-time of each step (after t_ini)
-        t0         = 0.0
-        initial_variable_values = nothing
-        initial_derivative_values = nothing
-
-        # Dynamic simulation
-        for i in 1:n
-            tf = boundaries[i]
-            simulate_model!(simu, initial_variable_values, initial_derivative_values, (t0, tf))
-
-            # Safety stop: cell voltage or O2 concentration became non-positive.
-            simu.sol.retcode === ReturnCode.Terminated && break
-
-            # Display
-            if simu.cfg.type_display != :no_display
-                display!(simu, ax1, ax2, ax3)
-                if _active_display_backend[] == :gl
-                    _open_interactive_figures!(fig1, fig2)
-                    sleep(0.001)
-                end
-            end
-
-            # Recovery of the internal states from the end of the preceding simulation.
-            initial_variable_values, initial_derivative_values = _extract_last_internal_state(simu)
-            # Time interval actualization.
-            t0 = simu.outputs.solver.t[end]
-        end
-
+        _simulate_live_calibration!(simu, ax1, ax2, ax3)
     else  # :postrun
         # Simulation
         simulate_model!(simu)
@@ -229,50 +130,14 @@ end
 
 Run an EIS simulation.
 - In `:live` mode: one ODE segment is solved per frequency point with intermediate displays.
-- In `:postrun` mode: the entire signal is solved in one pass, followed by a single display.
+- In `:postrun` mode: the sweep is solved frequency by frequency, followed by a single display.
 """
 function launch_AlphaPEM_for_EIS_current(simu::AlphaPEM)::AlphaPEM
     # Figures preparation
     fig1, ax1, fig2, ax2, fig3, ax3 = figures_preparation(simu.cfg)
 
     if simu.cfg.display_timing == :live
-        # Initialization
-        cd = simu.current_density   # ::EISCurrent
-        n  = length(cd.t_new_start)
-        initial_variable_values = nothing
-        initial_derivative_values = nothing
-
-        # A preliminary simulation run is necessary to equilibrate internal variables at i_EIS.
-        simulate_model!(simu, initial_variable_values, initial_derivative_values, (0.0, cd.t0))
-        # Recovery of the internal states from the end of the preceding simulation.
-        initial_variable_values, initial_derivative_values = _extract_last_internal_state(simu)
-
-        if simu.cfg.type_display == :multiple
-            @warn "Dynamic graph refresh is not available with `:multiple` display " *
-                  "due to the volume of data involved.  Data are computed correctly " *
-                  "and saved to the 'results' folder.  Use `:synthetic` to avoid this."
-        end
-
-        # Dynamic simulation: one segment per frequency.
-        for i in 1:n
-            # Time interval actualization
-            t0 = simu.outputs.solver.t[end]
-            tf = cd.t_new_start[i] + cd.delta_t_break[i] + cd.delta_t_measurement[i]
-
-            simulate_model!(simu, initial_variable_values, initial_derivative_values, (t0, tf))
-
-            # Recovery of the internal states from the end of the preceding simulation.
-            initial_variable_values, initial_derivative_values = _extract_last_internal_state(simu)
-
-            # Display
-            if simu.cfg.type_display != :no_display
-                display!(simu, ax1, ax2, ax3)
-                if _active_display_backend[] == :gl
-                    _open_interactive_figures!(fig1, fig2, fig3)
-                    sleep(0.001)
-                end
-            end
-        end
+        _simulate_live_EIS!(simu, ax1, ax2, ax3)
     else
         # :postrun mode: segment the solve by frequency, exactly like :live, but without
         # displaying between segments. A single continuous solve over the whole EIS sweep
@@ -465,23 +330,35 @@ end
 #  Section 4 – Display finalisation
 # ═══════════════════════════════════════════════════════════════════════════════
 
-"""Disable interactive mode and block until all figure windows are closed."""
+"""
+    _finalize_display!(cfg)
+    _finalize_display!(cfgs)
+
+Serve the final figures and, in a script, keep them served until Ctrl+C.
+
+In an interactive Julia session (REPL), the call returns immediately and the figures stay
+served until the next run replaces them (see `_plot_block_requested`).
+
+Parameters
+----------
+cfg : SimulationConfig
+    Configuration of the run (or `cfgs`, the configurations of a batch, of which the first
+    one decides the display).
+
+Returns
+-------
+Nothing
+"""
 function _finalize_display!(cfg::SimulationConfig)
-    if _active_display_backend[] == :gl && _use_interactive_display(cfg)
+    if _active_display_backend[] == :wgl && _use_interactive_display(cfg)
         # Fixed mode: show the fully populated figures only once computations are done.
-        if cfg.display_timing == :postrun && isempty(_interactive_screens)
-            _open_interactive_figures!(_prepared_interactive_figures...)
+        if cfg.display_timing == :postrun
+            _open_interactive_figures!()
         end
 
-        for screen in copy(_interactive_screens)
-            try
-                wait(screen)
-            catch err
-                @warn "Interactive GLMakie screen wait failed." exception=(err, catch_backtrace())
-            end
+        if !isempty(_served_figure_routes) && _plot_block_requested()
+            _serve_until_interrupted!("Press Ctrl+C to stop serving the interactive figures.")
         end
-        empty!(_interactive_screens)
-        empty!(_interactive_fig_to_screen)
     end
     empty!(_prepared_interactive_figures)
     return nothing

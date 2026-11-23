@@ -18,7 +18,7 @@ using DifferentialEquations
 using SparseArrays: sparse, SparseMatrixCSC, rowvals, nzrange, nonzeros, nnz
 using SciMLBase: DAEFunction, NoInit, successful_retcode, ReturnCode
 using Sundials: IDA, IDASetMaxStep
-using .PlotHelpers: _clear_dynamic_axes!, _clear_dynamic_legends!, saving_instructions!
+using .PlotHelpers: _clear_dynamic_legends!, _live_begin!, _live_end!, saving_instructions!
 using ...Currents: saveat_times
 
 
@@ -770,12 +770,14 @@ function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing;
     is_postrun_display = simu.cfg.display_timing == :postrun
     can_plot_extended_gc_postrun = has_extended_gc_profiles && is_postrun_display
 
-    if simu.cfg.display_timing == :live && !(simu.cfg.type_current isa EISParams)
-        if simu.cfg.type_current isa Union{PolarizationParams, PolarizationCalibrationParams}
-            _clear_dynamic_legends!(_ax1, _ax2, _ax3)
-        else
-            _clear_dynamic_axes!(_ax1, _ax2, _ax3)
-        end
+    # Live step runs update the plots in place (see `_live_begin!`); the other live displays
+    # refresh their legends only, or are not refreshed (EIS).
+    live_in_place = simu.cfg.display_timing == :live && simu.cfg.type_current isa StepParams
+    if live_in_place
+        _live_begin!(_ax1, _ax2, _ax3)
+    elseif simu.cfg.display_timing == :live &&
+           simu.cfg.type_current isa Union{PolarizationParams, PolarizationCalibrationParams}
+        _clear_dynamic_legends!(_ax1, _ax2, _ax3)
     end
 
     if simu.cfg.type_current isa StepParams
@@ -887,6 +889,7 @@ function display!(simu::AlphaPEM, _ax1=nothing, _ax2=nothing, _ax3=nothing;
         @warn "display!: plotting migration to CairoMakie is in progress; this simulation/display mode is not ported yet." maxlog=1
     end
 
+    live_in_place && _live_end!(_ax1, _ax2, _ax3)
     return nothing
 end
 

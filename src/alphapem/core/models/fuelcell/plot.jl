@@ -1,7 +1,4 @@
 # plot.jl
-#
-# Native CairoMakie plotting recipes for AlphaPEM.
-
 
 using .PlotHelpers: _publication_colors,
                     _series_color,
@@ -20,6 +17,8 @@ using .PlotHelpers: _publication_colors,
                     _colorbar_ticks_auto,
                     _set_dense_ticks!,
                     _plot_final_profile_along_gc!,
+                    _live_updating,
+                    _lines!,
                     gc_direction_labels,
                     lsub
 
@@ -37,13 +36,13 @@ function plot_ifc_1D_temporal(outputs::SimulationOutputs,
     nb_gc = cfg.numerical_parameters.nb_gc
 
     i_fc_cell_t = current(cd, t) ./ 1e4
-    lines!(ax, t, i_fc_cell_t; color=_cell_current_color(nb_gc), linewidth=2.8, label=lsub("i", "fc,cell"))
+    _lines!(ax, t, i_fc_cell_t; color=_cell_current_color(nb_gc), linewidth=2.8, label=lsub("i", "fc,cell"))
 
     all_series = [i_fc_cell_t]
     if nb_gc > 1
         i_fc_series = [extract_derived_gc_series(outputs, i, x -> x.i_fc) ./ 1e4 for i in 1:nb_gc]
         for i in 1:nb_gc
-            lines!(ax, t, i_fc_series[i]; color=palette[mod1(i, length(palette))], label=lsub("i", "fc,$(i)"))
+            _lines!(ax, t, i_fc_series[i]; color=palette[mod1(i, length(palette))], label=lsub("i", "fc,$(i)"))
         end
         append!(all_series, i_fc_series)
         _set_dense_ticks!(ax, t, all_series)
@@ -58,8 +57,8 @@ function plot_ifc_1D_temporal(outputs::SimulationOutputs,
                     legend_position=:lb)
     _set_initial_temporal_limits!(ax, t, all_series, initial_time_range(outputs, cd, cfg))
 
-    if nb_gc > 1
-        # Add flow configuration annotation in bottom-right corner
+    if nb_gc > 1 && !_live_updating(ax)
+        # Add flow configuration annotation in bottom-right corner (static: created once)
         flow_note = cfg.type_flow == :counter_flow ?
             rich(lsub("i", "fc,1"), " = cathode inlet\n(counter-flow)") :
             rich(lsub("i", "fc,1"), " = inlet\n(co-flow)")
@@ -103,10 +102,10 @@ function plot_C_v_1D_temporal(outputs::SimulationOutputs,
     ]
 
     for (i, (y, lbl)) in enumerate(series)
-        lines!(ax, t, y; color=palette[mod1(i, length(palette))], label=lbl)
+        _lines!(ax, t, y; color=palette[mod1(i, length(palette))], label=lbl)
     end
     # Reference saturation curve: bold black line
-    lines!(ax, t, C_v_sat_ccl; color=:black, linewidth=2.8,
+    _lines!(ax, t, C_v_sat_ccl; color=:black, linewidth=2.8,
            label=rich(lsub("C", "v,sat,ccl"); font=:bold))
     _set_dense_ticks!(ax, t, vcat([s[1] for s in series], [C_v_sat_ccl]))
     _finalize_axis!(ax;
@@ -147,20 +146,20 @@ function plot_lambda_1D_temporal(outputs::SimulationOutputs,
                         legend_position=:lb)
     else
         t = time_history(outputs)
-        lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.acl.lambda);
+        _lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.acl.lambda);
                color=palette[3], label=lsub("λ", "acl"))
-        lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.mem.lambda);
+        _lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.mem.lambda);
                color=palette[4], label=lsub("λ", "mem"))
         lambda_ccl_in_t = extract_mea_series(outputs, 1, mea -> mea.ccl.lambda)
         lambda_ccl_mid_t = extract_mea_series(outputs, mid_gc, mea -> mea.ccl.lambda)
         lambda_ccl_out_t = extract_mea_series(outputs, nb_gc, mea -> mea.ccl.lambda)
-        lines!(ax, t, lambda_ccl_in_t;
+        _lines!(ax, t, lambda_ccl_in_t;
                color=palette[5], linestyle=:dash, label=lsub("λ", "ccl,in"))
         mid_gc != 1 && mid_gc != nb_gc &&
-            lines!(ax, t, lambda_ccl_mid_t;
+            _lines!(ax, t, lambda_ccl_mid_t;
                    color=palette[5], linestyle=:solid, label=lsub("λ", "ccl,mid"))
         nb_gc != 1 &&
-            lines!(ax, t, lambda_ccl_out_t;
+            _lines!(ax, t, lambda_ccl_out_t;
                    color=palette[5], linestyle=:dot, label=lsub("λ", "ccl,out"))
         lambda_acl_t = extract_mid_mea_series(outputs, cfg, mea -> mea.acl.lambda)
         lambda_mem_t = extract_mid_mea_series(outputs, cfg, mea -> mea.mem.lambda)
@@ -226,7 +225,7 @@ function plot_s_1D_temporal(outputs::SimulationOutputs,
         ]
 
         for (i, (y, lbl)) in enumerate(series)
-            lines!(ax, t, y; color=palette[mod1(i, length(palette))], label=lbl)
+            _lines!(ax, t, y; color=palette[mod1(i, length(palette))], label=lbl)
         end
         _set_dense_ticks!(ax, t, [s[1] for s in series])
         _finalize_axis!(ax;
@@ -249,13 +248,13 @@ function plot_C_H2_1D_temporal(outputs::SimulationOutputs,
     nb_mpl_mid = middle_mpl_index(cfg)
     t = time_history(outputs)
 
-    lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.agc.C_H2);
+    _lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.agc.C_H2);
            color=palette[1], label=lsub("C", "H₂,agc"))
-    lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.agdl[nb_gdl_mid].C_H2);
+    _lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.agdl[nb_gdl_mid].C_H2);
            color=palette[2], label=lsub("C", "H₂,agdl"))
-    lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.ampl[nb_mpl_mid].C_H2);
+    _lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.ampl[nb_mpl_mid].C_H2);
            color=palette[3], label=lsub("C", "H₂,ampl"))
-    lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.acl.C_H2);
+    _lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.acl.C_H2);
            color=palette[4], label=lsub("C", "H₂,acl"))
 
     C_H2_agc_t = extract_mid_mea_series(outputs, cfg, mea -> mea.agc.C_H2)
@@ -285,24 +284,24 @@ function plot_C_O2_1D_temporal(outputs::SimulationOutputs,
     t = time_history(outputs)
 
     C_O2_Pt_t = extract_mid_derived_gc_series(outputs, cfg, x -> x.C_O2_Pt)
-    lines!(ax, t, C_O2_Pt_t;
+    _lines!(ax, t, C_O2_Pt_t;
            color=palette[10], label=lsub("C", "O₂,Pt"))
-    lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.ccl.C_O2);
+    _lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.ccl.C_O2);
            color=palette[5], label=lsub("C", "O₂,ccl"))
-    lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.cmpl[nb_mpl_mid].C_O2);
+    _lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.cmpl[nb_mpl_mid].C_O2);
            color=palette[6], label=lsub("C", "O₂,cmpl"))
-    lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.cgdl[nb_gdl_mid].C_O2);
+    _lines!(ax, t, extract_mid_mea_series(outputs, cfg, mea -> mea.cgdl[nb_gdl_mid].C_O2);
            color=palette[7], label=lsub("C", "O₂,cgdl"))
     C_O2_cgc_in_t = extract_mea_series(outputs, 1, mea -> mea.cgc.C_O2)
     C_O2_cgc_mid_t = extract_mea_series(outputs, mid_gc, mea -> mea.cgc.C_O2)
     C_O2_cgc_out_t = extract_mea_series(outputs, nb_gc, mea -> mea.cgc.C_O2)
-    lines!(ax, t, C_O2_cgc_in_t;
+    _lines!(ax, t, C_O2_cgc_in_t;
            color=palette[8], linestyle=:dash, label=lsub("C", "O₂,cgc,in"))
     mid_gc != 1 && mid_gc != nb_gc &&
-        lines!(ax, t, C_O2_cgc_mid_t;
+        _lines!(ax, t, C_O2_cgc_mid_t;
                color=palette[8], linestyle=:solid, label=lsub("C", "O₂,cgc,mid"))
     nb_gc != 1 &&
-        lines!(ax, t, C_O2_cgc_out_t;
+        _lines!(ax, t, C_O2_cgc_out_t;
                color=palette[8], linestyle=:dot, label=lsub("C", "O₂,cgc,out"))
 
     C_O2_ccl_t = extract_mid_mea_series(outputs, cfg, mea -> mea.ccl.C_O2)
@@ -374,9 +373,9 @@ function plot_T_1D_temporal(outputs::SimulationOutputs,
         ]
 
         for (i, (y, lbl)) in enumerate(series)
-            lines!(ax, t, y; color=palette[mod1(i, length(palette))], label=lbl)
+            _lines!(ax, t, y; color=palette[mod1(i, length(palette))], label=lbl)
         end
-        lines!(ax, t, fill(T_des, length(t)); color=:black, linestyle=:dash, label=lsub("T", "des"))
+        _lines!(ax, t, fill(T_des, length(t)); color=:black, linestyle=:dash, label=lsub("T", "des"))
 
         _set_dense_ticks!(ax, t, [s[1] for s in series])
         _finalize_axis!(ax;
@@ -396,7 +395,7 @@ function plot_Ucell(outputs::SimulationOutputs,
                     ax)
     t = time_history(outputs)
     Ucell_t = extract_derived_series(outputs, x -> x.Ucell)
-    lines!(ax, t, Ucell_t; color=_cell_voltage_color(), label=lsub("U", "cell"))
+    _lines!(ax, t, Ucell_t; color=_cell_voltage_color(), label=lsub("U", "cell"))
     _set_dense_ticks!(ax, t, [Ucell_t])
     _finalize_axis!(ax;
                     xlabel=rich("Time ", lsub("t", ""), " (s)"),
@@ -421,9 +420,9 @@ function plot_C_N2_1D_temporal(outputs::SimulationOutputs,
         C_N2_agc_i = extract_mea_series(outputs, i, mea -> mea.agc.C_N2)
         C_N2_cgc_i = extract_mea_series(outputs, i, mea -> mea.cgc.C_N2)
         push!(C_N2_series, C_N2_agc_i, C_N2_cgc_i)
-        lines!(ax, t, C_N2_agc_i; color=palette[mod1(i, length(palette))],
+        _lines!(ax, t, C_N2_agc_i; color=palette[mod1(i, length(palette))],
                linestyle=:solid, label=lsub("C", "N₂,agc,$(i)"))
-        lines!(ax, t, C_N2_cgc_i; color=palette[mod1(i, length(palette))],
+        _lines!(ax, t, C_N2_cgc_i; color=palette[mod1(i, length(palette))],
                linestyle=:dash,  label=lsub("C", "N₂,cgc,$(i)"))
     end
     _set_dense_ticks!(ax, t, C_N2_series)
@@ -458,10 +457,10 @@ function plot_Phi_a_1D_temporal(outputs::SimulationOutputs,
     ]
 
     for (i, (y, lbl)) in enumerate(series)
-        lines!(ax, t, y; color=palette[mod1(i, length(palette))], label=lbl)
+        _lines!(ax, t, y; color=palette[mod1(i, length(palette))], label=lbl)
     end
     # Saturation threshold: Φ = 1.
-    lines!(ax, t, ones(length(t));
+    _lines!(ax, t, ones(length(t));
            color=:black, linestyle=:dash, linewidth=1.4, label=rich("Φ = 1 (saturation)"))
     _set_dense_ticks!(ax, t, vcat([s[1] for s in series], [ones(length(t))]))
     _finalize_axis!(ax;
@@ -495,10 +494,10 @@ function plot_Phi_c_1D_temporal(outputs::SimulationOutputs,
     ]
 
     for (i, (y, lbl)) in enumerate(series)
-        lines!(ax, t, y; color=palette[mod1(i, length(palette))], label=lbl)
+        _lines!(ax, t, y; color=palette[mod1(i, length(palette))], label=lbl)
     end
     # Saturation threshold: Φ = 1.
-    lines!(ax, t, ones(length(t));
+    _lines!(ax, t, ones(length(t));
            color=:black, linestyle=:dash, linewidth=1.4, label=rich("Φ = 1 (saturation)"))
     _set_dense_ticks!(ax, t, vcat([s[1] for s in series], [ones(length(t))]))
     _finalize_axis!(ax;
@@ -524,9 +523,9 @@ function plot_v_1D_temporal(outputs::SimulationOutputs,
         v_a_i = extract_derived_gc_series(outputs, i, x -> x.v_a)
         v_c_i = extract_derived_gc_series(outputs, i, x -> x.v_c)
         push!(v_series, v_a_i, v_c_i)
-        lines!(ax, t, v_a_i; color=palette[mod1(i, length(palette))],
+        _lines!(ax, t, v_a_i; color=palette[mod1(i, length(palette))],
                linestyle=:solid, label=lsub("v", "a,$(i)"))
-        lines!(ax, t, v_c_i; color=palette[mod1(i, length(palette))],
+        _lines!(ax, t, v_c_i; color=palette[mod1(i, length(palette))],
                linestyle=:dash,  label=lsub("v", "c,$(i)"))
     end
     _set_dense_ticks!(ax, t, v_series)
@@ -563,9 +562,9 @@ function plot_Re_nb_1D_temporal(outputs::SimulationOutputs,
         Re_c_i = Re_c_full[i]
 
         push!(Re_series, Re_a_i, Re_c_i)
-        lines!(ax, t, Re_a_i; color=palette[mod1(i, length(palette))],
+        _lines!(ax, t, Re_a_i; color=palette[mod1(i, length(palette))],
                linestyle=:solid, label=lsub("Re", "a,$(i)"))
-        lines!(ax, t, Re_c_i; color=palette[mod1(i, length(palette))],
+        _lines!(ax, t, Re_c_i; color=palette[mod1(i, length(palette))],
                linestyle=:dash,  label=lsub("Re", "c,$(i)"))
     end
     _set_dense_ticks!(ax, t, Re_series)
@@ -605,12 +604,12 @@ function plot_P_1D_temporal(outputs::SimulationOutputs,
     Pa_out = fill(Pa_des / 1e5, length(t))
     Pc_out = fill(Pc_des / 1e5, length(t))
 
-    lines!(ax, t, P_agc; color=palette[1], label=lsub("P", "agc"))
-    lines!(ax, t, P_cgc; color=palette[2], label=lsub("P", "cgc"))
-    lines!(ax, t, Pa_in; color=palette[3], label=lsub("P", "a,in"))
-    lines!(ax, t, Pa_out; color=palette[4], label=lsub("P", "a,out"))
-    lines!(ax, t, Pc_in; color=palette[5], label=lsub("P", "c,in"))
-    lines!(ax, t, Pc_out; color=palette[6], label=lsub("P", "c,out"))
+    _lines!(ax, t, P_agc; color=palette[1], label=lsub("P", "agc"))
+    _lines!(ax, t, P_cgc; color=palette[2], label=lsub("P", "cgc"))
+    _lines!(ax, t, Pa_in; color=palette[3], label=lsub("P", "a,in"))
+    _lines!(ax, t, Pa_out; color=palette[4], label=lsub("P", "a,out"))
+    _lines!(ax, t, Pc_in; color=palette[5], label=lsub("P", "c,in"))
+    _lines!(ax, t, Pc_out; color=palette[6], label=lsub("P", "c,out"))
 
     _set_dense_ticks!(ax, t, [P_agc, P_cgc, Pa_in, Pa_out, Pc_in, Pc_out])
     _finalize_axis!(ax;

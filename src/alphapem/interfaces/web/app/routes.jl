@@ -131,9 +131,10 @@ end
 route("/api/fuel_cell_defaults/:fuel_cell_type"; method="GET") do
     fuel_cell_type::String = Router.params()[:fuel_cell_type]
     voltage_zone::String = string(get(Router.params(), :voltage_zone, "before_voltage_drop"))
+    nb_gc::Int = max(1, something(tryparse(Int, string(get(Router.params(), :nb_gc, "1"))), 1))
 
     try
-        defaults = SimulatorBackend.get_fuel_cell_defaults_safe(fuel_cell_type; voltage_zone=voltage_zone)
+        defaults = SimulatorBackend.get_fuel_cell_defaults_safe(fuel_cell_type; voltage_zone=voltage_zone, nb_gc=nb_gc)
         json(defaults)
     catch e
         json(Dict(:error => "Invalid fuel cell type: $(string(e))"))
@@ -189,10 +190,10 @@ route("/api/simulate/step"; method="POST") do
         params = string_keys_to_symbols(JSON.parse(String(Requests.rawpayload())))
         @info "Step simulation requested" fuel_cell_type=get(params, :fuel_cell_type, "unknown")
 
-        # Merge with fuel cell defaults before validation
+        # Merge with fuel cell defaults (built for the requested number of GC nodes) before validation
         if haskey(params, :fuel_cell_type)
             try
-                defaults = SimulatorBackend.get_fuel_cell_defaults(string(params[:fuel_cell_type]))
+                defaults = SimulatorBackend.get_fuel_cell_defaults(string(params[:fuel_cell_type]); nb_gc=SimulatorBackend.requested_nb_gc(params))
                 for (key, default_value) in defaults
                     if !haskey(params, key)
                         params[key] = default_value
@@ -247,10 +248,10 @@ route("/api/simulate/polarization"; method="POST") do
         params = string_keys_to_symbols(JSON.parse(String(Requests.rawpayload())))
         @info "Polarization curve simulation requested" fuel_cell_type=get(params, :fuel_cell_type, "unknown")
 
-        # Merge with fuel cell defaults before validation
+        # Merge with fuel cell defaults (built for the requested number of GC nodes) before validation
         if haskey(params, :fuel_cell_type)
             try
-                defaults = SimulatorBackend.get_fuel_cell_defaults(string(params[:fuel_cell_type]))
+                defaults = SimulatorBackend.get_fuel_cell_defaults(string(params[:fuel_cell_type]); nb_gc=SimulatorBackend.requested_nb_gc(params))
                 for (key, default_value) in defaults
                     if !haskey(params, key)
                         params[key] = default_value
@@ -305,10 +306,10 @@ route("/api/simulate/eis"; method="POST") do
         params = string_keys_to_symbols(JSON.parse(String(Requests.rawpayload())))
         @info "EIS simulation requested" fuel_cell_type=get(params, :fuel_cell_type, "unknown")
 
-        # Merge with fuel cell defaults before validation
+        # Merge with fuel cell defaults (built for the requested number of GC nodes) before validation
         if haskey(params, :fuel_cell_type)
             try
-                defaults = SimulatorBackend.get_fuel_cell_defaults(string(params[:fuel_cell_type]))
+                defaults = SimulatorBackend.get_fuel_cell_defaults(string(params[:fuel_cell_type]); nb_gc=SimulatorBackend.requested_nb_gc(params))
                 for (key, default_value) in defaults
                     if !haskey(params, key)
                         params[key] = default_value
