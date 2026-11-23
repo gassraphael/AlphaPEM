@@ -7,8 +7,8 @@ Pkg.activate(joinpath(@__DIR__, ".."))
 using AlphaPEM.Config: StepParams, PolarizationParams, PolarizationCalibrationParams, EISParams
 using AlphaPEM.Currents: StepCurrent, PolarizationCurrent, PolarizationCalibrationCurrent, EISCurrent, current
 using AlphaPEM.Core.Models.PlotHelpers: _publication_colors, _cell_current_color, _finalize_axis!, lsub, saving_instructions!
-using GLMakie
-GLMakie.activate!()  # Enable interactive window
+using WGLMakie
+WGLMakie.activate!()  # Interactive figures are served to the browser (no OpenGL/X11 needed)
 
 # --- Time resolution ---
 n_points = 10000  # points for plotting
@@ -186,11 +186,20 @@ for spine in (:leftspinecolor, :rightspinecolor, :topspinecolor, :bottomspinecol
     setproperty!(ax_zoom, spine, :orange)
 end
 
-# === Display and Save ===
-# Open an interactive window (GLMakie)
-DataInspector(fig) # Add hover inspection
-screen = GLMakie.Screen()
-display(screen, fig)
-
+# === Save and Display ===
 # Save to the results directory (CairoMakie PDF)
 saving_instructions!(nothing, "results", "currents", "plot_currents.pdf", fig)
+
+# Serve the interactive figure in the browser (use ALPHAPEM_PLOT_HOST=0.0.0.0 inside Docker)
+DataInspector(fig) # Add hover inspection
+Bonito = WGLMakie.Bonito
+host = get(ENV, "ALPHAPEM_PLOT_HOST", "127.0.0.1")
+port = parse(Int, get(ENV, "ALPHAPEM_PLOT_PORT", "9385"))
+server = Bonito.Server(host, port)
+Bonito.route!(server, "/" => Bonito.App(() -> fig))
+println("Interactive figure available at http://", host == "0.0.0.0" ? "localhost" : host, ":", port, "/ (Ctrl+C to stop)")
+try
+    wait(Condition())
+catch err
+    err isa InterruptException || rethrow()
+end

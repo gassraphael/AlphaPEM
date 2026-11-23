@@ -126,7 +126,6 @@ function validate_config(cfg::SimulationConfig)
         ("numerical_parameters.nb_man", cfg.numerical_parameters.nb_man),
         ("numerical_parameters.purge_time", cfg.numerical_parameters.purge_time),
         ("numerical_parameters.delta_purge", cfg.numerical_parameters.delta_purge),
-        ("numerical_parameters.delta_t_dyn_step", cfg.numerical_parameters.delta_t_dyn_step),
         ("numerical_parameters.rtol", cfg.numerical_parameters.rtol),
         ("numerical_parameters.atol", cfg.numerical_parameters.atol),
         ("state_scaling.cell.C_v", cell_scaling.C_v),

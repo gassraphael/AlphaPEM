@@ -933,8 +933,9 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="nb_gc">n<sub>gc</sub></label>
-                            <input type="number" id="nb_gc" value="1" min="1" max="100" oninput="updateModelType()">
+                            <input type="number" id="nb_gc" value="1" min="1" max="100" oninput="onNbGcInput()">
                             <p class="help-text">Number of gas channel nodes</p>
+                            <p class="help-text" id="nb-gc-reload-note" style="display: none;"></p>
                         </div>
                         <div class="form-group">
                             <label for="nb_gdl">n<sub>gdl</sub></label>
@@ -1006,8 +1007,8 @@
                     <div class="form-section">
                         <label class="section-title">Flow Type:</label>
                         <div class="input-row">
-                            <label><input type="radio" name="type_flow" value="counter_flow"> Counter Flow</label>
-                            <label><input type="radio" name="type_flow" value="co_flow" checked> Co-flow</label>
+                            <label><input type="radio" name="type_flow" value="counter_flow" checked> Counter Flow</label>
+                            <label><input type="radio" name="type_flow" value="co_flow"> Co-flow</label>
                             <!-- Inline warning placed at end of the row to avoid creating extra vertical space -->
                             <div id="model-config-warning" class="alert alert-warning" style="display: none; margin-left: auto; align-self: center; white-space: nowrap; padding: 6px 10px; font-size: 13px;">
                                 ZSW fuel cell with standard operating conditions typically requires counter-flow configuration for optimal performance.
@@ -1259,6 +1260,7 @@
         let lastSelectedPresetValues = null; // Store preset values to detect manual changes
         let i_max_exp = null; // Experimental max current from fuel cell defaults, in SI units (A/m²)
         let defaultsLoaded = false; // Flag to track if fuel cell defaults have been loaded
+        let loadedDiscretisation = null; // '1D' or '1D1D': discretisation the physical-parameter fields were loaded for
         let simulationTimerInterval = null; // Interval for the simulation timer
         let physicalParamsVisible = false; // Track visibility of physical parameters
 
@@ -1518,7 +1520,7 @@
             }
         }
 
-        function updateFuelCellDefaults(forcedType, skipPopulate = false) {
+        function updateFuelCellDefaults(forcedType, skipPopulate = false, physicalOnly = false) {
             try {
                 let fuelCellType = forcedType;
                 if (!fuelCellType) {
@@ -1533,14 +1535,18 @@
                     return Promise.resolve();
                 }
 
-                // Update the experimental presets list
-                updateExperimentalPresetsList(fuelCellType);
+                if (!physicalOnly) {
+                    // Update the experimental presets list
+                    updateExperimentalPresetsList(fuelCellType);
 
-                // Update temperature label and help text based on fuel cell type
-                updateTemperatureLabel(fuelCellType);
+                    // Update temperature label and help text based on fuel cell type
+                    updateTemperatureLabel(fuelCellType);
+                }
 
                 defaultsLoaded = false;
-                return fetch(`/api/fuel_cell_defaults/${fuelCellType}`)
+                // The calibrated physical parameters depend on the number of gas-channel nodes
+                // (1D or 1D+1D), so the server must build them for the value of the form.
+                return fetch(`/api/fuel_cell_defaults/${fuelCellType}?nb_gc=${currentNbGc()}`)
                     .then(r => r.json())
                     .then(data => {
                         if (!data || data.error) {
@@ -1597,6 +1603,21 @@
                         // Update highlighting using the list sent by server
                         updateUndeterminedHighlighting(fuelCellType, data.undetermined_list);
 
+                        if (physicalOnly) {
+                            // Only the physical parameters follow the discretisation: operating
+                            // conditions, numerical and run parameters keep their current values.
+                            loadedDiscretisation = discretisationOf(parseInt(cp.nb_gc) || 1);
+                            const note = document.getElementById('nb-gc-reload-note');
+                            if (note) {
+                                note.textContent = 'Physical parameters reloaded for the ' +
+                                    (loadedDiscretisation === '1D' ? 'pure 1D' : '1D + 1D') + ' discretisation.';
+                                note.style.display = 'block';
+                            }
+                            defaultsLoaded = true;
+                            updateTabStatus(0, true);
+                            return data;
+                        }
+
                         // Populate Operating Conditions
                         setVal('T_fc', oc.T_fc);
                         setVal('Pa', oc.Pa);
@@ -1615,6 +1636,7 @@
 
                         // Populate Numerical Parameters
                         setVal('nb_gc', cp.nb_gc);
+                        loadedDiscretisation = discretisationOf(parseInt(cp.nb_gc) || 1);
                         setVal('nb_gdl', cp.nb_gdl);
                         setVal('nb_mpl', cp.nb_mpl);
                         
@@ -2465,6 +2487,7 @@
             }
 
             defaultsLoaded = true;
+            loadedDiscretisation = discretisationOf(currentNbGc());
 
             // Refresh UI components
             if (typeof updateModelType === 'function') updateModelType();
@@ -2482,6 +2505,39 @@
             // Navigate directly to the Run tab so the user can launch immediately
             updateTabStatus(0, true);
             switchTab(5);
+        }
+
+        // Number of gas-channel nodes currently entered in the form (at least 1).
+        function currentNbGc() {
+            const el = document.getElementById('nb_gc');
+            return Math.max(1, parseInt(el ? el.value : '1') || 1);
+        }
+
+        // The fuel-cell data hold one calibrated parameter set per discretisation.
+        function discretisationOf(nbGc) {
+            return nbGc === 1 ? '1D' : '1D1D';
+        }
+
+        // Called when n_gc is edited: refresh the model badge and, when the discretisation
+        // changes (1 <-> several nodes), reload the physical parameters calibrated for it.
+        function onNbGcInput() {
+            updateModelType();
+
+            const note = document.getElementById('nb-gc-reload-note');
+            if (note) note.style.display = 'none';
+
+            const discretisation = discretisationOf(currentNbGc());
+            if (loadedDiscretisation === null || discretisation === loadedDiscretisation) return;
+
+            // A custom fuel cell keeps the user's values; only a pre-selected one has
+            // calibrated parameters to reload.
+            const configTypeEl = document.querySelector('input[name="config_type"]:checked');
+            const fuelCellTypeEl = document.querySelector('input[name="fuel_cell_type"]:checked');
+            if (!configTypeEl || configTypeEl.value !== 'pre_selected' || !fuelCellTypeEl || !fuelCellTypeEl.value) {
+                loadedDiscretisation = discretisation;
+                return;
+            }
+            updateFuelCellDefaults(undefined, false, true);
         }
 
         function updateModelType() {

@@ -232,9 +232,36 @@ function sanitize_for_json(x)
     end
 end
 
+"""
+    requested_nb_gc(params) -> Int
+
+Number of gas-channel nodes requested by a web payload (`computing_parameters.nb_gc`).
+
+The fuel-cell factory picks its calibrated physical-parameter set from this number (`:1D`
+for a single node, `:1D1D` otherwise), so every default that is merged into a simulation
+must be built with the same value as the simulation itself.
+
+Parameters
+----------
+params : AbstractDict
+    Payload sent by the web form (keys already converted to symbols).
+
+Returns
+-------
+Int
+    The requested number of nodes, or 1 (the form default) when it is missing or invalid.
+"""
+function requested_nb_gc(params)::Int
+    cp = get(params, :computing_parameters, nothing)
+    cp isa AbstractDict || return 1
+    nb_gc = get(cp, :nb_gc, 1)
+    return (nb_gc isa Real && isfinite(nb_gc)) ? max(1, round(Int, nb_gc)) : 1
+end
+
 # Wrapper that returns a JSON-safe copy of the defaults (no NaN sentinels)
-function get_fuel_cell_defaults_safe(fuel_cell_type::String; voltage_zone::String="before_voltage_drop")::Dict
-    raw = get_fuel_cell_defaults(fuel_cell_type; voltage_zone=voltage_zone)
+function get_fuel_cell_defaults_safe(fuel_cell_type::String; voltage_zone::String="before_voltage_drop",
+                                     nb_gc::Int=1)::Dict
+    raw = get_fuel_cell_defaults(fuel_cell_type; voltage_zone=voltage_zone, nb_gc=nb_gc)
     return sanitize_for_json(raw)
 end
 
@@ -310,11 +337,15 @@ Get default parameters for a specific fuel cell type.
 - fuel_cell_type: Symbol or String identifying the fuel cell
 - voltage_zone: ":before_voltage_drop" or ":full". Determines which experimental
   polarization dataset is used, and therefore the reported `i_max_exp` maximum.
+- nb_gc: Number of gas-channel nodes of the simulation these defaults are meant for. It
+  selects the calibrated physical-parameter set (`:1D` for 1, `:1D1D` otherwise), and is
+  reported back in `computing_parameters`.
 
 # Returns:
 Dictionary with all default operating conditions and parameters.
 """
-function get_fuel_cell_defaults(fuel_cell_type::String; voltage_zone::String="before_voltage_drop")::Dict
+function get_fuel_cell_defaults(fuel_cell_type::String; voltage_zone::String="before_voltage_drop",
+                                nb_gc::Int=1)::Dict
     # Handle mapping to internal symbols
     mapped_type = Symbol(fuel_cell_type)
 
@@ -324,7 +355,7 @@ function get_fuel_cell_defaults(fuel_cell_type::String; voltage_zone::String="be
     try
         # Use the factory to create a fuel cell instance
         # This ensures we get exactly the parameters defined in fuelcell/*.jl
-        fc = AlphaPEM.Fuelcell.create_fuelcell(mapped_type, v_zone; year=2024, nb_gc=5)
+        fc = AlphaPEM.Fuelcell.create_fuelcell(mapped_type, v_zone; year=2024, nb_gc=nb_gc)
 
         # Get undetermined parameters list for this fuel cell
         und_params_list = AlphaPEM.Fuelcell.undetermined_parameter_bounds(fc, v_zone)
@@ -379,7 +410,7 @@ function get_fuel_cell_defaults(fuel_cell_type::String; voltage_zone::String="be
             :undetermined_list => und_param_keys, # Explicitly send the list for UI highlighting
             :param_metadata => PARAM_UI_CONVERSION,
             :computing_parameters => Dict(
-                :nb_gc => 1,
+                :nb_gc => nb_gc,
                 :nb_gdl => 3,
                 :nb_mpl => 2,
                 :rtol => 1e-3,
@@ -466,7 +497,7 @@ function get_fuel_cell_defaults(fuel_cell_type::String; voltage_zone::String="be
         ),
         :undetermined_list => [:Hacl, :Hccl, :Hmem, :Hgdl, :Hmpl, :epsilon_gdl, :Re, :i0_c_ref, :kappa_co, :kappa_c, :K_O2_ad_Pt, :C_scl],
         :computing_parameters => Dict(
-            :nb_gc => 1,                # GC nodes
+            :nb_gc => nb_gc,            # GC nodes
             :nb_gdl => 5,               # GDL nodes
             :nb_mpl => 5,               # MPL nodes
             :t_purge => 0.6,            # s - Purge time
@@ -523,7 +554,7 @@ function validate_parameters(params::Dict)::Dict
     # Auto-fill missing sections from fuel cell defaults if available
     if haskey(params, :fuel_cell_type)
         try
-            defaults = get_fuel_cell_defaults(string(params[:fuel_cell_type]))
+            defaults = get_fuel_cell_defaults(string(params[:fuel_cell_type]); nb_gc=requested_nb_gc(params))
             for section in [:operating_conditions, :accessible_parameters,
                            :undetermined_parameters, :computing_parameters]
                 if !haskey(params, section)
@@ -639,7 +670,10 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
     # the physical-parameter defaults below rely on. Building it once here
     # (with the *actual* voltage zone requested by the user) avoids duplicating
     # this logic and keeps the experimental-data lookup consistent with the
-    # simulation that is about to run.
+    # simulation that is about to run. It must also use the *actual* number of
+    # gas-channel nodes: the calibrated physical parameters differ between the
+    # 1D and the 1D+1D discretisations.
+    nb_gc = requested_nb_gc(params)
     fc_type_str = string(get(params, :fuel_cell_type, "ZSW_nominal"))
     v_zone_str = string(get(params, :voltage_zone, "before_voltage_drop"))
 
@@ -649,10 +683,10 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
     v_zone = Symbol(v_zone_str)
 
     base_fc = try
-        AlphaPEM.Fuelcell.create_fuelcell(base_type, v_zone; year=2024, nb_gc=5)
+        AlphaPEM.Fuelcell.create_fuelcell(base_type, v_zone; year=2024, nb_gc=nb_gc)
     catch
         # Fallback to ZSW
-        AlphaPEM.Fuelcell.create_fuelcell(:ZSW_nominal, :before_voltage_drop; year=2024, nb_gc=5)
+        AlphaPEM.Fuelcell.create_fuelcell(:ZSW_nominal, :before_voltage_drop; year=2024, nb_gc=nb_gc)
     end
     base_ap = base_fc.physical_parameters
 
@@ -662,7 +696,7 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
         # Merge with defaults if available
         if haskey(params, :fuel_cell_type)
             try
-                defaults = get_fuel_cell_defaults(string(params[:fuel_cell_type]))
+                defaults = get_fuel_cell_defaults(string(params[:fuel_cell_type]); nb_gc=nb_gc)
                 for (key, val) in get(defaults, :step_parameters, Dict())
                     if !haskey(sp, key)
                         sp[key] = val
@@ -688,7 +722,7 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
         # Merge with defaults if available (i_max is handled separately below)
         if haskey(params, :fuel_cell_type)
             try
-                defaults = get_fuel_cell_defaults(string(params[:fuel_cell_type]))
+                defaults = get_fuel_cell_defaults(string(params[:fuel_cell_type]); nb_gc=nb_gc)
                 pola_defaults = get(defaults, :polarization_parameters, Dict())
                 for (key, val) in pola_defaults
                     if key !== :i_max_exp && key !== :i_max && !haskey(pp, key)
@@ -730,7 +764,7 @@ function build_simulation_config(params::Dict, sim_type::Symbol)::SimulationConf
         # Merge with defaults if available
         if haskey(params, :fuel_cell_type)
             try
-                defaults = get_fuel_cell_defaults(string(params[:fuel_cell_type]))
+                defaults = get_fuel_cell_defaults(string(params[:fuel_cell_type]); nb_gc=nb_gc)
                 for (key, val) in get(defaults, :eis_parameters, Dict())
                     if !haskey(ep, key)
                         ep[key] = val
