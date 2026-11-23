@@ -1,0 +1,43 @@
+/*
+   Stylesheet of the interactive figure pages (menu and figure pages) served by
+   `interactive_display.jl`. It follows the theme of the AlphaPEM web interface
+   (interfaces/web/public/css/style.css) and is scoped under `.ap-page`.
+*/
+
+.ap-page { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+           color: #1a1a1a; line-height: 1.6; background: #f5f5f5; min-height: 100vh; margin: -8px; }
+.ap-page .ap-container { max-width: 1200px; min-height: 100vh; margin: 0 auto; background: #ffffff;
+                         box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+.ap-page .ap-wide { max-width: 1500px; }
+
+/* Header, main area and footer */
+.ap-page header { background: linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%); padding: 24px 16px;
+                  text-align: center; border-bottom: 4px solid #0066cc; }
+.ap-page header img { max-height: 80px; max-width: 90%; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15)); }
+.ap-page header p { margin: 8px 0 0; color: #0052a3; }
+.ap-page main { flex: 1; padding: 24px 16px; }
+.ap-page footer { background: #1a1a1a; color: #e6e6e6; padding: 16px; text-align: center; font-size: 0.875rem; }
+.ap-page h2 { font-size: 1.25rem; font-weight: 600; color: #0066cc; border-bottom: 2px solid #e6e6e6;
+              padding-bottom: 8px; margin: 24px 0 16px; }
+.ap-page h2:first-child { margin-top: 0; }
+
+/* Menu: one card per figure */
+.ap-page .ap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.ap-page .ap-card { display: block; padding: 12px 16px; border: 1px solid #e6e6e6; border-left: 4px solid #0066cc;
+                    border-radius: 8px; color: #1a1a1a; text-decoration: none; background: #ffffff;
+                    box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background .15s, box-shadow .15s; }
+.ap-page .ap-card:hover { background: #e6f0ff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+.ap-page .ap-card strong { display: block; color: #0052a3; }
+.ap-page .ap-card span { font-size: 0.875rem; color: #4d4d4d; }
+
+/* Figure page: back link, centered figure, download buttons */
+.ap-page .ap-back { display: inline-block; margin-bottom: 16px; color: #0066cc; text-decoration: none; font-weight: 600; }
+.ap-page .ap-back:hover { text-decoration: underline; }
+.ap-page .ap-figure { display: grid; place-items: center; width: 100%; overflow-x: auto; padding: 8px 0; }
+.ap-page .ap-figure > * { justify-self: center; margin-inline: auto; }
+.ap-page .ap-figure canvas,
+.ap-page .ap-figure svg { display: block; margin-inline: auto; }
+.ap-page .ap-actions { display: flex; justify-content: center; gap: 12px; margin-top: 16px; }
+.ap-page .ap-btn { display: inline-block; padding: 8px 20px; border-radius: 4px; background: #0066cc; color: #ffffff;
+                   text-decoration: none; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.ap-page .ap-btn:hover { background: #0052a3; }

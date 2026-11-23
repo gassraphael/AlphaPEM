@@ -5,7 +5,8 @@
 module PlotHelpers
 using CairoMakie
 
-export _publication_colors,
+export export_figure_bytes,
+       _publication_colors,
        _series_color,
        _macroscopic_color,
        _cell_current_color,
@@ -26,7 +27,6 @@ export _publication_colors,
        _rounded_major_ticks,
        _set_dense_ticks!,
        _plot_final_profile_along_gc!,
-       _clear_dynamic_axes!,
        _clear_dynamic_legends!,
        saving_instructions!,
        gc_direction_labels,
@@ -42,6 +42,9 @@ function _get_initial_limits_obs(ax)
         Observable{Any}(nothing)
     end
 end
+
+# In-place plot updates of the `:live` display (kept apart: rarely needed, see the file header).
+include("plot_live.jl")
 
 """Return a color for a given series index, cycling through the publication palette."""
 function _series_color(index::Integer)
@@ -82,6 +85,9 @@ end
 function _cell_voltage_color()
     return _macroscopic_color()
 end
+
+# Toolbar blocks per figure, hidden while exporting so they never appear in saved files.
+const _toolbar_blocks = WeakKeyDict{Any, Vector{Any}}()
 
 """Add interactive 'Reset View' and 'Zoom' buttons to a specific axis."""
 function _add_axis_toolbar!(ax)
@@ -139,7 +145,7 @@ function _add_axis_toolbar!(ax)
     )
     
     # 5. Design: Styled background capsule
-    Box(gl[1, 1:3], color = (:gray95, 0.7), strokewidth = 0.5, strokecolor = :gray80, cornerradius = 4)
+    capsule = Box(gl[1, 1:3], color = (:gray95, 0.7), strokewidth = 0.5, strokecolor = :gray80, cornerradius = 4)
     
     btn_attr = (
         width = 22, 
@@ -159,6 +165,7 @@ function _add_axis_toolbar!(ax)
     btn_res = Button(gl[1, 3]; label = "⌂", btn_attr...)
     
     colgap!(gl, 0)
+    append!(get!(Vector{Any}, _toolbar_blocks, fig.scene), (capsule, btn_in, btn_out, btn_res))
 
     # 6. Interaction Logic
     obs = _get_initial_limits_obs(ax)
@@ -206,6 +213,9 @@ function _finalize_axis!(ax;
                          title="",
                          legend::Bool=false,
                          legend_position=:rb)
+    # Labels, ticks, toolbar and legend already exist when a live pass updates the plots in place.
+    _live_updating(ax) && return nothing
+
     # Apply labels: avoid wrapping already-rich text in another rich() call,
     # as deep nesting of RichText objects can cause SVG rendering failures.
     ax.xlabel = (xlabel isa Makie.RichText) ? xlabel : rich(xlabel; font=:bold)
@@ -458,6 +468,8 @@ function _set_dense_ticks!(ax,
                            x::AbstractVector{<:Real},
                            ys::AbstractVector{<:AbstractVector{<:Real}};
                            n_major::Int=7)
+    _live_updating(ax) && return nothing   # the tick functions do not depend on the data.
+
     # Define adaptive tick functions using closures that capture n_major.
     function _adaptive_x_ticks(vmin, vmax)
         ticks = _rounded_major_ticks(vmin, vmax; n_major=n_major)
@@ -585,32 +597,6 @@ function gc_direction_labels(cfg,
     return labels
 end
 
-"""Clear dynamic axes and attached legends for live plot refresh."""
-function _clear_dynamic_axes!(items...)
-    figures = Figure[]
-
-    function _visit(item)
-        item === nothing && return nothing
-        if item isa Axis
-            empty!(item)
-            fig = item.parent
-            fig in figures || push!(figures, fig)
-        elseif item isa AbstractArray
-            foreach(_visit, item)
-        end
-        return nothing
-    end
-
-    foreach(_visit, items)
-
-    for fig in figures
-        for block in reverse(copy(fig.content))
-            block isa Legend && delete!(block)
-        end
-    end
-    return nothing
-end
-
 """Remove dynamic legends without clearing already plotted data."""
 function _clear_dynamic_legends!(items...)
     figures = Figure[]
@@ -657,6 +643,64 @@ function _resolve_pdf_export_path(folder_path::String,
     return joinpath(folder_path, candidate_stem * ".pdf")
 end
 
+"""
+    _save_without_toolbars(path, fig; kwargs...) -> String
+
+Save `fig` with CairoMakie, hiding the interactive toolbars (WGLMakie) during the export so
+that they never appear in the saved file.
+
+Parameters
+----------
+path : AbstractString
+    Destination file; its extension selects the format.
+fig : Makie.Figure
+    Figure to save.
+kwargs : Any
+    Extra keyword arguments forwarded to `save` (for instance `px_per_unit`).
+
+Returns
+-------
+String
+    `path`.
+"""
+function _save_without_toolbars(path::AbstractString, fig; kwargs...)
+    blocks = get(_toolbar_blocks, fig.scene, Any[])
+    foreach(b -> b.blockscene.visible[] = false, blocks)
+    try
+        save(path, fig; backend=CairoMakie, kwargs...)
+    finally
+        foreach(b -> b.blockscene.visible[] = true, blocks)
+    end
+    return path
+end
+
+"""
+    export_figure_bytes(fig, ext) -> Vector{UInt8}
+
+Render `fig` with CairoMakie and return the file content, ready to be downloaded.
+
+Parameters
+----------
+fig : Makie.Figure
+    Figure to export (interactive toolbars are excluded).
+ext : AbstractString
+    File format, `"pdf"` or `"png"`.
+
+Returns
+-------
+Vector{UInt8}
+    Encoded file content.
+"""
+function export_figure_bytes(fig, ext::AbstractString)::Vector{UInt8}
+    path = tempname() * "." * ext
+    try
+        _save_without_toolbars(path, fig; (ext == "png" ? (; px_per_unit=2) : (;))...)
+        return read(path)
+    finally
+        rm(path; force=true)
+    end
+end
+
 """Save a figure to the project results directory."""
 function saving_instructions!(_simu,
                               root_folder::String,
@@ -684,7 +728,7 @@ function saving_instructions!(_simu,
     mkpath(folder_path)
 
     pdf_path = _resolve_pdf_export_path(folder_path, filename)
-    save(pdf_path, fig; backend=CairoMakie)
+    _save_without_toolbars(pdf_path, fig)
     return nothing
 end
 

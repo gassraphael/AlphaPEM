@@ -45,14 +45,20 @@ display_start_time(cd::AbstractCurrent) = hasproperty(cd, :delta_t_ini) ? getpro
 
 
 
-"""Return the recommended initial time range for temporal displays."""
+"""Return the recommended initial time range for temporal displays.
+
+During a `:live` run still inside the initial stabilisation window (`t_end` not past the
+nominal start), the whole history is shown, so the range is never empty or reversed.
+"""
 function initial_time_range(outputs::SimulationOutputs,
                             cd::AbstractCurrent,
                             cfg::SimulationConfig)::Tuple{Float64, Float64}
     t_hist = time_history(outputs)
-    t_start = 0.95*display_start_time(cd)
+    t_start = max(0.0, 0.95*display_start_time(cd))
     t_end = isempty(t_hist) ? t_start + 1.0 : t_hist[end]
-    return (max(0.0, t_start), t_end)
+    t_end > t_start || (t_start = 0.0)
+    t_end > t_start || (t_end = t_start + 1.0)
+    return (t_start, t_end)
 end
 
 

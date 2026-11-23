@@ -20,11 +20,9 @@ Base.@kwdef struct NumericalParams <: AbstractFuelCellParams
     nb_man::Int = 1                 # Number of model nodes placed inside each manifold line
     purge_time::Float64 = 0.6       # The time for purging the system in seconds
     delta_purge::Float64 = 15.0     # The time between two purges in seconds
-    delta_t_dyn_step::Float64 = 0.1 # Time for dynamic display of the step current density function in seconds
     rtol::Float64 = 1e-3            # Relative tolerance for the system of ODEs solver
     atol::Float64 = 1e-6            # Absolute tolerance for the system of ODEs solver
     maxiters::Int = 5e5             # Maximum number of internal time steps that the IDA solver is allowed to take.
     max_run_time_s::Float64 = 5*60  # Maximum simulation runtime in seconds (0 = no limit)
     save_freq::Float64 = 10.0       # Maximum output save frequency in Hz (caps save density, does not force a sampling grid)
 end
-
