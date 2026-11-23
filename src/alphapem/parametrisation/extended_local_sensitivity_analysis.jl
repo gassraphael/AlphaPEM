@@ -52,6 +52,7 @@ include(joinpath(@__DIR__, "sensitivity_analysis", "shared", "warning_logger.jl"
 include(joinpath(@__DIR__, "sensitivity_analysis", "shared", "hashing.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "shared", "checkpoint_io.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "types.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "current_density_summaries.jl")) # step 6.2: medians by current range / zone
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "operating_cases.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "outputs.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "parameters.jl"))
@@ -61,12 +62,15 @@ include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sampling.j
 
 export ExtendedLocalSensitivityConfig,
        ExtendedLocalSensitivityResult,
+       CurrentDensityZone,
+       DEFAULT_CURRENT_DENSITY_ZONES,
        OperatingCase,
        generate_operating_case_library,
        ascending_polarization_params,
        VoltageCurve,
        voltage_curve_from_history,
        extract_voltage_curve,
+       summarize_current_density_sensitivities,
        ScreeningDataset,
        ScreeningRecord,
        OutputSpec,

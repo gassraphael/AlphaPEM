@@ -21,6 +21,7 @@ const OPERATING_BOUNDS_OVERRIDES = Dict{Symbol, Tuple{Float64, Float64, Symbol}}
 cfg = ExtendedLocalSensitivityConfig(
     n_candidates = N_CANDIDATES,                             # Sobol candidates generated before experimental screening.
     current_density_grid = CURRENT_DENSITY_GRID,             # Shared current-density points for every operating case (A/cm²).
+    current_density_zones = DEFAULT_CURRENT_DENSITY_ZONES,   # Magnitude summaries by current range; replace to customize zone boundaries.
     pressure_gap = 0.2e5,                                    # Exact pressure difference: Pa_des - Pc_des (Pa).
     operating_bounds_overrides = OPERATING_BOUNDS_OVERRIDES, # Optional partial bound overrides; empty keeps framework defaults.
     base_operating_conditions = nothing,                     # Use selected fuel-cell nominal conditions as the base; swept fields vary, others stay nominal.

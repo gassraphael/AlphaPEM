@@ -421,3 +421,85 @@ end
     @test issorted(stopped.valid; rev = true)
     @test all(isnan, stopped.voltage[.!stopped.valid])
 end
+
+@testset "ExtendedLocalSensitivityAnalysis current-density summaries (step 6.2)" begin
+    bounds = AlphaPEM.Parametrisation.Calibration.ParameterBound
+    params = [
+        bounds(:Hmem, 0.1, 10.0, :real, :log, "Hmem", "Membrane thickness"),
+        bounds(:Re, 0.1, 10.0, :real, :log, "Re", "Electrical resistance"),
+    ]
+    grid = [0.0, 0.25, 0.5, 0.75, 1.5, 1.6, 2.0]
+    S = [
+        -1.0  1.0  -2.0  3.0  NaN  -4.0  NaN
+        NaN   NaN   NaN   NaN  NaN   NaN  NaN
+    ]
+    original_S = copy(S)
+    cfg = ELSA.ExtendedLocalSensitivityConfig(current_density_grid = grid)
+
+    summary = ELSA.summarize_current_density_sensitivities(S, params, cfg)
+    @test size(summary, 1) == length(params) * (1 + length(cfg.current_density_zones))
+    @test Set(summary.region) == Set([:all_current_densities; [z.name for z in cfg.current_density_zones]])
+    @test isequal(S, original_S) # Keep each positive/negative voltage response unchanged in the raw matrix.
+
+    row(parameter, region) = summary[(summary.parameter .== parameter) .&
+                                     (summary.region .== region), :]
+    global_hmem = row(:Hmem, :all_current_densities)
+    @test only(global_hmem.median_magnitude) == 2.0
+    @test only(global_hmem.median_signed) == -1.0
+    @test only(global_hmem.valid_points) == 5
+    @test only(global_hmem.total_points) == 7
+    @test only(global_hmem.coverage) ≈ 5 / 7
+
+    low = row(:Hmem, :low_current_density_or_kinetic)
+    @test only(low.median_magnitude) == 1.0
+    @test only(low.median_signed) == -1.0
+    @test only(low.valid_points) == 3
+    @test only(low.total_points) == 3
+    @test only(low.coverage) == 1.0
+
+    medium = row(:Hmem, :medium_current_density_or_ohmic)
+    @test only(medium.median_magnitude) == 3.0
+    @test only(medium.median_signed) == 3.0
+    @test only(medium.valid_points) == 1
+    @test only(medium.total_points) == 2
+    @test only(medium.coverage) == 0.5
+
+    high = row(:Hmem, :high_current_density_or_mass_transport)
+    @test only(high.median_magnitude) == 4.0
+    @test only(high.median_signed) == -4.0
+    @test only(high.valid_points) == 1
+    @test only(high.total_points) == 2
+    @test only(high.coverage) == 0.5
+
+    empty_region = row(:Re, :all_current_densities)
+    @test isnan(only(empty_region.median_magnitude))
+    @test isnan(only(empty_region.median_signed))
+    @test only(empty_region.valid_points) == 0
+    @test only(empty_region.coverage) == 0.0
+
+    no_grid_points_cfg = ELSA.ExtendedLocalSensitivityConfig(
+        current_density_grid = grid,
+        current_density_zones = [ELSA.CurrentDensityZone(:above_grid, 3.0, Inf)])
+    no_grid_points = ELSA.summarize_current_density_sensitivities(S, params, no_grid_points_cfg)
+    above_grid = no_grid_points[(no_grid_points.parameter .== :Hmem) .&
+                                (no_grid_points.region .== :above_grid), :]
+    @test only(above_grid.valid_points) == 0
+    @test only(above_grid.total_points) == 0
+    @test isnan(only(above_grid.coverage))
+    @test isnan(only(above_grid.median_magnitude))
+
+    # Zones may be customized, but overlapping intervals and duplicate names are rejected.
+    custom_zones = [ELSA.CurrentDensityZone(:first, 0.0, 1.0),
+                    ELSA.CurrentDensityZone(:second, 0.5, 2.0)]
+    @test_throws ArgumentError ELSA.validate_config(
+        ELSA.ExtendedLocalSensitivityConfig(current_density_zones = custom_zones))
+    duplicate_zones = [ELSA.CurrentDensityZone(:same, 0.0, 1.0),
+                       ELSA.CurrentDensityZone(:same, 1.0, 2.0)]
+    @test_throws ArgumentError ELSA.validate_config(
+        ELSA.ExtendedLocalSensitivityConfig(current_density_zones = duplicate_zones))
+
+    @test_throws ArgumentError ELSA.summarize_current_density_sensitivities(
+        zeros(1, length(grid)), params, cfg)
+    @test_throws ArgumentError ELSA.summarize_current_density_sensitivities(
+        zeros(length(params), length(grid) - 1), params, cfg)
+end

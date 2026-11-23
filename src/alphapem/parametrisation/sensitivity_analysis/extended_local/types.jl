@@ -28,6 +28,56 @@ const DEFAULT_CURRENT_DENSITY_GRID = Float64[
     0.0, 0.03, 0.05, 0.1, 0.2, 0.6, 1.0, 1.2, 1.5, 1.7, 1.9, 2.1, 2.4, 2.7, 3.0
 ]
 
+"""
+    CurrentDensityZone(name, lower, upper; include_lower=true, include_upper=false)
+
+Named current-density interval used to summarize sensitivities.
+
+Bounds are in A/cm². Inclusion flags make adjacent zones unambiguous (for example, one zone can
+include a shared boundary while the next excludes it).
+
+# Fields
+- `name::Symbol`: Stable name used in summary tables.
+- `lower::Float64`: Lower current-density bound (A/cm²).
+- `upper::Float64`: Upper current-density bound (A/cm²); `Inf` means unbounded.
+- `include_lower::Bool`: Whether the lower bound is part of the zone.
+- `include_upper::Bool`: Whether the upper bound is part of the zone.
+"""
+struct CurrentDensityZone
+    name::Symbol
+    lower::Float64
+    upper::Float64
+    include_lower::Bool
+    include_upper::Bool
+end
+
+"""
+    CurrentDensityZone(name, lower, upper; include_lower=true, include_upper=false)
+
+Create a current-density interval, converting its bounds to `Float64`.
+"""
+function CurrentDensityZone(
+    name::Symbol,
+    lower::Real,
+    upper::Real;
+    include_lower::Bool = true,
+    include_upper::Bool = false,
+)::CurrentDensityZone
+    return CurrentDensityZone(name, Float64(lower), Float64(upper), include_lower, include_upper)
+end
+
+"""
+    DEFAULT_CURRENT_DENSITY_ZONES
+
+Default non-overlapping current-density zones in A/cm². The boundary 0.5 belongs to the low zone,
+and 1.5 belongs to the medium zone.
+"""
+const DEFAULT_CURRENT_DENSITY_ZONES = CurrentDensityZone[
+    CurrentDensityZone(:low_current_density_or_kinetic, 0.0, 0.5; include_upper = true),
+    CurrentDensityZone(:medium_current_density_or_ohmic, 0.5, 1.5; include_lower = false, include_upper = true),
+    CurrentDensityZone(:high_current_density_or_mass_transport, 1.5, Inf; include_lower = false),
+]
+
 
 """
     ScreeningDataset(fuel_cell_type, year, voltage_zone)
@@ -71,6 +121,9 @@ Configuration of the extended local sensitivity and identifiability analysis.
 - `pressure_gap::Float64`: Exact `Pa_des - Pc_des` difference in pascals. Default `0.2e5`.
 - `current_density_grid::Vector{Float64}`: Shared current-density grid in A/cm². Default is
   Goshtasbi's 15-point grid.
+- `current_density_zones::Vector{CurrentDensityZone}`: Named, non-overlapping current-density
+  intervals used for sensitivity summaries. The default zones are low `0–0.5`, medium `(0.5, 1.5]`,
+  and high `>1.5 A/cm²`.
 - `delta_t_ini::Float64`: Stabilisation time at the initial 1 A/cm² current (s).
 - `v_load::Float64`: Loading rate for initialization and sweep ramps (A/m²/s).
 - `delta_t_break::Float64`: Stabilisation time above 0.3 A/cm² (s).
@@ -136,6 +189,7 @@ Base.@kwdef struct ExtendedLocalSensitivityConfig
     base_operating_conditions::Union{Nothing, OperatingConditions} = nothing # Base for cases: nominal if `nothing`; swept fields are replaced, others retained.
     pressure_gap::Float64                   = 0.2e5            # Enforce Pa_des - Pc_des = this pressure difference (Pa).
     current_density_grid::Vector{Float64}   = copy(DEFAULT_CURRENT_DENSITY_GRID) # Requested current points (A/cm²), shared by every case.
+    current_density_zones::Vector{CurrentDensityZone} = copy(DEFAULT_CURRENT_DENSITY_ZONES) # Named, non-overlapping current intervals for summaries.
     # Ascending current profile (defaults: AlphaPEM polarization durations)
     delta_t_ini::Float64                    = AscendingPolarizationParams().delta_t_ini             # Stabilization duration at the initial 1 A/cm² current (s).
     v_load::Float64                         = AscendingPolarizationParams().v_load                  # Current ramp rate (A/m²/s).
@@ -211,6 +265,25 @@ function validate_config(cfg::ExtendedLocalSensitivityConfig)::ExtendedLocalSens
            "current_density_grid must contain finite, non-negative values")
     _check(all(diff(cfg.current_density_grid) .> 0.0),
            "current_density_grid must be strictly increasing")
+    _check(!isempty(cfg.current_density_zones), "current_density_zones must not be empty")
+    zone_names = [zone.name for zone in cfg.current_density_zones]
+    _check(length(unique(zone_names)) == length(zone_names),
+           "current_density_zones must have unique names")
+    for zone in cfg.current_density_zones
+        _check(zone.name != :all_current_densities,
+               ":all_current_densities is reserved for the full-grid summary")
+        _check(isfinite(zone.lower) && zone.lower >= 0.0 && !isnan(zone.upper) &&
+               zone.upper > zone.lower && zone.upper > 0.0,
+               "current-density zone $(zone.name) must have lower >= 0 and upper > lower")
+    end
+    ordered_zones = sort(cfg.current_density_zones; by = zone -> (zone.lower, zone.upper))
+    for (previous, next) in zip(ordered_zones, ordered_zones[2:end])
+        overlaps_interior = next.lower < previous.upper
+        overlaps_at_boundary = next.lower == previous.upper &&
+                               previous.include_upper && next.include_lower
+        _check(!overlaps_interior && !overlaps_at_boundary,
+               "current-density zones $(previous.name) and $(next.name) must not overlap")
+    end
 
     # Validate the ascending current profile
     _check(all(isfinite, (cfg.delta_t_ini, cfg.v_load, cfg.delta_t_break,

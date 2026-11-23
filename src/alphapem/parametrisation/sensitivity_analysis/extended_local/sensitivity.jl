@@ -34,6 +34,10 @@ remain fixed. For measurement `j`, with `ỹ_m` the outputs at the successful le
 
     s_{j,i} = mean_m(ỹ_{j,m})⁻¹ · mean_m[(ỹ_{j,m+1} − ỹ_{j,m}) / (θ̄_{m+1} − θ̄_m)]
 
+The sensitivity is signed: its sign is the sign of the output slope as the normalized parameter
+increases. For the positive voltage outputs analysed here, a positive value means voltage increases
+with the parameter, while a negative value means voltage decreases.
+
 Parameters
 ----------
 simulate : Function
