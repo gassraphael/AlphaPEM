@@ -56,22 +56,6 @@ _positive_or_nan(values) = [isfinite(value) && value > 0.0 ? Float64(value) : Na
                             for value in values]
 
 
-# Serve a figure in the browser page; return whether it was served.
-function _serve_live_figure(figure; name::String, title::String, display::Bool)::Bool
-    display || return false
-    serve_interactive_figure!(figure; name, title)
-    return true
-end
-
-
-# Keep a served figure alive when running as a script.
-function _keep_figure_served(displayed::Bool, message::String)
-    displayed || return nothing
-    wait_for_interactive_figures!(message)
-    return nothing
-end
-
-
 # ============================================================
 # LIVE CONVERGENCE FIGURE
 # ============================================================
@@ -92,19 +76,18 @@ mutable struct SensitivityConvergencePlot
     deviation_values::Vector{Any}
     coverage_values::Vector{Any}
     next_state::Int
-    displayed::Bool
 end
 
 
 """
-    create_sensitivity_convergence_plot(params, n_samples; display=true) -> SensitivityConvergencePlot
+    create_sensitivity_convergence_plot(params, n_samples) -> SensitivityConvergencePlot
 
 Create the live median/standard-deviation convergence figure with measurement coverage.
 
 Each panel has one curve per cumulative sample prefix. Intermediate states are blue with increasing
 opacity; the final state is red. The coverage panel shows the median fraction of available
-measurements while partial curves contribute to the RMS. When `display` is true, the figure is
-served in the AlphaPEM browser plot page before simulations start.
+measurements while partial curves contribute to the RMS. The figure is
+served with [`serve_sensitivity_plots!`](@ref) before simulations start.
 
 $(SENSITIVITY_INTERPRETATION_WARNING)
 
@@ -114,8 +97,6 @@ params : Vector{ParameterBound}
     Analysed parameters in the order used by the sensitivity matrices.
 n_samples : Int
     Number of accepted samples expected from the screening stage.
-display : Bool, optional
-    Serve the figure in the browser as it is created. Default is `true`.
 
 Returns
 -------
@@ -124,8 +105,7 @@ SensitivityConvergencePlot
 """
 function create_sensitivity_convergence_plot(
     params::Vector{ParameterBound},
-    n_samples::Int;
-    display::Bool = true,
+    n_samples::Int,
 )::SensitivityConvergencePlot
     isempty(params) && throw(ArgumentError("params must not be empty"))
     sample_counts = convergence_sample_counts(n_samples)
@@ -178,12 +158,9 @@ function create_sensitivity_convergence_plot(
     WGLMakie.Legend(figure[1:2, 2], legend_handles, legend_labels;
                     title = "Cumulative samples")
 
-    displayed = _serve_live_figure(
-        figure; name = "extended_local_convergence",
-        title = "Extended local sensitivity convergence", display)
     return SensitivityConvergencePlot(
         figure, median_axis, deviation_axis, coverage_axis, parameter_names, sample_counts,
-        median_values, deviation_values, coverage_values, 1, displayed)
+        median_values, deviation_values, coverage_values, 1)
 end
 
 
@@ -229,29 +206,6 @@ function update_sensitivity_convergence_plot!(
 end
 
 
-"""
-    finish_sensitivity_convergence_plot!(plot)
-
-Keep the live browser figures available after the simulation finishes when running as a script.
-
-Parameters
-----------
-plot : SensitivityConvergencePlot
-    Figure whose final convergence state has been drawn. Call this last: in a script it blocks
-    while serving every live figure.
-
-Returns
--------
-Nothing
-    In a script, waits until the user interrupts the plot server; in a REPL, returns immediately.
-"""
-function finish_sensitivity_convergence_plot!(plot::SensitivityConvergencePlot)
-    _keep_figure_served(
-        plot.displayed,
-        "Sensitivity figures are complete. Press Ctrl+C to close the browser plot server.")
-end
-
-
 # ============================================================
 # LIVE VOLTAGE-SENSITIVITY FIGURE
 # ============================================================
@@ -267,7 +221,6 @@ Mutable handles for the live voltage-sensitivity figure.
 - `points`: Observable vector of gray per-candidate points.
 - `median_values`, `median_colors`: Observables for the median markers and their color values.
 - `color_range`: Observable color limits, set when the medians are known.
-- `displayed::Bool`: Whether the figure was served in the browser.
 """
 mutable struct VoltageSensitivityPlot
     figure
@@ -277,12 +230,11 @@ mutable struct VoltageSensitivityPlot
     median_values
     median_colors
     color_range
-    displayed::Bool
 end
 
 
 """
-    create_voltage_sensitivity_plot(params; display=true) -> VoltageSensitivityPlot
+    create_voltage_sensitivity_plot(params) -> VoltageSensitivityPlot
 
 Create the live voltage-sensitivity figure.
 
@@ -298,8 +250,6 @@ Parameters
 ----------
 params : Vector{ParameterBound}
     Analysed parameters in the order used by the sensitivity matrices.
-display : Bool, optional
-    Serve the figure in the browser as it is created. Default is `true`.
 
 Returns
 -------
@@ -319,8 +269,7 @@ fuel cell models—part i: Sensitivity analysis and parameter identifiability," 
 Electrochemical Society, vol. 167, p. 044504, Mar. 2020. https://doi.org/10.1149/1945-7111/ab7091.
 """
 function create_voltage_sensitivity_plot(
-    params::Vector{ParameterBound};
-    display::Bool = true,
+    params::Vector{ParameterBound},
 )::VoltageSensitivityPlot
     isempty(params) && throw(ArgumentError("params must not be empty"))
     parameter_names = [parameter.name for parameter in params]
@@ -347,12 +296,8 @@ function create_voltage_sensitivity_plot(
         markersize = 16, strokecolor = :black, strokewidth = 1)
     WGLMakie.Colorbar(figure[1, 2], median_plot; label = "log10 median sensitivity magnitude")
 
-    displayed = _serve_live_figure(
-        figure; name = "extended_local_voltage_sensitivity",
-        title = "Extended local voltage sensitivity", display)
     return VoltageSensitivityPlot(
-        figure, axis, parameter_names, points, median_values, median_colors, color_range,
-        displayed)
+        figure, axis, parameter_names, points, median_values, median_colors, color_range)
 end
 
 
@@ -423,4 +368,201 @@ function finish_voltage_sensitivity_plot!(
     plot.median_colors[] = [isfinite(value) ? value : lower for value in colors]
     plot.median_values[] = medians
     return nothing
+end
+
+
+# ============================================================
+# COLLINEARITY FIGURE
+# ============================================================
+
+"""
+Caution shown with every collinearity figure.
+
+High collinearity is a statement about the model structure and the measurements used, not about
+the physics of the parameters.
+"""
+const COLLINEARITY_INTERPRETATION_WARNING =
+    "High collinearity does not mean the parameters are physically related: the model structure " *
+    "cannot distinguish their effects from these measurements alone, so the same curve can be " *
+    "obtained by tuning either. If experiments clearly separate them, the model needs refinement."
+
+
+"""
+    CollinearityPlot
+
+Mutable handles for the voltage-sensitivity collinearity figure.
+
+# Fields
+- `figure`, `axis`: Makie figure and pair axis.
+- `parameter_names::Vector{Symbol}`: Analysed parameters, in matrix order.
+- `faded_values`, `highlighted_values`: Observables for all pairs (faded) and for pairs above the
+  collinearity threshold (full color).
+"""
+mutable struct CollinearityPlot
+    figure
+    axis
+    parameter_names::Vector{Symbol}
+    faded_values
+    highlighted_values
+end
+
+
+"""
+    create_collinearity_plot(params) -> CollinearityPlot
+
+Create the empty voltage-sensitivity collinearity figure, to be filled by
+[`finish_collinearity_plot!`](@ref).
+
+The layout follows the article's collinearity figures: lower triangle of pairwise collinearity
+indices on a fixed `[0, 1]` jet color scale, pairs above the threshold in full color and the others
+faded, with a color bar from 0 (blue) to 1 (red).
+
+$(COLLINEARITY_INTERPRETATION_WARNING)
+
+Parameters
+----------
+params : Vector{ParameterBound}
+    Analysed parameters in the order used by the sensitivity matrices.
+
+Returns
+-------
+CollinearityPlot
+    Figure and observables updated at the end of the analysis.
+
+Raises
+------
+ArgumentError
+    If `params` is empty.
+
+References
+----------
+A. Goshtasbi, J. Chen, J. R. Waldecker, S. Hirano, and T. Ersal, "Effective parameterization of pem
+fuel cell models—part i: Sensitivity analysis and parameter identifiability," Journal of The
+Electrochemical Society, vol. 167, p. 044504, Mar. 2020. https://doi.org/10.1149/1945-7111/ab7091.
+"""
+function create_collinearity_plot(params::Vector{ParameterBound})::CollinearityPlot
+    isempty(params) && throw(ArgumentError("params must not be empty"))
+    parameter_names = [parameter.name for parameter in params]
+    n_params = length(parameter_names)
+    positions = collect(1:n_params)
+    labels = string.(parameter_names)
+
+    figure = WGLMakie.Figure(size = (1100, 1250))
+    axis = WGLMakie.Axis(
+        figure[1, 1];
+        title = "Voltage Sensitivity Collinearity",
+        aspect = WGLMakie.DataAspect(),
+        yreversed = true,
+        xticks = (positions, labels), yticks = (positions, labels),
+        xticklabelrotation = pi / 2,
+        xticklabelsize = 9, yticklabelsize = 9,
+    )
+
+    # Both layers use the same colormap; the faded layer sits below the highlighted one.
+    faded_values = WGLMakie.Observable(fill(NaN, n_params, n_params))
+    highlighted_values = WGLMakie.Observable(fill(NaN, n_params, n_params))
+    WGLMakie.heatmap!(axis, positions, positions, faded_values;
+                      colormap = :jet, colorrange = (0, 1), alpha = 0.25, nan_color = :transparent)
+    highlight = WGLMakie.heatmap!(axis, positions, positions, highlighted_values;
+                                  colormap = :jet, colorrange = (0, 1), nan_color = :transparent)
+    WGLMakie.Colorbar(figure[1, 2], highlight; label = "Collinearity index")
+    WGLMakie.Label(figure[2, 1:2], COLLINEARITY_INTERPRETATION_WARNING;
+                   fontsize = 12, halign = :left, tellwidth = false, word_wrap = true)
+
+    return CollinearityPlot(
+        figure, axis, parameter_names, faded_values, highlighted_values)
+end
+
+
+"""
+    finish_collinearity_plot!(plot, collinearity, sensitivity_median; collinearity_threshold,
+                              sensitivity_threshold)
+
+Draw the median pairwise collinearity.
+
+Only pairs where both parameters have a non-negligible median sensitivity are drawn, and only pairs above `collinearity_threshold` use the full color.
+
+Parameters
+----------
+plot : CollinearityPlot
+    Figure returned by [`create_collinearity_plot`](@ref).
+collinearity : AbstractMatrix{<:Real}
+    Symmetric `n_params × n_params` median collinearity indices; `NaN` marks unavailable pairs.
+sensitivity_median : AbstractVector{<:Real}
+    Median voltage-sensitivity magnitude per parameter, used for the non-negligible criterion.
+collinearity_threshold : Real, optional
+    Index above which a pair is highlighted. Default is `0.707` (angle below 45°).
+sensitivity_threshold : Real, optional
+    Minimum median magnitude for a parameter to be non-negligible. Default is `0.1`.
+
+Raises
+------
+ArgumentError
+    If the input sizes do not match the plotted parameters.
+"""
+function finish_collinearity_plot!(
+    plot::CollinearityPlot,
+    collinearity::AbstractMatrix{<:Real},
+    sensitivity_median::AbstractVector{<:Real};
+    collinearity_threshold::Real = 0.707,
+    sensitivity_threshold::Real = 0.1,
+)
+    n_params = length(plot.parameter_names)
+    size(collinearity) == (n_params, n_params) ||
+        throw(ArgumentError("collinearity must be n_params × n_params"))
+    length(sensitivity_median) == n_params ||
+        throw(ArgumentError("sensitivity_median must contain one value per parameter"))
+
+    # Lower triangle only; the heatmap is indexed (column parameter, row parameter).
+    influential = [isfinite(value) && value >= sensitivity_threshold
+                   for value in sensitivity_median]
+    faded = fill(NaN, n_params, n_params)
+    highlighted = fill(NaN, n_params, n_params)
+    for row in 1:n_params, column in 1:(row - 1)
+        value = collinearity[row, column]
+        (isfinite(value) && influential[row] && influential[column]) || continue
+        faded[column, row] = value
+        value >= collinearity_threshold && (highlighted[column, row] = value)
+    end
+
+    plot.faded_values[] = faded
+    plot.highlighted_values[] = highlighted
+    return nothing
+end
+
+
+# ============================================================
+# BROWSER SERVICE
+# ============================================================
+
+"""
+    serve_sensitivity_plots!(plots...) -> String
+
+Serve every given sensitivity figure together in the AlphaPEM browser plot page.
+
+Call it once before the simulations start so the figures update as results arrive.
+
+Parameters
+----------
+plots : SensitivityConvergencePlot, VoltageSensitivityPlot, CollinearityPlot
+    Figures to publish; each type has a fixed route name and title.
+
+Returns
+-------
+String
+    Entry URL of the plot page.
+"""
+function serve_sensitivity_plots!(plots...)::String
+    descriptions = Dict(
+        SensitivityConvergencePlot =>
+            ("extended_local_convergence", "Extended local sensitivity convergence"),
+        VoltageSensitivityPlot =>
+            ("extended_local_voltage_sensitivity", "Extended local voltage sensitivity"),
+        CollinearityPlot =>
+            ("extended_local_collinearity", "Extended local voltage collinearity"),
+    )
+    return serve_interactive_figures!(
+        [plot.figure for plot in plots];
+        names = [descriptions[typeof(plot)][1] for plot in plots],
+        titles = [descriptions[typeof(plot)][2] for plot in plots])
 end

@@ -49,7 +49,7 @@ using AlphaPEM.Config: NumericalParams, PARAMETER_BOUNDS, PARAMETER_METADATA, Ph
                        exact_pressure_gap_constraint
 using AlphaPEM.Fuelcell: create_fuelcell
 using AlphaPEM.Application: run_simulation
-using AlphaPEM.Application: serve_interactive_figure!, wait_for_interactive_figures!
+using AlphaPEM.Application: serve_interactive_figures!, wait_for_interactive_figures!
 using AlphaPEM.Core.Models: _polarization_points_cali, time_history, derived_outputs
 using AlphaPEM.Currents: AscendingPolarizationCurrent
 import WGLMakie
@@ -70,6 +70,7 @@ include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sampling.j
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "convergence.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sensitivity_plots.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sensitivity_engine.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "collinearity.jl"))
 
 export ExtendedLocalSensitivityConfig,
        ExtendedLocalSensitivityResult,
@@ -114,12 +115,20 @@ export ExtendedLocalSensitivityConfig,
        SensitivityConvergencePlot,
        create_sensitivity_convergence_plot,
        update_sensitivity_convergence_plot!,
-       finish_sensitivity_convergence_plot!,
        SENSITIVITY_INTERPRETATION_WARNING,
        VoltageSensitivityPlot,
        create_voltage_sensitivity_plot,
        add_voltage_sensitivity_candidate!,
        finish_voltage_sensitivity_plot!,
+       COLLINEARITY_INTERPRETATION_WARNING,
+       CollinearityPlot,
+       create_collinearity_plot,
+       finish_collinearity_plot!,
+       serve_sensitivity_plots!,
+       candidate_collinearity,
+       CollinearitySummary,
+       collinearity_summary,
+       collinear_pairs,
        run_local_sensitivity_simulations,
        alphapem_local_sensitivity_simulator
 

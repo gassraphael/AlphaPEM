@@ -20,6 +20,6 @@ import HTTP
 include("run_simulation.jl")
 
 export run_simulation, prepare_web_figures,
-       serve_interactive_figure!, wait_for_interactive_figures!
+       serve_interactive_figures!, wait_for_interactive_figures!
 
 end  # module Application

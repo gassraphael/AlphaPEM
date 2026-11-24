@@ -297,53 +297,63 @@ function _open_interactive_figures!()
 end
 
 """
-    serve_interactive_figure!(fig; name, title, group="Analysis") -> String
+    serve_interactive_figures!(figs; names, titles, group="Analysis") -> String
 
-Serve one externally prepared WGLMakie figure through the AlphaPEM browser plot server.
+Serve externally prepared WGLMakie figures together through the AlphaPEM browser plot server.
 
-The figure may be updated after serving, for example by mutating its Makie observables during
-a long-running analysis. Only one prepared figure set is served at a time.
+The figures may be updated after serving, for example by mutating their Makie observables during
+a long-running analysis. Several figures are listed in a menu page. Only one prepared figure set
+is served at a time, so every figure must be passed in a single call.
 
 Parameters
 ----------
-fig : Any
-    WGLMakie figure to publish.
-name : AbstractString
-    Unique route segment for the figure; must not contain `/`.
-title : AbstractString
-    Human-readable browser-page title.
+figs : AbstractVector
+    WGLMakie figures to publish.
+names : AbstractVector{<:AbstractString}
+    Unique route segment for each figure; must not contain `/`.
+titles : AbstractVector{<:AbstractString}
+    Human-readable browser-page title for each figure.
 group : AbstractString, optional
-    Figure group shown in the menu when used by the shared plot page. Default is `"Analysis"`.
+    Figure group shown in the menu. Default is `"Analysis"`.
 
 Returns
 -------
 String
-    URL at which the interactive figure is served.
+    Entry URL: the figure itself for one figure, otherwise the menu page.
 
 Raises
 ------
 ArgumentError
-    If the route name is empty, contains `/`, or another figure set is already being served.
+    If the inputs are empty or of different lengths, a route name is empty, duplicated or contains
+    `/`, or another figure set is already being served.
 """
-function serve_interactive_figure!(
-    fig;
-    name::AbstractString,
-    title::AbstractString,
+function serve_interactive_figures!(
+    figs::AbstractVector;
+    names::AbstractVector{<:AbstractString},
+    titles::AbstractVector{<:AbstractString},
     group::AbstractString = "Analysis",
 )::String
-    isempty(name) && throw(ArgumentError("name must not be empty"))
-    occursin('/', name) && throw(ArgumentError("name must be a single route segment without '/'"))
+    # Preliminary checks
+    isempty(figs) && throw(ArgumentError("figs must not be empty"))
+    length(figs) == length(names) == length(titles) ||
+        throw(ArgumentError("figs, names and titles must have the same length"))
+    all(!isempty, names) || throw(ArgumentError("names must not be empty"))
+    any(occursin('/', name) for name in names) &&
+        throw(ArgumentError("names must be single route segments without '/'"))
+    length(unique(names)) == length(names) || throw(ArgumentError("names must be unique"))
     isempty(_served_figure_routes) ||
         throw(ArgumentError("Another AlphaPEM interactive figure set is already being served"))
 
-    # Register the external figure in the same WGLMakie/Bonito server used by simulations.
+    # Register the external figures in the same WGLMakie/Bonito server used by simulations.
     WGLMakie.activate!()
-    _store_prepared_figures!(fig)
+    _store_prepared_figures!(figs...)
     empty!(_prepared_figure_specs)
-    push!(_prepared_figure_specs,
-          Dict("name" => String(name), "title" => String(title), "group" => String(group)))
+    for (name, title) in zip(names, titles)
+        push!(_prepared_figure_specs,
+              Dict("name" => String(name), "title" => String(title), "group" => String(group)))
+    end
     _open_interactive_figures!()
-    return _plot_url("/" * String(name))
+    return _plot_url(length(figs) > 1 ? "/" : "/" * String(first(names)))
 end
 
 

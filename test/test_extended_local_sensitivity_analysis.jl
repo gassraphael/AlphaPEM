@@ -558,7 +558,7 @@ end
     @test snapshot.median_coverage == [1.0, 0.75]
 
     # Build and update the figure without serving a browser, as in non-interactive tests.
-    convergence_plot = ELSA.create_sensitivity_convergence_plot(params, 5; display = false)
+    convergence_plot = ELSA.create_sensitivity_convergence_plot(params, 5)
     for state_index in 1:5
         figure_snapshot = ELSA.SensitivityConvergenceSnapshot(
             state_index, state_index, [1.0, 2.0], [0.1, 0.2],
@@ -572,7 +572,7 @@ end
             5, 5, [1.0, 2.0], [0.1, 0.2], [5, 5], [1.0, 0.8]))
 
     # The voltage-sensitivity figure accepts candidate points live and medians only at the end.
-    voltage_plot = ELSA.create_voltage_sensitivity_plot(params; display = false)
+    voltage_plot = ELSA.create_voltage_sensitivity_plot(params)
     ELSA.add_voltage_sensitivity_candidate!(voltage_plot, [1.0, NaN])
     ELSA.add_voltage_sensitivity_candidate!(voltage_plot, [2.0, 3.0])
     @test length(voltage_plot.points[]) == 3
@@ -582,6 +582,36 @@ end
     @test voltage_plot.median_values[] == [1.5, 3.0]
     @test voltage_plot.color_range[] == (log10(1.5), log10(3.0))
     @test occursin("physically important", ELSA.SENSITIVITY_INTERPRETATION_WARNING)
+
+    # Collinearity: identical rows give 1, orthogonal rows 0, and NaN measurements are skipped.
+    params3 = [
+        ParameterBound(:a, 0.0, 1.0, :real, :linear, "", "a"),
+        ParameterBound(:b, 0.0, 1.0, :real, :linear, "", "b"),
+        ParameterBound(:c, 0.0, 1.0, :real, :linear, "", "c"),
+    ]
+    collinearity_blocks = Matrix{Union{Nothing, Matrix{Float64}}}(undef, 1, 1)
+    collinearity_blocks[1, 1] = [1.0 2.0 NaN 4.0; 2.0 4.0 9.0 8.0; 1.0 -0.5 0.0 0.0]
+    psi = ELSA.candidate_collinearity(collinearity_blocks, params3, 1)
+    @test psi[1, 2] ≈ 1.0
+    @test psi[1, 3] ≈ 0.0 atol = 1e-12
+    @test psi == psi'
+
+    # Summary and pair list require both parameters to have a non-negligible median magnitude.
+    summary = ELSA.CollinearitySummary(
+        [1.0 0.9 0.8; 0.9 1.0 0.1; 0.8 0.1 1.0], [1.0 0.95 0.9; 0.95 1.0 0.2; 0.9 0.2 1.0],
+        [1.0, 0.5, 0.01])
+    pairs = ELSA.collinear_pairs(summary, params3)
+    @test Tuple.(eachrow(pairs[:, [:i, :j]])) == [(:a, :b)]
+
+    # The collinearity figure shows only the lower triangle and highlights above-threshold pairs.
+    collinearity_plot = ELSA.create_collinearity_plot(params3)
+    ELSA.finish_collinearity_plot!(collinearity_plot, summary.median_collinearity,
+                                   summary.sensitivity_median)
+    @test count(!isnan, collinearity_plot.highlighted_values[]) == 1
+    @test isnan(collinearity_plot.faded_values[][1, 1])
+    @test_throws ArgumentError ELSA.finish_collinearity_plot!(
+        collinearity_plot, ones(2, 2), [1.0, 1.0])
+    @test occursin("physically related", ELSA.COLLINEARITY_INTERPRETATION_WARNING)
 
     # Every candidate/case unit contains one signed sensitivity block per current density.
     convergence_updates = ELSA.SensitivityConvergenceSnapshot[]

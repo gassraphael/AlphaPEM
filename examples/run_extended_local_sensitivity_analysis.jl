@@ -5,7 +5,10 @@
 import Pkg
 Pkg.activate(joinpath(@__DIR__, ".."))
 
+using AlphaPEM.Application: wait_for_interactive_figures!
 using AlphaPEM.Parametrisation.ExtendedLocalSensitivityAnalysis
+using CSV
+using DataFrames: nrow
 
 # ============================================================
 # CONFIGURATION
@@ -25,6 +28,8 @@ cfg = ExtendedLocalSensitivityConfig(
     pressure_gap = 0.2e5,                                        # Exact pressure difference: Pa_des - Pc_des (Pa).
     operating_bounds_overrides = OPERATING_BOUNDS_OVERRIDES,     # Optional partial bound overrides; empty keeps framework defaults.
     base_operating_conditions = nothing,                         # Use selected fuel-cell nominal conditions as the base; swept fields vary, others stay nominal.
+    sensitivity_threshold = 0.1,                                 # Minimum median voltage-sensitivity magnitude for a parameter to count as non-negligible; a collinear pair needs both parameters above it.
+    collinearity_threshold = 0.707,                              # Collinearity index above which a pair is highlighted (angle below 45°).
     screening_datasets = [
         ScreeningDataset(:ZSW_nominal, 2024, :full),             # Candidate must match this experimental polarization curve.
         ScreeningDataset(:ZSW_Pa_1_61_Pc_1_41, 2024, :full),     # Candidate must also match this curve.
@@ -76,11 +81,13 @@ projected_local_evaluations =
 # LOCAL-SENSITIVITY SIMULATION ENGINE
 # ============================================================
 
-# Open the live convergence figure before simulations start; callbacks add up to six cumulative
-# states only after the corresponding candidate prefix is complete.
+# Create every figure and serve them together before simulations start; callbacks fill them as
+# results arrive. The convergence figure gets up to six cumulative states, the voltage figure one
+# gray point set per finished candidate, and the collinearity figure is drawn at the end.
 convergence_plot = create_sensitivity_convergence_plot(params, accepted_count)
-# Open the voltage-sensitivity figure too; each finished candidate adds its gray points.
 voltage_plot = create_voltage_sensitivity_plot(params)
+collinearity_plot = create_collinearity_plot(params)
+serve_sensitivity_plots!(convergence_plot, voltage_plot, collinearity_plot)
 # Run every accepted candidate against every operating case; the engine checkpoints completed blocks.
 local_result = run_local_sensitivity_simulations(
     records, params, operating_cases, cfg;
@@ -93,6 +100,20 @@ local_result = run_local_sensitivity_simulations(
 final_snapshot = convergence_snapshot(
     local_result.sensitivities, params, length(local_result.candidates), 1)
 finish_voltage_sensitivity_plot!(voltage_plot, final_snapshot.median_magnitude)
+
+# Collinearity is summarized over all candidates, then drawn and exported as a pair list.
+collinearity = collinearity_summary(local_result)
+finish_collinearity_plot!(
+    collinearity_plot, collinearity.median_collinearity, collinearity.sensitivity_median;
+    collinearity_threshold = cfg.collinearity_threshold,
+    sensitivity_threshold = cfg.sensitivity_threshold)
+pairs = collinear_pairs(
+    collinearity, params;
+    collinearity_threshold = cfg.collinearity_threshold,
+    sensitivity_threshold = cfg.sensitivity_threshold)
+mkpath(cfg.output_dir)
+CSV.write(joinpath(cfg.output_dir, "collinear_pairs.csv"), pairs)
+@info "Collinear parameter pairs" count = nrow(pairs)
 @info "Local sensitivity simulation complete" candidate_count = length(local_result.candidates) case_count = length(local_result.operating_cases) block_status_counts = Dict(status => count(==(status), local_result.statuses) for status in (:complete, :partial, :invalid)) execution_time_s = round(local_result.execution_time; digits = 2)
 
 # ============================================================
@@ -102,5 +123,6 @@ finish_voltage_sensitivity_plot!(voltage_plot, final_snapshot.median_magnitude)
 println("Accepted $accepted_count / $(length(records)) candidates.")
 println("Fixed parameters: $(join(string.(fixed_parameters), ", "))")
 
-# In scripts, keep the browser page alive after all live figures are complete.
-finish_sensitivity_convergence_plot!(convergence_plot)
+# In scripts, keep the browser page alive after all figures are complete.
+wait_for_interactive_figures!(
+    "Sensitivity figures are complete. Press Ctrl+C to close the browser plot server.")
