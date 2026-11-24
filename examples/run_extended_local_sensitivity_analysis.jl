@@ -84,9 +84,18 @@ projected_local_evaluations =
 # Create every figure and serve them together before simulations start; callbacks fill them as
 # results arrive. The convergence figure gets up to six cumulative states, the voltage figure one
 # gray point set per finished candidate, and the collinearity figure is drawn at the end.
-convergence_plot = create_sensitivity_convergence_plot(params, accepted_count)
-voltage_plot = create_voltage_sensitivity_plot(params)
-collinearity_plot = create_collinearity_plot(params)
+# Each figure also overwrites one image in the output directory after every dynamic update, so the
+# file always shows the latest state and ends as the final figure.
+convergence_plot = create_sensitivity_convergence_plot(
+    params, accepted_count;
+    sensitivity_threshold = cfg.sensitivity_threshold,
+    autosave = FigureAutosave(cfg.output_dir, "convergence"))
+voltage_plot = create_voltage_sensitivity_plot(
+    params;
+    sensitivity_threshold = cfg.sensitivity_threshold,
+    autosave = FigureAutosave(cfg.output_dir, "voltage_sensitivity"))
+collinearity_plot = create_collinearity_plot(
+    params; autosave = FigureAutosave(cfg.output_dir, "collinearity"))
 serve_sensitivity_plots!(convergence_plot, voltage_plot, collinearity_plot)
 # Run every accepted candidate against every operating case; the engine checkpoints completed blocks.
 local_result = run_local_sensitivity_simulations(

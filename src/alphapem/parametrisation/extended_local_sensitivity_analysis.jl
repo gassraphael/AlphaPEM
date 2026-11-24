@@ -51,6 +51,7 @@ using AlphaPEM.Fuelcell: create_fuelcell
 using AlphaPEM.Application: run_simulation
 using AlphaPEM.Application: serve_interactive_figures!, wait_for_interactive_figures!
 using AlphaPEM.Core.Models: _polarization_points_cali, time_history, derived_outputs
+using AlphaPEM.Core.Models.PlotHelpers: export_figure_bytes
 using AlphaPEM.Currents: AscendingPolarizationCurrent
 import WGLMakie
 using ..Calibration
@@ -71,6 +72,7 @@ include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "convergenc
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sensitivity_plots.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sensitivity_engine.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "collinearity.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "multi_output.jl"))
 
 export ExtendedLocalSensitivityConfig,
        ExtendedLocalSensitivityResult,
@@ -125,10 +127,17 @@ export ExtendedLocalSensitivityConfig,
        create_collinearity_plot,
        finish_collinearity_plot!,
        serve_sensitivity_plots!,
+       FigureAutosave,
+       autosave_figure!,
        candidate_collinearity,
        CollinearitySummary,
        collinearity_summary,
        collinear_pairs,
+       FUTURE_OUTPUTS,
+       MeasurementSet,
+       DEFAULT_MEASUREMENT_SETS,
+       combine_outputs,
+       compare_measurement_sets,
        run_local_sensitivity_simulations,
        alphapem_local_sensitivity_simulator
 

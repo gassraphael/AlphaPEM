@@ -57,6 +57,74 @@ _positive_or_nan(values) = [isfinite(value) && value > 0.0 ? Float64(value) : Na
 
 
 # ============================================================
+# FIGURE AUTOSAVE
+# ============================================================
+
+"""
+    FigureAutosave(directory, name)
+
+Overwritable image file that mirrors a live figure while the analysis runs.
+
+Every save writes the same PDF file, so the file always shows the latest drawn state and ends as the
+final figure. A save is attempted each time the live plot is updated.
+
+Parameters
+----------
+directory : AbstractString
+    Output directory, created on the first save.
+name : AbstractString
+    File name without extension.
+"""
+mutable struct FigureAutosave
+    path::String
+
+    function FigureAutosave(directory::AbstractString, name::AbstractString)
+        return new(joinpath(directory, "$(name).pdf"))
+    end
+end
+
+
+"""
+    autosave_figure!(autosave, figure) -> Bool
+
+Overwrite the autosave file with the current state of `figure`.
+
+A rendering or disk failure only logs a warning, so it cannot interrupt a long analysis. `nothing`
+as `autosave` does nothing.
+
+Parameters
+----------
+autosave : FigureAutosave or nothing
+    Target PDF file.
+figure : Any
+    Makie figure to render.
+
+Returns
+-------
+Bool
+    Whether the file was written.
+"""
+function autosave_figure!(::Nothing, figure)::Bool
+    return false
+end
+
+function autosave_figure!(autosave::FigureAutosave, figure)::Bool
+    # Render to a temporary file first so a crash never leaves a truncated image.
+    try
+        mkpath(dirname(autosave.path))
+        temporary_path = autosave.path * ".tmp"
+        write(temporary_path, export_figure_bytes(figure, "pdf"))
+        mv(temporary_path, autosave.path; force = true)
+        return true
+    catch err
+        err isa InterruptException && rethrow()
+        @warn "Could not save sensitivity figure" path = autosave.path exception = (err, catch_backtrace())
+        return false
+    end
+end
+
+
+# ============================================================
 # LIVE CONVERGENCE FIGURE
 # ============================================================
 
@@ -75,12 +143,15 @@ mutable struct SensitivityConvergencePlot
     median_values::Vector{Any}
     deviation_values::Vector{Any}
     coverage_values::Vector{Any}
+    sensitivity_threshold::Float64
+    autosave::Union{Nothing, FigureAutosave}
     next_state::Int
 end
 
 
 """
-    create_sensitivity_convergence_plot(params, n_samples) -> SensitivityConvergencePlot
+    create_sensitivity_convergence_plot(params, n_samples; sensitivity_threshold=0.1,
+                                        autosave=nothing) -> SensitivityConvergencePlot
 
 Create the live median/standard-deviation convergence figure with measurement coverage.
 
@@ -97,6 +168,10 @@ params : Vector{ParameterBound}
     Analysed parameters in the order used by the sensitivity matrices.
 n_samples : Int
     Number of accepted samples expected from the screening stage.
+sensitivity_threshold : Real, optional
+    Horizontal reference line for non-negligible median sensitivity. Default is `0.1`.
+autosave : FigureAutosave or nothing, optional
+    File overwritten after every updated state; the last state gives the final figure.
 
 Returns
 -------
@@ -106,8 +181,13 @@ SensitivityConvergencePlot
 function create_sensitivity_convergence_plot(
     params::Vector{ParameterBound},
     n_samples::Int,
+    ;
+    sensitivity_threshold::Real = 0.1,
+    autosave::Union{Nothing, FigureAutosave} = nothing,
 )::SensitivityConvergencePlot
     isempty(params) && throw(ArgumentError("params must not be empty"))
+    isfinite(sensitivity_threshold) && sensitivity_threshold >= 0 ||
+        throw(ArgumentError("sensitivity_threshold must be finite and non-negative"))
     sample_counts = convergence_sample_counts(n_samples)
     parameter_names = [parameter.name for parameter in params]
     positions = Float64.(eachindex(parameter_names))
@@ -119,6 +199,10 @@ function create_sensitivity_convergence_plot(
         figure[1, 1], parameter_names;
         title = "Convergence of voltage-sensitivity median",
         ylabel = "Median sensitivity magnitude")
+    # A zero threshold cannot be represented on this logarithmic axis.
+    sensitivity_threshold > 0 &&
+        WGLMakie.hlines!(median_axis, [sensitivity_threshold];
+                         color = :black, linestyle = :dot, linewidth = 1.5)
     deviation_axis = _parameter_axis(
         figure[2, 1], parameter_names;
         title = "Convergence of voltage-sensitivity standard deviation",
@@ -160,14 +244,15 @@ function create_sensitivity_convergence_plot(
 
     return SensitivityConvergencePlot(
         figure, median_axis, deviation_axis, coverage_axis, parameter_names, sample_counts,
-        median_values, deviation_values, coverage_values, 1)
+        median_values, deviation_values, coverage_values, Float64(sensitivity_threshold), autosave, 1)
 end
 
 
 """
     update_sensitivity_convergence_plot!(plot, snapshot)
 
-Update the pre-created median and standard-deviation curves for one completed state.
+Update the pre-created median and standard-deviation curves for one completed state, then
+refresh the autosave file.
 
 Parameters
 ----------
@@ -202,6 +287,9 @@ function update_sensitivity_convergence_plot!(
     plot.deviation_values[snapshot.state_index][] = _positive_or_nan(snapshot.standard_deviation)
     plot.coverage_values[snapshot.state_index][] = coverages
     plot.next_state += 1
+
+    # Overwrite the saved PDF after every new convergence curve.
+    autosave_figure!(plot.autosave, plot.figure)
     return nothing
 end
 
@@ -230,11 +318,14 @@ mutable struct VoltageSensitivityPlot
     median_values
     median_colors
     color_range
+    sensitivity_threshold::Float64
+    autosave::Union{Nothing, FigureAutosave}
 end
 
 
 """
-    create_voltage_sensitivity_plot(params) -> VoltageSensitivityPlot
+    create_voltage_sensitivity_plot(params; sensitivity_threshold=0.1, autosave=nothing)
+        -> VoltageSensitivityPlot
 
 Create the live voltage-sensitivity figure.
 
@@ -250,6 +341,10 @@ Parameters
 ----------
 params : Vector{ParameterBound}
     Analysed parameters in the order used by the sensitivity matrices.
+sensitivity_threshold : Real, optional
+    Horizontal reference line for non-negligible median sensitivity. Default is `0.1`.
+autosave : FigureAutosave or nothing, optional
+    File overwritten as candidate points are added and when the medians are drawn.
 
 Returns
 -------
@@ -270,8 +365,13 @@ Electrochemical Society, vol. 167, p. 044504, Mar. 2020. https://doi.org/10.1149
 """
 function create_voltage_sensitivity_plot(
     params::Vector{ParameterBound},
+    ;
+    sensitivity_threshold::Real = 0.1,
+    autosave::Union{Nothing, FigureAutosave} = nothing,
 )::VoltageSensitivityPlot
     isempty(params) && throw(ArgumentError("params must not be empty"))
+    isfinite(sensitivity_threshold) && sensitivity_threshold >= 0 ||
+        throw(ArgumentError("sensitivity_threshold must be finite and non-negative"))
     parameter_names = [parameter.name for parameter in params]
     positions = Float64.(eachindex(parameter_names))
 
@@ -280,6 +380,10 @@ function create_voltage_sensitivity_plot(
         figure[1, 1], parameter_names;
         title = "Voltage sensitivity",
         xlabel = "Parameter", ylabel = "Sensitivity magnitude")
+    # A zero threshold cannot be represented on this logarithmic axis.
+    sensitivity_threshold > 0 &&
+        WGLMakie.hlines!(axis, [sensitivity_threshold];
+                         color = :black, linestyle = :dot, linewidth = 1.5)
     WGLMakie.Label(figure[2, 1:2], SENSITIVITY_INTERPRETATION_WARNING;
                    fontsize = 12, halign = :left, tellwidth = false)
 
@@ -297,14 +401,16 @@ function create_voltage_sensitivity_plot(
     WGLMakie.Colorbar(figure[1, 2], median_plot; label = "log10 median sensitivity magnitude")
 
     return VoltageSensitivityPlot(
-        figure, axis, parameter_names, points, median_values, median_colors, color_range)
+        figure, axis, parameter_names, points, median_values, median_colors, color_range,
+        Float64(sensitivity_threshold), autosave)
 end
 
 
 """
     add_voltage_sensitivity_candidate!(plot, magnitudes)
 
-Add one completed candidate's gray points, one per parameter.
+Add one completed candidate's gray points, one per parameter, and refresh the autosave file
+when its rate limit allows.
 
 Parameters
 ----------
@@ -330,6 +436,9 @@ function add_voltage_sensitivity_candidate!(
     isempty(new_points) && return nothing
     append!(plot.points[], new_points)
     WGLMakie.notify(plot.points)
+
+    # Overwrite the saved PDF after this candidate's batch of parameter points is plotted.
+    autosave_figure!(plot.autosave, plot.figure)
     return nothing
 end
 
@@ -337,7 +446,7 @@ end
 """
     finish_voltage_sensitivity_plot!(plot, median_magnitudes)
 
-Draw the final per-parameter medians on the color scale.
+Draw the final per-parameter medians on the color scale and write the final autosave file.
 
 Parameters
 ----------
@@ -367,6 +476,9 @@ function finish_voltage_sensitivity_plot!(
     plot.color_range[] = (lower, upper)
     plot.median_colors[] = [isfinite(value) ? value : lower for value in colors]
     plot.median_values[] = medians
+
+    # The final median update overwrites the last candidate-only version.
+    autosave_figure!(plot.autosave, plot.figure)
     return nothing
 end
 
@@ -404,11 +516,12 @@ mutable struct CollinearityPlot
     parameter_names::Vector{Symbol}
     faded_values
     highlighted_values
+    autosave::Union{Nothing, FigureAutosave}
 end
 
 
 """
-    create_collinearity_plot(params) -> CollinearityPlot
+    create_collinearity_plot(params; autosave=nothing) -> CollinearityPlot
 
 Create the empty voltage-sensitivity collinearity figure, to be filled by
 [`finish_collinearity_plot!`](@ref).
@@ -423,6 +536,8 @@ Parameters
 ----------
 params : Vector{ParameterBound}
     Analysed parameters in the order used by the sensitivity matrices.
+autosave : FigureAutosave or nothing, optional
+    File written when the collinearity matrix is drawn.
 
 Returns
 -------
@@ -440,7 +555,10 @@ A. Goshtasbi, J. Chen, J. R. Waldecker, S. Hirano, and T. Ersal, "Effective para
 fuel cell models—part i: Sensitivity analysis and parameter identifiability," Journal of The
 Electrochemical Society, vol. 167, p. 044504, Mar. 2020. https://doi.org/10.1149/1945-7111/ab7091.
 """
-function create_collinearity_plot(params::Vector{ParameterBound})::CollinearityPlot
+function create_collinearity_plot(
+    params::Vector{ParameterBound};
+    autosave::Union{Nothing, FigureAutosave} = nothing,
+)::CollinearityPlot
     isempty(params) && throw(ArgumentError("params must not be empty"))
     parameter_names = [parameter.name for parameter in params]
     n_params = length(parameter_names)
@@ -470,7 +588,7 @@ function create_collinearity_plot(params::Vector{ParameterBound})::CollinearityP
                    fontsize = 12, halign = :left, tellwidth = false, word_wrap = true)
 
     return CollinearityPlot(
-        figure, axis, parameter_names, faded_values, highlighted_values)
+        figure, axis, parameter_names, faded_values, highlighted_values, autosave)
 end
 
 
@@ -478,7 +596,7 @@ end
     finish_collinearity_plot!(plot, collinearity, sensitivity_median; collinearity_threshold,
                               sensitivity_threshold)
 
-Draw the median pairwise collinearity.
+Draw the median pairwise collinearity and write the final autosave file.
 
 Only pairs where both parameters have a non-negligible median sensitivity are drawn, and only pairs above `collinearity_threshold` use the full color.
 
@@ -527,6 +645,7 @@ function finish_collinearity_plot!(
 
     plot.faded_values[] = faded
     plot.highlighted_values[] = highlighted
+    autosave_figure!(plot.autosave, plot.figure)
     return nothing
 end
 

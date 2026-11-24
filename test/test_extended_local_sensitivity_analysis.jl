@@ -558,7 +558,11 @@ end
     @test snapshot.median_coverage == [1.0, 0.75]
 
     # Build and update the figure without serving a browser, as in non-interactive tests.
-    convergence_plot = ELSA.create_sensitivity_convergence_plot(params, 5)
+    convergence_plot = ELSA.create_sensitivity_convergence_plot(
+        params, 5; sensitivity_threshold = 0.25)
+    @test convergence_plot.sensitivity_threshold == 0.25
+    @test_throws ArgumentError ELSA.create_sensitivity_convergence_plot(
+        params, 5; sensitivity_threshold = -0.1)
     for state_index in 1:5
         figure_snapshot = ELSA.SensitivityConvergenceSnapshot(
             state_index, state_index, [1.0, 2.0], [0.1, 0.2],
@@ -572,7 +576,10 @@ end
             5, 5, [1.0, 2.0], [0.1, 0.2], [5, 5], [1.0, 0.8]))
 
     # The voltage-sensitivity figure accepts candidate points live and medians only at the end.
-    voltage_plot = ELSA.create_voltage_sensitivity_plot(params)
+    voltage_plot = ELSA.create_voltage_sensitivity_plot(params; sensitivity_threshold = 0.25)
+    @test voltage_plot.sensitivity_threshold == 0.25
+    @test_throws ArgumentError ELSA.create_voltage_sensitivity_plot(
+        params; sensitivity_threshold = Inf)
     ELSA.add_voltage_sensitivity_candidate!(voltage_plot, [1.0, NaN])
     ELSA.add_voltage_sensitivity_candidate!(voltage_plot, [2.0, 3.0])
     @test length(voltage_plot.points[]) == 3
@@ -582,6 +589,30 @@ end
     @test voltage_plot.median_values[] == [1.5, 3.0]
     @test voltage_plot.color_range[] == (log10(1.5), log10(3.0))
     @test occursin("physically important", ELSA.SENSITIVITY_INTERPRETATION_WARNING)
+
+    # Autosave overwrites one PDF after every plot update, then keeps only the final file.
+    autosave_dir = mktempdir()
+    autosave = ELSA.FigureAutosave(autosave_dir, "voltage")
+    saved_plot = ELSA.create_voltage_sensitivity_plot(params; autosave)
+    ELSA.add_voltage_sensitivity_candidate!(saved_plot, [1.0, 2.0])
+    saved_path = joinpath(autosave_dir, "voltage.pdf")
+    @test isfile(saved_path)
+    first_contents = read(saved_path)
+    ELSA.add_voltage_sensitivity_candidate!(saved_plot, [3.0, 4.0])
+    @test read(saved_path) != first_contents
+    ELSA.finish_voltage_sensitivity_plot!(saved_plot, [2.0, 3.0])
+    @test filesize(saved_path) > 0
+    @test readdir(autosave_dir) == ["voltage.pdf"]
+    @test !ELSA.autosave_figure!(nothing, saved_plot.figure)
+
+    convergence_autosave_dir = mktempdir()
+    saved_convergence = ELSA.create_sensitivity_convergence_plot(
+        params, 2; autosave = ELSA.FigureAutosave(convergence_autosave_dir, "convergence"))
+    ELSA.update_sensitivity_convergence_plot!(
+        saved_convergence, ELSA.SensitivityConvergenceSnapshot(1, 1, [1.0, 2.0], [0.1, 0.2], [1, 1], [1.0, 1.0]))
+    ELSA.update_sensitivity_convergence_plot!(
+        saved_convergence, ELSA.SensitivityConvergenceSnapshot(2, 2, [1.0, 2.0], [0.1, 0.2], [2, 2], [1.0, 1.0]))
+    @test isfile(joinpath(convergence_autosave_dir, "convergence.pdf"))
 
     # Collinearity: identical rows give 1, orthogonal rows 0, and NaN measurements are skipped.
     params3 = [
