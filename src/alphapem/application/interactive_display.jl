@@ -297,6 +297,86 @@ function _open_interactive_figures!()
 end
 
 """
+    serve_interactive_figure!(fig; name, title, group="Analysis") -> String
+
+Serve one externally prepared WGLMakie figure through the AlphaPEM browser plot server.
+
+The figure may be updated after serving, for example by mutating its Makie observables during
+a long-running analysis. Only one prepared figure set is served at a time.
+
+Parameters
+----------
+fig : Any
+    WGLMakie figure to publish.
+name : AbstractString
+    Unique route segment for the figure; must not contain `/`.
+title : AbstractString
+    Human-readable browser-page title.
+group : AbstractString, optional
+    Figure group shown in the menu when used by the shared plot page. Default is `"Analysis"`.
+
+Returns
+-------
+String
+    URL at which the interactive figure is served.
+
+Raises
+------
+ArgumentError
+    If the route name is empty, contains `/`, or another figure set is already being served.
+"""
+function serve_interactive_figure!(
+    fig;
+    name::AbstractString,
+    title::AbstractString,
+    group::AbstractString = "Analysis",
+)::String
+    isempty(name) && throw(ArgumentError("name must not be empty"))
+    occursin('/', name) && throw(ArgumentError("name must be a single route segment without '/'"))
+    isempty(_served_figure_routes) ||
+        throw(ArgumentError("Another AlphaPEM interactive figure set is already being served"))
+
+    # Register the external figure in the same WGLMakie/Bonito server used by simulations.
+    WGLMakie.activate!()
+    _store_prepared_figures!(fig)
+    empty!(_prepared_figure_specs)
+    push!(_prepared_figure_specs,
+          Dict("name" => String(name), "title" => String(title), "group" => String(group)))
+    _open_interactive_figures!()
+    return _plot_url("/" * String(name))
+end
+
+
+"""
+    wait_for_interactive_figures!(message)
+
+Keep the browser plot server alive until Ctrl+C when running as a script.
+
+In an interactive Julia session this returns immediately, leaving the server available while the
+REPL remains open.
+
+Parameters
+----------
+message : AbstractString
+    Instruction displayed while the script waits for the user to close the plot server.
+
+Returns
+-------
+Nothing
+"""
+function wait_for_interactive_figures!(message::AbstractString)
+    if _plot_block_requested() && !isempty(_served_figure_routes)
+        try
+            _serve_until_interrupted!(message)
+        finally
+            empty!(_prepared_interactive_figures)
+            empty!(_prepared_figure_specs)
+        end
+    end
+    return nothing
+end
+
+"""
     _close_interactive_figures!()
 
 Remove every served route so that the server can be reused by a later run.

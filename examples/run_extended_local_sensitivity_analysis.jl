@@ -76,8 +76,15 @@ projected_local_evaluations =
 # LOCAL-SENSITIVITY SIMULATION ENGINE
 # ============================================================
 
+# Open the live convergence figure before simulations start; callbacks add up to six cumulative
+# states only after the corresponding candidate prefix is complete.
+convergence_plot = create_sensitivity_convergence_plot(params, accepted_count)
 # Run every accepted candidate against every operating case; the engine checkpoints completed blocks.
-local_result = run_local_sensitivity_simulations(records, params, operating_cases, cfg)
+local_result = run_local_sensitivity_simulations(
+    records, params, operating_cases, cfg;
+    on_convergence_update = snapshot ->
+        update_sensitivity_convergence_plot!(convergence_plot, snapshot),
+)
 @info "Local sensitivity simulation complete" candidate_count = length(local_result.candidates) case_count = length(local_result.operating_cases) block_status_counts = Dict(status => count(==(status), local_result.statuses) for status in (:complete, :partial, :invalid)) execution_time_s = round(local_result.execution_time; digits = 2)
 
 # ============================================================
@@ -86,3 +93,6 @@ local_result = run_local_sensitivity_simulations(records, params, operating_case
 
 println("Accepted $accepted_count / $(length(records)) candidates.")
 println("Fixed parameters: $(join(string.(fixed_parameters), ", "))")
+
+# In scripts, keep the browser page alive after the final red convergence state is drawn.
+finish_sensitivity_convergence_plot!(convergence_plot)

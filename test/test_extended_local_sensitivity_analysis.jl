@@ -533,9 +533,50 @@ end
         output_dir = mktempdir(),
     )
 
+    # Cumulative visual-convergence states divide the accepted sample count into six integer steps.
+    @test ELSA.convergence_sample_counts(1) == [1]
+    @test ELSA.convergence_sample_counts(5) == collect(1:5)
+    @test ELSA.convergence_sample_counts(11) == [2, 4, 6, 7, 9, 11]
+    @test_throws ArgumentError ELSA.convergence_sample_counts(0)
+    @test_throws ArgumentError ELSA.convergence_sample_counts(5; n_states = 0)
+
+    # RMS values combine each sample's available measurements across cases and current densities.
+    convergence_blocks = Matrix{Union{Nothing, Matrix{Float64}}}(undef, 3, 2)
+    for candidate_index in 1:3
+        convergence_blocks[candidate_index, 1] =
+            [candidate_index 2candidate_index; 2candidate_index candidate_index]
+        convergence_blocks[candidate_index, 2] =
+            [candidate_index 2candidate_index; 2candidate_index candidate_index]
+    end
+    convergence_blocks[2, 2][2, 2] = NaN
+    convergence_blocks[3, 2][2, 2] = NaN
+    snapshot = ELSA.convergence_snapshot(convergence_blocks, params, 3, 1)
+    @test snapshot.sample_count == 3
+    @test snapshot.median_magnitude[1] ≈ sqrt(10)
+    @test snapshot.standard_deviation[1] ≈ sqrt(2.5)
+    @test snapshot.valid_sample_counts == [3, 3]
+    @test snapshot.median_coverage == [1.0, 0.75]
+
+    # Build and update the figure without serving a browser, as in non-interactive tests.
+    convergence_plot = ELSA.create_sensitivity_convergence_plot(params, 5; display = false)
+    for state_index in 1:5
+        figure_snapshot = ELSA.SensitivityConvergenceSnapshot(
+            state_index, state_index, [1.0, 2.0], [0.1, 0.2],
+            [state_index, state_index], [1.0, 0.8])
+        @test ELSA.update_sensitivity_convergence_plot!(convergence_plot, figure_snapshot) === nothing
+    end
+    @test convergence_plot.next_state == 6
+    @test_throws ArgumentError ELSA.update_sensitivity_convergence_plot!(
+        convergence_plot,
+        ELSA.SensitivityConvergenceSnapshot(
+            5, 5, [1.0, 2.0], [0.1, 0.2], [5, 5], [1.0, 0.8]))
+
     # Every candidate/case unit contains one signed sensitivity block per current density.
+    convergence_updates = ELSA.SensitivityConvergenceSnapshot[]
     result = ELSA.run_local_sensitivity_simulations(
-        records, params, cases, cfg; simulate_fn = simulate_voltage)
+        records, params, cases, cfg;
+        simulate_fn = simulate_voltage,
+        on_convergence_update = snapshot -> push!(convergence_updates, snapshot))
     @test size(result.sensitivities) == (2, 2)
     @test size(result.theta) == (2, 2)
     @test result.theta[:, 1] ≈ [0.2, 0.8]
@@ -549,6 +590,8 @@ end
     @test sum(values(result.run_status_counts)) == 2 * 2 * 2 * 3
     @test isempty(result.run_errors)
     @test result.execution_time >= 0.0
+    @test [snapshot.sample_count for snapshot in convergence_updates] == [1, 2]
+    @test [snapshot.state_index for snapshot in convergence_updates] == [1, 2]
     @test !isfile(joinpath(cfg.output_dir, "extended_local_sensitivity_checkpoint.jld2"))
 
     # Current-density summaries can be requested directly from a completed simulation block.
@@ -670,64 +713,75 @@ end
                 result.sensitivities[candidate_index, case_index],
             )
         end
+
+        # Parallel completion events still publish cumulative prefixes in candidate order.
+        parallel_updates = ELSA.SensitivityConvergenceSnapshot[]
+        ELSA.run_local_sensitivity_simulations(
+            records, params, cases, parallel_cfg;
+            simulate_fn = simulate_voltage,
+            on_convergence_update = snapshot -> push!(parallel_updates, snapshot),
+        )
+        @test [snapshot.sample_count for snapshot in parallel_updates] == [1, 2]
+        @test [snapshot.state_index for snapshot in parallel_updates] == [1, 2]
+
     end
 end
 
 @testset "ExtendedLocalSensitivityAnalysis AlphaPEM engine smoke test" begin
-numerical_params = AlphaPEM.Config.NumericalParams(
-    nb_gc = 5, nb_gdl = 2, nb_mpl = 1, nb_man = 1, rtol = 1e-2, atol = 1e-4,
-    maxiters = 1e4, max_run_time_s = 60.0, save_freq = 100.0)
-cfg = ELSA.ExtendedLocalSensitivityConfig(
-    current_density_grid = [0.0, 0.05, 0.1],
-    delta_t_ini = 10.0,
-    v_load = 0.01e4,
-    delta_t_break = 10.0,
-    delta_t_break_lower_0_3 = 10.0,
-    delta_t_break_OCV = 10.0,
-    delta_t_measurement = 5.0,
-    numerical_params = numerical_params,
-    parameter_subset = [:Hmem, :Re],
-    n_levels = 3,
-    max_run_time_s = 60.0,
-    parallel = false,
-    checkpoint_frequency = 0,
-    output_dir = mktempdir(),
-)
-nominal_fuel_cell = AlphaPEM.Fuelcell.create_fuelcell(
-    cfg.fuel_cell_type, cfg.voltage_zone; year = cfg.year, nb_gc = cfg.nb_gc)
-default_params, _ = ELSA.select_parameters(cfg)
-params = ELSA.Calibration.ParameterBound[]
-nominal_values = Float64[]
-for default_param in default_params
-    nominal = clamp(
-        Float64(getfield(nominal_fuel_cell.physical_parameters, default_param.name)),
-        default_param.min,
-        default_param.max,
+    numerical_params = AlphaPEM.Config.NumericalParams(
+        nb_gc = 5, nb_gdl = 2, nb_mpl = 1, nb_man = 1, rtol = 1e-2, atol = 1e-4,
+        maxiters = 1e4, max_run_time_s = 60.0, save_freq = 100.0)
+    cfg = ELSA.ExtendedLocalSensitivityConfig(
+        current_density_grid = [0.0, 0.05, 0.1],
+        delta_t_ini = 10.0,
+        v_load = 0.01e4,
+        delta_t_break = 10.0,
+        delta_t_break_lower_0_3 = 10.0,
+        delta_t_break_OCV = 10.0,
+        delta_t_measurement = 5.0,
+        numerical_params = numerical_params,
+        parameter_subset = [:Hmem, :Re],
+        n_levels = 3,
+        max_run_time_s = 60.0,
+        parallel = false,
+        checkpoint_frequency = 0,
+        output_dir = mktempdir(),
     )
-    push!(nominal_values, nominal)
-    parameter_span = max(abs(nominal) * 0.001, eps(Float64))
-    push!(params, ELSA.Calibration.ParameterBound(
-        default_param.name,
-        max(default_param.min, nominal - parameter_span),
-        min(default_param.max, nominal + parameter_span),
-        default_param.type,
-        :linear,
-        default_param.unit,
-        default_param.description,
-        default_param.latex,
-    ))
-end
-records = [ELSA.ScreeningRecord(1, nominal_values, :accepted, 0.0, Float64[])]
-conditions = AlphaPEM.Config.OperatingConditions(
-    Pa_des = 2.0e5, Pc_des = 1.8e5, Sa = 3.0, Sc = 4.0)
-cases = [ELSA.OperatingCase("smoke_case", conditions)]
+    nominal_fuel_cell = AlphaPEM.Fuelcell.create_fuelcell(
+        cfg.fuel_cell_type, cfg.voltage_zone; year = cfg.year, nb_gc = cfg.nb_gc)
+    default_params, _ = ELSA.select_parameters(cfg)
+    params = ELSA.Calibration.ParameterBound[]
+    nominal_values = Float64[]
+    for default_param in default_params
+        nominal = clamp(
+            Float64(getfield(nominal_fuel_cell.physical_parameters, default_param.name)),
+            default_param.min,
+            default_param.max,
+        )
+        push!(nominal_values, nominal)
+        parameter_span = max(abs(nominal) * 0.001, eps(Float64))
+        push!(params, ELSA.Calibration.ParameterBound(
+            default_param.name,
+            max(default_param.min, nominal - parameter_span),
+            min(default_param.max, nominal + parameter_span),
+            default_param.type,
+            :linear,
+            default_param.unit,
+            default_param.description,
+            default_param.latex,
+        ))
+    end
+    records = [ELSA.ScreeningRecord(1, nominal_values, :accepted, 0.0, Float64[])]
+    conditions = AlphaPEM.Config.OperatingConditions(
+        Pa_des = 2.0e5, Pc_des = 1.8e5, Sa = 3.0, Sc = 4.0)
+    cases = [ELSA.OperatingCase("smoke_case", conditions)]
 
-@test ELSA._numerical_params_for_local_simulation(cfg).max_run_time_s == cfg.max_run_time_s
-result = ELSA.run_local_sensitivity_simulations(records, params, cases, cfg)
-@test size(result.sensitivities) == (1, 1)
-@test size(result.sensitivities[1, 1]) == (2, 3)
-@test result.statuses[1, 1] in (:complete, :partial)
-@test any(result.validity_masks[1, 1])
-@test result.run_status_counts[:complete] == 6
-@test result.run_status_counts[:failed] == 0
+    @test ELSA._numerical_params_for_local_simulation(cfg).max_run_time_s == cfg.max_run_time_s
+    result = ELSA.run_local_sensitivity_simulations(records, params, cases, cfg)
+    @test size(result.sensitivities) == (1, 1)
+    @test size(result.sensitivities[1, 1]) == (2, 3)
+    @test result.statuses[1, 1] in (:complete, :partial)
+    @test any(result.validity_masks[1, 1])
+    @test result.run_status_counts[:complete] == 6
+    @test result.run_status_counts[:failed] == 0
 end

@@ -49,8 +49,10 @@ using AlphaPEM.Config: NumericalParams, PARAMETER_BOUNDS, PARAMETER_METADATA, Ph
                        exact_pressure_gap_constraint
 using AlphaPEM.Fuelcell: create_fuelcell
 using AlphaPEM.Application: run_simulation
+using AlphaPEM.Application: serve_interactive_figure!, wait_for_interactive_figures!
 using AlphaPEM.Core.Models: _polarization_points_cali, time_history, derived_outputs
 using AlphaPEM.Currents: AscendingPolarizationCurrent
+import WGLMakie
 using ..Calibration
 using ..Calibration: ParameterBound, ParameterBounds
 
@@ -65,6 +67,7 @@ include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "parameters
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sensitivity.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "statistics.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sampling.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "convergence.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "simulation.jl"))
 
 export ExtendedLocalSensitivityConfig,
@@ -103,6 +106,13 @@ export ExtendedLocalSensitivityConfig,
        screening_error,
        screen_candidates,
        alphapem_screening_simulator,
+       convergence_sample_counts,
+       SensitivityConvergenceSnapshot,
+       convergence_snapshot,
+       SensitivityConvergencePlot,
+       create_sensitivity_convergence_plot,
+       update_sensitivity_convergence_plot!,
+       finish_sensitivity_convergence_plot!,
        run_local_sensitivity_simulations,
        alphapem_local_sensitivity_simulator
 

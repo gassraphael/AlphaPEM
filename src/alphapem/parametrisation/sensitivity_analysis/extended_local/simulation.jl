@@ -495,7 +495,8 @@ end
 # ============================================================
 
 """
-    run_local_sensitivity_simulations(records, params, operating_cases, cfg; simulate_fn=nothing)
+    run_local_sensitivity_simulations(records, params, operating_cases, cfg;
+                                      simulate_fn=nothing, on_convergence_update=nothing)
         -> ExtendedLocalSimulationResult
 
 Run the local sensitivity analysis for every accepted parameter candidate and operating case.
@@ -504,6 +505,8 @@ One work unit is `(accepted candidate, operating case)`. It sequentially runs `n
 simulations, computes an `n_params × n_current_densities` sensitivity block, and retains a validity
 mask. Independent work units are threaded when requested. A failed simulation is isolated and
 reported in the returned diagnostics; partial current sweeps contribute only their valid prefix.
+When `on_convergence_update` is provided, completed candidate prefixes are summarized and delivered
+to it in sample order as soon as all operating cases in the next prefix are complete.
 
 Parameters
 ----------
@@ -518,6 +521,9 @@ cfg : ExtendedLocalSensitivityConfig
 simulate_fn : Function or nothing, optional
     Test/custom simulator with signature `(theta_unit, operating_case) -> VoltageCurve`. If
     `nothing`, use AlphaPEM with the configured physical parameters and current profile.
+on_convergence_update : Function or nothing, optional
+    Callback receiving each `SensitivityConvergenceSnapshot` on the calling thread, in increasing
+    candidate-prefix order. `nothing` disables convergence calculations and updates.
 
 Returns
 -------
@@ -543,6 +549,7 @@ function run_local_sensitivity_simulations(
     operating_cases::Vector{OperatingCase},
     cfg::ExtendedLocalSensitivityConfig;
     simulate_fn::Union{Nothing, Function} = nothing,
+    on_convergence_update::Union{Nothing, Function} = nothing,
 )::ExtendedLocalSimulationResult
     # === Validate inputs and select accepted candidates ===
     validate_config(cfg)
@@ -638,6 +645,13 @@ function run_local_sensitivity_simulations(
         end
     end
 
+    # A sample contributes to convergence only after its full row of operating-case blocks is ready.
+    candidate_ready = BitVector([all(@view done[candidate_index, :])
+                                 for candidate_index in 1:n_candidates])
+    convergence_counts = on_convergence_update === nothing ?
+        Int[] : convergence_sample_counts(n_candidates)
+    next_convergence_state = 1
+
     # Always persist an initial checkpoint before warm-up or local simulation begins.
     # This leaves a valid resume file even if the first work unit is interrupted.
     _save_local_sensitivity_checkpoint(
@@ -653,6 +667,8 @@ function run_local_sensitivity_simulations(
     pending_count = count(!, done)
     progress = pending_count == 0 ? nothing :
         Progress(pending_count; desc = "Extended local sensitivity: ", barlen = 40, color = :cyan)
+    unit_completed = on_convergence_update === nothing ? nothing :
+        Channel{Nothing}(max(pending_count, 1))
 
     # === Limit BLAS threading and warm up Julia before timing ===
     # Outer work units provide parallelism, so one BLAS thread avoids nested oversubscription.
@@ -675,6 +691,23 @@ function run_local_sensitivity_simulations(
             # Warm-up time is excluded from analysis timing and the progress bar.
             execution_start = time()
 
+            # Candidate rows can finish out of order under threading. Publish only the next
+            # cumulative prefix whose every candidate/case block has completed.
+            function publish_ready_convergence_states!()
+                while next_convergence_state <= length(convergence_counts)
+                    sample_count = convergence_counts[next_convergence_state]
+                    all(@view candidate_ready[1:sample_count]) || break
+                    snapshot = convergence_snapshot(
+                        sensitivities, params, sample_count, next_convergence_state)
+                    on_convergence_update(snapshot)
+                    next_convergence_state += 1
+                end
+                return nothing
+            end
+
+            # A resumed checkpoint may already contain one or more full candidate prefixes.
+            on_convergence_update !== nothing && publish_ready_convergence_states!()
+
             # Called only while holding `lock_obj`: snapshot arrays and cumulative diagnostics
             # together so the checkpoint cannot mix states from different completed units.
             function save_checkpoint_locked!()
@@ -696,12 +729,17 @@ function run_local_sensitivity_simulations(
                 elapsed = time() - unit_start
 
                 # Commit this unit atomically with respect to checkpoint and progress updates.
+                candidate_became_ready = false
                 lock(lock_obj) do
                     sensitivities[candidate_index, case_index] = block
                     validity_masks[candidate_index, case_index] = mask
                     statuses[candidate_index, case_index] = block_status
                     unit_times[candidate_index, case_index] = elapsed
                     done[candidate_index, case_index] = true
+                    if !candidate_ready[candidate_index] && all(@view done[candidate_index, :])
+                        candidate_ready[candidate_index] = true
+                        candidate_became_ready = true
+                    end
                     for (status, count) in local_status_counts
                         run_status_counts[status] += count
                     end
@@ -716,7 +754,7 @@ function run_local_sensitivity_simulations(
                     end
                     progress !== nothing && next!(progress)
                 end
-                return nothing
+                return candidate_became_ready
             end
 
             # === Execute independent candidate/case units serially or in parallel ===
@@ -724,15 +762,33 @@ function run_local_sensitivity_simulations(
                 if cfg.parallel && Threads.nthreads() > 1
                     # Spawn one task per unfinished matrix cell. Each task writes only its own cell;
                     # the lock protects shared counts, checkpoint snapshots, and progress updates.
-                    @sync for candidate_index in 1:n_candidates, case_index in 1:n_cases
-                        done[candidate_index, case_index] && continue
-                        Threads.@spawn run_one_unit!(candidate_index, case_index)
+                    @sync begin
+                        for candidate_index in 1:n_candidates, case_index in 1:n_cases
+                            done[candidate_index, case_index] && continue
+                            Threads.@spawn try
+                                run_one_unit!(candidate_index, case_index)
+                            finally
+                                # Notify the caller thread even if a work unit throws, preventing
+                                # the convergence-update loop from waiting forever for an event.
+                                unit_completed !== nothing && put!(unit_completed, nothing)
+                            end
+                        end
+
+                        # Makie figure mutations stay on this caller thread, never in worker tasks.
+                        if on_convergence_update !== nothing
+                            for _ in 1:pending_count
+                                take!(unit_completed)
+                                publish_ready_convergence_states!()
+                            end
+                        end
                     end
                 else
                     # Use the same unit function in serial mode to keep behavior identical.
                     for candidate_index in 1:n_candidates, case_index in 1:n_cases
                         done[candidate_index, case_index] && continue
-                        run_one_unit!(candidate_index, case_index)
+                        candidate_became_ready = run_one_unit!(candidate_index, case_index)
+                        candidate_became_ready && on_convergence_update !== nothing &&
+                            publish_ready_convergence_states!()
                     end
                 end
             finally
