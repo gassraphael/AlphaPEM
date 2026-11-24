@@ -68,7 +68,8 @@ include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sensitivit
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "statistics.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sampling.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "convergence.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "simulation.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sensitivity_plots.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sensitivity_engine.jl"))
 
 export ExtendedLocalSensitivityConfig,
        ExtendedLocalSensitivityResult,
@@ -108,11 +109,17 @@ export ExtendedLocalSensitivityConfig,
        alphapem_screening_simulator,
        convergence_sample_counts,
        SensitivityConvergenceSnapshot,
+       candidate_rms_magnitudes,
        convergence_snapshot,
        SensitivityConvergencePlot,
        create_sensitivity_convergence_plot,
        update_sensitivity_convergence_plot!,
        finish_sensitivity_convergence_plot!,
+       SENSITIVITY_INTERPRETATION_WARNING,
+       VoltageSensitivityPlot,
+       create_voltage_sensitivity_plot,
+       add_voltage_sensitivity_candidate!,
+       finish_voltage_sensitivity_plot!,
        run_local_sensitivity_simulations,
        alphapem_local_sensitivity_simulator
 

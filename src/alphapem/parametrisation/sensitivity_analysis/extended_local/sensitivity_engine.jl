@@ -496,7 +496,8 @@ end
 
 """
     run_local_sensitivity_simulations(records, params, operating_cases, cfg;
-                                      simulate_fn=nothing, on_convergence_update=nothing)
+                                      simulate_fn=nothing, on_convergence_update=nothing,
+                                      on_candidate_update=nothing)
         -> ExtendedLocalSimulationResult
 
 Run the local sensitivity analysis for every accepted parameter candidate and operating case.
@@ -506,7 +507,9 @@ simulations, computes an `n_params × n_current_densities` sensitivity block, an
 mask. Independent work units are threaded when requested. A failed simulation is isolated and
 reported in the returned diagnostics; partial current sweeps contribute only their valid prefix.
 When `on_convergence_update` is provided, completed candidate prefixes are summarized and delivered
-to it in sample order as soon as all operating cases in the next prefix are complete.
+to it in sample order as soon as all operating cases in the next prefix are complete. When
+`on_candidate_update` is provided, each candidate's per-parameter voltage-sensitivity magnitudes are
+delivered as soon as all of that candidate's operating cases are complete, in completion order.
 
 Parameters
 ----------
@@ -524,6 +527,10 @@ simulate_fn : Function or nothing, optional
 on_convergence_update : Function or nothing, optional
     Callback receiving each `SensitivityConvergenceSnapshot` on the calling thread, in increasing
     candidate-prefix order. `nothing` disables convergence calculations and updates.
+on_candidate_update : Function or nothing, optional
+    Callback with signature `(candidate_index, magnitudes)` called on the calling thread. The index
+    is the position among accepted candidates and `magnitudes` has one RMS value per parameter
+    (`NaN` when no finite measurement exists). `nothing` disables these updates.
 
 Returns
 -------
@@ -550,6 +557,7 @@ function run_local_sensitivity_simulations(
     cfg::ExtendedLocalSensitivityConfig;
     simulate_fn::Union{Nothing, Function} = nothing,
     on_convergence_update::Union{Nothing, Function} = nothing,
+    on_candidate_update::Union{Nothing, Function} = nothing,
 )::ExtendedLocalSimulationResult
     # === Validate inputs and select accepted candidates ===
     validate_config(cfg)
@@ -648,6 +656,8 @@ function run_local_sensitivity_simulations(
     # A sample contributes to convergence only after its full row of operating-case blocks is ready.
     candidate_ready = BitVector([all(@view done[candidate_index, :])
                                  for candidate_index in 1:n_candidates])
+    live_updates = on_convergence_update !== nothing || on_candidate_update !== nothing
+    candidate_published = falses(n_candidates)
     convergence_counts = on_convergence_update === nothing ?
         Int[] : convergence_sample_counts(n_candidates)
     next_convergence_state = 1
@@ -667,7 +677,7 @@ function run_local_sensitivity_simulations(
     pending_count = count(!, done)
     progress = pending_count == 0 ? nothing :
         Progress(pending_count; desc = "Extended local sensitivity: ", barlen = 40, color = :cyan)
-    unit_completed = on_convergence_update === nothing ? nothing :
+    unit_completed = !live_updates ? nothing :
         Channel{Nothing}(max(pending_count, 1))
 
     # === Limit BLAS threading and warm up Julia before timing ===
@@ -693,7 +703,19 @@ function run_local_sensitivity_simulations(
 
             # Candidate rows can finish out of order under threading. Publish only the next
             # cumulative prefix whose every candidate/case block has completed.
-            function publish_ready_convergence_states!()
+            function publish_ready_updates!()
+                # Candidate points are delivered once, as soon as their own row is complete.
+                if on_candidate_update !== nothing
+                    for candidate_index in 1:n_candidates
+                        (candidate_ready[candidate_index] && !candidate_published[candidate_index]) ||
+                            continue
+                        candidate_published[candidate_index] = true
+                        magnitudes, _ = candidate_rms_magnitudes(
+                            sensitivities, params, candidate_index)
+                        on_candidate_update(candidate_index, magnitudes)
+                    end
+                end
+                on_convergence_update === nothing && return nothing
                 while next_convergence_state <= length(convergence_counts)
                     sample_count = convergence_counts[next_convergence_state]
                     all(@view candidate_ready[1:sample_count]) || break
@@ -706,7 +728,7 @@ function run_local_sensitivity_simulations(
             end
 
             # A resumed checkpoint may already contain one or more full candidate prefixes.
-            on_convergence_update !== nothing && publish_ready_convergence_states!()
+            live_updates && publish_ready_updates!()
 
             # Called only while holding `lock_obj`: snapshot arrays and cumulative diagnostics
             # together so the checkpoint cannot mix states from different completed units.
@@ -775,10 +797,10 @@ function run_local_sensitivity_simulations(
                         end
 
                         # Makie figure mutations stay on this caller thread, never in worker tasks.
-                        if on_convergence_update !== nothing
+                        if live_updates
                             for _ in 1:pending_count
                                 take!(unit_completed)
-                                publish_ready_convergence_states!()
+                                publish_ready_updates!()
                             end
                         end
                     end
@@ -787,8 +809,7 @@ function run_local_sensitivity_simulations(
                     for candidate_index in 1:n_candidates, case_index in 1:n_cases
                         done[candidate_index, case_index] && continue
                         candidate_became_ready = run_one_unit!(candidate_index, case_index)
-                        candidate_became_ready && on_convergence_update !== nothing &&
-                            publish_ready_convergence_states!()
+                        candidate_became_ready && live_updates && publish_ready_updates!()
                     end
                 end
             finally

@@ -571,12 +571,26 @@ end
         ELSA.SensitivityConvergenceSnapshot(
             5, 5, [1.0, 2.0], [0.1, 0.2], [5, 5], [1.0, 0.8]))
 
+    # The voltage-sensitivity figure accepts candidate points live and medians only at the end.
+    voltage_plot = ELSA.create_voltage_sensitivity_plot(params; display = false)
+    ELSA.add_voltage_sensitivity_candidate!(voltage_plot, [1.0, NaN])
+    ELSA.add_voltage_sensitivity_candidate!(voltage_plot, [2.0, 3.0])
+    @test length(voltage_plot.points[]) == 3
+    @test all(isnan, voltage_plot.median_values[])
+    @test_throws ArgumentError ELSA.add_voltage_sensitivity_candidate!(voltage_plot, [1.0])
+    ELSA.finish_voltage_sensitivity_plot!(voltage_plot, [1.5, 3.0])
+    @test voltage_plot.median_values[] == [1.5, 3.0]
+    @test voltage_plot.color_range[] == (log10(1.5), log10(3.0))
+    @test occursin("physically important", ELSA.SENSITIVITY_INTERPRETATION_WARNING)
+
     # Every candidate/case unit contains one signed sensitivity block per current density.
     convergence_updates = ELSA.SensitivityConvergenceSnapshot[]
+    candidate_updates = Tuple{Int, Vector{Float64}}[]
     result = ELSA.run_local_sensitivity_simulations(
         records, params, cases, cfg;
         simulate_fn = simulate_voltage,
-        on_convergence_update = snapshot -> push!(convergence_updates, snapshot))
+        on_convergence_update = snapshot -> push!(convergence_updates, snapshot),
+        on_candidate_update = (index, magnitudes) -> push!(candidate_updates, (index, magnitudes)))
     @test size(result.sensitivities) == (2, 2)
     @test size(result.theta) == (2, 2)
     @test result.theta[:, 1] ≈ [0.2, 0.8]
@@ -592,6 +606,8 @@ end
     @test result.execution_time >= 0.0
     @test [snapshot.sample_count for snapshot in convergence_updates] == [1, 2]
     @test [snapshot.state_index for snapshot in convergence_updates] == [1, 2]
+    @test sort([index for (index, _) in candidate_updates]) == [1, 2]
+    @test all(length(magnitudes) == length(params) for (_, magnitudes) in candidate_updates)
     @test !isfile(joinpath(cfg.output_dir, "extended_local_sensitivity_checkpoint.jld2"))
 
     # Current-density summaries can be requested directly from a completed simulation block.

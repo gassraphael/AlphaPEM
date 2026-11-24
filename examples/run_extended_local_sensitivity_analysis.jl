@@ -79,12 +79,20 @@ projected_local_evaluations =
 # Open the live convergence figure before simulations start; callbacks add up to six cumulative
 # states only after the corresponding candidate prefix is complete.
 convergence_plot = create_sensitivity_convergence_plot(params, accepted_count)
+# Open the voltage-sensitivity figure too; each finished candidate adds its gray points.
+voltage_plot = create_voltage_sensitivity_plot(params)
 # Run every accepted candidate against every operating case; the engine checkpoints completed blocks.
 local_result = run_local_sensitivity_simulations(
     records, params, operating_cases, cfg;
     on_convergence_update = snapshot ->
         update_sensitivity_convergence_plot!(convergence_plot, snapshot),
+    on_candidate_update = (_, magnitudes) ->
+        add_voltage_sensitivity_candidate!(voltage_plot, magnitudes),
 )
+# Medians are drawn once, from every accepted candidate, after the run is complete.
+final_snapshot = convergence_snapshot(
+    local_result.sensitivities, params, length(local_result.candidates), 1)
+finish_voltage_sensitivity_plot!(voltage_plot, final_snapshot.median_magnitude)
 @info "Local sensitivity simulation complete" candidate_count = length(local_result.candidates) case_count = length(local_result.operating_cases) block_status_counts = Dict(status => count(==(status), local_result.statuses) for status in (:complete, :partial, :invalid)) execution_time_s = round(local_result.execution_time; digits = 2)
 
 # ============================================================
@@ -94,5 +102,5 @@ local_result = run_local_sensitivity_simulations(
 println("Accepted $accepted_count / $(length(records)) candidates.")
 println("Fixed parameters: $(join(string.(fixed_parameters), ", "))")
 
-# In scripts, keep the browser page alive after the final red convergence state is drawn.
+# In scripts, keep the browser page alive after all live figures are complete.
 finish_sensitivity_convergence_plot!(convergence_plot)
