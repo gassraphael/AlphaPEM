@@ -15,6 +15,10 @@ effect on the predicted outputs and (2) that effect cannot be reproduced by othe
 The conclusions depend on the model structure, the parameter bounds and the chosen measurements,
 and do not by themselves establish the physical importance of a parameter.
 
+`run_local_sensitivity_simulations` executes the accepted parameter candidates against the
+operating-case library and returns the signed local-sensitivity blocks and their validity masks.
+The result is the simulation stage consumed by the later summary and identifiability analyses.
+
 # References
 - A. Goshtasbi, J. Chen, J. R. Waldecker, S. Hirano, and T. Ersal, "Effective parameterization of
   pem fuel cell models—part i: Sensitivity analysis and parameter identifiability,"
@@ -30,7 +34,9 @@ module ExtendedLocalSensitivityAnalysis
 
 using DataFrames
 using JLD2
+using LinearAlgebra: BLAS
 using Logging
+using ProgressMeter: Progress, finish!, next!
 using Random
 using QuasiMonteCarlo
 using SHA
@@ -52,16 +58,18 @@ include(joinpath(@__DIR__, "sensitivity_analysis", "shared", "warning_logger.jl"
 include(joinpath(@__DIR__, "sensitivity_analysis", "shared", "hashing.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "shared", "checkpoint_io.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "types.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "current_density_summaries.jl")) # step 6.2: medians by current range / zone
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "current_density_summaries.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "operating_cases.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "outputs.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "parameters.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sensitivity.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "statistics.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sampling.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "simulation.jl"))
 
 export ExtendedLocalSensitivityConfig,
        ExtendedLocalSensitivityResult,
+       ExtendedLocalSimulationResult,
        CurrentDensityZone,
        DEFAULT_CURRENT_DENSITY_ZONES,
        OperatingCase,
@@ -94,6 +102,8 @@ export ExtendedLocalSensitivityConfig,
        unit_design_to_physical,
        screening_error,
        screen_candidates,
-       alphapem_screening_simulator
+       alphapem_screening_simulator,
+       run_local_sensitivity_simulations,
+       alphapem_local_sensitivity_simulator
 
 end  # module ExtendedLocalSensitivityAnalysis

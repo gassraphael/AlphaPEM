@@ -3,11 +3,7 @@
 """
     _struct_to_string(x)
 
-Serialize a composite value to a deterministic string representation.
-
-Only scalar fields are serialized; this is sufficient for the configuration objects used by the
-sensitivity analyses (`PolarizationParams`, `NumericalParams`, `ParameterBounds`, and
-`OperatingConditionConstraint`).
+Serialize a value and its nested fields/collections to a deterministic string representation.
 
 Parameters
 ----------
@@ -17,33 +13,69 @@ x : Any
 Returns
 -------
 String
-    Deterministic representation of the type and its field values.
+    Deterministic representation of the type, dimensions, elements, and field values.
 """
 function _struct_to_string(x)::String
-    # Initialize the serialized type representation
+    # Recursively serialize collections instead of relying on display strings that may include
+    # process-specific memory addresses on newer Julia versions.
     buf = IOBuffer()
-    print(buf, typeof(x), "(")
-
-    # Append each field using a stable scalar representation
-    for (i, fn) in enumerate(fieldnames(typeof(x)))
-        i > 1 && print(buf, ",")
-        val = getfield(x, fn)
-        if isa(val, AbstractString) || isa(val, Symbol)
-            print(buf, val)
-        elseif isa(val, Number) || isa(val, Bool)
-            print(buf, Float64(val))
-        elseif isa(val, Tuple)
-            print(buf, join(string.(val), ","))
-        elseif isa(val, AbstractVector)
-            print(buf, join(string.(val), ","))
-        else
-            print(buf, string(val))
-        end
-    end
-
-    # Close and return the serialized value
-    print(buf, ")")
+    _write_stable_value(buf, x)
     return String(take!(buf))
+end
+
+
+"""
+    _write_stable_value(io, value)
+
+Recursively write stable representations of scalar, collection, and struct values.
+
+Parameters
+----------
+io : IO
+    Destination buffer.
+value : Any
+    Value to serialize.
+
+Returns
+-------
+Nothing
+    Writes the representation to `io`.
+"""
+function _write_stable_value(io::IO, value)
+    if value === nothing
+        print(io, "nothing")
+    elseif value isa AbstractString
+        print(io, "String(", repr(String(value)), ")")
+    elseif value isa Symbol
+        print(io, "Symbol(", repr(String(value)), ")")
+    elseif value isa Number || value isa Bool
+        print(io, typeof(value), ":", repr(value))
+    elseif value isa Tuple
+        print(io, typeof(value), "(")
+        for (index, item) in enumerate(value)
+            index > 1 && print(io, ",")
+            _write_stable_value(io, item)
+        end
+        print(io, ")")
+    elseif value isa AbstractArray
+        print(io, typeof(value), "size=", size(value), "[")
+        for (index, item) in enumerate(value)
+            index > 1 && print(io, ",")
+            _write_stable_value(io, item)
+        end
+        print(io, "]")
+    elseif isstructtype(typeof(value))
+        print(io, typeof(value), "(")
+        for (index, field) in enumerate(fieldnames(typeof(value)))
+            index > 1 && print(io, ",")
+            print(io, field, "=")
+            _write_stable_value(io, getfield(value, field))
+        end
+        print(io, ")")
+    else
+        print(io, typeof(value), ":", repr(value))
+    end
+    return nothing
 end
 
 

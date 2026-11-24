@@ -255,6 +255,11 @@ function screen_candidates(phys_design::AbstractMatrix{<:Real},
 
     # Prepare candidate-indexed storage to preserve the design order when computed in parallel
     records = Vector{ScreeningRecord}(undef, n)
+    warning_counters = _new_warning_counters()
+    prog = Progress(n; desc = "Extended local sensitivity screening: ", barlen = 40, color = :cyan)
+    prog_lock = ReentrantLock()
+    old_blas_threads = cfg.parallel && Threads.nthreads() > 1 ? BLAS.get_num_threads() : nothing
+    old_blas_threads !== nothing && BLAS.set_num_threads(1)
 
     function screen_one(k::Int)
         # Initialize this candidate's measurements and optimistic status
@@ -282,17 +287,31 @@ function screen_candidates(phys_design::AbstractMatrix{<:Real},
         return ScreeningRecord(k, θ, status, worst, errs)
     end
 
-    # Run serially or in parallel
-    if cfg.parallel && Threads.nthreads() > 1
-        # Wait for all candidates before computing the acceptance rate.
-        @sync for k in 1:n
-            Threads.@spawn records[k] = screen_one(k)
-        end
-    else
-        for k in 1:n
-            records[k] = screen_one(k)
+    # Run serially or in parallel, updating the shared progress bar safely.
+    with_logger(_SimulationWarningLogger(warning_counters, current_logger())) do
+        try
+            if cfg.parallel && Threads.nthreads() > 1
+                # Wait for all candidates before computing the acceptance rate.
+                @sync for k in 1:n
+                    Threads.@spawn begin
+                        records[k] = screen_one(k)
+                        lock(prog_lock) do
+                            next!(prog)
+                        end
+                    end
+                end
+            else
+                for k in 1:n
+                    records[k] = screen_one(k)
+                    next!(prog)
+                end
+            end
+        finally
+            finish!(prog)
+            old_blas_threads !== nothing && BLAS.set_num_threads(old_blas_threads)
         end
     end
+    _print_warning_summary(warning_counters)
 
     # Summarize statuses and check the acceptance rate
     n_acc = count(r -> r.status == :accepted, records)

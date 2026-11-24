@@ -19,16 +19,16 @@ const CURRENT_DENSITY_GRID = Float64[
 const OPERATING_BOUNDS_OVERRIDES = Dict{Symbol, Tuple{Float64, Float64, Symbol}}()
 
 cfg = ExtendedLocalSensitivityConfig(
-    n_candidates = N_CANDIDATES,                             # Sobol candidates generated before experimental screening.
-    current_density_grid = CURRENT_DENSITY_GRID,             # Shared current-density points for every operating case (A/cm²).
-    current_density_zones = DEFAULT_CURRENT_DENSITY_ZONES,   # Magnitude summaries by current range; replace to customize zone boundaries.
-    pressure_gap = 0.2e5,                                    # Exact pressure difference: Pa_des - Pc_des (Pa).
-    operating_bounds_overrides = OPERATING_BOUNDS_OVERRIDES, # Optional partial bound overrides; empty keeps framework defaults.
-    base_operating_conditions = nothing,                     # Use selected fuel-cell nominal conditions as the base; swept fields vary, others stay nominal.
+    n_candidates = N_CANDIDATES,                                 # Sobol candidates generated before experimental screening.
+    current_density_grid = CURRENT_DENSITY_GRID,                 # Shared current-density points for every operating case (A/cm²).
+    current_density_zones = copy(DEFAULT_CURRENT_DENSITY_ZONES), # Magnitude summaries by current range; copy before customizing zone boundaries.
+    pressure_gap = 0.2e5,                                        # Exact pressure difference: Pa_des - Pc_des (Pa).
+    operating_bounds_overrides = OPERATING_BOUNDS_OVERRIDES,     # Optional partial bound overrides; empty keeps framework defaults.
+    base_operating_conditions = nothing,                         # Use selected fuel-cell nominal conditions as the base; swept fields vary, others stay nominal.
     screening_datasets = [
-        ScreeningDataset(:ZSW_nominal, 2024, :full),         # Candidate must match this experimental polarization curve.
-        ScreeningDataset(:ZSW_Pa_1_61_Pc_1_41, 2024, :full), # Candidate must also match this curve.
-    ],                                                       # A candidate is retained only if it passes screening on every listed dataset.
+        ScreeningDataset(:ZSW_nominal, 2024, :full),             # Candidate must match this experimental polarization curve.
+        ScreeningDataset(:ZSW_Pa_1_61_Pc_1_41, 2024, :full),     # Candidate must also match this curve.
+    ],                                                           # A candidate is retained only if it passes screening on every listed dataset.
 )
 validate_config(cfg)
 
@@ -73,13 +73,12 @@ projected_local_evaluations =
 @info "Projected local-sensitivity run count; all 729 operating cases will be used." accepted_parameter_points = accepted_count parameter_count = length(params) finite_difference_levels = cfg.n_levels operating_case_count = length(operating_cases) projected_simulations = projected_local_evaluations
 
 # ============================================================
-# ASCENDING CURRENT PROFILE (STEP 6.1)
+# LOCAL-SENSITIVITY SIMULATION ENGINE
 # ============================================================
 
-# Convert the configured grid (A/cm²) and durations into the AlphaPEM current-profile parameters.
-profile_params = ascending_polarization_params(cfg)
-# Build the profile: one ascending sweep from OCV, with a voltage measurement window per point.
-current_profile = AlphaPEM.Currents.AscendingPolarizationCurrent(profile_params)
+# Run every accepted candidate against every operating case; the engine checkpoints completed blocks.
+local_result = run_local_sensitivity_simulations(records, params, operating_cases, cfg)
+@info "Local sensitivity simulation complete" candidate_count = length(local_result.candidates) case_count = length(local_result.operating_cases) block_status_counts = Dict(status => count(==(status), local_result.statuses) for status in (:complete, :partial, :invalid)) execution_time_s = round(local_result.execution_time; digits = 2)
 
 # ============================================================
 # RUN SUMMARY

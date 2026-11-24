@@ -132,7 +132,7 @@ end
     @test_throws ArgumentError ELSA.influential_mask([0.2], Inf)
 end
 
-@testset "ExtendedLocalSensitivityAnalysis sampling and screening (step 4)" begin
+@testset "ExtendedLocalSensitivityAnalysis sampling and screening" begin
     @testset "scrambled Sobol design" begin
         D1 = ELSA.generate_unit_design(64, 5; seed = 1)
         D2 = ELSA.generate_unit_design(64, 5; seed = 1)
@@ -206,7 +206,7 @@ end
     end
 end
 
-@testset "ExtendedLocalSensitivityAnalysis operating cases (step 5)" begin
+@testset "ExtendedLocalSensitivityAnalysis operating cases" begin
     default_bounds = copy(AlphaPEM.Config.OPERATING_CONDITIONS_BOUNDS)
     cfg = ELSA.ExtendedLocalSensitivityConfig()
     cases = ELSA.generate_operating_case_library(cfg)
@@ -264,7 +264,7 @@ end
     @test_throws ArgumentError AlphaPEM.Config.exact_pressure_gap_constraint(Inf)
 end
 
-@testset "ExtendedLocalSensitivityAnalysis ascending current profile (step 6.1)" begin
+@testset "ExtendedLocalSensitivityAnalysis ascending current profile" begin
     AscendingParams = AlphaPEM.Config.AscendingPolarizationParams
     AscendingCurrent = AlphaPEM.Currents.AscendingPolarizationCurrent
     current = AlphaPEM.Currents.current
@@ -333,7 +333,7 @@ end
         ELSA.ExtendedLocalSensitivityConfig(delta_t_ini = NaN))
 end
 
-@testset "ExtendedLocalSensitivityAnalysis voltage curve (step 6.1)" begin
+@testset "ExtendedLocalSensitivityAnalysis voltage curve" begin
     AscendingParams = AlphaPEM.Config.AscendingPolarizationParams
     c = AlphaPEM.Currents.AscendingPolarizationCurrent(AscendingParams(
         delta_t_ini = 20.0, v_load = 1e4, delta_t_break = 10.0, delta_t_break_lower_0_3 = 8.0,
@@ -389,7 +389,7 @@ end
     @test_throws ArgumentError ELSA.extract_voltage_curve((current_density = 1.0, outputs = nothing))
 end
 
-@testset "ExtendedLocalSensitivityAnalysis ascending sweep on AlphaPEM (step 6.1)" begin
+@testset "ExtendedLocalSensitivityAnalysis ascending sweep on AlphaPEM" begin
     numerical_params = AlphaPEM.Config.NumericalParams(
         nb_gc = 5, nb_gdl = 2, nb_mpl = 1, nb_man = 1, rtol = 1e-2, atol = 1e-4,
         maxiters = 1e4, max_run_time_s = 60.0, save_freq = 100.0)
@@ -422,7 +422,7 @@ end
     @test all(isnan, stopped.voltage[.!stopped.valid])
 end
 
-@testset "ExtendedLocalSensitivityAnalysis current-density summaries (step 6.2)" begin
+@testset "ExtendedLocalSensitivityAnalysis current-density summaries" begin
     bounds = AlphaPEM.Parametrisation.Calibration.ParameterBound
     params = [
         bounds(:Hmem, 0.1, 10.0, :real, :log, "Hmem", "Membrane thickness"),
@@ -502,4 +502,232 @@ end
         zeros(1, length(grid)), params, cfg)
     @test_throws ArgumentError ELSA.summarize_current_density_sensitivities(
         zeros(length(params), length(grid) - 1), params, cfg)
+end
+
+@testset "ExtendedLocalSensitivityAnalysis simulation engine" begin
+    ParameterBound = AlphaPEM.Parametrisation.Calibration.ParameterBound
+    params = [
+        ParameterBound(:p1, 0.0, 1.0, :real, :linear, "", "p1"),
+        ParameterBound(:p2, 0.0, 1.0, :real, :linear, "", "p2"),
+    ]
+    grid = [0.0, 0.5, 1.5]
+    cases = [
+        ELSA.OperatingCase("case_001", AlphaPEM.Config.OperatingConditions()),
+        ELSA.OperatingCase("case_002", AlphaPEM.Config.OperatingConditions(Sa = 2.0)),
+    ]
+    records = [
+        ELSA.ScreeningRecord(1, [0.2, 0.8], :accepted, 0.0, Float64[]),
+        ELSA.ScreeningRecord(2, [0.7, 0.3], :accepted, 0.0, Float64[]),
+    ]
+    simulate_voltage(theta, operating_case) = begin
+        scale = operating_case.label == "case_001" ? 1.0 : 1.5
+        voltage = 0.9 .+ scale .* (
+            [0.1, 0.2, 0.3] .* theta[1] .+ [-0.05, 0.02, -0.1] .* theta[2])
+        ELSA.VoltageCurve(copy(grid), voltage, trues(length(grid)))
+    end
+    cfg = ELSA.ExtendedLocalSensitivityConfig(
+        current_density_grid = grid,
+        n_levels = 3,
+        parallel = false,
+        checkpoint_frequency = 1,
+        output_dir = mktempdir(),
+    )
+
+    # Every candidate/case unit contains one signed sensitivity block per current density.
+    result = ELSA.run_local_sensitivity_simulations(
+        records, params, cases, cfg; simulate_fn = simulate_voltage)
+    @test size(result.sensitivities) == (2, 2)
+    @test size(result.theta) == (2, 2)
+    @test result.theta[:, 1] ≈ [0.2, 0.8]
+    @test [record.id for record in result.screening_records] == [1, 2]
+    @test all(==(:complete), result.statuses)
+    @test all(size(block) == (2, 3) for block in result.sensitivities)
+    @test all(all(mask) for mask in result.validity_masks)
+    @test all(result.sensitivities[1, 1][1, :] .> 0.0)
+    @test result.sensitivities[1, 1][2, 1] < 0.0
+    @test result.sensitivities[1, 1][2, 2] > 0.0
+    @test sum(values(result.run_status_counts)) == 2 * 2 * 2 * 3
+    @test isempty(result.run_errors)
+    @test result.execution_time >= 0.0
+    @test !isfile(joinpath(cfg.output_dir, "extended_local_sensitivity_checkpoint.jld2"))
+
+    # Current-density summaries can be requested directly from a completed simulation block.
+    block_summary = ELSA.summarize_current_density_sensitivities(result, 1, 1)
+    @test size(block_summary, 1) == 2 * (1 + length(cfg.current_density_zones))
+    @test all(block_summary.valid_points .<= block_summary.total_points)
+
+    # Partial curves keep their valid current prefix; higher-current sensitivities remain NaN.
+    partial_simulator(theta, operating_case) = ELSA.VoltageCurve(
+        copy(grid), [0.9 + theta[1] * 0.1, 0.8 + theta[2] * 0.1, NaN],
+        BitVector([true, true, false]))
+    partial_cfg = ELSA.ExtendedLocalSensitivityConfig(
+        current_density_grid = grid,
+        n_levels = 3,
+        parallel = false,
+        checkpoint_frequency = 0,
+        output_dir = mktempdir(),
+    )
+    partial_result = ELSA.run_local_sensitivity_simulations(
+        records[1:1], params, cases[1:1], partial_cfg; simulate_fn = partial_simulator)
+    @test partial_result.statuses[1, 1] == :partial
+    @test partial_result.validity_masks[1, 1] == BitMatrix([1 1 0; 1 1 0])
+    @test all(isnan, partial_result.sensitivities[1, 1][:, 3])
+
+    # Thrown simulation errors are isolated, counted, and yield an invalid block.
+    failing_simulator(theta, operating_case) = error("injected simulation failure")
+    failed_result = ELSA.run_local_sensitivity_simulations(
+        records[1:1], params, cases[1:1], partial_cfg; simulate_fn = failing_simulator)
+    @test failed_result.statuses[1, 1] == :invalid
+    @test failed_result.run_status_counts[:failed] == 6
+    @test sum(values(failed_result.run_errors)) == 6
+    @test all(isnan, failed_result.sensitivities[1, 1])
+
+    # Resume skips a committed block and gives the same result as an uninterrupted run.
+    resume_dir = mktempdir()
+    resume_cfg = ELSA.ExtendedLocalSensitivityConfig(
+        current_density_grid = [0.0, 0.1],
+        n_levels = 3,
+        parallel = false,
+        checkpoint_frequency = 1,
+        output_dir = resume_dir,
+    )
+    interrupt_once = Ref(true)
+    run_count = Ref(0)
+    function interrupting_simulator(theta, operating_case)
+        run_count[] += 1
+        if interrupt_once[] && run_count[] == 7
+            interrupt_once[] = false
+            throw(InterruptException())
+        end
+        v = [0.9 + 0.1 * theta[1], 0.8 + 0.1 * theta[2]]
+        return ELSA.VoltageCurve([0.0, 0.1], v, trues(2))
+    end
+    resume_records = [
+        ELSA.ScreeningRecord(1, [0.2, 0.8], :accepted, 0.0, Float64[]),
+        ELSA.ScreeningRecord(2, [0.7, 0.3], :accepted, 0.0, Float64[]),
+    ]
+    resume_cases = [ELSA.OperatingCase("resume_case", AlphaPEM.Config.OperatingConditions())]
+    checkpoint_path = joinpath(resume_dir, "extended_local_sensitivity_checkpoint.jld2")
+    @test_throws InterruptException ELSA.run_local_sensitivity_simulations(
+        resume_records, params, resume_cases, resume_cfg;
+        simulate_fn = interrupting_simulator)
+    @test isfile(checkpoint_path)
+
+    resumed_cfg = ELSA.ExtendedLocalSensitivityConfig(
+        current_density_grid = [0.0, 0.1],
+        n_levels = 3,
+        parallel = false,
+        resume = true,
+        checkpoint_frequency = 1,
+        output_dir = resume_dir,
+    )
+    @test ELSA._struct_to_string(resume_cfg.current_density_grid) ==
+          ELSA._struct_to_string(resumed_cfg.current_density_grid)
+    @test ELSA._struct_to_string(resume_cfg.current_density_zones) ==
+          ELSA._struct_to_string(resumed_cfg.current_density_zones)
+    resumed = ELSA.run_local_sensitivity_simulations(
+        resume_records, params, resume_cases, resumed_cfg;
+        simulate_fn = interrupting_simulator)
+    @test run_count[] == 13 # Six runs for the saved first block, one interrupted run, and six resumed runs.
+    @test all(==(:complete), resumed.statuses)
+    @test !isfile(checkpoint_path)
+
+    uninterrupted_cfg = ELSA.ExtendedLocalSensitivityConfig(
+        current_density_grid = [0.0, 0.1],
+        n_levels = 3,
+        parallel = false,
+        checkpoint_frequency = 0,
+        output_dir = mktempdir(),
+    )
+    uninterrupted_simulator(theta, operating_case) =
+        ELSA.VoltageCurve([0.0, 0.1], [0.9 + 0.1 * theta[1], 0.8 + 0.1 * theta[2]], trues(2))
+    uninterrupted = ELSA.run_local_sensitivity_simulations(
+        resume_records, params, resume_cases, uninterrupted_cfg;
+        simulate_fn = uninterrupted_simulator)
+    @test resumed.statuses == uninterrupted.statuses
+    @test resumed.run_status_counts == uninterrupted.run_status_counts
+    @test resumed.run_errors == uninterrupted.run_errors
+    for candidate_index in eachindex(resume_records)
+        @test isequal(resumed.sensitivities[candidate_index, 1],
+                      uninterrupted.sensitivities[candidate_index, 1])
+    end
+
+    # With multiple Julia threads, scheduler order does not change any block values.
+    if Threads.nthreads() > 1
+        parallel_cfg = ELSA.ExtendedLocalSensitivityConfig(
+            current_density_grid = grid,
+            n_levels = 3,
+            parallel = true,
+            checkpoint_frequency = 0,
+            output_dir = mktempdir(),
+        )
+        parallel_result = ELSA.run_local_sensitivity_simulations(
+            records, params, cases, parallel_cfg; simulate_fn = simulate_voltage)
+        @test parallel_result.statuses == result.statuses
+        for candidate_index in eachindex(records), case_index in eachindex(cases)
+            @test isequal(
+                parallel_result.sensitivities[candidate_index, case_index],
+                result.sensitivities[candidate_index, case_index],
+            )
+        end
+    end
+end
+
+@testset "ExtendedLocalSensitivityAnalysis AlphaPEM engine smoke test" begin
+numerical_params = AlphaPEM.Config.NumericalParams(
+    nb_gc = 5, nb_gdl = 2, nb_mpl = 1, nb_man = 1, rtol = 1e-2, atol = 1e-4,
+    maxiters = 1e4, max_run_time_s = 60.0, save_freq = 100.0)
+cfg = ELSA.ExtendedLocalSensitivityConfig(
+    current_density_grid = [0.0, 0.05, 0.1],
+    delta_t_ini = 10.0,
+    v_load = 0.01e4,
+    delta_t_break = 10.0,
+    delta_t_break_lower_0_3 = 10.0,
+    delta_t_break_OCV = 10.0,
+    delta_t_measurement = 5.0,
+    numerical_params = numerical_params,
+    parameter_subset = [:Hmem, :Re],
+    n_levels = 3,
+    max_run_time_s = 60.0,
+    parallel = false,
+    checkpoint_frequency = 0,
+    output_dir = mktempdir(),
+)
+nominal_fuel_cell = AlphaPEM.Fuelcell.create_fuelcell(
+    cfg.fuel_cell_type, cfg.voltage_zone; year = cfg.year, nb_gc = cfg.nb_gc)
+default_params, _ = ELSA.select_parameters(cfg)
+params = ELSA.Calibration.ParameterBound[]
+nominal_values = Float64[]
+for default_param in default_params
+    nominal = clamp(
+        Float64(getfield(nominal_fuel_cell.physical_parameters, default_param.name)),
+        default_param.min,
+        default_param.max,
+    )
+    push!(nominal_values, nominal)
+    parameter_span = max(abs(nominal) * 0.001, eps(Float64))
+    push!(params, ELSA.Calibration.ParameterBound(
+        default_param.name,
+        max(default_param.min, nominal - parameter_span),
+        min(default_param.max, nominal + parameter_span),
+        default_param.type,
+        :linear,
+        default_param.unit,
+        default_param.description,
+        default_param.latex,
+    ))
+end
+records = [ELSA.ScreeningRecord(1, nominal_values, :accepted, 0.0, Float64[])]
+conditions = AlphaPEM.Config.OperatingConditions(
+    Pa_des = 2.0e5, Pc_des = 1.8e5, Sa = 3.0, Sc = 4.0)
+cases = [ELSA.OperatingCase("smoke_case", conditions)]
+
+@test ELSA._numerical_params_for_local_simulation(cfg).max_run_time_s == cfg.max_run_time_s
+result = ELSA.run_local_sensitivity_simulations(records, params, cases, cfg)
+@test size(result.sensitivities) == (1, 1)
+@test size(result.sensitivities[1, 1]) == (2, 3)
+@test result.statuses[1, 1] in (:complete, :partial)
+@test any(result.validity_masks[1, 1])
+@test result.run_status_counts[:complete] == 6
+@test result.run_status_counts[:failed] == 0
 end

@@ -55,6 +55,20 @@ end
     CurrentDensityZone(name, lower, upper; include_lower=true, include_upper=false)
 
 Create a current-density interval, converting its bounds to `Float64`.
+
+Parameters
+----------
+name : Symbol
+    Zone name used in sensitivity summary rows.
+lower, upper : Real
+    Zone bounds in A/cm²; `upper` may be `Inf`.
+include_lower, include_upper : Bool
+    Whether each bound is included. Defaults are `true` and `false`, respectively.
+
+Returns
+-------
+CurrentDensityZone
+    Named interval; validity and overlaps are checked when the run configuration is validated.
 """
 function CurrentDensityZone(
     name::Symbol,
