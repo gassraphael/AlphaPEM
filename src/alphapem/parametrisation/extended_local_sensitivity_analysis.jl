@@ -73,6 +73,7 @@ include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sensitivit
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sensitivity_engine.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "collinearity.jl"))
 include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "multi_output.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "parameter_selection.jl"))
 
 export ExtendedLocalSensitivityConfig,
        ExtendedLocalSensitivityResult,
@@ -133,6 +134,9 @@ export ExtendedLocalSensitivityConfig,
        CollinearitySummary,
        collinearity_summary,
        collinear_pairs,
+       CollinearityFilterResult,
+       filter_collinear_parameters,
+       select_parameters_by_sensitivity,
        FUTURE_OUTPUTS,
        MeasurementSet,
        DEFAULT_MEASUREMENT_SETS,

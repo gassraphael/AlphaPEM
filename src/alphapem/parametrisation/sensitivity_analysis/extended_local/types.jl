@@ -153,7 +153,12 @@ Configuration of the extended local sensitivity and identifiability analysis.
 - `collinearity_floor::Float64`: Lower bound of the sensitivity-norm product in the collinearity
   index. Default `1e-12`.
 - `collinearity_threshold::Float64`: Collinearity above which a pair is highlighted. Default `0.707`.
-- `sensitivity_threshold::Float64`: Minimum median sensitivity magnitude for a parameter to be considered influential. Default `0.1`.
+- `sensitivity_threshold::Float64`: Minimum median sensitivity magnitude for a parameter to be considered influential.
+   Default `0.1`.
+
+# Parameter-subset selection
+- `psi_th::Float64`: Collinearity-filter threshold: when the median collinearity of a pair exceeds
+  it, the parameter with the smaller median sensitivity is removed. Default `0.9` (Goshtasbi et al.).
 
 # Sampling and screening
 - `n_candidates::Int`: Requested number of Sobol candidates. If it is not a power of 2, the design
@@ -218,6 +223,8 @@ Base.@kwdef struct ExtendedLocalSensitivityConfig
     collinearity_floor::Float64            = 1e-12         # Minimum norm product used in collinearity calculations.
     collinearity_threshold::Float64        = 0.707         # Collinearity threshold for highlighting parameter pairs.
     sensitivity_threshold::Float64         = 0.1           # Minimum median sensitivity magnitude for an influential parameter.
+    # Parameter-subset selection
+    psi_th::Float64                        = 0.9           # Pairs with median collinearity above it lose their less sensitive parameter.
     # Sampling and screening
     n_candidates::Int                      = 2^9           # Sobol candidates generated before experimental screening.
     screening_datasets::Vector{ScreeningDataset} = [ScreeningDataset(:ZSW_nominal, 2024, :full)] # Experimental curves every candidate must match.
@@ -329,6 +336,7 @@ function validate_config(cfg::ExtendedLocalSensitivityConfig)::ExtendedLocalSens
     _check(0.0 < cfg.collinearity_threshold < 1.0, "collinearity_threshold must lie in (0, 1)")
     _check(isfinite(cfg.sensitivity_threshold) && cfg.sensitivity_threshold >= 0.0,
            "sensitivity_threshold must be finite and non-negative")
+    _check(0.0 < cfg.psi_th < 1.0, "psi_th must lie in (0, 1)")
 
     # Validate sampling and screening settings
     _check(cfg.n_candidates >= 1, "n_candidates must be positive")

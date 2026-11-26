@@ -398,7 +398,8 @@ function _local_simulation_config_hash(
     simulate_fn::Function,
 )::String
     # Runtime/output controls do not change the mathematical result and are excluded by design.
-    excluded_fields = Set((:output_dir, :parallel, :top_k, :resume, :checkpoint_frequency))
+    excluded_fields = Set((:output_dir, :parallel, :top_k, :resume, :checkpoint_frequency,
+                           :psi_th))
     parts = String[]
     # Serialize every remaining configuration field so changing a simulation setting invalidates
     # an old checkpoint instead of silently reusing results from a different run.

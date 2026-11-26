@@ -28,8 +28,9 @@ cfg = ExtendedLocalSensitivityConfig(
     pressure_gap = 0.2e5,                                        # Exact pressure difference: Pa_des - Pc_des (Pa).
     operating_bounds_overrides = OPERATING_BOUNDS_OVERRIDES,     # Optional partial bound overrides; empty keeps framework defaults.
     base_operating_conditions = nothing,                         # Use selected fuel-cell nominal conditions as the base; swept fields vary, others stay nominal.
-    sensitivity_threshold = 0.1,                                 # Minimum median voltage-sensitivity magnitude for a parameter to count as non-negligible; a collinear pair needs both parameters above it.
-    collinearity_threshold = 0.707,                              # Collinearity index above which a pair is highlighted (angle below 45°).
+    sensitivity_threshold = 0.1,                                 # FIGURES AND SUBSET SELECTION: minimum median voltage-sensitivity magnitude for a parameter to count as non-negligible; a collinear pair needs both parameters above it, and a retained parameter must reach it to be selected.
+    collinearity_threshold = 0.707,                              # FIGURES: collinearity index above which a pair is highlighted (angle below 45°).
+    psi_th = 0.9,                                                # SUBSET SELECTION: median collinearity above which the less sensitive parameter of a pair is removed from the candidates.
     screening_datasets = [
         ScreeningDataset(:ZSW_nominal, 2024, :full),             # Candidate must match this experimental polarization curve.
         ScreeningDataset(:ZSW_Pa_1_61_Pc_1_41, 2024, :full),     # Candidate must also match this curve.
@@ -123,6 +124,18 @@ pairs = collinear_pairs(
 mkpath(cfg.output_dir)
 CSV.write(joinpath(cfg.output_dir, "collinear_pairs.csv"), pairs)
 @info "Collinear parameter pairs" count = nrow(pairs)
+
+# Drop the weaker parameter of every pair whose median collinearity exceeds psi_th.
+collinearity_filter = filter_collinear_parameters(
+    collinearity, params; psi_th = cfg.psi_th)
+@info "Collinearity filter" psi_th = cfg.psi_th retained = length(collinearity_filter.retained) removed_parameters = collinearity_filter.removed.removed retained_parameters = collinearity_filter.retained
+
+# Parameter-subset selection, sensitivity threshold: keep the retained parameters the voltage reacts to
+# (simplified selection, not the method of Goshtasbi et al.).
+selection = select_parameters_by_sensitivity(
+    collinearity, params, collinearity_filter.retained;
+    sensitivity_threshold = cfg.sensitivity_threshold)
+@info "Selected parameter subset" sensitivity_threshold = cfg.sensitivity_threshold selected_count = length(selection.selected) selected = selection.selected below_threshold = selection.below_threshold
 @info "Local sensitivity simulation complete" candidate_count = length(local_result.candidates) case_count = length(local_result.operating_cases) block_status_counts = Dict(status => count(==(status), local_result.statuses) for status in (:complete, :partial, :invalid)) execution_time_s = round(local_result.execution_time; digits = 2)
 
 # ============================================================

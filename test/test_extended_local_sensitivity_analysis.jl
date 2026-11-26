@@ -634,6 +634,20 @@ end
     pairs = ELSA.collinear_pairs(summary, params3)
     @test Tuple.(eachrow(pairs[:, [:i, :j]])) == [(:a, :b)]
 
+    # A (0.9, 0.8) pair is removed only above psi_th; the weaker parameter goes.
+    filtered = ELSA.filter_collinear_parameters(summary, params3; psi_th = 0.85)
+    @test filtered.retained == [:a, :c]
+    @test filtered.removed.removed == [:b] && filtered.removed.kept == [:a]
+    @test ELSA.filter_collinear_parameters(summary, params3; psi_th = 0.95).retained == [:a, :b, :c]
+    @test_throws ArgumentError ELSA.filter_collinear_parameters(summary, params3; psi_th = 1.0)
+
+    # Threshold selection keeps retained parameters whose median sensitivity reaches the threshold.
+    by_threshold = ELSA.select_parameters_by_sensitivity(summary, params3, [:a, :b, :c];
+                                                         sensitivity_threshold = 0.1)
+    @test by_threshold.selected == [:a, :b] && by_threshold.below_threshold == [:c]
+    @test ELSA.select_parameters_by_sensitivity(summary, params3, [:b, :c]).selected == [:b]
+    @test_throws ArgumentError ELSA.select_parameters_by_sensitivity(summary, params3, [:z])
+
     # The collinearity figure shows only the lower triangle and highlights above-threshold pairs.
     collinearity_plot = ELSA.create_collinearity_plot(params3)
     ELSA.finish_collinearity_plot!(collinearity_plot, summary.median_collinearity,
