@@ -193,7 +193,6 @@ References
 A. Goshtasbi, J. Chen, J. R. Waldecker, S. Hirano, and T. Ersal, "Effective parameterization of pem
 fuel cell models—part i: Sensitivity analysis and parameter identifiability," Journal of The
 Electrochemical Society, vol. 167, p. 044504, Mar. 2020. https://doi.org/10.1149/1945-7111/ab7091.
-Affonso Nobrega, marapendi, for the RMSE alternative.
 """
 function screening_error(U_sim::AbstractVector{<:Real}, U_exp::AbstractVector{<:Real}, norm::Symbol)::Float64
     # Preliminary checks
@@ -347,18 +346,13 @@ Function
     results cannot be extracted.
 """
 function alphapem_screening_simulator(params::Vector{ParameterBound}, cfg::ExtendedLocalSensitivityConfig)
-    names = [p.name for p in params]
     return function (θ::AbstractVector{<:Real}, ds::ScreeningDataset)
         # Load the dataset's nominal stack and experimental data
         fc = create_fuelcell(ds.fuel_cell_type, ds.voltage_zone; year = ds.year, nb_gc = cfg.nb_gc)
         exp_data = fc.pola_exp_data_cali
 
         # Override analysed parameters while keeping all others nominal
-        overrides = (; (n => (p.type == :int ? Int(round(v)) : Float64(v))
-                        for (n, p, v) in zip(names, params, θ))...)
-        base = fc.physical_parameters
-        base_nt = (; (f => getfield(base, f) for f in fieldnames(PhysicalParams))...)
-        phys = PhysicalParams(; merge(base_nt, overrides)...)
+        phys = _physical_params_with_overrides(fc.physical_parameters, params, θ)
 
         # Configure and run the simulation at the calibration currents
         sim_cfg = SimulationConfig(
@@ -378,4 +372,41 @@ function alphapem_screening_simulator(params::Vector{ParameterBound}, cfg::Exten
         length(U_sim) == length(exp_data.U_exp) || return nothing
         return (Float64.(U_sim), Float64.(exp_data.U_exp))
     end
+end
+
+
+"""
+    run_candidate_screening(cfg, params) -> Vector{ScreeningRecord}
+
+Generate the Sobol candidates of a configuration and screen them against the experimental curves.
+
+Parameters
+----------
+cfg : ExtendedLocalSensitivityConfig
+    Analysis configuration (design size, seed, screening datasets and threshold).
+params : Vector{ParameterBound}
+    Analysed parameters.
+
+Returns
+-------
+Vector{ScreeningRecord}
+    One record per candidate, accepted or not, in design order.
+"""
+function run_candidate_screening(
+    cfg::ExtendedLocalSensitivityConfig,
+    params::Vector{ParameterBound},
+)::Vector{ScreeningRecord}
+    # Optional nominal candidate, taken from the selected fuel cell
+    base_fc = create_fuelcell(cfg.fuel_cell_type, cfg.voltage_zone; year = cfg.year, nb_gc = cfg.nb_gc)
+    nominal_unit = cfg.include_nominal ?
+        nominal_unit_point(params, base_fc.physical_parameters) : nothing
+
+    # Sobol design in the unit hypercube, mapped to the physical bounds
+    unit_design = generate_unit_design(cfg.n_candidates, length(params);
+                                       seed = cfg.seed, nominal_unit = nominal_unit)
+    physical_design = unit_design_to_physical(unit_design, params)
+
+    # Classification of every candidate against every screening dataset
+    return screen_candidates(physical_design, cfg.screening_datasets, cfg;
+                             simulate_fn = alphapem_screening_simulator(params, cfg))
 end

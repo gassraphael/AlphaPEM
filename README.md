@@ -33,6 +33,7 @@ email so that we may potentially share these latest advancements.
 - [Work in progress](#work-in-progress)
 - [Valid parameter region analysis](#valid-parameter-region-analysis)
 - [Sobol global sensitivity analysis](#sobol-global-sensitivity-analysis)
+- [Extended local sensitivity analysis](#extended-local-sensitivity-analysis)
 - [Roadmap](#roadmap)
 - [Related publications](#related-publications) 
 - [Contributions](#contributions)
@@ -211,6 +212,7 @@ and configuration, beyond what the GUI offers.
 | `run_calibration.jl` | Calibrates the undetermined physical parameters of the model via Genetic Algorithms.                                                                                                    |
 | `run_parameter_validity.jl` | Identifies the valid parameter region via LHS sampling, batch simulation and IRD methods (PRIM, MaxBox). A conservative epsilon pre-restriction is applied automatically to keep `epsilon_carb`, `epsilon_mc` and `epsilon_cl` in `[0,1]`; IRD requires the R + IRD package ([installation step 4](#installation-from-source))* |
 | `run_sobol_sensitivity_analysis.jl` | Runs a variance-based global sensitivity analysis (Sobol S1/ST/S2) directly on AlphaPEM simulations, per polarization region.                                                            |
+| `run_extended_local_sensitivity_analysis.jl` | Runs a local sensitivity analysis at many parameter sets (Goshtasbi et al.), analyses collinearity and selects the parameters to calibrate. Resumable from a checkpoint; the final result is archived for repeated analysis. |
 | `plot_currents.jl` | Plots the current density profiles                                                                                                                                                      |
 
 ### Steps to run a simulation
@@ -342,6 +344,21 @@ This pipeline is adapted from the internship projects of master's students in st
 > Supervised by Dr. Giuseppe Casalicchio and Fiona Ewald,  
 > In collaboration with Luis Winkler (ZSW Ulm) and Prof. Herbert Palm (UAS Munich),
 > Repository: <https://github.com/nathaly-vergel/Official-Sensitivity-Analysis-and-Surrogate-Modeling-of-PEM-Fuel-Cells>.
+
+# Extended local sensitivity analysis
+
+A sub-system (`Parametrisation.ExtendedLocalSensitivityAnalysis`) evaluates normalised local sensitivities
+of the voltage at many parameter sets drawn with a Sobol sequence, for a factorial library of operating
+conditions. It analyses their magnitude and collinearity, then selects the parameters to calibrate.
+`run_extended_local_sensitivity_analysis` coordinates the steps; the run can be resumed from a checkpoint and the
+complete result is archived so that the analysis can be repeated without simulating again
+(`reanalyze_extended_local_sensitivity`). See the documentation page *Extended Local Sensitivity Analysis*.
+
+## Credits
+
+> **Effective Parameterization of PEM Fuel Cell Models** (Parts I and II)  
+> A. Goshtasbi, J. Chen, J. R. Waldecker, S. Hirano, T. Ersal, *J. Electrochem. Soc.* 167, 044504 and 044505 (2020).
+
 
 # Roadmap
 

@@ -17,3 +17,11 @@ Modules = [AlphaPEM.Parametrisation.SobolSensitivityAnalysis]
 Private = false
 Order = [:type, :function]
 ```
+
+## Extended Local Sensitivity Analysis
+
+```@autodocs
+Modules = [AlphaPEM.Parametrisation.ExtendedLocalSensitivityAnalysis]
+Private = false
+Order = [:type, :function]
+```

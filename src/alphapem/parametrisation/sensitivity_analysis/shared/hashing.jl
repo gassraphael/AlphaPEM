@@ -57,6 +57,16 @@ function _write_stable_value(io::IO, value)
             _write_stable_value(io, item)
         end
         print(io, ")")
+    elseif value isa AbstractDict
+        # Sort by serialized key: dictionary iteration order and internal storage are not stable
+        entries = sort!([(_struct_to_string(k), v) for (k, v) in value]; by = first)
+        print(io, typeof(value), "{")
+        for (index, (key, item)) in enumerate(entries)
+            index > 1 && print(io, ",")
+            print(io, key, "=>")
+            _write_stable_value(io, item)
+        end
+        print(io, "}")
     elseif value isa AbstractArray
         print(io, typeof(value), "size=", size(value), "[")
         for (index, item) in enumerate(value)

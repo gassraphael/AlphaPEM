@@ -61,7 +61,8 @@ using ..Calibration: ParameterBound, ParameterBounds, bounds_for_fuel_cell, new_
 using ..ValidParameterRegion: ValidityCriteria
 using ..ExtendedLocalSensitivityAnalysis: _SimulationWarningLogger, _new_warning_counters, _print_warning_summary,
                                           _struct_to_string, _hash_sample,
-                                          _save_jld2_atomic, _load_jld2_checked, _find_missing_sample_ids, _remove_checkpoint
+                                          _save_jld2_atomic, _load_jld2_checked, _find_missing_sample_ids, _remove_checkpoint,
+                                          _enforce_integer_params
 
 export SobolAnalysisConfig,
        PolarizationRegion,

@@ -83,8 +83,6 @@ function alphapem_local_sensitivity_simulator(
     base_fuel_cell = create_fuelcell(
         cfg.fuel_cell_type, cfg.voltage_zone; year = cfg.year, nb_gc = cfg.nb_gc)
     base_physical_parameters = base_fuel_cell.physical_parameters
-    base_parameter_fields = (; (field => getfield(base_physical_parameters, field)
-                                for field in fieldnames(PhysicalParams))...)
     # Reuse the solver settings and ascending current profile throughout this run.
     numerical_params = _numerical_params_for_local_simulation(cfg)
     current_params = ascending_polarization_params(cfg)
@@ -98,12 +96,9 @@ function alphapem_local_sensitivity_simulator(
         physical_values = [from_unit(
             parameter, theta[index]; round_int = cfg.integer_policy == :round)
                            for (index, parameter) in enumerate(params)]
-        # Build field overrides using the types expected by PhysicalParams.
-        overrides = (; (parameter.name =>
-                        (parameter.type == :int ? Int(round(value)) : Float64(value))
-                        for (parameter, value) in zip(params, physical_values))...)
         # Merge the analysed values with nominal values for every unanalysed physical parameter.
-        physical_parameters = PhysicalParams(; merge(base_parameter_fields, overrides)...)
+        physical_parameters = _physical_params_with_overrides(
+            base_physical_parameters, params, physical_values)
 
         # === Configure and run this candidate/case simulation ===
         # Operating conditions come from the case; the same current grid is used for all cases.
@@ -399,7 +394,7 @@ function _local_simulation_config_hash(
 )::String
     # Runtime/output controls do not change the mathematical result and are excluded by design.
     excluded_fields = Set((:output_dir, :parallel, :top_k, :resume, :checkpoint_frequency,
-                           :psi_th))
+                           :psi_th, :save_result))
     parts = String[]
     # Serialize every remaining configuration field so changing a simulation setting invalidates
     # an old checkpoint instead of silently reusing results from a different run.
@@ -494,6 +489,38 @@ end
 # ============================================================
 # LOCAL-SENSITIVITY SIMULATION ENGINE
 # ============================================================
+
+"""
+    restored_screening_records(cfg) -> Union{Vector{ScreeningRecord}, Nothing}
+
+Screening records stored in the resume checkpoint.
+
+Reusing them when resuming avoids screening again, which would be slow and could give slightly
+different records than the interrupted run, invalidating the checkpoint.
+
+Parameters
+----------
+cfg : ExtendedLocalSensitivityConfig
+    Configuration; records are restored only if `cfg.resume` is `true`.
+
+Returns
+-------
+Vector{ScreeningRecord} or nothing
+    The stored records, or `nothing` if not resuming or the checkpoint is absent or unreadable.
+"""
+function restored_screening_records(cfg::ExtendedLocalSensitivityConfig)
+    cfg.resume || return nothing
+    path = joinpath(cfg.output_dir, "extended_local_sensitivity_checkpoint.jld2")
+    isfile(path) || return nothing
+    try
+        records = JLD2.load(path, "screening_records")
+        records isa Vector{ScreeningRecord} && return records
+    catch e
+        @warn "Could not read the screening records of the checkpoint; screening again: $e"
+    end
+    return nothing
+end
+
 
 """
     run_local_sensitivity_simulations(records, params, operating_cases, cfg;
@@ -830,7 +857,10 @@ function run_local_sensitivity_simulations(
                 cfg, params, screening_records, candidates, theta, operating_cases,
                 sensitivities, validity_masks, statuses, unit_times,
                 run_status_counts, run_errors, elapsed)
-            _remove_checkpoint(checkpoint_path)
+            # The checkpoint is dropped only once the full archive is safely on disk.
+            if !cfg.save_result || save_extended_local_sensitivity_result(result)
+                _remove_checkpoint(checkpoint_path)
+            end
             return result
         end
     finally

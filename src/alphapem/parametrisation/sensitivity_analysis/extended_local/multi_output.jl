@@ -31,8 +31,8 @@ unit and in number of measurements:
 
 - `:unit`: every output has weight 1, as in the reference (default).
 - `:count_ratio`: each output is weighted by the ratio of the voltage measurement count to its own
-  count, so that no output dominates through sheer number of points (a proposal inspired by the
-  `N_V/N_HFR` weighting of the Marapendi reference implementation, not part of the article).
+  count, so that no output dominates through sheer number of points (an `N_V/N_HFR` weighting
+  that is not part of the article).
 - `Dict{Symbol, Float64}`: explicit positive weight per output.
 
 Parameters

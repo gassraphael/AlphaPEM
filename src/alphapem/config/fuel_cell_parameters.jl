@@ -153,7 +153,7 @@ where type is either :real or :int.
 
 Sources for some intervals:
 - [Goshtasbi 2020] A. Goshtasbi et al., J. Electrochem. Soc. 167, 044504 (2020) (Part I and II, Table A·I).
-- [Nobrega 2026] P. Affonso Nobrega et al., J. Electrochem. Soc. 173, 114503 (2026) (Table II), marapendi.
+- [Nobrega 2026] P. Affonso Nobrega et al., J. Electrochem. Soc. 173, 114503 (2026) (Table II).
 """
 const PARAMETER_BOUNDS = Dict{Symbol, Tuple{Float64, Float64, Symbol}}(
     # ════════════════════════════════════════════════════════════════════════════

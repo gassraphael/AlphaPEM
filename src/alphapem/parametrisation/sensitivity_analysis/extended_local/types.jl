@@ -168,13 +168,12 @@ Configuration of the extended local sensitivity and identifiability analysis.
   candidates. A candidate is accepted if it is within `screening_threshold_V` on every dataset.
   Default: `ZSW_nominal` (2024, `:full`).
 - `include_nominal::Bool`: Add the nominal parameter set as a candidate. Default `false`.
-- `screening_norm::Symbol`: `:linf` (article) or `:rmse` (marapendi). Default `:linf`.
+- `screening_norm::Symbol`: `:linf` or `:rmse`. Default `:linf`.
 - `screening_threshold_V::Float64`: Maximum voltage error (V) for a candidate to be accepted. Default `0.3`.
 - `seed::Int`: Random seed for reproducibility. Default `42`.
 
 # Identifiability (equations 14-15 of the reference below)
-- `identifiability_matrix::Symbol`: `:single_point` (article), `:median` (marapendi) or
-  `:all_points`. Default `:single_point`.
+- `identifiability_matrix::Symbol`: `:single_point`, `:median` or `:all_points`. Default `:single_point`.
 - `lambda_threshold::Float64`: Minimum Hessian eigenvalue for an identifiable subset. Default `1.0`.
 
 # Execution
@@ -183,7 +182,8 @@ Configuration of the extended local sensitivity and identifiability analysis.
 - `resume::Bool`: Resume from an existing checkpoint in `output_dir`. Default `false`.
 - `checkpoint_frequency::Int`: Save a checkpoint every `n` completed work units (`0` disables). Default `10`.
 - `output_dir::String`: Directory for results. Default `results/extended_local_sensitivity`.
-- `save_raw::Bool`: Export the raw sensitivity blocks. Default `false`.
+- `save_result::Bool`: Archive the complete result (all sensitivity blocks) in `output_dir` at the end of
+  the run, so the analysis can be repeated without simulating again. Default `true`.
 - `top_k::Int`: Number of top parameters shown in plots. Default `13`.
 
 References
@@ -241,7 +241,7 @@ Base.@kwdef struct ExtendedLocalSensitivityConfig
     resume::Bool                           = false         # Resume analysis from a compatible checkpoint in `output_dir`.
     checkpoint_frequency::Int              = 10            # Save progress every this many work units; 0 disables periodic saves.
     output_dir::String                     = abspath(joinpath(@__DIR__, "..", "..", "..", "..", "..", "results", "extended_local_sensitivity")) # Directory for checkpoints and analysis outputs.
-    save_raw::Bool                         = false         # Export raw per-point sensitivity blocks in addition to summaries.
+    save_result::Bool                      = true          # Archive the complete result at the end of the run for later re-analysis.
     top_k::Int                             = 13            # Number of leading parameters shown in ranking plots.
 end
 

@@ -109,25 +109,6 @@ end
 
 
 """
-    _enforce_integer_params(X, params)
-
-Round and clamp integer parameters in sample matrix `X`.
-"""
-function _enforce_integer_params(X::Matrix{Float64},
-                                  params::Vector{InputParameter})::Matrix{Float64}
-    X_out = copy(X)
-    for (j, p) in enumerate(params)
-        if p.type == :int
-            for i in 1:size(X_out, 2)
-                X_out[j, i] = clamp(round(X_out[j, i]), p.min, p.max)
-            end
-        end
-    end
-    return X_out
-end
-
-
-"""
     sample_to_physical_params(sample, params, base_params)
 
 Map a Sobol sample vector to a `PhysicalParams` object.

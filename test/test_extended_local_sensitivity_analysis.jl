@@ -38,6 +38,13 @@ const ELSA = AlphaPEM.Parametrisation.ExtendedLocalSensitivityAnalysis
     @test_throws ArgumentError ELSA.to_unit(bad, 1.0)
 end
 
+@testset "ExtendedLocalSensitivityAnalysis figure labels" begin
+    PB = AlphaPEM.Parametrisation.Calibration.ParameterBound
+    latex_label = ELSA._parameter_label(PB(:Hmem, 1.0, 2.0, :real, :linear, "", "", "H_{mem}"))
+    @test string(latex_label) == "\$H_{mem}\$"
+    @test ELSA._parameter_label(PB(:Hmem, 1.0, 2.0, :real, :linear, "", "", "")) == "Hmem"
+end
+
 @testset "ExtendedLocalSensitivityAnalysis sensitivity (eq. 7)" begin
     θ_k = [0.3, 0.6, 0.9]
 
@@ -685,6 +692,49 @@ end
     @test all(length(magnitudes) == length(params) for (_, magnitudes) in candidate_updates)
     @test !isfile(joinpath(cfg.output_dir, "extended_local_sensitivity_checkpoint.jld2"))
 
+    # The finished run is archived and can be reloaded and re-analysed without simulating again.
+    archive_path = ELSA.extended_local_result_path(cfg)
+    @test isfile(archive_path)
+    reloaded = ELSA.load_extended_local_sensitivity_result(archive_path)
+    @test reloaded.sensitivities == result.sensitivities
+    @test reloaded.statuses == result.statuses && reloaded.theta == result.theta
+    @test [c.id for c in reloaded.candidates] == [c.id for c in result.candidates]
+    @test [p.name for p in reloaded.params] == [:p1, :p2]
+    analysis_dir = mktempdir()
+    analysis = ELSA.analyze_extended_local_sensitivity(
+        reloaded; output_dir = analysis_dir, figures = false)
+    @test isfile(joinpath(analysis_dir, "collinear_pairs.csv"))
+    @test isfile(joinpath(analysis_dir, "sensitivity_summary.csv"))
+    yaml_summary = AlphaPEM.Parametrisation.ExtendedLocalSensitivityAnalysis.YAML.load_file(
+        analysis.summary_yaml)
+    @test yaml_summary["design"]["n_parameters"] == 2
+    @test yaml_summary["metadata"]["seed"] == result.config.seed
+    @test sort(yaml_summary["selection"]["analysed"]) == ["p1", "p2"]
+    @test length(yaml_summary["metadata"]["config_sha256"]) == 64
+    @test analysis.summary.parameter == [:p1, :p2] && analysis.plots === nothing
+    @test sort(vcat(analysis.selection.selected, analysis.selection.below_threshold)) ==
+          sort(analysis.collinearity_filter.retained)
+    figure_dir = mktempdir()
+    with_figures = ELSA.analyze_extended_local_sensitivity(
+        reloaded; output_dir = figure_dir, interactive_figures = false)
+    @test with_figures.plots !== nothing && isfile(joinpath(figure_dir, "collinearity.pdf"))
+    reanalysis = ELSA.reanalyze_extended_local_sensitivity(
+        ELSA.ExtendedLocalSensitivityConfig(
+            current_density_grid = grid, n_levels = 3, output_dir = figure_dir, psi_th = 0.5);
+        path = archive_path, interactive_figures = false)
+    @test reanalysis.result.config.psi_th == 0.5
+    @test reanalysis.result.sensitivities == result.sensitivities
+    @test_throws ArgumentError ELSA.load_extended_local_sensitivity_result(
+        joinpath(analysis_dir, "collinear_pairs.csv"))
+    @test_throws ArgumentError ELSA.load_extended_local_sensitivity_result(
+        joinpath(analysis_dir, "missing.jld2"))
+    no_archive_cfg = ELSA.ExtendedLocalSensitivityConfig(
+        current_density_grid = grid, n_levels = 3, parallel = false,
+        checkpoint_frequency = 0, save_result = false, output_dir = mktempdir())
+    ELSA.run_local_sensitivity_simulations(records, params, cases, no_archive_cfg;
+                                           simulate_fn = simulate_voltage)
+    @test !isfile(ELSA.extended_local_result_path(no_archive_cfg))
+
     # Current-density summaries can be requested directly from a completed simulation block.
     block_summary = ELSA.summarize_current_density_sensitivities(result, 1, 1)
     @test size(block_summary, 1) == 2 * (1 + length(cfg.current_density_zones))
@@ -755,6 +805,10 @@ end
         checkpoint_frequency = 1,
         output_dir = resume_dir,
     )
+    # A resumed run reuses the screening stored in the checkpoint instead of screening again.
+    @test ELSA.restored_screening_records(resume_cfg) === nothing
+    restored = ELSA.restored_screening_records(resumed_cfg)
+    @test [r.id for r in restored] == [1, 2] && [r.status for r in restored] == [:accepted, :accepted]
     @test ELSA._struct_to_string(resume_cfg.current_density_grid) ==
           ELSA._struct_to_string(resumed_cfg.current_density_grid)
     @test ELSA._struct_to_string(resume_cfg.current_density_zones) ==

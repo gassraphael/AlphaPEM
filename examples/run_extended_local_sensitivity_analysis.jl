@@ -1,18 +1,55 @@
 # -*- coding: utf-8 -*-
 
-# Usage: julia --project=. examples/run_extended_local_sensitivity_analysis.jl
+# run_extended_local_sensitivity_analysis.jl
+#
+# Example script: extended local sensitivity and parameter-subset selection of AlphaPEM.
+#
+# This script only sets the analysis parameters and displays the outcome. The analysis itself is
+# coordinated step by step by `run_extended_local_sensitivity_analysis`
+# (src/alphapem/parametrisation/extended_local_sensitivity_analysis.jl).
+#
+# Long runs:
+#   - A checkpoint is written regularly. If the run is interrupted, set RESUME = true and launch the
+#     script again to continue where it stopped.
+#   - When the simulations are finished, the complete result is archived. Set LOAD_SAVED_RESULT = true
+#     to repeat the analysis (thresholds, figures, selection) without simulating again.
+#
+# Usage:
+#   julia --project=. examples/run_extended_local_sensitivity_analysis.jl
 
 import Pkg
 Pkg.activate(joinpath(@__DIR__, ".."))
 
+# ─────────────────────────────────────────────────────────────────────────────
+# THREADING
+# ─────────────────────────────────────────────────────────────────────────────
+
+const PARALLEL  = true
+const N_THREADS = 0   # 0 → use all available cores
+
+if PARALLEL
+    n_desired = N_THREADS == 0 ? Sys.CPU_THREADS : min(N_THREADS, Sys.CPU_THREADS)
+    if Threads.nthreads() < n_desired
+        julia_bin = joinpath(Sys.BINDIR, "julia")
+        project   = Base.active_project()
+        script    = @__FILE__
+        @info "Re-launching with $n_desired thread(s) (currently $(Threads.nthreads()))..."
+        exit(run(`$julia_bin --threads=$n_desired --project=$project $script $ARGS`).exitcode)
+    end
+end
+
+@info "Running with $(Threads.nthreads()) thread(s)."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# IMPORTS
+# ─────────────────────────────────────────────────────────────────────────────
+
 using AlphaPEM.Application: wait_for_interactive_figures!
 using AlphaPEM.Parametrisation.ExtendedLocalSensitivityAnalysis
-using CSV
-using DataFrames: nrow
 
-# ============================================================
+# ─────────────────────────────────────────────────────────────────────────────
 # CONFIGURATION
-# ============================================================
+# ─────────────────────────────────────────────────────────────────────────────
 
 # Sobol balance is guaranteed for a power-of-two sample size. A non-power-of-two edit is rounded up automatically.
 const N_CANDIDATES = 2^9
@@ -20,6 +57,11 @@ const CURRENT_DENSITY_GRID = Float64[
     0.0, 0.03, 0.05, 0.1, 0.2, 0.6, 1.0, 1.2, 1.5, 1.7, 1.9, 2.1, 2.4, 2.7, 3.0
 ]
 const OPERATING_BOUNDS_OVERRIDES = Dict{Symbol, Tuple{Float64, Float64, Symbol}}()
+
+# Resume an interrupted run from its checkpoint (the screening is not repeated).
+const RESUME = false
+# Skip the simulations: reload the archived result of a previous run and only repeat the analysis.
+const LOAD_SAVED_RESULT = false
 
 cfg = ExtendedLocalSensitivityConfig(
     n_candidates = N_CANDIDATES,                                 # Sobol candidates generated before experimental screening.
@@ -31,6 +73,10 @@ cfg = ExtendedLocalSensitivityConfig(
     sensitivity_threshold = 0.1,                                 # FIGURES AND SUBSET SELECTION: minimum median voltage-sensitivity magnitude for a parameter to count as non-negligible; a collinear pair needs both parameters above it, and a retained parameter must reach it to be selected.
     collinearity_threshold = 0.707,                              # FIGURES: collinearity index above which a pair is highlighted (angle below 45°).
     psi_th = 0.9,                                                # SUBSET SELECTION: median collinearity above which the less sensitive parameter of a pair is removed from the candidates.
+    parallel = PARALLEL,                                         # Run independent simulations concurrently when several Julia threads exist.
+    resume = RESUME,                                             # Continue from the checkpoint of an interrupted run.
+    checkpoint_frequency = 10,                                   # Save the checkpoint every this many finished work units (0 disables it).
+    save_result = true,                                          # Archive the complete result at the end so the analysis can be repeated without simulating.
     screening_datasets = [
         ScreeningDataset(:ZSW_nominal, 2024, :full),             # Candidate must match this experimental polarization curve.
         ScreeningDataset(:ZSW_Pa_1_61_Pc_1_41, 2024, :full),     # Candidate must also match this curve.
@@ -38,112 +84,44 @@ cfg = ExtendedLocalSensitivityConfig(
 )
 validate_config(cfg)
 
-# ============================================================
-# PARAMETER SELECTION AND SOBOL DESIGN
-# ============================================================
+# ─────────────────────────────────────────────────────────────────────────────
+# RUN
+# ─────────────────────────────────────────────────────────────────────────────
 
-# Get the analysed physical parameters; integer parameters excluded by policy are reported separately.
-params, fixed_parameters = select_parameters(cfg)
+println("="^72)
+println("  AlphaPEM — Extended Local Sensitivity Analysis")
+println("="^72)
 
-# Use the selected fuel cell's nominal parameters when an explicit nominal candidate is requested.
-base_fc = AlphaPEM.Fuelcell.create_fuelcell(
-    cfg.fuel_cell_type, cfg.voltage_zone; year = cfg.year, nb_gc = cfg.nb_gc)
-nominal_unit = cfg.include_nominal ?
-    nominal_unit_point(params, base_fc.physical_parameters) : nothing
+# Either simulate (or resume), or reload the archive and repeat only the analysis.
+outcome = LOAD_SAVED_RESULT ?
+    reanalyze_extended_local_sensitivity(cfg) :
+    run_extended_local_sensitivity_analysis(cfg)
 
-# Generate candidates in the unit hypercube, then map them to the physical parameter bounds.
-unit_design = generate_unit_design(N_CANDIDATES, length(params);
-                                   seed = cfg.seed, nominal_unit = nominal_unit)
-physical_design = unit_design_to_physical(unit_design, params)
+# ─────────────────────────────────────────────────────────────────────────────
+# DISPLAY SUMMARY
+# ─────────────────────────────────────────────────────────────────────────────
 
-# ============================================================
-# CANDIDATE SCREENING
-# ============================================================
-
-# Bind each candidate to real AlphaPEM simulations and classify it against every screening dataset.
-simulate_fn = alphapem_screening_simulator(params, cfg)
-records = screen_candidates(physical_design, cfg.screening_datasets, cfg;
-                            simulate_fn = simulate_fn)
-
-# ============================================================
-# FACTORIAL OPERATING-CASE LIBRARY AND BUDGET
-# ============================================================
-
-# Build all 729 operating cases; the configured common current grid is shared by the later simulations.
-accepted_count = count(r -> r.status == :accepted, records)
-operating_cases = generate_operating_case_library(cfg)
-# Estimate future local-sensitivity evaluations; this is a warning only and never reduces the library.
-projected_local_evaluations =
-    accepted_count * length(params) * cfg.n_levels * length(operating_cases)
-
-@info "Projected local-sensitivity run count; all 729 operating cases will be used." accepted_parameter_points = accepted_count parameter_count = length(params) finite_difference_levels = cfg.n_levels operating_case_count = length(operating_cases) projected_simulations = projected_local_evaluations
-
-# ============================================================
-# LOCAL-SENSITIVITY SIMULATION ENGINE
-# ============================================================
-
-# Create every figure and serve them together before simulations start; callbacks fill them as
-# results arrive. The convergence figure gets up to six cumulative states, the voltage figure one
-# gray point set per finished candidate, and the collinearity figure is drawn at the end.
-# Each figure also overwrites one image in the output directory after every dynamic update, so the
-# file always shows the latest state and ends as the final figure.
-convergence_plot = create_sensitivity_convergence_plot(
-    params, accepted_count;
-    sensitivity_threshold = cfg.sensitivity_threshold,
-    autosave = FigureAutosave(cfg.output_dir, "convergence"))
-voltage_plot = create_voltage_sensitivity_plot(
-    params;
-    sensitivity_threshold = cfg.sensitivity_threshold,
-    autosave = FigureAutosave(cfg.output_dir, "voltage_sensitivity"))
-collinearity_plot = create_collinearity_plot(
-    params; autosave = FigureAutosave(cfg.output_dir, "collinearity"))
-serve_sensitivity_plots!(convergence_plot, voltage_plot, collinearity_plot)
-# Run every accepted candidate against every operating case; the engine checkpoints completed blocks.
-local_result = run_local_sensitivity_simulations(
-    records, params, operating_cases, cfg;
-    on_convergence_update = snapshot ->
-        update_sensitivity_convergence_plot!(convergence_plot, snapshot),
-    on_candidate_update = (_, magnitudes) ->
-        add_voltage_sensitivity_candidate!(voltage_plot, magnitudes),
-)
-# Medians are drawn once, from every accepted candidate, after the run is complete.
-final_snapshot = convergence_snapshot(
-    local_result.sensitivities, params, length(local_result.candidates), 1)
-finish_voltage_sensitivity_plot!(voltage_plot, final_snapshot.median_magnitude)
-
-# Collinearity is summarized over all candidates, then drawn and exported as a pair list.
-collinearity = collinearity_summary(local_result)
-finish_collinearity_plot!(
-    collinearity_plot, collinearity.median_collinearity, collinearity.sensitivity_median;
-    collinearity_threshold = cfg.collinearity_threshold,
-    sensitivity_threshold = cfg.sensitivity_threshold)
-pairs = collinear_pairs(
-    collinearity, params;
-    collinearity_threshold = cfg.collinearity_threshold,
-    sensitivity_threshold = cfg.sensitivity_threshold)
-mkpath(cfg.output_dir)
-CSV.write(joinpath(cfg.output_dir, "collinear_pairs.csv"), pairs)
-@info "Collinear parameter pairs" count = nrow(pairs)
-
-# Drop the weaker parameter of every pair whose median collinearity exceeds psi_th.
-collinearity_filter = filter_collinear_parameters(
-    collinearity, params; psi_th = cfg.psi_th)
-@info "Collinearity filter" psi_th = cfg.psi_th retained = length(collinearity_filter.retained) removed_parameters = collinearity_filter.removed.removed retained_parameters = collinearity_filter.retained
-
-# Parameter-subset selection, sensitivity threshold: keep the retained parameters the voltage reacts to
-# (simplified selection, not the method of Goshtasbi et al.).
-selection = select_parameters_by_sensitivity(
-    collinearity, params, collinearity_filter.retained;
-    sensitivity_threshold = cfg.sensitivity_threshold)
-@info "Selected parameter subset" sensitivity_threshold = cfg.sensitivity_threshold selected_count = length(selection.selected) selected = selection.selected below_threshold = selection.below_threshold
-@info "Local sensitivity simulation complete" candidate_count = length(local_result.candidates) case_count = length(local_result.operating_cases) block_status_counts = Dict(status => count(==(status), local_result.statuses) for status in (:complete, :partial, :invalid)) execution_time_s = round(local_result.execution_time; digits = 2)
-
-# ============================================================
-# RUN SUMMARY
-# ============================================================
-
-println("Accepted $accepted_count / $(length(records)) candidates.")
-println("Fixed parameters: $(join(string.(fixed_parameters), ", "))")
+result, analysis = outcome.result, outcome.analysis
+println()
+println("─"^72)
+println("  Results summary")
+println("─"^72)
+println("  Accepted candidates : $(length(result.candidates)) / $(length(outcome.records))")
+println("  Operating cases     : $(length(result.operating_cases))")
+println("  Execution time      : $(round(result.execution_time / 3600; digits = 2)) h")
+println("  Output directory    : $(cfg.output_dir)")
+isempty(outcome.fixed_parameters) ||
+    println("  Fixed parameters    : $(join(string.(outcome.fixed_parameters), ", "))")
+println()
+println("  Collinear pairs above thresholds : $(size(analysis.pairs, 1))")
+println("  Removed by the collinearity filter (psi_th = $(cfg.psi_th)):")
+for row in eachrow(analysis.collinearity_filter.removed)
+    println("    $(rpad(row.removed, 16)) collinear with $(rpad(row.kept, 16)) (psi = $(round(row.psi_median; digits = 2)))")
+end
+println()
+println("  Selected parameters (median sensitivity >= $(cfg.sensitivity_threshold)): $(length(analysis.selection.selected))")
+println("    ", join(string.(analysis.selection.selected), ", "))
+println("="^72)
 
 # In scripts, keep the browser page alive after all figures are complete.
 wait_for_interactive_figures!(

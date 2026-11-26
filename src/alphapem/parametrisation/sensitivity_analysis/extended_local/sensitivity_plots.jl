@@ -20,10 +20,20 @@ const SENSITIVITY_INTERPRETATION_WARNING =
 # SHARED PLOTTING HELPERS
 # ============================================================
 
-# Build a log-scale axis whose x ticks are the analysed parameter names.
+# Tick label of a parameter: its LaTeX symbol rendered by Makie, or its plain name without symbol.
+function _parameter_label(parameter::ParameterBound)
+    if isempty(parameter.latex) || parameter.latex == string(parameter.name)
+        return string(parameter.name)
+    end
+    return WGLMakie.Makie.LaTeXString("\$" * parameter.latex * "\$")
+end
+
+
+# Build a log-scale axis whose x ticks are the analysed parameter labels.
 function _parameter_axis(
     cell,
-    parameter_names::Vector{Symbol};
+    parameter_names::Vector{Symbol},
+    parameter_labels::AbstractVector;
     title::String,
     ylabel::String,
     xlabel::String = "",
@@ -38,7 +48,7 @@ function _parameter_axis(
         ylabel,
         limits,
         yscale = logarithmic ? log10 : identity,
-        xticks = (positions, string.(parameter_names)),
+        xticks = (positions, parameter_labels),
         xticklabelrotation = pi / 2,
     )
 end
@@ -190,13 +200,14 @@ function create_sensitivity_convergence_plot(
         throw(ArgumentError("sensitivity_threshold must be finite and non-negative"))
     sample_counts = convergence_sample_counts(n_samples)
     parameter_names = [parameter.name for parameter in params]
+    parameter_labels = [_parameter_label(parameter) for parameter in params]
     positions = Float64.(eachindex(parameter_names))
 
     # The magnitude panels use a logarithmic y-axis, as the sensitivities span several orders
     # of magnitude.
     figure = WGLMakie.Figure(size = (1500, 1250))
     median_axis = _parameter_axis(
-        figure[1, 1], parameter_names;
+        figure[1, 1], parameter_names, parameter_labels;
         title = "Convergence of voltage-sensitivity median",
         ylabel = "Median sensitivity magnitude")
     # A zero threshold cannot be represented on this logarithmic axis.
@@ -204,11 +215,11 @@ function create_sensitivity_convergence_plot(
         WGLMakie.hlines!(median_axis, [sensitivity_threshold];
                          color = :black, linestyle = :dot, linewidth = 1.5)
     deviation_axis = _parameter_axis(
-        figure[2, 1], parameter_names;
+        figure[2, 1], parameter_names, parameter_labels;
         title = "Convergence of voltage-sensitivity standard deviation",
         ylabel = "Sensitivity standard deviation")
     coverage_axis = _parameter_axis(
-        figure[3, 1], parameter_names;
+        figure[3, 1], parameter_names, parameter_labels;
         title = "Convergence of median measurement coverage",
         xlabel = "Parameter", ylabel = "Median coverage",
         logarithmic = false, limits = (nothing, (0.0, 1.05)))
@@ -373,11 +384,12 @@ function create_voltage_sensitivity_plot(
     isfinite(sensitivity_threshold) && sensitivity_threshold >= 0 ||
         throw(ArgumentError("sensitivity_threshold must be finite and non-negative"))
     parameter_names = [parameter.name for parameter in params]
+    parameter_labels = [_parameter_label(parameter) for parameter in params]
     positions = Float64.(eachindex(parameter_names))
 
     figure = WGLMakie.Figure(size = (1500, 800))
     axis = _parameter_axis(
-        figure[1, 1], parameter_names;
+        figure[1, 1], parameter_names, parameter_labels;
         title = "Voltage sensitivity",
         xlabel = "Parameter", ylabel = "Sensitivity magnitude")
     # A zero threshold cannot be represented on this logarithmic axis.
@@ -563,7 +575,7 @@ function create_collinearity_plot(
     parameter_names = [parameter.name for parameter in params]
     n_params = length(parameter_names)
     positions = collect(1:n_params)
-    labels = string.(parameter_names)
+    labels = [_parameter_label(parameter) for parameter in params]
 
     figure = WGLMakie.Figure(size = (1100, 1250))
     axis = WGLMakie.Axis(
@@ -685,3 +697,120 @@ function serve_sensitivity_plots!(plots...)::String
         names = [descriptions[typeof(plot)][1] for plot in plots],
         titles = [descriptions[typeof(plot)][2] for plot in plots])
 end
+
+
+# ============================================================
+# COMPLETE SET OF FIGURES
+# ============================================================
+
+"""
+    create_sensitivity_plots(params, n_candidates, cfg; output_dir=cfg.output_dir,
+                             interactive=true) -> NamedTuple
+
+Create the convergence, voltage-sensitivity and collinearity figures of an analysis.
+
+Each figure overwrites a PDF in `output_dir` after every update. When `interactive` is `true`, the
+figures are served together in the browser.
+
+Parameters
+----------
+params : Vector{ParameterBound}
+    Analysed parameters.
+n_candidates : Int
+    Number of accepted candidates.
+cfg : ExtendedLocalSensitivityConfig
+    Configuration providing `sensitivity_threshold`.
+output_dir : AbstractString, optional
+    Directory of the PDF autosaves.
+interactive : Bool, optional
+    Serve the figures in the browser. Default is `true`.
+
+Returns
+-------
+NamedTuple
+    Figures `convergence`, `voltage` and `collinearity`.
+"""
+function create_sensitivity_plots(
+    params::Vector{ParameterBound},
+    n_candidates::Int,
+    cfg::ExtendedLocalSensitivityConfig;
+    output_dir::AbstractString = cfg.output_dir,
+    interactive::Bool = true,
+)
+    plots = (
+        convergence = create_sensitivity_convergence_plot(
+            params, n_candidates; sensitivity_threshold = cfg.sensitivity_threshold,
+            autosave = FigureAutosave(output_dir, "convergence")),
+        voltage = create_voltage_sensitivity_plot(
+            params; sensitivity_threshold = cfg.sensitivity_threshold,
+            autosave = FigureAutosave(output_dir, "voltage_sensitivity")),
+        collinearity = create_collinearity_plot(
+            params; autosave = FigureAutosave(output_dir, "collinearity")),
+    )
+    interactive && serve_sensitivity_plots!(plots.convergence, plots.voltage, plots.collinearity)
+    return plots
+end
+
+
+"""
+    fill_sensitivity_plots!(plots, result) -> Nothing
+
+Draw the convergence states and per-candidate points of a finished result.
+
+This is what the simulation callbacks do live; it lets a reloaded result produce the same figures.
+
+Parameters
+----------
+plots : NamedTuple
+    Figures from [`create_sensitivity_plots`](@ref).
+result : ExtendedLocalSimulationResult
+    Finished sensitivity simulations.
+
+Returns
+-------
+Nothing
+"""
+function fill_sensitivity_plots!(plots, result)::Nothing
+    n_candidates = length(result.candidates)
+    for (state, count) in enumerate(convergence_sample_counts(n_candidates))
+        update_sensitivity_convergence_plot!(
+            plots.convergence, convergence_snapshot(result.sensitivities, result.params, count, state))
+    end
+    for candidate_index in 1:n_candidates
+        add_voltage_sensitivity_candidate!(
+            plots.voltage, candidate_rms_magnitudes(result.sensitivities, result.params, candidate_index)[1])
+    end
+    return nothing
+end
+
+
+"""
+    finish_sensitivity_plots!(plots, result, collinearity) -> Nothing
+
+Add the elements that need every candidate: the median sensitivities and the collinearity matrix.
+
+Parameters
+----------
+plots : NamedTuple
+    Figures from [`create_sensitivity_plots`](@ref).
+result : ExtendedLocalSimulationResult
+    Finished sensitivity simulations.
+collinearity : CollinearitySummary
+    Result of [`collinearity_summary`](@ref).
+
+Returns
+-------
+Nothing
+"""
+function finish_sensitivity_plots!(plots, result, collinearity)::Nothing
+    cfg = result.config
+    final_snapshot = convergence_snapshot(
+        result.sensitivities, result.params, length(result.candidates), 1)
+    finish_voltage_sensitivity_plot!(plots.voltage, final_snapshot.median_magnitude)
+    finish_collinearity_plot!(
+        plots.collinearity, collinearity.median_collinearity, collinearity.sensitivity_median;
+        collinearity_threshold = cfg.collinearity_threshold,
+        sensitivity_threshold = cfg.sensitivity_threshold)
+    return nothing
+end
+
