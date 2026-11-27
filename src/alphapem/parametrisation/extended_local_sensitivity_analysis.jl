@@ -26,9 +26,6 @@ blocks and their validity masks.
   pem fuel cell models—part i: Sensitivity analysis and parameter identifiability,"
   Journal of The Electrochemical Society, vol. 167, p. 044504, Mar. 2020.
   https://doi.org/10.1149/1945-7111/ab7091.
-
-The module also hosts the simulation-infrastructure helpers shared with
-`SobolSensitivityAnalysis` (warning logger, hashing, checkpoint I/O, parameter mapping), stored in `sensitivity_analysis/shared/`.
 """
 module ExtendedLocalSensitivityAnalysis
 
@@ -60,25 +57,24 @@ import WGLMakie
 using ..Calibration
 using ..Calibration: ParameterBound, ParameterBounds
 
-include(joinpath(@__DIR__, "sensitivity_analysis", "shared", "warning_logger.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "shared", "hashing.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "shared", "checkpoint_io.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "shared", "parameter_mapping.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "types.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "current_density_summaries.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "operating_cases.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "outputs.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "parameters.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sensitivity.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "statistics.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sampling.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "convergence.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sensitivity_plots.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "sensitivity_engine.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "collinearity.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "multi_output.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "parameter_selection.jl"))
-include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "export.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "definitions", "types.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "definitions", "current_density_summaries.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "definitions", "operating_cases.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "definitions", "outputs.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "definitions", "parameters.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "results", "hashing.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "results", "checkpoint.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "simulation", "warning_logger.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "simulation", "sensitivity.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "analysis", "statistics.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "simulation", "sampling.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "analysis", "convergence.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "plots", "sensitivity_plots.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "simulation", "sensitivity_engine.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "analysis", "collinearity.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "analysis", "multi_output.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "analysis", "parameter_selection.jl"))
+include(joinpath(@__DIR__, "sensitivity_analysis", "extended_local", "results", "export.jl"))
 
 export ExtendedLocalSensitivityConfig,
        ExtendedLocalSensitivityResult,

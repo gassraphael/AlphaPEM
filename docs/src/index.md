@@ -17,7 +17,6 @@ model, it accurately captures internal states and voltage dynamics across all op
 - **Flexible Configuration**: Support for co-flow and counter-flow gas channels, multiple fuel cell models.
 - **Characterization**: Generate polarization curves and electrochemical impedance spectroscopy (EIS) measurements.
 - **Automatic Calibration**: Genetic algorithm-based parameter identification for real fuel cell systems.
-- **Global Sensitivity Analysis**: Variance-based Sobol analysis (S1/ST/S2) per polarization region, directly on AlphaPEM simulations.
 - **Extended Local Sensitivity Analysis**: Local sensitivities at many parameter sets, collinearity analysis and parameter-subset selection, with checkpoint and reusable result archive.
 - **Modern Interface**: Web-based graphical interface (V2.0+) or programmatic access via command line interface (CLI).
 
@@ -47,7 +46,7 @@ julia --project=. examples/run_step.jl
 
 - **[Getting Started](getting_started/installation.md)** — Complete installation guide and initial setup.
 - **[User Guide](user_guide/web_interface.md)** — How to use the web interface, CLI examples, and workflows.
-- **[Advanced Topics](advanced/calibration.md)** — Parameter calibration, validity analysis, Sobol and extended local sensitivity analysis.
+- **[Advanced Topics](advanced/calibration.md)** — Parameter calibration, validity analysis, extended local sensitivity analysis.
 - **[API Reference](api/configuration.md)** — Complete API documentation with all functions and types.
 - **[About](about/roadmap.md)** — Project roadmap and publications.
 

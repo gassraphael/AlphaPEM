@@ -317,10 +317,6 @@ end
     @test ELSA._hash_sample([1.0, 2.0]) == ELSA._hash_sample([1.0, 2.0])
     @test ELSA._hash_sample([1.0, 2.0]) != ELSA._hash_sample([1.0, 2.1])
 
-    # Missing-sample bookkeeping
-    @test ELSA._find_missing_sample_ids(nothing, 3) == [1, 2, 3]
-    @test ELSA._find_missing_sample_ids(DataFrame(sample_id = [1, 3]), 4) == [2, 4]
-
     # Atomic checkpoint round trip, hash mismatch and removal
     path = joinpath(mktempdir(), "ckpt.jld2")
     ELSA._save_jld2_atomic(path, "Test"; config_hash = "abc", value = 42)
@@ -341,79 +337,6 @@ end
     @test counters[:oxygen_starvation][] == 1
     @test counters[:voltage_limit][] == 1
     @test counters[:max_runtime][] == 1
-end
-
-@testset "Parametrisation.SobolSensitivityAnalysis" begin
-    using AlphaPEM.Parametrisation.SobolSensitivityAnalysis
-
-    # Region construction
-    regions = build_regions((0.4, 1.6))
-    @test length(regions) == 3
-    @test regions[1].name == :activation
-    @test regions[2].name == :ohmic
-    @test regions[3].name == :mass_transport
-
-    # Regional AUC
-    ifc = [0.0, 0.2, 0.5, 1.0, 1.5, 2.0, 2.5]
-    Ucell = [1.0, 0.9, 0.8, 0.7, 0.6, 0.4, 0.1]
-    aucs = compute_regional_aucs(ifc, Ucell, regions)
-    @test length(aucs) == 3
-    @test all(aucs .>= 0.0)
-
-    # Input parameter construction
-    cfg = SobolAnalysisConfig(
-        fuel_cell_type = :ZSW_nominal,
-        voltage_zone = :before_voltage_drop,
-        N = 4,
-        include_operating_conditions = true,
-    )
-    params = build_input_parameters(cfg)
-    @test length(params) > 0
-    @test all(p -> p.source in (:physical, :operating), params)
-
-    # Excluded operating conditions
-    cfg_excl = SobolAnalysisConfig(
-        fuel_cell_type = :ZSW_nominal,
-        voltage_zone = :before_voltage_drop,
-        N = 4,
-        include_operating_conditions = true,
-        excluded_operating_conditions = [:Sa, :Sc],
-    )
-    params_excl = build_input_parameters(cfg_excl)
-    @test :Sa ∉ [p.name for p in params_excl]
-    @test :Sc ∉ [p.name for p in params_excl]
-    @test :T_des ∈ [p.name for p in params_excl]
-
-    # Sobol design matrices
-    A, B = generate_sobol_design_matrices(cfg, params)
-    @test size(A, 1) == length(params)
-    @test size(A, 2) == cfg.N
-    @test size(B) == size(A)
-
-    # Operating condition validation
-    oc = AlphaPEM.Config.OperatingConditions()
-    @test is_valid_operating_conditions(oc)
-
-    # Tiny end-to-end Sobol analysis (very few samples, no second order)
-    cfg_tiny = SobolAnalysisConfig(
-        fuel_cell_type = :ZSW_nominal,
-        year = 2024,
-        voltage_zone = :before_voltage_drop,
-        N = 2,
-        second_order = false,
-        include_operating_conditions = false,
-        nb_gc = 1,
-        parallel = false,
-        max_run_time_s = 30.0,
-        output_dir = mktempdir(),
-        save_curves = false,
-    )
-    result = run_sobol_analysis(cfg_tiny)
-    @test result isa SobolAnalysisResult
-    @test length(result.regions) == 3
-    @test haskey(result.sobol_indices, :activation)
-    @test haskey(result.sobol_indices, :ohmic)
-    @test haskey(result.sobol_indices, :mass_transport)
 end
 
 @testset "Parametrisation.Calibration" begin

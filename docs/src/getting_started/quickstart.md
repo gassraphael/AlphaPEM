@@ -48,9 +48,6 @@ julia --project=. examples/run_polarization.jl
 
 # Electrochemical impedance spectroscopy
 julia --project=. examples/run_EIS.jl
-
-# Sobol global sensitivity analysis
-julia --project=. examples/run_sobol_sensitivity_analysis.jl
 ```
 
 Results are saved to the `results/` directory.
@@ -71,7 +68,7 @@ Key configuration fields:
 | `type_fuel_cell` | `:ZSW_nominal`, `:ZSW_Pa_1_61_Pc_1_41`, `:EH_nominal`, etc. | Select fuel cell model |
 | `type_current` | `StepParams(...)`, `PolarizationParams(...)`, `EISParams(...)` | Define current profile |
 | `voltage_zone` | `:before_voltage_drop`, `:full` | Include voltage drop or not |
-| `region_thresholds` | `(0.4, 1.6)` | Current-density thresholds (A/cm²) for activation / ohmic / mass-transport regions (Sobol analysis) |
+| `region_thresholds` | `(0.4, 1.6)` | Current-density thresholds (A/cm²) for activation / ohmic / mass-transport regions |
 | `type_auxiliary` | `:no_auxiliary`, `:forced_convective_cathode_...` | Auxiliary equipment |
 | `type_purge` | `:no_purge`, `:constant_purge`, `:periodic_purge` | Purge strategy |
 
@@ -79,7 +76,7 @@ Key configuration fields:
 
 - **Full Installation**: See [Installation Guide](installation.md) for optional features
 - **Web Interface**: Explore the [Web Interface Guide](../user_guide/web_interface.md)
-- **Advanced Topics**: Learn about [Parameter Calibration](../advanced/calibration.md) or [Sobol Sensitivity Analysis](../advanced/sobol_sensitivity_analysis.md)
+- **Advanced Topics**: Learn about [Parameter Calibration](../advanced/calibration.md)
 
 ## Troubleshooting quick reference
 

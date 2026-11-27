@@ -451,7 +451,7 @@ end
 """
     default_operating_condition_constraints()
 
-Return the default set of operating-condition constraints used during Sobol sampling.
+Return the default set of operating-condition constraints used during sampling.
 
 Default constraints:
 - `Pc_des >= Pa_des - 0.5e5` (cathode pressure is at most 0.5e5 Pa below anode pressure)

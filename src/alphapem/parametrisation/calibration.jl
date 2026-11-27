@@ -27,7 +27,7 @@ import AlphaPEM.Core.Models: AlphaPEM, simulate_model!, _polarization_points_cal
 export CalibrationConfig,
        CalibrationResult,
        calibrate,
-       # Shared parametrisation utilities used by ValidParameterRegion and SobolSensitivityAnalysis
+       # Shared parametrisation utilities used by ValidParameterRegion
        ParameterBound,
        ParameterBounds,
        SamplingConfig,

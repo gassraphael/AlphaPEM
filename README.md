@@ -32,7 +32,6 @@ email so that we may potentially share these latest advancements.
 - [Major updates](#major-updates)
 - [Work in progress](#work-in-progress)
 - [Valid parameter region analysis](#valid-parameter-region-analysis)
-- [Sobol global sensitivity analysis](#sobol-global-sensitivity-analysis)
 - [Extended local sensitivity analysis](#extended-local-sensitivity-analysis)
 - [Roadmap](#roadmap)
 - [Related publications](#related-publications) 
@@ -211,7 +210,6 @@ and configuration, beyond what the GUI offers.
 | `run_EIS.jl` | Generates an EIS curve <br/>                                                                                                                                                            |
 | `run_calibration.jl` | Calibrates the undetermined physical parameters of the model via Genetic Algorithms.                                                                                                    |
 | `run_parameter_validity.jl` | Identifies the valid parameter region via LHS sampling, batch simulation and IRD methods (PRIM, MaxBox). A conservative epsilon pre-restriction is applied automatically to keep `epsilon_carb`, `epsilon_mc` and `epsilon_cl` in `[0,1]`; IRD requires the R + IRD package ([installation step 4](#installation-from-source))* |
-| `run_sobol_sensitivity_analysis.jl` | Runs a variance-based global sensitivity analysis (Sobol S1/ST/S2) directly on AlphaPEM simulations, per polarization region.                                                            |
 | `run_extended_local_sensitivity_analysis.jl` | Runs a local sensitivity analysis at many parameter sets (Goshtasbi et al.), analyses collinearity and selects the parameters to calibrate. Resumable from a checkpoint; the final result is archived for repeated analysis. |
 | `plot_currents.jl` | Plots the current density profiles                                                                                                                                                      |
 
@@ -316,39 +314,10 @@ The PRIM and MaxBox algorithms are provided by the **IRD package** (Interpretabl
 > Conference paper: <https://link.springer.com/chapter/10.1007/978-3-031-43418-1_29>.
 
 
-# Sobol global sensitivity analysis
-
-A sub-system (`Parametrisation.SobolSensitivityAnalysis`) performs variance-based global sensitivity analysis
-directly on AlphaPEM simulations. It quantifies how each undetermined physical parameter and each operating 
-condition influences the polarization curve in three characteristic regions: activation, ohmic, and mass transport.
-
-## Workflow
-
-| Step | Action |
-|------|--------|
-| **1** | Define the input parameters: undetermined physical parameters plus optional operating conditions. |
-| **2** | Generate two Sobol quasi-random design matrices `A` and `B` and fuse them into the full design required by the Sobol estimator. |
-| **3** | Run AlphaPEM for every column of the fused design (multi-threaded). |
-| **4** | Extract the polarization curve for each simulation and compute the area under the curve (AUC) per region. |
-| **5** | Impute missing curves with a K-Nearest Neighbors approach in normalized parameter space. |
-| **6** | Compute first-order (`S1`), total-order (`ST`), and optional second-order (`S2`) Sobol indices with bootstrapped confidence intervals. |
-| **7** | Export CSV tables, a YAML summary, and bar/ranking plots. |
-
-## Credits
-
-This pipeline is adapted from the internship projects of master's students in statistics and data science:
-
-> **Sensitivity Analysis and Surrogate Modeling of PEM Fuel Cells**  
-> Nathaly Vergel Serrano, Dejvis Toptani, Camila Bermudez Valderrama,  
-> From the Department of Statistics in the University of Munich,
-> Supervised by Dr. Giuseppe Casalicchio and Fiona Ewald,  
-> In collaboration with Luis Winkler (ZSW Ulm) and Prof. Herbert Palm (UAS Munich),
-> Repository: <https://github.com/nathaly-vergel/Official-Sensitivity-Analysis-and-Surrogate-Modeling-of-PEM-Fuel-Cells>.
-
 # Extended local sensitivity analysis
 
 A sub-system (`Parametrisation.ExtendedLocalSensitivityAnalysis`) evaluates normalised local sensitivities
-of the voltage at many parameter sets drawn with a Sobol sequence, for a factorial library of operating
+of the voltage at many parameter sets drawn with a Sobol quasi-random sequence, for a factorial library of operating
 conditions. It analyses their magnitude and collinearity, then selects the parameters to calibrate.
 `run_extended_local_sensitivity_analysis` coordinates the steps; the run can be resumed from a checkpoint and the
 complete result is archived so that the analysis can be repeated without simulating again

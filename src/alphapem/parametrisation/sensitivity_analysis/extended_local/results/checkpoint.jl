@@ -76,33 +76,6 @@ end
 
 
 """
-    _find_missing_sample_ids(df_curves, n_total)
-
-Find sample IDs that have not yet been attempted.
-
-A sample is considered complete as soon as it has a row in `df_curves`.
-
-Parameters
-----------
-df_curves : DataFrame or nothing
-    Existing curve results; `nothing` means no samples have been attempted.
-n_total : Int
-    Total number of sample IDs.
-
-Returns
--------
-Vector{Int}
-    IDs in `1:n_total` that are absent from `df_curves`.
-"""
-function _find_missing_sample_ids(df_curves::DataFrame, n_total::Int)::Vector{Int}
-    completed = Set{Int}(df_curves.sample_id)
-    return Int[i for i in 1:n_total if !(i in completed)]
-end
-
-_find_missing_sample_ids(::Nothing, n_total::Int)::Vector{Int} = collect(1:n_total)
-
-
-"""
     _remove_checkpoint(path)
 
 Remove a checkpoint file if it exists.

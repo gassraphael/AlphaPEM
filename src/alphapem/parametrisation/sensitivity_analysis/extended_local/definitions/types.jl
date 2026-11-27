@@ -240,7 +240,7 @@ Base.@kwdef struct ExtendedLocalSensitivityConfig
     max_run_time_s::Float64                = 120.0         # Wall-clock limit for one simulation run (s).
     resume::Bool                           = false         # Resume analysis from a compatible checkpoint in `output_dir`.
     checkpoint_frequency::Int              = 10            # Save progress every this many work units; 0 disables periodic saves.
-    output_dir::String                     = abspath(joinpath(@__DIR__, "..", "..", "..", "..", "..", "results", "extended_local_sensitivity")) # Directory for checkpoints and analysis outputs.
+    output_dir::String                     = abspath(joinpath(@__DIR__, "..", "..", "..", "..", "..", "..", "results", "extended_local_sensitivity")) # Directory for checkpoints and analysis outputs.
     save_result::Bool                      = true          # Archive the complete result at the end of the run for later re-analysis.
     top_k::Int                             = 13            # Number of leading parameters shown in ranking plots.
 end

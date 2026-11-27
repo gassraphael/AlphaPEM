@@ -193,3 +193,31 @@ function from_unit(p::ParameterBound, u; round_int::Bool = false)
     # Round only when requested for an integer-valued parameter
     return (round_int && p.type == :int) ? round.(θ) : θ
 end
+
+
+"""
+    _physical_params_with_overrides(base, params, values) -> PhysicalParams
+
+Return `base` with the analysed parameters replaced by `values`, all other fields unchanged.
+
+Parameters
+----------
+base : PhysicalParams
+    Nominal physical parameters.
+params : AbstractVector
+    Analysed parameters, each with the fields `name` and `type`.
+values : AbstractVector{<:Real}
+    Physical values in the order of `params`; integer parameters are rounded.
+
+Returns
+-------
+PhysicalParams
+    New parameter set.
+"""
+function _physical_params_with_overrides(base::PhysicalParams, params::AbstractVector,
+                                         values::AbstractVector{<:Real})::PhysicalParams
+    base_fields = (; (f => getfield(base, f) for f in fieldnames(PhysicalParams))...)
+    overrides = (; (p.name => (p.type == :int ? Int(round(v)) : Float64(v))
+                    for (p, v) in zip(params, values))...)
+    return PhysicalParams(; merge(base_fields, overrides)...)
+end

@@ -12,11 +12,24 @@ directly over the full prior ranges is expensive and brittle, because a large
 fraction of that space produces non-physical polarization curves.
 The recommended approach is therefore:
 
-**Stage 1 — Restrict the space (ValidParameterRegion)**
+**Stage 1 — Select the parameters to calibrate (ExtendedLocalSensitivityAnalysis)**
 
-Run `run_validity_analysis` to identify a compact hyperbox where AlphaPEM
+Run `run_extended_local_sensitivity_analysis` to evaluate normalised local sensitivities at many
+Sobol-sampled parameter sets, then analyse their magnitude and collinearity to keep only the
+identifiable parameters. See `examples/run_extended_local_sensitivity_analysis.jl`:
+
+```julia
+using AlphaPEM.Parametrisation.ExtendedLocalSensitivityAnalysis
+
+cfg = ExtendedLocalSensitivityConfig()
+output = run_extended_local_sensitivity_analysis(cfg)
+```
+
+**Stage 2 — Restrict the space of the selected parameters (ValidParameterRegion)**
+
+Using the parameters selected in Stage 1, run `run_validity_analysis` to identify a compact hyperbox where AlphaPEM
 consistently produces physically meaningful curves.  Results are saved as a
-YAML file that can be reused in Stage 2:
+YAML file that can be reused in Stage 3:
 
 ```julia
 using AlphaPEM.Parametrisation.ValidParameterRegion
@@ -38,27 +51,9 @@ prim_cfg = PRIMConfig(
 result = run_validity_analysis(cfg, prim_cfg)  # also generates restricted_bounds_PRIM.yaml
 ```
 
-**Stage 2 — Understand parameter influence (SobolSensitivityAnalysis)**
+**Stage 3 — Calibrate within the restricted space** *(calibration module)*
 
-Run a variance-based global sensitivity analysis directly on AlphaPEM simulations
-to identify which parameters drive the polarization curve in the activation,
-ohmic, and mass-transport regions. See `examples/run_sobol_sensitivity_analysis.jl`:
-
-```julia
-using AlphaPEM.Parametrisation.SobolSensitivityAnalysis
-
-cfg = SobolAnalysisConfig(
-    fuel_cell_type = :ZSW_nominal,
-    year           = 2024,
-    voltage_zone   = :full,
-    N              = 1024,
-)
-result = run_sobol_analysis(cfg)
-```
-
-**Stage 3 — Calibrate within the restricted space** *(calibration module, work in progress)*
-
-Load the restricted bounds produced in Stage 1 and pass them to the genetic-algorithm
+Load the restricted bounds produced in Stage 2 for the parameters selected in Stage 1 and pass them to the genetic-algorithm
 calibration, focusing the search on the high-validity region:
 
 ```julia
@@ -75,11 +70,11 @@ Identifies the region of the undetermined-parameter space where AlphaPEM produce
 physically meaningful polarization curves, using Latin Hypercube Sampling, batch
 simulation, and the PRIM/IRD method.  See `examples/run_parameter_validity.jl`.
 
-### Sobol Sensitivity Analysis (`SobolSensitivityAnalysis`)
-Variance-based global sensitivity analysis (S1, ST, optional S2) using Sobol
-sampling and direct AlphaPEM simulation. Outputs are aggregated per polarization
-region (activation, ohmic, mass transport) as area-under-the-curve metrics.
-See `examples/run_sobol_sensitivity_analysis.jl`.
+### Extended Local Sensitivity Analysis (`ExtendedLocalSensitivityAnalysis`)
+Local sensitivity and practical identifiability analysis: normalised finite-difference sensitivities
+evaluated at many Sobol-sampled parameter sets over a library of operating cases, followed by a
+collinearity analysis and parameter selection. Runs are resumable from a checkpoint.
+See `examples/run_extended_local_sensitivity_analysis.jl`.
 
 ### Calibration (`Calibration`)
 GA-based parameter calibration system in pure Julia.
@@ -91,7 +86,7 @@ ohmic-drop slope) from cyclic voltammetry data. See `examples/run_cv_extraction.
 ## Exports
 
 - `ValidParameterRegion` — validity analysis module
-- `SobolSensitivityAnalysis` — Sobol global sensitivity analysis module
+- `ExtendedLocalSensitivityAnalysis` — extended local sensitivity and identifiability module
 - `Calibration` — genetic algorithm calibration module
 - `CVExtraction` — CV parameter extraction module
 """
@@ -100,13 +95,11 @@ module Parametrisation
 include("calibration.jl")
 include("valid_parameter_region.jl")
 include("extended_local_sensitivity_analysis.jl")
-include("sobol_sensitivity_analysis.jl")
 include("cv_extraction.jl")
 
 export ValidParameterRegion,
        Calibration,
        ExtendedLocalSensitivityAnalysis,
-       SobolSensitivityAnalysis,
        CVExtraction
 
 end  # module Parametrisation
