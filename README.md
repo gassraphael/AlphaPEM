@@ -375,6 +375,11 @@ which dramatically increases computation time compared to co-flow.
 The detailed model description and simulation results can be found in the following articles and thesis.
 	
 - Published journal papers:
+
+    - **AlphaPEM 2.0: an enhanced open-source framework in Julia for high-performance PEM fuel cell simulation with 1D+1D non-isothermal modeling** (2026, 1st author)
+        - In [HAL](https://hal.science/hal-05879818) (preprint).
+        - The objective of this work is to present the version 2.0 of AlphaPEM, which has been completely rewritten in Julia to improve its computational performance. The new version extends the model to a 1D+1D non-isothermal architecture and relies on sparse Jacobian computation with the KLU solver and matrix coloring, achieving two orders of magnitude faster simulations of PEM fuel cells.
+      
 	- **AlphaPEM: An Open-Source Dynamic 1D Physics-Based Pem Fuel Cell Model for Embedded Applications** (2025, 1st author)
 	    - In the [SoftwareX](https://doi.org/10.1016/j.softx.2024.102002) journal, in [arXiv](https://doi.org/10.48550/arXiv.2407.12373), in [HAL](https://hal.science/hal-04647829) or in [SSRN](http://ssrn.com/abstract=4946674) (postprint).
 	    - The objective of this work is to highlight the AlphaPEM software, which has been published as open-source on GitHub. The first version of this PEM fuel cell simulator is based on the dynamic 1D model developed during 2021-2024. 
